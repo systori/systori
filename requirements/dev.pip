@@ -1,0 +1,4 @@
+-r common.pip
+fabric
+django-debug-toolbar
+django-nose
