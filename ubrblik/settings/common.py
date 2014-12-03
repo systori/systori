@@ -35,7 +35,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'tastypie',
     'ubrblik.apps.project',
-    'ubrblik.apps.quote',
+    'ubrblik.apps.proposal',
     'ubrblik.apps.main'
 )
 
