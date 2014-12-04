@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ project.name }} - {% trans "Tasks" %}{% endblock %}
+
+{% block content %}
+
+<ul>
+{% for task in object_list %}
+    <li><a href="{% url 'task.edit' task.id %}">{{ task.name }}</a> - [
+        <a href="{% url 'task.delete' task.id %}">{% trans "Delete" %}</a>
+    ]</li>
+{% endfor %}
+</ul>
+<a href="{% url 'task.create' project.id %}">{% trans "Create" %}</a>
+
+{% endblock content %}

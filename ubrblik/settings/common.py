@@ -44,6 +44,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'ubrblik.middleware.locale.ForceDefaultLanguageMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -76,9 +78,17 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'de'
 
-TIME_ZONE = 'UTC'
+gettext_noop = lambda s: s
+LANGUAGES = (
+    ('de', gettext_noop('Deutsch')),
+    ('en', gettext_noop('English')),
+    ('uk', gettext_noop('Українською')),
+    ('ru', gettext_noop('По-русски')),
+)
+
+TIME_ZONE = 'Europe/Berlin'
 
 USE_I18N = True
 
@@ -89,14 +99,21 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
+STATIC_ROOT = os.path.join(BASE_DIR, '../../static')
 
 STATIC_URL = '/static/'
-STATIC_ROOT = ''
 MEDIA_ROOT = ''
+MEDIA_URL = ''
 
 STATICFILES_DIRS = (
     ('js', 'ubrblik/static/js'),
     ('css', 'ubrblik/static/css'),
     ('img', 'ubrblik/static/img'),
     ('fonts', 'ubrblik/static/fonts'),
+)
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder'
 )
