@@ -1,17 +1,110 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n staticfiles %}
 
 {% block title %}{{ project.name }} - {% trans "Tasks" %}{% endblock %}
 
 {% block content %}
-
-<ul>
-{% for task in object_list %}
-    <li><a href="{% url 'task.edit' task.id %}">{{ task.name }}</a> - [
-        <a href="{% url 'task.delete' task.id %}">{% trans "Delete" %}</a>
-    ]</li>
+{% for group in object_list %}
+<ubr-task-group data-id="{{ group.id }}">
+  <span class="name">{{ group.name }}</span>
+  {% for task in group.tasks.all %}
+  <ubr-task data-id="{{ task.id }}">
+    <span class="name">{{ task.name }}</span>
+    <span class="total">0</span>
+  </ubr-task>
+  {% endfor %}
+</ubr-task-group>
 {% endfor %}
-</ul>
 <a href="{% url 'task.create' project.id %}">{% trans "Create" %}</a>
 
+<!-- 
+  <div id="task-editor">
+    <ubr-task-group>
+      <span class="name">Task Group 1</span>
+      <ubr-task>
+        <span class="name">Task 1</span>
+        <span class="total">0</span>
+      </ubr-task>
+      <ubr-task>
+        <span class="name">Task 2</span>
+        <span class="total">0</span>
+      </ubr-task>
+      <ubr-task>
+        <span class="name">Task 3</span>
+        <span class="total">400</span>
+        <ubr-line-item>
+          <span class="name">do stuff</span>
+          <span class="qty">16</span>
+          <span class="value">25</span>
+          <span class="total">400</span>
+        </ubr-line-item>
+      </ubr-task>
+    </ubr-task-group>
+  </div>
+ -->
+
+<style>
+::shadow .item {
+  padding-left: 20px;
+}
+::shadow .edit {
+  display: none;
+}
+.total {
+  font-weight: bold;
+}
+.total::after {
+  content: "\20AC";
+}
+</style>
+
+
+<template id="ubr-task-group-template">
+  <div class="item task-group">
+    <div class="view">
+      <content select=".name"></content>
+    </div>
+    <div class="edit">
+      <input name="name" placeholder="task group name" />
+    </div>
+    <content select="ubr-task"></content>
+  </div>
+</template>
+
+<template id="ubr-task-template">
+  <div class="item task">
+    <div class="view">
+      <content select=".name"></content>
+      <content select=".total"></content>
+    </div>
+    <div class="edit">
+      <input name="name" placeholder="task name" />
+    </div>
+    <content select="ubr-line-item"></content>
+  </div>
+</template>
+
+<template id="ubr-line-item-template">
+  <div class="item line-item">
+    <div class="view">
+      <content select=".name"></content>
+      <content select=".qty"></content>
+      <content select=".value"></content>
+      <content select=".total"></content>
+    </div>
+    <div class="edit">
+      <input name="name" placeholder="line item name" />
+      <input name="qty" placeholder="qty" />
+      <input name="value" placeholder="value" />
+    </div>
+  </div>
+</template>
+
 {% endblock content %}
+
+{% block extra_js%}
+<script type="application/dart" src="{% static "dart/editor.dart" %}"></script>
+<!-- 
+<script src="{% static "js/ubrblik/editor.dart.js" %}"></script>
+ -->
+{% endblock extra_js%}
