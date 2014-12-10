@@ -1,9 +1,12 @@
 from .common import *
-from .dev import *
+
+DEBUG = True
+TEMPLATE_DEBUG = True
 
 STATICFILES_DIRS += (
-    ('dart', 'ubrblik/static/dart'),
+    ('editor', os.path.join(ROOT_DIR, 'ubrblik-editor/web')),
 )
+print(STATICFILES_DIRS)
 
 DATABASES['default'].update({
     'NAME': 'ubrblik_local',
