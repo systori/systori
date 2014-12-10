@@ -19,38 +19,4 @@ class TaskList(SingleObjectMixin, ListView):
         return context
 
     def get_queryset(self):
-        return self.object.task_groups.all()
-
-
-class TaskCreate(CreateView):
-    model = TaskGroup
-
-    def get_context_data(self, **kwargs):
-        context = super(TaskCreate, self).get_context_data(**kwargs)
-        context['project'] = self.object.project
-        return context
-
-    def get_success_url(self):
-        return reverse('tasks', args=(self.object.project.id,))
-
-class TaskUpdate(UpdateView):
-    model = TaskGroup
-
-    def get_context_data(self, **kwargs):
-        context = super(TaskUpdate, self).get_context_data(**kwargs)
-        context['project'] = self.object.project
-        return context
-
-    def get_success_url(self):
-        return reverse('tasks', args=(self.object.project.id,))
-
-class TaskDelete(DeleteView):
-    model = TaskGroup
-
-    def get_context_data(self, **kwargs):
-        context = super(TaskDelete, self).get_context_data(**kwargs)
-        context['project'] = self.object.project
-        return context
-
-    def get_success_url(self):
-        return reverse('tasks', args=(self.object.project.id,))
+        return self.object.taskgroups.all()

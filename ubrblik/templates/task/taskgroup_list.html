@@ -5,43 +5,27 @@
 
 {% block content %}
 {% for group in object_list %}
-<ubr-task-group data-id="{{ group.id }}">
-  <span class="name">{{ group.name }}</span>
-  {% for task in group.tasks.all %}
-  <ubr-task data-id="{{ task.id }}">
-    <span class="name">{{ task.name }}</span>
-    <span class="total">0</span>
-  </ubr-task>
-  {% endfor %}
-</ubr-task-group>
+<div id="task-editor" data-project-pk="{{ project.pk }}">
+  <ubr-taskgroup data-pk="{{ group.pk }}">
+    <span class="name">{{ group.name }}</span>
+    {% for task in group.tasks.all %}
+    <ubr-task data-pk="{{ task.pk }}">
+      <span class="name">{{ task.name }}</span>
+      <span class="total">{{ task.total|floatformat:2 }}</span>
+      {% for lineitem in task.lineitems.all %}
+      <ubr-lineitem data-pk="{{ lineitem.pk }}">
+        <span class="name">{{ lineitem.name }}</span>
+        <span class="qty">{{ lineitem.qty|floatformat:1 }}</span>
+        <span class="price">{{ lineitem.price|floatformat:2 }}</span>
+        <span class="total">{{ lineitem.total|floatformat:2 }}</span>
+      </ubr-lineitem>
+      {% endfor %}
+    </ubr-task>
+    {% endfor %}
+  </ubr-taskgroup>
+</div>
 {% endfor %}
-<a href="{% url 'task.create' project.id %}">{% trans "Create" %}</a>
 
-<!-- 
-  <div id="task-editor">
-    <ubr-task-group>
-      <span class="name">Task Group 1</span>
-      <ubr-task>
-        <span class="name">Task 1</span>
-        <span class="total">0</span>
-      </ubr-task>
-      <ubr-task>
-        <span class="name">Task 2</span>
-        <span class="total">0</span>
-      </ubr-task>
-      <ubr-task>
-        <span class="name">Task 3</span>
-        <span class="total">400</span>
-        <ubr-line-item>
-          <span class="name">do stuff</span>
-          <span class="qty">16</span>
-          <span class="value">25</span>
-          <span class="total">400</span>
-        </ubr-line-item>
-      </ubr-task>
-    </ubr-task-group>
-  </div>
- -->
 
 <style>
 ::shadow .item {
@@ -59,7 +43,7 @@
 </style>
 
 
-<template id="ubr-task-group-template">
+<template id="taskgroup-template">
   <div class="item task-group">
     <div class="view">
       <content select=".name"></content>
@@ -71,7 +55,7 @@
   </div>
 </template>
 
-<template id="ubr-task-template">
+<template id="task-template">
   <div class="item task">
     <div class="view">
       <content select=".name"></content>
@@ -80,22 +64,22 @@
     <div class="edit">
       <input name="name" placeholder="task name" />
     </div>
-    <content select="ubr-line-item"></content>
+    <content select="ubr-lineitem"></content>
   </div>
 </template>
 
-<template id="ubr-line-item-template">
-  <div class="item line-item">
+<template id="lineitem-template">
+  <div class="item lineitem">
     <div class="view">
       <content select=".name"></content>
       <content select=".qty"></content>
-      <content select=".value"></content>
+      <content select=".price"></content>
       <content select=".total"></content>
     </div>
     <div class="edit">
       <input name="name" placeholder="line item name" />
       <input name="qty" placeholder="qty" />
-      <input name="value" placeholder="value" />
+      <input name="price" placeholder="price" />
     </div>
   </div>
 </template>

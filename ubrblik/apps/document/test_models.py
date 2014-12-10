@@ -10,7 +10,7 @@ class DocumentTests(TestCase):
     def setUp(self):
         self.proj = Project.objects.create(name="my project")
         group = TaskGroup.objects.create(name="my group", project=self.proj)
-        self.task = Task.objects.create(name="my task", group=group)
+        self.task = Task.objects.create(name="my task", taskgroup=group)
 
     def test_associate_task(self):
         p = Document.objects.create(project=self.proj)

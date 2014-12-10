@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, TaskGroup
+from .models import TaskGroup, Task, LineItem
 
 
 class TaskGroupAdmin(admin.ModelAdmin):
@@ -8,5 +8,9 @@ class TaskGroupAdmin(admin.ModelAdmin):
 class TaskAdmin(admin.ModelAdmin):
     pass
 
+class LineItemAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.register(TaskGroup, TaskGroupAdmin)
 admin.site.register(Task, TaskAdmin)
+admin.site.register(LineItem, LineItemAdmin)
