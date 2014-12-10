@@ -34,6 +34,15 @@ class TaskGroupResourceTest(ResourceTestCaseBase):
         self.assertEqual("created group", group.name)
         self.assertEqual(self.proj.id, group.project.id)
 
+    def test_delete_task_group(self):
+        start_count = TaskGroup.objects.count()
+        url = self.url+'{}/'.format(self.group.id)
+        resp = self.api_client.delete(url, format='json')
+        self.assertHttpAccepted(resp)
+        new_count = TaskGroup.objects.count()
+        self.assertEqual(start_count-1, new_count)
+
+
 class TaskResourceTest(ResourceTestCaseBase):
 
     url = '/api/v1/task/'
@@ -57,6 +66,13 @@ class TaskResourceTest(ResourceTestCaseBase):
         self.assertEqual("created task", task.name)
         self.assertEqual(self.group.id, task.taskgroup.id)
 
+    def test_delete_task(self):
+        start_count = Task.objects.count()
+        url = self.url+'{}/'.format(self.task.id)
+        resp = self.api_client.delete(url, format='json')
+        self.assertHttpAccepted(resp)
+        new_count = Task.objects.count()
+        self.assertEqual(start_count-1, new_count)
 
 class LineItemResourceTest(ResourceTestCaseBase):
 
@@ -70,7 +86,7 @@ class LineItemResourceTest(ResourceTestCaseBase):
         lineitem = LineItem.objects.get(pk=self.task.id)
         self.assertEqual("new name", lineitem.name)
 
-    def test_create_task(self):
+    def test_create_lineitem(self):
         data = {
             "task": "/api/v1/task/{}/".format(self.task.id),
             "name": "created line item",
@@ -83,3 +99,11 @@ class LineItemResourceTest(ResourceTestCaseBase):
         self.assertEqual("created line item", lineitem.name)
         self.assertEqual(self.task.id, lineitem.task.id)
         self.assertEqual(160, lineitem.total)
+
+    def test_delete_lineitem(self):
+        start_count = LineItem.objects.count()
+        url = self.url+'{}/'.format(self.task.id)
+        resp = self.api_client.delete(url, format='json')
+        self.assertHttpAccepted(resp)
+        new_count = LineItem.objects.count()
+        self.assertEqual(start_count-1, new_count)
