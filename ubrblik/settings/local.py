@@ -8,9 +8,5 @@ STATICFILES_DIRS += (
 )
 
 DATABASES['default'].update({
-    'NAME': 'django',
-    'USER': 'lina',
-    'PASSWORD': 'tieb1enck2yaj3ip5by3',
-    'HOST': '127.0.0.1',
-    'PORT': '5433',
+    'NAME': 'ubrblik_local'
 })
