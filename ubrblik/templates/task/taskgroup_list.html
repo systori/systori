@@ -8,6 +8,7 @@
 <div id="task-editor" data-project-pk="{{ project.pk }}">
   <ubr-taskgroup data-pk="{{ group.pk }}">
     <span class="name">{{ group.name }}</span>
+    <span class="grand_total">{{ task.grand_total|floatformat:2 }}</span>
     {% for task in group.tasks.all %}
     <ubr-task data-pk="{{ task.pk }}">
       <span class="name">{{ task.name }}</span>
@@ -16,6 +17,7 @@
       <ubr-lineitem data-pk="{{ lineitem.pk }}">
         <span class="name">{{ lineitem.name }}</span>
         <span class="qty">{{ lineitem.qty|floatformat:1 }}</span>
+        <span class="unit">{{ lineitem.unit|floatformat:1 }}</span>
         <span class="price">{{ lineitem.price|floatformat:2 }}</span>
         <span class="total">{{ lineitem.total|floatformat:2 }}</span>
       </ubr-lineitem>
@@ -37,7 +39,13 @@
 .total {
   font-weight: bold;
 }
+.grand_total {
+  font-weight: bold;
+}
 .total::after {
+  content: "\20AC";
+}
+.grand_total::after {
   content: "\20AC";
 }
 </style>
@@ -47,6 +55,7 @@
   <div class="item task-group">
     <div class="view">
       <content select=".name"></content>
+      <content select=".grand_total"></content>
     </div>
     <div class="edit">
       <input name="name" placeholder="task group name" />
@@ -73,12 +82,14 @@
     <div class="view">
       <content select=".name"></content>
       <content select=".qty"></content>
+      <content select=".unit"></content>
       <content select=".price"></content>
       <content select=".total"></content>
     </div>
     <div class="edit">
       <input name="name" placeholder="line item name" />
       <input name="qty" placeholder="qty" />
+      <input name="unit" placeholder="unit" />
       <input name="price" placeholder="price" />
     </div>
   </div>
@@ -88,7 +99,7 @@
 
 {% block extra_js%}
 <script type="application/dart" src="{% static "editor/editor.dart" %}"></script>
-<!-- 
+<!--
 <script src="{% static "js/ubrblik/editor.dart.js" %}"></script>
  -->
 {% endblock extra_js%}
