@@ -17,7 +17,7 @@ This guide assumes you are on the most recent LTS Ubuntu linux system and that y
 You will need PostgreSQL, Python3 and some other tools installed with apt-get:
 
 ```
-$ apt-get install\
+$ sudo apt-get install\
  postgresql postgresql-contrib postgresql-server-dev-all\
  python-pip python-dev python3-dev\
  texlive-full
