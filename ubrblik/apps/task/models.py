@@ -11,6 +11,13 @@ class TaskGroup(models.Model):
         verbose_name_plural = _("Task Groups")
         ordering = ['id']
 
+    @property
+    def total(self):
+        # TODO: slow implementation, convert to aggregate
+        t = 0
+        for task in self.tasks.all():
+            t += task.total
+        return t
 
 class Task(models.Model):
     name = models.CharField(_("Name"), max_length=128)

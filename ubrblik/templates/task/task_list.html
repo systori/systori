@@ -28,6 +28,8 @@
 </div>
 {% endfor %}
 
+<br /> <br /> <br />
+<a href="{% url 'taskpdf' project.id %}">{% trans "PDF Report" %}</a>
 
 <style>
 ::shadow .item {
