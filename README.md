@@ -21,6 +21,7 @@ $ sudo apt-get install\
  postgresql postgresql-contrib postgresql-server-dev-all\
  python-pip python-dev python3-dev\
  texlive-full
+$ sudo -u postgres createuser --superuser YOUR_LINUX_USERNAME
 $ sudo pip install --upgrade fabric virtualenvwrapper
 ```
 
