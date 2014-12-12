@@ -21,8 +21,13 @@ $ sudo apt-get install\
  postgresql postgresql-contrib postgresql-server-dev-all\
  python-pip python-dev python3-dev\
  texlive-full
-$ sudo -u postgres createuser --superuser YOUR_LINUX_USERNAME
 $ sudo pip install --upgrade fabric virtualenvwrapper
+```
+
+Create a database user; when the databse user name matches your linux user name this allows `psql` and other tools to automatically authenticate you:
+
+```
+$ sudo -u postgres createuser --superuser [YOUR_LINUX_USERNAME]
 ```
 
 Now change into the directory where you'd like to install ubrblik and run the following commands:
@@ -34,6 +39,7 @@ $ mkvirtualenv -a `pwd` -p /usr/bin/python3 ubrblik
 $ pip install -r requirements/dev.pip
 $ fab init_settings
 ```
+
 Now run some tests to make sure everything is working:
 
 ```
