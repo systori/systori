@@ -16,7 +16,7 @@ This guide assumes you are on the most recent LTS Ubuntu linux system and that y
 
 You will need PostgreSQL, Python3 and some other tools installed with apt-get:
 
-```console
+```
 $ apt-get install\
  postgresql postgresql-contrib postgresql-server-dev-all\
  python-pip python-dev python3-dev\
@@ -26,29 +26,36 @@ $ sudo pip install --upgrade fabric virtualenvwrapper
 
 Now change into the directory where you'd like to install ubrblik and run the following commands:
 
-```console
+```
 $ git clone git@bitbucket.org:damoti/ubrblik.git
 $ cd ubrblik/
 $ mkvirtualenv -a `pwd` -p /usr/bin/python3 ubrblik
+$ pip install -r requirements/dev.pip
+$ fab init_settings
+```
+Now run some tests to make sure everything is working:
+
+```
+$ ./manage.py test
 ```
 
-Now setup the database and run some tests:
+Finally setup a database for local development and start the app:
 
-```console
+```
 $ createdb ubrblik_local
-$ ./manage.py syncdb
-$ ./manage.py test
+$ ./manage.py migrate
+$ ./manage.py runserver
 ```
 
 When you are done working on ubrblik, you can deactivate the virtual environment:
 
-```console
+```
 $ deactive
 ```
 
-And the next time you want to activate it run:
+And the next time you want to activate it run (this will automatically place you in the ubrblik checkout directory):
 
-```console
+```
 $ workon ubrblik
 ```
 
