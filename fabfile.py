@@ -26,7 +26,7 @@ def deploy():
 def resetlocaldb():
     local('dropdb ubrblik_local')
     local('createdb ubrblik_local')
-    local('./manage.py migrate --noinput')
+    local('./manage.py syncdb')
     #local('./manage.py loaddata bootstrap')
 
 

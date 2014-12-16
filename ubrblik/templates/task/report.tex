@@ -51,22 +51,24 @@ wie vereinbart und nach Freigabe unseres Aufmaßes berechnen wir wie folgt:
   {% for task in group.tasks.all %}
 
 {{ group.id }}.{{ task.id }} &
-\multicolumn{4}{l}{\hspace{5mm} {{ task.name }} } \\[5pt]
+\multicolumn{3}{l}{\hspace{5mm} {{ task.name }} } &
+{{ task.total|floatformat:2 }} \\[5pt]
 
+{% comment %}
     {% for lineitem in task.lineitems.all %}
-
 {{ group.id }}.{{ task.id }}.{{ lineitem.id }} &
 \hspace{10mm} {{ lineitem.name }} &
 {{ lineitem.qty|floatformat:1 }} {{ lineitem.unit }} &
 {{ lineitem.price|floatformat:2 }} &
 {{ lineitem.total|floatformat:2 }} \\[5pt]
-
     {% endfor %}
+{% endcomment %}
+
   {% endfor %}
 {% endfor %}
 
 & & & Summe netto & {{ project.total|floatformat:2 }} \\
-& & & 19,00 MWSt & {{ project.multiplier|floatformat:2 }} \\
+& & & 19,00 MWSt & {{ project.tax|floatformat:2 }} \\
 & & & Summe brutto & {{ project.total_gross|floatformat:2 }} \\
 
 \end{longtable}

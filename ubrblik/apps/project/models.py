@@ -19,7 +19,7 @@ class Project(models.Model):
         return t
     
     @property
-    def multiplier(self):
+    def tax(self):
         return self.total * Decimal(.19)
 
     @property
