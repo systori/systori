@@ -4,6 +4,10 @@
 {% block title %}{{ project.name }} - {% trans "Tasks" %}{% endblock %}
 
 {% block content %}
+<div id="overview">
+  <div id="project-total">Summe netto: {{ project.total|floatformat:2 }}</div>
+  <div id="project-total-gross">Summe brutto: {{project.total_gross|floatformat:2}}</div>
+</div>
 {% for group in object_list %}
 <div id="task-editor" data-project-pk="{{ project.pk }}">
   <ubr-taskgroup data-pk="{{ group.pk }}">
@@ -16,7 +20,7 @@
       {% for lineitem in task.lineitems.all %}
       <ubr-lineitem data-pk="{{ lineitem.pk }}">
         <span class="name">{{ lineitem.name }}</span>
-        <span class="qty">{{ lineitem.qty|floatformat:1 }}</span>
+        <span class="qty">{{ lineitem.qty|floatformat:2 }}</span>
         <span class="unit">{{ lineitem.unit }}</span>
         <span class="price">{{ lineitem.price|floatformat:2 }}</span>
         <span class="total">{{ lineitem.total|floatformat:2 }}</span>
@@ -27,23 +31,38 @@
   </ubr-taskgroup>
 </div>
 {% endfor %}
-
 <br /> <br /> <br />
 <a href="{% url 'taskpdf' project.id %}">{% trans "PDF Report" %}</a>
 
 <style>
-::shadow .item {
-  padding-left: 20px;
-}
 ::shadow .edit {
   display: none;
 }
-.total {
-  font-weight: bold;
+::shadow .item {
+  padding-left: 20px;
 }
-.total::after {
-  content: "\20AC";
+#overview {
+  display:flex;
+  flex-direction:row;
+  flex-wrap: nowrap;
 }
+#overview div {
+  flex:1;
+}
+::shadow .task-group {
+  display:flex;
+  flex-direction: column;
+}
+::shadow .task-group span {
+  flex: 1;
+}
+::shadow ubr-task {
+  display:flex;
+}
+.hide {
+  display:none;
+}
+
 </style>
 
 
