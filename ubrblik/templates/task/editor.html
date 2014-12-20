@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load i18n staticfiles %}
+
+{% block title %}{{ project.name }} - {% trans "Tasks" %}{% endblock %}
+
+{% block content %}
+<div id="task-editor" data-project-pk="{{ project.pk }}">
+{% for group in object_list %}
+  <ubr-taskgroup data-pk="{{ group.pk }}">
+    <span class="code">{{ group.sequence_number }}</span>
+    <span class="name">{{ group.name }}</span>
+    <span class="description">{{ group.description }}</span>
+    <span class="total">{{ group.total|floatformat:2 }}</span>
+    {% for task in group.tasks.all %}
+    <ubr-task data-pk="{{ task.pk }}">
+      <span class="code">{{ task.code }}</span>
+      <span class="name">{{ task.name }}</span>
+      <span class="description">{{ task.description }}</span>
+      <span class="total">{{ task.total|floatformat:2 }}</span>
+      {% for lineitem in task.lineitems.all %}
+      <ubr-lineitem data-pk="{{ lineitem.pk }}">
+        <span class="name">{{ lineitem.name }}</span>
+        <span class="qty">{{ lineitem.qty|floatformat:2 }}</span>
+        <span class="unit">{{ lineitem.unit }}</span>
+        <span class="price">{{ lineitem.price|floatformat:2 }}</span>
+        <span class="total">{{ lineitem.total|floatformat:2 }}</span>
+      </ubr-lineitem>
+      {% endfor %}
+    </ubr-task>
+    {% endfor %}
+  </ubr-taskgroup>
+{% endfor %}
+</div>
+<br /> <br /> <br />
+<a href="{% url 'taskpdf' project.id %}">{% trans "PDF Report" %}</a>
+
+<style>
+::shadow .task-group>.view {
+  display: flex;
+}
+.task-group>span {
+  font-weight: bold;
+}
+::shadow .edit {
+  display: none;
+}
+.total {
+  font-weight: bold;
+}
+</style>
+
+
+<template id="taskgroup-template">
+  <style>
+  .view {
+    display: flex;
+  }
+  ::content > span {
+    font-weight: bold;
+  }
+  </style>
+  <div class="view">
+    <content select=".code"></content>
+    <content select=".name"></content>
+    <content select=".description"></content>
+    <content select=".total"></content>
+  </div>
+  <div class="edit">
+    <input name="name" placeholder="{% trans 'task group' %}" />
+    <input name="description" placeholder="{% trans 'description' %}" />
+  </div>
+  <content select="ubr-task"></content>
+</template>
+
+<template id="task-template">
+  <div class="view">
+    <content select=".code"></content>
+    <content select=".name"></content>
+    <content select=".description"></content>
+    <content select=".total"></content>
+  </div>
+  <div class="edit">
+    <input name="name" placeholder="{% trans 'task' %}" />
+    <input name="description" placeholder="{% trans 'description' %}" />
+  </div>
+  <content select="ubr-lineitem"></content>
+</template>
+
+<template id="lineitem-template">
+  <div class="view">
+    <content select=".name"></content>
+    <content select=".qty"></content>
+    <content select=".unit"></content>
+    <content select=".price"></content>
+    <content select=".total"></content>
+  </div>
+  <div class="edit">
+    <input name="name" placeholder="{% trans 'line item' %}" />
+    <input name="qty" placeholder="{% trans 'qty' %}" />
+    <input name="unit" placeholder="{% trans 'unit' %}" />
+    <input name="price" placeholder="{% trans 'price' %}" />
+  </div>
+</template>
+
+{% endblock content %}
+
+{% block extra_js%}
+<script type="application/dart" src="{% static "editor/editor.dart" %}"></script>
+<!--
+<script src="{% static "js/ubrblik/editor.dart.js" %}"></script>
+ -->
+{% endblock extra_js%}

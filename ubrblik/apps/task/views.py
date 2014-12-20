@@ -10,35 +10,35 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.template.loader import get_template
 from django.template import Context
 
-from ..project.models import Project
-from .models import TaskGroup
+from .models import Job, TaskGroup
 
 from ubrblik import settings
 
 
-class BaseProjectTaskView(SingleObjectMixin, ListView):
+class BaseJobTaskView(SingleObjectMixin, ListView):
 
     def get_context_data(self, **kwargs):
-        context = super(BaseProjectTaskView, self).get_context_data(**kwargs)
-        context['project'] = self.object
+        context = super(BaseJobTaskView, self).get_context_data(**kwargs)
+        context['project'] = self.object.project
+        context['job'] = self.object
         return context
 
     def get_object(self):
-        queryset = Project.objects.all()
-        return super(BaseProjectTaskView, self).get_object(queryset)
+        queryset = Job.objects.all()
+        return super(BaseJobTaskView, self).get_object(queryset)
 
     def get_queryset(self):
         self.object = self.get_object()
         return self.object.taskgroups.all()
 
 
-class TaskList(BaseProjectTaskView):
-    template_name = "task/task_list.html"
+class TaskEditor(BaseJobTaskView):
+    template_name = "task/editor.html"
 
 
 TASK_TEMPLATE_DIR = 'ubrblik/templates/task/'
 
-class TaskPDF(BaseProjectTaskView):
+class TaskPDF(BaseJobTaskView):
     template_name = "task/report.tex"
 
     def render_to_response(self, context):

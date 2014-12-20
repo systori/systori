@@ -46,3 +46,4 @@ class ProjectResourceTest(ResourceTestCaseBase):
         proj = Project.objects.last()
         self.assertEqual("new proj", proj.name)
         self.assertEqual("new desc", proj.description)
+

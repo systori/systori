@@ -1,3 +1,4 @@
+from collections import namedtuple
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -25,25 +26,46 @@ and generated. By locking editing and generating a PDF we have created a snap sh
 point in time where the user was satisfied with the state of all associated Tasks.
 """
 
+class Status(namedtuple('Status', ['name', 'label'])):
+    def __eq__(self, other):
+        return self.name == other
+
 class Document(models.Model):
-    INVOICE = "invoice"
+
+    project = models.ForeignKey("project.Project", related_name="document")
+    description = models.TextField(_("Proposal Description"), blank=True, null=True)
+    pdf = models.FileField()
+
     PROPOSAL = "proposal"
-    REPORT = "report"
+    INVOICE = "invoice"
     DOCUMENT_TYPE = (
         (PROPOSAL, _("Proposal")),
         (INVOICE, _("Invoice")),
-        (REPORT, _("Report"))
     )
-    project = models.ForeignKey("project.Project", related_name="document")
-    description = models.TextField(_("Proposal Description"), blank=True, null=True)
     doctype = models.CharField(max_length=128, choices=DOCUMENT_TYPE, default=PROPOSAL)
+
+    DRAFT = Status("draft", _("Draft"))
+    READY = Status("ready", _("Ready"))
+    SENT = Status("sent", _("Sent"))
+    APPROVED = Status("approved", _("Approved"))
+    PAID = Status("paid", _("Paid"))
+    CANCELED = Status("canceled", _("Canceled"))
+
+    WORKFLOW = {
+      PROPOSAL: [READY, SENT, APPROVED, CANCELED],
+      INVOICE: [READY, SENT, PAID, CANCELED]
+    }
+
+    STATUS_TYPE = (DRAFT, READY, SENT, APPROVED, PAID, CANCELED)
+
+    status = models.CharField(max_length=128, choices=STATUS_TYPE, default=DRAFT)
+
     class Meta:
         verbose_name = _("Document")
         verbose_name_plural = _("Documents")
 
-    def add_task(self, task):
-        DocumentItem.objects.create(document=self, task=task)
 
-class DocumentItem(models.Model):
-    document = models.ForeignKey("Document", related_name="items")
-    task = models.ForeignKey("task.Task")
+# Photos and other evidence of work in progress or completion of Task
+class ProgressAttachment(models.Model):
+    report = models.ForeignKey("task.ProgressReport", related_name="attachments")
+    attachment = models.FileField()

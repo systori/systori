@@ -10,8 +10,9 @@ def create_data(self):
     self.user = User.objects.create_user('lex', 'lex@damoti.com', 'pass')
     self.proj = Project.objects.create(name="my project")
     self.proj2 = Project.objects.create(name="my second project")
-    self.group = TaskGroup.objects.create(name="my group", project=self.proj)
-    self.group2 = TaskGroup.objects.create(name="my group 2", project=self.proj)
+    self.job = Job.objects.create(name="Default", project=self.proj)
+    self.group = TaskGroup.objects.create(name="my group", job=self.job)
+    self.group2 = TaskGroup.objects.create(name="my group 2", job=self.job)
     self.task = Task.objects.create(name="my task", taskgroup=self.group)
     self.lineitem = LineItem.objects.create(name="my task", qty=8, price=120, task=self.task)
 

@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     url(r'^accounts/login/', 'django.contrib.auth.views.login', name="login"),
     url(r'^accounts/logout/', 'django.contrib.auth.views.logout', {'next_page':'/'}, name="logout"),
 
-    url(r'^projects/', include('ubrblik.apps.project.urls')),
+    url(r'', include('ubrblik.apps.project.urls')),
     url(r'', include('ubrblik.apps.task.urls')),
     url(r'', include('ubrblik.apps.main.urls')),
 )

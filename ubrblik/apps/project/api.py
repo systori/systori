@@ -16,6 +16,7 @@ class BaseMeta:
     authentication = MultiAuthentication(BasicAuthentication(), SessionAuthentication())
     authorization = Authorization()
 
+
 class BaseCorsResource(ModelResource):
     """
     Class implementing CORS
@@ -46,6 +47,7 @@ class BaseCorsResource(ModelResource):
             raise ImmediateHttpResponse(response=response)
 
         return request_method
+
 
 class ProjectResource(BaseCorsResource):
     class Meta(BaseMeta):

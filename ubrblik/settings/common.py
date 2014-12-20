@@ -35,6 +35,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'tastypie',
+    'ordered_model',
     'ubrblik.apps.project',
     'ubrblik.apps.task',
     'ubrblik.apps.document',
