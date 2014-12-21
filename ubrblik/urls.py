@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     url(r'^accounts/logout/', 'django.contrib.auth.views.logout', {'next_page':'/'}, name="logout"),
 
     url(r'', include('ubrblik.apps.project.urls')),
-    url(r'', include('ubrblik.apps.task.urls')),
+    url(r'^project-(?P<project_pk>\d+)/', include('ubrblik.apps.task.urls')),
     url(r'', include('ubrblik.apps.main.urls')),
+    
 )

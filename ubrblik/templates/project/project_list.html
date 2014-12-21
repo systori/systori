@@ -1,13 +1,11 @@
-{% extends "base.html" %}
+{% extends "frame.html" %}
 {% load i18n %}
-
-{% block title %}{% trans "Projects" %}{% endblock %}
 
 {% block content %}
 
 <ul>
 {% for project in project_list %}
-    <li><a href="{% url 'tasks' project.id %}">{{ project.name }}</a> - [
+    <li><a href="{% url 'project.view' project.id %}">{{ project.name }}</a> - [
         <a href="{% url 'project.edit' project.id %}">{% trans "Edit" %}</a>
         <a href="{% url 'project.delete' project.id %}">{% trans "Delete" %}</a>
     ]</li>

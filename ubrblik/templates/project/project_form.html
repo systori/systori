@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "frame.html" %}
 
 {% block content %}
 <form action="{% url 'project.create' %}" method="post">{% csrf_token %}

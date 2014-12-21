@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 
 from django.http import HttpResponse
 from django.views.generic import View, ListView
-from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.template.loader import get_template
@@ -77,3 +77,23 @@ class TaskPDF(BaseJobTaskView):
         response.write(pdf)
 
         return response
+
+class JobSuccessRedirectMixin:
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
+
+class JobCreate(JobSuccessRedirectMixin, CreateView):
+    model = Job
+    def form_valid(self, form):
+        response = super(JobCreate, self).form_valid(form)
+        TaskGroup.objects.create(name='first task group', job=self.object)
+        return response
+
+class JobView(DetailView):
+    model = Job
+
+class JobUpdate(JobSuccessRedirectMixin, UpdateView):
+    model = Job
+
+class JobDelete(JobSuccessRedirectMixin, DeleteView):
+    model = Job

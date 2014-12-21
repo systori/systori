@@ -1,11 +1,10 @@
 {% load i18n staticfiles %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
+
   <head>
+
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
     <link rel="shortcut icon" href="{% static "img/favicon.png" %}">
 
     <title>{% block title %}ubrblik{% endblock %}</title>
@@ -18,17 +17,18 @@
 
   <body>
 
-    <nav class="navbar navbar-default" role="navigation">
-      <div class="container">
+    <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+      <div class="{% block navbar_container_class %}container{% endblock %}">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">Ubrblik</a>
+          {% block navbar_title %}<a class="navbar-brand" href="/">Ubrblik</a>{% endblock navbar_title %}
         </div>
-        <div class="navbar-collapse collapse">
+        <div id="navbar" class="navbar-collapse collapse">
           <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
             <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
@@ -46,7 +46,7 @@
             </ul>
           </form>
           {% if not user.is_authenticated and request.path != "/accounts/login/" %}
-          <form class="navbar-form navbar-right" method="post" action="{% url 'login' %}">
+          <form class="navbar-form navbar-right" role="form" method="post" action="{% url 'login' %}">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.get_full_path }}" />
             <div class="form-group">
@@ -59,44 +59,22 @@
           </form>
           {% endif %}
           {% if user.is_authenticated %}
-          <ul class="nav navbar-nav">
-            <li><a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
-          </ul>
           <ul class="nav navbar-nav navbar-right">
-              <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ user.username }} <b class="caret"></b></a>
-                  <ul class="dropdown-menu">
-                      <li><a href="{% url 'settings' %}">{% trans 'Settings' %}</a></li>
-                      <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>
-                  </ul>
-              </li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ user.username }} <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                    <li><a href="{% url 'settings' %}">{% trans 'Settings' %}</a></li>
+                    <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>
+                </ul>
+            </li>
           </ul>
           {% endif %}
-        </div><!--/.navbar-collapse -->
+        </div>
       </div>
     </nav>
 
-    {% block jumbotron %}
-    {% endblock jumbotron %}
-
-    <div class="container">
-
-      {% if user.is_authenticated and project %}
-      <ol class="breadcrumb">
-        <li><a href="{% url 'tasks' project.id %}">{{ project.name }}</a></li>
-        <li class="active">{% trans "Tasks" %}</li>
-      </ol>
-      {% endif %}
-
-      {% block content %}
-      {% endblock content %}
-
-      <hr>
-
-      <footer>
-        <p>&copy; Ubrblik 2015</p>
-      </footer>
-    </div> <!-- /container -->
+    {% block container %}
+    {% endblock container %}
 
     <script src="//code.jquery.com/jquery-1.9.1.js"></script>
     <script src="//code.jquery.com/ui/1.10.3/jquery-ui.js"></script>

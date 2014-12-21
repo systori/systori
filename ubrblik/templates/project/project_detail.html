@@ -1,18 +1,36 @@
-{% extends "base.html" %}
+{% extends "project.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Projects" %}{% endblock %}
-
 {% block content %}
+  <h1 class="page-header">Project Dashboard</h1>
 
-<ul>
-{% for project in project_list %}
-    <li><a href="{% url 'tasks' project.id %}">{{ project.name }}</a> - [
-        <a href="{% url 'project.edit' project.id %}">{% trans "Edit" %}</a>
-        <a href="{% url 'project.delete' project.id %}">{% trans "Delete" %}</a>
-    ]</li>
-{% endfor %}
-</ul>
-<a href="{% url 'project.create' %}">{% trans "Create" %}</a>
-
-{% endblock content %}
+  <h2 class="sub-header">Jobs</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Cost</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in jobs %}
+        <tr>
+          <td>{{ job.id }}</td>
+          <td><a href="{% url 'tasks' project.id job.id %}">{{ job.name }}</a></td>
+          <td>{{ job.status }}</td>
+          <td>{{ job.total_amount }}</td>
+          <td>
+            <a href="{% url 'job.edit' project.id job.id %}">{% trans "Edit" %}</a>
+            <a href="{% url 'job.delete' project.id job.id %}">{% trans "Delete" %}</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <a href="{% url 'job.create' project.id %}">{% trans "Create" %}</a>
+  </div>
+{% endblock %}
