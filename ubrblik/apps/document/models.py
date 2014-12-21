@@ -63,9 +63,3 @@ class Document(models.Model):
     class Meta:
         verbose_name = _("Document")
         verbose_name_plural = _("Documents")
-
-
-# Photos and other evidence of work in progress or completion of Task
-class ProgressAttachment(models.Model):
-    report = models.ForeignKey("task.ProgressReport", related_name="attachments")
-    attachment = models.FileField()

@@ -1,13 +1,13 @@
 from tastypie.test import ResourceTestCase
 from .models import Job, TaskGroup, Task, LineItem
-from .test_models import create_data
+from .test_models import create_task_data
 
 
 class ResourceTestCaseBase(ResourceTestCase):
 
     def setUp(self):
         super(ResourceTestCaseBase, self).setUp()
-        create_data(self)
+        create_task_data(self)
         self.api_client.client.login(username='lex', password='pass')
 
 
@@ -38,7 +38,7 @@ class JobOrderResourceTest(ResourceTestCaseBase):
 
     def test_create_job(self):
         data = {
-            "project": "/api/v1/project/{}/".format(self.proj.id),
+            "project": "/api/v1/project/{}/".format(self.project.id),
             "name": "new job",
             "description": "new desc"
         }
@@ -96,7 +96,8 @@ class TaskResourceTest(ResourceTestCaseBase):
     def test_create_task(self):
         data = {
             "taskgroup": "/api/v1/taskgroup/{}/".format(self.group.id),
-            "name": "created task"
+            "name": "created task",
+            "qty": 0
         }
         resp = self.api_client.post(self.url, data=data, format='json')
         self.assertHttpCreated(resp)
@@ -136,7 +137,7 @@ class LineItemResourceTest(ResourceTestCaseBase):
         lineitem = LineItem.objects.last()
         self.assertEqual("created line item", lineitem.name)
         self.assertEqual(self.task.id, lineitem.task.id)
-        self.assertEqual(160, lineitem.total)
+        self.assertEqual(160, lineitem.total_amount)
 
     def test_delete_lineitem(self):
         start_count = LineItem.objects.count()

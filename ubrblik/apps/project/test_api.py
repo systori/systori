@@ -1,13 +1,13 @@
 from tastypie.test import ResourceTestCase
 from .models import Project
-from .test_models import create_data
+from ..task.test_models import create_task_data
 
 
 class ResourceTestCaseBase(ResourceTestCase):
 
     def setUp(self):
         super(ResourceTestCaseBase, self).setUp()
-        create_data(self)
+        create_task_data(self)
         self.api_client.client.login(username='lex', password='pass')
 
 
@@ -32,7 +32,7 @@ class ProjectResourceTest(ResourceTestCaseBase):
         data = {"name": "updated proj", "description": "updated desc"}
         resp = self.api_client.put(url, data=data, format='json')
         self.assertHttpAccepted(resp)
-        proj = Project.objects.get(pk=self.proj.id)
+        proj = Project.objects.get(pk=self.project.id)
         self.assertEqual("updated proj", proj.name)
         self.assertEqual("updated desc", proj.description)
 
