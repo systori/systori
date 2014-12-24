@@ -1,16 +1,37 @@
 {% extends "frame.html" %}
 {% load i18n %}
 
+{% block sidebar %}
+  <ul class="nav nav-sidebar">
+    <li><a href="/">Dashboard</a></li>
+    <li class="active"><a href="{% url 'projects' %}">Projects</a></li>
+  </ul>
+{% endblock %}
+
 {% block content %}
-
-<ul>
-{% for project in project_list %}
-    <li><a href="{% url 'project.view' project.id %}">{{ project.name }}</a> - [
-        <a href="{% url 'project.edit' project.id %}">{% trans "Edit" %}</a>
-        <a href="{% url 'project.delete' project.id %}">{% trans "Delete" %}</a>
-    ]</li>
-{% endfor %}
-</ul>
-<a href="{% url 'project.create' %}">{% trans "Create" %}</a>
-
+  <h2 class="sub-header">Projects</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in project_list %}
+        <tr>
+          <td>{{ project.id }}</td>
+          <td><a href="{% url 'project.view' project.id %}">{{ project.name }}</a></td>
+          <td>
+            <a href="{% url 'project.edit' project.id %}">{% trans "Edit" %}</a>
+            <a href="{% url 'project.delete' project.id %}">{% trans "Delete" %}</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <a href="{% url 'project.create' %}">{% trans "Create" %}</a>
+  </div>
 {% endblock content %}

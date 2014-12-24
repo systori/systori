@@ -2,11 +2,18 @@ from django.db import models, connections
 from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
 
-
 class Job(OrderedModel):
 
     name = models.CharField(_('Job Name'), max_length=512)
     description = models.TextField()
+
+    FIXED_PRICE = "fixed_price"
+    TIME_AND_MATERIALS = "time_and_materials"
+    BILLING_METHOD = (
+        (FIXED_PRICE , _("Fixed Price")),
+        (TIME_AND_MATERIALS, _("Time and Materials")),
+    )
+    billing_method = models.CharField(max_length=128, choices=BILLING_METHOD, default=FIXED_PRICE)
 
     project = models.ForeignKey('project.Project', related_name="jobs")
     order_with_respect_to = 'project'
@@ -15,19 +22,20 @@ class Job(OrderedModel):
         verbose_name = _("Job")
         verbose_name_plural = _("Job")
 
-    @property
-    def total_amount(self):
-        t = 0
+    def _total_calc(self, calc_type):
+        field = "{}_{}".format(self.billing_method, calc_type)
+        total = 0
         for taskgroup in self.taskgroups.all():
-            t += taskgroup.total_amount
-        return t
+            total += getattr(taskgroup, field)
+        return total
 
     @property
-    def billable_amount(self):
-        t = 0
-        for taskgroup in self.taskgroups.all():
-            t += taskgroup.billable_amount
-        return t
+    def estimate_total(self):
+        return self._total_calc('estimate')
+
+    @property
+    def billable_total(self):
+        return self._total_calc('billable')
 
 
 class TaskGroup(OrderedModel):
@@ -42,19 +50,27 @@ class TaskGroup(OrderedModel):
         verbose_name = _("Task Group")
         verbose_name_plural = _("Task Groups")
 
-    @property
-    def total_amount(self):
-        t = 0
+    def _total_calc(self, field):
+        total = 0
         for task in self.tasks.all():
-            t += task.total_amount
-        return t
+            total += getattr(task, field)
+        return total
 
     @property
-    def billable_amount(self):
-        t = 0
-        for task in self.tasks.all():
-            t += task.billable_amount
-        return t
+    def fixed_price_estimate(self):
+        return self._total_calc('fixed_price_estimate')
+
+    @property
+    def fixed_price_billable(self):
+        return self._total_calc('fixed_price_billable')
+
+    @property
+    def time_and_materials_estimate(self):
+        return self._total_calc('time_and_materials_estimate')
+
+    @property
+    def time_and_materials_billable(self):
+        return self._total_calc('time_and_materials_billable')
 
 
 class Task(OrderedModel):
@@ -62,13 +78,14 @@ class Task(OrderedModel):
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField()
 
-    # tracking completion of this task by a quantifiable indicator
+    # tracking completion of this task by a quantifiable indicator, an estimate
     qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2)
 
     # unit for the completion tracking quantifiable indicator
     unit = models.CharField(_("Unit"), max_length=64)
 
     # how much of the project is complete in units of quantity
+    # may be more than qty
     complete = models.DecimalField(_("Complete"), max_digits=12, decimal_places=2, default=0.0)
 
     # date when this task was started
@@ -84,18 +101,45 @@ class Task(OrderedModel):
         verbose_name = _("Task")
         verbose_name_plural = _("Tasks")
 
+    # For fixed price billing, returns the price
+    # per unit of this task
     @property
-    def total_amount(self):
+    def unit_price(self):
         t = 0
         for lineitem in self.lineitems.all():
-            t += lineitem.total_amount
+            t += lineitem.price_per_task_unit
         return t
 
+    # For fixed price billing, returns the estimated price
+    # to complete this task.
     @property
-    def billable_amount(self):
+    def fixed_price_estimate(self):
+        return self.unit_price * self.qty
+
+    # For fixed price billing, returns the price based
+    # on what has been completed.
+    @property
+    def fixed_price_billable(self):
+        return self.unit_price * self.complete
+
+    # For time and materials billing, returns
+    # the estimated amount that will been expended by
+    # all line items contained by this task.
+    @property
+    def time_and_materials_estimate(self):
         t = 0
         for lineitem in self.lineitems.all():
-            t += lineitem.billable_amount
+            t += lineitem.time_and_materials_estimate
+        return t
+
+    # For time and materials billing, returns
+    # the total amount that has been expended by
+    # all line items contained by this task.
+    @property
+    def time_and_materials_billable(self):
+        t = 0
+        for lineitem in self.lineitems.all():
+            t += lineitem.time_and_materials_billable
         return t
 
 
@@ -103,17 +147,20 @@ class LineItem(models.Model):
 
     name = models.CharField(_("Name"), max_length=512)
 
-    # amount of hours or materials
-    qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2)
+    # fixed billing, amount of hours or materials to complete just one task unit
+    qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2, default=0.0)
+
+    # time and materials billing, estimate of the amount of hours or materials to complete the entire task
+    estimate = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2, default=0.0)
+
+    # time and materials billing, how many units of this have been delivered/expended and can thus be billed
+    billable = models.DecimalField(_("Billable"), max_digits=12, decimal_places=2, default=0.0)
 
     # unit for the quantity
     unit = models.CharField(_("Unit"), max_length=64)
 
     # price per unit
     price = models.DecimalField(_("Price"), max_digits=12, decimal_places=2)
-
-    # how many units of this have been delivered/expended and can be thus be billed
-    billable = models.DecimalField(_("Billable"), max_digits=12, decimal_places=2, default=0.0)
 
     # when labor is true, this will cause this line item to show up in time sheet and other
     # labor related parts of the system
@@ -135,12 +182,22 @@ class LineItem(models.Model):
         verbose_name_plural = _("Line Items")
         ordering = ['id']
 
+    # For fixed price billing, returns the price
+    # of this line item per 1 unit of the parent task.
     @property
-    def total_amount(self):
+    def price_per_task_unit(self):
         return self.price * self.qty
 
+    # For time and materials billing, returns the estimated price
+    # of this line item to complete the entire task.
     @property
-    def billable_amount(self):
+    def time_and_materials_estimate(self):
+        return self.price * self.estimate
+
+    # For time and materials billing, returns
+    # the total amount that has been expended.
+    @property
+    def time_and_materials_billable(self):
         return self.price * self.billable
 
 

@@ -14,17 +14,17 @@ class Project(models.Model):
         verbose_name_plural = _("Projects")
         ordering = ['name']
 
-    @property
-    def total(self):
+    def _calc_total(self, calc_type):
+        field = '{}_total'.format(calc_type)
         t = 0
         for job in self.jobs.all():
-            t += job.total_amount
+            t += getattr(job, field)
         return t
 
     @property
-    def tax(self):
-        return self.total * Decimal(.19)
+    def estimate_total(self):
+        return sum([job.estimate_total for job in self.jobs.all()])
 
     @property
-    def total_gross(self):
-        return self.total * Decimal(1.19)
+    def billable_total(self):
+        return sum([job.billable_total for job in self.jobs.all()])

@@ -15,12 +15,8 @@ class ProjectTotalTests(TestCase):
     
     def test_zero(self):
         project = Project.objects.get(pk=self.project2.pk)
-        self.assertEqual(0, project.total)
-        self.assertEqual(0, project.tax)
-        self.assertEqual(0, project.total_gross)
+        self.assertEqual(0, project.estimate_total)
 
     def test_nonzero(self):
         project = Project.objects.get(pk=self.project.pk)
-        self.assertEqual(960, project.total)
-        self.assertEqual(182.4, float(round(project.tax, 1)))
-        self.assertEqual(1142.4, float(round(project.total_gross, 1)))
+        self.assertEqual(960, project.estimate_total)

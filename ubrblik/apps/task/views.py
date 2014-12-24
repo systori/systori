@@ -11,6 +11,7 @@ from django.template.loader import get_template
 from django.template import Context
 
 from .models import Job, TaskGroup
+from .forms import JobForm
 
 from ubrblik import settings
 
@@ -78,22 +79,37 @@ class TaskPDF(BaseJobTaskView):
 
         return response
 
-class JobSuccessRedirectMixin:
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
 
-class JobCreate(JobSuccessRedirectMixin, CreateView):
+class JobView(DetailView):
     model = Job
+
+
+class JobCreate(CreateView):
+    model = Job
+    form_class = JobForm
+    
+    def get_form_kwargs(self):
+        kwargs = super(JobCreate, self).get_form_kwargs()
+        kwargs['instance'] = Job(project=self.request.project)
+        return kwargs
+
     def form_valid(self, form):
         response = super(JobCreate, self).form_valid(form)
         TaskGroup.objects.create(name='first task group', job=self.object)
         return response
 
-class JobView(DetailView):
+    def get_success_url(self):
+        return reverse('tasks', args=[self.object.project.id, self.object.id])
+
+class JobUpdate(UpdateView):
+    model = Job
+    form_class = JobForm
+
+    def get_success_url(self):
+        return reverse('tasks', args=[self.object.project.id, self.object.id])
+
+class JobDelete(DeleteView):
     model = Job
 
-class JobUpdate(JobSuccessRedirectMixin, UpdateView):
-    model = Job
-
-class JobDelete(JobSuccessRedirectMixin, DeleteView):
-    model = Job
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])

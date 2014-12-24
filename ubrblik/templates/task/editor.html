@@ -1,7 +1,19 @@
 {% extends "project.html" %}
 {% load i18n staticfiles %}
 
-{% block title %}{{ project.name }} - {% trans "Tasks" %}{% endblock %}
+{% block title %}{{ project.name }} > {{ job.name }}{% endblock %}
+{% block head_navbar %}
+<ul class="nav navbar-nav navbar-left">
+  <li><a href="{% url 'project.view' project.id %}">{{ project.name }}</a></li>
+  <li class="active"><a href="{% url 'tasks' project.id job.id %}">{{ job.name }}</a></li>
+</ul>
+{% endblock %}
+
+{% block sidebar %}
+<ul class="nav nav-sidebar">
+  <li class="active"><a href="{% url 'project.view' project.id %}">Tasks</a></li>
+</ul>
+{% endblock %}
 
 {% block content %}
 <div id="task-editor" data-job-pk="{{ job.pk }}">

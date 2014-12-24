@@ -23,7 +23,7 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         object = objects[0]
         keys = object.keys()
         expected_keys = [
-            'id', 'name', 'description', 'order', 'project', 'resource_uri'
+            'id', 'name', 'description', 'order', 'project', 'billing_method', 'resource_uri'
         ]
         self.assertEqual(sorted(expected_keys), sorted(keys))
 
@@ -137,7 +137,7 @@ class LineItemResourceTest(ResourceTestCaseBase):
         lineitem = LineItem.objects.last()
         self.assertEqual("created line item", lineitem.name)
         self.assertEqual(self.task.id, lineitem.task.id)
-        self.assertEqual(160, lineitem.total_amount)
+        self.assertEqual(160, lineitem.price_per_task_unit)
 
     def test_delete_lineitem(self):
         start_count = LineItem.objects.count()
