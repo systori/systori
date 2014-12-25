@@ -87,8 +87,8 @@ gettext_noop = lambda s: s
 LANGUAGES = (
     ('de', gettext_noop('Deutsch')),
     ('en', gettext_noop('English')),
-    ('uk', gettext_noop('Українською')),
-    ('ru', gettext_noop('По-русски')),
+#    ('uk', gettext_noop('Українською')),
+#    ('ru', gettext_noop('По-русски')),
 )
 
 TIME_ZONE = 'Europe/Berlin'
