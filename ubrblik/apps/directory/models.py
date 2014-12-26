@@ -46,8 +46,8 @@ class ProjectContact(models.Model):
     )
     association = models.CharField(max_length=128, choices=ASSOCIATION_TYPE, default=CUSTOMER)
 
-    project = models.ForeignKey("project.Project")
-    contact = models.ForeignKey(Contact)
+    project = models.ForeignKey("project.Project", related_name="project_contacts")
+    contact = models.ForeignKey(Contact, related_name="project_contacts")
 
     notes = models.TextField(_("Notes"), blank=True)
 

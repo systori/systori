@@ -2,28 +2,37 @@
 {% load i18n %}
 
 {% block content %}
-<h2 class="sub-header">Jobs</h2>
+<h2 class="sub-header">{% trans "Jobs" %}</h2>
 <div class="table-responsive">
   <table class="table table-striped">
     <thead>
       <tr>
         <th>#</th>
-        <th>Name</th>
-        <th>Status</th>
-        <th>Cost</th>
-        <th>Actions</th>
+        <th>{% trans "Name" %}</th>
+        <th>{% trans "Status" %}</th>
+        <th>{% trans "Estimate" %}</th>
+        <th>{% trans "Billing Method" %}</th>
+        <th>{% trans "Billable Amount" %}</th>
+        <th>{% trans "Actions" %}</th>
       </tr>
     </thead>
     <tbody>
-      {% for job in jobs %}
+      {% for job in project.jobs.all %}
       <tr>
         <td>{{ job.id }}</td>
         <td><a href="{% url 'tasks' project.id job.id %}">{{ job.name }}</a></td>
-        <td>{{ job.status }}</td>
-        <td>{{ job.total_amount }}</td>
+        <td>{{ job.get_status_display }}</td>
+        <td>{{ job.estimate_total|floatformat:2 }}</td>
+        <td>{{ job.get_billing_method_display }}</td>
+        <td>{{ job.billable_total|floatformat:2 }}</td>
         <td>
+          {% for state in job.get_available_status_transitions %}
+            <a href="{% url 'job.transition' project.id job.id state.name %}">{{ state.custom.label }}</a>
+          {% endfor %}
+          {% if job.status == job.DRAFT %}
           <a href="{% url 'job.edit' project.id job.id %}">{% trans "Edit" %}</a>
           <a href="{% url 'job.delete' project.id job.id %}">{% trans "Delete" %}</a>
+          {% endif %}
         </td>
       </tr>
       {% endfor %}
@@ -32,7 +41,98 @@
   <a href="{% url 'job.create' project.id %}">{% trans "Create" %}</a>
 </div>
 
-<h2 class="sub-header">Contacts</h2>
+
+<h2 class="sub-header">{% trans "Proposals" %}</h2>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>{% trans 'Status' %}</th>
+        <th>{% trans 'Jobs' %}</th>
+        <th>{% trans 'Amount' %}</th>
+        <th>{% trans 'Created On' %}</th>
+        <th>{% trans 'Actions' %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for doc in project.proposals.all %}
+      <tr>
+        <td>{{ doc.id }}</td>
+        <td>{{ doc.get_status_display }}</td>
+        <td>
+        {% for job in doc.jobs.all %}
+          {{ job }}<br />
+        {% endfor %}
+        </td>
+        <td>{{ doc.amount|floatformat:2 }}</td>
+        <td>{{ doc.created_on }}</td>
+        <td>
+          {% for state in doc.get_available_status_transitions %}
+            <a href="{% url 'proposal.transition' project.id doc.id state.name %}">{{ state.custom.label }}</a>
+          {% endfor %}
+          {% if doc.status == doc.NEW %}
+          <a href="{% url 'proposal.delete' project.id doc.id %}">{% trans "Delete" %}</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if project.has_jobs_for_proposal %}
+    <a href="{% url 'proposal.create' project.id %}">{% trans "Create" %}</a>
+  {% else %}
+    {% trans "No jobs available for new proposal." %}
+  {% endif %}
+</div>
+
+
+<h2 class="sub-header">{% trans "Invoices" %}</h2>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>{% trans 'Status' %}</th>
+        <th>{% trans 'Jobs' %}</th>
+        <th>{% trans 'Amount' %}</th>
+        <th>{% trans 'Created On' %}</th>
+        <th>{% trans 'Actions' %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for doc in project.invoices.all %}
+      <tr>
+        <td>{{ doc.id }}</td>
+        <td>{{ doc.get_status_display }}</td>
+        <td>
+        {% for job in doc.jobs.all %}
+          {{ job }}<br />
+        {% endfor %}
+        </td>
+        <td>{{ doc.amount|floatformat:2 }}</td>
+        <td>{{ doc.created_on }}</td>
+        <td>
+          {% for state in doc.get_available_status_transitions %}
+            <a href="{% url 'invoice.transition' project.id doc.id state.name %}">{{ state.custom.label }}</a>
+          {% endfor %}
+          {% if doc.status == doc.NEW %}
+          <a href="{% url 'proposal.delete' project.id doc.id %}">{% trans "Delete" %}</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if project.has_jobs_for_invoice %}
+    <a href="{% url 'invoice.create' project.id %}">{% trans "Create" %}</a>
+  {% else %}
+    {% trans "No jobs available to invoice." %}
+  {% endif %}
+</div>
+
+
+<h2 class="sub-header">{% trans "Contacts" %}</h2>
 <div class="table-responsive">
   <table class="table table-striped">
     <thead>
@@ -44,7 +144,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for contact in contacts %}
+      {% for contact in project.project_contacts.all %}
       <tr>
         <td>{{ contact.id }}</td>
         <td><a href="{% url 'contact.view' contact.contact.id %}">{{ contact.contact }}</a></td>

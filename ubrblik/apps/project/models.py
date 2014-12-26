@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.db import models
 from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
-
+from ..task.models import Job
 
 class Project(models.Model):
 
@@ -28,3 +28,19 @@ class Project(models.Model):
     @property
     def billable_total(self):
         return sum([job.billable_total for job in self.jobs.all()])
+    
+    @property
+    def jobs_for_proposal(self):
+        return self.jobs.filter(status=Job.DRAFT)
+
+    @property
+    def has_jobs_for_proposal(self):
+        return self.jobs_for_proposal.exists()
+
+    @property
+    def jobs_for_invoice(self):
+        return self.jobs.filter(status=Job.STARTED)
+
+    @property
+    def has_jobs_for_invoice(self):
+        return self.jobs_for_invoice.exists()

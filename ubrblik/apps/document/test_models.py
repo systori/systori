@@ -1,20 +1,23 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from ..project.models import *
-from ..task.models import *
 from .models import *
 
+from ..task.test_models import create_task_data
 
-class DocumentTests(TestCase):
+
+class ProposalTests(TestCase):
 
     def setUp(self):
-        self.proj = Project.objects.create(name="my project")
-        self.job = Job.objects.create(name="Default", project=self.proj)
-        group = TaskGroup.objects.create(name="my group", job=self.job)
-        self.task = Task.objects.create(name="my task", qty=1, taskgroup=group)
+        create_task_data(self)
 
-    def test_associate_task(self):
-        p = Document.objects.create(project=self.proj)
-        #p.add_task(self.task)
-        #p = Document.objects.get(pk=p.pk)
-        #self.assertEquals(1, p.items.count())
+    def test_proposal_new(self):
+        d = Proposal.objects.create(project=self.project)
+        self.assertEquals('New', d.get_status_display())
+        self.assertEquals(['Send'], [t.custom['label'] for t in d.get_available_status_transitions()])
+
+    def test_proposal_send(self):
+        d = Proposal.objects.create(project=self.project)
+        d.send(); d.save()
+        d = Proposal.objects.get(pk=d.pk)
+        self.assertEquals('Sent', d.get_status_display())
+        self.assertEquals(['Approve', 'Decline'], [t.custom['label'] for t in d.get_available_status_transitions()])

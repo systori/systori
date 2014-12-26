@@ -2,3 +2,4 @@ psycopg2
 django
 django-tastypie
 django-ordered-model
+django-fsm

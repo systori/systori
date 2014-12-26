@@ -2,7 +2,7 @@ import os.path, shutil
 from subprocess import Popen, PIPE
 from tempfile import TemporaryDirectory
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import View, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -14,6 +14,25 @@ from .models import Job, TaskGroup
 from .forms import JobForm
 
 from ubrblik import settings
+
+
+class JobTransition(SingleObjectMixin, View):
+    model = Job
+    
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        transition = None
+        for t in self.object.get_available_status_transitions():
+            if t.name == kwargs['transition']:
+                transition = t
+                break
+        
+        if transition:
+          getattr(self.object, transition.name)()
+          self.object.save()
+
+        return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
 
 
 class BaseJobTaskView(SingleObjectMixin, ListView):

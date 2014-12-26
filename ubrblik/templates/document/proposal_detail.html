@@ -1,0 +1,13 @@
+{% extends "project.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='proposals' %}{% endblock %}
+
+{% block content %}
+
+<h2>{% trans 'Proposal Details' %}</h2>
+Status: {{ proposal.get_status_display }}<br />
+Created: {{ proposal.created_on }}<br />
+Notes:<br />{{ proposal.notes }}
+
+{% endblock %}

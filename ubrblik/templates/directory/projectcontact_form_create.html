@@ -1,6 +1,8 @@
 {% extends "project.html" %}
 {% load i18n %}
 
+{% block sidebar %}{% include "project/sidebar.html" with section='contacts' %}{% endblock %}
+
 {% block content %}
 <h2 class="sub-header">{% blocktrans with project_name=project.name %}Create and then add contact to {{ project_name }}{% endblocktrans %}</h2>
 <form method="post">{% csrf_token %}

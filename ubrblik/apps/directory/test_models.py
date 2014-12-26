@@ -12,7 +12,9 @@ class ContactProjectTests(TestCase):
 
     def test_no_association(self):
         self.assertEquals(0, len(self.contact.projects.all()))
+        self.assertEquals(0, len(self.contact.project_contacts.all()))
         self.assertEquals(0, len(self.project.contacts.all()))
+        self.assertEquals(0, len(self.project.project_contacts.all()))
 
     def test_customer_association(self):
         ProjectContact.objects.create(project=self.project, contact=self.contact, association=ProjectContact.CUSTOMER)

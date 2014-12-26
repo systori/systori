@@ -1,6 +1,8 @@
 {% extends "project.html" %}
 {% load i18n %}
 
+{% block sidebar %}{% include "project/sidebar.html" with section='contacts' %}{% endblock %}
+
 {% block content %}
   <h2 class="sub-header">{% blocktrans with project_name=project.name %}Add Contact to {{ project_name }}{% endblocktrans %}</h2>
   <div class="table-responsive">

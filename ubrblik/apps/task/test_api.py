@@ -97,13 +97,14 @@ class TaskResourceTest(ResourceTestCaseBase):
         data = {
             "taskgroup": "/api/v1/taskgroup/{}/".format(self.group.id),
             "name": "created task",
-            "qty": 0
+            "qty": 5
         }
         resp = self.api_client.post(self.url, data=data, format='json')
         self.assertHttpCreated(resp)
         task = Task.objects.last()
         self.assertEqual("created task", task.name)
         self.assertEqual(self.group.id, task.taskgroup.id)
+        self.assertEqual(5, task.qty)
 
     def test_delete_task(self):
         start_count = Task.objects.count()
@@ -122,7 +123,7 @@ class LineItemResourceTest(ResourceTestCaseBase):
         data = {"name": "new name"}
         resp = self.api_client.put(url, data=data, format='json')
         self.assertHttpAccepted(resp)
-        lineitem = LineItem.objects.get(pk=self.task.id)
+        lineitem = LineItem.objects.get(pk=self.lineitem.id)
         self.assertEqual("new name", lineitem.name)
 
     def test_create_lineitem(self):
@@ -141,7 +142,7 @@ class LineItemResourceTest(ResourceTestCaseBase):
 
     def test_delete_lineitem(self):
         start_count = LineItem.objects.count()
-        url = self.url+'{}/'.format(self.task.id)
+        url = self.url+'{}/'.format(self.lineitem.id)
         resp = self.api_client.delete(url, format='json')
         self.assertHttpAccepted(resp)
         new_count = LineItem.objects.count()

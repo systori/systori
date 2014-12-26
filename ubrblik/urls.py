@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     url(r'', include('ubrblik.apps.project.urls')),
     url(r'', include('ubrblik.apps.directory.urls')),
     url(r'^project-(?P<project_pk>\d+)/', include('ubrblik.apps.task.urls')),
+    url(r'^project-(?P<project_pk>\d+)/', include('ubrblik.apps.document.urls')),
     url(r'', include('ubrblik.apps.main.urls')),
     
 )

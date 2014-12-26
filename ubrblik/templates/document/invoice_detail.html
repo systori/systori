@@ -1,0 +1,13 @@
+{% extends "project.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
+
+{% block content %}
+
+<h2>{% trans 'Invoice Details' %}</h2>
+Status: {{ invoice.get_status_display }}<br />
+Created: {{ invoice.created_on }}<br />
+Notes:<br />{{ invoice.notes }}
+
+{% endblock %}

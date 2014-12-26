@@ -22,11 +22,6 @@ class ProjectCreate(CreateView):
 
 class ProjectView(DetailView):
     model = Project
-    def get_context_data(self, **kwargs):
-        context = super(ProjectView, self).get_context_data(**kwargs)
-        context['jobs'] = self.object.jobs.all()
-        context['contacts'] = ProjectContact.objects.filter(project=self.object)
-        return context
 
 class ProjectUpdate(UpdateView):
     model = Project

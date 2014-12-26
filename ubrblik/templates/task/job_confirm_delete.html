@@ -1,7 +1,10 @@
 {% extends "project.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='jobs' %}{% endblock %}
 
 {% block content %}
-<form action="" method="post">{% csrf_token %}
+<form method="post">{% csrf_token %}
     <p>{% blocktrans with object=object.name %}Are you sure you want to delete "{{ object }}"?{% endblocktrans %}</p>
     <input type="submit" value="{% trans 'Confirm' %}" />
 </form>

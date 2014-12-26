@@ -8,14 +8,7 @@
 </ul>
 {% endblock %}
 
-{% block sidebar %}
-<ul class="nav nav-sidebar">
-  <li class="active"><a href="{% url 'project.view' project.id %}">Project Dashboard</a></li>
-  <li><a href="{% url 'project.view' project.id %}#jobs">Jobs</a></li>
-  <li><a href="{% url 'project.view' project.id %}#docs">Documents</a></li>
-  <li><a href="{% url 'project.view' project.id %}#contacts">Contacts</a></li>
-</ul>
-{% endblock %}
+{% block sidebar %}{% include "project/sidebar.html" %}{% endblock %}
 
 {% block content %}
 {% endblock %}

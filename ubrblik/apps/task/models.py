@@ -1,11 +1,13 @@
+from decimal import Decimal
 from django.db import models, connections
 from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
+from django_fsm import FSMField, transition
 
 class Job(OrderedModel):
 
     name = models.CharField(_('Job Name'), max_length=512)
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
     FIXED_PRICE = "fixed_price"
     TIME_AND_MATERIALS = "time_and_materials"
@@ -18,13 +20,37 @@ class Job(OrderedModel):
     project = models.ForeignKey('project.Project', related_name="jobs")
     order_with_respect_to = 'project'
 
+    DRAFT = "draft"
+    PROPOSED = "proposed"
+    APPROVED = "approved"
+    STARTED = "started"
+    COMPLETED = "completed"
+
+    STATE_CHOICES = (
+        (DRAFT, _("Draft")),
+        (PROPOSED, _("Proposed")),
+        (APPROVED, _("Approved")),
+        (STARTED, _("Started")),
+        (COMPLETED, _("Completed"))
+    )
+
+    status = FSMField(default=DRAFT, choices=STATE_CHOICES)
+
     class Meta(OrderedModel.Meta):
         verbose_name = _("Job")
         verbose_name_plural = _("Job")
 
+    @transition(field=status, source=[APPROVED,COMPLETED], target=STARTED, custom={'label': _("Start")})
+    def start(self):
+        pass
+
+    @transition(field=status, source=STARTED, target=COMPLETED, custom={'label': _("Complete")})
+    def complete(self):
+        pass
+
     def _total_calc(self, calc_type):
         field = "{}_{}".format(self.billing_method, calc_type)
-        total = 0
+        total = Decimal(0.0)
         for taskgroup in self.taskgroups.all():
             total += getattr(taskgroup, field)
         return total
@@ -37,11 +63,18 @@ class Job(OrderedModel):
     def billable_total(self):
         return self._total_calc('billable')
 
+    @property
+    def code(self):
+        # TODO: use project formatting for codes
+        return self.order
+
+    def __str__(self):
+        return '{} {}'.format(self.code, self.name)
 
 class TaskGroup(OrderedModel):
 
     name = models.CharField(_("Name"), max_length=512)
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
     job = models.ForeignKey(Job, related_name="taskgroups")
     order_with_respect_to = 'job'
@@ -51,7 +84,7 @@ class TaskGroup(OrderedModel):
         verbose_name_plural = _("Task Groups")
 
     def _total_calc(self, field):
-        total = 0
+        total = Decimal(0.0)
         for task in self.tasks.all():
             total += getattr(task, field)
         return total
@@ -105,7 +138,7 @@ class Task(OrderedModel):
     # per unit of this task
     @property
     def unit_price(self):
-        t = 0
+        t = Decimal(0.0)
         for lineitem in self.lineitems.all():
             t += lineitem.price_per_task_unit
         return t
@@ -127,7 +160,7 @@ class Task(OrderedModel):
     # all line items contained by this task.
     @property
     def time_and_materials_estimate(self):
-        t = 0
+        t = Decimal(0.0)
         for lineitem in self.lineitems.all():
             t += lineitem.time_and_materials_estimate
         return t
@@ -137,7 +170,7 @@ class Task(OrderedModel):
     # all line items contained by this task.
     @property
     def time_and_materials_billable(self):
-        t = 0
+        t = Decimal(0.0)
         for lineitem in self.lineitems.all():
             t += lineitem.time_and_materials_billable
         return t

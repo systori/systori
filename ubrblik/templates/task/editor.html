@@ -9,11 +9,7 @@
 </ul>
 {% endblock %}
 
-{% block sidebar %}
-<ul class="nav nav-sidebar">
-  <li class="active"><a href="{% url 'project.view' project.id %}">Tasks</a></li>
-</ul>
-{% endblock %}
+{% block sidebar %}{% include "project/sidebar.html" with section='jobs' %}{% endblock %}
 
 {% block content %}
 <div id="task-editor" data-job-pk="{{ job.pk }}">
@@ -30,6 +26,8 @@
       <span class="code">{{ task.code }}</span>
       <span class="name">{{ task.name }}</span>
       <span class="description">{{ task.description }}</span>
+      <span class="qty">{{ task.qty|floatformat:2 }}</span>
+      <span class="unit">{{ task.unit }}</span>
       <span class="total">{{ task.total_amount|floatformat:2 }}</span>
     </ubr-task>
 
@@ -45,8 +43,6 @@
   {% endfor %}
 {% endfor %}
 </div>
-<br /> <br /> <br />
-<a href="{% url 'task.pdf' project.id job.id %}">{% trans "PDF Report" %}</a>
 
 <style>
 .total {
@@ -118,10 +114,12 @@ ubr-lineitem:hover::shadow span[placeholder]:empty:before {
   }
   </style>
   <td><span class="code"></span></td>
-  <td colspan="4">
+  <td colspan="2">
     <span class="name" placeholder="{% trans 'task' %}" contenteditable></span>
     <span class="description" placeholder="{% trans 'description' %}" contenteditable></span>
   </td>
+  <td><span class="qty" placeholder="{% trans 'qty' %}" contenteditable></span></td>
+  <td><span class="unit" placeholder="{% trans 'unit' %}" contenteditable></span></td>
   <td><span class="total"></span></td>
 </template>
 

@@ -1,65 +1,97 @@
 from collections import namedtuple
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django_fsm import FSMField, transition
 
-"""
-Document represents a work-in-progress model for a physical document.
-
-Workflow is something like this:
-
-1. User creates a new Document object (either Invoice, Proposal, Report, etc).
-
-2. They will associate Tasks with this document. At this point the tasks might
-   change due to other factors in the system (workers marking tasks as done).
-
-3. When user is satisfied with the document and have verified that the tasks
-   look correct they must generate a PDF.
-
-4. Once a PDF is generated they can no longer edit the document. They can easily
-   duplicate the document and start a new one.
-
-Rationale:
-
-Because a Document represents references to live Tasks (which can change due to other
-factors) it would be confusing to leave a document editable after it has been verified
-and generated. By locking editing and generating a PDF we have created a snap shot at a
-point in time where the user was satisfied with the state of all associated Tasks.
-"""
-
-class Status(namedtuple('Status', ['name', 'label'])):
-    def __eq__(self, other):
-        return self.name == other
 
 class Document(models.Model):
-
-    project = models.ForeignKey("project.Project", related_name="document")
-    description = models.TextField(_("Proposal Description"), blank=True, null=True)
     pdf = models.FileField()
+    notes = models.TextField(_("Notes"), blank=True, null=True)
+    amount = models.DecimalField(_("Amount"), max_digits=12, decimal_places=2)
+    created_on = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return '{} {} {}'.format(self.get_status_display(), self.__class__.__name__, self.created_on)
+    class Meta:
+        abstract = True
 
-    PROPOSAL = "proposal"
-    INVOICE = "invoice"
-    DOCUMENT_TYPE = (
-        (PROPOSAL, _("Proposal")),
-        (INVOICE, _("Invoice")),
+
+class Proposal(Document):
+    project = models.ForeignKey("project.Project", related_name="proposals")
+    jobs = models.ManyToManyField("task.Job", related_name="proposals")
+
+    NEW = "new"
+    SENT = "sent"
+    APPROVED = "approved"
+    DECLINED = "declined"
+
+    STATE_CHOICES = (
+        (NEW, _("New")),
+        (SENT, _("Sent")),
+        (APPROVED, _("Approved")),
+        (DECLINED, _("Declined"))
     )
-    doctype = models.CharField(max_length=128, choices=DOCUMENT_TYPE, default=PROPOSAL)
 
-    DRAFT = Status("draft", _("Draft"))
-    READY = Status("ready", _("Ready"))
-    SENT = Status("sent", _("Sent"))
-    APPROVED = Status("approved", _("Approved"))
-    PAID = Status("paid", _("Paid"))
-    CANCELED = Status("canceled", _("Canceled"))
+    status = FSMField(default=NEW, choices=STATE_CHOICES)
 
-    WORKFLOW = {
-      PROPOSAL: [READY, SENT, APPROVED, CANCELED],
-      INVOICE: [READY, SENT, PAID, CANCELED]
-    }
+    @transition(field=status, source=NEW, target=SENT, custom={'label': _("Send")})
+    def send(self):
+        pass
 
-    STATUS_TYPE = (DRAFT, READY, SENT, APPROVED, PAID, CANCELED)
+    @transition(field=status, source=SENT, target=APPROVED, custom={'label': _("Approve")})
+    def approve(self):
+        for job in self.jobs.all():
+            job.status = job.APPROVED
+            job.save()
 
-    status = models.CharField(max_length=128, choices=STATUS_TYPE, default=DRAFT)
+    @transition(field=status, source=SENT, target=DECLINED, custom={'label': _("Decline")})
+    def decline(self):
+        for job in self.jobs.all():
+            job.status = job.DRAFT
+            job.save()
+
+    def delete(self, using=None):
+        for job in self.jobs.all():
+            job.status = job.DRAFT
+            job.save()
+        super(Proposal, self).delete(using)
 
     class Meta:
-        verbose_name = _("Document")
-        verbose_name_plural = _("Documents")
+        verbose_name = _("Proposal")
+        verbose_name_plural = _("Proposals")
+        ordering = ['id']
+
+
+class Invoice(Document):
+    project = models.ForeignKey("project.Project", related_name="invoices")
+    jobs = models.ManyToManyField("task.Job", related_name="invoices")
+
+    NEW = "new"
+    SENT = "sent"
+    PAID = "paid"
+    DISPUTED = "disputed"
+
+    STATE_CHOICES = (
+        (NEW, _("New")),
+        (SENT, _("Sent")),
+        (PAID, _("Paid")),
+        (DISPUTED, _("Disputed"))
+    )
+
+    status = FSMField(default=NEW, choices=STATE_CHOICES)
+
+    @transition(field=status, source=NEW, target=SENT, custom={'label': _("Send")})
+    def send(self):
+        pass
+
+    @transition(field=status, source=SENT, target=PAID, custom={'label': _("Pay")})
+    def pay(self):
+        pass
+
+    @transition(field=status, source=SENT, target=DISPUTED, custom={'label': _("Dispute")})
+    def dispute(self):
+        pass
+
+    class Meta:
+        verbose_name = _("Invoice")
+        verbose_name_plural = _("Invoices")
+        ordering = ['id']
