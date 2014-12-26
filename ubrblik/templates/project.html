@@ -10,8 +10,10 @@
 
 {% block sidebar %}
 <ul class="nav nav-sidebar">
-  <li class="active"><a href="{% url 'project.view' project.id %}">Jobs</a></li>
-  <li><a href="{% url 'project.view' project.id %}">Documents</a></li>
+  <li class="active"><a href="{% url 'project.view' project.id %}">Project Dashboard</a></li>
+  <li><a href="{% url 'project.view' project.id %}#jobs">Jobs</a></li>
+  <li><a href="{% url 'project.view' project.id %}#docs">Documents</a></li>
+  <li><a href="{% url 'project.view' project.id %}#contacts">Contacts</a></li>
 </ul>
 {% endblock %}
 

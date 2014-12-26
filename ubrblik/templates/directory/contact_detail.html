@@ -1,0 +1,34 @@
+{% extends "frame.html" %}
+{% load i18n %}
+
+{% block content %}
+<h2>{% trans 'Contact Details' %}</h2>
+{% for field in form %}
+<div>
+    {{ field.label }}: {{ field.value }}
+</div>
+{% endfor %}
+
+<h2>{% trans 'Associated Projects' %}</h2>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>{% trans 'Project' %}</th>
+        <th>{% trans 'Association' %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for projectcontact in contact.projectcontact_set.all %}
+      <tr>
+        <td>{{ projectcontact.project.id }}</td>
+        <td><a href="{% url 'project.view' projectcontact.project.id %}">{{ projectcontact.project.name }}</a></td>
+        <td>{{ projectcontact.get_association_display }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

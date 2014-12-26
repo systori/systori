@@ -2,7 +2,7 @@
 
 {% block content %}
 <form action="" method="post">{% csrf_token %}
-    <p>Are you sure you want to delete the "{{ job.name }}" job?</p>
-    <input type="submit" value="Confirm" />
+    <p>{% blocktrans with object=object.name %}Are you sure you want to delete "{{ object }}"?{% endblocktrans %}</p>
+    <input type="submit" value="{% trans 'Confirm' %}" />
 </form>
 {% endblock %}

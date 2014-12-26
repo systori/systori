@@ -70,6 +70,12 @@ ubr-task::shadow > td,
 ubr-lineitem::shadow > td {
   //border:1px solid black;
   vertical-align: top;
+  padding-left: 5px;
+  padding-bottom: 10px;
+}
+
+ubr-lineitem::shadow > td:nth-of-type(2) {
+  padding-left: 20px;
 }
 
 ubr-taskgroup:hover::shadow span[placeholder]:empty:before,
@@ -97,12 +103,12 @@ ubr-lineitem:hover::shadow span[placeholder]:empty:before {
     display: block;
   }
   </style>
-  <td class="code"></td>
+  <td><span class="code"></span></td>
   <td colspan="4">
     <span class="name" placeholder="{% trans 'task group' %}" contenteditable></span>
     <span class="description" placeholder="{% trans 'description' %}" contenteditable></span>
   </td>
-  <td class="total"></td>
+  <td><span class="total"></span></td>
 </template>
 
 <template id="task-template">
@@ -111,23 +117,23 @@ ubr-lineitem:hover::shadow span[placeholder]:empty:before {
     display: block;
   }
   </style>
-  <td class="code"></td>
+  <td><span class="code"></span></td>
   <td colspan="4">
     <span class="name" placeholder="{% trans 'task' %}" contenteditable></span>
     <span class="description" placeholder="{% trans 'description' %}" contenteditable></span>
   </td>
-  <td class="total"></td>
+  <td><span class="total"></span></td>
 </template>
 
 <template id="lineitem-template">
   <style>
   </style>
   <td></td>
-  <td class="name" placeholder="{% trans 'line item' %}" contenteditable></td>
-  <td class="qty" placeholder="{% trans 'qty' %}" contenteditable></td>
-  <td class="unit" placeholder="{% trans 'unit' %}" contenteditable></td>
-  <td class="price" placeholder="{% trans 'price' %}" contenteditable></td>
-  <td class="total"></td>
+  <td><span class="name" placeholder="{% trans 'line item' %}" contenteditable></span></td>
+  <td><span class="qty" placeholder="{% trans 'qty' %}" contenteditable></span></td>
+  <td><span class="unit" placeholder="{% trans 'unit' %}" contenteditable></span></td>
+  <td><span class="price" placeholder="{% trans 'price' %}" contenteditable></span></td>
+  <td><span class="total"></span></td>
 </template>
 
 {% endblock content %}

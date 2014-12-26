@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'tastypie',
     'ordered_model',
     'ubrblik.apps.project',
+    'ubrblik.apps.directory',
     'ubrblik.apps.task',
     'ubrblik.apps.document',
     'ubrblik.apps.main'

@@ -1,7 +1,7 @@
 {% extends "project.html" %}
 
 {% block content %}
-<form action="{% url 'job.create' project.id %}" method="post">{% csrf_token %}
+<form method="post">{% csrf_token %}
 {{ form.as_p }}
 <input type="submit" value="Submit" />
 </form>

@@ -2,10 +2,11 @@
 {% load i18n %}
 
 {% block sidebar %}
-  <ul class="nav nav-sidebar">
-    <li class="active"><a href="/">Dashboard</a></li>
-    <li><a href="{% url 'projects' %}">Projects</a></li>
-  </ul>
+<ul class="nav nav-sidebar">
+  <li class="active"><a href="/">{% trans 'Dashboard' %}</a></li>
+  <li><a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
+  <li><a href="{% url 'directory' %}">{% trans 'Directory' %}</a></li>
+</ul>
 {% endblock %}
 
 {% block content %}

@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse_lazy
 
 from .models import Project
 from ..task.models import Job, TaskGroup
+from ..directory.models import ProjectContact
 
 class ProjectList(ListView):
     model = Project
@@ -23,8 +24,8 @@ class ProjectView(DetailView):
     model = Project
     def get_context_data(self, **kwargs):
         context = super(ProjectView, self).get_context_data(**kwargs)
-        context['project'] = self.object
         context['jobs'] = self.object.jobs.all()
+        context['contacts'] = ProjectContact.objects.filter(project=self.object)
         return context
 
 class ProjectUpdate(UpdateView):

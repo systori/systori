@@ -1,0 +1,38 @@
+{% extends "frame.html" %}
+{% load i18n %}
+
+{% block sidebar %}
+<ul class="nav nav-sidebar">
+  <li><a href="/">{% trans 'Dashboard' %}</a></li>
+  <li><a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
+  <li class="active"><a href="{% url 'directory' %}">{% trans 'Directory' %}</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+  <h2 class="sub-header">{% trans 'Directory' %}</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>{% trans 'Contact' %}</th>
+          <th>{% trans 'Actions' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for contact in contact_list %}
+        <tr>
+          <td>{{ contact.id }}</td>
+          <td><a href="{% url 'contact.view' contact.id %}">{{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }}</a></td>
+          <td>
+            <a href="{% url 'contact.edit' contact.id %}">{% trans "Edit" %}</a>
+            <a href="{% url 'contact.delete' contact.id %}">{% trans "Delete" %}</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <a href="{% url 'contact.create' %}">{% trans "Create" %}</a>
+  </div>
+{% endblock content %}
