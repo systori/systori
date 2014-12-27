@@ -7,7 +7,6 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>#</th>
         <th>{% trans "Name" %}</th>
         <th>{% trans "Status" %}</th>
         <th>{% trans "Estimate" %}</th>
@@ -19,8 +18,7 @@
     <tbody>
       {% for job in project.jobs.all %}
       <tr>
-        <td>{{ job.id }}</td>
-        <td><a href="{% url 'tasks' project.id job.id %}">{{ job.name }}</a></td>
+        <td><a href="{% url 'tasks' project.id job.id %}">{{ job }}</a></td>
         <td>{{ job.get_status_display }}</td>
         <td>{{ job.estimate_total|floatformat:2 }}</td>
         <td>{{ job.get_billing_method_display }}</td>

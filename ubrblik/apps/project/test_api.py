@@ -23,7 +23,7 @@ class ProjectResourceTest(ResourceTestCaseBase):
         object = objects[0]
         keys = object.keys()
         expected_keys = [
-            'id', 'name', 'description', 'resource_uri'
+            'id', 'name', 'description', 'job_zfill', 'taskgroup_zfill', 'task_zfill', 'resource_uri'
         ]
         self.assertEqual(sorted(expected_keys), sorted(keys))
 

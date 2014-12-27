@@ -65,8 +65,7 @@ class Job(OrderedModel):
 
     @property
     def code(self):
-        # TODO: use project formatting for codes
-        return self.order
+        return str(self.order+1).zfill(self.project.job_zfill)
 
     def __str__(self):
         return '{} {}'.format(self.code, self.name)
@@ -105,6 +104,14 @@ class TaskGroup(OrderedModel):
     def time_and_materials_billable(self):
         return self._total_calc('time_and_materials_billable')
 
+    @property
+    def code(self):
+        parent_code = self.job.code
+        self_code = str(self.order+1).zfill(self.job.project.taskgroup_zfill)
+        return '{}.{}'.format(parent_code, self_code)
+
+    def __str__(self):
+        return '{} {}'.format(self.code, self.name)
 
 class Task(OrderedModel):
 
@@ -175,16 +182,24 @@ class Task(OrderedModel):
             t += lineitem.time_and_materials_billable
         return t
 
+    @property
+    def code(self):
+        parent_code = self.taskgroup.code
+        self_code = str(self.order+1).zfill(self.taskgroup.job.project.task_zfill)
+        return '{}.{}'.format(parent_code, self_code)
+
+    def __str__(self):
+        return '{} {}'.format(self.code, self.name)
 
 class LineItem(models.Model):
 
     name = models.CharField(_("Name"), max_length=512)
 
-    # fixed billing, amount of hours or materials to complete just one task unit
-    qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2, default=0.0)
+    # fixed billing, amount of hours or materials to complete just one unit of the task
+    unit_qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2, default=0.0)
 
-    # time and materials billing, estimate of the amount of hours or materials to complete the entire task
-    estimate = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2, default=0.0)
+    # time and materials billing, amount of hours or materials to complete the entire task
+    task_qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2, default=0.0)
 
     # time and materials billing, how many units of this have been delivered/expended and can thus be billed
     billable = models.DecimalField(_("Billable"), max_digits=12, decimal_places=2, default=0.0)
@@ -219,13 +234,13 @@ class LineItem(models.Model):
     # of this line item per 1 unit of the parent task.
     @property
     def price_per_task_unit(self):
-        return self.price * self.qty
+        return self.price * self.unit_qty
 
     # For time and materials billing, returns the estimated price
     # of this line item to complete the entire task.
     @property
     def time_and_materials_estimate(self):
-        return self.price * self.estimate
+        return self.price * self.task_qty
 
     # For time and materials billing, returns
     # the total amount that has been expended.

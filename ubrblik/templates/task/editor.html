@@ -12,10 +12,16 @@
 {% block sidebar %}{% include "project/sidebar.html" with section='jobs' %}{% endblock %}
 
 {% block content %}
-<div id="task-editor" data-job-pk="{{ job.pk }}">
+<div id="task-editor"
+  data-job-pk="{{ job.pk }}"
+  data-job-code="{{ job.code }}"
+  data-taskgroup-zfill="{{ project.taskgroup_zfill }}"
+  data-task-zfill="{{ project.task_zfill }}">
+
+
 {% for group in object_list %}
   <ubr-taskgroup data-pk="{{ group.pk }}">
-    <span class="code">{{ group.order }}</span>
+    <span class="code">{{ group.code }}</span>
     <span class="name">{{ group.name }}</span>
     <span class="description">{{ group.description }}</span>
     <span class="total">{{ group.total_amount|floatformat:2 }}</span>
@@ -34,7 +40,7 @@
     {% for lineitem in task.lineitems.all %}
     <ubr-lineitem data-pk="{{ lineitem.pk }}">
       <span class="name">{{ lineitem.name }}</span>
-      <span class="qty">{{ lineitem.qty|floatformat:2 }}</span>
+      <span class="unit-qty">{{ lineitem.unit_qty|floatformat:2 }}</span>
       <span class="unit">{{ lineitem.unit }}</span>
       <span class="price">{{ lineitem.price|floatformat:2 }}</span>
       <span class="total">{{ lineitem.total_amount|floatformat:2 }}</span>
@@ -50,7 +56,6 @@
 }
 #task-editor {
   display: table;
-  //border: 1px solid #000;
   width: 600px;
 }
 
@@ -58,80 +63,129 @@ ubr-taskgroup,
 ubr-task,
 ubr-lineitem {
   display: table-row;
-  //border: 1px solid #000;
 }
 
 ubr-taskgroup::shadow > td,
 ubr-task::shadow > td,
 ubr-lineitem::shadow > td {
-  //border:1px solid black;
+  position: relative;
   vertical-align: top;
-  padding-left: 5px;
-  padding-bottom: 10px;
+  padding: 0px 5px 0px 5px;
+  border: 1px solid white;
+}
+
+ubr-taskgroup::shadow > td > div:focus,
+ubr-task::shadow > td > div:focus,
+ubr-lineitem::shadow > td > div:focus {
+  outline: 0px;
 }
 
 ubr-lineitem::shadow > td:nth-of-type(2) {
   padding-left: 20px;
 }
 
-ubr-taskgroup:hover::shadow span[placeholder]:empty:before,
-ubr-task:hover::shadow span[placeholder]:empty:before,
-ubr-lineitem:hover::shadow span[placeholder]:empty:before {
+ubr-taskgroup::shadow div[placeholder]:empty:before,
+ubr-task::shadow div[placeholder]:empty:before,
+ubr-lineitem::shadow div[placeholder]:empty:before {
   content: attr(placeholder);
   font-style: italic;
   color: #d9d9d9;
 }
 
-ubr-taskgroup:hover::shadow span[placeholder]:empty:focus:before,
-ubr-task:hover::shadow span[placeholder]:empty:focus:before,
-ubr-lineitem:hover::shadow span[placeholder]:empty:before {
-  content: " ";
+ubr-taskgroup::shadow div[placeholder]:empty:focus:before,
+ubr-task::shadow div[placeholder]:empty:focus:before,
+ubr-lineitem::shadow div[placeholder]:empty:focus:before {
+  content: "";
 }
 </style>
 
 <template id="taskgroup-template">
   <style>
+  td:nth-of-type(2) {
+    width: 90%;
+  }
+  td:nth-of-type(3) {
+    width: 10%;
+  }
   .name {
     font-weight: bold;
-    display: block;
-  }
-  .description {
-    display: block;
   }
   </style>
-  <td><span class="code"></span></td>
+  <td><div class="code"></div></td>
   <td colspan="4">
-    <span class="name" placeholder="{% trans 'task group' %}" contenteditable></span>
-    <span class="description" placeholder="{% trans 'description' %}" contenteditable></span>
+    <div class="name" placeholder="{% trans 'task group' %}" contenteditable></div>
+    <div class="description" placeholder="{% trans 'description' %}" contenteditable></div>
   </td>
-  <td><span class="total"></span></td>
+  <td><div class="total"></div></td>
 </template>
 
 <template id="task-template">
   <style>
-  .description {
-    display: block;
+  :host(:hover) td:nth-of-type(1n+1),
+  :host(.focused) td:nth-of-type(1n+1) {
+    border-right: 1px dashed lightgray;
+  }
+  :host(:hover) td:nth-of-type(1n+2),
+  :host(.focused) td:nth-of-type(1n+2) {
+    border-bottom: 1px dashed lightgray;
+  }
+  :host(:hover) td:nth-of-type(1n+5),
+  :host(.focused) td:nth-of-type(1n+5) {
+    border-right: 1px solid white;
+    border-bottom: 1px solid white;
+  }
+  td:nth-of-type(2) {
+    width: 40%;
+  }
+  td:nth-of-type(1n+3) {
+    width: 15%;
+  }
+  .qty, .total {
+    text-align: right;
   }
   </style>
-  <td><span class="code"></span></td>
-  <td colspan="2">
-    <span class="name" placeholder="{% trans 'task' %}" contenteditable></span>
-    <span class="description" placeholder="{% trans 'description' %}" contenteditable></span>
+  <td><div class="code"></div></td>
+  <td>
+    <div class="name" placeholder="{% trans 'task' %}" contenteditable></div>
+    <div class="description" placeholder="{% trans 'description' %}" contenteditable></div>
   </td>
-  <td><span class="qty" placeholder="{% trans 'qty' %}" contenteditable></span></td>
-  <td><span class="unit" placeholder="{% trans 'unit' %}" contenteditable></span></td>
-  <td><span class="total"></span></td>
+  <td><div class="qty" placeholder="{% trans 'qty' %}" contenteditable></div></td>
+  <td><div class="unit" placeholder="{% trans 'unit' %}" contenteditable></div></td>
+  <td></td>
+  <td><div class="total"></div></td>
 </template>
 
 <template id="lineitem-template">
   <style>
+  :host(:hover) td:nth-of-type(1n+1),
+  :host(.focused) td:nth-of-type(1n+1) {
+    border-right: 1px dashed lightgray;
+  }
+  :host(:hover) td:nth-of-type(1n+2),
+  :host(.focused) td:nth-of-type(1n+2) {
+    border-bottom: 1px dashed lightgray;
+  }
+  :host(:hover) td:nth-of-type(1n+6),
+  :host(.focused) td:nth-of-type(1n+6) {
+    border-right: 1px solid white;
+    border-bottom: 1px solid white;
+  }
+  td:nth-of-type(2) {
+    width: 40%;
+  }
+  td:nth-of-type(1n+3) {
+    width: 15%;
+  }
+  .unit-qty-cell, .price-cell, .total-cell {
+    text-align: right;
+  }
   </style>
   <td></td>
-  <td><span class="name" placeholder="{% trans 'line item' %}" contenteditable></span></td>
-  <td><span class="qty" placeholder="{% trans 'qty' %}" contenteditable></span></td>
-  <td><span class="unit" placeholder="{% trans 'unit' %}" contenteditable></span></td>
-  <td><span class="price" placeholder="{% trans 'price' %}" contenteditable></span></td>
-  <td><span class="total"></span></td>
+  <td><div class="name" placeholder="{% trans 'line item' %}" contenteditable></div></td>
+  <td class="unit-qty-cell"><div class="unit-qty" placeholder="{% trans 'qty' %}" contenteditable></div></td>
+  <td><div class="unit" placeholder="{% trans 'unit' %}" contenteditable></div></td>
+  <td class="price-cell"><div class="price" placeholder="{% trans 'price' %}" contenteditable></div></td>
+  <td class="total-cell"><div class="total"></div></td>
 </template>
 
 {% endblock content %}

@@ -9,6 +9,10 @@ class Project(models.Model):
     name = models.CharField(_('Project Name'), max_length=512)
     description = models.TextField(_('Project Description'), blank=True, null=True)
 
+    job_zfill = models.PositiveSmallIntegerField(_("Job Code Zero Fill"), default=1)
+    taskgroup_zfill = models.PositiveSmallIntegerField(_("Task Group Code Zero Fill"), default=1)
+    task_zfill = models.PositiveSmallIntegerField(_("Task Code Zero Fill"), default=1)
+
     class Meta:
         verbose_name = _("Project")
         verbose_name_plural = _("Projects")

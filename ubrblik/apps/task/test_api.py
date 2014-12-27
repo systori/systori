@@ -23,7 +23,7 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         object = objects[0]
         keys = object.keys()
         expected_keys = [
-            'id', 'name', 'description', 'order', 'project', 'billing_method', 'resource_uri'
+            'id', 'name', 'description', 'order', 'project', 'billing_method', 'status', 'resource_uri'
         ]
         self.assertEqual(sorted(expected_keys), sorted(keys))
 
@@ -130,7 +130,7 @@ class LineItemResourceTest(ResourceTestCaseBase):
         data = {
             "task": "/api/v1/task/{}/".format(self.task.id),
             "name": "created line item",
-            "qty": "8",
+            "unit_qty": "8",
             "price": "20"
         }
         resp = self.api_client.post(self.url, data=data, format='json')

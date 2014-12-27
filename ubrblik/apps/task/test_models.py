@@ -14,9 +14,9 @@ def create_task_data(self):
     self.group = TaskGroup.objects.create(name="my group", job=self.job)
     self.group2 = TaskGroup.objects.create(name="my group 2", job=self.job)
     self.task = Task.objects.create(name="my task", qty=1, taskgroup=self.group)
-    self.lineitem = LineItem.objects.create(name="my task", qty=8, price=120, task=self.task)
+    self.lineitem = LineItem.objects.create(name="my task", unit_qty=8, price=120, task=self.task)
     self.task2 = Task.objects.create(name="my task", qty=0, taskgroup=self.group)
-    self.lineitem2 = LineItem.objects.create(name="my task", qty=0, price=0, task=self.task2)
+    self.lineitem2 = LineItem.objects.create(name="my task", unit_qty=0, price=0, task=self.task2)
 
 
 class TaskTotalTests(TestCase):
@@ -32,7 +32,7 @@ class TaskTotalTests(TestCase):
         self.assertEqual(0, task.time_and_materials_billable)
 
     def test_non_zero_total(self):
-        lineitem1 = LineItem.objects.create(name="do stuff", price=10, qty=8, unit="hour", task=self.task)
+        lineitem1 = LineItem.objects.create(name="do stuff", price=10, unit_qty=8, unit="hour", task=self.task)
         self.assertEqual(80, lineitem1.price_per_task_unit)
         task = Task.objects.get(pk=self.task.pk)
         self.assertEqual(1040, task.fixed_price_estimate)
