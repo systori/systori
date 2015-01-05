@@ -73,6 +73,10 @@ FIXTURE_DIRS = (
     os.path.join(BASE_DIR, '../fixtures'),
 )
 
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, '../locale'),
+)
+
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
