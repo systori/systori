@@ -6,8 +6,8 @@
 {% block content %}
 
 <h2>{% trans 'Proposal Details' %}</h2>
-Status: {{ proposal.get_status_display }}<br />
-Created: {{ proposal.created_on }}<br />
-Notes:<br />{{ proposal.notes }}
+{% trans 'Status' %}: {{ proposal.get_status_display }}<br />
+{% trans 'Created' %}: {{ proposal.created_on }}<br />
+{% trans 'Notes' %}:<br />{{ proposal.notes }}
 
 {% endblock %}

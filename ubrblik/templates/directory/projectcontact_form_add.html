@@ -24,13 +24,13 @@
               <input type="hidden" name="project" value="{{ project.id }}" />
               <input type="hidden" name="contact" value="{{ contact.id }}" />
               {{ form.association }}
-              <input type="submit" value="{% trans "Add" %}" />
+              <input type="submit" value="{% trans 'Add' %}" />
             </form>
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-    <a href="{% url 'project.contact.create' project.id %}">{% trans "Create" %}</a>
+    <a href="{% url 'project.contact.create' project.id %}">{% trans 'Create' %}</a>
   </div>
 {% endblock content %}

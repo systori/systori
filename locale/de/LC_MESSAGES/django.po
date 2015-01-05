@@ -27,8 +27,6 @@ msgid "Salutation"
 msgstr "Geschäftsform"
 
 #: ubrblik/apps/directory/models.py:12
-#, fuzzy
-#| msgid "Project Name"
 msgid "First Name"
 msgstr "Vorname"
 
@@ -102,14 +100,10 @@ msgid "Other"
 msgstr "Andere"
 
 #: ubrblik/apps/directory/models.py:55
-#, fuzzy
-#| msgid "Project Name"
 msgid "Project Contact"
 msgstr "Projektkontakt"
 
 #: ubrblik/apps/directory/models.py:56
-#, fuzzy
-#| msgid "Projects"
 msgid "Project Contacts"
 msgstr "Projektkontakte"
 
@@ -217,8 +211,6 @@ msgid "Default"
 msgstr "Default"
 
 #: ubrblik/apps/task/models.py:9
-#, fuzzy
-#| msgid "Project Name"
 msgid "Job Name"
 msgstr "Losbezeichnung"
 
@@ -504,8 +496,6 @@ msgid "Remove"
 msgstr "Löschen"
 
 #: ubrblik/templates/project/sidebar.html:7
-#, fuzzy
-#| msgid "Projects"
 msgid "Project Dashboard"
 msgstr "Projektkarte"
 
@@ -523,8 +513,6 @@ msgstr "Positionsgruppe"
 
 #: ubrblik/templates/task/editor.html:117
 #: ubrblik/templates/task/editor.html:150
-#, fuzzy
-#| msgid "Project Description"
 msgid "description"
 msgstr "Beschreibung"
 

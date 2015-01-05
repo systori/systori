@@ -4,14 +4,36 @@
 {% block sidebar %}{% include "main/sidebar.html" %}{% endblock %}
 
 {% block content %}
-<h1 class="page-header">Dashboard</h1>
+<h1 class="page-header">{% trans 'Dashboard' %}</h1>
 
-<p>Dashboard screen will have things like:</p>
-<ul>
-<li>short list of recent/active project this user is working on</li>
-<li>documents awaiting approval, invoices needing generated, etc</li>
-<li>tasks needing to be done</li>
-<li>tasks behind schedule</li>
-<li>etc...</li>
-</ul>
+
+{% if LANGUAGE_CODE = 'de' %}
+  <p>Dashboard screen will have things like:</p>
+  <ul>
+  <li>short list of recent/active project this user is working on</li>
+  <li>documents awaiting approval, invoices needing generated, etc</li>
+  <li>tasks needing to be done</li>
+  <li>tasks behind schedule</li>
+  <li>etc...</li>
+  </ul>
+{% elif LANGUAGE_CODE = 'uk' %}
+  <p>Dashboard screen will have things like:</p>
+  <ul>
+  <li>short list of recent/active project this user is working on</li>
+  <li>documents awaiting approval, invoices needing generated, etc</li>
+  <li>tasks needing to be done</li>
+  <li>tasks behind schedule</li>
+  <li>etc...</li>
+  </ul>
+{% else %}
+  <p>Dashboard screen will have things like:</p>
+  <ul>
+  <li>short list of recent/active project this user is working on</li>
+  <li>documents awaiting approval, invoices needing generated, etc</li>
+  <li>tasks needing to be done</li>
+  <li>tasks behind schedule</li>
+  <li>etc...</li>
+  </ul>
+{% endif %}
+
 {% endblock %}

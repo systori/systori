@@ -8,6 +8,8 @@ class Document(models.Model):
     pdf = models.FileField()
     notes = models.TextField(_("Notes"), blank=True, null=True)
     amount = models.DecimalField(_("Amount"), max_digits=12, decimal_places=2)
+    header = models.TextField(_("Header"))
+    footer = models.TextField(_("Footer"))
     created_on = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return '{} {} {}'.format(self.get_status_display(), self.__class__.__name__, self.created_on)
