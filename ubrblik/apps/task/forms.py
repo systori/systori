@@ -1,11 +1,12 @@
 from django import forms
 from .models import Job
+from django.utils.translation import ugettext_lazy as _
 
 class JobForm(forms.ModelForm):
-    template_job = forms.ModelChoiceField(queryset=Job.objects.filter(project__is_template=True), required=False)
+    job_template = forms.ModelChoiceField(label=_('Job Template'), queryset=Job.objects.filter(project__is_template=True), required=False)
     class Meta:
         model = Job
-        fields = ['name', 'description', 'billing_method', 'template_job']
+        fields = ['name', 'description', 'billing_method', 'job_template']
 
 class JobTemplateForm(forms.ModelForm):
     class Meta:

@@ -123,8 +123,8 @@ class JobCreate(CreateView):
 
     def form_valid(self, form):
         response = super(JobCreate, self).form_valid(form)
-        if isinstance(form, JobForm) and form.cleaned_data['template_job']:
-            tmpl = form.cleaned_data['template_job']
+        if isinstance(form, JobForm) and form.cleaned_data['job_template']:
+            tmpl = form.cleaned_data['job_template']
             tmpl.clone_to(self.object)
         else:
             TaskGroup.objects.create(name='first task group', job=self.object)

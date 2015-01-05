@@ -11,15 +11,17 @@ class Document(models.Model):
     header = models.TextField(_("Header"))
     footer = models.TextField(_("Footer"))
     created_on = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
         return '{} {} {}'.format(self.get_status_display(), self.__class__.__name__, self.created_on)
+
     class Meta:
         abstract = True
 
 
 class Proposal(Document):
     project = models.ForeignKey("project.Project", related_name="proposals")
-    jobs = models.ManyToManyField("task.Job", related_name="proposals")
+    jobs = models.ManyToManyField("task.Job", verbose_name=_('Jobs'), related_name="proposals")
 
     NEW = "new"
     SENT = "sent"

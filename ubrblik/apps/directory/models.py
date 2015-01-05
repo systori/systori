@@ -44,7 +44,7 @@ class ProjectContact(models.Model):
         (ARCHITECT, _("Architect")),
         (OTHER, _("Other")),
     )
-    association = models.CharField(max_length=128, choices=ASSOCIATION_TYPE, default=CUSTOMER)
+    association = models.CharField(_('Association'), max_length=128, choices=ASSOCIATION_TYPE, default=CUSTOMER)
 
     project = models.ForeignKey("project.Project", related_name="project_contacts")
     contact = models.ForeignKey(Contact, related_name="project_contacts")

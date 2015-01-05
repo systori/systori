@@ -7,7 +7,7 @@ from django_fsm import FSMField, transition
 class Job(OrderedModel):
 
     name = models.CharField(_('Job Name'), max_length=512)
-    description = models.TextField(blank=True)
+    description = models.TextField(_('Description'), blank=True)
 
     FIXED_PRICE = "fixed_price"
     TIME_AND_MATERIALS = "time_and_materials"
@@ -15,7 +15,7 @@ class Job(OrderedModel):
         (FIXED_PRICE , _("Fixed Price")),
         (TIME_AND_MATERIALS, _("Time and Materials")),
     )
-    billing_method = models.CharField(max_length=128, choices=BILLING_METHOD, default=FIXED_PRICE)
+    billing_method = models.CharField(_('Billing Method'), max_length=128, choices=BILLING_METHOD, default=FIXED_PRICE)
 
     project = models.ForeignKey('project.Project', related_name="jobs")
     order_with_respect_to = 'project'
