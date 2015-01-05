@@ -48,6 +48,23 @@ class Job(OrderedModel):
     def complete(self):
         pass
 
+    def clone_to(self, other_job):
+        taskgroups = self.taskgroups.all()
+        for taskgroup in taskgroups:
+            tasks = taskgroup.tasks.all()
+            taskgroup.pk = None
+            taskgroup.job = other_job
+            taskgroup.save()
+            for task in tasks:
+                lineitems = task.lineitems.all()
+                task.pk = None
+                task.taskgroup = taskgroup
+                task.save()
+                for lineitem in lineitems:
+                    lineitem.pk = None
+                    lineitem.task = task
+                    lineitem.save()
+
     def _total_calc(self, calc_type):
         field = "{}_{}".format(self.billing_method, calc_type)
         total = Decimal(0.0)

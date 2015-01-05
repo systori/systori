@@ -69,6 +69,9 @@ TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'templates'),
 )
 
+FIXTURE_DIRS = (
+    os.path.join(BASE_DIR, '../fixtures'),
+)
 
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases

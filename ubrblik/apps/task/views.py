@@ -101,11 +101,21 @@ class TaskPDF(BaseJobTaskView):
 class JobView(DetailView):
     model = Job
 
+def tasks_url(self):
+    if self.object.project.is_template:
+        return reverse('tasks', args=[self.object.id])
+    else:
+        return reverse('tasks', args=[self.object.project.id, self.object.id])
 
 class JobCreate(CreateView):
     model = Job
-    form_class = JobForm
-    
+
+    def get_form_class(self):
+        if self.request.project.is_template:
+            return JobTemplateForm
+        else:
+            return JobForm
+
     def get_form_kwargs(self):
         kwargs = super(JobCreate, self).get_form_kwargs()
         kwargs['instance'] = Job(project=self.request.project)
@@ -113,21 +123,24 @@ class JobCreate(CreateView):
 
     def form_valid(self, form):
         response = super(JobCreate, self).form_valid(form)
-        TaskGroup.objects.create(name='first task group', job=self.object)
+        if isinstance(form, JobForm) and form.cleaned_data['template_job']:
+            tmpl = form.cleaned_data['template_job']
+            tmpl.clone_to(self.object)
+        else:
+            TaskGroup.objects.create(name='first task group', job=self.object)
         return response
 
     def get_success_url(self):
-        return reverse('tasks', args=[self.object.project.id, self.object.id])
+        return tasks_url(self)
 
 class JobUpdate(UpdateView):
     model = Job
     form_class = JobForm
 
     def get_success_url(self):
-        return reverse('tasks', args=[self.object.project.id, self.object.id])
+        return tasks_url(self)
 
 class JobDelete(DeleteView):
     model = Job
-
     def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+        return self.object.project.get_absolute_url()

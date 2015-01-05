@@ -21,4 +21,7 @@ class ProposalTests(TestCase):
         d.send(); d.save()
         d = Proposal.objects.get(pk=d.pk)
         self.assertEquals('Sent', d.get_status_display())
-        self.assertEquals(['Approve', 'Decline'], [t.custom['label'] for t in d.get_available_status_transitions()])
+        # TODO: for some reason result of get_available_status_transitions() is not consistently sorted
+        labels = [str(t.custom['label']) for t in d.get_available_status_transitions()]
+        labels.sort()
+        self.assertEquals(['Approve', 'Decline'], labels)

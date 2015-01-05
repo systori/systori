@@ -8,6 +8,7 @@ User = get_user_model()
 
 def create_task_data(self):
     self.user = User.objects.create_user('lex', 'lex@damoti.com', 'pass')
+    self.template_project = Project.objects.create(name="Template Project", is_template=True)
     self.project = Project.objects.create(name="my project")
     self.project2 = Project.objects.create(name="my project 2")
     self.job = Job.objects.create(name="Default", project=self.project)
@@ -36,3 +37,19 @@ class TaskTotalTests(TestCase):
         self.assertEqual(80, lineitem1.price_per_task_unit)
         task = Task.objects.get(pk=self.task.pk)
         self.assertEqual(1040, task.fixed_price_estimate)
+
+class TaskCloneTests(TestCase):
+    
+    def setUp(self):
+        create_task_data(self)
+    
+    def test_clone(self):
+        new_job = Job.objects.create(name="New", project=self.project)
+        self.assertEqual(new_job.taskgroups.count(), 0)
+        self.job.clone_to(new_job)
+
+        job = Job.objects.get(pk=new_job.pk)
+        self.assertEqual(job.taskgroups.count(), 2)
+        group = job.taskgroups.get(name="my group")
+        self.assertNotEqual(group.id, self.group.id)
+        self.assertEqual(group.tasks.count(), 2)

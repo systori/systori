@@ -4,17 +4,27 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from .models import Project
+from .forms import ProjectForm
 from ..task.models import Job, TaskGroup
 from ..directory.models import ProjectContact
 
 class ProjectList(ListView):
     model = Project
+    def get_queryset(self):
+        return self.model.objects.without_template()
+
+class TemplateProjectView(DetailView):
+    model = Project
+    template_name='project/template_project.html'
+    def get_object(self):
+        return self.model.objects.template().get()
 
 class ProjectView(DetailView):
     model = Project
 
 class ProjectCreate(CreateView):
     model = Project
+    form_class = ProjectForm
 
     def form_valid(self, form):
         response = super(ProjectCreate, self).form_valid(form)
@@ -28,6 +38,7 @@ class ProjectCreate(CreateView):
 
 class ProjectUpdate(UpdateView):
     model = Project
+    form_class = ProjectForm
     def get_success_url(self):
         return reverse('project.view', args=[self.object.id])
 

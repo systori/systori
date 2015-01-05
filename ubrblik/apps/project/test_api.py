@@ -43,7 +43,7 @@ class ProjectResourceTest(ResourceTestCaseBase):
         }
         resp = self.api_client.post(self.url, data=data, format='json')
         self.assertHttpCreated(resp)
-        proj = Project.objects.last()
+        proj = Project.objects.order_by('id').last()
         self.assertEqual("new proj", proj.name)
         self.assertEqual("new desc", proj.description)
 

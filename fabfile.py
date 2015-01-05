@@ -27,8 +27,8 @@ def resetlocaldb():
     local('dropdb ubrblik_local')
     local('createdb ubrblik_local')
     local('./manage.py migrate')
-    local('./manage.py createsuperuser --username=`whoami` --email=`whoami`@ubrblik.de')
-    #local('./manage.py loaddata bootstrap')
+    #local('./manage.py createsuperuser --username=`whoami` --email=`whoami`@ubrblik.de')
+    local('./manage.py loaddata bootstrap')
 
 
 #def resettestdb():

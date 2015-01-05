@@ -1,0 +1,26 @@
+[
+  {
+    "model": "auth.user", 
+    "pk": 1,
+    "fields": {
+      "username": "lex", 
+      "is_active": true, 
+      "is_superuser": true, 
+      "is_staff": true, 
+      "password": "pbkdf2_sha256$10000$d4g6owTnc8Et$fu6kWjF9SB5v2CAsfgUpmSBqt+zG3iU/yO51UM22zl0=", 
+      "email": "lex@damoti.com"
+    }
+  },
+  {
+    "model": "project.Project",
+    "pk": 1,
+    "fields": {
+      "name": "Template Project",
+      "description": "Jobs in this project are available as templates.",
+      "is_template": true,
+      "job_zfill": 1,
+      "taskgroup_zfill": 1,
+      "task_zfill": 1
+    }
+  }
+]

@@ -51,8 +51,9 @@ class BaseCorsResource(ModelResource):
 
 class ProjectResource(BaseCorsResource):
     class Meta(BaseMeta):
-        queryset = Project.objects.all()
+        queryset = Project.objects.without_template().all()
         resource_name = 'project'
+        excludes = ['is_template']
 
 
 from tastypie.api import Api

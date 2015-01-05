@@ -1,5 +1,7 @@
 {% extends "frame.html" %}
 
+{% block sidebar %}{% include "main/sidebar.html" with section='projects' %}{% endblock %}
+
 {% block content %}
 <form method="post">{% csrf_token %}
 {{ form.as_p }}

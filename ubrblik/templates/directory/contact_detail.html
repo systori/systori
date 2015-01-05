@@ -1,6 +1,8 @@
 {% extends "frame.html" %}
 {% load i18n %}
 
+{% block sidebar %}{% include "main/sidebar.html" with section='directory' %}{% endblock %}
+
 {% block content %}
 <h2>{% trans 'Contact Details' %}</h2>
 {% for field in form %}

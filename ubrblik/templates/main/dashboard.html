@@ -1,13 +1,7 @@
 {% extends "frame.html" %}
 {% load i18n %}
 
-{% block sidebar %}
-<ul class="nav nav-sidebar">
-  <li class="active"><a href="/">{% trans 'Dashboard' %}</a></li>
-  <li><a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
-  <li><a href="{% url 'directory' %}">{% trans 'Directory' %}</a></li>
-</ul>
-{% endblock %}
+{% block sidebar %}{% include "main/sidebar.html" %}{% endblock %}
 
 {% block content %}
 <h1 class="page-header">Dashboard</h1>
