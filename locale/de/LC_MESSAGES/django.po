@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-06 00:08+0100\n"
+"POT-Creation-Date: 2015-01-06 00:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,6 +101,13 @@ msgstr "Architekt"
 msgid "Other"
 msgstr "Andere"
 
+#: ubrblik/apps/directory/models.py:47
+#: ubrblik/templates/directory/contact_detail.html:21
+#: ubrblik/templates/directory/projectcontact_form_add.html:14
+#: ubrblik/templates/project/project_detail.html:140
+msgid "Association"
+msgstr "Verknüpfung"
+
 #: ubrblik/apps/directory/models.py:55
 msgid "Project Contact"
 msgstr "Projektkontakt"
@@ -123,65 +130,73 @@ msgstr "Vortext"
 msgid "Footer"
 msgstr "Nachtext"
 
-#: ubrblik/apps/document/models.py:30 ubrblik/apps/document/models.py:76
+#: ubrblik/apps/document/models.py:24
+#: ubrblik/templates/project/project_detail.html:5
+#: ubrblik/templates/project/project_detail.html:50
+#: ubrblik/templates/project/project_detail.html:95
+#: ubrblik/templates/project/sidebar.html:8
+msgid "Jobs"
+msgstr "Lose"
+
+#: ubrblik/apps/document/models.py:32 ubrblik/apps/document/models.py:78
 msgid "New"
 msgstr "Neu"
 
-#: ubrblik/apps/document/models.py:31 ubrblik/apps/document/models.py:77
+#: ubrblik/apps/document/models.py:33 ubrblik/apps/document/models.py:79
 msgid "Sent"
 msgstr "Gesendet"
 
-#: ubrblik/apps/document/models.py:32 ubrblik/apps/task/models.py:32
+#: ubrblik/apps/document/models.py:34 ubrblik/apps/task/models.py:32
 msgid "Approved"
 msgstr "Beauftragt"
 
-#: ubrblik/apps/document/models.py:33
+#: ubrblik/apps/document/models.py:35
 msgid "Declined"
 msgstr "Abgelehnt"
 
-#: ubrblik/apps/document/models.py:38 ubrblik/apps/document/models.py:84
+#: ubrblik/apps/document/models.py:40 ubrblik/apps/document/models.py:86
 msgid "Send"
 msgstr "als gesendet markieren"
 
-#: ubrblik/apps/document/models.py:42
+#: ubrblik/apps/document/models.py:44
 msgid "Approve"
 msgstr "als beauftragt markieren"
 
-#: ubrblik/apps/document/models.py:48
+#: ubrblik/apps/document/models.py:50
 msgid "Decline"
 msgstr "als abgelehnt markieren"
 
-#: ubrblik/apps/document/models.py:61
+#: ubrblik/apps/document/models.py:63
 msgid "Proposal"
 msgstr "Angebot"
 
-#: ubrblik/apps/document/models.py:62
+#: ubrblik/apps/document/models.py:64
 #: ubrblik/templates/project/project_detail.html:43
 #: ubrblik/templates/project/sidebar.html:9
 msgid "Proposals"
 msgstr "Angebote"
 
-#: ubrblik/apps/document/models.py:78
+#: ubrblik/apps/document/models.py:80
 msgid "Paid"
 msgstr "bezahlt"
 
-#: ubrblik/apps/document/models.py:79
+#: ubrblik/apps/document/models.py:81
 msgid "Disputed"
 msgstr "geklärt"
 
-#: ubrblik/apps/document/models.py:88
+#: ubrblik/apps/document/models.py:90
 msgid "Pay"
 msgstr "Bezahlen"
 
-#: ubrblik/apps/document/models.py:92
+#: ubrblik/apps/document/models.py:94
 msgid "Dispute"
 msgstr "Unklar"
 
-#: ubrblik/apps/document/models.py:97
+#: ubrblik/apps/document/models.py:99
 msgid "Invoice"
 msgstr "Rechnung"
 
-#: ubrblik/apps/document/models.py:98
+#: ubrblik/apps/document/models.py:100
 #: ubrblik/templates/project/project_detail.html:88
 #: ubrblik/templates/project/sidebar.html:10
 msgid "Invoices"
@@ -221,7 +236,7 @@ msgstr "Projekte"
 msgid "Default"
 msgstr "Default"
 
-#: ubrblik/apps/task/forms.py:5
+#: ubrblik/apps/task/forms.py:6
 msgid "Job Template"
 msgstr "Los-Vorlage"
 
@@ -399,12 +414,6 @@ msgstr "Kontaktdetails"
 msgid "Associated Projects"
 msgstr "Verknüpfte Projekte"
 
-#: ubrblik/templates/directory/contact_detail.html:21
-#: ubrblik/templates/directory/projectcontact_form_add.html:14
-#: ubrblik/templates/project/project_detail.html:140
-msgid "Association"
-msgstr "Verknüpfung"
-
 #: ubrblik/templates/directory/contact_form.html:9
 #: ubrblik/templates/document/invoice_form.html:9
 #: ubrblik/templates/document/proposal_form.html:9
@@ -504,13 +513,6 @@ msgstr "Karte"
 #: ubrblik/templates/main/sidebar.html:6
 msgid "Templates"
 msgstr "Vorlages"
-
-#: ubrblik/templates/project/project_detail.html:5
-#: ubrblik/templates/project/project_detail.html:50
-#: ubrblik/templates/project/project_detail.html:95
-#: ubrblik/templates/project/sidebar.html:8
-msgid "Jobs"
-msgstr "Lose"
 
 #: ubrblik/templates/project/project_detail.html:12
 msgid "Estimate"
