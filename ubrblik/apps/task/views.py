@@ -11,7 +11,7 @@ from django.template.loader import get_template
 from django.template import Context
 
 from .models import Job, TaskGroup
-from .forms import JobForm
+from .forms import JobForm, JobTemplateForm
 
 from ubrblik import settings
 

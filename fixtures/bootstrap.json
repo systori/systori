@@ -12,6 +12,18 @@
     }
   },
   {
+    "model": "auth.user", 
+    "pk": 2,
+    "fields": {
+      "username": "mr", 
+      "is_active": true, 
+      "is_superuser": true, 
+      "is_staff": true, 
+      "password": "pbkdf2_sha256$12000$Wz97grAD80Oz$IhK2aa16G3D9vT7wQ7Na4ImRZQsV0b+BhxT/Ge/8hRc=", 
+      "email": "mr@mehr-handwerk.de"
+    }
+  },
+  {
     "model": "project.Project",
     "pk": 1,
     "fields": {
