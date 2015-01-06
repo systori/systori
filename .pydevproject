@@ -5,5 +5,5 @@
 <value>manage.py</value>
 </pydev_variables_property>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 3.0</pydev_property>
-<pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">/home/elmcrest/.virtualenvs/ubrblik/bin/python</pydev_property>
+<pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">ubrblik-python</pydev_property>
 </pydev_project>

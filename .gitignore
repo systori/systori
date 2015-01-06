@@ -1,4 +1,5 @@
 *.pyc
+.settings/
 __pycache__
 documents/
 ubrblik/settings/__init__.py
