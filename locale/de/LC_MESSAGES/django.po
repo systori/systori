@@ -212,15 +212,15 @@ msgstr "Projektbeschreibung"
 
 #: ubrblik/apps/project/models.py:22
 msgid "Job Code Zero Fill"
-msgstr "Anzahl an Losen"
+msgstr "Numerierung Anzahl für Lose"
 
 #: ubrblik/apps/project/models.py:23
 msgid "Task Group Code Zero Fill"
-msgstr "Anzahl an Gruppen"
+msgstr "Numerierung Anzahl für Gruppen"
 
 #: ubrblik/apps/project/models.py:24
 msgid "Task Code Zero Fill"
-msgstr "Anzahl an Positionen"
+msgstr "Numerierung Anzahl für Positionen"
 
 #: ubrblik/apps/project/models.py:35
 #: ubrblik/templates/directory/contact_detail.html:20
