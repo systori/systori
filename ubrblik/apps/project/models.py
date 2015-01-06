@@ -57,7 +57,7 @@ class Project(models.Model):
 
     @property
     def has_jobs_for_proposal(self):
-        return self.jobs_for_proposal.exists()
+        return self.jobs_for_proposal.exists() and self.has_billable_contact
 
     @property
     def jobs_for_invoice(self):
@@ -65,4 +65,15 @@ class Project(models.Model):
 
     @property
     def has_jobs_for_invoice(self):
-        return self.jobs_for_invoice.exists()
+        return self.jobs_for_invoice.exists() and self.has_billable_contact
+    
+    @property
+    def billable_contact(self):
+        try:
+            return self.project_contacts.filter(is_billable=True).get()
+        except self.project_contacts.model.DoesNotExist:
+            return None
+
+    @property
+    def has_billable_contact(self):
+        return self.billable_contact != None

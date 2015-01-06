@@ -326,7 +326,7 @@ msgstr "Positionen"
 
 #: ubrblik/apps/task/models.py:222
 msgid "Billable"
-msgstr "abrechenbar"
+msgstr "Abrechenbar"
 
 #: ubrblik/apps/task/models.py:228
 msgid "Price"
@@ -477,7 +477,7 @@ msgstr "Kontakt zu %(project_name)s hinzufügen"
 #: ubrblik/templates/directory/projectcontact_form_add.html:27
 #: ubrblik/templates/project/project_detail.html:157
 msgid "Add"
-msgstr "hinzufügen"
+msgstr "Hinzufügen"
 
 #: ubrblik/templates/directory/projectcontact_form_create.html:7
 #, python-format

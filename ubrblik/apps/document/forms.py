@@ -9,7 +9,7 @@ class ProposalForm(ModelForm):
 
     class Meta:
         model = Proposal
-        fields = ['notes', 'jobs']
+        fields = ['jobs', 'header', 'footer', 'notes']
 
 class InvoiceForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -18,4 +18,4 @@ class InvoiceForm(ModelForm):
 
     class Meta:
         model = Invoice
-        fields = ['notes', 'jobs']
+        fields = ['jobs', 'header', 'footer', 'notes']

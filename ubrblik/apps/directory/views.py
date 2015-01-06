@@ -1,14 +1,24 @@
+from django.http import HttpResponseRedirect
+
+from django.views.generic.base import View
 from django.views.generic.list import ListView, MultipleObjectMixin
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.forms.models import modelform_factory
 from django.core.urlresolvers import reverse, reverse_lazy
 
 from .models import Contact, ProjectContact
-from .forms import ContactForm
+from .forms import ContactForm, ProjectContactForm
 
 class DirectoryList(ListView):
     model = Contact
+
+class ProjectContactSetBillable(SingleObjectMixin, View):
+    model = ProjectContact
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.is_billable = True
+        self.object.save()
+        return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
 
 class ProjectContactAdd(CreateView):
     model = ProjectContact
@@ -26,8 +36,6 @@ class ProjectContactAdd(CreateView):
 
     def get_success_url(self):
         return reverse('project.view', args=[self.request.project.id])
-
-ProjectContactForm = modelform_factory(ProjectContact, fields=('association',))
 
 class ProjectContactCreate(CreateView):
     model = Contact

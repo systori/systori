@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf.urls import patterns, url
 from .views import DirectoryList
 from .views import ContactView, ContactCreate, ContactUpdate, ContactDelete
-from .views import ProjectContactAdd, ProjectContactCreate, ProjectContactRemove
+from .views import ProjectContactSetBillable, ProjectContactAdd, ProjectContactCreate, ProjectContactRemove
 
 urlpatterns = patterns('',
   url(r'^directory$', login_required(DirectoryList.as_view()), name='directory'),
@@ -15,4 +15,5 @@ urlpatterns = patterns('',
   url(r'^project-(?P<project_pk>\d+)/contact/add$', login_required(ProjectContactAdd.as_view()), name='project.contact.add'),
   url(r'^project-(?P<project_pk>\d+)/contact/create$', login_required(ProjectContactCreate.as_view()), name='project.contact.create'),
   url(r'^project-(?P<project_pk>\d+)/contact-(?P<pk>\d+)/remove$', login_required(ProjectContactRemove.as_view()), name='project.contact.remove'),
+  url(r'^project-(?P<project_pk>\d+)/contact-(?P<pk>\d+)/billable$', login_required(ProjectContactSetBillable.as_view()), name='project.contact.billable'),
 )

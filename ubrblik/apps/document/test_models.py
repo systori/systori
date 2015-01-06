@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.utils.translation import activate
 from .models import *
 
 from ..task.test_models import create_task_data
@@ -9,6 +10,7 @@ from ..task.test_models import create_task_data
 class ProposalTests(TestCase):
 
     def setUp(self):
+        activate('en')
         create_task_data(self)
 
     def test_proposal_new(self):
