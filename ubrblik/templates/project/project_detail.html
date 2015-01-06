@@ -51,6 +51,7 @@
         <th>{% trans 'Amount' %}</th>
         <th>{% trans 'Created On' %}</th>
         <th>{% trans 'Notes' %}</th>
+        <th>{% trans 'Download' %}</th>
         <th>{% trans 'Actions' %}</th>
       </tr>
     </thead>
@@ -67,6 +68,9 @@
         <td>{{ doc.amount|floatformat:2 }}</td>
         <td>{{ doc.created_on }}</td>
         <td>{{ doc.notes }}</td>
+        <td>
+          <a href="{% url 'proposal.pdf' project.id doc.id %}">{% trans 'PDF' %}</a>
+        </td>
         <td>
           {% for state in doc.get_available_status_transitions %}
             <a href="{% url 'proposal.transition' project.id doc.id state.name %}">{{ state.custom.label }}</a>
@@ -101,6 +105,7 @@
         <th>{% trans 'Amount' %}</th>
         <th>{% trans 'Created On' %}</th>
         <th>{% trans 'Notes' %}</th>
+        <th>{% trans 'Download' %}</th>
         <th>{% trans 'Actions' %}</th>
       </tr>
     </thead>
@@ -117,6 +122,9 @@
         <td>{{ doc.amount|floatformat:2 }}</td>
         <td>{{ doc.created_on }}</td>
         <td>{{ doc.notes }}</td>
+        <td>
+          <a href="{% url 'invoice.pdf' project.id doc.id %}">{% trans 'PDF' %}</a>
+        </td>
         <td>
           {% for state in doc.get_available_status_transitions %}
             <a href="{% url 'invoice.transition' project.id doc.id state.name %}">{{ state.custom.label }}</a>

@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -9,6 +9,11 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from .models import Proposal, Invoice
 from .forms import ProposalForm, InvoiceForm
 
+
+class BaseDocumentPDFView(SingleObjectMixin, View):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return HttpResponse(self.object.pdf, content_type='application/pdf')
 
 class BaseDocumentCreateView(CreateView):
     
@@ -35,6 +40,10 @@ class BaseDocumentCreateView(CreateView):
 
 
 class ProposalView(DetailView):
+    model = Proposal
+
+
+class ProposalPDF(BaseDocumentPDFView):
     model = Proposal
 
 
@@ -75,6 +84,8 @@ class ProposalDelete(DeleteView):
 class InvoiceView(DetailView):
     model = Invoice
 
+class InvoicePDF(BaseDocumentPDFView):
+    model = Invoice
 
 class InvoiceCreate(BaseDocumentCreateView):
     model = Invoice
