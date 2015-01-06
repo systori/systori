@@ -122,6 +122,14 @@ class TaskGroup(OrderedModel):
         return self._total_calc('time_and_materials_billable')
 
     @property
+    def estimate_total(self):
+        return self.fixed_price_estimate
+
+    @property
+    def billable_total(self):
+        return self.fixed_price_billable
+
+    @property
     def code(self):
         parent_code = self.job.code
         self_code = str(self.order+1).zfill(self.job.project.taskgroup_zfill)

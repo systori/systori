@@ -7,8 +7,8 @@ LOGIN_REDIRECT_URL = '/'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-ROOT_DIR = os.path.join(BASE_DIR, '../../')
+BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, '../'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -70,12 +70,14 @@ TEMPLATE_DIRS = (
 )
 
 FIXTURE_DIRS = (
-    os.path.join(BASE_DIR, '../fixtures'),
+    os.path.join(ROOT_DIR, 'fixtures'),
 )
 
 LOCALE_PATHS = (
-    os.path.join(BASE_DIR, '../locale'),
+    os.path.join(ROOT_DIR, 'locale'),
 )
+
+LATEX_WORKING_DIR = os.path.join(BASE_DIR, 'templates/document/latex')
 
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
@@ -112,7 +114,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 # this is where files are copied when running ./manage.py collectstatic
-STATIC_ROOT = os.path.join(ROOT_DIR, 'static')
+STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, '../static'))
 
 STATIC_URL = '/static/'
 MEDIA_ROOT = ''

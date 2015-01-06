@@ -1,4 +1,5 @@
 *.pyc
 __pycache__
+documents/
 ubrblik/settings/__init__.py
 ubrblik/templates/task/output

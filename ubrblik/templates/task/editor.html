@@ -24,7 +24,7 @@
     <span class="code">{{ group.code }}</span>
     <span class="name">{{ group.name }}</span>
     <span class="description">{{ group.description }}</span>
-    <span class="total">{{ group.total_amount|floatformat:2 }}</span>
+    <span class="total">{{ group.estimate_total|floatformat:2 }}</span>
   </ubr-taskgroup>
 
   {% for task in group.tasks.all %}

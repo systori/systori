@@ -1,45 +1,49 @@
-import os.path, shutil
-from subprocess import Popen, PIPE
-from tempfile import TemporaryDirectory
-
 from decimal import Decimal
 
-from django.http import HttpResponse, HttpResponseRedirect
-from django.views.generic import View, ListView
+from django.http import HttpResponseRedirect
+from django.views.generic import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.template.loader import get_template
-from django.template import Context
 
 from .models import Proposal, Invoice
 from .forms import ProposalForm, InvoiceForm
+
+
+class BaseDocumentCreateView(CreateView):
+    
+    def get_form_kwargs(self):
+        kwargs = super(BaseDocumentCreateView, self).get_form_kwargs()
+        kwargs['instance'] = self.model(project=self.request.project)
+        return kwargs
+
+    def form_valid(self, form):
+
+        amount = Decimal(0.0)
+        for job in form.cleaned_data['jobs']:
+            amount += self.process_job(job)
+        form.instance.amount = amount
+
+        redirect = super(BaseDocumentCreateView, self).form_valid(form)
+
+        self.object.generate_document()
+
+        return redirect
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
 
 
 class ProposalView(DetailView):
     model = Proposal
 
 
-class ProposalCreate(CreateView):
+class ProposalCreate(BaseDocumentCreateView):
     model = Proposal
     form_class = ProposalForm
-
-    def get_form_kwargs(self):
-        kwargs = super(ProposalCreate, self).get_form_kwargs()
-        kwargs['instance'] = Proposal(project=self.request.project)
-        return kwargs
-
-    def form_valid(self, form):
-        amount = Decimal(0.0)
-        for job in form.cleaned_data['jobs']:
-            amount += job.estimate_total
-            job.status = job.PROPOSED
-            job.save()
-        form.instance.amount = amount
-        return super(ProposalCreate, self).form_valid(form)
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+    def process_job(self, job):
+        job.status = job.PROPOSED
+        return job.estimate_total
 
 
 class ProposalTransition(SingleObjectMixin, View):
@@ -71,24 +75,11 @@ class InvoiceView(DetailView):
     model = Invoice
 
 
-class InvoiceCreate(CreateView):
+class InvoiceCreate(BaseDocumentCreateView):
     model = Invoice
     form_class = InvoiceForm
-
-    def get_form_kwargs(self):
-        kwargs = super(InvoiceCreate, self).get_form_kwargs()
-        kwargs['instance'] = Invoice(project=self.request.project)
-        return kwargs
-
-    def form_valid(self, form):
-        amount = Decimal(0.0)
-        for job in form.cleaned_data['jobs']:
-            amount += job.billable_total
-        form.instance.amount = amount
-        return super(InvoiceCreate, self).form_valid(form)
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+    def process_job(self, job):
+        return job.billable_total
 
 
 class InvoiceTransition(SingleObjectMixin, View):
@@ -114,3 +105,5 @@ class InvoiceDelete(DeleteView):
     model = Invoice
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])
+
+

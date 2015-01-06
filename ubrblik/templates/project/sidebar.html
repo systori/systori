@@ -4,7 +4,7 @@
 {% include "main/sidebar.html" with section="templates" %}
 {% else %}
 <ul class="nav nav-sidebar">
-  <li {% if not section %}class="active"{% endif %}><a href="{% url 'project.view' project.id %}">{% trans 'Project Dashboard' %}</a></li>
+  <li {% if section == 'dashboard' or not section %}class="active"{% endif %}><a href="{% url 'project.view' project.id %}">{% trans 'Project Dashboard' %}</a></li>
   <li {% if section == 'jobs' %}class="active"{% endif %}><a href="{% url 'project.view' project.id %}#jobs">{% trans 'Jobs' %}</a></li>
   <li {% if section == 'proposals' %}class="active"{% endif %}><a href="{% url 'project.view' project.id %}#proposals">{% trans 'Proposals' %}</a></li>
   <li {% if section == 'invoices' %}class="active"{% endif %}><a href="{% url 'project.view' project.id %}#invoices">{% trans 'Invoices' %}</a></li>
