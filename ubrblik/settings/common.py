@@ -9,6 +9,7 @@ LOGIN_REDIRECT_URL = '/'
 import os
 BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, '../'))
+PROJECTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, '../'))
 
 
 # Quick-start development settings - unsuitable for production

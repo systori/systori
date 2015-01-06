@@ -36,21 +36,14 @@ class Project(models.Model):
         verbose_name_plural = _("Projects")
         ordering = ['name']
 
-    def _calc_total(self, calc_type):
-        field = '{}_total'.format(calc_type)
-        t = 0
-        for job in self.jobs.all():
-            t += getattr(job, field)
-        return t
-
     @property
     def estimate_total(self):
-        return sum([job.estimate_total for job in self.jobs.all()])
+        return self.jobs.estimate_total()
 
     @property
     def billable_total(self):
-        return sum([job.billable_total for job in self.jobs.all()])
-    
+        return self.jobs.billable_total()
+
     @property
     def jobs_for_proposal(self):
         return self.jobs.filter(status=Job.DRAFT)

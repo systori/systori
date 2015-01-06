@@ -43,6 +43,7 @@ class ProposalCreate(BaseDocumentCreateView):
     form_class = ProposalForm
     def process_job(self, job):
         job.status = job.PROPOSED
+        job.save()
         return job.estimate_total
 
 

@@ -1,8 +1,23 @@
 from decimal import Decimal
 from django.db import models, connections
+from django.db.models.manager import BaseManager
 from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
+
+
+class JobQuerySet(models.QuerySet):
+
+    def estimate_total(self):
+        return sum([job.estimate_total for job in self.all()])
+
+    def billable_total(self):
+        return sum([job.billable_total for job in self.all()])
+
+
+class JobManager(BaseManager.from_queryset(JobQuerySet)):
+    use_for_related_fields = True
+
 
 class Job(OrderedModel):
 
@@ -35,6 +50,8 @@ class Job(OrderedModel):
     )
 
     status = FSMField(default=DRAFT, choices=STATE_CHOICES)
+
+    objects = JobManager()
 
     class Meta(OrderedModel.Meta):
         verbose_name = _("Job")

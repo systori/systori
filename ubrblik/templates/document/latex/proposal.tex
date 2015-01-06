@@ -1,91 +1,103 @@
-\documentclass[10pt,a4paper]{letter}
-\usepackage{wallpaper}
-\usepackage{ngerman}
-%\usepackage[T1]{fontenc}
-\usepackage[utf8x]{inputenc}
+{% load i18n %}
+\documentclass[10pt, oneside]{letter}
+\usepackage[utf8]{inputenc}
 
-\usepackage{longtable}
-\usepackage{eurosym}
+\usepackage{wallpaper, array, longtable, tabu, booktabs, eurosym, lastpage}
+% wallpaper = wallpaper pdf, array to stretch the table,
+% longtable break page for tables
+% tabu variable width columns for table
+% booktabs beautify table
+% eurosym for the € symbol
+% lastpage for footer Page X of LastPage
 
-\usepackage{helvet}
-\renewcommand{\familydefault}{\sfdefault}
+\usepackage{droidsans}
+% droidsans font
 
-\usepackage{numprint}
-\nprounddigits{2}
+\ThisULCornerWallPaper{1}{softronic_page1.pdf}
+\ULCornerWallPaper{1}{softronic_page2.pdf}
 
-\pagenumbering{arabic}
+% general page setup
+\usepackage[a4paper, width=125mm,top=55mm,bottom=22mm, left=25mm]{geometry}
+\usepackage{fancyhdr}%custom header package
+\pagestyle{fancy}%custom header
+\fancyhf{}%clear all
+\renewcommand{\headrulewidth}{0pt}%clear head line
+\rfoot{Page \thepage\ of \pageref{LastPage}}
 
-\setlength{\oddsidemargin}{0pt}
-
-
-\ThisULCornerWallPaper{1}{softronic1.pdf}
-\ULCornerWallPaper{1}{softronic2.pdf}
+%settings for longtable/tabu
+\renewcommand*{\arraystretch}{1.5}
+{\setlength{\tabcolsep}{0.5mm}
 
 \begin{document}
 \begin{letter}
 
-Ev. Stiftung Pflege Schönau\\
-\\
-z.Hd. Herrn Peter Trautmann\\
-Zähringer Str. 18\\
-69115 Heidelberg\\
+{% if contact.business %}{{ contact.business }} \\{% endif %}
+z.H. {{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }} \\
+{{ contact.address }} \\
+{{ contact.postal_code }} {{ contact.city }} \\
+
 \vspace{15mm}
 
-Sehr geehrte Herr Trautmann,
+{{ doc.header }}
 
-wie vereinbart und nach Freigabe unseres Aufmaßes berechnen wir wie folgt:
+\begin{longtabu} to \textwidth{@{}l X[l] r l r r}
 
-\setlength\LTleft{0pt}            % default: \parindent
-\setlength\LTright{0pt}           % default: \fill
-\renewcommand*{\arraystretch}{1.4}
+\textbf{Pos.} & \textbf{Description} & \multicolumn{2}{c}{\textbf{Amount}} & \textbf{Price} & \textbf{Total} \\
+\hline
+\endfirsthead
+\multicolumn{6}{l} {\textit{... Continuation}} \\
 
-\begin{longtable}{@{\extracolsep{\fill}}lllrr}
-\textbf{Pos.} & \textbf{Beschreibung} & \textbf{Menge} & \textbf{EP} & \textbf{GP} \\
+\textbf{Pos.} & \textbf{Description} & \multicolumn{2}{c}{\textbf{Amount}} & \textbf{Price} & \textbf{Total} \\
 \hline
 
-{% for group in object_list %}
+\endhead
+\multicolumn{6}{r}{\textit{Continuation ...}} \\
+\hline
+\endfoot
 
-{{ group.id }} &
-\multicolumn{4}{l}{ {{ group.name }} } \\[5pt]
+\endlastfoot
 
-  {% for task in group.tasks.all %}
+{% for job in jobs.all %}
 
-{{ group.id }}.{{ task.id }} &
-\multicolumn{3}{l}{\hspace{5mm} {{ task.name }} } &
-{{ task.total|floatformat:2 }} \\[5pt]
+{% for taskgroup in job.taskgroups.all %}
+{{taskgroup.code}} & \multicolumn{4}{l}{\parbox[t]{9cm}{\textbf{ {{taskgroup.name}} }}} &\\
 
-{% comment %}
-    {% for lineitem in task.lineitems.all %}
-{{ group.id }}.{{ task.id }}.{{ lineitem.id }} &
-\hspace{10mm} {{ lineitem.name }} &
-{{ lineitem.qty|floatformat:1 }} {{ lineitem.unit }} &
-{{ lineitem.price|floatformat:2 }} &
-{{ lineitem.total|floatformat:2 }} \\[5pt]
-    {% endfor %}
-{% endcomment %}
-
-  {% endfor %}
+{% for task in taskgroup.tasks.all %}
+{{task.code}}
+    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{task.name}} }} \\*
+    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{task.description}} }} \\*
+    & & {{task.qty|floatformat:2}} & {{task.unit}} & {{task.unit_price|floatformat:2}} \euro\  & {{task.fixed_price_estimate|floatformat:2}} \euro\ \\
 {% endfor %}
 
-& & & Summe netto & {{ project.total|floatformat:2 }} \\
-& & & 19,00 MWSt & {{ project.tax|floatformat:2 }} \\
-& & & Summe brutto & {{ project.total_gross|floatformat:2 }} \\
+\tabucline{6}
+    & \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{forloop.counter}} - {{taskgroup.name}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} \euro\ }\\
+\\
+{% endfor %}
 
-\end{longtable}
+{% endfor %}
 
-\begin{tabular}{ll}
-Zahlungsart & {\parbox[t]{10cm}{Innerhalb 2 Wochen nach Rechnungsstellung mit 2\% Skonto, überwiesen auf das Konto der Sparkasse RNN - Mannheim.}}\\
-Gültigkeit & {\parbox[t]{10cm}{Gerichtstand ist Mannheim. Ware bleibt bis zur restlosen Bezahlung unser Eigentum.}}\\
-\end{tabular}
-\\
-Wir danken für Ihren Auftrag und hoffen alles zu Ihrer Zufriedenheit erledigt zu haben.\\
-\\
-Mit freundlichen Grüßen,\\
-\\
-Testprojekt Sanierung Superdach
-\\
-Marius Räsener\\
-Softronic Haustechnik und Holzbau GmbH
+{% for job in jobs.all %}
+{% for taskgroup in job.taskgroups.all %}
+& \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{forloop.counter}} - {{taskgroup.name}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} \euro\ } \\*
+{% endfor %}
+{% endfor %}
+
+\tabucline{2-6}
+& \multicolumn{4}{r} {\textbf{Total without VAT}} & \textbf{12.785,16 \euro\ } \\*
+& \multicolumn{4}{r} {\textbf{19,00\% VAT}} & \textbf{2.429,18 \euro\ } \\*
+& \multicolumn{4}{r} {\textbf{Total including VAT}} & \textbf{15.214,34 \euro\ } \\*
+
+\end{longtabu}
+
+\setlength{\tabcolsep}{2mm}
+\begin{tabu} to \textwidth{@{} r X[l] }
+method of payment & 2,00\% cash discount when paid within two weeks until the 01.02.2015, after that without rebate.\\*
+validity & place of jurisdiction is Mannheim. The goods are until the complete payment our property.\\
+\end{tabu}
+
+\vspace{5mm}
+
+{{ doc.footer }}
 
 \end{letter}
 \end{document}

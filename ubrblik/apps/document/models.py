@@ -44,10 +44,13 @@ class Document(models.Model):
 
         template = get_template(self.LATEX_TEMPLATE)
 
+        project_contact = self.project.billable_contact
+
         context = Context({
           'doc': self,
           'jobs': self.jobs.all(),
-          'contact': self.project.billable_contact
+          'contact': project_contact.contact,
+          'project_contact': project_contact # this has the association attribute
         })
 
         rendered_latex = template.render(context).encode('utf-8')

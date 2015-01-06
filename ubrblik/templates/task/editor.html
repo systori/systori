@@ -34,7 +34,7 @@
       <span class="description">{{ task.description }}</span>
       <span class="qty">{{ task.qty|floatformat:2 }}</span>
       <span class="unit">{{ task.unit }}</span>
-      <span class="total">{{ task.total_amount|floatformat:2 }}</span>
+      <span class="total">{{ task.fixed_price_estimate|floatformat:2 }}</span>
     </ubr-task>
 
     {% for lineitem in task.lineitems.all %}
@@ -43,7 +43,7 @@
       <span class="unit-qty">{{ lineitem.unit_qty|floatformat:2 }}</span>
       <span class="unit">{{ lineitem.unit }}</span>
       <span class="price">{{ lineitem.price|floatformat:2 }}</span>
-      <span class="total">{{ lineitem.total_amount|floatformat:2 }}</span>
+      <span class="total">{{ lineitem.price_per_task_unit|floatformat:2 }}</span>
     </ubr-lineitem>
     {% endfor %}
   {% endfor %}
