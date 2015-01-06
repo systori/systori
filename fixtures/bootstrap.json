@@ -48,7 +48,7 @@
     }
   },
   {"pk": 1,
- "fields": {"status": "proposed",
+ "fields": {"status": "draft",
  "name": "Sample Job",
  "billing_method": "fixed_price",
  "project": 2,

@@ -38,6 +38,28 @@ class TaskTotalTests(TestCase):
         task = Task.objects.get(pk=self.task.pk)
         self.assertEqual(1040, task.fixed_price_estimate)
 
+class JobTotalTests(TestCase):
+
+    def setUp(self):
+        create_task_data(self)
+        self.job2 = Job.objects.create(name="Empty Job", project=self.project)
+    
+    def test_zero_total(self):
+        jobs = Job.objects.filter(pk=self.job2.id)
+        self.assertEqual(0, jobs.estimate_total())
+        self.assertEqual(0, jobs.estimate_tax_total())
+        self.assertEqual(0, jobs.estimate_gross_total())
+        self.assertEqual(0, jobs.billable_total())
+        self.assertEqual(0, jobs.billable_tax_total())
+        self.assertEqual(0, jobs.billable_gross_total())
+
+    def test_nonzero_total(self):
+        jobs = Job.objects
+        self.assertEqual(Decimal(960), jobs.estimate_total())
+        self.assertEqual(Decimal(0), jobs.billable_total())
+        self.assertEqual(round(Decimal(960*.19),2), round(jobs.estimate_tax_total(),2))
+        self.assertEqual(round(Decimal(960*1.19),2), round(jobs.estimate_gross_total(),2))
+
 class TaskCloneTests(TestCase):
     
     def setUp(self):

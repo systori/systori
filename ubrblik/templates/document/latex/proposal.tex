@@ -83,9 +83,9 @@ z.H. {{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }} \
 {% endfor %}
 
 \tabucline{2-6}
-& \multicolumn{4}{r} {\textbf{Total without VAT}} & \textbf{12.785,16 \euro\ } \\*
-& \multicolumn{4}{r} {\textbf{19,00\% VAT}} & \textbf{2.429,18 \euro\ } \\*
-& \multicolumn{4}{r} {\textbf{Total including VAT}} & \textbf{15.214,34 \euro\ } \\*
+& \multicolumn{4}{r} {\textbf{Total without VAT}} & \textbf{ {{jobs.estimate_total|floatformat:2}} \euro\ } \\*
+& \multicolumn{4}{r} {\textbf{19,00\% VAT}} & \textbf{ {{jobs.estimate_tax_total|floatformat:2}} \euro\ } \\*
+& \multicolumn{4}{r} {\textbf{Total including VAT}} & \textbf{ {{jobs.estimate_gross_total|floatformat:2}} \euro\ } \\*
 
 \end{longtabu}
 

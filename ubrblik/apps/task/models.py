@@ -6,14 +6,27 @@ from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 
 
+TAX_RATE = Decimal(.19)
+
 class JobQuerySet(models.QuerySet):
 
     def estimate_total(self):
         return sum([job.estimate_total for job in self.all()])
 
+    def estimate_tax_total(self):
+        return self.estimate_total() * TAX_RATE
+
+    def estimate_gross_total(self):
+        return self.estimate_total() * (TAX_RATE+1)
+
     def billable_total(self):
         return sum([job.billable_total for job in self.all()])
 
+    def billable_tax_total(self):
+        return self.billable_total() * TAX_RATE
+
+    def billable_gross_total(self):
+        return self.billable_total() * (TAX_RATE+1)
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
     use_for_related_fields = True
