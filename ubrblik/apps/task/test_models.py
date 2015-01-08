@@ -14,10 +14,10 @@ def create_task_data(self):
     self.job = Job.objects.create(name="Default", project=self.project)
     self.group = TaskGroup.objects.create(name="my group", job=self.job)
     self.group2 = TaskGroup.objects.create(name="my group 2", job=self.job)
-    self.task = Task.objects.create(name="my task", qty=1, taskgroup=self.group)
-    self.lineitem = LineItem.objects.create(name="my task", unit_qty=8, price=120, task=self.task)
-    self.task2 = Task.objects.create(name="my task", qty=0, taskgroup=self.group)
-    self.lineitem2 = LineItem.objects.create(name="my task", unit_qty=0, price=0, task=self.task2)
+    self.task = Task.objects.create(name="my task one", qty=1, taskgroup=self.group)
+    self.lineitem = LineItem.objects.create(name="my line item 1", unit_qty=8, price=120, task=self.task)
+    self.task2 = Task.objects.create(name="my task two", qty=0, taskgroup=self.group)
+    self.lineitem2 = LineItem.objects.create(name="my line item 2", unit_qty=0, price=0, task=self.task2)
 
 
 class TaskTotalTests(TestCase):
@@ -37,6 +37,7 @@ class TaskTotalTests(TestCase):
         self.assertEqual(80, lineitem1.price_per_task_unit)
         task = Task.objects.get(pk=self.task.pk)
         self.assertEqual(1040, task.fixed_price_estimate)
+
 
 class JobTotalTests(TestCase):
 
@@ -60,11 +61,12 @@ class JobTotalTests(TestCase):
         self.assertEqual(round(Decimal(960*.19),2), round(jobs.estimate_tax_total(),2))
         self.assertEqual(round(Decimal(960*1.19),2), round(jobs.estimate_gross_total(),2))
 
+
 class TaskCloneTests(TestCase):
-    
+
     def setUp(self):
         create_task_data(self)
-    
+
     def test_clone(self):
         new_job = Job.objects.create(name="New", project=self.project)
         self.assertEqual(new_job.taskgroups.count(), 0)

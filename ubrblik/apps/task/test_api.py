@@ -85,6 +85,11 @@ class TaskResourceTest(ResourceTestCaseBase):
 
     url = '/api/v1/task/'
 
+    def setUp(self):
+        super(TaskResourceTest, self).setUp()
+        self.task3 = Task.objects.create(name="my task three green", qty=0, taskgroup=self.group)
+        self.task4 = Task.objects.create(name="my task four green", qty=0, taskgroup=self.group)
+
     def test_update_task(self):
         url = self.url+'{}/'.format(self.task.id)
         data = {"name": "new name"}
@@ -113,6 +118,13 @@ class TaskResourceTest(ResourceTestCaseBase):
         self.assertHttpAccepted(resp)
         new_count = Task.objects.count()
         self.assertEqual(start_count-1, new_count)
+
+    def test_autocomplete_task(self):
+        resp = self.api_client.get(self.url, data={"name__icontains": "green"}, format='json')
+        self.assertValidJSONResponse(resp)
+        objects = self.deserialize(resp)['objects']
+        self.assertEqual(len(objects), 2)
+
 
 class LineItemResourceTest(ResourceTestCaseBase):
 

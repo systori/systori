@@ -57,7 +57,8 @@ class TaskGroupResource(ModelResource):
         queryset = TaskGroup.objects.all()
         resource_name = "taskgroup"
         filtering = {
-            "job": "exact"
+            "job": "exact",
+            "name": "icontains"
         }
 
 
@@ -67,7 +68,8 @@ class TaskResource(ModelResource):
         queryset = Task.objects.all()
         resource_name = "task"
         filtering = {
-            "taskgroup": "exact"
+            "taskgroup": "exact",
+            "name": "icontains"
         }
 
 
