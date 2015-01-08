@@ -1,0 +1,132 @@
+{% extends "project.html" %}
+{% load i18n staticfiles %}
+
+{% block title %}{{ project.name }} > {{ job.name }}{% endblock %}
+{% block head_navbar %}
+<ul class="nav navbar-nav navbar-left">
+  <li><a href="{% url 'project.view' project.id %}">{{ project.name }}</a></li>
+  <li class="active"><a href="{% url 'tasks' project.id job.id %}">{{ job.name }}</a></li>
+</ul>
+{% endblock %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='jobs' %}{% endblock %}
+
+{% block content %}
+<style>
+ubr-editor {
+  width: 100%;
+}
+ubr-taskgroup {
+  width: 100%;
+  display: block;
+}
+ubr-taskgroup-code, ubr-taskgroup-name, ubr-taskgroup-total, ubr-taskgroup-description {
+  float: left;
+  height: 18px;
+  display: block;
+}
+
+ubr-taskgroup-total, ubr-task-total, ubr-lineitem-total {
+  width: 70px;
+  text-align: right;
+  border: 1px solid black;
+}
+
+ubr-taskgroup-code, ubr-task-code {
+  width: 40px;
+}
+
+ubr-taskgroup-description, ubr-task-description {
+  width: 100%;
+  padding-left: 40px;
+}
+ubr-task {
+  display: block;
+}
+
+ubr-task-code,
+ubr-task-name,
+ubr-task-qty,
+ubr-task-unit,
+ubr-task-total,
+ubr-task-description {
+  float: left;
+  height: 18px;
+  display: block;
+}
+
+ubr-task-qty,
+ubr-task-unit,
+ubr-task-total,
+ubr-task-description {
+  float: right;
+}
+
+ubr-lineitem {
+  float: left;
+  display: block;
+  width: 100%;
+  padding-left: 80px;
+}
+
+ubr-lineitem-name {
+  height: 18px;
+  display: inline-block;
+}
+
+ubr-lineitem-unit-qty,
+ubr-lineitem-unit,
+ubr-lineitem-price,
+ubr-lineitem-total {
+  height: 18px;
+  display: inline-block;
+  width: 70px;
+  text-align: right;
+}
+
+</style>
+
+
+<p>job.pk: {{job.pk}} job.code: {{job.code}} project.taskgroup_zfill: {{project.taskgroup_zfill}} project.task_zfill:{{project.task_zfill}}</p>
+
+<ubr-editor>
+{% for group in object_list %}
+  <ubr-taskgroup>
+    <ubr-taskgroup-code>{{ group.code }}</ubr-taskgroup-code>
+    <ubr-taskgroup-name>{{ group.name }}</ubr-taskgroup-name>
+    <ubr-taskgroup-total>{{ group.estimate_total|floatformat:2 }}</ubr-taskgroup-total>
+    <ubr-taskgroup-description>{{ group.description  }} Some really static Description!</ubr-taskgroup-description>
+    {% for task in group.tasks.all %}
+    <ubr-task>
+      <ubr-task-code>{{ task.code }}</ubr-task-code>
+      <ubr-task-name>{{ task.name }}</ubr-task-name>
+      <ubr-task-qty>{{ task.qty|floatformat:2 }}</ubr-task-qty>
+      <ubr-task-unit>{{ task.unit }}</ubr-task-unit>
+      <ubr-task-total>{{ task.fixed_price_estimate|floatformat:2 }}</ubr-task-total>
+      <ubr-task-description>{{ task.description }}</ubr-task-description>
+      {% for lineitem in task.lineitems.all %}
+        <ubr-lineitem data-pk="{{ lineitem.pk }}">
+          <ubr-lineitem-name>{{ lineitem.name }}</ubr-lineitem-name>
+          <ubr-lineitem-unit-qty>{{ lineitem.unit_qty|floatformat:2 }}</ubr-lineitem-unit-qty>
+          <ubr-lineitem-unit>{{ lineitem.unit }}</ubr-lineitem-unit>
+          <ubr-lineitem-price>{{ lineitem.price|floatformat:2 }}</ubr-lineitem-price>
+          <ubr-lineitem-total>{{ lineitem.price_per_task_unit|floatformat:2 }}</ubr-lineitem-total>
+        </ubr-lineitem>
+      {% endfor %}
+    </ubr-task>
+    {% endfor %}
+  </ubr-taskgroup>
+{% endfor %}
+</ubr-editor>
+
+
+{% endblock content %}
+
+{% block extra_js%}
+<!--
+<script type="application/dart" src="{% static "editor/editor.dart" %}"></script>
+-->
+<!--
+<script src="{% static "js/ubrblik/editor.dart.js" %}"></script>
+ -->
+{% endblock extra_js%}

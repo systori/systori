@@ -10,7 +10,7 @@ from .forms import JobForm, JobTemplateForm
 
 class JobTransition(SingleObjectMixin, View):
     model = Job
-    
+
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
 
@@ -19,7 +19,7 @@ class JobTransition(SingleObjectMixin, View):
             if t.name == kwargs['transition']:
                 transition = t
                 break
-        
+
         if transition:
           getattr(self.object, transition.name)()
           self.object.save()
@@ -28,7 +28,7 @@ class JobTransition(SingleObjectMixin, View):
 
 
 class TaskEditor(SingleObjectMixin, ListView):
-    template_name = "task/editor.html"
+    template_name = "task/flexgrid_editor.html"
 
     def get_context_data(self, **kwargs):
         context = super(TaskEditor, self).get_context_data(**kwargs)

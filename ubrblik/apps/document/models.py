@@ -61,7 +61,7 @@ class Document(models.Model):
         dir_path = os.path.dirname(self.latex.path)
 
         # create pdf file
-        for i in range(2):
+        for i in range(3):
             process = Popen(
                 ['pdflatex', '-output-directory', dir_path],
                 stdin=PIPE,

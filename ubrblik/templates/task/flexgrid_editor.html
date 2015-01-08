@@ -1,0 +1,189 @@
+{% extends "project.html" %}
+{% load i18n staticfiles %}
+<!DOCTYPE html>
+
+{% block title %}{{ project.name }} > {{ job.name }}{% endblock %}
+{% block head_navbar %}
+<ul class="nav navbar-nav navbar-left">
+  <li><a href="{% url 'project.view' project.id %}">{{ project.name }}</a></li>
+  <li class="active"><a href="{% url 'tasks' project.id job.id %}">{{ job.name }}</a></li>
+</ul>
+{% endblock %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='jobs' %}{% endblock %}
+
+{% block content %}
+<style>
+body, ubr-job, ubr-taskgroup, ubr-task, ubr-lineitem {
+  font-family: 'Roboto', sans-serif;
+}
+
+ubr-editor {
+  width: 100%;
+}
+
+ubr-job {
+  font-weight: 700;
+}
+.flex-row {
+  background-color: rgba(0,0,0,0.1);
+}
+.flex-box-row {
+}
+.textRight {
+  text-align:right;
+}
+.textBold {
+  font-weight: 700;
+}
+.lineHigher {
+  line-height: 22px;
+}
+.description {
+  font-weight: lighter;
+}
+.marginTaskGroup {
+  margin-top: 20px;
+}
+.marginTask {
+  margin-top: 5px;
+}
+.paddingLineItem {
+  padding-top: 2px;
+}
+</style>
+
+<ubr-editor>
+
+<div class="flex-row lineHigher">
+  <div class="flex-col-xs-1">
+  </div>
+  <div class="flex-col-xs-9">
+    <div class="flex-box-row">
+      job.pk: {{job.pk}} job.code: {{job.code}} project.taskgroup_zfill: {{project.taskgroup_zfill}} project.task_zfill:{{project.task_zfill}}
+    </div>
+  </div>
+  <div class="flex-col-xs-2">
+  </div>
+</div>
+
+<ubr-job>
+  <div class="flex-row lineHigher">
+    <div class="flex-col-xs-1 flex-col-md-1">
+      <div class="flex-box-row textRight">{{ job.code }}</div>
+    </div>
+    <div class="flex-col-xs-8 flex-col-md-9">
+      <div class="flex-box-row" contenteditable>{{ job.name }}</div>
+    </div>
+    <div class="flex-col-xs-3 flex-col-md-2 textRight">
+      <div class="flex-box-row">{{ job.estimate_total|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="flex-row">
+    <div class="flex-col-xs-1 flex-col-md-1">
+      <div class="flex-box-row"></div>
+    </div>
+    <div class="flex-col-xs-9 flex-col-md-9">
+      <div class="flex-box-row description" contenteditable>{{ job.description  }} Some really static Description!</div>
+    </div>
+    <div class="flex-col-xs-2 flex-col-md-2">
+    </div>
+  </div>
+</ubr-job>
+
+{% for taskgroup in object_list %}
+  <ubr-taskgroup>
+    <div class="flex-row lineHigher marginTaskGroup textBold">
+      <div class="flex-col-xs-1 flex-col-md-1">
+        <div class="flex-box-row textRight">{{ taskgroup.code }}</div>
+      </div>
+      <div class="flex-col-xs-8 flex-col-md-9">
+        <div class="flex-box-row" contenteditable>{{ taskgroup.name }}</div>
+      </div>
+      <div class="flex-col-xs-3 flex-col-md-2 textRight">
+        <div class="flex-box-row">{{ taskgroup.estimate_total|floatformat:2 }}</div>
+      </div>
+    </div>
+    <div class="flex-row">
+      <div class="flex-col-xs-1 flex-col-md-1">
+        <div class="flex-box-row"></div>
+      </div>
+      <div class="flex-col-xs-9 flex-col-md-9">
+        <div class="flex-box-row description" contenteditable>{{ taskgroup.description  }} Some really static Description!</div>
+      </div>
+      <div class="flex-col-xs-2 flex-col-md-2">
+      </div>
+    </div>
+    {% for task in taskgroup.tasks.all %}
+      <ubr-task>
+        <div class="flex-row lineHigher textBold marginTask">
+          <div class="flex-col-xs-1 flex-col-md-1">
+            <div class="flex-box-row textRight">{{ task.code }}</div>
+          </div>
+          <div class="flex-col-xs-5 flex-col-md-7">
+            <div class="flex-box-row" contenteditable>{{ task.name }}</div>
+          </div>
+          <div class="flex-col-xs-2 flex-col-md-1 textRight">
+            <div class="flex-box-row" contenteditable>{{ task.qty|floatformat:2 }}</div>
+          </div>
+          <div class="flex-col-xs-1 flex-col-md-1 textRight">
+            <div class="flex-box-row" contenteditable>{{ task.unit }}</div>
+          </div>
+          <div class="flex-col-xs-1 flex-col-md-1 textRight">
+            <div class="flex-box-row">{{ task.fixed_price_estimate|floatformat:2 }}</div>
+          </div>
+          <div class="flex-col-xs-2 flex-col-md-1 textRight">
+            <div class="flex-box-row" style="color:red;">missing</div>
+          </div>
+        </div>
+        <div class="flex-row">
+          <div class="flex-col-xs-1 flex-col-md-1">
+            <div class="flex-box-row"></div>
+          </div>
+          <div class="flex-col-xs-9 flex-col-md-9">
+            <div class="flex-box-row description" contenteditable>{{ task.description }}</div>
+          </div>
+          <div class="flex-col-xs-2 flex-col-md-2">
+          </div>
+        </div>
+        {% for lineitem in task.lineitems.all %}
+          <ubr-lineitem data-pk="{{ lineitem.pk }}">
+            <div class="flex-row lineHigher paddingLineItem">
+              <div class="flex-col-xs-1 flex-col-md-1">
+                <div class="flex-box-row"></div>
+              </div>
+              <div class="flex-col-xs-5 flex-col-md-7">
+                <div class="flex-box-row" contenteditable>{{ lineitem.name }}</div>
+              </div>
+              <div class="flex-col-xs-2 flex-col-md-1 textRight">
+                <div class="flex-box-row" contenteditable>{{ lineitem.unit_qty|floatformat:2 }}</div>
+              </div>
+              <div class="flex-col-xs-1 flex-col-md-1 textRight">
+                <div class="flex-box-row" contenteditable>{{ lineitem.unit }}</div>
+              </div>
+              <div class="flex-col-xs-1 flex-col-md-1 textRight">
+                <div class="flex-box-row" contenteditable>{{ lineitem.price|floatformat:2 }}</div>
+              </div>
+              <div class="flex-col-xs-2 flex-col-md-1 textRight">
+                <div class="flex-box-row">{{ lineitem.price_per_task_unit|floatformat:2 }}</div>
+              </div>
+            </div>
+          </ubr-lineitem>
+        {% endfor %}
+      </ubr-task>
+    {% endfor %}
+</ubr-taskgroup>
+{% endfor %}
+
+</ubr-editor>
+
+{% endblock %}
+
+{% block extra_js%}
+<!--
+<script type="application/dart" src="{% static "editor/editor.dart" %}"></script>
+-->
+<!--
+<script src="{% static "js/ubrblik/editor.dart.js" %}"></script>
+ -->
+{% endblock extra_js%}
