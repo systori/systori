@@ -451,7 +451,7 @@ msgstr "Summe brutto"
  msgstr "Angebotsdetails"
 
  msgid "Dashboard"
- msgstr "Karte"
+ msgstr "Pinnwand"
 
  msgid "Templates"
  msgstr "Vorlagen"
