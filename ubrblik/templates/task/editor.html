@@ -12,6 +12,93 @@
 {% block sidebar %}{% include "project/sidebar.html" with section='jobs' %}{% endblock %}
 
 {% block content %}
+<style>
+
+#task-editor {
+}
+
+.editor {
+  margin-bottom: 10px;
+}
+
+.editor-row {
+  display: flex;
+}
+
+/* task group & task */
+
+.code {
+  width: 60px;
+}
+
+.description {
+  margin-left: 60px;
+  width: 440px;
+}
+
+.qty {
+  width: 70px;
+  text-align: right;
+}
+
+.unit {
+  width: 70px;
+  padding-left: 4px;
+}
+
+.price {
+  width: 70px;
+  text-align: right;
+}
+
+.total {
+  width: 70px;
+  font-weight: bold;
+  text-align: right;
+}
+
+/* task group */
+
+ubr-taskgroup > .editor .name {
+  font-weight: bold;
+  width: 510px;
+}
+
+ubr-taskgroup > .editor .total {
+  width: 100px;
+}
+
+/* task */
+
+ubr-task > .editor .name {
+  width: 330px;
+}
+
+/* line item */
+
+ubr-lineitem .name {
+  width: 310px;
+  margin-left: 80px;
+}
+
+div[contenteditable][placeholder]:empty:before {
+  content: attr(placeholder);
+  font-style: italic;
+  color: #d9d9d9;
+}
+
+div[contenteditable][placeholder]:empty:focus:before {
+  content: "";
+}
+
+.autocomplete {
+  display: none;
+  position: absolute;
+  background: white;
+}
+</style>
+
+
 <div id="task-editor"
   data-job-pk="{{ job.pk }}"
   data-job-code="{{ job.code }}"
@@ -20,186 +107,95 @@
 
 
 {% for group in object_list %}
-  <ubr-taskgroup data-pk="{{ group.pk }}">
-    <span class="code">{{ group.code }}</span>
-    <span class="name">{{ group.name }}</span>
-    <span class="description">{{ group.description }}</span>
-    <span class="total">{{ group.estimate_total|floatformat:2 }}</span>
-  </ubr-taskgroup>
+<ubr-taskgroup data-pk="{{ group.pk }}">
+  <div class="editor">
+    <div class="editor-row">
+      <div class="code">{{ group.code }}</div>
+      <div class="name" placeholder="{% trans 'task group' %}" contenteditable>{{ group.name }}</div>
+      <div class="total">{{ group.estimate_total|floatformat:2 }}</div>
+    </div>
+    <div class="autocomplete"></div>
+    <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ group.description }}</div>
+  </div>
 
   {% for task in group.tasks.all %}
-    <ubr-task data-pk="{{ task.pk }}">
-      <span class="code">{{ task.code }}</span>
-      <span class="name">{{ task.name }}</span>
-      <span class="description">{{ task.description }}</span>
-      <span class="qty">{{ task.qty|floatformat:2 }}</span>
-      <span class="unit">{{ task.unit }}</span>
-      <span class="total">{{ task.fixed_price_estimate|floatformat:2 }}</span>
-    </ubr-task>
+  <ubr-task data-pk="{{ task.pk }}">
+    <div class="editor">
+      <div class="editor-row">
+        <div class="code">{{ task.code }}</div>
+        <div class="name" placeholder="{% trans 'task' %}" contenteditable>{{ task.name }}</div>
+        <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ task.qty|floatformat:2 }}</div>
+        <div class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ task.unit }}</div>
+        <div class="price">{{ task.unit_price|floatformat:2 }}</div>
+        <div class="total">{{ task.fixed_price_estimate|floatformat:2 }}</div>
+      </div>
+      <div class="autocomplete"></div>
+      <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ task.description }}</div>
+    </div>
 
     {% for lineitem in task.lineitems.all %}
     <ubr-lineitem data-pk="{{ lineitem.pk }}">
-      <span class="name">{{ lineitem.name }}</span>
-      <span class="unit-qty">{{ lineitem.unit_qty|floatformat:2 }}</span>
-      <span class="unit">{{ lineitem.unit }}</span>
-      <span class="price">{{ lineitem.price|floatformat:2 }}</span>
-      <span class="total">{{ lineitem.price_per_task_unit|floatformat:2 }}</span>
+      <div class="editor">
+        <div class="editor-row">
+          <div class="name" placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name }}</div>
+          <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ lineitem.unit_qty|floatformat:2 }}</div>
+          <div class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ lineitem.unit }}</div>
+          <div class="price" placeholder="{% trans 'price' %}" contenteditable>{{ lineitem.price|floatformat:2 }}</div>
+          <div class="total">{{ lineitem.price_per_task_unit|floatformat:2 }}</div>
+        </div>
+      </div>
     </ubr-lineitem>
     {% endfor %}
+
+  </ubr-task>
   {% endfor %}
+
+</ubr-taskgroup>
 {% endfor %}
+
 </div>
 
-
-<style>
-
-::shadow #autocomplete {
-  position: absolute;
-  background: white;
-}
-
-.total {
-  font-weight: bold;
-}
-#task-editor {
-  display: table;
-  width: 600px;
-}
-
-ubr-taskgroup,
-ubr-task,
-ubr-lineitem {
-  display: table-row;
-}
-
-ubr-taskgroup::shadow > td,
-ubr-task::shadow > td,
-ubr-lineitem::shadow > td {
-  position: relative;
-  vertical-align: top;
-  padding: 0px 5px 0px 5px;
-  border: 1px solid white;
-}
-
-ubr-taskgroup::shadow > td > div:focus,
-ubr-task::shadow > td > div:focus,
-ubr-lineitem::shadow > td > div:focus {
-  outline: 0px;
-}
-
-ubr-lineitem::shadow > td:nth-of-type(2) {
-  padding-left: 20px;
-}
-
-ubr-taskgroup::shadow div[placeholder]:empty:before,
-ubr-task::shadow div[placeholder]:empty:before,
-ubr-lineitem::shadow div[placeholder]:empty:before {
-  content: attr(placeholder);
-  font-style: italic;
-  color: #d9d9d9;
-}
-
-ubr-taskgroup::shadow div[placeholder]:empty:focus:before,
-ubr-task::shadow div[placeholder]:empty:focus:before,
-ubr-lineitem::shadow div[placeholder]:empty:focus:before {
-  content: "";
-}
-</style>
-
 <template id="taskgroup-template">
-  <style>
-  td:nth-of-type(2) {
-    width: 90%;
-  }
-  td:nth-of-type(3) {
-    width: 10%;
-  }
-  .name {
-    font-weight: bold;
-  }
-  </style>
-  <td><div class="code"></div></td>
-  <td colspan="4">
-    <div class="name" placeholder="{% trans 'task group' %}" contenteditable></div>
+  <div class="editor">
+    <div class="editor-row">
+      <div class="code"></div>
+      <div class="name" placeholder="{% trans 'task group' %}" contenteditable></div>
+      <div class="total"></div>
+    </div>
+    <div class="autocomplete"></div>
     <div class="description" placeholder="{% trans 'description' %}" contenteditable></div>
-  </td>
-  <td><div class="total"></div></td>
+  </div>
 </template>
 
 <template id="task-template">
-  <style>
-  :host(:hover) td:nth-of-type(1n+1),
-  :host(.focused) td:nth-of-type(1n+1) {
-    border-right: 1px dashed lightgray;
-  }
-  :host(:hover) td:nth-of-type(1n+2),
-  :host(.focused) td:nth-of-type(1n+2) {
-    border-bottom: 1px dashed lightgray;
-  }
-  :host(:hover) td:nth-of-type(1n+5),
-  :host(.focused) td:nth-of-type(1n+5) {
-    border-right: 1px solid white;
-    border-bottom: 1px solid white;
-  }
-  td:nth-of-type(2) {
-    width: 40%;
-  }
-  td:nth-of-type(1n+3) {
-    width: 15%;
-  }
-  .qty, .total {
-    text-align: right;
-  }
-  </style>
-  <td><div class="code"></div></td>
-  <td>
-    <div class="name" placeholder="{% trans 'task' %}" contenteditable></div>
+  <div class="editor">
+    <div class="editor-row">
+      <div class="code"></div>
+      <div class="name" placeholder="{% trans 'task' %}" contenteditable></div>
+      <div class="qty" placeholder="{% trans 'qty' %}" contenteditable></div>
+      <div class="unit" placeholder="{% trans 'unit' %}" contenteditable></div>
+      <div class="price"></div>
+      <div class="total"></div>
+    </div>
+    <div class="autocomplete"></div>
     <div class="description" placeholder="{% trans 'description' %}" contenteditable></div>
-  </td>
-  <td><div class="qty" placeholder="{% trans 'qty' %}" contenteditable></div></td>
-  <td><div class="unit" placeholder="{% trans 'unit' %}" contenteditable></div></td>
-  <td></td>
-  <td><div class="total"></div></td>
+  </div>
 </template>
 
 <template id="lineitem-template">
-  <style>
-  :host(:hover) td:nth-of-type(1n+1),
-  :host(.focused) td:nth-of-type(1n+1) {
-    border-right: 1px dashed lightgray;
-  }
-  :host(:hover) td:nth-of-type(1n+2),
-  :host(.focused) td:nth-of-type(1n+2) {
-    border-bottom: 1px dashed lightgray;
-  }
-  :host(:hover) td:nth-of-type(1n+6),
-  :host(.focused) td:nth-of-type(1n+6) {
-    border-right: 1px solid white;
-    border-bottom: 1px solid white;
-  }
-  td:nth-of-type(2) {
-    width: 40%;
-  }
-  td:nth-of-type(1n+3) {
-    width: 15%;
-  }
-  .unit-qty-cell, .price-cell, .total-cell {
-    text-align: right;
-  }
-  </style>
-  <td></td>
-  <td><div class="name" placeholder="{% trans 'line item' %}" contenteditable></div></td>
-  <td class="unit-qty-cell"><div class="unit-qty" placeholder="{% trans 'qty' %}" contenteditable></div></td>
-  <td><div class="unit" placeholder="{% trans 'unit' %}" contenteditable></div></td>
-  <td class="price-cell"><div class="price" placeholder="{% trans 'price' %}" contenteditable></div></td>
-  <td class="total-cell"><div class="total"></div></td>
+  <div class="editor">
+    <div class="editor-row">
+      <div class="name" placeholder="{% trans 'line item' %}" contenteditable></div>
+      <div class="qty" placeholder="{% trans 'qty' %}" contenteditable></div>
+      <div class="unit" placeholder="{% trans 'unit' %}" contenteditable></div>
+      <div class="price" placeholder="{% trans 'price' %}" contenteditable></div>
+      <div class="total"></div>
+    </div>
+  </div>
 </template>
 
 {% endblock content %}
 
 {% block extra_js%}
 <script type="application/dart" src="{% static "editor/editor.dart" %}"></script>
-<!--
-<script src="{% static "js/ubrblik/editor.dart.js" %}"></script>
- -->
 {% endblock extra_js%}

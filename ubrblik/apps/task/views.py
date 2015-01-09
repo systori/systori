@@ -28,7 +28,7 @@ class JobTransition(SingleObjectMixin, View):
 
 
 class TaskEditor(SingleObjectMixin, ListView):
-    template_name = "task/flexgrid_editor.html"
+    template_name = "task/editor.html"
 
     def get_context_data(self, **kwargs):
         context = super(TaskEditor, self).get_context_data(**kwargs)
