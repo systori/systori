@@ -18,6 +18,7 @@
 }
 
 .editor {
+  position: relative;
   margin-bottom: 10px;
 }
 
@@ -91,107 +92,52 @@ div[contenteditable][placeholder]:empty:focus:before {
   content: "";
 }
 
-.autocomplete {
+ubr-autocomplete {
+  z-index: 100;
   display: none;
   position: absolute;
   background: white;
+  left: 60px;
+  width: 310px;
+  border: 1px solid lightgrey;
 }
+
+/*
+ubr-autocomplete > div:hover {
+  background: #FFE8D9;
+  cursor: pointer;
+}
+*/
+
+ubr-autocomplete > div.active {
+  background: orange;
+}
+
 </style>
 
 
-<div id="task-editor"
-  data-job-pk="{{ job.pk }}"
-  data-job-code="{{ job.code }}"
+<ubr-job id="task-editor"
+  data-pk="{{ job.pk }}"
+  data-code="{{ job.code }}"
   data-taskgroup-zfill="{{ project.taskgroup_zfill }}"
   data-task-zfill="{{ project.task_zfill }}">
 
-
-{% for group in object_list %}
-<ubr-taskgroup data-pk="{{ group.pk }}">
-  <div class="editor">
-    <div class="editor-row">
-      <div class="code">{{ group.code }}</div>
-      <div class="name" placeholder="{% trans 'task group' %}" contenteditable>{{ group.name }}</div>
-      <div class="total">{{ group.estimate_total|floatformat:2 }}</div>
-    </div>
-    <div class="autocomplete"></div>
-    <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ group.description }}</div>
-  </div>
-
-  {% for task in group.tasks.all %}
-  <ubr-task data-pk="{{ task.pk }}">
-    <div class="editor">
-      <div class="editor-row">
-        <div class="code">{{ task.code }}</div>
-        <div class="name" placeholder="{% trans 'task' %}" contenteditable>{{ task.name }}</div>
-        <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ task.qty|floatformat:2 }}</div>
-        <div class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ task.unit }}</div>
-        <div class="price">{{ task.unit_price|floatformat:2 }}</div>
-        <div class="total">{{ task.fixed_price_estimate|floatformat:2 }}</div>
-      </div>
-      <div class="autocomplete"></div>
-      <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ task.description }}</div>
-    </div>
-
-    {% for lineitem in task.lineitems.all %}
-    <ubr-lineitem data-pk="{{ lineitem.pk }}">
-      <div class="editor">
-        <div class="editor-row">
-          <div class="name" placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name }}</div>
-          <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ lineitem.unit_qty|floatformat:2 }}</div>
-          <div class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ lineitem.unit }}</div>
-          <div class="price" placeholder="{% trans 'price' %}" contenteditable>{{ lineitem.price|floatformat:2 }}</div>
-          <div class="total">{{ lineitem.price_per_task_unit|floatformat:2 }}</div>
-        </div>
-      </div>
-    </ubr-lineitem>
-    {% endfor %}
-
-  </ubr-task>
+  {% for group in object_list %}
+    {% include "task/taskgroup_loop.html" with group=group %}
   {% endfor %}
 
-</ubr-taskgroup>
-{% endfor %}
-
-</div>
+</ubr-job>
 
 <template id="taskgroup-template">
-  <div class="editor">
-    <div class="editor-row">
-      <div class="code"></div>
-      <div class="name" placeholder="{% trans 'task group' %}" contenteditable></div>
-      <div class="total"></div>
-    </div>
-    <div class="autocomplete"></div>
-    <div class="description" placeholder="{% trans 'description' %}" contenteditable></div>
-  </div>
+  {% include "task/taskgroup_editor.html" with group=blank_taskgroup %}
 </template>
 
 <template id="task-template">
-  <div class="editor">
-    <div class="editor-row">
-      <div class="code"></div>
-      <div class="name" placeholder="{% trans 'task' %}" contenteditable></div>
-      <div class="qty" placeholder="{% trans 'qty' %}" contenteditable></div>
-      <div class="unit" placeholder="{% trans 'unit' %}" contenteditable></div>
-      <div class="price"></div>
-      <div class="total"></div>
-    </div>
-    <div class="autocomplete"></div>
-    <div class="description" placeholder="{% trans 'description' %}" contenteditable></div>
-  </div>
+  {% include "task/task_editor.html" with task=blank_task %}
 </template>
 
 <template id="lineitem-template">
-  <div class="editor">
-    <div class="editor-row">
-      <div class="name" placeholder="{% trans 'line item' %}" contenteditable></div>
-      <div class="qty" placeholder="{% trans 'qty' %}" contenteditable></div>
-      <div class="unit" placeholder="{% trans 'unit' %}" contenteditable></div>
-      <div class="price" placeholder="{% trans 'price' %}" contenteditable></div>
-      <div class="total"></div>
-    </div>
-  </div>
+  {% include "task/lineitem_editor.html" with lineitem=blank_lineitem %}
 </template>
 
 {% endblock content %}

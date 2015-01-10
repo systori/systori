@@ -1,0 +1,10 @@
+{% load i18n %}
+<div class="editor">
+  <div class="editor-row">
+    <div class="name" placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name }}</div>
+    <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ lineitem.unit_qty|floatformat:2 }}</div>
+    <div class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ lineitem.unit }}</div>
+    <div class="price" placeholder="{% trans 'price' %}" contenteditable>{{ lineitem.price|floatformat:2 }}</div>
+    <div class="total">{{ lineitem.price_per_task_unit|floatformat:2 }}</div>
+  </div>
+</div>

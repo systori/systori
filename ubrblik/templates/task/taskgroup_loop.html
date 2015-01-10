@@ -1,0 +1,6 @@
+<ubr-taskgroup data-pk="{{ group.pk }}">
+  {% include "task/taskgroup_editor.html" with group=group %}
+  {% for task in group.tasks.all %}
+    {% include "task/task_loop.html" with task=task %}
+  {% endfor %}
+</ubr-taskgroup>

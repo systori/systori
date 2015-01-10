@@ -1,6 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
 from django.conf.urls import url
+from django.template.loader import get_template
+from django.template import Context
 from tastypie import fields
 from tastypie import http
 from tastypie.resources import ModelResource
@@ -17,13 +19,17 @@ class BaseMeta:
     authorization = Authorization()
 
 
-class OrderedModelResource(ModelResource):
+class OrderedModelResourceMixin:
+
     def prepend_urls(self):
-        return [
+        urls = super(OrderedModelResourceMixin, self).prepend_urls()
+        urls.append(
             url(r"^(?P<resource_name>%s)/(?P<%s>.*?)/move%s$" %
                 (self._meta.resource_name, self._meta.detail_uri_name, trailing_slash()),
-                self.wrap_view('dispatch_move'), name="api_dispatch_move"),
-            ]
+                self.wrap_view('dispatch_move'), name="api_dispatch_move")
+        )
+        self._meta.move_allowed_methods = ['post']
+        return urls
 
     def dispatch_move(self, request, **kwargs):
         return self.dispatch('move', request, **kwargs)
@@ -40,9 +46,39 @@ class OrderedModelResource(ModelResource):
 
         return http.HttpAccepted()
 
+class ClonableModelResourceMixin:
 
-class JobResource(OrderedModelResource):
+    def prepend_urls(self):
+        urls = super(ClonableModelResourceMixin, self).prepend_urls()
+        urls.append(
+            url(r"^(?P<resource_name>%s)/(?P<%s>.*?)/clone%s$" %
+                (self._meta.resource_name, self._meta.detail_uri_name, trailing_slash()),
+                self.wrap_view('dispatch_clone'), name="api_dispatch_clone")
+        )
+        self._meta.clone_allowed_methods = ['post']
+        return urls
+
+    def dispatch_clone(self, request, **kwargs):
+        return self.dispatch('clone', request, **kwargs)
+
+    def post_clone(self, request, **kwargs):
+        data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
+        obj = self.obj_get(self.build_bundle(request=request), **self.remove_api_resource_names(kwargs))
+
+        if 'target' not in data or 'pos' not in data:
+            raise ValidationError("Need target and pos for clone operation.")
+
+        template, context = self.perform_cloning(obj, data['target'], data['pos'])
+
+        rendered = template.render(Context(context)).encode('utf-8')
+
+        return http.HttpCreated(rendered)
+
+
+class JobResource(OrderedModelResourceMixin, ModelResource):
+
     project = fields.ForeignKey(ProjectResource, 'project')
+
     class Meta(BaseMeta):
         queryset = Job.objects.all()
         resource_name = 'job'
@@ -51,8 +87,10 @@ class JobResource(OrderedModelResource):
         }
 
 
-class TaskGroupResource(ModelResource):
+class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, ModelResource):
+
     job = fields.ForeignKey(JobResource, 'job')
+
     class Meta(BaseMeta):
         queryset = TaskGroup.objects.all()
         resource_name = "taskgroup"
@@ -61,9 +99,15 @@ class TaskGroupResource(ModelResource):
             "name": "icontains"
         }
 
+    def perform_cloning(self, specimen, new_parent_uri, new_pos):
+        job = JobResource().get_via_uri(new_parent_uri)
+        specimen.clone_to(job, new_pos)
+        return get_template('task/taskgroup_loop.html'), {'group': specimen}
 
-class TaskResource(ModelResource):
+class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, ModelResource):
+
     taskgroup = fields.ForeignKey(TaskGroupResource, 'taskgroup')
+
     class Meta(BaseMeta):
         queryset = Task.objects.all()
         resource_name = "task"
@@ -71,6 +115,11 @@ class TaskResource(ModelResource):
             "taskgroup": "exact",
             "name": "icontains"
         }
+
+    def perform_cloning(self, specimen, new_parent_uri, new_pos):
+        taskgroup = TaskGroupResource().get_via_uri(new_parent_uri)
+        specimen.clone_to(taskgroup, new_pos)
+        return get_template('task/task_loop.html'), {'task': specimen}
 
 
 class LineItemResource(ModelResource):

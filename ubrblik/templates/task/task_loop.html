@@ -1,0 +1,8 @@
+<ubr-task data-pk="{{ task.pk }}">
+  {% include "task/task_editor.html" with task=task %}
+  {% for lineitem in task.lineitems.all %}
+  <ubr-lineitem data-pk="{{ lineitem.pk }}">
+    {% include "task/lineitem_editor.html" with lineitem=lineitem %}
+  </ubr-lineitem>
+  {% endfor %}
+</ubr-task>

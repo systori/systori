@@ -6,6 +6,18 @@ from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 
 
+class BetterOrderedModel(OrderedModel):
+
+    class Meta(OrderedModel.Meta):
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        if not self.pk and self.order != None:
+            qs = self.get_ordering_queryset()
+            qs.filter(order__gte=self.order).update(order=models.F('order') + 1)
+        super(BetterOrderedModel, self).save(*args, **kwargs)
+
+
 TAX_RATE = Decimal(.19)
 
 class JobQuerySet(models.QuerySet):
@@ -32,7 +44,7 @@ class JobManager(BaseManager.from_queryset(JobQuerySet)):
     use_for_related_fields = True
 
 
-class Job(OrderedModel):
+class Job(BetterOrderedModel):
 
     name = models.CharField(_('Job Name'), max_length=512)
     description = models.TextField(_('Description'), blank=True)
@@ -81,19 +93,7 @@ class Job(OrderedModel):
     def clone_to(self, other_job):
         taskgroups = self.taskgroups.all()
         for taskgroup in taskgroups:
-            tasks = taskgroup.tasks.all()
-            taskgroup.pk = None
-            taskgroup.job = other_job
-            taskgroup.save()
-            for task in tasks:
-                lineitems = task.lineitems.all()
-                task.pk = None
-                task.taskgroup = taskgroup
-                task.save()
-                for lineitem in lineitems:
-                    lineitem.pk = None
-                    lineitem.task = task
-                    lineitem.save()
+            taskgroup.clone_to(other_job, taskgroup.order)
 
     def _total_calc(self, calc_type):
         field = "{}_{}".format(self.billing_method, calc_type)
@@ -117,7 +117,7 @@ class Job(OrderedModel):
     def __str__(self):
         return '{} {}'.format(self.code, self.name)
 
-class TaskGroup(OrderedModel):
+class TaskGroup(BetterOrderedModel):
 
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField(blank=True)
@@ -168,7 +168,16 @@ class TaskGroup(OrderedModel):
     def __str__(self):
         return '{} {}'.format(self.code, self.name)
 
-class Task(OrderedModel):
+    def clone_to(self, new_job, new_order):
+        tasks = self.tasks.all()
+        self.pk = None
+        self.job = new_job
+        self.order = new_order
+        self.save()
+        for task in tasks:
+            task.clone_to(self, task.order)
+
+class Task(BetterOrderedModel):
 
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField()
@@ -245,6 +254,17 @@ class Task(OrderedModel):
 
     def __str__(self):
         return '{} {}'.format(self.code, self.name)
+
+    def clone_to(self, new_taskgroup, new_order):
+        lineitems = self.lineitems.all()
+        self.pk = None
+        self.taskgroup = new_taskgroup
+        self.order = new_order
+        self.save()
+        for lineitem in lineitems:
+            lineitem.pk = None
+            lineitem.task = self
+            lineitem.save()
 
 class LineItem(models.Model):
 

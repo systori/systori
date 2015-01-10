@@ -4,7 +4,7 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse
 
-from .models import Job, TaskGroup
+from .models import *
 from .forms import JobForm, JobTemplateForm
 
 
@@ -33,6 +33,9 @@ class TaskEditor(SingleObjectMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(TaskEditor, self).get_context_data(**kwargs)
         context['job'] = self.object
+        context['blank_taskgroup'] = TaskGroup()
+        context['blank_task'] = Task()
+        context['blank_lineitem'] = LineItem()
         return context
 
     def get_object(self):
@@ -73,7 +76,7 @@ class JobCreate(CreateView):
             tmpl = form.cleaned_data['job_template']
             tmpl.clone_to(self.object)
         else:
-            TaskGroup.objects.create(name='first task group', job=self.object)
+            TaskGroup.objects.create(name='', job=self.object)
         return response
 
     def get_success_url(self):

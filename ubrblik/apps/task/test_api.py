@@ -119,11 +119,23 @@ class TaskResourceTest(ResourceTestCaseBase):
         new_count = Task.objects.count()
         self.assertEqual(start_count-1, new_count)
 
-    def test_autocomplete_task(self):
+    def test_find_matches(self):
         resp = self.api_client.get(self.url, data={"name__icontains": "green"}, format='json')
         self.assertValidJSONResponse(resp)
         objects = self.deserialize(resp)['objects']
         self.assertEqual(len(objects), 2)
+
+    def test_clone_task(self):
+        url = self.url+'{}/clone/'.format(self.task.id)
+        data = {
+            "target": "/api/v1/taskgroup/{}/".format(self.group.id),
+            "pos": 1
+        }
+        self.assertEqual(1, Task.objects.filter(name=self.task.name).count())
+        resp = self.api_client.post(url, data=data, format='json')
+        self.assertHttpCreated(resp)
+        self.assertEqual(2, Task.objects.filter(name=self.task.name).count())
+        self.assertEqual('<html>', resp.content)
 
 
 class LineItemResourceTest(ResourceTestCaseBase):
