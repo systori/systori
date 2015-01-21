@@ -4,6 +4,7 @@ from django.db.models.manager import BaseManager
 from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
+from django.utils.functional import cached_property
 
 
 class BetterOrderedModel(OrderedModel):
@@ -177,7 +178,70 @@ class TaskGroup(BetterOrderedModel):
         for task in tasks:
             task.clone_to(self, task.order)
 
+
 class Task(BetterOrderedModel):
+    name = models.CharField(_("Name"), max_length=512)
+    description = models.TextField()
+
+    taskgroup = models.ForeignKey(TaskGroup, related_name="tasks")
+    order_with_respect_to = 'taskgroup'
+
+    class Meta(OrderedModel.Meta):
+        verbose_name = _("Task")
+        verbose_name_plural = _("Task")
+
+    @cached_property
+    def instance(self):
+        return self.taskinstances.all()[0]
+
+    @property
+    def unit_price(self):
+        return self.instance.unit_price
+
+    @property
+    def fixed_price_estimate(self):
+        return self.instance.fixed_price_estimate
+
+    @property
+    def fixed_price_billable(self):
+        return self.instance.fixed_price_billable
+
+    @property
+    def time_and_materials_estimate(self):
+        return self.instance.time_and_materials_estimate
+
+    @property
+    def time_and_materials_billable(self):
+        return self.instance.time_and_materials_billable
+
+    @property
+    def code(self):
+        parent_code = self.taskgroup.code
+        self_code = str(self.order+1).zfill(self.taskgroup.job.project.task_zfill)
+        return '{}.{}'.format(parent_code, self_code)
+
+    def __str__(self):
+        return '{} {}'.format(self.code, self.name)
+
+    def clone_to(self, new_taskgroup, new_order):
+        taskinstances = self.taskinstances.all()
+        self.pk = None
+        self.taskgroup = new_taskgroup
+        self.order = new_order
+        self.save()
+        for taskinstance in taskinstances:
+            taskinstance.clone_to(self, taskinstance.order)
+
+
+class TaskInstance(BetterOrderedModel):
+    """
+    A TaskInstance is a concrete version of a task that can actually be executed.
+    For example, a Task could be to "Install a window."
+    This task could have two TaskInstances:
+      1. Install a standard window.
+      2. Install an insulated window.
+    A single TaskInstance must be chosen (by customer) before a Task can be invoiced or tracked.
+    """
 
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField()
@@ -198,12 +262,12 @@ class Task(BetterOrderedModel):
     # date when complete became equal to qty
     completed_on = models.DateField(blank=True, null=True)
 
-    taskgroup = models.ForeignKey(TaskGroup, related_name="tasks")
-    order_with_respect_to = 'taskgroup'
+    task = models.ForeignKey(Task, related_name="taskinstances")
+    order_with_respect_to = 'task'
 
     class Meta(OrderedModel.Meta):
-        verbose_name = _("Task")
-        verbose_name_plural = _("Tasks")
+        verbose_name = _("Task Instance")
+        verbose_name_plural = _("Task Instances")
 
     # For fixed price billing, returns the price
     # per unit of this task
@@ -255,16 +319,17 @@ class Task(BetterOrderedModel):
     def __str__(self):
         return '{} {}'.format(self.code, self.name)
 
-    def clone_to(self, new_taskgroup, new_order):
+    def clone_to(self, new_task, new_order):
         lineitems = self.lineitems.all()
         self.pk = None
-        self.taskgroup = new_taskgroup
+        self.task = new_task
         self.order = new_order
         self.save()
         for lineitem in lineitems:
             lineitem.pk = None
-            lineitem.task = self
+            lineitem.taskoption = self
             lineitem.save()
+
 
 class LineItem(models.Model):
 
@@ -298,7 +363,7 @@ class LineItem(models.Model):
     # or it could be set manual by a users
     is_flagged = models.BooleanField(default=False)
 
-    task = models.ForeignKey(Task, related_name="lineitems")
+    taskinstance = models.ForeignKey(TaskInstance, related_name="lineitems")
 
     class Meta:
         verbose_name = _("Line Item")
