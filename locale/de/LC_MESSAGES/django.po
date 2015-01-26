@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-26 21:24+0100\n"
+"POT-Creation-Date: 2015-01-26 22:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -332,11 +332,11 @@ msgstr "Position"
 
 #: ubrblik/apps/task/models.py:273
 msgid "Task Instance"
-msgstr ""
+msgstr "Positionsinstanz"
 
 #: ubrblik/apps/task/models.py:274
 msgid "Task Instances"
-msgstr ""
+msgstr "Positionsinstanzen"
 
 #: ubrblik/apps/task/models.py:349
 #: ubrblik/templates/project/project_detail.html:159
@@ -383,7 +383,7 @@ msgstr "Englisch"
 
 #: ubrblik/templates/base.html:24
 msgid "Toggle navigation"
-msgstr ""
+msgstr "Navigation togglen"
 
 #: ubrblik/templates/base.html:53
 msgid "Username"
@@ -437,7 +437,7 @@ msgstr "Verknüpfte Projekte"
 #: ubrblik/templates/project/project_form.html:9
 #: ubrblik/templates/task/job_form.html:9
 msgid "Save"
-msgstr ""
+msgstr "Speichern"
 
 #: ubrblik/templates/directory/contact_list.html:7
 #: ubrblik/templates/main/sidebar.html:7
@@ -547,7 +547,7 @@ msgstr "Fortsetzung"
 #: ubrblik/templates/document/latex/proposal.tex:75
 #: ubrblik/templates/task/task_editor.html:11
 msgid "Optional"
-msgstr ""
+msgstr "Bedarf"
 
 #: ubrblik/templates/document/latex/proposal.tex:92
 msgid "Total without VAT"
@@ -571,10 +571,8 @@ msgid "Dashboard"
 msgstr "Pinnwand"
 
 #: ubrblik/templates/main/dashboard.html:9
-#, fuzzy
-#| msgid "Line Items"
 msgid "Flagged Items"
-msgstr "Kalkulationen"
+msgstr "Markierte Elemente"
 
 #: ubrblik/templates/main/sidebar.html:6
 msgid "Templates"
@@ -592,12 +590,12 @@ msgstr "Erstellt am"
 #: ubrblik/templates/project/project_detail.html:54
 #: ubrblik/templates/project/project_detail.html:108
 msgid "Download"
-msgstr ""
+msgstr "Download"
 
 #: ubrblik/templates/project/project_detail.html:72
 #: ubrblik/templates/project/project_detail.html:126
 msgid "PDF"
-msgstr ""
+msgstr "PDF"
 
 #: ubrblik/templates/project/project_detail.html:89
 msgid "No jobs available for new proposal."
@@ -606,7 +604,7 @@ msgstr "Keine Positionen verfügbar."
 #: ubrblik/templates/project/project_detail.html:91
 #: ubrblik/templates/project/project_detail.html:145
 msgid "No billable contact defined."
-msgstr ""
+msgstr "Kein Kontakt für eine Abrechnung definiert."
 
 #: ubrblik/templates/project/project_detail.html:143
 msgid "No jobs available to invoice."
@@ -652,7 +650,7 @@ msgstr "Preis"
 
 #: ubrblik/templates/task/lineitem_editor.html:11
 msgid "Flag"
-msgstr ""
+msgstr "Markierung"
 
 #: ubrblik/templates/task/task_editor.html:5
 msgid "task"
@@ -669,13 +667,11 @@ msgid "task group"
 msgstr "Positionsgruppe"
 
 #: ubrblik/templates/task/taskinstance_editor.html:5
-#, fuzzy
-#| msgid "task group"
 msgid "task option"
-msgstr "Positionsgruppe"
+msgstr "Alternative"
 
-#~ msgid "Tasks"
-#~ msgstr "Positionen"
+msgid "Tasks"
+msgstr "Positionen"
 
-#~ msgid "Estimate"
-#~ msgstr "Aufmaß"
+msgid "Estimate"
+msgstr "Aufmaß"
