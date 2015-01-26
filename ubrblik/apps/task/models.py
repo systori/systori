@@ -392,6 +392,13 @@ class LineItem(models.Model):
     def time_and_materials_billable(self):
         return self.price * self.billable
 
+    @property
+    def job(self):
+        return self.taskinstance.task.taskgroup.job
+
+    @property
+    def project(self):
+        return self.job.project
 
 class ProgressReport(models.Model):
 

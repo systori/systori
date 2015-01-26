@@ -1,4 +1,5 @@
 from django.views.generic import TemplateView
+from ..task.models import LineItem
 
 class SettingsView(TemplateView):
     template_name = "main/settings.html"
@@ -12,8 +13,7 @@ class DashboardView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
-        # display tasks for the logged in user
-        #context['tasks'] = Task.objects.filter(owner=self.request.user)
+        context['flagged_lineitems'] = LineItem.objects.filter(is_flagged=True)
         return context
 
 class IndexView(TemplateView):

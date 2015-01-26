@@ -31,7 +31,7 @@ class BaseDocumentCreateView(CreateView):
 
         redirect = super(BaseDocumentCreateView, self).form_valid(form)
 
-        self.object.generate_document()
+        self.object.generate_document(form.cleaned_data['corporate_letterhead'])
 
         return redirect
 

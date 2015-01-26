@@ -17,8 +17,10 @@
 \usepackage[T1]{fontenc}
 % droidsans font
 
+{% if corporate_letterhead %}
 \ThisULCornerWallPaper{1}{softronic_page1.pdf}
 \ULCornerWallPaper{1}{softronic_page2.pdf}
+{% endif %}
 
 % general page setup
 \usepackage[a4paper, width=125mm,top=55mm,bottom=22mm, left=25mm]{geometry}
@@ -70,7 +72,7 @@ z.H. {{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }} \
 {{task.code}}
     & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{task.name}} }} \\*
     & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{task.description}} }} \\*
-    & & {{task.qty|floatformat:2}} & {{task.unit}} & {{task.unit_price|floatformat:2}} €  & {{task.fixed_price_estimate|floatformat:2}} € \\
+    & & {{task.qty|floatformat:2}} & {{task.unit}} & {{task.unit_price|floatformat:2}} €  & {% if task.is_optional %}{% trans 'Optional' %}{% else %}{{task.fixed_price_estimate|floatformat:2}} €{% endif %} \\
 {% endfor %}
 
 \tabucline{6}

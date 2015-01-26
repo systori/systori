@@ -230,7 +230,8 @@
    {"pk": 9,
  "fields": {
  "task": 9,
- "order": 1
+ "order": 1,
+ "selected": true
  },
 
    "model": "task.taskinstance"},

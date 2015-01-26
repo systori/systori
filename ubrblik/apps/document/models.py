@@ -40,7 +40,7 @@ class Document(models.Model):
     class Meta:
         abstract = True
 
-    def generate_document(self):
+    def generate_document(self, corporate_letterhead=True):
 
         template = get_template(self.LATEX_TEMPLATE)
 
@@ -48,6 +48,7 @@ class Document(models.Model):
 
         context = Context({
           'doc': self,
+          'corporate_letterhead': corporate_letterhead,
           'jobs': self.jobs.all(),
           'contact': project_contact.contact,
           'project_contact': project_contact # this has the association attribute
