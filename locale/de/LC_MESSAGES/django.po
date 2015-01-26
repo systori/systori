@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-07 15:48+0100\n"
+"POT-Creation-Date: 2015-01-26 21:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,14 +63,22 @@ msgstr "Land"
 
 #: ubrblik/apps/directory/models.py:24 ubrblik/apps/directory/models.py:54
 #: ubrblik/apps/document/models.py:27
+#: ubrblik/templates/document/invoice_detail.html:11
+#: ubrblik/templates/document/proposal_detail.html:11
+#: ubrblik/templates/project/project_detail.html:53
+#: ubrblik/templates/project/project_detail.html:107
 msgid "Notes"
 msgstr "Notizen"
 
 #: ubrblik/apps/directory/models.py:27
+#: ubrblik/templates/directory/contact_list.html:13
+#: ubrblik/templates/directory/projectcontact_form_add.html:13
 msgid "Contact"
 msgstr "Kontakt"
 
 #: ubrblik/apps/directory/models.py:28
+#: ubrblik/templates/project/project_detail.html:151
+#: ubrblik/templates/project/sidebar.html:11
 msgid "Contacts"
 msgstr "Kontakte"
 
@@ -95,6 +103,9 @@ msgid "Other"
 msgstr "Andere"
 
 #: ubrblik/apps/directory/models.py:48
+#: ubrblik/templates/directory/contact_detail.html:21
+#: ubrblik/templates/directory/projectcontact_form_add.html:14
+#: ubrblik/templates/project/project_detail.html:158
 msgid "Association"
 msgstr "Verknüpfung"
 
@@ -111,8 +122,8 @@ msgid "Project Contacts"
 msgstr "Projektkontakte"
 
 #: ubrblik/apps/document/models.py:28
-#: ubrblik/templates/document/latex/proposal.tex:45
-#: ubrblik/templates/document/latex/proposal.tex:50
+#: ubrblik/templates/project/project_detail.html:51
+#: ubrblik/templates/project/project_detail.html:105
 msgid "Amount"
 msgstr "Menge"
 
@@ -124,67 +135,75 @@ msgstr "Vortext"
 msgid "Footer"
 msgstr "Nachtext"
 
-#: ubrblik/apps/document/models.py:81
+#: ubrblik/apps/document/models.py:82
+#: ubrblik/templates/project/project_detail.html:5
+#: ubrblik/templates/project/project_detail.html:50
+#: ubrblik/templates/project/project_detail.html:104
+#: ubrblik/templates/project/sidebar.html:8
 msgid "Jobs"
 msgstr "Lose"
 
-#: ubrblik/apps/document/models.py:91 ubrblik/apps/document/models.py:139
+#: ubrblik/apps/document/models.py:92 ubrblik/apps/document/models.py:140
 msgid "New"
 msgstr "Neu"
 
-#: ubrblik/apps/document/models.py:92 ubrblik/apps/document/models.py:140
+#: ubrblik/apps/document/models.py:93 ubrblik/apps/document/models.py:141
 msgid "Sent"
 msgstr "Gesendet"
 
-#: ubrblik/apps/document/models.py:93 ubrblik/apps/task/models.py:60
+#: ubrblik/apps/document/models.py:94 ubrblik/apps/task/models.py:73
 msgid "Approved"
 msgstr "Beauftragt"
 
-#: ubrblik/apps/document/models.py:94
+#: ubrblik/apps/document/models.py:95
 msgid "Declined"
 msgstr "Abgelehnt"
 
-#: ubrblik/apps/document/models.py:99 ubrblik/apps/document/models.py:147
+#: ubrblik/apps/document/models.py:100 ubrblik/apps/document/models.py:148
 msgid "Send"
 msgstr "als gesendet markieren"
 
-#: ubrblik/apps/document/models.py:103
+#: ubrblik/apps/document/models.py:104
 msgid "Approve"
 msgstr "als beauftragt markieren"
 
-#: ubrblik/apps/document/models.py:109
+#: ubrblik/apps/document/models.py:110
 msgid "Decline"
 msgstr "als abgelehnt markieren"
 
-#: ubrblik/apps/document/models.py:122
+#: ubrblik/apps/document/models.py:123
 msgid "Proposal"
 msgstr "Angebot"
 
-#: ubrblik/apps/document/models.py:123
+#: ubrblik/apps/document/models.py:124
+#: ubrblik/templates/project/project_detail.html:43
+#: ubrblik/templates/project/sidebar.html:9
 msgid "Proposals"
 msgstr "Angebote"
 
-#: ubrblik/apps/document/models.py:141
+#: ubrblik/apps/document/models.py:142
 msgid "Paid"
 msgstr "bezahlt"
 
-#: ubrblik/apps/document/models.py:142
+#: ubrblik/apps/document/models.py:143
 msgid "Disputed"
 msgstr "geklärt"
 
-#: ubrblik/apps/document/models.py:151
+#: ubrblik/apps/document/models.py:152
 msgid "Pay"
 msgstr "Bezahlen"
 
-#: ubrblik/apps/document/models.py:155
+#: ubrblik/apps/document/models.py:156
 msgid "Dispute"
 msgstr "Unklar"
 
-#: ubrblik/apps/document/models.py:160
+#: ubrblik/apps/document/models.py:161
 msgid "Invoice"
 msgstr "Rechnung"
 
-#: ubrblik/apps/document/models.py:161
+#: ubrblik/apps/document/models.py:162
+#: ubrblik/templates/project/project_detail.html:97
+#: ubrblik/templates/project/sidebar.html:10
 msgid "Invoices"
 msgstr "Rechnungen"
 
@@ -209,10 +228,12 @@ msgid "Task Code Zero Fill"
 msgstr "Numerierung Anzahl für Positionen"
 
 #: ubrblik/apps/project/models.py:35
+#: ubrblik/templates/directory/contact_detail.html:20
 msgid "Project"
 msgstr "Projekt"
 
-#: ubrblik/apps/project/models.py:36
+#: ubrblik/apps/project/models.py:36 ubrblik/templates/main/sidebar.html:5
+#: ubrblik/templates/project/project_list.html:7
 msgid "Projects"
 msgstr "Projekte"
 
@@ -224,285 +245,413 @@ msgstr "Default"
 msgid "Job Template"
 msgstr "Los-Vorlage"
 
-#: ubrblik/apps/task/models.py:37
+#: ubrblik/apps/task/models.py:50
 msgid "Job Name"
 msgstr "Losbezeichnung"
 
-#: ubrblik/apps/task/models.py:38
-#: ubrblik/templates/document/latex/proposal.tex:45
-#: ubrblik/templates/document/latex/proposal.tex:50
+#: ubrblik/apps/task/models.py:51
 msgid "Description"
 msgstr "Beschreibung"
 
-#: ubrblik/apps/task/models.py:43
+#: ubrblik/apps/task/models.py:56
 msgid "Fixed Price"
 msgstr "Leistungsverzeichnis"
 
-#: ubrblik/apps/task/models.py:44
+#: ubrblik/apps/task/models.py:57
 msgid "Time and Materials"
 msgstr "Taglohn"
 
-#: ubrblik/apps/task/models.py:46
+#: ubrblik/apps/task/models.py:59
+#: ubrblik/templates/project/project_detail.html:13
 msgid "Billing Method"
 msgstr "Zahlungsmethode"
 
-#: ubrblik/apps/task/models.py:58
+#: ubrblik/apps/task/models.py:71
 msgid "Draft"
 msgstr "Entwurf"
 
-#: ubrblik/apps/task/models.py:59
+#: ubrblik/apps/task/models.py:72
 msgid "Proposed"
 msgstr "angeboten"
 
-#: ubrblik/apps/task/models.py:61
+#: ubrblik/apps/task/models.py:74
 msgid "Started"
 msgstr "gestarted"
 
-#: ubrblik/apps/task/models.py:62
+#: ubrblik/apps/task/models.py:75
 msgid "Completed"
 msgstr "fertiggestellt"
 
-#: ubrblik/apps/task/models.py:70 ubrblik/apps/task/models.py:71
+#: ubrblik/apps/task/models.py:83 ubrblik/apps/task/models.py:84
+#: ubrblik/templates/main/dashboard.html:14
 msgid "Job"
 msgstr "Los"
 
-#: ubrblik/apps/task/models.py:73
+#: ubrblik/apps/task/models.py:86
 msgid "Start"
 msgstr "Start"
 
-#: ubrblik/apps/task/models.py:77 ubrblik/apps/task/models.py:184
-#: ubrblik/apps/task/models.py:317
+#: ubrblik/apps/task/models.py:90 ubrblik/apps/task/models.py:194
+#: ubrblik/apps/task/models.py:413
 msgid "Complete"
 msgstr "fertigstellen"
 
-#: ubrblik/apps/task/models.py:122 ubrblik/apps/task/models.py:173
-#: ubrblik/apps/task/models.py:251
+#: ubrblik/apps/task/models.py:123 ubrblik/apps/task/models.py:183
+#: ubrblik/apps/task/models.py:262 ubrblik/apps/task/models.py:340
+#: ubrblik/templates/project/project_detail.html:10
+#: ubrblik/templates/project/project_detail.html:157
+#: ubrblik/templates/project/project_list.html:13
+#: ubrblik/templates/project/template_project.html:12
 msgid "Name"
 msgstr "Name"
 
-#: ubrblik/apps/task/models.py:129
+#: ubrblik/apps/task/models.py:130
 msgid "Task Group"
 msgstr "Gruppe"
 
-#: ubrblik/apps/task/models.py:130
+#: ubrblik/apps/task/models.py:131
 msgid "Task Groups"
 msgstr "Gruppen"
 
-#: ubrblik/apps/task/models.py:177 ubrblik/apps/task/models.py:254
-#: ubrblik/apps/task/models.py:257
+#: ubrblik/apps/task/models.py:187 ubrblik/apps/task/models.py:343
+#: ubrblik/apps/task/models.py:346
 msgid "Quantity"
 msgstr "Menge"
 
-#: ubrblik/apps/task/models.py:180 ubrblik/apps/task/models.py:263
+#: ubrblik/apps/task/models.py:190 ubrblik/apps/task/models.py:352
 msgid "Unit"
 msgstr "Einheit"
 
-#: ubrblik/apps/task/models.py:196
+#: ubrblik/apps/task/models.py:206 ubrblik/apps/task/models.py:207
 msgid "Task"
 msgstr "Position"
 
-#: ubrblik/apps/task/models.py:197
-msgid "Tasks"
-msgstr "Positionen"
+#: ubrblik/apps/task/models.py:273
+msgid "Task Instance"
+msgstr ""
 
-#: ubrblik/apps/task/models.py:260
+#: ubrblik/apps/task/models.py:274
+msgid "Task Instances"
+msgstr ""
+
+#: ubrblik/apps/task/models.py:349
+#: ubrblik/templates/project/project_detail.html:159
 msgid "Billable"
 msgstr "Abrechenbar"
 
-#: ubrblik/apps/task/models.py:266
-#: ubrblik/templates/document/latex/proposal.tex:45
-#: ubrblik/templates/document/latex/proposal.tex:50
+#: ubrblik/apps/task/models.py:355
 msgid "Price"
 msgstr "Preis"
 
-#: ubrblik/apps/task/models.py:284
+#: ubrblik/apps/task/models.py:373 ubrblik/templates/main/dashboard.html:15
 msgid "Line Item"
 msgstr "Kalkulation"
 
-#: ubrblik/apps/task/models.py:285
+#: ubrblik/apps/task/models.py:374
 msgid "Line Items"
 msgstr "Kalkulationen"
 
-#: ubrblik/apps/task/models.py:322
+#: ubrblik/apps/task/models.py:418
 msgid "Progress Report"
 msgstr "Stundenzettel"
 
-#: ubrblik/apps/task/models.py:323
+#: ubrblik/apps/task/models.py:419
 msgid "Progress Reports"
 msgstr "Stundenzettel"
 
-#: ubrblik/apps/task/models.py:333
+#: ubrblik/apps/task/models.py:429
 msgid "Attachment"
 msgstr "Anhang"
 
-#: ubrblik/apps/task/models.py:334
+#: ubrblik/apps/task/models.py:430
 msgid "Attachments"
 msgstr "Anhänge"
 
-#: ubrblik/settings/common.py:99
+#: ubrblik/settings/common.py:100
 msgid "Deutsch"
 msgstr "Deutsch"
 
-#: ubrblik/settings/common.py:100
+#: ubrblik/settings/common.py:101
 msgid "English"
 msgstr "Englisch"
 
-#: ubrblik/templates/document/latex/proposal.tex:25
-msgid "Page"
-msgstr "Seite"
+#: ubrblik/templates/base.html:24
+msgid "Toggle navigation"
+msgstr ""
 
-#: ubrblik/templates/document/latex/proposal.tex:25
-msgid "of"
-msgstr "von"
+#: ubrblik/templates/base.html:53
+msgid "Username"
+msgstr "Benutzername"
 
-#: ubrblik/templates/document/latex/proposal.tex:45
-#: ubrblik/templates/document/latex/proposal.tex:50
-msgid "Pos."
-msgstr "Pos."
+#: ubrblik/templates/base.html:56
+msgid "Password"
+msgstr "Passwort"
 
-#: ubrblik/templates/document/latex/proposal.tex:45
-#: ubrblik/templates/document/latex/proposal.tex:50
-#: ubrblik/templates/document/latex/proposal.tex:73
-#: ubrblik/templates/document/latex/proposal.tex:81
+#: ubrblik/templates/base.html:58 ubrblik/templates/registration/login.html:24
+msgid "Sign in"
+msgstr "Anmelden"
+
+#: ubrblik/templates/base.html:67
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: ubrblik/templates/base.html:68
+msgid "Logout"
+msgstr "Abmelden"
+
+#: ubrblik/templates/directory/contact_confirm_delete.html:8
+#: ubrblik/templates/document/invoice_confirm_delete.html:8
+#: ubrblik/templates/document/proposal_confirm_delete.html:8
+#: ubrblik/templates/project/project_confirm_delete.html:8
+#: ubrblik/templates/task/job_confirm_delete.html:8
+#, python-format
+msgid "Are you sure you want to delete \"%(object)s\"?"
+msgstr "Sicher den Mist \"%(object)s\" löschen?"
+
+#: ubrblik/templates/directory/contact_confirm_delete.html:9
+#: ubrblik/templates/directory/projectcontact_confirm_delete.html:9
+#: ubrblik/templates/document/invoice_confirm_delete.html:9
+#: ubrblik/templates/document/proposal_confirm_delete.html:9
+#: ubrblik/templates/project/project_confirm_delete.html:9
+#: ubrblik/templates/task/job_confirm_delete.html:9
+msgid "Confirm"
+msgstr "Bestätigen"
+
+#: ubrblik/templates/directory/contact_detail.html:7
+msgid "Contact Details"
+msgstr "Kontaktdetails"
+
+#: ubrblik/templates/directory/contact_detail.html:14
+msgid "Associated Projects"
+msgstr "Verknüpfte Projekte"
+
+#: ubrblik/templates/directory/contact_form.html:9
+#: ubrblik/templates/document/invoice_form.html:9
+#: ubrblik/templates/document/proposal_form.html:9
+#: ubrblik/templates/project/project_form.html:9
+#: ubrblik/templates/task/job_form.html:9
+msgid "Save"
+msgstr ""
+
+#: ubrblik/templates/directory/contact_list.html:7
+#: ubrblik/templates/main/sidebar.html:7
+msgid "Directory"
+msgstr "Adressbuch"
+
+#: ubrblik/templates/directory/contact_list.html:14
+#: ubrblik/templates/project/project_detail.html:15
+#: ubrblik/templates/project/project_detail.html:55
+#: ubrblik/templates/project/project_detail.html:109
+#: ubrblik/templates/project/project_detail.html:160
+#: ubrblik/templates/project/project_list.html:14
+#: ubrblik/templates/project/template_project.html:13
+msgid "Actions"
+msgstr "Aktionen"
+
+#: ubrblik/templates/directory/contact_list.html:23
+#: ubrblik/templates/project/project_detail.html:31
+#: ubrblik/templates/project/project_list.html:23
+#: ubrblik/templates/project/template_project.html:21
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: ubrblik/templates/directory/contact_list.html:24
+#: ubrblik/templates/project/project_detail.html:32
+#: ubrblik/templates/project/project_detail.html:79
+#: ubrblik/templates/project/project_detail.html:133
+#: ubrblik/templates/project/project_list.html:24
+#: ubrblik/templates/project/template_project.html:22
+msgid "Delete"
+msgstr "Löschen"
+
+#: ubrblik/templates/directory/contact_list.html:30
+#: ubrblik/templates/directory/projectcontact_form_add.html:34
+#: ubrblik/templates/directory/projectcontact_form_create.html:11
+#: ubrblik/templates/project/project_detail.html:39
+#: ubrblik/templates/project/project_detail.html:87
+#: ubrblik/templates/project/project_detail.html:141
+#: ubrblik/templates/project/project_list.html:30
+#: ubrblik/templates/project/template_project.html:28
+msgid "Create"
+msgstr "Erstellen"
+
+#: ubrblik/templates/directory/projectcontact_confirm_delete.html:8
+#, python-format
+msgid "Are you sure you want to remove \"%(object)s\" from this project?"
+msgstr "Sicher den Mist \"%(object)s\" löschen?"
+
+#: ubrblik/templates/directory/projectcontact_form_add.html:7
+#, python-format
+msgid "Add Contact to %(project_name)s"
+msgstr "Kontakt zu %(project_name)s hinzufügen"
+
+#: ubrblik/templates/directory/projectcontact_form_add.html:27
+#: ubrblik/templates/project/project_detail.html:180
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: ubrblik/templates/directory/projectcontact_form_create.html:7
+#, python-format
+msgid "Create and then add contact to %(project_name)s"
+msgstr "Kontakt erstellen und zu Projekt %(project_name)s hinzufügen."
+
+#: ubrblik/templates/document/invoice_detail.html:8
+msgid "Invoice Details"
+msgstr "Rechnungsdetails"
+
+#: ubrblik/templates/document/invoice_detail.html:9
+#: ubrblik/templates/document/proposal_detail.html:9
+#: ubrblik/templates/project/project_detail.html:11
+#: ubrblik/templates/project/project_detail.html:49
+#: ubrblik/templates/project/project_detail.html:103
+msgid "Status"
+msgstr "Status"
+
+#: ubrblik/templates/document/invoice_detail.html:10
+#: ubrblik/templates/document/proposal_detail.html:10
+msgid "Created"
+msgstr "Erstellen"
+
+#: ubrblik/templates/document/proposal_detail.html:8
+msgid "Proposal Details"
+msgstr "Angebotsdetails"
+
+#: ubrblik/templates/main/dashboard.html:7
+#: ubrblik/templates/main/sidebar.html:4
+msgid "Dashboard"
+msgstr "Pinnwand"
+
+#: ubrblik/templates/main/dashboard.html:9
+msgid "Flagged Items"
+msgstr ""
+
+#: ubrblik/templates/main/sidebar.html:6
+msgid "Templates"
+msgstr "Vorlagen"
+
+#: ubrblik/templates/project/project_detail.html:12
 msgid "Total"
 msgstr "Summe"
 
-#: ubrblik/templates/document/latex/proposal.tex:48
-#: ubrblik/templates/document/latex/proposal.tex:54
-msgid "Continuation"
-msgstr "Fortsetzung"
+#: ubrblik/templates/project/project_detail.html:14
+msgid "Billable Amount"
+msgstr "Abrechenbare Menge"
 
-#: ubrblik/templates/document/latex/proposal.tex:86
-msgid "Total without VAT"
-msgstr "Summe netto"
+#: ubrblik/templates/project/project_detail.html:52
+#: ubrblik/templates/project/project_detail.html:106
+msgid "Created On"
+msgstr "Erstellt am"
 
-#: ubrblik/templates/document/latex/proposal.tex:87
-msgid "VAT"
-msgstr "MWSt"
+#: ubrblik/templates/project/project_detail.html:54
+#: ubrblik/templates/project/project_detail.html:108
+msgid "Download"
+msgstr ""
 
-#: ubrblik/templates/document/latex/proposal.tex:88
-msgid "Total including VAT"
-msgstr "Summe brutto"
+#: ubrblik/templates/project/project_detail.html:72
+#: ubrblik/templates/project/project_detail.html:126
+msgid "PDF"
+msgstr ""
 
- msgid "Username"
- msgstr "Benutzername"
+#: ubrblik/templates/project/project_detail.html:89
+msgid "No jobs available for new proposal."
+msgstr "Keine Positionen verfügbar."
 
- msgid "Password"
- msgstr "Passwort"
+#: ubrblik/templates/project/project_detail.html:91
+#: ubrblik/templates/project/project_detail.html:145
+msgid "No billable contact defined."
+msgstr ""
 
- msgid "Sign in"
- msgstr "Anmelden"
+#: ubrblik/templates/project/project_detail.html:143
+msgid "No jobs available to invoice."
+msgstr "Keine Positionen verfügbar."
 
- msgid "Settings"
- msgstr "Einstellungen"
+#: ubrblik/templates/project/project_detail.html:172
+msgid "Set Billable"
+msgstr "Abrechenbar"
 
- msgid "Logout"
- msgstr "Abmelden"
+#: ubrblik/templates/project/project_detail.html:173
+msgid "Remove"
+msgstr "Entfernen"
 
- msgid "Are you sure you want to delete \"%(object)s\"?"
- msgstr "Sicher den Mist \"%(object)s\" löschen?"
+#: ubrblik/templates/project/sidebar.html:7
+msgid "Project Dashboard"
+msgstr "Projektkarte"
 
- msgid "Confirm"
- msgstr "Bestätigen"
+#: ubrblik/templates/project/template_project.html:7
+msgid "Job Templates"
+msgstr "Los-Vorlagen"
 
- msgid "Contact Details"
- msgstr "Kontaktdetails"
+#: ubrblik/templates/registration/login.html:9
+msgid "Your username and password didn't match. Please try again."
+msgstr "Simple.Depp."
 
- msgid "Associated Projects"
- msgstr "Verknüpfte Projekte"
+#: ubrblik/templates/task/lineitem_editor.html:5
+msgid "line item"
+msgstr "Kalkulation"
 
- msgid "Directory"
- msgstr "Adressbuch"
+#: ubrblik/templates/task/lineitem_editor.html:6
+#: ubrblik/templates/task/task_editor.html:6
+msgid "qty"
+msgstr "Menge"
 
- msgid "Actions"
- msgstr "Aktionen"
+#: ubrblik/templates/task/lineitem_editor.html:7
+#: ubrblik/templates/task/task_editor.html:7
+msgid "unit"
+msgstr "Einheit"
 
- msgid "Edit"
- msgstr "Bearbeiten"
+#: ubrblik/templates/task/lineitem_editor.html:8
+msgid "price"
+msgstr "Preis"
 
- msgid "Delete"
- msgstr "Löschen"
+#: ubrblik/templates/task/lineitem_editor.html:11
+msgid "Flag"
+msgstr ""
 
- msgid "Create"
- msgstr "Erstellen"
+#: ubrblik/templates/task/task_editor.html:5
+msgid "task"
+msgstr "Position"
 
- msgid "Are you sure you want to remove \"%(object)s\" from this project?"
- msgstr "Sicher den Mist \"%(object)s\" löschen?"
+#: ubrblik/templates/task/task_editor.html:11
+msgid "Optional"
+msgstr ""
 
- msgid "Add Contact to %(project_name)s"
- msgstr "Kontakt zu %(project_name)s hinzufügen"
+#: ubrblik/templates/task/task_editor.html:14
+#: ubrblik/templates/task/taskgroup_editor.html:8
+#: ubrblik/templates/task/taskinstance_editor.html:7
+msgid "description"
+msgstr "Beschreibung"
 
- msgid "Add"
- msgstr "Hinzufügen"
+#: ubrblik/templates/task/taskgroup_editor.html:5
+msgid "task group"
+msgstr "Positionsgruppe"
 
- msgid "Create and then add contact to %(project_name)s"
- msgstr "Kontakt erstellen und zu Projekt %(project_name)s hinzufügen."
+#: ubrblik/templates/task/taskinstance_editor.html:5
+msgid "task option"
+msgstr ""
 
- msgid "Invoice Details"
- msgstr "Rechnungsdetails"
+#~ msgid "Tasks"
+#~ msgstr "Positionen"
 
- msgid "Status"
- msgstr "Status"
+#~ msgid "Page"
+#~ msgstr "Seite"
 
- msgid "Created"
- msgstr "Erstellen"
+#~ msgid "of"
+#~ msgstr "von"
 
- msgid "Proposal Details"
- msgstr "Angebotsdetails"
+#~ msgid "Pos."
+#~ msgstr "Pos."
 
- msgid "Dashboard"
- msgstr "Pinnwand"
+#~ msgid "Continuation"
+#~ msgstr "Fortsetzung"
 
- msgid "Templates"
- msgstr "Vorlagen"
+#~ msgid "Total without VAT"
+#~ msgstr "Summe netto"
 
- msgid "Estimate"
- msgstr "Aufmaß"
+#~ msgid "VAT"
+#~ msgstr "MWSt"
 
- msgid "Billable Amount"
- msgstr "Abrechenbare Menge"
+#~ msgid "Total including VAT"
+#~ msgstr "Summe brutto"
 
- msgid "Created On"
- msgstr "Erstellt am"
-
- msgid "No jobs available for new proposal."
- msgstr "Keine Positionen verfügbar."
-
- msgid "No jobs available to invoice."
- msgstr "Keine Positionen verfügbar."
-
- msgid "Set Billable"
- msgstr "Abrechenbar"
-
- msgid "Remove"
- msgstr "Entfernen"
-
- msgid "Project Dashboard"
- msgstr "Projektkarte"
-
- msgid "Job Templates"
- msgstr "Los-Vorlagen"
-
- msgid "Your username and password didn't match. Please try again."
- msgstr "Simple.Depp."
-
- msgid "task group"
- msgstr "Positionsgruppe"
-
- msgid "description"
- msgstr "Beschreibung"
-
- msgid "task"
- msgstr "Position"
-
- msgid "qty"
- msgstr "Menge"
-
- msgid "unit"
- msgstr "Einheit"
-
- msgid "line item"
- msgstr "Kalkulation"
-
- msgid "price"
- msgstr "Preis"
+#~ msgid "Estimate"
+#~ msgstr "Aufmaß"
