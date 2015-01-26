@@ -69,10 +69,12 @@ z.H. {{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }} \
 {{taskgroup.code|bold}} & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{taskgroup.name|bold}} }} &\\
 
 {% for task in taskgroup.tasks.all %}
-{{task.code}}
-    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{task.name}} }} \\*
-    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{task.description}} }} \\*
-    & & {{task.qty|floatformat:2}} & {{task.unit}} & {{task.unit_price|floatformat:2}} €  & {% if task.is_optional %}{% trans 'Optional' %}{% else %}{{task.fixed_price_estimate|floatformat:2}} €{% endif %} \\
+{% for instance in task.taskinstances.all %}
+{{instance.code}}
+    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_name}} }} \\*
+    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_description}} }} \\*
+    & & {{task.qty|floatformat:3}} & {{task.unit}} & {{instance.unit_price|floatformat:2}} €  & {% if task.is_optional or not instance.selected %}{% trans 'Optional' %}{% else %}{{instance.fixed_price_estimate|floatformat:2}} €{% endif %} \\
+{% endfor %}
 {% endfor %}
 
 \tabucline{6}

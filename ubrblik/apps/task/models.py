@@ -210,6 +210,10 @@ class Task(BetterOrderedModel):
     def instance(self):
         return self.taskinstances.get(selected=True)
 
+    @cached_property
+    def instance_count(self):
+        return self.taskinstances.count()
+
     @property
     def unit_price(self):
         return self.instance.unit_price
@@ -273,6 +277,14 @@ class TaskInstance(BetterOrderedModel):
         verbose_name = _("Task Instance")
         verbose_name_plural = _("Task Instances")
 
+    @property
+    def full_name(self):
+        return self.task.name + " " + self.name
+
+    @property
+    def full_description(self):
+        return self.task.description + " " + self.description
+
     # For fixed price billing, returns the price
     # per unit of this task
     @property
@@ -316,9 +328,11 @@ class TaskInstance(BetterOrderedModel):
 
     @property
     def code(self):
-        parent_code = self.taskgroup.code
-        self_code = str(self.order+1).zfill(self.taskgroup.job.project.task_zfill)
-        return '{}.{}'.format(parent_code, self_code)
+        parent_code = self.task.code
+        self_code = 0
+        if self.task.instance_count > 1:
+          self_code = self.order + 1
+        return '{}{}'.format(parent_code, self_code)
 
     def __str__(self):
         return '{} {}'.format(self.code, self.name)
