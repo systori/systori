@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-26 21:17+0100\n"
+"POT-Creation-Date: 2015-01-26 21:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -122,6 +122,8 @@ msgid "Project Contacts"
 msgstr "Projektkontakte"
 
 #: ubrblik/apps/document/models.py:28
+#: ubrblik/templates/document/latex/proposal.tex:51
+#: ubrblik/templates/document/latex/proposal.tex:56
 #: ubrblik/templates/project/project_detail.html:51
 #: ubrblik/templates/project/project_detail.html:105
 msgid "Amount"
@@ -250,6 +252,8 @@ msgid "Job Name"
 msgstr "Losbezeichnung"
 
 #: ubrblik/apps/task/models.py:51
+#: ubrblik/templates/document/latex/proposal.tex:51
+#: ubrblik/templates/document/latex/proposal.tex:56
 msgid "Description"
 msgstr "Beschreibung"
 
@@ -340,6 +344,8 @@ msgid "Billable"
 msgstr "Abrechenbar"
 
 #: ubrblik/apps/task/models.py:355
+#: ubrblik/templates/document/latex/proposal.tex:51
+#: ubrblik/templates/document/latex/proposal.tex:56
 msgid "Price"
 msgstr "Preis"
 
@@ -512,6 +518,49 @@ msgstr "Status"
 msgid "Created"
 msgstr "Erstellen"
 
+#: ubrblik/templates/document/latex/proposal.tex:31
+msgid "Page"
+msgstr "Seite"
+
+#: ubrblik/templates/document/latex/proposal.tex:31
+msgid "of"
+msgstr "von"
+
+#: ubrblik/templates/document/latex/proposal.tex:51
+#: ubrblik/templates/document/latex/proposal.tex:56
+msgid "Pos."
+msgstr "Pos."
+
+#: ubrblik/templates/document/latex/proposal.tex:51
+#: ubrblik/templates/document/latex/proposal.tex:56
+#: ubrblik/templates/document/latex/proposal.tex:79
+#: ubrblik/templates/document/latex/proposal.tex:87
+#: ubrblik/templates/project/project_detail.html:12
+msgid "Total"
+msgstr "Summe"
+
+#: ubrblik/templates/document/latex/proposal.tex:54
+#: ubrblik/templates/document/latex/proposal.tex:60
+msgid "Continuation"
+msgstr "Fortsetzung"
+
+#: ubrblik/templates/document/latex/proposal.tex:75
+#: ubrblik/templates/task/task_editor.html:11
+msgid "Optional"
+msgstr ""
+
+#: ubrblik/templates/document/latex/proposal.tex:92
+msgid "Total without VAT"
+msgstr "Summe netto"
+
+#: ubrblik/templates/document/latex/proposal.tex:93
+msgid "VAT"
+msgstr "MWSt"
+
+#: ubrblik/templates/document/latex/proposal.tex:94
+msgid "Total including VAT"
+msgstr "Summe brutto"
+
 #: ubrblik/templates/document/proposal_detail.html:8
 msgid "Proposal Details"
 msgstr "Angebotsdetails"
@@ -522,16 +571,14 @@ msgid "Dashboard"
 msgstr "Pinnwand"
 
 #: ubrblik/templates/main/dashboard.html:9
+#, fuzzy
+#| msgid "Line Items"
 msgid "Flagged Items"
-msgstr ""
+msgstr "Kalkulationen"
 
 #: ubrblik/templates/main/sidebar.html:6
 msgid "Templates"
 msgstr "Vorlagen"
-
-#: ubrblik/templates/project/project_detail.html:12
-msgid "Total"
-msgstr "Summe"
 
 #: ubrblik/templates/project/project_detail.html:14
 msgid "Billable Amount"
@@ -611,10 +658,6 @@ msgstr ""
 msgid "task"
 msgstr "Position"
 
-#: ubrblik/templates/task/task_editor.html:11
-msgid "Optional"
-msgstr ""
-
 #: ubrblik/templates/task/task_editor.html:14
 #: ubrblik/templates/task/taskgroup_editor.html:8
 #: ubrblik/templates/task/taskinstance_editor.html:7
@@ -626,32 +669,13 @@ msgid "task group"
 msgstr "Positionsgruppe"
 
 #: ubrblik/templates/task/taskinstance_editor.html:5
+#, fuzzy
+#| msgid "task group"
 msgid "task option"
-msgstr ""
+msgstr "Positionsgruppe"
 
 #~ msgid "Tasks"
 #~ msgstr "Positionen"
-
-#~ msgid "Page"
-#~ msgstr "Seite"
-
-#~ msgid "of"
-#~ msgstr "von"
-
-#~ msgid "Pos."
-#~ msgstr "Pos."
-
-#~ msgid "Continuation"
-#~ msgstr "Fortsetzung"
-
-#~ msgid "Total without VAT"
-#~ msgstr "Summe netto"
-
-#~ msgid "VAT"
-#~ msgstr "MWSt"
-
-#~ msgid "Total including VAT"
-#~ msgstr "Summe brutto"
 
 #~ msgid "Estimate"
 #~ msgstr "Aufmaß"

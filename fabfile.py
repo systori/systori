@@ -47,6 +47,8 @@ def init_settings(env_name='local'):
             print('Initializing settings for {}'.format(env_name))
             s.write('from .{} import *\n'.format(env_name))
 
+def makemessages():
+    local('./manage.py makemessages -l de -e tex,html,py')
 
 def mail():
     local('python -m smtpd -n -c DebuggingServer localhost:1025')
