@@ -17,6 +17,13 @@
 #task-editor {
 }
 
+ubr-taskgroup,
+ubr-task,
+ubr-taskinstance,
+ubr-lineitem {
+  display: block;
+}
+
 .editor {
   position: relative;
   padding-bottom: 10px;
@@ -38,24 +45,26 @@
 }
 
 .qty {
-  width: 70px;
+  width: 90px;
   text-align: right;
 }
 
 .unit {
-  width: 70px;
+  width: 90px;
   padding-left: 4px;
 }
 
 .price {
-  width: 70px;
+  width: 90px;
   text-align: right;
+  padding-right: 4px;
 }
 
 .total {
-  width: 70px;
+  width: 90px;
   font-weight: bold;
   text-align: right;
+  padding-right: 4px;
 }
 
 .labels {
@@ -79,7 +88,7 @@
 
 ubr-taskgroup > .editor .name {
   font-weight: bold;
-  width: 510px;
+  width: 680px;
 }
 
 ubr-taskgroup > .editor .total {
@@ -88,15 +97,59 @@ ubr-taskgroup > .editor .total {
 
 /* task */
 
-ubr-task > .editor .name {
-  width: 330px;
+ubr-task {
+  padding-bottom: 40px;
 }
+
+ubr-task > .editor {
+  padding-bottom: 0px;
+}
+
+ubr-task > .editor .name {
+  width: 420px;
+}
+
+ubr-task > .editor .price {
+  font-weight: bold;
+  border: 1px solid black;
+}
+
+ubr-task > .editor .description {
+  width: 602px;
+  padding-bottom: 20px;
+  border-right: 1px solid #f5f5f5;
+}
+
+/* task instance */
+
+ubr-taskinstance:nth-of-type(1) > .editor {
+  width: 682px;
+  border-right: 1px solid #f5f5f5;
+}
+
+ubr-taskinstance:nth-of-type(1) > ubr-lineitem > .editor .total {
+  border: 1px solid #f5f5f5;
+}
+
+ubr-taskinstance:nth-of-type(1) > ubr-lineitem > .editor .total:before {
+  display: block;
+  position: absolute;
+  content: "";
+  height: 10px;
+  border-left: 1px solid #f5f5f5;
+  top: -10px;
+}
+
 
 /* line item */
 
 ubr-lineitem .name {
   width: 310px;
   margin-left: 100px;
+}
+
+ubr-lineitem .price {
+  padding-right: 10px;
 }
 
 div[contenteditable][placeholder]:empty:before {
