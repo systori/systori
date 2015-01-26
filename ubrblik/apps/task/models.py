@@ -132,7 +132,7 @@ class TaskGroup(BetterOrderedModel):
 
     def _total_calc(self, field):
         total = Decimal(0.0)
-        for task in self.tasks.all():
+        for task in self.tasks.filter(is_optional=False).all():
             total += getattr(task, field)
         return total
 
@@ -183,6 +183,22 @@ class Task(BetterOrderedModel):
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField()
 
+    # tracking completion of this task by a quantifiable indicator, an estimate
+    qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=3)
+
+    # unit for the completion tracking quantifiable indicator
+    unit = models.CharField(_("Unit"), max_length=64)
+
+    # how much of the project is complete in units of quantity
+    # may be more than qty
+    complete = models.DecimalField(_("Complete"), max_digits=12, decimal_places=3, default=0.0)
+
+    # tasks marked optional aren't included in the total
+    is_optional = models.BooleanField(default=False)
+
+    started_on = models.DateField(blank=True, null=True)
+    completed_on = models.DateField(blank=True, null=True)
+
     taskgroup = models.ForeignKey(TaskGroup, related_name="tasks")
     order_with_respect_to = 'taskgroup'
 
@@ -192,7 +208,7 @@ class Task(BetterOrderedModel):
 
     @cached_property
     def instance(self):
-        return self.taskinstances.all()[0]
+        return self.taskinstances.get(selected=True)
 
     @property
     def unit_price(self):
@@ -246,21 +262,9 @@ class TaskInstance(BetterOrderedModel):
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField()
 
-    # tracking completion of this task by a quantifiable indicator, an estimate
-    qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2)
-
-    # unit for the completion tracking quantifiable indicator
-    unit = models.CharField(_("Unit"), max_length=64)
-
-    # how much of the project is complete in units of quantity
-    # may be more than qty
-    complete = models.DecimalField(_("Complete"), max_digits=12, decimal_places=2, default=0.0)
-
-    # date when this task was started
-    started_on = models.DateField(blank=True, null=True)
-
-    # date when complete became equal to qty
-    completed_on = models.DateField(blank=True, null=True)
+    # By default the first TaskInstance created for a task
+    # will be the selected one.
+    selected = models.BooleanField(default=False)
 
     task = models.ForeignKey(Task, related_name="taskinstances")
     order_with_respect_to = 'task'
@@ -282,13 +286,13 @@ class TaskInstance(BetterOrderedModel):
     # to complete this task.
     @property
     def fixed_price_estimate(self):
-        return self.unit_price * self.qty
+        return self.unit_price * self.task.qty
 
     # For fixed price billing, returns the price based
     # on what has been completed.
     @property
     def fixed_price_billable(self):
-        return self.unit_price * self.complete
+        return self.unit_price * self.task.complete
 
     # For time and materials billing, returns
     # the estimated amount that will been expended by
@@ -327,7 +331,7 @@ class TaskInstance(BetterOrderedModel):
         self.save()
         for lineitem in lineitems:
             lineitem.pk = None
-            lineitem.taskoption = self
+            lineitem.taskinstance = self
             lineitem.save()
 
 
@@ -336,13 +340,13 @@ class LineItem(models.Model):
     name = models.CharField(_("Name"), max_length=512)
 
     # fixed billing, amount of hours or materials to complete just one unit of the task
-    unit_qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2, default=0.0)
+    unit_qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=3, default=0.0)
 
     # time and materials billing, amount of hours or materials to complete the entire task
-    task_qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2, default=0.0)
+    task_qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=3, default=0.0)
 
     # time and materials billing, how many units of this have been delivered/expended and can thus be billed
-    billable = models.DecimalField(_("Billable"), max_digits=12, decimal_places=2, default=0.0)
+    billable = models.DecimalField(_("Billable"), max_digits=12, decimal_places=3, default=0.0)
 
     # unit for the quantity
     unit = models.CharField(_("Unit"), max_length=64)

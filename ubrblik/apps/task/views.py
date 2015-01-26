@@ -35,6 +35,7 @@ class TaskEditor(SingleObjectMixin, ListView):
         context['job'] = self.object
         context['blank_taskgroup'] = TaskGroup()
         context['blank_task'] = Task()
+        context['blank_taskinstance'] = TaskInstance()
         context['blank_lineitem'] = LineItem()
         return context
 

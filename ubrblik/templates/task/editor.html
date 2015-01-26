@@ -19,7 +19,7 @@
 
 .editor {
   position: relative;
-  margin-bottom: 10px;
+  padding-bottom: 10px;
 }
 
 .editor-row {
@@ -56,6 +56,23 @@
   width: 70px;
   font-weight: bold;
   text-align: right;
+}
+
+.labels {
+  padding-left: 20px;
+}
+
+.labels > .label:hover {
+  cursor: pointer;
+}
+
+.labels > .label.False {
+  display: none;
+  background-color: #F0F0F0;
+}
+
+.editor:hover > .editor-row > .labels > .label.False {
+  display: inline;
 }
 
 /* task group */
@@ -134,6 +151,10 @@ ubr-autocomplete > div.active {
 
 <template id="task-template">
   {% include "task/task_editor.html" with task=blank_task %}
+</template>
+
+<template id="taskinstance-template">
+  {% include "task/taskinstance_editor.html" with task=blank_taskinstance %}
 </template>
 
 <template id="lineitem-template">

@@ -14,12 +14,12 @@ def create_task_data(self):
     self.job = Job.objects.create(name="Default", project=self.project)
     self.group = TaskGroup.objects.create(name="my group", job=self.job)
     self.group2 = TaskGroup.objects.create(name="my group 2", job=self.job)
-    self.task = Task.objects.create(name="my task one", taskgroup=self.group)
-    self.taskinstance = TaskInstance.objects.create(name="my task instance one", qty=1, task=self.task)
-    self.lineitem = LineItem.objects.create(name="my line item 1", unit_qty=8, price=120, taskinstance=self.taskinstance)
-    self.task2 = Task.objects.create(name="my task two", taskgroup=self.group)
-    self.taskinstance2 = TaskInstance.objects.create(name="my task option two", qty=0, task=self.task2)
-    self.lineitem2 = LineItem.objects.create(name="my line item 2", unit_qty=0, price=0, taskinstance=self.taskinstance2)
+    self.task = Task.objects.create(name="my task one", qty=1, taskgroup=self.group)
+    TaskInstance.objects.create(task=self.task,selected=True)
+    self.lineitem = LineItem.objects.create(name="my line item 1", unit_qty=8, price=120, taskinstance=self.task.instance)
+    self.task2 = Task.objects.create(name="my task two", qty=0, taskgroup=self.group)
+    TaskInstance.objects.create(task=self.task2,selected=True)
+    self.lineitem2 = LineItem.objects.create(name="my line item 2", unit_qty=0, price=0, taskinstance=self.task2.instance)
 
 
 class TaskInstanceTotalTests(TestCase):
@@ -28,16 +28,16 @@ class TaskInstanceTotalTests(TestCase):
         create_task_data(self)
     
     def test_zero_total(self):
-        task = TaskInstance.objects.get(pk=self.taskinstance2.pk)
+        task = TaskInstance.objects.get(pk=self.task2.instance.pk)
         self.assertEqual(0, task.fixed_price_estimate)
         self.assertEqual(0, task.fixed_price_billable)
         self.assertEqual(0, task.time_and_materials_estimate)
         self.assertEqual(0, task.time_and_materials_billable)
 
     def test_non_zero_total(self):
-        lineitem1 = LineItem.objects.create(name="do stuff", price=10, unit_qty=8, unit="hour", taskinstance=self.taskinstance)
+        lineitem1 = LineItem.objects.create(name="do stuff", price=10, unit_qty=8, unit="hour", taskinstance=self.task.instance)
         self.assertEqual(80, lineitem1.price_per_task_unit)
-        task = TaskInstance.objects.get(pk=self.taskinstance.pk)
+        task = TaskInstance.objects.get(pk=self.task.instance.pk)
         self.assertEqual(1040, task.fixed_price_estimate)
 
 

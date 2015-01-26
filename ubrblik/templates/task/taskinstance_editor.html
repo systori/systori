@@ -2,11 +2,7 @@
 <div class="editor">
   <div class="editor-row">
     <div class="code"></div>
-    <div class="name" placeholder="{% trans 'task instance' %}" contenteditable>{{ taskinstance.name }}</div>
-    <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ taskinstance.qty|floatformat:2 }}</div>
-    <div class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ taskinstance.unit }}</div>
-    <div class="price">{{ taskinstance.unit_price|floatformat:2 }}</div>
-    <div class="total">{{ taskinstance.fixed_price_estimate|floatformat:2 }}</div>
+    <div class="name" placeholder="{% trans 'task option' %}" contenteditable>{{ taskinstance.name }}</div>
   </div>
   <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ taskinstance.description }}</div>
 </div>

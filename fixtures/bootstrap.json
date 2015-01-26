@@ -81,138 +81,157 @@
 
    "model": "task.taskgroup"},
 
-   {"pk": 1, "model": "task.task", "fields": {"taskgroup": 1, "order": 0}},
+   {"pk": 1, "model": "task.task", "fields": {"taskgroup": 1, "order": 0,
+ "started_on": null,
+   "completed_on": null,
+ "unit": "pce",
+ "complete": "0.00",
+ "qty": "1.00",
+ "name": "Workers Rest Room",
+ "description": "Workers Rest Room including transport, cleaning and consumables. Endurence four weeks."
+                                             }},
 
    {"pk": 1,
- "fields": {"completed_on": null,
- "started_on": null,
- "name": "Workers Rest Room",
+ "fields": {
  "task": 1,
- "unit": "pce",
- "complete": "0.00",
  "order": 0,
- "description": "Workers Rest Room including transport, cleaning and consumables. Endurence four weeks.",
- "qty": "1.00"},
+ "selected": true
+ },
 
    "model": "task.taskinstance"},
 
-   {"pk": 2, "model": "task.task", "fields": {"taskgroup": 1, "order": 0}},
-
-   {"pk": 2,
- "fields": {"completed_on": null,
- "started_on": null,
+   {"pk": 2, "model": "task.task", "fields": {"taskgroup": 1, "order": 0,
+ "started_on": null,"completed_on": null,
  "name": "Workers Rest Room",
- "task": 2,
  "unit": "week",
  "complete": "0.00",
+ "description": "The same Service as mentioned in 1.1 but the price for every following week.","qty": "1.00"
+                                             }},
+
+   {"pk": 2,
+ "fields": {
+ "task": 2,
  "order": 1,
- "description": "The same Service as mentioned in 1.1 but the price for every following week.",
- "qty": "1.00"},
+ "selected": true
+ },
 
    "model": "task.taskinstance"},
 
-   {"pk": 3, "model": "task.task", "fields": {"taskgroup": 1, "order": 0}},
+   {"pk": 3, "model": "task.task", "fields": {"taskgroup": 1, "order": 0,
+ "started_on": null,"completed_on": null,
+ "name": "Road Signs",
+ "unit": "pce",
+ "complete": "0.00",
+ "description": "All needed Road Signs as long as needed. Some more text to see how the table handles that. Probably everything is going to be fine, since its LaTeX.","qty": "1.00"
+                                             }},
 
    {"pk": 3,
- "fields": {"completed_on": null,
- "started_on": null,
- "name": "Road Signs",
+ "fields": {
  "task": 3,
- "unit": "pce",
- "complete": "0.00",
  "order": 2,
- "description": "All needed Road Signs as long as needed. Some more text to see how the table handles that. Probably everything is going to be fine, since its LaTeX.",
- "qty": "1.00"},
+ "selected": true
+ },
 
    "model": "task.taskinstance"},
 
-   {"pk": 4, "model": "task.task", "fields": {"taskgroup": 2, "order": 0}},
+   {"pk": 4, "model": "task.task", "fields": {"taskgroup": 2, "order": 0,
+ "started_on": null,"completed_on": null,
+ "name": "Covering the old roof tiles",
+ "unit": "m\u00b2",
+ "complete": "0.00",
+ "description": "Covering the old roof tiles including transportation and professional removal at the waste disposal.","qty": "173.00"
+                                             }},
 
    {"pk": 4,
- "fields": {"completed_on": null,
- "started_on": null,
- "name": "Covering the old roof tiles",
+ "fields": {
  "task": 4,
- "unit": "m\u00b2",
- "complete": "0.00",
  "order": 0,
- "description": "Covering the old roof tiles including transportation and professional removal at the waste disposal.",
- "qty": "173.00"},
+ "selected": true
+ },
 
    "model": "task.taskinstance"},
 
-   {"pk": 5, "model": "task.task", "fields": {"taskgroup": 2, "order": 0}},
+   {"pk": 5, "model": "task.task", "fields": {"taskgroup": 2, "order": 0,
+ "started_on": null,"completed_on": null,
+ "name": "Keeping old roof tiles",
+ "unit": "m\u00b2",
+ "complete": "0.00",
+ "description": "Keeping the old roof tiles to reuse them.","qty": "30.00"
+                                             }},
 
    {"pk": 5,
- "fields": {"completed_on": null,
- "started_on": null,
- "name": "Keeping old roof tiles",
+ "fields": {
  "task": 5,
- "unit": "m\u00b2",
- "complete": "0.00",
  "order": 1,
- "description": "Keeping the old roof tiles to reuse them.",
- "qty": "30.00"},
+ "selected": true
+ },
 
    "model": "task.taskinstance"},
 
-   {"pk": 6, "model": "task.task", "fields": {"taskgroup": 2, "order": 0}},
-
-   {"pk": 6,
- "fields": {"completed_on": null,
- "started_on": null,
+   {"pk": 6, "model": "task.task", "fields": {"taskgroup": 2, "order": 0,
+ "started_on": null,"completed_on": null,
  "name": "Covering the old wood construction",
- "task": 6,
  "unit": "m\u00b3",
  "complete": "0.00",
+ "description": "Covering the old wood construction including transportation and professional removal at the waste disposal.","qty": "17.00"
+                                             }},
+
+   {"pk": 6,
+ "fields": {
+ "task": 6,
  "order": 2,
- "description": "Covering the old wood construction including transportation and professional removal at the waste disposal.",
- "qty": "17.00"},
+ "selected": true
+ },
 
    "model": "task.taskinstance"},
 
-   {"pk": 7, "model": "task.task", "fields": {"taskgroup": 2, "order": 0}},
-
-   {"pk": 7,
- "fields": {"completed_on": null,
- "started_on": null,
+   {"pk": 7, "model": "task.task", "fields": {"taskgroup": 2, "order": 0,
+ "started_on": null,"completed_on": null,
  "name": "Professional cleaning the truss.",
- "task": 7,
  "unit": "pce",
  "complete": "0.00",
+ "description": "Professional cleaning the truss including vacuuming, wiping and licking everything clean.","qty": "1.00"
+                                             }},
+
+   {"pk": 7,
+ "fields": {
+ "task": 7,
  "order": 3,
- "description": "Professional cleaning the truss including vacuuming, wiping and licking everything clean.",
- "qty": "1.00"},
+ "selected": true
+ },
 
    "model": "task.taskinstance"},
 
-   {"pk": 8, "model": "task.task", "fields": {"taskgroup": 3, "order": 0}},
+   {"pk": 8, "model": "task.task", "fields": {"taskgroup": 3, "order": 0,
+ "started_on": null,"completed_on": null,
+ "name": "Covering the old roof tiles",
+ "unit": "m\u00b2",
+ "complete": "0.00",
+ "description": "Covering the old roof tiles including transportation and professional removal at the waste disposal.","qty": "173.00"
+                                             }},
 
    {"pk": 8,
- "fields": {"completed_on": null,
- "started_on": null,
- "name": "Covering the old roof tiles",
+ "fields": {
  "task": 8,
- "unit": "m\u00b2",
- "complete": "0.00",
  "order": 0,
- "description": "Covering the old roof tiles including transportation and professional removal at the waste disposal.",
- "qty": "173.00"},
+ "selected": true
+ },
 
    "model": "task.taskinstance"},
 
-   {"pk": 9, "model": "task.task", "fields": {"taskgroup": 3, "order": 0}},
-
-   {"pk": 9,
- "fields": {"completed_on": null,
- "started_on": null,
+   {"pk": 9, "model": "task.task", "fields": {"taskgroup": 3, "order": 0,
+ "started_on": null,"completed_on": null,
  "name": "Keeping old roof tiles",
- "task": 9,
  "unit": "m\u00b2",
  "complete": "0.00",
- "order": 1,
- "description": "Keeping the old roof tiles to reuse them.",
- "qty": "30.00"},
+ "description": "Keeping the old roof tiles to reuse them.","qty": "30.00"
+                                             }},
+
+   {"pk": 9,
+ "fields": {
+ "task": 9,
+ "order": 1
+ },
 
    "model": "task.taskinstance"},
 

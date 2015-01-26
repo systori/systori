@@ -87,8 +87,8 @@ class TaskResourceTest(ResourceTestCaseBase):
 
     def setUp(self):
         super(TaskResourceTest, self).setUp()
-        self.task3 = Task.objects.create(name="my task three green", taskgroup=self.group)
-        self.task4 = Task.objects.create(name="my task four green", taskgroup=self.group)
+        self.task3 = Task.objects.create(name="my task three green", qty=0, taskgroup=self.group)
+        self.task4 = Task.objects.create(name="my task four green", qty=0, taskgroup=self.group)
 
     def test_update_task(self):
         url = self.url+'{}/'.format(self.task.id)
@@ -101,13 +101,15 @@ class TaskResourceTest(ResourceTestCaseBase):
     def test_create_task(self):
         data = {
             "taskgroup": "/api/v1/taskgroup/{}/".format(self.group.id),
-            "name": "created task"
+            "name": "created task",
+            "qty": 5
         }
         resp = self.api_client.post(self.url, data=data, format='json')
         self.assertHttpCreated(resp)
         task = Task.objects.last()
         self.assertEqual("created task", task.name)
         self.assertEqual(self.group.id, task.taskgroup.id)
+        self.assertEqual(5, task.qty)
 
     def test_delete_task(self):
         start_count = Task.objects.count()
@@ -136,35 +138,32 @@ class TaskResourceTest(ResourceTestCaseBase):
         new_task = Task.objects.get(taskgroup=self.group.id, order=1)
         self.assertIn('<ubr-task data-pk="{0}">'.format(new_task.id), str(resp.content))
 
-
 class TaskInstanceResourceTest(ResourceTestCaseBase):
 
     url = '/api/v1/taskinstance/'
 
     def test_update_taskinstance(self):
-        url = self.url+'{}/'.format(self.taskinstance.id)
+        url = self.url+'{}/'.format(self.task.instance.id)
         data = {"name": "new name"}
         resp = self.api_client.put(url, data=data, format='json')
         self.assertHttpAccepted(resp)
-        task = TaskInstance.objects.get(pk=self.taskinstance.id)
+        task = TaskInstance.objects.get(pk=self.task.instance.id)
         self.assertEqual("new name", task.name)
 
     def test_create_taskinstance(self):
         data = {
             "task": "/api/v1/task/{}/".format(self.task.id),
-            "name": "created task instance",
-            "qty": 5
+            "name": "created task instance"
         }
         resp = self.api_client.post(self.url, data=data, format='json')
         self.assertHttpCreated(resp)
         task = TaskInstance.objects.last()
         self.assertEqual("created task instance", task.name)
         self.assertEqual(self.task.id, task.task.id)
-        self.assertEqual(5, task.qty)
 
     def test_delete_taskinstance(self):
         start_count = TaskInstance.objects.count()
-        url = self.url+'{}/'.format(self.taskinstance.id)
+        url = self.url+'{}/'.format(self.task.instance.id)
         resp = self.api_client.delete(url, format='json')
         self.assertHttpAccepted(resp)
         new_count = TaskInstance.objects.count()
@@ -185,7 +184,7 @@ class LineItemResourceTest(ResourceTestCaseBase):
 
     def test_create_lineitem(self):
         data = {
-            "taskinstance": "/api/v1/taskinstance/{}/".format(self.taskinstance.id),
+            "taskinstance": "/api/v1/taskinstance/{}/".format(self.task.instance.id),
             "name": "created line item",
             "unit_qty": "8",
             "price": "20"
@@ -194,7 +193,7 @@ class LineItemResourceTest(ResourceTestCaseBase):
         self.assertHttpCreated(resp)
         lineitem = LineItem.objects.last()
         self.assertEqual("created line item", lineitem.name)
-        self.assertEqual(self.taskinstance.id, lineitem.taskinstance.id)
+        self.assertEqual(self.task.instance.id, lineitem.taskinstance.id)
         self.assertEqual(160, lineitem.price_per_task_unit)
 
     def test_delete_lineitem(self):
