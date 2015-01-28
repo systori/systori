@@ -1,8 +1,10 @@
 from decimal import Decimal
+from datetime import datetime
 from django.db import models, connections
 from django.db.models.manager import BaseManager
 from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
+from django.utils.formats import date_format
 from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
 
@@ -49,6 +51,9 @@ class Job(BetterOrderedModel):
 
     name = models.CharField(_('Job Name'), max_length=512)
     description = models.TextField(_('Description'), blank=True)
+
+    ESTIMATE_INCREMENT = 0.05
+    ESTIMATE_INCREMENT_DISPLAY = '{:.0%}'.format(ESTIMATE_INCREMENT)
 
     FIXED_PRICE = "fixed_price"
     TIME_AND_MATERIALS = "time_and_materials"
@@ -103,6 +108,10 @@ class Job(BetterOrderedModel):
             total += getattr(taskgroup, field)
         return total
 
+    def estimate_total_modify(self, user, action):
+        for taskgroup in self.taskgroups.all():
+            taskgroup.estimate_total_modify(user, action, self.ESTIMATE_INCREMENT)
+
     @property
     def estimate_total(self):
         return self._total_calc('estimate')
@@ -135,6 +144,10 @@ class TaskGroup(BetterOrderedModel):
         for task in self.tasks.filter(is_optional=False).all():
             total += getattr(task, field)
         return total
+
+    def estimate_total_modify(self, user, action, rate):
+        for task in self.tasks.all():
+            task.estimate_total_modify(user, action, rate)
 
     @property
     def fixed_price_estimate(self):
@@ -206,6 +219,10 @@ class Task(BetterOrderedModel):
         verbose_name = _("Task")
         verbose_name_plural = _("Task")
 
+    def estimate_total_modify(self, user, action, rate):
+        for instance in self.taskinstances.all():
+            instance.estimate_total_modify(user, action, rate)
+
     @cached_property
     def instance(self):
         return self.taskinstances.get(selected=True)
@@ -276,6 +293,20 @@ class TaskInstance(BetterOrderedModel):
     class Meta(OrderedModel.Meta):
         verbose_name = _("Task Instance")
         verbose_name_plural = _("Task Instances")
+
+    def estimate_total_modify(self, user, action, rate):
+        correction = self.lineitems.filter(is_correction=True).first()
+        if action in ['increase', 'decrease']:
+            correction = correction or LineItem(taskinstance=self, is_correction=True, price=0)
+            correction.name = _("Price correction from %(user)s on %(date)s") %\
+                                {'user': user.username, 'date': date_format(datetime.now())}
+            correction.unit_qty = 1.0
+            correction.unit = _("correction")
+            direction = {'increase': 1, 'decrease': -1}[action]
+            correction.price += self.unit_price * Decimal(rate) * direction
+            correction.save()
+        elif action == 'reset' and correction:
+            correction.delete()
 
     @property
     def full_name(self):
@@ -380,6 +411,9 @@ class LineItem(models.Model):
     # could be set automatically by the system from temporal triggers (materials should have been delivered by now)
     # or it could be set manual by a users
     is_flagged = models.BooleanField(default=False)
+
+    # this line item is a price correction
+    is_correction = models.BooleanField(default=False)
 
     taskinstance = models.ForeignKey(TaskInstance, related_name="lineitems")
 

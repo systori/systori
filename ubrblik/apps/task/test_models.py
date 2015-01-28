@@ -41,7 +41,7 @@ class TaskInstanceTotalTests(TestCase):
         self.assertEqual(1040, task.fixed_price_estimate)
 
 
-class JobTotalTests(TestCase):
+class JobQuerySetTests(TestCase):
 
     def setUp(self):
         create_task_data(self)
@@ -63,6 +63,49 @@ class JobTotalTests(TestCase):
         self.assertEqual(round(Decimal(960*.19),2), round(jobs.estimate_tax_total(),2))
         self.assertEqual(round(Decimal(960*1.19),2), round(jobs.estimate_gross_total(),2))
 
+class JobEstimateModificationTests(TestCase):
+    
+    def setUp(self):
+        create_task_data(self)
+
+    def test_increase_total(self):
+        self.assertEqual(Decimal(960), self.job.estimate_total)
+        self.job.estimate_total_modify(self.user, 'increase')
+        self.assertEqual(Decimal(960*(Job.ESTIMATE_INCREMENT+1)), self.job.estimate_total)
+
+    def test_2x_increase_total(self):
+        self.assertEqual(Decimal(960), self.job.estimate_total)
+        self.job.estimate_total_modify(self.user,'increase')
+        self.job.estimate_total_modify(self.user,'increase')
+        first = Decimal(960)*Decimal(Job.ESTIMATE_INCREMENT)
+        second = first + (Decimal(960)+first)*Decimal(Job.ESTIMATE_INCREMENT)
+        self.assertEqual(round(Decimal(960)+second, 2), round(self.job.estimate_total, 2))
+
+    def test_decrease_total(self):
+        self.assertEqual(Decimal(960), self.job.estimate_total)
+        self.job.estimate_total_modify(self.user,'decrease')
+        self.assertEqual(Decimal(960*(1-Job.ESTIMATE_INCREMENT)), self.job.estimate_total)
+
+    def test_2x_decrease_total(self):
+        self.assertEqual(Decimal(960), self.job.estimate_total)
+        self.job.estimate_total_modify(self.user, 'decrease')
+        self.job.estimate_total_modify(self.user, 'decrease')
+        first = Decimal(960)*Decimal(Job.ESTIMATE_INCREMENT)*-1
+        second = first - (Decimal(960)+first)*Decimal(Job.ESTIMATE_INCREMENT)
+        self.assertEqual(round(Decimal(960)+second, 2), round(self.job.estimate_total, 2))
+
+    def test_decrease_increase_total(self):
+        self.assertEqual(Decimal(960), self.job.estimate_total)
+        self.job.estimate_total_modify(self.user, 'decrease')
+        self.job.estimate_total_modify(self.user, 'increase')
+        first = Decimal(960)*Decimal(Job.ESTIMATE_INCREMENT)*-1
+        second = first + (Decimal(960)+first)*Decimal(Job.ESTIMATE_INCREMENT)
+        self.assertEqual(round(Decimal(960)+second, 2), round(self.job.estimate_total, 2))
+
+    def test_reset_total(self):
+        self.job.estimate_total_modify(self.user, 'increase')
+        self.job.estimate_total_modify(self.user, 'reset')
+        self.assertEqual(Decimal(960), self.job.estimate_total)
 
 class TaskCloneTests(TestCase):
 

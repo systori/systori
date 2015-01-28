@@ -27,6 +27,15 @@ class JobTransition(SingleObjectMixin, View):
         return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
 
 
+class JobEstimateModification(SingleObjectMixin, View):
+    model = Job
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        assert kwargs['action'] in ['increase','decrease','reset']
+        self.object.estimate_total_modify(request.user, kwargs['action'])
+        return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
+
+
 class TaskEditor(SingleObjectMixin, ListView):
     template_name = "task/editor.html"
 

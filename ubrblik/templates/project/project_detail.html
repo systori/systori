@@ -9,7 +9,7 @@
       <tr>
         <th>{% trans "Name" %}</th>
         <th>{% trans "Status" %}</th>
-        <th>{% trans "Total" %}</th>
+        <th style="text-align: right; padding-right: 100px; width: 200px;">{% trans "Total" %}</th>
         <th>{% trans "Billing Method" %}</th>
         <th>{% trans "Billable Amount" %}</th>
         <th>{% trans "Actions" %}</th>
@@ -20,7 +20,14 @@
       <tr>
         <td><a href="{% url 'tasks' project.id job.id %}">{{ job }}</a></td>
         <td>{{ job.get_status_display }}</td>
-        <td>{{ job.estimate_total|floatformat:2 }}</td>
+        <td style="text-align: right;">
+          {{ job.estimate_total|floatformat:2 }}
+          <div class="btn-group">
+            <a class="btn btn-default btn-xs" href="{% url 'job.estimate' project.id job.id 'increase' %}" title="{% blocktrans with percent=job.ESTIMATE_INCREMENT_DISPLAY %}Increase estimate by {{ percent }}.{% endblocktrans %}"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
+            <a class="btn btn-default btn-xs" href="{% url 'job.estimate' project.id job.id 'decrease' %}" title="{% blocktrans with percent=job.ESTIMATE_INCREMENT_DISPLAY %}Decrease estimate by {{ percent }}.{% endblocktrans %}"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></a>
+            <a class="btn btn-default btn-xs" href="{% url 'job.estimate' project.id job.id 'reset' %}" title="{% trans 'Reset estimate to original amount.' %}"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span></a>
+          </div>
+        </td>
         <td>{{ job.get_billing_method_display }}</td>
         <td>{{ job.billable_total|floatformat:2 }}</td>
         <td>
