@@ -279,7 +279,10 @@ class TaskInstance(BetterOrderedModel):
 
     @property
     def full_name(self):
-        return self.task.name + " " + self.name
+        if not self.selected:
+            return "Alternativ: " + self.task.name + " " + self.name
+        else:
+            return self.task.name + " " + self.name
 
     @property
     def full_description(self):

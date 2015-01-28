@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-26 22:24+0100\n"
+"POT-Creation-Date: 2015-01-28 15:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -122,8 +122,8 @@ msgid "Project Contacts"
 msgstr "Projektkontakte"
 
 #: ubrblik/apps/document/models.py:28
-#: ubrblik/templates/document/latex/proposal.tex:51
-#: ubrblik/templates/document/latex/proposal.tex:56
+#: ubrblik/templates/document/latex/proposal.tex:57
+#: ubrblik/templates/document/latex/proposal.tex:62
 #: ubrblik/templates/project/project_detail.html:51
 #: ubrblik/templates/project/project_detail.html:105
 msgid "Amount"
@@ -252,8 +252,8 @@ msgid "Job Name"
 msgstr "Losbezeichnung"
 
 #: ubrblik/apps/task/models.py:51
-#: ubrblik/templates/document/latex/proposal.tex:51
-#: ubrblik/templates/document/latex/proposal.tex:56
+#: ubrblik/templates/document/latex/proposal.tex:57
+#: ubrblik/templates/document/latex/proposal.tex:62
 msgid "Description"
 msgstr "Beschreibung"
 
@@ -296,12 +296,12 @@ msgid "Start"
 msgstr "Start"
 
 #: ubrblik/apps/task/models.py:90 ubrblik/apps/task/models.py:194
-#: ubrblik/apps/task/models.py:413
+#: ubrblik/apps/task/models.py:430
 msgid "Complete"
 msgstr "fertigstellen"
 
 #: ubrblik/apps/task/models.py:123 ubrblik/apps/task/models.py:183
-#: ubrblik/apps/task/models.py:262 ubrblik/apps/task/models.py:340
+#: ubrblik/apps/task/models.py:266 ubrblik/apps/task/models.py:357
 #: ubrblik/templates/project/project_detail.html:10
 #: ubrblik/templates/project/project_detail.html:157
 #: ubrblik/templates/project/project_list.html:13
@@ -317,12 +317,12 @@ msgstr "Gruppe"
 msgid "Task Groups"
 msgstr "Gruppen"
 
-#: ubrblik/apps/task/models.py:187 ubrblik/apps/task/models.py:343
-#: ubrblik/apps/task/models.py:346
+#: ubrblik/apps/task/models.py:187 ubrblik/apps/task/models.py:360
+#: ubrblik/apps/task/models.py:363
 msgid "Quantity"
 msgstr "Menge"
 
-#: ubrblik/apps/task/models.py:190 ubrblik/apps/task/models.py:352
+#: ubrblik/apps/task/models.py:190 ubrblik/apps/task/models.py:369
 msgid "Unit"
 msgstr "Einheit"
 
@@ -330,46 +330,46 @@ msgstr "Einheit"
 msgid "Task"
 msgstr "Position"
 
-#: ubrblik/apps/task/models.py:273
+#: ubrblik/apps/task/models.py:277
 msgid "Task Instance"
 msgstr "Positionsinstanz"
 
-#: ubrblik/apps/task/models.py:274
+#: ubrblik/apps/task/models.py:278
 msgid "Task Instances"
 msgstr "Positionsinstanzen"
 
-#: ubrblik/apps/task/models.py:349
+#: ubrblik/apps/task/models.py:366
 #: ubrblik/templates/project/project_detail.html:159
 msgid "Billable"
 msgstr "Abrechenbar"
 
-#: ubrblik/apps/task/models.py:355
-#: ubrblik/templates/document/latex/proposal.tex:51
-#: ubrblik/templates/document/latex/proposal.tex:56
+#: ubrblik/apps/task/models.py:372
+#: ubrblik/templates/document/latex/proposal.tex:57
+#: ubrblik/templates/document/latex/proposal.tex:62
 msgid "Price"
 msgstr "Preis"
 
-#: ubrblik/apps/task/models.py:373 ubrblik/templates/main/dashboard.html:15
+#: ubrblik/apps/task/models.py:390 ubrblik/templates/main/dashboard.html:15
 msgid "Line Item"
 msgstr "Kalkulation"
 
-#: ubrblik/apps/task/models.py:374
+#: ubrblik/apps/task/models.py:391
 msgid "Line Items"
 msgstr "Kalkulationen"
 
-#: ubrblik/apps/task/models.py:418
+#: ubrblik/apps/task/models.py:435
 msgid "Progress Report"
 msgstr "Stundenzettel"
 
-#: ubrblik/apps/task/models.py:419
+#: ubrblik/apps/task/models.py:436
 msgid "Progress Reports"
 msgstr "Stundenzettel"
 
-#: ubrblik/apps/task/models.py:429
+#: ubrblik/apps/task/models.py:446
 msgid "Attachment"
 msgstr "Anhang"
 
-#: ubrblik/apps/task/models.py:430
+#: ubrblik/apps/task/models.py:447
 msgid "Attachments"
 msgstr "Anhänge"
 
@@ -518,48 +518,64 @@ msgstr "Status"
 msgid "Created"
 msgstr "Erstellen"
 
-#: ubrblik/templates/document/latex/proposal.tex:31
+#: ubrblik/templates/document/latex/proposal.tex:30
 msgid "Page"
 msgstr "Seite"
 
-#: ubrblik/templates/document/latex/proposal.tex:31
+#: ubrblik/templates/document/latex/proposal.tex:30
 msgid "of"
 msgstr "von"
 
 #: ubrblik/templates/document/latex/proposal.tex:51
-#: ubrblik/templates/document/latex/proposal.tex:56
+msgid "Date"
+msgstr "Datum"
+
+#: ubrblik/templates/document/latex/proposal.tex:57
+#: ubrblik/templates/document/latex/proposal.tex:62
 msgid "Pos."
 msgstr "Pos."
 
-#: ubrblik/templates/document/latex/proposal.tex:51
-#: ubrblik/templates/document/latex/proposal.tex:56
-#: ubrblik/templates/document/latex/proposal.tex:79
+#: ubrblik/templates/document/latex/proposal.tex:57
+#: ubrblik/templates/document/latex/proposal.tex:62
 #: ubrblik/templates/document/latex/proposal.tex:87
+#: ubrblik/templates/document/latex/proposal.tex:95
 #: ubrblik/templates/project/project_detail.html:12
 msgid "Total"
 msgstr "Summe"
 
-#: ubrblik/templates/document/latex/proposal.tex:54
 #: ubrblik/templates/document/latex/proposal.tex:60
+#: ubrblik/templates/document/latex/proposal.tex:66
 msgid "Continuation"
 msgstr "Fortsetzung"
 
-#: ubrblik/templates/document/latex/proposal.tex:75
+#: ubrblik/templates/document/latex/proposal.tex:82
 #: ubrblik/templates/task/task_editor.html:11
 msgid "Optional"
 msgstr "Bedarf"
 
-#: ubrblik/templates/document/latex/proposal.tex:92
+#: ubrblik/templates/document/latex/proposal.tex:82
+msgid "alternate"
+msgstr "Alternativ"
+
+#: ubrblik/templates/document/latex/proposal.tex:100
 msgid "Total without VAT"
 msgstr "Summe netto"
 
-#: ubrblik/templates/document/latex/proposal.tex:93
+#: ubrblik/templates/document/latex/proposal.tex:101
 msgid "VAT"
 msgstr "MWSt"
 
-#: ubrblik/templates/document/latex/proposal.tex:94
+#: ubrblik/templates/document/latex/proposal.tex:102
 msgid "Total including VAT"
 msgstr "Summe brutto"
+
+#: ubrblik/templates/document/latex/proposal.tex:108
+msgid "method of payment"
+msgstr "Zahlungsbedingungen"
+
+#: ubrblik/templates/document/latex/proposal.tex:109
+msgid "validity"
+msgstr "Gültigkeit"
 
 #: ubrblik/templates/document/proposal_detail.html:8
 msgid "Proposal Details"
@@ -670,8 +686,8 @@ msgstr "Positionsgruppe"
 msgid "task option"
 msgstr "Alternative"
 
-msgid "Tasks"
-msgstr "Positionen"
+#~ msgid "Tasks"
+#~ msgstr "Positionen"
 
-msgid "Estimate"
-msgstr "Aufmaß"
+#~ msgid "Estimate"
+#~ msgstr "Aufmaß"

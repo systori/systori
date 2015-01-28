@@ -1,6 +1,5 @@
 
 {% load latex i18n %}
-\listfiles
 \documentclass[10pt, oneside]{letter}
 \usepackage[utf8x]{inputenc}
 
@@ -18,12 +17,12 @@
 % droidsans font
 
 {% if corporate_letterhead %}
-\ThisULCornerWallPaper{1}{softronic_page1.pdf}
+\ThisULCornerWallPaper{1}{softronic_page1_parts.pdf}
 \ULCornerWallPaper{1}{softronic_page2.pdf}
 {% endif %}
 
 % general page setup
-\usepackage[a4paper, width=125mm,top=55mm,bottom=22mm, left=25mm]{geometry}
+\usepackage[a4paper,top=55mm,bottom=22mm,left=25mm,right=58mm]{geometry}
 \usepackage{fancyhdr}%custom header package
 \pagestyle{fancy}%custom header
 \fancyhf{}%clear all
@@ -34,7 +33,11 @@
 \renewcommand*{\arraystretch}{1.5}
 {\setlength{\tabcolsep}{0.5mm}
 
+\usepackage{ragged2e}
+\RaggedRight
+
 \begin{document}
+\sloppy
 \begin{letter}
 
 {% if contact.business %}{{ contact.business }} \\{% endif %}
@@ -44,6 +47,9 @@ z.H. {{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }} \
 
 \vspace{15mm}
 
+\begin{flushright}
+  {% trans 'Date' %}: {% now "l" %}, {% now "d" %}. {% now "F Y" %}
+\end{flushright}
 {{ doc.header }}
 
 \begin{longtabu} to \textwidth{@{}l X[l] r l r r}
@@ -73,12 +79,12 @@ z.H. {{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }} \
 {{instance.code}}
     & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_name}} }} \\*
     & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_description}} }} \\*
-    & & {{task.qty|floatformat:3}} & {{task.unit}} & {{instance.unit_price|floatformat:2}} €  & {% if task.is_optional or not instance.selected %}{% trans 'Optional' %}{% else %}{{instance.fixed_price_estimate|floatformat:2}} €{% endif %} \\
+    & & {{task.qty|floatformat:2}} & {{task.unit}} & {{instance.unit_price|floatformat:2}} €  & {% if task.is_optional %}{% trans 'Optional' %}{% elif not instance.selected %}{% trans 'alternate'%} {% else %}{{instance.fixed_price_estimate|floatformat:2}} €{% endif %} \\
 {% endfor %}
 {% endfor %}
 
 \tabucline{6}
-    & \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{forloop.counter}} - {{taskgroup.name}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} € }\\
+& \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} € }\\
 \\
 {% endfor %}
 
@@ -86,7 +92,7 @@ z.H. {{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }} \
 
 {% for job in jobs.all %}
 {% for taskgroup in job.taskgroups.all %}
-& \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{forloop.counter}} - {{taskgroup.name}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} € } \\*
+  & \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} € } \\*
 {% endfor %}
 {% endfor %}
 
@@ -99,8 +105,8 @@ z.H. {{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }} \
 
 \setlength{\tabcolsep}{2mm}
 \begin{tabu} to \textwidth{@{} r X[l] }
-method of payment & 2,00\% cash discount when paid within two weeks until the 01.02.2015, after that without rebate.\\*
-validity & place of jurisdiction is Mannheim. The goods are until the complete payment our property.\\
+{% trans 'method of payment' %} & Zahlbar sofort ohne Abzug.\\*
+{% trans 'validity' %} & Gerichtsstand ist Mannheim. Waren bleiben bis zur restlosen Zahlung unser Eigentum. Es gelten unsere AGBs..\\
 \end{tabu}
 
 \vspace{5mm}
