@@ -30,8 +30,12 @@ class Document(models.Model):
     footer = models.TextField(_("Footer"))
     created_on = models.DateTimeField(auto_now_add=True)
 
-    pdf = models.FileField(upload_to=generate_file_path)
-    latex = models.FileField(upload_to=generate_file_path)
+    email_pdf = models.FileField(upload_to=generate_file_path)
+    email_latex = models.FileField(upload_to=generate_file_path)
+
+    print_pdf = models.FileField(upload_to=generate_file_path)
+    print_latex = models.FileField(upload_to=generate_file_path)
+
     json = models.FileField(upload_to=generate_file_path)
 
     def __str__(self):
@@ -40,38 +44,43 @@ class Document(models.Model):
     class Meta:
         abstract = True
 
-    def generate_document(self, corporate_letterhead=True):
+    def generate_document(self, add_terms=True):
 
         template = get_template(self.LATEX_TEMPLATE)
 
         project_contact = self.project.billable_contact
 
+        # generate latex files
         context = Context({
           'doc': self,
-          'corporate_letterhead': corporate_letterhead,
+          'add_terms': add_terms,
+          'add_letterhead': False,
           'jobs': self.jobs.all(),
           'contact': project_contact.contact,
           'project_contact': project_contact # this has the association attribute
         })
+        print_latex = template.render(context).encode('utf-8')
+        self.print_latex.save('print.tex', ContentFile(print_latex), save=False)
 
-        rendered_latex = template.render(context).encode('utf-8')
+        context.update({'add_letterhead': True})
+        email_latex = template.render(context).encode('utf-8')
+        self.email_latex.save('email.tex', ContentFile(email_latex), save=False)
 
-        # create latex file
-        self.latex.save('document.tex', ContentFile(rendered_latex), save=False)
+        dir_path = os.path.dirname(self.email_latex.path)
 
-        dir_path = os.path.dirname(self.latex.path)
+        # generate pdf files
+        for format, latex in [('email', email_latex), ('print', print_latex)]:
 
-        # create pdf file
-        for i in range(3):
-            process = Popen(
-                ['pdflatex', '-output-directory', dir_path],
-                stdin=PIPE,
-                stdout=PIPE,
-                cwd=settings.LATEX_WORKING_DIR
-            )
-            process.communicate(rendered_latex)
+          for i in range(3):
+              process = Popen(
+                  ['pdflatex', '-output-directory', dir_path, '-jobname', format],
+                  stdin=PIPE,
+                  stdout=PIPE,
+                  cwd=settings.LATEX_WORKING_DIR
+              )
+              process.communicate(latex)
 
-        self.pdf = os.path.join(dir_path, 'texput.pdf')
+          setattr(self, format+'_pdf', os.path.join(dir_path, format+'.pdf'))
 
         # save file paths to database
         self.save()

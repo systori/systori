@@ -13,7 +13,8 @@ from .forms import ProposalForm, InvoiceForm
 class BaseDocumentPDFView(SingleObjectMixin, View):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        return HttpResponse(self.object.pdf, content_type='application/pdf')
+        pdf = getattr(self.object, kwargs['format']+'_pdf')
+        return HttpResponse(pdf, content_type='application/pdf')
 
 class BaseDocumentCreateView(CreateView):
     
@@ -31,7 +32,7 @@ class BaseDocumentCreateView(CreateView):
 
         redirect = super(BaseDocumentCreateView, self).form_valid(form)
 
-        self.object.generate_document(form.cleaned_data['corporate_letterhead'])
+        self.object.generate_document(form.cleaned_data['add_terms'])
 
         return redirect
 

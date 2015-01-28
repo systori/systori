@@ -76,7 +76,8 @@
         <td>{{ doc.created_on }}</td>
         <td>{{ doc.notes }}</td>
         <td>
-          <a href="{% url 'proposal.pdf' project.id doc.id %}">{% trans 'PDF' %}</a>
+          <a href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a>
+          <a href="{% url 'proposal.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a>
         </td>
         <td>
           {% for state in doc.get_available_status_transitions %}
