@@ -4,7 +4,7 @@ DEBUG = True
 TEMPLATE_DEBUG = True
 
 STATICFILES_DIRS += (
-    ('editor', 'ubrblik/static/dart/editor'),
+    ('editor', '../ubrblik-editor/build/web'),
 )
 
 DATABASES['default'].update({
