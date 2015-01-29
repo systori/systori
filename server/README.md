@@ -14,7 +14,7 @@ sudo apt-get install nginx uwsgi uwsgi-plugin-python3
 
 Create directories and add internal IPs for the two sites (this makes it easier to link nginx to uwsgi).
 ```
-mkdir -p /srv/ubrblik/{dev,production}/
+sudo mkdir -p /srv/ubrblik/{dev,production}/
 sudo echo 127.0.0.101 dev_ubrblik >> /etc/hosts
 sudo echo 127.0.0.102 production_ubrblik >> /etc/hosts
 ```
