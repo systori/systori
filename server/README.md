@@ -42,7 +42,7 @@ sudo cp server/dev_ubrblik.ini /etc/uwsgi/apps-available/
 cd /etc/uwsgi/apps-enabled/
 sudo ln -s /etc/uwsgi/apps-available/dev_ubrblik.ini
 sudo service uwsgi start dev_ubrblik
-
+cd -
 
 sudo cp server/dev.ubrblik.de /etc/nginx/sites-available/
 cd /etc/nginx/sites-available/
