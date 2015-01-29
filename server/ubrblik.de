@@ -1,0 +1,14 @@
+server {
+    server_name ubrblik.de;
+    access_log /var/log/nginx/production.ubrblik.access.log;
+    error_log /var/log/nginx/production.ubrblik.error.log;
+    auth_basic "Restricted";
+    auth_basic_user_file htpasswd;
+    location / {
+        uwsgi_pass production_ubrblik:8080;
+        include uwsgi_params;
+    }
+    location /static {
+        alias /srv/ubrblik/production/static/;
+    }
+}
