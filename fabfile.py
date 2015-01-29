@@ -6,9 +6,9 @@ env.hosts = ['ubrblik.damoti.com' if env.user == 'lex' else 'ubrblik.de']
 
 
 def deploy(env_name='dev'):
-    assert env_name in ['dev', 'prod']
+    assert env_name in ['dev', 'production']
 
-    if env_name == 'prod':
+    if env_name == 'production':
         yes=raw_input('Deploying to PRODUCTION. Are you sure? (type "yes"): ')
         if not yes == 'yes':
             print 'Canceling.'
@@ -39,7 +39,7 @@ def resetlocaldb():
 
 
 def init_settings(env_name='local'):
-    assert env_name in ['dev', 'prod', 'local']
+    assert env_name in ['dev', 'production', 'local']
     if os.path.exists('ubrblik/settings/__init__.py'):
         print('Settings have already been initialized.')
     else:

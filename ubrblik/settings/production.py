@@ -1,5 +1,8 @@
 from .common import *
 
+DEBUG = False
+TEMPLATE_DEBUG = False
+
 STATICFILES_DIRS += (
     ('editor', '../ubrblik-editor/build/web'),
 )
