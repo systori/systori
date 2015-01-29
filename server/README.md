@@ -1,5 +1,7 @@
-dart: https://www.dartlang.org/tools/debian.html#set-up-stable-channel
+[Install dart.](https://www.dartlang.org/tools/debian.html)
 
+Install Ubrblik on Dev/Production Server
+```
 mkdir -p /srv/ubrblik/{dev,production}/
 sudo echo 127.0.0.101 dev_ubrblik >> /etc/hosts
 sudo echo 127.0.0.102 production_ubrblik >> /etc/hosts
@@ -35,3 +37,4 @@ sudo cp server/dev.ubrblik.de /etc/nginx/sites-available/
 cd /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/dev.ubrblik.de
 sudo service nginx restart
+```
