@@ -1,41 +1,41 @@
 import os
 from fabric.api import env, run, local, cd, lcd, prefix, sudo, settings
 
-env.hosts = ['ubrblik.de']
 
-def deploy():
-    sudo('service uwsgi stop ubrblik')
+env.hosts = ['ubrblik.damoti.com' if env.user == 'lex' else 'ubrblik.de']
 
-    with cd('/srv/ubrblik.de/ubrblik'):
+
+def deploy(env_name='dev'):
+    assert env_name in ['dev', 'prod']
+
+    if env_name == 'prod':
+        yes=raw_input('Deploying to PRODUCTION. Are you sure? (type "yes"): ')
+        if not yes == 'yes':
+            print 'Canceling.'
+            return
+
+    sudo('service uwsgi stop ubrblik_'+env_name)
+
+    with cd('/srv/ubrblik/'+env_name+'/ubrblik-editor'):
+        run('git pull')
+        run('/usr/lib/dart/bin/pub get')
+        run('/usr/lib/dart/bin/pub build')
+
+    with cd('/srv/ubrblik/'+env_name+'/ubrblik'):
         with prefix('source ../bin/activate'):
+            run('git pull')
+            run('pip install --upgrade -r requirements/%s.pip'%env_name)
+            sudo('./manage.py migrate --noinput', user='www-data')
+            run('./manage.py collectstatic --noinput')
 
-            run('hg pull -u')
-
-            #run('pip install --upgrade -r requirements/prod.pip')
-
-            #run('dropdb ubrblik_production')
-            #run('createdb -O www-data ubrblik_production')
-            #sudo('./manage.py migrate --migrate --noinput', user='www-data')
-            #sudo('./manage.py loaddata bootstrap', user='www-data')
-            #run('./manage.py collectstatic --noinput')
-            #run('./manage.py compress')
-
-    sudo('service uwsgi start ubrblik')
+    sudo('service uwsgi start ubrblik_'+env_name)
 
 
 def resetlocaldb():
     local('dropdb ubrblik_local')
     local('createdb ubrblik_local')
     local('./manage.py migrate')
-    #local('./manage.py createsuperuser --username=`whoami` --email=`whoami`@ubrblik.de')
     local('./manage.py loaddata bootstrap')
-
-
-#def resettestdb():
-#    local('dropdb test_ubrblik_local')
-#    local('createdb test_ubrblik_local')
-#    local('./manage.py migrate --settings=ubrblik.settings.test --migrate --noinput')
-#    local('./manage.py loaddata --settings=ubrblik.settings.test bootstrap')
 
 
 def init_settings(env_name='local'):
@@ -47,8 +47,10 @@ def init_settings(env_name='local'):
             print('Initializing settings for {}'.format(env_name))
             s.write('from .{} import *\n'.format(env_name))
 
+
 def makemessages():
     local('./manage.py makemessages -l de -e tex,html,py')
+
 
 def mail():
     local('python -m smtpd -n -c DebuggingServer localhost:1025')
