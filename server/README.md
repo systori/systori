@@ -8,6 +8,8 @@ Install Ubrblik on Dev/Production Server
 ========================================
 
 ```
+sudo apt-get install nginx uwsgi uwsgi-plugin-python3
+
 mkdir -p /srv/ubrblik/{dev,production}/
 sudo echo 127.0.0.101 dev_ubrblik >> /etc/hosts
 sudo echo 127.0.0.102 production_ubrblik >> /etc/hosts
