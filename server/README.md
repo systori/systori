@@ -1,6 +1,12 @@
-[Install dart.](https://www.dartlang.org/tools/debian.html)
+Prerequisites
+=============
+Most things from the developer instructions are required such as python3, postgresql, latex, git+bitbucket access, etc.
+
+Also Dart: [Install Instructions](https://www.dartlang.org/tools/debian.html)
 
 Install Ubrblik on Dev/Production Server
+========================================
+
 ```
 mkdir -p /srv/ubrblik/{dev,production}/
 sudo echo 127.0.0.101 dev_ubrblik >> /etc/hosts
