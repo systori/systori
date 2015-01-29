@@ -20,6 +20,9 @@ cd ubrblik
 fab init_settings:env_name=dev
 pip install -r requirements/dev.pip
 createdb -O www-data ubrblik_dev
+# modify /etc/passwd so that www-data has a shell
+# this is probably a security issue, should find
+# better way to do this
 sudo su www-data
 source ../bin/activate
 ./manage.py migrate
