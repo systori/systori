@@ -25,7 +25,7 @@ source ../bin/activate
 ./manage.py migrate
 ./manage.py loaddata bootstrap
 ./manage.py collectstatic --noinput
-
+exit # logout www-data
 
 sudo cp server/dev_ubrblik.ini /etc/uwsgi/apps-available/
 cd /etc/uwsgi/apps-enabled/
