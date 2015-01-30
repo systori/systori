@@ -33,7 +33,4 @@ server {
         alias /srv/ubrblik/production/static/;
     }
 
-    location /static/editor {
-        alias /srv/ubrblik/production/ubrblik-editor/build/web;
-    }
 }

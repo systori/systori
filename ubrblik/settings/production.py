@@ -3,6 +3,8 @@ from .common import *
 DEBUG = False
 TEMPLATE_DEBUG = False
 
+ALLOWED_HOSTS = ['ubrblik.de']
+
 STATICFILES_DIRS += (
     ('editor', '../ubrblik-editor/build/web'),
 )
