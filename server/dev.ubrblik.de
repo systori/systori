@@ -20,8 +20,8 @@ server {
     ssl_protocols TLSv1.2;
     add_header Strict-Transport-Security max-age=31536000;
 
-#    auth_basic "Restricted";
-#    auth_basic_user_file htpasswd;
+    auth_basic "Restricted";
+    auth_basic_user_file htpasswd;
 
     location / {
         uwsgi_pass dev_ubrblik:8080;
