@@ -1,14 +1,39 @@
 server {
+    listen       80;
+    server_name  dev.ubrblik.de;
+    return       301 https://$server_name$request_uri;
+}
+
+server {
+    listen      443 ssl;
     server_name dev.ubrblik.de;
+
     access_log /var/log/nginx/dev.ubrblik.access.log;
     error_log /var/log/nginx/dev.ubrblik.error.log;
-    auth_basic "Restricted";
-    auth_basic_user_file htpasswd;
+
+    ssl_certificate /etc/ssl/nginx/ssl-unified.crt;
+    ssl_certificate_key /etc/ssl/nginx/ubrblik.de.key;
+
+    ssl_ciphers RC4:HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    ssl_protocols TLSv1.2;
+    add_header Strict-Transport-Security max-age=31536000;
+
+#    auth_basic "Restricted";
+#    auth_basic_user_file htpasswd;
+
     location / {
         uwsgi_pass dev_ubrblik:8080;
         include uwsgi_params;
     }
+
     location /static {
         alias /srv/ubrblik/dev/static/;
     }
+
+    location /static/editor {
+        alias /srv/ubrblik/dev/ubrblik-editor/build/web;
+    }
 }
+
