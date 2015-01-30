@@ -9,7 +9,7 @@ server {
     server_name ubrblik.de;
 
     access_log /var/log/nginx/production.ubrblik.access.log;
-    error_log /var/log/nginx/produciton.ubrblik.error.log;
+    error_log /var/log/nginx/production.ubrblik.error.log;
 
     ssl_certificate /etc/ssl/nginx/ssl-unified.crt;
     ssl_certificate_key /etc/ssl/nginx/ubrblik.de.key;
