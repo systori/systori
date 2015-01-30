@@ -1,11 +1,11 @@
-{% load i18n %}
+{% load i18n customformatting %}
 <a name="lineitem-{{ lineitem.id }}"></a> 
 <div class="editor">
   <div class="editor-row">
     <div class="name" placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name }}</div>
-    <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ lineitem.unit_qty|floatformat:3 }}</div>
+    <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ lineitem.unit_qty|floatformat:4|cleandecimal:2 }}</div>
     <div class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ lineitem.unit }}</div>
-    <div class="price" placeholder="{% trans 'price' %}" contenteditable>{{ lineitem.price|floatformat:2 }}</div>
+    <div class="price" placeholder="{% trans 'price' %}" contenteditable>{{ lineitem.price|floatformat:4|cleandecimal:2 }}</div>
     <div class="total">{{ lineitem.price_per_task_unit|floatformat:2 }}</div>
     <div class="labels">
       <span class="is_flagged {{ lineitem.is_flagged }} label label-danger">{% trans 'Flag' %}</span>

@@ -197,14 +197,14 @@ class Task(BetterOrderedModel):
     description = models.TextField()
 
     # tracking completion of this task by a quantifiable indicator, an estimate
-    qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=3)
+    qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
 
     # unit for the completion tracking quantifiable indicator
     unit = models.CharField(_("Unit"), max_length=64)
 
     # how much of the project is complete in units of quantity
     # may be more than qty
-    complete = models.DecimalField(_("Complete"), max_digits=12, decimal_places=3, default=0.0)
+    complete = models.DecimalField(_("Complete"), max_digits=14, decimal_places=4, default=0.0)
 
     # tasks marked optional aren't included in the total
     is_optional = models.BooleanField(default=False)
@@ -388,19 +388,19 @@ class LineItem(models.Model):
     name = models.CharField(_("Name"), max_length=512)
 
     # fixed billing, amount of hours or materials to complete just one unit of the task
-    unit_qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=3, default=0.0)
+    unit_qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
 
     # time and materials billing, amount of hours or materials to complete the entire task
-    task_qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=3, default=0.0)
+    task_qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
 
     # time and materials billing, how many units of this have been delivered/expended and can thus be billed
-    billable = models.DecimalField(_("Billable"), max_digits=12, decimal_places=3, default=0.0)
+    billable = models.DecimalField(_("Billable"), max_digits=14, decimal_places=4, default=0.0)
 
     # unit for the quantity
     unit = models.CharField(_("Unit"), max_length=64)
 
     # price per unit
-    price = models.DecimalField(_("Price"), max_digits=12, decimal_places=2)
+    price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=0.0)
 
     # when labor is true, this will cause this line item to show up in time sheet and other
     # labor related parts of the system
@@ -461,7 +461,7 @@ class ProgressReport(models.Model):
 
     # how much of the project is complete in units of quantity
     # this gets copied into task.complete with the latest progress report value
-    complete = models.DecimalField(_("Complete"), max_digits=12, decimal_places=2)
+    complete = models.DecimalField(_("Complete"), max_digits=14, decimal_places=4, default=0.0)
 
     task = models.ForeignKey(Task, related_name="reports")
 

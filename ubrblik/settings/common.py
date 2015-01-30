@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'tastypie',
     'ordered_model',
+    'ubrblik.lib',
     'ubrblik.apps.project',
     'ubrblik.apps.directory',
     'ubrblik.apps.task',
