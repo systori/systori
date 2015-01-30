@@ -22,6 +22,7 @@ server {
 
     auth_basic "Restricted";
     auth_basic_user_file htpasswd;
+    # softronic:mehr-handwerk.de
 
     location / {
         uwsgi_pass production_ubrblik:8080;
