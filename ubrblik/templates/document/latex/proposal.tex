@@ -40,17 +40,19 @@
 \sloppy
 \begin{letter}
 
+{% autoescape off %}
+
 {% if contact.business %}{{ contact.business }} \\{% endif %}
-z.H. {{ contact.salutation|tex_escape|safe }} {{ contact.first_name|tex_escape|safe }} {{ contact.last_name|tex_escape|safe }} \\
-{{ contact.address|tex_escape|safe }} \\
-{{ contact.postal_code|tex_escape|safe }} {{ contact.city|tex_escape|safe }} \\
+z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ contact.last_name|tex_escape }} \\
+{{ contact.address|tex_escape }} \\
+{{ contact.postal_code|tex_escape }} {{ contact.city|tex_escape }} \\
 
 \vspace{15mm}
 
 \begin{flushright}
   {% now "l" %}, {% now "d" %}. {% now "F Y" %}
 \end{flushright}
-{{ doc.header|tex_escape|safe }}
+{{ doc.header|tex_escape }}
 
 \begin{longtabu} to \textwidth{@{}l X[l] r l r r}
 
@@ -70,21 +72,21 @@ z.H. {{ contact.salutation|tex_escape|safe }} {{ contact.first_name|tex_escape|s
 \endlastfoot
 
 {% for job in jobs.all %}
-{{job.code|bold}} & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{job.name|tex_escape|safe|bold}} }} &\\
+{{job.code|bold}} & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{job.name|tex_escape|bold}} }} &\\
 {% for taskgroup in job.taskgroups.all %}
-{{taskgroup.code|bold}} & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{taskgroup.name|tex_escape|safe|bold}} }} &\\
+{{taskgroup.code|bold}} & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{taskgroup.name|tex_escape|bold}} }} &\\
 
 {% for task in taskgroup.tasks.all %}
 {% for instance in task.taskinstances.all %}
 {{instance.code}}
-    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_name|tex_escape|safe}} }} \\*
-    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_description|tex_escape|safe}} }} \\*
-    & & {{task.qty|floatformat:2}} & {{task.unit|tex_escape|safe}} & {{instance.unit_price|floatformat:2}} €  & {% if task.is_optional %}{% trans 'Optional' %}{% elif not instance.selected %}{% trans 'alternate'%} {% else %}{{instance.fixed_price_estimate|floatformat:2}} €{% endif %} \\
+    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_name|tex_escape}} }} \\*
+    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_description|tex_escape}} }} \\*
+    & & {{task.qty|floatformat:2}} & {{task.unit|tex_escape}} & {{instance.unit_price|floatformat:2}} €  & {% if task.is_optional %}{% trans 'Optional' %}{% elif not instance.selected %}{% trans 'alternate'%} {% else %}{{instance.fixed_price_estimate|floatformat:2}} €{% endif %} \\
 {% endfor %}
 {% endfor %}
 
 \tabucline{6}
-& \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name|tex_escape|safe}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} € }\\
+& \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name|tex_escape}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} € }\\
 \\
 {% endfor %}
 
@@ -92,7 +94,7 @@ z.H. {{ contact.salutation|tex_escape|safe }} {{ contact.first_name|tex_escape|s
 
 {% for job in jobs.all %}
 {% for taskgroup in job.taskgroups.all %}
-  & \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name|tex_escape|safe}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} € } \\*
+  & \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name|tex_escape}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} € } \\*
 {% endfor %}
 {% endfor %}
 
@@ -111,7 +113,8 @@ z.H. {{ contact.salutation|tex_escape|safe }} {{ contact.first_name|tex_escape|s
 
 \vspace{5mm}
 
-{{ doc.footer|tex_escape|safe}}
+{{ doc.footer|tex_escape }}
+{% endautoescape %}
 
 \end{letter}
 \end{document}
