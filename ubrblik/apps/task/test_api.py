@@ -81,13 +81,13 @@ class TaskGroupResourceTest(ResourceTestCaseBase):
         self.assertEqual(start_count-1, new_count)
 
     def test_autocomplete_no_matches(self):
-        url = self.url + '/autocomplete/'
+        url = self.url + 'autocomplete/'
         resp = self.api_client.get(url, data={"query": "green"}, format='json')
         self.assertHttpOK(resp)
-        self.assertEqual(0, len(resp.content))
+        self.assertEqual(b'', resp.content.strip())
 
     def test_autocomplete_has_matches(self):
-        url = self.url + '/autocomplete/'
+        url = self.url + 'autocomplete/'
         resp = self.api_client.get(url, data={"query": "group"}, format='json')
         self.assertHttpOK(resp)
         self.assertEqual(2, str(resp.content).count('group'))

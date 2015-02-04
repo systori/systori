@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
 from django.conf.urls import url
+from django.db.models import Q
 from django.template.loader import get_template
 from django.template import Context
 from tastypie import fields
@@ -94,13 +95,18 @@ class AutoCompleteModelResourceMixin:
         if 'query' not in request.GET:
             raise ValidationError("Missing 'query' argument.")
         
-        query = request.GET['query']
-        if not query:
+        search_string = request.GET['query']
+        if not search_string:
             raise ValidationError("Search string is empty.")
 
-        template, context = self.perform_autocomplete(query)
+        query = self._meta.queryset.\
+                filter(Q(name__icontains=search_string) | Q(description__icontains=search_string))
 
-        rendered = template.render(Context(context)).encode('utf-8')
+        self.add_prefetching(query)
+
+        template = get_template('task/{}_autocomplete.html'.format(self._meta.resource_name))
+        context = Context({'objects': query.all()})
+        rendered = template.render(context).encode('utf-8')
 
         return http.HttpResponse(rendered)
 
@@ -133,10 +139,9 @@ class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, A
         specimen.clone_to(job, new_pos)
         return get_template('task/taskgroup_loop.html'), {'group': specimen}
 
-    def perform_autocomplete(self, query):
-        # TODO: Add prefetching, this should significantly improve performance.
-        groups = TaskGroup.objects.filter(name__icontains=query)
-        return get_template('task/taskgroup_autocomplete.html'), {'groups': groups}
+    def add_prefetching(self, query):
+        # TODO: Add prefetching.
+        pass
 
 
 class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCompleteModelResourceMixin, ModelResource):
@@ -155,10 +160,9 @@ class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCo
         specimen.clone_to(taskgroup, new_pos)
         return get_template('task/task_loop.html'), {'task': specimen}
 
-    def perform_autocomplete(self, query):
-        # TODO: Add prefetching, this should significantly improve performance.
-        tasks = Task.objects.filter(name__icontains=query)
-        return get_template('task/task_autocomplete.html'), {'tasks': tasks}
+    def add_prefetching(self, query):
+        # TODO: Add prefetching.
+        pass
 
 class TaskInstanceResource(OrderedModelResourceMixin, ModelResource):
     task = fields.ForeignKey(TaskResource, 'task')
