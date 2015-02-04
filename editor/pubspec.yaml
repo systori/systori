@@ -1,0 +1,8 @@
+name: 'ubrblik_editor'
+version: 0.0.1
+description: >
+  Task editor for ubrblik.
+dependencies:
+  intl: any
+  collection: any
+  browser: any

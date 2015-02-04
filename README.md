@@ -4,9 +4,7 @@ Ubrblik is a suite of tools for construction companies to create project estimat
 
 Server side is written in [Python](https://www.python.org/) using the [Django framework](https://www.djangoproject.com/) with [PostgreSQL](http://www.postgresql.org/) as the backing database.
 
-Desktop client side is written using Django templates and [Dart](https://www.dartlang.org/). The task editor has a separate repository here: [ubrblik-editor](https://bitbucket.org/damoti/ubrblik-editor)
-
-Mobile client is written in Dart using the [Polymer framework](https://www.polymer-project.org/) and [Google's port of Cordova](https://github.com/MobileChromeApps/mobile-chrome-apps). The mobile client repository is located here: [ubrblik-mobile](https://bitbucket.org/damoti/ubrblik-mobile)
+Desktop client side is written using Django templates and [Dart](https://www.dartlang.org/).
 
 The rest of this guide will focus on the Django app. See links above for information on getting setup with task editor and mobile client.
 

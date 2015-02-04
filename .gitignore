@@ -3,4 +3,7 @@
 __pycache__
 documents/
 ubrblik/settings/__init__.py
-ubrblik/templates/task/output
+editor/pubspec.lock
+editor/packages/
+editor/build/
+editor/.pub/

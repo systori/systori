@@ -75,6 +75,36 @@ class ClonableModelResourceMixin:
         return http.HttpCreated(rendered)
 
 
+class AutoCompleteModelResourceMixin:
+
+    def prepend_urls(self):
+        urls = super(AutoCompleteModelResourceMixin, self).prepend_urls()
+        urls.append(
+            url(r"^(?P<resource_name>%s)/autocomplete%s$" %
+                (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('dispatch_autocomplete'), name="api_dispatch_autocomplete")
+        )
+        self._meta.autocomplete_allowed_methods = ['get']
+        return urls
+
+    def dispatch_autocomplete(self, request, **kwargs):
+        return self.dispatch('autocomplete', request, **kwargs)
+
+    def get_autocomplete(self, request, **kwargs):
+        if 'query' not in request.GET:
+            raise ValidationError("Missing 'query' argument.")
+        
+        query = request.GET['query']
+        if not query:
+            raise ValidationError("Search string is empty.")
+
+        template, context = self.perform_autocomplete(query)
+
+        rendered = template.render(Context(context)).encode('utf-8')
+
+        return http.HttpResponse(rendered)
+
+
 class JobResource(OrderedModelResourceMixin, ModelResource):
 
     project = fields.ForeignKey(ProjectResource, 'project')
@@ -87,7 +117,7 @@ class JobResource(OrderedModelResourceMixin, ModelResource):
         }
 
 
-class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, ModelResource):
+class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCompleteModelResourceMixin, ModelResource):
 
     job = fields.ForeignKey(JobResource, 'job')
 
@@ -95,8 +125,7 @@ class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, M
         queryset = TaskGroup.objects.all()
         resource_name = "taskgroup"
         filtering = {
-            "job": "exact",
-            "name": "icontains"
+            "job": "exact"
         }
 
     def perform_cloning(self, specimen, new_parent_uri, new_pos):
@@ -104,8 +133,13 @@ class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, M
         specimen.clone_to(job, new_pos)
         return get_template('task/taskgroup_loop.html'), {'group': specimen}
 
+    def perform_autocomplete(self, query):
+        # TODO: Add prefetching, this should significantly improve performance.
+        groups = TaskGroup.objects.filter(name__icontains=query)
+        return get_template('task/taskgroup_autocomplete.html'), {'groups': groups}
 
-class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, ModelResource):
+
+class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCompleteModelResourceMixin, ModelResource):
 
     taskgroup = fields.ForeignKey(TaskGroupResource, 'taskgroup')
 
@@ -113,8 +147,7 @@ class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, ModelR
         queryset = Task.objects.all()
         resource_name = "task"
         filtering = {
-            "taskgroup": "exact",
-            "name": "icontains"
+            "taskgroup": "exact"
         }
 
     def perform_cloning(self, specimen, new_parent_uri, new_pos):
@@ -122,6 +155,10 @@ class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, ModelR
         specimen.clone_to(taskgroup, new_pos)
         return get_template('task/task_loop.html'), {'task': specimen}
 
+    def perform_autocomplete(self, query):
+        # TODO: Add prefetching, this should significantly improve performance.
+        tasks = Task.objects.filter(name__icontains=query)
+        return get_template('task/task_autocomplete.html'), {'tasks': tasks}
 
 class TaskInstanceResource(OrderedModelResourceMixin, ModelResource):
     task = fields.ForeignKey(TaskResource, 'task')

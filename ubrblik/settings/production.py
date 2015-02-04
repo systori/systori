@@ -6,7 +6,7 @@ TEMPLATE_DEBUG = False
 ALLOWED_HOSTS = ['ubrblik.de']
 
 STATICFILES_DIRS += (
-    ('editor', '../ubrblik-editor/build/web'),
+    ('editor', 'editor/build/web'),
 )
 
 DATABASES['default'].update({

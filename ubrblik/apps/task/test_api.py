@@ -80,6 +80,18 @@ class TaskGroupResourceTest(ResourceTestCaseBase):
         new_count = TaskGroup.objects.count()
         self.assertEqual(start_count-1, new_count)
 
+    def test_autocomplete_no_matches(self):
+        url = self.url + '/autocomplete/'
+        resp = self.api_client.get(url, data={"query": "green"}, format='json')
+        self.assertHttpOK(resp)
+        self.assertEqual(0, len(resp.content))
+
+    def test_autocomplete_has_matches(self):
+        url = self.url + '/autocomplete/'
+        resp = self.api_client.get(url, data={"query": "group"}, format='json')
+        self.assertHttpOK(resp)
+        self.assertEqual(2, str(resp.content).count('group'))
+
 
 class TaskResourceTest(ResourceTestCaseBase):
 
@@ -118,12 +130,6 @@ class TaskResourceTest(ResourceTestCaseBase):
         self.assertHttpAccepted(resp)
         new_count = Task.objects.count()
         self.assertEqual(start_count-1, new_count)
-
-    def test_find_matches(self):
-        resp = self.api_client.get(self.url, data={"name__icontains": "green"}, format='json')
-        self.assertValidJSONResponse(resp)
-        objects = self.deserialize(resp)['objects']
-        self.assertEqual(len(objects), 2)
 
     def test_clone_task(self):
         url = self.url+'{}/clone/'.format(self.task.id)
