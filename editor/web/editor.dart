@@ -238,7 +238,9 @@ abstract class EditableElement extends UbrElement {
 
   DivElement code_view;
   DivElement name_view;
+  DivElement description_view;
   DivElement qty_view;
+  DivElement unit_view;
   DivElement price_view;
   DivElement total_view;
 
@@ -271,25 +273,57 @@ abstract class EditableElement extends UbrElement {
 
     code_view = this.querySelector(":scope>.editor .code");
     name_view = this.querySelector(":scope>.editor .name");
+    description_view = this.querySelector(":scope>.editor .description");
     qty_view = this.querySelector(":scope>.editor .qty");
+    unit_view = this.querySelector(":scope>.editor .unit");
     price_view = this.querySelector(":scope>.editor .price");
     total_view = this.querySelector(":scope>.editor .total");
 
     input_views = this.querySelectorAll(':scope>.editor [contenteditable]');
     streams.add(input_views.onBlur.listen(unfocus));
     input_views.onKeyDown.listen(handle_input);
-    input_views.onClick.listen((MouseEvent event) {
+    input_views.onFocus.listen((MouseEvent event) {
       if (!started)
         start(focus: false);
     });
 
-    [qty_view, price_view].forEach((DivElement view) {
-      if (view != null) {
-        view.onKeyUp.listen((KeyboardEvent event) {
-          this.update_totals();
-        });
-      }
+    // recalculate totals when these views are changed
+    [qty_view, price_view].where((v)=>v!=null)
+    .forEach((DivElement view) {
+      view.onKeyUp.listen((KeyboardEvent event) {
+        this.update_totals();
+      });
     });
+
+    // select the entire contents of the view when these views are focused
+    [qty_view, price_view, unit_view].where((v)=>v!=null)
+    .forEach((DivElement view) {
+      view.onFocus.listen((FocusEvent event) {
+        /* This timer solves an annoying situation when user clicks
+         * on an input field and two events are fired:
+         *   1) onFocus is fired first and the text is selected. So far good.
+         *   2) Immediately after onFocus, the onClick event is fired. But the onClick event
+         *      default behavior is to place a carret somewhere in the text. This causes the
+         *      selection we made in onFocus to be un-selected. :-(
+         * The solution is to set a timer that will delay selecting text
+         * until after onClick is called. It's a hack but it works.
+         */
+        new Timer(new Duration(milliseconds: 1), () {
+          window.getSelection().selectAllChildren(event.target);
+        });
+      });
+    });
+
+    // move carret to the end of content when these views are focused
+    [name_view, description_view].where((v)=>v!=null)
+    .forEach((DivElement view) {
+      view.onFocus.listen((FocusEvent event) {
+        window.getSelection()
+          ..selectAllChildren(event.target)
+          ..collapseToEnd();
+      });
+    });
+
   }
 
   use_autocompleter() {
