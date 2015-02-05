@@ -29,21 +29,25 @@ class OrderedModelResourceMixin:
                 (self._meta.resource_name, self._meta.detail_uri_name, trailing_slash()),
                 self.wrap_view('dispatch_move'), name="api_dispatch_move")
         )
-        self._meta.move_allowed_methods = ['post']
+        self._meta.move_allowed_methods = ['get']
         return urls
 
     def dispatch_move(self, request, **kwargs):
         return self.dispatch('move', request, **kwargs)
 
-    def post_move(self, request, **kwargs):
-        data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
+    def get_move(self, request, **kwargs):
         obj = self.obj_get(self.build_bundle(request=request), **self.remove_api_resource_names(kwargs))
 
-        if 'target' not in data or 'pos' not in data:
-            raise ValidationError("Need target and pos for move operation.")
+        if 'position' not in request.GET:
+            raise ValidationError("Missing 'position' argument.")
 
-        target = self.get_via_uri(data['target'])
-        obj.move(target, data['pos'])
+        position = request.GET['position'] or '0'
+        try:
+            position = int(position)
+        except:
+            raise ValidationError("'position' must be an integer")
+
+        obj.to(position)
 
         return http.HttpAccepted()
 

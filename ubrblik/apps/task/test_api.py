@@ -19,7 +19,7 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         resp = self.api_client.get(self.url, data={})
         self.assertValidJSONResponse(resp)
         objects = self.deserialize(resp)['objects']
-        self.assertEqual(len(objects), 1)
+        self.assertEqual(len(objects), 2)
         object = objects[0]
         keys = object.keys()
         expected_keys = [
@@ -48,6 +48,31 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         self.assertEqual("new job", job.name)
         self.assertEqual("new desc", job.description)
 
+    def test_move(self):
+        first, second = Job.objects.all()
+        def update_first_second():
+            nonlocal first, second
+            first = Job.objects.get(pk=first.pk)
+            second = Job.objects.get(pk=second.pk)
+
+        self.assertEqual(0, first.order)
+        self.assertEqual(1, second.order)
+
+        url = self.url+'{}/move/'.format(first.pk)
+
+        # move down
+        resp = self.api_client.get(url, data={"position": 1})
+        self.assertHttpAccepted(resp)
+        update_first_second()
+        self.assertEqual(1, first.order)
+        self.assertEqual(0, second.order)
+
+        # move up 
+        resp = self.api_client.get(url, data={"position": 0})
+        self.assertHttpAccepted(resp)
+        update_first_second()
+        self.assertEqual(0, first.order)
+        self.assertEqual(1, second.order)
 
 class TaskGroupResourceTest(ResourceTestCaseBase):
 

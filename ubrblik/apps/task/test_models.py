@@ -12,6 +12,7 @@ def create_task_data(self):
     self.project = Project.objects.create(name="my project")
     self.project2 = Project.objects.create(name="my project 2")
     self.job = Job.objects.create(name="Default", project=self.project)
+    self.job2 = Job.objects.create(name="Default 2", project=self.project)
     self.group = TaskGroup.objects.create(name="my group", job=self.job)
     self.group2 = TaskGroup.objects.create(name="my group 2", job=self.job)
     self.task = Task.objects.create(name="my task one", qty=1, taskgroup=self.group)

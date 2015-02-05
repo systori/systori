@@ -11,7 +11,7 @@ from django.utils.functional import cached_property
 
 class BetterOrderedModel(OrderedModel):
 
-    class Meta(OrderedModel.Meta):
+    class Meta:
         abstract = True
 
     def save(self, *args, **kwargs):
@@ -84,9 +84,10 @@ class Job(BetterOrderedModel):
 
     objects = JobManager()
 
-    class Meta(OrderedModel.Meta):
+    class Meta:
         verbose_name = _("Job")
         verbose_name_plural = _("Job")
+        ordering = ['order']
 
     @transition(field=status, source=[APPROVED,COMPLETED], target=STARTED, custom={'label': _("Start")})
     def start(self):
@@ -125,7 +126,7 @@ class Job(BetterOrderedModel):
         return str(self.order+1).zfill(self.project.job_zfill)
 
     def __str__(self):
-        return '{} {}'.format(self.code, self.name)
+        return self.name
 
 class TaskGroup(BetterOrderedModel):
 
@@ -135,9 +136,10 @@ class TaskGroup(BetterOrderedModel):
     job = models.ForeignKey(Job, related_name="taskgroups")
     order_with_respect_to = 'job'
 
-    class Meta(OrderedModel.Meta):
+    class Meta:
         verbose_name = _("Task Group")
         verbose_name_plural = _("Task Groups")
+        ordering = ['order']
 
     def _total_calc(self, field):
         total = Decimal(0.0)
@@ -215,9 +217,10 @@ class Task(BetterOrderedModel):
     taskgroup = models.ForeignKey(TaskGroup, related_name="tasks")
     order_with_respect_to = 'taskgroup'
 
-    class Meta(OrderedModel.Meta):
+    class Meta:
         verbose_name = _("Task")
         verbose_name_plural = _("Task")
+        ordering = ['order']
 
     def estimate_total_modify(self, user, action, rate):
         for instance in self.taskinstances.all():
@@ -290,9 +293,10 @@ class TaskInstance(BetterOrderedModel):
     task = models.ForeignKey(Task, related_name="taskinstances")
     order_with_respect_to = 'task'
 
-    class Meta(OrderedModel.Meta):
+    class Meta:
         verbose_name = _("Task Instance")
         verbose_name_plural = _("Task Instances")
+        ordering = ['order']
 
     def estimate_total_modify(self, user, action, rate):
         correction = self.lineitems.filter(is_correction=True).first()
