@@ -12,6 +12,13 @@ NumberFormat DECIMAL = new NumberFormat("#,###,###,##0.####");
 double parse_currency(String value) => value.length > 0 ? CURRENCY.parse(value) : 0;
 double parse_decimal(String value) => value.length > 0 ? DECIMAL.parse(value) : 0;
 
+enum InputMode {
+  TASK,
+  LINEITEM
+}
+
+InputMode INPUT_MODE = InputMode.LINEITEM;
+
 
 DocumentFragment stringToDocumentFragment(html) {
   var tmp = document.createDocumentFragment();
@@ -405,22 +412,32 @@ abstract class EditableElement extends UbrElement {
           stop();
           autocompleter.handleEnter();
         } else {
-          if (is_blank()) break;
-          stop_n_save();
+
+          if (!is_blank()) stop_n_save();
+
           if (event.shiftKey) {
             new_parent_sibling();
+          }
+
+          if (is_blank()) break;
+
+          if (INPUT_MODE == InputMode.TASK && object_name == 'task') {
+            new_sibling();
           } else if (child_element != null) {
             new_child();
           } else {
             new_sibling();
           }
+
         }
         break;
 
       case KeyCode.DELETE:
         if (event.shiftKey) {
+          if (object_name == 'taskgroup' && parent.children.length == 1) break;
           event.preventDefault();
           delete();
+          stop();
           next();
           remove();
           break;
@@ -437,9 +454,12 @@ abstract class EditableElement extends UbrElement {
       case KeyCode.DELETE:
         break;
       default:
-        repository.autocomplete(object_name, name_view.text.trim()).then((data) {
-          autocompleter.handleResults(data);
-        });
+        var search = name_view.text.trim();
+        if (search.length > 1) {
+          repository.autocomplete(object_name, search).then((data) {
+            autocompleter.handleResults(data);
+          });
+        }
     }
   }
 
@@ -656,7 +676,8 @@ class TaskElement extends EditableElement {
   }
 
   after_create() {
-    new_child();
+    if (INPUT_MODE == InputMode.LINEITEM)
+      new_child();
   }
 
   new_child() {
@@ -755,6 +776,10 @@ class LineItemElement extends EditableElement {
 
 }
 
+setup_input_mode_buttons() {
+  querySelector('#input-task-mode').onClick.listen((_)=>INPUT_MODE=InputMode.TASK);
+  querySelector('#input-lineitem-mode').onClick.listen((_)=>INPUT_MODE=InputMode.LINEITEM);
+}
 
 void main() {
   Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
@@ -764,4 +789,5 @@ void main() {
   document.registerElement('ubr-task', TaskElement);
   document.registerElement('ubr-taskinstance', TaskInstanceElement);
   document.registerElement('ubr-lineitem', LineItemElement);
+  setup_input_mode_buttons();
 }
