@@ -106,7 +106,7 @@ class Repository {
     return result.future;
   }
 
-  Future<List> autocomplete(String type, String query) {
+  Future<String> autocomplete(String type, String query) {
     var encoded_query = Uri.encodeQueryComponent(query);
     var wait_for_response = HttpRequest.request(
       "/api/v1/${type}/autocomplete/?query=$encoded_query",
@@ -148,7 +148,7 @@ class AutoComplete extends HtmlElement {
   AutoComplete.created() : super.created();
 
   handleResults(String html) {
-    if (html.isEmpty) {
+    if (html.trim().isEmpty) {
       style.display = 'none';
       return;
     }
@@ -276,6 +276,10 @@ abstract class EditableElement extends UbrElement {
       var template = document.querySelector('#${object_name}-template');
       var clone = document.importNode(template.content, true);
       append(clone);
+    }
+
+    if (this.querySelector(":scope>${child_element}") == null) {
+      classes.add('empty');
     }
 
     code_view = this.querySelector(":scope>.editor .code");
@@ -415,8 +419,9 @@ abstract class EditableElement extends UbrElement {
 
           if (!is_blank()) stop_n_save();
 
-          if (event.shiftKey) {
+          if (event.shiftKey && object_name != 'taskgroup') {
             new_parent_sibling();
+            break;
           }
 
           if (is_blank()) break;
@@ -439,7 +444,15 @@ abstract class EditableElement extends UbrElement {
           delete();
           stop();
           next();
+
+          var saved_parent = this.parent;
+
           remove();
+
+          if (saved_parent.querySelector(":scope>${nodeName}") == null) {
+            saved_parent.classes.add('empty');
+          }
+
           break;
         }
 
@@ -459,6 +472,8 @@ abstract class EditableElement extends UbrElement {
           repository.autocomplete(object_name, search).then((data) {
             autocompleter.handleResults(data);
           });
+        } else {
+          autocompleter.handleBlur();
         }
     }
   }
@@ -531,6 +546,9 @@ abstract class EditableElement extends UbrElement {
       UbrElement parent_cached = parent;
       remove();
       parent_cached.recalculate_code();
+      if (parent_cached.querySelector(":scope>${nodeName}") == null) {
+        parent_cached.classes.add('empty');
+      }
     }
   }
 
@@ -609,6 +627,7 @@ abstract class EditableElement extends UbrElement {
     EditableElement item = document.createElement(child_element);
     append(item);
     recalculate_code();
+    classes.remove('empty');
     item.start();
   }
 
@@ -639,7 +658,9 @@ class TaskGroupElement extends EditableElement {
   int get child_zfill => int.parse(parent.dataset['task-zfill']);
 
   TaskGroupElement.created(): super.created() {
-    use_autocompleter();
+    if (pk == null) {
+      use_autocompleter();
+    }
   }
 
   update_totals() {
@@ -654,7 +675,9 @@ class TaskElement extends EditableElement {
   final child_element = "ubr-taskinstance";
 
   TaskElement.created(): super.created() {
-    use_autocompleter();
+    if (pk == null) {
+      use_autocompleter();
+    }
     add_toggle('is_optional');
   }
 
@@ -710,6 +733,8 @@ class TaskElement extends EditableElement {
         item.pk = new_pk;
         item.new_child(); // <-- starts a new line item
       });
+
+      classes.remove('empty');
 
     // Use Case 2:
     } else {

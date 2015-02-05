@@ -101,7 +101,7 @@ ubr-taskgroup > .editor .total {
   z-index: 2;
 }
 
-ubr-taskgroup > .editor:after {
+ubr-taskgroup:not(.empty) > .editor:after {
   display: block;
   position: absolute;
   content: "";
@@ -127,6 +127,10 @@ ubr-task:not(:last-child):after {
 
 ubr-task > .editor {
   padding-bottom: 0px;
+}
+
+ubr-task > .editor .code {
+  padding-left: 10px;
 }
 
 ubr-task > .editor .name {
@@ -189,6 +193,10 @@ ubr-task > .editor .total:before {
 }
 
 ubr-task > .editor .description {
+  padding-bottom: 15px;
+}
+
+ubr-task:not(.empty) > .editor .description {
   padding-bottom: 20px;
   border-right: 1px solid #e9e9e9;
 }
@@ -247,7 +255,7 @@ ubr-autocomplete {
   display: none;
   position: absolute;
   background: white;
-  left: 60px;
+  left: 80px;
   width: 310px;
   border: 1px solid lightgrey;
 }
@@ -275,10 +283,10 @@ ubr-autocomplete > div.active {
 </style>
 
 <div id="mode-selector" class="btn-group-vertical" data-toggle="buttons">
-  <label id="input-task-mode" class="btn btn-default btn-sm" title="{% trans 'Automatically indent down to tasks.' %}">
+  <label id="input-task-mode" class="btn btn-default btn-sm" title="{% trans "Stops indenting at the tasks level." %}">
     <input type="radio" name="input-mode"><span class="glyphicon glyphicon-step-forward"></span>
   </label>
-  <label id="input-lineitem-mode" class="btn btn-default btn-sm active" title="{% trans 'Automatically indent down to line items.' %}">
+  <label id="input-lineitem-mode" class="btn btn-default btn-sm active" title="{% trans 'Stops indenting at line items level.' %}">
     <input type="radio" name="input-mode"><span class="glyphicon glyphicon-fast-forward"></span>
   </label>
 </div>

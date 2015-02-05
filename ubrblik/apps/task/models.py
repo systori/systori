@@ -139,7 +139,8 @@ class TaskGroup(BetterOrderedModel):
     class Meta:
         verbose_name = _("Task Group")
         verbose_name_plural = _("Task Groups")
-        ordering = ['order']
+        #TODO: ordering = ['order']
+        ordering = ['id']
 
     def _total_calc(self, field):
         total = Decimal(0.0)
@@ -220,7 +221,8 @@ class Task(BetterOrderedModel):
     class Meta:
         verbose_name = _("Task")
         verbose_name_plural = _("Task")
-        ordering = ['order']
+        #TODO: ordering = ['order']
+        ordering = ['id']
 
     def estimate_total_modify(self, user, action, rate):
         for instance in self.taskinstances.all():
@@ -296,7 +298,8 @@ class TaskInstance(BetterOrderedModel):
     class Meta:
         verbose_name = _("Task Instance")
         verbose_name_plural = _("Task Instances")
-        ordering = ['order']
+        #TODO: ordering = ['order']
+        ordering = ['id']
 
     def estimate_total_modify(self, user, action, rate):
         correction = self.lineitems.filter(is_correction=True).first()
