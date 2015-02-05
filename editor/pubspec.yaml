@@ -6,3 +6,6 @@ dependencies:
   intl: any
   collection: any
   browser: any
+transformers:
+- $dart2js:
+    commandLineOptions: [--enable-enum]
