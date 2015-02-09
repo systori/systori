@@ -64,6 +64,30 @@ class JobQuerySetTests(TestCase):
         self.assertEqual(round(Decimal(960*.19),2), round(jobs.estimate_tax_total(),2))
         self.assertEqual(round(Decimal(960*1.19),2), round(jobs.estimate_gross_total(),2))
 
+
+class JobOffsetTests(TestCase):
+    def setUp(self):
+        create_task_data(self)
+
+    def test_no_offset(self):
+        self.assertEqual('1', self.job.code)
+
+    def test_offset_4(self):
+        self.project.job_offset = 4
+        self.assertEqual('5', self.job.code)
+
+class TaskGroupOffsetTests(TestCase):
+    def setUp(self):
+        create_task_data(self)
+
+    def test_no_offset(self):
+        self.assertEqual('1.1', self.group.code)
+
+    def test_offset_4(self):
+        self.project.job_offset = 2
+        self.job.taskgroup_offset = 3
+        self.assertEqual('3.4', self.group.code)
+
 class JobEstimateModificationTests(TestCase):
     
     def setUp(self):

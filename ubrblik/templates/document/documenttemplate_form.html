@@ -1,0 +1,21 @@
+{% extends "frame.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "main/sidebar.html" with section="templates" %}{% endblock %}
+
+{% block content %}
+<table>
+<tr>
+<td>
+<form method="post">{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="{% trans 'Save' %}" />
+</form>
+</td>
+<td valign="top"><br /><br />
+{% for key, val in form.instance.vars.items %}
+<b>[{{ key }}]</b> &nbsp; {{ val }}<br />
+{% endfor %}
+</tr>
+</table>
+{% endblock %}

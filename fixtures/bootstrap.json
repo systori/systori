@@ -32,7 +32,8 @@
       "is_template": true,
       "job_zfill": 1,
       "taskgroup_zfill": 1,
-      "task_zfill": 1
+      "task_zfill": 1,
+      "job_offset": 0
     }
   },
   {
@@ -44,7 +45,8 @@
       "is_template": false,
       "job_zfill": 1,
       "taskgroup_zfill": 1,
-      "task_zfill": 1
+      "task_zfill": 1,
+      "job_offset": 0
     }
   },
   {"pk": 1,

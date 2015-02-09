@@ -1,8 +1,8 @@
 import os
-from fabric.api import env, run, local, cd, lcd, prefix, sudo, settings
+from fabric.api import env, run, local, cd, get, prefix, sudo
 
 
-env.hosts = ['ubrblik.damoti.com' if env.user == 'lex' else 'ubrblik.de']
+env.hosts = ['ubrblik.de']
 
 
 def deploy(env_name='dev'):
@@ -30,13 +30,32 @@ def deploy(env_name='dev'):
 
     sudo('service uwsgi start ubrblik_'+env_name)
 
-
-def resetlocaldb():
+def _reset_localdb():
     local('dropdb ubrblik_local')
     local('createdb ubrblik_local')
+
+def localdb_from_bootstrap():
+    _reset_localdb()
     local('./manage.py migrate')
     local('./manage.py loaddata bootstrap')
 
+prod_dump_path = '/tmp/ubrblik.prod.dump'
+prod_dump_file = os.path.basename(prod_dump_path)
+def fetch_productiondb():
+    dbname = 'ubrblik_production'
+    # -Fc : custom postgresql compressed format
+    sudo('pg_dump -Fc -f %s %s' % (prod_dump_path,dbname), user='www-data')
+    get(prod_dump_path, prod_dump_file)
+    sudo('rm %s'%prod_dump_path)
+
+def load_productiondb():
+    _reset_localdb()
+    local('pg_restore -d ubrblik_local -O '+prod_dump_file)
+
+def localdb_from_productiondb():
+    fetch_productiondb()
+    load_productiondb()
+    local('rm '+prod_dump_file)
 
 def init_settings(env_name='local'):
     assert env_name in ['dev', 'production', 'local']
@@ -48,7 +67,7 @@ def init_settings(env_name='local'):
             s.write('from .{} import *\n'.format(env_name))
 
 
-def makemessages():
+def make_messages():
     local('./manage.py makemessages -l de -e tex,html,py')
 
 

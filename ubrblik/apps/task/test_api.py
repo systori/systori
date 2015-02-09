@@ -23,7 +23,7 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         object = objects[0]
         keys = object.keys()
         expected_keys = [
-            'id', 'name', 'description', 'order', 'project', 'billing_method', 'status', 'resource_uri'
+            'id', 'name', 'description', 'order', 'project', 'billing_method', 'status', 'taskgroup_offset', 'resource_uri'
         ]
         self.assertEqual(sorted(expected_keys), sorted(keys))
 
@@ -163,11 +163,10 @@ class TaskResourceTest(ResourceTestCaseBase):
             "pos": 1
         }
         self.assertEqual(1, Task.objects.filter(name=self.task.name).count())
-        resp = self.api_client.post(url, data=data, format='json')
-        self.assertHttpCreated(resp)
+        response = self.api_client.post(url, data=data, format='json')
         self.assertEqual(2, Task.objects.filter(name=self.task.name).count())
         new_task = Task.objects.get(taskgroup=self.group.id, order=1)
-        self.assertIn('<ubr-task data-pk="{0}">'.format(new_task.id), str(resp.content))
+        self.assertContains(response, '<ubr-task data-pk="{0}">'.format(new_task.id), 1, 201)
 
 class TaskInstanceResourceTest(ResourceTestCaseBase):
 

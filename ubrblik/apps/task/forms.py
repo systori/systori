@@ -6,9 +6,9 @@ class JobForm(forms.ModelForm):
     job_template = forms.ModelChoiceField(label=_('Job Template'), queryset=Job.objects.filter(project__is_template=True), required=False)
     class Meta:
         model = Job
-        fields = ['name', 'description', 'billing_method', 'job_template']
+        fields = ['name', 'description', 'billing_method', 'job_template', 'taskgroup_offset']
 
 class JobTemplateForm(forms.ModelForm):
     class Meta:
         model = Job
-        fields = ['name', 'description']
+        fields = ['name', 'description', 'taskgroup_offset']

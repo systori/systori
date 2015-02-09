@@ -1,9 +1,11 @@
 import os.path, shutil
+from collections import OrderedDict
 from datetime import datetime
 from subprocess import Popen, PIPE
 from django.template.loader import get_template
 from django.template import Context
 from django.core.files.base import ContentFile
+from django.utils.formats import date_format
 
 from collections import namedtuple
 from django.db import models
@@ -170,3 +172,60 @@ class Invoice(Document):
         verbose_name = _("Invoice")
         verbose_name_plural = _("Invoices")
         ordering = ['id']
+
+class SampleContact:
+    salutation = _('Mr')
+    first_name = _('John')
+    last_name = _('Smith')
+
+class SampleProjectContact:
+    contact = SampleContact
+
+class DocumentTemplate(models.Model):
+    name = models.CharField(_('Name'), max_length=512)
+    header = models.TextField(_("Header"))
+    footer = models.TextField(_("Footer"))
+
+    PROPOSAL = "proposal"
+    INVOICE = "invoice"
+    DOCUMENT_TYPE = (
+        (PROPOSAL, _("Proposal")),
+        (INVOICE, _("Invoice")),
+    )
+    document_type = models.CharField(_('Document Type'), max_length=128, choices=DOCUMENT_TYPE, default=PROPOSAL)
+
+    class Meta:
+        verbose_name = _("Document Template")
+        verbose_name_plural = _("Document Templates")
+        ordering = ['name']
+
+    def vars(self, project=None):
+        project_contact = project.billable_contact if project else SampleProjectContact
+        full_name = '%s %s %s' % (
+            project_contact.contact.salutation,
+            project_contact.contact.first_name,
+            project_contact.contact.last_name)
+
+        return OrderedDict([
+            (_('salutation'), project_contact.contact.salutation),
+            (_('firstname'), project_contact.contact.first_name),
+            (_('lastname'), project_contact.contact.last_name),
+            (_('name'), full_name.strip()),
+            (_('today'), date_format(datetime.now()))
+        ])
+
+    def render(self, project=None):
+        vars = self.vars(project)
+        result = {
+            'header': self.header,
+            'footer': self.footer
+        }
+        for key in result:
+            value = result[key]
+            for var in vars:
+                value = value.replace('['+str(var)+']', str(vars[var]))
+            result[key] = value
+        return result
+
+    def __str__(self):
+        return self.name

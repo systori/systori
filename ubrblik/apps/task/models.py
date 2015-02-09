@@ -52,6 +52,8 @@ class Job(BetterOrderedModel):
     name = models.CharField(_('Job Name'), max_length=512)
     description = models.TextField(_('Description'), blank=True)
 
+    taskgroup_offset = models.PositiveSmallIntegerField(_("Task Group Offset"), default=0)
+
     ESTIMATE_INCREMENT = 0.05
     ESTIMATE_INCREMENT_DISPLAY = '{:.0%}'.format(ESTIMATE_INCREMENT)
 
@@ -123,7 +125,7 @@ class Job(BetterOrderedModel):
 
     @property
     def code(self):
-        return str(self.order+1).zfill(self.project.job_zfill)
+        return str(self.order+1+self.project.job_offset).zfill(self.project.job_zfill)
 
     def __str__(self):
         return self.name
@@ -179,7 +181,8 @@ class TaskGroup(BetterOrderedModel):
     @property
     def code(self):
         parent_code = self.job.code
-        self_code = str(self.order+1).zfill(self.job.project.taskgroup_zfill)
+        offset = self.job.taskgroup_offset
+        self_code = str(self.order+1+offset).zfill(self.job.project.taskgroup_zfill)
         return '{}.{}'.format(parent_code, self_code)
 
     def __str__(self):
