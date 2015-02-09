@@ -1,0 +1,14 @@
+{% extends "frame.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "main/sidebar.html" with section="templates" %}{% endblock %}
+
+{% block content %}
+
+<h2>{{ object.name }}</h2>
+{% with parts=object.render %}
+{% trans 'Header' %}: {{ parts.header|linebreaks }}<br />
+{% trans 'Footer' %}: {{ parts.footer|linebreaks }}<br />
+{% endwith %}
+
+{% endblock %}

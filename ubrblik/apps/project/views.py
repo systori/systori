@@ -13,12 +13,6 @@ class ProjectList(ListView):
     def get_queryset(self):
         return self.model.objects.without_template()
 
-class TemplateProjectView(DetailView):
-    model = Project
-    template_name='project/template_project.html'
-    def get_object(self):
-        return self.model.objects.template().get()
-
 class ProjectView(DetailView):
     model = Project
 

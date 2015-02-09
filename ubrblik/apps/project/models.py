@@ -22,6 +22,8 @@ class Project(models.Model):
     job_zfill = models.PositiveSmallIntegerField(_("Job Code Zero Fill"), default=1)
     taskgroup_zfill = models.PositiveSmallIntegerField(_("Task Group Code Zero Fill"), default=1)
     task_zfill = models.PositiveSmallIntegerField(_("Task Code Zero Fill"), default=1)
+    
+    job_offset = models.PositiveSmallIntegerField(_("Job Offset"), default=0)
 
     objects = ProjectQuerySet.as_manager()
 

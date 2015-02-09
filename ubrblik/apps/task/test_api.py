@@ -19,11 +19,11 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         resp = self.api_client.get(self.url, data={})
         self.assertValidJSONResponse(resp)
         objects = self.deserialize(resp)['objects']
-        self.assertEqual(len(objects), 1)
+        self.assertEqual(len(objects), 2)
         object = objects[0]
         keys = object.keys()
         expected_keys = [
-            'id', 'name', 'description', 'order', 'project', 'billing_method', 'status', 'resource_uri'
+            'id', 'name', 'description', 'order', 'project', 'billing_method', 'status', 'taskgroup_offset', 'resource_uri'
         ]
         self.assertEqual(sorted(expected_keys), sorted(keys))
 
@@ -48,6 +48,31 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         self.assertEqual("new job", job.name)
         self.assertEqual("new desc", job.description)
 
+    def test_move(self):
+        first, second = Job.objects.all()
+        def update_first_second():
+            nonlocal first, second
+            first = Job.objects.get(pk=first.pk)
+            second = Job.objects.get(pk=second.pk)
+
+        self.assertEqual(0, first.order)
+        self.assertEqual(1, second.order)
+
+        url = self.url+'{}/move/'.format(first.pk)
+
+        # move down
+        resp = self.api_client.get(url, data={"position": 1})
+        self.assertHttpAccepted(resp)
+        update_first_second()
+        self.assertEqual(1, first.order)
+        self.assertEqual(0, second.order)
+
+        # move up 
+        resp = self.api_client.get(url, data={"position": 0})
+        self.assertHttpAccepted(resp)
+        update_first_second()
+        self.assertEqual(0, first.order)
+        self.assertEqual(1, second.order)
 
 class TaskGroupResourceTest(ResourceTestCaseBase):
 
@@ -81,13 +106,13 @@ class TaskGroupResourceTest(ResourceTestCaseBase):
         self.assertEqual(start_count-1, new_count)
 
     def test_autocomplete_no_matches(self):
-        url = self.url + '/autocomplete/'
+        url = self.url + 'autocomplete/'
         resp = self.api_client.get(url, data={"query": "green"}, format='json')
         self.assertHttpOK(resp)
-        self.assertEqual(0, len(resp.content))
+        self.assertEqual(b'', resp.content.strip())
 
     def test_autocomplete_has_matches(self):
-        url = self.url + '/autocomplete/'
+        url = self.url + 'autocomplete/'
         resp = self.api_client.get(url, data={"query": "group"}, format='json')
         self.assertHttpOK(resp)
         self.assertEqual(2, str(resp.content).count('group'))
@@ -138,11 +163,10 @@ class TaskResourceTest(ResourceTestCaseBase):
             "pos": 1
         }
         self.assertEqual(1, Task.objects.filter(name=self.task.name).count())
-        resp = self.api_client.post(url, data=data, format='json')
-        self.assertHttpCreated(resp)
+        response = self.api_client.post(url, data=data, format='json')
         self.assertEqual(2, Task.objects.filter(name=self.task.name).count())
         new_task = Task.objects.get(taskgroup=self.group.id, order=1)
-        self.assertIn('<ubr-task data-pk="{0}">'.format(new_task.id), str(resp.content))
+        self.assertContains(response, '<ubr-task data-pk="{0}">'.format(new_task.id), 1, 201)
 
 class TaskInstanceResourceTest(ResourceTestCaseBase):
 

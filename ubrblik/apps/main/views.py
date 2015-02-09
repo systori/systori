@@ -1,5 +1,7 @@
 from django.views.generic import TemplateView
+from ..project.models import Project
 from ..task.models import LineItem
+from ..document.models import DocumentTemplate
 
 class SettingsView(TemplateView):
     template_name = "main/settings.html"
@@ -24,3 +26,11 @@ class IndexView(TemplateView):
             view = DashboardView.as_view()
             return view(request, *args, **kwargs)
         return super(IndexView, self).dispatch(request, *args, **kwargs)
+
+class TemplatesView(TemplateView):
+    template_name='main/templates.html'
+    def get_context_data(self, **kwargs):
+        context = super(TemplatesView, self).get_context_data(**kwargs)
+        context['jobs'] = Project.objects.template().get().jobs.all()
+        context['documents'] = DocumentTemplate.objects.all()
+        return context

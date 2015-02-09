@@ -12,6 +12,13 @@ NumberFormat DECIMAL = new NumberFormat("#,###,###,##0.####");
 double parse_currency(String value) => value.length > 0 ? CURRENCY.parse(value) : 0;
 double parse_decimal(String value) => value.length > 0 ? DECIMAL.parse(value) : 0;
 
+enum InputMode {
+  TASK,
+  LINEITEM
+}
+
+InputMode INPUT_MODE = InputMode.LINEITEM;
+
 
 DocumentFragment stringToDocumentFragment(html) {
   var tmp = document.createDocumentFragment();
@@ -99,7 +106,7 @@ class Repository {
     return result.future;
   }
 
-  Future<List> autocomplete(String type, String query) {
+  Future<String> autocomplete(String type, String query) {
     var encoded_query = Uri.encodeQueryComponent(query);
     var wait_for_response = HttpRequest.request(
       "/api/v1/${type}/autocomplete/?query=$encoded_query",
@@ -141,7 +148,7 @@ class AutoComplete extends HtmlElement {
   AutoComplete.created() : super.created();
 
   handleResults(String html) {
-    if (html.isEmpty) {
+    if (html.trim().isEmpty) {
       style.display = 'none';
       return;
     }
@@ -238,7 +245,9 @@ abstract class EditableElement extends UbrElement {
 
   DivElement code_view;
   DivElement name_view;
+  DivElement description_view;
   DivElement qty_view;
+  DivElement unit_view;
   DivElement price_view;
   DivElement total_view;
 
@@ -269,27 +278,63 @@ abstract class EditableElement extends UbrElement {
       append(clone);
     }
 
+    if (this.querySelector(":scope>${child_element}") == null) {
+      classes.add('empty');
+    }
+
     code_view = this.querySelector(":scope>.editor .code");
     name_view = this.querySelector(":scope>.editor .name");
+    description_view = this.querySelector(":scope>.editor .description");
     qty_view = this.querySelector(":scope>.editor .qty");
+    unit_view = this.querySelector(":scope>.editor .unit");
     price_view = this.querySelector(":scope>.editor .price");
     total_view = this.querySelector(":scope>.editor .total");
 
     input_views = this.querySelectorAll(':scope>.editor [contenteditable]');
     streams.add(input_views.onBlur.listen(unfocus));
     input_views.onKeyDown.listen(handle_input);
-    input_views.onClick.listen((MouseEvent event) {
+    input_views.onFocus.listen((MouseEvent event) {
       if (!started)
         start(focus: false);
     });
 
-    [qty_view, price_view].forEach((DivElement view) {
-      if (view != null) {
-        view.onKeyUp.listen((KeyboardEvent event) {
-          this.update_totals();
-        });
-      }
+    // recalculate totals when these views are changed
+    [qty_view, price_view].where((v)=>v!=null)
+    .forEach((DivElement view) {
+      view.onKeyUp.listen((KeyboardEvent event) {
+        this.update_totals();
+      });
     });
+
+    // select the entire contents of the view when these views are focused
+    [qty_view, price_view, unit_view].where((v)=>v!=null)
+    .forEach((DivElement view) {
+      view.onFocus.listen((FocusEvent event) {
+        /* This timer solves an annoying situation when user clicks
+         * on an input field and two events are fired:
+         *   1) onFocus is fired first and the text is selected. So far good.
+         *   2) Immediately after onFocus, the onClick event is fired. But the onClick event
+         *      default behavior is to place a carret somewhere in the text. This causes the
+         *      selection we made in onFocus to be un-selected. :-(
+         * The solution is to set a timer that will delay selecting text
+         * until after onClick is called. It's a hack but it works.
+         */
+        new Timer(new Duration(milliseconds: 1), () {
+          window.getSelection().selectAllChildren(event.target);
+        });
+      });
+    });
+
+    // move carret to the end of content when these views are focused
+    [name_view, description_view].where((v)=>v!=null)
+    .forEach((DivElement view) {
+      view.onFocus.listen((FocusEvent event) {
+        window.getSelection()
+          ..selectAllChildren(event.target)
+          ..collapseToEnd();
+      });
+    });
+
   }
 
   use_autocompleter() {
@@ -371,24 +416,43 @@ abstract class EditableElement extends UbrElement {
           stop();
           autocompleter.handleEnter();
         } else {
-          if (is_blank()) break;
-          stop_n_save();
-          if (event.shiftKey) {
+
+          if (!is_blank()) stop_n_save();
+
+          if (event.shiftKey && object_name != 'taskgroup') {
             new_parent_sibling();
+            break;
+          }
+
+          if (is_blank()) break;
+
+          if (INPUT_MODE == InputMode.TASK && object_name == 'task') {
+            new_sibling();
           } else if (child_element != null) {
             new_child();
           } else {
             new_sibling();
           }
+
         }
         break;
 
       case KeyCode.DELETE:
         if (event.shiftKey) {
+          if (object_name == 'taskgroup' && parent.children.length == 1) break;
           event.preventDefault();
           delete();
+          stop();
           next();
+
+          var saved_parent = this.parent;
+
           remove();
+
+          if (saved_parent.querySelector(":scope>${nodeName}") == null) {
+            saved_parent.classes.add('empty');
+          }
+
           break;
         }
 
@@ -403,9 +467,14 @@ abstract class EditableElement extends UbrElement {
       case KeyCode.DELETE:
         break;
       default:
-        repository.autocomplete(object_name, name_view.text.trim()).then((data) {
-          autocompleter.handleResults(data);
-        });
+        var search = name_view.text.trim();
+        if (search.length > 1) {
+          repository.autocomplete(object_name, search).then((data) {
+            autocompleter.handleResults(data);
+          });
+        } else {
+          autocompleter.handleBlur();
+        }
     }
   }
 
@@ -477,6 +546,9 @@ abstract class EditableElement extends UbrElement {
       UbrElement parent_cached = parent;
       remove();
       parent_cached.recalculate_code();
+      if (parent_cached.querySelector(":scope>${nodeName}") == null) {
+        parent_cached.classes.add('empty');
+      }
     }
   }
 
@@ -555,6 +627,7 @@ abstract class EditableElement extends UbrElement {
     EditableElement item = document.createElement(child_element);
     append(item);
     recalculate_code();
+    classes.remove('empty');
     item.start();
   }
 
@@ -585,7 +658,9 @@ class TaskGroupElement extends EditableElement {
   int get child_zfill => int.parse(parent.dataset['task-zfill']);
 
   TaskGroupElement.created(): super.created() {
-    use_autocompleter();
+    if (pk == null) {
+      use_autocompleter();
+    }
   }
 
   update_totals() {
@@ -600,7 +675,9 @@ class TaskElement extends EditableElement {
   final child_element = "ubr-taskinstance";
 
   TaskElement.created(): super.created() {
-    use_autocompleter();
+    if (pk == null) {
+      use_autocompleter();
+    }
     add_toggle('is_optional');
   }
 
@@ -622,7 +699,8 @@ class TaskElement extends EditableElement {
   }
 
   after_create() {
-    new_child();
+    if (INPUT_MODE == InputMode.LINEITEM)
+      new_child();
   }
 
   new_child() {
@@ -655,6 +733,8 @@ class TaskElement extends EditableElement {
         item.pk = new_pk;
         item.new_child(); // <-- starts a new line item
       });
+
+      classes.remove('empty');
 
     // Use Case 2:
     } else {
@@ -721,6 +801,10 @@ class LineItemElement extends EditableElement {
 
 }
 
+setup_input_mode_buttons() {
+  querySelector('#input-task-mode').onClick.listen((_)=>INPUT_MODE=InputMode.TASK);
+  querySelector('#input-lineitem-mode').onClick.listen((_)=>INPUT_MODE=InputMode.LINEITEM);
+}
 
 void main() {
   Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
@@ -730,4 +814,5 @@ void main() {
   document.registerElement('ubr-task', TaskElement);
   document.registerElement('ubr-taskinstance', TaskInstanceElement);
   document.registerElement('ubr-lineitem', LineItemElement);
+  setup_input_mode_buttons();
 }

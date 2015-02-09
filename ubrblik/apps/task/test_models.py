@@ -12,6 +12,7 @@ def create_task_data(self):
     self.project = Project.objects.create(name="my project")
     self.project2 = Project.objects.create(name="my project 2")
     self.job = Job.objects.create(name="Default", project=self.project)
+    self.job2 = Job.objects.create(name="Default 2", project=self.project)
     self.group = TaskGroup.objects.create(name="my group", job=self.job)
     self.group2 = TaskGroup.objects.create(name="my group 2", job=self.job)
     self.task = Task.objects.create(name="my task one", qty=1, taskgroup=self.group)
@@ -62,6 +63,30 @@ class JobQuerySetTests(TestCase):
         self.assertEqual(Decimal(0), jobs.billable_total())
         self.assertEqual(round(Decimal(960*.19),2), round(jobs.estimate_tax_total(),2))
         self.assertEqual(round(Decimal(960*1.19),2), round(jobs.estimate_gross_total(),2))
+
+
+class JobOffsetTests(TestCase):
+    def setUp(self):
+        create_task_data(self)
+
+    def test_no_offset(self):
+        self.assertEqual('1', self.job.code)
+
+    def test_offset_4(self):
+        self.project.job_offset = 4
+        self.assertEqual('5', self.job.code)
+
+class TaskGroupOffsetTests(TestCase):
+    def setUp(self):
+        create_task_data(self)
+
+    def test_no_offset(self):
+        self.assertEqual('1.1', self.group.code)
+
+    def test_offset_4(self):
+        self.project.job_offset = 2
+        self.job.taskgroup_offset = 3
+        self.assertEqual('3.4', self.group.code)
 
 class JobEstimateModificationTests(TestCase):
     

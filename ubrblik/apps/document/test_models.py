@@ -5,6 +5,8 @@ from django.utils.translation import activate
 from .models import *
 
 from ..task.test_models import create_task_data
+from ..directory.test_models import create_contact_data
+from ..directory.models import ProjectContact
 
 
 class ProposalTests(TestCase):
@@ -27,3 +29,30 @@ class ProposalTests(TestCase):
         labels = [str(t.custom['label']) for t in d.get_available_status_transitions()]
         labels.sort()
         self.assertEquals(['Approve', 'Decline'], labels)
+
+class DocumentTemplateTests(TestCase):
+
+    def setUp(self):
+        create_contact_data(self)
+        self.pc = ProjectContact.objects.create(project=self.project, contact=self.contact, is_billable=True)
+
+    def test_render_english_tpl(self):
+        d = DocumentTemplate.objects.create(name="DocTpl", header="Dear [lastname]", footer="Thanks [firstname]!", document_type="invoice")
+        activate('en')
+        r = d.render(self.project)
+        self.assertEqual("Dear von Mises", r['header'])
+        self.assertEqual("Thanks Ludwig!", r['footer'])
+
+    def test_render_german_tpl(self):
+        d = DocumentTemplate.objects.create(name="DocTpl", header="Dear [nachname]", footer="Thanks [vorname]!", document_type="invoice")
+        activate('de')
+        r = d.render(self.project)
+        self.assertEqual("Dear von Mises", r['header'])
+        self.assertEqual("Thanks Ludwig!", r['footer'])
+
+    def test_render_sample_tpl(self):
+        d = DocumentTemplate.objects.create(name="DocTpl", header="Dear [lastname]", footer="Thanks [firstname]!", document_type="invoice")
+        activate('en')
+        r = d.render()
+        self.assertEqual("Dear Smith", r['header'])
+        self.assertEqual("Thanks John!", r['footer'])

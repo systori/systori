@@ -6,7 +6,7 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 
-from .models import Proposal, Invoice
+from .models import Proposal, Invoice, DocumentTemplate
 from .forms import ProposalForm, InvoiceForm
 
 
@@ -120,3 +120,18 @@ class InvoiceDelete(DeleteView):
         return reverse('project.view', args=[self.object.project.id])
 
 
+
+class DocumentTemplateView(DetailView):
+    model = DocumentTemplate
+
+class DocumentTemplateCreate(CreateView):
+    model = DocumentTemplate
+    success_url = reverse_lazy('templates')
+
+class DocumentTemplateUpdate(UpdateView):
+    model = DocumentTemplate
+    success_url = reverse_lazy('templates')
+
+class DocumentTemplateDelete(DeleteView):
+    model = DocumentTemplate
+    success_url = reverse_lazy('templates')

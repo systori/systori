@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
 from django.conf.urls import url
+from django.db.models import Q
 from django.template.loader import get_template
 from django.template import Context
 from tastypie import fields
@@ -28,21 +29,25 @@ class OrderedModelResourceMixin:
                 (self._meta.resource_name, self._meta.detail_uri_name, trailing_slash()),
                 self.wrap_view('dispatch_move'), name="api_dispatch_move")
         )
-        self._meta.move_allowed_methods = ['post']
+        self._meta.move_allowed_methods = ['get']
         return urls
 
     def dispatch_move(self, request, **kwargs):
         return self.dispatch('move', request, **kwargs)
 
-    def post_move(self, request, **kwargs):
-        data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
+    def get_move(self, request, **kwargs):
         obj = self.obj_get(self.build_bundle(request=request), **self.remove_api_resource_names(kwargs))
 
-        if 'target' not in data or 'pos' not in data:
-            raise ValidationError("Need target and pos for move operation.")
+        if 'position' not in request.GET:
+            raise ValidationError("Missing 'position' argument.")
 
-        target = self.get_via_uri(data['target'])
-        obj.move(target, data['pos'])
+        position = request.GET['position'] or '0'
+        try:
+            position = int(position)
+        except:
+            raise ValidationError("'position' must be an integer")
+
+        obj.to(position)
 
         return http.HttpAccepted()
 
@@ -94,13 +99,18 @@ class AutoCompleteModelResourceMixin:
         if 'query' not in request.GET:
             raise ValidationError("Missing 'query' argument.")
         
-        query = request.GET['query']
-        if not query:
+        search_string = request.GET['query']
+        if not search_string:
             raise ValidationError("Search string is empty.")
 
-        template, context = self.perform_autocomplete(query)
+        query = self._meta.queryset.\
+                filter(Q(name__icontains=search_string) | Q(description__icontains=search_string))
 
-        rendered = template.render(Context(context)).encode('utf-8')
+        self.add_prefetching(query)
+
+        template = get_template('task/{}_autocomplete.html'.format(self._meta.resource_name))
+        context = Context({'objects': query.all()})
+        rendered = template.render(context).encode('utf-8')
 
         return http.HttpResponse(rendered)
 
@@ -133,10 +143,9 @@ class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, A
         specimen.clone_to(job, new_pos)
         return get_template('task/taskgroup_loop.html'), {'group': specimen}
 
-    def perform_autocomplete(self, query):
-        # TODO: Add prefetching, this should significantly improve performance.
-        groups = TaskGroup.objects.filter(name__icontains=query)
-        return get_template('task/taskgroup_autocomplete.html'), {'groups': groups}
+    def add_prefetching(self, query):
+        # TODO: Add prefetching.
+        pass
 
 
 class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCompleteModelResourceMixin, ModelResource):
@@ -155,10 +164,9 @@ class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCo
         specimen.clone_to(taskgroup, new_pos)
         return get_template('task/task_loop.html'), {'task': specimen}
 
-    def perform_autocomplete(self, query):
-        # TODO: Add prefetching, this should significantly improve performance.
-        tasks = Task.objects.filter(name__icontains=query)
-        return get_template('task/task_autocomplete.html'), {'tasks': tasks}
+    def add_prefetching(self, query):
+        # TODO: Add prefetching.
+        pass
 
 class TaskInstanceResource(OrderedModelResourceMixin, ModelResource):
     task = fields.ForeignKey(TaskResource, 'task')

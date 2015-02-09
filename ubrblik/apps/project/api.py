@@ -1,3 +1,4 @@
+import json
 from django.http.response import HttpResponse
 from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
@@ -10,46 +11,47 @@ from tastypie.authorization import Authorization
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.utils import trailing_slash
 from .models import Project
+from ..document.models import DocumentTemplate
 
 
 class BaseMeta:
-    authentication = MultiAuthentication(BasicAuthentication(), SessionAuthentication())
+    authentication = SessionAuthentication()
     authorization = Authorization()
 
 
-class BaseCorsResource(ModelResource):
-    """
-    Class implementing CORS
-    """
-    def create_response(self, *args, **kwargs):
-        response = super(BaseCorsResource, self).create_response(*args, **kwargs)
-        response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Headers'] = 'Content-Type'
-        return response
+class DocumentTemplateRendererResourceMixin:
 
-    def method_check(self, request, allowed=None):
-        if allowed is None:
-            allowed = []
+    def prepend_urls(self):
+        urls = super(DocumentTemplateRendererResourceMixin, self).prepend_urls()
+        urls.append(
+            url(r"^(?P<resource_name>%s)/(?P<%s>.*?)/document-template%s$" %
+                (self._meta.resource_name, self._meta.detail_uri_name, trailing_slash()),
+                self.wrap_view('dispatch_document_template'), name="api_dispatch_document_template")
+        )
+        self._meta.document_template_allowed_methods = ['get']
+        return urls
 
-        request_method = request.method.lower()
-        allows = ','.join(map(str.upper, allowed))
+    def dispatch_document_template(self, request, **kwargs):
+        return self.dispatch('document_template', request, **kwargs)
 
-        if request_method == 'options':
-            response = HttpResponse(allows)
-            response['Access-Control-Allow-Origin'] = '*'
-            response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            response['Allow'] = allows
-            raise ImmediateHttpResponse(response=response)
+    def get_document_template(self, request, **kwargs):
+        project = self.obj_get(self.build_bundle(request=request), **self.remove_api_resource_names(kwargs))
 
-        if not request_method in allowed:
-            response = http.HttpMethodNotAllowed(allows)
-            response['Allow'] = allows
-            raise ImmediateHttpResponse(response=response)
+        if 'templateid' not in request.GET:
+            raise ValidationError("Missing 'templateid' argument.")
 
-        return request_method
+        templateid = request.GET['templateid']
+        if not templateid:
+            raise ValidationError("'templateid' is empty.")
+
+        template = DocumentTemplate.objects.get(id=templateid)
+
+        rendered = template.render(project)
+
+        return http.HttpResponse(json.dumps(rendered))
 
 
-class ProjectResource(BaseCorsResource):
+class ProjectResource(DocumentTemplateRendererResourceMixin, ModelResource):
     class Meta(BaseMeta):
         queryset = Project.objects.without_template().all()
         resource_name = 'project'

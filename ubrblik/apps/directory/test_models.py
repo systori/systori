@@ -3,12 +3,15 @@ from django.contrib.auth import get_user_model
 from ..project.models import *
 from .models import *
 
+def create_contact_data(self):
+    self.project = Project.objects.create(name="my project")
+    self.contact = Contact.objects.create(first_name="Ludwig", last_name="von Mises")
+
 
 class ContactProjectTests(TestCase):
 
     def setUp(self):
-        self.project = Project.objects.create(name="my project")
-        self.contact = Contact.objects.create(first_name="A", last_name="B")
+        create_contact_data(self)
 
     def test_no_association(self):
         self.assertEquals(0, len(self.contact.projects.all()))
