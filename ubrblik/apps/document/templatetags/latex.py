@@ -33,6 +33,7 @@ def tex_escape(text):
         '\\': r'\textbackslash{}',
         '<': r'\textless',
         '>': r'\textgreater',
+        '\r':r'\hfill\\',
     }
     conv = dict((re.escape(k), v) for k, v in conv.items())
     pattern = re.compile("|".join(conv.keys()))
