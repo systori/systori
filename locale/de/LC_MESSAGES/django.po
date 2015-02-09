@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-09 09:52+0100\n"
+"POT-Creation-Date: 2015-02-09 12:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,7 +63,6 @@ msgstr "Land"
 
 #: ubrblik/apps/directory/models.py:24 ubrblik/apps/directory/models.py:54
 #: ubrblik/apps/document/models.py:29
-#: ubrblik/templates/document/documenttemplate_detail.html:11
 #: ubrblik/templates/document/invoice_detail.html:11
 #: ubrblik/templates/document/proposal_detail.html:11
 #: ubrblik/templates/project/project_detail.html:62
@@ -123,6 +122,8 @@ msgid "Project Contacts"
 msgstr "Projektkontakte"
 
 #: ubrblik/apps/document/models.py:30
+#: ubrblik/templates/document/latex/bkp_proposal.tex:57
+#: ubrblik/templates/document/latex/bkp_proposal.tex:62
 #: ubrblik/templates/document/latex/proposal.tex:59
 #: ubrblik/templates/document/latex/proposal.tex:64
 #: ubrblik/templates/project/project_detail.html:60
@@ -131,10 +132,12 @@ msgid "Amount"
 msgstr "Menge"
 
 #: ubrblik/apps/document/models.py:31 ubrblik/apps/document/models.py:186
+#: ubrblik/templates/document/documenttemplate_detail.html:10
 msgid "Header"
 msgstr "Vortext"
 
 #: ubrblik/apps/document/models.py:32 ubrblik/apps/document/models.py:187
+#: ubrblik/templates/document/documenttemplate_detail.html:11
 msgid "Footer"
 msgstr "Nachtext"
 
@@ -234,7 +237,7 @@ msgstr "Name"
 
 #: ubrblik/apps/document/models.py:195
 msgid "Document Type"
-msgstr ""
+msgstr "Dokumententyp"
 
 #: ubrblik/apps/document/models.py:198
 #, fuzzy
@@ -291,7 +294,7 @@ msgstr "Numerierung Anzahl für Positionen"
 
 #: ubrblik/apps/project/models.py:26
 msgid "Job Offset"
-msgstr ""
+msgstr "Los Nr. Offset"
 
 #: ubrblik/apps/project/models.py:37
 #: ubrblik/templates/directory/contact_detail.html:20
@@ -316,6 +319,8 @@ msgid "Job Name"
 msgstr "Losbezeichnung"
 
 #: ubrblik/apps/task/models.py:53
+#: ubrblik/templates/document/latex/bkp_proposal.tex:57
+#: ubrblik/templates/document/latex/bkp_proposal.tex:62
 #: ubrblik/templates/document/latex/proposal.tex:59
 #: ubrblik/templates/document/latex/proposal.tex:64
 msgid "Description"
@@ -414,6 +419,8 @@ msgid "Billable"
 msgstr "Abrechenbar"
 
 #: ubrblik/apps/task/models.py:413
+#: ubrblik/templates/document/latex/bkp_proposal.tex:57
+#: ubrblik/templates/document/latex/bkp_proposal.tex:62
 #: ubrblik/templates/document/latex/proposal.tex:59
 #: ubrblik/templates/document/latex/proposal.tex:64
 msgid "Price"
@@ -578,12 +585,10 @@ msgstr "Hinzufügen"
 msgid "Create and then add contact to %(project_name)s"
 msgstr "Kontakt erstellen und zu Projekt %(project_name)s hinzufügen."
 
-#: ubrblik/templates/document/documenttemplate_detail.html:8
-#: ubrblik/templates/document/proposal_detail.html:8
-msgid "Proposal Details"
-msgstr "Angebotsdetails"
+#: ubrblik/templates/document/invoice_detail.html:8
+msgid "Invoice Details"
+msgstr "Rechnungsdetails"
 
-#: ubrblik/templates/document/documenttemplate_detail.html:9
 #: ubrblik/templates/document/invoice_detail.html:9
 #: ubrblik/templates/document/proposal_detail.html:9
 #: ubrblik/templates/project/project_detail.html:12
@@ -592,29 +597,32 @@ msgstr "Angebotsdetails"
 msgid "Status"
 msgstr "Status"
 
-#: ubrblik/templates/document/documenttemplate_detail.html:10
 #: ubrblik/templates/document/invoice_detail.html:10
 #: ubrblik/templates/document/proposal_detail.html:10
 msgid "Created"
 msgstr "Erstellen"
 
-#: ubrblik/templates/document/invoice_detail.html:8
-msgid "Invoice Details"
-msgstr "Rechnungsdetails"
-
+#: ubrblik/templates/document/latex/bkp_proposal.tex:30
 #: ubrblik/templates/document/latex/proposal.tex:30
 msgid "Page"
 msgstr "Seite"
 
+#: ubrblik/templates/document/latex/bkp_proposal.tex:30
 #: ubrblik/templates/document/latex/proposal.tex:30
 msgid "of"
 msgstr "von"
 
+#: ubrblik/templates/document/latex/bkp_proposal.tex:57
+#: ubrblik/templates/document/latex/bkp_proposal.tex:62
 #: ubrblik/templates/document/latex/proposal.tex:59
 #: ubrblik/templates/document/latex/proposal.tex:64
 msgid "Pos."
 msgstr "Pos."
 
+#: ubrblik/templates/document/latex/bkp_proposal.tex:57
+#: ubrblik/templates/document/latex/bkp_proposal.tex:62
+#: ubrblik/templates/document/latex/bkp_proposal.tex:87
+#: ubrblik/templates/document/latex/bkp_proposal.tex:95
 #: ubrblik/templates/document/latex/proposal.tex:59
 #: ubrblik/templates/document/latex/proposal.tex:64
 #: ubrblik/templates/document/latex/proposal.tex:89
@@ -623,39 +631,52 @@ msgstr "Pos."
 msgid "Total"
 msgstr "Summe"
 
+#: ubrblik/templates/document/latex/bkp_proposal.tex:60
+#: ubrblik/templates/document/latex/bkp_proposal.tex:66
 #: ubrblik/templates/document/latex/proposal.tex:62
 #: ubrblik/templates/document/latex/proposal.tex:68
 msgid "Continuation"
 msgstr "Fortsetzung"
 
+#: ubrblik/templates/document/latex/bkp_proposal.tex:82
 #: ubrblik/templates/document/latex/proposal.tex:84
 #: ubrblik/templates/task/task_editor.html:11
 msgid "Optional"
 msgstr "Bedarf"
 
+#: ubrblik/templates/document/latex/bkp_proposal.tex:82
 #: ubrblik/templates/document/latex/proposal.tex:84
 msgid "alternate"
 msgstr "Alternativ"
 
+#: ubrblik/templates/document/latex/bkp_proposal.tex:100
 #: ubrblik/templates/document/latex/proposal.tex:102
 msgid "Total without VAT"
 msgstr "Summe netto"
 
+#: ubrblik/templates/document/latex/bkp_proposal.tex:101
 #: ubrblik/templates/document/latex/proposal.tex:103
 msgid "VAT"
 msgstr "MWSt"
 
+#: ubrblik/templates/document/latex/bkp_proposal.tex:102
 #: ubrblik/templates/document/latex/proposal.tex:104
 msgid "Total including VAT"
 msgstr "Summe brutto"
 
+#: ubrblik/templates/document/latex/bkp_proposal.tex:108
 #: ubrblik/templates/document/latex/proposal.tex:110
 msgid "method of payment"
 msgstr "Zahlungsbedingungen"
 
+#: ubrblik/templates/document/latex/bkp_proposal.tex:109
 #: ubrblik/templates/document/latex/proposal.tex:111
 msgid "validity"
 msgstr "Gültigkeit"
+
+#: ubrblik/templates/document/proposal_detail.html:8
+msgid "Proposal Details"
+msgstr "Angebotsdetails"
 
 #: ubrblik/templates/main/dashboard.html:7
 #: ubrblik/templates/main/sidebar.html:4
@@ -710,7 +731,7 @@ msgstr "eMail"
 
 #: ubrblik/templates/project/project_detail.html:82
 msgid "Print PDF"
-msgstr ""
+msgstr "Druck"
 
 #: ubrblik/templates/project/project_detail.html:99
 msgid "No jobs available for new proposal."
@@ -747,11 +768,11 @@ msgstr "Simple.Depp."
 
 #: ubrblik/templates/task/editor.html:286
 msgid "Stops indenting at the tasks level."
-msgstr ""
+msgstr "Nur Positionen erstellen."
 
 #: ubrblik/templates/task/editor.html:289
 msgid "Stops indenting at line items level."
-msgstr ""
+msgstr "Positionen mit Kalkulation erstellen."
 
 #: ubrblik/templates/task/lineitem_editor.html:5
 msgid "line item"
