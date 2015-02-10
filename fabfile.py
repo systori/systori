@@ -3,6 +3,7 @@ from fabric.api import env, run, local, cd, get, prefix, sudo
 
 
 env.hosts = ['ubrblik.de']
+env.user = 'ubrblik'
 
 
 def deploy(env_name='dev'):
@@ -14,30 +15,45 @@ def deploy(env_name='dev'):
             print 'Canceling.'
             return
 
-    sudo('service uwsgi stop ubrblik_'+env_name)
-
-    with cd('/srv/ubrblik/'+env_name+'/ubrblik-editor'):
-        run('git pull')
-        run('/usr/lib/dart/bin/pub get')
-        run('/usr/lib/dart/bin/pub build')
+    sudo('service uwsgi stop %s_ubrblik'%env_name)
 
     with cd('/srv/ubrblik/'+env_name+'/ubrblik'):
-        with prefix('source ../bin/activate'):
-            run('git pull')
-            run('pip install --upgrade -r requirements/%s.pip'%env_name)
-            sudo('./manage.py migrate --noinput', user='www-data')
-            run('./manage.py collectstatic --noinput')
 
-    sudo('service uwsgi start ubrblik_'+env_name)
+        run('git pull')
+
+        with cd('editor'):
+            run('/usr/lib/dart/bin/pub get')
+            run('/usr/lib/dart/bin/pub build')
+
+        if env_name == 'dev':
+            # load production db
+            sudo('dropdb ubrblik_dev', user='www-data')
+            sudo('createdb ubrblik_dev', user='www-data')
+            sudo('pg_dump -f prod.sql ubrblik_production', user='www-data')
+            sudo('psql -f prod.sql ubrblik_dev >/dev/null', user='www-data')
+            sudo('psql -c "update document_proposal set email_pdf = substr(email_pdf, 33), print_pdf = substr(print_pdf, 33);" ubrblik_dev', user='www-data')
+            sudo('rm prod.sql')
+            # copy production documents
+            run('cp -p -r /srv/ubrblik/production/ubrblik/documents documents')
+
+        with prefix('source ../bin/activate'):
+            run('pip install -q -U -r requirements/%s.pip'%env_name)
+            sudo('./manage.py migrate --noinput', user='www-data')
+            run('./manage.py collectstatic --noinput --verbosity 0')
+
+    sudo('service uwsgi start %s_ubrblik'%env_name)
+
 
 def _reset_localdb():
     local('dropdb ubrblik_local')
     local('createdb ubrblik_local')
 
+
 def localdb_from_bootstrap():
     _reset_localdb()
     local('./manage.py migrate')
     local('./manage.py loaddata bootstrap')
+
 
 prod_dump_path = '/tmp/ubrblik.prod.dump'
 prod_dump_file = os.path.basename(prod_dump_path)
@@ -56,6 +72,7 @@ def localdb_from_productiondb():
     fetch_productiondb()
     load_productiondb()
     local('rm '+prod_dump_file)
+
 
 def init_settings(env_name='local'):
     assert env_name in ['dev', 'production', 'local']
