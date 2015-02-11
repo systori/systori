@@ -11,7 +11,7 @@ def deploy(env_name='dev'):
 
     if env_name == 'production':
         yes=raw_input('Deploying to PRODUCTION. Are you sure? (type "yes"): ')
-        if not yes == 'yes':
+        if yes!='yes':
             print 'Canceling.'
             return
 
