@@ -212,6 +212,7 @@ abstract class UbrElement extends HtmlElement {
 
   String get code => dataset['code'];
   int get child_zfill;
+  int get child_offset => 0;
 
   double get total => 0.0;
   set total(double calculated) => dataset['total'] = CURRENCY.format(calculated);
@@ -225,7 +226,7 @@ abstract class UbrElement extends HtmlElement {
     List<EditableElement> items = this.querySelectorAll(child_element);
 
     for (int i = 0; items.length > i; i++) {
-      var new_code = (i+1).toString().padLeft(child_zfill, '0');
+      var new_code = (i+1+child_offset).toString().padLeft(child_zfill, '0');
       items[i].code_view.text = "${code}.${new_code}";
     }
   }
@@ -236,6 +237,7 @@ abstract class UbrElement extends HtmlElement {
 class JobElement extends UbrElement {
   final child_element = "ubr-taskgroup";
   int get child_zfill => int.parse(dataset['taskgroup-zfill']);
+  int get child_offset => int.parse(dataset['taskgroup-offset']);
   JobElement.created(): super.created() {
   }
 }
@@ -625,7 +627,13 @@ abstract class EditableElement extends UbrElement {
 
   void new_child() {
     EditableElement item = document.createElement(child_element);
-    append(item);
+    if (child_element == "ubr-lineitem") {
+        // linteitems don't support ordering so always insert line items at end
+        append(item);
+    } else {
+        var editor = this.querySelector(":scope>.editor");
+        insertBefore(item, editor.nextElementSibling);
+    }
     recalculate_code();
     classes.remove('empty');
     item.start();
