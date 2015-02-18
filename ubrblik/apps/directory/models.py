@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
+from django.conf import settings
 
 class Contact(models.Model):
 
@@ -19,7 +19,7 @@ class Contact(models.Model):
     address = models.CharField(_("Address"), max_length=512)
     postal_code = models.CharField(_("Postal Code"), max_length=512)
     city = models.CharField(_("City"), max_length=512)
-    country = models.CharField(_("Country"), max_length=512, blank=True)
+    country = models.CharField(_("Country"), max_length=512, default=settings.DEFAULT_COUNTRY)
 
     notes = models.TextField(_("Notes"), blank=True)
 

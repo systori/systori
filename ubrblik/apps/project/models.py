@@ -1,9 +1,12 @@
 from decimal import Decimal
 from django.db import models
+from django.conf import settings
 from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
 from ..task.models import Job
+from geopy import geocoders
 
 class ProjectQuerySet(models.QuerySet):
 
@@ -25,6 +28,14 @@ class Project(models.Model):
     
     job_offset = models.PositiveSmallIntegerField(_("Job Offset"), default=0)
 
+    address = models.CharField(_("Address"), max_length=512)
+    city = models.CharField(_("City"), max_length=512)
+    postal_code = models.CharField(_("Postal Code"), max_length=512)
+    country = models.CharField(_("Country"), max_length=512, default=settings.DEFAULT_COUNTRY)
+
+    latitude = models.FloatField(_('Latitude'), null=True, blank=True)
+    longitude = models.FloatField(_('Longitude'), null=True, blank=True)
+
     objects = ProjectQuerySet.as_manager()
 
     def get_absolute_url(self):
@@ -37,6 +48,19 @@ class Project(models.Model):
         verbose_name = _("Project")
         verbose_name_plural = _("Projects")
         ordering = ['name']
+
+    def save(self, *args, **kwargs):
+        g = geocoders.GoogleV3()
+        address = smart_str("{}, {}, {}, {}".format(self.address, self.city, self.postal_code, self.country))
+        try:
+            location = g.geocode(address)
+            self.latitude = location.latitude
+            self.longitude = location.longitude
+        except:
+            self.latitude = None
+            self.longitude = None
+        finally:
+            super(Project, self).save(*args, **kwargs)
 
     @property
     def estimate_total(self):

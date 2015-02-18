@@ -3,3 +3,4 @@ django
 django-tastypie
 django-ordered-model
 django-fsm
+geopy

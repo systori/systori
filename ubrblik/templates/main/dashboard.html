@@ -1,10 +1,13 @@
 {% extends "frame.html" %}
-{% load i18n %}
+{% load i18n l10n %}
 
 {% block sidebar %}{% include "main/sidebar.html" %}{% endblock %}
 
 {% block content %}
 <h1 class="page-header">{% trans 'Dashboard' %}</h1>
+
+<h2 class="sub-header">{% trans "Projects" %}</h2>
+<div id="map-canvas" style="height: 400px;"></div>
 
 <h2 class="sub-header">{% trans "Flagged Items" %}</h2>
 <div class="table-responsive">
@@ -26,5 +29,47 @@
   </table>
 </div>
 
-
 {% endblock %}
+
+{% block extra_js%}
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}"></script>
+<script type="text/javascript">
+$(document).ready(function () {
+
+	var locations = [
+	{% for project in mapped_projects %}
+	   ['<a href="{% url "project.view" project.id %}">{{ project.name|addslashes }}</a><br /> {{ project.estimate_total|floatformat:2 }} {{ CURRENCY_SYMBOL|safe }}',
+	    {{ project.latitude|unlocalize }}, {{ project.longitude|unlocalize }}],
+	{% endfor %}
+    ];
+	
+	var map = new google.maps.Map($('#map-canvas')[0]);
+	var bounds = new google.maps.LatLngBounds();
+	var infowindow = new google.maps.InfoWindow();    
+
+	for (i = 0; i < locations.length; i++) {  
+	  var marker = new google.maps.Marker({
+	    position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+	    map: map
+	  });
+
+	  bounds.extend(marker.position);
+
+	  google.maps.event.addListener(marker, 'click', (function(marker, i) {
+	    return function() {
+	      infowindow.setContent(locations[i][0]);
+	      infowindow.open(map, marker);
+	    }
+	  })(marker, i));
+	}
+
+	map.fitBounds(bounds);
+
+	var listener = google.maps.event.addListener(map, "idle", function () {
+	    map.setZoom(9);
+	    google.maps.event.removeListener(listener);
+	});
+
+});
+</script>
+{% endblock extra_js%}
