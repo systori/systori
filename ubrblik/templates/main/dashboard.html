@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n l10n %}
+{% load i18n l10n customformatting %}
 
 {% block sidebar %}{% include "main/sidebar.html" %}{% endblock %}
 
@@ -38,7 +38,7 @@ $(document).ready(function () {
 
 	var locations = [
 	{% for project in mapped_projects %}
-	   ['<a href="{% url "project.view" project.id %}">{{ project.name|addslashes }}</a><br /> {{ project.estimate_total|floatformat:2 }} {{ CURRENCY_SYMBOL|safe }}',
+	   ['<a href="{% url "project.view" project.id %}">{{ project.name|addslashes }}</a><br /> {{ project.estimate_total|money }}',
 	    {{ project.latitude|unlocalize }}, {{ project.longitude|unlocalize }}],
 	{% endfor %}
     ];

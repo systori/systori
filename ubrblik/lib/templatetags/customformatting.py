@@ -1,5 +1,6 @@
+import locale
 from django.template.defaultfilters import stringfilter
-from django.utils.formats import get_format
+from django.utils.formats import get_format, get_language
 from django import template
 register = template.Library()
 
@@ -27,3 +28,8 @@ def cleandecimal(decimal, max_decimal_places):
         return decimal[:separator_pos+1] + significand.ljust(max_decimal_places, '0')
     else:
         return decimal
+
+@register.filter
+def money(decimal):
+    locale.setlocale(locale.LC_ALL, (get_language(), 'utf-8'))
+    return locale.currency(decimal, True, True)

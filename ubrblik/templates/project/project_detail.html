@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n %}
+{% load i18n customformatting %}
 
 {% block content %}
 <h2 class="sub-header">{% trans "Jobs" %}</h2>
@@ -23,7 +23,7 @@
         <td><a href="{% url 'tasks' project.id job.id %}">{{ job }}</a></td>
         <td>{{ job.get_status_display }}</td>
         <td style="text-align: right;">
-          {{ job.estimate_total|floatformat:2 }}
+          {{ job.estimate_total|money }} &nbsp;
           <div class="btn-group">
             <a class="btn btn-default btn-xs" href="{% url 'job.estimate' project.id job.id 'increase' %}" title="{% blocktrans with percent=job.ESTIMATE_INCREMENT_DISPLAY %}Increase estimate by {{ percent }}.{% endblocktrans %}"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
             <a class="btn btn-default btn-xs" href="{% url 'job.estimate' project.id job.id 'decrease' %}" title="{% blocktrans with percent=job.ESTIMATE_INCREMENT_DISPLAY %}Decrease estimate by {{ percent }}.{% endblocktrans %}"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></a>
@@ -31,7 +31,7 @@
           </div>
         </td>
         <td>{{ job.get_billing_method_display }}</td>
-        <td>{{ job.billable_total|floatformat:2 }}</td>
+        <td>{{ job.billable_total|money }}</td>
         <td>
           {% for state in job.get_available_status_transitions %}
             <a href="{% url 'job.transition' project.id job.id state.name %}">{{ state.custom.label }}</a>
@@ -74,7 +74,7 @@
           {{ job }}<br />
         {% endfor %}
         </td>
-        <td>{{ doc.amount|floatformat:2 }}</td>
+        <td>{{ doc.amount|money }}</td>
         <td>{{ doc.created_on }}</td>
         <td>{{ doc.notes }}</td>
         <td>
