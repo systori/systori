@@ -32,7 +32,7 @@
 {% endblock %}
 
 {% block extra_js%}
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&sensor=false"></script>
 <script type="text/javascript">
 $(document).ready(function () {
 
@@ -66,7 +66,7 @@ $(document).ready(function () {
 	map.fitBounds(bounds);
 
 	var listener = google.maps.event.addListener(map, "idle", function () {
-	    map.setZoom(9);
+	    map.setZoom(13);
 	    google.maps.event.removeListener(listener);
 	});
 
