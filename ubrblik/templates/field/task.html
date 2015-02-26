@@ -1,0 +1,12 @@
+{% extends "field/base.html" %}
+{% load i18n staticfiles %}
+
+{% block container %}
+<div class="container">
+  <div class="list-group">
+  {% for lineitem in task.taskinstances.first.lineitems.all %}
+    {{ lineitem.name }}
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}

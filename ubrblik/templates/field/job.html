@@ -1,0 +1,15 @@
+{% extends "field/base.html" %}
+{% load i18n staticfiles %}
+
+{% block container %}
+<div class="container">
+  <div class="list-group">
+  {% for taskgroup in object.taskgroups.all %}
+    <div class="list-group-item active">{{ taskgroup.name }}</div>
+  {% for task in taskgroup.tasks.all %}
+    <a href="{% url 'field.task' project.id job.id task.id %}" class="list-group-item">{{ task.name }}</a>
+  {% endfor %}
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}

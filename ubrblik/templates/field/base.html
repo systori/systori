@@ -1,0 +1,29 @@
+{% load i18n staticfiles %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+
+  <head>
+
+    <meta charset="utf-8">
+    <link rel="shortcut icon" href="{% static "img/favicon.png" %}">
+
+    <title>{% block title %}ubrblik{% endblock %}</title>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/flick/jquery-ui.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link href="{% static "css/mobile.css" %}" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    {% block container %}{% endblock container %}
+
+    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+    {% block extra_js%}{% endblock extra_js%}
+
+  </body>
+</html>

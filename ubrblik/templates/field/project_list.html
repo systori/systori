@@ -1,0 +1,12 @@
+{% extends "field/base.html" %}
+{% load i18n staticfiles %}
+
+{% block container %}
+<div class="container">
+  <div class="list-group">
+  {% for project in project_list %}
+    <a href="{% url 'field.project' project.id %}" class="list-group-item">{{ project.name }}</a>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}

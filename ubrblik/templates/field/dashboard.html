@@ -1,0 +1,11 @@
+{% extends "field/base.html" %}
+{% load i18n staticfiles %}
+
+{% block container %}
+<div class="container">
+  <h1>Ubrblik</h1>
+  <div class="list-group">
+    <a href="{% url 'field.projects' %}" class="list-group-item">{% trans 'Projects' %}</a>
+  </div>
+</div>
+{% endblock %}

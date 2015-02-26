@@ -19,4 +19,7 @@ urlpatterns = patterns('',
 
     url(r'^project-(?P<project_pk>\d+)/', include('ubrblik.apps.task.urls')),
     url(r'^templates/', include('ubrblik.apps.task.urls')),
+
+    url(r'^field/', include('ubrblik.apps.field.urls')),
+
 )
