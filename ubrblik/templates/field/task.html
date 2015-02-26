@@ -1,12 +1,21 @@
 {% extends "field/base.html" %}
-{% load i18n staticfiles %}
+{% load i18n staticfiles customformatting %}
 
 {% block container %}
 <div class="container">
-  <div class="list-group">
-  {% for lineitem in task.taskinstances.first.lineitems.all %}
-    {{ lineitem.name }}
-  {% endfor %}
-  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      {{task.name}}
+    </div>
+    <div class="panel-body">
+      {{task.description}}
+    </div>
+   </div> 
+
+    <ul class="list-group">
+    {% for lineitem in task.taskinstances.first.lineitems.all %}
+      <li class="list-group-item">{{ lineitem.name }}<span class="pull-right">{{lineitem.unit_qty|floatformat:4|cleandecimal:2}} {{lineitem.unit}}</span></li>
+    {% endfor %}
+    </ul>
 </div>
 {% endblock %}
