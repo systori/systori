@@ -31,5 +31,5 @@ def cleandecimal(decimal, max_decimal_places):
 
 @register.filter
 def money(decimal):
-    locale.setlocale(locale.LC_ALL, (to_locale(get_language()), 'utf-8'))
+    locale.setlocale(locale.LC_ALL, (to_locale(get_language()), 'UTF-8'))
     return locale.currency(decimal, True, True)
