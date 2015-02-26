@@ -6,7 +6,7 @@
     <h4>{% trans 'Job' %}</h4>
   <div class="list-group">
   {% for job in project.jobs.all %}
-    <a href="{% url 'field.job' project.id job.id %}" class="list-group-item">{{ job.name }}</a>
+    <a href="{% url 'field.job' project.id job.id %}" class="list-group-item">{{job.code}} - {{ job.name }}</a>
   {% endfor %}
   </div>
 </div>
