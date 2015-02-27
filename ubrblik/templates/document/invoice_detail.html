@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n %}
+{% load i18n l10n %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
@@ -7,7 +7,7 @@
 
 <h2>{% trans 'Invoice Details' %}</h2>
 {% trans 'Status' %}: {{ invoice.get_status_display }}<br />
-{% trans 'Created' %}: {{ invoice.created_on }}<br />
+{% trans 'Created' %}: {{ invoice.created_on|localize }}<br />
 {% trans 'Notes' %}:<br />{{ invoice.notes }}
 
 {% endblock %}

@@ -72,15 +72,15 @@ z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ 
 \endlastfoot
 
 {% for job in jobs.all %}
-{{job.code|bold}} & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{job.name|tex_escape|bold}} }} &\\
+{{job.code|bold}} & \multicolumn{5}{l}{\parbox[t]{15cm}{ {{job.name|tex_escape|bold}} }} \\
 {% for taskgroup in job.taskgroups.all %}
-{{taskgroup.code|bold}} & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{taskgroup.name|tex_escape|bold}} }} &\\
+{{taskgroup.code|bold}} & \multicolumn{5}{l}{\parbox[t]{15cm}{ {{taskgroup.name|tex_escape|bold}} }} \\
 
 {% for task in taskgroup.tasks.all %}
 {% for instance in task.taskinstances.all %}
 {{instance.code}}
-    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_name|tex_escape}} }} \\*
-    & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_description|tex_escape}} }} \\*
+    & \multicolumn{5}{l}{\parbox[t]{9cm}{ {{instance.full_name|tex_escape}} }} \\*
+    & \multicolumn{5}{l}{\parbox[t]{9cm}{ {{instance.full_description|tex_escape}} }} \\*
     & & {{task.qty|ubrdecimal}} & {{task.unit|tex_escape}} & {{instance.unit_price|money}}   & {% if task.is_optional %}{% trans 'Optional' %}{% elif not instance.selected %}{% trans 'alternate'%} {% else %}{{instance.fixed_price_estimate|money}} {% endif %} \\
 {% endfor %}
 {% endfor %}
@@ -98,7 +98,7 @@ z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ 
 {% endfor %}
 {% endfor %}
 
-\tabucline{2-6}
+% \tabucline{2-6}
 & \multicolumn{4}{r} {\textbf{ {% trans 'Total without VAT' %} }} & \textbf{ {{jobs.estimate_total|money}}  } \\*
 & \multicolumn{4}{r} {\textbf{19,00\% {% trans 'VAT' %} }} & \textbf{ {{jobs.estimate_tax_total|money}}  } \\*
 & \multicolumn{4}{r} {\textbf{ {% trans 'Total including VAT' %} }} & \textbf{ {{jobs.estimate_gross_total|money}}  } \\*

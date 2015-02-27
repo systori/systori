@@ -18,7 +18,7 @@
         {% for project in project_list %}
         <tr>
           <td>{{ project.id }}</td>
-          <td><a href="{% url 'project.view' project.id %}">{{ project.name }}</a></td>
+          <td><a href="{% url 'project.view' project.id %}">{{ project }}</a></td>
           <td>
             <a href="{% url 'project.edit' project.id %}">{% trans "Edit" %}</a>
             <a href="{% url 'project.delete' project.id %}">{% trans "Delete" %}</a>

@@ -129,7 +129,7 @@
           {{ job }}<br />
         {% endfor %}
         </td>
-        <td>{{ doc.amount|floatformat:2 }}</td>
+        <td>{{ doc.amount|ubrdecimal }}</td>
         <td>{{ doc.created_on|localize }}</td>
         <td>{{ doc.notes }}</td>
         <td>
