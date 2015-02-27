@@ -3,13 +3,31 @@
 
 {% block container %}
 <div class="container">
-  <div class="list-group">
-  {% for taskgroup in object.taskgroups.all %}
-    <div class="list-group-item active">{{taskgroup.code}} {{ taskgroup.name }}</div>
-  {% for task in taskgroup.tasks.all %}
-    <a href="{% url 'field.task' project.id job.id task.id %}" class="list-group-item">{{task.code}} {{ task.name }}</a>
-  {% endfor %}
-  {% endfor %}
+
+  <a href="{% url 'field.project' project.id %}" class="btn btn-primary btn-block btn-lg btn-back">&laquo; {{ project.name }}</a>
+
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+      {% trans 'Tasks' %}
+    </div>
+
+    <ul class="list-group">
+    {% for taskgroup in object.taskgroups.all %}
+      <div class="list-group-item disabled">{{taskgroup.code}} {{ taskgroup.name }}</div>
+    {% for task in taskgroup.tasks.all %}
+      <a href="{% url 'field.task' project.id job.id task.id %}" class="list-group-item clearfix">
+        {{task.code}} {{ task.name }}
+        {% if task.complete_percent > 0 %}
+        <span class="badge">{{ task.complete_percent }}%</span>
+        {% else %}
+        <span class="pull-right">&raquo;</span>
+        {% endif %}
+      </a>
+    {% endfor %}
+    {% endfor %}
+    </ul>
+
   </div>
 </div>
 {% endblock %}

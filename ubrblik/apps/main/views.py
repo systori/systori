@@ -4,12 +4,14 @@ from ..project.models import Project
 from ..task.models import LineItem
 from ..document.models import DocumentTemplate
 
+
 class SettingsView(TemplateView):
     template_name = "main/settings.html"
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
         return context
+
 
 class DashboardView(TemplateView):
     template_name = "main/dashboard.html"
@@ -21,6 +23,7 @@ class DashboardView(TemplateView):
         context['GOOGLE_MAPS_API_KEY'] = settings.GOOGLE_MAPS_API_KEY
         return context
 
+
 class IndexView(TemplateView):
     template_name = "main/front_page.html"
 
@@ -29,6 +32,7 @@ class IndexView(TemplateView):
             view = DashboardView.as_view()
             return view(request, *args, **kwargs)
         return super(IndexView, self).dispatch(request, *args, **kwargs)
+
 
 class TemplatesView(TemplateView):
     template_name='main/templates.html'

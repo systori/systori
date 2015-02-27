@@ -3,11 +3,22 @@
 
 {% block container %}
 <div class="container">
-  <h4>{% trans 'Projects' %}</h4>
-  <div class="list-group">
-  {% for project in project_list %}
-    <a href="{% url 'field.project' project.id %}" class="list-group-item">{{ project.name }}</a>
-  {% endfor %}
+
+  <a href="{% url 'field.dashboard' %}" class="btn btn-primary btn-block btn-lg btn-back">&laquo; {% trans 'Dashboard' %}</a>
+
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+      {% trans 'Projects' %}
+    </div>
+
+    <ul class="list-group">
+    {% for project in project_list %}
+      <a href="{% url 'field.project' project.id %}" class="list-group-item clearfix">{{ project.name }} <span class="pull-right">&raquo;</span></a>
+    {% endfor %}
+    </ul>
+
   </div>
+
 </div>
 {% endblock %}

@@ -1,22 +1,83 @@
 {% extends "field/base.html" %}
-{% load i18n staticfiles customformatting %}
+{% load i18n l10n staticfiles customformatting %}
 
 {% block container %}
 <div class="container">
-  <h4>{% trans 'Task' %}</h4>
+
+  <a href="{% url 'field.job' project.id task.taskgroup.job.id %}" class="btn btn-primary btn-block btn-lg btn-back">&laquo; {{ task.taskgroup.job.name }}</a>
+
   <div class="panel panel-default">
+
     <div class="panel-heading">
       {{task.code}} {{task.name}}
     </div>
+
     <div class="panel-body">
       {{task.description}}
     </div>
-   </div> 
+
+  </div> 
+
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+      {% trans 'Progress' %}
+    </div>
+
+    <div class="panel-body">
+      <form method="post">{% csrf_token %}
+        {% localize off %}
+        <div class="input-group input-group-lg">
+          <span class="input-group-addon" id="percent">{{ task.complete_percent }}%</span>
+          <input type="text" class="form-control" name="complete" value="{{ task.complete|stringformat:'d' }}">
+          <span class="input-group-addon">{{ task.unit }}</span>
+        </div>
+        <input type="range" id="completion-range" min="0" max="{{ task.qty|stringformat:'d' }}" value="{{ task.complete|stringformat:'d' }}" step="1" data-unit="{{ task.unit }}" />
+        <input type="submit" class="btn btn-primary btn-block btn-lg" value="{% trans 'Save' %}" />
+        {% endlocalize %}
+      </form>
+    </div>
+
+  </div> 
+
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+      {% trans 'Line Items' %}
+    </div>
 
     <ul class="list-group">
     {% for lineitem in task.taskinstances.first.lineitems.all %}
-      <li class="list-group-item">{{ lineitem.name }}<span class="pull-right">{{lineitem.unit_qty|floatformat:4|cleandecimal:2}} {{lineitem.unit}}</span></li>
+      <li class="list-group-item clearfix">{{ lineitem.name }}<span class="pull-right">{{lineitem.unit_qty|floatformat:4|cleandecimal:2}} {{lineitem.unit}}</span></li>
     {% endfor %}
     </ul>
+
+  </div> 
+
 </div>
 {% endblock %}
+
+
+{% block extra_js%}
+<script type="text/javascript">
+$(document).ready(function () {
+    var range = $('#completion-range');
+    var complete = $('input[name="complete"]');
+    var percent = $('#percent');
+    var max = range.attr('max');
+    range.on('input', function() {
+      percent.text(Math.round(range.val() / max * 100) + '%');
+      complete.val(range.val());
+    });
+    complete.on('keyup', function() {
+      if (complete.val() == '') {
+        percent.text('0%');
+        range.val(0);
+      } else {
+        percent.text(Math.round(complete.val() / max * 100) + '%');
+        range.val(complete.val());
+      }
+    });
+});
+</script>
+{% endblock extra_js%}

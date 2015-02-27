@@ -1,8 +1,10 @@
 body {
-  padding-top: 40px;
+  padding-top: 20px;
   padding-bottom: 40px;
   background-color: #eee;
 }
+
+
 
 .form-signin {
   max-width: 330px;
@@ -37,4 +39,73 @@ body {
   margin-bottom: 10px;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+.btn-back {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+#percent {
+  width: 80px;
+}
+
+input[name="complete"] {
+  text-align: right;
+}
+
+/*
+
+Input Range CSS
+
+Initially generated using this tool: http://danielstern.ca/range.css
+
+Since this is intended for Android/iOS the Firefox and IE specific styles have been removed.
+
+*/
+
+input[type=range]::before {
+  content: attr(min) " " attr(data-unit);	
+  position: absolute;
+  left: 1px;
+  top: -20px;
+}
+
+input[type=range]::after {
+  content: attr(max) " " attr(data-unit);	
+  position: absolute;
+  right: 1px;
+  top: -20px;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  margin: 60px 0;
+  position: relative;
+}
+
+input[type=range]:focus {
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  background: #eee;
+  border: 0px solid #ccc;
+  border-radius: 6px;
+  z-index: 10;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  height: 50px;
+  width: 50px;
+  border: 1px solid #2e6da4;
+  border-radius: 6px;
+  background: #337ab7;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -20px;/*-19.5px;*/
 }

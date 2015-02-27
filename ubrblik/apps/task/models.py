@@ -238,6 +238,10 @@ class Task(BetterOrderedModel):
         return self.taskinstances.count()
 
     @property
+    def complete_percent(self):
+        return int(self.complete / self.qty * 100)
+
+    @property
     def unit_price(self):
         return self.instance.unit_price
 
