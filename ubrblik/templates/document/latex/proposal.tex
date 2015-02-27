@@ -1,5 +1,5 @@
 
-{% load latex i18n %}
+{% load latex i18n l10n customformatting %}
 \documentclass[10pt, oneside]{letter}
 \usepackage[utf8x]{inputenc}
 
@@ -81,12 +81,12 @@ z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ 
 {{instance.code}}
     & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_name|tex_escape}} }} \\*
     & \multicolumn{4}{l}{\parbox[t]{9cm}{ {{instance.full_description|tex_escape}} }} \\*
-    & & {{task.qty|floatformat:2}} & {{task.unit|tex_escape}} & {{instance.unit_price|floatformat:2}} €  & {% if task.is_optional %}{% trans 'Optional' %}{% elif not instance.selected %}{% trans 'alternate'%} {% else %}{{instance.fixed_price_estimate|floatformat:2}} €{% endif %} \\
+    & & {{task.qty|ubrdecimal}} & {{task.unit|tex_escape}} & {{instance.unit_price|money}}   & {% if task.is_optional %}{% trans 'Optional' %}{% elif not instance.selected %}{% trans 'alternate'%} {% else %}{{instance.fixed_price_estimate|money}} {% endif %} \\
 {% endfor %}
 {% endfor %}
 
 \tabucline{6}
-& \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name|tex_escape}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} € }\\
+& \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name|tex_escape}} }} & \textbf{ {{taskgroup.estimate_total|money}}  }\\
 \\
 {% endfor %}
 
@@ -94,24 +94,24 @@ z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ 
 
 {% for job in jobs.all %}
 {% for taskgroup in job.taskgroups.all %}
-  & \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name|tex_escape}} }} & \textbf{ {{taskgroup.estimate_total|floatformat:2}} € } \\*
+  & \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name|tex_escape}} }} & \textbf{ {{taskgroup.estimate_total|money}}  } \\*
 {% endfor %}
 {% endfor %}
 
 \tabucline{2-6}
-& \multicolumn{4}{r} {\textbf{ {% trans 'Total without VAT' %} }} & \textbf{ {{jobs.estimate_total|floatformat:2}} € } \\*
-& \multicolumn{4}{r} {\textbf{19,00\% {% trans 'VAT' %} }} & \textbf{ {{jobs.estimate_tax_total|floatformat:2}} € } \\*
-& \multicolumn{4}{r} {\textbf{ {% trans 'Total including VAT' %} }} & \textbf{ {{jobs.estimate_gross_total|floatformat:2}} € } \\*
+& \multicolumn{4}{r} {\textbf{ {% trans 'Total without VAT' %} }} & \textbf{ {{jobs.estimate_total|money}}  } \\*
+& \multicolumn{4}{r} {\textbf{19,00\% {% trans 'VAT' %} }} & \textbf{ {{jobs.estimate_tax_total|money}}  } \\*
+& \multicolumn{4}{r} {\textbf{ {% trans 'Total including VAT' %} }} & \textbf{ {{jobs.estimate_gross_total|money}}  } \\*
 
 \end{longtabu}
 
-\setlength{\tabcolsep}{2mm}
-\begin{tabu} to \textwidth{@{} r X[l] }
-{% trans 'method of payment' %} & Zahlbar sofort ohne Abzug.\\*
-{% trans 'validity' %} & Gerichtsstand ist Mannheim. Waren bleiben bis zur restlosen Zahlung unser Eigentum. Es gelten unsere AGBs.\\
-\end{tabu}
+% \setlength{\tabcolsep}{2mm}
+% \begin{tabu} to \textwidth{@{} r X[l] }
+% {% trans 'method of payment' %} & Zahlbar sofort ohne Abzug.\\*
+% {% trans 'validity' %} & Gerichtsstand ist Mannheim. Waren bleiben bis zur restlosen Zahlung unser Eigentum. Es gelten unsere AGBs.\\
+% \end{tabu}
 
-\vspace{5mm}
+% \vspace{5mm}
 
 {{ doc.footer|tex_escape }}
 {% endautoescape %}
