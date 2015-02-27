@@ -1,7 +1,8 @@
-<ubr-taskinstance data-pk="{{ taskinstance.pk }}">
+{% load i18n l10n %}
+<ubr-taskinstance data-pk="{{ taskinstance.pk|unlocalize }}">
   {% include "task/taskinstance_editor.html" with taskinstance=taskinstance %}
   {% for lineitem in taskinstance.lineitems.all %}
-  <ubr-lineitem data-pk="{{ lineitem.pk }}">
+  <ubr-lineitem data-pk="{{ lineitem.pk|unlocalize }}">
     {% include "task/lineitem_editor.html" with lineitem=lineitem %}
   </ubr-lineitem>
   {% endfor %}

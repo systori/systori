@@ -1,4 +1,5 @@
-<ubr-taskgroup data-pk="{{ group.pk }}" {% if not group.tasks.all %}class="empty"{% endif %}>
+{% load i18n l10n %}
+<ubr-taskgroup data-pk="{{ group.pk|unlocalize }}" {% if not group.tasks.all %}class="empty"{% endif %}>
   {% include "task/taskgroup_editor.html" with group=group %}
   {% for task in group.tasks.all %}
     {% include "task/task_loop.html" with task=task %}

@@ -1,6 +1,6 @@
-{% load i18n %}
+{% load i18n l10n %}
 {% for group in objects %}
-<div data-pk="{{ group.id }}">
+<div data-pk="{{ group.id|unlocalize }}">
   {{ group.job.project.name }} / {{ group.job.name }} <br />
   {{ group.name }} - {{ group.estimate_total|floatformat:2 }}
 </div>

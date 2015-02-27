@@ -1,4 +1,5 @@
-<ubr-task data-pk="{{ task.pk }}"{% if not task.taskinstances.all %} class="empty"{% endif %}>
+{% load i18n l10n %}
+<ubr-task data-pk="{{ task.pk|unlocalize }}"{% if not task.taskinstances.all %} class="empty"{% endif %}>
   {% include "task/task_editor.html" with task=task %}
   {% for taskinstance in task.taskinstances.all %}
     {% include "task/taskinstance_loop.html" with taskinstance=taskinstance %}

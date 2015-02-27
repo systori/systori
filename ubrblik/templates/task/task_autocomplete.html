@@ -1,6 +1,6 @@
-{% load i18n %}
+{% load i18n l10n %}
 {% for task in objects %}
-<div data-pk="{{ task.id }}">
+<div data-pk="{{ task.id|unlocalize }}">
   {{ task.taskgroup.job.project.name }} / {{ task.taskgroup.job.name }} <br />
   {{ task.name }} - {{ task.qty|floatformat:2 }} {{ task.unit }} - {{ task.fixed_price_estimate|floatformat:2 }}
 </div>

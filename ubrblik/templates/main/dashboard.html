@@ -21,7 +21,7 @@
     <tbody>
       {% for lineitem in flagged_lineitems.all %}
       <tr>
-        <td nowrap><a href="{% url 'tasks' lineitem.project.id lineitem.job.id %}#lineitem-{{ lineitem.id }}">{{ lineitem.job }}</a></td>
+        <td nowrap><a href="{% url 'tasks' lineitem.project.id lineitem.job.id %}#lineitem-{{ lineitem.id|unlocalize }}">{{ lineitem.job }}</a></td>
         <td width="100%">{{ lineitem.name }}</td>
       </tr>
       {% endfor %}
