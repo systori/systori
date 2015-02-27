@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n customformatting %}
+{% load i18n l10n customformatting %}
 
 {% block content %}
 <h2 class="sub-header">{% trans "Jobs" %}</h2>
@@ -75,7 +75,7 @@
         {% endfor %}
         </td>
         <td>{{ doc.amount|money }}</td>
-        <td>{{ doc.created_on }}</td>
+        <td>{{ doc.created_on|localize }}</td>
         <td>{{ doc.notes }}</td>
         <td>
           <a href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a>
@@ -130,7 +130,7 @@
         {% endfor %}
         </td>
         <td>{{ doc.amount|floatformat:2 }}</td>
-        <td>{{ doc.created_on }}</td>
+        <td>{{ doc.created_on|localize }}</td>
         <td>{{ doc.notes }}</td>
         <td>
           <a href="{% url 'invoice.pdf' project.id doc.id %}">{% trans 'PDF' %}</a>

@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n l10n customformatting %}
+{% load i18n customformatting %}
 
 {% block sidebar %}{% include "main/sidebar.html" %}{% endblock %}
 
@@ -21,7 +21,7 @@
     <tbody>
       {% for lineitem in flagged_lineitems.all %}
       <tr>
-        <td nowrap><a href="{% url 'tasks' lineitem.project.id lineitem.job.id %}#lineitem-{{ lineitem.id|unlocalize }}">{{ lineitem.job }}</a></td>
+        <td nowrap><a href="{% url 'tasks' lineitem.project.id lineitem.job.id %}#lineitem-{{ lineitem.id }}">{{ lineitem.job }}</a></td>
         <td width="100%">{{ lineitem.name }}</td>
       </tr>
       {% endfor %}
@@ -39,7 +39,7 @@ $(document).ready(function () {
 	var locations = [
 	{% for project in mapped_projects %}
 	   ['<a href="{% url "project.view" project.id %}">{{ project.name|addslashes }}</a><br /> {{ project.estimate_total|money }}',
-	    {{ project.latitude|unlocalize }}, {{ project.longitude|unlocalize }}],
+	    {{ project.latitude }}, {{ project.longitude }}],
 	{% endfor %}
     ];
 	

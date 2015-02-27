@@ -5,12 +5,50 @@ from .templatetags.customformatting import *
 
 class CustomFormattingTest(TestCase):
 
-    def test_cleandecimal(self):
-        for language, sep in [('en','.'),('de',',')]:
-          activate(language)
-          self.assertEqual('1%s00'%sep, cleandecimal('1%s00'%sep,2))
-          self.assertEqual('1%s00'%sep, cleandecimal('1',2))
-          self.assertEqual('1%s00'%sep, cleandecimal('1%s0'%sep,2))
-          self.assertEqual('1%s00'%sep, cleandecimal('1%s000000'%sep,2))
-          self.assertEqual('1%s001'%sep, cleandecimal('1%s001000'%sep,2))
-          self.assertEqual('1234567891%s04'%sep, cleandecimal('1234567891%s040000'%sep, 2))
+    def test_ubrdecimal_en(self):
+        activate('en')
+
+        self.assertEqual('1.00', ubrdecimal(Decimal('1')))
+
+        self.assertEqual('1.00', ubrdecimal(Decimal('1.0')))
+        self.assertEqual('1.10', ubrdecimal(Decimal('1.1')))
+
+        self.assertEqual('1.00', ubrdecimal(Decimal('1.00')))
+        self.assertEqual('1.01', ubrdecimal(Decimal('1.01')))
+        self.assertEqual('1.01', ubrdecimal(Decimal('1.010')))
+
+        self.assertEqual('1.00', ubrdecimal(Decimal('1.000')))
+        self.assertEqual('1.001', ubrdecimal(Decimal('1.001')))
+        self.assertEqual('1.001', ubrdecimal(Decimal('1.0010')))
+
+        self.assertEqual('1.0001', ubrdecimal(Decimal('1.0001')))
+        self.assertEqual('1.0001', ubrdecimal(Decimal('1.00010')))
+
+        self.assertEqual('1.00',   ubrdecimal(Decimal('1.00001')))
+        self.assertEqual('1.00',   ubrdecimal(Decimal('1.000010')))
+
+        self.assertEqual('1,234,567,891.0004', ubrdecimal(Decimal('1234567891.000400')))
+
+    def test_ubrdecimal_de(self):
+        activate('de')
+
+        self.assertEqual('1,00', ubrdecimal(Decimal('1')))
+
+        self.assertEqual('1,00', ubrdecimal(Decimal('1.0')))
+        self.assertEqual('1,10', ubrdecimal(Decimal('1.1')))
+
+        self.assertEqual('1,00', ubrdecimal(Decimal('1.00')))
+        self.assertEqual('1,01', ubrdecimal(Decimal('1.01')))
+        self.assertEqual('1,01', ubrdecimal(Decimal('1.010')))
+
+        self.assertEqual('1,00', ubrdecimal(Decimal('1.000')))
+        self.assertEqual('1,001', ubrdecimal(Decimal('1.001')))
+        self.assertEqual('1,001', ubrdecimal(Decimal('1.0010')))
+
+        self.assertEqual('1,0001', ubrdecimal(Decimal('1.0001')))
+        self.assertEqual('1,0001', ubrdecimal(Decimal('1.00010')))
+
+        self.assertEqual('1,00',   ubrdecimal(Decimal('1.00001')))
+        self.assertEqual('1,00',   ubrdecimal(Decimal('1.000010')))
+
+        self.assertEqual('1.234.567.891,0004', ubrdecimal(Decimal('1234567891.000400')))

@@ -112,11 +112,13 @@ TIME_ZONE = 'Europe/Berlin'
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
 
+# having this on by default caused a lot of problems when outputing primary keys
+# and other data that needed to be machine readable
+USE_L10N = False
 USE_THOUSAND_SEPARATOR = True
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
