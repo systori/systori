@@ -41,7 +41,7 @@ class Document(models.Model):
     json = models.FileField(upload_to=generate_file_path)
 
     def __str__(self):
-        return '{} {} {}'.format(self.get_status_display(), self.__class__.__name__, self.created_on|localize)
+        return '{} {} {}'.format(self.get_status_display(), self.__class__.__name__, self.created_on)
 
     class Meta:
         abstract = True

@@ -37,7 +37,10 @@ class Project(models.Model):
     longitude = models.FloatField(_('Longitude'), null=True, blank=True)
 
     objects = ProjectQuerySet.as_manager()
-
+    
+    def __str__(self):
+        return '{}, {}'.format(self.name, self.city)
+    
     def get_absolute_url(self):
         if self.is_template:
             return reverse('templates')
