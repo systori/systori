@@ -22,7 +22,8 @@ $ sudo apt-get install\
 $ sudo pip install --upgrade fabric virtualenvwrapper
 $ source /usr/local/bin/virtualenvwrapper.sh
 $ echo "source /usr/local/bin/virtualenvwrapper.sh" > ~/.bashrc
-# install needed locales too
+
+# install needed locales
 ```
 
 Create a database user; when the databse user name matches your linux user name this allows `psql` and other tools to automatically authenticate you:
