@@ -50,7 +50,7 @@ z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ 
 \vspace{15mm}
 
 \begin{flushright}
-  {% now "l" %}, {% now "d" %}. {% now "F Y" %}
+{{ doc.document_date.date|localize }}
 \end{flushright}
 {{ doc.header|tex_escape }}
 

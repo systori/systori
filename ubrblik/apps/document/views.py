@@ -16,8 +16,9 @@ class BaseDocumentPDFView(SingleObjectMixin, View):
         pdf = getattr(self.object, kwargs['format']+'_pdf')
         return HttpResponse(pdf, content_type='application/pdf')
 
+
 class BaseDocumentCreateView(CreateView):
-    
+
     def get_form_kwargs(self):
         kwargs = super(BaseDocumentCreateView, self).get_form_kwargs()
         kwargs['instance'] = self.model(project=self.request.project)
@@ -51,6 +52,7 @@ class ProposalPDF(BaseDocumentPDFView):
 class ProposalCreate(BaseDocumentCreateView):
     model = Proposal
     form_class = ProposalForm
+
     def process_job(self, job):
         job.status = job.PROPOSED
         job.save()
@@ -59,7 +61,7 @@ class ProposalCreate(BaseDocumentCreateView):
 
 class ProposalTransition(SingleObjectMixin, View):
     model = Proposal
-    
+
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
 
@@ -68,12 +70,13 @@ class ProposalTransition(SingleObjectMixin, View):
             if t.name == kwargs['transition']:
                 transition = t
                 break
-        
-        if transition:
-          getattr(self.object, transition.name)()
-          self.object.save()
 
-        return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
+        if transition:
+            getattr(self.object, transition.name)()
+            self.object.save()
+
+        return HttpResponseRedirect(reverse('project.view',
+                                            args=[self.object.project.id]))
 
 
 class ProposalDelete(DeleteView):

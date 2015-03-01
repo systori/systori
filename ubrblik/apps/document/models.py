@@ -1,6 +1,6 @@
 import os.path, shutil
 from collections import OrderedDict
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from subprocess import Popen, PIPE
 from django.template.loader import get_template
 from django.template import Context
@@ -13,6 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 
 from ubrblik import settings
+from django.templatetags.l10n import localize
 
 
 def generate_file_path(self, filename):
@@ -31,6 +32,7 @@ class Document(models.Model):
     header = models.TextField(_("Header"))
     footer = models.TextField(_("Footer"))
     created_on = models.DateTimeField(auto_now_add=True)
+    document_date = models.DateTimeField(_("Date"), default=datetime.now, blank=True)
 
     email_pdf = models.FileField(upload_to=generate_file_path)
     email_latex = models.FileField(upload_to=generate_file_path)
@@ -199,8 +201,12 @@ class DocumentTemplate(models.Model):
         verbose_name_plural = _("Document Templates")
         ordering = ['name']
 
+
     def vars(self, project=None):
         project_contact = project.billable_contact if project else SampleProjectContact
+        project_document_date = _('{date_of_document}') if project else localize(date.today())
+        project_time_for_payment = _('{day_of_payment}') if project \
+                                    else localize(date.today()+timedelta(days=21))
         full_name = '%s %s %s' % (
             project_contact.contact.salutation,
             project_contact.contact.first_name,
@@ -211,7 +217,8 @@ class DocumentTemplate(models.Model):
             (_('firstname'), project_contact.contact.first_name),
             (_('lastname'), project_contact.contact.last_name),
             (_('name'), full_name.strip()),
-            (_('today'), date_format(datetime.now()))
+            (_('document_date'), project_document_date),
+            (_('payment_21_days'), project_time_for_payment)
         ])
 
     def render(self, project=None):
