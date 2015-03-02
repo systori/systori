@@ -1,19 +1,16 @@
-import os.path, shutil
+import os.path
 from collections import OrderedDict
-from datetime import datetime, date, timedelta
+from datetime import datetime
 from subprocess import Popen, PIPE
 from django.template.loader import get_template
 from django.template import Context
 from django.core.files.base import ContentFile
-from django.utils.formats import date_format
 
-from collections import namedtuple
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 
 from ubrblik import settings
-from django.templatetags.l10n import localize
 
 
 def generate_file_path(self, filename):
@@ -32,7 +29,8 @@ class Document(models.Model):
     header = models.TextField(_("Header"))
     footer = models.TextField(_("Footer"))
     created_on = models.DateTimeField(auto_now_add=True)
-    document_date = models.DateTimeField(_("Date"), default=datetime.now, blank=True)
+    document_date = models.DateTimeField(_("Date"), default=datetime.now,
+                                         blank=True)
 
     email_pdf = models.FileField(upload_to=generate_file_path)
     email_latex = models.FileField(upload_to=generate_file_path)
@@ -43,7 +41,8 @@ class Document(models.Model):
     json = models.FileField(upload_to=generate_file_path)
 
     def __str__(self):
-        return '{} {} {}'.format(self.get_status_display(), self.__class__.__name__, self.created_on)
+        return '{} {} {}'.format(self.get_status_display(),
+                                 self.__class__.__name__, self.created_on)
 
     class Meta:
         abstract = True
@@ -75,16 +74,17 @@ class Document(models.Model):
         # generate pdf files
         for format, latex in [('email', email_latex), ('print', print_latex)]:
 
-          for i in range(3):
-              process = Popen(
-                  ['pdflatex', '-output-directory', dir_path, '-jobname', format],
-                  stdin=PIPE,
-                  stdout=PIPE,
-                  cwd=settings.LATEX_WORKING_DIR
-              )
-              process.communicate(latex)
+            for i in range(3):
+                process = Popen(
+                    ['pdflatex', '-output-directory', dir_path,
+                     '-jobname', format],
+                    stdin=PIPE,
+                    stdout=PIPE,
+                    cwd=settings.LATEX_WORKING_DIR
+                    )
+                process.communicate(latex)
 
-          setattr(self, format+'_pdf', os.path.join(dir_path, format+'.pdf'))
+            setattr(self, format+'_pdf', os.path.join(dir_path, format+'.pdf'))
 
         # save file paths to database
         self.save()
@@ -92,7 +92,8 @@ class Document(models.Model):
 
 class Proposal(Document):
     project = models.ForeignKey("project.Project", related_name="proposals")
-    jobs = models.ManyToManyField("task.Job", verbose_name=_('Jobs'), related_name="proposals")
+    jobs = models.ManyToManyField("task.Job", verbose_name=_('Jobs'),
+                                  related_name="proposals")
 
     LATEX_TEMPLATE = "document/latex/proposal.tex"
 
@@ -110,17 +111,20 @@ class Proposal(Document):
 
     status = FSMField(default=NEW, choices=STATE_CHOICES)
 
-    @transition(field=status, source=NEW, target=SENT, custom={'label': _("Send")})
+    @transition(field=status, source=NEW, target=SENT,
+                custom={'label': _("Send")})
     def send(self):
         pass
 
-    @transition(field=status, source=SENT, target=APPROVED, custom={'label': _("Approve")})
+    @transition(field=status, source=SENT, target=APPROVED,
+                custom={'label': _("Approve")})
     def approve(self):
         for job in self.jobs.all():
             job.status = job.APPROVED
             job.save()
 
-    @transition(field=status, source=SENT, target=DECLINED, custom={'label': _("Decline")})
+    @transition(field=status, source=SENT, target=DECLINED,
+                custom={'label': _("Decline")})
     def decline(self):
         for job in self.jobs.all():
             job.status = job.DRAFT
@@ -175,13 +179,16 @@ class Invoice(Document):
         verbose_name_plural = _("Invoices")
         ordering = ['id']
 
+
 class SampleContact:
     salutation = _('Mr')
     first_name = _('John')
     last_name = _('Smith')
 
+
 class SampleProjectContact:
     contact = SampleContact
+
 
 class DocumentTemplate(models.Model):
     name = models.CharField(_('Name'), max_length=512)
@@ -194,19 +201,17 @@ class DocumentTemplate(models.Model):
         (PROPOSAL, _("Proposal")),
         (INVOICE, _("Invoice")),
     )
-    document_type = models.CharField(_('Document Type'), max_length=128, choices=DOCUMENT_TYPE, default=PROPOSAL)
+    document_type = models.CharField(_('Document Type'), max_length=128,
+                                     choices=DOCUMENT_TYPE, default=PROPOSAL)
 
     class Meta:
         verbose_name = _("Document Template")
         verbose_name_plural = _("Document Templates")
         ordering = ['name']
 
-
     def vars(self, project=None):
-        project_contact = project.billable_contact if project else SampleProjectContact
-        project_document_date = _('{date_of_document}') if project else localize(date.today())
-        project_time_for_payment = _('{day_of_payment}') if project \
-                                    else localize(date.today()+timedelta(days=21))
+        project_contact = project.billable_contact if project \
+            else SampleProjectContact
         full_name = '%s %s %s' % (
             project_contact.contact.salutation,
             project_contact.contact.first_name,
@@ -216,9 +221,7 @@ class DocumentTemplate(models.Model):
             (_('salutation'), project_contact.contact.salutation),
             (_('firstname'), project_contact.contact.first_name),
             (_('lastname'), project_contact.contact.last_name),
-            (_('name'), full_name.strip()),
-            (_('document_date'), project_document_date),
-            (_('payment_21_days'), project_time_for_payment)
+            (_('name'), full_name.strip())
         ])
 
     def render(self, project=None):

@@ -1,6 +1,6 @@
 import locale
 from django.template.defaultfilters import stringfilter
-from django.utils.formats import get_format, get_language, number_format
+from django.utils.formats import get_format, get_language, number_format, to_locale
 from django import template
 register = template.Library()
 
@@ -31,5 +31,5 @@ def ubrdecimal(decimal, decimal_pos=4):
 
 @register.filter
 def money(decimal):
-    locale.setlocale(locale.LC_ALL, (get_language(), 'utf-8'))
+    locale.setlocale(locale.LC_ALL, (to_locale(get_language()), 'utf-8'))
     return locale.currency(decimal, True, True)

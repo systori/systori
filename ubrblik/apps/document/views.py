@@ -81,6 +81,7 @@ class ProposalTransition(SingleObjectMixin, View):
 
 class ProposalDelete(DeleteView):
     model = Proposal
+
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])
 
@@ -88,19 +89,22 @@ class ProposalDelete(DeleteView):
 class InvoiceView(DetailView):
     model = Invoice
 
+
 class InvoicePDF(BaseDocumentPDFView):
     model = Invoice
+
 
 class InvoiceCreate(BaseDocumentCreateView):
     model = Invoice
     form_class = InvoiceForm
+
     def process_job(self, job):
         return job.billable_total
 
 
 class InvoiceTransition(SingleObjectMixin, View):
     model = Invoice
-    
+
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
 
@@ -109,31 +113,35 @@ class InvoiceTransition(SingleObjectMixin, View):
             if t.name == kwargs['transition']:
                 transition = t
                 break
-        
-        if transition:
-          getattr(self.object, transition.name)()
-          self.object.save()
 
-        return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
+        if transition:
+            getattr(self.object, transition.name)()
+            self.object.save()
+
+        return HttpResponseRedirect(reverse('project.view',
+                                            args=[self.object.project.id]))
 
 
 class InvoiceDelete(DeleteView):
     model = Invoice
+
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])
-
 
 
 class DocumentTemplateView(DetailView):
     model = DocumentTemplate
 
+
 class DocumentTemplateCreate(CreateView):
     model = DocumentTemplate
     success_url = reverse_lazy('templates')
 
+
 class DocumentTemplateUpdate(UpdateView):
     model = DocumentTemplate
     success_url = reverse_lazy('templates')
+
 
 class DocumentTemplateDelete(DeleteView):
     model = DocumentTemplate

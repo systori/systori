@@ -57,16 +57,14 @@ z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ 
 \begin{longtabu} to \textwidth{@{}l X[l] r l r r}
 
 {% filter bold %}{% trans 'Pos.' %}{% endfilter %}  & {% filter bold %}{% trans 'Description' %}{% endfilter %} & \multicolumn{2}{c}{ {% filter bold %}{% trans 'Amount' %}{% endfilter %} } & {% filter bold %}{% trans 'Price' %}{% endfilter %} & {% filter bold %}{% trans 'Total'%}{% endfilter %} \\
-\hline
 \endfirsthead
 \multicolumn{6}{l} {\textit{... {% trans 'Continuation' %} }} \\
 
 {% filter bold %}{% trans 'Pos.' %}{% endfilter %}  & {% filter bold %}{% trans 'Description' %}{% endfilter %} & \multicolumn{2}{c}{ {% filter bold %}{% trans 'Amount' %}{% endfilter %} } & {% filter bold %}{% trans 'Price' %}{% endfilter %} & {% filter bold %}{% trans 'Total'%}{% endfilter %} \\
-\hline
+\midrule
 
 \endhead
 \multicolumn{6}{r}{\textit{ {% trans 'Continuation' %} ...}} \\
-\hline
 \endfoot
 
 \endlastfoot
@@ -85,16 +83,17 @@ z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ 
 {% endfor %}
 {% endfor %}
 
-% \tabucline{6}
-& \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name|tex_escape}} }} & \textbf{ {{taskgroup.estimate_total|money}}  }\\
+{% if job.taskgroups.all|length > 1 %}
+& \multicolumn{4}{r}{\parbox[b]{8.5cm}{ \textbf{ {% trans 'Total' %} {{taskgroup.code}} - {{taskgroup.name}} }} } & \textbf{ {{taskgroup.estimate_total|money}}  }\\
 \\
+{% endif %}
 {% endfor %}
 
 {% endfor %}
 
 {% for job in jobs.all %}
 {% for taskgroup in job.taskgroups.all %}
-  & \multicolumn{4}{r} {\textbf{ {% trans 'Total' %} {{job.code}}.{{forloop.counter}} - {{taskgroup.name|tex_escape}} }} & \textbf{ {{taskgroup.estimate_total|money}}  } \\*
+& \multicolumn{4}{r}{\parbox[b]{8.5cm}{ \textbf{ {% trans 'Total' %} {{taskgroup.code}} - {{taskgroup.name|tex_escape}} }} } & \textbf{ {{taskgroup.estimate_total|money}}  } \\*
 {% endfor %}
 {% endfor %}
 
