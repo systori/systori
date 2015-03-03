@@ -3,6 +3,8 @@
 # Django Settings
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
+
+AUTH_USER_MODEL = 'user.User'
 LOGIN_REDIRECT_URL = '/'
 
 DEFAULT_COUNTRY = "Deutschland"
@@ -41,8 +43,10 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'tastypie',
+    'django_mobile',
     'ordered_model',
     'ubrblik.lib',
+    'ubrblik.apps.user',
     'ubrblik.apps.project',
     'ubrblik.apps.directory',
     'ubrblik.apps.task',
@@ -55,6 +59,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'ubrblik.middleware.locale.ForceDefaultLanguageMiddleware',
+    'ubrblik.middleware.mobile.UbrMobileDetectionMiddleware',
+    'django_mobile.middleware.SetFlavourMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -66,6 +72,7 @@ from django.conf import global_settings
 TEMPLATE_CONTEXT_PROCESSORS =\
     global_settings.TEMPLATE_CONTEXT_PROCESSORS + (
     'django.core.context_processors.request',
+    'django_mobile.context_processors.flavour',
 )
 
 ROOT_URLCONF = 'ubrblik.urls'

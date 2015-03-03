@@ -5,17 +5,6 @@ from ..task.models import Job, Task
 from .forms import CompletionForm
 
 
-class FieldDashboard(TemplateView):
-    template_name = "field/dashboard.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(FieldDashboard, self).get_context_data(**kwargs)
-        #context['flagged_lineitems'] = LineItem.objects.filter(is_flagged=True)
-        #context['mapped_projects'] = Project.objects.exclude(latitude=None).exclude(longitude=None).all()
-        #context['GOOGLE_MAPS_API_KEY'] = settings.GOOGLE_MAPS_API_KEY
-        return context
-
-
 class FieldProjectList(ProjectList):
     template_name = "field/project_list.html"
 

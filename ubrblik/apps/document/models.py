@@ -1,6 +1,6 @@
 import os.path
 from collections import OrderedDict
-from datetime import datetime
+from datetime import date
 from subprocess import Popen, PIPE
 from django.template.loader import get_template
 from django.template import Context
@@ -29,8 +29,7 @@ class Document(models.Model):
     header = models.TextField(_("Header"))
     footer = models.TextField(_("Footer"))
     created_on = models.DateTimeField(auto_now_add=True)
-    document_date = models.DateTimeField(_("Date"), default=datetime.now,
-                                         blank=True)
+    document_date = models.DateField(_("Date"), default=date.today, blank=True)
 
     email_pdf = models.FileField(upload_to=generate_file_path)
     email_latex = models.FileField(upload_to=generate_file_path)

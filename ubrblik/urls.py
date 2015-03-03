@@ -9,17 +9,15 @@ urlpatterns = patterns('',
 
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^accounts/login/', 'django.contrib.auth.views.login', name="login"),
-    url(r'^accounts/logout/', 'django.contrib.auth.views.logout', {'next_page':'/'}, name="logout"),
 
     url(r'', include('ubrblik.apps.project.urls')),
     url(r'', include('ubrblik.apps.directory.urls')),
     url(r'', include('ubrblik.apps.document.urls')),
     url(r'', include('ubrblik.apps.main.urls')),
+    url(r'', include('ubrblik.apps.user.urls')),
 
     url(r'^project-(?P<project_pk>\d+)/', include('ubrblik.apps.task.urls')),
     url(r'^templates/', include('ubrblik.apps.task.urls')),
 
     url(r'^field/', include('ubrblik.apps.field.urls')),
-
 )

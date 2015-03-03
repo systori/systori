@@ -3,4 +3,5 @@ django
 django-tastypie
 django-ordered-model
 django-fsm
+django_mobile
 geopy
