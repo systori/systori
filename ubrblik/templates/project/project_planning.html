@@ -1,0 +1,199 @@
+{% extends "project.html" %}
+{% load i18n l10n customformatting %}
+
+{% block content %}
+<style>
+.daily-plan {
+  width: 500px;
+  height: 350px;
+  position: relative;
+  display: inline-block;
+  margin-bottom: 0px;
+}
+
+.daily-plan > .panel-heading {
+  height: 35px;
+  width: 200px;
+}
+
+.daily-plan-slider {
+  overflow-x: auto;
+  margin-left: -20px;
+  margin-right: -20px;
+  margin-top: -10px;
+}
+
+.daily-labor {
+  width: 200px;
+  height: 313px;
+  margin: 0px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  overflow-y: scroll;
+}
+
+.daily-tasks {
+  border-radius: 4px;
+  height: 348px;
+  width: 300px;
+  position: absolute;
+  top: 0;
+  left: 200px;
+  overflow-y: scroll;
+}
+
+.labor-tasks-row {
+    position: fixed;
+    top: 440px;
+    left: 300px;
+    bottom: 30px;
+    right: 15px;
+}
+
+.task-list, .labor-list {
+  overflow-y: scroll;
+  position: absolute;
+  top: 38px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+}
+
+</style>
+
+<div class="daily-plan-slider">
+
+<div class="panel panel-default daily-plan">
+
+  <div class="panel-heading">
+    <h3 class="panel-title">{% localize on %}{% now "N j" %}{% endlocalize %}</h3>
+  </div>
+
+   <div class="row daily-labor">
+        <div class="col-md-6">
+         <div class="thumbnail">
+           <span class="glyphicon glyphicon-user" style="font-size: 20px;"></span>
+           <div class="caption">Bob</div>
+         </div>
+        </div>
+   </div>
+
+    <div class="list-group daily-tasks">
+      <a href="#" class="list-group-item">Task 1</a>
+      <a href="#" class="list-group-item">Task 2</a>
+      <a href="#" class="list-group-item">Task 3</a>
+      <a href="#" class="list-group-item">Task 4</a>
+      <a href="#" class="list-group-item">Task 5</a>
+      <a href="#" class="list-group-item">Task 6</a>
+    </div>
+
+</div>
+
+</div>
+
+<div class="row labor-tasks-row">
+
+  <div class="col-md-6" style="height: 100%;">
+    <div class="panel panel-default" style="height: 100%; position: relative;">
+
+      <div class="panel-heading">
+        <h3 class="panel-title">{% trans 'Labor' %}</h3>
+      </div>
+
+      <div class="panel-body labor-list">
+       <div class="row">
+        <div class="col-md-6 draggable-labor">
+         <div class="thumbnail">
+           <span class="glyphicon glyphicon-user" style="font-size: 20px;"></span>
+           <div class="caption">Fred</div>
+         </div>
+        </div>
+       </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="col-md-6" style="height: 100%;">
+
+    <div class="panel panel-default" style="height: 100%; position: relative;">
+
+      <div class="panel-heading">
+        <div class="dropdown pull-right">
+            {% with first_job=project.jobs.first job_count=project.jobs.count %}
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ first_job.name }} {% if job_count > 1 %}<b class="caret"></b>{% endif %}</a>
+            {% if job_count > 1 %}
+            <ul class="dropdown-menu" role="menu">
+                {% for job in project.jobs.all %}
+                {% if not job.id == first_job.id %}
+                <li><a href="#">{{ job.name }}</a></li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+        </div>
+        <h3 class="panel-title">{% trans 'Tasks' %}</h3>
+      </div>
+
+        <ul class="list-group task-list">
+        {% for taskgroup in project.jobs.first.taskgroups.all %}
+        <div class="list-group-item disabled">{{taskgroup.code}} {{ taskgroup.name }}</div>
+        {% for task in taskgroup.tasks.all %}
+          <a href="#" class="list-group-item draggable-task">
+            {{task.code}} {{ task.name }}
+            {% if task.complete_percent > 0 %}
+            <span class="badge">{{ task.complete_percent }}%</span>
+            {% endif %}
+          </a>
+        {% endfor %}
+        {% endfor %}
+        </ul>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js%}
+<script type="text/javascript">
+$(function() {
+    $(".daily-labor").sortable();
+    $(".labor-list").sortable();
+    $(".draggable-labor").draggable({
+    	connectToSortable: ".daily-labor",
+    	revert: 'invalid',
+    	scroll: false
+    });
+
+    $(".task-list").sortable();
+    $(".daily-tasks").sortable();
+    $(".draggable-task").draggable({
+    	connectToSortable: ".daily-tasks",
+    	revert: 'invalid',
+    	scroll: false
+    });
+});
+
+
+
+
+
+
+
+$("#job-table").sortable({
+		handle: ".handle",
+    update: function(event, ui) {
+      $.ajax({
+        type: 'GET',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        data: {'position': ui.item.index()},
+        url: ui.item.data('move'),
+        async: false
+      });
+    }
+});
+</script>
+{% endblock extra_js%}
