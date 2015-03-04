@@ -47,6 +47,15 @@ class ProjectDelete(DeleteView):
     success_url = reverse_lazy('projects')
 
 
+class ProjectPlanning(DetailView):
+    model = Project
+    template_name='project/project_planning.html'
+    def get_context_data(self, **kwargs):
+        context = super(ProjectPlanning, self).get_context_data(**kwargs)
+        context['jobs'] = self.object.jobs.all()
+        return context
+
+
 class TemplatesView(TemplateView):
     template_name='main/templates.html'
     def get_context_data(self, **kwargs):
