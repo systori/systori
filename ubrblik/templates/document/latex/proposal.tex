@@ -42,7 +42,7 @@
 
 {% autoescape off %}
 
-{% if contact.business %}{{ contact.business }} \\{% endif %}
+{% if contact.business %}{{ contact.business|tex_escape }} \\{% endif %}
 z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ contact.last_name|tex_escape }} \\
 {{ contact.address|tex_escape }} \\
 {{ contact.postal_code|tex_escape }} {{ contact.city|tex_escape }} \\
