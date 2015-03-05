@@ -2,66 +2,6 @@
 {% load i18n %}
 
 {% block container %}
-<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-        <span class="sr-only">{% trans 'Toggle navigation' %}</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/">Ubrblik</a>
-    </div>
-    <div id="navbar" class="navbar-collapse collapse">
-      <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
-        <ul class="nav navbar-nav">
-          <li><a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ LANGUAGE_CODE }}<b class="caret"></b></a>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
-            {% get_language_info_list for LANGUAGES as languages %}
-            <input type="hidden" name="language" value="" />
-            {% for language in languages %}
-                {% if language.code != LANGUAGE_CODE %}
-                <li><a class="language-link" href="#" data-language="{{ language.code }}">{{ language.name_local }}</a></li>
-                {% endif %}
-            {% endfor %}
-            </ul>
-          </li>
-        </ul>
-      </form>
-      {% if not user.is_authenticated and request.path != "/accounts/login/" %}
-      <form class="navbar-form navbar-right" role="form" method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{ request.get_full_path }}" />
-        <div class="form-group">
-          <input name="username" type="text" placeholder="{% trans 'Username' %}" class="form-control">
-        </div>
-        <div class="form-group">
-          <input name="password" type="password" placeholder="{% trans 'Password' %}" class="form-control">
-        </div>
-        <button type="submit" class="btn btn-success">{% trans 'Sign in' %}</button>
-      </form>
-      {% endif %}
-      {% if user.is_authenticated %}
-      {% block head_navbar %}{% endblock %}
-      <ul class="nav navbar-nav navbar-right">
-        <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ user.username }} <b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                <li><a href="{% url 'settings' %}">{% trans 'Settings' %}</a></li>
-                <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>
-            </ul>
-        </li>
-      </ul>
-      {% endif %}
-    </div>
-  </div>
-</nav>
-
 <div class="container-fluid" style="padding-bottom:100px;">
   <div class="row">
     <div class="col-sm-3 col-md-2 sidebar">

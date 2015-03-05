@@ -2,6 +2,7 @@
 {% load i18n %}
 
 {% block title %}{{ project.name }}{% endblock %}
+
 {% block head_navbar %}
 <ul class="nav navbar-nav navbar-left">
   <li class="active"><a href="{% url 'project.view' project.id %}">{{ project.name }}</a></li>

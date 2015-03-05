@@ -1,106 +1,300 @@
-{% extends "project.html" %}
+{% extends "base.html" %}
 {% load i18n l10n customformatting %}
 
-{% block content %}
+{% block title %}{{ project.name }}{% endblock %}
+{% block head_navbar %}
+<ul class="nav navbar-nav navbar-left">
+  <li class="active"><a href="{% url 'project.view' project.id %}">{{ project.name }}</a></li>
+</ul>
+{% endblock %}
+
+{% block container %}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.1/css/datepicker3.min.css">
 <style>
-.daily-plan {
-  width: 500px;
-  height: 350px;
+.list-group > .list-group-item:first-child {
+  border-width: 0;
+}
+.panel > .list-group:last-child > .list-group-item:last-child {
+  border-bottom: 1px solid #ddd;
+}
+
+.list-group-item {
+  padding: 9px 15px;
+}
+
+.panel-col {
+  height: 100%;
+  padding-right: 10px;
+}
+
+.panel-col > .panel,
+.panel-col > .week-slider > .panel {
+  height: 100%;
   position: relative;
+}
+
+
+
+.daily-plan-row {
+  position: fixed;
+  left: 20px;
+  right: 20px;
+  height: 350px;
+}
+
+.week-slider {
+  direction: rtl;
+  white-space: nowrap;
+  overflow-x: scroll;
+  padding: 0px 0px 4px 0px;
+  height: 100%;
+}
+
+.daily-plan {
+  direction: ltr;
+  white-space: normal;
+  width: 400px;
   display: inline-block;
   margin-bottom: 0px;
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .daily-plan > .panel-heading {
-  height: 35px;
-  width: 200px;
-}
-
-.daily-plan-slider {
-  overflow-x: auto;
-  margin-left: -20px;
-  margin-right: -20px;
-  margin-top: -10px;
+  width: 150px;
 }
 
 .daily-labor {
-  width: 200px;
-  height: 313px;
+  width: 150px;
+  position: absolute;
+  top: 38px;
+  bottom: 0px;
+  left: 0px;
   margin: 0px;
   padding-top: 15px;
   padding-bottom: 15px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .daily-tasks {
-  border-radius: 4px;
-  height: 348px;
-  width: 300px;
+  width: 248px;
   position: absolute;
   top: 0;
-  left: 200px;
-  overflow-y: scroll;
+  bottom: 0;
+  left: 150px;
+  overflow-y: auto;
+  border-left: 1px solid #ddd;
 }
 
-.labor-tasks-row {
+.daily-tasks > a.list-group-item:first-child {
+  border-top-right-radius: 4px;
+}
+
+
+#calendar {
+  height: 100%;
+}
+
+#calendar > .datepicker-inline, 
+#calendar > .datepicker-inline > div, 
+#calendar > .datepicker-inline > div > table {
+  width: 100%;
+  height: 100%;
+}
+
+#calendar .datepicker-days tbody > tr:hover {
+  background: #f5f5f5;
+}
+#calendar .datepicker-days tbody > tr > td {
+  border-radius: 0;
+}
+#calendar .datepicker-days .cw:hover {
+  cursor: pointer;
+  background: #eee;
+}
+
+</style>
+
+
+<div class="row daily-plan-row">
+
+  <div class="col-md-9 panel-col">
+  
+  <div class="week-slider">
+
+    <div class="panel panel-default daily-plan">
+
+      <div class="panel-heading">
+        <h3 class="panel-title">März 4</h3>
+      </div>
+
+       <div class="row daily-labor">
+            <div class="col-md-6">
+             <div class="thumbnail">
+               <span class="glyphicon glyphicon-user" style="font-size: 20px;"></span>
+               <div class="caption">Bob</div>
+             </div>
+            </div>
+            <div class="col-md-6">
+             <div class="thumbnail">
+               <span class="glyphicon glyphicon-user" style="font-size: 20px;"></span>
+               <div class="caption">Bob</div>
+             </div>
+            </div>
+       </div>
+
+        <div class="list-group daily-tasks">
+          <a href="#" class="list-group-item">1.1.06 Baustellen-WC ab der fünften Woche</a>
+          <a href="#" class="list-group-item">Task 11</a>
+          <a href="#" class="list-group-item">Task 12</a>
+          <a href="#" class="list-group-item">Task 13</a>
+          <a href="#" class="list-group-item">Task 14</a>
+        </div>
+
+    </div>
+
+    <div class="panel panel-default daily-plan">
+
+      <div class="panel-heading">
+        <h3 class="panel-title">März 3</h3>
+      </div>
+
+       <div class="row daily-labor">
+            <div class="col-md-6">
+             <div class="thumbnail">
+               <span class="glyphicon glyphicon-user" style="font-size: 20px;"></span>
+               <div class="caption">Bob</div>
+             </div>
+            </div>
+            <div class="col-md-6">
+             <div class="thumbnail">
+               <span class="glyphicon glyphicon-user" style="font-size: 20px;"></span>
+               <div class="caption">Bob</div>
+             </div>
+            </div>
+       </div>
+
+        <div class="list-group daily-tasks">
+          <a href="#" class="list-group-item">Task 10</a>
+          <a href="#" class="list-group-item">Task 11</a>
+          <a href="#" class="list-group-item">Task 12</a>
+          <a href="#" class="list-group-item">Task 13</a>
+          <a href="#" class="list-group-item">Task 14</a>
+        </div>
+
+    </div>
+
+    <div class="panel panel-default daily-plan">
+
+      <div class="panel-heading">
+        <h3 class="panel-title">März 2</h3>
+      </div>
+
+       <div class="row daily-labor">
+            <div class="col-md-6">
+             <div class="thumbnail">
+               <span class="glyphicon glyphicon-user" style="font-size: 20px;"></span>
+               <div class="caption">Bob</div>
+             </div>
+            </div>
+            <div class="col-md-6">
+             <div class="thumbnail">
+               <span class="glyphicon glyphicon-user" style="font-size: 20px;"></span>
+               <div class="caption">Bob</div>
+             </div>
+            </div>
+       </div>
+
+        <div class="list-group daily-tasks">
+          <a href="#" class="list-group-item">Task 7</a>
+          <a href="#" class="list-group-item">Task 8</a>
+          <a href="#" class="list-group-item">Task 9</a>
+        </div>
+
+    </div>
+
+    <div class="panel panel-default daily-plan">
+
+      <div class="panel-heading">
+        <h3 class="panel-title">März 1</h3>
+      </div>
+
+       <div class="row daily-labor">
+            <div class="col-md-6">
+             <div class="thumbnail">
+               <span class="glyphicon glyphicon-user" style="font-size: 20px;"></span>
+               <div class="caption">Bob</div>
+             </div>
+            </div>
+            <div class="col-md-6">
+             <div class="thumbnail">
+               <span class="glyphicon glyphicon-user" style="font-size: 20px;"></span>
+               <div class="caption">Bob</div>
+             </div>
+            </div>
+       </div>
+
+        <div class="list-group daily-tasks">
+          <a href="#" class="list-group-item">Task 1</a>
+          <a href="#" class="list-group-item">Task 2</a>
+          <a href="#" class="list-group-item">Task 3</a>
+          <a href="#" class="list-group-item">Task 4</a>
+          <a href="#" class="list-group-item">Task 5</a>
+          <a href="#" class="list-group-item">Task 6</a>
+        </div>
+
+    </div>
+
+ </div>
+
+</div>
+
+  <div class="col-md-3 panel-col">
+    <div class="panel panel-default">
+    <div id="calendar"></div>
+    </div>
+  </div>
+
+</div>
+
+
+
+<style>
+.panels-row {
     position: fixed;
     top: 440px;
-    left: 340px;
-    bottom: 30px;
-    right: 15px;
+    left: 20px;
+    bottom: 20px;
+    right: 20px;
 }
 
-.task-list, .labor-list {
-  overflow-y: scroll;
+.panel-list {
+  overflow-y: auto;
   position: absolute;
   top: 38px;
   right: 0px;
   bottom: 0px;
   left: 0px;
+  display: none;
+}
+
+.panel-list.visible {
+  display: block;
 }
 
 </style>
 
-<div class="daily-plan-slider">
+<div class="row panels-row">
 
-<div class="panel panel-default daily-plan">
+  <div class="col-md-3 panel-col">
 
-  <div class="panel-heading">
-    <h3 class="panel-title">{% localize on %}{% now "N j" %}{% endlocalize %}</h3>
-  </div>
-
-   <div class="row daily-labor">
-        <div class="col-md-6">
-         <div class="thumbnail">
-           <span class="glyphicon glyphicon-user" style="font-size: 20px;"></span>
-           <div class="caption">Bob</div>
-         </div>
-        </div>
-   </div>
-
-    <div class="list-group daily-tasks">
-      <a href="#" class="list-group-item">Task 1</a>
-      <a href="#" class="list-group-item">Task 2</a>
-      <a href="#" class="list-group-item">Task 3</a>
-      <a href="#" class="list-group-item">Task 4</a>
-      <a href="#" class="list-group-item">Task 5</a>
-      <a href="#" class="list-group-item">Task 6</a>
-    </div>
-
-</div>
-
-</div>
-
-<div class="row labor-tasks-row">
-
-  <div class="col-md-6" style="height: 100%;">
-    <div class="panel panel-default" style="height: 100%; position: relative;">
+    <div class="panel panel-default">
 
       <div class="panel-heading">
         <h3 class="panel-title">{% trans 'Labor' %}</h3>
       </div>
 
-      <div class="panel-body labor-list">
+      <div class="panel-body panel-list visible">
        <div class="row">
         <div class="col-md-6 draggable-labor">
          <div class="thumbnail">
@@ -114,42 +308,64 @@
     </div>
   </div>
 
+  <div class="col-md-3 panel-col">
 
-  <div class="col-md-6" style="height: 100%;">
-
-    <div class="panel panel-default" style="height: 100%; position: relative;">
+    <div class="panel panel-default">
 
       <div class="panel-heading">
-        <div class="dropdown pull-right">
-            {% with first_job=project.jobs.first job_count=project.jobs.count %}
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ first_job.name }} {% if job_count > 1 %}<b class="caret"></b>{% endif %}</a>
-            {% if job_count > 1 %}
-            <ul class="dropdown-menu" role="menu">
-                {% for job in project.jobs.all %}
-                {% if not job.id == first_job.id %}
-                <li><a href="#">{{ job.name }}</a></li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-            {% endif %}
-            {% endwith %}
+        <h3 class="panel-title">{% trans 'Jobs' %}</h3>
+      </div>
+
+        <div class="list-group panel-list job-list visible">
+        {% for job in project.jobs.all %}
+            <a href="#" class="list-group-item {% if forloop.first %}active{% endif %}" data-job-id="{{ job.id }}">{{ job.name }}</a>
+        {% endfor %}
         </div>
+
+    </div>
+  </div>
+
+  <div class="col-md-3 panel-col">
+
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        <h3 class="panel-title">{% trans 'Task Groups' %}</h3>
+      </div>
+
+        {% for job in project.jobs.all %}
+        <div class="list-group panel-list taskgroup-list {% if forloop.first %}visible{% endif %}" id="task_groups_for_{{ job.id }}">
+        {% for taskgroup in job.taskgroups.all %}
+          <a href="#" class="list-group-item {% if forloop.first %}active{% endif %}" data-taskgroup-id="{{ taskgroup.id }}">{{ taskgroup.code }} {{ taskgroup.name }}</a>
+        {% endfor %}
+        </div>
+        {% endfor %}
+
+    </div>
+  </div>
+
+  <div class="col-md-3 panel-col">
+
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
         <h3 class="panel-title">{% trans 'Tasks' %}</h3>
       </div>
 
-        <ul class="list-group task-list">
-        {% for taskgroup in project.jobs.first.taskgroups.all %}
-        <div class="list-group-item disabled">{{taskgroup.code}} {{ taskgroup.name }}</div>
+        {% for job in project.jobs.all %}
+        {% for taskgroup in job.taskgroups.all %}
+        <div class="list-group panel-list task-list {% if forloop.first %}visible{% endif %}" id="tasks_for_{{ taskgroup.id }}">
         {% for task in taskgroup.tasks.all %}
-          <a href="#" class="list-group-item draggable-task">
+          <a href="#" class="list-group-item">
             {{task.code}} {{ task.name }}
             {% if task.complete_percent > 0 %}
             <span class="badge">{{ task.complete_percent }}%</span>
             {% endif %}
           </a>
         {% endfor %}
+        </div>
         {% endfor %}
-        </ul>
+        {% endfor %}
 
     </div>
   </div>
@@ -158,23 +374,39 @@
 {% endblock %}
 
 {% block extra_js%}
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.1/js/bootstrap-datepicker.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.1/js/locales/bootstrap-datepicker.{{ LANGUAGE_CODE }}.js"></script>
 <script type="text/javascript">
 $(function() {
-    $(".daily-labor").sortable();
-    $(".labor-list").sortable();
-    $(".draggable-labor").draggable({
-    	connectToSortable: ".daily-labor",
-    	revert: 'invalid',
-    	scroll: false
-    });
 
-    $(".task-list").sortable();
+	$('#calendar').datepicker({
+		language: "{{ LANGUAGE_CODE }}",
+		calendarWeeks: true
+	}).on('click', function(e) {
+		var target = $(e.target).closest('span, td, th');
+		if (target.length === 1 && target[0].nodeName.toLowerCase() == 'td' && target.hasClass('cw')) {
+			alert(target.text());
+		}
+	});
+	
+	$('.job-list > a').on('click', function(e) {
+		$('.job-list a.active').removeClass('active');
+		$(this).addClass('active');
+
+		$('.taskgroup-list.visible').removeClass('visible');
+		$('#task_groups_for_'+$(e.target).data('job-id')).addClass('visible');
+	});
+
+	$('.taskgroup-list > a').on('click', function(e) {
+		$('.taskgroup-list a.active').removeClass('active');
+		$(this).addClass('active');
+
+		$('.task-list.visible').removeClass('visible');
+		$('#tasks_for_'+$(e.target).data('taskgroup-id')).addClass('visible');
+	});
+
     $(".daily-tasks").sortable();
-    $(".draggable-task").draggable({
-    	connectToSortable: ".daily-tasks",
-    	revert: 'invalid',
-    	scroll: false
-    });
+
 });
 
 
