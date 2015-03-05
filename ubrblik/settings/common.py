@@ -5,6 +5,7 @@
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
 AUTH_USER_MODEL = 'user.User'
+LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/'
 
 DEFAULT_COUNTRY = "Deutschland"

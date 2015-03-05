@@ -5,8 +5,8 @@
     <div class="name" placeholder="{% trans 'task' %}" contenteditable>{{ task.name }}</div>
     <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ task.qty|ubrdecimal }}</div>
     <div class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ task.unit }}</div>
-    <div class="price">{{ task.unit_price|ubrdecimal:2 }}</div>
-    <div class="total">{{ task.fixed_price_estimate|ubrdecimal:2 }}</div>
+    <div class="price">{{ task.unit_price|ubrdecimal:3 }}</div>
+    <div class="total">{{ task.fixed_price_estimate|ubrdecimal:3 }}</div>
     <div class="labels">
       <span class="is_optional {{ task.is_optional }} label label-primary">{% trans 'Optional' %}</span>
     </div>

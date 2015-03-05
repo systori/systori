@@ -6,7 +6,7 @@ import 'package:collection/equality.dart';
 
 
 final Repository repository = new Repository();
-NumberFormat CURRENCY = new NumberFormat("#,###,###,##0.00");
+NumberFormat CURRENCY = new NumberFormat("#,###,###,##0.00#");
 NumberFormat DECIMAL = new NumberFormat("#,###,###,##0.####");
 
 double parse_currency(String value) => value.length > 0 ? CURRENCY.parse(value) : 0;
