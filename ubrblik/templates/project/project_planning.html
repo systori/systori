@@ -347,6 +347,7 @@ function newDailyPlan(week, date, formatted) {
         updateLaborFromPlan(plan);
 	});
 
+    $(".daily-tasks").sortable();
     $('.daily-tasks > a', active_plan).on('click', removeDailyTask);
     $('.daily-labor > div', active_plan).on('click', removeDailyLabor);
 
@@ -422,8 +423,6 @@ $(function() {
 		$('.task-list.visible').removeClass('visible');
 		$('#tasks_for_'+$(e.target).data('taskgroup-id')).addClass('visible');
 	});
-
-    $(".daily-tasks").sortable();
 
 });
 
