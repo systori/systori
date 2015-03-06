@@ -54,7 +54,8 @@ class TaskEditor(SingleObjectMixin, ListView):
 
     def get_queryset(self):
         self.object = self.get_object()
-        return self.object.taskgroups.all()
+        queryset = self.object.taskgroups.prefetch_related('tasks__taskinstances__lineitems')
+        return queryset.all()
 
 
 class JobView(DetailView):
