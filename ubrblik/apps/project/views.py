@@ -18,7 +18,9 @@ class ProjectList(ListView):
 
 class ProjectView(DetailView):
     model = Project
-
+    def get_queryset(self):
+        queryset = super(ProjectView, self).get_queryset()
+        return queryset.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
 
 class ProjectCreate(CreateView):
     model = Project

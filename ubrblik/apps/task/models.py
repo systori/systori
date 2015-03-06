@@ -145,8 +145,9 @@ class TaskGroup(BetterOrderedModel):
 
     def _total_calc(self, field):
         total = Decimal(0.0)
-        for task in self.tasks.filter(is_optional=False).all():
-            total += getattr(task, field)
+        for task in self.tasks.all():
+            if not task.is_optional:
+                total += getattr(task, field)
         return total
 
     def estimate_total_modify(self, user, action, rate):
@@ -231,7 +232,10 @@ class Task(BetterOrderedModel):
 
     @cached_property
     def instance(self):
-        return self.taskinstances.get(selected=True)
+        for instance in self.taskinstances.all():
+            if instance.selected:
+                return instance
+        raise self.taskinstances.DoesNotExist
 
     @cached_property
     def instance_count(self):
