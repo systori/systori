@@ -48,7 +48,7 @@ body {
 
 <div class="container">
   <form class="form-signin" method="post" action="{% url 'login' %}">{% csrf_token %}
-    <h2 class="form-signin-heading">Ubrblik</h2>
+    <h2 class="form-signin-heading">Systori</h2>
     {% if form.errors %}
     <p>{% trans "Your username and password didn't match. Please try again." %}</p>
     {% endif %}

@@ -53,6 +53,7 @@ class ProjectPlanning(DetailView):
     def get_context_data(self, **kwargs):
         context = super(ProjectPlanning, self).get_context_data(**kwargs)
         context['jobs'] = self.object.jobs.all()
+        context['users'] = ["Fred", "Bob", "Frank", "John", "Jay", "Lex", "Marius"]
         return context
 
 
