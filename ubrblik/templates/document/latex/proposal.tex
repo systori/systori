@@ -42,17 +42,17 @@
 
 {% autoescape off %}
 
-{% if contact.business %}{{ contact.business|tex_escape }} \\{% endif %}
-z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ contact.last_name|tex_escape }} \\
-{{ contact.address|tex_escape }} \\
-{{ contact.postal_code|tex_escape }} {{ contact.city|tex_escape }} \\
+{% if contact.business %}{{ contact.business|tex_escape|trim }} \\{% endif %}
+z.H. {{ contact.salutation|tex_escape|trim }} {{ contact.first_name|tex_escape|trim }} {{ contact.last_name|tex_escape|trim }} \\
+{{ contact.address|tex_escape|trim }} \\
+{{ contact.postal_code|tex_escape|trim }} {{ contact.city|tex_escape|trim }} \\
 
 \vspace{15mm}
 
 \begin{flushright}
 {{ doc.document_date.date|localize }}
 \end{flushright}
-{{ doc.header|tex_escape }}
+{{ doc.header|tex_escape|trim }}
 
 \begin{longtabu} to \textwidth{@{}l X[l] r l r r}
 
@@ -60,7 +60,7 @@ z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ 
 \endfirsthead
 \multicolumn{6}{l} {\textit{... {% trans 'Continuation' %} }} \\
 
-{% filter bold %}{% trans 'Pos.' %}{% endfilter %}  & {% filter bold %}{% trans 'Description' %}{% endfilter %} & \multicolumn{2}{c}{ {% filter bold %}{% trans 'Amount' %}{% endfilter %} } & {% filter bold %}{% trans 'Price' %}{% endfilter %} & {% filter bold %}{% trans 'Total'%}{% endfilter %} \\
+{% filter bold %}{% trans 'Pos.' %}{% endfilter %} & {% filter bold %}{% trans 'Description' %}{% endfilter %} & \multicolumn{2}{c}{ {% filter bold %}{% trans 'Amount' %}{% endfilter %} } & {% filter bold %}{% trans 'Price' %}{% endfilter %} & {% filter bold %}{% trans 'Total'%}{% endfilter %} \\
 \midrule
 
 \endhead
@@ -70,49 +70,39 @@ z.H. {{ contact.salutation|tex_escape }} {{ contact.first_name|tex_escape }} {{ 
 \endlastfoot
 
 {% for job in jobs.all %}
-{{job.code|bold}} & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{job.name|tex_escape|bold}} }} \\
+{{job.code|trim|bold}} & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{job.name|tex_escape|trim|bold}} }} \\
 {% for taskgroup in job.taskgroups.all %}
-{{taskgroup.code|bold}} & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{taskgroup.name|tex_escape|bold}} }} \\
+{{taskgroup.code|trim|bold}} & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{taskgroup.name|tex_escape|trim|bold}} }} \\
 
 {% for task in taskgroup.tasks.all %}
 {% for instance in task.taskinstances.all %}
-{{instance.code}}
-    & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{instance.full_name|tex_escape}} }} \\*
-    & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{instance.full_description|tex_escape}} }} \\*
-    & & {{task.qty|ubrdecimal}} & {{task.unit|tex_escape}} & {{instance.unit_price|money}}   & {% if task.is_optional %}{% trans 'Optional' %}{% elif not instance.selected %}{% trans 'alternate'%} {% else %}{{instance.fixed_price_estimate|money}} {% endif %} \\
+{{instance.code|trim}}
+    & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{instance.full_name|tex_escape|trim}} }} \\*
+    & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{instance.full_description|tex_escape|trim}} }} \\*
+    & & {{task.qty|ubrdecimal}} & {{task.unit|tex_escape|trim}} & {{instance.unit_price|money|tex_escape|trim}} & {% if task.is_optional %}{% trans 'Optional' %}{% elif not instance.selected %}{% trans 'alternate'%} {% else %}{{instance.fixed_price_estimate|money|tex_escape|trim}} {% endif %} \\
 {% endfor %}
 {% endfor %}
 
-{% if job.taskgroups.all|length > 1 %}
-& \multicolumn{4}{r}{\parbox[b]{8.5cm}{ \textbf{ {% trans 'Total' %} {{taskgroup.code}} - {{taskgroup.name}} }} } & \textbf{ {{taskgroup.estimate_total|money}}  }\\
-\\
-{% endif %}
+{% if job.taskgroups.all|length > 1 %}& \multicolumn{4}{r}{\parbox[b]{8.5cm}{ \bfseries{ {% trans 'Total' %} {{taskgroup.code|trim}} - {{taskgroup.name}} }} } & \bfseries{ {{taskgroup.estimate_total|money|tex_escape|trim}}  }\\
+\\{% endif %}
 {% endfor %}
 
 {% endfor %}
 
 {% for job in jobs.all %}
 {% for taskgroup in job.taskgroups.all %}
-& \multicolumn{4}{r}{\parbox[b]{8.5cm}{ \textbf{ {% trans 'Total' %} {{taskgroup.code}} - {{taskgroup.name|tex_escape}} }} } & \textbf{ {{taskgroup.estimate_total|money}}  } \\*
+& \multicolumn{4}{r}{\parbox[b]{8.5cm}{ \bfseries{ {% trans 'Total' %} {{taskgroup.code|trim}} - {{taskgroup.name|tex_escape|trim}} }} } & \bfseries{ {{taskgroup.estimate_total|money|tex_escape|trim}}  } \\
 {% endfor %}
 {% endfor %}
 
 \tabucline{2-6}
-& \multicolumn{4}{r} {\textbf{ {% trans 'Total without VAT' %} }} & \textbf{ {{jobs.estimate_total|money}}  } \\*
-& \multicolumn{4}{r} {\textbf{19,00\% {% trans 'VAT' %} }} & \textbf{ {{jobs.estimate_tax_total|money}}  } \\*
-& \multicolumn{4}{r} {\textbf{ {% trans 'Total including VAT' %} }} & \textbf{ {{jobs.estimate_gross_total|money}}  } \\*
+& \multicolumn{4}{r}{\bfseries{ {% trans 'Total without VAT' %} }} & \bfseries{ {{jobs.estimate_total|money|tex_escape|trim}}  } \\*
+& \multicolumn{4}{r}{\bfseries{ 19,00\% {% trans 'VAT' %} }} & \bfseries{ {{jobs.estimate_tax_total|money|tex_escape|trim}}  } \\*
+& \multicolumn{4}{r}{\bfseries{ {% trans 'Total including VAT' %} }} & \bfseries{ {{jobs.estimate_gross_total|money|tex_escape|trim}}  } \\*
 
 \end{longtabu}
 
-% \setlength{\tabcolsep}{2mm}
-% \begin{tabu} to \textwidth{@{} r X[l] }
-% {% trans 'method of payment' %} & Zahlbar sofort ohne Abzug.\\*
-% {% trans 'validity' %} & Gerichtsstand ist Mannheim. Waren bleiben bis zur restlosen Zahlung unser Eigentum. Es gelten unsere AGBs.\\
-% \end{tabu}
-
-% \vspace{5mm}
-
-{{ doc.footer|tex_escape }}
+{{ doc.footer|tex_escape|trim }}
 {% endautoescape %}
 
 \end{letter}

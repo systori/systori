@@ -10,7 +10,7 @@ def bold(text):
         :param text: a plain text message
         :return: the message returned to appear with Bold text styling in LaTeX
     """
-    return "\\textbf{{{}}}".format(text)
+    return "\\bfseries{{{}}}".format(text)
 
 @register.filter
 @stringfilter
@@ -38,3 +38,8 @@ def tex_escape(text):
     conv = dict((re.escape(k), v) for k, v in conv.items())
     pattern = re.compile("|".join(conv.keys()))
     return pattern.sub(lambda m: conv[re.escape(m.group(0))], text)
+
+@register.filter
+@stringfilter
+def trim(value):
+        return value.strip()
