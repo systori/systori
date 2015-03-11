@@ -104,12 +104,12 @@ class AutoCompleteModelResourceMixin:
             raise ValidationError("Search string is empty.")
 
         query = self._meta.queryset.\
-                filter(Q(name__icontains=search_string) | Q(description__icontains=search_string))
+                filter(Q(name__icontains=search_string) | Q(description__icontains=search_string))\
 
-        self.add_prefetching(query)
+        query = self.add_prefetching(query)
 
         template = get_template('task/{}_autocomplete.html'.format(self._meta.resource_name))
-        context = Context({'objects': query.all()})
+        context = Context({'objects': query[:20]})
         rendered = template.render(context).encode('utf-8')
 
         return http.HttpResponse(rendered)
@@ -144,8 +144,8 @@ class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, A
         return get_template('task/taskgroup_loop.html'), {'group': specimen}
 
     def add_prefetching(self, query):
-        # TODO: Add prefetching.
-        pass
+        return query.prefetch_related('job__project')\
+                    .prefetch_related('tasks__taskinstances__lineitems')
 
 
 class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCompleteModelResourceMixin, ModelResource):
@@ -165,8 +165,9 @@ class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCo
         return get_template('task/task_loop.html'), {'task': specimen}
 
     def add_prefetching(self, query):
-        # TODO: Add prefetching.
-        pass
+        return query.prefetch_related('taskgroup__job__project')\
+                    .prefetch_related('taskinstances__lineitems')
+
 
 class TaskInstanceResource(OrderedModelResourceMixin, ModelResource):
     task = fields.ForeignKey(TaskResource, 'task')

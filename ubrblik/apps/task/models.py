@@ -26,7 +26,7 @@ TAX_RATE = Decimal(.19)
 class JobQuerySet(models.QuerySet):
 
     def estimate_total(self):
-        return sum([job.estimate_total for job in self.all()])
+        return sum([job.estimate_total for job in self])
 
     def estimate_tax_total(self):
         return self.estimate_total() * TAX_RATE
@@ -35,7 +35,7 @@ class JobQuerySet(models.QuerySet):
         return self.estimate_total() * (TAX_RATE+1)
 
     def billable_total(self):
-        return sum([job.billable_total for job in self.all()])
+        return sum([job.billable_total for job in self])
 
     def billable_tax_total(self):
         return self.billable_total() * TAX_RATE
