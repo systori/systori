@@ -9,3 +9,24 @@
 <input type="submit" value="{% trans 'Save' %}" />
 </form>
 {% endblock %}
+
+{% block extra_js%}
+<script type="text/javascript">
+$('[name="doc_template"]').on('change', function () {
+   var templateid = this.value;
+   if (templateid) {
+    $.ajax({
+      type: 'GET',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+      dataType: 'json',
+      data: {'templateid': templateid},
+      url: "{% url 'api_dispatch_document_template' 'v1' 'project' project.id %}",
+      async: false
+    }).done(function (template) {
+      $('[name="header"]').val(template['header']);
+      $('[name="footer"]').val(template['footer']);
+    });
+   }
+});
+</script>
+{% endblock extra_js%}

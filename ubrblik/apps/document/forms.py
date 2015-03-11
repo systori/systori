@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import ugettext_lazy as _
 from .models import Proposal, Invoice
 from ..document.models import DocumentTemplate
 from ..task.models import Job
@@ -9,7 +10,7 @@ class ProposalForm(forms.ModelForm):
     doc_template = forms.ModelChoiceField(
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.PROPOSAL), required=False)
-    add_terms = forms.BooleanField(label='Add Terms',
+    add_terms = forms.BooleanField(label=_('Add Terms'),
                                    initial=True, required=False)
 
     def __init__(self, *args, **kwargs):
@@ -26,7 +27,10 @@ class ProposalForm(forms.ModelForm):
 
 
 class InvoiceForm(forms.ModelForm):
-    add_terms = forms.BooleanField(label='Add Terms', initial=True,
+    doc_template = forms.ModelChoiceField(
+        queryset=DocumentTemplate.objects.filter(
+            document_type=DocumentTemplate.INVOICE), required=False)
+    add_terms = forms.BooleanField(label=_('Add Terms'), initial=True,
                                    required=False)
 
     def __init__(self, *args, **kwargs):
@@ -35,7 +39,7 @@ class InvoiceForm(forms.ModelForm):
 
     class Meta:
         model = Invoice
-        fields = ['document_date', 'header', 'footer',
+        fields = ['doc_template', 'document_date', 'invoice_no', 'header', 'footer',
                   'jobs', 'add_terms', 'notes']
         widgets = {
             'document_date': DateInput(attrs={'type': 'date'}),
