@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import date, datetime
 from django.db import models
 from django.conf import settings
 from ordered_model.models import OrderedModel
@@ -99,3 +100,36 @@ class Project(models.Model):
     @property
     def has_billable_contact(self):
         return self.billable_contact != None
+
+
+class JobSite(models.Model):
+    """ A project can have one or more job sites. """
+    project = models.ForeignKey(Project, related_name="sites")
+    name = models.CharField(_('Site Name'), max_length=512)
+
+    address = models.CharField(_("Address"), max_length=512)
+    city = models.CharField(_("City"), max_length=512)
+    postal_code = models.CharField(_("Postal Code"), max_length=512)
+    country = models.CharField(_("Country"), max_length=512, default=settings.DEFAULT_COUNTRY)
+
+
+class DailyPlan(models.Model):
+    """ Daily Plan contains a list of tasks that are planned for the day,
+        a list of workers performing the tasks and a job site at which they
+        will perform the tasks. All on a particular day.
+    """
+    site = models.ForeignKey(JobSite, related_name="daily_plans")
+    day = models.DateField(_("Day"), default=date.today)
+    team = models.ManyToManyField(settings.AUTH_USER_MODEL, through='TeamMember', related_name="daily_plans")
+    tasks = models.ManyToManyField('task.Task', related_name="daily_plans")
+
+
+class TeamMember(models.Model):
+    """ When a worker is assigned to a DailyPlan we need to record
+        if they are a foreman or a regular worker.
+    """
+    plan = models.ForeignKey(DailyPlan, related_name="members")
+    member = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="teams")
+    is_foreman = models.BooleanField(default=False)
+    class Meta:
+        ordering = ['is_foreman', 'member__first_name']

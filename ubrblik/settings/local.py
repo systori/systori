@@ -3,7 +3,7 @@ from .common import *
 DEBUG = True
 TEMPLATE_DEBUG = True
 INSTALLED_APPS += (
-    'debug_toolbar',
+#    'debug_toolbar',
 )
 
 STATICFILES_DIRS += (

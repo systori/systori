@@ -1,5 +1,6 @@
 import os
 from fabric.api import env, run, local, cd, get, prefix, sudo
+import requests
 
 
 env.hosts = ['ubrblik.de']
@@ -86,6 +87,25 @@ def init_settings(env_name='local'):
 
 def make_messages():
     local('./manage.py makemessages -l de -e tex,html,py')
+
+def get_bitbucket_login():
+    try:
+        user, password = open('bitbucket.login').read().split(':')
+        return user.strip(), password.strip()
+    except:
+        print 'Bitbucket API requires your user credentials'
+        user = raw_input('Username: ') or exit(1)
+        password = raw_input('Password: ') or exit(1)
+        saved = '{}:{}'.format(user, password)
+        open('bitbucket.login','w').write(saved)
+        return user, password
+
+
+REPO = 'https://api.bitbucket.org/1.0/repositories/damoti/ubrblik/'
+def current_issues():
+    r = requests.get(REPO+'issues?status=new', auth=get_bitbucket_login())
+    print r.status_code
+    print r.text
 
 
 def mail():

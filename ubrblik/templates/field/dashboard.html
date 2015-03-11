@@ -4,6 +4,19 @@
 {% block container %}
 <div class="container">
 
+  {% 
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+      {% trans 'Dashboard' %}
+    </div>
+
+    <ul class="list-group">
+      <a href="{% url 'field.projects' %}" class="list-group-item clearfix">{% trans 'Projects' %} <span class="pull-right">&raquo;</span></a>
+    </ul>
+
+  </div>
+
   <div class="panel panel-default">
 
     <div class="panel-heading">

@@ -4,7 +4,7 @@ from django_mobile import get_flavour
 from django.conf import settings
 from ..project.models import Project
 from ..task.models import LineItem
-
+from ..field.views import FieldDashboard
 
 class OfficeDashboard(TemplateView):
     template_name = "main/dashboard.html"
@@ -15,10 +15,6 @@ class OfficeDashboard(TemplateView):
         context['mapped_projects'] = projects.exclude(latitude=None).exclude(longitude=None).all()
         context['GOOGLE_MAPS_API_KEY'] = settings.GOOGLE_MAPS_API_KEY
         return context
-
-
-class FieldDashboard(TemplateView):
-    template_name = "field/dashboard.html"
 
 
 class IndexView(View):

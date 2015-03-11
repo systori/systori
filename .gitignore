@@ -1,5 +1,6 @@
 *.pyc
 .settings/
+bitbucket.login
 __pycache__
 documents/
 ubrblik/settings/__init__.py
