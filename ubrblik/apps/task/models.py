@@ -420,7 +420,7 @@ class LineItem(models.Model):
     # when labor is true, this will cause this line item to show up in time sheet and other
     # labor related parts of the system
     is_labor = models.BooleanField(default=False)
-    
+
     # when material is true, this will cause this line item to show up in materials tracking
     # and other inventory parts of the system
     is_material = models.BooleanField(default=False)

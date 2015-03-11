@@ -142,6 +142,8 @@ class Proposal(Document):
 
 
 class Invoice(Document):
+    invoice_no = models.CharField(_("Invoice No."), max_length=30)
+
     project = models.ForeignKey("project.Project", related_name="invoices")
     jobs = models.ManyToManyField("task.Job", related_name="invoices")
 

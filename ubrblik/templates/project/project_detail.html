@@ -104,8 +104,8 @@
 </div>
 
 
-<h2 style="color:lightgrey;" class="sub-header">{% trans "Invoices" %}</h2>
-<div  style="color:lightgrey;" class="table-responsive">
+<h2 class="sub-header">{% trans "Invoices" %}</h2>
+<div  class="table-responsive">
   <table  class="table table-striped">
     <thead>
       <tr>
@@ -132,15 +132,16 @@
         <td>{{ doc.amount|ubrdecimal }}</td>
         <td>{{ doc.created_on|localize }}</td>
         <td>{{ doc.notes }}</td>
-        <td>
-          <a href="{% url 'invoice.pdf' project.id doc.id %}">{% trans 'PDF' %}</a>
+         <td>
+          <a href="{% url 'invoice.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a>
+          <a href="{% url 'invoice.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a>
         </td>
         <td>
           {% for state in doc.get_available_status_transitions %}
             <a href="{% url 'invoice.transition' project.id doc.id state.name %}">{{ state.custom.label }}</a>
           {% endfor %}
           {% if doc.status == doc.NEW %}
-          <a href="{% url 'proposal.delete' project.id doc.id %}">{% trans "Delete" %}</a>
+          <a href="{% url 'invoice.delete' project.id doc.id %}">{% trans "Delete" %}</a>
           {% endif %}
         </td>
       </tr>
