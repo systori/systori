@@ -2,7 +2,7 @@ from django.views.generic import View, TemplateView
 from django.contrib.auth.views import login
 from django_mobile import get_flavour
 from django.conf import settings
-from ..project.models import Project
+from ..project.models import Project, JobSite
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
 
@@ -11,8 +11,8 @@ class OfficeDashboard(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(OfficeDashboard, self).get_context_data(**kwargs)
         context['flagged_lineitems'] = LineItem.objects.filter(is_flagged=True)
-        projects = Project.objects.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
-        context['mapped_projects'] = projects.exclude(latitude=None).exclude(longitude=None).all()
+        sites = JobSite.objects.select_related('project')
+        context['job_sites'] = sites.exclude(latitude=None).exclude(longitude=None).all()
         context['GOOGLE_MAPS_API_KEY'] = settings.GOOGLE_MAPS_API_KEY
         return context
 

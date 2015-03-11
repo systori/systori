@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from ..task.models import Job
 from geopy import geocoders
 
+
 class ProjectQuerySet(models.QuerySet):
 
     def template(self):
@@ -29,19 +30,11 @@ class Project(models.Model):
     
     job_offset = models.PositiveSmallIntegerField(_("Job Offset"), default=0)
 
-    address = models.CharField(_("Address"), max_length=512)
-    city = models.CharField(_("City"), max_length=512)
-    postal_code = models.CharField(_("Postal Code"), max_length=512)
-    country = models.CharField(_("Country"), max_length=512, default=settings.DEFAULT_COUNTRY)
-
-    latitude = models.FloatField(_('Latitude'), null=True, blank=True)
-    longitude = models.FloatField(_('Longitude'), null=True, blank=True)
-
     objects = ProjectQuerySet.as_manager()
-    
+
     def __str__(self):
-        return '{}, {}'.format(self.name, self.city)
-    
+        return self.name
+
     def get_absolute_url(self):
         if self.is_template:
             return reverse('templates')
@@ -52,19 +45,6 @@ class Project(models.Model):
         verbose_name = _("Project")
         verbose_name_plural = _("Projects")
         ordering = ['name']
-
-    def save(self, *args, **kwargs):
-        g = geocoders.GoogleV3()
-        address = smart_str("{}, {}, {}, {}".format(self.address, self.city, self.postal_code, self.country))
-        try:
-            location = g.geocode(address)
-            self.latitude = location.latitude
-            self.longitude = location.longitude
-        except:
-            self.latitude = None
-            self.longitude = None
-        finally:
-            super(Project, self).save(*args, **kwargs)
 
     @property
     def estimate_total(self):
@@ -104,13 +84,36 @@ class Project(models.Model):
 
 class JobSite(models.Model):
     """ A project can have one or more job sites. """
+
     project = models.ForeignKey(Project, related_name="sites")
-    name = models.CharField(_('Site Name'), max_length=512)
+    name = models.CharField(_('Site Name'), max_length=512, blank=True)
 
     address = models.CharField(_("Address"), max_length=512)
     city = models.CharField(_("City"), max_length=512)
     postal_code = models.CharField(_("Postal Code"), max_length=512)
     country = models.CharField(_("Country"), max_length=512, default=settings.DEFAULT_COUNTRY)
+
+    latitude = models.FloatField(_('Latitude'), null=True, blank=True)
+    longitude = models.FloatField(_('Longitude'), null=True, blank=True)
+
+    def __str__(self):
+        if len(self.name) == 0:
+            return '{} #{}'.format(_('Job Site'), self.id)
+        else:
+            return self.name
+
+    def save(self, *args, **kwargs):
+        g = geocoders.GoogleV3()
+        address = smart_str("{}, {}, {}, {}".format(self.address, self.city, self.postal_code, self.country))
+        try:
+            location = g.geocode(address)
+            self.latitude = location.latitude
+            self.longitude = location.longitude
+        except:
+            self.latitude = None
+            self.longitude = None
+        finally:
+            super(JobSite, self).save(*args, **kwargs)
 
 
 class DailyPlan(models.Model):

@@ -235,7 +235,7 @@ class Task(BetterOrderedModel):
         for instance in self.taskinstances.all():
             if instance.selected:
                 return instance
-        raise self.taskinstances.DoesNotExist
+        raise self.taskinstances.model.DoesNotExist
 
     @cached_property
     def instance_count(self):

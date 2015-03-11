@@ -37,9 +37,9 @@
 $(document).ready(function () {
 
 	var locations = [
-	{% for project in mapped_projects %}
-	   ['<a href="{% url "project.view" project.id %}">{{ project.name|addslashes }}</a><br /> {{ project.estimate_total|money }}',
-	    {{ project.latitude }}, {{ project.longitude }}],
+	{% for site in job_sites %}
+	   ['<a href="{% url "project.view" site.project.id %}">{{ site.project.name }}<br />{{ site|addslashes }}</a><br />{{ site.address }}<br />{{ site.city }}',
+	    {{ site.latitude }}, {{ site.longitude }}],
 	{% endfor %}
     ];
 	
