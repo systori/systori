@@ -1,7 +1,10 @@
 import os
+from distutils.version import LooseVersion as V
 from fabric.api import env, run, local, cd, get, prefix, sudo
 import requests
 
+from version import VERSION
+version = V(VERSION)
 
 env.hosts = ['ubrblik.de']
 env.user = 'ubrblik'
@@ -110,3 +113,82 @@ def current_issues():
 
 def mail():
     local('python -m smtpd -n -c DebuggingServer localhost:1025')
+
+
+# Git Workflow
+# See: http://nvie.com/posts/a-successful-git-branching-model/
+
+
+def bump_version(ver):
+    with file('version.py', 'w') as f:
+        f.write('VERSION = \'%s\'' % ver)
+    print('Bumped version number to %s' % ver)
+
+
+def feature_start(name):
+    local('git checkout -b %s dev' % name)
+
+
+def feature_finish(name):
+    local('git checkout dev')
+    local('git merge --no-ff %s' % name)
+    local('git branch -d %s' % name)
+    local('git push origin dev')
+
+
+def release_start(ver):
+    branch = 'release-%s' % ver
+    local('git checkout -b %s dev' % branch)
+    if VERSION != ver:
+        bump_version(ver)
+    with settings(warn_only=True):
+        local('git commit -a -m "bumped version number to %s"' % ver)
+    local('git push origin %s' % branch)
+
+
+def release_finish():
+    _merge_this()
+
+
+def hotfix_start(bump='yes'):
+    sub_number = version.version[1] + (bump == 'yes' and 1 or 0)
+    new_ver = '%s.%s' % (version.version[0], sub_number)
+    local('git checkout -b hotfix-%s master' % new_ver)
+    if bump == 'bump':
+        bump_version(new_ver)
+        local('git commit version.py -m "bumped version number to %s"' % new_ver)
+
+
+def hotfix_finish():
+    _merge_this()
+
+
+def _merge_this():
+    '''
+    Merge current branch into both master and dev branches, then delete it.
+    Meant to be called from commands
+    '''
+    # Parsing branch version: (release|hotfix)-<major>.<minor>
+    branch = local('git rev-parse --abbrev-ref HEAD', capture=True).rstrip()
+    if branch in ('master', 'dev'):
+        abort('''Your current branch is %s, which is one of the main branches. 
+            Try checking out your hotfix/release branch.''' % branch)
+    # Trying to figure out version from current branch name
+    ver = branch.split('-')
+    ver = len(ver) > 1 and ver[-1] or None
+    # Merging into prod branch
+    local('git checkout master')
+    local('git merge --no-ff %s' % branch)
+    if ver:
+        # Updating prod branch tag
+        local('git tag -a -f -m "{v}" {v}'.format(v=ver))
+    local('git push')
+    # Merging into dev
+    local('git checkout dev')
+    local('git merge --no-ff %s' % branch)
+    # Killing this branch
+    with settings(warn_only=True):
+        local('git push origin :%s' % branch)
+    local('git branch -d %s' % branch)
+    local('git push')
+
