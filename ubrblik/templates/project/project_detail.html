@@ -204,7 +204,8 @@
       </tr>
     </thead>
     <tbody>
-      {% for site in project.sites.all %}
+      {% with jobsite_count=project.jobsites.count %}
+      {% for site in project.jobsites.all %}
       <tr>
         <td>{{ site.id }}</td>
         <td>{{ site }}</td>
@@ -213,10 +214,13 @@
         <td>{{ site.latitude }}<br />{{ site.longitude }}</td>
         <td>
           <a href="{% url 'jobsite.edit' project.id site.id %}">{% trans "Edit" %}</a>
+          {% if jobsite_count > 1 %}
           <a href="{% url 'jobsite.delete' project.id site.id %}">{% trans "Delete" %}</a>
+          {% endif %}
         </td>
       </tr>
       {% endfor %}
+      {% endwith %}
     </tbody>
   </table>
   <a href="{% url 'jobsite.create' project.id %}">{% trans "Create" %}</a>

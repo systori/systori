@@ -85,16 +85,16 @@ class Project(models.Model):
 class JobSite(models.Model):
     """ A project can have one or more job sites. """
 
-    project = models.ForeignKey(Project, related_name="sites")
-    name = models.CharField(_('Site Name'), max_length=512, blank=True)
+    project = models.ForeignKey(Project, related_name="jobsites")
+    name = models.CharField(_('Site Name'), max_length=512)
 
     address = models.CharField(_("Address"), max_length=512)
     city = models.CharField(_("City"), max_length=512)
     postal_code = models.CharField(_("Postal Code"), max_length=512)
     country = models.CharField(_("Country"), max_length=512, default=settings.DEFAULT_COUNTRY)
 
-    latitude = models.FloatField(_('Latitude'), null=True, blank=True)
-    longitude = models.FloatField(_('Longitude'), null=True, blank=True)
+    latitude = models.FloatField(_("Latitude"), null=True, blank=True)
+    longitude = models.FloatField(_("Longitude"), null=True, blank=True)
 
     def __str__(self):
         if len(self.name) == 0:

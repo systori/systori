@@ -4,7 +4,8 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from .models import Project, JobSite
-from .forms import ProjectForm, JobSiteForm
+from .forms import ProjectCreateForm, ProjectUpdateForm
+from .forms import JobSiteForm
 from ..task.models import Job, TaskGroup
 from ..directory.models import ProjectContact
 from ..document.models import DocumentTemplate
@@ -27,13 +28,23 @@ class ProjectView(DetailView):
 
 class ProjectCreate(CreateView):
     model = Project
-    form_class = ProjectForm
+    form_class = ProjectCreateForm
 
     def form_valid(self, form):
         response = super(ProjectCreate, self).form_valid(form)
+
         TaskGroup.objects.create(name='',
           job=Job.objects.create(name=_('Default'), project=self.object)
         )
+
+        jobsite = JobSite()
+        jobsite.project = self.object
+        jobsite.name = _('Main Site')
+        jobsite.address = form.cleaned_data['address']
+        jobsite.city = form.cleaned_data['city']
+        jobsite.postal_code = form.cleaned_data['postal_code']
+        jobsite.save()
+
         return response
 
     def get_success_url(self):
@@ -42,7 +53,7 @@ class ProjectCreate(CreateView):
 
 class ProjectUpdate(UpdateView):
     model = Project
-    form_class = ProjectForm
+    form_class = ProjectUpdateForm
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.id])
@@ -80,7 +91,16 @@ class JobSiteCreate(CreateView):
 
     def get_form_kwargs(self):
         kwargs = super(JobSiteCreate, self).get_form_kwargs()
+
         kwargs['instance'] = JobSite(project=self.request.project)
+
+        address = self.request.project.jobsites.first()
+        kwargs['initial'].update({
+            'address': address.address,
+            'city': address.city,
+            'postal_code': address.postal_code
+        })
+
         return kwargs
 
     def get_success_url(self):
