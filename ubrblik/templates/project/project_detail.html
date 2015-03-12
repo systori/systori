@@ -109,12 +109,11 @@
   <table  class="table table-striped">
     <thead>
       <tr>
-        <th>#</th>
         <th>{% trans 'Status' %}</th>
         <th>{% trans 'Jobs' %}</th>
-        <th>{% trans 'Amount' %}</th>
+        <th>{% trans 'Value' %}</th>
         <th>{% trans 'Created On' %}</th>
-        <th>{% trans 'Notes' %}</th>
+        <th>{% trans 'Invoice No.' %}</th>
         <th>{% trans 'Download' %}</th>
         <th>{% trans 'Actions' %}</th>
       </tr>
@@ -122,7 +121,6 @@
     <tbody>
       {% for doc in project.invoices.all %}
       <tr>
-        <td>{{ doc.id }}</td>
         <td>{{ doc.get_status_display }}</td>
         <td>
         {% for job in doc.jobs.all %}
@@ -131,7 +129,7 @@
         </td>
         <td>{{ doc.amount|ubrdecimal }}</td>
         <td>{{ doc.created_on|localize }}</td>
-        <td>{{ doc.notes }}</td>
+        <td>{{ doc.invoice_no }}</td>
          <td>
           <a href="{% url 'invoice.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a>
           <a href="{% url 'invoice.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a>
