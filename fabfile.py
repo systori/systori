@@ -126,10 +126,12 @@ def bump_version(ver):
 
 
 def feature_start(name):
+    "fab feature_start:name=my_new_feature"
     local('git checkout -b %s dev' % name)
 
 
 def feature_finish(name):
+    "fab feature_finish:name=my_new_feature"
     local('git checkout dev')
     local('git merge --no-ff %s' % name)
     local('git branch -d %s' % name)
