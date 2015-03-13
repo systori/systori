@@ -1,5 +1,5 @@
 from decimal import Decimal
-from datetime import date, datetime
+from datetime import date
 from django.db import models
 from django.conf import settings
 from ordered_model.models import OrderedModel
@@ -121,10 +121,16 @@ class DailyPlan(models.Model):
         a list of workers performing the tasks and a job site at which they
         will perform the tasks. All on a particular day.
     """
-    site = models.ForeignKey(JobSite, related_name="daily_plans")
+    jobsite = models.ForeignKey(JobSite, related_name="daily_plans")
     day = models.DateField(_("Day"), default=date.today)
     team = models.ManyToManyField(settings.AUTH_USER_MODEL, through='TeamMember', related_name="daily_plans")
     tasks = models.ManyToManyField('task.Task', related_name="daily_plans")
+
+    def is_today(self):
+        return self.day == date.today()
+
+    class Meta:
+        ordering = ['day']
 
 
 class TeamMember(models.Model):
