@@ -1,4 +1,4 @@
-# Ubrblik Settings
+# Systori Settings
 
 # Django Settings
 
@@ -46,27 +46,27 @@ INSTALLED_APPS = (
     'tastypie',
     'django_mobile',
     'ordered_model',
-    'ubrblik.lib',
-    'ubrblik.apps.user',
-    'ubrblik.apps.project',
-    'ubrblik.apps.directory',
-    'ubrblik.apps.task',
-    'ubrblik.apps.document',
-    'ubrblik.apps.main'
+    'systori.lib',
+    'systori.apps.user',
+    'systori.apps.project',
+    'systori.apps.directory',
+    'systori.apps.task',
+    'systori.apps.document',
+    'systori.apps.main'
 )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'ubrblik.middleware.locale.ForceDefaultLanguageMiddleware',
-    'ubrblik.middleware.mobile.UbrMobileDetectionMiddleware',
+    'systori.middleware.locale.ForceDefaultLanguageMiddleware',
+    'systori.middleware.mobile.UbrMobileDetectionMiddleware',
     'django_mobile.middleware.SetFlavourMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'ubrblik.apps.project.middleware.ProjectMiddleware'
+    'systori.apps.project.middleware.ProjectMiddleware'
 )
 
 from django.conf import global_settings
@@ -76,9 +76,9 @@ TEMPLATE_CONTEXT_PROCESSORS =\
     'django_mobile.context_processors.flavour',
 )
 
-ROOT_URLCONF = 'ubrblik.urls'
+ROOT_URLCONF = 'systori.urls'
 
-WSGI_APPLICATION = 'ubrblik.wsgi.application'
+WSGI_APPLICATION = 'systori.wsgi.application'
 
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'templates'),
@@ -139,10 +139,10 @@ MEDIA_ROOT = ''
 MEDIA_URL = ''
 
 STATICFILES_DIRS = (
-    ('js', 'ubrblik/static/js'),
-    ('css', 'ubrblik/static/css'),
-    ('img', 'ubrblik/static/img'),
-    ('fonts', 'ubrblik/static/fonts'),
+    ('js', 'systori/static/js'),
+    ('css', 'systori/static/css'),
+    ('img', 'systori/static/img'),
+    ('fonts', 'systori/static/fonts'),
 )
 
 STATICFILES_FINDERS = (

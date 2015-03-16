@@ -3,13 +3,13 @@ from .common import *
 DEBUG = False
 TEMPLATE_DEBUG = False
 
-ALLOWED_HOSTS = ['ubrblik.de']
+ALLOWED_HOSTS = ['systori.de']
 
 STATICFILES_DIRS += (
     ('editor', 'editor/build/web'),
 )
 
 DATABASES['default'].update({
-    'NAME': 'ubrblik_production',
+    'NAME': 'systori_production',
     'USER': 'www-data'
 })

@@ -11,5 +11,5 @@ STATICFILES_DIRS += (
 )
 
 DATABASES['default'].update({
-    'NAME': 'ubrblik_local'
+    'NAME': 'systori_local'
 })

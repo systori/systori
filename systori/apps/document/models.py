@@ -10,7 +10,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 
-from ubrblik import settings
+from systori import settings
 
 
 def generate_file_path(self, filename):

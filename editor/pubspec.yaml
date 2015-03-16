@@ -1,7 +1,7 @@
-name: 'ubrblik_editor'
+name: 'systori_editor'
 version: 0.0.1
 description: >
-  Task editor for ubrblik.
+  Task editor for systori.
 dependencies:
   intl: any
   collection: any

@@ -8,6 +8,6 @@ STATICFILES_DIRS += (
 )
 
 DATABASES['default'].update({
-    'NAME': 'ubrblik_dev',
+    'NAME': 'systori_dev',
     'USER': 'www-data'
 })

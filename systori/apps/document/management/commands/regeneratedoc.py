@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import translation
 from optparse import make_option
-from ubrblik.apps.task.models import *
-from ubrblik.apps.document.models import *
+from systori.apps.task.models import *
+from systori.apps.document.models import *
 
 DOC_TYPES = {
     'invoice': Invoice,

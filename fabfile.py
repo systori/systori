@@ -59,7 +59,7 @@ def localdb_from_bootstrap():
     local('./manage.py loaddata bootstrap')
 
 
-prod_dump_path = '/tmp/ubrblik.prod.dump'
+prod_dump_path = '/tmp/systori.prod.dump'
 prod_dump_file = os.path.basename(prod_dump_path)
 def fetch_productiondb():
     dbname = 'ubrblik_mehr_handwerk'
@@ -70,7 +70,7 @@ def fetch_productiondb():
 
 def load_productiondb():
     _reset_localdb()
-    local('pg_restore -d ubrblik_local -O '+prod_dump_file)
+    local('pg_restore -d systori_local -O '+prod_dump_file)
 
 def localdb_from_productiondb():
     fetch_productiondb()

@@ -3,7 +3,7 @@
 bitbucket.login
 __pycache__
 documents/
-ubrblik/settings/__init__.py
+systori/settings/__init__.py
 editor/pubspec.lock
 editor/packages/
 editor/web/packages
