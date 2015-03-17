@@ -1,0 +1,13 @@
+{% extends "frame.html" %}
+{% load i18n %}
+
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block head_navbar %}
+<li class="active"><a href="{% url 'project.view' project.id %}">{{ project.name }}</a></li>
+{% endblock %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section="dashboard" %}{% endblock %}
+
+{% block content %}
+{% endblock %}

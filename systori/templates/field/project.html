@@ -1,0 +1,96 @@
+{% extends "field/base.html" %}
+{% load i18n staticfiles %}
+
+{% block container %}
+<div class="container">
+
+  <a href="{% url 'field.projects' %}" class="btn btn-default btn-block btn-back">&laquo; {% trans 'Projects' %}</a>
+
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+      {{ project.name }}
+    </div>
+    
+    <div class="panel-body">
+      {{ project.description }}
+    </div>
+
+  </div>
+
+{% for jobsite in project.jobsites.all %}
+{% with daily_plan=jobsite.daily_plans.today.first %}
+
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+        {{ jobsite }}<br />
+        {{ jobsite.address }} {{ jobsite.city }}
+    </div>
+
+    {% if daily_plan %}
+
+    <div class="list-group">
+    {% for worker in daily_plan.members.all %}
+      <div class="list-group-item nav nav-pills">
+        {{ worker.member.get_full_name }}
+
+        {% if user.is_staff %}
+          <a href="{% url 'field.toggle.role' project.id worker.id %}" class="btn btn-default pull-right">
+        {% else %}
+          <span class="pull-right">
+        {% endif %}
+
+        {% if worker.is_foreman %}
+          {% trans 'Foreman' %}
+        {% else %}
+          {% trans 'Laborer' %}
+        {% endif %}
+
+        {% if user.is_staff %}
+          </a>
+        {% else %}
+          </span>
+        {% endif %}
+
+      </div>
+    {% endfor %}
+    </div>
+
+    {% else %}
+
+    <div class="panel-body">
+      {% trans "Nothing planned for today yet." %}
+    </div>
+
+    {% endif %}
+
+    <div class="panel-footer clearfix">
+        <div class="pull-right">
+            {% if user.is_staff %}
+
+            <a href="{% url 'field.assign.labor' project.id jobsite.id %}" class="btn btn-default">{% blocktrans %}Assign Labor{% endblocktrans %}</a>
+
+            {% elif user in daily_plan.team.all %}
+
+            {% for worker in daily_plan.members.all %}
+            {% if worker.member == user %}
+            <a href="{% url 'field.remove.labor' project.id worker.id %}" class="btn btn-default pull-right">Remove yourself.</a>
+            {% endif %}
+            {% endfor %}
+
+            {% else %}
+
+            <a href="{% url 'field.add_self_to_jobsite' project.id jobsite.id 'foreman' %}" class="btn btn-default">{% blocktrans %}Add yourself as <b>foreman</b>.{% endblocktrans %}</a>
+            <a href="{% url 'field.add_self_to_jobsite' project.id jobsite.id 'laborer' %}" class="btn btn-default">{% blocktrans %}Add yourself as <b>laborer</b>.{% endblocktrans %}</a>
+
+            {% endif %}
+        </div>
+    </div>
+
+  </div>
+{% endwith %}
+{% endfor %}
+
+</div>
+{% endblock %}

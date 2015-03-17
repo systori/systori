@@ -1,0 +1,86 @@
+{% load i18n staticfiles %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{% static "img/favicon.png" %}">
+
+    <title>{% block title %}systori{% endblock %}</title>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/flick/jquery-ui.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link href="{% block custom_css %}{% static "css/main.css" %}{% endblock %}" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    {% block header %}
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">{% trans 'Toggle navigation' %}</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Systori</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+
+          <ul class="nav navbar-nav">
+            <li><a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
+            {% block head_navbar %}{% endblock %}
+          </ul>
+
+          <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+              <input type="hidden" name="language" value="" />
+          </form>
+
+          <ul class="nav navbar-nav navbar-right">
+          
+            <li><a href="javascript:window.open('{% url 'field.dashboard' %}', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">{% trans 'open field app' %}</a></li>
+
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ user.username }} <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                    <li><a href="{% url 'settings' %}">{% trans 'Settings' %}</a></li>
+                    <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>
+                </ul>
+            </li>
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ LANGUAGE_CODE }}<b class="caret"></b></a>
+              <ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
+              {% get_language_info_list for LANGUAGES as languages %}
+              {% for language in languages %}
+                  {% if language.code != LANGUAGE_CODE %}
+                  <li><a class="language-link" href="#" data-language="{{ language.code }}">{{ language.name_local }}</a></li>
+                  {% endif %}
+              {% endfor %}
+              </ul>
+            </li>
+
+          </ul>
+
+        </div>
+      </div>
+    </nav>
+    {% endblock %}
+
+    {% block container %}{% endblock container %}
+
+    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+    {% block lang_js%}<script src="{% static "js/language_picker.js" %}"></script>{% endblock lang_js%}
+    {% block extra_js%}{% endblock extra_js%}
+
+  </body>
+</html>
