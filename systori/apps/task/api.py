@@ -98,7 +98,7 @@ class AutoCompleteModelResourceMixin:
     def get_autocomplete(self, request, **kwargs):
         if 'query' not in request.GET:
             raise ValidationError("Missing 'query' argument.")
-        
+
         search_string = request.GET['query']
         if not search_string:
             raise ValidationError("Search string is empty.")

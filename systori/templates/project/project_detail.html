@@ -156,6 +156,46 @@
   {% endif %}
 </div>
 
+<h2 class="sub-header">{% trans "Evidences" %}</h2>
+<div  class="table-responsive">
+  <table  class="table table-striped">
+    <thead>
+      <tr>
+        <th>{% trans 'Jobs' %}</th>
+        <th>{% trans 'Created On' %}</th>
+        <th>{% trans 'Download' %}</th>
+        <th>{% trans 'Actions' %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for doc in project.evidences.all %}
+      <tr>
+        <td>
+        {% for job in doc.jobs.all %}
+          {{ job }}<br />
+        {% endfor %}
+        </td>
+        <td>{{ doc.created_on|localize }}</td>
+         <td>
+          <a href="{% url 'evidence.pdf' project.id 'print' doc.id %}">{% trans 'PDF' %}</a>
+        </td>
+        <td>
+          <a href="{% url 'evidence.delete' project.id doc.id %}">{% trans "Delete" %}</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if project.has_jobs_for_invoice %}
+    <a href="{% url 'evidence.create' project.id %}">{% trans "Create" %}</a>
+  {% else %}
+    <p>{% trans "No jobs available to invoice." %}</p>
+    {% if not project.has_billable_contact %}
+    <p>{% trans "No billable contact defined." %}</p>
+    {% endif %}
+  {% endif %}
+</div>
+
 
 <h2 class="sub-header">{% trans "Contacts" %}</h2>
 <div class="table-responsive">

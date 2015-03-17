@@ -1,0 +1,12 @@
+{% extends "project.html" %}
+{% load i18n l10n %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='evidences' %}{% endblock %}
+
+{% block content %}
+
+<h2>{% trans 'Evidence Details' %}</h2>
+{% trans 'Created' %}: {{ invoice.created_on|localize }}<br />
+{% trans 'Notes' %}:<br />{{ invoice.notes }}
+
+{% endblock %}
