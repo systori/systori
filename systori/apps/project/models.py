@@ -116,6 +116,12 @@ class JobSite(models.Model):
             super(JobSite, self).save(*args, **kwargs)
 
 
+class DailyPlanQuerySet(models.QuerySet):
+
+    def today(self):
+        return self.filter(day=date.today())
+
+
 class DailyPlan(models.Model):
     """ Daily Plan contains a list of tasks that are planned for the day,
         a list of workers performing the tasks and a job site at which they
@@ -126,11 +132,14 @@ class DailyPlan(models.Model):
     team = models.ManyToManyField(settings.AUTH_USER_MODEL, through='TeamMember', related_name="daily_plans")
     tasks = models.ManyToManyField('task.Task', related_name="daily_plans")
 
+    objects = DailyPlanQuerySet.as_manager()
+
+    @property
     def is_today(self):
         return self.day == date.today()
 
     class Meta:
-        ordering = ['day']
+        ordering = ['-day']
 
 
 class TeamMember(models.Model):
@@ -141,4 +150,4 @@ class TeamMember(models.Model):
     member = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="teams")
     is_foreman = models.BooleanField(default=False)
     class Meta:
-        ordering = ['is_foreman', 'member__first_name']
+        ordering = ['-is_foreman', 'member__first_name']

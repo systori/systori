@@ -8,22 +8,25 @@
   <div class="panel panel-primary">
 
     <div class="panel-heading">
-      {% trans 'Today' %}
+      {% trans 'Today' %} - {% now 'DATE_FORMAT' %}
     </div>
 
 {% if todays_plans %}
 
-    <ul class="list-group">
+    <div class="list-group">
     {% for plan in todays_plans %}
 
-      <a href="#" class="list-group-item clearfix">{{ plan.jobsite }}</a>
+      <div class="list-group-item list-group-item-info">
+        <b>{{ plan.jobsite.project.name }}</b><br/>
+        {{ plan.jobsite.name }} - {{ plan.jobsite.address }} {{ plan.jobsite.city }}
+      </div>
     
-      {% for member in plan.team.all %}
-      <a href="#" class="list-group-item clearfix">{{ member.username }}</a>
+      {% for member in plan.members.all %}
+      <div class="list-group-item"> {{ member.member.get_full_name }} {% if member.is_foreman %}<span class="pull-right">{% trans 'Foreman' %}</span>{% endif %}</div>
       {% endfor %}
 
     {% endfor %}
-    </ul>
+    </div>
 
 {% else %}
 
@@ -40,21 +43,6 @@
     </div>
   </div>
 
-
-{% for plan in previous_plans %}
-
-  <div class="panel panel-info">
-
-    <div class="panel-heading">
-        {{ plan.day }}
-    </div>
-
-    <ul class="list-group">
-    </ul>
-
-  </div>
-
-{% endfor %}
 
 </div>
 {% endblock %}
