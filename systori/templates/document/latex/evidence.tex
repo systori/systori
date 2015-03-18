@@ -48,10 +48,10 @@
   {% for task in taskgroup.tasks.all|exclude_tasks_with_zero_complete %}
    {% for instance in task.taskinstances.all %}
     \begin{tabu} to \textwidth {l X[l] X[r] X[l] X[r] X[l]}
-    \large \textbf{Aufmaßblatt} & & & & & Datum: {{doc.document_date|localize}} \\
-    \textbf{Projekt} & \multicolumn5{l}{ {{job.project}} \textbf{/} {{job.name|tex_escape|trim}} \textbf{/} {{taskgroup.name}} } \\
-    \textbf{Position} & {{task.code|trim}} & \textbf{Kurztext} & \multicolumn3{l}{ {{task.name|trim}} } \\
-    \textbf{LV-Menge} & {{task.qty|ubrdecimal}} & \textbf{Ist-Menge} & {{task.complete|ubrdecimal}} & \textbf{EP} & {{task.unit_price|money}} \\
+    \large {% filter bold%} {% trans 'Evidence Sheet' %} {% endfilter %} & & & & & {% trans 'Date' %}: {{doc.document_date|localize}} \\
+    {% filter bold%} {% trans 'Project' %} {% endfilter %} & \multicolumn5{l}{ {{job.project}} \textbf{/} {{job.name|tex_escape|trim}} \textbf{/} {{taskgroup.name}} } \\
+    {% filter bold%} {% trans 'Task' %} {% endfilter %} & {{task.code|trim}} & \textbf{Kurztext} & \multicolumn3{l}{ {{task.name|trim}} } \\
+    {% filter bold%} {% trans 'P-Amount' %} {% endfilter %} & {{task.qty|ubrdecimal}} {{task.unit}} & {% filter bold%} {% trans 'Amount' %} {% endfilter %} & {{task.complete|ubrdecimal}} {{task.unit}} & {% filter bold%} {% trans 'UP' %} {% endfilter %} & {{task.unit_price|money}} \\
     \end{tabu}
     \vspace{5mm}
     \karos{27.5}{12}
