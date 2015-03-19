@@ -11,7 +11,7 @@ env.user = 'ubrblik'
 
 deploy_apps = {
   'dev': ['dev'],
-  'production': ['demo', 'mehr_handwerk']
+  'production': ['mehr_handwerk']
 }
 
 
@@ -27,12 +27,12 @@ def deploy(env_name='dev'):
                 # load production db
                 sudo('dropdb systori_dev', user='www-data')
                 sudo('createdb systori_dev', user='www-data')
-                sudo('pg_dump -f prod.sql ubrblik_mehr_handwerk', user='www-data')
+                sudo('pg_dump -f prod.sql systori_mehr_handwerk', user='www-data')
                 sudo('psql -f prod.sql systori_dev >/dev/null', user='www-data')
                 sudo('psql -c "update document_proposal set email_pdf = substr(email_pdf, 33), print_pdf = substr(print_pdf, 33);" systori_dev', user='www-data')
                 sudo('rm prod.sql')
                 # copy production documents
-                run('cp -p -r /srv/ubrblik/mehr_handwerk/ubrblik/documents documents')
+                run('cp -p -r /srv/systori/mehr_handwerk/systori/documents documents')
 
             run('git pull')
 
@@ -62,7 +62,7 @@ def localdb_from_bootstrap():
 prod_dump_path = '/tmp/systori.prod.dump'
 prod_dump_file = os.path.basename(prod_dump_path)
 def fetch_productiondb():
-    dbname = 'ubrblik_mehr_handwerk'
+    dbname = 'systori_mehr_handwerk'
     # -Fc : custom postgresql compressed format
     sudo('pg_dump -Fc -f %s %s' % (prod_dump_path,dbname), user='www-data')
     get(prod_dump_path, prod_dump_file)
