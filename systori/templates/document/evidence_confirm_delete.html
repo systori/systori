@@ -1,0 +1,11 @@
+{% extends "project.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='evidences' %}{% endblock %}
+
+{% block content %}
+<form method="post">{% csrf_token %}
+    <p>{% blocktrans %}Are you sure you want to delete that?{% endblocktrans %}</p>
+    <input type="submit" value="{% trans 'Confirm' %}" />
+</form>
+{% endblock %}

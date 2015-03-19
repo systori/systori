@@ -10,7 +10,7 @@ LOGIN_REDIRECT_URL = '/'
 
 DEFAULT_COUNTRY = "Deutschland"
 
-GOOGLE_MAPS_API_KEY = "AIzaSyAnSP6vllTFMFwyIeb7uhEkOy1t04IPg_M"
+GOOGLE_MAPS_API_KEY = "AIzaSyAEhGj7BuZtHzx8lHow-cm6lTCja1txOX4"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os

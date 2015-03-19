@@ -4,9 +4,7 @@
 {% block title %}{{ project.name }}{% endblock %}
 
 {% block head_navbar %}
-<ul class="nav navbar-nav navbar-left">
-  <li class="active"><a href="{% url 'project.view' project.id %}">{{ project.name }}</a></li>
-</ul>
+<li class="active"><a href="{% url 'project.view' project.id %}">{{ project.name }}</a></li>
 {% endblock %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section="dashboard" %}{% endblock %}

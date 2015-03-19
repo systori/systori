@@ -466,6 +466,7 @@ class LineItem(models.Model):
     def project(self):
         return self.job.project
 
+
 class ProgressReport(models.Model):
 
     # date when this progress report was filed

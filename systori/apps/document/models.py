@@ -181,6 +181,59 @@ class Invoice(Document):
         ordering = ['id']
 
 
+class Evidence(models.Model):
+    notes = models.TextField(_("Notes"), blank=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    document_date = models.DateField(_("Date"), default=date.today, blank=True)
+
+    print_pdf = models.FileField(upload_to=generate_file_path)
+    print_latex = models.FileField(upload_to=generate_file_path)
+
+    json = models.FileField(upload_to=generate_file_path)
+
+    project = models.ForeignKey("project.Project", related_name="evidences")
+    jobs = models.ManyToManyField("task.Job", related_name="evidences")
+
+    LATEX_TEMPLATE = "document/latex/evidence.tex"
+
+    class Meta:
+        verbose_name = _("Invoice")
+        verbose_name_plural = _("Invoices")
+        ordering = ['id']
+
+    def generate_document(self, add_terms=True):
+
+        template = get_template(self.LATEX_TEMPLATE)
+
+        # generate latex files
+        context = Context({
+          'doc': self,
+          'jobs': self.jobs.all(),
+        })
+        print_latex = template.render(context).encode('utf-8')
+        self.print_latex.save('print.tex', ContentFile(print_latex), save=False)
+
+        dir_path = os.path.dirname(self.print_latex.path)
+
+        # generate pdf files
+        for format, latex in [('print', print_latex)]:
+
+            for i in range(2):
+                process = Popen(
+                    ['pdflatex', '-output-directory', dir_path,
+                     '-jobname', format],
+                    stdin=PIPE,
+                    stdout=PIPE,
+                    cwd=settings.LATEX_WORKING_DIR
+                    )
+                process.communicate(latex)
+
+            setattr(self, format+'_pdf', os.path.join(dir_path, format+'.pdf'))
+
+        # save file paths to database
+        self.save()
+
+
 class SampleContact:
     salutation = _('Mr')
     first_name = _('John')
@@ -198,9 +251,11 @@ class DocumentTemplate(models.Model):
 
     PROPOSAL = "proposal"
     INVOICE = "invoice"
+    EVIDENCE = "evidence"
     DOCUMENT_TYPE = (
         (PROPOSAL, _("Proposal")),
         (INVOICE, _("Invoice")),
+        (EVIDENCE, _("Evidence")),
     )
     document_type = models.CharField(_('Document Type'), max_length=128,
                                      choices=DOCUMENT_TYPE, default=PROPOSAL)

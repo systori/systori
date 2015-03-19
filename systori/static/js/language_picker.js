@@ -4,7 +4,7 @@
     return $(".language-link").on("click", function(event) {
       event.preventDefault();
       $("input[name='language']").val($(this).data("language"));
-      return $(this).parents("form").submit();
+      return $("#set-language").submit();
     });
   });
 

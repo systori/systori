@@ -6,8 +6,8 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 
-from .models import Proposal, Invoice, DocumentTemplate
-from .forms import ProposalForm, InvoiceForm
+from .models import Proposal, Invoice, Evidence, DocumentTemplate
+from .forms import ProposalForm, InvoiceForm, EvidenceForm
 
 
 class BaseDocumentPDFView(SingleObjectMixin, View):
@@ -34,6 +34,24 @@ class BaseDocumentCreateView(CreateView):
         redirect = super(BaseDocumentCreateView, self).form_valid(form)
 
         self.object.generate_document(form.cleaned_data['add_terms'])
+
+        return redirect
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
+
+
+class EvidenceDocumentCreateView(CreateView):
+
+    def get_form_kwargs(self):
+        kwargs = super(EvidenceDocumentCreateView, self).get_form_kwargs()
+        kwargs['instance'] = self.model(project=self.request.project)
+        return kwargs
+
+    def form_valid(self, form):
+
+        redirect = super(EvidenceDocumentCreateView, self).form_valid(form)
+        self.object.generate_document(form.cleaned_data)
 
         return redirect
 
@@ -146,3 +164,26 @@ class DocumentTemplateUpdate(UpdateView):
 class DocumentTemplateDelete(DeleteView):
     model = DocumentTemplate
     success_url = reverse_lazy('templates')
+
+
+class EvidenceView(DetailView):
+    model = Evidence
+
+
+class EvidencePDF(BaseDocumentPDFView):
+    model = Evidence
+
+
+class EvidenceCreate(EvidenceDocumentCreateView):
+    model = Evidence
+    form_class = EvidenceForm
+
+    def process_job(self, job):
+        return job.billable_total
+
+
+class EvidenceDelete(DeleteView):
+    model = Evidence
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])

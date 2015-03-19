@@ -7,7 +7,7 @@ def office_auth(view):
     def is_authorized(user):
         if not user.is_authenticated():
             return False # redirect to login
-        if user.is_staff or user.is_superuser:
+        if user.has_staff:
             return True # all good
         raise PermissionDenied # logged in but not allowed
 
@@ -15,5 +15,12 @@ def office_auth(view):
 
 
 def field_auth(view):
-    # anyone who's logged-in can access field app
-    return login_required(view)
+
+    def is_authorized(user):
+        if not user.is_authenticated():
+            return False # redirect to login
+        if user.has_laborer:
+            return True # all good
+        raise PermissionDenied # logged in but not allowed
+
+    return user_passes_test(is_authorized)(view)

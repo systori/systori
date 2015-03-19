@@ -11,6 +11,19 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterModelOptions(
+            name='dailyplan',
+            options={'ordering': ['-day']},
+        ),
+        migrations.AlterModelOptions(
+            name='teammember',
+            options={'ordering': ['-is_foreman', 'member__first_name']},
+        ),
+        migrations.RenameField(
+            model_name='dailyplan',
+            old_name='site',
+            new_name='jobsite',
+        ),
         migrations.AlterField(
             model_name='jobsite',
             name='project',

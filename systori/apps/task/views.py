@@ -61,11 +61,13 @@ class TaskEditor(SingleObjectMixin, ListView):
 class JobView(DetailView):
     model = Job
 
+
 def tasks_url(self):
     if self.object.project.is_template:
         return reverse('tasks', args=[self.object.id])
     else:
         return reverse('tasks', args=[self.object.project.id, self.object.id])
+
 
 class JobCreate(CreateView):
     model = Job
@@ -93,12 +95,14 @@ class JobCreate(CreateView):
     def get_success_url(self):
         return tasks_url(self)
 
+
 class JobUpdate(UpdateView):
     model = Job
     form_class = JobForm
 
     def get_success_url(self):
         return tasks_url(self)
+
 
 class JobDelete(DeleteView):
     model = Job
