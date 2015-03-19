@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('project', '0006_auto_20150313_2036'),
+        ('project', '0004_auto_20150311_1705'),
     ]
 
     operations = [
@@ -18,5 +18,16 @@ class Migration(migrations.Migration):
         migrations.AlterModelOptions(
             name='teammember',
             options={'ordering': ['-is_foreman', 'member__first_name']},
+        ),
+        migrations.RenameField(
+            model_name='dailyplan',
+            old_name='site',
+            new_name='jobsite',
+        ),
+        migrations.AlterField(
+            model_name='jobsite',
+            name='project',
+            field=models.ForeignKey(related_name='jobsites', to='project.Project'),
+            preserve_default=True,
         ),
     ]

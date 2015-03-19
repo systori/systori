@@ -4,6 +4,22 @@
 {% block container %}
 <div class="container">
 
+  {% if user.has_staff %}
+
+  <div class="panel panel-primary">
+
+    <div class="panel-heading">
+      {% trans 'Manage' %}
+    </div>    
+
+    <div class="list-group">
+      <a href="{% url 'field.projects' %}" class="list-group-item">{% trans 'Projects' %}</a>
+      <a href="{% url 'field.dailies' %}" class="list-group-item">{% trans 'Daily Plans' %}</a>
+    </div>
+
+  </div>
+
+  {% endif %}
 
   <div class="panel panel-primary">
 
@@ -16,13 +32,33 @@
     <div class="list-group">
     {% for plan in todays_plans %}
 
-      <div class="list-group-item list-group-item-info">
+      <a href="{% url 'field.project' plan.jobsite.project_id %}" class="list-group-item list-group-item-info">
+        <span class="pull-right">&raquo;</span>
         <b>{{ plan.jobsite.project.name }}</b><br/>
         {{ plan.jobsite.name }} - {{ plan.jobsite.address }} {{ plan.jobsite.city }}
+      </a>
+
+      <div class="list-group-item sub-header">
+        {% trans "Workers" %}
       </div>
     
       {% for member in plan.members.all %}
       <div class="list-group-item"> {{ member.member.get_full_name }} {% if member.is_foreman %}<span class="pull-right">{% trans 'Foreman' %}</span>{% endif %}</div>
+      {% endfor %}
+
+      <div class="list-group-item sub-header">
+        {% trans "Tasks" %}
+      </div>
+
+      {% for task in plan.tasks.all %}
+      <a href="{% url 'field.task' project.id plan.jobsite.id task.taskgroup.job.id task.id %}" class="list-group-item clearfix">
+        {{ task.name }}
+        {% if task.complete_percent > 0 %}
+        <span class="badge">{{ task.complete_percent }}%</span>
+        {% else %}
+        <span class="pull-right">&raquo;</span>
+        {% endif %}
+      </a>
       {% endfor %}
 
     {% endfor %}
@@ -38,9 +74,10 @@
 
     <div class="panel-footer clearfix">
         <div class="pull-right">
-            <a href="{% url 'field.projects' %}" class="btn btn-default">{% trans "Add Job Site" %}</a>
+            <a href="{% url 'field.projects' %}" class="btn btn-default">{% trans "Add Job Site" %} &raquo;</a>
         </div>
     </div>
+
   </div>
 
 

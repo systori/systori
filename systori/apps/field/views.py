@@ -18,6 +18,7 @@ def days_ago(ago):
 
 class FieldDashboard(TemplateView):
     template_name = "field/dashboard.html"
+
     def get_context_data(self, **kwargs):
         context = super(FieldDashboard, self).get_context_data(**kwargs)
 
@@ -26,6 +27,17 @@ class FieldDashboard(TemplateView):
         context['previous_plans'] = self.request.user.daily_plans\
             .filter(day__gt=days_ago(5))\
             .exclude(day=date.today()).all()
+
+        return context
+
+
+class FieldDailyPlans(TemplateView):
+    template_name = "field/dailies.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(FieldDailyPlans, self).get_context_data(**kwargs)
+
+        context['todays_plans'] = DailyPlan.objects.today().all()
 
         return context
 
@@ -39,6 +51,11 @@ class FieldProjectView(ProjectView):
     template_name = "field/project.html"
 
 
+class FieldJobList(ProjectView):
+    pk_url_kwarg = 'project_pk'
+    template_name = "field/job_list.html"
+
+
 class FieldJobView(DetailView):
     model = Job
     pk_url_kwarg = 'job_pk'
@@ -50,8 +67,9 @@ class FieldTaskView(UpdateView):
     pk_url_kwarg = 'task_pk'
     template_name = "field/task.html"
     form_class = CompletionForm
+
     def get_success_url(self):
-        return reverse('field.job', args=[self.request.project.id, self.object.taskgroup.job.id])
+        return reverse('field.job', args=[self.request.project.id, self.request.jobsite.id, self.object.taskgroup.job.id])
 
 
 def get_daily_plan(jobsite):
@@ -61,6 +79,32 @@ def get_daily_plan(jobsite):
         daily_plan.jobsite = jobsite
         daily_plan.save()
     return daily_plan
+
+
+class FieldAssignTask(SingleObjectMixin, View):
+
+    model = Task
+    pk_url_kwarg = 'task_pk'
+
+    def get(self, request, *args, **kwargs):
+        task = self.get_object()
+        daily_plan = get_daily_plan(self.request.jobsite)
+        daily_plan.tasks.add(task)
+        return HttpResponseRedirect(reverse('field.task', args=[
+                    self.request.project.id, self.request.jobsite.id, task.taskgroup.job.id, task.id]))
+
+
+class FieldRemoveTask(SingleObjectMixin, View):
+
+    model = Task
+    pk_url_kwarg = 'task_pk'
+
+    def get(self, request, *args, **kwargs):
+        task = self.get_object()
+        for daily_plan in task.daily_plans.today().all():
+            daily_plan.tasks.remove(task)
+        return HttpResponseRedirect(reverse('field.task', args=[
+                    self.request.project.id, self.request.jobsite.id, task.taskgroup.job.id, task.id]))
 
 
 class FieldAddSelfToJobSite(SingleObjectMixin, View):
@@ -141,16 +185,3 @@ class FieldToggleRole(SingleObjectMixin, View):
         member.is_foreman = not member.is_foreman
         member.save()
         return HttpResponseRedirect(reverse('field.project', args=[request.project.id]))
-
-
-class FieldAssignTasks(SingleObjectMixin, TemplateView):
-
-    model = JobSite
-    template_name = "field/assign_tasks.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(FieldAssignTasks, self).get_context_data(**kwargs)
-        return context
-
-    def put(self, request, *args, **kwargs):
-        return HttpResponseRedirect(reverse('field.dashboard'))

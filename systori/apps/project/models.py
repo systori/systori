@@ -97,10 +97,7 @@ class JobSite(models.Model):
     longitude = models.FloatField(_("Longitude"), null=True, blank=True)
 
     def __str__(self):
-        if len(self.name) == 0:
-            return '{} #{}'.format(_('Job Site'), self.id)
-        else:
-            return self.name
+        return self.name
 
     def save(self, *args, **kwargs):
         g = geocoders.GoogleV3()
