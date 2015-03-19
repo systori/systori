@@ -4,7 +4,9 @@
 {% block container %}
 <div class="container">
 
-  <a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block btn-back">&laquo; {% trans 'Dashboard' %}</a>
+  <div class="row back-buttons">
+    <div class="col-xs-12"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
+  </div>
 
   <div class="panel panel-default">
 

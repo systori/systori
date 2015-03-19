@@ -4,7 +4,10 @@
 {% block container %}
 <div class="container">
 
-  <a href="{% url 'field.projects' %}" class="btn btn-default btn-block btn-back">&laquo; {% trans 'Projects' %}</a>
+  <div class="row back-buttons">
+    <div class="col-xs-8"><a href="{% url 'field.projects' %}" class="btn btn-default btn-block btn-back">&laquo; {% trans 'Projects' %}</a></div>
+    <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
+  </div>
 
   <div class="panel panel-default">
 
@@ -24,6 +27,7 @@
   <div class="panel panel-default">
 
     <div class="panel-heading">
+        <span class="pull-right">{% now 'DATE_FORMAT' %}</span>
         {{ jobsite }}<br />
         {{ jobsite.address }} {{ jobsite.city }}
     </div>
@@ -31,12 +35,18 @@
     {% if daily_plan %}
 
     <div class="list-group">
+
+      <div class="list-group-item sub-header">
+        {% trans "Workers" %}
+      </div>
+
     {% for worker in daily_plan.members.all %}
+
       <div class="list-group-item nav nav-pills">
         {{ worker.member.get_full_name }}
 
         {% if user.is_staff %}
-          <a href="{% url 'field.toggle.role' project.id worker.id %}" class="btn btn-default pull-right">
+          <a href="{% url 'field.toggle.role' project.id worker.id %}" class="btn btn-primary pull-right">
         {% else %}
           <span class="pull-right">
         {% endif %}
@@ -54,7 +64,32 @@
         {% endif %}
 
       </div>
+
+    {% empty %}
+
+      <div class="list-group-item">
+        {% trans "No workers have been assigned." %}
+      </div>
+
     {% endfor %}
+
+
+      <div class="list-group-item sub-header">
+        {% trans "Tasks" %}
+      </div>
+
+    {% for task in daily_plan.tasks.all %}
+
+      <a href="{% url 'field.task' project.id jobsite.id task.taskgroup.job.id task.id %}" class="list-group-item clearfix">{{ task.name }} <span class="pull-right">&raquo;</span></a>
+
+    {% empty %}
+
+      <div class="list-group-item">
+        {% trans "No tasks have been assigned." %}
+      </div>
+
+    {% endfor %}
+
     </div>
 
     {% else %}
@@ -69,7 +104,8 @@
         <div class="pull-right">
             {% if user.is_staff %}
 
-            <a href="{% url 'field.assign.labor' project.id jobsite.id %}" class="btn btn-default">{% blocktrans %}Assign Labor{% endblocktrans %}</a>
+            <a href="{% url 'field.assign.labor' project.id jobsite.id %}" class="btn btn-default">{% blocktrans %}Workers{% endblocktrans %} &raquo;</a>
+            <a href="{% url 'field.jobs' project.id jobsite.id %}" class="btn btn-default">{% blocktrans %}Tasks{% endblocktrans %} &raquo;</a>
 
             {% elif user in daily_plan.team.all %}
 

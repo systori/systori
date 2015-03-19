@@ -21,7 +21,7 @@ class IndexView(View):
     def dispatch(self, request, *args, **kwargs):
         user = request.user
         if user.is_authenticated():
-            if get_flavour() == 'full' and (user.is_staff or user.is_superuser):
+            if get_flavour() == 'full' and user.has_staff:
                 view = OfficeDashboard.as_view()
             else:
                 view = FieldDashboard.as_view()
