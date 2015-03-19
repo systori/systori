@@ -51,7 +51,7 @@
       </div>
 
       {% for task in plan.tasks.all %}
-      <a href="{% url 'field.task' project.id plan.jobsite.id task.taskgroup.job.id task.id %}" class="list-group-item clearfix">
+      <a href="{% url 'field.task' project.id plan.jobsite.id task.taskgroup.job.id task.id %}?origin={{request.path}}" class="list-group-item clearfix">
         {{ task.name }}
         {% if task.complete_percent > 0 %}
         <span class="badge">{{ task.complete_percent }}%</span>

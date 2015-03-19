@@ -19,7 +19,7 @@
     {% for taskgroup in object.taskgroups.all %}
       <div class="list-group-item sub-header">{{taskgroup.code}} {{ taskgroup.name }}</div>
     {% for task in taskgroup.tasks.all %}
-      <a href="{% url 'field.task' project.id jobsite.id job.id task.id %}" class="list-group-item clearfix{% if task.daily_plans.exists %} list-group-item-success{% endif %}">
+      <a href="{% url 'field.task' project.id jobsite.id job.id task.id %}?origin={{request.path}}" class="list-group-item clearfix{% if task.daily_plans.exists %} list-group-item-success{% endif %}">
         {{task.code}} {{ task.name }}
         {% if task.complete_percent > 0 %}
         <span class="badge">{{ task.complete_percent }}%</span>

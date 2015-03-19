@@ -8,7 +8,7 @@ urlpatterns = patterns('',
 
   url(r'^project-(?P<project_pk>\d+)/jobsite-(?P<jobsite_pk>\d+)/job-(?P<job_pk>\d+)/task-(?P<task_pk>\d+)/add$', field_auth(FieldAssignTask.as_view()), name='field.assign.task'),
   url(r'^project-(?P<project_pk>\d+)/jobsite-(?P<jobsite_pk>\d+)/job-(?P<job_pk>\d+)/task-(?P<task_pk>\d+)/remove$', field_auth(FieldRemoveTask.as_view()), name='field.remove.task'),
-  url(r'^project-(?P<project_pk>\d+)/jobsite-(?P<jobsite_pk>\d+)/job-(?P<job_pk>\d+)/task-(?P<task_pk>\d+)/$', field_auth(FieldTaskView.as_view()), name='field.task'),
+  url(r'^project-(?P<project_pk>\d+)/jobsite-(?P<jobsite_pk>\d+)/job-(?P<job_pk>\d+)/task-(?P<task_pk>\d+)$', field_auth(FieldTaskView.as_view()), name='field.task'),
   url(r'^project-(?P<project_pk>\d+)/jobsite-(?P<jobsite_pk>\d+)/job-(?P<job_pk>\d+)/$', field_auth(FieldJobView.as_view()), name='field.job'),
   url(r'^project-(?P<project_pk>\d+)/jobsite-(?P<jobsite_pk>\d+)/jobs$', field_auth(FieldJobList.as_view()), name='field.jobs'),
 
