@@ -1,0 +1,36 @@
+{% extends "field/base.html" %}
+{% load i18n staticfiles %}
+
+{% block container %}
+<div class="container">
+
+  <div class="row back-buttons">
+    <div class="col-xs-8"><a href="{% url 'field.jobs' project.id jobsite.id %}" class="btn btn-default btn-block btn-back">&laquo; {{ project.name }}</a></div>
+    <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
+  </div>
+
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+      {{ object.name }} {% trans 'Tasks' %}
+    </div>
+
+    <ul class="list-group">
+    {% for taskgroup in object.taskgroups.all %}
+      <div class="list-group-item sub-header">{{taskgroup.code}} {{ taskgroup.name }}</div>
+    {% for task in taskgroup.tasks.all %}
+      <a href="{% url 'field.task' project.id jobsite.id job.id task.id %}?origin={{request.path}}" class="list-group-item clearfix{% if task.daily_plans.exists %} list-group-item-success{% endif %}">
+        {{task.code}} {{ task.name }}
+        {% if task.complete_percent > 0 %}
+        <span class="badge">{{ task.complete_percent }}%</span>
+        {% else %}
+        <span class="pull-right">&raquo;</span>
+        {% endif %}
+      </a>
+    {% endfor %}
+    {% endfor %}
+    </ul>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% load i18n customformatting %}
+{% for task in objects %}
+<div data-pk="{{ task.id }}">
+  {{ task.name }} - {{ task.unit }} - {{ task.unit_price|ubrdecimal:2 }} <br />
+  {{ task.description }} <br />
+  {{ task.taskgroup.job.project }} / {{ task.taskgroup.job.name }}
+</div>
+{% endfor %}

@@ -1,0 +1,7 @@
+{% load i18n customformatting %}
+{% for group in objects %}
+<div data-pk="{{ group.id }}">
+  {{ group.job.project }} / {{ group.job.name }} <br />
+  {{ group.name }} - {{ group.estimate_total|ubrdecimal:2 }}
+</div>
+{% endfor %}

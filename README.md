@@ -1,6 +1,6 @@
-### About Ubrblik ###
+### About Systori ###
 
-Ubrblik is a suite of tools for construction companies to create project estimates, to manage those projects and generate invoices.
+Systori is a suite of tools for construction companies to create project estimates, to manage those projects and generate invoices.
 
 Server side is written in [Python](https://www.python.org/) using the [Django framework](https://www.djangoproject.com/) with [PostgreSQL](http://www.postgresql.org/) as the backing database.
 
@@ -32,12 +32,12 @@ Create a database user; when the databse user name matches your linux user name 
 $ sudo -u postgres createuser --superuser [YOUR_LINUX_USERNAME]
 ```
 
-Now change into the directory where you'd like to install ubrblik and run the following commands:
+Now change into the directory where you'd like to install systori and run the following commands:
 
 ```
-$ git clone git@bitbucket.org:damoti/ubrblik.git
-$ cd ubrblik/
-$ mkvirtualenv -a `pwd` -p /usr/bin/python3 ubrblik
+$ git clone git@bitbucket.org:damoti/systori.git
+$ cd systori/
+$ mkvirtualenv -a `pwd` -p /usr/bin/python3 systori
 $ pip install -r requirements/dev.pip
 $ fab init_settings
 ```
@@ -51,21 +51,21 @@ $ ./manage.py test
 Finally setup a database for local development and start the app:
 
 ```
-$ createdb ubrblik_local
+$ createdb systori_local
 $ ./manage.py migrate
 $ ./manage.py runserver
 ```
 
-When you are done working on ubrblik, you can deactivate the virtual environment:
+When you are done working on systori, you can deactivate the virtual environment:
 
 ```
 $ deactive
 ```
 
-And the next time you want to activate it run (this will automatically place you in the ubrblik checkout directory):
+And the next time you want to activate it run (this will automatically place you in the systori checkout directory):
 
 ```
-$ workon ubrblik
+$ workon systori
 ```
 
 

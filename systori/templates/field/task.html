@@ -1,0 +1,104 @@
+{% extends "field/base.html" %}
+{% load i18n l10n staticfiles customformatting %}
+
+{% block container %}
+<div class="container">
+
+  <div class="row back-buttons">
+    <div class="col-xs-8"><a href="{% url 'field.job' project.id jobsite.id task.taskgroup.job.id %}" class="btn btn-default btn-block">&laquo; {{ task.taskgroup.job.name }}</a></div>
+    <div class="col-xs-4"><a href="{% if request.GET.origin %}{{request.GET.origin}}{% else %}{% url 'field.dashboard' %}{% endif %}" class="btn btn-default btn-block">&laquo; {% if request.GET.origin  %}{% trans 'Back' %}{% else %}{% trans 'Dashboard' %}{% endif %}</a></div>
+  </div>
+
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+      {{task.code}} {{task.name}}
+    </div>
+
+    <div class="panel-body">
+      {{task.description}}
+    </div>
+
+    <div class="panel-footer clearfix">
+      <div class="pull-right">
+        {% with daily_plan=task.daily_plans.first %}
+        {% if daily_plan %}
+        <a href="{% url 'field.remove.task' project.id jobsite.id task.taskgroup.job.id task.id %}?origin={{request.GET.origin}}" class="btn btn-primary">{% blocktrans with jobsite=daily_plan.jobsite.name %}Remove task from {{jobsite}}.{% endblocktrans %}</a>
+        {% else %}
+        <a href="{% url 'field.assign.task' project.id jobsite.id task.taskgroup.job.id task.id %}?origin={{request.GET.origin}}" class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Add task to {{jobsite}}.{% endblocktrans %}</a>
+        {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+
+  </div> 
+
+  <form method="post">{% csrf_token %}
+  {% localize off %}
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+      {% trans 'Progress' %}
+    </div>
+
+    <div class="panel-body">
+        <div class="input-group input-group-lg">
+          <span class="input-group-addon" id="percent">{{ task.complete_percent }}%</span>
+          <input type="text" class="form-control" name="complete" value="{{ task.complete|stringformat:'d' }}">
+          <span class="input-group-addon">{{ task.unit }}</span>
+        </div>
+        <input type="range" id="completion-range" min="0" max="{{ task.qty|stringformat:'d' }}" value="{{ task.complete|stringformat:'d' }}" step="1" data-unit="{{ task.unit }}" />
+    </div>
+
+    <div class="panel-footer clearfix">
+      <div class="pull-right">
+        <input type="hidden" name="origin" value="{{request.GET.origin}}" />
+        <input type="submit" class="btn btn-primary" value="{% trans 'Save Progress' %}" />
+      </div>
+    </div>
+
+  </div> 
+  {% endlocalize %}
+  </form>
+
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+      {% trans 'Line Items' %}
+    </div>
+
+    <ul class="list-group">
+    {% for lineitem in task.taskinstances.first.lineitems.all %}
+      <li class="list-group-item clearfix">{{ lineitem.name }}<span class="pull-right">{{lineitem.unit_qty|ubrdecimal}} {{lineitem.unit}}</span></li>
+    {% endfor %}
+    </ul>
+
+  </div> 
+
+</div>
+{% endblock %}
+
+
+{% block extra_js%}
+<script type="text/javascript">
+$(document).ready(function () {
+    var range = $('#completion-range');
+    var complete = $('input[name="complete"]');
+    var percent = $('#percent');
+    var max = range.attr('max');
+    range.on('input', function() {
+      percent.text(Math.round(range.val() / max * 100) + '%');
+      complete.val(range.val());
+    });
+    complete.on('keyup', function() {
+      if (complete.val() == '') {
+        percent.text('0%');
+        range.val(0);
+      } else {
+        percent.text(Math.round(complete.val() / max * 100) + '%');
+        range.val(complete.val());
+      }
+    });
+});
+</script>
+{% endblock extra_js%}
