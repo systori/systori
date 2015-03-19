@@ -6,7 +6,7 @@
 
   <div class="row back-buttons">
     <div class="col-xs-8"><a href="{% url 'field.job' project.id jobsite.id task.taskgroup.job.id %}" class="btn btn-default btn-block">&laquo; {{ task.taskgroup.job.name }}</a></div>
-    <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
+    <div class="col-xs-4"><a href="{% if request.GET.origin %}{{request.GET.origin}}{% else %}{% url 'field.dashboard' %}{% endif %}" class="btn btn-default btn-block">&laquo; {% if request.GET.origin  %}{% trans 'Back' %}{% else %}{% trans 'Dashboard' %}{% endif %}</a></div>
   </div>
 
   <div class="panel panel-default">
@@ -23,9 +23,9 @@
       <div class="pull-right">
         {% with daily_plan=task.daily_plans.first %}
         {% if daily_plan %}
-        <a href="{% url 'field.remove.task' project.id jobsite.id task.taskgroup.job.id task.id %}" class="btn btn-primary">{% blocktrans with jobsite=daily_plan.jobsite.name %}Remove task from {{jobsite}}.{% endblocktrans %}</a>
+        <a href="{% url 'field.remove.task' project.id jobsite.id task.taskgroup.job.id task.id %}?origin={{request.GET.origin}}" class="btn btn-primary">{% blocktrans with jobsite=daily_plan.jobsite.name %}Remove task from {{jobsite}}.{% endblocktrans %}</a>
         {% else %}
-        <a href="{% url 'field.assign.task' project.id jobsite.id task.taskgroup.job.id task.id %}" class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Add task to {{jobsite}}.{% endblocktrans %}</a>
+        <a href="{% url 'field.assign.task' project.id jobsite.id task.taskgroup.job.id task.id %}?origin={{request.GET.origin}}" class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Add task to {{jobsite}}.{% endblocktrans %}</a>
         {% endif %}
         {% endwith %}
       </div>
@@ -52,6 +52,7 @@
 
     <div class="panel-footer clearfix">
       <div class="pull-right">
+        <input type="hidden" name="origin" value="{{request.GET.origin}}" />
         <input type="submit" class="btn btn-primary" value="{% trans 'Save Progress' %}" />
       </div>
     </div>

@@ -62,6 +62,11 @@ class FieldJobView(DetailView):
     template_name = "field/job.html"
 
 
+def task_success_url(request, task):
+    return request.GET.get('origin') or\
+       reverse('field.task', args=[request.project.id, request.jobsite.id, task.taskgroup.job.id, task.id])
+
+
 class FieldTaskView(UpdateView):
     model = Task
     pk_url_kwarg = 'task_pk'
@@ -69,7 +74,7 @@ class FieldTaskView(UpdateView):
     form_class = CompletionForm
 
     def get_success_url(self):
-        return reverse('field.job', args=[self.request.project.id, self.request.jobsite.id, self.object.taskgroup.job.id])
+        return task_success_url(self.request, self.object)
 
 
 def get_daily_plan(jobsite):
@@ -90,8 +95,7 @@ class FieldAssignTask(SingleObjectMixin, View):
         task = self.get_object()
         daily_plan = get_daily_plan(self.request.jobsite)
         daily_plan.tasks.add(task)
-        return HttpResponseRedirect(reverse('field.task', args=[
-                    self.request.project.id, self.request.jobsite.id, task.taskgroup.job.id, task.id]))
+        return HttpResponseRedirect(task_success_url(self.request, task))
 
 
 class FieldRemoveTask(SingleObjectMixin, View):
@@ -103,8 +107,7 @@ class FieldRemoveTask(SingleObjectMixin, View):
         task = self.get_object()
         for daily_plan in task.daily_plans.today().all():
             daily_plan.tasks.remove(task)
-        return HttpResponseRedirect(reverse('field.task', args=[
-                    self.request.project.id, self.request.jobsite.id, task.taskgroup.job.id, task.id]))
+        return HttpResponseRedirect(task_success_url(self.request, task))
 
 
 class FieldAddSelfToJobSite(SingleObjectMixin, View):
