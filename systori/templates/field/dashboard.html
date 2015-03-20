@@ -13,8 +13,8 @@
     </div>    
 
     <div class="list-group">
-      <a href="{% url 'field.projects' %}" class="list-group-item">{% trans 'Projects' %}</a>
-      <a href="{% url 'field.dailies' %}" class="list-group-item">{% trans 'Daily Plans' %}</a>
+      <a href="{% url 'field.projects' %}" class="list-group-item">{% trans 'Projects' %} <span class="pull-right">&raquo;</span></a>
+      <a href="{% url 'field.planning' %}" class="list-group-item">{% trans 'Planning' %} <span class="pull-right">&raquo;</span></a>
     </div>
 
   </div>
@@ -72,11 +72,13 @@
 
 {% endif %}
 
+    {% if user.is_laborer or user.is_foreman %}
     <div class="panel-footer clearfix">
         <div class="pull-right">
             <a href="{% url 'field.projects' %}" class="btn btn-default">{% trans "Add Job Site" %} &raquo;</a>
         </div>
     </div>
+    {% endif %}
 
   </div>
 
