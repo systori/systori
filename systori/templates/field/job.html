@@ -1,11 +1,11 @@
 {% extends "field/base.html" %}
-{% load i18n staticfiles %}
+{% load i18n staticfiles field_app %}
 
 {% block container %}
 <div class="container">
 
   <div class="row back-buttons">
-    <div class="col-xs-8"><a href="{% url 'field.jobs' project.id jobsite.id %}" class="btn btn-default btn-block btn-back">&laquo; {{ project.name }}</a></div>
+    <div class="col-xs-8"><a href="{% url 'field.jobs' jobsite.id dailyplan.url_id %}" class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
     <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
   </div>
 
@@ -16,10 +16,11 @@
     </div>
 
     <ul class="list-group">
-    {% for taskgroup in object.taskgroups.all %}
+    {% for taskgroup in job.taskgroups.all %}
       <div class="list-group-item sub-header">{{taskgroup.code}} {{ taskgroup.name }}</div>
     {% for task in taskgroup.tasks.all %}
-      <a href="{% url 'field.task' project.id jobsite.id job.id task.id %}?origin={{request.path}}" class="list-group-item clearfix{% if task.daily_plans.exists %} list-group-item-success{% endif %}">
+      {% task_dailyplans_count task dailyplan.day as is_assigned %}
+      <a href="{% url 'field.task' jobsite.id dailyplan.url_id task.id %}?origin={{request.path}}" class="list-group-item clearfix{% if is_assigned %} list-group-item-success{% endif %}">
         {{task.code}} {{ task.name }}
         {% if task.complete_percent > 0 %}
         <span class="badge">{{ task.complete_percent }}%</span>

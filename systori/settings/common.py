@@ -52,6 +52,7 @@ INSTALLED_APPS = (
     'systori.apps.directory',
     'systori.apps.task',
     'systori.apps.document',
+    'systori.apps.field',
     'systori.apps.main'
 )
 
@@ -66,7 +67,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'systori.apps.project.middleware.ProjectMiddleware'
+    'systori.apps.project.middleware.ProjectMiddleware',
+    'systori.apps.field.middleware.FieldMiddleware'
 )
 
 from django.conf import global_settings
