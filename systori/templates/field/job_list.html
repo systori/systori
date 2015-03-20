@@ -5,7 +5,7 @@
 <div class="container">
 
   <div class="row back-buttons">
-    <div class="col-xs-8"><a href="{% url 'field.project' project.id %}" class="btn btn-default btn-block btn-back">&laquo; {{ project.name }}</a></div>
+    <div class="col-xs-8"><a href="{% url 'field.project' jobsite.project.id %}" class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
     <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
   </div>
 
@@ -16,8 +16,8 @@
     </div>
 
     <ul class="list-group">
-    {% for job in project.jobs.all %}
-      <a href="{% url 'field.job' project.id jobsite.id job.id %}" class="list-group-item clearfix">{{ job.name }} <span class="pull-right">&raquo;</span></a>
+    {% for job in jobsite.project.jobs.all %}
+      <a href="{% url 'field.job' jobsite.id dailyplan.url_id job.id %}" class="list-group-item clearfix">{{ job.name }} <span class="pull-right">&raquo;</span></a>
     {% endfor %}
     </ul>
 

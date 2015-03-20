@@ -37,7 +37,23 @@ class FieldDailyPlans(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(FieldDailyPlans, self).get_context_data(**kwargs)
 
-        context['todays_plans'] = DailyPlan.objects.today().all()
+        selected_day = date.today()
+        if kwargs.get('selected_day'):
+            selected_day = date(*map(int, kwargs['selected_day'].split('-')))
+
+        context['today_url'] = reverse('field.dailies', args=[date.today().isoformat()])
+
+        context['previous_day'] = selected_day-timedelta(days=1)
+        context['previous_day_url'] = reverse('field.dailies', args=[context['previous_day'].isoformat()])
+        context['previous_exists'] = DailyPlan.objects.filter(day=context['previous_day']).exists()
+
+        context['selected_day'] = selected_day
+        context['selected_plans'] = DailyPlan.objects.filter(day=selected_day).all()
+        context['is_selected_today'] = selected_day == date.today()
+        context['is_selected_future'] = selected_day > date.today()
+
+        context['next_day'] = selected_day+timedelta(days=1)
+        context['next_day_url'] = reverse('field.dailies', args=[context['next_day'].isoformat()])
 
         return context
 
@@ -50,9 +66,13 @@ class FieldProjectView(ProjectView):
     pk_url_kwarg = 'project_pk'
     template_name = "field/project.html"
 
+    def get_context_data(self, **kwargs):
+        context = super(FieldProjectView, self).get_context_data(**kwargs)
+        context['today'] = date.today()
+        return context
 
-class FieldJobList(ProjectView):
-    pk_url_kwarg = 'project_pk'
+
+class FieldJobList(TemplateView):
     template_name = "field/job_list.html"
 
 
@@ -64,7 +84,7 @@ class FieldJobView(DetailView):
 
 def task_success_url(request, task):
     return request.GET.get('origin') or\
-       reverse('field.task', args=[request.project.id, request.jobsite.id, task.taskgroup.job.id, task.id])
+       reverse('field.task', args=[request.jobsite.id, request.dailyplan.url_id, task.id])
 
 
 class FieldTaskView(UpdateView):
@@ -73,17 +93,15 @@ class FieldTaskView(UpdateView):
     template_name = "field/task.html"
     form_class = CompletionForm
 
+    def get_context_data(self, **kwargs):
+        context = super(FieldTaskView, self).get_context_data(**kwargs)
+        task = self.get_object()
+        dailyplan = self.request.dailyplan
+        context['in_current_dailyplan'] = dailyplan.id and task.daily_plans.filter(id=dailyplan.id).exists()
+        return context
+
     def get_success_url(self):
         return task_success_url(self.request, self.object)
-
-
-def get_daily_plan(jobsite):
-    daily_plan = jobsite.daily_plans.today().first()
-    if not daily_plan:
-        daily_plan = DailyPlan()
-        daily_plan.jobsite = jobsite
-        daily_plan.save()
-    return daily_plan
 
 
 class FieldAssignTask(SingleObjectMixin, View):
@@ -93,8 +111,9 @@ class FieldAssignTask(SingleObjectMixin, View):
 
     def get(self, request, *args, **kwargs):
         task = self.get_object()
-        daily_plan = get_daily_plan(self.request.jobsite)
-        daily_plan.tasks.add(task)
+        dailyplan = self.request.dailyplan
+        if not dailyplan.id: dailyplan.save()
+        dailyplan.tasks.add(task)
         return HttpResponseRedirect(task_success_url(self.request, task))
 
 
@@ -104,23 +123,22 @@ class FieldRemoveTask(SingleObjectMixin, View):
     pk_url_kwarg = 'task_pk'
 
     def get(self, request, *args, **kwargs):
-        task = self.get_object()
-        for daily_plan in task.daily_plans.today().all():
+        dailyplan = self.request.dailyplan
+        if dailyplan.id:
+            task = self.get_object()
             daily_plan.tasks.remove(task)
         return HttpResponseRedirect(task_success_url(self.request, task))
 
 
-class FieldAddSelfToJobSite(SingleObjectMixin, View):
-
-    model = JobSite
+class FieldAddSelfToDailyPlan(View):
 
     def get(self, request, *args, **kwargs):
-        jobsite = self.get_object()
-        daily_plan = get_daily_plan(jobsite)
+        dailyplan = self.request.dailyplan
+        if not dailyplan.id: dailyplan.save()
 
-        if not TeamMember.objects.filter(plan=daily_plan, member=self.request.user).exists():
+        if not TeamMember.objects.filter(plan=dailyplan, member=self.request.user).exists():
             TeamMember.objects.create(
-                plan = daily_plan,
+                plan = dailyplan,
                 member = self.request.user,
                 is_foreman = True if kwargs['role'] == 'foreman' else False
             )
@@ -128,33 +146,39 @@ class FieldAddSelfToJobSite(SingleObjectMixin, View):
         return HttpResponseRedirect(reverse('field.dashboard'))
 
 
-class FieldAssignLabor(DetailView):
+class FieldRemoveSelfFromDailyPlan(SingleObjectMixin, View):
 
-    model = JobSite
+    model = TeamMember
+
+    def get(self, request, *args, **kwargs):
+        self.get_object().delete()
+        return HttpResponseRedirect(reverse('field.project', args=[request.jobsite.project.id]))
+
+
+class FieldAssignLabor(TemplateView):
+
     template_name = "field/assign_labor.html"
 
     def get_context_data(self, **kwargs):
         context = super(FieldAssignLabor, self).get_context_data(**kwargs)
         context['workers'] = User.objects.filter(Q(is_laborer=True) | Q(is_foreman=True))
-
         context['assigned'] = []
-        daily_plan = self.get_object().daily_plans.today().first()
-        if daily_plan: context['assigned'] = daily_plan.team.all()
-
+        dailyplan = self.request.dailyplan
+        if dailyplan.id: context['assigned'] = dailyplan.team.all()
         return context
 
     def post(self, request, *args, **kwargs):
-        jobsite = self.get_object()
-        daily_plan = get_daily_plan(jobsite)
+        dailyplan = self.request.dailyplan
+        if not dailyplan.id: dailyplan.save()
 
-        previous_assignment = daily_plan.team.values_list('id', flat=True)
+        previous_assignment = dailyplan.team.values_list('id', flat=True)
 
         # Add new assignments
         new_assignment = [int(id) for id in request.POST.getlist('workers')]
         for worker in new_assignment:
             if worker not in previous_assignment:
                 TeamMember.objects.create(
-                    plan = daily_plan,
+                    plan = dailyplan,
                     member_id = worker
                 )
 
@@ -162,21 +186,11 @@ class FieldAssignLabor(DetailView):
         for worker in previous_assignment:
             if worker not in new_assignment:
                 TeamMember.objects.filter(
-                    plan = daily_plan,
+                    plan = dailyplan,
                     member_id = worker
                 ).delete()
 
-        #return HttpResponseRedirect(reverse('field.assign.labor', args=[request.project.id, jobsite.id]))
-        return HttpResponseRedirect(reverse('field.project', args=[request.project.id]))
-
-
-class FieldRemoveLabor(SingleObjectMixin, View):
-
-    model = TeamMember
-
-    def get(self, request, *args, **kwargs):
-        self.get_object().delete()
-        return HttpResponseRedirect(reverse('field.project', args=[request.project.id]))
+        return HttpResponseRedirect(reverse('field.project', args=[request.jobsite.project.id]))
 
 
 class FieldToggleRole(SingleObjectMixin, View):
@@ -187,4 +201,4 @@ class FieldToggleRole(SingleObjectMixin, View):
         member = self.get_object()
         member.is_foreman = not member.is_foreman
         member.save()
-        return HttpResponseRedirect(reverse('field.project', args=[request.project.id]))
+        return HttpResponseRedirect(reverse('field.project', args=[request.jobsite.project.id]))
