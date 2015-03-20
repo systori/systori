@@ -41,10 +41,10 @@ class FieldDailyPlans(TemplateView):
         if kwargs.get('selected_day'):
             selected_day = date(*map(int, kwargs['selected_day'].split('-')))
 
-        context['today_url'] = reverse('field.dailies', args=[date.today().isoformat()])
+        context['today_url'] = reverse('field.planning', args=[date.today().isoformat()])
 
         context['previous_day'] = selected_day-timedelta(days=1)
-        context['previous_day_url'] = reverse('field.dailies', args=[context['previous_day'].isoformat()])
+        context['previous_day_url'] = reverse('field.planning', args=[context['previous_day'].isoformat()])
         context['previous_exists'] = DailyPlan.objects.filter(day=context['previous_day']).exists()
 
         context['selected_day'] = selected_day
@@ -53,7 +53,7 @@ class FieldDailyPlans(TemplateView):
         context['is_selected_future'] = selected_day > date.today()
 
         context['next_day'] = selected_day+timedelta(days=1)
-        context['next_day_url'] = reverse('field.dailies', args=[context['next_day'].isoformat()])
+        context['next_day_url'] = reverse('field.planning', args=[context['next_day'].isoformat()])
 
         return context
 

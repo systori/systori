@@ -20,7 +20,7 @@
 
   <div class="row back-buttons">
     <div class="col-xs-4"><a href="{{ previous_day_url }}" class="btn btn-default btn-block">&laquo; {{ previous_day|date:"N j" }}</a></div>
-    <div class="col-xs-4 date-header">{{ current_day|date:"DATE_FORMAT" }}<br />{{ current_day|date:"l" }}</div>
+    <div class="col-xs-4 date-header">{{ selected_day|date:"DATE_FORMAT" }}<br />{{ selected_day|date:"l" }}</div>
     <div class="col-xs-4 text-right"><a href="{{ next_day_url }}" class="btn btn-default btn-block">{{ next_day|date:"N j" }} &raquo;</a></div>
   </div>
 
