@@ -135,6 +135,10 @@ class DailyPlan(models.Model):
     def is_today(self):
         return self.day == date.today()
 
+    @property
+    def url_id(self):
+        return '{}-{}'.format(self.day.isoformat(), self.id or 0)
+
     class Meta:
         ordering = ['-day']
 
