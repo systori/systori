@@ -103,7 +103,7 @@
 
         {% for worker in dailyplan.workers.all %}
         {% if worker.user == user %}
-        <a href="{% url 'field.dailyplan.self.remove' jobsite.id dailyplan.url_id worker.id %}" class="btn btn-default pull-right">Remove yourself.</a>
+        <a href="{% url 'field.dailyplan.self.remove' jobsite.id dailyplan.url_id %}" class="btn btn-default pull-right">Remove yourself.</a>
         {% endif %}
         {% endfor %}
 

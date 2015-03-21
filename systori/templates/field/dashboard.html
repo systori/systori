@@ -21,66 +21,28 @@
 
   {% endif %}
 
-  <div class="panel panel-primary">
 
-    <div class="panel-heading">
-      {% trans 'Today' %} - {% now 'DATE_FORMAT' %}
-    </div>
+  <div class="day-separator">
+    {%  now "l" %}, {% now "DATE_FORMAT" %}
+  </div>
 
-{% if todays_plans %}
+{% for plan in todays_plans %}
 
-    <div class="list-group">
-    {% for plan in todays_plans %}
+  {% include "field/dailyplan.html" with dailyplan=plan %}
+ 
+{% empty %}
 
-      <a href="{% url 'field.project' plan.jobsite.project_id %}" class="list-group-item list-group-item-info">
-        <span class="pull-right">&raquo;</span>
-        <b>{{ plan.jobsite.project.name }}</b><br/>
-        {{ plan.jobsite.name }} - {{ plan.jobsite.address }} {{ plan.jobsite.city }}
-      </a>
+  <p>{% trans "You have not been assigned to any job sites today." %}</p>
 
-      <div class="list-group-item sub-header">
-        {% trans "Workers" %}
-      </div>
-    
-      {% for member in plan.members.all %}
-      <div class="list-group-item"> {{ member.member.get_full_name }} {% if member.is_foreman %}<span class="pull-right">{% trans 'Foreman' %}</span>{% endif %}</div>
-      {% endfor %}
+{% endfor %}
 
-      <div class="list-group-item sub-header">
-        {% trans "Tasks" %}
-      </div>
+{% if user.is_laborer or user.is_foreman %}
 
-      {% for task in plan.tasks.all %}
-      <a href="{% url 'field.task' plan.jobsite.project.id plan.jobsite.id task.taskgroup.job.id task.id %}?origin={{request.path}}" class="list-group-item clearfix">
-        {{ task.name }}
-        {% if task.complete_percent > 0 %}
-        <span class="badge">{{ task.complete_percent }}%</span>
-        {% else %}
-        <span class="pull-right">&raquo;</span>
-        {% endif %}
-      </a>
-      {% endfor %}
-
-    {% endfor %}
-    </div>
-
-{% else %}
-
-    <div class="panel-body">
-        <p>{% trans "You have not been assigned to any job sites today." %}</p>
-    </div>
+  <div class="pull-right">
+    <a href="{% url 'field.projects' %}" class="btn btn-default">{% trans "Add Job Site" %} &raquo;</a>
+  </div>
 
 {% endif %}
-
-    {% if user.is_laborer or user.is_foreman %}
-    <div class="panel-footer clearfix">
-        <div class="pull-right">
-            <a href="{% url 'field.projects' %}" class="btn btn-default">{% trans "Add Job Site" %} &raquo;</a>
-        </div>
-    </div>
-    {% endif %}
-
-  </div>
 
 
 </div>
