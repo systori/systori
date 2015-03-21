@@ -105,12 +105,13 @@ class FieldHTMLCalendar(LocaleHTMLCalendar):
         self.month = month
         self.today = date.today()
 
-        self.plans =\
-            DailyPlan.objects\
+        plans = DailyPlan.objects\
                 .filter(jobsite__project=project,
                         day__lt=end_date,
                         day__gt=start_date
                 ).values('day').annotate(plans=Count('day'))
+
+        self.plans = dict([(p['day'],p['plans']) for p in plans])
 
     def render(self):
         return self.formatmonth(self.year, self.month)
@@ -122,10 +123,12 @@ class FieldHTMLCalendar(LocaleHTMLCalendar):
             return '<td class="noday">&nbsp;</td>'
         else:
             day_date = date(self.year, self.month, day)
-            return '<td class="%s"><a href="%s">%d</a></td>' % (
-                        self.cssclasses[weekday] + (' today' if self.today==day_date else ''),
+            return '<td class="%s"><a href="%s">%d <span class="dailyplan-count">%s</span></a></td>' % (
+                        self.cssclasses[weekday] +\
+                         (' today' if self.today==day_date else '') +\
+                         (' scheduled' if day_date in self.plans else ''),
                         reverse('field.project', args=[self.project.id, day_date.isoformat()]),
-                        day
+                        day, self.plans.get(day_date, '')
                     )
 
 
