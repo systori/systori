@@ -13,10 +13,15 @@ class FieldMiddleware:
                 else:
                     request.dailyplan = DailyPlan(day=date(year, month, day), jobsite=request.jobsite)
 
+        if kwargs.get('selected_day'):
+            request.selected_day = date(*map(int, kwargs['selected_day'].split('-')))
+
     def process_template_response(self, request, response):
         if hasattr(response, 'context_data'):
             if hasattr(request, 'jobsite') and 'jobsite' not in response.context_data:
                 response.context_data['jobsite'] = request.jobsite
             if hasattr(request, 'dailyplan') and 'dailyplan' not in response.context_data:
                 response.context_data['dailyplan'] = request.dailyplan
+            if hasattr(request, 'selected_day'):
+                response.context_data['selected_day'] = request.selected_day
         return response

@@ -124,10 +124,10 @@ class DailyPlan(models.Model):
         a list of workers performing the tasks and a job site at which they
         will perform the tasks. All on a particular day.
     """
-    jobsite = models.ForeignKey(JobSite, related_name="daily_plans")
+    jobsite = models.ForeignKey(JobSite, related_name="dailyplans")
     day = models.DateField(_("Day"), default=date.today)
-    team = models.ManyToManyField(settings.AUTH_USER_MODEL, through='TeamMember', related_name="daily_plans")
-    tasks = models.ManyToManyField('task.Task', related_name="daily_plans")
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='TeamMember', related_name="dailyplans")
+    tasks = models.ManyToManyField('task.Task', related_name="dailyplans")
 
     objects = DailyPlanQuerySet.as_manager()
 
@@ -147,8 +147,8 @@ class TeamMember(models.Model):
     """ When a worker is assigned to a DailyPlan we need to record
         if they are a foreman or a regular worker.
     """
-    plan = models.ForeignKey(DailyPlan, related_name="members")
-    member = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="teams")
+    dailyplan = models.ForeignKey(DailyPlan, related_name="workers")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="assignments")
     is_foreman = models.BooleanField(default=False)
     class Meta:
-        ordering = ['-is_foreman', 'member__first_name']
+        ordering = ['-is_foreman', 'user__first_name']

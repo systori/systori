@@ -1,0 +1,74 @@
+{% extends "field/base.html" %}
+{% load i18n staticfiles field_app %}
+
+{% block container %}
+<style>
+
+.calendar {
+  position: absolute;
+  top: 105px;
+  left: 10px;
+  bottom: 10px;
+  right: 10px;
+}
+
+table {
+  height: 100%;
+  width: 100%;
+  table-layout: fixed;
+}
+
+tr:first-child {
+  height: 35px;
+}
+
+th, td {
+  border: 1px solid black;
+}
+
+th {
+  text-align: center;
+}
+
+td > a {
+  display: block;
+  height: 100%;
+  vertical-align: top;
+  padding-top: 2px;
+  padding-left: 5px;
+  color: #000;
+}
+
+td > a:focus,
+td > a:hover {
+  color: #000;
+  text-decoration: none;
+}
+
+.today {
+  font-weight: bold;
+  font-size: 14pt;
+}
+
+.scheduled {
+  color: #31708f;
+  background-color: #d9edf7;
+}
+</style>
+
+<div class="container">
+
+  <div class="row back-buttons">
+    <div class="col-xs-8"><a href="{% url 'field.project' project.id %}" class="btn btn-default btn-block btn-back">&laquo; {{ project.name }}</a></div>
+    <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
+  </div>
+
+  <div class="row back-buttons">
+    <div class="col-xs-4"><a href="{% url 'field.project.calendar' project.id previous_month %}" class="btn btn-default btn-block">&laquo; {{ previous_month|date:"F" }}</a></div>
+    <div class="col-xs-4 btn">{{ selected_day|date:"F Y" }}</div>
+    <div class="col-xs-4 text-right"><a href="{% url 'field.project.calendar' project.id next_month %}" class="btn btn-default btn-block">{{ next_month|date:"F" }} &raquo;</a></div>
+  </div>
+
+<div class="calendar">{{ calendar|safe }}</div>
+
+{% endblock %}
