@@ -2,7 +2,7 @@ from datetime import timedelta, date
 from calendar import LocaleHTMLCalendar, month_name
 from itertools import groupby
 from django.http import HttpResponseRedirect
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.formats import to_locale, get_language
 from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView
 from django.views.generic.detail import SingleObjectMixin
@@ -22,7 +22,7 @@ class FieldDashboard(TemplateView):
 
         context['todays_plans'] = self.request.user.todays_plans.all()
 
-        context['previous_plans'] = self.request.user.daily_plans\
+        context['previous_plans'] = self.request.user.dailyplans\
             .filter(day__gt=days_ago(5))\
             .exclude(day=date.today()).all()
 

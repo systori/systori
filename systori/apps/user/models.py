@@ -14,7 +14,7 @@ class User(AbstractUser):
 
     @cached_property
     def todays_plans(self):
-        return self.daily_plans.filter(day=date.today())
+        return self.dailyplans.filter(day=date.today())
 
     @property
     def has_staff(self):
