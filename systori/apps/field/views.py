@@ -267,12 +267,13 @@ class FieldAddSelfToDailyPlan(View):
         return HttpResponseRedirect(reverse('field.dashboard'))
 
 
-class FieldRemoveSelfFromDailyPlan(SingleObjectMixin, View):
-
-    model = TeamMember
+class FieldRemoveSelfFromDailyPlan(View):
 
     def get(self, request, *args, **kwargs):
-        self.get_object().delete()
+        TeamMember.objects.filter(
+            dailyplan = request.dailyplan,
+            user_id = request.user
+        ).delete()
         return HttpResponseRedirect(reverse('field.dashboard'))
 
 
