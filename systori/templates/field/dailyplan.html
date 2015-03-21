@@ -1,0 +1,124 @@
+{% load i18n staticfiles %}
+
+{% with jobsite=dailyplan.jobsite %}
+
+<div class="panel panel-default">
+
+  <div class="panel-heading">
+    <div class="pull-right dailyplan-number"># {{dailyplan.id}}</div>
+    {{ jobsite.name }}<br />
+    {{ jobsite.address }} {{ jobsite.city }}
+  </div>
+
+  <div class="list-group">
+
+    {% if user.is_staff %}
+      <a class="list-group-item sub-header clearfix" href="{% url 'field.dailyplan.assign-labor' jobsite.id dailyplan.url_id %}?origin={{request.path}}">
+    {% else %}
+      <div class="list-group-item sub-header">
+    {% endif %}
+
+      {% trans "Workers" %}
+
+    {% if user.is_staff %}
+       <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
+    {% else %}
+      </div>
+    {% endif %}
+
+  {% for worker in dailyplan.workers.all %}
+
+    <div class="list-group-item nav nav-pills">
+      {{ worker.user.get_full_name }}
+
+      {% if user.is_staff %}
+        <a href="{% url 'field.dailyplan.toggle-role' jobsite.id dailyplan.url_id worker.id %}?origin={{request.path}}" class="btn btn-default btn-sm btn-contextual pull-right">
+      {% else %}
+        <span class="pull-right">
+      {% endif %}
+
+      {% if worker.is_foreman %}
+        {% trans 'Foreman' %}
+      {% else %}
+        {% trans 'Laborer' %}
+      {% endif %}
+
+      {% if user.is_staff %}
+        </a>
+      {% else %}
+        </span>
+      {% endif %}
+
+    </div>
+
+  {% empty %}
+
+    <div class="list-group-item">
+      {% trans "No workers have been assigned." %}
+    </div>
+
+  {% endfor %}
+
+    {% if user.is_staff %}
+      <a class="list-group-item sub-header clearfix" href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{request.path}}">
+    {% else %}
+      <div class="list-group-item sub-header">
+    {% endif %}
+
+      {% trans "Tasks" %}
+
+    {% if user.is_staff %}
+       <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
+    {% else %}
+      </div>
+    {% endif %}
+
+  {% for task in dailyplan.tasks.all %}
+
+    <a href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={{request.path}}" class="list-group-item clearfix">
+      {{ task.name }}
+      {% if task.complete_percent > 0 %}
+      <span class="badge">{{ task.complete_percent }}%</span>
+      {% else %}
+      <span class="pull-right">&raquo;</span>
+      {% endif %}
+    </a>
+
+  {% empty %}
+
+    <div class="list-group-item">
+      {% trans "No tasks have been assigned." %}
+    </div>
+
+  {% endfor %}
+
+  </div>
+
+  {% if not user.has_staff %}
+
+  <div class="panel-footer clearfix">
+    <div class="pull-right">
+
+        {% if user in dailyplan.users.all %}
+
+        {% for worker in dailyplan.workers.all %}
+        {% if worker.user == user %}
+        <a href="{% url 'field.dailyplan.self.remove' jobsite.id dailyplan.url_id worker.id %}" class="btn btn-default pull-right">Remove yourself.</a>
+        {% endif %}
+        {% endfor %}
+
+        {% else %}
+
+        <a href="{% url 'field.add.self' jobsite.id dailyplan.url_id 'foreman' %}" class="btn btn-default">{% blocktrans %}Add yourself as <b>foreman</b>.{% endblocktrans %}</a>
+        <a href="{% url 'field.add.self' jobsite.id dailyplan.url_id 'laborer' %}" class="btn btn-default">{% blocktrans %}Add yourself as <b>laborer</b>.{% endblocktrans %}</a>
+
+        {% endif %}
+
+    </div>
+  </div>
+
+  {% endif %}
+
+</div>
+
+{% endwith %}

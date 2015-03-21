@@ -5,7 +5,7 @@
 <div class="container">
 
   <div class="row back-buttons">
-    <div class="col-xs-8"><a href="{% url 'field.job' jobsite.id dailyplan.url_id task.taskgroup.job.id %}" class="btn btn-default btn-block">&laquo; {{ task.taskgroup.job.name }}</a></div>
+    <div class="col-xs-8"><a href="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id task.taskgroup.job.id %}" class="btn btn-default btn-block">&laquo; {{ task.taskgroup.job.name }}</a></div>
     <div class="col-xs-4"><a href="{% if request.GET.origin %}{{request.GET.origin}}{% else %}{% url 'field.dashboard' %}{% endif %}" class="btn btn-default btn-block">&laquo; {% if request.GET.origin  %}{% trans 'Back' %}{% else %}{% trans 'Dashboard' %}{% endif %}</a></div>
   </div>
 
@@ -22,9 +22,9 @@
     <div class="panel-footer clearfix">
       <div class="pull-right">
         {% if in_current_dailyplan %}
-        <a href="{% url 'field.remove.task' jobsite.id dailyplan.url_id task.id %}?origin={{request.GET.origin}}" class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Remove task from {{jobsite}}.{% endblocktrans %}</a>
+        <a href="{% url 'field.dailyplan.task.remove' jobsite.id dailyplan.url_id task.id %}?origin={{request.GET.origin}}" class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Remove task from {{jobsite}}.{% endblocktrans %}</a>
         {% else %}
-        <a href="{% url 'field.add.task' jobsite.id dailyplan.url_id task.id %}?origin={{request.GET.origin}}" class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Add task to {{jobsite}}.{% endblocktrans %}</a>
+        <a href="{% url 'field.dailyplan.task.add' jobsite.id dailyplan.url_id task.id %}?origin={{request.GET.origin}}" class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Add task to {{jobsite}}.{% endblocktrans %}</a>
         {% endif %}
       </div>
     </div>

@@ -25,6 +25,10 @@ body {
   overflow: hidden;
 }
 
+.row.back-buttons > div.text-right > a {
+  text-align: right;
+}
+
 #percent {
   width: 80px;
 }
