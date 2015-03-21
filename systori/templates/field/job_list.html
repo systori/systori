@@ -17,7 +17,7 @@
 
     <ul class="list-group">
     {% for job in jobsite.project.jobs.all %}
-      <a href="{% url 'field.job' jobsite.id dailyplan.url_id job.id %}" class="list-group-item clearfix">{{ job.name }} <span class="pull-right">&raquo;</span></a>
+      <a href="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id job.id %}" class="list-group-item clearfix">{{ job.name }} <span class="pull-right">&raquo;</span></a>
     {% endfor %}
     </ul>
 
