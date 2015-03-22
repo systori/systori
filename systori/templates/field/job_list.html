@@ -5,8 +5,8 @@
 <div class="container">
 
   <div class="row back-buttons">
-    <div class="col-xs-8"><a href="{% url 'field.project' jobsite.project.id %}" class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
-    <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
+    <div class="col-xs-8"><a href="{% url 'field.project' jobsite.project.id dailyplan.day.isoformat %}" class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
+    <div class="col-xs-4"><a href="{% if request.GET.origin %}{{request.GET.origin}}{% else %}{% url 'field.dashboard' %}{% endif %}" class="btn btn-default btn-block">&laquo; {% if request.GET.origin  %}{% trans 'Back' %}{% else %}{% trans 'Dashboard' %}{% endif %}</a></div>
   </div>
 
   <div class="panel panel-default">
@@ -17,7 +17,7 @@
 
     <ul class="list-group">
     {% for job in jobsite.project.jobs.all %}
-      <a href="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id job.id %}" class="list-group-item clearfix">{{ job.name }} <span class="pull-right">&raquo;</span></a>
+      <a href="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id job.id %}?origin={{request.GET.origin}}" class="list-group-item clearfix">{{ job.name }} <span class="pull-right">&raquo;</span></a>
     {% endfor %}
     </ul>
 

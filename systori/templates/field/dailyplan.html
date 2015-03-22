@@ -2,7 +2,7 @@
 
 {% with jobsite=dailyplan.jobsite %}
 
-<div class="panel panel-default">
+<div class="panel panel-success">
 
   <div class="panel-heading">
     <div class="pull-right dailyplan-number"># {{dailyplan.id}}</div>
@@ -18,7 +18,7 @@
       <div class="list-group-item sub-header">
     {% endif %}
 
-      {% trans "Workers" %}
+    {% trans "Workers" %}
 
     {% if user.is_staff %}
        <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
@@ -59,19 +59,19 @@
 
   {% endfor %}
 
-    {% if user.is_staff %}
-      <a class="list-group-item sub-header clearfix" href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{request.path}}">
-    {% else %}
-      <div class="list-group-item sub-header">
-    {% endif %}
+  {% if user.is_staff %}
+    <a class="list-group-item sub-header clearfix" href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{request.path}}">
+  {% else %}
+    <div class="list-group-item sub-header">
+  {% endif %}
 
-      {% trans "Tasks" %}
+    {% trans "Tasks" %}
 
-    {% if user.is_staff %}
-       <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
-    {% else %}
-      </div>
-    {% endif %}
+  {% if user.is_staff %}
+     <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
+  {% else %}
+    </div>
+  {% endif %}
 
   {% for task in dailyplan.tasks.all %}
 

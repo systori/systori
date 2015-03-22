@@ -1,8 +1,9 @@
-from django.forms import ModelForm
+from django import forms
 from ..task.models import Task
 
 
-class CompletionForm(ModelForm):
+class CompletionForm(forms.ModelForm):
+    comment = forms.CharField(required=False)
     class Meta:
         model = Task
-        fields = ['complete']
+        fields = ['complete', 'comment']

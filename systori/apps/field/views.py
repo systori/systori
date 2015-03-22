@@ -9,9 +9,9 @@ from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
 from ..user.models import User
 from ..project.models import Project, DailyPlan, JobSite, TeamMember
-from ..task.models import Job, Task
+from ..task.models import Job, Task, ProgressReport
 from .forms import CompletionForm
-from .utils import find_next_workday, days_ago, dailyplan_flow_next_url
+from .utils import find_next_workday, days_ago
 
 
 class FieldDashboard(TemplateView):
@@ -221,6 +221,20 @@ class FieldTaskView(UpdateView):
         context['in_current_dailyplan'] = dailyplan.id and task.dailyplans.filter(id=dailyplan.id).exists()
         return context
 
+    def form_valid(self, form):
+
+        redirect = super(FieldTaskView, self).form_valid(form)
+
+        if 'complete' in form.changed_data or form.cleaned_data['comment']:
+            ProgressReport.objects.create(
+                user = self.request.user,
+                task = self.object,
+                complete = self.object.complete,
+                comment = form.cleaned_data['comment']
+            )
+
+        return redirect
+
     def get_success_url(self):
         return task_success_url(self.request, self.object)
 
@@ -279,7 +293,8 @@ class FieldRemoveSelfFromDailyPlan(View):
 
 def dailyplan_success_url(request):
     return request.GET.get('origin') or\
-       reverse('field.project', args=[request.jobsite.project.id])
+           request.POST.get('origin') or\
+           reverse('field.project', args=[request.jobsite.project.id])
 
 
 class FieldAssignLabor(TemplateView):
@@ -300,7 +315,10 @@ class FieldAssignLabor(TemplateView):
         redirect = dailyplan_success_url(request)
         if not dailyplan.id:
             dailyplan.save()
-            redirect = dailyplan_flow_next_url(dailyplan, 'assign-labor')
+            origin = request.GET.get('origin') or request.POST.get('origin')
+            redirect = reverse('field.dailyplan.assign-tasks',
+                               args=[dailyplan.jobsite.id, dailyplan.url_id])+\
+                               '?origin='+origin if origin else ''
 
         previous_assignments = dailyplan.users.values_list('id', flat=True)
 
@@ -332,4 +350,4 @@ class FieldToggleRole(SingleObjectMixin, View):
         member = self.get_object()
         member.is_foreman = not member.is_foreman
         member.save()
-        return HttpResponseRedirect(reverse('field.project', args=[request.jobsite.project.id]))
+        return HttpResponseRedirect(dailyplan_success_url(request))
