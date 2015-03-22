@@ -21,9 +21,11 @@
 
   {% endif %}
 
-
   <div class="day-separator">
     {%  now "l" %}, {% now "DATE_FORMAT" %}
+    {% if user.is_laborer or user.is_foreman %}
+      <a href="{% url 'field.projects' %}" class="btn btn-default btn-contextual btn-add-plan">{% trans "Projects" %} &raquo;</a>
+    {% endif %}
   </div>
 
 {% for plan in todays_plans %}
@@ -35,14 +37,6 @@
   <p>{% trans "You have not been assigned to any job sites today." %}</p>
 
 {% endfor %}
-
-{% if user.is_laborer or user.is_foreman %}
-
-  <div class="pull-right">
-    <a href="{% url 'field.projects' %}" class="btn btn-default">{% trans "Add Job Site" %} &raquo;</a>
-  </div>
-
-{% endif %}
 
 
 </div>

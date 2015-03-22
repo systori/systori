@@ -14,6 +14,24 @@ from .forms import CompletionForm
 from .utils import find_next_workday, days_ago
 
 
+def _origin_success_url(request, alternate):
+    return request.GET.get('origin') or\
+           request.POST.get('origin') or\
+           alternate
+
+def project_success_url(request):
+    return _origin_success_url(request,
+            reverse('field.project', args=[request.jobsite.project.id]))
+
+def task_success_url(request, task):
+    return _origin_success_url(request,
+            reverse('field.dailyplan.task', args=[request.jobsite.id, request.dailyplan.url_id, task.id]))
+
+def dashboard_success_url(request):
+    return _origin_success_url(request,
+            reverse('field.dashboard'))
+
+
 class FieldDashboard(TemplateView):
     template_name = "field/dashboard.html"
 
@@ -201,11 +219,6 @@ class FieldJobView(DetailView):
     template_name = "field/job.html"
 
 
-def task_success_url(request, task):
-    return request.GET.get('origin') or\
-       reverse('field.dailyplan.task', args=[request.jobsite.id, request.dailyplan.url_id, task.id])
-
-
 class FieldTaskView(UpdateView):
     model = Task
     pk_url_kwarg = 'task_pk'
@@ -266,33 +279,33 @@ class FieldRemoveTask(SingleObjectMixin, View):
 class FieldAddSelfToDailyPlan(View):
 
     def get(self, request, *args, **kwargs):
+
         dailyplan = self.request.dailyplan
         if not dailyplan.id: dailyplan.save()
 
-        if not TeamMember.objects.filter(plan=dailyplan, member=self.request.user).exists():
+        already_assigned =\
+         TeamMember.objects.filter(dailyplan=dailyplan, user=self.request.user).exists()
+
+        if not already_assigned:
             TeamMember.objects.create(
-                plan = dailyplan,
-                member = self.request.user,
+                dailyplan = dailyplan,
+                user = request.user,
                 is_foreman = True if kwargs['role'] == 'foreman' else False
             )
 
-        return HttpResponseRedirect(reverse('field.dashboard'))
+        return HttpResponseRedirect(dashboard_success_url(request))
 
 
 class FieldRemoveSelfFromDailyPlan(View):
 
     def get(self, request, *args, **kwargs):
+
         TeamMember.objects.filter(
             dailyplan = request.dailyplan,
-            user_id = request.user
+            user = request.user
         ).delete()
-        return HttpResponseRedirect(reverse('field.dashboard'))
 
-
-def dailyplan_success_url(request):
-    return request.GET.get('origin') or\
-           request.POST.get('origin') or\
-           reverse('field.project', args=[request.jobsite.project.id])
+        return HttpResponseRedirect(dashboard_success_url(request))
 
 
 class FieldAssignLabor(TemplateView):
@@ -310,7 +323,7 @@ class FieldAssignLabor(TemplateView):
     def post(self, request, *args, **kwargs):
 
         dailyplan = self.request.dailyplan
-        redirect = dailyplan_success_url(request)
+        redirect = project_success_url(request)
         if not dailyplan.id:
             dailyplan.save()
             origin = request.GET.get('origin') or request.POST.get('origin')
@@ -348,4 +361,4 @@ class FieldToggleRole(SingleObjectMixin, View):
         member = self.get_object()
         member.is_foreman = not member.is_foreman
         member.save()
-        return HttpResponseRedirect(dailyplan_success_url(request))
+        return HttpResponseRedirect(project_success_url(request))
