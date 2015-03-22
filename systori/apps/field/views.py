@@ -30,28 +30,27 @@ class FieldDashboard(TemplateView):
 
 
 class FieldPlanning(TemplateView):
-    template_name = "field/dailies.html"
+    template_name = "field/planning.html"
 
     def get_context_data(self, **kwargs):
-        context = super(FieldDailyPlans, self).get_context_data(**kwargs)
+        context = super(FieldPlanning, self).get_context_data(**kwargs)
 
-        selected_day = date.today()
-        if kwargs.get('selected_day'):
-            selected_day = date(*map(int, kwargs['selected_day'].split('-')))
+        if not hasattr(self.request, 'selected_day'):
+            self.request.selected_day = date.today()
+        selected_day = self.request.selected_day
 
-        context['today_url'] = reverse('field.planning', args=[date.today().isoformat()])
-
+        context['today'] = date.today()
         context['previous_day'] = selected_day-timedelta(days=1)
+        context['next_day'] = selected_day+timedelta(days=1)
+
         context['previous_day_url'] = reverse('field.planning', args=[context['previous_day'].isoformat()])
-        context['previous_exists'] = DailyPlan.objects.filter(day=context['previous_day']).exists()
+        context['today_url'] = reverse('field.planning', args=[date.today().isoformat()])
+        context['next_day_url'] = reverse('field.planning', args=[context['next_day'].isoformat()])
 
         context['selected_day'] = selected_day
-        context['selected_plans'] = DailyPlan.objects.filter(day=selected_day).all()
+        context['selected_plans'] = DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id').all()
         context['is_selected_today'] = selected_day == date.today()
         context['is_selected_future'] = selected_day > date.today()
-
-        context['next_day'] = selected_day+timedelta(days=1)
-        context['next_day_url'] = reverse('field.planning', args=[context['next_day'].isoformat()])
 
         return context
 
@@ -74,7 +73,6 @@ class FieldProjectView(DetailView):
 
         if not hasattr(self.request, 'selected_day'):
             self.request.selected_day = find_next_workday(date.today())
-
         selected_day = self.request.selected_day
 
         project = self.get_object()
