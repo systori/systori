@@ -5,6 +5,7 @@ from django.db.models.manager import BaseManager
 from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
 from django.utils.formats import date_format
+from django.conf import settings
 from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
 
@@ -469,8 +470,8 @@ class LineItem(models.Model):
 
 class ProgressReport(models.Model):
 
-    # date when this progress report was filed
-    date = models.DateField(auto_now_add=True)
+    # date and time when this progress report was filed
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     # description of what has been done
     comment = models.TextField()
@@ -479,12 +480,18 @@ class ProgressReport(models.Model):
     # this gets copied into task.complete with the latest progress report value
     complete = models.DecimalField(_("Complete"), max_digits=14, decimal_places=4, default=0.0)
 
-    task = models.ForeignKey(Task, related_name="reports")
+    task = models.ForeignKey(Task, related_name="progressreports")
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="filedreports")
+
+    @property
+    def complete_percent(self):
+        return int(self.complete / self.task.qty * 100)
 
     class Meta:
         verbose_name = _("Progress Report")
         verbose_name_plural = _("Progress Reports")
-        ordering = ['date']
+        ordering = ['-timestamp']
 
 
 class ProgressAttachment(models.Model):

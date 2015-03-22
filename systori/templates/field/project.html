@@ -21,38 +21,11 @@
 
   </div>
 
-<style>
-.dailyplan-number {
-}
-.day-picker {
-  border-bottom: 0px;
-  border-bottom-left-radius: 0px;
-  border-bottom-right-radius: 0px;
-}
-.day-separator {
-  border-bottom: 2px solid #ccc;
-  margin: 10px 0px 10px 0px;
-  font-size: 14pt;
-  position: relative;
-}
-.day-separator.today {
-  font-weight: bold;
-}
-.btn-contextual {
-  padding: 3px 10px;
-}
-.btn-add-plan {
-  position: absolute;
-  bottom: 1px;
-  right: 0px;
-}
-</style>
-
 {% if not first_daily_plan or first_daily_plan and first_daily_plan.day != selected_day %}
   <div class="day-separator">
     {% include "field/project_datepicker.html" with day=selected_day %}
     {% if user.is_staff and selected_day >= today %}
-      <a href="{% add_daily_plan_url project selected_day %}" class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
+      <a href="{% add_daily_plan_url project selected_day %}?origin={{request.path}}" class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
     {% endif %}
   </div>
   {% if user.is_staff %}
@@ -75,7 +48,7 @@
     {{ day|date:"l" }}, {{ day|date:"DATE_FORMAT" }}
   {% endif %}
     {% if user.is_staff and day >= today %}
-      <a href="{% add_daily_plan_url project day %}" class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
+      <a href="{% add_daily_plan_url project day %}?origin={{request.path}}" class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
     {% endif %}
   </div>
   

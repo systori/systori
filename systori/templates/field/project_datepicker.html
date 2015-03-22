@@ -1,5 +1,5 @@
 {% load i18n %}
 <a href="{% url 'field.project.calendar' project.id day.isoformat %}" class="btn btn-default day-picker">
-  {{ day|date:"l" }}, {{ day|date:"DATE_FORMAT" }} &nbsp;
+  {{ day|date:"l" }}, {{ day|date:"DATE_FORMAT" }}
   <span class="glyphicon glyphicon-calendar"></span>
 </a>

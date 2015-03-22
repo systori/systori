@@ -1,11 +1,5 @@
 # Systori Settings
 
-# Daily Plan Wizard Steps
-# Daily Plan creation is lazy, this means if
-# there is no steps in flow, no plan will be created.
-# Valid Options: ['assign-labor', 'assign-tasks']
-SYSTORI_CREATE_DAILYPLAN_FLOW = ['assign-labor', 'assign-tasks']
-
 # Pre-populates all addresses and used by geocoding
 # for address-> lat/long coordinates.
 DEFAULT_COUNTRY = "Deutschland"

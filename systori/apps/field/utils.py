@@ -15,20 +15,7 @@ def days_ago(ago):
     return date.today() - timedelta(days=ago)
 
 
-def dailyplan_flow_next_url(dailyplan, current):
+def delete_me_dailyplan_flow_next_url(dailyplan, current):
     next_step = next_dailyplan_step(current)
-    return reverse('field.dailyplan.'+next_step, args=[dailyplan.jobsite.id, dailyplan.url_id])
-
-
-def next_dailyplan_step(current):
-
-    if current == 'start':
-        return settings.SYSTORI_CREATE_DAILYPLAN_FLOW[0]
-
-    idx = settings.SYSTORI_CREATE_DAILYPLAN_FLOW.index(current)
-
-    # last element in flow, exit
-    if len(settings.SYSTORI_CREATE_DAILYPLAN_FLOW) == idx+1:
-        return False
-
-    return settings.SYSTORI_CREATE_DAILYPLAN_FLOW[idx+1]
+    return reverse('field.dailyplan.'+next_step, args=[dailyplan.jobsite.id, dailyplan.url_id])+\
+            '?origin='+reverse('field.project', args=[dailyplan.jobsite.project.id, dailyplan.day.isoformat()])
