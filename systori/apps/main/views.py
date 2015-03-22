@@ -1,10 +1,12 @@
-from django.views.generic import View, TemplateView
+from datetime import date
+from django.views.generic import View, TemplateView, ListView
 from django.contrib.auth.views import login
 from django_mobile import get_flavour
 from django.conf import settings
-from ..project.models import Project, JobSite
+from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
+from ..field.utils import find_next_workday
 
 class OfficeDashboard(TemplateView):
     template_name = "main/dashboard.html"
@@ -28,3 +30,12 @@ class IndexView(View):
             return view(request, *args, **kwargs)
         else:
             return login(request, template_name="user/login.html")
+
+
+class DayBasedOverviewView(ListView):
+    template_name = "main/day_based_overview.html"
+
+    model = DailyPlan
+
+    def get_queryset(self):
+        return self.model.objects.filter(day=find_next_workday(date.today())).all()

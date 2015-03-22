@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n customformatting %}
+
+{% block container %}
+<h1>Heute</h1>
+<div class="tile-container">
+{%for plan in dailyplan_list%}
+  <div class="tile">
+    {{plan.jobsite}}
+    <ul class="list-group">
+    {% for user in plan.users.all %}
+      <li >{{user.first_name}}</li>
+    {% endfor %}
+    </ul>
+  </div>
+{% endfor %}
+</div>
+
+{% endblock %}
