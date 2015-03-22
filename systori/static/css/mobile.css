@@ -2,6 +2,7 @@ body {
   padding-top: 10px;
   padding-bottom: 10px;
   background: #eee url("/static/img/field_app_bg.png") no-repeat fixed center;
+  background-position-y: 150px;
 }
 
 .container {
