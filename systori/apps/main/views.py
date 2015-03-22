@@ -1,8 +1,9 @@
-from datetime import date
+from datetime import date, timedelta
 from django.views.generic import View, TemplateView, ListView
 from django.contrib.auth.views import login
 from django_mobile import get_flavour
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
@@ -32,10 +33,33 @@ class IndexView(View):
             return login(request, template_name="user/login.html")
 
 
-class DayBasedOverviewView(ListView):
+class DayBasedOverviewView(TemplateView):
     template_name = "main/day_based_overview.html"
 
-    model = DailyPlan
+#    model = DailyPlan
+#
+#    def get_queryset(self):
+#        return self.model.objects.filter(day=find_next_workday(date.today())).all()
 
-    def get_queryset(self):
-        return self.model.objects.filter(day=find_next_workday(date.today())).all()
+    def get_context_data(self, **kwargs):
+        context = super(DayBasedOverviewView, self).get_context_data(**kwargs)
+
+        if not hasattr(self.request, 'selected_day'):
+            self.request.selected_day = find_next_workday(date.today())
+        selected_day = self.request.selected_day
+
+        context['today'] = date.today()
+#        context['selected_day'] = selected_day
+        context['previous_day'] = selected_day-timedelta(days=1)
+        context['next_day'] = selected_day+timedelta(days=1)
+
+        context['previous_day_url'] = reverse('field.planning', args=[context['previous_day'].isoformat()])
+        context['today_url'] = reverse('field.planning', args=[date.today().isoformat()])
+        context['next_day_url'] = reverse('field.planning', args=[context['next_day'].isoformat()])
+
+        context['selected_day'] = selected_day
+        context['selected_plans'] = DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id').all()
+        context['is_selected_today'] = selected_day == date.today()
+        context['is_selected_future'] = selected_day > date.today()
+
+        return context

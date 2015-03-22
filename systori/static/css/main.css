@@ -66,43 +66,17 @@ body {
  * Day Based Overview
  */
 
-.tile-container{
-  display:flex;
-  flex-wrap:wrap;
-  align-items: stretch;
-}
-.tile{
-  flex:1 0 350px;
-  align-self:stretch;
-  max-width:100%;
-  min-height: 10rem;
-  margin:5px;
-  border: 3px solid #ccc;
-  background:white;
-  
-  // Min width
-  &:nth-child(2n+3){
-    flex-basis:300px;
-  }
-  &:nth-child(4n+5){
-    flex-basis:450px;
-  }
-  // End Min width
-  
-  // Color
-  &:nth-child(odd){
-     border-top-color:teal;
-  }
-  &:nth-child(even){
-     border-top-color:wheat;
-  }
-  // End Color
-  
+.overview-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  height: 100vw;
+  padding:0px;
+  margin:0px;
 }
 
-@media screen and(max-width:500px){
-  .tile{
-     flex-basis:100% !important;
-     max-width:100%;
-  }
+.overview-plan {
+	self-align:stretch;
+	height:300px;
+	border: 1px solid gray;
 }
