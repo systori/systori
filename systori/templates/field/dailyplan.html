@@ -97,24 +97,22 @@
   {% if not user.has_staff %}
 
   <div class="panel-footer clearfix">
-    <div class="pull-right">
 
-        {% if user in dailyplan.users.all %}
+    {% if user in dailyplan.users.all %}
 
-        {% for worker in dailyplan.workers.all %}
-        {% if worker.user == user %}
-        <a href="{% url 'field.dailyplan.self.remove' jobsite.id dailyplan.url_id %}" class="btn btn-default pull-right">Remove yourself.</a>
-        {% endif %}
-        {% endfor %}
+    {% for worker in dailyplan.workers.all %}
+    {% if worker.user == user %}
+    <a href="{% url 'field.dailyplan.self.remove' jobsite.id dailyplan.url_id %}?origin={{request.path}}" class="btn btn-default">Remove yourself from this assignment.</a>
+    {% endif %}
+    {% endfor %}
 
-        {% else %}
+    {% else %}
 
-        <a href="{% url 'field.add.self' jobsite.id dailyplan.url_id 'foreman' %}" class="btn btn-default">{% blocktrans %}Add yourself as <b>foreman</b>.{% endblocktrans %}</a>
-        <a href="{% url 'field.add.self' jobsite.id dailyplan.url_id 'laborer' %}" class="btn btn-default">{% blocktrans %}Add yourself as <b>laborer</b>.{% endblocktrans %}</a>
+    <a href="{% url 'field.dailyplan.self.add' jobsite.id dailyplan.url_id 'foreman' %}?origin={{request.path}}" class="btn btn-default">{% blocktrans %}Add yourself as <b>foreman</b>.{% endblocktrans %}</a>
+    <a href="{% url 'field.dailyplan.self.add' jobsite.id dailyplan.url_id 'laborer' %}?origin={{request.path}}" class="btn btn-default">{% blocktrans %}Add yourself as <b>laborer</b>.{% endblocktrans %}</a>
 
-        {% endif %}
+    {% endif %}
 
-    </div>
   </div>
 
   {% endif %}
