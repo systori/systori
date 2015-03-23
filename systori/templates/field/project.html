@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n staticfiles %}
+{% load i18n staticfiles field_app %}
 
 {% block container %}
 <div class="container">
@@ -21,113 +21,41 @@
 
   </div>
 
-{% for jobsite in project.jobsites.all %}
-{% with daily_plan=jobsite.daily_plans.today.first %}
-
-  <div class="panel panel-default">
-
-    <div class="panel-heading">
-        <span class="pull-right">{% now 'DATE_FORMAT' %}</span>
-        {{ jobsite }}<br />
-        {{ jobsite.address }} {{ jobsite.city }}
-    </div>
-
-    {% if daily_plan %}
-
-    <div class="list-group">
-
-      <div class="list-group-item sub-header">
-        {% trans "Workers" %}
-      </div>
-
-    {% for worker in daily_plan.members.all %}
-
-      <div class="list-group-item nav nav-pills">
-        {{ worker.member.get_full_name }}
-
-        {% if user.is_staff %}
-          <a href="{% url 'field.toggle.role' project.id worker.id %}" class="btn btn-primary pull-right">
-        {% else %}
-          <span class="pull-right">
-        {% endif %}
-
-        {% if worker.is_foreman %}
-          {% trans 'Foreman' %}
-        {% else %}
-          {% trans 'Laborer' %}
-        {% endif %}
-
-        {% if user.is_staff %}
-          </a>
-        {% else %}
-          </span>
-        {% endif %}
-
-      </div>
-
-    {% empty %}
-
-      <div class="list-group-item">
-        {% trans "No workers have been assigned." %}
-      </div>
-
-    {% endfor %}
-
-
-      <div class="list-group-item sub-header">
-        {% trans "Tasks" %}
-      </div>
-
-    {% for task in daily_plan.tasks.all %}
-
-      <a href="{% url 'field.task' project.id jobsite.id task.taskgroup.job.id task.id %}" class="list-group-item clearfix">{{ task.name }} <span class="pull-right">&raquo;</span></a>
-
-    {% empty %}
-
-      <div class="list-group-item">
-        {% trans "No tasks have been assigned." %}
-      </div>
-
-    {% endfor %}
-
-    </div>
-
-    {% else %}
-
-    <div class="panel-body">
-      {% trans "Nothing planned for today yet." %}
-    </div>
-
+{% if not first_daily_plan or first_daily_plan and first_daily_plan.day != selected_day %}
+  <div class="day-separator">
+    {% include "field/project_datepicker.html" with day=selected_day %}
+    {% if user.is_staff and selected_day >= today %}
+      <a href="{% add_daily_plan_url project selected_day %}?origin={{request.path}}" class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
     {% endif %}
-
-    <div class="panel-footer clearfix">
-        <div class="pull-right">
-            {% if user.is_staff %}
-
-            <a href="{% url 'field.assign.labor' project.id jobsite.id %}" class="btn btn-default">{% blocktrans %}Workers{% endblocktrans %} &raquo;</a>
-
-            {% elif user in daily_plan.team.all %}
-
-            {% for worker in daily_plan.members.all %}
-            {% if worker.member == user %}
-            <a href="{% url 'field.remove.labor' project.id worker.id %}" class="btn btn-default pull-right">Remove yourself.</a>
-            {% endif %}
-            {% endfor %}
-
-            {% else %}
-
-            <a href="{% url 'field.add_self_to_jobsite' project.id jobsite.id 'foreman' %}" class="btn btn-default">{% blocktrans %}Add yourself as <b>foreman</b>.{% endblocktrans %}</a>
-            <a href="{% url 'field.add_self_to_jobsite' project.id jobsite.id 'laborer' %}" class="btn btn-default">{% blocktrans %}Add yourself as <b>laborer</b>.{% endblocktrans %}</a>
-
-            {% endif %}
-
-            <a href="{% url 'field.jobs' project.id jobsite.id %}" class="btn btn-default">{% blocktrans %}Tasks{% endblocktrans %} &raquo;</a>
-
-        </div>
-    </div>
-
   </div>
-{% endwith %}
+  {% if user.is_staff and selected_day >= today and latest_daily_plan.day < selected_day %}
+    <a href="{% url 'field.dailyplan.generate' project.id selected_day.isoformat latest_daily_plan.day.isoformat %}" class="btn btn-primary">{% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
+  {% elif user.is_staff and selected_day < today %}
+    <div>{% trans 'Cannot change the past.' %}</div>
+  {% else %}
+    <div>{% blocktrans with day=selected_day %}No daily plans exist for {{day}}.{% endblocktrans %}</div>
+  {% endif %}
+{% endif %}
+
+{% for day, plans in daily_plans %}
+
+  <div class="day-separator {% if day == today %}today{% endif %}">
+  {% if day == selected_day %}
+    {% include "field/project_datepicker.html" with day=day %}
+  {% else %}
+    {{ day|date:"l" }}, {{ day|date:"DATE_FORMAT" }}
+  {% endif %}
+    {% if user.is_staff and day >= today %}
+      <a href="{% add_daily_plan_url project day %}?origin={{request.path}}" class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
+    {% endif %}
+  </div>
+  
+  {% for plan in plans %}
+
+  {% include "field/dailyplan.html" with dailyplan=plan %}
+
+  {% endfor %}
+
 {% endfor %}
 
 </div>

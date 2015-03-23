@@ -1,5 +1,12 @@
 # Systori Settings
 
+# Pre-populates all addresses and used by geocoding
+# for address-> lat/long coordinates.
+DEFAULT_COUNTRY = "Deutschland"
+
+GOOGLE_MAPS_API_KEY = "AIzaSyAEhGj7BuZtHzx8lHow-cm6lTCja1txOX4"
+
+
 # Django Settings
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
@@ -7,10 +14,6 @@ TASTYPIE_DEFAULT_FORMATS = ['json']
 AUTH_USER_MODEL = 'user.User'
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/'
-
-DEFAULT_COUNTRY = "Deutschland"
-
-GOOGLE_MAPS_API_KEY = "AIzaSyAEhGj7BuZtHzx8lHow-cm6lTCja1txOX4"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
@@ -52,6 +55,7 @@ INSTALLED_APPS = (
     'systori.apps.directory',
     'systori.apps.task',
     'systori.apps.document',
+    'systori.apps.field',
     'systori.apps.main'
 )
 
@@ -66,7 +70,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'systori.apps.project.middleware.ProjectMiddleware'
+    'systori.apps.project.middleware.ProjectMiddleware',
+    'systori.apps.field.middleware.FieldMiddleware'
 )
 
 from django.conf import global_settings

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-19 15:24+0100\n"
+"POT-Creation-Date: 2015-03-23 00:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -173,7 +173,7 @@ msgstr "Neu"
 msgid "Sent"
 msgstr "Gesendet"
 
-#: systori/apps/document/models.py:107 systori/apps/task/models.py:80
+#: systori/apps/document/models.py:107 systori/apps/task/models.py:81
 msgid "Approved"
 msgstr "Beauftragt"
 
@@ -249,9 +249,9 @@ msgstr "Stefan"
 msgid "Smith"
 msgstr "Schmidt"
 
-#: systori/apps/document/models.py:248 systori/apps/task/models.py:135
-#: systori/apps/task/models.py:202 systori/apps/task/models.py:297
-#: systori/apps/task/models.py:403 systori/templates/main/templates.html:12
+#: systori/apps/document/models.py:248 systori/apps/task/models.py:136
+#: systori/apps/task/models.py:203 systori/apps/task/models.py:298
+#: systori/apps/task/models.py:404 systori/templates/main/templates.html:12
 #: systori/templates/main/templates.html:36
 #: systori/templates/project/project_detail.html:11
 #: systori/templates/project/project_detail.html:206
@@ -324,8 +324,8 @@ msgid "Project"
 msgstr "Projekt"
 
 #: systori/apps/project/models.py:46 systori/templates/base.html:37
-#: systori/templates/field/dailies.html:19
 #: systori/templates/field/dashboard.html:16
+#: systori/templates/field/dashboard.html:27
 #: systori/templates/field/project.html:8
 #: systori/templates/field/project_list.html:14
 #: systori/templates/main/dashboard.html:9
@@ -364,11 +364,11 @@ msgstr "Baustelle"
 msgid "Job Template"
 msgstr "Los-Vorlage"
 
-#: systori/apps/task/models.py:52
+#: systori/apps/task/models.py:53
 msgid "Job Name"
 msgstr "Losbezeichnung"
 
-#: systori/apps/task/models.py:53
+#: systori/apps/task/models.py:54
 #: systori/templates/document/latex/invoice.tex:64
 #: systori/templates/document/latex/invoice.tex:68
 #: systori/templates/document/latex/proposal.tex:59
@@ -376,99 +376,99 @@ msgstr "Losbezeichnung"
 msgid "Description"
 msgstr "Beschreibung"
 
-#: systori/apps/task/models.py:55
+#: systori/apps/task/models.py:56
 msgid "Task Group Offset"
 msgstr "Gruppen-Offset"
 
-#: systori/apps/task/models.py:63
+#: systori/apps/task/models.py:64
 msgid "Fixed Price"
 msgstr "Leistungsverzeichnis"
 
-#: systori/apps/task/models.py:64
+#: systori/apps/task/models.py:65
 msgid "Time and Materials"
 msgstr "Taglohn"
 
-#: systori/apps/task/models.py:66
+#: systori/apps/task/models.py:67
 #: systori/templates/project/project_detail.html:14
 msgid "Billing Method"
 msgstr "Zahlungsmethode"
 
-#: systori/apps/task/models.py:78
+#: systori/apps/task/models.py:79
 msgid "Draft"
 msgstr "Entwurf"
 
-#: systori/apps/task/models.py:79
+#: systori/apps/task/models.py:80
 msgid "Proposed"
 msgstr "angeboten"
 
-#: systori/apps/task/models.py:81
+#: systori/apps/task/models.py:82
 msgid "Started"
 msgstr "gestarted"
 
-#: systori/apps/task/models.py:82
+#: systori/apps/task/models.py:83
 msgid "Completed"
 msgstr "fertiggestellt"
 
-#: systori/apps/task/models.py:90 systori/apps/task/models.py:91
+#: systori/apps/task/models.py:91 systori/apps/task/models.py:92
 #: systori/templates/main/dashboard.html:17
 msgid "Job"
 msgstr "Los"
 
-#: systori/apps/task/models.py:94
+#: systori/apps/task/models.py:95
 msgid "Start"
 msgstr "Start"
 
-#: systori/apps/task/models.py:98 systori/apps/task/models.py:213
-#: systori/apps/task/models.py:480
+#: systori/apps/task/models.py:99 systori/apps/task/models.py:214
+#: systori/apps/task/models.py:481
 msgid "Complete"
 msgstr "fertigstellen"
 
-#: systori/apps/task/models.py:142
+#: systori/apps/task/models.py:143
 msgid "Task Group"
 msgstr "Gruppe"
 
-#: systori/apps/task/models.py:143
+#: systori/apps/task/models.py:144
 #: systori/templates/project/project_planning.html:246
 msgid "Task Groups"
 msgstr "Gruppen"
 
-#: systori/apps/task/models.py:206 systori/apps/task/models.py:406
-#: systori/apps/task/models.py:409
+#: systori/apps/task/models.py:207 systori/apps/task/models.py:407
+#: systori/apps/task/models.py:410
 msgid "Quantity"
 msgstr "Menge"
 
-#: systori/apps/task/models.py:209 systori/apps/task/models.py:415
+#: systori/apps/task/models.py:210 systori/apps/task/models.py:416
 msgid "Unit"
 msgstr "Einheit"
 
-#: systori/apps/task/models.py:225 systori/apps/task/models.py:226
+#: systori/apps/task/models.py:226 systori/apps/task/models.py:227
 #: systori/templates/document/latex/evidence.tex:53
 msgid "Task"
 msgstr "Position"
 
-#: systori/apps/task/models.py:308
+#: systori/apps/task/models.py:309
 msgid "Task Instance"
 msgstr "Positionsinstanz"
 
-#: systori/apps/task/models.py:309
+#: systori/apps/task/models.py:310
 msgid "Task Instances"
 msgstr "Positionsinstanzen"
 
-#: systori/apps/task/models.py:316
+#: systori/apps/task/models.py:317
 #, python-format
 msgid "Price correction from %(user)s on %(date)s"
 msgstr "Preiskorrektur von %(user)s am %(date)s"
 
-#: systori/apps/task/models.py:319
+#: systori/apps/task/models.py:320
 msgid "correction"
 msgstr "Korrektur"
 
-#: systori/apps/task/models.py:412
+#: systori/apps/task/models.py:413
 #: systori/templates/project/project_detail.html:208
 msgid "Billable"
 msgstr "Abrechenbar"
 
-#: systori/apps/task/models.py:418
+#: systori/apps/task/models.py:419
 #: systori/templates/document/latex/invoice.tex:64
 #: systori/templates/document/latex/invoice.tex:68
 #: systori/templates/document/latex/proposal.tex:59
@@ -476,27 +476,27 @@ msgstr "Abrechenbar"
 msgid "Price"
 msgstr "Preis"
 
-#: systori/apps/task/models.py:439 systori/templates/main/dashboard.html:18
+#: systori/apps/task/models.py:440 systori/templates/main/dashboard.html:18
 msgid "Line Item"
 msgstr "Kalkulation"
 
-#: systori/apps/task/models.py:440 systori/templates/field/task.html:67
+#: systori/apps/task/models.py:441 systori/templates/field/task.html:67
 msgid "Line Items"
 msgstr "Kalkulationen"
 
-#: systori/apps/task/models.py:485
+#: systori/apps/task/models.py:492
 msgid "Progress Report"
 msgstr "Stundenzettel"
 
-#: systori/apps/task/models.py:486
+#: systori/apps/task/models.py:493 systori/templates/field/task.html:81
 msgid "Progress Reports"
 msgstr "Stundenzettel"
 
-#: systori/apps/task/models.py:496
+#: systori/apps/task/models.py:503
 msgid "Attachment"
 msgstr "Anhang"
 
-#: systori/apps/task/models.py:497
+#: systori/apps/task/models.py:504
 msgid "Attachments"
 msgstr "Anhänge"
 
@@ -512,9 +512,7 @@ msgstr "Erlaubnisse"
 msgid "Important dates"
 msgstr "Wichtige Daten"
 
-#: systori/apps/user/models.py:9 systori/templates/field/dailies.html:41
-#: systori/templates/field/dashboard.html:46
-#: systori/templates/field/project.html:55
+#: systori/apps/user/models.py:9 systori/templates/field/dailyplan.html:41
 msgid "Foreman"
 msgstr "Vorarbeiter"
 
@@ -522,7 +520,7 @@ msgstr "Vorarbeiter"
 msgid "Foremen can manage laborers."
 msgstr "Vorarbeiter können Mitarbeiter bearbeiten"
 
-#: systori/apps/user/models.py:12 systori/templates/field/project.html:57
+#: systori/apps/user/models.py:12 systori/templates/field/dailyplan.html:43
 msgid "Laborer"
 msgstr "Mitarbeiter"
 
@@ -530,11 +528,11 @@ msgstr "Mitarbeiter"
 msgid "Laborer has limited access to the system."
 msgstr "Mitarbeiter haben beschränkten Zugriff auf das System"
 
-#: systori/settings/common.py:113
+#: systori/settings/common.py:118
 msgid "Deutsch"
 msgstr "Deutsch"
 
-#: systori/settings/common.py:114
+#: systori/settings/common.py:119
 msgid "English"
 msgstr "Englisch"
 
@@ -660,6 +658,9 @@ msgid "Add Contact to %(project_name)s"
 msgstr "Kontakt zu %(project_name)s hinzufügen"
 
 #: systori/templates/directory/projectcontact_form_add.html:27
+#: systori/templates/field/planning.html:31
+#: systori/templates/field/project.html:28
+#: systori/templates/field/project.html:49
 #: systori/templates/project/project_detail.html:229
 msgid "Add"
 msgstr "Hinzufügen"
@@ -775,9 +776,16 @@ msgstr "Alternativ"
 msgid "Proposal Details"
 msgstr "Angebotsdetails"
 
-#: systori/templates/field/assign_labor.html:18
-#: systori/templates/field/dailies.html:17 systori/templates/field/job.html:9
+#: systori/templates/field/assign_labor.html:19
+#: systori/templates/field/job.html:9 systori/templates/field/job_list.html:9
+#: systori/templates/field/task.html:9
+msgid "Back"
+msgstr "Zurück"
+
+#: systori/templates/field/assign_labor.html:19
+#: systori/templates/field/calendar.html:79 systori/templates/field/job.html:9
 #: systori/templates/field/job_list.html:9
+#: systori/templates/field/planning.html:14
 #: systori/templates/field/project.html:9
 #: systori/templates/field/project_list.html:8
 #: systori/templates/field/task.html:9 systori/templates/main/dashboard.html:7
@@ -785,7 +793,7 @@ msgstr "Angebotsdetails"
 msgid "Dashboard"
 msgstr "Pinnwand"
 
-#: systori/templates/field/assign_labor.html:24
+#: systori/templates/field/assign_labor.html:25
 #: systori/templates/project/project_planning.html:205
 msgid "Labor"
 msgstr "Lohn"
@@ -794,77 +802,83 @@ msgstr "Lohn"
 msgid "Assign"
 msgstr "verknüpfen"
 
-#: systori/templates/field/dailies.html:37
-#: systori/templates/field/dashboard.html:42
-#: systori/templates/field/project.html:40
-#: systori/templates/field/project.html:107
+#: systori/templates/field/dailyplan.html:21
 msgid "Workers"
 msgstr "Arbeiter"
 
-#: systori/templates/field/dailies.html:45
-#: systori/templates/field/dashboard.html:50
-#: systori/templates/field/job.html:15 systori/templates/field/project.html:78
-#: systori/templates/field/project.html:124
+#: systori/templates/field/dailyplan.html:24
+#: systori/templates/field/dailyplan.html:71
+msgid "edit"
+msgstr "bearbeiten"
+
+#: systori/templates/field/dailyplan.html:57
+msgid "No workers have been assigned."
+msgstr "Keine Arbeiter zugewiesen."
+
+#: systori/templates/field/dailyplan.html:68
+#: systori/templates/field/job.html:15
 #: systori/templates/project/project_planning.html:265
 msgid "Tasks"
 msgstr "Positionen"
+
+#: systori/templates/field/dailyplan.html:90
+msgid "No tasks have been assigned."
+msgstr "Keine Positionen zugewiesen."
+
+#: systori/templates/field/dailyplan.html:111
+msgid "Add yourself as <b>foreman</b>."
+msgstr "Selbst als <b>Vorarbeiter</b> verknüpfen."
+
+#: systori/templates/field/dailyplan.html:112
+msgid "Add yourself as <b>laborer</b>."
+msgstr "Selbst als <b>Mitarbeiter</b> verknüpfen."
 
 #: systori/templates/field/dashboard.html:12
 msgid "Manage"
 msgstr "Verwaltung"
 
 #: systori/templates/field/dashboard.html:17
-msgid "Daily Plans"
-msgstr "Tagesplan"
+msgid "Planning"
+msgstr "Planung"
 
-#: systori/templates/field/dashboard.html:27
-msgid "Today"
-msgstr "heute"
-
-#: systori/templates/field/dashboard.html:70
+#: systori/templates/field/dashboard.html:37
 msgid "You have not been assigned to any job sites today."
 msgstr "Du bist noch keinem Einsatzort zugeteilt."
 
-#: systori/templates/field/dashboard.html:77
-msgid "Add Job Site"
-msgstr "Einsatzort hinzufügen"
+#: systori/templates/field/planning.html:15
+msgid "Today"
+msgstr "heute"
 
-#: systori/templates/field/project.html:71
-msgid "No workers have been assigned."
-msgstr "Keine Arbeiter zugewiesen."
+#: systori/templates/field/project.html:32
+#, python-format
+msgid "Copy from %(otherday)s."
+msgstr "Von %(otherday)s kopieren."
 
-#: systori/templates/field/project.html:88
-msgid "No tasks have been assigned."
-msgstr "Keine Positionen zugewiesen."
+#: systori/templates/field/project.html:34
+msgid "Cannot change the past."
+msgstr "Nicht die Vergangenheit ändern du kannst."
 
-#: systori/templates/field/project.html:98
-msgid "Nothing planned for today yet."
-msgstr "Für heute wurde noch nichts geplant."
+#: systori/templates/field/project.html:36
+#, python-format
+msgid "No daily plans exist for %(day)s."
+msgstr "Für %(day)s existieren keine Tagespläne"
 
-#: systori/templates/field/project.html:119
-msgid "Add yourself as <b>foreman</b>."
-msgstr "Selbst als <b>Vorarbeiter</b> verknüpfen."
-
-#: systori/templates/field/project.html:120
-msgid "Add yourself as <b>laborer</b>."
-msgstr "Selbst als <b>Mitarbeiter</b> verknüpfen."
-
-#: systori/templates/field/task.html:9
-msgid "Back"
-msgstr "Zurück"
-
-#: systori/templates/field/task.html:26
+#: systori/templates/field/task.html:25
 #, python-format
 msgid "Remove task from %(jobsite)s."
 msgstr "Entferne Pos. von %(jobsite)s."
 
-#: systori/templates/field/task.html:28
+#: systori/templates/field/task.html:27
 msgid "Add task to %(jobsite)s."
-msgstr "Kontakt zu %(project_name)s hinzufügen"
+msgstr "Position zu %(jobsite)s hinzufügen"
 
-#: systori/templates/field/task.html:41
+#: systori/templates/field/task.html:39
 msgid "Progress"
 msgstr "Fortschritt"
+
+#: systori/templates/field/task.html:49
+msgid "Comments"
+msgstr "Kommentar"
 
 #: systori/templates/field/task.html:56
 msgid "Save Progress"
@@ -1021,13 +1035,22 @@ msgstr "Positionsgruppe"
 msgid "task option"
 msgstr "Alternative"
 
-#: systori/templates/user/login.html:53
+#: systori/templates/user/login.html:55
 msgid "Your username and password didn't match. Please try again."
 msgstr "Die eingegebenen Daten sind nicht richtig."
 
-#: systori/templates/user/login.html:59
+#: systori/templates/user/login.html:61
 msgid "Sign in"
 msgstr "Anmelden"
+
+msgid "Daily Plans"
+msgstr "Tagesplan"
+
+msgid "Add Job Site"
+msgstr "Einsatzort hinzufügen"
+
+msgid "Nothing planned for today yet."
+msgstr "Für heute wurde noch nichts geplant."
 
 msgid "Job Site"
 msgstr "Einsatzort"
@@ -1046,9 +1069,6 @@ msgstr "ToDos"
 
 msgid "User"
 msgstr "Benutzer"
-
-msgid "P / P / D"
-msgstr "P / P / D"
 
 msgid "method of payment"
 msgstr "Zahlungsbedingungen"

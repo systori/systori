@@ -1,14 +1,17 @@
 body {
+  background-image: url("/static/img/field_app_bg.png");
+  background-repeat: no-repeat;
+  background-position-y: 300px; 
+  background-position-x: center; 
+
   padding-top: 10px;
   padding-bottom: 10px;
-  background-color: #eee;
 }
 
 .container {
   padding-right: 10px;
   padding-left: 10px;
 }
-
 
 .row.back-buttons {
   margin-left: -5px;
@@ -25,6 +28,40 @@ body {
   text-align: left;
   overflow: hidden;
 }
+
+.row.back-buttons > div.text-right > a {
+  text-align: right;
+}
+
+.day-picker {
+  font-size: 14pt;
+  font-weight: bold;
+  padding: 5px;
+  border-bottom: 0px;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+.day-separator {
+  font-size: 14pt;
+  font-weight: bold;
+  border-bottom: 2px solid #333;
+  margin: 10px 0px 10px 0px;
+  position: relative;
+}
+.day-separator.today {
+  font-weight: bold;
+}
+.btn-contextual {
+  padding: 3px 10px;
+}
+.day-separator a.btn-add-plan {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
 
 #percent {
   width: 80px;
@@ -66,7 +103,7 @@ input[type=range]::after {
 input[type=range] {
   -webkit-appearance: none;
   width: 100%;
-  margin: 60px 0;
+  margin: 50px 0;
   position: relative;
 }
 
