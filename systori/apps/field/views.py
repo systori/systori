@@ -314,7 +314,10 @@ class FieldAssignLabor(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(FieldAssignLabor, self).get_context_data(**kwargs)
-        context['workers'] = User.objects.filter(Q(is_laborer=True) | Q(is_foreman=True))
+        context['workers'] = User.objects\
+                                .filter(Q(is_laborer=True) | Q(is_foreman=True))\
+                                .annotate(plan_count=Count('dailyplans'))\
+                                .order_by('plan_count', 'username')
         context['assigned'] = []
         dailyplan = self.request.dailyplan
         if dailyplan.id: context['assigned'] = dailyplan.users.all()
