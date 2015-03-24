@@ -1,10 +1,13 @@
-from django.views.generic import View, TemplateView
+from datetime import date, timedelta
+from django.views.generic import View, TemplateView, ListView
 from django.contrib.auth.views import login
 from django_mobile import get_flavour
 from django.conf import settings
-from ..project.models import Project, JobSite
+from django.core.urlresolvers import reverse
+from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
+from ..field.utils import get_workday
 
 class OfficeDashboard(TemplateView):
     template_name = "main/dashboard.html"
@@ -28,3 +31,29 @@ class IndexView(View):
             return view(request, *args, **kwargs)
         else:
             return login(request, template_name="user/login.html")
+
+
+class DayBasedOverviewView(TemplateView):
+    template_name = "main/day_based_overview.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(DayBasedOverviewView, self).get_context_data(**kwargs)
+
+        if not hasattr(self.request, 'selected_day'):
+            self.request.selected_day = get_workday(date.today())
+        selected_day = self.request.selected_day
+
+        context['today'] = date.today()
+        context['previous_day'] = selected_day-timedelta(days=1)
+        context['next_day'] = selected_day+timedelta(days=1)
+
+        context['previous_day_url'] = reverse('field.planning', args=[context['previous_day'].isoformat()])
+        context['today_url'] = reverse('field.planning', args=[date.today().isoformat()])
+        context['next_day_url'] = reverse('field.planning', args=[context['next_day'].isoformat()])
+
+        context['selected_day'] = selected_day
+        context['selected_plans'] = DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id').all()
+        context['is_selected_today'] = selected_day == date.today()
+        context['is_selected_future'] = selected_day > date.today()
+
+        return context

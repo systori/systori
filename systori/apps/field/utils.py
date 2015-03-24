@@ -11,6 +11,12 @@ def find_next_workday(start_date):
         return start_date + timedelta(days=1)
 
 
+def get_workday(start_date):
+    if start_date.weekday() < 5:
+        return start_date
+    return find_next_workday(start_date)
+
+
 def days_ago(ago):
     return date.today() - timedelta(days=ago)
 
