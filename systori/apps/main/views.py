@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
-from ..field.utils import find_next_workday
+from ..field.utils import get_workday
 
 class OfficeDashboard(TemplateView):
     template_name = "main/dashboard.html"
@@ -36,20 +36,14 @@ class IndexView(View):
 class DayBasedOverviewView(TemplateView):
     template_name = "main/day_based_overview.html"
 
-#    model = DailyPlan
-#
-#    def get_queryset(self):
-#        return self.model.objects.filter(day=find_next_workday(date.today())).all()
-
     def get_context_data(self, **kwargs):
         context = super(DayBasedOverviewView, self).get_context_data(**kwargs)
 
         if not hasattr(self.request, 'selected_day'):
-            self.request.selected_day = find_next_workday(date.today())
+            self.request.selected_day = get_workday(date.today())
         selected_day = self.request.selected_day
 
         context['today'] = date.today()
-#        context['selected_day'] = selected_day
         context['previous_day'] = selected_day-timedelta(days=1)
         context['next_day'] = selected_day+timedelta(days=1)
 
