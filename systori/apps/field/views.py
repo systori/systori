@@ -32,6 +32,13 @@ def dashboard_success_url(request):
             reverse('field.dashboard'))
 
 
+def delete_when_empty(dailyplan):
+    if dailyplan.tasks.count() == 0 and\
+       dailyplan.users.count() == 0:
+        dailyplan.delete()
+        return True
+    return False
+
 class FieldDashboard(TemplateView):
     template_name = "field/dashboard.html"
 
@@ -269,11 +276,16 @@ class FieldRemoveTask(SingleObjectMixin, View):
     pk_url_kwarg = 'task_pk'
 
     def get(self, request, *args, **kwargs):
+
         dailyplan = self.request.dailyplan
         if dailyplan.id:
             task = self.get_object()
             dailyplan.tasks.remove(task)
-        return HttpResponseRedirect(task_success_url(self.request, task))
+
+        if delete_when_empty(dailyplan):
+            return HttpResponseRedirect(project_success_url(request))
+        else:
+            return HttpResponseRedirect(task_success_url(self.request, task))
 
 
 class FieldAddSelfToDailyPlan(View):
@@ -293,6 +305,8 @@ class FieldAddSelfToDailyPlan(View):
                 is_foreman = True if kwargs['role'] == 'foreman' else False
             )
 
+        delete_when_empty(dailyplan)
+
         return HttpResponseRedirect(dashboard_success_url(request))
 
 
@@ -305,6 +319,8 @@ class FieldRemoveSelfFromDailyPlan(View):
             user = request.user
         ).delete()
 
+        delete_when_empty(request.dailyplan)
+
         return HttpResponseRedirect(dashboard_success_url(request))
 
 
@@ -314,7 +330,10 @@ class FieldAssignLabor(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(FieldAssignLabor, self).get_context_data(**kwargs)
-        context['workers'] = User.objects.filter(Q(is_laborer=True) | Q(is_foreman=True))
+        context['workers'] = User.objects\
+                                .filter(Q(is_laborer=True) | Q(is_foreman=True))\
+                                .annotate(plan_count=Count('dailyplans'))\
+                                .order_by('plan_count', 'username')
         context['assigned'] = []
         dailyplan = self.request.dailyplan
         if dailyplan.id: context['assigned'] = dailyplan.users.all()
@@ -323,18 +342,26 @@ class FieldAssignLabor(TemplateView):
     def post(self, request, *args, **kwargs):
 
         dailyplan = self.request.dailyplan
+
+
+        new_assignments = [int(id) for id in request.POST.getlist('workers')]
+
         redirect = project_success_url(request)
         if not dailyplan.id:
-            dailyplan.save()
             origin = request.GET.get('origin') or request.POST.get('origin')
             redirect = reverse('field.dailyplan.assign-tasks',
-                               args=[dailyplan.jobsite.id, dailyplan.url_id])+\
-                               '?origin='+origin if origin else ''
+                           args=[dailyplan.jobsite.id, dailyplan.url_id])+\
+                           '?origin='+origin if origin else ''
+
+            if not new_assignments:
+                return HttpResponseRedirect(redirect)
+
+            else:
+                dailyplan.save()
 
         previous_assignments = dailyplan.users.values_list('id', flat=True)
 
         # Add new assignments
-        new_assignments = [int(id) for id in request.POST.getlist('workers')]
         for worker in new_assignments:
             if worker not in previous_assignments:
                 TeamMember.objects.create(
@@ -349,6 +376,8 @@ class FieldAssignLabor(TemplateView):
                     dailyplan = dailyplan,
                     user_id = worker
                 ).delete()
+
+        delete_when_empty(dailyplan)
 
         return HttpResponseRedirect(redirect)
 
