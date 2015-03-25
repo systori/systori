@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n customformatting %}
+
+{% block header %}
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="margin:0px;">
+  <div class="container-fluid">
+
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">{% trans 'Toggle navigation' %}</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Systori</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+
+      <ul class="nav navbar-nav">
+        <li><a>{{request.selected_day}}</a></li>
+      </ul>
+
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+
+{% block container %}
+<div class="overview-wrapper">
+	{%for plan in selected_plans%}
+	<div class="overview-box">
+	  <div class="overview-innerContent">  
+	      <h4 style="height:70px;">{{plan.jobsite.project.name}}</h4>
+	      <h5 style="height:40px;">{{plan.jobsite}}</h5>
+	      <div class="panel panel-primary">
+	      {% for worker in plan.workers.all %}
+	        {% if worker.is_foreman %}
+		      <div class="panel-heading">
+		        <h3 class="panel-title" id="panel-title">
+		        {{worker.user.get_full_name}} 
+		        </h3>
+		      </div>
+		      {% else %}
+		      <div class="panel-body">
+            {{worker.user.get_full_name}} 
+		      </div>
+		      {% endif %}
+		    {% endfor %}
+		    </div>
+	      </ul>
+	  </div>
+	</div>
+	{% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+function fullscreen() { var elem = document.getElementById("body"); if (elem.requestFullscreen) { elem.requestFullscreen(); } else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); } else if (elem.mozRequestFullScreen) { elem.mozRequestFullScreen(); } else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }}
+fullscreen();
+</script>
+{% endblock %}

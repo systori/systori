@@ -1,3 +1,19 @@
+"""
+This script lists the TaskInstance(s) of a given Task-ID
+it prints the "order" Integer of the Instances starting from 0
+f.e.
+0 - A
+1 - B
+2 - C
+it expects as the input the "new order" with given Integer values.
+f.e.
+2,0,1
+result:
+0 - B
+1 - C
+2 - A
+"""
+
 import os
 import re
 import unicodedata
