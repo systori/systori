@@ -27,7 +27,7 @@ project_urls = patterns('',
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})?$', field_auth(FieldProjectView.as_view()), name='field.project'),
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/pick-jobsite$', field_auth(FieldPickJobSite.as_view()), name='field.dailyplan.pick-jobsite'),
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/calendar$', field_auth(FieldProjectCalendar.as_view()), name='field.project.calendar'),
-    url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/copy-from/(?P<other_day>\d{4}-\d{2}-\d{2})$', field_auth(FieldGenerateDailyPlans.as_view()), name='field.dailyplan.generate'),
+    url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/copy-from/(?P<other_day>\d{4}-\d{2}-\d{2})$', field_auth(FieldGenerateProjectDailyPlans.as_view()), name='field.dailyplan.generate'),
 )
 
 
@@ -37,4 +37,5 @@ urlpatterns = patterns('',
     url(r'^project-(?P<project_pk>\d+)/', include(project_urls)),
     url(r'^jobsite-(?P<jobsite_pk>\d+)/(?P<dailyplan_url_id>\d{4}-\d{2}-\d{2}-\d+)/', include(dailyplan_urls)),
     url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})?$', field_auth(FieldPlanning.as_view()), name='field.planning'),
+    url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})/generate$', field_auth(FieldGenerateAllDailyPlans.as_view()), name='field.planning.generate'),
 )
