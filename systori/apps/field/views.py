@@ -77,6 +77,8 @@ class FieldPlanning(TemplateView):
         context['is_selected_today'] = selected_day == date.today()
         context['is_selected_future'] = selected_day > date.today()
 
+        context['latest_daily_plan'] = DailyPlan.objects.first()
+
         return context
 
 
@@ -176,17 +178,13 @@ class FieldProjectCalendar(TemplateView):
         return context
 
 
-class FieldGenerateDailyPlans(View):
+class FieldGenerateProjectDailyPlans(View):
 
     def get(self, request, *args, **kwargs):
 
         project = request.project
         selected_day = request.selected_day
         other_day = date(*map(int, kwargs['other_day'].split('-')))
-
-        really_crappy_task_picking_algorithm = Task.objects\
-            .filter(taskgroup__job__project=project)\
-            .order_by('id')
 
         for oldplan in DailyPlan.objects.filter(jobsite__project=project, day=other_day):
 
@@ -203,6 +201,30 @@ class FieldGenerateDailyPlans(View):
                 )
 
         return HttpResponseRedirect(reverse('field.project', args=[project.id, selected_day.isoformat()]))
+
+
+class FieldGenerateAllDailyPlans(View):
+
+    def get(self, request, *args, **kwargs):
+
+        selected_day = request.selected_day
+        other_day = DailyPlan.objects.first().day
+
+        for oldplan in DailyPlan.objects.filter(day=other_day):
+
+            newplan = DailyPlan.objects.create(jobsite=oldplan.jobsite, day=selected_day)
+
+            for task in oldplan.tasks.all():
+                newplan.tasks.add(task)
+
+            for oldmember in oldplan.workers.all():
+                TeamMember.objects.create(
+                    dailyplan=newplan,
+                    user=oldmember.user,
+                    is_foreman=oldmember.is_foreman
+                )
+
+        return HttpResponseRedirect(reverse('field.planning', args=[selected_day.isoformat()]))
 
 
 class FieldPickJobSite(TemplateView):

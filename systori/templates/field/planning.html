@@ -36,6 +36,13 @@
 
   {% include "field/dailyplan.html" with dailyplan=plan %}
 
+{% empty %}
+
+
+  {% if user.is_staff and selected_day >= today and latest_daily_plan.day < selected_day %}
+    <a href="{% url 'field.planning.generate' selected_day %}" class="btn btn-primary">{% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
+  {% endif %}
+
 {% endfor %}
 
 </div>
