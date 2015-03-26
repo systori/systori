@@ -59,6 +59,8 @@
 
   {% endfor %}
 
+  {% if 'planning' not in request.path or request.session.is_planning_tasks %}
+
   {% if user.is_staff %}
     <a class="list-group-item sub-header clearfix" href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{request.path}}">
   {% else %}
@@ -92,7 +94,33 @@
 
   {% endfor %}
 
+  {% endif %}
+
   </div>
+  
+
+
+  {% if 'planning' not in request.path or request.session.is_planning_notes %}
+  {% if user.has_staff or dailyplan.notes %}
+
+  <div class="list-group-item sub-header">{% trans "Notes" %}</div>
+
+  <div class="panel-body">
+    {% if user.has_staff %}
+    <form action="{% url 'field.dailyplan.save.notes' dailyplan.id %}" method="post">
+    <input type="hidden" name="origin" value="{{request.path}}" />{% csrf_token %}
+    <textarea rows="4" style="width: 100%;" name="notes">{{dailyplan.notes}}</textarea>
+    <input type="submit" class="btn btn-default" value="{% trans 'Save' %}" />
+    </form>
+    {% else %}
+      {{ dailyplan.notes }}
+    {% endif %}
+
+  </div>
+
+  {% endif %}
+  {% endif %}
+
 
   {% if not user.has_staff %}
 
