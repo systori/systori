@@ -11,8 +11,9 @@
 <div class="container">
 
   <div class="row back-buttons">
-    <div class="col-xs-6"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
-    <div class="col-xs-6"><a href="{{ today_url }}" class="btn btn-default btn-block" style="text-align: center;">{% trans 'Today' %}, {% now 'DATE_FORMAT' %}</a></div>
+    <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
+    <div class="col-xs-4"><a href="{% url 'field.planning.toggle' selected_day.isoformat 'tasks' %}" class="btn btn-default btn-block {% if request.session.is_planning_tasks %}active{% endif %}" style="text-align: center;">{% trans 'Tasks' %}</a></div>
+    <div class="col-xs-4"><a href="{% url 'field.planning.toggle' selected_day.isoformat 'notes' %}" class="btn btn-default btn-block {% if request.session.is_planning_notes %}active{% endif %}" style="text-align: center;">{% trans 'Notes' %}</a></div>
   </div>
 
   <div class="row back-buttons">

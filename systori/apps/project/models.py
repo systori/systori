@@ -129,6 +129,8 @@ class DailyPlan(models.Model):
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='TeamMember', related_name="dailyplans")
     tasks = models.ManyToManyField('task.Task', related_name="dailyplans")
 
+    notes = models.TextField(blank=True)
+
     objects = DailyPlanQuerySet.as_manager()
 
     @property

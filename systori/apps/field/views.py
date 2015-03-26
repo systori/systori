@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 from ..user.models import User
 from ..project.models import Project, DailyPlan, JobSite, TeamMember
 from ..task.models import Job, Task, ProgressReport
-from .forms import CompletionForm
+from .forms import CompletionForm, DailyPlanNoteForm
 from .utils import find_next_workday, days_ago
 
 
@@ -188,7 +188,7 @@ class FieldGenerateProjectDailyPlans(View):
 
         for oldplan in DailyPlan.objects.filter(jobsite__project=project, day=other_day):
 
-            newplan = DailyPlan.objects.create(jobsite=oldplan.jobsite, day=selected_day)
+            newplan = DailyPlan.objects.create(jobsite=oldplan.jobsite, day=selected_day, notes=oldplan.notes)
 
             for task in oldplan.tasks.all():
                 newplan.tasks.add(task)
@@ -212,7 +212,7 @@ class FieldGenerateAllDailyPlans(View):
 
         for oldplan in DailyPlan.objects.filter(day=other_day):
 
-            newplan = DailyPlan.objects.create(jobsite=oldplan.jobsite, day=selected_day)
+            newplan = DailyPlan.objects.create(jobsite=oldplan.jobsite, day=selected_day, notes=oldplan.notes)
 
             for task in oldplan.tasks.all():
                 newplan.tasks.add(task)
@@ -413,3 +413,20 @@ class FieldToggleRole(SingleObjectMixin, View):
         member.is_foreman = not member.is_foreman
         member.save()
         return HttpResponseRedirect(project_success_url(request))
+
+
+class FieldDailyPlanNotes(UpdateView):
+
+    model = DailyPlan
+    form_class = DailyPlanNoteForm
+
+    def get_success_url(self):
+        return dashboard_success_url(self.request)
+
+
+class FieldPlanningToggle(View):
+
+    def get(self, request, *args, **kwargs):
+        toggle = 'is_planning_'+kwargs['toggle']
+        request.session[toggle] = not request.session.get(toggle, False)
+        return HttpResponseRedirect(reverse('field.planning', args=[self.request.selected_day.isoformat()]))
