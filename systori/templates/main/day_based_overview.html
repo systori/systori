@@ -24,6 +24,7 @@
 
       <ul class="nav navbar-nav">
         <li><a>{{request.selected_day}}</a></li>
+        <li><a onclick="DoFullScreen()">fullscreen</a></li>
       </ul>
 
     </div>
@@ -77,7 +78,24 @@
 
 {% block extra_js %}
 <script type="text/javascript">
-function fullscreen() { var elem = document.getElementById("body"); if (elem.requestFullscreen) { elem.requestFullscreen(); } else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); } else if (elem.mozRequestFullScreen) { elem.mozRequestFullScreen(); } else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }}
-fullscreen();
+function DoFullScreen() {
+
+    var isInFullScreen = (document.fullScreenElement && document.fullScreenElement !==     null) ||    // alternative standard method  
+            (document.mozFullScreen || document.webkitIsFullScreen);
+
+    var docElm = document.documentElement;
+    if (!isInFullScreen) {
+
+        if (docElm.requestFullscreen) {
+            docElm.requestFullscreen();
+        }
+        else if (docElm.mozRequestFullScreen) {
+            docElm.mozRequestFullScreen();
+        }
+        else if (docElm.webkitRequestFullScreen) {
+            docElm.webkitRequestFullScreen();
+        }
+    }
+}
 </script>
 {% endblock %}
