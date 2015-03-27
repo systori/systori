@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from django.http.response import HttpResponse
 from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
@@ -10,7 +11,7 @@ from tastypie.authentication import SessionAuthentication, BasicAuthentication, 
 from tastypie.authorization import Authorization
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.utils import trailing_slash
-from .models import Project
+from .models import Project, DailyPlan
 from ..document.models import DocumentTemplate
 
 
@@ -58,7 +59,14 @@ class ProjectResource(DocumentTemplateRendererResourceMixin, ModelResource):
         excludes = ['is_template']
 
 
+class DailyPlanTodayResource(ModelResource):
+    class Meta(BaseMeta):
+        queryset = DailyPlan.objects.filter(day=date.today()).all()
+        resource_name = 'daily_plan_today'
+
+
 from tastypie.api import Api
 api = Api()
 api.register(ProjectResource())
+api.register(DailyPlanTodayResource())
 urlpatterns = api.urls
