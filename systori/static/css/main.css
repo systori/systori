@@ -97,7 +97,6 @@ body {
 
 .notes-container{
 	display:flex;
-	height:25vw;
 	width:100vw;
 	position:fixed;
 	bottom:0px;
