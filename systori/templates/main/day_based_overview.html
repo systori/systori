@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 {% load i18n customformatting %}
 
+{% block head %}
+ {{ block.super }}
+ <meta http-equiv="refresh" content="60">
+{% endblock %}
+
 {% block header %}
+<div style="font-size:20px; height:100%; position:fixed;">
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="margin:0px;">
   <div class="container-fluid">
 
@@ -31,27 +37,41 @@
 	{%for plan in selected_plans%}
 	<div class="overview-box">
 	  <div class="overview-innerContent">  
-	      <h4 style="height:70px;">{{plan.jobsite.project.name}}</h4>
-	      <h5 style="height:40px;">{{plan.jobsite}}</h5>
+	      <h4>{{plan.jobsite.project.name}}</h4>
 	      <div class="panel panel-primary">
 	      {% for worker in plan.workers.all %}
 	        {% if worker.is_foreman %}
-		      <div class="panel-heading">
+		      <div class="panel-heading panel-custom">
 		        <h3 class="panel-title" id="panel-title">
-		        {{worker.user.get_full_name}} 
+		        <span class="foreman_crown"></span> {{worker.user.get_full_name}}
 		        </h3>
 		      </div>
 		      {% else %}
-		      <div class="panel-body">
+		      <div class="panel-body panel-custom">
             {{worker.user.get_full_name}} 
 		      </div>
 		      {% endif %}
 		    {% endfor %}
-		    </div>
+	      </div>
 	      </ul>
 	  </div>
 	</div>
 	{% endfor %}
+</div>
+<div class="notes-container">
+  <div class="notes-box">
+    <div class="panel panel-info">
+      <div class="panel-heading">{% trans 'Notes' %}</div>
+      <div class="panel-body">
+		    {% for plan in selected_plans %}
+		        {% if plan.notes %}
+		            &#9733; <span class="notes-project">{{plan.jobsite.project.name}}</span> {{plan.notes}}
+		        {% endif %}
+		    {% endfor %}
+		   </div>
+    </div>
+  </div>
+</div>
 </div>
 {% endblock %}
 
