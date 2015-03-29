@@ -1,0 +1,36 @@
+{% extends "frame.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "main/sidebar.html" with section='vehicle' %}{% endblock %}
+
+{% block content %}
+  <h2 class="sub-header">{% trans 'Vehicle' %}</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>{% trans 'Name' %}</th>
+          <th>{% trans 'Manufacturer' %}</th>
+          <th>{% trans 'License Plate' %}</th>
+          <th>{% trans 'Actions' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for vehicle in vehicle_list %}
+        <tr>
+          <td>{{ vehicle.id }}</td>
+          <td>{{ vehicle.name }}</td>
+          <td>{{ vehicle.manufacturer }}</td>
+          <td>{{ vehicle.license_plate }}</td>
+          <td>
+            <a href="{% url 'vehicle.edit' vehicle.id %}">{% trans "Edit" %}</a>
+            <a href="{% url 'vehicle.delete' vehicle.id %}">{% trans "Delete" %}</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <a href="{% url 'vehicle.create' %}">{% trans "Create" %}</a>
+  </div>
+{% endblock content %}
