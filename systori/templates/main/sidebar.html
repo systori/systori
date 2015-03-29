@@ -5,5 +5,6 @@
   <li {% if section == 'projects' %}class="active"{% endif %}><a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
   <li {% if section == 'templates' %}class="active"{% endif %}><a href="{% url 'templates' %}">{% trans 'Templates' %}</a></li>
   <li {% if section == 'directory' %}class="active"{% endif %}><a href="{% url 'directory' %}">{% trans 'Directory' %}</a></li>
+  <li {% if section == 'vehicle' %}class="active"{% endif %}><a href="{% url 'vehicle.list' %}">{% trans 'Vehicle' %}</a></li>
   <li><a href="{% url 'day_based_overview' %}">{% trans 'Daily Plans' %}</a></li>
 </ul>

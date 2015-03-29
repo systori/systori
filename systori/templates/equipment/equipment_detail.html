@@ -1,0 +1,14 @@
+{% extends "frame.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "main/sidebar.html" %}{% endblock %}
+
+{% block content %}
+<h2>{% trans 'Equipment Details' %}</h2>
+{% for field in form %}
+<div>
+    {{ field.label }}: {{ field.value }}
+</div>
+{% endfor %}
+
+{% endblock %}

@@ -52,6 +52,15 @@
 		      </div>
 		      {% endif %}
 		    {% endfor %}
+		    {% for equipment in plan.equipment.all %}
+		      <div class="panel-body panel-custom">
+		        {% if equipment.vehicle %}
+		          ✓ {{equipment.vehicle.get_info}}
+		        {% else %}
+		          {{equipment.get_info}}
+		        {% endif %}
+		      </div>
+		    {% endfor %}
 	      </div>
 	      </ul>
 	</div>

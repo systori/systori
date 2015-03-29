@@ -15,6 +15,11 @@ def task_dailyplans_count(task, date):
     return task.dailyplans.filter(day=date).count()
 
 
+@register.assignment_tag
+def equipment_dailyplans_count(equipment, date):
+    return equipment.dailyplans.filter(day=date).count()
+
+
 @register.simple_tag
 def add_daily_plan_url(project, date):
     if project.jobsites.count() == 1:
