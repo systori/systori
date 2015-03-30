@@ -1,0 +1,51 @@
+{% extends "field/base.html" %}
+{% load i18n staticfiles field_app %}
+
+{% block container %}
+<style>
+.state-icon {
+    left: -5px;
+}
+</style>
+
+<form method="post">{% csrf_token %}
+<input type="hidden" name="origin" value="{{request.GET.origin}}" />
+
+<div class="container">
+
+
+  <div class="row back-buttons">
+    <div class="col-xs-8"><a href="{% url 'field.project' jobsite.project.id dailyplan.day.isoformat %}" class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
+    <div class="col-xs-4"><a href="{% if request.GET.origin %}{{request.GET.origin}}{% else %}{% url 'field.dashboard' %}{% endif %}" class="btn btn-default btn-block">&laquo; {% if request.GET.origin  %}{% trans 'Back' %}{% else %}{% trans 'Dashboard' %}{% endif %}</a></div>
+  </div>
+
+  <div class="panel panel-default">
+
+    <div class="panel-heading">
+      {% trans 'Equipment' %} - {{ jobsite.name }} - {{ dailyplan.day|date:'DATE_FORMAT' }}
+    </div>
+
+    <div class="list-group">
+    
+    {% for equipment in equipment_list %}
+      <label class="list-group-item">
+        {% equipment_dailyplans_count equipment dailyplan.day as existing_assignments %}
+        {% if existing_assignments > 0 %}<span class="badge">{{ existing_assignments }}</span>{% endif %}
+        <input type="checkbox" value="{{equipment.id}}" name="equipment_list" {% if equipment in assigned %}checked{% endif %}/>{{ equipment }}
+      </label>
+    {% endfor %}
+    </div>
+
+    <div class="panel-footer clearfix">
+        <div class="pull-right">
+            <button class="btn btn-primary" type="submit">{% trans "Assign" %}</button>
+        </div>
+    </div>
+
+  </div>
+
+</div>
+
+</form>
+
+{% endblock %}

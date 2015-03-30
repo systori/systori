@@ -128,6 +128,7 @@ class DailyPlan(models.Model):
     day = models.DateField(_("Day"), default=date.today)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='TeamMember', related_name="dailyplans")
     tasks = models.ManyToManyField('task.Task', related_name="dailyplans")
+    equipment = models.ManyToManyField('equipment.Equipment', related_name="dailyplans")
 
     notes = models.TextField(blank=True)
 

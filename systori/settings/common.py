@@ -56,6 +56,7 @@ INSTALLED_APPS = (
     'systori.apps.task',
     'systori.apps.document',
     'systori.apps.field',
+    'systori.apps.equipment',
     'systori.apps.main'
 )
 

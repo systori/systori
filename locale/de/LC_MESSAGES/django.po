@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-23 00:25+0100\n"
+"POT-Creation-Date: 2015-03-30 00:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,6 +59,7 @@ msgstr "PLZ"
 #: systori/apps/directory/models.py:21 systori/apps/project/forms.py:10
 #: systori/apps/project/models.py:92
 #: systori/templates/project/project_detail.html:241
+#: systori/templates/project/project_list.html:14
 msgid "City"
 msgstr "Stadt"
 
@@ -71,6 +72,9 @@ msgstr "Land"
 #: systori/templates/document/evidence_detail.html:10
 #: systori/templates/document/invoice_detail.html:11
 #: systori/templates/document/proposal_detail.html:11
+#: systori/templates/field/dailyplan.html:140
+#: systori/templates/field/planning.html:16
+#: systori/templates/main/day_based_overview.html:72
 #: systori/templates/project/project_detail.html:62
 msgid "Notes"
 msgstr "Notizen"
@@ -249,9 +253,12 @@ msgstr "Stefan"
 msgid "Smith"
 msgstr "Schmidt"
 
-#: systori/apps/document/models.py:248 systori/apps/task/models.py:136
-#: systori/apps/task/models.py:203 systori/apps/task/models.py:298
-#: systori/apps/task/models.py:404 systori/templates/main/templates.html:12
+#: systori/apps/document/models.py:248 systori/apps/equipment/models.py:8
+#: systori/apps/task/models.py:136 systori/apps/task/models.py:203
+#: systori/apps/task/models.py:298 systori/apps/task/models.py:404
+#: systori/templates/equipment/equipment_list.html:13
+#: systori/templates/equipment/vehicle_list.html:13
+#: systori/templates/main/templates.html:12
 #: systori/templates/main/templates.html:36
 #: systori/templates/project/project_detail.html:11
 #: systori/templates/project/project_detail.html:206
@@ -293,6 +300,29 @@ msgstr "nachname"
 msgid "name"
 msgstr "name"
 
+#: systori/apps/equipment/models.py:7
+msgid "Uses count"
+msgstr "Benutzt Zähler"
+
+#: systori/apps/equipment/models.py:10
+msgid "Purchasing Date"
+msgstr "Kaufdatum"
+
+#: systori/apps/equipment/models.py:11
+msgid "Purchasing Price"
+msgstr "Kaufpreis"
+
+#: systori/apps/equipment/models.py:14
+#: systori/templates/equipment/equipment_list.html:14
+#: systori/templates/equipment/vehicle_list.html:14
+msgid "Manufacturer"
+msgstr "Hersteller"
+
+#: systori/apps/equipment/models.py:21
+#: systori/templates/equipment/vehicle_list.html:15
+msgid "License Plate"
+msgstr "Kennzeichen"
+
 #: systori/apps/project/models.py:23
 msgid "Project Name"
 msgstr "Projektbezeichnung"
@@ -323,7 +353,7 @@ msgstr "Los Nr. Offset"
 msgid "Project"
 msgstr "Projekt"
 
-#: systori/apps/project/models.py:46 systori/templates/base.html:37
+#: systori/apps/project/models.py:46 systori/templates/base.html:38
 #: systori/templates/field/dashboard.html:16
 #: systori/templates/field/dashboard.html:27
 #: systori/templates/field/project.html:8
@@ -528,27 +558,28 @@ msgstr "Mitarbeiter"
 msgid "Laborer has limited access to the system."
 msgstr "Mitarbeiter haben beschränkten Zugriff auf das System"
 
-#: systori/settings/common.py:118
+#: systori/settings/common.py:119
 msgid "Deutsch"
 msgstr "Deutsch"
 
-#: systori/settings/common.py:119
+#: systori/settings/common.py:120
 msgid "English"
 msgstr "Englisch"
 
-#: systori/templates/base.html:27
+#: systori/templates/base.html:28
+#: systori/templates/main/day_based_overview.html:16
 msgid "Toggle navigation"
 msgstr "Navigation togglen"
 
-#: systori/templates/base.html:47
+#: systori/templates/base.html:48
 msgid "open field app"
 msgstr "öffne Field App"
 
-#: systori/templates/base.html:52 systori/templates/user/settings.html:9
+#: systori/templates/base.html:53 systori/templates/user/settings.html:9
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: systori/templates/base.html:53
+#: systori/templates/base.html:54
 msgid "Logout"
 msgstr "Abmelden"
 
@@ -556,6 +587,8 @@ msgstr "Abmelden"
 #: systori/templates/document/documenttemplate_confirm_delete.html:8
 #: systori/templates/document/invoice_confirm_delete.html:8
 #: systori/templates/document/proposal_confirm_delete.html:8
+#: systori/templates/equipment/equipment_confirm_delete.html:8
+#: systori/templates/equipment/vehicle_confirm_delete.html:8
 #: systori/templates/project/jobsite_confirm_delete.html:8
 #: systori/templates/project/project_confirm_delete.html:8
 #: systori/templates/task/job_confirm_delete.html:8
@@ -569,6 +602,8 @@ msgstr "Sind Sie sicher dass Sie das Objekt \"%(object)s\" löschen möchten?"
 #: systori/templates/document/evidence_confirm_delete.html:9
 #: systori/templates/document/invoice_confirm_delete.html:9
 #: systori/templates/document/proposal_confirm_delete.html:9
+#: systori/templates/equipment/equipment_confirm_delete.html:9
+#: systori/templates/equipment/vehicle_confirm_delete.html:9
 #: systori/templates/project/jobsite_confirm_delete.html:9
 #: systori/templates/project/project_confirm_delete.html:9
 #: systori/templates/task/job_confirm_delete.html:9
@@ -588,6 +623,9 @@ msgstr "Verknüpfte Projekte"
 #: systori/templates/document/evidence_form.html:9
 #: systori/templates/document/invoice_form.html:9
 #: systori/templates/document/proposal_form.html:9
+#: systori/templates/equipment/equipment_form.html:9
+#: systori/templates/equipment/vehicle_form.html:9
+#: systori/templates/field/dailyplan.html:147
 #: systori/templates/project/jobsite_form.html:9
 #: systori/templates/project/project_form.html:9
 #: systori/templates/task/job_form.html:9
@@ -600,6 +638,7 @@ msgid "Directory"
 msgstr "Adressbuch"
 
 #: systori/templates/directory/contact_list.html:14
+#: systori/templates/equipment/vehicle_list.html:16
 #: systori/templates/main/templates.html:13
 #: systori/templates/main/templates.html:38
 #: systori/templates/project/project_detail.html:16
@@ -608,20 +647,22 @@ msgstr "Adressbuch"
 #: systori/templates/project/project_detail.html:167
 #: systori/templates/project/project_detail.html:209
 #: systori/templates/project/project_detail.html:243
-#: systori/templates/project/project_list.html:14
+#: systori/templates/project/project_list.html:15
 msgid "Actions"
 msgstr "Aktionen"
 
 #: systori/templates/directory/contact_list.html:23
+#: systori/templates/equipment/vehicle_list.html:27
 #: systori/templates/main/templates.html:21
 #: systori/templates/main/templates.html:47
 #: systori/templates/project/project_detail.html:40
 #: systori/templates/project/project_detail.html:256
-#: systori/templates/project/project_list.html:23
+#: systori/templates/project/project_list.html:25
 msgid "Edit"
 msgstr "Bearbeiten"
 
 #: systori/templates/directory/contact_list.html:24
+#: systori/templates/equipment/vehicle_list.html:28
 #: systori/templates/main/templates.html:22
 #: systori/templates/main/templates.html:48
 #: systori/templates/project/project_detail.html:41
@@ -629,13 +670,15 @@ msgstr "Bearbeiten"
 #: systori/templates/project/project_detail.html:142
 #: systori/templates/project/project_detail.html:183
 #: systori/templates/project/project_detail.html:258
-#: systori/templates/project/project_list.html:24
+#: systori/templates/project/project_list.html:26
 msgid "Delete"
 msgstr "Löschen"
 
 #: systori/templates/directory/contact_list.html:30
 #: systori/templates/directory/projectcontact_form_add.html:34
 #: systori/templates/directory/projectcontact_form_create.html:11
+#: systori/templates/equipment/equipment_list.html:27
+#: systori/templates/equipment/vehicle_list.html:34
 #: systori/templates/main/templates.html:28
 #: systori/templates/main/templates.html:54
 #: systori/templates/project/project_detail.html:48
@@ -643,7 +686,7 @@ msgstr "Löschen"
 #: systori/templates/project/project_detail.html:150
 #: systori/templates/project/project_detail.html:190
 #: systori/templates/project/project_detail.html:266
-#: systori/templates/project/project_list.html:30
+#: systori/templates/project/project_list.html:32
 msgid "Create"
 msgstr "Erstellen"
 
@@ -658,7 +701,7 @@ msgid "Add Contact to %(project_name)s"
 msgstr "Kontakt zu %(project_name)s hinzufügen"
 
 #: systori/templates/directory/projectcontact_form_add.html:27
-#: systori/templates/field/planning.html:31
+#: systori/templates/field/planning.html:32
 #: systori/templates/field/project.html:28
 #: systori/templates/field/project.html:49
 #: systori/templates/project/project_detail.html:229
@@ -776,12 +819,32 @@ msgstr "Alternativ"
 msgid "Proposal Details"
 msgstr "Angebotsdetails"
 
+#: systori/templates/equipment/equipment_detail.html:7
+msgid "Equipment Details"
+msgstr "Rechnungsdetails"
+
+#: systori/templates/equipment/equipment_list.html:7
+#: systori/templates/field/assign_equipment.html:25
+#: systori/templates/field/dailyplan.html:70
+msgid "Equipment"
+msgstr "Ausrüstung"
+
+#: systori/templates/equipment/vehicle_detail.html:7
+msgid "Vehicle Details"
+msgstr "Fahrzeugsdetails"
+
+#: systori/templates/equipment/vehicle_list.html:7
+msgid "Vehicles"
+msgstr "Fahrzeuge"
+
+#: systori/templates/field/assign_equipment.html:19
 #: systori/templates/field/assign_labor.html:19
 #: systori/templates/field/job.html:9 systori/templates/field/job_list.html:9
 #: systori/templates/field/task.html:9
 msgid "Back"
 msgstr "Zurück"
 
+#: systori/templates/field/assign_equipment.html:19
 #: systori/templates/field/assign_labor.html:19
 #: systori/templates/field/calendar.html:79 systori/templates/field/job.html:9
 #: systori/templates/field/job_list.html:9
@@ -793,21 +856,23 @@ msgstr "Zurück"
 msgid "Dashboard"
 msgstr "Pinnwand"
 
+#: systori/templates/field/assign_equipment.html:41
+#: systori/templates/field/assign_labor.html:40
+msgid "Assign"
+msgstr "verknüpfen"
+
 #: systori/templates/field/assign_labor.html:25
 #: systori/templates/project/project_planning.html:205
 msgid "Labor"
 msgstr "Lohn"
-
-#: systori/templates/field/assign_labor.html:40
-msgid "Assign"
-msgstr "verknüpfen"
 
 #: systori/templates/field/dailyplan.html:21
 msgid "Workers"
 msgstr "Arbeiter"
 
 #: systori/templates/field/dailyplan.html:24
-#: systori/templates/field/dailyplan.html:71
+#: systori/templates/field/dailyplan.html:73
+#: systori/templates/field/dailyplan.html:107
 msgid "edit"
 msgstr "bearbeiten"
 
@@ -815,21 +880,26 @@ msgstr "bearbeiten"
 msgid "No workers have been assigned."
 msgstr "Keine Arbeiter zugewiesen."
 
-#: systori/templates/field/dailyplan.html:68
+#: systori/templates/field/dailyplan.html:91
+msgid "No equipment has been assigned."
+msgstr "Keine Positionen zugewiesen."
+
+#: systori/templates/field/dailyplan.html:104
 #: systori/templates/field/job.html:15
+#: systori/templates/field/planning.html:15
 #: systori/templates/project/project_planning.html:265
 msgid "Tasks"
 msgstr "Positionen"
 
-#: systori/templates/field/dailyplan.html:90
+#: systori/templates/field/dailyplan.html:126
 msgid "No tasks have been assigned."
 msgstr "Keine Positionen zugewiesen."
 
-#: systori/templates/field/dailyplan.html:111
+#: systori/templates/field/dailyplan.html:173
 msgid "Add yourself as <b>foreman</b>."
 msgstr "Selbst als <b>Vorarbeiter</b> verknüpfen."
 
-#: systori/templates/field/dailyplan.html:112
+#: systori/templates/field/dailyplan.html:174
 msgid "Add yourself as <b>laborer</b>."
 msgstr "Selbst als <b>Mitarbeiter</b> verknüpfen."
 
@@ -845,10 +915,7 @@ msgstr "Planung"
 msgid "You have not been assigned to any job sites today."
 msgstr "Du bist noch keinem Einsatzort zugeteilt."
 
-#: systori/templates/field/planning.html:15
-msgid "Today"
-msgstr "heute"
-
+#: systori/templates/field/planning.html:44
 #: systori/templates/field/project.html:32
 #, python-format
 msgid "Copy from %(otherday)s."
@@ -869,6 +936,7 @@ msgid "Remove task from %(jobsite)s."
 msgstr "Entferne Pos. von %(jobsite)s."
 
 #: systori/templates/field/task.html:27
+#, python-format
 msgid "Add task to %(jobsite)s."
 msgstr "Position zu %(jobsite)s hinzufügen"
 
@@ -891,6 +959,14 @@ msgstr "Markierte Elemente"
 #: systori/templates/main/sidebar.html:6
 msgid "Templates"
 msgstr "Vorlagen"
+
+#: systori/templates/main/sidebar.html:8
+msgid "Vehicle"
+msgstr "Fahrzeug"
+
+#: systori/templates/main/sidebar.html:9
+msgid "Daily Plans"
+msgstr "Tagesplan"
 
 #: systori/templates/main/templates.html:7
 msgid "Job Templates"
@@ -1043,8 +1119,8 @@ msgstr "Die eingegebenen Daten sind nicht richtig."
 msgid "Sign in"
 msgstr "Anmelden"
 
-msgid "Daily Plans"
-msgstr "Tagesplan"
+msgid "Today"
+msgstr "heute"
 
 msgid "Add Job Site"
 msgstr "Einsatzort hinzufügen"

@@ -10,6 +10,7 @@ from django.core.urlresolvers import reverse
 from ..user.models import User
 from ..project.models import Project, DailyPlan, JobSite, TeamMember
 from ..task.models import Job, Task, ProgressReport
+from ..equipment.models import Equipment
 from .forms import CompletionForm, DailyPlanNoteForm
 from .utils import find_next_workday, days_ago
 
@@ -26,6 +27,10 @@ def project_success_url(request):
 def task_success_url(request, task):
     return _origin_success_url(request,
             reverse('field.dailyplan.task', args=[request.jobsite.id, request.dailyplan.url_id, task.id]))
+
+def equipment_success_url(request, equipment):
+    return _origin_success_url(request,
+            reverse('field.dailyplan.equipment', args=[request.jobsite.id, request.dailyplan.url_id, equipment.id]))
 
 def dashboard_success_url(request):
     return _origin_success_url(request,
@@ -430,3 +435,53 @@ class FieldPlanningToggle(View):
         toggle = 'is_planning_'+kwargs['toggle']
         request.session[toggle] = not request.session.get(toggle, False)
         return HttpResponseRedirect(reverse('field.planning', args=[self.request.selected_day.isoformat()]))
+    
+    
+class FieldAssignEquipment(TemplateView):
+
+    template_name = "field/assign_equipment.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(FieldAssignEquipment, self).get_context_data(**kwargs)
+        context['equipment_list'] = Equipment.objects\
+                                .annotate(plan_count=Count('dailyplans'))\
+                                .order_by('plan_count', 'name')
+        context['assigned'] = []
+        dailyplan = self.request.dailyplan
+        if dailyplan.id: context['assigned'] = dailyplan.equipment.all()
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        dailyplan = self.request.dailyplan
+
+        new_assignments = [int(id) for id in request.POST.getlist('equipment_list')]
+
+        redirect = project_success_url(request)
+        if not dailyplan.id:
+            origin = request.GET.get('origin') or request.POST.get('origin')
+            redirect = reverse('field.dailyplan.assign-equipment',
+                           args=[dailyplan.jobsite.id, dailyplan.url_id])+\
+                           '?origin='+origin if origin else ''
+
+            if not new_assignments:
+                return HttpResponseRedirect(redirect)
+
+            else:
+                dailyplan.save()
+
+        previous_assignments = dailyplan.equipment.values_list('id', flat=True)
+
+        # Add new assignments
+        for equipment in new_assignments:
+            if equipment not in previous_assignments:
+                dailyplan.equipment.add(equipment)
+
+        # Remove unchecked assignments
+        for equipment in previous_assignments:
+            if equipment not in new_assignments:
+                dailyplan.equipment.remove(equipment)
+
+        delete_when_empty(dailyplan)
+
+        return HttpResponseRedirect(redirect)

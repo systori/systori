@@ -3,7 +3,7 @@
 
 {% block head %}
  {{ block.super }}
- <meta http-equiv="refresh" content="60">
+ <!-- <meta http-equiv="refresh" content="60">  -->
 {% endblock %}
 
 {% block header %}
@@ -24,7 +24,7 @@
 
       <ul class="nav navbar-nav">
         <li><a>{{request.selected_day}}</a></li>
-        <li><a onclick="DoFullScreen()">fullscreen</a></li>
+        <!-- <li><a onclick="DoFullScreen()">fullscreen</a></li> -->
       </ul>
 
     </div>
@@ -37,15 +37,14 @@
 <div class="overview-wrapper">
 	{%for plan in selected_plans%}
 	<div class="overview-box">
-	  <div class="overview-innerContent">  
-	      <h4>{{plan.jobsite.project.name}}</h4>
-	      <div class="panel panel-primary">
+	      <div class="panel panel-default dailyplan" data-id="{{plan.id}}">
+		      <div class="panel-heading panel-custom">
+		        {{plan.jobsite.project.name}} 
+		      </div>
 	      {% for worker in plan.workers.all %}
 	        {% if worker.is_foreman %}
-		      <div class="panel-heading panel-custom">
-		        <h3 class="panel-title" id="panel-title">
+		      <div class="panel-body panel-custom">
 		        <span class="foreman_crown"></span> {{worker.user.get_full_name}}
-		        </h3>
 		      </div>
 		      {% else %}
 		      <div class="panel-body panel-custom">
@@ -53,9 +52,13 @@
 		      </div>
 		      {% endif %}
 		    {% endfor %}
+		    {% for equipment in plan.equipment.all %}
+		      <div class="panel-body panel-custom">
+		          ✓ {{equipment}}
+		      </div>
+		    {% endfor %}
 	      </div>
 	      </ul>
-	  </div>
 	</div>
 	{% endfor %}
 </div>
@@ -97,5 +100,13 @@ function DoFullScreen() {
         }
     }
 }
+
+var dailyplans = $('.dailyplan');
+console.dir(dailyplans);
+
+dailyplans.forEach(function(plan) {
+	return console.log(plan);
+});
+
 </script>
 {% endblock %}

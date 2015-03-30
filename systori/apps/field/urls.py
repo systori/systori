@@ -14,6 +14,9 @@ dailyplan_urls = patterns('',
     url(r'^task-(?P<task_pk>\d+)$', field_auth(FieldTaskView.as_view()), name='field.dailyplan.task'),
     url(r'^task-(?P<task_pk>\d+)/add$', field_auth(FieldAddTask.as_view()), name='field.dailyplan.task.add'),
     url(r'^task-(?P<task_pk>\d+)/remove$', field_auth(FieldRemoveTask.as_view()), name='field.dailyplan.task.remove'),
+    
+    # assign-equipment
+    url(r'^equipment$', field_auth(FieldAssignEquipment.as_view()), name='field.dailyplan.assign-equipment'),
 
     # misc
     url(r'^member-(?P<pk>\d+)/toggle-role$', field_auth(FieldToggleRole.as_view()), name='field.dailyplan.toggle-role'),

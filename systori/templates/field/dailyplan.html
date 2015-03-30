@@ -59,6 +59,36 @@
 
   {% endfor %}
 
+
+
+    {% if user.is_staff %}
+      <a class="list-group-item sub-header clearfix" href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{request.path}}">
+    {% else %}
+      <div class="list-group-item sub-header">
+    {% endif %}
+
+    {% trans "Equipment" %}
+
+    {% if user.is_staff %}
+       <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
+    {% else %}
+      </div>
+    {% endif %}
+
+  {% for equipment in dailyplan.equipment.all %}
+
+    <div class="list-group-item nav nav-pills">
+      {{ equipment }}
+    </div>
+
+  {% empty %}
+
+    <div class="list-group-item">
+      {% trans "No equipment has been assigned." %}
+    </div>
+
+  {% endfor %}
+
   {% if 'planning' not in request.path or request.session.is_planning_tasks %}
 
   {% if user.is_staff %}
@@ -97,7 +127,7 @@
   {% endif %}
 
   </div>
-  
+
 
 
   {% if 'planning' not in request.path or request.session.is_planning_notes %}
