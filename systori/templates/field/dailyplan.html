@@ -59,7 +59,7 @@
 
   {% endfor %}
 
-  <div class="list-group">
+
 
     {% if user.is_staff %}
       <a class="list-group-item sub-header clearfix" href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{request.path}}">
@@ -127,7 +127,7 @@
   {% endif %}
 
   </div>
-  
+
 
 
   {% if 'planning' not in request.path or request.session.is_planning_notes %}
