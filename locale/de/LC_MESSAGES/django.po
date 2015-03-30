@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-30 00:01+0200\n"
+"POT-Creation-Date: 2015-03-30 00:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -831,12 +831,11 @@ msgstr "Ausrüstung"
 
 #: systori/templates/equipment/vehicle_detail.html:7
 msgid "Vehicle Details"
-msgstr "Rechnungsdetails"
+msgstr "Fahrzeugsdetails"
 
 #: systori/templates/equipment/vehicle_list.html:7
-#: systori/templates/main/sidebar.html:8
-msgid "Vehicle"
-msgstr "Fahrzeug"
+msgid "Vehicles"
+msgstr "Fahrzeuge"
 
 #: systori/templates/field/assign_equipment.html:19
 #: systori/templates/field/assign_labor.html:19
@@ -960,6 +959,10 @@ msgstr "Markierte Elemente"
 #: systori/templates/main/sidebar.html:6
 msgid "Templates"
 msgstr "Vorlagen"
+
+#: systori/templates/main/sidebar.html:8
+msgid "Vehicle"
+msgstr "Fahrzeug"
 
 #: systori/templates/main/sidebar.html:9
 msgid "Daily Plans"

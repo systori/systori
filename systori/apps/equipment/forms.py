@@ -1,8 +1,7 @@
 from django.forms import ModelForm
-from .models import Vehicle
+from .models import Equipment
 
 
-class VehicleForm(ModelForm):
+class EquipmentForm(ModelForm):
     class Meta:
-        model = Vehicle
-        exclude = ['uses_count']
+        model = Equipment

@@ -1,7 +1,7 @@
 {% extends "frame.html" %}
 {% load i18n %}
 
-{% block sidebar %}{% include "main/sidebar.html" %}{% endblock %}
+{% block sidebar %}{% include "main/sidebar.html" with section='equipment' %}{% endblock %}
 
 {% block content %}
 <h2>{% trans 'Equipment Details' %}</h2>

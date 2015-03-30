@@ -31,7 +31,7 @@
       <label class="list-group-item">
         {% equipment_dailyplans_count equipment dailyplan.day as existing_assignments %}
         {% if existing_assignments > 0 %}<span class="badge">{{ existing_assignments }}</span>{% endif %}
-        <input type="checkbox" value="{{equipment.id}}" name="equipment_list" {% if equipment in assigned %}checked{% endif %}/>{% if equipment.vehicle %} {{ equipment.vehicle.get_info }} {% else %} {{ equipment.get_info }} {% endif %}
+        <input type="checkbox" value="{{equipment.id}}" name="equipment_list" {% if equipment in assigned %}checked{% endif %}/>{{ equipment }}
       </label>
     {% endfor %}
     </div>

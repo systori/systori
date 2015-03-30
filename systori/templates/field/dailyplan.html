@@ -78,11 +78,7 @@
   {% for equipment in dailyplan.equipment.all %}
 
     <div class="list-group-item nav nav-pills">
-      {% if equipment.vehicle %}
-        {{ equipment.vehicle.get_info }}
-      {% else %}
-        {{ equipment.get_info }}
-      {% endif %}
+      {{ equipment }}
     </div>
 
   {% empty %}
