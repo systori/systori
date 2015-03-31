@@ -17,46 +17,7 @@ class BaseDocumentPDFView(SingleObjectMixin, View):
         return HttpResponse(pdf, content_type='application/pdf')
 
 
-class BaseDocumentCreateView(CreateView):
-
-    def get_form_kwargs(self):
-        kwargs = super(BaseDocumentCreateView, self).get_form_kwargs()
-        kwargs['instance'] = self.model(project=self.request.project)
-        return kwargs
-
-    def form_valid(self, form):
-
-        amount = Decimal(0.0)
-        for job in form.cleaned_data['jobs']:
-            amount += self.process_job(job)
-        form.instance.amount = amount
-
-        redirect = super(BaseDocumentCreateView, self).form_valid(form)
-
-        self.object.generate_document(form.cleaned_data['add_terms'])
-
-        return redirect
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
-
-
-class EvidenceDocumentCreateView(CreateView):
-
-    def get_form_kwargs(self):
-        kwargs = super(EvidenceDocumentCreateView, self).get_form_kwargs()
-        kwargs['instance'] = self.model(project=self.request.project)
-        return kwargs
-
-    def form_valid(self, form):
-
-        redirect = super(EvidenceDocumentCreateView, self).form_valid(form)
-        self.object.generate_document(form.cleaned_data)
-
-        return redirect
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+# Proposal
 
 
 class ProposalView(DetailView):
@@ -67,14 +28,32 @@ class ProposalPDF(BaseDocumentPDFView):
     model = Proposal
 
 
-class ProposalCreate(BaseDocumentCreateView):
+class ProposalCreate(CreateView):
     model = Proposal
     form_class = ProposalForm
 
-    def process_job(self, job):
-        job.status = job.PROPOSED
-        job.save()
-        return job.estimate_total
+    def get_form_kwargs(self):
+        kwargs = super(ProposalCreate, self).get_form_kwargs()
+        kwargs['instance'] = self.model(project=self.request.project)
+        return kwargs
+
+    def form_valid(self, form):
+
+        amount = Decimal(0.0)
+        for job in form.cleaned_data['jobs']:
+            job.status = job.PROPOSED
+            job.save()
+            amount += job.estimate_total
+        form.instance.amount = amount
+
+        redirect = super(ProposalCreate, self).form_valid(form)
+
+        self.object.generate_document(form.cleaned_data['add_terms'])
+
+        return redirect
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
 
 
 class ProposalTransition(SingleObjectMixin, View):
@@ -96,12 +75,14 @@ class ProposalTransition(SingleObjectMixin, View):
         return HttpResponseRedirect(reverse('project.view',
                                             args=[self.object.project.id]))
 
-
 class ProposalDelete(DeleteView):
     model = Proposal
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])
+
+
+# Invoice
 
 
 class InvoiceView(DetailView):
@@ -112,12 +93,30 @@ class InvoicePDF(BaseDocumentPDFView):
     model = Invoice
 
 
-class InvoiceCreate(BaseDocumentCreateView):
+class InvoiceCreate(CreateView):
     model = Invoice
     form_class = InvoiceForm
 
-    def process_job(self, job):
-        return job.billable_total
+    def get_form_kwargs(self):
+        kwargs = super(ProposalCreate, self).get_form_kwargs()
+        kwargs['instance'] = self.model(project=self.request.project)
+        return kwargs
+
+    def form_valid(self, form):
+
+        amount = Decimal(0.0)
+        for job in self.project.billable_jobs:
+            amount += job.billable_total
+        form.instance.amount = amount
+
+        redirect = super(ProposalCreate, self).form_valid(form)
+
+        self.object.generate_document(form.cleaned_data['add_terms'])
+
+        return redirect
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
 
 
 class InvoiceTransition(SingleObjectMixin, View):
@@ -147,6 +146,9 @@ class InvoiceDelete(DeleteView):
         return reverse('project.view', args=[self.object.project.id])
 
 
+# Document Template
+
+
 class DocumentTemplateView(DetailView):
     model = DocumentTemplate
 
@@ -164,6 +166,27 @@ class DocumentTemplateUpdate(UpdateView):
 class DocumentTemplateDelete(DeleteView):
     model = DocumentTemplate
     success_url = reverse_lazy('templates')
+
+
+# Evidence
+
+
+class EvidenceDocumentCreateView(CreateView):
+
+    def get_form_kwargs(self):
+        kwargs = super(EvidenceDocumentCreateView, self).get_form_kwargs()
+        kwargs['instance'] = self.model(project=self.request.project)
+        return kwargs
+
+    def form_valid(self, form):
+
+        redirect = super(EvidenceDocumentCreateView, self).form_valid(form)
+        self.object.generate_document(form.cleaned_data)
+
+        return redirect
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
 
 
 class EvidenceView(DetailView):

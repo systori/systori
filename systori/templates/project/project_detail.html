@@ -146,7 +146,7 @@
       {% endfor %}
     </tbody>
   </table>
-  {% if project.has_jobs_for_invoice %}
+  {% if project.is_billable and project.has_billable_contact %}
     <a href="{% url 'invoice.create' project.id %}">{% trans "Create" %}</a>
   {% else %}
     <p>{% trans "No jobs available to invoice." %}</p>
