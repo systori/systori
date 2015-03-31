@@ -61,6 +61,7 @@ INSTALLED_APPS = (
     'systori.apps.document',
     'systori.apps.field',
     'systori.apps.equipment',
+    'systori.apps.accounting',
     'systori.apps.main'
 )
 
