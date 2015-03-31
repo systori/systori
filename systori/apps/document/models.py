@@ -46,14 +46,9 @@ class Document(models.Model):
     class Meta:
         abstract = True
 
-    def generate_document(self, add_terms=True):
-
-        template = get_template(self.LATEX_TEMPLATE)
-
+    def get_document_context(self, add_terms):
         project_contact = self.project.billable_contact
-
-        # generate latex files
-        context = Context({
+        return Context({
           'doc': self,
           'add_terms': add_terms,
           'add_letterhead': False,
@@ -61,6 +56,13 @@ class Document(models.Model):
           'contact': project_contact.contact,
           'project_contact': project_contact # this has the association attribute
         })
+
+    def generate_document(self, add_terms=True):
+
+        template = get_template(self.LATEX_TEMPLATE)
+
+        context = self.get_document_context(add_terms)
+
         print_latex = template.render(context).encode('utf-8')
         self.print_latex.save('print.tex', ContentFile(print_latex), save=False)
 
@@ -174,6 +176,17 @@ class Invoice(Document):
     @transition(field=status, source=SENT, target=DISPUTED, custom={'label': _("Dispute")})
     def dispute(self):
         pass
+
+    def get_document_context(self, add_terms=True):
+        project_contact = self.project.billable_contact
+        return Context({
+          'doc': self,
+          'add_terms': add_terms,
+          'add_letterhead': False,
+          'jobs': self.project.billable_jobs,
+          'contact': project_contact.contact,
+          'project_contact': project_contact # this has the association attribute
+        })
 
     class Meta:
         verbose_name = _("Invoice")
