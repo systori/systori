@@ -48,7 +48,7 @@ class Document(models.Model):
 
     def generate_document(self, add_terms=True):
 
-        template = get_template(self.LATEX_TEMPLATE)
+        template = get_template(os.path.join("document/latex", self.latex_template))
 
         project_contact = self.project.billable_contact
 
@@ -94,7 +94,7 @@ class Proposal(Document):
     jobs = models.ManyToManyField("task.Job", verbose_name=_('Jobs'),
                                   related_name="proposals")
 
-    LATEX_TEMPLATE = "document/latex/proposal.tex"
+    latex_template = models.CharField(_('Template'), max_length=512, default="proposal.tex")
 
     NEW = "new"
     SENT = "sent"
@@ -147,7 +147,7 @@ class Invoice(Document):
     project = models.ForeignKey("project.Project", related_name="invoices")
     jobs = models.ManyToManyField("task.Job", related_name="invoices")
 
-    LATEX_TEMPLATE = "document/latex/invoice.tex"
+    latex_template = models.CharField(_('Template'), max_length=512, default="invoice.tex")
 
     NEW = "new"
     SENT = "sent"
