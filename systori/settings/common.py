@@ -6,6 +6,10 @@ DEFAULT_COUNTRY = "Deutschland"
 
 GOOGLE_MAPS_API_KEY = "AIzaSyAEhGj7BuZtHzx8lHow-cm6lTCja1txOX4"
 
+_ = lambda s: s
+PROPOSAL_LATEX_TEMPLATES = [
+    ('proposal.tex', _('Basic'))
+]
 
 # Django Settings
 
