@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from .models import Proposal, Invoice, Evidence
-from ..document.models import DocumentTemplate
+from django.conf import settings
+from .models import Proposal, Invoice, Evidence, DocumentTemplate
 from ..task.models import Job
 from django.forms.widgets import DateInput
 
@@ -10,6 +10,7 @@ class ProposalForm(forms.ModelForm):
     doc_template = forms.ModelChoiceField(
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.PROPOSAL), required=False)
+    latex_template = forms.ChoiceField(choices = [(k,_(v)) for k,v in settings.PROPOSAL_LATEX_TEMPLATES])
     add_terms = forms.BooleanField(label=_('Add Terms'),
                                    initial=True, required=False)
 
@@ -19,7 +20,7 @@ class ProposalForm(forms.ModelForm):
 
     class Meta:
         model = Proposal
-        fields = ['doc_template', 'document_date', 'header', 'footer',
+        fields = ['doc_template', 'latex_template', 'document_date', 'header', 'footer',
                   'jobs', 'add_terms', 'notes']
         widgets = {
             'document_date': DateInput(attrs={'type': 'date'}),
