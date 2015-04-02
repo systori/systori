@@ -3,7 +3,7 @@
 
 {% block head %}
  {{ block.super }}
- <!-- <meta http-equiv="refresh" content="60">  -->
+<meta http-equiv="refresh" content="3">
 {% endblock %}
 
 {% block header %}
@@ -44,7 +44,7 @@
 	      {% for worker in plan.workers.all %}
 	        {% if worker.is_foreman %}
 		      <div class="panel-body panel-custom">
-		        <span class="foreman_crown"></span> {{worker.user.get_full_name}}
+		        {{worker.user.get_full_name}} <span style="color:#4ABEF7;">♔</span>
 		      </div>
 		      {% else %}
 		      <div class="panel-body panel-custom">
@@ -54,7 +54,7 @@
 		    {% endfor %}
 		    {% for equipment in plan.equipment.all %}
 		      <div class="panel-body panel-custom">
-		          ✓ {{equipment}}
+		        {{equipment}} <span style="color:#4ABEF7;">♘</span>
 		      </div>
 		    {% endfor %}
 	      </div>
