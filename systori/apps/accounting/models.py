@@ -5,51 +5,27 @@ from datetime import date
 from decimal import Decimal
 
 
-# Reading material for double entry accounting:
-# http://www.accountingcoach.com/accounts-receivable-and-bad-debts-expense/explanation
-# http://www.find-uk-accountant.co.uk/articles/fua/16
-
-
-# Used when generating an invoice.
-def debit_customer(project, amount):
-    sales_account = Project.objects.get(id=1).account
-    customer_account = project.account
-
-    transaction = Transaction.objects.create(amount=amount)
-
-    # Debit Entry
-    Entry.objects.create(
-        account = account,
-        transaction = transaction,
-        amount = amount
-    )
-
-    # Credit Entry
-    credit_entry = Entry.objects.create(
-                                        )
-
-
-# Used when entering a payment from customer.
-def credit_customer(project, amount):
-
-
 class Account(models.Model):
     """ At least two accounts are required to perform double entry accounting.
     """
-    project = models.ForeignKey('project.Project', related_name="accounts")
+
+    # bs - balance sheet, debit (+), credit (-)
+    # pl - profit/loss, debit (-), credit (+)
 
     # Each project gets a receivable account.
-    RECEIVABLE = "receivable"  # debit (+) on invoice, credit (-) on payment
+    RECEIVABLE = "bs:receivable" # 10.001: debit (+) on invoice, credit (-) on payment
 
-    # Only one sales and taxes account per installation of systori.
-    SALES = "sales" # credit (-) on invoice, just the income portion
-    TAXES = "taxes" # credit (-) on invoice, just the tax portion
+    # Business related accounts, one of each per installation of systori.
+    SALES = "pl:sales" # 4000: credit (+) on invoice, debit (-) on payment
 
-    # Payments
-    CASH = "cash" # debit (+) on payment from customer, credit (-) to receivable
+    BANK = "bs:bank"   # 1800: debit (+) on payment
+    PAYMENTS = "pl:payments" # 3272: credit (+) on payment
+    TAXES = "taxes" # credit (+) on payment
 
-    # Write-offs
-    LOSS = "loss" # debit (+) when customer won't pay, credit (-) to receivable
+    ACCOUNT_TYPE = (
+        (SALES, _("Sales - 4000")),
+    )
+    account_type = models.CharField(_('Account Type'), max_length=128)#, choices=ACCOUNT_TYPE)
 
     @property
     def balance(self):
@@ -58,6 +34,7 @@ class Account(models.Model):
             amount += entry.amount
         return amount
 
+    def credit(self, ):
 
 class Transaction(models.Model):
     """ A transaction is a collection of accounting entries (usually
