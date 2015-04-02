@@ -34,19 +34,21 @@ def credit_customer(project, amount):
 
 
 class Account(models.Model):
-    """ At least two accounts are required in order to perform double entry accounting.
+    """ At least two accounts are required to perform double entry accounting.
     """
-    project = models.OneToOneField('project.Project', primary_key=True)
+    project = models.ForeignKey('project.Project', related_name="accounts")
 
-    # Customer
+    # Each project gets a receivable account.
     RECEIVABLE = "receivable"  # debit (+) on invoice, credit (-) on payment
 
-    # Business
+    # Only one sales and taxes account per installation of systori.
     SALES = "sales" # credit (-) on invoice, just the income portion
     TAXES = "taxes" # credit (-) on invoice, just the tax portion
 
+    # Payments
     CASH = "cash" # debit (+) on payment from customer, credit (-) to receivable
 
+    # Write-offs
     LOSS = "loss" # debit (+) when customer won't pay, credit (-) to receivable
 
     @property
