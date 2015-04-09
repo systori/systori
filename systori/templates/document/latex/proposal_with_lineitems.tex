@@ -1,0 +1,135 @@
+
+{% load latex i18n l10n customformatting %}
+\documentclass[10pt, oneside]{letter}
+\usepackage[utf8x]{inputenc}
+
+\usepackage{wallpaper, array, longtable, tabu, booktabs, eurosym, lastpage}
+% wallpaper = wallpaper pdf, array to stretch the table,
+% longtable break page for tables
+% tabu variable width columns for table
+% booktabs beautify table
+% eurosym for the € symbol
+% lastpage for footer Page X of LastPage
+
+\usepackage[defaultsans]{droidsans}
+\renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be typewriter style
+\usepackage[T1]{fontenc}
+% droidsans font
+
+{% if add_letterhead %}
+\ThisULCornerWallPaper{1}{softronic_page1_parts.pdf}
+\ULCornerWallPaper{1}{softronic_page2.pdf}
+{% endif %}
+
+% general page setup
+\usepackage[a4paper,top=55mm,bottom=22mm,left=25mm,right=62mm]{geometry}
+\usepackage{fancyhdr}%custom header package
+\pagestyle{fancy}%custom header
+\fancyhf{}%clear all
+\renewcommand{\headrulewidth}{0pt}%clear head line
+\rfoot{ {% trans 'Page' %} \thepage\ {% trans 'of' %} \pageref{LastPage}}
+
+%settings for longtable/tabu
+\renewcommand*{\arraystretch}{1.5}
+{\setlength{\tabcolsep}{0.5mm}
+
+\usepackage{ragged2e}
+\RaggedRight
+
+\begin{document}
+\sloppy
+\begin{letter}
+
+{% autoescape off %}
+
+{% if contact.business %}{{ contact.business|tex_escape|trim }} \\{% endif %}
+z.H. {{ contact.salutation|tex_escape|trim }} {{ contact.first_name|tex_escape|trim }} {{ contact.last_name|tex_escape|trim }} \\
+{{ contact.address|tex_escape|trim }} \\
+{{ contact.postal_code|tex_escape|trim }} {{ contact.city|tex_escape|trim }} \\
+
+\vspace{15mm}
+
+\begin{flushright}
+{{ doc.document_date|localize }}
+\end{flushright}
+{{ doc.header|tex_escape|trim }}
+
+\begin{longtabu} to \textwidth{@{}l X[l] r l r r}
+
+{% filter bold %}{% trans 'Pos.' %}{% endfilter %}  & {% filter bold %}{% trans 'Description' %}{% endfilter %} & \multicolumn{2}{c}{ {% filter bold %}{% trans 'Amount' %}{% endfilter %} } & {% filter bold %}{% trans 'Price' %}{% endfilter %} & {% filter bold %}{% trans 'Total'%}{% endfilter %} \\
+\endfirsthead
+\multicolumn{6}{l} {\textit{... {% trans 'Continuation' %} }} \\
+
+{% filter bold %}{% trans 'Pos.' %}{% endfilter %} & {% filter bold %}{% trans 'Description' %}{% endfilter %} & \multicolumn{2}{c}{ {% filter bold %}{% trans 'Amount' %}{% endfilter %} } & {% filter bold %}{% trans 'Price' %}{% endfilter %} & {% filter bold %}{% trans 'Total'%}{% endfilter %} \\
+\midrule
+
+\endhead
+\multicolumn{6}{r}{\textit{ {% trans 'Continuation' %} ...}} \\
+\endfoot
+
+\endlastfoot
+
+{% for job in jobs.all %}
+{{job.code|trim|bold}} & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{job.name|tex_escape|trim|bold}} }} \\
+{% for taskgroup in job.taskgroups.all %}
+{{taskgroup.code|trim|bold}} & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{taskgroup.name|tex_escape|trim|bold}} }} \\
+
+{% for task in taskgroup.tasks.all %}
+{% for instance in task.taskinstances.all %}
+{{instance.code|trim}}
+    & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{instance.full_name|tex_escape|trim}} }} \\
+    & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{instance.full_description|tex_escape|trim}} }} \\
+    & & {{task.qty|ubrdecimal}} & {{task.unit|tex_escape|trim}} & {{instance.unit_price|money|tex_escape|trim}} & {% if task.is_optional %}{% trans 'Optional' %}{% elif not instance.selected %}{% trans 'alternate'%} {% else %}{{instance.fixed_price_estimate|money|tex_escape|trim}} {% endif %} \\
+{% endfor %}
+{% endfor %}
+
+{% if job.taskgroups.all|length > 1 %}& \multicolumn{4}{r}{\parbox[b]{8.5cm}{ \bfseries{ {% trans 'Total' %} {{taskgroup.code|trim}} - {{taskgroup.name}} }} } & \bfseries{ {{taskgroup.estimate_total|money|tex_escape|trim}}  }\\
+\\{% endif %}
+{% endfor %}
+
+{% endfor %}
+
+{% for job in jobs.all %}
+{% for taskgroup in job.taskgroups.all %}
+& \multicolumn{4}{r}{\parbox[b]{8.5cm}{ \bfseries{ {% trans 'Total' %} {{taskgroup.code|trim}} - {{taskgroup.name|tex_escape|trim}} }} } & \bfseries{ {{taskgroup.estimate_total|money|tex_escape|trim}}  } \\
+{% endfor %}
+{% endfor %}
+
+\tabucline{2-6}
+& \multicolumn{4}{r}{\bfseries{ {% trans 'Total without VAT' %} }} & \bfseries{ {{jobs.estimate_total|money|tex_escape|trim}}  } \\*
+& \multicolumn{4}{r}{\bfseries{ 19,00\% {% trans 'VAT' %} }} & \bfseries{ {{jobs.estimate_tax_total|money|tex_escape|trim}}  } \\*
+& \multicolumn{4}{r}{\bfseries{ {% trans 'Total including VAT' %} }} & \bfseries{ {{jobs.estimate_gross_total|money|tex_escape|trim}}  } \\*
+
+\end{longtabu}
+
+{{ doc.footer|tex_escape|trim }}
+
+\newpage
+
+{% for job in jobs.all %}
+{% for taskgroup in job.taskgroups.all %}
+{% for task in taskgroup.tasks.all %}
+{% for instance in task.taskinstances.all %}
+\begin{longtabu} to \textwidth{@{}l X[l] r l r r}
+
+{{job.code|trim|bold}} & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{job.name|tex_escape|trim|bold}} }} \\
+
+{{taskgroup.code|trim|bold}} & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{taskgroup.name|tex_escape|trim|bold}} }} \\
+
+{{instance.code|trim}}
+    & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{instance.full_name|tex_escape|trim}} }} \\
+    & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{instance.full_description|tex_escape|trim}} }} \\
+\tabularnewline
+{% for lineitem in instance.lineitems.all %} \multicolumn{2}{l}{ {{lineitem.name|tex_escape}} } & {{lineitem.unit_qty|ubrdecimal}} & {{lineitem.unit|tex_escape}} & {{lineitem.price|money}} & {{lineitem.price_per_task_unit|money }} \\{% endfor %} \tabucline{1-6} 
+    & & {{'1,00'|bold}} & {{task.unit|tex_escape|trim|bold}} & & {{instance.unit_price|money|tex_escape|trim|bold}} \\
+
+\end{longtabu}
+\newpage
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+
+{% endautoescape %}
+\end{letter}
+\end{document}

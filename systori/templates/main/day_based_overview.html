@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% load i18n customformatting %}
-
+{% debug %}
 {% block head %}
  {{ block.super }}
-<meta http-equiv="refresh" content="3">
+<!--  <meta http-equiv="refresh" content="3"> -->
 {% endblock %}
 
 {% block header %}
@@ -23,7 +23,9 @@
     <div id="navbar" class="navbar-collapse collapse">
 
       <ul class="nav navbar-nav">
+        <li><a href="{{ previous_day_url }}">{% trans 'back' %}</a></li>
         <li><a>{{request.selected_day}}</a></li>
+        <li><a href="{{ next_day_url }}">{% trans 'next' %}</a></li>
         <!-- <li><a onclick="DoFullScreen()">fullscreen</a></li> -->
       </ul>
 
@@ -34,6 +36,7 @@
 
 
 {% block container %}
+
 <div class="overview-wrapper">
 	{%for plan in selected_plans%}
 	<div class="overview-box">

@@ -1,5 +1,6 @@
 from decimal import Decimal
 from datetime import datetime
+from string import ascii_lowercase
 from django.db import models, connections
 from django.db.models.manager import BaseManager
 from ordered_model.models import OrderedModel
@@ -379,10 +380,10 @@ class TaskInstance(BetterOrderedModel):
     @property
     def code(self):
         parent_code = self.task.code
-        self_code = 0
         if self.task.instance_count > 1:
-          self_code = self.order + 1
-        return '{}{}'.format(parent_code, self_code)
+            return '{}{}'.format(parent_code, ascii_lowercase[self.order])
+        else:
+            return parent_code
 
     def __str__(self):
         return '{} {}'.format(self.code, self.name)
