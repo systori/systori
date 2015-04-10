@@ -217,7 +217,9 @@ class FieldGenerateAllDailyPlans(View):
 
         for oldplan in DailyPlan.objects.filter(day=other_day):
 
-            newplan = DailyPlan.objects.create(jobsite=oldplan.jobsite, day=selected_day, notes=oldplan.notes)
+            newplan = DailyPlan.objects.create(jobsite=oldplan.jobsite,
+                                               day=selected_day,
+                                               notes=oldplan.notes)
 
             for task in oldplan.tasks.all():
                 newplan.tasks.add(task)
@@ -228,6 +230,9 @@ class FieldGenerateAllDailyPlans(View):
                     user=oldmember.user,
                     is_foreman=oldmember.is_foreman
                 )
+
+            for oldequipment in oldplan.equipment.all():
+                newplan.equipment.add(oldequipment)
 
         return HttpResponseRedirect(reverse('field.planning', args=[selected_day.isoformat()]))
 
