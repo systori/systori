@@ -8,14 +8,15 @@ import datetime
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('project', '0008_dailyplan_equipment'),
     ]
 
     operations = [
         migrations.CreateModel(
             name='Account',
             fields=[
-                ('project', models.OneToOneField(serialize=False, to='project.Project', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
+                ('account_type', models.CharField(max_length=128, verbose_name='Account Type', choices=[('asset', 'Asset'), ('liability', 'Liability'), ('income', 'Income'), ('expense', 'Expense'), ('capital', 'Capital')])),
+                ('code', models.CharField(max_length=32, verbose_name='Code')),
             ],
             options={
             },
@@ -24,9 +25,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Entry',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
-                ('amount', models.DecimalField(verbose_name='Amount', default=0.0, decimal_places=4, max_digits=14)),
-                ('account', models.ForeignKey(to='accounting.Account', related_name='entries')),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
+                ('amount', models.DecimalField(verbose_name='Amount', max_digits=14, default=0.0, decimal_places=4)),
+                ('account', models.ForeignKey(related_name='entries', to='accounting.Account')),
+            ],
+            options={
+                'ordering': ['transaction__date_recorded'],
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Payment',
+            fields=[
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
+                ('amount', models.DecimalField(verbose_name='Amount', max_digits=14, default=0.0, decimal_places=4)),
+                ('date_sent', models.DateField(verbose_name='Date Sent', default=datetime.date.today)),
+                ('date_received', models.DateField(verbose_name='Date Received', default=datetime.date.today)),
+                ('is_discounted', models.BooleanField(verbose_name='Was discounted applied?', default=False)),
             ],
             options={
             },
@@ -35,11 +50,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Transaction',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
-                ('date_sent', models.DateField(verbose_name='Date Sent', default=datetime.date.today)),
-                ('date_received', models.DateField(verbose_name='Date Received', default=datetime.date.today)),
-                ('date_recorded', models.DateTimeField(auto_now_add=True, verbose_name='Date Recorded')),
-                ('amount', models.DecimalField(verbose_name='Amount', default=0.0, decimal_places=4, max_digits=14)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
+                ('date_recorded', models.DateTimeField(verbose_name='Date Recorded', auto_now_add=True)),
                 ('notes', models.TextField(blank=True)),
             ],
             options={
@@ -47,9 +59,15 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.AddField(
+            model_name='payment',
+            name='transaction',
+            field=models.ForeignKey(related_name='payments', to='accounting.Transaction'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
             model_name='entry',
             name='transaction',
-            field=models.ForeignKey(to='accounting.Transaction', related_name='entries'),
+            field=models.ForeignKey(related_name='entries', to='accounting.Transaction'),
             preserve_default=True,
         ),
     ]

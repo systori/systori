@@ -30,7 +30,7 @@ class Project(models.Model):
 
     job_offset = models.PositiveSmallIntegerField(_("Job Offset"), default=0)
 
-    account = models.OneToOneField('account.Account', related_name="project")
+    account = models.OneToOneField('accounting.Account', related_name="project", null=True)
 
     objects = ProjectQuerySet.as_manager()
 

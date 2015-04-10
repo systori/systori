@@ -6,26 +6,32 @@ from decimal import Decimal
 
 
 class Account(models.Model):
-    """ At least two accounts are required to perform double entry accounting.
+    """
+                 Debit Credit
+          Asset:   +     -
+    Liabilities:   -     +
+         Income:   -     +
+       Expenses:   +     -
+        Capital:   -     +
+    
+    http://en.wikipedia.org/wiki/Double-entry_bookkeeping_system
     """
 
-    # bs - balance sheet, debit (+), credit (-)
-    # pl - profit/loss, debit (-), credit (+)
-
-    # Each project gets a receivable account.
-    RECEIVABLE = "bs:receivable" # 10.001: debit (+) on invoice, credit (-) on payment
-
-    # Business related accounts, one of each per installation of systori.
-    SALES = "pl:sales" # 4000: credit (+) on invoice, debit (-) on payment
-
-    BANK = "bs:bank"   # 1800: debit (+) on payment
-    PAYMENTS = "pl:payments" # 3272: credit (+) on payment
-    TAXES = "taxes" # credit (+) on payment
-
+    ASSET = "asset"
+    LIABILITY = "liability"
+    INCOME = "income"
+    EXPENSE = "expense"
+    CAPITAL = "capital"
+    
     ACCOUNT_TYPE = (
-        (SALES, _("Sales - 4000")),
+        (ASSET, _("Asset")),
+        (LIABILITY, _("Liability")),
+        (INCOME, _("Income")),
+        (EXPENSE, _("Expense")),
+        (CAPITAL, _("Capital")),
     )
-    account_type = models.CharField(_('Account Type'), max_length=128)#, choices=ACCOUNT_TYPE)
+    account_type = models.CharField(_('Account Type'), max_length=128, choices=ACCOUNT_TYPE)
+    code = models.CharField(_('Code'), max_length=32)
 
     @property
     def balance(self):
@@ -34,47 +40,76 @@ class Account(models.Model):
             amount += entry.amount
         return amount
 
-    def credit(self, ):
+    @property
+    def debits_total(self):
+        amount = Decimal(0.0)
+        for entry in self.entries.all():
+            if (self.account_type in self.DEBIT_ACCOUNTS and entry.amount > 0) or
+               (self.account_type in self.CREDITS_ACCOUNTS and entry.amount < 0):
+                amount += entry.amount
+        return amount
+
+    @property
+    def credits_total(self):
+        amount = Decimal(0.0)
+        for entry in self.entries.all():
+            if (self.account_type in self.CREDITS_ACCOUNTS and entry.amount > 0) or
+               (self.account_type in self.DEBIT_ACCOUNTS and entry.amount < 0):
+                amount += entry.amount
+        return amount
+
+    DEBIT_ACCOUNTS  = (ASSET, EXPENSE)
+
+    def debit(self, amount):
+        if self.account_type in self.DEBIT_ACCOUNTS:
+            return amount
+        else:
+            return amount * -1
+
+    CREDIT_ACCOUNTS = (LIABILITY, INCOME, CAPITAL)
+
+    def credit(self, amount):
+        if self.account_type in self.CREDIT_ACCOUNTS:
+            return amount
+        else:
+            return amount * -1
+
 
 class Transaction(models.Model):
     """ A transaction is a collection of accounting entries (usually
         at least two entries to two different accounts).
 
-        An invoice will result in a Transaction with two entries:
-
-          1. Negative amount entry for the construction company. (given away value)
-          2. Positive amount entry for the customer. (received value)
-
-        An invoice being paid will also result in two entries:
-
-          1. Positive amount entry for construction company. (received payment for value)
-          2. Negative amount entry for the customer. (paid for value)
-
-        When construction company does work and sends an invoice
-        they are negative at that moment (haven't gotten paid)
-        and the customer is positive (they've gotten value). The
-        customer must then settle the debt by making a payment and
-        balancing the books.
-
-        Sum of all entries in a Transaction should always equal 0, this
+        Difference between all credits and debits in a Transaction should always equal 0, this
         is the essence of double entry accounting.
     """
-
-    # Date customer wrote the check/initiated payment.
-    date_sent = models.DateField(_("Date Sent"), default=date.today)
-
-    # Date payment was settled/received.
-    date_received = models.DateField(_("Date Received"), default=date.today)
-
-    # Date this transaction was entered into systori.
     date_recorded = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
-
-    # Used to record payments. Especially since a single payment could cover multiple
-    # projects the total amount of the payment would be entered here and the split/breakdown
-    # towards each project would be entered in the entry.
-    amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=4, default=0.0)
-
     notes = models.TextField(blank=True)
+
+    def __init__(self):
+        super(Transaction, self).__init__()
+        self._entries = []
+
+    def debit(self, account, amount):
+        entry = Entry(account = account, amount = account.debit(amount))
+        self._entries.append(('debit', entry))
+
+    def credit(self, account, amount):
+        entry = Entry(account = account, amount = account.credit(amount))
+        self._entries.append(('credit', entry))
+    
+    def _total(self, column):
+        return sum([abs(item[1].amount) for item in self._entries if item[0] == column])
+
+    @property
+    def is_balanced(self):
+        return self._total('debit') == self._total('credit')
+
+    def save(self):
+        assert self.is_balanced
+        super(Transaction, self).save()
+        for item in self._entries:
+            item[1].transaction = self
+            item[1].save()
 
 
 class Entry(models.Model):
@@ -85,3 +120,22 @@ class Entry(models.Model):
 
     class Meta:
         ordering = ['transaction__date_recorded']
+
+
+class Payment(models.Model):
+    """ Payment adds some extra information to a transaction with details on
+        customer payments, such as when it was sent, received, etc.
+    """
+    transaction = models.ForeignKey(Transaction, related_name="payments")
+
+    # Amount of payment
+    amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=4, default=0.0)
+
+    # Date customer wrote the check/initiated payment.
+    date_sent = models.DateField(_("Date Sent"), default=date.today)
+
+    # Date payment was settled/received.
+    date_received = models.DateField(_("Date Received"), default=date.today)
+
+    # Record whether discount was applied.
+    is_discounted = models.BooleanField(_("Was discounted applied?"), default=False)
