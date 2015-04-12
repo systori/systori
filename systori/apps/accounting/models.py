@@ -44,8 +44,8 @@ class Account(models.Model):
     def debits_total(self):
         amount = Decimal(0.0)
         for entry in self.entries.all():
-            if (self.account_type in self.DEBIT_ACCOUNTS and entry.amount > 0) or
-               (self.account_type in self.CREDITS_ACCOUNTS and entry.amount < 0):
+            if (self.account_type in self.DEBIT_ACCOUNTS and entry.amount > 0) or\
+               (self.account_type in self.CREDIT_ACCOUNTS and entry.amount < 0):
                 amount += entry.amount
         return amount
 
@@ -53,7 +53,7 @@ class Account(models.Model):
     def credits_total(self):
         amount = Decimal(0.0)
         for entry in self.entries.all():
-            if (self.account_type in self.CREDITS_ACCOUNTS and entry.amount > 0) or
+            if (self.account_type in self.CREDIT_ACCOUNTS and entry.amount > 0) or\
                (self.account_type in self.DEBIT_ACCOUNTS and entry.amount < 0):
                 amount += entry.amount
         return amount
