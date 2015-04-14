@@ -69,6 +69,14 @@ class Project(models.Model):
         return self.jobs.billable_total()
 
     @property
+    def billable_tax_total(self):
+        return self.jobs.billable_tax_total()
+
+    @property
+    def billable_gross_total(self):
+        return self.jobs.billable_gross_total()
+
+    @property
     def jobs_for_proposal(self):
         return self.jobs.filter(status=Job.DRAFT)
 

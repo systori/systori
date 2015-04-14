@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models.manager import BaseManager
 from datetime import date
 from decimal import Decimal
+from .constants import *
 
 
 class Account(models.Model):
@@ -34,6 +35,14 @@ class Account(models.Model):
     @property
     def balance(self):
         return self.entries.all().total
+
+    @property
+    def balance_tax(self):
+        return round(self.balance_base * TAX_RATE, 2)
+
+    @property
+    def balance_base(self):
+        return round(self.entries.all().total / (1+TAX_RATE), 2)
 
     DEBIT_ACCOUNTS  = (ASSET, EXPENSE)
  
@@ -100,8 +109,8 @@ class Transaction(models.Model):
     date_recorded = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
     notes = models.TextField(blank=True)
 
-    def __init__(self):
-        super(Transaction, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(Transaction, self).__init__(*args, **kwargs)
         self._entries = []
 
     def debit(self, account, amount, **kwargs):
@@ -149,6 +158,14 @@ class Entry(models.Model):
     is_discount = models.BooleanField(_("Discount"), default=False)
 
     objects = EntryManager()
+
+    @property
+    def amount_base(self):
+        return round(self.amount / (1+TAX_RATE), 2)
+
+    @property
+    def amount_tax(self):
+        return round(self.amount_base * TAX_RATE, 2)
 
     class Meta:
         ordering = ['transaction__date_recorded']

@@ -48,20 +48,19 @@ class Document(models.Model):
 
     def get_document_context(self, add_terms):
         project_contact = self.project.billable_contact
-        return Context({
+        return {
           'doc': self,
           'add_terms': add_terms,
           'add_letterhead': False,
-          'jobs': self.jobs.all(),
           'contact': project_contact.contact,
           'project_contact': project_contact # this has the association attribute
-        })
+        }
 
     def generate_document(self, add_terms=True):
 
         template = get_template(os.path.join("document/latex", self.latex_template))
 
-        context = self.get_document_context(add_terms)
+        context = Context(self.get_document_context(add_terms))
 
         print_latex = template.render(context).encode('utf-8')
         self.print_latex.save('print.tex', ContentFile(print_latex), save=False)
@@ -137,6 +136,11 @@ class Proposal(Document):
             job.save()
         super(Proposal, self).delete(using)
 
+    def get_document_context(self, add_terms):
+        context = super(Proposal, self).get_document_context(add_terms)
+        context['jobs'] = self.jobs.all()
+        return context
+
     class Meta:
         verbose_name = _("Proposal")
         verbose_name_plural = _("Proposals")
@@ -147,7 +151,6 @@ class Invoice(Document):
     invoice_no = models.CharField(_("Invoice No."), max_length=30)
 
     project = models.ForeignKey("project.Project", related_name="invoices")
-    jobs = models.ManyToManyField("task.Job", related_name="invoices")
 
     latex_template = models.CharField(_('Template'), max_length=512, default="invoice.tex")
 
@@ -177,16 +180,10 @@ class Invoice(Document):
     def dispute(self):
         pass
 
-    def get_document_context(self, add_terms=True):
-        project_contact = self.project.billable_contact
-        return Context({
-          'doc': self,
-          'add_terms': add_terms,
-          'add_letterhead': False,
-          'jobs': self.project.billable_jobs,
-          'contact': project_contact.contact,
-          'project_contact': project_contact # this has the association attribute
-        })
+    def get_document_context(self, add_terms):
+        context = super(Invoice, self).get_document_context(add_terms)
+        context['project'] = self.project
+        return context
 
     class Meta:
         verbose_name = _("Invoice")

@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='Account',
             fields=[
                 ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
-                ('account_type', models.CharField(max_length=128, verbose_name='Account Type', choices=[('asset', 'Asset'), ('liability', 'Liability'), ('income', 'Income'), ('expense', 'Expense'), ('capital', 'Capital')])),
+                ('account_type', models.CharField(max_length=128, verbose_name='Account Type', choices=[('asset', 'Asset'), ('liability', 'Liability'), ('income', 'Income'), ('expense', 'Expense')])),
                 ('code', models.CharField(max_length=32, verbose_name='Code')),
             ],
             options={

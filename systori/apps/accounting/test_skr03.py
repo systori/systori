@@ -8,20 +8,9 @@ from .skr03 import *
 
 def create_data(self):
     create_task_data(self)
-
+    create_chart_of_accounts(self)
     self.project.account = Account.objects.create(account_type=Account.ASSET, code="10001")
     self.project.save()
-
-    self.promised_payments = Account.objects.create(account_type=Account.LIABILITY, code="1710")
-    self.partial_payments = Account.objects.create(account_type=Account.LIABILITY, code="1718")
-    self.tax_payments = Account.objects.create(account_type=Account.LIABILITY, code="1776")
-
-    self.bank = Account.objects.create(account_type=Account.ASSET, code="1200")
-
-    self.income = Account.objects.create(account_type=Account.INCOME, code="8400")
-    self.discounts = Account.objects.create(account_type=Account.INCOME, code="8736")
-
-    self.project = Project.objects.get(id=self.project.id)
 
 
 class TestExceptions(TestCase):

@@ -9,6 +9,19 @@ from .constants import *
 # http://www.ledger-cli.org/3.0/doc/ledger3.html
 
 
+def create_chart_of_accounts(self=None):
+    if not self: self = type('',(),{})()
+
+    self.promised_payments = Account.objects.create(account_type=Account.LIABILITY, code="1710")
+    self.partial_payments = Account.objects.create(account_type=Account.LIABILITY, code="1718")
+    self.tax_payments = Account.objects.create(account_type=Account.LIABILITY, code="1776")
+
+    self.income = Account.objects.create(account_type=Account.INCOME, code="8400")
+    self.discounts = Account.objects.create(account_type=Account.INCOME, code="8736")
+
+    self.bank = Account.objects.create(account_type=Account.ASSET, code="1200")
+
+
 def new_amount_to_debit(project):
     """ This function returns the amount that can be debited to the customers
         account based on work done since the last time the customer account was debited.
@@ -47,6 +60,11 @@ def partial_credit(project, payment, was_discount_applied=False):
     """
     assert isinstance(payment, Decimal)
 
+    transaction = Transaction()
+    transaction.credit(project.account, payment) # credit the customer
+    transaction.debit(Account.objects.get(code="1200"), payment)
+    transaction.save()
+
     income = round(payment / (1+TAX_RATE), 2)
 
     # full_payment is the payment that would have been made if discount hadn't been applied
@@ -60,11 +78,6 @@ def partial_credit(project, payment, was_discount_applied=False):
     transaction.credit(Account.objects.get(code="1776"), payment-income)
     if payment < pre_discount_payment: # credit customer's account with the discount
         transaction.credit(project.account, pre_discount_payment-payment, is_discount=True)
-    transaction.save()
-
-    transaction = Transaction()
-    transaction.credit(project.account, payment) # credit the customer
-    transaction.debit(Account.objects.get(code="1200"), payment)
     transaction.save()
 
 

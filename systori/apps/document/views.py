@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 
 from .models import Proposal, Invoice, Evidence, DocumentTemplate
 from .forms import ProposalForm, InvoiceForm, EvidenceForm
+from ..accounting import skr03
 
 
 class BaseDocumentPDFView(SingleObjectMixin, View):
@@ -98,18 +99,19 @@ class InvoiceCreate(CreateView):
     form_class = InvoiceForm
 
     def get_form_kwargs(self):
-        kwargs = super(ProposalCreate, self).get_form_kwargs()
+        kwargs = super(InvoiceCreate, self).get_form_kwargs()
         kwargs['instance'] = self.model(project=self.request.project)
         return kwargs
 
     def form_valid(self, form):
 
-        amount = Decimal(0.0)
-        for job in self.project.billable_jobs:
-            amount += job.billable_total
-        form.instance.amount = amount
+        # update account balance with any new work that's been done
+        skr03.partial_debit(self.request.project)
 
-        redirect = super(ProposalCreate, self).form_valid(form)
+        # record account balance in document record
+        form.instance.amount = self.request.project.account.balance
+
+        redirect = super(InvoiceCreate, self).form_valid(form)
 
         self.object.generate_document(form.cleaned_data['add_terms'])
 
