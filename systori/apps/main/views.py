@@ -40,16 +40,16 @@ class DayBasedOverviewView(TemplateView):
         context = super(DayBasedOverviewView, self).get_context_data(**kwargs)
 
         if not hasattr(self.request, 'selected_day'):
-            self.request.selected_day = get_workday(date.today())
+            self.request.selected_day = date.today()
         selected_day = self.request.selected_day
 
         context['today'] = date.today()
         context['previous_day'] = selected_day-timedelta(days=1)
         context['next_day'] = selected_day+timedelta(days=1)
 
-        context['previous_day_url'] = reverse('field.planning', args=[context['previous_day'].isoformat()])
-        context['today_url'] = reverse('field.planning', args=[date.today().isoformat()])
-        context['next_day_url'] = reverse('field.planning', args=[context['next_day'].isoformat()])
+        context['previous_day_url'] = reverse('day_based_overview', args=[context['previous_day'].isoformat()])
+        context['today_url'] = reverse('day_based_overview', args=[date.today().isoformat()])
+        context['next_day_url'] = reverse('day_based_overview', args=[context['next_day'].isoformat()])
 
         context['selected_day'] = selected_day
         context['selected_plans'] = DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id').all()
