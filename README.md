@@ -18,7 +18,7 @@ You will need PostgreSQL, Python3 and some other tools installed with apt-get:
 $ sudo apt-get install\
  postgresql postgresql-contrib postgresql-server-dev-all\
  python-pip python-dev python3-dev\
- texlive-full
+ texlive-full python3-lxml
 $ sudo pip install --upgrade fabric virtualenvwrapper
 $ source /usr/local/bin/virtualenvwrapper.sh
 $ echo "source /usr/local/bin/virtualenvwrapper.sh" > ~/.bashrc
