@@ -155,3 +155,4 @@ class TeamMember(models.Model):
     is_foreman = models.BooleanField(default=False)
     class Meta:
         ordering = ['-is_foreman', 'user__first_name']
+  
