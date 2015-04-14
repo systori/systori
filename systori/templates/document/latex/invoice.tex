@@ -112,29 +112,29 @@ z.H. {{ contact.salutation|tex_escape|trim }} {{ contact.first_name|tex_escape|t
 {\setlength{\tabcolsep}{1.0mm}
 \begin{longtabu} to \textwidth{X[l]|r|r|r}
 
- & \bfseries{gross pay} & \bfseries{consideration} &  \bfseries{VAT} \\
+ & \bfseries{ {% trans 'gross pay' %} } & \bfseries{ {% trans 'consideration' %} } &  \bfseries{ {% trans 'VAT' %} } \\
 \endfirsthead
-\multicolumn{4}{l} {\textit{... Fortsetzung }} \\
+\multicolumn{4}{l} {\textit{ {% trans 'Continuation' %} }} \\
 
- & \bfseries{gross pay} & \bfseries{consideration} &  \bfseries{VAT} \\
+ & \bfseries{ {% trans 'gross pay' %} } & \bfseries{ {% trans 'consideration' %} } &  \bfseries{ {% trans 'VAT' %} } \\
 \midrule
 
 \endhead
-\multicolumn{4}{r}{\textit{ Fortsetzung ...}} \\
+\multicolumn{4}{r}{\textit{ {% trans 'Continuation' %} }} \\
 \endfoot
 
 \endlastfoot
 
 \tabucline \\
-Invoice Total & {{project.billable_gross_total|money|tex_escape|trim}} € & {{project.billable_total|money|tex_escape|trim}} € & {{project.billable_tax_total|money|tex_escape|trim}} €\\[5pt]
+{% trans 'Invoice Total' %} & {{project.billable_gross_total|money|tex_escape|trim}} € & {{project.billable_total|money|tex_escape|trim}} € & {{project.billable_tax_total|money|tex_escape|trim}} €\\[5pt]
 {% for credit in project.account.credits %}
 {% if credit.is_discount %}
-Discount applied & {{ credit.amount|money|tex_escape|trim }} € & {{ credit.amount_base|money|tex_escape|trim }} € & {{ credit.amount_tax|money|tex_escape|trim }} €\\[5pt]
+{% trans 'Discount applied' %} & {{ credit.amount|money|tex_escape|trim }} € & {{ credit.amount_base|money|tex_escape|trim }} € & {{ credit.amount_tax|money|tex_escape|trim }} €\\[5pt]
 {% else %}
-Your Payment on {{ credit.transaction.date_recorded|date:"DATE_FORMAT" }} & {{ credit.amount|money|tex_escape|trim }} € & {{ credit.amount_base|money|tex_escape|trim }} € & {{ credit.amount_tax|money|tex_escape|trim }} €\\[5pt]
+{% trans 'Your Payment on' %} {{ credit.transaction.date_recorded|date:"DATE_FORMAT" }} & {{ credit.amount|money|tex_escape|trim }} € & {{ credit.amount_base|money|tex_escape|trim }} € & {{ credit.amount_tax|money|tex_escape|trim }} €\\[5pt]
 {% endif %}
 {% endfor %}
-\bfseries{Remaining amount} & \bfseries{ {{project.account.balance|money|tex_escape|trim}} €} & \bfseries{ {{project.account.balance_base|money|tex_escape|trim}} €} & \bfseries{ {{project.account.balance_tax|money|tex_escape|trim}} €}\\[5pt]
+\bfseries{ {% trans 'Remaining amount' %} } & \bfseries{ {{project.account.balance|money|tex_escape|trim}} €} & \bfseries{ {{project.account.balance_base|money|tex_escape|trim}} €} & \bfseries{ {{project.account.balance_tax|money|tex_escape|trim}} €}\\[5pt]
 
 \end{longtabu}}
 

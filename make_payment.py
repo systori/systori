@@ -6,5 +6,5 @@ django.setup()
 from systori.apps.accounting.skr03 import *
 from systori.apps.project.models import *
 
-p6 = Project.objects.get(id=6)
-partial_credit(p6, decimal.Decimal(200), was_discount_applied=True)
+p = Project.objects.get(id=18)
+partial_credit(p, decimal.Decimal(5063.62), was_discount_applied=False)
