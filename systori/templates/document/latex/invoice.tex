@@ -1,4 +1,3 @@
-
 {% load latex i18n l10n customformatting %}
 \documentclass[10pt, oneside]{letter}
 \usepackage[utf8x]{inputenc}
@@ -74,17 +73,19 @@ z.H. {{ contact.salutation|tex_escape|trim }} {{ contact.first_name|tex_escape|t
 
 \endlastfoot
 
-{% for job in jobs.all %}
+
+{% for job in project.billable_jobs %}
 {{job.code|trim|bold}} & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{job.name|tex_escape|trim|bold}} }} \\
-{% for taskgroup in job.taskgroups.all|exclude_taskgroups_with_zero_billable_total %}
+
+{% for taskgroup in job.billable_taskgroups %}
 {{taskgroup.code|trim|bold}} & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{taskgroup.name|tex_escape|trim|bold}} }} \\
 
-{% for task in taskgroup.tasks.all|exclude_tasks_with_zero_complete %}
-{% for instance in task.taskinstances.all %}
+{% for task in taskgroup.billable_tasks %}
+{% with instance=task.instance %}
 {{instance.code|trim}}
     & \multicolumn{5}{l}{\parbox[t]{11cm}{ {{instance.full_name|tex_escape|trim}} }} \\*
     & & {{task.complete|ubrdecimal}} & {{task.unit|tex_escape|trim}} & {{instance.unit_price|money|tex_escape|trim}} & {{instance.fixed_price_billable|money|tex_escape|trim}} \\
-{% endfor %}
+{% endwith %}
 {% endfor %}
 
 {% if job.taskgroups.all|length > 1 %}& \multicolumn{4}{r}{\parbox[b]{8.5cm}{ \bfseries{ {% trans 'Total' %} {{taskgroup.code|trim}} - {{taskgroup.name}} }} } & \bfseries{ {{taskgroup.billable_total|money|tex_escape|trim}}  }\\
@@ -93,18 +94,49 @@ z.H. {{ contact.salutation|tex_escape|trim }} {{ contact.first_name|tex_escape|t
 
 {% endfor %}
 
-{% for job in jobs.all %}
-{% for taskgroup in job.taskgroups.all|exclude_taskgroups_with_zero_billable_total %}
+
+{% for job in project.billable_jobs %}
+{% for taskgroup in job.billable_taskgroups %}
 & \multicolumn{4}{r}{\parbox[b]{8.5cm}{ \bfseries{ {% trans 'Total' %} {{taskgroup.code|trim}} - {{taskgroup.name|tex_escape|trim}} }} } & \bfseries{ {{taskgroup.billable_total|money|tex_escape|trim}}  } \\
 {% endfor %}
 {% endfor %}
 
 \tabucline{2-6}
-& \multicolumn{4}{r}{\bfseries{ {% trans 'Total without VAT' %} }} & \bfseries{ {{jobs.billable_total|money|tex_escape|trim}}  } \\*
-& \multicolumn{4}{r}{\bfseries{ 19,00\% {% trans 'VAT' %} }} & \bfseries{ {{jobs.billable_tax_total|money|tex_escape|trim}}  } \\*
-& \multicolumn{4}{r}{\bfseries{ {% trans 'Total including VAT' %} }} & \bfseries{ {{jobs.billable_gross_total|money|tex_escape|trim}}  } \\*
+& \multicolumn{4}{r}{\bfseries{ {% trans 'Total without VAT' %} }} & \bfseries{ {{project.billable_total|money|tex_escape|trim}}  } \\*
+& \multicolumn{4}{r}{\bfseries{ 19,00\% {% trans 'VAT' %} }} & \bfseries{ {{project.billable_tax_total|money|tex_escape|trim}}  } \\*
+& \multicolumn{4}{r}{\bfseries{ {% trans 'Total including VAT' %} }} & \bfseries{ {{project.billable_gross_total|money|tex_escape|trim}}  } \\*
 
 \end{longtabu}
+
+
+{\setlength{\tabcolsep}{1.0mm}
+\begin{longtabu} to \textwidth{X[l]|r|r|r}
+
+ & \bfseries{ {% trans 'gross pay' %} } & \bfseries{ {% trans 'consideration' %} } &  \bfseries{ {% trans 'VAT' %} } \\
+\endfirsthead
+\multicolumn{4}{l} {\textit{ {% trans 'Continuation' %} }} \\
+
+ & \bfseries{ {% trans 'gross pay' %} } & \bfseries{ {% trans 'consideration' %} } &  \bfseries{ {% trans 'VAT' %} } \\
+\midrule
+
+\endhead
+\multicolumn{4}{r}{\textit{ {% trans 'Continuation' %} }} \\
+\endfoot
+
+\endlastfoot
+
+\tabucline \\
+{% trans 'Invoice Total' %} & {{project.billable_gross_total|money|tex_escape|trim}} € & {{project.billable_total|money|tex_escape|trim}} € & {{project.billable_tax_total|money|tex_escape|trim}} €\\[5pt]
+{% for credit in project.account.credits %}
+{% if credit.is_discount %}
+{% trans 'Discount applied' %} & {{ credit.amount|money|tex_escape|trim }} € & {{ credit.amount_base|money|tex_escape|trim }} € & {{ credit.amount_tax|money|tex_escape|trim }} €\\[5pt]
+{% else %}
+{% trans 'Your Payment on' %} {{ credit.transaction.date_recorded|date:"DATE_FORMAT" }} & {{ credit.amount|money|tex_escape|trim }} € & {{ credit.amount_base|money|tex_escape|trim }} € & {{ credit.amount_tax|money|tex_escape|trim }} €\\[5pt]
+{% endif %}
+{% endfor %}
+\bfseries{ {% trans 'Remaining amount' %} } & \bfseries{ {{project.account.balance|money|tex_escape|trim}} €} & \bfseries{ {{project.account.balance_base|money|tex_escape|trim}} €} & \bfseries{ {{project.account.balance_tax|money|tex_escape|trim}} €}\\[5pt]
+
+\end{longtabu}}
 
 {{ doc.footer|tex_escape|trim }}
 {% endautoescape %}

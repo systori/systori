@@ -9,6 +9,7 @@ from django.utils.formats import date_format
 from django.conf import settings
 from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
+from ..accounting.constants import TAX_RATE
 
 
 class BetterOrderedModel(OrderedModel):
@@ -22,8 +23,6 @@ class BetterOrderedModel(OrderedModel):
             qs.filter(order__gte=self.order).update(order=models.F('order') + 1)
         super(BetterOrderedModel, self).save(*args, **kwargs)
 
-
-TAX_RATE = Decimal(.19)
 
 class JobQuerySet(models.QuerySet):
 
@@ -44,6 +43,7 @@ class JobQuerySet(models.QuerySet):
 
     def billable_gross_total(self):
         return self.billable_total() * (TAX_RATE+1)
+
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
     use_for_related_fields = True
@@ -101,6 +101,18 @@ class Job(BetterOrderedModel):
     def complete(self):
         pass
 
+    @property
+    def billable_taskgroups(self):
+        for taskgroup in self.taskgroups.all():
+            if taskgroup.is_billable:
+                yield taskgroup
+
+    @property
+    def is_billable(self):
+        for taskgroup in self.billable_taskgroups:
+            return True
+        return False
+
     def clone_to(self, other_job):
         taskgroups = self.taskgroups.all()
         for taskgroup in taskgroups:
@@ -132,6 +144,7 @@ class Job(BetterOrderedModel):
     def __str__(self):
         return self.name
 
+
 class TaskGroup(BetterOrderedModel):
 
     name = models.CharField(_("Name"), max_length=512)
@@ -144,6 +157,18 @@ class TaskGroup(BetterOrderedModel):
         verbose_name = _("Task Group")
         verbose_name_plural = _("Task Groups")
         ordering = ['order']
+
+    @property
+    def billable_tasks(self):
+        for task in self.tasks.all():
+            if task.is_billable:
+                yield task
+
+    @property
+    def is_billable(self):
+        for task in self.billable_tasks:
+            return True
+        return False
 
     def _total_calc(self, field):
         total = Decimal(0.0)
@@ -227,6 +252,10 @@ class Task(BetterOrderedModel):
         verbose_name = _("Task")
         verbose_name_plural = _("Task")
         ordering = ['order']
+
+    @property
+    def is_billable(self):
+        return self.complete > 0
 
     def estimate_total_modify(self, user, action, rate):
         for instance in self.taskinstances.all():
