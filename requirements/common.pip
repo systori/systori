@@ -5,3 +5,4 @@ django-ordered-model
 django-fsm
 django_mobile
 geopy
+lxml

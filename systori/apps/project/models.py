@@ -27,8 +27,10 @@ class Project(models.Model):
     job_zfill = models.PositiveSmallIntegerField(_("Job Code Zero Fill"), default=1)
     taskgroup_zfill = models.PositiveSmallIntegerField(_("Task Group Code Zero Fill"), default=1)
     task_zfill = models.PositiveSmallIntegerField(_("Task Code Zero Fill"), default=1)
-    
+
     job_offset = models.PositiveSmallIntegerField(_("Job Offset"), default=0)
+
+    account = models.OneToOneField('accounting.Account', related_name="project", null=True)
 
     objects = ProjectQuerySet.as_manager()
 
@@ -47,12 +49,32 @@ class Project(models.Model):
         ordering = ['name']
 
     @property
+    def billable_jobs(self):
+        for job in self.jobs.all():
+            if job.is_billable:
+                yield job
+
+    @property
+    def is_billable(self):
+        for job in self.billable_jobs:
+            return True
+        return False
+
+    @property
     def estimate_total(self):
         return self.jobs.estimate_total()
 
     @property
     def billable_total(self):
         return self.jobs.billable_total()
+
+    @property
+    def billable_tax_total(self):
+        return self.jobs.billable_tax_total()
+
+    @property
+    def billable_gross_total(self):
+        return self.jobs.billable_gross_total()
 
     @property
     def jobs_for_proposal(self):
@@ -62,14 +84,6 @@ class Project(models.Model):
     def has_jobs_for_proposal(self):
         return self.jobs_for_proposal.exists() and self.has_billable_contact
 
-    @property
-    def jobs_for_invoice(self):
-        return self.jobs.filter(status=Job.STARTED)
-
-    @property
-    def has_jobs_for_invoice(self):
-        return self.jobs_for_invoice.exists() and self.has_billable_contact
-    
     @property
     def billable_contact(self):
         try:
@@ -155,3 +169,4 @@ class TeamMember(models.Model):
     is_foreman = models.BooleanField(default=False)
     class Meta:
         ordering = ['-is_foreman', 'user__first_name']
+  

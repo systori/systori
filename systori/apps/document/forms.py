@@ -36,12 +36,10 @@ class InvoiceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(InvoiceForm, self).__init__(*args, **kwargs)
-        self.fields['jobs'].queryset = self.instance.project.jobs_for_invoice
 
     class Meta:
         model = Invoice
-        fields = ['doc_template', 'document_date', 'invoice_no', 'header', 'footer',
-                  'jobs', 'add_terms', 'notes']
+        fields = ['doc_template', 'document_date', 'invoice_no', 'header', 'footer', 'add_terms', 'notes']
         widgets = {
             'document_date': DateInput(attrs={'type': 'date'}),
         }
