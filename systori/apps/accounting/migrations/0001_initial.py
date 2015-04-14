@@ -23,11 +23,24 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.CreateModel(
+            name='Transaction',
+            fields=[
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
+                ('date_recorded', models.DateTimeField(verbose_name='Date Recorded', auto_now_add=True)),
+                ('notes', models.TextField(blank=True)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
             name='Entry',
             fields=[
                 ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('amount', models.DecimalField(verbose_name='Amount', max_digits=14, default=0.0, decimal_places=4)),
                 ('account', models.ForeignKey(related_name='entries', to='accounting.Account')),
+                ('transaction', models.ForeignKey(related_name='entries', to='accounting.Transaction')),
+                ('is_discount', models.BooleanField(verbose_name='Discount', default=False))
             ],
             options={
                 'ordering': ['transaction__date_recorded'],
@@ -47,27 +60,10 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
-        migrations.CreateModel(
-            name='Transaction',
-            fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
-                ('date_recorded', models.DateTimeField(verbose_name='Date Recorded', auto_now_add=True)),
-                ('notes', models.TextField(blank=True)),
-            ],
-            options={
-            },
-            bases=(models.Model,),
-        ),
         migrations.AddField(
             model_name='payment',
             name='transaction',
             field=models.ForeignKey(related_name='payments', to='accounting.Transaction'),
-            preserve_default=True,
-        ),
-        migrations.AddField(
-            model_name='entry',
-            name='transaction',
-            field=models.ForeignKey(related_name='entries', to='accounting.Transaction'),
             preserve_default=True,
         ),
     ]

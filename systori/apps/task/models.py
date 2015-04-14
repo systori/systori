@@ -9,6 +9,7 @@ from django.utils.formats import date_format
 from django.conf import settings
 from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
+from ..accounting.constants import TAX_RATE
 
 
 class BetterOrderedModel(OrderedModel):
@@ -22,8 +23,6 @@ class BetterOrderedModel(OrderedModel):
             qs.filter(order__gte=self.order).update(order=models.F('order') + 1)
         super(BetterOrderedModel, self).save(*args, **kwargs)
 
-
-TAX_RATE = Decimal(.19)
 
 class JobQuerySet(models.QuerySet):
 
@@ -44,6 +43,7 @@ class JobQuerySet(models.QuerySet):
 
     def billable_gross_total(self):
         return self.billable_total() * (TAX_RATE+1)
+
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
     use_for_related_fields = True

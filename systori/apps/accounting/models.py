@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from ..project.models import Project
 from django.db import models
+from django.db.models.manager import BaseManager
 from datetime import date
 from decimal import Decimal
 
@@ -12,7 +13,6 @@ class Account(models.Model):
     Liabilities:   -     +
          Income:   -     +
        Expenses:   +     -
-        Capital:   -     +
     
     http://en.wikipedia.org/wiki/Double-entry_bookkeeping_system
     """
@@ -21,58 +21,73 @@ class Account(models.Model):
     LIABILITY = "liability"
     INCOME = "income"
     EXPENSE = "expense"
-    CAPITAL = "capital"
     
     ACCOUNT_TYPE = (
         (ASSET, _("Asset")),
         (LIABILITY, _("Liability")),
         (INCOME, _("Income")),
         (EXPENSE, _("Expense")),
-        (CAPITAL, _("Capital")),
     )
     account_type = models.CharField(_('Account Type'), max_length=128, choices=ACCOUNT_TYPE)
     code = models.CharField(_('Code'), max_length=32)
-
+    
     @property
     def balance(self):
-        amount = Decimal(0.0)
-        for entry in self.entries.all():
-            amount += entry.amount
-        return amount
-
-    @property
-    def debits_total(self):
-        amount = Decimal(0.0)
-        for entry in self.entries.all():
-            if (self.account_type in self.DEBIT_ACCOUNTS and entry.amount > 0) or\
-               (self.account_type in self.CREDIT_ACCOUNTS and entry.amount < 0):
-                amount += entry.amount
-        return amount
-
-    @property
-    def credits_total(self):
-        amount = Decimal(0.0)
-        for entry in self.entries.all():
-            if (self.account_type in self.CREDIT_ACCOUNTS and entry.amount > 0) or\
-               (self.account_type in self.DEBIT_ACCOUNTS and entry.amount < 0):
-                amount += entry.amount
-        return amount
+        return self.entries.all().total
 
     DEBIT_ACCOUNTS  = (ASSET, EXPENSE)
+ 
+    @property
+    def is_debit_account(self):
+        return self.account_type in self.DEBIT_ACCOUNTS
 
-    def debit(self, amount):
-        if self.account_type in self.DEBIT_ACCOUNTS:
+    CREDIT_ACCOUNTS = (LIABILITY, INCOME)
+
+    @property
+    def is_credit_account(self):
+        return self.account_type in self.CREDIT_ACCOUNTS
+
+    def as_debit(self, amount):
+        """ Convert the 'amount' into correct positive/negative number based on double-entry accounting rules. """
+        if self.is_debit_account:
             return amount
         else:
             return amount * -1
 
-    CREDIT_ACCOUNTS = (LIABILITY, INCOME, CAPITAL)
-
-    def credit(self, amount):
-        if self.account_type in self.CREDIT_ACCOUNTS:
+    def as_credit(self, amount):
+        """ Convert the 'amount' into correct positive/negative number based on double-entry accounting rules. """
+        if self.is_credit_account:
             return amount
         else:
             return amount * -1
+
+    def debits(self):
+        """ Get all debit entries for this account. """
+        if self.is_debit_account:
+            return self.entries.filter(amount__gt=0)
+        else:
+            return self.entries.filter(amount__lt=0)
+
+    def credits(self):
+        """ Get all credit entries for this account. """
+        if self.is_credit_account:
+            return self.entries.filter(amount__gt=0)
+        else:
+            return self.entries.filter(amount__lt=0)
+
+    def payments(self):
+        """ This method should only be used on customer accounts (trade debtors).
+            It returns all entries that are credits and not marked as discount.
+        """
+        self.project # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
+        return self.credits().exclude(is_discount=True)
+
+    def discounts(self):
+        """ This method should only be used on customer accounts (trade debtors).
+            It returns all entries that are credits and not marked as discount.
+        """
+        self.project # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
+        return self.credits().filter(is_discount=True)
 
 
 class Transaction(models.Model):
@@ -89,12 +104,12 @@ class Transaction(models.Model):
         super(Transaction, self).__init__()
         self._entries = []
 
-    def debit(self, account, amount):
-        entry = Entry(account = account, amount = account.debit(amount))
+    def debit(self, account, amount, **kwargs):
+        entry = Entry(account = account, amount = account.as_debit(amount), **kwargs)
         self._entries.append(('debit', entry))
 
-    def credit(self, account, amount):
-        entry = Entry(account = account, amount = account.credit(amount))
+    def credit(self, account, amount, **kwargs):
+        entry = Entry(account = account, amount = account.as_credit(amount), **kwargs)
         self._entries.append(('credit', entry))
     
     def _total(self, column):
@@ -112,11 +127,28 @@ class Transaction(models.Model):
             item[1].save()
 
 
+class EntryQuerySet(models.QuerySet):
+
+    @property
+    def total(self):
+        amount = Decimal(0.0)
+        for entry in self:
+            amount += entry.amount
+        return amount
+
+class EntryManager(BaseManager.from_queryset(EntryQuerySet)):
+    use_for_related_fields = True
+
+
 class Entry(models.Model):
     """ Represents a debit or credit to an account. """
     transaction = models.ForeignKey(Transaction, related_name="entries")
     account = models.ForeignKey(Account, related_name="entries")
     amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=4, default=0.0)
+
+    is_discount = models.BooleanField(_("Discount"), default=False)
+
+    objects = EntryManager()
 
     class Meta:
         ordering = ['transaction__date_recorded']
