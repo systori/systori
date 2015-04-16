@@ -44,6 +44,13 @@ class TestInitialPartialDebit(TestCase):
         self.assertEquals(round(Decimal(480.00)*Decimal(1.19),2), self.project.account.balance)
         self.assertEquals(round(Decimal(480.00)*Decimal(1.19),2), Account.objects.get(code="1710").balance)
 
+    def test_initial_partial_debit_with_prepayment(self):
+        self.task.complete += 2
+        self.task.save()
+        partial_credit(self.project, Decimal(480.00)*Decimal(1.19))
+        partial_debit(self.project)
+        self.assertEquals(round(Decimal(192.0)*Decimal(1.19),2), self.project.account.balance)
+
 
 class TestPartialCredit(TestCase):
 
@@ -121,7 +128,7 @@ class TestFinalDebit(TestCase):
         self.assertEquals(0, Account.objects.get(code="1718").balance)
         self.assertEquals(0, Account.objects.get(code="8736").balance)
 
-    def Xtest_final_invoice_w_previous_debit(self):
+    def test_final_invoice_with_previous_debit(self):
         self.task.complete = 5
         self.task.save()
         partial_debit(self.project)
@@ -135,3 +142,38 @@ class TestFinalDebit(TestCase):
         self.assertEquals(round(Decimal(960.00)*Decimal(0.19),2), Account.objects.get(code="1776").balance)
         self.assertEquals(0, Account.objects.get(code="1718").balance)
         self.assertEquals(0, Account.objects.get(code="8736").balance)
+
+    def test_final_invoice_with_previous_debit_and_credit(self):
+        self.task.complete = 5
+        self.task.save()
+
+        partial_debit(self.project)
+        partial_credit(self.project, Decimal(400)*Decimal(1.19))
+
+        self.task.complete += 5
+        self.task.save()
+        final_debit(self.project)
+
+        self.assertEquals(round(Decimal(560.00)*Decimal(1.19),2), self.project.account.balance)
+        self.assertEquals(round(Decimal(960.00),2), Account.objects.get(code="8400").balance)
+        self.assertEquals(round(Decimal(960.00)*Decimal(0.19),2), Account.objects.get(code="1776").balance)
+        self.assertEquals(0, Account.objects.get(code="1718").balance)
+        self.assertEquals(0, Account.objects.get(code="8736").balance)
+
+    def test_final_invoice_with_previous_debit_and_discount_credit(self):
+        self.task.complete = 5
+        self.task.save()
+
+        partial_debit(self.project)
+        payment = Decimal(400)*Decimal(0.9)
+        partial_credit(self.project, payment*Decimal(1.19), True)
+
+        self.task.complete += 5
+        self.task.save()
+        final_debit(self.project)
+
+        self.assertEquals(round(Decimal(560.00)*Decimal(1.19),2), self.project.account.balance)
+        self.assertEquals(round(Decimal(960.00),2), Account.objects.get(code="8400").balance)
+        self.assertEquals(round(payment*Decimal(0.19)+Decimal(560.00)*Decimal(0.19),2), Account.objects.get(code="1776").balance)
+        self.assertEquals(0, Account.objects.get(code="1718").balance)
+        self.assertEquals(Decimal(-40), Account.objects.get(code="8736").balance)
