@@ -1,0 +1,11 @@
+{% extends "frame.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "main/sidebar.html" with section='projects' %}{% endblock %}
+
+{% block content %}
+<form action="" method="post" enctype="multipart/form-data" data-ajax="false">{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" class="btn btn-default" value="{% trans 'Save' %}" />
+</form>
+{% endblock %}

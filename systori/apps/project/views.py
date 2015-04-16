@@ -1,12 +1,12 @@
 from django.views.generic import TemplateView, ListView, DetailView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from .models import Project, JobSite
-from .forms import ProjectCreateForm, ProjectUpdateForm
+from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
 from .forms import JobSiteForm
-from ..task.models import Job, TaskGroup
+from ..task.models import Job, TaskGroup, Task
 from ..directory.models import ProjectContact
 from ..document.models import DocumentTemplate
 
@@ -49,6 +49,18 @@ class ProjectCreate(CreateView):
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.id])
+
+
+class ProjectImport(CreateView):
+    """ Import Function to import Gaeb X83 proposal request files. based on lxml objectify"""
+    form_class = ProjectImportForm
+    template_name = "project/project_form_upload.html"
+    success_url = reverse_lazy("projects")
+    
+    def form_valid(self, form):
+        response = super(ProjectImport, self).form_valid(form)
+
+        return response
 
 
 class ProjectUpdate(UpdateView):
