@@ -84,19 +84,27 @@ class Account(models.Model):
         else:
             return self.entries.filter(amount__lt=0)
 
+    def credits_without_adjustments(self):
+        return self.credits().exclude(is_adjustment=True)
+
     def payments(self):
         """ This method should only be used on customer accounts (trade debtors).
             It returns all entries that are credits and not marked as discount.
         """
         self.project # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
-        return self.credits().exclude(is_discount=True)
+        return self.credits_without_adjustments().exclude(is_discount=True)
 
     def discounts(self):
         """ This method should only be used on customer accounts (trade debtors).
             It returns all entries that are credits and not marked as discount.
         """
         self.project # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
-        return self.credits().filter(is_discount=True)
+        return self.credits_without_adjustments().filter(is_discount=True)
+
+
+class TransactionGroup(models.Model):
+    date_recorded = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
+    notes = models.TextField(blank=True)
 
 
 class Transaction(models.Model):
@@ -106,8 +114,7 @@ class Transaction(models.Model):
         Difference between all credits and debits in a Transaction should always equal 0, this
         is the essence of double entry accounting.
     """
-    date_recorded = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
-    notes = models.TextField(blank=True)
+    group = models.ForeignKey(TransactionGroup, related_name="transactions")
 
     def __init__(self, *args, **kwargs):
         super(Transaction, self).__init__(*args, **kwargs)
@@ -116,10 +123,12 @@ class Transaction(models.Model):
     def debit(self, account, amount, **kwargs):
         entry = Entry(account = account, amount = account.as_debit(amount), **kwargs)
         self._entries.append(('debit', entry))
+        return entry
 
     def credit(self, account, amount, **kwargs):
         entry = Entry(account = account, amount = account.as_credit(amount), **kwargs)
         self._entries.append(('credit', entry))
+        return entry
     
     def _total(self, column):
         return sum([abs(item[1].amount) for item in self._entries if item[0] == column])
@@ -155,7 +164,10 @@ class Entry(models.Model):
     account = models.ForeignKey(Account, related_name="entries")
     amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=4, default=0.0)
 
+    # is_discount and is_adjustment are flags to help with rendering credits
+    # on an invoice or any other user facing balance sheet
     is_discount = models.BooleanField(_("Discount"), default=False)
+    is_adjustment = models.BooleanField(_("Adjustment"), default=False)
 
     objects = EntryManager()
 
@@ -168,14 +180,15 @@ class Entry(models.Model):
         return round(self.amount_base * TAX_RATE, 2)
 
     class Meta:
-        ordering = ['transaction__date_recorded']
+        ordering = ['id']
 
 
 class Payment(models.Model):
     """ Payment adds some extra information to a transaction with details on
         customer payments, such as when it was sent, received, etc.
     """
-    transaction = models.ForeignKey(Transaction, related_name="payments")
+    project = models.ForeignKey('project.Project', related_name="payments")
+    transaction_group = models.OneToOneField(TransactionGroup, related_name="payment")
 
     # Amount of payment
     amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=4, default=0.0)
@@ -187,4 +200,7 @@ class Payment(models.Model):
     date_received = models.DateField(_("Date Received"), default=date.today)
 
     # Record whether discount was applied.
-    is_discounted = models.BooleanField(_("Was discounted applied?"), default=False)
+    is_discounted = models.BooleanField(_("Was discount applied?"), default=False)
+
+    class Meta:
+        ordering = ['id']
