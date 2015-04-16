@@ -126,15 +126,15 @@ z.H. {{ contact.salutation|tex_escape|trim }} {{ contact.first_name|tex_escape|t
 \endlastfoot
 
 \tabucline \\
-{% trans 'Invoice Total' %} & {{project.billable_gross_total|money|tex_escape|trim}} € & {{project.billable_total|money|tex_escape|trim}} € & {{project.billable_tax_total|money|tex_escape|trim}} €\\[5pt]
+{% trans 'Invoice Total' %} & {{project.billable_gross_total|money|tex_escape|trim}} & {{project.billable_total|money|tex_escape|trim}} & {{project.billable_tax_total|money|tex_escape|trim}}\\[5pt]
 {% for credit in project.account.credits %}
 {% if credit.is_discount %}
-{% trans 'Discount applied' %} & {{ credit.amount|money|tex_escape|trim }} € & {{ credit.amount_base|money|tex_escape|trim }} € & {{ credit.amount_tax|money|tex_escape|trim }} €\\[5pt]
+{% trans 'Discount applied' %} & {{ credit.amount|money|tex_escape|trim }} & {{ credit.amount_base|money|tex_escape|trim }} & {{ credit.amount_tax|money|tex_escape|trim }}\\[5pt]
 {% else %}
-{% trans 'Your Payment on' %} {{ credit.transaction.group.date_recorded|date:"DATE_FORMAT" }} & {{ credit.amount|money|tex_escape|trim }} € & {{ credit.amount_base|money|tex_escape|trim }} € & {{ credit.amount_tax|money|tex_escape|trim }} €\\[5pt]
+{% trans 'Your Payment on' %} {{ credit.transaction.group.payment.date_received|date:"DATE_FORMAT" }} & {{ credit.amount|money|tex_escape|trim }} & {{ credit.amount_base|money|tex_escape|trim }} & {{ credit.amount_tax|money|tex_escape|trim }}\\[5pt]
 {% endif %}
 {% endfor %}
-\bfseries{ {% trans 'Remaining amount' %} } & \bfseries{ {{project.account.balance|money|tex_escape|trim}} €} & \bfseries{ {{project.account.balance_base|money|tex_escape|trim}} €} & \bfseries{ {{project.account.balance_tax|money|tex_escape|trim}} €}\\[5pt]
+\bfseries{ {% trans 'Remaining amount' %} } & \bfseries{ {{project.account.balance|money|tex_escape|trim}} }& \bfseries{ {{project.account.balance_base|money|tex_escape|trim}} }& \bfseries{ {{project.account.balance_tax|money|tex_escape|trim}} }\\[5pt]
 
 \end{longtabu}}
 
