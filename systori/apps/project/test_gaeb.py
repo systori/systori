@@ -16,8 +16,8 @@ class GaebImportTests(TestCase):
     
     def test_import(self):
         file_path = os.path.join(settings.BASE_DIR, "apps/project/test_data/gaeb.x83")
-        project = gaeb_import(file_path)
-        print(project)
-        self.assertEqual("7030 Herschelbad", project)
+        project = Project.objects.get(id=gaeb_import(file_path))
+        print(project.name)
+        self.assertEqual("7030 Herschelbad", project.name)
         #xml = open(´test_data...)
         #ok, and after this, i do ar

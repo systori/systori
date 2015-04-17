@@ -9,6 +9,7 @@ from .forms import JobSiteForm
 from ..task.models import Job, TaskGroup, Task
 from ..directory.models import ProjectContact
 from ..document.models import DocumentTemplate
+from .gaeb_utils import gaeb_import
 
 
 class ProjectList(ListView):
@@ -55,12 +56,18 @@ class ProjectImport(CreateView):
     """ Import Function to import Gaeb X83 proposal request files. based on lxml objectify"""
     form_class = ProjectImportForm
     template_name = "project/project_form_upload.html"
-    success_url = reverse_lazy("projects")
     
     def form_valid(self, form):
         response = super(ProjectImport, self).form_valid(form)
+        self.object.id = gaeb_import(self.request.FILES['file'])
+        
+        project = Project.objects.get(id=self.object.id)
+        print(project.name)
 
         return response
+    
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.id])
 
 
 class ProjectUpdate(UpdateView):
