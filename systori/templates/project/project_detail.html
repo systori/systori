@@ -110,7 +110,6 @@
     <thead>
       <tr>
         <th>{% trans 'Status' %}</th>
-        <th>{% trans 'Jobs' %}</th>
         <th>{% trans 'Value' %}</th>
         <th>{% trans 'Created On' %}</th>
         <th>{% trans 'Invoice No.' %}</th>
@@ -122,11 +121,6 @@
       {% for doc in project.invoices.all %}
       <tr>
         <td>{{ doc.get_status_display }}</td>
-        <td>
-        {% for job in doc.jobs.all %}
-          {{ job }}<br />
-        {% endfor %}
-        </td>
         <td>{{ doc.amount|ubrdecimal }}</td>
         <td>{{ doc.created_on|localize }}</td>
         <td>{{ doc.invoice_no }}</td>
@@ -146,7 +140,7 @@
       {% endfor %}
     </tbody>
   </table>
-  {% if project.has_jobs_for_invoice %}
+  {% if project.is_billable and project.has_billable_contact %}
     <a href="{% url 'invoice.create' project.id %}">{% trans "Create" %}</a>
   {% else %}
     <p>{% trans "No jobs available to invoice." %}</p>
@@ -155,6 +149,29 @@
     {% endif %}
   {% endif %}
 </div>
+
+
+<h2 class="sub-header">{% trans "Payments" %}</h2>
+<div  class="table-responsive">
+  <table  class="table table-striped">
+    <thead>
+      <tr>
+        <th>{% trans 'Received' %}</th>
+        <th>{% trans 'Amount' %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for payment in project.payments.all %}
+      <tr>
+        <td>{{ payment.date_received }}</td>
+        <td>{{ payment.amount|ubrdecimal }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'payment.create' project.id %}">{% trans "Add" %}</a>
+</div>
+
 
 <h2 class="sub-header">{% trans "Evidences" %}</h2>
 <div  class="table-responsive">

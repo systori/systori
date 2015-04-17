@@ -10,6 +10,7 @@ from ..task.models import Job, TaskGroup, Task
 from ..directory.models import ProjectContact
 from ..document.models import DocumentTemplate
 from .gaeb_utils import gaeb_import
+from ..accounting.models import Account
 
 
 class ProjectList(ListView):
@@ -45,6 +46,9 @@ class ProjectCreate(CreateView):
         jobsite.city = form.cleaned_data['city']
         jobsite.postal_code = form.cleaned_data['postal_code']
         jobsite.save()
+
+        self.object.account = Account.objects.create(account_type=Account.ASSET, code='1{:04}'.format(self.object.id))
+        self.object.save()
 
         return response
 
