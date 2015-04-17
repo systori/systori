@@ -4,7 +4,6 @@ from django.db import models
 from django.db.models.manager import BaseManager
 from datetime import date
 from decimal import Decimal
-from .constants import *
 
 
 class Account(models.Model):
@@ -37,12 +36,12 @@ class Account(models.Model):
         return self.entries.all().total
 
     @property
-    def balance_tax(self):
-        return round(self.balance_base * TAX_RATE, 2)
-
-    @property
     def balance_base(self):
         return round(self.entries.all().total / (1+TAX_RATE), 2)
+
+    @property
+    def balance_tax(self):
+        return round(self.balance_base * TAX_RATE, 2)
 
     DEBIT_ACCOUNTS  = (ASSET, EXPENSE)
  
@@ -84,22 +83,19 @@ class Account(models.Model):
         else:
             return self.entries.filter(amount__lt=0)
 
-    def credits_without_adjustments(self):
-        return self.credits().exclude(is_adjustment=True)
-
     def payments(self):
         """ This method should only be used on customer accounts (trade debtors).
             It returns all entries that are credits and not marked as discount.
         """
         self.project # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
-        return self.credits_without_adjustments().exclude(is_discount=True)
+        return self.credits().filter(is_payment=True)
 
     def discounts(self):
         """ This method should only be used on customer accounts (trade debtors).
             It returns all entries that are credits and not marked as discount.
         """
         self.project # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
-        return self.credits_without_adjustments().filter(is_discount=True)
+        return self.credits().filter(is_discount=True)
 
 
 class TransactionGroup(models.Model):
@@ -164,28 +160,18 @@ class Entry(models.Model):
     account = models.ForeignKey(Account, related_name="entries")
     amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=4, default=0.0)
 
-    # is_discount and is_adjustment are flags to help with rendering credits
-    # on an invoice or any other user facing balance sheet
+    is_payment = models.BooleanField(_("Payment"), default=False)
     is_discount = models.BooleanField(_("Discount"), default=False)
-    is_adjustment = models.BooleanField(_("Adjustment"), default=False)
 
     objects = EntryManager()
-
-    @property
-    def amount_base(self):
-        return round(self.amount / (1+TAX_RATE), 2)
-
-    @property
-    def amount_tax(self):
-        return round(self.amount_base * TAX_RATE, 2)
 
     class Meta:
         ordering = ['id']
 
 
 class Payment(models.Model):
-    """ Payment adds some extra information to a transaction with details on
-        customer payments, such as when it was sent, received, etc.
+    """ Payment is user entered or imported from bank and needs to be reconciled with
+        accounting system.
     """
     project = models.ForeignKey('project.Project', related_name="payments")
     transaction_group = models.OneToOneField(TransactionGroup, related_name="payment")
@@ -198,9 +184,6 @@ class Payment(models.Model):
 
     # Date payment was settled/received.
     date_received = models.DateField(_("Date Received"), default=date.today)
-
-    # Record whether discount was applied.
-    is_discounted = models.BooleanField(_("Was discount applied?"), default=False)
 
     class Meta:
         ordering = ['id']

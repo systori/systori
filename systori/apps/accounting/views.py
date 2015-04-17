@@ -10,7 +10,8 @@ class PaymentCreate(CreateView):
     def form_valid(self, form):
         amount = form.cleaned_data['amount']
         is_discount = form.cleaned_data['is_discounted']
-        group = partial_credit(self.request.project, amount, is_discount)
+        group = TransactionGroup.objects.create()
+        partial_credit(group, self.request.project, amount, is_discount)
         form.instance.project = self.request.project
         form.instance.transaction_group = group
         return super(PaymentCreate, self).form_valid(form)
