@@ -43,7 +43,7 @@
           <td>&nbsp;</td>
           <td>
           {% if entry.account.project %}
-            <a href="{% url 'project.view' entry.account.project.id %}"><small>{{ entry.account.project }}</small><br />{{ entry.account }}</a>
+            <a href="{% url 'project.view' entry.account.project.id %}">{{ entry.account.code }} - {{ entry.account.project }}</a>
           {% elif account_entry.id == entry.id %}
             {{ entry.account }}
           {% else %}
