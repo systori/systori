@@ -8,6 +8,8 @@ from .constants import *
 # http://www.accountingcoach.com/accounts-receivable-and-bad-debts-expense/explanation
 # http://www.ledger-cli.org/3.0/doc/ledger3.html
 
+DEBTOR_CODE_TEMPLATE = '1{:04}'
+BANK_CODE_TEMPLATE = '12{:02}'
 
 def create_chart_of_accounts(self=None):
     if not self: self = type('',(),{})()
@@ -35,37 +37,35 @@ def new_amount_to_debit(project):
     return billable - already_debited
 
 
-def partial_debit(group, project):
+def partial_debit(project):
     """ Attempts to debit the customer account with any new work that was done since last debit. """
 
     amount = new_amount_to_debit(project)
 
     if not amount: return
 
-    transaction = Transaction(group=group)
+    transaction = Transaction()
     transaction.debit(project.account, amount) # debit the customer
     transaction.credit(Account.objects.get(code="1710"), amount)
     transaction.save()
 
 
-def partial_credit(group, projects, payment):
+def partial_credit(projects, payment):
     """ Applies a payment to a list of customer accounts. Including discounts on a per account basis. """
 
     assert isinstance(payment, Decimal)
 
-    transaction = Transaction(group=group)
-    transaction.debit(Account.objects.get(code="1200"), payment)
-    for (project, credit, is_discounted) in projects:
-        transaction.credit(project.account, credit, is_payment=True) # credit the customer
-    transaction.save()
-
     income = round(payment / (1+TAX_RATE), 2)
 
-    transaction = Transaction(group=group)
+    transaction = Transaction()
+
     transaction.debit(Account.objects.get(code="1710"), payment)
     transaction.credit(Account.objects.get(code="1718"), income)
     transaction.credit(Account.objects.get(code="1776"), payment - income)
-    transaction.save()
+
+    transaction.debit(Account.objects.get(code="1200"), payment)
+    for (project, credit, is_discounted) in projects:
+        transaction.credit(project.account, credit, is_payment=True) # credit the customer
 
     for (project, credit, is_discounted) in projects:
 
@@ -74,34 +74,32 @@ def partial_credit(group, projects, payment):
             pre_discount_credit = round(credit / (1-DISCOUNT), 2) # undo the discount to get original amount invoiced
             discount = pre_discount_credit - credit
 
-            transaction = Transaction(group=group)
             transaction.debit(Account.objects.get(code="1710"), discount)
             transaction.credit(project.account, discount, is_discount=True)
-            transaction.save()
+
+    transaction.save()
 
 
-def final_debit(group, project):
+def final_debit(project):
     """ Similar to partial_debit but also handles a lot of different accounting situations to prepare
         customer's account for final invoice generation.
     """
 
+    transaction = Transaction()
+
     unpaid_amount = project.account.balance
     if unpaid_amount > 0:
         # reset balance, we'll add unpaid_amount back into a final debit to customer
-        transaction = Transaction(group=group)
         transaction.debit(Account.objects.get(code="1710"), unpaid_amount)
         transaction.credit(project.account, unpaid_amount)
-        transaction.save()
 
     new_amount = new_amount_to_debit(project)
     amount = new_amount + unpaid_amount
     income = round(amount / (1+TAX_RATE), 2)
 
-    transaction = Transaction(group=group)
     transaction.debit(project.account, amount)
     transaction.credit(Account.objects.get(code="8400"), income)
     transaction.credit(Account.objects.get(code="1776"), amount-income)
-    transaction.save()
 
 
     payments = project.account.payments().total
@@ -110,7 +108,7 @@ def final_debit(group, project):
 
         pre_tax_payments = round(payments * -1 / (1+TAX_RATE), 2)
 
-        transaction = Transaction(group=group)
         transaction.debit(Account.objects.get(code="1718"), pre_tax_payments)
         transaction.credit(Account.objects.get(code="8400"), pre_tax_payments)
-        transaction.save()
+
+    transaction.save()

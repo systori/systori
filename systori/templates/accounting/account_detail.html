@@ -1,0 +1,58 @@
+{% extends "frame.html" %}
+{% load i18n l10n customformatting %}
+
+{% block sidebar %}{% include "main/sidebar.html" with section='accounts' %}{% endblock %}
+
+{% block content %}
+<style>
+.active-account {
+  font-weight: bold;
+}
+</style>
+
+  <h2 class="sub-header">{{ account }}</h2>
+  <div class="table-responsive">
+    <table class="table table-condensed">
+      <thead>
+        <tr>
+          <th>{% trans 'Transaction #' %}</th>
+          <th>{% trans 'Date' %}</th>
+          <th>{% trans 'Account' %}</th>
+          <th class="text-right">{% trans 'Debit' %}</th>
+          <th class="text-right">{% trans 'Credit' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for account_entry in account.entries.all %}
+        <tr class="active">
+          <td>{{ account_entry.transaction.id }}</td>
+          <td>{{ account_entry.transaction.recorded_on }}</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        {% for entry in account_entry.transaction.entries.all %}
+        <tr {% if account_entry.id == entry.id %}class="active-account"{% endif %}>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>
+          {% if entry.account.project %}
+            <a href="{% url 'project.view' entry.account.project.id %}"><small>{{ entry.account.project }}</small><br />{{ entry.account }}</a>
+          {% else %}
+            <a href="{% url 'account.view' entry.account.id %}">{{ entry.account }}</a>
+          {% endif %}
+          </td>
+          {% if entry.is_debit %}
+          <td align="right">{{ entry.absolute_amount|money }}</td>
+          <td align="right"></td>
+          {% else %}
+          <td align="right"></td>
+          <td align="right">{{ entry.absolute_amount|money }}</td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
