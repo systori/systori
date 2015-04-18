@@ -6,8 +6,9 @@ from .models import *
 User = get_user_model()
 
 
-def create_task_data(self):
-    self.user = User.objects.create_user('lex', 'lex@damoti.com', 'pass')
+def create_task_data(self, create_user=True):
+    if create_user:
+        self.user = User.objects.create_user('lex', 'lex@damoti.com', 'pass')
     self.template_project = Project.objects.create(name="Template Project", is_template=True)
     self.project = Project.objects.create(name="my project")
     self.project2 = Project.objects.create(name="my project 2")

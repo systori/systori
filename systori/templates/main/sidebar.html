@@ -7,4 +7,5 @@
   <li {% if section == 'directory' %}class="active"{% endif %}><a href="{% url 'directory' %}">{% trans 'Directory' %}</a></li>
   <li {% if section == 'equipment' %}class="active"{% endif %}><a href="{% url 'equipment.list' %}">{% trans 'Equipment' %}</a></li>
   <li><a href="{% url 'day_based_overview' %}">{% trans 'Daily Plans' %}</a></li>
+  <li {% if section == 'accounts' %}class="active"{% endif %}><a href="{% url 'accounts' %}">{% trans 'Accounts' %}</a></li>
 </ul>
