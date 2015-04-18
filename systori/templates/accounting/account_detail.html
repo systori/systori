@@ -8,6 +8,12 @@
 .active-account {
   font-weight: bold;
 }
+.other-account {
+  color: lightgrey;
+}
+.other-account a {
+  color: lightgrey;
+}
 </style>
 
   <h2 class="sub-header">{{ account }}</h2>
@@ -32,12 +38,14 @@
           <td>&nbsp;</td>
         </tr>
         {% for entry in account_entry.transaction.entries.all %}
-        <tr {% if account_entry.id == entry.id %}class="active-account"{% endif %}>
+        <tr class="{% if account_entry.id == entry.id %}active{% else %}other{% endif %}-account">
           <td>&nbsp;</td>
           <td>&nbsp;</td>
           <td>
           {% if entry.account.project %}
             <a href="{% url 'project.view' entry.account.project.id %}"><small>{{ entry.account.project }}</small><br />{{ entry.account }}</a>
+          {% elif account_entry.id == entry.id %}
+            {{ entry.account }}
           {% else %}
             <a href="{% url 'account.view' entry.account.id %}">{{ entry.account }}</a>
           {% endif %}
