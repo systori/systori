@@ -50,10 +50,12 @@ def partial_debit(project):
     transaction.save()
 
 
-def partial_credit(projects, payment):
+def partial_credit(projects, payment, bank=None):
     """ Applies a payment to a list of customer accounts. Including discounts on a per account basis. """
 
     assert isinstance(payment, Decimal)
+
+    if not bank: bank = Account.objects.get(code="1200")
 
     income = round(payment / (1+TAX_RATE), 2)
 
@@ -63,7 +65,7 @@ def partial_credit(projects, payment):
     transaction.credit(Account.objects.get(code="1718"), income)
     transaction.credit(Account.objects.get(code="1776"), payment - income)
 
-    transaction.debit(Account.objects.get(code="1200"), payment)
+    transaction.debit(bank, payment)
     for (project, credit, is_discounted) in projects:
         transaction.credit(project.account, credit, is_payment=True) # credit the customer
 

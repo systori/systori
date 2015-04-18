@@ -13,7 +13,8 @@ class PaymentCreate(FormView):
     def form_valid(self, form):
         amount = form.cleaned_data['amount']
         is_discounted = form.cleaned_data['is_discounted']
-        partial_credit([(self.request.project, amount, is_discounted)], amount)
+        bank = form.cleaned_data['bank_account']
+        partial_credit([(self.request.project, amount, is_discounted)], amount, bank)
         return super(PaymentCreate, self).form_valid(form)
 
     def get_success_url(self):
