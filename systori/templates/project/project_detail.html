@@ -164,7 +164,7 @@
       {% for payment in project.account.payments.all %}
       <tr>
         <td>{{ payment.received_on }}</td>
-        <td>{{ payment.amount|ubrdecimal }}</td>
+        <td>{{ payment.absolute_amount|money }}</td>
       </tr>
       {% endfor %}
     </tbody>
