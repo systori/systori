@@ -92,7 +92,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(null=True, default=None, to='accounting.TransactionGroup', related_name='transactions'),
             preserve_default=False,
         ),
-        migrations.RunPython(add_transaction_group),
+        #migrations.RunPython(add_transaction_group),
         migrations.AlterField(
             model_name='transaction',
             name='group',
