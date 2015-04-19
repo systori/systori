@@ -109,9 +109,8 @@ class InvoiceCreate(CreateView):
         project = self.request.project
 
         # update account balance with any new work that's been done
-        if skr03.new_amount_to_debit(project):
-            group = TransactionGroup.objects.create()
-            skr03.partial_debit(group, project)
+        if project.new_amount_to_debit:
+            skr03.partial_debit(project)
 
         # record account balance in document record
         form.instance.amount = project.account.balance

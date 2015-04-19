@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models.manager import BaseManager
 from datetime import date
 from decimal import Decimal
+from .constants import *
 
 
 class AccountQuerySet(models.QuerySet):
@@ -165,6 +166,12 @@ class Transaction(models.Model):
             item[1].transaction = self
             item[1].save()
 
+    @property
+    def is_reconciled(self):
+        return self.entries.filter(is_reconciled=True).exists()
+
+    def discounts_to_account(self, account):
+        return self.entries.filter(account=account).filter(is_discount=True)
 
 class EntryQuerySet(models.QuerySet):
 
@@ -192,6 +199,8 @@ class Entry(models.Model):
 
     is_discount = models.BooleanField(_("Discount"), default=False)
 
+    is_reconciled = models.BooleanField(_("Reconciled"), default=False)
+
     objects = EntryManager()
 
     def is_credit(self):
@@ -202,6 +211,14 @@ class Entry(models.Model):
 
     def absolute_amount(self):
         return abs(self.amount)
+
+    @property
+    def amount_base(self):
+        return round(self.amount / (1+TAX_RATE), 2)
+
+    @property
+    def amount_tax(self):
+        return round(self.amount_base * TAX_RATE, 2)
 
     class Meta:
         ordering = ['transaction__recorded_on', 'id']

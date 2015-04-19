@@ -7,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
 from ..task.models import Job
+from ..accounting.constants import TAX_RATE
 from geopy import geocoders
 
 
@@ -94,6 +95,23 @@ class Project(models.Model):
     @property
     def has_billable_contact(self):
         return self.billable_contact != None
+
+    @property
+    def new_amount_to_debit(self):
+        """ This function returns the amount that can be debited to the customers
+            account based on work done since the last time the customer account was debited.
+        """
+        # total cost of all complete work so far (with tax)
+        billable = round(self.billable_total * (1+TAX_RATE), 2)
+
+        # total we have already charged the customer
+        already_debited = round(self.account.debits().total, 2)
+
+        return billable - already_debited
+
+    @property
+    def new_amount_with_balance(self):
+        return self.new_amount_to_debit + self.account.balance
 
 
 class JobSite(models.Model):

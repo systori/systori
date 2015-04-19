@@ -7,8 +7,8 @@ from .models import *
 
 class PaymentForm(Form):
     bank_account = forms.ModelChoiceField(label=_('Bank Account'), queryset=Account.objects.banks())
-    amount = forms.DecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
-    received_on = forms.DateField(label=_("Received Date"), initial=date.today)
+    amount = forms.DecimalField(label=_("Amount"), max_digits=14, decimal_places=4, localize=True)
+    received_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
     is_discounted = forms.BooleanField(label=_('Is discounted?'), initial=False, required=False)
 
 

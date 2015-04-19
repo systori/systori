@@ -209,3 +209,15 @@ class TestFinalDebit(TestCase):
         self.assertEquals(round(Decimal(920.00),2), Account.objects.get(code="8400").balance)
         self.assertEquals(round(payment*Decimal(0.19)+Decimal(560.00)*Decimal(0.19),2), Account.objects.get(code="1776").balance)
         self.assertEquals(0, Account.objects.get(code="1718").balance)
+
+
+class TestDeleteTransaction(TestCase):
+
+    def setUp(self):
+        create_data(self)
+        partial_credit([(self.project, Decimal(100), False)], Decimal(100))
+
+    def test_that_all_entries_are_also_deleted(self):
+        self.assertEquals(Decimal(-100.00), self.project.account.balance)
+        Transaction.objects.first().delete()
+        self.assertEquals(Decimal(0), self.project.account.balance)
