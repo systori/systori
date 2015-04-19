@@ -1,10 +1,12 @@
 from django.views.generic import TemplateView, ListView, DetailView, FormView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from .models import *
 from .forms import *
 from .skr03 import *
+
 
 class PaymentCreate(FormView):
     form_class = PaymentForm
@@ -17,6 +19,20 @@ class PaymentCreate(FormView):
         partial_credit([(self.request.project, amount, is_discounted)], amount, bank)
         return super(PaymentCreate, self).form_valid(form)
 
+    def get_success_url(self):
+        return self.request.project.get_absolute_url()
+
+
+class TransactionDelete(DeleteView):
+    model = Transaction
+    def delete(self, request, *args, **kwargs):
+        object = self.get_object()
+        if not object.is_reconciled:
+            object.delete()
+        return HttpResponseRedirect(self.get_success_url())
+
+class PaymentDelete(TransactionDelete):
+    template_name = 'accounting/payment_confirm_delete.html'
     def get_success_url(self):
         return self.request.project.get_absolute_url()
 
