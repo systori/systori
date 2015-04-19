@@ -38,13 +38,13 @@
           <td>&nbsp;</td>
         </tr>
         {% for entry in account_entry.transaction.entries.all %}
-        <tr class="{% if account_entry.id == entry.id %}active{% else %}other{% endif %}-account">
+        <tr class="{% if entry.account.id == account.id %}active{% else %}other{% endif %}-account">
           <td>&nbsp;</td>
           <td>&nbsp;</td>
           <td>
           {% if entry.account.project %}
             <a href="{% url 'project.view' entry.account.project.id %}">{{ entry.account.code }} - {{ entry.account.project }}</a>
-          {% elif account_entry.id == entry.id %}
+          {% elif entry.account.id == account.id %}
             {{ entry.account }}
           {% else %}
             <a href="{% url 'account.view' entry.account.id %}">{{ entry.account }}</a>

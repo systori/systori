@@ -8,9 +8,10 @@ from .forms import ProjectCreateForm, ProjectUpdateForm
 from .forms import JobSiteForm
 from ..task.models import Job, TaskGroup
 from ..directory.models import ProjectContact
-from ..document.models import DocumentTemplate
-from ..accounting.models import Account
+from ..document.models import Invoice, DocumentTemplate
+from ..accounting.models import Account, Entry
 from ..accounting.skr03 import DEBTOR_CODE_TEMPLATE
+from ..accounting.utils import get_transactions_table
 
 
 class ProjectList(ListView):
@@ -22,6 +23,11 @@ class ProjectList(ListView):
 
 class ProjectView(DetailView):
     model = Project
+
+    def get_context_data(self, **kwargs):
+        context = super(ProjectView, self).get_context_data(**kwargs)
+        context['transactions'] = get_transactions_table(self.object)
+        return context
 
     def get_queryset(self):
         queryset = super(ProjectView, self).get_queryset()

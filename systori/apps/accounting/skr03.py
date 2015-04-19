@@ -8,8 +8,10 @@ from .constants import *
 # http://www.accountingcoach.com/accounts-receivable-and-bad-debts-expense/explanation
 # http://www.ledger-cli.org/3.0/doc/ledger3.html
 
+
 DEBTOR_CODE_TEMPLATE = '1{:04}'
 BANK_CODE_TEMPLATE = '12{:02}'
+
 
 def create_chart_of_accounts(self=None):
     if not self: self = type('',(),{})()
@@ -23,24 +25,10 @@ def create_chart_of_accounts(self=None):
     self.bank = Account.objects.create(account_type=Account.ASSET, code="1200")
 
 
-def new_amount_to_debit(project):
-    """ This function returns the amount that can be debited to the customers
-        account based on work done since the last time the customer account was debited.
-    """
-
-    # total cost of all complete work so far (with tax)
-    billable = round(project.billable_total * (1+TAX_RATE), 2)
-
-    # total we have already charged the customer
-    already_debited = round(project.account.debits().total, 2)
-
-    return billable - already_debited
-
-
 def partial_debit(project):
     """ Attempts to debit the customer account with any new work that was done since last debit. """
 
-    amount = new_amount_to_debit(project)
+    amount = project.new_amount_to_debit
 
     if not amount: return
 
@@ -95,7 +83,7 @@ def final_debit(project):
         transaction.debit(Account.objects.get(code="1710"), unpaid_amount)
         transaction.credit(project.account, unpaid_amount)
 
-    new_amount = new_amount_to_debit(project)
+    new_amount = project.new_amount_to_debit
     amount = new_amount + unpaid_amount
     income = round(amount / (1+TAX_RATE), 2)
 
