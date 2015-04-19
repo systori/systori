@@ -37,19 +37,31 @@ def get(el, path, default=None, required=False, element_only=False):
     else:
         return default
 
-def gaeb_import(filepath):
-        tree = objectify.parse(filepath)
+"""
+ <GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/200407">
+ <GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/200407">
+ {http://www.gaeb.de/GAEB_DA_XML/200407}Qty
+
+ <GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA83/3.2">
+ 
+"""
+
+def gaeb_import(file):
+        tree = objectify.parse(file)
         root = tree.getroot()
         label = root.PrjInfo.LblPrj
         project = Project.objects.create(name=label)
+
         for ctgy in root.Award.BoQ.BoQBody.BoQCtgy:
             job = Job.objects.create(name=" ".join(ctgy.LblTx.xpath(".//text()")), project=project)
             for grp in ctgy.BoQBody.BoQCtgy:
                 taskgroup = TaskGroup.objects.create(name=" ".join(grp.LblTx.xpath(".//text()")), job=job)
                 for item in grp.BoQBody.Itemlist.getchildren():
                     task = Task.objects.create(taskgroup=taskgroup)
-                    task.qty = item.Qty.text
-                    task.unit = item.QU.text
+                    #if not hasattr(item,"Qty"):
+                    #    pass # this is a trick nice
+                    task.qty = get(item, "Qty", default=0)#Qty.text
+                    task.unit = get(item, "QU", default="boom")#item.QU.text
                     for text_node in item.Description.CompleteText.DetailTxt.getchildren():
                         task.description = " ".join(text_node.xpath(".//text()"))
                     for text_node in item.Description.CompleteText.OutlineText.getchildren():
@@ -58,5 +70,5 @@ def gaeb_import(filepath):
                     task.save()
                 taskgroup.save()
             job.save()
-        return project.id
+        return project
 

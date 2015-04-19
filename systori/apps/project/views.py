@@ -56,22 +56,18 @@ class ProjectCreate(CreateView):
         return reverse('project.view', args=[self.object.id])
 
 
-class ProjectImport(CreateView):
+class ProjectImport(FormView):
     """ Import Function to import Gaeb X83 proposal request files. based on lxml objectify"""
     form_class = ProjectImportForm
     template_name = "project/project_form_upload.html"
     
     def form_valid(self, form):
-        response = super(ProjectImport, self).form_valid(form)
-        self.object.id = gaeb_import(self.request.FILES['file'])
-        
-        project = Project.objects.get(id=self.object.id)
-        print(project.name)
-
-        return response
+        self.object = gaeb_import(self.request.FILES['file'])
+        return super(ProjectImport, self).form_valid(form) # <- this will call get_success_url(), so self.object h
+    # has to already be set before hand
     
     def get_success_url(self):
-        return reverse('project.view', args=[self.object.id])
+        return reverse('project.view', args=[self.object.id]) # otherwise this will fail
 
 
 class ProjectUpdate(UpdateView):

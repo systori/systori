@@ -4,6 +4,7 @@
 {% block sidebar %}{% include "main/sidebar.html" with section='projects' %}{% endblock %}
 
 {% block content %}
+  <a href="{% url 'project.create' %}">{% trans "Create" %}</a> {% trans "or" %} <a href="{% url 'project.import' %}"> {% trans "Import" %}</a>
   <h2 class="sub-header">{% trans 'Projects' %}</h2>
   <div class="table-responsive">
     <table class="table table-striped">
@@ -29,6 +30,5 @@
         {% endfor %}
       </tbody>
     </table>
-    <a href="{% url 'project.create' %}">{% trans "Create" %}</a>
   </div>
 {% endblock content %}
