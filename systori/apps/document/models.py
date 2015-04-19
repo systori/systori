@@ -10,6 +10,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 
+from ..accounting.utils import get_transactions_table
+
 from systori import settings
 
 
@@ -183,6 +185,7 @@ class Invoice(Document):
     def get_document_context(self, add_terms):
         context = super(Invoice, self).get_document_context(add_terms)
         context['project'] = self.project
+        context['transactions'] = get_transactions_table(self.project)
         return context
 
     class Meta:

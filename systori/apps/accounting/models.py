@@ -7,6 +7,15 @@ from decimal import Decimal
 from .constants import *
 
 
+class AccountQuerySet(models.QuerySet):
+
+    def banks(self):
+        return Account.objects.filter(account_type=Account.ASSET).filter(project__isnull=True)
+
+class AccountManager(BaseManager.from_queryset(AccountQuerySet)):
+    use_for_related_fields = True
+
+
 class Account(models.Model):
     """
                  Debit Credit
@@ -29,20 +38,29 @@ class Account(models.Model):
         (INCOME, _("Income")),
         (EXPENSE, _("Expense")),
     )
-    account_type = models.CharField(_('Account Type'), max_length=128, choices=ACCOUNT_TYPE)
+    account_type = models.CharField(_('Account Type'), max_length=32, choices=ACCOUNT_TYPE)
     code = models.CharField(_('Code'), max_length=32)
-    
+    name = models.CharField(_('Name'), max_length=512, blank=True)
+
+    objects = AccountManager()
+
+    class Meta:
+        ordering = ['code']
+
+    def __str__(self):
+        return '{} - {}'.format(self.code, self.name)
+
     @property
     def balance(self):
         return self.entries.all().total
 
     @property
-    def balance_tax(self):
-        return round(self.balance_base * TAX_RATE, 2)
-
-    @property
     def balance_base(self):
         return round(self.entries.all().total / (1+TAX_RATE), 2)
+
+    @property
+    def balance_tax(self):
+        return round(self.balance_base * TAX_RATE, 2)
 
     DEBIT_ACCOUNTS  = (ASSET, EXPENSE)
  
@@ -63,12 +81,26 @@ class Account(models.Model):
         else:
             return amount * -1
 
+    def is_debit_amount(self, amount):
+        if (self.is_debit_account and amount > 0) or\
+           (self.is_credit_account and amount < 0):
+            return True
+        else:
+            return False
+
     def as_credit(self, amount):
         """ Convert the 'amount' into correct positive/negative number based on double-entry accounting rules. """
         if self.is_credit_account:
             return amount
         else:
             return amount * -1
+
+    def is_credit_amount(self, amount):
+        if (self.is_debit_account and amount < 0) or\
+           (self.is_credit_account and amount > 0):
+            return True
+        else:
+            return False
 
     def debits(self):
         """ Get all debit entries for this account. """
@@ -84,37 +116,27 @@ class Account(models.Model):
         else:
             return self.entries.filter(amount__lt=0)
 
-    def credits_without_adjustments(self):
-        return self.credits().exclude(is_adjustment=True)
-
     def payments(self):
         """ This method should only be used on customer accounts (trade debtors).
-            It returns all entries that are credits and not marked as discount.
+            It returns all credit entries marked as payment.
         """
         self.project # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
-        return self.credits_without_adjustments().exclude(is_discount=True)
+        return self.credits().filter(is_payment=True)
 
     def discounts(self):
         """ This method should only be used on customer accounts (trade debtors).
-            It returns all entries that are credits and not marked as discount.
+            It returns all credit entries marked as discount.
         """
         self.project # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
-        return self.credits_without_adjustments().filter(is_discount=True)
-
-
-class TransactionGroup(models.Model):
-    date_recorded = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
-    notes = models.TextField(blank=True)
+        return self.credits().filter(is_discount=True)
 
 
 class Transaction(models.Model):
     """ A transaction is a collection of accounting entries (usually
         at least two entries to two different accounts).
-
-        Difference between all credits and debits in a Transaction should always equal 0, this
-        is the essence of double entry accounting.
     """
-    group = models.ForeignKey(TransactionGroup, related_name="transactions")
+    recorded_on = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
+    notes = models.TextField(blank=True)
 
     def __init__(self, *args, **kwargs):
         super(Transaction, self).__init__(*args, **kwargs)
@@ -144,6 +166,12 @@ class Transaction(models.Model):
             item[1].transaction = self
             item[1].save()
 
+    @property
+    def is_reconciled(self):
+        return self.entries.filter(is_reconciled=True).exists()
+
+    def discounts_to_account(self, account):
+        return self.entries.filter(account=account).filter(is_discount=True)
 
 class EntryQuerySet(models.QuerySet):
 
@@ -160,16 +188,29 @@ class EntryManager(BaseManager.from_queryset(EntryQuerySet)):
 
 class Entry(models.Model):
     """ Represents a debit or credit to an account. """
+
     transaction = models.ForeignKey(Transaction, related_name="entries")
     account = models.ForeignKey(Account, related_name="entries")
+
     amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=4, default=0.0)
 
-    # is_discount and is_adjustment are flags to help with rendering credits
-    # on an invoice or any other user facing balance sheet
+    is_payment = models.BooleanField(_("Payment"), default=False)
+    received_on = models.DateField(_("Date Received"), default=date.today)
+
     is_discount = models.BooleanField(_("Discount"), default=False)
-    is_adjustment = models.BooleanField(_("Adjustment"), default=False)
+
+    is_reconciled = models.BooleanField(_("Reconciled"), default=False)
 
     objects = EntryManager()
+
+    def is_credit(self):
+        return self.account.is_credit_amount(self.amount)
+
+    def is_debit(self):
+        return self.account.is_debit_amount(self.amount)
+
+    def absolute_amount(self):
+        return abs(self.amount)
 
     @property
     def amount_base(self):
@@ -180,27 +221,4 @@ class Entry(models.Model):
         return round(self.amount_base * TAX_RATE, 2)
 
     class Meta:
-        ordering = ['id']
-
-
-class Payment(models.Model):
-    """ Payment adds some extra information to a transaction with details on
-        customer payments, such as when it was sent, received, etc.
-    """
-    project = models.ForeignKey('project.Project', related_name="payments")
-    transaction_group = models.OneToOneField(TransactionGroup, related_name="payment")
-
-    # Amount of payment
-    amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=4, default=0.0)
-
-    # Date customer wrote the check/initiated payment.
-    date_sent = models.DateField(_("Date Sent"), default=date.today)
-
-    # Date payment was settled/received.
-    date_received = models.DateField(_("Date Received"), default=date.today)
-
-    # Record whether discount was applied.
-    is_discounted = models.BooleanField(_("Was discount applied?"), default=False)
-
-    class Meta:
-        ordering = ['id']
+        ordering = ['transaction__recorded_on', 'id']

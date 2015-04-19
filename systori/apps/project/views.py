@@ -8,9 +8,11 @@ from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
 from .forms import JobSiteForm
 from ..task.models import Job, TaskGroup, Task
 from ..directory.models import ProjectContact
-from ..document.models import DocumentTemplate
+from ..document.models import Invoice, DocumentTemplate
+from ..accounting.models import Account, Entry
+from ..accounting.skr03 import DEBTOR_CODE_TEMPLATE
+from ..accounting.utils import get_transactions_table
 from .gaeb_utils import gaeb_import
-from ..accounting.models import Account
 
 
 class ProjectList(ListView):
@@ -22,6 +24,11 @@ class ProjectList(ListView):
 
 class ProjectView(DetailView):
     model = Project
+
+    def get_context_data(self, **kwargs):
+        context = super(ProjectView, self).get_context_data(**kwargs)
+        context['transactions'] = get_transactions_table(self.object)
+        return context
 
     def get_queryset(self):
         queryset = super(ProjectView, self).get_queryset()
@@ -47,7 +54,8 @@ class ProjectCreate(CreateView):
         jobsite.postal_code = form.cleaned_data['postal_code']
         jobsite.save()
 
-        self.object.account = Account.objects.create(account_type=Account.ASSET, code='1{:04}'.format(self.object.id))
+        code = DEBTOR_CODE_TEMPLATE.format(self.object.id)
+        self.object.account = Account.objects.create(account_type=Account.ASSET, code=code)
         self.object.save()
 
         return response

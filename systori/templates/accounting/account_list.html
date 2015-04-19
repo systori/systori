@@ -1,0 +1,64 @@
+{% extends "frame.html" %}
+{% load i18n l10n customformatting %}
+
+{% block sidebar %}{% include "main/sidebar.html" with section='accounts' %}{% endblock %}
+
+{% block content %}
+  <h2 class="sub-header">{% trans 'Bank Accounts' %}</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>{% trans 'Code' %}</th>
+          <th>{% trans 'Name' %}</th>
+          <th class="text-right">{% trans 'Balance' %}</th>
+          <th>{% trans 'Actions' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for account in banks %}
+        <tr>
+          <td><a href="{% url 'account.view' account.id %}">{{ account.code }}</a></td>
+          <td><a href="{% url 'account.view' account.id %}">{{ account.name }}</a></td>
+          <td align="right">{{ account.balance|money }}</td>
+          <td>
+            <a href="{% url 'account.edit' account.id %}">{% trans "Edit" %}</a>
+            {% if account.entries.count == 0 %}
+            <a href="{% url 'account.delete' account.id %}">{% trans "Delete" %}</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <a href="{% url 'account.create' %}">{% trans "Add" %}</a>
+  </div>
+
+  <h2 class="sub-header">{% trans 'Other Accounts' %} - SKR03</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>{% trans 'Type' %}</th>
+          <th>{% trans 'Code' %}</th>
+          <th>{% trans 'Name' %}</th>
+          <th class="text-right">{% trans 'Balance' %}</th>
+          <th>{% trans 'Actions' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for account in other %}
+        <tr>
+          <td>{{ account.get_account_type_display }}</td>
+          <td><a href="{% url 'account.view' account.id %}">{{ account.code }}</a></td>
+          <td><a href="{% url 'account.view' account.id %}">{{ account.name }}</a></td>
+          <td align="right">{{ account.balance|money }}</td>
+          <td>
+            <a href="{% url 'account.edit' account.id %}">{% trans "Edit" %}</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock content %}
