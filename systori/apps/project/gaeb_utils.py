@@ -1,6 +1,7 @@
 from lxml import objectify, etree
 
 from ..task.models import Job, TaskGroup, Task, TaskInstance
+from ..accounting.models import Account
 from .models import Project
 
 def get_text(element):
@@ -48,9 +49,15 @@ def get(el, path, default=None, required=False, element_only=False):
 
 def gaeb_import(file):
         tree = objectify.parse(file)
+        GAEB_NS = tree.xpath('namespace-uri(.)')
         root = tree.getroot()
         label = root.PrjInfo.LblPrj
         project = Project.objects.create(name=label)
+        try:
+            first_job_no = int(root.Award.BoQ.BoQInfo.Name)-1
+            project.job_offset = first_job_no if first_job_no >= 0 else 0
+        except:
+            pass
 
         for ctgy in root.Award.BoQ.BoQBody.BoQCtgy:
             job = Job.objects.create(name=" ".join(ctgy.LblTx.xpath(".//text()")), project=project)
@@ -58,17 +65,23 @@ def gaeb_import(file):
                 taskgroup = TaskGroup.objects.create(name=" ".join(grp.LblTx.xpath(".//text()")), job=job)
                 for item in grp.BoQBody.Itemlist.getchildren():
                     task = Task.objects.create(taskgroup=taskgroup)
-                    #if not hasattr(item,"Qty"):
-                    #    pass # this is a trick nice
-                    task.qty = get(item, "Qty", default=0)#Qty.text
-                    task.unit = get(item, "QU", default="boom")#item.QU.text
+                    task.qty = get(item, "Qty", default=0)
+                    task.unit = get(item, "QU", default="INFO")
                     for text_node in item.Description.CompleteText.DetailTxt.getchildren():
-                        task.description = " ".join(text_node.xpath(".//text()"))
+                        for p in text_node.getchildren():
+                            for child in p.getchildren():
+                                if child.tag in "{{{ns}}}span".format(ns=GAEB_NS):
+                                    task.description += " ".join(child.xpath(".//text()"))
+                                elif child.tag in "{{{ns}}}image".format(ns=GAEB_NS):
+                                    task.description += " !Bild im LV vorhanden!"
                     for text_node in item.Description.CompleteText.OutlineText.getchildren():
                         task.name = " ".join(text_node.xpath(".//text()"))
                     TaskInstance.objects.create(task=task, selected=True)
                     task.save()
                 taskgroup.save()
             job.save()
+        project.save()
+        project.account = Account.objects.create(account_type=Account.ASSET, code=str(10000+project.id))
+        project.save()
         return project
 

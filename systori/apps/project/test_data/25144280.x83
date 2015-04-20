@@ -1,0 +1,930 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/200407">
+  <GAEBInfo>
+    <Version>3.0</Version>
+    <VersDate>2004-08</VersDate>
+    <Date>2015-03-18</Date>
+    <Time>12:01:14</Time>
+    <ProgSystem>G&amp;W CALIFORNIA 3000</ProgSystem>
+    <ProgName>CALIFORNIA 3000</ProgName>
+  </GAEBInfo>
+  <PrjInfo>
+    <NamePrj>3300 EZH</NamePrj>
+    <LblPrj>Dachinstandsetzung</LblPrj>
+    <Cur>EUR</Cur>
+    <CurLbl>Euro</CurLbl>
+  </PrjInfo>
+  <Award>
+    <DP>83</DP>
+    <AwardInfo>
+      <Cur>EUR</Cur>
+      <CurLbl>Euro</CurLbl>
+    </AwardInfo>
+    <BoQ ID="GW_2666770">
+      <BoQInfo>
+        <Name>Statisch</Name>
+        <LblBoQ>Dachdecker-, Zimmererarbeiten inkl. Stahlblechkonstruktionen</LblBoQ>
+        <Date>2015-03-18</Date>
+        <OutlCompl>AllTxt</OutlCompl>
+        <BoQBkdn>
+          <Type>BoQLevel</Type>
+          <Length>2</Length>
+          <Num>Yes</Num>
+        </BoQBkdn>
+        <BoQBkdn>
+          <Type>BoQLevel</Type>
+          <Length>2</Length>
+          <Num>Yes</Num>
+        </BoQBkdn>
+        <BoQBkdn>
+          <Type>Item</Type>
+          <Length>4</Length>
+          <Num>Yes</Num>
+        </BoQBkdn>
+        <BoQBkdn>
+          <Type>Index</Type>
+          <Length>1</Length>
+          <Num>No</Num>
+          <Alignment>right</Alignment>
+        </BoQBkdn>
+      </BoQInfo>
+      <BoQBody>
+        <BoQCtgy ID="GW_2705940" RNoPart="01">
+          <LblTx>
+            <span>Dachdecker- und Klempnerarbeiten</span>
+          </LblTx>
+          <NotApplBoQ>No</NotApplBoQ>
+          <BoQBody>
+            <Remark ID="GW_2705941">
+              <Description>
+                <CompleteText>
+                  <DetailTxt>
+                    <Text>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Statisch bedingt sind bei der bereits sanierten 'Roten Halle' des Eissportzentrum Herzogenried Verstärkungsmaßnahmen notwendig.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Hierzu ist bei den 8 Satteldächern mit einer jeweiligen Länge von ca. 38 m der First (je 2 Firstplatten) zu öffnen und die oberen Faserzement-Wellplatten (je 2 Faserzement-Wellplatten) zu demontieren. Die Firsthauben und Platten im Randbereich / Giebelbereich müssen nicht entfernt werden. Hier sind jedoch je Satteldach 2-mal die Schrauben zu lösen um die Nachbarplatte entfernen zu können.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Die Traufhöhe beträgt ca. 8,50 m, die Firsthöhe beträgt ca. 11,5m</span>
+                      </p>
+                      <p style="text-align:left;">
+                        <br />
+                      </p>
+                      <p style="text-align:left;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Die Arbeiten müssen mit auf den Dachflächen liegenden Leitern oder Bohlen mit aufgenagelten Trittlatten durchgeführt werden (Durchfallschutz).</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Im nächsten Schritt sind die vorhandenen Marderschutzbleche im Firstbereich zu entfernen.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Daraufhin sind Überstände der Kanthölzer am First zu beseitigen und die Kante ist zu brechen.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Anschließend sind die Verstärkungsbleche (ca. 40 pro Satteldach) einzubauen.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Überwiegend liegen die Kanthölzer bündig nebeneinander; dementsprechend ist das Stahlblech gemäß Plan S004a zu verwenden. Bei nicht bündiger Lage sind die im Plan S005a bzw. S006a verwendeten Stahlbleche zu verwenden.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Nach Einbau des Marderschutzes ist die Dachfläche wieder zu schließen.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Diese Leistungen erfolgen jeweils in Tagesabschnitten. Erst nach kompletter Fertigstellung  eines Satteldaches ist mit dem nächsten Satteldach zu beginnen.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Der erste Bauabschnitt ist der First zwischen Reihe 1 und 2. </span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Der 2. Bauabschnitt beinhaltet die Bearbeitung des Firstes zwischen Reihe 2 und 3.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Der 3. Bauabschnitt beinhaltet die Bearbeitung des Firstes zwischen Reihe 8 und 9.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Die weitere Taktfolge der restlichen Firste ist mit der Bauleitung abzusprechen. Es ist weiterhin jeweils ein ganzer First fertigzustellen, bevor der nächste begonnen wird.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Die notwendigen Gerüste, ein Lastenaufzug zum Transport der Stahlblechkonstruktionen vom Grund</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">über Traufhöhe, Schutznetze sowie die Bautoilette werden bauseits gestellt.</span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <br />
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Grundlagen: </span>
+                      </p>
+                      <p style="text-align:justify;">
+                        <span style="color:#000000;font-family:Arial;font-size:10.0pt;">- siehe </span>
+                        <span style="font-family:Arial;font-size:10.0pt;">Verzeichnis weiterer Vertragsbestandteile</span>
+                      </p>
+                    </Text>
+                  </DetailTxt>
+                  <OutlineText>
+                    <OutlTxt>
+                      <TextOutlTxt>
+                        <p style="text-align:left;">
+                          <span style="">Hinweistext zum Bauablauf</span>
+                        </p>
+                      </TextOutlTxt>
+                    </OutlTxt>
+                  </OutlineText>
+                </CompleteText>
+              </Description>
+            </Remark>
+            <BoQCtgy ID="GW_2705942" RNoPart="01">
+              <LblTx>
+                <span>Vorbereitende und begleitende Maßnahmen</span>
+              </LblTx>
+              <NotApplBoQ>No</NotApplBoQ>
+              <BoQBody>
+                <Itemlist>
+                  <Item ID="GW_2705943" RNoPart="0001">
+                    <NotAppl>No</NotAppl>
+                    <Qty>1200.000</Qty>
+                    <QU>m2</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Durchführung der Arbeiten mittels auf der Dachfläche liegenden Leitern oder Bohlen mit aufgenagelten Trittlatten zur Gewährleistung des Durchfallschutzes.</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Schutzmaßnahmen bei Arbeiten auf den Satteldächern</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2705944" RNoPart="0002">
+                    <NotAppl>No</NotAppl>
+                    <Qty>1.000</Qty>
+                    <QU>psch</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Bauteildokumentation der durchgeführten Arbeiten als bebildertes Bautagebuch in je 8 Ordnern (pro Satteldachfläche 1 Ordner) </span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <br />
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Die Feststellungen sind detailliert mit Skizzen und Fotos in einem Baubericht schriftlich festzuhalten und dem AG nach der Maßnahme zu übergeben.  </span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Bauteildokumentation</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2705945" RNoPart="0003">
+                    <NotAppl>No</NotAppl>
+                    <Qty>600.000</Qty>
+                    <QU>m2</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Liefern und Einbau des Witterungsschutzes im Dachbereich der "Roten Halle" mittels gewebeverstärkter Planen einschl. der erforderlichen Unterkonstruktion zum Abdecken der offenen Dachflächen bzw. abschnittsweisen Durchführung der Baumaßnahmen und zum Schutz der Dachkonstruktion.  Das arbeitstägliche bzw. witterungsbedinge Auf- und Zudecken ist mit einzukalkulieren.</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <br />
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Vorhalten, Unterhalten und nach Beendigung der Dacharbeiten entfernen, vom Dach transportieren und gemäß Kreislaufwirt- schafts- und Abfallgesetz entsorgen. Die Entsorgungskosten sind mit in die Position einzukalkulieren.</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Witterungsschutz / Dach-Planen</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2705946" RNoPart="0004">
+                    <NotAppl>No</NotAppl>
+                    <Qty>76.000</Qty>
+                    <QU>m</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Liefern und Verlegen von Bautenschutzmatten, bestehend aus Gummigranulat, 10 mm stark, im Bereich der Entwässerungs- rinnen, Rinnenbreite ca. 250 mm. Nach Beendigung der Arbeiten sind die Bautenschutzmatten zu entfernen und  gemäß Kreislauf- wirtschafts- und Abfallgesetz zu entsorgen. Die Entsorgungs- kosten sind mit sind mit in die Position einzukalkulieren.</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Rinne 1 und Rinne 2</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Bautenschutzmatten / Rinne /  lief / verl / ents</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2705947" RNoPart="0005">
+                    <NotAppl>No</NotAppl>
+                    <Qty>266.000</Qty>
+                    <QU>lfm</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Bautenschutzmatten aus Vorposition umsetzen</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">zu Rinne 3 und 4 (76 lfm)</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">zu Rinne 5 und 6 (76 lfm)</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">zu Rinne 7 und 8 (76 lfm)</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">zu Rinne 9 (38 lfm)</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Bautenschutzmatten / Rinne / umsetz</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2705948" RNoPart="0006">
+                    <NotAppl>No</NotAppl>
+                    <Qty>40.000</Qty>
+                    <QU>m2</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Liefern und Verlegen von Bautenschutzmatten, , bestehend aus Gummigranulat, 10 mm stark. Verlegung im Laufwegbereich  der bereits sanierten Flachdächer 6, 7 und 8 - Mitteltrakt. Laufwegbreite: ca. 1,00 m</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Bautenschutzmatten / lief / verl</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                </Itemlist>
+              </BoQBody>
+            </BoQCtgy>
+            <BoQCtgy ID="GW_2705949" RNoPart="02">
+              <LblTx>
+                <span>De-, Montage Dachaufbau/ Einbau Stahlblechkonstruktion</span>
+              </LblTx>
+              <NotApplBoQ>No</NotApplBoQ>
+              <BoQBody>
+                <Itemlist>
+                  <Item ID="GW_2705950" RNoPart="0001">
+                    <NotAppl>No</NotAppl>
+                    <Qty>640.000</Qty>
+                    <QU>Stck</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Vorhandene Faserzement-Wellplattenfirst fachgerecht demontieren, seitlich lagern und abschnittsweise entsprechend der Baubeschreibung nach Einbau der Stahlblechkonstruktion und des Marderschutzes montieren. </span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Faserzement-Wellplatten-Firstelement / dem / mont</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2706654" RNoPart="0002">
+                    <NotAppl>No</NotAppl>
+                    <Qty>640.000</Qty>
+                    <QU>St</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:justify;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Faserzement-Wellplatten / dem / mont</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <br />
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Vorhandene Faserzement-Wellplatten fachgerecht demontieren, inkl. sämtlicher Befestigungsteile seitlich lagern und abschnittsweise entsprechend der Baubeschreibung nach Einbau der Stahlblechkonstruktion und des Marderschutzes montieren.</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:justify;">
+                                <span style="font-family:Arial;font-size:10.0pt;">Faserzement-Wellplatten / dem / mont</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2706058" RNoPart="0003">
+                    <NotAppl>No</NotAppl>
+                    <Qty>600.000</Qty>
+                    <QU>m</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Heraustrennen und Wiedermontage der Traglattung</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Heraustrennen von bestehender Traglattung/ Dachlattung (60/60) aus KVH. Diese Position dient dazu die Koppelpfetten freizulegen um die Stahlblechkonstruktion montieren zu können. Länge des Teilstückes bis 1 lfm.</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Seitliches Lagern der Teilstücke und Wiedereinbau nach Montage der Stahlblechkonstruktion.</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="font-family:Arial;font-size:10.0pt;">Heraustrennen und Wiedermontage der Traglattung</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2706624" RNoPart="0004">
+                    <NotAppl>No</NotAppl>
+                    <Qty>600.000</Qty>
+                    <QU>St</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Heraustrennen und Wiedermontage von Konterlattung</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Heraustrennen von bestehender Konterlattung(60/60) aus KVH. Diese Position dient dazu die Koppelpfetten freizulegen um die Stahlblechkonstruktion montieren zu können. Länge des Teilstückes bis 1 lfm.</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Seitliches Lagern der Teilstücke und Wiedereinbau nach Montage der Stahlblechkonstruktion.</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="font-family:Arial;font-size:10.0pt;">Heraustrennen und Wiedermontage von Konterlattung</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2706625" RNoPart="0005">
+                    <NotAppl>No</NotAppl>
+                    <Qty>600.000</Qty>
+                    <QU>m2</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Öffnen und Wiederverschließen bestehende Unterspannbahn</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Öffnen der bestehenden Unterspannbahn, umschlagen und </span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">nach Montage der Stahlblechkonstruktion wieder</span>
+                              <span style="font-family:MyriadProDoerkenRegular;font-size:10.0pt;"> fachgerecht verschließen. </span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:MyriadProDoerkenRegular;font-size:10.0pt;">Die Befestigung erfolgt mit Breitkopfstiften oder Tackerklammern auf</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:MyriadProDoerkenRegular;font-size:10.0pt;">dem Sparren.</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Fabrikat der bestehenden Unterspannbahn ist aus technischen</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Gründen wieder z</span>
+                              <span style="font-family:Arial;font-size:10.0pt;">u verwenden; </span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Eingebautes Fabrikat:</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Dörken Delta Maxx:</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:MyriadProDoerkenRegular;font-size:10.0pt;">Klassifizierung UDB A, gem. ZVDH</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:MyriadProDoerkenRegular;font-size:10.0pt;">Brandverhalten Klasse E, EN 13501-1</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:MyriadProDoerkenRegular;font-size:10.0pt;">schwer entflammbar B 1</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:MyriadProDoerkenRegular;font-size:10.0pt;">nach DIN 4102</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:MyriadProDoerkenRegular;font-size:10.0pt;">Reißkraft ca. 450/300 N/5 cm,</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:MyriadProDoerkenRegular;font-size:10.0pt;">EN 12311-1+2</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:MyriadProDoerkenRegular;font-size:10.0pt;">Sd-Wert ca. 0,15 m</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:MyriadProDoerkenRegular;font-size:10.0pt;">Gewicht ca. 190 g/m2</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Diese Position dient dazu die Koppelpfetten freizulegen um die Stahlblechkonstruktion montieren zu können. </span>
+                            </p>
+                            <p style="text-align:left;" />
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="font-family:Arial;font-size:10.0pt;">Öffnen und Wiederverschließen bestehende Unterspannbahn</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2706059" RNoPart="0006">
+                    <NotAppl>No</NotAppl>
+                    <Qty>600.000</Qty>
+                    <QU>m</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Zulageposition Unterspannbahn im Firstbereich</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Zulage für Verschließen der Unterspannbahn, beschrieben in voriger Position, im Firstbereich;</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Breite bis 500mm.</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="font-family:Arial;font-size:10.0pt;">Zulageposition Unterspannbahn im Firstbereich</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2706060" RNoPart="0007">
+                    <NotAppl>No</NotAppl>
+                    <Qty>300.000</Qty>
+                    <QU>m2</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Wärmedämmung aus Styropor</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Ausschneiden der Wärmedämmung aus Styropor;</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Dicke bis 400mm; seitlich lagern und nach ein und Wieder</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">einbau nach Montage der Stahlblechkonstruktion.</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="font-family:Arial;font-size:10.0pt;">Wärmedämmung aus Styropor</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2705952" RNoPart="0008">
+                    <NotAppl>No</NotAppl>
+                    <Qty>600.000</Qty>
+                    <QU>lfm</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Vorhandenes Lochblech, welches im Firstbereich als Marderschutz dient, fachgerecht bzw. zerstörungsfrei demontieren, inkl. sämtlicher Befestigungsteile seitlich lagern und nach Einbau der Stahlblechkonstruktion wieder montieren.</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Lochblech / Marderschutz / dem / mont</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2705953" RNoPart="0009">
+                    <NotAppl>No</NotAppl>
+                    <Qty>300.000</Qty>
+                    <QU>Stck</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Überstände der Kanthölzer am First beseitigen und anschließend Kante brechen</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">(als Vorbereitung für die bündige Montage der Stahlblechkonstruktion)</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <br />
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">s. Anlage </span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="font-family:Arial;font-size:10.0pt;">Verzeichnis weiterer Vertragsbestandteile</span>
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;"> Nr. 6 Seite 9</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Überstand Kanthölzer am First beseitigen</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2705954" RNoPart="0010">
+                    <NotAppl>No</NotAppl>
+                    <Qty>300.000</Qty>
+                    <QU>Stck</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Herstellen, liefern und montieren der Stahlblechkonstruktion bestehend aus:</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Stahlblech sowie Verbindungsmittel gemäß Plan 16/07-S004a.</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Einbau gemäß Skizze aus beigefügter Statik</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Stahlblech </span>
+                              <span style="font-weight:bold;color:#000000;font-family:Arial;font-size:10.0pt;">120</span>
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;"> x 270 x 1,5 mm</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Einzelgewicht gemäß Plan: 0,382 kg </span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Stahlsorte: S 235 JR G2</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Feuerverzinkt nach DIN 50976</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">incl. Bohrungen gem. Werkstattzeichnung S004a</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Gesamtgewicht: ca. 120 kg</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Stahlblechkonstruktion / herst / lief / mont</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2705955" RNoPart="0011">
+                    <NotAppl>No</NotAppl>
+                    <Qty>30.000</Qty>
+                    <QU>Stck</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Herstellen, liefern und montieren der Stahlblechkonstruktion bestehend aus:</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Stahlblech sowie Verbindungsmittel gemäß Plan 16/07-S005a</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Einbau gemäß Skizze aus beigefügter Statik</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Stahlblech </span>
+                              <span style="font-weight:bold;color:#000000;font-family:Arial;font-size:10.0pt;">170 </span>
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">x 270 x 1,5 mm</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Einzelgewicht gemäß Plan: 0,540 kg </span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Stahlsorte: S 235 JR G2</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Feuerverzinkt nach DIN 50976</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">incl. Bohrungen / sowie zusätzliche Bohrungen beim Anbringen gem. Werkstattzeichnung S005a</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Gesamtgewicht: ca. 16 kg</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Stahlblechkonstruktion / herst / lief / mont</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2705956" RNoPart="0012">
+                    <NotAppl>No</NotAppl>
+                    <Qty>5.000</Qty>
+                    <QU>Stck</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Herstellen, liefern und montieren der Stahlblechkonstruktion bestehend aus:</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Stahlblech sowie Verbindungsmittel gemäß Plan 16/07-S006a</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Einbau gemäß Skizze aus beigefügter Statik</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Stahlblech </span>
+                              <span style="font-weight:bold;color:#000000;font-family:Arial;font-size:10.0pt;">2.000,0 </span>
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">x 270 x 1,5 mm</span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Einzelgewicht gemäß Plan: 6,359 kg </span>
+                            </p>
+                            <p style="text-align:justify;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Stahlsorte: S 235 JR G2</span>
+                            </p>
+                            <p style="text-align:left;text-indent:-1.05mm;margin-left:1.05mm;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Feuerverzinkt nach DIN 50976</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">incl. Bohrungen / sowie zusätzliche Bohrungen beim Anbringen gem. Werkstattzeichnung S006a  </span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Gesamtgewicht: ca. 32 kg</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Stahlblechkonstruktion / herst / lief / mont</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                  <Item ID="GW_2705958" RNoPart="0013">
+                    <NotAppl>No</NotAppl>
+                    <Qty>1.000</Qty>
+                    <QU>Stck</QU>
+                    <Description>
+                      <CompleteText>
+                        <DetailTxt>
+                          <Text>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Bohrschablone für Stahlblechkonstruktion gemäß Plan 16/07-S005a herstellen</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">100 mm x 60 mm x 1 mm</span>
+                            </p>
+                            <p style="text-align:left;">
+                              <span style="color:#000000;font-family:Arial;font-size:10.0pt;">Blech</span>
+                            </p>
+                          </Text>
+                        </DetailTxt>
+                        <OutlineText>
+                          <OutlTxt>
+                            <TextOutlTxt>
+                              <p style="text-align:left;">
+                                <span style="">Bohrschablone für Stahlblechlonstruktionen</span>
+                              </p>
+                            </TextOutlTxt>
+                          </OutlTxt>
+                        </OutlineText>
+                      </CompleteText>
+                    </Description>
+                  </Item>
+                </Itemlist>
+              </BoQBody>
+            </BoQCtgy>
+          </BoQBody>
+        </BoQCtgy>
+      </BoQBody>
+    </BoQ>
+  </Award>
+</GAEB>
