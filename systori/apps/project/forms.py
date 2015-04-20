@@ -15,6 +15,10 @@ class ProjectCreateForm(ModelForm):
                   'address', 'postal_code', 'city']
 
 
+class ProjectImportForm(forms.Form):
+    file = forms.FileField()
+
+
 class ProjectUpdateForm(ModelForm):
 
     class Meta:
