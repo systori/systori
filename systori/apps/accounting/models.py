@@ -1,10 +1,26 @@
 from django.utils.translation import ugettext_lazy as _
 from ..project.models import Project
-from django.db import models
+from django.db import models, IntegrityError
 from django.db.models.manager import BaseManager
 from datetime import date
 from decimal import Decimal
 from .constants import *
+
+
+def create_account_for_project(project):
+    """ Project passed to this function should have already been saved because
+        an project.id is required to generate the account code. This function returns
+        the newly created Account object.
+    """
+    # TODO: Add support for recycling account numbers when the maximum has been reached.
+    from .skr03 import DEBTOR_CODE_RANGE
+    int(project.id) # raises exception if id is not an int (eg. project hasn't been saved()'ed yet)
+    code = DEBTOR_CODE_RANGE[0]+project.id
+    if Account.objects.filter(code=str(code)).exists():
+        raise IntegrityError("Account with code %s already exists." % code)
+    if code > DEBTOR_CODE_RANGE[1]:
+        raise ValueError("Account id %s is outside the maximum range of %s." % (code, DEBTOR_CODE_RANGE[1]))
+    return Account.objects.create(account_type=Account.ASSET, code=str(code))
 
 
 class AccountQuerySet(models.QuerySet):
