@@ -22,16 +22,16 @@
           <td><a href="{% url 'account.view' account.id %}">{{ account.name }}</a></td>
           <td align="right">{{ account.balance|money }}</td>
           <td>
-            <a href="{% url 'account.edit' account.id %}">{% trans "Edit" %}</a>
+            <a href="{% url 'bank.account.edit' account.id %}">{% trans "Edit" %}</a>
             {% if account.entries.count == 0 %}
-            <a href="{% url 'account.delete' account.id %}">{% trans "Delete" %}</a>
+            <a href="{% url 'bank.account.delete' account.id %}">{% trans "Delete" %}</a>
             {% endif %}
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-    <a href="{% url 'account.create' %}">{% trans "Add" %}</a>
+    <a href="{% url 'bank.account.create' %}">{% trans "Add" %}</a>
   </div>
 
   <h2 class="sub-header">{% trans 'Other Accounts' %} - SKR03</h2>

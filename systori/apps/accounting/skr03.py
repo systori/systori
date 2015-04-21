@@ -1,3 +1,4 @@
+from datetime import date
 from .models import *
 from .constants import *
 
@@ -9,8 +10,9 @@ from .constants import *
 # http://www.ledger-cli.org/3.0/doc/ledger3.html
 
 
-DEBTOR_CODE_TEMPLATE = '1{:04}'
-BANK_CODE_TEMPLATE = '12{:02}'
+DEBTOR_CODE_RANGE = (10000, 69999)
+
+BANK_CODE_RANGE = (1200, 1288)
 
 
 def create_chart_of_accounts(self=None):
@@ -38,24 +40,25 @@ def partial_debit(project):
     transaction.save()
 
 
-def partial_credit(projects, payment, bank=None):
+def partial_credit(projects, payment, received_on=None, bank=None):
     """ Applies a payment to a list of customer accounts. Including discounts on a per account basis. """
 
     assert isinstance(payment, Decimal)
 
-    if not bank: bank = Account.objects.get(code="1200")
+    if bank is None: bank = Account.objects.get(code="1200")
+    if received_on is None: received_on = date.today()
 
     income = round(payment / (1+TAX_RATE), 2)
 
     transaction = Transaction()
 
-    transaction.debit(Account.objects.get(code="1710"), payment)
-    transaction.credit(Account.objects.get(code="1718"), income)
-    transaction.credit(Account.objects.get(code="1776"), payment - income)
+    transaction.debit(Account.objects.get(code="1710"), payment, received_on=received_on)
+    transaction.credit(Account.objects.get(code="1718"), income, received_on=received_on)
+    transaction.credit(Account.objects.get(code="1776"), payment - income, received_on=received_on)
 
     transaction.debit(bank, payment)
     for (project, credit, is_discounted) in projects:
-        transaction.credit(project.account, credit, is_payment=True) # credit the customer
+        transaction.credit(project.account, credit, is_payment=True, received_on=received_on) # credit the customer
 
     for (project, credit, is_discounted) in projects:
 
@@ -64,8 +67,8 @@ def partial_credit(projects, payment, bank=None):
             pre_discount_credit = round(credit / (1-DISCOUNT), 2) # undo the discount to get original amount invoiced
             discount = pre_discount_credit - credit
 
-            transaction.debit(Account.objects.get(code="1710"), discount)
-            transaction.credit(project.account, discount, is_discount=True)
+            transaction.debit(Account.objects.get(code="1710"), discount, received_on=received_on)
+            transaction.credit(project.account, discount, is_discount=True, received_on=received_on)
 
     transaction.save()
 

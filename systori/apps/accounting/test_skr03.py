@@ -1,15 +1,17 @@
 from decimal import Decimal
 from django.test import TestCase
+from django.db import IntegrityError
 from ..task.test_models import create_task_data
 from ..project.models import Project
 from .models import *
 from .skr03 import *
+from .forms import *
 
 
 def create_data(self):
     create_task_data(self)
     create_chart_of_accounts(self)
-    self.project.account = Account.objects.create(account_type=Account.ASSET, code='1{:04}'.format(self.project.id))
+    self.project.account = create_account_for_project(self.project)
     self.project.save()
 
 
@@ -21,6 +23,40 @@ class TestExceptions(TestCase):
     def test_payments_discounts_on_non_customer_account(self):
         self.assertRaisesMessage(Project.DoesNotExist, "Account has no project.", self.income.payments)
         self.assertRaisesMessage(Project.DoesNotExist, "Account has no project.", self.income.discounts)
+
+    def test_creating_account_for_project(self):
+        self.assertRaisesMessage(IntegrityError,
+                "Account with code %s already exists."%'1{:04}'.format(self.project.id),
+                create_account_for_project, self.project)
+
+        self.project.id = DEBTOR_CODE_RANGE[1]-DEBTOR_CODE_RANGE[0]+1
+        self.assertRaisesMessage(ValueError,
+                "Account id %s is outside the maximum range of %s." % (DEBTOR_CODE_RANGE[1]+1, DEBTOR_CODE_RANGE[1]),
+                create_account_for_project, self.project)
+
+
+class TestBankAccountForm(TestCase):
+    def test_form_initial_code(self):
+        self.assertEquals(str(BANK_CODE_RANGE[0]), BankAccountForm().initial['code'])
+
+    def test_form_initial_incremented_code(self):
+        create_data(self)
+        self.assertEquals(str(BANK_CODE_RANGE[0]+1), BankAccountForm().initial['code'])
+
+    def test_form_edit_code(self):
+        self.assertEquals("hi", BankAccountForm(instance=Account.objects.create(code="hi")).initial['code'])
+
+    def test_valid_code(self):
+        self.assertTrue(BankAccountForm({'code': '1200'}).is_valid())
+        self.assertTrue(BankAccountForm({'code': '1288'}).is_valid())
+
+    def test_invalid_code(self):
+        self.assertFalse(BankAccountForm({'code': 'foo'}).is_valid())
+        self.assertFalse(BankAccountForm({'code': '1199'}).is_valid())
+        self.assertFalse(BankAccountForm({'code': '1289'}).is_valid())
+    
+        form = BankAccountForm({'code': '1a'})
+        self.assertEquals('Account code must be a number between 1200 and 1288 inclusive.', form.errors['code'][0])
 
 
 class TestInitialPartialDebit(TestCase):

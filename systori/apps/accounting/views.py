@@ -15,8 +15,9 @@ class PaymentCreate(FormView):
     def form_valid(self, form):
         amount = form.cleaned_data['amount']
         is_discounted = form.cleaned_data['is_discounted']
+        received_on = form.cleaned_data['received_on']
         bank = form.cleaned_data['bank_account']
-        partial_credit([(self.request.project, amount, is_discounted)], amount, bank)
+        partial_credit([(self.request.project, amount, is_discounted)], amount, received_on, bank)
         return super(PaymentCreate, self).form_valid(form)
 
     def get_success_url(self):
@@ -30,6 +31,7 @@ class TransactionDelete(DeleteView):
         if not object.is_reconciled:
             object.delete()
         return HttpResponseRedirect(self.get_success_url())
+
 
 class PaymentDelete(TransactionDelete):
     template_name = 'accounting/payment_confirm_delete.html'
@@ -55,23 +57,25 @@ class AccountView(DetailView):
         return queryset#.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
 
 
-class BankAccountCreate(CreateView):
+class AccountUpdate(UpdateView):
     model = Account
     form_class = AccountForm
-
-    def get_form_kwargs(self):
-        kwargs = super(BankAccountCreate, self).get_form_kwargs()
-        next_code = int(Account.objects.banks().order_by('-code').first().code)+1
-        kwargs['instance'] = Account(account_type = Account.ASSET, code=str(next_code))
-        return kwargs
 
     def get_success_url(self):
         return reverse('accounts')
 
 
-class AccountUpdate(UpdateView):
+class BankAccountCreate(CreateView):
     model = Account
-    form_class = AccountForm
+    form_class = BankAccountForm
+
+    def get_success_url(self):
+        return reverse('accounts')
+
+
+class BankAccountUpdate(UpdateView):
+    model = Account
+    form_class = BankAccountForm
 
     def get_success_url(self):
         return reverse('accounts')
