@@ -12,6 +12,7 @@ from ..document.models import Invoice, DocumentTemplate
 from ..accounting.models import create_account_for_project
 from ..accounting.utils import get_transactions_table
 from .gaeb_utils import gaeb_import
+from django.core.exceptions import ValidationError
 
 
 class ProjectList(ListView):
@@ -63,14 +64,15 @@ class ProjectCreate(CreateView):
 
 
 class ProjectImport(FormView):
-    """ Import Function to import Gaeb X83 proposal request files. based on lxml objectify"""
     form_class = ProjectImportForm
     template_name = "project/project_form_upload.html"
     
     def form_valid(self, form):
-        self.object = gaeb_import(self.request.FILES['file'])
-        return super(ProjectImport, self).form_valid(form) # <- this will call get_success_url(), so self.object h
-    # has to already be set before hand
+        try:
+            self.object = gaeb_import(self.request.FILES['file'])
+        except:
+            raise ValidationError(_('This provided File can\'t be imported. Please check your File and contact Support.'), code='invalid')
+        return super(ProjectImport, self).form_valid(form)
     
     def get_success_url(self):
         return reverse('project.view', args=[self.object.id]) # otherwise this will fail
