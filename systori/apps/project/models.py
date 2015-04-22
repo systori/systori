@@ -86,14 +86,37 @@ class Project(models.Model):
     def is_executing(self):
         return self.phase == Project.PLANNING
 
-    @transition(field=phase, source=EXECUTING, target=SETTLEMENT, custom={'label': _("Enter Settlement Phase")})
+    @transition(field=phase, source=EXECUTING, target=SETTLEMENT)
     def begin_settlement(self):
         pass
 
-    @transition(field=phase, source=SETTLEMENT, target=WARRANTY, custom={'label': _("Begin Warranty Coverage")})
+    @transition(field=phase, source=SETTLEMENT, target=WARRANTY)
     def begin_warranty(self):
         pass
 
+    @transition(field=phase, source="*", target=FINISHED)
+    def finish(self):
+        pass
+
+    def phases(self, user):
+        phases = []
+        available = list(self.get_available_user_phase_transitions(user))
+        is_past = True
+        for name, label in self.PHASE_CHOICES:
+
+            if self.phase == name:
+                is_past = False
+
+            transition_name = None
+            for transition in available:
+                if transition.target == name:
+                    transition_name = transition.name
+                    break
+
+            phases.append((name, label, self.phase==name, is_past, transition_name))
+
+        return phases
+            
 
     ACTIVE = "active"
     PAUSED = "paused"
