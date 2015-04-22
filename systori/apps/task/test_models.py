@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.utils.translation import activate
 from ..project.models import *
+from ..document.models import *
 from .models import *
 
 User = get_user_model()
@@ -148,3 +150,46 @@ class TaskCloneTests(TestCase):
         group = job.taskgroups.get(name="my group")
         self.assertNotEqual(group.id, self.group.id)
         self.assertEqual(group.tasks.count(), 2)
+
+
+class TestJobTransitions(TestCase):
+    
+    def setUp(self):
+        activate('en')
+        create_task_data(self)
+
+    def test_job_draft(self):
+        self.assertEquals('Draft', self.job.get_status_display())
+
+    def test_job_proposed(self):
+        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal.jobs.add(self.job)
+        self.job.refresh_from_db()
+        self.assertEquals('Proposed', self.job.get_status_display())
+
+    def test_job_approved(self):
+        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal.jobs.add(self.job)
+        proposal.send()
+        proposal.approve()
+        self.job.refresh_from_db()
+        self.assertEquals('Approved', self.job.get_status_display())
+
+    def test_job_declined(self):
+        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal.jobs.add(self.job)
+        self.job.refresh_from_db()
+        self.assertEquals('Proposed', self.job.get_status_display())
+        proposal.send()
+        proposal.decline()
+        self.job.refresh_from_db()
+        self.assertEquals('Draft', self.job.get_status_display())
+
+    def test_job_after_proposal_deleted(self):
+        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal.jobs.add(self.job)
+        self.job.refresh_from_db()
+        self.assertEquals('Proposed', self.job.get_status_display())
+        proposal.delete()
+        self.job.refresh_from_db()
+        self.assertEquals('Draft', self.job.get_status_display())

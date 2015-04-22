@@ -6,6 +6,7 @@ from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
+from django_fsm import FSMField, transition
 from ..task.models import Job
 from ..accounting.constants import TAX_RATE
 from geopy import geocoders
@@ -18,6 +19,7 @@ class ProjectQuerySet(models.QuerySet):
 
     def without_template(self):
         return self.exclude(is_template=True)
+
 
 class Project(models.Model):
 
@@ -34,6 +36,81 @@ class Project(models.Model):
     account = models.OneToOneField('accounting.Account', related_name="project", null=True)
 
     objects = ProjectQuerySet.as_manager()
+
+
+    PROSPECTIVE = "prospective"
+    TENDERING = "tendering"
+    PLANNING = "planning"
+    EXECUTING = "executing"
+    SETTLEMENT = "settlement"
+    WARRANTY = "warranty"
+    FINISHED = "finished"
+
+    PHASE_CHOICES = (
+        (PROSPECTIVE, _("Prospective")),
+        (TENDERING, _("Tendering")),
+        (PLANNING, _("Planning")),
+        (EXECUTING, _("Executing")),
+        (SETTLEMENT, _("Settlement")),
+        (WARRANTY, _("Warranty")),
+        (FINISHED, _("Finished"))
+    )
+
+    phase = FSMField(default=PROSPECTIVE, choices=PHASE_CHOICES)
+
+    @property
+    def is_prospective(self):
+        return self.phase == Project.PROSPECTIVE
+
+    @transition(field=phase, source=PROSPECTIVE, target=TENDERING)
+    def begin_tendering(self):
+        pass
+
+    @property
+    def is_tendering(self):
+        return self.phase == Project.TENDERING
+
+    @transition(field=phase, source=TENDERING, target=PLANNING)
+    def begin_planning(self):
+        pass
+
+    @property
+    def is_planning(self):
+        return self.phase == Project.PLANNING
+
+    @transition(field=phase, source=PLANNING, target=EXECUTING)
+    def begin_executing(self):
+        pass
+
+    @property
+    def is_executing(self):
+        return self.phase == Project.PLANNING
+
+    @transition(field=phase, source=EXECUTING, target=SETTLEMENT, custom={'label': _("Enter Settlement Phase")})
+    def begin_settlement(self):
+        pass
+
+    @transition(field=phase, source=SETTLEMENT, target=WARRANTY, custom={'label': _("Begin Warranty Coverage")})
+    def begin_warranty(self):
+        pass
+
+
+    ACTIVE = "active"
+    PAUSED = "paused"
+    CANCELED = "canceled"
+    DISPUTED = "disputed"
+    STOPPED = "stopped"
+
+    STATE_CHOICES = (
+        (ACTIVE, _("Active")),
+        (PAUSED, _("Paused")),
+        (CANCELED, _("Canceled")),
+        (DISPUTED, _("Disputed")),
+        (STOPPED, _("Stopped"))
+    )
+
+    state = FSMField(default=ACTIVE, choices=STATE_CHOICES)
+
 
     def __str__(self):
         return self.name
