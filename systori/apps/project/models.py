@@ -134,6 +134,41 @@ class Project(models.Model):
 
     state = FSMField(default=ACTIVE, choices=STATE_CHOICES)
 
+    @transition(field=state, source="*", target=ACTIVE)
+    def activate(self):
+        pass
+
+    @transition(field=state, source="*", target=PAUSED)
+    def pause(self):
+        pass
+
+    @transition(field=state, source="*", target=CANCELED)
+    def cancel(self):
+        pass
+
+    @transition(field=state, source="*", target=DISPUTED)
+    def dispute(self):
+        pass
+
+    @transition(field=state, source="*", target=STOPPED)
+    def stop(self):
+        pass
+
+    def states(self, user):
+        states = []
+        available = list(self.get_available_user_state_transitions(user))
+        for name, label in self.STATE_CHOICES:
+
+            transition_name = None
+            for transition in available:
+                if transition.target == name:
+                    transition_name = transition.name
+                    break
+
+            states.append((name, label, self.state==name, transition_name))
+
+        return states
+
 
     def __str__(self):
         return self.name

@@ -121,6 +121,23 @@ class ProjectManualPhaseTransition(SingleObjectMixin, View):
         return HttpResponseRedirect(reverse('project.view', args=[self.object.id]))
 
 
+class ProjectManualStateTransition(SingleObjectMixin, View):
+    model = Project
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        transition = None
+        for t in self.object.get_available_user_state_transitions(request.user):
+            if t.name == kwargs['transition']:
+                transition = t
+                break
+
+        if transition:
+          getattr(self.object, transition.name)()
+          self.object.save()
+
+        return HttpResponseRedirect(reverse('project.view', args=[self.object.id]))
 
 
 class TemplatesView(TemplateView):
