@@ -93,10 +93,26 @@ class Job(BetterOrderedModel):
         verbose_name_plural = _("Job")
         ordering = ['order']
 
+    @transition(field=status, source="*", target=DRAFT)
+    def draft(self):
+        pass
+
+    @transition(field=status, source=DRAFT, target=PROPOSED)
+    def propose(self):
+        pass
+
+    @transition(field=status, source=PROPOSED, target=APPROVED)
+    def approve(self):
+        pass
+
     @transition(field=status, source=[APPROVED,COMPLETED], target=STARTED, custom={'label': _("Start")})
     def start(self):
         pass
 
+    @property
+    def is_started(self):
+        return self.status == Job.STARTED
+        
     @transition(field=status, source=STARTED, target=COMPLETED, custom={'label': _("Complete")})
     def complete(self):
         pass
