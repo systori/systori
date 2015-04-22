@@ -43,8 +43,6 @@ class ProposalCreate(CreateView):
 
         amount = Decimal(0.0)
         for job in form.cleaned_data['jobs']:
-            job.status = job.PROPOSED
-            job.save()
             amount += job.estimate_total
         form.instance.amount = amount
 

@@ -113,30 +113,21 @@ class Proposal(Document):
 
     status = FSMField(default=NEW, choices=STATE_CHOICES)
 
-    @transition(field=status, source=NEW, target=SENT,
-                custom={'label': _("Send")})
+    @transition(field=status, source=NEW, target=SENT, custom={'label': _("Send")})
     def send(self):
         pass
 
-    @transition(field=status, source=SENT, target=APPROVED,
-                custom={'label': _("Approve")})
+    @transition(field=status, source=SENT, target=APPROVED, custom={'label': _("Approve")})
     def approve(self):
-        for job in self.jobs.all():
-            job.status = job.APPROVED
-            job.save()
+        pass
 
-    @transition(field=status, source=SENT, target=DECLINED,
-                custom={'label': _("Decline")})
+    @property
+    def is_approved(self):
+        return self.status == Proposal.APPROVED
+    
+    @transition(field=status, source=SENT, target=DECLINED, custom={'label': _("Decline")})
     def decline(self):
-        for job in self.jobs.all():
-            job.status = job.DRAFT
-            job.save()
-
-    def delete(self, using=None):
-        for job in self.jobs.all():
-            job.status = job.DRAFT
-            job.save()
-        super(Proposal, self).delete(using)
+        pass
 
     def get_document_context(self, add_terms):
         context = super(Proposal, self).get_document_context(add_terms)
