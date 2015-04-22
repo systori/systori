@@ -1,4 +1,6 @@
-from django.views.generic import TemplateView, ListView, DetailView
+from django.http import HttpResponseRedirect
+from django.views.generic import View, TemplateView, ListView
+from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
@@ -98,6 +100,27 @@ class ProjectPlanning(DetailView):
         context['jobs'] = self.object.jobs.all()
         context['users'] = ["Fred", "Bob", "Frank", "John", "Jay", "Lex", "Marius"]
         return context
+
+
+class ProjectManualPhaseTransition(SingleObjectMixin, View):
+    model = Project
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        transition = None
+        for t in self.object.get_available_user_phase_transitions(request.user):
+            if t.name == kwargs['transition']:
+                transition = t
+                break
+
+        if transition:
+          getattr(self.object, transition.name)()
+          self.object.save()
+
+        return HttpResponseRedirect(reverse('project.view', args=[self.object.id]))
+
+
 
 
 class TemplatesView(TemplateView):

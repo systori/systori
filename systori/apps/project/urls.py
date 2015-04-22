@@ -1,10 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import patterns, url
 from ..user.authorization import office_auth
-from .views import ProjectList, ProjectView, ProjectCreate, ProjectImport, ProjectUpdate, ProjectDelete
-from .views import ProjectPlanning, TemplatesView
-from .views import JobSiteCreate, JobSiteUpdate, JobSiteDelete
 from ..accounting.views import PaymentCreate, PaymentDelete
+from .views import *
 
 
 urlpatterns = patterns('',
@@ -16,6 +14,7 @@ urlpatterns = patterns('',
     url(r'^project-(?P<pk>\d+)/edit$', office_auth(ProjectUpdate.as_view()), name='project.edit'),
     url(r'^project-(?P<pk>\d+)/plan$', office_auth(ProjectPlanning.as_view()), name='project.plan'),
     url(r'^project-(?P<pk>\d+)/delete$', office_auth(ProjectDelete.as_view()), name='project.delete'),
+    url(r'^project-(?P<pk>\d+)/transition/(?P<transition>\w+)$', office_auth(ProjectManualPhaseTransition.as_view()), name='project.transition.phase'),
     url(r'^templates$', office_auth(TemplatesView.as_view()), name='templates'),
 
     url(r'^project-(?P<project_pk>\d+)/create-jobsite$', office_auth(JobSiteCreate.as_view()), name='jobsite.create'),
