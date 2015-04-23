@@ -307,7 +307,7 @@ msgstr "bezahlt"
 
 #: systori/apps/document/models.py:159 systori/apps/project/models.py:131
 msgid "Disputed"
-msgstr "geklärt"
+msgstr "streit"
 
 #: systori/apps/document/models.py:168
 msgid "Pay"
