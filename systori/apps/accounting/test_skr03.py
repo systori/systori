@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.test import TestCase
 from django.db import IntegrityError
+from django.utils.translation import activate
 from ..task.test_models import create_task_data
 from ..project.models import Project
 from .models import *
@@ -51,6 +52,7 @@ class TestBankAccountForm(TestCase):
         self.assertTrue(BankAccountForm({'code': '1288'}).is_valid())
 
     def test_invalid_code(self):
+        activate('en')
         self.assertFalse(BankAccountForm({'code': 'foo'}).is_valid())
         self.assertFalse(BankAccountForm({'code': '1199'}).is_valid())
         self.assertFalse(BankAccountForm({'code': '1289'}).is_valid())
