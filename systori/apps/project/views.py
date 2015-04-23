@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from django.http import HttpResponseRedirect
 from django.views.generic import View, TemplateView, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
@@ -16,11 +17,36 @@ from ..accounting.utils import get_transactions_table
 from .gaeb_utils import gaeb_import
 
 
-class ProjectList(ListView):
-    model = Project
+class ProjectList(TemplateView):
 
-    def get_queryset(self):
-        return self.model.objects.without_template()
+    template_name = 'project/project_list.html'
+
+    phase_order = [
+        "prospective",
+        "tendering",
+        "planning",
+        "executing",
+        "settlement",
+        "warranty",
+        "finished"
+    ]
+
+    def get_context_data(self, **kwargs):
+        context = super(ProjectList, self).get_context_data(**kwargs)
+
+        query = Project.objects.without_template()
+        if kwargs['phase_filter']:
+            assert kwargs['phase_filter'] in self.phase_order
+            query = query.filter(phase=kwargs['phase_filter'])
+        else:
+            query = query.exclude(phase=Project.FINISHED)
+
+        project_groups = OrderedDict([(phase, []) for phase in self.phase_order])
+        for project in query.all():
+            project_groups[project.phase].append(project)
+
+        context['project_groups'] = project_groups
+        return context
 
 
 class ProjectView(DetailView):

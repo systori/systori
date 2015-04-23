@@ -7,7 +7,7 @@ from .views import *
 
 urlpatterns = patterns('',
 
-    url(r'^projects$', office_auth(ProjectList.as_view()), name='projects'),
+    url(r'^projects/(?P<phase_filter>\w+)?$', office_auth(ProjectList.as_view()), name='projects'),
     url(r'^create-project$', office_auth(ProjectCreate.as_view()), name='project.create'),
     url(r'^import-project$', office_auth(ProjectImport.as_view()), name='project.import'),
     url(r'^project-(?P<pk>\d+)$', office_auth(ProjectView.as_view()), name='project.view'),
