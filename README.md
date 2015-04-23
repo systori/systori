@@ -19,6 +19,7 @@ $ sudo apt-get install\
  postgresql postgresql-contrib postgresql-server-dev-all\
  python-pip python-dev python3-dev\
  texlive-full python3-lxml
+$ sudo apt-get build-dep python3-lxml
 $ sudo pip install --upgrade fabric virtualenvwrapper
 $ source /usr/local/bin/virtualenvwrapper.sh
 $ echo "source /usr/local/bin/virtualenvwrapper.sh" > ~/.bashrc
