@@ -3,7 +3,7 @@ from datetime import date
 from django.db import models
 from django.conf import settings
 from ordered_model.models import OrderedModel
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
 from django_fsm import FSMField, transition
@@ -47,13 +47,13 @@ class Project(models.Model):
     FINISHED = "finished"
 
     PHASE_CHOICES = (
-        (PROSPECTIVE, _("Prospective")),
-        (TENDERING, _("Tendering")),
-        (PLANNING, _("Planning")),
-        (EXECUTING, _("Executing")),
-        (SETTLEMENT, _("Settlement")),
-        (WARRANTY, _("Warranty")),
-        (FINISHED, _("Finished"))
+        (PROSPECTIVE, pgettext_lazy('phase', "Prospective")),
+        (TENDERING, pgettext_lazy('phase', "Tendering")),
+        (PLANNING, pgettext_lazy('phase', "Planning")),
+        (EXECUTING, pgettext_lazy('phase', "Executing")),
+        (SETTLEMENT, pgettext_lazy('phase', "Settlement")),
+        (WARRANTY, pgettext_lazy('phase', "Warranty")),
+        (FINISHED, pgettext_lazy('phase', "Finished"))
     )
 
     phase = FSMField(default=PROSPECTIVE, choices=PHASE_CHOICES)
