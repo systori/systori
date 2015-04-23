@@ -120,14 +120,12 @@ class Project(models.Model):
 
     ACTIVE = "active"
     PAUSED = "paused"
-    CANCELED = "canceled"
     DISPUTED = "disputed"
     STOPPED = "stopped"
 
     STATE_CHOICES = (
         (ACTIVE, _("Active")),
         (PAUSED, _("Paused")),
-        (CANCELED, _("Canceled")),
         (DISPUTED, _("Disputed")),
         (STOPPED, _("Stopped"))
     )
@@ -140,10 +138,6 @@ class Project(models.Model):
 
     @transition(field=state, source="*", target=PAUSED)
     def pause(self):
-        pass
-
-    @transition(field=state, source="*", target=CANCELED)
-    def cancel(self):
         pass
 
     @transition(field=state, source="*", target=DISPUTED)
