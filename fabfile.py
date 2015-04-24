@@ -7,7 +7,6 @@ from version import VERSION
 version = V(VERSION)
 
 env.hosts = ['systori.com']
-env.user = 'ubrblik'
 
 deploy_apps = {
   'dev': ['dev'],
@@ -16,6 +15,8 @@ deploy_apps = {
 
 
 def deploy(env_name='dev'):
+
+    env.user = 'ubrblik'
 
     for app in deploy_apps[env_name]:
 
@@ -29,10 +30,10 @@ def deploy(env_name='dev'):
                 sudo('createdb systori_dev', user='www-data')
                 sudo('pg_dump -f prod.sql systori_mehr_handwerk', user='www-data')
                 sudo('psql -f prod.sql systori_dev >/dev/null', user='www-data')
-                sudo('psql -c "update document_proposal set email_pdf = substr(email_pdf, 33), print_pdf = substr(print_pdf, 33);" systori_dev', user='www-data')
                 sudo('rm prod.sql')
                 # copy production documents
-                run('cp -p -r /srv/systori/mehr_handwerk/systori/documents documents')
+                #sudo('psql -c "update document_proposal set email_pdf = substr(email_pdf, 33), print_pdf = substr(print_pdf, 33);" systori_dev', user='www-data')
+                #run('cp -p -r /srv/systori/mehr_handwerk/systori/documents documents')
 
             run('git pull')
 
@@ -59,14 +60,13 @@ def localdb_from_bootstrap():
     local('./manage.py loaddata bootstrap')
 
 
-prod_dump_path = '/tmp/systori.prod.dump'
-prod_dump_file = os.path.basename(prod_dump_path)
+prod_dump_file = '.systori.prod.dump'
 def fetch_productiondb():
     dbname = 'systori_mehr_handwerk'
     # -Fc : custom postgresql compressed format
-    sudo('pg_dump -Fc -f %s %s' % (prod_dump_path,dbname), user='www-data')
-    get(prod_dump_path, prod_dump_file)
-    sudo('rm %s'%prod_dump_path)
+    run('pg_dump -Fc -x -f %s %s' % (prod_dump_file, dbname))
+    get(prod_dump_file, prod_dump_file)
+    run('rm '+prod_dump_file)
 
 def load_productiondb():
     _reset_localdb()
