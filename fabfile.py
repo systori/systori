@@ -7,7 +7,6 @@ from version import VERSION
 version = V(VERSION)
 
 env.hosts = ['systori.com']
-env.user = 'ubrblik'
 
 deploy_apps = {
   'dev': ['dev'],
@@ -59,14 +58,13 @@ def localdb_from_bootstrap():
     local('./manage.py loaddata bootstrap')
 
 
-prod_dump_path = '/tmp/systori.prod.dump'
-prod_dump_file = os.path.basename(prod_dump_path)
+prod_dump_file = '.systori.prod.dump'
 def fetch_productiondb():
     dbname = 'systori_mehr_handwerk'
     # -Fc : custom postgresql compressed format
-    sudo('pg_dump -Fc -f %s %s' % (prod_dump_path,dbname), user='www-data')
-    get(prod_dump_path, prod_dump_file)
-    sudo('rm %s'%prod_dump_path)
+    run('pg_dump -Fc -x -f %s %s' % (prod_dump_file, dbname))
+    get(prod_dump_file, prod_dump_file)
+    run('rm '+prod_dump_file)
 
 def load_productiondb():
     _reset_localdb()

@@ -71,6 +71,7 @@ def tasks_url(self):
 
 class JobCreate(CreateView):
     model = Job
+    fields = '__all__'
 
     def get_form_class(self):
         if self.request.project.is_template:

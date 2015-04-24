@@ -1,4 +1,7 @@
-from django.views.generic import TemplateView, ListView, DetailView
+from collections import OrderedDict
+from django.http import HttpResponseRedirect
+from django.views.generic import View, TemplateView, ListView
+from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
@@ -14,11 +17,36 @@ from ..accounting.utils import get_transactions_table
 from .gaeb_utils import gaeb_import
 
 
-class ProjectList(ListView):
-    model = Project
+class ProjectList(TemplateView):
 
-    def get_queryset(self):
-        return self.model.objects.without_template()
+    template_name = 'project/project_list.html'
+
+    phase_order = [
+        "prospective",
+        "tendering",
+        "planning",
+        "executing",
+        "settlement",
+        "warranty",
+        "finished"
+    ]
+
+    def get_context_data(self, **kwargs):
+        context = super(ProjectList, self).get_context_data(**kwargs)
+
+        query = Project.objects.without_template()
+        if kwargs['phase_filter']:
+            assert kwargs['phase_filter'] in self.phase_order
+            query = query.filter(phase=kwargs['phase_filter'])
+        else:
+            query = query.exclude(phase=Project.FINISHED)
+
+        project_groups = OrderedDict([(phase, []) for phase in self.phase_order])
+        for project in query.all():
+            project_groups[project.phase].append(project)
+
+        context['project_groups'] = project_groups
+        return context
 
 
 class ProjectView(DetailView):
@@ -98,6 +126,44 @@ class ProjectPlanning(DetailView):
         context['jobs'] = self.object.jobs.all()
         context['users'] = ["Fred", "Bob", "Frank", "John", "Jay", "Lex", "Marius"]
         return context
+
+
+class ProjectManualPhaseTransition(SingleObjectMixin, View):
+    model = Project
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        transition = None
+        for t in self.object.get_available_user_phase_transitions(request.user):
+            if t.name == kwargs['transition']:
+                transition = t
+                break
+
+        if transition:
+          getattr(self.object, transition.name)()
+          self.object.save()
+
+        return HttpResponseRedirect(reverse('project.view', args=[self.object.id]))
+
+
+class ProjectManualStateTransition(SingleObjectMixin, View):
+    model = Project
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        transition = None
+        for t in self.object.get_available_user_state_transitions(request.user):
+            if t.name == kwargs['transition']:
+                transition = t
+                break
+
+        if transition:
+          getattr(self.object, transition.name)()
+          self.object.save()
+
+        return HttpResponseRedirect(reverse('project.view', args=[self.object.id]))
 
 
 class TemplatesView(TemplateView):

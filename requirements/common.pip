@@ -1,6 +1,9 @@
 psycopg2
-django==1.7.7
-django-tastypie
+django==1.8
+
+#django-tastypie
+-e git+https://github.com/django-tastypie/django-tastypie.git#egg=django-tastypie
+
 django-ordered-model
 django-fsm
 django_mobile

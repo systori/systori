@@ -12,8 +12,9 @@
 
   <div class="row back-buttons">
     <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
-    <div class="col-xs-4"><a href="{% url 'field.planning.toggle' selected_day.isoformat 'tasks' %}" class="btn btn-default btn-block {% if request.session.is_planning_tasks %}active{% endif %}" style="text-align: center;">{% trans 'Tasks' %}</a></div>
-    <div class="col-xs-4"><a href="{% url 'field.planning.toggle' selected_day.isoformat 'notes' %}" class="btn btn-default btn-block {% if request.session.is_planning_notes %}active{% endif %}" style="text-align: center;">{% trans 'Notes' %}</a></div>
+    <div class="col-xs-4"><a href="{% url 'field.projects' %}" class="btn btn-default btn-block" style="text-align: center;">&uarr; {% trans 'Projects' %}</a></div>
+    <div class="col-xs-2"><a href="{% url 'field.planning.toggle' selected_day.isoformat 'tasks' %}" class="btn btn-default btn-block {% if request.session.is_planning_tasks %}active{% endif %}" style="text-align: center;"><span class="glyphicon glyphicon-list" aria-hidden="true"></span></a></div>
+    <div class="col-xs-2"><a href="{% url 'field.planning.toggle' selected_day.isoformat 'notes' %}" class="btn btn-default btn-block {% if request.session.is_planning_notes %}active{% endif %}" style="text-align: center;"><span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span></a></div>
   </div>
 
   <div class="row back-buttons">
