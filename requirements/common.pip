@@ -9,3 +9,5 @@ django-fsm
 django_mobile
 geopy
 lxml
+reportlab
+jsonfield

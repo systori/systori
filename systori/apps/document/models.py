@@ -9,8 +9,8 @@ from django.core.files.base import ContentFile
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
+from jsonfield import JSONField
 
-from ..accounting.utils import get_transactions_table
 
 from systori import settings
 
@@ -39,7 +39,7 @@ class Document(models.Model):
     print_pdf = models.FileField(upload_to=generate_file_path)
     print_latex = models.FileField(upload_to=generate_file_path)
 
-    json = models.FileField(upload_to=generate_file_path)
+    json = JSONField()
 
     def __str__(self):
         return '{} {} {}'.format(self.get_status_display(),

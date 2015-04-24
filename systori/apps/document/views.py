@@ -9,7 +9,8 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from .models import Proposal, Invoice, Evidence, DocumentTemplate
 from .forms import ProposalForm, InvoiceForm, EvidenceForm
 from ..accounting import skr03
-from ..accounting.models import *
+
+from .pdf import *
 
 
 class BaseDocumentPDFView(SingleObjectMixin, View):
@@ -89,8 +90,17 @@ class InvoiceView(DetailView):
     model = Invoice
 
 
-class InvoicePDF(BaseDocumentPDFView):
+class InvoicePDF(SingleObjectMixin, View):
     model = Invoice
+
+    def get(self, request, *args, **kwargs):
+        invoice = self.get_object()
+        
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="{}.pdf"'.format(_('invoice'))
+        response.write(draw_invoice(invoice))
+
+        return response
 
 
 class InvoiceCreate(CreateView):
@@ -110,14 +120,10 @@ class InvoiceCreate(CreateView):
         if project.new_amount_to_debit:
             skr03.partial_debit(project)
 
-        # record account balance in document record
         form.instance.amount = project.account.balance
+        form.instance.json = serialize_invoice(project, form)
 
-        redirect = super(InvoiceCreate, self).form_valid(form)
-
-        self.object.generate_document(form.cleaned_data['add_terms'])
-
-        return redirect
+        return super(InvoiceCreate, self).form_valid(form)
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])
