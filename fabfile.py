@@ -16,6 +16,8 @@ deploy_apps = {
 
 def deploy(env_name='dev'):
 
+    env.user = 'ubrblik'
+
     for app in deploy_apps[env_name]:
 
         sudo('service uwsgi stop systori_'+app)
@@ -28,10 +30,10 @@ def deploy(env_name='dev'):
                 sudo('createdb systori_dev', user='www-data')
                 sudo('pg_dump -f prod.sql systori_mehr_handwerk', user='www-data')
                 sudo('psql -f prod.sql systori_dev >/dev/null', user='www-data')
-                sudo('psql -c "update document_proposal set email_pdf = substr(email_pdf, 33), print_pdf = substr(print_pdf, 33);" systori_dev', user='www-data')
                 sudo('rm prod.sql')
                 # copy production documents
-                run('cp -p -r /srv/systori/mehr_handwerk/systori/documents documents')
+                #sudo('psql -c "update document_proposal set email_pdf = substr(email_pdf, 33), print_pdf = substr(print_pdf, 33);" systori_dev', user='www-data')
+                #run('cp -p -r /srv/systori/mehr_handwerk/systori/documents documents')
 
             run('git pull')
 
