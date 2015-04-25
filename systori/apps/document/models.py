@@ -1,45 +1,20 @@
-import os.path
 from collections import OrderedDict
-from datetime import date, datetime
-from subprocess import Popen, PIPE
-from django.template.loader import get_template
-from django.template import Context
-from django.core.files.base import ContentFile
-
+from datetime import date
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from jsonfield import JSONField
 
 
-from systori import settings
-
-
-def generate_file_path(self, filename):
-    if not hasattr(self, '_document_directory_path'):
-        doc_type = self.__class__.__name__.lower()
-        path_fmt = 'documents/project-{}/%Y_%m_%d_{}_{}'
-        path = path_fmt.format(self.project.id, doc_type, self.id)
-        self._document_directory_path = datetime.now().strftime(path)
-    return os.path.join(self._document_directory_path, filename)
-
-
 class Document(models.Model):
 
-    notes = models.TextField(_("Notes"), blank=True, null=True)
+    json = JSONField(default={})
+    json_version = models.CharField(max_length=5)
     amount = models.DecimalField(_("Amount"), max_digits=12, decimal_places=2)
-    header = models.TextField(_("Header"))
-    footer = models.TextField(_("Footer"))
     created_on = models.DateTimeField(auto_now_add=True)
     document_date = models.DateField(_("Date"), default=date.today, blank=True)
+    notes = models.TextField(_("Notes"), blank=True, null=True)
 
-    email_pdf = models.FileField(upload_to=generate_file_path)
-    email_latex = models.FileField(upload_to=generate_file_path)
-
-    print_pdf = models.FileField(upload_to=generate_file_path)
-    print_latex = models.FileField(upload_to=generate_file_path)
-
-    json = JSONField()
 
     def __str__(self):
         return '{} {} {}'.format(self.get_status_display(),
@@ -94,10 +69,7 @@ class Document(models.Model):
 
 class Proposal(Document):
     project = models.ForeignKey("project.Project", related_name="proposals")
-    jobs = models.ManyToManyField("task.Job", verbose_name=_('Jobs'),
-                                  related_name="proposals")
-
-    latex_template = models.CharField(_('Template'), max_length=512, default="proposal.tex")
+    jobs = models.ManyToManyField("task.Job", verbose_name=_('Jobs'), related_name="proposals")
 
     NEW = "new"
     SENT = "sent"
@@ -129,11 +101,6 @@ class Proposal(Document):
     def decline(self):
         pass
 
-    def get_document_context(self, add_terms):
-        context = super(Proposal, self).get_document_context(add_terms)
-        context['jobs'] = self.jobs.all()
-        return context
-
     class Meta:
         verbose_name = _("Proposal")
         verbose_name_plural = _("Proposals")
@@ -142,10 +109,7 @@ class Proposal(Document):
 
 class Invoice(Document):
     invoice_no = models.CharField(_("Invoice No."), max_length=30)
-
     project = models.ForeignKey("project.Project", related_name="invoices")
-
-    latex_template = models.CharField(_('Template'), max_length=512, default="invoice.tex")
 
     NEW = "new"
     SENT = "sent"
@@ -173,69 +137,10 @@ class Invoice(Document):
     def dispute(self):
         pass
 
-    def get_document_context(self, add_terms):
-        context = super(Invoice, self).get_document_context(add_terms)
-        context['project'] = self.project
-        context['transactions'] = get_transactions_table(self.project)
-        return context
-
     class Meta:
         verbose_name = _("Invoice")
         verbose_name_plural = _("Invoices")
         ordering = ['id']
-
-
-class Evidence(models.Model):
-    notes = models.TextField(_("Notes"), blank=True, null=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    document_date = models.DateField(_("Date"), default=date.today, blank=True)
-
-    print_pdf = models.FileField(upload_to=generate_file_path)
-    print_latex = models.FileField(upload_to=generate_file_path)
-
-    json = models.FileField(upload_to=generate_file_path)
-
-    project = models.ForeignKey("project.Project", related_name="evidences")
-    jobs = models.ManyToManyField("task.Job", related_name="evidences")
-
-    LATEX_TEMPLATE = "document/latex/evidence.tex"
-
-    class Meta:
-        verbose_name = _("Invoice")
-        verbose_name_plural = _("Invoices")
-        ordering = ['id']
-
-    def generate_document(self, add_terms=True):
-
-        template = get_template(self.LATEX_TEMPLATE)
-
-        # generate latex files
-        context = Context({
-          'doc': self,
-          'jobs': self.jobs.all(),
-        })
-        print_latex = template.render(context).encode('utf-8')
-        self.print_latex.save('print.tex', ContentFile(print_latex), save=False)
-
-        dir_path = os.path.dirname(self.print_latex.path)
-
-        # generate pdf files
-        for format, latex in [('print', print_latex)]:
-
-            for i in range(2):
-                process = Popen(
-                    ['pdflatex', '-output-directory', dir_path,
-                     '-jobname', format],
-                    stdin=PIPE,
-                    stdout=PIPE,
-                    cwd=settings.LATEX_WORKING_DIR
-                    )
-                process.communicate(latex)
-
-            setattr(self, format+'_pdf', os.path.join(dir_path, format+'.pdf'))
-
-        # save file paths to database
-        self.save()
 
 
 class SampleContact:
@@ -255,11 +160,9 @@ class DocumentTemplate(models.Model):
 
     PROPOSAL = "proposal"
     INVOICE = "invoice"
-    EVIDENCE = "evidence"
     DOCUMENT_TYPE = (
         (PROPOSAL, _("Proposal")),
         (INVOICE, _("Invoice")),
-        (EVIDENCE, _("Evidence")),
     )
     document_type = models.CharField(_('Document Type'), max_length=128,
                                      choices=DOCUMENT_TYPE, default=PROPOSAL)

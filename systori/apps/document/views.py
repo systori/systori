@@ -6,18 +6,20 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 
-from .models import Proposal, Invoice, Evidence, DocumentTemplate
-from .forms import ProposalForm, InvoiceForm, EvidenceForm
+from .models import Proposal, Invoice, DocumentTemplate
+from .forms import ProposalForm, InvoiceForm
 from ..accounting import skr03
 
-from .pdf import *
+from .type import proposal, invoice, evidence
 
 
-class BaseDocumentPDFView(SingleObjectMixin, View):
+class DocumentRenderView(SingleObjectMixin, View):
+
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        pdf = getattr(self.object, kwargs['format']+'_pdf')
-        return HttpResponse(pdf, content_type='application/pdf')
+        return HttpResponse(self.pdf(), content_type='application/pdf')
+
+    def pdf(self):
+        raise NotImplementedError
 
 
 # Proposal
@@ -27,8 +29,11 @@ class ProposalView(DetailView):
     model = Proposal
 
 
-class ProposalPDF(BaseDocumentPDFView):
+class ProposalPDF(DocumentRenderView):
     model = Proposal
+    def pdf(self):
+        json = self.get_object().json
+        return proposal.render(json)
 
 
 class ProposalCreate(CreateView):
@@ -90,17 +95,12 @@ class InvoiceView(DetailView):
     model = Invoice
 
 
-class InvoicePDF(SingleObjectMixin, View):
+class InvoicePDF(DocumentRenderView):
     model = Invoice
 
-    def get(self, request, *args, **kwargs):
-        invoice = self.get_object()
-        
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="{}.pdf"'.format(_('invoice'))
-        response.write(draw_invoice(invoice))
-
-        return response
+    def pdf(self):
+        json = self.get_object().json
+        return invoice.render(json)
 
 
 class InvoiceCreate(CreateView):
@@ -121,7 +121,8 @@ class InvoiceCreate(CreateView):
             skr03.partial_debit(project)
 
         form.instance.amount = project.account.balance
-        form.instance.json = serialize_invoice(project, form)
+        form.instance.json = invoice.serialize(project, form)
+        form.instance.json_version = form.instance.json['version']
 
         return super(InvoiceCreate, self).form_valid(form)
 
@@ -178,48 +179,3 @@ class DocumentTemplateUpdate(UpdateView):
 class DocumentTemplateDelete(DeleteView):
     model = DocumentTemplate
     success_url = reverse_lazy('templates')
-
-
-# Evidence
-
-
-class EvidenceDocumentCreateView(CreateView):
-
-    def get_form_kwargs(self):
-        kwargs = super(EvidenceDocumentCreateView, self).get_form_kwargs()
-        kwargs['instance'] = self.model(project=self.request.project)
-        return kwargs
-
-    def form_valid(self, form):
-
-        redirect = super(EvidenceDocumentCreateView, self).form_valid(form)
-        self.object.generate_document(form.cleaned_data)
-
-        return redirect
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
-
-
-class EvidenceView(DetailView):
-    model = Evidence
-
-
-class EvidencePDF(BaseDocumentPDFView):
-    model = Evidence
-
-
-class EvidenceCreate(EvidenceDocumentCreateView):
-    model = Evidence
-    fields = '__all__'
-    form_class = EvidenceForm
-
-    def process_job(self, job):
-        return job.billable_total
-
-
-class EvidenceDelete(DeleteView):
-    model = Evidence
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])

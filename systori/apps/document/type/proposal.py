@@ -1,18 +1,17 @@
 from io import BytesIO
 from reportlab.pdfgen import canvas
-from ..accounting.utils import get_transactions_table
 from django.utils.translation import ugettext_lazy as _
 
 
-def serialize_invoice(project, form):
+def serialize(project, form):
 
-    invoice = {'version': '1.0'}
+    proposal = {'version': '1.0'}
 
     if form.cleaned_data['add_terms']:
-        invoice['terms'] = ['The Terms'] # TODO: Calculate the terms.
+        proposal['terms'] = ['The Terms'] # TODO: Calculate the terms.
 
 
-    invoice['jobs'] = []
+    proposal['jobs'] = []
 
     for job in project.billable_jobs:
         job_dict = {
@@ -20,7 +19,7 @@ def serialize_invoice(project, form):
             'name': job.name,
             'taskgroups': []
         }
-        invoice['jobs'].append(job_dict)
+        proposal['jobs'].append(job_dict)
 
         for taskgroup in job.billable_taskgroups:
             taskgroup_dict = {
@@ -54,7 +53,7 @@ def serialize_invoice(project, form):
                     task_dict['lineitems'].append(lineitem_dict)
 
 
-    invoice['transactions'] = []
+    proposal['transactions'] = []
 
     for record_type, date, record in get_transactions_table(self.project):
 
@@ -68,14 +67,14 @@ def serialize_invoice(project, form):
         if record_type == 'payment':
             txn['received'] = record.received_on
 
-        invoice['transactions'].append(txn)
+        proposal['transactions'].append(txn)
 
 
-    return invoice
+    return proposal
 
 
-def draw_invoice(invoice):
-    
+def render(proposal):
+
     with BytesIO() as buffer:
         p = canvas.Canvas(buffer)
 
