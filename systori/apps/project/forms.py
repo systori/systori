@@ -1,6 +1,7 @@
 from django.forms import ModelForm
 from django import forms
 from .models import Project, JobSite
+from .gaeb_utils import gaeb_validator
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -16,7 +17,7 @@ class ProjectCreateForm(ModelForm):
 
 
 class ProjectImportForm(forms.Form):
-    file = forms.FileField()
+    file = forms.FileField(validators=[gaeb_validator])
 
 
 class ProjectUpdateForm(ModelForm):
