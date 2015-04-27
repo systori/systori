@@ -6,6 +6,7 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 
+from ..project.models import Project
 from .models import Proposal, Invoice, DocumentTemplate
 from .forms import ProposalForm, InvoiceForm
 from ..accounting import skr03
@@ -114,7 +115,10 @@ class InvoiceCreate(CreateView):
 
     def form_valid(self, form):
 
-        project = self.request.project
+        project =\
+            Project.objects.filter(id=self.request.project.id)\
+                .prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')\
+                .get()
 
         # update account balance with any new work that's been done
         if project.new_amount_to_debit:

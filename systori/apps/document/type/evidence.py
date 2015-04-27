@@ -3,7 +3,7 @@ from reportlab.pdfgen import canvas
 from django.utils.translation import ugettext_lazy as _
 
 
-def render_evidence(project):
+def render(project):
 
     with BytesIO() as buffer:
         p = canvas.Canvas(buffer)
