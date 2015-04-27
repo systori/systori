@@ -87,39 +87,43 @@ $ sudo apt-get install oracle-java7-installer
 
 1. Download latest [Eclipse IDE for Java Developers](http://www.eclipse.org/downloads/)
 
+
 1. Create a **bin** directory in home and extract eclipse:
 
-    ```
-$ mkdir ~/bin
-$ cd ~/bin
-$ tar xzf ../Downloads/eclipse-java-mars-M6-linux-gtk.tar.gz
-```
+
+        $ mkdir ~/bin
+        $ cd ~/bin
+        $ tar xzf ../Downloads/eclipse-java-mars-M6-linux-gtk.tar.gz
+
 
 1. Edit ```eclipse.ini```...
 
+
     Add GTK version to fix rendering bug (should be two lines just like below):
-    ```
---launcher.GTK_version
-2
-```
+
+
+        --launcher.GTK_version
+        2
+
 
     Change memory amounts:
-    ```
--XX:MaxPermSize=512m
--Xms512m
--Xmx1024m
-```
+
+
+        -XX:MaxPermSize=512m
+        -Xms512m
+        -Xmx1024m
+
 
 1. Open text editor with new file ```~/bin/eclipse.desktop``` and add the following content making sure to replace **[YOUR_USER_NAME]** with your user name:
 
-    ```
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Eclipse 
-Icon=/home/[YOUR_USER_NAME]/bin/eclipse/icon.xpm
-Exec=/home/[YOUR_USER_NAME]/bin/eclipse/eclipse
-```
+
+        [Desktop Entry]
+        Version=1.0
+        Type=Application
+        Name=Eclipse 
+        Icon=/home/[YOUR_USER_NAME]/bin/eclipse/icon.xpm
+        Exec=/home/[YOUR_USER_NAME]/bin/eclipse/eclipse
+
 
 1. Open file manager (Nautilus) and find the file you created above. Drag the file onto the Ubuntu Unity side bar.
 
@@ -128,23 +132,26 @@ Exec=/home/[YOUR_USER_NAME]/bin/eclipse/eclipse
 
 1. Start eclipse, open menu: ```Help -> Install New Software...```
 
-1. Make sure "Work with:" shows the standard eclipse update site (eg. **Mars**).
+1. Make sure *Work with:* shows the standard eclipse update site (eg. **Mars**).
 
 1. Now install:
 
     * Web, XML, Java EE and OSGi Enterprise Development
+
         * **Eclipse Web Developer Tools**
         * **JavaScript Development Tools**
 
 1. Add PyDev update site and install PyDev:
 
-    Name: **PyDev**
-    Location: **http://pydev.org/updates**
+    * Name: **PyDev**
+
+    * Location: **http://pydev.org/updates**
 
 1. Add Vrapper update site (vim emulator for eclipse) and install it:
 
-    Name: **Vrapper**
-    Location: **http://vrapper.sourceforge.net/update-site/stable**
+    * Name: **Vrapper**
+
+    * Location: **http://vrapper.sourceforge.net/update-site/stable**
 
 
 ### PyDev Tips & Tricks
