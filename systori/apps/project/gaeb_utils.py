@@ -29,10 +29,26 @@ def gaeb_validator(request):
     try:
         gaeb_validate(request.file)
     except:
-        raise ValidationError(_("The provided File can\t be imported. Please Contact Support."))
+        raise ValidationError(_("""File {} can\'t be imported. Please
+        Contact Support.""".format(request.name)))
 
 def gaeb_validate(file):
     tree = objectify.parse(file)
+    GAEB_NS = tree.xpath('namespace-uri(.)')
+    root = tree.getroot()
+    for ctgy in root.Award.BoQ.BoQBody.BoQCtgy:
+        for grp in ctgy.BoQBody.BoQCtgy:
+            for item in grp.BoQBody.Itemlist.getchildren():
+                for text_node in item.Description.CompleteText.DetailTxt.getchildren():
+                    for p in text_node.getchildren():
+                        for child in p.getchildren():
+                            if child.tag in "{{{ns}}}span".format(ns=GAEB_NS):
+                                pass
+                            elif child.tag in "{{{ns}}}image".format(ns=GAEB_NS):
+                                pass
+                for text_node in item.Description.CompleteText.OutlineText.getchildren():
+                    pass
+
 
 def gaeb_import(file):
     tree = objectify.parse(file)
