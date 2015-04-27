@@ -159,11 +159,13 @@ class DocumentTemplateView(DetailView):
 
 class DocumentTemplateCreate(CreateView):
     model = DocumentTemplate
+    fields = '__all__'
     success_url = reverse_lazy('templates')
 
 
 class DocumentTemplateUpdate(UpdateView):
     model = DocumentTemplate
+    fields = '__all__'
     success_url = reverse_lazy('templates')
 
 
@@ -203,6 +205,7 @@ class EvidencePDF(BaseDocumentPDFView):
 
 class EvidenceCreate(EvidenceDocumentCreateView):
     model = Evidence
+    fields = '__all__'
     form_class = EvidenceForm
 
     def process_job(self, job):

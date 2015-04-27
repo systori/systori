@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.test import TestCase
 from django.db import IntegrityError
+from django.utils.translation import activate
 from ..task.test_models import create_task_data
 from ..project.models import Project
 from .models import *
@@ -35,6 +36,18 @@ class TestExceptions(TestCase):
                 create_account_for_project, self.project)
 
 
+class TestAccountDelete(TestCase):
+
+    def setUp(self):
+        create_data(self)
+
+    def test_delete_account_when_project_is_deleted(self):
+        account_id = self.project.account.id
+        self.assertTrue(Account.objects.filter(id=account_id).exists())
+        self.project.delete()
+        self.assertFalse(Account.objects.filter(id=account_id).exists())
+
+
 class TestBankAccountForm(TestCase):
     def test_form_initial_code(self):
         self.assertEquals(str(BANK_CODE_RANGE[0]), BankAccountForm().initial['code'])
@@ -51,6 +64,7 @@ class TestBankAccountForm(TestCase):
         self.assertTrue(BankAccountForm({'code': '1288'}).is_valid())
 
     def test_invalid_code(self):
+        activate('en')
         self.assertFalse(BankAccountForm({'code': 'foo'}).is_valid())
         self.assertFalse(BankAccountForm({'code': '1199'}).is_valid())
         self.assertFalse(BankAccountForm({'code': '1289'}).is_valid())

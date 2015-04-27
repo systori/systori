@@ -92,7 +92,9 @@ class FieldProjectList(ListView):
     template_name = "field/project_list.html"
 
     def get_queryset(self):
-        return self.model.objects.without_template()
+        return Project.objects\
+                .without_template()\
+                .filter(phase__in=[Project.PLANNING, Project.EXECUTING])
 
 
 class FieldProjectView(DetailView):

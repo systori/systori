@@ -23,6 +23,7 @@ class ProjectContactSetBillable(SingleObjectMixin, View):
 class ProjectContactAdd(CreateView):
     model = ProjectContact
     template_name = 'directory/projectcontact_form_add.html'
+    fields = '__all__'
 
     def get_context_data(self, **kwargs):
         context = super(ProjectContactAdd, self).get_context_data(**kwargs)

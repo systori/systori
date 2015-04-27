@@ -11,15 +11,12 @@ def update_project_phase(apps, schema):
     Proposal = apps.get_model('document', 'Proposal')
     for project in Project.objects.filter(is_template=False).all():
         if Job.objects.filter(project_id=project.id, status='started').exists():
-            print('executing')
             project.phase = 'executing'
             project.save()
         elif Proposal.objects.filter(project_id=project.id, status='approved').exists():
-            print('planning')
             project.phase = 'planning'
             project.save()
         elif Proposal.objects.filter(project_id=project.id).exists():
-            print('tendering')
             project.phase = 'tendering'
             project.save()
 

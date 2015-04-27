@@ -1,7 +1,26 @@
 {% extends "project.html" %}
-{% load i18n l10n customformatting %}
+{% load i18n l10n customformatting project %}
 
 {% block content %}
+
+<div class="pull-right">
+{% project_states as states %}
+{% for name, label, is_current, transition in states %}
+<a {% if transition %}href="{% url 'project.transition.state' project.id transition %}"{% endif %}
+class="btn btn-xs btn-{% if is_current %}success{% else %}primary{% endif %} {% if is_current %}active{% endif %}{% if not transition and not is_current %}disabled{% endif %}"
+>{{ label }}</a>
+{% endfor %}
+
+&nbsp; &nbsp; &nbsp; &nbsp;
+
+{% project_phases as phases %}
+{% for name, label, is_current, is_past, transition in phases %}
+<a {% if transition %}href="{% url 'project.transition.phase' project.id transition %}"{% endif %}
+class="btn btn-xs btn-{% if is_past %}default{% elif is_current %}success{% else %}primary{% endif %} {% if is_current %}active{% endif %}{% if not transition and not is_current %}disabled{% endif %}"
+>{{ label }}</a>
+{% endfor %}
+</div>
+
 <h2 class="sub-header">{% trans "Jobs" %}</h2>
 <div class="table-responsive">
   <table class="table table-striped">

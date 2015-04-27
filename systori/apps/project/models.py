@@ -3,7 +3,7 @@ from datetime import date
 from django.db import models
 from django.conf import settings
 from ordered_model.models import OrderedModel
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
 from django_fsm import FSMField, transition
@@ -47,13 +47,13 @@ class Project(models.Model):
     FINISHED = "finished"
 
     PHASE_CHOICES = (
-        (PROSPECTIVE, _("Prospective")),
-        (TENDERING, _("Tendering")),
-        (PLANNING, _("Planning")),
-        (EXECUTING, _("Executing")),
-        (SETTLEMENT, _("Settlement")),
-        (WARRANTY, _("Warranty")),
-        (FINISHED, _("Finished"))
+        (PROSPECTIVE, pgettext_lazy('phase', "Prospective")),
+        (TENDERING, pgettext_lazy('phase', "Tendering")),
+        (PLANNING, pgettext_lazy('phase', "Planning")),
+        (EXECUTING, pgettext_lazy('phase', "Executing")),
+        (SETTLEMENT, pgettext_lazy('phase', "Settlement")),
+        (WARRANTY, pgettext_lazy('phase', "Warranty")),
+        (FINISHED, pgettext_lazy('phase', "Finished"))
     )
 
     phase = FSMField(default=PROSPECTIVE, choices=PHASE_CHOICES)
@@ -86,30 +86,82 @@ class Project(models.Model):
     def is_executing(self):
         return self.phase == Project.PLANNING
 
-    @transition(field=phase, source=EXECUTING, target=SETTLEMENT, custom={'label': _("Enter Settlement Phase")})
+    @transition(field=phase, source=EXECUTING, target=SETTLEMENT)
     def begin_settlement(self):
         pass
 
-    @transition(field=phase, source=SETTLEMENT, target=WARRANTY, custom={'label': _("Begin Warranty Coverage")})
+    @transition(field=phase, source=SETTLEMENT, target=WARRANTY)
     def begin_warranty(self):
         pass
 
+    @transition(field=phase, source="*", target=FINISHED)
+    def finish(self):
+        pass
+
+    def phases(self, user):
+        phases = []
+        available = list(self.get_available_user_phase_transitions(user))
+        is_past = True
+        for name, label in self.PHASE_CHOICES:
+
+            if self.phase == name:
+                is_past = False
+
+            transition_name = None
+            for transition in available:
+                if transition.target == name:
+                    transition_name = transition.name
+                    break
+
+            phases.append((name, label, self.phase==name, is_past, transition_name))
+
+        return phases
+            
 
     ACTIVE = "active"
     PAUSED = "paused"
-    CANCELED = "canceled"
     DISPUTED = "disputed"
     STOPPED = "stopped"
 
     STATE_CHOICES = (
         (ACTIVE, _("Active")),
         (PAUSED, _("Paused")),
-        (CANCELED, _("Canceled")),
         (DISPUTED, _("Disputed")),
         (STOPPED, _("Stopped"))
     )
 
     state = FSMField(default=ACTIVE, choices=STATE_CHOICES)
+
+    @transition(field=state, source="*", target=ACTIVE)
+    def activate(self):
+        pass
+
+    @transition(field=state, source="*", target=PAUSED)
+    def pause(self):
+        pass
+
+    @transition(field=state, source="*", target=DISPUTED)
+    def dispute(self):
+        pass
+
+    @transition(field=state, source="*", target=STOPPED)
+    def stop(self):
+        pass
+
+    def states(self, user):
+        states = []
+        available = list(self.get_available_user_state_transitions(user))
+        for name, label in self.STATE_CHOICES:
+
+            transition_name = None
+            for transition in available:
+                if transition.target == name:
+                    transition_name = transition.name
+                    break
+
+            states.append((name, label, self.state==name, transition_name))
+
+        return states
 
 
     def __str__(self):
