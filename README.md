@@ -1,16 +1,16 @@
-### About Systori ###
+## About Systori
 
-Systori is a suite of tools for construction companies to create project estimates, to manage those projects and generate invoices.
+Systori is a suite of tools for craftsmen to create project estimates, to manage those projects and generate invoices.
 
 Server side is written in [Python](https://www.python.org/) using the [Django framework](https://www.djangoproject.com/) with [PostgreSQL](http://www.postgresql.org/) as the backing database.
 
 Desktop client side is written using Django templates and [Dart](https://www.dartlang.org/).
 
-The rest of this guide will focus on the Django app. See links above for information on getting setup with task editor and mobile client.
+## How do I get set up?
 
-### How do I get set up? ###
+### Workstation
 
-This guide assumes you are on the most recent LTS Ubuntu linux system and that you already have git and SSH keys setup with bitbucket.org.
+This guide assumes you are on the most recent **Ubuntu LTS** linux system and that you already have git and SSH keys setup with bitbucket.org.
 
 You will need PostgreSQL, Python3 and some other tools installed with apt-get:
 
@@ -53,8 +53,7 @@ Finally setup a database for local development and start the app:
 
 ```
 $ createdb systori_local
-$ ./manage.py migrate
-$ ./manage.py runserver
+$ fab localdb_from_productiondb
 ```
 
 When you are done working on systori, you can deactivate the virtual environment:
@@ -68,6 +67,89 @@ And the next time you want to activate it run (this will automatically place you
 ```
 $ workon systori
 ```
+
+
+## Development Environment
+
+For development of systori we've standardized on PyDev (if you prefer a different IDE and know how to set it up and maintain it, you're welcome to skip this section.).
+
+
+### Install Oracle Java 7
+
+```
+$ sudo add-apt-repository ppa:webupd8team/java
+$ sudo apt-get update
+$ sudo apt-get install oracle-java7-installer
+```
+
+
+### Eclipse
+
+1. Download latest [Eclipse IDE for Java Developers](http://www.eclipse.org/downloads/)
+
+1. Create a **bin** directory in home and extract eclipse:
+
+    ```
+$ mkdir ~/bin
+$ cd ~/bin
+$ tar xzf ../Downloads/eclipse-java-mars-M6-linux-gtk.tar.gz
+```
+
+1. Edit ```eclipse.ini```...
+
+    Add GTK version to fix rendering bug (should be two lines just like below):
+    ```
+--launcher.GTK_version
+2
+```
+
+    Change memory amounts:
+    ```
+-XX:MaxPermSize=512m
+-Xms512m
+-Xmx1024m
+```
+
+1. Open text editor with new file ```~/bin/eclipse.desktop``` and add the following content making sure to replace **[YOUR_USER_NAME]** with your user name:
+
+    ```
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Eclipse 
+Icon=/home/[YOUR_USER_NAME]/bin/eclipse/icon.xpm
+Exec=/home/[YOUR_USER_NAME]/bin/eclipse/eclipse
+```
+
+1. Open file manager (Nautilus) and find the file you created above. Drag the file onto the Ubuntu Unity side bar.
+
+
+### PyDev & Plugins
+
+1. Start eclipse, open menu: ```Help -> Install New Software...```
+
+1. Make sure "Work with:" shows the standard eclipse update site (eg. **Mars**).
+
+1. Now install:
+
+    * Web, XML, Java EE and OSGi Enterprise Development
+        * **Eclipse Web Developer Tools**
+        * **JavaScript Development Tools**
+
+1. Add PyDev update site and install PyDev:
+
+    Name: **PyDev**
+    Location: **http://pydev.org/updates**
+
+1. Add Vrapper update site (vim emulator for eclipse) and install it:
+
+    Name: **Vrapper**
+    Location: **http://vrapper.sourceforge.net/update-site/stable**
+
+
+### PyDev Tips & Tricks
+
+To be done.
 
 
 ### Contribution guidelines ###
