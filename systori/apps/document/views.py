@@ -177,24 +177,6 @@ class DocumentTemplateDelete(DeleteView):
 # Evidence
 
 
-class EvidenceDocumentCreateView(CreateView):
-
-    def get_form_kwargs(self):
-        kwargs = super(EvidenceDocumentCreateView, self).get_form_kwargs()
-        kwargs['instance'] = self.model(project=self.request.project)
-        return kwargs
-
-    def form_valid(self, form):
-
-        redirect = super(EvidenceDocumentCreateView, self).form_valid(form)
-        self.object.generate_document(form.cleaned_data)
-
-        return redirect
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
-
-
 class EvidenceView(DetailView):
     model = Evidence
 
@@ -203,13 +185,22 @@ class EvidencePDF(BaseDocumentPDFView):
     model = Evidence
 
 
-class EvidenceCreate(EvidenceDocumentCreateView):
+class EvidenceCreate(CreateView):
     model = Evidence
-    fields = '__all__'
     form_class = EvidenceForm
 
-    def process_job(self, job):
-        return job.billable_total
+    def get_form_kwargs(self):
+        kwargs = super(EvidenceCreate, self).get_form_kwargs()
+        kwargs['instance'] = self.model(project=self.request.project)
+        return kwargs
+
+    def form_valid(self, form):
+        redirect = super(EvidenceCreate, self).form_valid(form)
+        self.object.generate_document()
+        return redirect
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
 
 
 class EvidenceDelete(DeleteView):

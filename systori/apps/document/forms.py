@@ -46,17 +46,13 @@ class InvoiceForm(forms.ModelForm):
 
 
 class EvidenceForm(forms.ModelForm):
-    doc_template = forms.ModelChoiceField(
-        queryset=DocumentTemplate.objects.filter(
-            document_type=DocumentTemplate.EVIDENCE), required=False)
-
     def __init__(self, *args, **kwargs):
         super(EvidenceForm, self).__init__(*args, **kwargs)
-        self.fields['jobs'].queryset = self.instance.project.jobs_for_invoice
+        self.fields['jobs'].queryset = self.instance.project.jobs
 
     class Meta:
         model = Evidence
-        fields = ['doc_template', 'document_date', 'jobs', 'notes']
+        fields = ['document_date', 'jobs']
         widgets = {
             'document_date': DateInput(attrs={'type': 'date'}),
         }

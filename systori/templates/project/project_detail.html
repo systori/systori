@@ -302,14 +302,7 @@ class="btn btn-xs btn-{% if is_past %}default{% elif is_current %}success{% else
       {% endfor %}
     </tbody>
   </table>
-  {% if project.has_jobs_for_invoice %}
-    <a href="{% url 'evidence.create' project.id %}">{% trans "Create" %}</a>
-  {% else %}
-    <p>{% trans "No jobs available to invoice." %}</p>
-    {% if not project.has_billable_contact %}
-    <p>{% trans "No billable contact defined." %}</p>
-    {% endif %}
-  {% endif %}
+  <a href="{% url 'evidence.create' project.id %}">{% trans "Create" %}</a>
 </div>
 
 
