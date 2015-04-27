@@ -76,7 +76,7 @@ def gaeb_import(file):
                             if child.tag in "{{{ns}}}span".format(ns=GAEB_NS):
                                 task.description += " ".join(child.xpath(".//text()"))
                             elif child.tag in "{{{ns}}}image".format(ns=GAEB_NS):
-                                task.description += " !Bild im LV vorhanden!"
+                                task.description += str(_(" Info: Picture was in Imported File."))
                 for text_node in item.Description.CompleteText.OutlineText.getchildren():
                     task.name = " ".join(text_node.xpath(".//text()"))
                 TaskInstance.objects.create(task=task, selected=True)

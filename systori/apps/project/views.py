@@ -96,10 +96,7 @@ class ProjectImport(FormView):
     template_name = "project/project_form_upload.html"
     
     def form_valid(self, form):
-        try:
-            self.object = gaeb_import(self.request.FILES['file'])
-        except:
-            raise ValidationError(_('This provided File can\'t be imported. Please check your File and contact Support.'), code='invalid')
+        self.object = gaeb_import(self.request.FILES['file'])
         return super(ProjectImport, self).form_valid(form)
     
     def get_success_url(self):

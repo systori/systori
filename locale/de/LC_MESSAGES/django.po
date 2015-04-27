@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-23 15:27+0200\n"
+"POT-Creation-Date: 2015-04-27 15:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -139,25 +139,25 @@ msgstr "eMail"
 msgid "Website"
 msgstr "Webseite"
 
-#: systori/apps/directory/models.py:19 systori/apps/project/forms.py:8
-#: systori/apps/project/models.py:258
+#: systori/apps/directory/models.py:19 systori/apps/project/forms.py:9
+#: systori/apps/project/models.py:252
 #: systori/templates/project/project_detail.html:356
 msgid "Address"
 msgstr "Adresse"
 
-#: systori/apps/directory/models.py:20 systori/apps/project/forms.py:9
-#: systori/apps/project/models.py:260
+#: systori/apps/directory/models.py:20 systori/apps/project/forms.py:10
+#: systori/apps/project/models.py:254
 msgid "Postal Code"
 msgstr "PLZ"
 
-#: systori/apps/directory/models.py:21 systori/apps/project/forms.py:10
-#: systori/apps/project/models.py:259
+#: systori/apps/directory/models.py:21 systori/apps/project/forms.py:11
+#: systori/apps/project/models.py:253
 #: systori/templates/project/project_detail.html:357
 #: systori/templates/project/project_list_table.html:9
 msgid "City"
 msgstr "Stadt"
 
-#: systori/apps/directory/models.py:22 systori/apps/project/models.py:261
+#: systori/apps/directory/models.py:22 systori/apps/project/models.py:255
 msgid "Country"
 msgstr "Land"
 
@@ -167,7 +167,6 @@ msgstr "Land"
 #: systori/templates/document/invoice_detail.html:11
 #: systori/templates/document/proposal_detail.html:11
 #: systori/templates/field/dailyplan.html:136
-#: systori/templates/field/planning.html:16
 #: systori/templates/main/day_based_overview.html:71
 #: systori/templates/project/project_detail.html:81
 msgid "Notes"
@@ -305,7 +304,7 @@ msgstr "Re-Nr."
 msgid "Paid"
 msgstr "bezahlt"
 
-#: systori/apps/document/models.py:159 systori/apps/project/models.py:131
+#: systori/apps/document/models.py:159 systori/apps/project/models.py:129
 msgid "Disputed"
 msgstr "streit"
 
@@ -386,6 +385,18 @@ msgstr "Kaufdatum"
 msgid "Purchase Price"
 msgstr "Kaufpreis"
 
+#: systori/apps/project/gaeb_utils.py:32
+msgid ""
+"File {} can't be imported. Please\n"
+"        Contact Support."
+msgstr ""
+"Datei {} kann nicht importiert werden.\n"
+"Bitte kontaktieren Sie den Support."
+
+#: systori/apps/project/gaeb_utils.py:79
+msgid " Info: Picture was in Imported File."
+msgstr " Info: Bild in importierter Datei vorhanden."
+
 #: systori/apps/project/models.py:26
 msgid "Project Name"
 msgstr "Projektbezeichnung"
@@ -445,31 +456,28 @@ msgctxt "phase"
 msgid "Finished"
 msgstr "beendet"
 
-#: systori/apps/project/models.py:128
+#: systori/apps/project/models.py:127
 msgid "Active"
 msgstr "aktiv"
 
-#: systori/apps/project/models.py:129
+#: systori/apps/project/models.py:128
 msgid "Paused"
 msgstr "pausiert"
 
 #: systori/apps/project/models.py:130
-msgid "Canceled"
-msgstr "abgebrochen"
-
-#: systori/apps/project/models.py:132
 msgid "Stopped"
 msgstr "gestopt"
 
-#: systori/apps/project/models.py:183
+#: systori/apps/project/models.py:177
 #: systori/templates/directory/contact_detail.html:20
 #: systori/templates/document/latex/evidence.tex:52
 msgid "Project"
 msgstr "Projekt"
 
-#: systori/apps/project/models.py:184 systori/templates/base.html:38
+#: systori/apps/project/models.py:178 systori/templates/base.html:38
 #: systori/templates/field/dashboard.html:16
 #: systori/templates/field/dashboard.html:27
+#: systori/templates/field/planning.html:15
 #: systori/templates/field/project.html:8
 #: systori/templates/field/project_list.html:14
 #: systori/templates/main/dashboard.html:9
@@ -477,29 +485,29 @@ msgstr "Projekt"
 msgid "Projects"
 msgstr "Projekte"
 
-#: systori/apps/project/models.py:256
+#: systori/apps/project/models.py:250
 msgid "Site Name"
 msgstr "Vorname"
 
-#: systori/apps/project/models.py:263
+#: systori/apps/project/models.py:257
 #: systori/templates/project/project_detail.html:358
 msgid "Latitude"
 msgstr "Breitengrad"
 
-#: systori/apps/project/models.py:264
+#: systori/apps/project/models.py:258
 #: systori/templates/project/project_detail.html:358
 msgid "Longitude"
 msgstr "Längengrad"
 
-#: systori/apps/project/models.py:295
+#: systori/apps/project/models.py:289
 msgid "Day"
 msgstr "Tag"
 
-#: systori/apps/project/views.py:73
+#: systori/apps/project/views.py:74
 msgid "Default"
 msgstr "Default"
 
-#: systori/apps/project/views.py:78
+#: systori/apps/project/views.py:79
 msgid "Main Site"
 msgstr "Baustelle"
 
@@ -607,6 +615,11 @@ msgstr "Preiskorrektur von %(user)s am %(date)s"
 #: systori/apps/task/models.py:366
 msgid "correction"
 msgstr "Korrektur"
+
+#: systori/apps/task/models.py:376
+#| msgid "alternate"
+msgid "Alternative"
+msgstr "Alternativ"
 
 #: systori/apps/task/models.py:459
 #: systori/templates/project/project_detail.html:324
@@ -809,7 +822,7 @@ msgstr "Löschen"
 
 #: systori/templates/accounting/account_list.html:34
 #: systori/templates/directory/projectcontact_form_add.html:27
-#: systori/templates/field/planning.html:32
+#: systori/templates/field/planning.html:33
 #: systori/templates/field/project.html:28
 #: systori/templates/field/project.html:49
 #: systori/templates/project/project_detail.html:345
@@ -1095,7 +1108,6 @@ msgstr "Keine Positionen zugewiesen."
 
 #: systori/templates/field/dailyplan.html:100
 #: systori/templates/field/job.html:15
-#: systori/templates/field/planning.html:15
 #: systori/templates/project/project_planning.html:265
 msgid "Tasks"
 msgstr "Positionen"
@@ -1124,7 +1136,7 @@ msgstr "Planung"
 msgid "You have not been assigned to any job sites today."
 msgstr "Du bist noch keinem Einsatzort zugeteilt."
 
-#: systori/templates/field/planning.html:44
+#: systori/templates/field/planning.html:45
 #: systori/templates/field/project.html:32
 #, python-format
 msgid "Copy from %(otherday)s."
@@ -1404,6 +1416,9 @@ msgstr "Die eingegebenen Daten sind nicht richtig."
 #: systori/templates/user/login.html:61
 msgid "Sign in"
 msgstr "Anmelden"
+
+msgid "Canceled"
+msgstr "abgebrochen"
 
 msgid "Adjustment"
 msgstr "Anhang"
