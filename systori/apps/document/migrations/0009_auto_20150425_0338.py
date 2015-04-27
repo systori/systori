@@ -93,16 +93,6 @@ class Migration(migrations.Migration):
             name='document_type',
             field=models.CharField(max_length=128, verbose_name='Document Type', default='proposal', choices=[('proposal', 'Proposal'), ('invoice', 'Invoice')]),
         ),
-        migrations.AlterField(
-            model_name='invoice',
-            name='json',
-            field=jsonfield.fields.JSONField(default={}),
-        ),
-        migrations.AlterField(
-            model_name='proposal',
-            name='json',
-            field=jsonfield.fields.JSONField(default={}),
-        ),
         migrations.DeleteModel(
             name='Evidence',
         ),
