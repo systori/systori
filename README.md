@@ -153,6 +153,12 @@ $ sudo apt-get install oracle-java7-installer
 
     * Location: **http://vrapper.sourceforge.net/update-site/stable**
 
+1. Add Mylyn Bitbucket update site and install it:
+
+    * Name: **Mylyn Bitbucket**
+
+    * Location: **http://babelserver.org/mylyn-bitbucket/**
+
 1. Add Dart Editor update site and install it:
 
     * Name: **Dart Editor**
