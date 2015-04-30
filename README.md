@@ -71,7 +71,7 @@ $ workon systori
 
 ## Development Environment
 
-For development of systori we've standardized on PyDev (if you prefer a different IDE and know how to set it up and maintain it, you're welcome to skip this section.).
+For development of systori you can use either PyCharm or PyDev.
 
 
 ### Install Oracle Java 7
