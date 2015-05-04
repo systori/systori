@@ -15,7 +15,7 @@
       <excludeFolder url="file://$MODULE_DIR$/editor/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/editor/web/packages" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="systori-python" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="application" />
     <orderEntry type="module-library">
