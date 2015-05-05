@@ -9,3 +9,6 @@ django-fsm
 django_mobile
 geopy
 lxml
+
+#django-boardinghouse
+-e ../django-boardinghouse
