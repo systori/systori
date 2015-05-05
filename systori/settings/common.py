@@ -12,6 +12,8 @@ PROPOSAL_LATEX_TEMPLATES = [
     ('proposal_with_lineitems.tex', _('Extended'))
 ]
 
+BOARDINGHOUSE_SCHEMA_MODEL = 'company.Company'
+
 # Django Settings
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
@@ -63,7 +65,8 @@ INSTALLED_APPS = (
     'systori.apps.field',
     'systori.apps.equipment',
     'systori.apps.accounting',
-    'systori.apps.main'
+    'systori.apps.main',
+    'systori.apps.company',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -77,6 +80,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'systori.apps.company.middleware.CompanyMiddleware',
     'systori.apps.project.middleware.ProjectMiddleware',
     'systori.apps.field.middleware.FieldMiddleware'
 )
@@ -111,7 +115,8 @@ LATEX_WORKING_DIR = os.path.join(BASE_DIR, 'templates/document/latex')
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'boardinghouse.backends.postgres',
     }
 }
 
