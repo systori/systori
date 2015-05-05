@@ -6,6 +6,10 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import BaseDocTemplate, SimpleDocTemplate, Paragraph, Table, TableStyle, Frame, PageTemplate, FrameBreak
+
+
 from ..project.models import Project
 from .models import Proposal, Invoice, DocumentTemplate
 from .forms import ProposalForm, InvoiceForm
@@ -99,9 +103,29 @@ class InvoiceView(DetailView):
 class InvoicePDF(DocumentRenderView):
     model = Invoice
 
+    # so the _header_footer expects canvas and doc
+    @staticmethod
+    def _header_footer(canvas, doc):
+        # Save the state of our canvas so we can draw on it
+        canvas.saveState()
+        styles = getSampleStyleSheet()
+
+        # Header
+        header = Paragraph('This is a multi-line header.  It goes on every page.   ' * 5, styles['Normal'])
+        w, h = header.wrap(doc.width, doc.topMargin)
+        header.drawOn(canvas, doc.leftMargin, doc.height + doc.topMargin - h)
+
+        # Footer
+        footer = Paragraph('This is a multi-line footer.  It goes on every page.   ' * 5, styles['Normal'])
+        w, h = footer.wrap(doc.width, doc.bottomMargin)
+        footer.drawOn(canvas, doc.leftMargin, h)
+
+        # Release the canvas
+        canvas.restoreState()
+
     def pdf(self):
         json = self.get_object().json
-        return invoice.render(json)
+        return invoice.render(self, json)
 
 
 class InvoiceCreate(CreateView):

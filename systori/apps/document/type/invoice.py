@@ -1,17 +1,27 @@
 from io import BytesIO
-from reportlab.lib.pagesizes import letter
+
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import cm, mm
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
-from systori.apps.accounting.utils import get_transactions_table
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
+from reportlab.platypus import BaseDocTemplate, SimpleDocTemplate, Paragraph, Table, TableStyle, Frame, PageTemplate, FrameBreak
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.rl_settings import showBoundary
+
 from django.utils.translation import ugettext as _
+from django.http.response import HttpResponse
+
+from systori.apps.accounting.utils import get_transactions_table
+from reportlab.platypus.doctemplate import NextPageTemplate, FrameBreak
 
 
 def txt(t):
     return Paragraph(str(t), ParagraphStyle('',fontName='Helvetica',fontSize=12,leading=17))
 
-def render(invoice):
+def render_old(invoice):
 
     with BytesIO() as buffer:
         doc = SimpleDocTemplate(buffer, pagesize=letter)
@@ -160,3 +170,73 @@ def serialize(project, form):
 
 
     return invoice
+
+
+class NumberedCanvas(canvas.Canvas):
+    def __init__(self, *args, **kwargs):
+        canvas.Canvas.__init__(self, *args, **kwargs)
+        self._saved_page_states = []
+
+    def showPage(self):
+        self._saved_page_states.append(dict(self.__dict__))
+        self._startPage()
+
+    def save(self):
+        """add page info to each page (page x of y)"""
+        num_pages = len(self._saved_page_states)
+        for state in self._saved_page_states:
+            self.__dict__.update(state)
+            self.draw_page_number(num_pages)
+            canvas.Canvas.showPage(self)
+        canvas.Canvas.save(self)
+
+    def draw_page_number(self, page_count):
+        # Change the position of this to wherever you want the page number to be
+        self.drawRightString(190 * mm, 10 * mm,
+                             "Page %d of %d" % (self._pageNumber, page_count))
+
+def first_page(canvas, document):
+    pass
+
+def later_pages(canvas, document):
+    pass
+
+def render(self, invoice):
+    with BytesIO() as buffer:
+
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(name='centered', fontName='DroidSans', alignment=TA_CENTER))
+
+        recipient = Frame(5 * mm, 282 * mm, 20 * cm, 10 * mm, id='recipient', showBoundary=1)
+        content = Frame(5 * mm, 17.5 * mm, 20 * cm, 262 * mm, id='content', showBoundary=1)
+        footer = Frame(5 * mm, 5 * mm, 20 * cm, 10 * mm, id='footer', showBoundary=1)
+
+        mainPage = PageTemplate(frames=[recipient, content, footer])
+
+        #doc = BaseDocTemplate(buffer,
+        doc = SimpleDocTemplate(buffer,
+                              rightMargin=0,
+                              leftMargin=0,
+                              topMargin=0,
+                              bottomMargin=0,
+                              pagesize=A4)
+        elements = []
+
+        #doc.addPageTemplates([PageTemplate(id='Standard',frames=[recipient, content, footer])])
+
+        #elements.append(NextPageTemplate('Standard'))
+        elements.append(Paragraph('This is the Header.', styles['BodyText']))
+        #elements.append(FrameBreak())
+
+        elements.append(txt(invoice['business']))
+
+        #elements.append(FrameBreak())
+        elements.append(Paragraph('This is the Footer.', styles['BodyText']))
+
+        # but here it's just 'called'?
+        # I mean that's what I assume it gets called ... onFirstPage and onLaterPages
+        # or it's handed to some other thing
+        doc.build(elements, onFirstPage=first_page, onLaterPages=later_pages, canvasmaker=NumberedCanvas)
+        #doc.build(elements, canvasmaker=NumberedCanvas)
+
+        return buffer.getvalue()
