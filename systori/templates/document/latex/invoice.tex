@@ -131,7 +131,7 @@ z.H. {{ contact.salutation|tex_escape|trim }} {{ contact.first_name|tex_escape|t
 {% if record_type == "discount" %}
 {% trans 'Discount applied' %} & {{ record.amount|money|tex_escape|trim }} & {{ record.amount_base|money|tex_escape|trim }} & {{ record.amount_tax|money|tex_escape|trim }}\\[5pt]
 {% elif record_type == "payment" %}
-{% trans 'Your Payment on' %} {{ record.transaction.group.payment.date_received|date:"DATE_FORMAT" }} & {{ record.amount|money|tex_escape|trim }} & {{ record.amount_base|money|tex_escape|trim }} & {{ record.amount_tax|money|tex_escape|trim }}\\[5pt]
+{% trans 'Your Payment on' %} {{ record.received_on|date:"DATE_FORMAT" }} & {{ record.amount|money|tex_escape|trim }} & {{ record.amount_base|money|tex_escape|trim }} & {{ record.amount_tax|money|tex_escape|trim }}\\[5pt]
 {% endif %}
 {% endfor %}
 \bfseries{ {% trans 'Remaining amount' %} } & \bfseries{ {{project.account.balance|money|tex_escape|trim}} }& \bfseries{ {{project.account.balance_base|money|tex_escape|trim}} }& \bfseries{ {{project.account.balance_tax|money|tex_escape|trim}} }\\[5pt]

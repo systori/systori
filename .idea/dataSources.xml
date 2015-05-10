@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="3712093265">
+    <data-source source="LOCAL" name="PostgreSQL - systori_local@localhost" uuid="a520894e-0b03-4fe9-977c-4f5677d0c1e7">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/systori_local</jdbc-url>
+      <libraries />
+    </data-source>
+  </component>
+</project>

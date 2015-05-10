@@ -1,3 +1,4 @@
 -r common.pip
 django-debug-toolbar
 django-nose
+coverage

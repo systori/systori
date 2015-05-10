@@ -207,3 +207,39 @@ class DocumentTemplateUpdate(UpdateView):
 class DocumentTemplateDelete(DeleteView):
     model = DocumentTemplate
     success_url = reverse_lazy('templates')
+
+
+# Evidence
+
+
+class EvidenceView(DetailView):
+    model = Evidence
+
+
+class EvidencePDF(BaseDocumentPDFView):
+    model = Evidence
+
+
+class EvidenceCreate(CreateView):
+    model = Evidence
+    form_class = EvidenceForm
+
+    def get_form_kwargs(self):
+        kwargs = super(EvidenceCreate, self).get_form_kwargs()
+        kwargs['instance'] = self.model(project=self.request.project)
+        return kwargs
+
+    def form_valid(self, form):
+        redirect = super(EvidenceCreate, self).form_valid(form)
+        self.object.generate_document()
+        return redirect
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
+
+
+class EvidenceDelete(DeleteView):
+    model = Evidence
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])

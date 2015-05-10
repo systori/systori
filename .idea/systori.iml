@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="PYTHON_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="django" name="Django">
+      <configuration>
+        <option name="rootFolder" value="$MODULE_DIR$" />
+        <option name="settingsModule" value="systori/settings" />
+        <option name="manageScript" value="manage.py" />
+        <option name="environment" value="&lt;map/&gt;" />
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/editor/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/editor/web/packages" />
+    </content>
+    <orderEntry type="jdk" jdkName="systori-python" jdkType="Python SDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Dart SDK" level="application" />
+    <orderEntry type="module-library">
+      <library name="Dart custom package roots">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/editor" />
+        </CLASSES>
+        <SOURCES />
+      </library>
+    </orderEntry>
+  </component>
+  <component name="TemplatesService">
+    <option name="TEMPLATE_CONFIGURATION" value="Django" />
+    <option name="TEMPLATE_FOLDERS">
+      <list>
+        <option value="$MODULE_DIR$/systori/templates" />
+      </list>
+    </option>
+  </component>
+</module>

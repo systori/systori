@@ -1,3 +1,7 @@
+.idea/workspace.xml
+.idea/dataSources.ids
+.idea/dataSources.local.xml
+.idea/dataSources.xml
 *.pyc
 .settings/
 bitbucket.login
