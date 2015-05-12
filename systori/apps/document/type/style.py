@@ -129,7 +129,6 @@ def force_break(txt):
 def p(txt):
     return Paragraph(txt, stylesheet['Normal'])
 
-
 def b(txt):
     return Paragraph(txt, stylesheet['Bold'])
 

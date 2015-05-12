@@ -10,9 +10,11 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm, mm
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus import BaseDocTemplate, SimpleDocTemplate, Paragraph, Table, TableStyle, Frame, PageTemplate, FrameBreak
+from reportlab.platypus import BaseDocTemplate, SimpleDocTemplate, Paragraph, Table,\
+    TableStyle, Frame, PageTemplate, FrameBreak
 from reportlab.platypus import Spacer, cleanBlockQuotedText
 from reportlab.platypus.tables import IdentStr
+from reportlab.platypus.flowables import KeepTogether
 from reportlab.lib import colors
 
 from django.conf import settings
@@ -93,8 +95,12 @@ def compile_jobs(jobs, available_width):
         ]
 
     lines.append((_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total")))
+    style.append(('LEFTPADDING', (0,0),(-1,-1), 0))
+    style.append(('RIGHTPADDING', (-1,0),(-1,-1), 0))
     style.append(('FONTNAME', (0, row()), (-1, row()), font.bold))
-    style.append(('ALIGNMENT', (1, row()), (-1, row()), "CENTER"))
+    style.append(('ALIGNMENT', (2, row()), (3, row()), "CENTER"))
+    style.append(('ALIGNMENT', (3, row()), (-1, row()), "RIGHT"))
+    style.append(('VALIGN',(0, 0),(-1,-1),'TOP'))
     style.append(('SPAN', (2, row()), (3, row())))
 
     code_width = 1
@@ -114,9 +120,13 @@ def compile_jobs(jobs, available_width):
             style.append(('SPAN', (1, row()), (-1, row())))
 
             for task in taskgroup['tasks']:
+                # TODO: Figure out a way to KeepTogether() the two lines
+                # already tried to use keepWithNext = 1 and KeepTogether() without success
+                # probably we're going to need a custom flowable
+                # TODO: Figure out a way to have a smaller empty row after each Task
                 lines.append([p(task['code']), p(task['name'])])
                 code_width = max(code_width, s_width(task['code']))
-                style.append(('SPAN', (1, row()), (-1, row())))
+                style.append(('SPAN', (1, row()), (-2, row())))
 
                 s_complete = ubrdecimal(task['complete'])
                 s_price = money(task['price'])
@@ -146,12 +156,12 @@ def compile_jobs(jobs, available_width):
 
     pad = 5*mm
     widths = [
-        code_width + pad,
+        code_width + pad/2,
         0,
         complete_width + pad,
         unit_width + pad,
         price_width + pad,
-        total_width + pad
+        total_width + pad/2
     ]
     widths[1] = available_width - sum(widths)
 
@@ -209,6 +219,8 @@ def render(invoice):
             compile_jobs(invoice['jobs'], doc.width),
 
             Table(compile_payments(invoice)),
+
+            Spacer(0, 4*mm),
 
             Paragraph(force_break(invoice['footer']), stylesheet['Normal']),
 
