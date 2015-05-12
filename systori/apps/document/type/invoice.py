@@ -66,31 +66,23 @@ class InvoiceDocument(BaseDocTemplate):
         super(InvoiceDocument, self).build(flowables, canvasmaker=NumberedCanvas)
 
 
-class ItemizedTable(Table):
-    # TODO: Figure out a way to add "Continued..." and "...continued"
-    def onSplit(self, table, byRow=1):
-        self_pos = int(self.ident[1:-1])
-        table_pos = int(table.ident[1:-1])
-        if self_pos+1 == table_pos: pos = "Previous"
-        if self_pos+2 == table_pos: pos = "Next"
-        print(table_pos, self.ident, table.ident)
-        #self.canv.setFont(font.normal, 10)
-        #self.canv.drawRightString(145*mm, 10*mm, 'Continue..')
+class InvoiceTable(Table):
+    pass
 
 
 class TableFormatter:
 
     font = font.normal
     font_size = 10
-    columns = [1, 0, 1, 1, 1, 1]
 
-    def __init__(self, available_width, pad, trim_ends=False):
-        assert self.columns.count(0) == 1, "Must have exactly one stretch column."
-        self.lines = []
-        self._maximums = self.columns.copy()
-        self._available_width = available_width
+    def __init__(self, columns, width, pad=5*mm, trim_ends=True):
+        assert columns.count(0) == 1, "Must have exactly one stretch column."
+        self._maximums = columns.copy()
+        self._available_width = width
         self._pad = pad
         self._trim_ends = trim_ends
+        self.columns = columns
+        self.lines = []
         self.style = [
             ('FONTNAME', (0, 0), (-1, -1), self.font),
             ('FONTSIZE', (0, 0), (-1, -1), self.font_size)
@@ -100,6 +92,9 @@ class TableFormatter:
                 ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
                 ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
             ]
+
+    def get_table(self, **kwargs):
+        return InvoiceTable(self.lines, colWidths=self.get_widths(), style=self.style, **kwargs)
 
     def row(self, *line):
         for i, column in enumerate(self.columns):
@@ -136,10 +131,12 @@ class TableFormatter:
     def row_style(self, name, from_column, to_column, *args):
         self.style.append((name, (from_column, self._row_num), (to_column, self._row_num))+args)
 
+    def keep_previous_n_rows_together(self, n):
+        self.style.append(('NOSPLIT', (0, self._row_num-n+1), (0, self._row_num)))
 
 def compile_jobs(jobs, available_width):
 
-    t = TableFormatter(available_width, 5*mm, True)
+    t = TableFormatter([1, 0, 1, 1, 1, 1], available_width)
     t.style.append(('LEFTPADDING', (0, 0), (-1,-1), 0))
     t.style.append(('RIGHTPADDING', (-1, 0), (-1,-1), 0))
     t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
@@ -159,18 +156,18 @@ def compile_jobs(jobs, available_width):
             t.row_style('SPAN', 1, -1)
 
             for task in taskgroup['tasks']:
-                # TODO: Figure out a way to KeepTogether() the two lines
-                # already tried to use keepWithNext = 1 and KeepTogether() without success
-                # probably we're going to need a custom flowable
-                # TODO: Figure out a way to have a smaller empty row after each Task
                 t.row(p(task['code']), p(task['name']))
                 t.row_style('SPAN', 1, -2)
 
                 t.row('', '', ubrdecimal(task['complete']), p(task['unit']), money(task['price']), money(task['total']))
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
 
+                t.row_style('BOTTOMPADDING', 0, -1, 6)
+
+                t.keep_previous_n_rows_together(2)
+
             t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
-                           '', '', '', money(taskgroup['total']))
+                  '', '', '', money(taskgroup['total']))
             t.row_style('SPAN', 1, 4)
             t.row_style('ALIGNMENT', -1, -1, "RIGHT")
 
@@ -182,7 +179,7 @@ def compile_jobs(jobs, available_width):
             #lines.append(['', p('Total {} - {}'.format(taskgroup['code'], taskgroup['name'])), p(taskgroup['total'])])
             pass
 
-    return ItemizedTable(t.lines, colWidths=t.get_widths(), style=t.style, repeatRows=1, ident=IdentStr(''))
+    return t.get_table(repeatRows=1, ident=IdentStr(''))
 
 
 def compile_payments(invoice):
