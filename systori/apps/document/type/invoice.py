@@ -28,7 +28,7 @@ from .style import NumberedCanvas, stylesheet, force_break, p, b, nr
 from . import font
 
 
-DEBUG_DOCUMENT = True # Shows boxes in rendered output
+DEBUG_DOCUMENT = True  # Shows boxes in rendered output
 
 
 class InvoiceDocument(BaseDocTemplate):
@@ -78,75 +78,103 @@ class ItemizedTable(Table):
         #self.canv.drawRightString(145*mm, 10*mm, 'Continue..')
 
 
+class TableFormatter:
+
+    font = font.normal
+    font_size = 10
+    columns = [1, 0, 1, 1, 1, 1]
+
+    def __init__(self, available_width, pad, trim_ends=False):
+        assert self.columns.count(0) == 1, "Must have exactly one stretch column."
+        self.lines = []
+        self._maximums = self.columns.copy()
+        self._available_width = available_width
+        self._pad = pad
+        self._trim_ends = trim_ends
+        self.style = [
+            ('FONTNAME', (0, 0), (-1, -1), self.font),
+            ('FONTSIZE', (0, 0), (-1, -1), self.font_size)
+        ]
+        if DEBUG_DOCUMENT:
+            self.style += [
+                ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+                ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
+            ]
+
+    def row(self, *line):
+        for i, column in enumerate(self.columns):
+            if column != 0 and i < len(line):
+                self._maximums[i] = max(self._maximums[i], self.string_width(line[i]))
+        self.lines.append(line)
+
+    def string_width(self, txt):
+        if isinstance(txt, str):
+            return stringWidth(txt, self.font, self.font_size)
+        else:
+            return stringWidth(txt.text, self.font, self.font_size)
+
+    def get_widths(self):
+
+        widths = self._maximums.copy()
+
+        for i, w in enumerate(widths):
+            if w != 0:
+                widths[i] += self._pad
+
+        if self._trim_ends:
+            trim = self._pad/2
+            widths[0] -= trim if widths[0] >= trim else 0
+            widths[-1] -= trim if widths[-1] >= trim else 0
+
+        widths[widths.index(0)] = self._available_width - sum(widths)
+
+        return widths
+
+    @property
+    def _row_num(self): return len(self.lines)-1
+
+    def row_style(self, name, from_column, to_column, *args):
+        self.style.append((name, (from_column, self._row_num), (to_column, self._row_num))+args)
+
+
 def compile_jobs(jobs, available_width):
 
-    lines = []
-    def row(): return len(lines)-1
-    def s_width(t): return stringWidth(t, font.normal, 10)
+    t = TableFormatter(available_width, 5*mm, True)
+    t.style.append(('LEFTPADDING', (0, 0), (-1,-1), 0))
+    t.style.append(('RIGHTPADDING', (-1, 0), (-1,-1), 0))
+    t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
 
-    style = [
-        ('FONTNAME', (0, 0), (-1, -1), font.normal),
-        ('FONTSIZE', (0, 0), (-1, -1), 10)
-    ]
-    if DEBUG_DOCUMENT:
-        style += [
-            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-            ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
-        ]
-
-    lines.append((_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total")))
-    style.append(('LEFTPADDING', (0,0),(-1,-1), 0))
-    style.append(('RIGHTPADDING', (-1,0),(-1,-1), 0))
-    style.append(('FONTNAME', (0, row()), (-1, row()), font.bold))
-    style.append(('ALIGNMENT', (2, row()), (3, row()), "CENTER"))
-    style.append(('ALIGNMENT', (3, row()), (-1, row()), "RIGHT"))
-    style.append(('VALIGN',(0, 0),(-1,-1),'TOP'))
-    style.append(('SPAN', (2, row()), (3, row())))
-
-    code_width = 1
-    complete_width = 1
-    unit_width = 1
-    price_width = 1
-    total_width = 1
+    t.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
+    t.row_style('FONTNAME', 0, -1, font.bold)
+    t.row_style('ALIGNMENT', 2, 3, "CENTER")
+    t.row_style('ALIGNMENT', 4, -1, "RIGHT")
+    t.row_style('SPAN', 2, 3)
 
     for job in jobs:
-        lines.append([b(job['code']), b(job['name'])])
-        code_width = max(code_width, s_width(job['code']))
-        style.append(('SPAN', (1, row()), (-1, row())))
+        t.row(b(job['code']), b(job['name']))
+        t.row_style('SPAN', 1, -1)
 
         for taskgroup in job['taskgroups']:
-            lines.append([b(taskgroup['code']), b(taskgroup['name'])])
-            code_width = max(code_width, s_width(taskgroup['code']))
-            style.append(('SPAN', (1, row()), (-1, row())))
+            t.row(b(taskgroup['code']), b(taskgroup['name']))
+            t.row_style('SPAN', 1, -1)
 
             for task in taskgroup['tasks']:
                 # TODO: Figure out a way to KeepTogether() the two lines
                 # already tried to use keepWithNext = 1 and KeepTogether() without success
                 # probably we're going to need a custom flowable
                 # TODO: Figure out a way to have a smaller empty row after each Task
-                lines.append([p(task['code']), p(task['name'])])
-                code_width = max(code_width, s_width(task['code']))
-                style.append(('SPAN', (1, row()), (-2, row())))
+                t.row(p(task['code']), p(task['name']))
+                t.row_style('SPAN', 1, -2)
 
-                s_complete = ubrdecimal(task['complete'])
-                s_price = money(task['price'])
-                s_total = money(task['total'])
+                t.row('', '', ubrdecimal(task['complete']), p(task['unit']), money(task['price']), money(task['total']))
+                t.row_style('ALIGNMENT', 1, -1, "RIGHT")
 
-                lines.append(['', '', s_complete, p(task['unit']), s_price, s_total])
-                style.append(('ALIGNMENT', (1, row()), (-1, row()), "RIGHT"))
+            t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
+                           '', '', '', money(taskgroup['total']))
+            t.row_style('SPAN', 1, 4)
+            t.row_style('ALIGNMENT', -1, -1, "RIGHT")
 
-                complete_width = max(complete_width, s_width(s_complete))
-                unit_width = max(unit_width, s_width(cleanBlockQuotedText(task['unit'])))
-                price_width = max(price_width, s_width(s_price))
-                total_width = max(total_width, s_width(s_total))
-
-            s_total = money(taskgroup['total'])
-            lines.append(['', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])), '', '', '', s_total])
-            style.append(('SPAN', (1, row()), (4, row())))
-            style.append(('ALIGNMENT', (-1, row()), (-1, row()), "RIGHT"))
-            total_width = max(total_width, s_width(s_total))
-
-            lines.append([''*6])  # blank row
+            t.row('')
 
 
     for job in jobs:
@@ -154,18 +182,7 @@ def compile_jobs(jobs, available_width):
             #lines.append(['', p('Total {} - {}'.format(taskgroup['code'], taskgroup['name'])), p(taskgroup['total'])])
             pass
 
-    pad = 5*mm
-    widths = [
-        code_width + pad/2,
-        0,
-        complete_width + pad,
-        unit_width + pad,
-        price_width + pad,
-        total_width + pad/2
-    ]
-    widths[1] = available_width - sum(widths)
-
-    return ItemizedTable(lines, colWidths=widths, style=style, repeatRows=1, ident=IdentStr(''))
+    return ItemizedTable(t.lines, colWidths=t.get_widths(), style=t.style, repeatRows=1, ident=IdentStr(''))
 
 
 def compile_payments(invoice):
