@@ -47,18 +47,5 @@ class InvoiceForm(forms.ModelForm):
         model = Invoice
         fields = ['doc_template', 'document_date', 'invoice_no', 'header', 'footer', 'add_terms', 'notes']
         widgets = {
-            'document_date': DateInput(attrs={'type': 'date'}),
-        }
-
-
-class EvidenceForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(EvidenceForm, self).__init__(*args, **kwargs)
-        self.fields['jobs'].queryset = self.instance.project.jobs
-
-    class Meta:
-        model = Evidence
-        fields = ['document_date', 'jobs']
-        widgets = {
-            'document_date': DateInput(attrs={'type': 'date'}),
+            'document_date': widgets.DateInput(attrs={'type': 'date'}),
         }

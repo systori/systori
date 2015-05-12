@@ -11,3 +11,6 @@ geopy
 lxml
 reportlab
 jsonfield
+
+#pypdf2
+-e git+https://github.com/jerickbixly/PyPDF2.git#egg=pypdf2

@@ -103,29 +103,9 @@ class InvoiceView(DetailView):
 class InvoicePDF(DocumentRenderView):
     model = Invoice
 
-    # so the _header_footer expects canvas and doc
-    @staticmethod
-    def _header_footer(canvas, doc):
-        # Save the state of our canvas so we can draw on it
-        canvas.saveState()
-        styles = getSampleStyleSheet()
-
-        # Header
-        header = Paragraph('This is a multi-line header.  It goes on every page.   ' * 5, styles['Normal'])
-        w, h = header.wrap(doc.width, doc.topMargin)
-        header.drawOn(canvas, doc.leftMargin, doc.height + doc.topMargin - h)
-
-        # Footer
-        footer = Paragraph('This is a multi-line footer.  It goes on every page.   ' * 5, styles['Normal'])
-        w, h = footer.wrap(doc.width, doc.bottomMargin)
-        footer.drawOn(canvas, doc.leftMargin, h)
-
-        # Release the canvas
-        canvas.restoreState()
-
     def pdf(self):
         json = self.get_object().json
-        return invoice.render(self, json)
+        return invoice.render(json)
 
 
 class InvoiceCreate(CreateView):
@@ -208,38 +188,3 @@ class DocumentTemplateDelete(DeleteView):
     model = DocumentTemplate
     success_url = reverse_lazy('templates')
 
-
-# Evidence
-
-
-class EvidenceView(DetailView):
-    model = Evidence
-
-
-class EvidencePDF(BaseDocumentPDFView):
-    model = Evidence
-
-
-class EvidenceCreate(CreateView):
-    model = Evidence
-    form_class = EvidenceForm
-
-    def get_form_kwargs(self):
-        kwargs = super(EvidenceCreate, self).get_form_kwargs()
-        kwargs['instance'] = self.model(project=self.request.project)
-        return kwargs
-
-    def form_valid(self, form):
-        redirect = super(EvidenceCreate, self).form_valid(form)
-        self.object.generate_document()
-        return redirect
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
-
-
-class EvidenceDelete(DeleteView):
-    model = Evidence
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
