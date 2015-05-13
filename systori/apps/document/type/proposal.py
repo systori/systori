@@ -19,6 +19,8 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b, nr
 from . import font
 
+from ...accounting.constants import TAX_RATE
+
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
@@ -64,16 +66,6 @@ def collate_tasks(proposal, available_width):
 
             t.row('')
 
-    for job in proposal['jobs']:
-        for taskgroup in job['taskgroups']:
-            t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
-                  '', '', '', money(taskgroup['total']))
-            t.row_style('SPAN', 1, 4)
-            t.row_style('ALIGNMENT', -1, -1, "RIGHT")
-            t.row_style('FONTNAME', 0, -1, font.bold)
-
-    t.row_style('LINEBELOW', 1, 5, 0.25, colors.black)
-
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
@@ -81,8 +73,15 @@ def collate_tasks_total(proposal, available_width):
 
     t = TableFormatter([0, 1], available_width, debug=DEBUG_DOCUMENT)
     t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
+    t.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
     t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
+
+    for job in proposal['jobs']:
+        for taskgroup in job['taskgroups']:
+            t.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
+                  money(taskgroup['total']))
+    t.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
 
     t.row(_("Total without VAT"), money(proposal['total_base']))
     t.row("19,00% "+_("VAT"), money(proposal['total_tax']))
@@ -165,9 +164,9 @@ def serialize(project, form):
         'postal_code': contact.postal_code,
         'city': contact.city,
 
-        'total_gross': project.billable_gross_total,
-        'total_base': project.billable_total,
-        'total_tax': project.billable_tax_total,
+        'total_gross': project.estimate_total * (TAX_RATE+1),
+        'total_base': project.estimate_total,
+        'total_tax': project.estimate_total * TAX_RATE,
 
         }
 
@@ -184,7 +183,7 @@ def serialize(project, form):
         }
         proposal['jobs'].append(job_dict)
 
-        for taskgroup in job.billable_taskgroups:
+        for taskgroup in job.taskgroups:
             taskgroup_dict = {
                 'code': taskgroup.code,
                 'name': taskgroup.name,
@@ -193,7 +192,7 @@ def serialize(project, form):
             }
             job_dict['taskgroups'].append(taskgroup_dict)
 
-            for task in taskgroup.billable_tasks:
+            for task in taskgroup.tasks:
                 task_dict = {
                     'code': task.instance.code,
                     'name': task.instance.full_name,

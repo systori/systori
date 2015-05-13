@@ -65,16 +65,6 @@ def collate_tasks(invoice, available_width):
 
             t.row('')
 
-    for job in invoice['jobs']:
-        for taskgroup in job['taskgroups']:
-            t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
-                  '', '', '', money(taskgroup['total']))
-            t.row_style('SPAN', 1, 4)
-            t.row_style('ALIGNMENT', -1, -1, "RIGHT")
-            t.row_style('FONTNAME', 0, -1, font.bold)
-
-    t.row_style('LINEBELOW', 1, 5, 0.25, colors.black)
-
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
@@ -82,8 +72,15 @@ def collate_tasks_total(invoice, available_width):
 
     t = TableFormatter([0, 1], available_width, debug=DEBUG_DOCUMENT)
     t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
+    t.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
     t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
+
+    for job in invoice['jobs']:
+        for taskgroup in job['taskgroups']:
+            t.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
+                  money(taskgroup['total']))
+    t.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
 
     t.row(_("Total without VAT"), money(invoice['total_base']))
     t.row("19,00% "+_("VAT"), money(invoice['total_tax']))
