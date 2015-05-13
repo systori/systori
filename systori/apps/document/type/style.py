@@ -115,11 +115,16 @@ stylesheet.add(ParagraphStyle(name='Definition',
                               bulletFontName=font.boldItalic),
                alias='df')
 
-
 from django.utils.translation import ugettext as _
-from reportlab.platypus import Paragraph
+
+from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.lib.pagesizes import A4
+
+from reportlab.platypus import BaseDocTemplate, PageTemplate
+from reportlab.platypus import Frame, Paragraph, Table
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
+from reportlab.lib import colors
 
 
 def force_break(txt):
@@ -160,4 +165,141 @@ class NumberedCanvas(canvas.Canvas):
         self.setFont(font.normal, 10)
         self.drawRightString(145*mm, 10*mm,
                              '{} {} {} {}'.format(_("Page"), self._pageNumber, _("of"), page_count))
+
+
+class SystoriDocument(BaseDocTemplate):
+
+    def __init__(self, buffer, debug=False):
+        super(SystoriDocument, self).__init__(buffer,
+                                              pagesize = A4,
+                                              topMargin = 55*mm,
+                                              bottomMargin = 22*mm,
+                                              leftMargin = 25*mm,
+                                              rightMargin = 62*mm,
+                                              showBoundary = debug
+                                              )
+
+    def onFirstPage(self, canvas, document):
+        pass
+
+    def onLaterPages(self, canvas, document):
+        pass
+
+    def handle_pageBegin(self):
+        self._handle_pageBegin()
+        self._handle_nextPageTemplate('Later')
+
+    def build(self, flowables):
+        self._calc()
+        frame = Frame(self.leftMargin, self.bottomMargin,
+                      self.width, self.height,
+                      leftPadding=0, bottomPadding=0,
+                      rightPadding=0, topPadding=0)
+        self.addPageTemplates([
+            PageTemplate(id='First', frames=frame, onPage=self.onFirstPage, pagesize=self.pagesize),
+            PageTemplate(id='Later', frames=frame, onPage=self.onLaterPages, pagesize=self.pagesize)
+        ])
+        super(SystoriDocument, self).build(flowables, canvasmaker=NumberedCanvas)
+
+
+class ContinuationTable(Table):
+
+    def draw(self):
+
+        self.canv.saveState()
+        self.canv.setFont(font.italic, 10)
+
+        if getattr(self, '_splitCount', 0) > 1:
+            self.canv.drawString(0, self._height + 2*mm, '... '+_('Continuation'))
+
+        if getattr(self, '_splitCount', 0) >= 1 and not getattr(self, '_lastTable', False):
+            self.canv.drawRightString(self._width, -2*mm, _('Continuation')+' ...')
+
+        self.canv.restoreState()
+
+        super(ContinuationTable, self).draw()
+
+    def onSplit(self, table, byRow=1):
+        """ Figure out the number of the split in the table and whether
+            this split is the last one to occur. This is used to then
+            intelligently display 'continued...' header/footers.
+        """
+        if not hasattr(self, '_splitCount'):
+            self._splitCount = 0
+        if not hasattr(self, '_splitR0'):
+            self._splitR0 = True
+
+        table._splitCount = self._splitCount+1
+
+        if self._splitR0:
+            table._lastTable = False
+            self._splitR0 = False
+        else:
+            table._lastTable = True
+
+
+
+class TableFormatter:
+
+    font = font.normal
+    font_size = 10
+
+    def __init__(self, columns, width, pad=5*mm, trim_ends=True, debug=False):
+        assert columns.count(0) == 1, "Must have exactly one stretch column."
+        self._maximums = columns.copy()
+        self._available_width = width
+        self._pad = pad
+        self._trim_ends = trim_ends
+        self.columns = columns
+        self.lines = []
+        self.style = [
+            ('FONTNAME', (0, 0), (-1, -1), self.font),
+            ('FONTSIZE', (0, 0), (-1, -1), self.font_size)
+        ]
+        if debug:
+            self.style += [
+                ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+                ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
+            ]
+
+    def get_table(self, table_class=Table, **kwargs):
+        return table_class(self.lines, colWidths=self.get_widths(), style=self.style, **kwargs)
+
+    def row(self, *line):
+        for i, column in enumerate(self.columns):
+            if column != 0 and i < len(line):
+                self._maximums[i] = max(self._maximums[i], self.string_width(line[i]))
+        self.lines.append(line)
+
+    def string_width(self, txt):
+        if isinstance(txt, str):
+            return stringWidth(txt, self.font, self.font_size)
+        else:
+            return stringWidth(txt.text, self.font, self.font_size)
+
+    def get_widths(self):
+
+        widths = self._maximums.copy()
+
+        for i, w in enumerate(widths):
+            if w != 0:
+                widths[i] += self._pad
+
+        if self._trim_ends:
+            trim = self._pad/2
+            widths[0] -= trim if widths[0] >= trim else 0
+            widths[-1] -= trim if widths[-1] >= trim else 0
+
+        widths[widths.index(0)] = self._available_width - sum(widths)
+
+        return widths
+
+    @property
+    def _row_num(self): return len(self.lines)-1
+
+    def row_style(self, name, from_column, to_column, *args):
+        self.style.append((name, (from_column, self._row_num), (to_column, self._row_num))+args)
+
+    def keep_previous_n_rows_together(self, n):
+        self.style.append(('NOSPLIT', (0, self._row_num-n+1), (0, self._row_num)))
 
