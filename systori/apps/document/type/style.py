@@ -295,7 +295,8 @@ class TableFormatter:
         return widths
 
     @property
-    def _row_num(self): return len(self.lines)-1
+    def _row_num(self):
+        return len(self.lines)-1
 
     def row_style(self, name, from_column, to_column, *args):
         self.style.append((name, (from_column, self._row_num), (to_column, self._row_num))+args)

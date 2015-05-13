@@ -11,6 +11,7 @@ from reportlab.platypus import BaseDocTemplate, SimpleDocTemplate, Paragraph, Ta
 
 
 from ..project.models import Project
+from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate
 from .forms import ProposalForm, InvoiceForm
 from ..accounting import skr03
@@ -52,6 +53,10 @@ class ProposalCreate(CreateView):
         return kwargs
 
     def form_valid(self, form):
+
+        form.cleaned_data['jobs'] = [
+            Job.prefetch(job.id) for job in form.cleaned_data['jobs']
+        ]
 
         amount = Decimal(0.0)
         for job in form.cleaned_data['jobs']:
@@ -119,10 +124,7 @@ class InvoiceCreate(CreateView):
 
     def form_valid(self, form):
 
-        project =\
-            Project.objects.filter(id=self.request.project.id)\
-                .prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')\
-                .get()
+        project = Project.prefetch(self.request.project.id)
 
         # update account balance with any new work that's been done
         if project.new_amount_to_debit:

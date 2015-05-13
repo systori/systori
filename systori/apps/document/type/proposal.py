@@ -51,7 +51,7 @@ def collate_tasks(proposal, available_width):
                 t.row(p(task['code']), p(task['name']))
                 t.row_style('SPAN', 1, -2)
 
-                t.row('', '', ubrdecimal(task['complete']), p(task['unit']), money(task['price']), money(task['total']))
+                t.row('', '', ubrdecimal(task['qty']), p(task['unit']), money(task['price']), money(task['total']))
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
 
                 t.row_style('BOTTOMPADDING', 0, -1, 10)
@@ -110,6 +110,8 @@ def render(proposal):
 
             Paragraph(proposal_date, stylesheet['NormalRight']),
 
+            Spacer(0, 4*mm),
+
             Paragraph(force_break(proposal['header']), stylesheet['Normal']),
 
             Spacer(0, 4*mm),
@@ -164,11 +166,11 @@ def serialize(project, form):
         'postal_code': contact.postal_code,
         'city': contact.city,
 
-        'total_gross': project.estimate_total * (TAX_RATE+1),
-        'total_base': project.estimate_total,
-        'total_tax': project.estimate_total * TAX_RATE,
+        'total_gross': form.instance.amount * (TAX_RATE+1),
+        'total_base': form.instance.amount,
+        'total_tax': form.instance.amount * TAX_RATE,
 
-        }
+    }
 
     if form.cleaned_data['add_terms']:
         proposal['add_terms'] = True  # TODO: Calculate the terms.
@@ -183,36 +185,41 @@ def serialize(project, form):
         }
         proposal['jobs'].append(job_dict)
 
-        for taskgroup in job.taskgroups:
+        for taskgroup in job.taskgroups.all():
             taskgroup_dict = {
                 'code': taskgroup.code,
                 'name': taskgroup.name,
-                'total': taskgroup.billable_total,
+                'total': taskgroup.estimate_total,
                 'tasks': []
             }
             job_dict['taskgroups'].append(taskgroup_dict)
 
-            for task in taskgroup.tasks:
-                task_dict = {
-                    'code': task.instance.code,
-                    'name': task.instance.full_name,
-                    'description': task.instance.full_description,
-                    'complete': task.complete,
-                    'unit': task.unit,
-                    'price': task.instance.unit_price,
-                    'total': task.fixed_price_billable,
-                    'lineitems': []
-                }
-                taskgroup_dict['tasks'].append(task_dict)
+            for task in taskgroup.tasks.all():
 
-                for lineitem in task.instance.lineitems.all():
-                    lineitem_dict = {
-                        'name': lineitem.name,
-                        'qty': lineitem.unit_qty,
-                        'unit': lineitem.unit,
-                        'price': lineitem.price,
-                        'price_per': lineitem.price_per_task_unit,
+                for instance in task.taskinstances.all():
+
+                    task_dict = {
+                        'code': instance.code,
+                        'name': instance.full_name,
+                        'description': instance.full_description,
+                        'selected': instance.selected,
+                        'is_optional': task.is_optional,
+                        'qty': task.qty,
+                        'unit': task.unit,
+                        'price': instance.unit_price,
+                        'total': instance.fixed_price_estimate,
+                        'lineitems': []
+                    }
+                    taskgroup_dict['tasks'].append(task_dict)
+
+                    for lineitem in task.instance.lineitems.all():
+                        lineitem_dict = {
+                            'name': lineitem.name,
+                            'qty': lineitem.unit_qty,
+                            'unit': lineitem.unit,
+                            'price': lineitem.price,
+                            'price_per': lineitem.price_per_task_unit,
                         }
-                    task_dict['lineitems'].append(lineitem_dict)
+                        task_dict['lineitems'].append(lineitem_dict)
 
     return proposal

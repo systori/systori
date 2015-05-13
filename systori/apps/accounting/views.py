@@ -54,7 +54,7 @@ class AccountView(DetailView):
 
     def get_queryset(self):
         queryset = super(AccountView, self).get_queryset()
-        return queryset#.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
+        return queryset
 
 
 class AccountUpdate(UpdateView):
