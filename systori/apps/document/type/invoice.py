@@ -28,7 +28,7 @@ from .style import NumberedCanvas, stylesheet, force_break, p, b, nr
 from . import font
 
 
-DEBUG_DOCUMENT = True  # Shows boxes in rendered output
+DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
 class InvoiceDocument(BaseDocTemplate):
@@ -66,8 +66,41 @@ class InvoiceDocument(BaseDocTemplate):
         super(InvoiceDocument, self).build(flowables, canvasmaker=NumberedCanvas)
 
 
-class InvoiceTable(Table):
-    pass
+class ContinuationTable(Table):
+
+    def draw(self):
+
+        self.canv.saveState()
+        self.canv.setFont(font.italic, 10)
+
+        if getattr(self, '_splitCount', 0) > 1:
+            self.canv.drawString(0, self._height + 2*mm, '... '+_('Continuation'))
+
+        if getattr(self, '_splitCount', 0) >= 1 and not getattr(self, '_lastTable', False):
+            self.canv.drawRightString(self._width, -2*mm, _('Continuation')+' ...')
+
+        self.canv.restoreState()
+
+        super(ContinuationTable, self).draw()
+
+    def onSplit(self, table, byRow=1):
+        """ Figure out the number of the split in the table and whether
+            this split is the last one to occur. This is used then
+            intelligently display 'continued...' header/footers.
+        """
+        if not hasattr(self, '_splitCount'):
+            self._splitCount = 0
+        if not hasattr(self, '_splitR0'):
+            self._splitR0 = True
+
+        table._splitCount = self._splitCount+1
+
+        if self._splitR0:
+            table._lastTable = False
+            self._splitR0 = False
+        else:
+            table._lastTable = True
+
 
 
 class TableFormatter:
@@ -93,8 +126,8 @@ class TableFormatter:
                 ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
             ]
 
-    def get_table(self, **kwargs):
-        return InvoiceTable(self.lines, colWidths=self.get_widths(), style=self.style, **kwargs)
+    def get_table(self, table_class=Table, **kwargs):
+        return table_class(self.lines, colWidths=self.get_widths(), style=self.style, **kwargs)
 
     def row(self, *line):
         for i, column in enumerate(self.columns):
@@ -134,12 +167,14 @@ class TableFormatter:
     def keep_previous_n_rows_together(self, n):
         self.style.append(('NOSPLIT', (0, self._row_num-n+1), (0, self._row_num)))
 
-def compile_jobs(jobs, available_width):
+
+def collate_tasks(invoice, available_width):
 
     t = TableFormatter([1, 0, 1, 1, 1, 1], available_width)
     t.style.append(('LEFTPADDING', (0, 0), (-1,-1), 0))
     t.style.append(('RIGHTPADDING', (-1, 0), (-1,-1), 0))
     t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
+    t.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
 
     t.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
     t.row_style('FONTNAME', 0, -1, font.bold)
@@ -147,7 +182,7 @@ def compile_jobs(jobs, available_width):
     t.row_style('ALIGNMENT', 4, -1, "RIGHT")
     t.row_style('SPAN', 2, 3)
 
-    for job in jobs:
+    for job in invoice['jobs']:
         t.row(b(job['code']), b(job['name']))
         t.row_style('SPAN', 1, -1)
 
@@ -162,27 +197,47 @@ def compile_jobs(jobs, available_width):
                 t.row('', '', ubrdecimal(task['complete']), p(task['unit']), money(task['price']), money(task['total']))
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
 
-                t.row_style('BOTTOMPADDING', 0, -1, 6)
+                t.row_style('BOTTOMPADDING', 0, -1, 10)
 
                 t.keep_previous_n_rows_together(2)
 
             t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
                   '', '', '', money(taskgroup['total']))
-            t.row_style('SPAN', 1, 4)
+            t.row_style('FONTNAME', 0, -1, font.bold)
             t.row_style('ALIGNMENT', -1, -1, "RIGHT")
+            t.row_style('SPAN', 1, 4)
 
             t.row('')
 
 
-    for job in jobs:
+    for job in invoice['jobs']:
         for taskgroup in job['taskgroups']:
-            #lines.append(['', p('Total {} - {}'.format(taskgroup['code'], taskgroup['name'])), p(taskgroup['total'])])
-            pass
+            t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
+                  '', '', '', money(taskgroup['total']))
+            t.row_style('SPAN', 1, 4)
+            t.row_style('ALIGNMENT', -1, -1, "RIGHT")
+            t.row_style('FONTNAME', 0, -1, font.bold)
 
-    return t.get_table(repeatRows=1, ident=IdentStr(''))
+    t.row_style('LINEBELOW', 1, 5, 0.25, colors.black)
+
+    return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def compile_payments(invoice):
+def collate_tasks_total(invoice, available_width):
+
+    t = TableFormatter([0, 1], available_width)
+    t.style.append(('RIGHTPADDING', (-1, 0), (-1,-1), 0))
+    t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold))
+    t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
+
+    t.row(_("Total without VAT"), money(invoice['total_base']))
+    t.row("19,00% "+_("VAT"), money(invoice['total_tax']))
+    t.row(_("Total including VAT"), money(invoice['total_gross']))
+
+    return t.get_table()
+
+
+def collate_payments(invoice, available_width):
 
     lines = [['', nr(invoice['total_gross']), nr(invoice['total_base']), nr(invoice['total_tax'])]]
     for payment in invoice['transactions']:
@@ -196,7 +251,7 @@ def compile_payments(invoice):
 
     lines.append(['', nr(invoice['balance_gross']), nr(invoice['balance_base']), nr(invoice['balance_tax'])])
 
-    return lines
+    return Table(lines)
 
 
 def render(invoice):
@@ -230,9 +285,11 @@ def render(invoice):
 
             Spacer(0, 4*mm),
 
-            compile_jobs(invoice['jobs'], doc.width),
+            collate_tasks(invoice, doc.width),
 
-            Table(compile_payments(invoice)),
+            collate_tasks_total(invoice, doc.width),
+
+            collate_payments(invoice, doc.width),
 
             Spacer(0, 4*mm),
 
