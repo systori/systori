@@ -98,8 +98,8 @@ def collate_payments(invoice, available_width):
     t.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
     t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     t.style.append(('BOTTOMPADDING', (0, 1), (-1, -1), 3*mm))
-    t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
+    t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
     t.style.append(('VALIGN', (0, 0), (-1, -1), "TOP"))
 
     t.style.append(('LINEBELOW', (0, 0), (-1, 0), 0.25, colors.black))
@@ -107,8 +107,6 @@ def collate_payments(invoice, available_width):
 
     t.row('', _("gross pay"), _("consideration"), _("VAT"))
     t.row_style('FONTNAME', 0, -1, font.bold)
-    #t.row_style('ALIGNMENT', 4, -1, "RIGHT")
-    #t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold))
 
     t.row(_("Invoice Total"), money(invoice['total_gross']), money(invoice['total_base']), money(invoice['total_tax']))
 
