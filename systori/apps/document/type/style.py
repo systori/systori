@@ -127,12 +127,34 @@ from reportlab.lib.units import mm
 from reportlab.lib import colors
 
 
+def chunk_text(txt, max_length=1500):
+    """ Break the txt down into paragraphs. Each chunk is guaranteed to
+        be less than max_length (so that it will fit on a page).
+        This is necessary for Table cells since ReportLab cannot
+        split cells across pages. Instead we add a table row for each chunk.
+    """
+    if not isinstance(txt, list):
+        txt = txt.split('<br />')
+
+    if txt:
+
+        if len(txt[0]) < max_length:
+            yield txt[0]
+
+        else:
+            yield txt[0][:max_length]
+            txt.insert(1, txt[0][max_length:])
+
+        yield from chunk_text(txt[1:])
+
+
 def force_break(txt):
     return txt.replace('\n', '<br />')
 
 
 def p(txt):
     return Paragraph(txt, stylesheet['Normal'])
+
 
 def b(txt):
     return Paragraph(txt, stylesheet['Bold'])
@@ -212,7 +234,7 @@ class ContinuationTable(Table):
         if getattr(self, '_splitCount', 0) > 1:
             self.canv.drawString(0, self._height + 2*mm, '... '+_('Continuation'))
 
-        if getattr(self, '_splitCount', 0) >= 1 and not getattr(self, '_lastTable', False):
+        if getattr(self, '_splitCount', 0) >= 1 and not hasattr(self, '_lastTable'):
             self.canv.drawRightString(self._width, -2*mm, _('Continuation')+' ...')
 
         self.canv.restoreState()
@@ -226,17 +248,13 @@ class ContinuationTable(Table):
         """
         if not hasattr(self, '_splitCount'):
             self._splitCount = 0
+
         if not hasattr(self, '_splitR0'):
-            self._splitR0 = True
-
-        table._splitCount = self._splitCount+1
-
-        if self._splitR0:
-            table._lastTable = False
-            self._splitR0 = False
+            self._splitR0 = table
+            table._splitCount = self._splitCount+1
         else:
+            table._splitCount = self._splitR0._splitCount+1
             table._lastTable = True
-
 
 
 class TableFormatter:

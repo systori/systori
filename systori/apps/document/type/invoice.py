@@ -167,10 +167,10 @@ def render(invoice):
 
         ])
 
-        DIR = os.path.join(settings.BASE_DIR, 'static')
+        static_dir = os.path.join(settings.BASE_DIR, 'static')
 
         pdf = PdfFileReader(BytesIO(buffer.getvalue()))
-        cover_pdf = PdfFileReader(os.path.join(DIR, "soft_briefbogen_2014.pdf"))
+        cover_pdf = PdfFileReader(os.path.join(static_dir, "soft_briefbogen_2014.pdf"))
 
         output = PdfFileWriter()
 
@@ -235,6 +235,7 @@ def serialize(project, form):
             taskgroup_dict = {
                 'code': taskgroup.code,
                 'name': taskgroup.name,
+                'description': taskgroup.description,
                 'total': taskgroup.billable_total,
                 'tasks': []
             }

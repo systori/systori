@@ -5,9 +5,7 @@ from datetime import date
 from PyPDF2 import PdfFileReader, PdfFileWriter
 
 from reportlab.lib.units import mm
-from reportlab.lib.enums import TA_RIGHT
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus import Paragraph, Spacer, KeepTogether
+from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
 from reportlab.lib import colors
 
 from django.conf import settings
@@ -16,7 +14,8 @@ from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 
-from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b, nr
+from .style import SystoriDocument, TableFormatter, ContinuationTable
+from .style import stylesheet, chunk_text, force_break, p, b
 from . import font
 
 from ...accounting.constants import TAX_RATE
@@ -51,12 +50,14 @@ def collate_tasks(proposal, available_width):
                 t.row(p(task['code']), p(task['name']))
                 t.row_style('SPAN', 1, -2)
 
+                for chunk in chunk_text(task['description']):
+                    t.row('', p(chunk))
+                    t.row_style('SPAN', 1, -2)
+
                 t.row('', '', ubrdecimal(task['qty']), p(task['unit']), money(task['price']), money(task['total']))
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
 
                 t.row_style('BOTTOMPADDING', 0, -1, 10)
-
-                t.keep_previous_n_rows_together(2)
 
             t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
                   '', '', '', money(taskgroup['total']))
@@ -90,7 +91,61 @@ def collate_tasks_total(proposal, available_width):
     return t.get_table()
 
 
-def render(proposal):
+def collate_lineitems(proposal, available_width):
+
+    pages = []
+
+    for job in proposal['jobs']:
+
+        for taskgroup in job['taskgroups']:
+
+            for task in taskgroup['tasks']:
+
+                pages.append(PageBreak())
+
+                t = TableFormatter([1, 0], available_width, debug=DEBUG_DOCUMENT)
+                t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
+                t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
+                t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
+
+                t.row(b(job['code']), b(job['name']))
+                t.row(b(taskgroup['code']), b(taskgroup['name']))
+                t.row(p(task['code']), p(task['name']))
+
+                for chunk in chunk_text(task['description']):
+                    t.row('', p(chunk))
+
+                t.row_style('BOTTOMPADDING', 0, -1, 10)
+
+                pages.append(t.get_table(ContinuationTable))
+
+                t = TableFormatter([0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
+                t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
+                t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
+                t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
+                t.style.append(('ALIGNMENT', (1, 0), (1, -1), 'RIGHT'))
+                t.style.append(('ALIGNMENT', (3, 0), (-1, -1), 'RIGHT'))
+
+                for lineitem in task['lineitems']:
+                    t.row(p(lineitem['name']),
+                          ubrdecimal(lineitem['qty']),
+                          p(lineitem['unit']),
+                          money(lineitem['price']),
+                          money(lineitem['price_per'])
+                    )
+
+                t.row_style('LINEBELOW', 0, -1, 0.25, colors.black)
+
+                t.row('', ubrdecimal(task['qty']), b(task['unit']), '', money(task['total']))
+                t.row_style('FONTNAME', 0, -1, font.bold)
+
+                pages.append(t.get_table(ContinuationTable))
+
+
+    return pages
+
+
+def render(proposal, with_line_items):
 
     with BytesIO() as buffer:
 
@@ -124,12 +179,12 @@ def render(proposal):
 
             KeepTogether(Paragraph(force_break(proposal['footer']), stylesheet['Normal'])),
 
-            ])
+        ] + (collate_lineitems(proposal, doc.width) if with_line_items else []))
 
-        DIR = os.path.join(settings.BASE_DIR, 'static')
+        static_dir = os.path.join(settings.BASE_DIR, 'static')
 
         pdf = PdfFileReader(BytesIO(buffer.getvalue()))
-        cover_pdf = PdfFileReader(os.path.join(DIR, "soft_briefbogen_2014.pdf"))
+        cover_pdf = PdfFileReader(os.path.join(static_dir, "soft_briefbogen_2014.pdf"))
 
         output = PdfFileWriter()
 
@@ -189,6 +244,7 @@ def serialize(project, form):
             taskgroup_dict = {
                 'code': taskgroup.code,
                 'name': taskgroup.name,
+                'description': taskgroup.description,
                 'total': taskgroup.estimate_total,
                 'tasks': []
             }

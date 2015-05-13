@@ -99,6 +99,7 @@ class="btn btn-xs btn-{% if is_past %}default{% elif is_current %}success{% else
         <td>
           <a href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a>
           <a href="{% url 'proposal.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a>
+          <a href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'Line Items' %}</a>
         </td>
         <td>
           {% for state in doc.get_available_status_transitions %}

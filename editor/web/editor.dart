@@ -30,6 +30,7 @@ DocumentFragment stringToDocumentFragment(html) {
       ..allowCustomElement('ubr-lineitem', attributes: ['data-pk'])
       ..allowCustomElement('ubr-autocomplete', attributes: ['data-pk'])
       ..allowElement('div', attributes: ['contenteditable', 'placeholder', 'data-pk'])
+      ..allowElement('br')
   );
   return tmp;
 }
@@ -375,7 +376,7 @@ abstract class EditableElement extends UbrElement {
   }
 
   List _editable_values() {
-    return input_views.map((e)=>e.text).toList();
+    return input_views.map((e)=>e.innerHtml).toList();
   }
 
   bool is_modified() {
@@ -413,20 +414,26 @@ abstract class EditableElement extends UbrElement {
         break;
 
       case KeyCode.ENTER:
-        event.preventDefault();
+
         if (autocompleter != null && autocompleter.isActive && autocompleter.hasSelection) {
+          event.preventDefault();
           stop();
           autocompleter.handleEnter();
-        } else {
 
-          if (!is_blank()) stop_n_save();
+        } else if (event.shiftKey) {
+          event.preventDefault();
 
-          if (event.shiftKey && object_name != 'taskgroup') {
+          if (is_blank()) {
+            new_parent_sibling();
+            break;
+          } else {
+            stop_n_save();
+          }
+
+          if (event.ctrlKey) {
             new_parent_sibling();
             break;
           }
-
-          if (is_blank()) break;
 
           if (INPUT_MODE == InputMode.TASK && object_name == 'task') {
             new_sibling();
@@ -508,7 +515,16 @@ abstract class EditableElement extends UbrElement {
       parent_name: "/api/v1/${parent_name}/${parent_pk}/"
     };
     input_views.forEach((Element e) {
-      data[e.className] = e.text;
+      data[e.className] = e.innerHtml
+
+                            .replaceAll('<div>', '<br />').replaceAll('</div>', '')
+
+                            // can't support formatting yet
+                            .replaceAll('<i>', '').replaceAll('</i>', '')
+                            .replaceAll('<b>', '').replaceAll('</b>', '')
+
+                            .replaceAll('<br>', '<br />');
+
     });
     toggle_views.forEach((key,_) {
       data[key] = truthy(key);

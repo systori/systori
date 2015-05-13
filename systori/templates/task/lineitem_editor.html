@@ -2,7 +2,7 @@
 <a name="lineitem-{{ lineitem.id }}"></a> 
 <div class="editor">
   <div class="editor-row">
-    <div class="name" placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name }}</div>
+    <div class="name" placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name|safe }}</div>
     <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ lineitem.unit_qty|ubrdecimal }}</div>
     <div class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ lineitem.unit }}</div>
     <div class="price" placeholder="{% trans 'price' %}" contenteditable>{{ lineitem.price|ubrdecimal }}</div>
