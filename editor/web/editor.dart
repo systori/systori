@@ -517,11 +517,14 @@ abstract class EditableElement extends UbrElement {
     input_views.forEach((Element e) {
       data[e.className] = e.innerHtml
 
-                            .replaceAll('<div>', '<br />').replaceAll('</div>', '')
+                            .replaceAll('<div>', '<br />')
+                            .replaceAll('</div>', '')
 
                             // can't support formatting yet
-                            .replaceAll('<i>', '').replaceAll('</i>', '')
-                            .replaceAll('<b>', '').replaceAll('</b>', '')
+                            .replaceAll(new RegExp(r'<\/?i>'), '')
+                            .replaceAll(new RegExp(r'<\/?b>'), '')
+
+                            .replaceAll(new RegExp(r'<\/?span.*?>'), '')
 
                             .replaceAll('<br>', '<br />');
 
