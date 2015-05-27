@@ -80,7 +80,7 @@ def render(job):
 
         doc.build(pages)
 
-        return buffer.getvalue()
+        #return buffer.getvalue()
 
         static_dir = os.path.join(settings.BASE_DIR, 'static')
 
