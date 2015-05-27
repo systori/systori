@@ -59,6 +59,7 @@ class="btn btn-xs btn-{% if is_past %}default{% elif is_current %}success{% else
           <a href="{% url 'job.edit' project.id job.id %}">{% trans "Edit" %}</a>
           <a href="{% url 'job.delete' project.id job.id %}">{% trans "Delete" %}</a>
           {% endif %}
+          <a href="{% url 'evidence.pdf' project.id job.id %}">{% trans "Evidence" %}</a>
         </td>
       </tr>
       {% endfor %}
@@ -271,39 +272,6 @@ class="btn btn-xs btn-{% if is_past %}default{% elif is_current %}success{% else
 </tbody>
 </table>
 <br />
-
-
-<h2 class="sub-header">{% trans "Evidences" %}</h2>
-<div  class="table-responsive">
-  <table  class="table table-striped">
-    <thead>
-      <tr>
-        <th>{% trans 'Jobs' %}</th>
-        <th>{% trans 'Created On' %}</th>
-        <th>{% trans 'Download' %}</th>
-        <th>{% trans 'Actions' %}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for doc in project.evidences.all %}
-      <tr>
-        <td>
-        {% for job in doc.jobs.all %}
-          {{ job }}<br />
-        {% endfor %}
-        </td>
-        <td>{{ doc.created_on|localize }}</td>
-         <td>
-          <a href="{% url 'evidence.pdf' project.id 'print' doc.id %}">{% trans 'PDF' %}</a>
-        </td>
-        <td>
-          <a href="{% url 'evidence.delete' project.id doc.id %}">{% trans "Delete" %}</a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
 
 
 <h2 class="sub-header">{% trans "Contacts" %}</h2>

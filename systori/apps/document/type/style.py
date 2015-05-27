@@ -28,6 +28,11 @@ stylesheet.add(ParagraphStyle(name='Bold',
                               leading=12)
                )
 
+stylesheet.add(ParagraphStyle(name='BoldRight',
+                              parent=stylesheet['Bold'],
+                              alignment=TA_RIGHT)
+               )
+
 stylesheet.add(ParagraphStyle(name='BodyText',
                               parent=stylesheet['Normal'],
                               spaceBefore=6)
@@ -159,6 +164,8 @@ def p(txt):
 def b(txt):
     return Paragraph(txt, stylesheet['Bold'])
 
+def br(txt):
+    return Paragraph(str(txt), stylesheet['BoldRight'])
 
 def nr(txt):
     return Paragraph(str(txt), stylesheet['NormalRight'])

@@ -167,6 +167,17 @@ class InvoiceDelete(DeleteView):
         return reverse('project.view', args=[self.object.project.id])
 
 
+# Evidence
+
+
+class EvidencePDF(DocumentRenderView):
+    model = Job
+
+    def pdf(self):
+        job = Job.prefetch(self.get_object().id)
+        return evidence.render(job)
+
+
 # Document Template
 
 
@@ -189,4 +200,3 @@ class DocumentTemplateUpdate(UpdateView):
 class DocumentTemplateDelete(DeleteView):
     model = DocumentTemplate
     success_url = reverse_lazy('templates')
-
