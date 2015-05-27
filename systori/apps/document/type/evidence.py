@@ -2,13 +2,14 @@ import os.path
 from io import BytesIO
 from datetime import date
 
-from PyPDF2 import PdfFileReader, PdfFileWriter
-
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.platypus import Paragraph, Table, TableStyle, PageBreak
+from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
+
+from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
 
 from django.conf import settings
 from django.utils.formats import date_format
@@ -20,10 +21,24 @@ from .style import SystoriDocument, TableFormatter, ContinuationTable
 from .style import stylesheet, chunk_text, force_break, p, b, br, nr
 from . import font
 
-from ...accounting.constants import TAX_RATE
-
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
+
+
+class StationaryCanvas(Canvas):
+
+    def __init__(self, *args, **kwargs):
+        super(StationaryCanvas, self).__init__(*args, **kwargs)
+        static_dir = os.path.join(settings.BASE_DIR, 'static')
+        cover_pdf_path = os.path.join(static_dir, "softronic2_landscape.pdf")
+        cover_pdf = open_and_read(cover_pdf_path)
+
+        self.page_content = storeFormsInMemory(cover_pdf, pagenumbers=[0], prefix='stationary')[1]
+        restoreFormsInMemory(self.page_content, self)
+
+    def showPage(self):
+        self.doForm('stationary0')
+        super(StationaryCanvas, self).showPage()
 
 
 def render(job):
@@ -76,24 +91,8 @@ def render(job):
                 topMargin = 20*mm,
                 bottomMargin = 34*mm,
                 leftMargin = 11*mm,
-                rightMargin = 11*mm)\
+                rightMargin = 11*mm)
 
-        doc.build(pages)
+        doc.build(pages, canvasmaker=StationaryCanvas)
 
-        #return buffer.getvalue()
-
-        static_dir = os.path.join(settings.BASE_DIR, 'static')
-
-        pdf = PdfFileReader(BytesIO(buffer.getvalue()))
-        cover_pdf = PdfFileReader(os.path.join(static_dir, "softronic2_landscape.pdf"))
-
-        output = PdfFileWriter()
-
-        for idx, page in enumerate(pdf.pages):
-            page.mergePage(cover_pdf.getPage(0))
-            output.addPage(page)
-
-        with BytesIO() as final_output:
-            output.write(final_output)
-            return final_output.getvalue()
-
+        return buffer.getvalue()
