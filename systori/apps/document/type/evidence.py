@@ -1,4 +1,3 @@
-import os.path
 from io import BytesIO
 from datetime import date
 
@@ -9,36 +8,16 @@ from reportlab.platypus import Paragraph, Table, TableStyle, PageBreak
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
 
-from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
-
-from django.conf import settings
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 
-from .style import SystoriDocument, TableFormatter, ContinuationTable
-from .style import stylesheet, chunk_text, force_break, p, b, br, nr
-from . import font
+from .style import LandscapeStationaryCanvas
+from .style import p, b, br, nr
 
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
-
-
-class StationaryCanvas(Canvas):
-
-    def __init__(self, *args, **kwargs):
-        super(StationaryCanvas, self).__init__(*args, **kwargs)
-        static_dir = os.path.join(settings.BASE_DIR, 'static')
-        cover_pdf_path = os.path.join(static_dir, "softronic2_landscape.pdf")
-        cover_pdf = open_and_read(cover_pdf_path)
-
-        self.page_content = storeFormsInMemory(cover_pdf, pagenumbers=[0], prefix='stationary')[1]
-        restoreFormsInMemory(self.page_content, self)
-
-    def showPage(self):
-        self.doForm('stationary0')
-        super(StationaryCanvas, self).showPage()
 
 
 def render(job):
@@ -93,6 +72,6 @@ def render(job):
                 leftMargin = 11*mm,
                 rightMargin = 11*mm)
 
-        doc.build(pages, canvasmaker=StationaryCanvas)
+        doc.build(pages, canvasmaker=LandscapeStationaryCanvas)
 
         return buffer.getvalue()

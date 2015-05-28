@@ -120,7 +120,12 @@ stylesheet.add(ParagraphStyle(name='Definition',
                               bulletFontName=font.boldItalic),
                alias='df')
 
+
+import os.path
+from django.conf import settings
 from django.utils.translation import ugettext as _
+
+from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
 
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.pagesizes import A4
@@ -171,6 +176,36 @@ def nr(txt):
     return Paragraph(str(txt), stylesheet['NormalRight'])
 
 
+
+class StationaryCanvas(canvas.Canvas):
+
+    stationary_filename = None
+
+    def __init__(self, *args, **kwargs):
+        super(StationaryCanvas, self).__init__(*args, **kwargs)
+        static_dir = os.path.join(settings.BASE_DIR, 'static')
+        cover_pdf_path = os.path.join(static_dir, self.stationary_filename)
+        cover_pdf = open_and_read(cover_pdf_path)
+
+        self.page_info, self.page_content = storeFormsInMemory(cover_pdf, prefix='stationary', all=True)
+        restoreFormsInMemory(self.page_content, self)
+
+    def showPage(self):
+        if self._pageNumber > 1 and len(self.page_info) > 1:
+            self.doForm(self.page_info[1])
+        else:
+            self.doForm(self.page_info[0])
+        super(StationaryCanvas, self).showPage()
+
+
+class PortraitStationaryCanvas(StationaryCanvas):
+    stationary_filename = "soft_briefbogen_2014.pdf"
+
+
+class LandscapeStationaryCanvas(StationaryCanvas):
+    stationary_filename = "softronic2_landscape.pdf"
+
+
 class NumberedCanvas(canvas.Canvas):
 
     def __init__(self, *args, **kwargs):
@@ -200,12 +235,12 @@ class SystoriDocument(BaseDocTemplate):
 
     def __init__(self, buffer, debug=False):
         super(SystoriDocument, self).__init__(buffer,
-                                              pagesize = A4,
-                                              topMargin = 55*mm,
-                                              bottomMargin = 22*mm,
-                                              leftMargin = 25*mm,
-                                              rightMargin = 62*mm,
-                                              showBoundary = debug
+                                              pagesize=A4,
+                                              topMargin=55*mm,
+                                              bottomMargin=22*mm,
+                                              leftMargin=25*mm,
+                                              rightMargin=62*mm,
+                                              showBoundary=debug
                                               )
 
     def onFirstPage(self, canvas, document):
@@ -218,7 +253,7 @@ class SystoriDocument(BaseDocTemplate):
         self._handle_pageBegin()
         self._handle_nextPageTemplate('Later')
 
-    def build(self, flowables):
+    def build(self, flowables, canvasmaker=NumberedCanvas):
         self._calc()
         frame = Frame(self.leftMargin, self.bottomMargin,
                       self.width, self.height,
@@ -228,7 +263,7 @@ class SystoriDocument(BaseDocTemplate):
             PageTemplate(id='First', frames=frame, onPage=self.onFirstPage, pagesize=self.pagesize),
             PageTemplate(id='Later', frames=frame, onPage=self.onLaterPages, pagesize=self.pagesize)
         ])
-        super(SystoriDocument, self).build(flowables, canvasmaker=NumberedCanvas)
+        super(SystoriDocument, self).build(flowables, canvasmaker=canvasmaker)
 
 
 class ContinuationTable(Table):

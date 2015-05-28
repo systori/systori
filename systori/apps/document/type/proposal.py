@@ -1,14 +1,10 @@
-import os.path
 from io import BytesIO
 from datetime import date
-
-from PyPDF2 import PdfFileReader, PdfFileWriter
 
 from reportlab.lib.units import mm
 from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
 from reportlab.lib import colors
 
-from django.conf import settings
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
@@ -16,6 +12,7 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable
 from .style import stylesheet, chunk_text, force_break, p, b
+from .style import PortraitStationaryCanvas
 from . import font
 
 from ...accounting.constants import TAX_RATE
@@ -141,7 +138,6 @@ def collate_lineitems(proposal, available_width):
 
                 pages.append(t.get_table(ContinuationTable))
 
-
     return pages
 
 
@@ -179,25 +175,13 @@ def render(proposal, with_line_items):
 
             KeepTogether(Paragraph(force_break(proposal['footer']), stylesheet['Normal'])),
 
-        ] + (collate_lineitems(proposal, doc.width) if with_line_items else []))
+            ] + (collate_lineitems(proposal, doc.width) if with_line_items else []),
 
-        static_dir = os.path.join(settings.BASE_DIR, 'static')
+            canvasmaker=PortraitStationaryCanvas
 
-        pdf = PdfFileReader(BytesIO(buffer.getvalue()))
-        cover_pdf = PdfFileReader(os.path.join(static_dir, "soft_briefbogen_2014.pdf"))
+        )
 
-        output = PdfFileWriter()
-
-        for idx, page in enumerate(pdf.pages):
-            if idx is 0:
-                page.mergePage(cover_pdf.getPage(0))
-            else:
-                page.mergePage(cover_pdf.getPage(1))
-            output.addPage(page)
-
-        with BytesIO() as final_output:
-            output.write(final_output)
-            return final_output.getvalue()
+        return buffer.getvalue()
 
 
 def serialize(project, form):

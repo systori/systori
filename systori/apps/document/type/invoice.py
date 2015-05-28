@@ -1,8 +1,5 @@
-import os.path
 from io import BytesIO
 from datetime import date
-
-from PyPDF2 import PdfFileReader, PdfFileWriter
 
 from reportlab.lib.units import mm
 from reportlab.lib.enums import TA_RIGHT
@@ -10,7 +7,6 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph, Spacer, KeepTogether
 from reportlab.lib import colors
 
-from django.conf import settings
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
@@ -18,6 +14,7 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 from systori.apps.accounting.utils import get_transactions_table
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b, nr
+from .style import PortraitStationaryCanvas
 from . import font
 
 
@@ -165,25 +162,12 @@ def render(invoice):
 
             KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal'])),
 
-        ])
+            ],
 
-        static_dir = os.path.join(settings.BASE_DIR, 'static')
+            canvasmaker=PortraitStationaryCanvas
+        )
 
-        pdf = PdfFileReader(BytesIO(buffer.getvalue()))
-        cover_pdf = PdfFileReader(os.path.join(static_dir, "soft_briefbogen_2014.pdf"))
-
-        output = PdfFileWriter()
-
-        for idx, page in enumerate(pdf.pages):
-            if idx is 0:
-                page.mergePage(cover_pdf.getPage(0))
-            else:
-                page.mergePage(cover_pdf.getPage(1))
-            output.addPage(page)
-
-        with BytesIO() as final_output:
-            output.write(final_output)
-            return final_output.getvalue()
+        return buffer.getvalue()
 
 
 def serialize(project, form):
