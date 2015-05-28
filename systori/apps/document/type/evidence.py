@@ -67,6 +67,9 @@ def render(job):
 
                 pages.append(PageBreak())
 
+        if not pages:
+            pages.append(b(_('There are no billable Tasks available.')))
+
         doc = SimpleDocTemplate(buffer,
                 pagesize = landscape(A4),
                 topMargin = 20*mm,
