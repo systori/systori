@@ -47,13 +47,15 @@ def render(job):
                 ))
 
                 pages.append(Table([
-                    [b(_('Code')), p(task.code), br(_('Task')), p(task.name)],
-                    [b(_('P-Amount')), p(job.project.name), br(_('Amount')), p(job.project.name), br(_('UP')), money(task.unit_price)]
+                    [b(_('Code')), p(task.code),
+                     br(_('Task')), p(task.name)],
+                    [b(_('P-Amount')), '%s %s' % (ubrdecimal(task.qty), task.unit),
+                     br(_('Amount')), '%s %s' % (ubrdecimal(task.complete), task.unit),
+                     br(_('UP')), money(task.unit_price)]
                 ],
                     colWidths=[30*mm, None, None, None, None, None],
                     style=TableStyle([
-                        #('ALIGN', (0, 0), (1, -1), 'LEFT'),
-                        #('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                        ('SPAN', (3, 0), (-1, 0)),
                     ])
                 ))
 
