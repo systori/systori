@@ -141,14 +141,15 @@ def collate_lineitems(proposal, available_width):
     return pages
 
 
-def render(proposal, with_line_items):
+def render(proposal, with_line_items, format):
 
     with BytesIO() as buffer:
 
         proposal_date = date_format(date(*map(int, proposal['date'].split('-'))), use_l10n=True)
 
         doc = SystoriDocument(buffer, debug=DEBUG_DOCUMENT)
-        doc.build([
+
+        flowables = [
 
             Paragraph(force_break("""\
             {business}
@@ -175,11 +176,12 @@ def render(proposal, with_line_items):
 
             KeepTogether(Paragraph(force_break(proposal['footer']), stylesheet['Normal'])),
 
-            ] + (collate_lineitems(proposal, doc.width) if with_line_items else []),
+            ] + (collate_lineitems(proposal, doc.width) if with_line_items else [])
 
-            canvasmaker=PortraitStationaryCanvas
-
-        )
+        if format == 'print':
+            doc.build(flowables)
+        else:
+            doc.build(flowables, canvasmaker=PortraitStationaryCanvas)
 
         return buffer.getvalue()
 

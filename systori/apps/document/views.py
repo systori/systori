@@ -40,7 +40,7 @@ class ProposalPDF(DocumentRenderView):
 
     def pdf(self):
         json = self.get_object().json
-        return proposal.render(json, self.request.GET.get('with_lineitems', False))
+        return proposal.render(json, self.request.GET.get('with_lineitems', False), self.kwargs['format'])
 
 
 class ProposalCreate(CreateView):
