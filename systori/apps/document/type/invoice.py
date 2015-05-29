@@ -119,14 +119,14 @@ def collate_payments(invoice, available_width):
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def render(invoice):
+def render(invoice, format):
 
     with BytesIO() as buffer:
 
         invoice_date = date_format(date(*map(int, invoice['date'].split('-'))), use_l10n=True)
 
         doc = SystoriDocument(buffer, debug=DEBUG_DOCUMENT)
-        doc.build([
+        flowables = [
 
             Paragraph(force_break("""\
             {business}
@@ -162,10 +162,13 @@ def render(invoice):
 
             KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal'])),
 
-            ],
+            ]
 
-            canvasmaker=PortraitStationaryCanvas
-        )
+        if format == 'print':
+            doc.build(flowables)
+        else:
+            doc.build(flowables, canvasmaker=PortraitStationaryCanvas)
+
 
         return buffer.getvalue()
 

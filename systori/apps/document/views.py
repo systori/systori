@@ -110,7 +110,7 @@ class InvoicePDF(DocumentRenderView):
 
     def pdf(self):
         json = self.get_object().json
-        return invoice.render(json)
+        return invoice.render(json, self.kwargs['format'])
 
 
 class InvoiceCreate(CreateView):
