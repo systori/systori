@@ -22,11 +22,14 @@ def _origin_success_url(request, alternate):
 
 def project_success_url(request):
     return _origin_success_url(request,
-            reverse('field.project', args=[request.jobsite.project.id]))
+            reverse('field.project-with-origin', args=[request.jobsite.project.id, request.jobsite.project.id]))
 
 def task_success_url(request, task):
-    return _origin_success_url(request,
-            reverse('field.dailyplan.task', args=[request.jobsite.id, request.dailyplan.url_id, task.id]))
+    if request.jobsite.project.jobs.count() > 1:
+        return reverse('field.dailyplan.job', args=[request.jobsite.id, request.dailyplan.url_id, task.taskgroup.job.id])
+    else:
+        return _origin_success_url(request,
+                reverse('field.dailyplan.task', args=[request.jobsite.id, request.dailyplan.url_id, task.id]))
 
 def equipment_success_url(request, equipment):
     return _origin_success_url(request,
