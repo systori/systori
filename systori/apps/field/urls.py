@@ -28,7 +28,6 @@ dailyplan_urls = patterns('',
 
 project_urls = patterns('',
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})?$', field_auth(FieldProjectView.as_view()), name='field.project'),
-    url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})?#(?P<origin_id>\d+)$', field_auth(FieldProjectView.as_view()), name='field.project-with-origin'),
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/pick-jobsite$', field_auth(FieldPickJobSite.as_view()), name='field.dailyplan.pick-jobsite'),
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/calendar$', field_auth(FieldProjectCalendar.as_view()), name='field.project.calendar'),
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/copy-from/(?P<other_day>\d{4}-\d{2}-\d{2})$', field_auth(FieldGenerateProjectDailyPlans.as_view()), name='field.dailyplan.generate'),

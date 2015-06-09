@@ -22,7 +22,7 @@ def _origin_success_url(request, alternate):
 
 def project_success_url(request):
     return _origin_success_url(request,
-            reverse('field.project-with-origin', args=[request.jobsite.project.id, request.jobsite.project.id]))
+            reverse('field.project', args=[request.jobsite.project.id]))
 
 def task_success_url(request, task):
     if request.jobsite.project.jobs.count() > 1:
