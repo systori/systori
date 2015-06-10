@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n customformatting %}
+{% load i18n customformatting staticfiles %}
 
 {% block sidebar %}{% include "main/sidebar.html" %}{% endblock %}
 
@@ -36,39 +36,75 @@
 <script type="text/javascript">
 $(document).ready(function () {
 
-	var locations = [
-	{% for site in job_sites %}
-	   ['<a href="{% url "project.view" site.project.id %}">{{ site.project.name }}<br />{{ site|addslashes }}</a><br />{{ site.address }}<br />{{ site.city }}',
-	    {{ site.latitude }}, {{ site.longitude }}],
-	{% endfor %}
+    var locations = [
+    {% for site in job_sites %}
+        ['<a href="{% url "project.view" site.project.id %}">{{ site.project.name }}<br />{{ site|addslashes }}</a><br />{{ site.address }}<br />{{ site.city }}<br /><b>{{ site.project.get_phase_display }}</b>',
+        {{ site.latitude }}, {{ site.longitude }}, "{{ site.project.phase }}"],
+    {% endfor %}
     ];
-	
-	var map = new google.maps.Map($('#map-canvas')[0]);
-	var bounds = new google.maps.LatLngBounds();
-	var infowindow = new google.maps.InfoWindow();    
 
-	for (i = 0; i < locations.length; i++) {  
-	  var marker = new google.maps.Marker({
-	    position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-	    map: map
-	  });
+    var map = new google.maps.Map($('#map-canvas')[0]);
+    var bounds = new google.maps.LatLngBounds();
+    var infowindow = new google.maps.InfoWindow();
 
-	  bounds.extend(marker.position);
+    function Pin(color) {
+        return {
+            path: 'M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z',
+            fillColor: color,
+            fillOpacity: 0.9,
+            scale: 1.4,
+            strokeColor: 'black',
+            strokeWeight: 0.5
+        }
+    }
 
-	  google.maps.event.addListener(marker, 'click', (function(marker, i) {
-	    return function() {
-	      infowindow.setContent(locations[i][0]);
-	      infowindow.open(map, marker);
-	    }
-	  })(marker, i));
-	}
+    pinkPin = Pin("HotPink");
+    redPin = Pin("FireBrick");
+    bluePin = Pin("DodgerBlue");
+    greenPin = Pin("green");
+    yellowPin = Pin("Gold");
+    greyPin = Pin("grey");
 
-	map.fitBounds(bounds);
 
-	var listener = google.maps.event.addListener(map, "idle", function () {
-	    map.setZoom(11);
-	    google.maps.event.removeListener(listener);
-	});
+    for (i = 0; i< locations.length; i++) {
+        if (locations[i][3] === 'prospective') {
+            locations[i][3] = pinkPin;
+        } else if (locations[i][3] === 'tendering') {
+            locations[i][3] = yellowPin;
+        } else if (locations[i][3] === 'planning') {
+            locations[i][3] = greenPin;
+        } else if (locations[i][3] === 'executing') {
+            locations[i][3] = bluePin;
+        } else if (locations[i][3] === 'settlement') {
+            locations[i][3] = redPin;
+        } else {
+            locations[i][3] = greyPin; // warranty
+        }
+    }
+
+    for (i = 0; i < locations.length; i++) {
+        var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+            map: map,
+            icon: locations[i][3]
+        });
+
+        bounds.extend(marker.position);
+
+        google.maps.event.addListener(marker, 'click', (function(marker, i) {
+            return function() {
+                infowindow.setContent(locations[i][0]);
+                infowindow.open(map, marker);
+            }
+        })(marker, i));
+    }
+
+    map.fitBounds(bounds);
+
+    var listener = google.maps.event.addListener(map, "idle", function () {
+        map.setZoom(11);
+        google.maps.event.removeListener(listener);
+    });
 
 });
 </script>

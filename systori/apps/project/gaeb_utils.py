@@ -85,7 +85,7 @@ def gaeb_import(file):
         job.save()
     project.save()
     project.account = Account.objects.create(account_type=Account.ASSET, code=str(10000+project.id))
-    jobsite = JobSite(project=project, name="Gaeb-Baustelle", address="Straße", city="Stadt", postal_code="12345")
+    jobsite = JobSite(project=project, name="Gaeb-Baustelle", address="Pettenkoferstr. 10", city="Mannheim", postal_code="68169")
     jobsite.save()
     project.save()
     return project
