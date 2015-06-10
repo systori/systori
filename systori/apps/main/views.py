@@ -14,7 +14,7 @@ class OfficeDashboard(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(OfficeDashboard, self).get_context_data(**kwargs)
         context['flagged_lineitems'] = LineItem.objects.filter(is_flagged=True)
-        sites = JobSite.objects.exclude(project__phase=Project.WARRANTY).exclude(project__phase=Project.FINISHED).select_related('project')
+        sites = JobSite.objects.select_related('project')
         context['job_sites'] = sites.exclude(latitude=None).exclude(longitude=None).all()
         context['GOOGLE_MAPS_API_KEY'] = settings.GOOGLE_MAPS_API_KEY
         return context

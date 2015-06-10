@@ -47,23 +47,23 @@ $(document).ready(function () {
     var bounds = new google.maps.LatLngBounds();
     var infowindow = new google.maps.InfoWindow();
 
-    function Pin(color) {
+    function Pin(color, opacity) {
         return {
             path: 'M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z',
             fillColor: color,
-            fillOpacity: 0.9,
+            fillOpacity: opacity,
             scale: 1.4,
             strokeColor: 'black',
             strokeWeight: 0.5
         }
     }
 
-    pinkPin = Pin("HotPink");
-    redPin = Pin("FireBrick");
-    bluePin = Pin("DodgerBlue");
-    greenPin = Pin("green");
-    yellowPin = Pin("Gold");
-    greyPin = Pin("grey");
+    pinkPin = Pin("HotPink", 0.9);
+    redPin = Pin("FireBrick", 0.9);
+    bluePin = Pin("DodgerBlue", 0.9);
+    greenPin = Pin("green", 0.9);
+    yellowPin = Pin("Gold", 0.9);
+    greyPin = Pin("GhostWhite", 0.2);
 
 
     for (i = 0; i< locations.length; i++) {
@@ -77,8 +77,10 @@ $(document).ready(function () {
             locations[i][3] = bluePin;
         } else if (locations[i][3] === 'settlement') {
             locations[i][3] = redPin;
+        } else if (locations[i][3] === 'warranty') {
+            locations[i][3] = greyPin;
         } else {
-            locations[i][3] = greyPin; // warranty
+            locations[i][3] = greyPin; // finished
         }
     }
 
