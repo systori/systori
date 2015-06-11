@@ -51,7 +51,13 @@ def collate_tasks(proposal, available_width):
                     t.row('', p(chunk))
                     t.row_style('SPAN', 1, -2)
 
-                t.row('', '', ubrdecimal(task['qty']), p(task['unit']), money(task['price']), money(task['total']))
+                task_total_column = money(task['total'])
+                if task['is_optional']:
+                    task_total_column = _('Optional')
+                elif not task['selected']:
+                    task_total_column = _('Alternative')
+
+                t.row('', '', ubrdecimal(task['qty']), p(task['unit']), money(task['price']), task_total_column)
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
 
                 t.row_style('BOTTOMPADDING', 0, -1, 10)
