@@ -88,7 +88,10 @@ class ProjectCreate(CreateView):
         return response
 
     def get_success_url(self):
-        return reverse('project.view', args=[self.object.id])
+        if 'save_goto_project' in self.request.POST:
+            return reverse('project.view', args=[self.object.id])
+        else:
+            return reverse('projects')
 
 
 class ProjectImport(FormView):

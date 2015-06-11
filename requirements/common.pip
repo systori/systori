@@ -9,3 +9,10 @@ django-fsm
 django_mobile
 geopy
 lxml
+jsonfield
+
+#reportlab
+-e hg+ssh://hg@bitbucket.org/rptlab/reportlab#egg=reportlab
+-e hg+ssh://hg@bitbucket.org/rptlab/preppy#egg=preppy
+# rlextra doesn't work if installed in-place (-e)
+git+ssh://git@bitbucket.org/damoti/rlextra.git#egg=rlextra

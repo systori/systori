@@ -47,17 +47,20 @@ ubr-lineitem {
 .qty {
   width: 90px;
   text-align: right;
+  align-self: flex-end;
 }
 
 .unit {
   width: 90px;
   padding-left: 4px;
+  align-self: flex-end;
 }
 
 .price {
   width: 90px;
   text-align: right;
   padding-right: 4px;
+  align-self: flex-end;
 }
 
 .total {
@@ -66,10 +69,12 @@ ubr-lineitem {
   text-align: right;
   padding-right: 4px;
   margin-left: 10px;
+  align-self: flex-end;
 }
 
 .labels {
   padding-left: 20px;
+  align-self: flex-end;
 }
 
 .labels > .label:hover {
@@ -200,6 +205,11 @@ ubr-task:not(.empty) > .editor .description {
 }
 
 /* task instance */
+
+ubr-taskinstance > .editor .name {
+    width: 612px;
+    padding-right: 10px;
+}
 
 ubr-taskinstance:nth-of-type(1) > .editor {
   width: 692px;

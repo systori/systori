@@ -129,6 +129,13 @@ class Job(BetterOrderedModel):
             return True
         return False
 
+    @staticmethod
+    def prefetch(job_id):
+        return\
+            Job.objects.filter(id=job_id)\
+               .prefetch_related('taskgroups__tasks__taskinstances__lineitems')\
+               .get()
+
     def clone_to(self, other_job):
         taskgroups = self.taskgroups.all()
         for taskgroup in taskgroups:

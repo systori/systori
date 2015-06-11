@@ -6,6 +6,7 @@
 {% block content %}
 <form method="post">{% csrf_token %}
 {{ form.as_p }}
-<input type="submit" class="btn btn-default" value="{% trans 'Save' %}" />
+<input type="submit" class="btn btn-default" name="save_goto_project" value="{% trans 'Save &raquo; Project' %}" />
+<input type="submit" class="btn btn-default" name="save_goto_list" value="{% trans 'Save &uarr; List' %}"/>
 </form>
 {% endblock %}

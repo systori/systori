@@ -2,8 +2,8 @@
 <div class="editor">
   <div class="editor-row">
     <div class="code">{{ group.code }}</div>
-    <div class="name" placeholder="{% trans 'task group' %}" contenteditable>{{ group.name }}</div>
+    <div class="name" placeholder="{% trans 'task group' %}" contenteditable>{{ group.name|safe }}</div>
     <div class="total">{{ group.estimate_total|ubrdecimal:2 }}</div>
   </div>
-  <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ group.description }}</div>
+  <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ group.description|safe }}</div>
 </div>

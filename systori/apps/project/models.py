@@ -178,6 +178,13 @@ class Project(models.Model):
         verbose_name_plural = _("Projects")
         ordering = ['name']
 
+    @staticmethod
+    def prefetch(project_id):
+        return \
+            Project.objects.filter(id=project_id) \
+                   .prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems') \
+                   .get()
+
     @property
     def billable_jobs(self):
         for job in self.jobs.all():
