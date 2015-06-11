@@ -5,8 +5,8 @@
 <div class="container">
 
   <div class="row back-buttons">
-    <div class="col-xs-8"><a href="{% url 'field.project' jobsite.project.id dailyplan.day.isoformat %}" class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
-    <div class="col-xs-4"><a href="{% if request.GET.origin %}{{request.GET.origin}}{% else %}{% url 'field.dashboard' %}{% endif %}" class="btn btn-default btn-block">&laquo; {% if request.GET.origin  %}{% trans 'Back' %}{% else %}{% trans 'Dashboard' %}{% endif %}</a></div>
+    <div class="col-xs-6"><a href="{% url 'field.planning' %}#{{ jobsite.project.id }}" class="btn btn-default btn-block btn-back">&laquo; {% trans 'Planning' %}</a></div>
+    <div class="col-xs-6"><a href="{% url 'field.project' jobsite.project.id dailyplan.day.isoformat %}" class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
   </div>
 
   <div class="panel panel-default">
@@ -20,7 +20,7 @@
       <div class="list-group-item sub-header">{{taskgroup.code}} {{ taskgroup.name }}</div>
     {% for task in taskgroup.tasks.all %}
       {% task_dailyplans_count task dailyplan.day as is_assigned %}
-      <a href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={{request.GET.origin}}" class="list-group-item clearfix{% if is_assigned %} list-group-item-success{% endif %}">
+      <a href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}" class="list-group-item clearfix{% if is_assigned %} list-group-item-success{% endif %}">
         {{task.code}} {{ task.name }}
         {% if task.complete_percent > 0 %}
         <span class="badge">{{ task.complete_percent }}%</span>

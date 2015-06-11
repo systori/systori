@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from ..task.models import Job, TaskGroup, Task, TaskInstance
 from ..accounting.models import Account
-from .models import Project
+from .models import Project, JobSite
 
 def get(el, path, default=None, required=False, element_only=False):
     parts = path.split('.')
@@ -85,6 +85,8 @@ def gaeb_import(file):
         job.save()
     project.save()
     project.account = Account.objects.create(account_type=Account.ASSET, code=str(10000+project.id))
+    jobsite = JobSite(project=project, name="Gaeb-Baustelle", address="Straße", city="Stadt", postal_code="12345")
+    jobsite.save()
     project.save()
     return project
 

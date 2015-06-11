@@ -27,10 +27,10 @@
 
   {% ifchanged plan.jobsite.project.id %}
 
-  <div class="day-separator">
+  <div class="day-separator"> <a name="{{ plan.jobsite.project.id }}" style="visibility: hidden;"></a>
     {{ plan.jobsite.project.name }}
     {% if user.is_staff and plan.day >= today %}
-      <a href="{% add_daily_plan_url plan.jobsite.project plan.day %}?origin={{request.path}}" class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
+      <a href="{% add_daily_plan_url plan.jobsite.project plan.day %}?origin={{request.path}}#{{dailyplan.jobsite.project.id}}" class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
     {% endif %}
   </div>
 
