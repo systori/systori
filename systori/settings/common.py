@@ -14,6 +14,13 @@ PROPOSAL_LATEX_TEMPLATES = [
 
 BOARDINGHOUSE_SCHEMA_MODEL = 'company.Company'
 
+SHARED_MODELS = [
+    'company.access',
+    'user.user',
+    'tastypie.apiaccess',
+    'tastypie.apikey'
+]
+
 # Django Settings
 
 TASTYPIE_DEFAULT_FORMATS = ['json']

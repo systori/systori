@@ -197,7 +197,7 @@ class CompanyMiddleware:
             except Forbidden:
                 return FORBIDDEN
 
-        elif 'company' not in request.session and len(request.user.visible_companies) == 1:
+        elif 'company' not in request.session and len(request.user.visible_companies):
             # Can we not require a db hit each request here?
             change_schema(request, request.user.visible_companies[0])
 
@@ -212,8 +212,9 @@ class CompanyMiddleware:
             if 'companies' not in response.context_data and not request.user.is_anonymous():
                 response.context_data['companies'] = request.user.visible_companies
 
-            if 'company' not in response.context_data:
-                response.context_data['company'] = request.session.get('company', None)
+            if 'company' not in response.context_data and not request.user.is_anonymous():
+                Schema = get_schema_model()
+                response.context_data['company'] = Schema.objects.get(schema=request.session.get('company'))
 
         return response
 
