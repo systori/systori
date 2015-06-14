@@ -2,44 +2,46 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+from django.conf import settings
 import django_fsm
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('project', '__first__'),
+        ('project', '0001_initial'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
             name='Job',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
                 ('order', models.PositiveIntegerField(editable=False, db_index=True)),
                 ('name', models.CharField(verbose_name='Job Name', max_length=512)),
-                ('description', models.TextField(blank=True, verbose_name='Description')),
-                ('billing_method', models.CharField(verbose_name='Billing Method', max_length=128, choices=[('fixed_price', 'Fixed Price'), ('time_and_materials', 'Time and Materials')], default='fixed_price')),
-                ('status', django_fsm.FSMField(max_length=50, choices=[('draft', 'Draft'), ('proposed', 'Proposed'), ('approved', 'Approved'), ('started', 'Started'), ('completed', 'Completed')], default='draft')),
+                ('description', models.TextField(verbose_name='Description', blank=True)),
+                ('taskgroup_offset', models.PositiveSmallIntegerField(verbose_name='Task Group Offset', default=0)),
+                ('billing_method', models.CharField(verbose_name='Billing Method', choices=[('fixed_price', 'Fixed Price'), ('time_and_materials', 'Time and Materials')], default='fixed_price', max_length=128)),
+                ('status', django_fsm.FSMField(choices=[('draft', 'Draft'), ('proposed', 'Proposed'), ('approved', 'Approved'), ('started', 'Started'), ('completed', 'Completed')], default='draft', max_length=50)),
                 ('project', models.ForeignKey(to='project.Project', related_name='jobs')),
             ],
             options={
                 'verbose_name_plural': 'Job',
-                'verbose_name': 'Job',
                 'ordering': ['order'],
+                'verbose_name': 'Job',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='LineItem',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
                 ('name', models.CharField(verbose_name='Name', max_length=512)),
-                ('unit_qty', models.DecimalField(verbose_name='Quantity', default=0.0, decimal_places=4, max_digits=14)),
-                ('task_qty', models.DecimalField(verbose_name='Quantity', default=0.0, decimal_places=4, max_digits=14)),
-                ('billable', models.DecimalField(verbose_name='Billable', default=0.0, decimal_places=4, max_digits=14)),
+                ('unit_qty', models.DecimalField(max_digits=14, verbose_name='Quantity', default=0.0, decimal_places=4)),
+                ('task_qty', models.DecimalField(max_digits=14, verbose_name='Quantity', default=0.0, decimal_places=4)),
+                ('billable', models.DecimalField(max_digits=14, verbose_name='Billable', default=0.0, decimal_places=4)),
                 ('unit', models.CharField(verbose_name='Unit', max_length=64)),
-                ('price', models.DecimalField(verbose_name='Price', default=0.0, decimal_places=4, max_digits=14)),
+                ('price', models.DecimalField(max_digits=14, verbose_name='Price', default=0.0, decimal_places=4)),
                 ('is_labor', models.BooleanField(default=False)),
                 ('is_material', models.BooleanField(default=False)),
                 ('is_flagged', models.BooleanField(default=False)),
@@ -47,64 +49,60 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name_plural': 'Line Items',
-                'verbose_name': 'Line Item',
                 'ordering': ['id'],
+                'verbose_name': 'Line Item',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='ProgressAttachment',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
                 ('attachment', models.FileField(upload_to='')),
             ],
             options={
                 'verbose_name_plural': 'Attachments',
-                'verbose_name': 'Attachment',
                 'ordering': ['id'],
+                'verbose_name': 'Attachment',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='ProgressReport',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('date', models.DateField(auto_now_add=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('timestamp', models.DateTimeField(auto_now_add=True)),
                 ('comment', models.TextField()),
-                ('complete', models.DecimalField(verbose_name='Complete', default=0.0, decimal_places=4, max_digits=14)),
+                ('complete', models.DecimalField(max_digits=14, verbose_name='Complete', default=0.0, decimal_places=4)),
             ],
             options={
                 'verbose_name_plural': 'Progress Reports',
+                'ordering': ['-timestamp'],
                 'verbose_name': 'Progress Report',
-                'ordering': ['date'],
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='Task',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
                 ('order', models.PositiveIntegerField(editable=False, db_index=True)),
                 ('name', models.CharField(verbose_name='Name', max_length=512)),
                 ('description', models.TextField()),
-                ('qty', models.DecimalField(verbose_name='Quantity', default=0.0, decimal_places=4, max_digits=14)),
+                ('qty', models.DecimalField(max_digits=14, verbose_name='Quantity', default=0.0, decimal_places=4)),
                 ('unit', models.CharField(verbose_name='Unit', max_length=64)),
-                ('complete', models.DecimalField(verbose_name='Complete', default=0.0, decimal_places=4, max_digits=14)),
+                ('complete', models.DecimalField(max_digits=14, verbose_name='Complete', default=0.0, decimal_places=4)),
                 ('is_optional', models.BooleanField(default=False)),
-                ('started_on', models.DateField(null=True, blank=True)),
-                ('completed_on', models.DateField(null=True, blank=True)),
+                ('started_on', models.DateField(blank=True, null=True)),
+                ('completed_on', models.DateField(blank=True, null=True)),
             ],
             options={
                 'verbose_name_plural': 'Task',
+                'ordering': ['order'],
                 'verbose_name': 'Task',
-                'ordering': ['id'],
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='TaskGroup',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
                 ('order', models.PositiveIntegerField(editable=False, db_index=True)),
                 ('name', models.CharField(verbose_name='Name', max_length=512)),
                 ('description', models.TextField(blank=True)),
@@ -112,15 +110,14 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name_plural': 'Task Groups',
+                'ordering': ['order'],
                 'verbose_name': 'Task Group',
-                'ordering': ['id'],
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='TaskInstance',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
                 ('order', models.PositiveIntegerField(editable=False, db_index=True)),
                 ('name', models.CharField(verbose_name='Name', max_length=512)),
                 ('description', models.TextField()),
@@ -129,33 +126,33 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name_plural': 'Task Instances',
+                'ordering': ['order'],
                 'verbose_name': 'Task Instance',
-                'ordering': ['id'],
             },
-            bases=(models.Model,),
         ),
         migrations.AddField(
             model_name='task',
             name='taskgroup',
             field=models.ForeignKey(to='task.TaskGroup', related_name='tasks'),
-            preserve_default=True,
         ),
         migrations.AddField(
             model_name='progressreport',
             name='task',
-            field=models.ForeignKey(to='task.Task', related_name='reports'),
-            preserve_default=True,
+            field=models.ForeignKey(to='task.Task', related_name='progressreports'),
+        ),
+        migrations.AddField(
+            model_name='progressreport',
+            name='user',
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='filedreports'),
         ),
         migrations.AddField(
             model_name='progressattachment',
             name='report',
             field=models.ForeignKey(to='task.ProgressReport', related_name='attachments'),
-            preserve_default=True,
         ),
         migrations.AddField(
             model_name='lineitem',
             name='taskinstance',
             field=models.ForeignKey(to='task.TaskInstance', related_name='lineitems'),
-            preserve_default=True,
         ),
     ]
