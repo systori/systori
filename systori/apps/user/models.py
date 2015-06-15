@@ -28,5 +28,9 @@ class User(AbstractUser):
     def has_laborer(self):
         return self.is_laborer or self.has_foreman
 
+    @cached_property
+    def visible_companies(self):
+        return self.companies.active()
+
     class Meta:
         ordering = ('username',)
