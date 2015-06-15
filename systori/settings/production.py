@@ -3,7 +3,7 @@ from .common import *
 DEBUG = False
 TEMPLATE_DEBUG = False
 
-ALLOWED_HOSTS = ['systori.de']
+ALLOWED_HOSTS = ['systori.com']
 
 STATICFILES_DIRS += (
     ('editor', 'editor/build/web'),
