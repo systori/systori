@@ -56,13 +56,13 @@ def localdb_from_bootstrap():
     local('./manage.py loaddata bootstrap')
 
 
-prod_dump_file = '.systori.prod.dump'
+prod_dump_file = 'systori.prod.dump'
 def fetch_productiondb():
     dbname = 'systori_production'
     # -Fc : custom postgresql compressed format
-    run('pg_dump -Fc -x -f %s %s' % (prod_dump_file, dbname))
-    get(prod_dump_file, prod_dump_file)
-    run('rm '+prod_dump_file)
+    sudo('pg_dump -Fc -x -f /tmp/%s %s' % (prod_dump_file, dbname), user='www-data')
+    get('/tmp/'+prod_dump_file, prod_dump_file)
+    sudo('rm /tmp/'+prod_dump_file)
 
 def load_productiondb():
     _reset_localdb()
