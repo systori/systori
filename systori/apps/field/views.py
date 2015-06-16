@@ -42,7 +42,8 @@ def dashboard_success_url(request):
 
 def delete_when_empty(dailyplan):
     if dailyplan.tasks.count() == 0 and\
-       dailyplan.users.count() == 0:
+       dailyplan.users.count() == 0 and\
+       dailyplan.equipment.count() == 0:
         dailyplan.delete()
         return True
     return False
@@ -438,6 +439,18 @@ class FieldToggleRole(SingleObjectMixin, View):
         member = self.get_object()
         member.is_foreman = not member.is_foreman
         member.save()
+        return HttpResponseRedirect(project_success_url(request))
+
+
+class FieldMemberRemove(SingleObjectMixin, View):
+
+    model = TeamMember
+
+    def get(self, request, *args, **kwargs):
+        self.get_object().delete()
+
+        delete_when_empty(request.dailyplan)
+
         return HttpResponseRedirect(project_success_url(request))
 
 

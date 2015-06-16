@@ -32,7 +32,8 @@
       {{ worker.user.get_full_name }}
 
       {% if user.is_staff %}
-        <a href="{% url 'field.dailyplan.toggle-role' jobsite.id dailyplan.url_id worker.id %}?origin={{request.path}}#{{dailyplan.jobsite.project.id}}" class="btn btn-default btn-sm btn-contextual pull-right">
+        <span class="pull-right"><div class="btn-group" role="group">
+        <a href="{% url 'field.dailyplan.toggle-role' jobsite.id dailyplan.url_id worker.id %}?origin={{request.path}}#{{dailyplan.jobsite.project.id}}" class="btn btn-default btn-sm btn-contextual">
       {% else %}
         <span class="pull-right">
       {% endif %}
@@ -45,6 +46,10 @@
 
       {% if user.is_staff %}
         </a>
+        <a href="{% url 'field.dailyplan.member-remove' jobsite.id dailyplan.url_id worker.id %}?origin={{request.path}}#{{dailyplan.jobsite.project.id}}" class="btn btn-default btn-sm btn-contextual">
+          <span class="glyphicon glyphicon-remove" style="color:red;"></span>
+        </a>
+        </div></span>
       {% else %}
         </span>
       {% endif %}
