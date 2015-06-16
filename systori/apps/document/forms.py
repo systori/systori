@@ -37,6 +37,7 @@ class InvoiceForm(forms.ModelForm):
     add_terms = forms.BooleanField(label=_('Add Terms'), initial=True,
                                    required=False)
 
+    title = forms.CharField(label=_('Title'), initial=_("Invoice"))
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
 
@@ -45,7 +46,7 @@ class InvoiceForm(forms.ModelForm):
 
     class Meta:
         model = Invoice
-        fields = ['doc_template', 'document_date', 'invoice_no', 'header', 'footer', 'add_terms', 'notes']
+        fields = ['doc_template', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes']
         widgets = {
             'document_date': widgets.DateInput(attrs={'type': 'date'}),
         }

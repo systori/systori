@@ -137,7 +137,7 @@ def render(invoice, format):
 
             Spacer(0, 18*mm),
 
-            Paragraph(_("Invoice"), stylesheet['h2']),
+            Paragraph(invoice.get('title') or _("Invoice"), stylesheet['h2']),
 
             Spacer(0, 4*mm),
 
@@ -181,6 +181,7 @@ def serialize(project, form):
 
         'version': '1.0',
 
+        'title': form.cleaned_data['title'],
         'date': form.cleaned_data['document_date'],
         'invoice_no': form.cleaned_data['invoice_no'],
 
