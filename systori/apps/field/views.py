@@ -436,11 +436,7 @@ class FieldMemberRemove(SingleObjectMixin, View):
     model = TeamMember
 
     def get(self, request, *args, **kwargs):
-        TeamMember.objects.filter(
-            dailyplan = request.dailyplan,
-            user = self.get_object().user
-        ).delete()
-        # maybe remove() is better?
+        self.get_object().delete()
 
         delete_when_empty(request.dailyplan)
 
