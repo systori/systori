@@ -21,7 +21,6 @@ dailyplan_urls = patterns('',
     # misc
     url(r'^member-(?P<pk>\d+)/toggle-role$', field_auth(FieldToggleRole.as_view()), name='field.dailyplan.toggle-role'),
     url(r'^member-(?P<pk>\d+)/remove$', field_auth(FieldMemberRemove.as_view()), name='field.dailyplan.member-remove'),
-    # ToDo consistent URI scheme
     url(r'^add-self-as-(?P<role>(foreman|laborer))$', field_auth(FieldAddSelfToDailyPlan.as_view()), name='field.dailyplan.self.add'),
     url(r'^remove-self$', field_auth(FieldRemoveSelfFromDailyPlan.as_view()), name='field.dailyplan.self.remove'),
 
