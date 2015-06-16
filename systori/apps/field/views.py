@@ -47,6 +47,7 @@ def delete_when_empty(dailyplan):
         return True
     return False
 
+
 class FieldDashboard(TemplateView):
     template_name = "field/dashboard.html"
 
@@ -367,9 +368,19 @@ class FieldAssignLabor(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(FieldAssignLabor, self).get_context_data(**kwargs)
+        plan_count = """
+            SELECT
+                count(*)
+            FROM
+                project_teammember
+                INNER JOIN project_dailyplan ON (project_teammember.dailyplan_id = project_dailyplan.id)
+            WHERE
+                project_teammember.user_id = user_user.id AND
+                project_dailyplan.day = current_date
+        """
         context['workers'] = User.objects\
                                 .filter(Q(is_laborer=True) | Q(is_foreman=True))\
-                                .annotate(plan_count=Count('dailyplans'))\
+                                .extra(select={'plan_count': plan_count})\
                                 .order_by('plan_count', 'username')
         context['assigned'] = []
         dailyplan = self.request.dailyplan

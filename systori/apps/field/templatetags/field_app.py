@@ -6,11 +6,6 @@ from systori.apps.project.models import DailyPlan
 
 
 @register.assignment_tag
-def worker_dailyplans_count(worker, date):
-    return worker.dailyplans.filter(day=date).count()
-
-
-@register.assignment_tag
 def task_dailyplans_count(task, date):
     return task.dailyplans.filter(day=date).count()
 
