@@ -8,4 +8,8 @@ dependencies:
   browser: any
 transformers:
 - $dart2js:
-    commandLineOptions: [--enable-enum]
+    minify: true
+    commandLineOptions: [
+        --trust-type-annotations
+        --trust-primitives
+    ]

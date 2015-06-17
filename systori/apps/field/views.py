@@ -42,10 +42,12 @@ def dashboard_success_url(request):
 
 def delete_when_empty(dailyplan):
     if dailyplan.tasks.count() == 0 and\
-       dailyplan.users.count() == 0:
+       dailyplan.users.count() == 0 and\
+       dailyplan.equipment.count() == 0:
         dailyplan.delete()
         return True
     return False
+
 
 class FieldDashboard(TemplateView):
     template_name = "field/dashboard.html"
@@ -367,9 +369,19 @@ class FieldAssignLabor(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(FieldAssignLabor, self).get_context_data(**kwargs)
+        plan_count = """
+            SELECT
+                count(*)
+            FROM
+                project_teammember
+                INNER JOIN project_dailyplan ON (project_teammember.dailyplan_id = project_dailyplan.id)
+            WHERE
+                project_teammember.user_id = user_user.id AND
+                project_dailyplan.day = current_date
+        """
         context['workers'] = User.objects\
                                 .filter(Q(is_laborer=True) | Q(is_foreman=True))\
-                                .annotate(plan_count=Count('dailyplans'))\
+                                .extra(select={'plan_count': plan_count})\
                                 .order_by('plan_count', 'username')
         context['assigned'] = []
         dailyplan = self.request.dailyplan
@@ -427,6 +439,18 @@ class FieldToggleRole(SingleObjectMixin, View):
         member = self.get_object()
         member.is_foreman = not member.is_foreman
         member.save()
+        return HttpResponseRedirect(project_success_url(request))
+
+
+class FieldMemberRemove(SingleObjectMixin, View):
+
+    model = TeamMember
+
+    def get(self, request, *args, **kwargs):
+        self.get_object().delete()
+
+        delete_when_empty(request.dailyplan)
+
         return HttpResponseRedirect(project_success_url(request))
 
 

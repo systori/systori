@@ -28,8 +28,7 @@
     <div class="list-group">
     {% for worker in workers %}
       <label class="list-group-item">
-        {% worker_dailyplans_count worker dailyplan.day as existing_assignments %}
-        {% if existing_assignments > 0 %}<span class="badge">{{ existing_assignments }}</span>{% endif %}
+        {% if worker.plan_count > 0 %}<span class="badge">{{ worker.plan_count }}</span>{% endif %}
         <input type="checkbox" value="{{worker.id}}" name="workers" {% if worker in assigned %}checked{% endif %}/> {{ worker.get_full_name }}
       </label>
     {% endfor %}

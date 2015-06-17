@@ -224,7 +224,7 @@ abstract class UbrElement extends HtmlElement {
   }
 
   recalculate_code() {
-    List<EditableElement> items = this.querySelectorAll(child_element);
+    ElementList<EditableElement> items = this.querySelectorAll(child_element);
 
     for (int i = 0; items.length > i; i++) {
       var new_code = (i+1+child_offset).toString().padLeft(child_zfill, '0');
