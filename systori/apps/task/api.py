@@ -102,8 +102,8 @@ class AutoCompleteModelResourceMixin:
             raise ValidationError("Search string is empty.")
 
         query = self._meta.queryset. \
-            filter(Q(name__icontains=search_string) | Q(description__icontains=search_string)) \
- \
+            filter(Q(name__icontains=search_string) | Q(description__icontains=search_string))
+
         query = self.add_prefetching(query)
 
         template = get_template('task/{}_autocomplete.html'.format(self._meta.resource_name))
