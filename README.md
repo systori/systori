@@ -190,10 +190,10 @@ You should now be able to connect and browse the `systori_local` database.
 
 ### Code guidelines ###
 
-Pyhton 4 spaces
-Dart 4 spaces
-HTML 2 spaces
-CSS 2 spaces
+* Pyhton 4 spaces
+* Dart 4 spaces
+* HTML 2 spaces
+* CSS 2 spaces
 
 ### Contribution guidelines ###
 
