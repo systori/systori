@@ -19,7 +19,6 @@ from django.core.exceptions import ValidationError
 
 
 class ProjectList(TemplateView):
-
     template_name = 'project/project_list.html'
 
     phase_order = [
@@ -71,8 +70,8 @@ class ProjectCreate(CreateView):
         response = super(ProjectCreate, self).form_valid(form)
 
         TaskGroup.objects.create(name='',
-          job=Job.objects.create(name=_('Default'), project=self.object)
-        )
+                                 job=Job.objects.create(name=_('Default'), project=self.object)
+                                 )
 
         jobsite = JobSite()
         jobsite.project = self.object
@@ -97,13 +96,13 @@ class ProjectCreate(CreateView):
 class ProjectImport(FormView):
     form_class = ProjectImportForm
     template_name = "project/project_form_upload.html"
-    
+
     def form_valid(self, form):
         self.object = gaeb_import(self.request.FILES['file'])
         return super(ProjectImport, self).form_valid(form)
-    
+
     def get_success_url(self):
-        return reverse('project.view', args=[self.object.id]) # otherwise this will fail
+        return reverse('project.view', args=[self.object.id])  # otherwise this will fail
 
 
 class ProjectUpdate(UpdateView):
@@ -121,7 +120,7 @@ class ProjectDelete(DeleteView):
 
 class ProjectPlanning(DetailView):
     model = Project
-    template_name='project/project_planning.html'
+    template_name = 'project/project_planning.html'
 
     def get_context_data(self, **kwargs):
         context = super(ProjectPlanning, self).get_context_data(**kwargs)
@@ -143,8 +142,8 @@ class ProjectManualPhaseTransition(SingleObjectMixin, View):
                 break
 
         if transition:
-          getattr(self.object, transition.name)()
-          self.object.save()
+            getattr(self.object, transition.name)()
+            self.object.save()
 
         return HttpResponseRedirect(reverse('project.view', args=[self.object.id]))
 
@@ -162,14 +161,14 @@ class ProjectManualStateTransition(SingleObjectMixin, View):
                 break
 
         if transition:
-          getattr(self.object, transition.name)()
-          self.object.save()
+            getattr(self.object, transition.name)()
+            self.object.save()
 
         return HttpResponseRedirect(reverse('project.view', args=[self.object.id]))
 
 
 class TemplatesView(TemplateView):
-    template_name='main/templates.html'
+    template_name = 'main/templates.html'
 
     def get_context_data(self, **kwargs):
         context = super(TemplatesView, self).get_context_data(**kwargs)

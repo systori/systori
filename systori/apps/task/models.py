@@ -13,7 +13,6 @@ from ..accounting.constants import TAX_RATE
 
 
 class BetterOrderedModel(OrderedModel):
-
     class Meta:
         abstract = True
 
@@ -25,7 +24,6 @@ class BetterOrderedModel(OrderedModel):
 
 
 class JobQuerySet(models.QuerySet):
-
     def estimate_total(self):
         return sum([job.estimate_total for job in self])
 
@@ -33,7 +31,7 @@ class JobQuerySet(models.QuerySet):
         return self.estimate_total() * TAX_RATE
 
     def estimate_gross_total(self):
-        return self.estimate_total() * (TAX_RATE+1)
+        return self.estimate_total() * (TAX_RATE + 1)
 
     def billable_total(self):
         return sum([job.billable_total for job in self])
@@ -42,7 +40,7 @@ class JobQuerySet(models.QuerySet):
         return self.billable_total() * TAX_RATE
 
     def billable_gross_total(self):
-        return self.billable_total() * (TAX_RATE+1)
+        return self.billable_total() * (TAX_RATE + 1)
 
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
@@ -50,7 +48,6 @@ class JobManager(BaseManager.from_queryset(JobQuerySet)):
 
 
 class Job(BetterOrderedModel):
-
     name = models.CharField(_('Job Name'), max_length=512)
     description = models.TextField(_('Description'), blank=True)
 
@@ -62,7 +59,7 @@ class Job(BetterOrderedModel):
     FIXED_PRICE = "fixed_price"
     TIME_AND_MATERIALS = "time_and_materials"
     BILLING_METHOD = (
-        (FIXED_PRICE , _("Fixed Price")),
+        (FIXED_PRICE, _("Fixed Price")),
         (TIME_AND_MATERIALS, _("Time and Materials")),
     )
     billing_method = models.CharField(_('Billing Method'), max_length=128, choices=BILLING_METHOD, default=FIXED_PRICE)
@@ -105,14 +102,14 @@ class Job(BetterOrderedModel):
     def approve(self):
         pass
 
-    @transition(field=status, source=[APPROVED,COMPLETED], target=STARTED, custom={'label': _("Start")})
+    @transition(field=status, source=[APPROVED, COMPLETED], target=STARTED, custom={'label': _("Start")})
     def start(self):
         pass
 
     @property
     def is_started(self):
         return self.status == Job.STARTED
-        
+
     @transition(field=status, source=STARTED, target=COMPLETED, custom={'label': _("Complete")})
     def complete(self):
         pass
@@ -131,10 +128,10 @@ class Job(BetterOrderedModel):
 
     @staticmethod
     def prefetch(job_id):
-        return\
-            Job.objects.filter(id=job_id)\
-               .prefetch_related('taskgroups__tasks__taskinstances__lineitems')\
-               .get()
+        return \
+            Job.objects.filter(id=job_id) \
+                .prefetch_related('taskgroups__tasks__taskinstances__lineitems') \
+                .get()
 
     def clone_to(self, other_job):
         taskgroups = self.taskgroups.all()
@@ -162,14 +159,13 @@ class Job(BetterOrderedModel):
 
     @property
     def code(self):
-        return str(self.order+1+self.project.job_offset).zfill(self.project.job_zfill)
+        return str(self.order + 1 + self.project.job_offset).zfill(self.project.job_zfill)
 
     def __str__(self):
         return self.name
 
 
 class TaskGroup(BetterOrderedModel):
-
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField(blank=True)
 
@@ -232,7 +228,7 @@ class TaskGroup(BetterOrderedModel):
     def code(self):
         parent_code = self.job.code
         offset = self.job.taskgroup_offset
-        self_code = str(self.order+1+offset).zfill(self.job.project.taskgroup_zfill)
+        self_code = str(self.order + 1 + offset).zfill(self.job.project.taskgroup_zfill)
         return '{}.{}'.format(parent_code, self_code)
 
     def __str__(self):
@@ -322,7 +318,7 @@ class Task(BetterOrderedModel):
     @property
     def code(self):
         parent_code = self.taskgroup.code
-        self_code = str(self.order+1).zfill(self.taskgroup.job.project.task_zfill)
+        self_code = str(self.order + 1).zfill(self.taskgroup.job.project.task_zfill)
         return '{}.{}'.format(parent_code, self_code)
 
     def __str__(self):
@@ -367,8 +363,8 @@ class TaskInstance(BetterOrderedModel):
         correction = self.lineitems.filter(is_correction=True).first()
         if action in ['increase', 'decrease']:
             correction = correction or LineItem(taskinstance=self, is_correction=True, price=0)
-            correction.name = _("Price correction from %(user)s on %(date)s") %\
-                                {'user': user.username, 'date': date_format(datetime.now())}
+            correction.name = _("Price correction from %(user)s on %(date)s") % \
+                              {'user': user.username, 'date': date_format(datetime.now())}
             correction.unit_qty = 1.0
             correction.unit = _("correction")
             direction = {'increase': 1, 'decrease': -1}[action]
@@ -453,7 +449,6 @@ class TaskInstance(BetterOrderedModel):
 
 
 class LineItem(models.Model):
-
     name = models.CharField(_("Name"), max_length=512)
 
     # fixed billing, amount of hours or materials to complete just one unit of the task
@@ -522,7 +517,6 @@ class LineItem(models.Model):
 
 
 class ProgressReport(models.Model):
-
     # date and time when this progress report was filed
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -548,7 +542,6 @@ class ProgressReport(models.Model):
 
 
 class ProgressAttachment(models.Model):
-
     report = models.ForeignKey(ProgressReport, related_name="attachments")
     attachment = models.FileField()
 

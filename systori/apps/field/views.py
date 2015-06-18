@@ -16,34 +16,41 @@ from .utils import find_next_workday, days_ago
 
 
 def _origin_success_url(request, alternate):
-    return request.GET.get('origin') or\
-           request.POST.get('origin') or\
+    return request.GET.get('origin') or \
+           request.POST.get('origin') or \
            alternate
+
 
 def project_success_url(request):
     return _origin_success_url(request,
-            reverse('field.project', args=[request.jobsite.project.id]))
+                               reverse('field.project', args=[request.jobsite.project.id]))
+
 
 def task_success_url(request, task):
     if request.jobsite.project.jobs.count() > 1:
-        return reverse('field.dailyplan.job', args=[request.jobsite.id, request.dailyplan.url_id, task.taskgroup.job.id])
+        return reverse('field.dailyplan.job',
+                       args=[request.jobsite.id, request.dailyplan.url_id, task.taskgroup.job.id])
     else:
         return _origin_success_url(request,
-                reverse('field.dailyplan.task', args=[request.jobsite.id, request.dailyplan.url_id, task.id]))
+                                   reverse('field.dailyplan.task',
+                                           args=[request.jobsite.id, request.dailyplan.url_id, task.id]))
+
 
 def equipment_success_url(request, equipment):
     return _origin_success_url(request,
-            reverse('field.dailyplan.equipment', args=[request.jobsite.id, request.dailyplan.url_id, equipment.id]))
+                               reverse('field.dailyplan.equipment',
+                                       args=[request.jobsite.id, request.dailyplan.url_id, equipment.id]))
+
 
 def dashboard_success_url(request):
     return _origin_success_url(request,
-            reverse('field.dashboard'))
+                               reverse('field.dashboard'))
 
 
 def delete_when_empty(dailyplan):
-    if dailyplan.tasks.count() == 0 and\
-       dailyplan.users.count() == 0 and\
-       dailyplan.equipment.count() == 0:
+    if dailyplan.tasks.count() == 0 and \
+                    dailyplan.users.count() == 0 and \
+                    dailyplan.equipment.count() == 0:
         dailyplan.delete()
         return True
     return False
@@ -57,8 +64,8 @@ class FieldDashboard(TemplateView):
 
         context['todays_plans'] = self.request.user.todays_plans.all()
 
-        context['previous_plans'] = self.request.user.dailyplans\
-            .filter(day__gt=days_ago(5))\
+        context['previous_plans'] = self.request.user.dailyplans \
+            .filter(day__gt=days_ago(5)) \
             .exclude(day=date.today()).all()
 
         return context
@@ -75,8 +82,8 @@ class FieldPlanning(TemplateView):
         selected_day = self.request.selected_day
 
         context['today'] = date.today()
-        context['previous_day'] = selected_day-timedelta(days=1)
-        context['next_day'] = selected_day+timedelta(days=1)
+        context['previous_day'] = selected_day - timedelta(days=1)
+        context['next_day'] = selected_day + timedelta(days=1)
 
         context['previous_day_url'] = reverse('field.planning', args=[context['previous_day'].isoformat()])
         context['today_url'] = reverse('field.planning', args=[date.today().isoformat()])
@@ -97,9 +104,9 @@ class FieldProjectList(ListView):
     template_name = "field/project_list.html"
 
     def get_queryset(self):
-        return Project.objects\
-                .without_template()\
-                .filter(phase__in=[Project.PLANNING, Project.EXECUTING])
+        return Project.objects \
+            .without_template() \
+            .filter(phase__in=[Project.PLANNING, Project.EXECUTING])
 
 
 class FieldProjectView(DetailView):
@@ -116,11 +123,11 @@ class FieldProjectView(DetailView):
 
         project = self.get_object()
 
-        daily_plans = DailyPlan.objects\
-                        .filter(jobsite__project=project)\
-                        .filter(day__lte=selected_day)\
-                        .filter(day__gte=selected_day-timedelta(days=3))\
-                        .all()
+        daily_plans = DailyPlan.objects \
+            .filter(jobsite__project=project) \
+            .filter(day__lte=selected_day) \
+            .filter(day__gte=selected_day - timedelta(days=3)) \
+            .all()
 
         grouped_by_days = []
         for day, plans in groupby(daily_plans, lambda o: o.day):
@@ -142,18 +149,19 @@ class FieldHTMLCalendar(LocaleHTMLCalendar):
         self.month = month
         self.today = date.today()
 
-        plans = DailyPlan.objects\
-                .filter(jobsite__project=project,
-                        day__lt=end_date,
-                        day__gt=start_date
-                ).values('day').annotate(plans=Count('day'))
+        plans = DailyPlan.objects \
+            .filter(jobsite__project=project,
+                    day__lt=end_date,
+                    day__gt=start_date
+                    ).values('day').annotate(plans=Count('day'))
 
-        self.plans = dict([(p['day'],p['plans']) for p in plans])
+        self.plans = dict([(p['day'], p['plans']) for p in plans])
 
     def render(self):
         return self.formatmonth(self.year, self.month)
 
-    def formatmonthname(self, theyear, themonth, withyear=True): return ''
+    def formatmonthname(self, theyear, themonth, withyear=True):
+        return ''
 
     def formatday(self, day, weekday):
         if day == 0:
@@ -161,12 +169,12 @@ class FieldHTMLCalendar(LocaleHTMLCalendar):
         else:
             day_date = date(self.year, self.month, day)
             return '<td class="%s"><a href="%s">%d <span class="dailyplan-count">%s</span></a></td>' % (
-                        self.cssclasses[weekday] +\
-                         (' today' if self.today==day_date else '') +\
-                         (' scheduled' if day_date in self.plans else ''),
-                        reverse('field.project', args=[self.project.id, day_date.isoformat()]),
-                        day, self.plans.get(day_date, '')
-                    )
+                self.cssclasses[weekday] + \
+                (' today' if self.today == day_date else '') + \
+                (' scheduled' if day_date in self.plans else ''),
+                reverse('field.project', args=[self.project.id, day_date.isoformat()]),
+                day, self.plans.get(day_date, '')
+            )
 
 
 class FieldProjectCalendar(TemplateView):
@@ -178,20 +186,19 @@ class FieldProjectCalendar(TemplateView):
         project = self.request.project
         day = self.request.selected_day
 
-        previous = date(day.year, day.month, 1)-timedelta(days=1)
+        previous = date(day.year, day.month, 1) - timedelta(days=1)
         context['previous_month'] = date(previous.year, previous.month, 1)
 
-        next = date(day.year, day.month, 25)+timedelta(days=10)
+        next = date(day.year, day.month, 25) + timedelta(days=10)
         context['next_month'] = date(next.year, next.month, 1)
 
         context['calendar'] = FieldHTMLCalendar(project, day.year, day.month,
-                                previous, context['next_month']).render()
+                                                previous, context['next_month']).render()
 
         return context
 
 
 class FieldGenerateProjectDailyPlans(View):
-
     def get(self, request, *args, **kwargs):
 
         project = request.project
@@ -216,7 +223,6 @@ class FieldGenerateProjectDailyPlans(View):
 
 
 class FieldGenerateAllDailyPlans(View):
-
     def get(self, request, *args, **kwargs):
 
         selected_day = request.selected_day
@@ -279,15 +285,14 @@ class FieldTaskView(UpdateView):
         return context
 
     def form_valid(self, form):
-
         redirect = super(FieldTaskView, self).form_valid(form)
 
         if 'complete' in form.changed_data or form.cleaned_data['comment']:
             ProgressReport.objects.create(
-                user = self.request.user,
-                task = self.object,
-                complete = self.object.complete,
-                comment = form.cleaned_data['comment']
+                user=self.request.user,
+                task=self.object,
+                complete=self.object.complete,
+                comment=form.cleaned_data['comment']
             )
 
         return redirect
@@ -297,7 +302,6 @@ class FieldTaskView(UpdateView):
 
 
 class FieldAddTask(SingleObjectMixin, View):
-
     model = Task
     pk_url_kwarg = 'task_pk'
 
@@ -310,7 +314,6 @@ class FieldAddTask(SingleObjectMixin, View):
 
 
 class FieldRemoveTask(SingleObjectMixin, View):
-
     model = Task
     pk_url_kwarg = 'task_pk'
 
@@ -328,20 +331,19 @@ class FieldRemoveTask(SingleObjectMixin, View):
 
 
 class FieldAddSelfToDailyPlan(View):
-
     def get(self, request, *args, **kwargs):
 
         dailyplan = self.request.dailyplan
         if not dailyplan.id: dailyplan.save()
 
-        already_assigned =\
-         TeamMember.objects.filter(dailyplan=dailyplan, user=self.request.user).exists()
+        already_assigned = \
+            TeamMember.objects.filter(dailyplan=dailyplan, user=self.request.user).exists()
 
         if not already_assigned:
             TeamMember.objects.create(
-                dailyplan = dailyplan,
-                user = request.user,
-                is_foreman = True if kwargs['role'] == 'foreman' else False
+                dailyplan=dailyplan,
+                user=request.user,
+                is_foreman=True if kwargs['role'] == 'foreman' else False
             )
 
         delete_when_empty(dailyplan)
@@ -350,12 +352,10 @@ class FieldAddSelfToDailyPlan(View):
 
 
 class FieldRemoveSelfFromDailyPlan(View):
-
     def get(self, request, *args, **kwargs):
-
         TeamMember.objects.filter(
-            dailyplan = request.dailyplan,
-            user = request.user
+            dailyplan=request.dailyplan,
+            user=request.user
         ).delete()
 
         delete_when_empty(request.dailyplan)
@@ -364,7 +364,6 @@ class FieldRemoveSelfFromDailyPlan(View):
 
 
 class FieldAssignLabor(TemplateView):
-
     template_name = "field/assign_labor.html"
 
     def get_context_data(self, **kwargs):
@@ -387,11 +386,11 @@ class FieldAssignLabor(TemplateView):
                 project_dailyplan.day = %s
         """
         params = (dailyplan.day,)
-        workers = User.objects\
-                      .filter(Q(is_laborer=True) | Q(is_foreman=True))\
-                      .extra(select={'plan_count': plan_count}, select_params=params)\
-                      .order_by('plan_count', 'username')\
-                      .all()
+        workers = User.objects \
+            .filter(Q(is_laborer=True) | Q(is_foreman=True)) \
+            .extra(select={'plan_count': plan_count}, select_params=params) \
+            .order_by('plan_count', 'username') \
+            .all()
 
         assigned_workers = []
         available_workers = []
@@ -409,15 +408,14 @@ class FieldAssignLabor(TemplateView):
 
         dailyplan = self.request.dailyplan
 
-
         new_assignments = [int(id) for id in request.POST.getlist('workers')]
 
         redirect = project_success_url(request)
         if not dailyplan.id:
             origin = request.GET.get('origin') or request.POST.get('origin')
             redirect = reverse('field.dailyplan.assign-tasks',
-                           args=[dailyplan.jobsite.id, dailyplan.url_id])+\
-                           '?origin='+origin if origin else ''
+                               args=[dailyplan.jobsite.id, dailyplan.url_id]) + \
+                       '?origin=' + origin if origin else ''
 
             if not new_assignments:
                 return HttpResponseRedirect(redirect)
@@ -431,16 +429,16 @@ class FieldAssignLabor(TemplateView):
         for worker in new_assignments:
             if worker not in previous_assignments:
                 TeamMember.objects.create(
-                    dailyplan = dailyplan,
-                    user_id = worker
+                    dailyplan=dailyplan,
+                    user_id=worker
                 )
 
         # Remove unchecked assignments
         for worker in previous_assignments:
             if worker not in new_assignments:
                 TeamMember.objects.filter(
-                    dailyplan = dailyplan,
-                    user_id = worker
+                    dailyplan=dailyplan,
+                    user_id=worker
                 ).delete()
 
         delete_when_empty(dailyplan)
@@ -449,7 +447,6 @@ class FieldAssignLabor(TemplateView):
 
 
 class FieldToggleRole(SingleObjectMixin, View):
-
     model = TeamMember
 
     def get(self, request, *args, **kwargs):
@@ -460,7 +457,6 @@ class FieldToggleRole(SingleObjectMixin, View):
 
 
 class FieldMemberRemove(SingleObjectMixin, View):
-
     model = TeamMember
 
     def get(self, request, *args, **kwargs):
@@ -472,7 +468,6 @@ class FieldMemberRemove(SingleObjectMixin, View):
 
 
 class FieldDailyPlanNotes(UpdateView):
-
     model = DailyPlan
     form_class = DailyPlanNoteForm
 
@@ -481,22 +476,20 @@ class FieldDailyPlanNotes(UpdateView):
 
 
 class FieldPlanningToggle(View):
-
     def get(self, request, *args, **kwargs):
-        toggle = 'is_planning_'+kwargs['toggle']
+        toggle = 'is_planning_' + kwargs['toggle']
         request.session[toggle] = not request.session.get(toggle, False)
         return HttpResponseRedirect(reverse('field.planning', args=[self.request.selected_day.isoformat()]))
-    
-    
-class FieldAssignEquipment(TemplateView):
 
+
+class FieldAssignEquipment(TemplateView):
     template_name = "field/assign_equipment.html"
 
     def get_context_data(self, **kwargs):
         context = super(FieldAssignEquipment, self).get_context_data(**kwargs)
-        context['equipment_list'] = Equipment.objects\
-                                .annotate(plan_count=Count('dailyplans'))\
-                                .order_by('plan_count', 'name')
+        context['equipment_list'] = Equipment.objects \
+            .annotate(plan_count=Count('dailyplans')) \
+            .order_by('plan_count', 'name')
         context['assigned'] = []
         dailyplan = self.request.dailyplan
         if dailyplan.id: context['assigned'] = dailyplan.equipment.all()
@@ -512,8 +505,8 @@ class FieldAssignEquipment(TemplateView):
         if not dailyplan.id:
             origin = request.GET.get('origin') or request.POST.get('origin')
             redirect = reverse('field.dailyplan.assign-equipment',
-                           args=[dailyplan.jobsite.id, dailyplan.url_id])+\
-                           '?origin='+origin if origin else ''
+                               args=[dailyplan.jobsite.id, dailyplan.url_id]) + \
+                       '?origin=' + origin if origin else ''
 
             if not new_assignments:
                 return HttpResponseRedirect(redirect)

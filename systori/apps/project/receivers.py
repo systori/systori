@@ -6,7 +6,6 @@ from ..task.models import Job
 
 @receiver(post_save, sender=Proposal)
 def proposal_save_handler(sender, instance, created, **kwargs):
-
     if created and instance.project.is_prospective:
         instance.project.begin_tendering()
         instance.project.save()
@@ -18,7 +17,6 @@ def proposal_save_handler(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Job)
 def job_save_handler(sender, instance, created, **kwargs):
-
     if instance.is_started and instance.project.is_planning:
         instance.project.begin_executing()
         instance.project.save()

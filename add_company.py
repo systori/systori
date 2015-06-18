@@ -1,8 +1,10 @@
 import os
 import re
 import unicodedata
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
 import django
+
 django.setup()
 
 from systori.apps.user.models import User
@@ -13,16 +15,18 @@ company = Company.objects.create(
     name=input("Name: ")
 )
 
-for user in ['lex','mr']:
+for user in ['lex', 'mr']:
     Access.objects.create(
-            company=company,
-            user=User.objects.get(username=user)
+        company=company,
+        user=User.objects.get(username=user)
     )
 
 company.activate()
 
 from systori.apps.project.models import Project
+
 Project.objects.create(name="Template Project", is_template=True)
 
 from systori.apps.accounting.skr03 import create_chart_of_accounts
+
 create_chart_of_accounts()

@@ -4,9 +4,9 @@
 {% block sidebar %}{% include "main/sidebar.html" with section='projects' %}{% endblock %}
 
 {% block content %}
-<form method="post">{% csrf_token %}
-{{ form.as_p }}
-<input type="submit" class="btn btn-default" name="save_goto_project" value="{% trans 'Save &raquo; Project' %}" />
-<input type="submit" class="btn btn-default" name="save_goto_list" value="{% trans 'Save &uarr; List' %}"/>
-</form>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" class="btn btn-default" name="save_goto_project" value="{% trans 'Save &raquo; Project' %}"/>
+    <input type="submit" class="btn btn-default" name="save_goto_list" value="{% trans 'Save &uarr; List' %}"/>
+  </form>
 {% endblock %}

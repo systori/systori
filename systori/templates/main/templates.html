@@ -4,53 +4,53 @@
 {% block sidebar %}{% include "main/sidebar.html" with section="templates" %}{% endblock %}
 
 {% block content %}
-<h2 class="sub-header">{% trans "Job Templates" %}</h2>
-<div class="table-responsive">
-  <table class="table table-striped">
-    <thead>
+  <h2 class="sub-header">{% trans "Job Templates" %}</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
       <tr>
         <th>{% trans "Name" %}</th>
         <th>{% trans "Actions" %}</th>
       </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
       {% for job in jobs %}
-      <tr>
-        <td><a href="{% url 'tasks' job.id %}">{{ job }}</a></td>
-        <td>
-          <a href="{% url 'job.edit' job.id %}">{% trans "Edit" %}</a>
-          <a href="{% url 'job.delete' job.id %}">{% trans "Delete" %}</a>
-        </td>
-      </tr>
+        <tr>
+          <td><a href="{% url 'tasks' job.id %}">{{ job }}</a></td>
+          <td>
+            <a href="{% url 'job.edit' job.id %}">{% trans "Edit" %}</a>
+            <a href="{% url 'job.delete' job.id %}">{% trans "Delete" %}</a>
+          </td>
+        </tr>
       {% endfor %}
-    </tbody>
-  </table>
-  <a href="{% url 'job.create' %}">{% trans "Create" %}</a>
-</div>
+      </tbody>
+    </table>
+    <a href="{% url 'job.create' %}">{% trans "Create" %}</a>
+  </div>
 
-<h2 class="sub-header">{% trans "Document Templates" %}</h2>
-<div class="table-responsive">
-  <table class="table table-striped">
-    <thead>
+  <h2 class="sub-header">{% trans "Document Templates" %}</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
       <tr>
         <th>{% trans "Name" %}</th>
         <th>{% trans "Type" %}</th>
         <th>{% trans "Actions" %}</th>
       </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
       {% for doc in documents %}
-      <tr>
-        <td><a href="{% url 'document-template.view' doc.id %}">{{ doc }}</a></td>
-        <td>{{ doc.document_type }}</a></td>
-        <td>
-          <a href="{% url 'document-template.edit' doc.id %}">{% trans "Edit" %}</a>
-          <a href="{% url 'document-template.delete' doc.id %}">{% trans "Delete" %}</a>
-        </td>
-      </tr>
+        <tr>
+          <td><a href="{% url 'document-template.view' doc.id %}">{{ doc }}</a></td>
+          <td>{{ doc.document_type }}</a></td>
+          <td>
+            <a href="{% url 'document-template.edit' doc.id %}">{% trans "Edit" %}</a>
+            <a href="{% url 'document-template.delete' doc.id %}">{% trans "Delete" %}</a>
+          </td>
+        </tr>
       {% endfor %}
-    </tbody>
-  </table>
-  <a href="{% url 'document-template.create' %}">{% trans "Create" %}</a>
-</div>
+      </tbody>
+    </table>
+    <a href="{% url 'document-template.create' %}">{% trans "Create" %}</a>
+  </div>
 {% endblock %}

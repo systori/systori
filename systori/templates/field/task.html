@@ -2,117 +2,132 @@
 {% load i18n l10n staticfiles customformatting %}
 
 {% block container %}
-<div class="container">
+  <div class="container">
 
-  <div class="row back-buttons">
-    <div class="col-xs-8"><a href="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id task.taskgroup.job.id %}?origin={{request.GET.origin}}" class="btn btn-default btn-block">&laquo; {{ task.taskgroup.job.name }}</a></div>
-    <div class="col-xs-4"><a href="{% if request.GET.origin %}{{request.GET.origin}}{% else %}{% url 'field.dashboard' %}{% endif %}" class="btn btn-default btn-block">&laquo; {% if request.GET.origin  %}{% trans 'Back' %}{% else %}{% trans 'Dashboard' %}{% endif %}</a></div>
-  </div>
-
-  <div class="panel panel-default">
-
-    <div class="panel-heading">
-      {{task.code}} {{task.name}}
+    <div class="row back-buttons">
+      <div class="col-xs-8"><a
+          href="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id task.taskgroup.job.id %}?origin={{ request.GET.origin }}"
+          class="btn btn-default btn-block">&laquo; {{ task.taskgroup.job.name }}</a></div>
+      <div class="col-xs-4"><a
+          href="{% if request.GET.origin %}{{ request.GET.origin }}{% else %}{% url 'field.dashboard' %}{% endif %}"
+          class="btn btn-default btn-block">&laquo;
+        {% if request.GET.origin %}{% trans 'Back' %}{% else %}{% trans 'Dashboard' %}{% endif %}</a></div>
     </div>
 
-    <div class="panel-body">
-      {{task.description}}
-    </div>
+    <div class="panel panel-default">
 
-    <div class="panel-footer clearfix">
-      <div class="pull-right">
-        {% if in_current_dailyplan %}
-        <a href="{% url 'field.dailyplan.task.remove' jobsite.id dailyplan.url_id task.id %}?origin={{request.GET.origin}}" class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Remove task from {{jobsite}}.{% endblocktrans %}</a>
-        {% else %}
-        <a href="{% url 'field.dailyplan.task.add' jobsite.id dailyplan.url_id task.id %}?origin={{request.GET.origin}}" class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Add task to {{jobsite}}.{% endblocktrans %}</a>
-        {% endif %}
+      <div class="panel-heading">
+        {{ task.code }} {{ task.name }}
       </div>
-    </div>
 
-  </div> 
+      <div class="panel-body">
+        {{ task.description }}
+      </div>
 
-  <form method="post">{% csrf_token %}
-  {% localize off %}
-  <div class="panel panel-default">
-
-    <div class="panel-heading">
-      {% trans 'Progress' %}
-    </div>
-
-    <div class="panel-body">
-        <div class="input-group input-group-lg">
-          <span class="input-group-addon" id="percent">{{ task.complete_percent }}%</span>
-          <input type="text" class="form-control" name="complete" value="{{ task.complete|stringformat:'d' }}">
-          <span class="input-group-addon">{{ task.unit }}</span>
+      <div class="panel-footer clearfix">
+        <div class="pull-right">
+          {% if in_current_dailyplan %}
+            <a href="{% url 'field.dailyplan.task.remove' jobsite.id dailyplan.url_id task.id %}?origin={{ request.GET.origin }}"
+               class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Remove task from {{ jobsite }}
+              .{% endblocktrans %}</a>
+          {% else %}
+            <a href="{% url 'field.dailyplan.task.add' jobsite.id dailyplan.url_id task.id %}?origin={{ request.GET.origin }}"
+               class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Add task to {{ jobsite }}
+              .{% endblocktrans %}</a>
+          {% endif %}
         </div>
-        <input type="range" id="completion-range" min="0" max="{{ task.qty|stringformat:'d' }}" value="{{ task.complete|stringformat:'d' }}" step="1" data-unit="{{ task.unit }}" />
-        <div>{% trans 'Comments' %}:</div>
-        <textarea rows="4" style="width: 100%;" name="comment"></textarea>
-    </div>
-
-    <div class="panel-footer clearfix">
-      <div class="pull-right">
-        <input type="hidden" name="origin" value="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id task.taskgroup.job.id %}" />
-        <input type="submit" class="btn btn-primary" value="{% trans 'Save Progress' %}" />
       </div>
+
     </div>
 
-  </div> 
-  {% endlocalize %}
-  </form>
+    <form method="post">{% csrf_token %}
+      {% localize off %}
+        <div class="panel panel-default">
 
-  <div class="panel panel-default">
+          <div class="panel-heading">
+            {% trans 'Progress' %}
+          </div>
 
-    <div class="panel-heading">
-      {% trans 'Line Items' %}
+          <div class="panel-body">
+            <div class="input-group input-group-lg">
+              <span class="input-group-addon" id="percent">{{ task.complete_percent }}%</span>
+              <input type="text" class="form-control" name="complete" value="{{ task.complete|stringformat:'d' }}">
+              <span class="input-group-addon">{{ task.unit }}</span>
+            </div>
+            <input type="range" id="completion-range" min="0" max="{{ task.qty|stringformat:'d' }}"
+                   value="{{ task.complete|stringformat:'d' }}" step="1" data-unit="{{ task.unit }}"/>
+
+            <div>{% trans 'Comments' %}:</div>
+            <textarea rows="4" style="width: 100%;" name="comment"></textarea>
+          </div>
+
+          <div class="panel-footer clearfix">
+            <div class="pull-right">
+              <input type="hidden" name="origin"
+                     value="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id task.taskgroup.job.id %}"/>
+              <input type="submit" class="btn btn-primary" value="{% trans 'Save Progress' %}"/>
+            </div>
+          </div>
+
+        </div>
+      {% endlocalize %}
+    </form>
+
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        {% trans 'Line Items' %}
+      </div>
+
+      <ul class="list-group">
+        {% for lineitem in task.taskinstances.first.lineitems.all %}
+          <li class="list-group-item clearfix">{{ lineitem.name }}<span
+              class="pull-right">{{ lineitem.unit_qty|ubrdecimal }} {{ lineitem.unit }}</span></li>
+        {% endfor %}
+      </ul>
+
     </div>
 
-    <ul class="list-group">
-    {% for lineitem in task.taskinstances.first.lineitems.all %}
-      <li class="list-group-item clearfix">{{ lineitem.name }}<span class="pull-right">{{lineitem.unit_qty|ubrdecimal}} {{lineitem.unit}}</span></li>
-    {% endfor %}
-    </ul>
+    <div class="panel panel-default">
 
-  </div> 
+      <div class="panel-heading">
+        {% trans 'Progress Reports' %}
+      </div>
 
-  <div class="panel panel-default">
+      <ul class="list-group">
+        {% for report in task.progressreports.all %}
+          <li class="list-group-item clearfix"><span
+              class="badge">{{ report.complete|stringformat:'d' }} {{ task.unit }} / {{ report.complete_percent }}%</span>{{ report.timestamp }}<br/>{{ report.user.get_full_name }}
+              {% if report.comment %}<br/>{{ report.comment }}{% endif %}</li>
+        {% endfor %}
+      </ul>
 
-    <div class="panel-heading">
-      {% trans 'Progress Reports' %}
     </div>
 
-    <ul class="list-group">
-    {% for report in task.progressreports.all %}
-      <li class="list-group-item clearfix"><span class="badge">{{report.complete|stringformat:'d'}} {{ task.unit }} / {{report.complete_percent}}%</span>{{ report.timestamp }}<br />{{ report.user.get_full_name }}{% if report.comment %}<br />{{ report.comment }}{% endif %}</li>
-    {% endfor %}
-    </ul>
-
-  </div> 
-
-</div>
+  </div>
 {% endblock %}
 
 
-{% block extra_js%}
-<script type="text/javascript">
-$(document).ready(function () {
-    var range = $('#completion-range');
-    var complete = $('input[name="complete"]');
-    var percent = $('#percent');
-    var max = range.attr('max');
-    range.on('input', function() {
-      percent.text(Math.round(range.val() / max * 100) + '%');
-      complete.val(range.val());
+{% block extra_js %}
+  <script type="text/javascript">
+    $(document).ready(function () {
+      var range = $('#completion-range');
+      var complete = $('input[name="complete"]');
+      var percent = $('#percent');
+      var max = range.attr('max');
+      range.on('input', function () {
+        percent.text(Math.round(range.val() / max * 100) + '%');
+        complete.val(range.val());
+      });
+      complete.on('keyup', function () {
+        if (complete.val() == '') {
+          percent.text('0%');
+          range.val(0);
+        } else {
+          percent.text(Math.round(complete.val() / max * 100) + '%');
+          range.val(complete.val());
+        }
+      });
     });
-    complete.on('keyup', function() {
-      if (complete.val() == '') {
-        percent.text('0%');
-        range.val(0);
-      } else {
-        percent.text(Math.round(complete.val() / max * 100) + '%');
-        range.val(complete.val());
-      }
-    });
-});
-</script>
-{% endblock extra_js%}
+  </script>
+{% endblock extra_js %}

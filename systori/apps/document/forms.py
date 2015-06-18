@@ -10,13 +10,13 @@ class ProposalForm(forms.ModelForm):
     doc_template = forms.ModelChoiceField(
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.PROPOSAL), required=False)
-    latex_template = forms.ChoiceField(choices = [(k,_(v)) for k,v in settings.PROPOSAL_LATEX_TEMPLATES])
+    latex_template = forms.ChoiceField(choices=[(k, _(v)) for k, v in settings.PROPOSAL_LATEX_TEMPLATES])
     add_terms = forms.BooleanField(label=_('Add Terms'),
                                    initial=True, required=False)
 
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
-    
+
     def __init__(self, *args, **kwargs):
         super(ProposalForm, self).__init__(*args, **kwargs)
         self.fields['jobs'].queryset = self.instance.project.jobs_for_proposal

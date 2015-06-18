@@ -4,32 +4,34 @@
 {% block sidebar %}{% include "main/sidebar.html" with section='accounts' %}{% endblock %}
 
 {% block content %}
-<style>
-.active-account {
-  font-weight: bold;
-}
-.other-account {
-  color: lightgrey;
-}
-.other-account a {
-  color: lightgrey;
-}
-</style>
+  <style>
+    .active-account {
+      font-weight: bold;
+    }
+
+    .other-account {
+      color: lightgrey;
+    }
+
+    .other-account a {
+      color: lightgrey;
+    }
+  </style>
 
   <h2 class="sub-header">{{ account }}</h2>
   <div class="table-responsive">
     <table class="table table-condensed">
       <thead>
-        <tr>
-          <th>{% trans 'Transaction #' %}</th>
-          <th>{% trans 'Date' %}</th>
-          <th>{% trans 'Account' %}</th>
-          <th class="text-right">{% trans 'Debit' %}</th>
-          <th class="text-right">{% trans 'Credit' %}</th>
-        </tr>
+      <tr>
+        <th>{% trans 'Transaction #' %}</th>
+        <th>{% trans 'Date' %}</th>
+        <th>{% trans 'Account' %}</th>
+        <th class="text-right">{% trans 'Debit' %}</th>
+        <th class="text-right">{% trans 'Credit' %}</th>
+      </tr>
       </thead>
       <tbody>
-        {% for account_entry in account.entries.all %}
+      {% for account_entry in account.entries.all %}
         <tr class="active">
           <td>{{ account_entry.transaction.id }}</td>
           <td>{{ account_entry.transaction.recorded_on }}</td>
@@ -38,28 +40,29 @@
           <td>&nbsp;</td>
         </tr>
         {% for entry in account_entry.transaction.entries.all %}
-        <tr class="{% if entry.account.id == account.id %}active{% else %}other{% endif %}-account">
-          <td>&nbsp;</td>
-          <td>&nbsp;</td>
-          <td>
-          {% if entry.account.project %}
-            <a href="{% url 'project.view' entry.account.project.id %}">{{ entry.account.code }} - {{ entry.account.project }}</a>
-          {% elif entry.account.id == account.id %}
-            {{ entry.account }}
-          {% else %}
-            <a href="{% url 'account.view' entry.account.id %}">{{ entry.account }}</a>
-          {% endif %}
-          </td>
-          {% if entry.is_debit %}
-          <td align="right">{{ entry.absolute_amount|money }}</td>
-          <td align="right"></td>
-          {% else %}
-          <td align="right"></td>
-          <td align="right">{{ entry.absolute_amount|money }}</td>
-          {% endif %}
-        </tr>
+          <tr class="{% if entry.account.id == account.id %}active{% else %}other{% endif %}-account">
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>
+              {% if entry.account.project %}
+                <a href="{% url 'project.view' entry.account.project.id %}">{{ entry.account.code }}
+                  - {{ entry.account.project }}</a>
+              {% elif entry.account.id == account.id %}
+                {{ entry.account }}
+              {% else %}
+                <a href="{% url 'account.view' entry.account.id %}">{{ entry.account }}</a>
+              {% endif %}
+            </td>
+            {% if entry.is_debit %}
+              <td align="right">{{ entry.absolute_amount|money }}</td>
+              <td align="right"></td>
+            {% else %}
+              <td align="right"></td>
+              <td align="right">{{ entry.absolute_amount|money }}</td>
+            {% endif %}
+          </tr>
         {% endfor %}
-        {% endfor %}
+      {% endfor %}
       </tbody>
     </table>
   </div>

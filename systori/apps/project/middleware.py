@@ -1,7 +1,7 @@
 from .models import Project, JobSite
 
-class ProjectMiddleware:
 
+class ProjectMiddleware:
     def process_view(self, request, view, args, kwargs):
         if 'company' in request.session:
             if 'project_pk' in kwargs:

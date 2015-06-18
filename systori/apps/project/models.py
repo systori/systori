@@ -13,7 +13,6 @@ from geopy import geocoders
 
 
 class ProjectQuerySet(models.QuerySet):
-
     def template(self):
         return self.filter(is_template=True)
 
@@ -22,7 +21,6 @@ class ProjectQuerySet(models.QuerySet):
 
 
 class Project(models.Model):
-
     name = models.CharField(_('Project Name'), max_length=512)
     description = models.TextField(_('Project Description'), blank=True, null=True)
     is_template = models.BooleanField(default=False)
@@ -36,7 +34,6 @@ class Project(models.Model):
     account = models.OneToOneField('accounting.Account', related_name="project", null=True)
 
     objects = ProjectQuerySet.as_manager()
-
 
     PROSPECTIVE = "prospective"
     TENDERING = "tendering"
@@ -113,10 +110,9 @@ class Project(models.Model):
                     transition_name = transition.name
                     break
 
-            phases.append((name, label, self.phase==name, is_past, transition_name))
+            phases.append((name, label, self.phase == name, is_past, transition_name))
 
         return phases
-            
 
     ACTIVE = "active"
     PAUSED = "paused"
@@ -159,10 +155,9 @@ class Project(models.Model):
                     transition_name = transition.name
                     break
 
-            states.append((name, label, self.state==name, transition_name))
+            states.append((name, label, self.state == name, transition_name))
 
         return states
-
 
     def __str__(self):
         return self.name
@@ -182,8 +177,8 @@ class Project(models.Model):
     def prefetch(project_id):
         return \
             Project.objects.filter(id=project_id) \
-                   .prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems') \
-                   .get()
+                .prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems') \
+                .get()
 
     @property
     def billable_jobs(self):
@@ -238,7 +233,7 @@ class Project(models.Model):
             account based on work done since the last time the customer account was debited.
         """
         # total cost of all complete work so far (with tax)
-        billable = round(self.billable_total * (1+TAX_RATE), 2)
+        billable = round(self.billable_total * (1 + TAX_RATE), 2)
 
         # total we have already charged the customer
         already_debited = round(self.account.debits().total, 2)
@@ -282,7 +277,6 @@ class JobSite(models.Model):
 
 
 class DailyPlanQuerySet(models.QuerySet):
-
     def today(self):
         return self.filter(day=date.today())
 
@@ -321,6 +315,6 @@ class TeamMember(models.Model):
     dailyplan = models.ForeignKey(DailyPlan, related_name="workers")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="assignments")
     is_foreman = models.BooleanField(default=False)
+
     class Meta:
         ordering = ['-is_foreman', 'user__first_name']
-  

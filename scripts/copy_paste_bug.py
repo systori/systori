@@ -1,8 +1,10 @@
 import os
 import re
 import unicodedata
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ubrblik.settings")
 import django
+
 django.setup()
 
 from ubrblik.apps.task.models import *
@@ -16,9 +18,9 @@ for job in p22.jobs.all():
         print("before description: {}".format(taskgroup.description))
         name_striped = taskgroup.name.strip()
         description_striped = taskgroup.description.strip()
-        taskgroup.name = re.sub('\s+',' ',name_striped)
+        taskgroup.name = re.sub('\s+', ' ', name_striped)
         taskgroup.name = unicodedata.normalize('NFC', taskgroup.name)
-        taskgroup.description = re.sub('\s+',' ',description_striped)
+        taskgroup.description = re.sub('\s+', ' ', description_striped)
         taskgroup.description = unicodedata.normalize('NFC', taskgroup.description)
         print("after name: {}".format(taskgroup.name))
         print("after description: {}".format(taskgroup.description))
@@ -28,12 +30,11 @@ for job in p22.jobs.all():
             print("before description: {}".format(task.description))
             name_striped = task.name.strip()
             description_striped = task.description.strip()
-            task.name = re.sub('\s+',' ',name_striped)
+            task.name = re.sub('\s+', ' ', name_striped)
             task.name = unicodedata.normalize('NFC', task.name)
-            task.description = re.sub('\s+',' ',description_striped)
+            task.description = re.sub('\s+', ' ', description_striped)
             task.description = unicodedata.normalize('NFC', task.description)
             print("after name: {}".format(task.name))
             print("after description: {}".format(task.description))
             print("\n\n\n")
             task.save()
-

@@ -1,4 +1,3 @@
-
 def schemata(request):
     """
     A Django context_processor that provides access to the

@@ -13,5 +13,6 @@ class CompanyConfig(AppConfig):
 def monkey_patch_anonymous_user():
     from django.contrib.auth import models
     from .models import Company
+
     models.AnonymousUser.companies = Company.objects.none()
     models.AnonymousUser.visible_companies = Company.objects.none()

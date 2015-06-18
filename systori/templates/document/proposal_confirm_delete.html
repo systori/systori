@@ -4,8 +4,8 @@
 {% block sidebar %}{% include "project/sidebar.html" with section='proposals' %}{% endblock %}
 
 {% block content %}
-<form method="post">{% csrf_token %}
+  <form method="post">{% csrf_token %}
     <p>{% blocktrans with object=object %}Are you sure you want to delete "{{ object }}"?{% endblocktrans %}</p>
-    <input type="submit" value="{% trans 'Confirm' %}" />
-</form>
+    <input type="submit" value="{% trans 'Confirm' %}"/>
+  </form>
 {% endblock %}

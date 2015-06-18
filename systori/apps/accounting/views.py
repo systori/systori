@@ -26,6 +26,7 @@ class PaymentCreate(FormView):
 
 class TransactionDelete(DeleteView):
     model = Transaction
+
     def delete(self, request, *args, **kwargs):
         object = self.get_object()
         if not object.is_reconciled:
@@ -35,6 +36,7 @@ class TransactionDelete(DeleteView):
 
 class PaymentDelete(TransactionDelete):
     template_name = 'accounting/payment_confirm_delete.html'
+
     def get_success_url(self):
         return self.request.project.get_absolute_url()
 

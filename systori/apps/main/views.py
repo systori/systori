@@ -9,12 +9,15 @@ from ..task.models import LineItem
 from ..field.views import FieldDashboard
 from ..field.utils import get_workday
 
+
 class OfficeDashboard(TemplateView):
     template_name = "main/dashboard.html"
+
     def get_context_data(self, **kwargs):
         context = super(OfficeDashboard, self).get_context_data(**kwargs)
         context['flagged_lineitems'] = LineItem.objects.filter(is_flagged=True)
-        sites = JobSite.objects.exclude(project__phase=Project.WARRANTY).exclude(project__phase=Project.FINISHED).select_related('project')
+        sites = JobSite.objects.exclude(project__phase=Project.WARRANTY).exclude(
+            project__phase=Project.FINISHED).select_related('project')
         context['job_sites'] = sites.exclude(latitude=None).exclude(longitude=None).all()
         context['GOOGLE_MAPS_API_KEY'] = settings.GOOGLE_MAPS_API_KEY
         return context
@@ -44,8 +47,8 @@ class DayBasedOverviewView(TemplateView):
         selected_day = self.request.selected_day
 
         context['today'] = date.today()
-        context['previous_day'] = selected_day-timedelta(days=1)
-        context['next_day'] = selected_day+timedelta(days=1)
+        context['previous_day'] = selected_day - timedelta(days=1)
+        context['next_day'] = selected_day + timedelta(days=1)
 
         context['previous_day_url'] = reverse('day_based_overview', args=[context['previous_day'].isoformat()])
         context['today_url'] = reverse('day_based_overview', args=[date.today().isoformat()])

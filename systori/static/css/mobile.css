@@ -1,8 +1,8 @@
 body {
   background-image: url("/static/img/field_app_bg.png");
   background-repeat: no-repeat;
-  background-position-y: 300px; 
-  background-position-x: center; 
+  background-position-y: 300px;
+  background-position-x: center;
 
   padding-top: 10px;
   padding-bottom: 10px;
@@ -41,6 +41,7 @@ body {
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
 }
+
 .day-separator {
   font-size: 14pt;
   font-weight: bold;
@@ -48,12 +49,15 @@ body {
   margin: 10px 0px 10px 0px;
   position: relative;
 }
+
 .day-separator.today {
   font-weight: bold;
 }
+
 .btn-contextual {
   padding: 3px 10px;
 }
+
 .day-separator a.btn-add-plan {
   position: absolute;
   bottom: 0px;
@@ -61,7 +65,6 @@ body {
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
 }
-
 
 #percent {
   width: 80px;
@@ -87,14 +90,14 @@ Since this is intended for Android/iOS the Firefox and IE specific styles have b
 */
 
 input[type=range]::before {
-  content: attr(min) " " attr(data-unit);	
+  content: attr(min) " " attr(data-unit);
   position: absolute;
   left: 1px;
   top: -20px;
 }
 
 input[type=range]::after {
-  content: attr(max) " " attr(data-unit);	
+  content: attr(max) " " attr(data-unit);
   position: absolute;
   right: 1px;
   top: -20px;
@@ -129,5 +132,5 @@ input[type=range]::-webkit-slider-thumb {
   background: #337ab7;
   cursor: pointer;
   -webkit-appearance: none;
-  margin-top: -20px;/*-19.5px;*/
+  margin-top: -20px; /*-19.5px;*/
 }

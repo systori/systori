@@ -21,7 +21,6 @@ class BaseMeta:
 
 
 class OrderedModelResourceMixin:
-
     def prepend_urls(self):
         urls = super(OrderedModelResourceMixin, self).prepend_urls()
         urls.append(
@@ -51,8 +50,8 @@ class OrderedModelResourceMixin:
 
         return http.HttpAccepted()
 
-class ClonableModelResourceMixin:
 
+class ClonableModelResourceMixin:
     def prepend_urls(self):
         urls = super(ClonableModelResourceMixin, self).prepend_urls()
         urls.append(
@@ -81,7 +80,6 @@ class ClonableModelResourceMixin:
 
 
 class AutoCompleteModelResourceMixin:
-
     def prepend_urls(self):
         urls = super(AutoCompleteModelResourceMixin, self).prepend_urls()
         urls.append(
@@ -103,9 +101,9 @@ class AutoCompleteModelResourceMixin:
         if not search_string:
             raise ValidationError("Search string is empty.")
 
-        query = self._meta.queryset.\
-                filter(Q(name__icontains=search_string) | Q(description__icontains=search_string))\
-
+        query = self._meta.queryset. \
+            filter(Q(name__icontains=search_string) | Q(description__icontains=search_string)) \
+ \
         query = self.add_prefetching(query)
 
         template = get_template('task/{}_autocomplete.html'.format(self._meta.resource_name))
@@ -116,7 +114,6 @@ class AutoCompleteModelResourceMixin:
 
 
 class JobResource(OrderedModelResourceMixin, ModelResource):
-
     project = fields.ForeignKey(ProjectResource, 'project')
 
     class Meta(BaseMeta):
@@ -127,8 +124,8 @@ class JobResource(OrderedModelResourceMixin, ModelResource):
         }
 
 
-class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCompleteModelResourceMixin, ModelResource):
-
+class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCompleteModelResourceMixin,
+                        ModelResource):
     job = fields.ForeignKey(JobResource, 'job')
 
     class Meta(BaseMeta):
@@ -144,12 +141,12 @@ class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, A
         return get_template('task/taskgroup_loop.html'), {'group': specimen}
 
     def add_prefetching(self, query):
-        return query.prefetch_related('job__project')\
-                    .prefetch_related('tasks__taskinstances__lineitems')
+        return query.prefetch_related('job__project') \
+            .prefetch_related('tasks__taskinstances__lineitems')
 
 
-class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCompleteModelResourceMixin, ModelResource):
-
+class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCompleteModelResourceMixin,
+                   ModelResource):
     taskgroup = fields.ForeignKey(TaskGroupResource, 'taskgroup')
 
     class Meta(BaseMeta):
@@ -165,12 +162,13 @@ class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCo
         return get_template('task/task_loop.html'), {'task': specimen}
 
     def add_prefetching(self, query):
-        return query.prefetch_related('taskgroup__job__project')\
-                    .prefetch_related('taskinstances__lineitems')
+        return query.prefetch_related('taskgroup__job__project') \
+            .prefetch_related('taskinstances__lineitems')
 
 
 class TaskInstanceResource(OrderedModelResourceMixin, ModelResource):
     task = fields.ForeignKey(TaskResource, 'task')
+
     class Meta(BaseMeta):
         queryset = TaskInstance.objects.all()
         resource_name = "taskinstance"
@@ -181,6 +179,7 @@ class TaskInstanceResource(OrderedModelResourceMixin, ModelResource):
 
 class LineItemResource(ModelResource):
     taskinstance = fields.ForeignKey(TaskInstanceResource, 'taskinstance')
+
     class Meta(BaseMeta):
         queryset = LineItem.objects.all()
         resource_name = "lineitem"
@@ -190,6 +189,7 @@ class LineItemResource(ModelResource):
 
 
 from tastypie.api import Api
+
 api = Api()
 api.register(JobResource())
 api.register(TaskGroupResource())

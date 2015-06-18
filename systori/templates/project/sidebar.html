@@ -1,14 +1,20 @@
 {% load i18n %}
 
 {% if project.is_template %}
-{% include "main/sidebar.html" with section="templates" %}
+  {% include "main/sidebar.html" with section="templates" %}
 {% else %}
-<ul class="nav nav-sidebar">
-  <li {% if section == 'dashboard' or not section %}class="active"{% endif %}><a href="{% url 'project.view' project.id %}">{% trans 'Project Dashboard' %}</a></li>
-  <li {% if section == 'jobs' %}class="active"{% endif %}><a href="{% url 'project.view' project.id %}#jobs">{% trans 'Jobs' %}</a></li>
-  <li {% if section == 'plan' %}class="active"{% endif %}><a href="{% url 'project.plan' project.id %}">{% trans 'Plan' %}</a></li>
-  <li {% if section == 'proposals' %}class="active"{% endif %}><a href="{% url 'project.view' project.id %}#proposals">{% trans 'Proposals' %}</a></li>
-  <li {% if section == 'invoices' %}class="active"{% endif %}><a href="{% url 'project.view' project.id %}#invoices">{% trans 'Invoices' %}</a></li>
-  <li {% if section == 'contacts' %}class="active"{% endif %}><a href="{% url 'project.view' project.id %}#contacts">{% trans 'Contacts' %}</a></li>
-</ul>
+  <ul class="nav nav-sidebar">
+    <li {% if section == 'dashboard' or not section %}class="active"{% endif %}><a
+        href="{% url 'project.view' project.id %}">{% trans 'Project Dashboard' %}</a></li>
+    <li {% if section == 'jobs' %}class="active"{% endif %}><a
+        href="{% url 'project.view' project.id %}#jobs">{% trans 'Jobs' %}</a></li>
+    <li {% if section == 'plan' %}class="active"{% endif %}><a
+        href="{% url 'project.plan' project.id %}">{% trans 'Plan' %}</a></li>
+    <li {% if section == 'proposals' %}class="active"{% endif %}><a
+        href="{% url 'project.view' project.id %}#proposals">{% trans 'Proposals' %}</a></li>
+    <li {% if section == 'invoices' %}class="active"{% endif %}><a
+        href="{% url 'project.view' project.id %}#invoices">{% trans 'Invoices' %}</a></li>
+    <li {% if section == 'contacts' %}class="active"{% endif %}><a
+        href="{% url 'project.view' project.id %}#contacts">{% trans 'Contacts' %}</a></li>
+  </ul>
 {% endif %}

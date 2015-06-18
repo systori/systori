@@ -15,7 +15,6 @@ def proposal_create_handler(sender, instance, action, reverse, model, pk_set, **
 
 @receiver(post_transition, sender=Proposal)
 def proposal_transition_handler(sender, instance, name, source, target, **kwargs):
-
     for job in instance.jobs.all():
 
         if target == instance.APPROVED:
