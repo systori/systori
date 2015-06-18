@@ -1,4 +1,6 @@
-<ubr-taskgroup data-pk="{{ group.pk }}" {% if not group.tasks.all %}class="empty"{% endif %}>
+<ubr-taskgroup
+  {% if group.pk %}data-pk="{{ group.pk }}"{% endif %}
+  {% if not group.tasks.all %}class="empty"{% endif %}>
   {% include "task/taskgroup_editor.html" with group=group %}
   {% for task in group.tasks.all %}
     {% include "task/task_loop.html" with task=task %}

@@ -369,6 +369,13 @@ class FieldAssignLabor(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(FieldAssignLabor, self).get_context_data(**kwargs)
+
+        dailyplan = self.request.dailyplan
+
+        assigned = []
+        if dailyplan.id:
+            assigned = dailyplan.users.all()
+
         plan_count = """
             SELECT
                 count(*)
@@ -377,15 +384,25 @@ class FieldAssignLabor(TemplateView):
                 INNER JOIN project_dailyplan ON (project_teammember.dailyplan_id = project_dailyplan.id)
             WHERE
                 project_teammember.user_id = user_user.id AND
-                project_dailyplan.day = current_date
+                project_dailyplan.day = %s
         """
-        context['workers'] = User.objects\
-                                .filter(Q(is_laborer=True) | Q(is_foreman=True))\
-                                .extra(select={'plan_count': plan_count})\
-                                .order_by('plan_count', 'username')
-        context['assigned'] = []
-        dailyplan = self.request.dailyplan
-        if dailyplan.id: context['assigned'] = dailyplan.users.all()
+        params = (dailyplan.day,)
+        workers = User.objects\
+                      .filter(Q(is_laborer=True) | Q(is_foreman=True))\
+                      .extra(select={'plan_count': plan_count}, select_params=params)\
+                      .order_by('plan_count', 'username')\
+                      .all()
+
+        assigned_workers = []
+        available_workers = []
+        for worker in workers:
+            worker.assigned = worker in assigned
+            if worker.assigned:
+                assigned_workers.append(worker)
+            else:
+                available_workers.append(worker)
+
+        context['workers'] = assigned_workers + available_workers
         return context
 
     def post(self, request, *args, **kwargs):
