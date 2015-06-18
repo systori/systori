@@ -1,19 +1,17 @@
 {% load i18n %}
-<h2 class="sub-header">{{ phase }}</h2>
-<div class="table-responsive">
-  <table class="table table-striped">
-    <thead>
-    <tr>
-      <th>#</th>
-      <th>{% trans 'Name' %}</th>
-      <th>{% trans 'City' %}</th>
-      <th>{% trans 'State' %}</th>
-      <th>{% trans 'Actions' %}</th>
-    </tr>
-    </thead>
-    <tbody>
+      <tr style="background-color:
+                  {% if forloop.counter == 1 %}#FF97CC;">
+                  {% elif forloop.counter == 2 %}#D04242;">
+                  {% elif forloop.counter == 3 %}#49A6FF;">
+                  {% elif forloop.counter == 4 %}#0F9A0F;">
+                  {% elif forloop.counter == 5 %}#FFE039;">
+                  {% elif forloop.counter == 6 %}#8C97A2;">
+                  {% else %} inherit;">
+                  {% endif %}
+        <td colspan="5" align="center"><b>{{ phase }}</b></td>
+      </tr>
     {% for project in projects %}
-      <tr>
+      <tr data-phase="{{ phase }}">
         <td width="5%">{{ project.id }}</td>
         <td width="40%"><a href="{% url 'project.view' project.id %}">{{ project }}</a></td>
         <td width="30%">{{ project.jobsites.all.0.city }}</td>
@@ -24,6 +22,3 @@
         </td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
-</div>

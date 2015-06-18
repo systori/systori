@@ -6,12 +6,37 @@
 {% block content %}
   <p><a href="{% url 'project.create' %}">{% trans "Create" %}</a> {% trans "or" %} <a
       href="{% url 'project.import' %}">{% trans "Import" %}</a></p>
+  <div class="row">
+    <div class="col-xs-12">
+      <form class="form-inline">
+          <div class="input-group col-xs-12 col-lg-6">
+            <div class="input-group-addon"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></div>
+            <input type="text" class="form-control" id="filter" placeholder="Filter" />
+          </div>
+      </form>
+    </div>
+  </div>
 
-  {% for phase, projects in project_groups.items %}
-    {% if projects %}
-      {% include 'project/project_list_table.html' with phase=projects.0.get_phase_display projects=projects %}
-    {% endif %}
-  {% endfor %}
+  <div class="table-responsive">
+    <table class="table table-striped" id="table">
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>{% trans 'Name' %}</th>
+        <th>{% trans 'City' %}</th>
+        <th>{% trans 'State' %}</th>
+        <th>{% trans 'Actions' %}</th>
+      </tr>
+      </thead>
+      <tbody>
+        {% for phase, projects in project_groups.items %}
+          {% if projects %}
+            {% include 'project/project_list_table.html' with phase=projects.0.get_phase_display projects=projects %}
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
   <p>
     {% if not phase_filter %}
@@ -25,3 +50,26 @@
   </p>
 
 {% endblock content %}
+
+{% block extra_js %}
+
+<script type="application/javascript">
+  $("input#filter").keyup(function () {
+      var filter = $(this).val();
+      var regExPattern = "gi";
+      var regEx = new RegExp(filter, regExPattern);
+      $("table tr").each(function () {
+          if($(this).data('phase'))
+          if (
+          $(this).text().search(new RegExp(filter, "i")) < 0
+          && $(this).data('phase').search(regEx) < 0
+          ){
+              $(this).hide();
+          } else {
+              $(this).show();
+          }
+      });
+  });
+</script>
+
+{% endblock %}
