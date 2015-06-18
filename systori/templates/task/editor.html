@@ -337,5 +337,7 @@ ubr-autocomplete > div.active {
 
 {% block extra_js%}
 <script type="application/dart" src="{% static "editor/editor.dart" %}"></script>
-<script type="text/javascript" src="{% static "editor/packages/browser/dart.js" %}"></script>
+<script src="{% static "editor/packages/web_components/webcomponents.min.js" %}"></script>
+<script src="{% static "editor/packages/web_components/dart_support.js" %}"></script>
+<script src="{% static "editor/packages/browser/dart.js" %}"></script>
 {% endblock extra_js%}
