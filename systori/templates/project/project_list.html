@@ -30,31 +30,33 @@
       </thead>
       <tbody>
         {% for phase, projects in project_groups.items %}
-          {% if projects %}
-              <tr style="background-color:
-                {% if forloop.counter == 1 %}#FF97CC;">
-                {% elif forloop.counter == 2 %}#D04242;">
-                {% elif forloop.counter == 3 %}#49A6FF;">
-                {% elif forloop.counter == 4 %}#0F9A0F;">
-                {% elif forloop.counter == 5 %}#FFE039;">
-                {% elif forloop.counter == 6 %}#8C97A2;">
-                {% else %} inherit;">
-                {% endif %}
-                <td colspan="5" align="center"><b>{{ phase }}</b></td>
-              </tr>
-            {% for project in projects %}
-              <tr data-phase="{{ phase }}">
-                <td width="5%">{{ project.id }}</td>
-                <td width="40%"><a href="{% url 'project.view' project.id %}">{{ project }}</a></td>
-                <td width="30%">{{ project.jobsites.all.0.city }}</td>
-                <td width="10%">{{ project.get_state_display }}</td>
-                <td width="15%">
-                  <a href="{% url 'project.edit' project.id %}">{% trans "Edit" %}</a>
-                  <a href="{% url 'project.delete' project.id %}">{% trans "Delete" %}</a>
-                </td>
-              </tr>
-            {% endfor %}
-          {% endif %}
+          {% with phase=projects.0.get_phase_display %}
+            {% if projects %}
+                <tr style="background-color:
+                  {% if forloop.counter == 1 %}#FF97CC;">
+                  {% elif forloop.counter == 2 %}#D04242;">
+                  {% elif forloop.counter == 3 %}#49A6FF;">
+                  {% elif forloop.counter == 4 %}#0F9A0F;">
+                  {% elif forloop.counter == 5 %}#FFE039;">
+                  {% elif forloop.counter == 6 %}#8C97A2;">
+                  {% else %} inherit;">
+                  {% endif %}
+                  <td colspan="5" align="center"><b>{{ phase }}</b></td>
+                </tr>
+              {% for project in projects %}
+                <tr data-phase="{{ phase }}">
+                  <td width="5%">{{ project.id }}</td>
+                  <td width="40%"><a href="{% url 'project.view' project.id %}">{{ project }}</a></td>
+                  <td width="30%">{{ project.jobsites.all.0.city }}</td>
+                  <td width="10%">{{ project.get_state_display }}</td>
+                  <td width="15%">
+                    <a href="{% url 'project.edit' project.id %}">{% trans "Edit" %}</a>
+                    <a href="{% url 'project.delete' project.id %}">{% trans "Delete" %}</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
         {% endfor %}
       </tbody>
     </table>
