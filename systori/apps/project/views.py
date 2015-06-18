@@ -35,7 +35,7 @@ class ProjectList(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(ProjectList, self).get_context_data(**kwargs)
 
-        query = Project.objects.without_template()
+        query = Project.objects.without_template().prefetch_related('jobsites')
         if kwargs['phase_filter']:
             assert kwargs['phase_filter'] in self.phase_order
             query = query.filter(phase=kwargs['phase_filter'])

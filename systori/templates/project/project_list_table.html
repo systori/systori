@@ -16,7 +16,7 @@
     <tr>
       <td width="5%">{{ project.id }}</td>
       <td width="40%"><a href="{% url 'project.view' project.id %}">{{ project }}</a></td>
-      <td width="30%">{{ project.jobsites.first.city }}</td>
+      <td width="30%">{{ project.jobsites.0.city }}</td>
       <td width="10%">{{ project.get_state_display }}</td>
       <td width="15%">
         <a href="{% url 'project.edit' project.id %}">{% trans "Edit" %}</a>
