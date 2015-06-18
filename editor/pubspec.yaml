@@ -6,6 +6,7 @@ dependencies:
   intl: any
   collection: any
   browser: any
+  web_components: any
 transformers:
 - $dart2js:
     minify: true
