@@ -387,6 +387,10 @@ abstract class EditableElement extends UbrElement {
     return name_view.text.length == 0 && pk == null;
   }
 
+  bool can_delete() {
+    return true;
+  }
+
   void handle_input(KeyboardEvent event) {
 
     switch (event.keyCode) {
@@ -448,7 +452,7 @@ abstract class EditableElement extends UbrElement {
 
       case KeyCode.DELETE:
         if (event.shiftKey) {
-          if (object_name == 'taskgroup' && parent.children.length == 1) break;
+          if (!can_delete()) break;
           event.preventDefault();
           delete();
           stop();
@@ -563,7 +567,7 @@ abstract class EditableElement extends UbrElement {
   }
 
   void cleanup() {
-    if (is_blank()) {
+    if (is_blank() && can_delete()) {
       UbrElement parent_cached = parent;
       remove();
       parent_cached.recalculate_code();
@@ -688,6 +692,10 @@ class TaskGroupElement extends EditableElement {
     if (pk == null) {
       use_autocompleter();
     }
+  }
+
+  bool can_delete() {
+    return parent.children.length > 1;
   }
 
   update_totals() {

@@ -360,6 +360,8 @@ ubr-autocomplete > div.active {
 
   {% for group in object_list %}
     {% include "task/taskgroup_loop.html" with group=group %}
+  {% empty %}
+    {% include "task/taskgroup_loop.html" with group=blank_taskgroup %}
   {% endfor %}
 
 </ubr-job>
