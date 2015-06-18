@@ -21,17 +21,18 @@ class JobTransition(SingleObjectMixin, View):
                 break
 
         if transition:
-          getattr(self.object, transition.name)()
-          self.object.save()
+            getattr(self.object, transition.name)()
+            self.object.save()
 
         return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
 
 
 class JobEstimateModification(SingleObjectMixin, View):
     model = Job
+
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        assert kwargs['action'] in ['increase','decrease','reset']
+        assert kwargs['action'] in ['increase', 'decrease', 'reset']
         self.object.estimate_total_modify(request.user, kwargs['action'])
         return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
 
@@ -42,14 +43,14 @@ class TaskEditor(SingleObjectMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(TaskEditor, self).get_context_data(**kwargs)
         context['job'] = self.object
-        context['blank_taskgroup'] = TaskGroup()
+        context['blank_taskgroup'] = TaskGroup(job=self.object, order=0)
         context['blank_task'] = Task()
         context['blank_taskinstance'] = TaskInstance()
         context['blank_lineitem'] = LineItem()
         return context
 
     def get_object(self):
-        queryset = Job.objects.all()
+        queryset = Job.objects.prefetch_related('project').all()
         return super(TaskEditor, self).get_object(queryset)
 
     def get_queryset(self):
@@ -89,8 +90,6 @@ class JobCreate(CreateView):
         if isinstance(form, JobForm) and form.cleaned_data['job_template']:
             tmpl = form.cleaned_data['job_template']
             tmpl.clone_to(self.object)
-        else:
-            TaskGroup.objects.create(name='', job=self.object)
         return response
 
     def get_success_url(self):
@@ -107,5 +106,6 @@ class JobUpdate(UpdateView):
 
 class JobDelete(DeleteView):
     model = Job
+
     def get_success_url(self):
         return self.object.project.get_absolute_url()

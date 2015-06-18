@@ -7,7 +7,6 @@ from jsonfield import JSONField
 
 
 class Document(models.Model):
-
     json = JSONField(default={})
     json_version = models.CharField(max_length=5)
     amount = models.DecimalField(_("Amount"), max_digits=12, decimal_places=2)
@@ -15,56 +14,12 @@ class Document(models.Model):
     document_date = models.DateField(_("Date"), default=date.today, blank=True)
     notes = models.TextField(_("Notes"), blank=True, null=True)
 
-
     def __str__(self):
         return '{} {} {}'.format(self.get_status_display(),
                                  self.__class__.__name__, self.created_on)
 
     class Meta:
         abstract = True
-
-    def get_document_context(self, add_terms):
-        project_contact = self.project.billable_contact
-        return {
-          'doc': self,
-          'add_terms': add_terms,
-          'add_letterhead': False,
-          'contact': project_contact.contact,
-          'project_contact': project_contact # this has the association attribute
-        }
-
-    def generate_document(self, add_terms=True):
-
-        template = get_template(os.path.join("document/latex", self.latex_template))
-
-        context = Context(self.get_document_context(add_terms))
-
-        print_latex = template.render(context).encode('utf-8')
-        self.print_latex.save('print.tex', ContentFile(print_latex), save=False)
-
-        context.update({'add_letterhead': True})
-        email_latex = template.render(context).encode('utf-8')
-        self.email_latex.save('email.tex', ContentFile(email_latex), save=False)
-
-        dir_path = os.path.dirname(self.email_latex.path)
-
-        # generate pdf files
-        for format, latex in [('email', email_latex), ('print', print_latex)]:
-
-            for i in range(3):
-                process = Popen(
-                    ['pdflatex', '-output-directory', dir_path,
-                     '-jobname', format],
-                    stdin=PIPE,
-                    stdout=PIPE,
-                    cwd=settings.LATEX_WORKING_DIR
-                    )
-                process.communicate(latex)
-
-            setattr(self, format+'_pdf', os.path.join(dir_path, format+'.pdf'))
-
-        # save file paths to database
-        self.save()
 
 
 class Proposal(Document):
@@ -96,7 +51,7 @@ class Proposal(Document):
     @property
     def is_approved(self):
         return self.status == Proposal.APPROVED
-    
+
     @transition(field=status, source=SENT, target=DECLINED, custom={'label': _("Decline")})
     def decline(self):
         pass
@@ -196,7 +151,7 @@ class DocumentTemplate(models.Model):
         for key in result:
             value = result[key]
             for var in vars:
-                value = value.replace('['+str(var)+']', str(vars[var]))
+                value = value.replace('[' + str(var) + ']', str(vars[var]))
             result[key] = value
         return result
 

@@ -2,114 +2,115 @@
 {% load i18n customformatting %}
 {% debug %}
 {% block head %}
- {{ block.super }}
- <meta http-equiv="refresh" content="3">
+  {{ block.super }}
+  <meta http-equiv="refresh" content="3">
 {% endblock %}
 
 {% block header %}
-<div style="font-size:20px; height:100%; position:fixed;">
-<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="margin:0px;">
-  <div class="container-fluid">
+  <div style="font-size:20px; height:100%; position:fixed;">
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="margin:0px;">
+    <div class="container-fluid">
 
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-        <span class="sr-only">{% trans 'Toggle navigation' %}</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/">Systori</a>
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">{% trans 'Toggle navigation' %}</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">Systori</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+
+        <ul class="nav navbar-nav">
+          <li><a href="{{ previous_day_url }}">{% trans 'back' %}</a></li>
+          <li><a>{{ request.selected_day }}</a></li>
+          <li><a href="{{ next_day_url }}">{% trans 'next' %}</a></li>
+          <!-- <li><a onclick="DoFullScreen()">fullscreen</a></li> -->
+        </ul>
+
+      </div>
     </div>
-    <div id="navbar" class="navbar-collapse collapse">
-
-      <ul class="nav navbar-nav">
-        <li><a href="{{ previous_day_url }}">{% trans 'back' %}</a></li>
-        <li><a>{{request.selected_day}}</a></li>
-        <li><a href="{{ next_day_url }}">{% trans 'next' %}</a></li>
-        <!-- <li><a onclick="DoFullScreen()">fullscreen</a></li> -->
-      </ul>
-
-    </div>
-  </div>
-</nav>
+  </nav>
 {% endblock %}
 
 
 {% block container %}
 
-<div class="overview-wrapper">
-	{%for plan in selected_plans%}
-	<div class="overview-box">
-	      <div class="panel panel-default dailyplan" data-id="{{plan.id}}">
-		      <div class="panel-heading panel-custom">
-		        {{plan.jobsite.project.name}} 
-		      </div>
-	      {% for worker in plan.workers.all %}
-	        {% if worker.is_foreman %}
-		      <div class="panel-body panel-custom">
-		        {{worker.user.get_full_name}} <span style="color:#4ABEF7;">♔</span>
-		      </div>
-		      {% else %}
-		      <div class="panel-body panel-custom">
-            {{worker.user.get_full_name}} 
-		      </div>
-		      {% endif %}
-		    {% endfor %}
-		    {% for equipment in plan.equipment.all %}
-		      <div class="panel-body panel-custom">
-		        {{equipment}} <span style="color:#4ABEF7;">♘</span>
-		      </div>
-		    {% endfor %}
-	      </div>
-	      </ul>
-	</div>
-	{% endfor %}
-</div>
-<div class="notes-container">
-  <div class="notes-box">
-    <div class="panel panel-info">
-      <div class="panel-heading">{% trans 'Notes' %}</div>
-      <div class="panel-body">
-		    {% for plan in selected_plans %}
-		        {% if plan.notes %}
-		            &#9733; <span class="notes-project">{{plan.jobsite.project.name}}</span> {{plan.notes}}
-		        {% endif %}
-		    {% endfor %}
-		   </div>
+  <div class="overview-wrapper">
+    {% for plan in selected_plans %}
+      <div class="overview-box">
+        <div class="panel panel-default dailyplan" data-id="{{ plan.id }}">
+          <div class="panel-heading panel-custom">
+            {{ plan.jobsite.project.name }}
+          </div>
+          {% for worker in plan.workers.all %}
+            {% if worker.is_foreman %}
+              <div class="panel-body panel-custom">
+                {{ worker.user.get_full_name }} <span style="color:#4ABEF7;">♔</span>
+              </div>
+            {% else %}
+              <div class="panel-body panel-custom">
+                {{ worker.user.get_full_name }}
+              </div>
+            {% endif %}
+          {% endfor %}
+          {% for equipment in plan.equipment.all %}
+            <div class="panel-body panel-custom">
+              {{ equipment }} <span style="color:#4ABEF7;">♘</span>
+            </div>
+          {% endfor %}
+        </div>
+        </ul>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="notes-container">
+    <div class="notes-box">
+      <div class="panel panel-info">
+        <div class="panel-heading">{% trans 'Notes' %}</div>
+        <div class="panel-body">
+          {% for plan in selected_plans %}
+            {% if plan.notes %}
+              &#9733; <span class="notes-project">{{ plan.jobsite.project.name }}</span> {{ plan.notes }}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
     </div>
   </div>
-</div>
-</div>
+  </div>
 {% endblock %}
 
 {% block extra_js %}
-<script type="text/javascript">
-function DoFullScreen() {
+  <script type="text/javascript">
+    function DoFullScreen() {
 
-    var isInFullScreen = (document.fullScreenElement && document.fullScreenElement !==     null) ||    // alternative standard method  
-            (document.mozFullScreen || document.webkitIsFullScreen);
+      var isInFullScreen = (document.fullScreenElement && document.fullScreenElement !== null) ||    // alternative standard method
+          (document.mozFullScreen || document.webkitIsFullScreen);
 
-    var docElm = document.documentElement;
-    if (!isInFullScreen) {
+      var docElm = document.documentElement;
+      if (!isInFullScreen) {
 
         if (docElm.requestFullscreen) {
-            docElm.requestFullscreen();
+          docElm.requestFullscreen();
         }
         else if (docElm.mozRequestFullScreen) {
-            docElm.mozRequestFullScreen();
+          docElm.mozRequestFullScreen();
         }
         else if (docElm.webkitRequestFullScreen) {
-            docElm.webkitRequestFullScreen();
+          docElm.webkitRequestFullScreen();
         }
+      }
     }
-}
 
-var dailyplans = $('.dailyplan');
-console.dir(dailyplans);
+    var dailyplans = $('.dailyplan');
+    console.dir(dailyplans);
 
-dailyplans.forEach(function(plan) {
-	return console.log(plan);
-});
+    dailyplans.forEach(function (plan) {
+      return console.log(plan);
+    });
 
-</script>
+  </script>
 {% endblock %}

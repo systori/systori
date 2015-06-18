@@ -1,27 +1,28 @@
 import os
 from distutils.version import LooseVersion as V
-from fabric.api import env, run, local, cd, get, prefix, sudo
+from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
 import requests
 
 from version import VERSION
+
 version = V(VERSION)
 
 env.hosts = ['systori.com']
 
 deploy_apps = {
-  'dev': ['dev'],
-  'production': ['production']
+    'dev': ['dev'],
+    'production': ['production']
 }
 
-def deploy(env_name='dev'):
 
+def deploy(env_name='dev'):
     env.user = 'ubrblik'
 
     for app in deploy_apps[env_name]:
 
-        sudo('service uwsgi stop systori_'+app)
+        sudo('service uwsgi stop systori_' + app)
 
-        with cd('/srv/systori/'+app+'/systori'):
+        with cd('/srv/systori/' + app + '/systori'):
 
             if env_name == 'dev':
                 # load production db
@@ -38,11 +39,11 @@ def deploy(env_name='dev'):
                 run('/usr/lib/dart/bin/pub build')
 
             with prefix('source ../bin/activate'):
-                run('pip install -q -U -r requirements/%s.pip'%env_name)
+                run('pip install -q -U -r requirements/%s.pip' % env_name)
                 sudo('./manage.py migrate --noinput', user='www-data')
                 run('./manage.py collectstatic --noinput --verbosity 0')
 
-        sudo('service uwsgi start systori_'+app)
+        sudo('service uwsgi start systori_' + app)
 
 
 def _reset_localdb():
@@ -57,21 +58,26 @@ def localdb_from_bootstrap():
 
 
 prod_dump_file = 'systori.prod.dump'
+
+
 def fetch_productiondb():
     dbname = 'systori_production'
     # -Fc : custom postgresql compressed format
     sudo('pg_dump -Fc -x -f /tmp/%s %s' % (prod_dump_file, dbname), user='www-data')
-    get('/tmp/'+prod_dump_file, prod_dump_file)
-    sudo('rm /tmp/'+prod_dump_file)
+    get('/tmp/' + prod_dump_file, prod_dump_file)
+    sudo('rm /tmp/' + prod_dump_file)
+
 
 def load_productiondb():
     _reset_localdb()
-    local('pg_restore -d systori_local -O '+prod_dump_file)
+    local('pg_restore -d systori_local -O ' + prod_dump_file)
+
 
 def localdb_from_productiondb():
     fetch_productiondb()
     load_productiondb()
-    local('rm '+prod_dump_file)
+    local('rm ' + prod_dump_file)
+
 
 def init_settings(env_name='local'):
     assert env_name in ['dev', 'production', 'local']
@@ -86,24 +92,35 @@ def init_settings(env_name='local'):
 def make_messages():
     local('./manage.py makemessages -l de -e tex,html,py')
 
+
+def make_editor():
+    with lcd('editor'):
+        local('pub build --mode=debug')
+
+
 def get_bitbucket_login():
     try:
         user, password = open('bitbucket.login').read().split(':')
         return user.strip(), password.strip()
     except:
-        print 'Bitbucket API requires your user credentials'
+        print
+        'Bitbucket API requires your user credentials'
         user = raw_input('Username: ') or exit(1)
         password = raw_input('Password: ') or exit(1)
         saved = '{}:{}'.format(user, password)
-        open('bitbucket.login','w').write(saved)
+        open('bitbucket.login', 'w').write(saved)
         return user, password
 
 
 REPO = 'https://api.bitbucket.org/1.0/repositories/damoti/systori/'
+
+
 def current_issues():
-    r = requests.get(REPO+'issues?status=new', auth=get_bitbucket_login())
-    print r.status_code
-    print r.text
+    r = requests.get(REPO + 'issues?status=new', auth=get_bitbucket_login())
+    print
+    r.status_code
+    print
+    r.text
 
 
 def mail():
@@ -188,4 +205,3 @@ def _merge_this():
         local('git push origin :%s' % branch)
     local('git branch -d %s' % branch)
     local('git push')
-

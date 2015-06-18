@@ -4,7 +4,6 @@ from .test_models import create_task_data
 
 
 class ResourceTestCaseBase(ResourceTestCase):
-
     def setUp(self):
         super(ResourceTestCaseBase, self).setUp()
         create_task_data(self)
@@ -12,7 +11,6 @@ class ResourceTestCaseBase(ResourceTestCase):
 
 
 class JobOrderResourceTest(ResourceTestCaseBase):
-
     url = '/api/v1/job/'
 
     def test_get_jobs(self):
@@ -23,12 +21,13 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         object = objects[0]
         keys = object.keys()
         expected_keys = [
-            'id', 'name', 'description', 'order', 'project', 'billing_method', 'status', 'taskgroup_offset', 'resource_uri'
+            'id', 'name', 'description', 'order', 'project', 'billing_method', 'status', 'taskgroup_offset',
+            'resource_uri'
         ]
         self.assertEqual(sorted(expected_keys), sorted(keys))
 
     def test_update_job(self):
-        url = self.url+'{}/'.format(Job.objects.first().pk)
+        url = self.url + '{}/'.format(Job.objects.first().pk)
         data = {"name": "updated job", "description": "updated desc"}
         resp = self.api_client.put(url, data=data, format='json')
         self.assertHttpAccepted(resp)
@@ -50,6 +49,7 @@ class JobOrderResourceTest(ResourceTestCaseBase):
 
     def test_move(self):
         first, second = Job.objects.all()
+
         def update_first_second():
             nonlocal first, second
             first = Job.objects.get(pk=first.pk)
@@ -58,7 +58,7 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         self.assertEqual(0, first.order)
         self.assertEqual(1, second.order)
 
-        url = self.url+'{}/move/'.format(first.pk)
+        url = self.url + '{}/move/'.format(first.pk)
 
         # move down
         resp = self.api_client.get(url, data={"position": 1})
@@ -74,12 +74,12 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         self.assertEqual(0, first.order)
         self.assertEqual(1, second.order)
 
-class TaskGroupResourceTest(ResourceTestCaseBase):
 
+class TaskGroupResourceTest(ResourceTestCaseBase):
     url = '/api/v1/taskgroup/'
 
     def test_update_task_group(self):
-        url = self.url+'{}/'.format(self.group.id)
+        url = self.url + '{}/'.format(self.group.id)
         data = {"name": "new name"}
         resp = self.api_client.put(url, data=data, format='json')
         self.assertHttpAccepted(resp)
@@ -99,11 +99,11 @@ class TaskGroupResourceTest(ResourceTestCaseBase):
 
     def test_delete_task_group(self):
         start_count = TaskGroup.objects.count()
-        url = self.url+'{}/'.format(self.group.id)
+        url = self.url + '{}/'.format(self.group.id)
         resp = self.api_client.delete(url, format='json')
         self.assertHttpAccepted(resp)
         new_count = TaskGroup.objects.count()
-        self.assertEqual(start_count-1, new_count)
+        self.assertEqual(start_count - 1, new_count)
 
     def test_autocomplete_no_matches(self):
         url = self.url + 'autocomplete/'
@@ -119,7 +119,6 @@ class TaskGroupResourceTest(ResourceTestCaseBase):
 
 
 class TaskResourceTest(ResourceTestCaseBase):
-
     url = '/api/v1/task/'
 
     def setUp(self):
@@ -128,7 +127,7 @@ class TaskResourceTest(ResourceTestCaseBase):
         self.task4 = Task.objects.create(name="my task four green", qty=0, taskgroup=self.group)
 
     def test_update_task(self):
-        url = self.url+'{}/'.format(self.task.id)
+        url = self.url + '{}/'.format(self.task.id)
         data = {"name": "new name"}
         resp = self.api_client.put(url, data=data, format='json')
         self.assertHttpAccepted(resp)
@@ -150,14 +149,14 @@ class TaskResourceTest(ResourceTestCaseBase):
 
     def test_delete_task(self):
         start_count = Task.objects.count()
-        url = self.url+'{}/'.format(self.task.id)
+        url = self.url + '{}/'.format(self.task.id)
         resp = self.api_client.delete(url, format='json')
         self.assertHttpAccepted(resp)
         new_count = Task.objects.count()
-        self.assertEqual(start_count-1, new_count)
+        self.assertEqual(start_count - 1, new_count)
 
     def test_clone_task(self):
-        url = self.url+'{}/clone/'.format(self.task.id)
+        url = self.url + '{}/clone/'.format(self.task.id)
         data = {
             "target": "/api/v1/taskgroup/{}/".format(self.group.id),
             "pos": 1
@@ -168,12 +167,12 @@ class TaskResourceTest(ResourceTestCaseBase):
         new_task = Task.objects.get(taskgroup=self.group.id, order=1)
         self.assertContains(response, '<ubr-task data-pk="{0}">'.format(new_task.id), 1, 201)
 
-class TaskInstanceResourceTest(ResourceTestCaseBase):
 
+class TaskInstanceResourceTest(ResourceTestCaseBase):
     url = '/api/v1/taskinstance/'
 
     def test_update_taskinstance(self):
-        url = self.url+'{}/'.format(self.task.instance.id)
+        url = self.url + '{}/'.format(self.task.instance.id)
         data = {"name": "new name"}
         resp = self.api_client.put(url, data=data, format='json')
         self.assertHttpAccepted(resp)
@@ -193,19 +192,18 @@ class TaskInstanceResourceTest(ResourceTestCaseBase):
 
     def test_delete_taskinstance(self):
         start_count = TaskInstance.objects.count()
-        url = self.url+'{}/'.format(self.task.instance.id)
+        url = self.url + '{}/'.format(self.task.instance.id)
         resp = self.api_client.delete(url, format='json')
         self.assertHttpAccepted(resp)
         new_count = TaskInstance.objects.count()
-        self.assertEqual(start_count-1, new_count)
+        self.assertEqual(start_count - 1, new_count)
 
 
 class LineItemResourceTest(ResourceTestCaseBase):
-
     url = '/api/v1/lineitem/'
 
     def test_update_lineitem(self):
-        url = self.url+'{}/'.format(self.lineitem.id)
+        url = self.url + '{}/'.format(self.lineitem.id)
         data = {"name": "new name"}
         resp = self.api_client.put(url, data=data, format='json')
         self.assertHttpAccepted(resp)
@@ -228,8 +226,8 @@ class LineItemResourceTest(ResourceTestCaseBase):
 
     def test_delete_lineitem(self):
         start_count = LineItem.objects.count()
-        url = self.url+'{}/'.format(self.lineitem.id)
+        url = self.url + '{}/'.format(self.lineitem.id)
         resp = self.api_client.delete(url, format='json')
         self.assertHttpAccepted(resp)
         new_count = LineItem.objects.count()
-        self.assertEqual(start_count-1, new_count)
+        self.assertEqual(start_count - 1, new_count)

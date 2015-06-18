@@ -3,13 +3,13 @@ from django.contrib.auth import get_user_model
 from ..project.models import *
 from .models import *
 
+
 def create_contact_data(self):
     self.project = Project.objects.create(name="my project")
     self.contact = Contact.objects.create(first_name="Ludwig", last_name="von Mises")
 
 
 class ContactProjectTests(TestCase):
-
     def setUp(self):
         create_contact_data(self)
 
@@ -26,14 +26,15 @@ class ContactProjectTests(TestCase):
         pc = ProjectContact.objects.get(project=self.project)
         self.assertEquals(ProjectContact.CUSTOMER, pc.association)
 
+
 class BillableContactTests(TestCase):
     def setUp(self):
         self.project = Project.objects.create(name="my project")
         self.pc1 = ProjectContact.objects.create(project=self.project, contact=
-                      Contact.objects.create(first_name="A 1", last_name="B 1"))
+        Contact.objects.create(first_name="A 1", last_name="B 1"))
         self.pc2 = ProjectContact.objects.create(project=self.project, contact=
-                      Contact.objects.create(first_name="A 2", last_name="B 2"))
-    
+        Contact.objects.create(first_name="A 2", last_name="B 2"))
+
     def test_no_billable_set(self):
         self.assertEqual(0, self.project.project_contacts.filter(is_billable=True).count())
 

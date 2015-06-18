@@ -2,25 +2,27 @@
 {% load i18n staticfiles %}
 
 {% block container %}
-<div class="container">
+  <div class="container">
 
-  <div class="row back-buttons">
-    <div class="col-xs-12"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
-  </div>
-
-  <div class="panel panel-default">
-
-    <div class="panel-heading">
-      {% trans 'Projects' %}
+    <div class="row back-buttons">
+      <div class="col-xs-12"><a href="{% url 'field.dashboard' %}"
+                                class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
     </div>
 
-    <ul class="list-group">
-    {% for project in project_list %}
-      <a href="{% url 'field.project' project.id %}" class="list-group-item clearfix">{{ project.name }} <span class="pull-right">&raquo;</span></a>
-    {% endfor %}
-    </ul>
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        {% trans 'Projects' %}
+      </div>
+
+      <ul class="list-group">
+        {% for project in project_list %}
+          <a href="{% url 'field.project' project.id %}" class="list-group-item clearfix">{{ project.name }} <span
+              class="pull-right">&raquo;</span></a>
+        {% endfor %}
+      </ul>
+
+    </div>
 
   </div>
-
-</div>
 {% endblock %}

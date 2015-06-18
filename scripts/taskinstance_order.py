@@ -17,8 +17,10 @@ result:
 import os
 import re
 import unicodedata
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
 import django
+
 django.setup()
 
 from systori.apps.task.models import *
@@ -37,6 +39,5 @@ for key, taskinstance in enumerate(task.taskinstances.all()):
 
 if input("Are you sure to save changes?: ") == "yes":
     for key, taskinstance in enumerate(task.taskinstances.all()):
-        taskinstance.order =  new_order[key]
+        taskinstance.order = new_order[key]
         taskinstance.save()
-

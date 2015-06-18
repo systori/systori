@@ -4,23 +4,96 @@
 {% block sidebar %}{% include "main/sidebar.html" with section='projects' %}{% endblock %}
 
 {% block content %}
-  <p><a href="{% url 'project.create' %}">{% trans "Create" %}</a> {% trans "or" %} <a href="{% url 'project.import' %}">{% trans "Import" %}</a></p>
+  <p><a href="{% url 'project.create' %}">{% trans "Create" %}</a> {% trans "or" %} <a
+      href="{% url 'project.import' %}">{% trans "Import" %}</a></p>
+  <div class="row">
+    <div class="col-xs-12">
+      <form class="form-inline">
+          <div class="input-group col-xs-12 col-lg-6">
+            <div class="input-group-addon"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></div>
+            <input type="text" class="form-control" id="filter" placeholder="Filter" />
+          </div>
+      </form>
+    </div>
+  </div>
 
-  {% for phase, projects in project_groups.items %}
-    {% if projects %}
-      {% include 'project/project_list_table.html' with phase=projects.0.get_phase_display projects=projects %}
-    {% endif %}
-  {% endfor %}
+  <div class="table-responsive">
+    <table class="table table-striped" id="table">
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>{% trans 'Name' %}</th>
+        <th>{% trans 'City' %}</th>
+        <th>{% trans 'State' %}</th>
+        <th>{% trans 'Actions' %}</th>
+      </tr>
+      </thead>
+      <tbody>
+        {% for phase, projects in project_groups.items %}
+          {% with phase=projects.0.get_phase_display %}
+            {% if projects %}
+                <tr style="background-color:
+                  {% if forloop.counter == 1 %}#FF97CC;">
+                  {% elif forloop.counter == 2 %}#D04242;">
+                  {% elif forloop.counter == 3 %}#49A6FF;">
+                  {% elif forloop.counter == 4 %}#0F9A0F;">
+                  {% elif forloop.counter == 5 %}#FFE039;">
+                  {% elif forloop.counter == 6 %}#8C97A2;">
+                  {% else %} inherit;">
+                  {% endif %}
+                  <td colspan="5" align="center"><b>{{ phase }}</b></td>
+                </tr>
+              {% for project in projects %}
+                <tr data-phase="{{ phase }}">
+                  <td width="5%">{{ project.id }}</td>
+                  <td width="40%"><a href="{% url 'project.view' project.id %}">{{ project }}</a></td>
+                  <td width="30%">{{ project.jobsites.all.0.city }}</td>
+                  <td width="10%">{{ project.get_state_display }}</td>
+                  <td width="15%">
+                    <a href="{% url 'project.edit' project.id %}">{% trans "Edit" %}</a>
+                    <a href="{% url 'project.delete' project.id %}">{% trans "Delete" %}</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
   <p>
-  {% if not phase_filter %}
+    {% if not phase_filter %}
       <a href="{% url 'projects' 'finished' %}">
-      {% trans "Finished" as finished_phase %}
-      {% blocktrans with phase=finished_phase %}Show {{phase}} Projects{% endblocktrans %}
+        {% trans "Finished" as finished_phase %}
+        {% blocktrans with phase=finished_phase %}Show {{ phase }} Projects{% endblocktrans %}
       </a>
-  {% elif phase_filter %}
+    {% elif phase_filter %}
       <a href="{% url 'projects' %}">{% trans 'Show All Projects' %}</a>
-  {% endif %}
+    {% endif %}
   </p>
 
 {% endblock content %}
+
+{% block extra_js %}
+
+<script type="application/javascript">
+  $("input#filter").keyup(function () {
+      var filter = $(this).val();
+      var regExPattern = "gi";
+      var regEx = new RegExp(filter, regExPattern);
+      $("table tr").each(function () {
+          if($(this).data('phase'))
+          if (
+          $(this).text().search(new RegExp(filter, "i")) < 0
+          && $(this).data('phase').search(regEx) < 0
+          ){
+              $(this).hide();
+          } else {
+              $(this).show();
+          }
+      });
+  });
+</script>
+
+{% endblock %}

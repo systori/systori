@@ -5,10 +5,10 @@
 
 {% block content %}
 
-<h2>{{ object.name }}</h2>
-{% with parts=object.render %}
-{% trans 'Header' %}: {{ parts.header|linebreaks }}<br />
-{% trans 'Footer' %}: {{ parts.footer|linebreaks }}<br />
-{% endwith %}
+  <h2>{{ object.name }}</h2>
+  {% with parts=object.render %}
+    {% trans 'Header' %}: {{ parts.header|linebreaks }}<br/>
+    {% trans 'Footer' %}: {{ parts.footer|linebreaks }}<br/>
+  {% endwith %}
 
 {% endblock %}

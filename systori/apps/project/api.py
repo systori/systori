@@ -21,7 +21,6 @@ class BaseMeta:
 
 
 class DocumentTemplateRendererResourceMixin:
-
     def prepend_urls(self):
         urls = super(DocumentTemplateRendererResourceMixin, self).prepend_urls()
         urls.append(
@@ -66,6 +65,7 @@ class DailyPlanTodayResource(ModelResource):
 
 
 from tastypie.api import Api
+
 api = Api()
 api.register(ProjectResource())
 api.register(DailyPlanTodayResource())

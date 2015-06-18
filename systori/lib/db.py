@@ -27,6 +27,7 @@ class AncestorOrEqual(Lookup):
         params = lhs_params + rhs_params
         return '%s @> %s' % (lhs, rhs), params
 
+
 # LtreeField.register_lookup(AncestorOrEqual)
 
 
@@ -38,6 +39,7 @@ class DescendantOrEqual(Lookup):
         rhs, rhs_params = self.process_rhs(qn, connection)
         params = lhs_params + rhs_params
         return '%s <@ %s' % (lhs, rhs), params
+
 
 # LtreeField.register_lookup(DescendantOrEqual)
 
@@ -51,4 +53,4 @@ class Match(Lookup):
         params = lhs_params + rhs_params
         return '%s ~ %s' % (lhs, rhs), params
 
-# LtreeField.register_lookup(Match)
+        # LtreeField.register_lookup(Match)

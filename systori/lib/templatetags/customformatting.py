@@ -2,11 +2,12 @@ import locale
 from django.template.defaultfilters import stringfilter
 from django.utils.formats import get_format, get_language, number_format, to_locale
 from django import template
+
 register = template.Library()
+
 
 @register.filter
 def ubrdecimal(decimal, decimal_pos=4):
-
     if decimal == '': return ''
 
     decimal = round(decimal, decimal_pos)
@@ -20,14 +21,15 @@ def ubrdecimal(decimal, decimal_pos=4):
         separator_pos = len(decimal)
 
     min_decimal_places = 2
-    significand = decimal[separator_pos+1:]
+    significand = decimal[separator_pos + 1:]
     if len(significand) > min_decimal_places:
         clean_significand = significand[:min_decimal_places] + significand[min_decimal_places:].rstrip('0')
-        return decimal[:separator_pos+1] + clean_significand
+        return decimal[:separator_pos + 1] + clean_significand
     elif len(significand) < min_decimal_places:
-        return decimal[:separator_pos+1] + significand.ljust(min_decimal_places, '0')
+        return decimal[:separator_pos + 1] + significand.ljust(min_decimal_places, '0')
     else:
         return decimal
+
 
 @register.filter
 def money(decimal):

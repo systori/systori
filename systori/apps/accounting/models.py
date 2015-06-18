@@ -14,8 +14,9 @@ def create_account_for_project(project):
     """
     # TODO: Add support for recycling account numbers when the maximum has been reached.
     from .skr03 import DEBTOR_CODE_RANGE
-    int(project.id) # raises exception if id is not an int (eg. project hasn't been saved()'ed yet)
-    code = DEBTOR_CODE_RANGE[0]+project.id
+
+    int(project.id)  # raises exception if id is not an int (eg. project hasn't been saved()'ed yet)
+    code = DEBTOR_CODE_RANGE[0] + project.id
     if Account.objects.filter(code=str(code)).exists():
         raise IntegrityError("Account with code %s already exists." % code)
     if code > DEBTOR_CODE_RANGE[1]:
@@ -24,9 +25,9 @@ def create_account_for_project(project):
 
 
 class AccountQuerySet(models.QuerySet):
-
     def banks(self):
         return Account.objects.filter(account_type=Account.ASSET).filter(project__isnull=True)
+
 
 class AccountManager(BaseManager.from_queryset(AccountQuerySet)):
     use_for_related_fields = True
@@ -47,7 +48,7 @@ class Account(models.Model):
     LIABILITY = "liability"
     INCOME = "income"
     EXPENSE = "expense"
-    
+
     ACCOUNT_TYPE = (
         (ASSET, _("Asset")),
         (LIABILITY, _("Liability")),
@@ -72,14 +73,14 @@ class Account(models.Model):
 
     @property
     def balance_base(self):
-        return round(self.entries.all().total / (1+TAX_RATE), 2)
+        return round(self.entries.all().total / (1 + TAX_RATE), 2)
 
     @property
     def balance_tax(self):
         return round(self.balance_base * TAX_RATE, 2)
 
-    DEBIT_ACCOUNTS  = (ASSET, EXPENSE)
- 
+    DEBIT_ACCOUNTS = (ASSET, EXPENSE)
+
     @property
     def is_debit_account(self):
         return self.account_type in self.DEBIT_ACCOUNTS
@@ -98,8 +99,8 @@ class Account(models.Model):
             return amount * -1
 
     def is_debit_amount(self, amount):
-        if (self.is_debit_account and amount > 0) or\
-           (self.is_credit_account and amount < 0):
+        if (self.is_debit_account and amount > 0) or \
+                (self.is_credit_account and amount < 0):
             return True
         else:
             return False
@@ -112,8 +113,8 @@ class Account(models.Model):
             return amount * -1
 
     def is_credit_amount(self, amount):
-        if (self.is_debit_account and amount < 0) or\
-           (self.is_credit_account and amount > 0):
+        if (self.is_debit_account and amount < 0) or \
+                (self.is_credit_account and amount > 0):
             return True
         else:
             return False
@@ -136,14 +137,14 @@ class Account(models.Model):
         """ This method should only be used on customer accounts (trade debtors).
             It returns all credit entries marked as payment.
         """
-        self.project # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
+        self.project  # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
         return self.credits().filter(is_payment=True)
 
     def discounts(self):
         """ This method should only be used on customer accounts (trade debtors).
             It returns all credit entries marked as discount.
         """
-        self.project # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
+        self.project  # Raises DoesNotExist exception if no project exists to prevent misuse of this method.
         return self.credits().filter(is_discount=True)
 
 
@@ -159,15 +160,15 @@ class Transaction(models.Model):
         self._entries = []
 
     def debit(self, account, amount, **kwargs):
-        entry = Entry(account = account, amount = account.as_debit(amount), **kwargs)
+        entry = Entry(account=account, amount=account.as_debit(amount), **kwargs)
         self._entries.append(('debit', entry))
         return entry
 
     def credit(self, account, amount, **kwargs):
-        entry = Entry(account = account, amount = account.as_credit(amount), **kwargs)
+        entry = Entry(account=account, amount=account.as_credit(amount), **kwargs)
         self._entries.append(('credit', entry))
         return entry
-    
+
     def _total(self, column):
         return sum([abs(item[1].amount) for item in self._entries if item[0] == column])
 
@@ -189,14 +190,15 @@ class Transaction(models.Model):
     def discounts_to_account(self, account):
         return self.entries.filter(account=account).filter(is_discount=True)
 
-class EntryQuerySet(models.QuerySet):
 
+class EntryQuerySet(models.QuerySet):
     @property
     def total(self):
         amount = Decimal(0.0)
         for entry in self:
             amount += entry.amount
         return amount
+
 
 class EntryManager(BaseManager.from_queryset(EntryQuerySet)):
     use_for_related_fields = True
@@ -230,7 +232,7 @@ class Entry(models.Model):
 
     @property
     def amount_base(self):
-        return round(self.amount / (1+TAX_RATE), 2)
+        return round(self.amount / (1 + TAX_RATE), 2)
 
     @property
     def amount_tax(self):

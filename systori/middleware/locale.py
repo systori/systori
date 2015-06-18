@@ -5,6 +5,7 @@ class ForceDefaultLanguageMiddleware(object):
     Rationale is that not everyone knows how to set this setting correctly in
     their browser so we default to German.
     """
+
     def process_request(self, request):
         if 'HTTP_ACCEPT_LANGUAGE' in request.META:
             if request.META['HTTP_ACCEPT_LANGUAGE'].find('en') == 0:

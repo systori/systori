@@ -3,8 +3,8 @@ from django.test import TestCase
 from django.utils.translation import activate
 from .templatetags.customformatting import *
 
-class CustomFormattingTest(TestCase):
 
+class CustomFormattingTest(TestCase):
     def test_ubrdecimal_en(self):
         activate('en')
 
@@ -24,8 +24,8 @@ class CustomFormattingTest(TestCase):
         self.assertEqual('1.0001', ubrdecimal(Decimal('1.0001')))
         self.assertEqual('1.0001', ubrdecimal(Decimal('1.00010')))
 
-        self.assertEqual('1.00',   ubrdecimal(Decimal('1.00001')))
-        self.assertEqual('1.00',   ubrdecimal(Decimal('1.000010')))
+        self.assertEqual('1.00', ubrdecimal(Decimal('1.00001')))
+        self.assertEqual('1.00', ubrdecimal(Decimal('1.000010')))
 
         self.assertEqual('1,234,567,891.0004', ubrdecimal(Decimal('1234567891.000400')))
 
@@ -48,7 +48,7 @@ class CustomFormattingTest(TestCase):
         self.assertEqual('1,0001', ubrdecimal(Decimal('1.0001')))
         self.assertEqual('1,0001', ubrdecimal(Decimal('1.00010')))
 
-        self.assertEqual('1,00',   ubrdecimal(Decimal('1.00001')))
-        self.assertEqual('1,00',   ubrdecimal(Decimal('1.000010')))
+        self.assertEqual('1,00', ubrdecimal(Decimal('1.00001')))
+        self.assertEqual('1,00', ubrdecimal(Decimal('1.000010')))
 
         self.assertEqual('1.234.567.891,0004', ubrdecimal(Decimal('1234567891.000400')))

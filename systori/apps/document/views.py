@@ -6,10 +6,6 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import BaseDocTemplate, SimpleDocTemplate, Paragraph, Table, TableStyle, Frame, PageTemplate, FrameBreak
-
-
 from ..project.models import Project
 from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate
@@ -20,7 +16,6 @@ from .type import proposal, invoice, evidence
 
 
 class DocumentRenderView(SingleObjectMixin, View):
-
     def get(self, request, *args, **kwargs):
         return HttpResponse(self.pdf(), content_type='application/pdf')
 
@@ -53,10 +48,9 @@ class ProposalCreate(CreateView):
         return kwargs
 
     def form_valid(self, form):
-
         form.cleaned_data['jobs'] = [
             Job.prefetch(job.id) for job in form.cleaned_data['jobs']
-        ]
+            ]
 
         amount = Decimal(0.0)
         for job in form.cleaned_data['jobs']:
@@ -76,20 +70,21 @@ class ProposalTransition(SingleObjectMixin, View):
     model = Proposal
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        doc = self.get_object()
 
         transition = None
-        for t in self.object.get_available_status_transitions():
+        for t in doc.get_available_status_transitions():
             if t.name == kwargs['transition']:
                 transition = t
                 break
 
         if transition:
-            getattr(self.object, transition.name)()
-            self.object.save()
+            getattr(doc, transition.name)()
+            doc.save()
 
         return HttpResponseRedirect(reverse('project.view',
-                                            args=[self.object.project.id]))
+                                            args=[doc.project.id]))
+
 
 class ProposalDelete(DeleteView):
     model = Proposal
@@ -123,7 +118,6 @@ class InvoiceCreate(CreateView):
         return kwargs
 
     def form_valid(self, form):
-
         project = Project.prefetch(self.request.project.id)
 
         # update account balance with any new work that's been done
@@ -144,20 +138,20 @@ class InvoiceTransition(SingleObjectMixin, View):
     model = Invoice
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        doc = self.get_object()
 
         transition = None
-        for t in self.object.get_available_status_transitions():
+        for t in doc.get_available_status_transitions():
             if t.name == kwargs['transition']:
                 transition = t
                 break
 
         if transition:
-            getattr(self.object, transition.name)()
-            self.object.save()
+            getattr(doc, transition.name)()
+            doc.save()
 
         return HttpResponseRedirect(reverse('project.view',
-                                            args=[self.object.project.id]))
+                                            args=[doc.project.id]))
 
 
 class InvoiceDelete(DeleteView):
