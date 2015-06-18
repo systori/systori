@@ -1,6 +1,6 @@
 import os
 from distutils.version import LooseVersion as V
-from fabric.api import env, run, local, cd, get, prefix, sudo
+from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
 import requests
 
 from version import VERSION
@@ -85,6 +85,10 @@ def init_settings(env_name='local'):
 
 def make_messages():
     local('./manage.py makemessages -l de -e tex,html,py')
+
+def make_editor():
+    with lcd('editor'):
+        local('pub build --mode=debug')
 
 def get_bitbucket_login():
     try:
