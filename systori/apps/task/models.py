@@ -189,10 +189,10 @@ class TaskGroup(BetterOrderedModel):
             return True
         return False
 
-    def _total_calc(self, field):
+    def _total_calc(self, field, include_optional=True):
         total = Decimal(0.0)
         for task in self.tasks.all():
-            if not task.is_optional:
+            if include_optional or not task.is_optional:
                 total += getattr(task, field)
         return total
 
@@ -202,7 +202,7 @@ class TaskGroup(BetterOrderedModel):
 
     @property
     def fixed_price_estimate(self):
-        return self._total_calc('fixed_price_estimate')
+        return self._total_calc('fixed_price_estimate', include_optional=False)
 
     @property
     def fixed_price_billable(self):
@@ -210,7 +210,7 @@ class TaskGroup(BetterOrderedModel):
 
     @property
     def time_and_materials_estimate(self):
-        return self._total_calc('time_and_materials_estimate')
+        return self._total_calc('time_and_materials_estimate', include_optional=False)
 
     @property
     def time_and_materials_billable(self):
