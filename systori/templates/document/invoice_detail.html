@@ -5,9 +5,9 @@
 
 {% block content %}
 
-<h2>{% trans 'Invoice Details' %}</h2>
-{% trans 'Status' %}: {{ invoice.get_status_display }}<br />
-{% trans 'Created' %}: {{ invoice.created_on|localize }}<br />
-{% trans 'Notes' %}:<br />{{ invoice.notes }}
+  <h2>{% trans 'Invoice Details' %}</h2>
+  {% trans 'Status' %}: {{ invoice.get_status_display }}<br/>
+  {% trans 'Created' %}: {{ invoice.created_on|localize }}<br/>
+  {% trans 'Notes' %}:<br/>{{ invoice.notes }}
 
 {% endblock %}

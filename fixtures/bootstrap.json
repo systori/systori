@@ -1,25 +1,25 @@
 [
   {
-    "model": "auth.user", 
+    "model": "auth.user",
     "pk": 1,
     "fields": {
-      "username": "lex", 
-      "is_active": true, 
-      "is_superuser": true, 
-      "is_staff": true, 
-      "password": "pbkdf2_sha256$10000$d4g6owTnc8Et$fu6kWjF9SB5v2CAsfgUpmSBqt+zG3iU/yO51UM22zl0=", 
+      "username": "lex",
+      "is_active": true,
+      "is_superuser": true,
+      "is_staff": true,
+      "password": "pbkdf2_sha256$10000$d4g6owTnc8Et$fu6kWjF9SB5v2CAsfgUpmSBqt+zG3iU/yO51UM22zl0=",
       "email": "lex@damoti.com"
     }
   },
   {
-    "model": "auth.user", 
+    "model": "auth.user",
     "pk": 2,
     "fields": {
-      "username": "mr", 
-      "is_active": true, 
-      "is_superuser": true, 
-      "is_staff": true, 
-      "password": "pbkdf2_sha256$12000$Wz97grAD80Oz$IhK2aa16G3D9vT7wQ7Na4ImRZQsV0b+BhxT/Ge/8hRc=", 
+      "username": "mr",
+      "is_active": true,
+      "is_superuser": true,
+      "is_staff": true,
+      "password": "pbkdf2_sha256$12000$Wz97grAD80Oz$IhK2aa16G3D9vT7wQ7Na4ImRZQsV0b+BhxT/Ge/8hRc=",
       "email": "mr@mehr-handwerk.de"
     }
   },
@@ -49,332 +49,422 @@
       "job_offset": 0
     }
   },
-  {"pk": 1,
- "fields": {"status": "draft",
- "name": "Sample Job",
- "billing_method": "fixed_price",
- "project": 2,
- "description": "Sample job description.",
- "order": 0},
-
-   "model": "task.job"},
-
-   {"pk": 1,
- "fields": {"job": 1,
- "description": "",
- "name": "Construction Site Equipment",
- "order": 0},
-
-   "model": "task.taskgroup"},
-
-   {"pk": 2,
- "fields": {"job": 1,
- "description": "",
- "name": "Demolition Work",
- "order": 1},
-
-   "model": "task.taskgroup"},
-
-   {"pk": 3,
- "fields": {"job": 1,
- "description": "",
- "name": "New Roof",
- "order": 2},
-
-   "model": "task.taskgroup"},
-
-   {"pk": 1, "model": "task.task", "fields": {"taskgroup": 1, "order": 0,
- "started_on": null,
-   "completed_on": null,
- "unit": "pce",
- "complete": "0.00",
- "qty": "1.00",
- "name": "Workers Rest Room",
- "description": "Workers Rest Room including transport, cleaning and consumables. Endurence four weeks."
-                                             }},
-
-   {"pk": 1,
- "fields": {
- "task": 1,
- "order": 0,
- "selected": true
- },
-
-   "model": "task.taskinstance"},
-
-   {"pk": 2, "model": "task.task", "fields": {"taskgroup": 1, "order": 0,
- "started_on": null,"completed_on": null,
- "name": "Workers Rest Room",
- "unit": "week",
- "complete": "0.00",
- "description": "The same Service as mentioned in 1.1 but the price for every following week.","qty": "1.00"
-                                             }},
-
-   {"pk": 2,
- "fields": {
- "task": 2,
- "order": 1,
- "selected": true
- },
-
-   "model": "task.taskinstance"},
-
-   {"pk": 3, "model": "task.task", "fields": {"taskgroup": 1, "order": 0,
- "started_on": null,"completed_on": null,
- "name": "Road Signs",
- "unit": "pce",
- "complete": "0.00",
- "description": "All needed Road Signs as long as needed. Some more text to see how the table handles that. Probably everything is going to be fine, since its LaTeX.","qty": "1.00"
-                                             }},
-
-   {"pk": 3,
- "fields": {
- "task": 3,
- "order": 2,
- "selected": true
- },
-
-   "model": "task.taskinstance"},
-
-   {"pk": 4, "model": "task.task", "fields": {"taskgroup": 2, "order": 0,
- "started_on": null,"completed_on": null,
- "name": "Covering the old roof tiles",
- "unit": "m\u00b2",
- "complete": "0.00",
- "description": "Covering the old roof tiles including transportation and professional removal at the waste disposal.","qty": "173.00"
-                                             }},
-
-   {"pk": 4,
- "fields": {
- "task": 4,
- "order": 0,
- "selected": true
- },
-
-   "model": "task.taskinstance"},
-
-   {"pk": 5, "model": "task.task", "fields": {"taskgroup": 2, "order": 0,
- "started_on": null,"completed_on": null,
- "name": "Keeping old roof tiles",
- "unit": "m\u00b2",
- "complete": "0.00",
- "description": "Keeping the old roof tiles to reuse them.","qty": "30.00"
-                                             }},
-
-   {"pk": 5,
- "fields": {
- "task": 5,
- "order": 1,
- "selected": true
- },
-
-   "model": "task.taskinstance"},
-
-   {"pk": 6, "model": "task.task", "fields": {"taskgroup": 2, "order": 0,
- "started_on": null,"completed_on": null,
- "name": "Covering the old wood construction",
- "unit": "m\u00b3",
- "complete": "0.00",
- "description": "Covering the old wood construction including transportation and professional removal at the waste disposal.","qty": "17.00"
-                                             }},
-
-   {"pk": 6,
- "fields": {
- "task": 6,
- "order": 2,
- "selected": true
- },
-
-   "model": "task.taskinstance"},
-
-   {"pk": 7, "model": "task.task", "fields": {"taskgroup": 2, "order": 0,
- "started_on": null,"completed_on": null,
- "name": "Professional cleaning the truss.",
- "unit": "pce",
- "complete": "0.00",
- "description": "Professional cleaning the truss including vacuuming, wiping and licking everything clean.","qty": "1.00"
-                                             }},
-
-   {"pk": 7,
- "fields": {
- "task": 7,
- "order": 3,
- "selected": true
- },
-
-   "model": "task.taskinstance"},
-
-   {"pk": 8, "model": "task.task", "fields": {"taskgroup": 3, "order": 0,
- "started_on": null,"completed_on": null,
- "name": "Covering the old roof tiles",
- "unit": "m\u00b2",
- "complete": "0.00",
- "description": "Covering the old roof tiles including transportation and professional removal at the waste disposal.","qty": "173.00"
-                                             }},
-
-   {"pk": 8,
- "fields": {
- "task": 8,
- "order": 0,
- "selected": true
- },
-
-   "model": "task.taskinstance"},
-
-   {"pk": 9, "model": "task.task", "fields": {"taskgroup": 3, "order": 0,
- "started_on": null,"completed_on": null,
- "name": "Keeping old roof tiles",
- "unit": "m\u00b2",
- "complete": "0.00",
- "description": "Keeping the old roof tiles to reuse them.","qty": "30.00"
-                                             }},
-
-   {"pk": 9,
- "fields": {
- "task": 9,
- "order": 1,
- "selected": true
- },
-
-   "model": "task.taskinstance"},
-
-   {"pk": 1,
- "fields": {"price": "79.36",
- "task_qty": "0.00",
- "is_flagged": false,
- "unit_qty": "1.00",
- "name": "First week rental.",
- "billable": "0.00",
- "unit": "week",
- "taskinstance": 1,
- "is_material": false,
- "is_labor": false},
-
-   "model": "task.lineitem"},
-
-   {"pk": 2,
- "fields": {"price": "24.90",
- "task_qty": "0.00",
- "is_flagged": false,
- "unit_qty": "1.00",
- "name": "Subsequent week rentals.",
- "billable": "0.00",
- "unit": "week",
- "taskinstance": 2,
- "is_material": false,
- "is_labor": false},
-
-   "model": "task.lineitem"},
-
-   {"pk": 3,
- "fields": {"price": "99.00",
- "task_qty": "0.00",
- "is_flagged": false,
- "unit_qty": "1.00",
- "name": "Individual road sign.",
- "billable": "0.00",
- "unit": "pce",
- "taskinstance": 3,
- "is_material": false,
- "is_labor": false},
-
-   "model": "task.lineitem"},
-
-   {"pk": 4,
- "fields": {"price": "12.48",
- "task_qty": "0.00",
- "is_flagged": false,
- "unit_qty": "1.00",
- "name": "Removal",
- "billable": "0.00",
- "unit": "m\u00b2",
- "taskinstance": 4,
- "is_material": false,
- "is_labor": false},
-
-   "model": "task.lineitem"},
-
-   {"pk": 5,
- "fields": {"price": "10.00",
- "task_qty": "0.00",
- "is_flagged": false,
- "unit_qty": "1.00",
- "name": "Transportation",
- "billable": "0.00",
- "unit": "m\u00b2",
- "taskinstance": 4,
- "is_material": false,
- "is_labor": false},
-
-   "model": "task.lineitem"},
-
-   {"pk": 6,
- "fields": {"price": "20.48",
- "task_qty": "0.00",
- "is_flagged": false,
- "unit_qty": "1.00",
- "name": "Refurbishing a tile.",
- "billable": "0.00",
- "unit": "m\u00b2",
- "taskinstance": 5,
- "is_material": false,
- "is_labor": false},
-
-   "model": "task.lineitem"},
-
-   {"pk": 7,
- "fields": {"price": "105.88",
- "task_qty": "0.00",
- "is_flagged": false,
- "unit_qty": "1.00",
- "name": "Labor",
- "billable": "0.00",
- "unit": "m\u00b3",
- "taskinstance": 6,
- "is_material": false,
- "is_labor": false},
-
-   "model": "task.lineitem"},
-
-   {"pk": 8,
- "fields": {"price": "28.99",
- "task_qty": "0.00",
- "is_flagged": false,
- "unit_qty": "100.00",
- "name": "Labor",
- "billable": "0.00",
- "unit": "hrs",
- "taskinstance": 7,
- "is_material": false,
- "is_labor": false},
-
-   "model": "task.lineitem"},
-
-   {"pk": 9,
- "fields": {"price": "22.48",
- "task_qty": "0.00",
- "is_flagged": false,
- "unit_qty": "1.00",
- "name": "Labor",
- "billable": "0.00",
- "unit": "hrs",
- "taskinstance": 8,
- "is_material": false,
- "is_labor": false},
-
-   "model": "task.lineitem"},
-
-   {"pk": 10,
- "fields": {"price": "20.48",
- "task_qty": "0.00",
- "is_flagged": false,
- "unit_qty": "1.00",
- "name": "Labor",
- "billable": "0.00",
- "unit": "hrs",
- "taskinstance": 9,
- "is_material": false,
- "is_labor": false},
-
-   "model": "task.lineitem"}
+  {
+    "pk": 1,
+    "fields": {
+      "status": "draft",
+      "name": "Sample Job",
+      "billing_method": "fixed_price",
+      "project": 2,
+      "description": "Sample job description.",
+      "order": 0
+    },
+    "model": "task.job"
+  },
+  {
+    "pk": 1,
+    "fields": {
+      "job": 1,
+      "description": "",
+      "name": "Construction Site Equipment",
+      "order": 0
+    },
+    "model": "task.taskgroup"
+  },
+  {
+    "pk": 2,
+    "fields": {
+      "job": 1,
+      "description": "",
+      "name": "Demolition Work",
+      "order": 1
+    },
+    "model": "task.taskgroup"
+  },
+  {
+    "pk": 3,
+    "fields": {
+      "job": 1,
+      "description": "",
+      "name": "New Roof",
+      "order": 2
+    },
+    "model": "task.taskgroup"
+  },
+  {
+    "pk": 1,
+    "model": "task.task",
+    "fields": {
+      "taskgroup": 1,
+      "order": 0,
+      "started_on": null,
+      "completed_on": null,
+      "unit": "pce",
+      "complete": "0.00",
+      "qty": "1.00",
+      "name": "Workers Rest Room",
+      "description": "Workers Rest Room including transport, cleaning and consumables. Endurence four weeks."
+    }
+  },
+  {
+    "pk": 1,
+    "fields": {
+      "task": 1,
+      "order": 0,
+      "selected": true
+    },
+    "model": "task.taskinstance"
+  },
+  {
+    "pk": 2,
+    "model": "task.task",
+    "fields": {
+      "taskgroup": 1,
+      "order": 0,
+      "started_on": null,
+      "completed_on": null,
+      "name": "Workers Rest Room",
+      "unit": "week",
+      "complete": "0.00",
+      "description": "The same Service as mentioned in 1.1 but the price for every following week.",
+      "qty": "1.00"
+    }
+  },
+  {
+    "pk": 2,
+    "fields": {
+      "task": 2,
+      "order": 1,
+      "selected": true
+    },
+    "model": "task.taskinstance"
+  },
+  {
+    "pk": 3,
+    "model": "task.task",
+    "fields": {
+      "taskgroup": 1,
+      "order": 0,
+      "started_on": null,
+      "completed_on": null,
+      "name": "Road Signs",
+      "unit": "pce",
+      "complete": "0.00",
+      "description": "All needed Road Signs as long as needed. Some more text to see how the table handles that. Probably everything is going to be fine, since its LaTeX.",
+      "qty": "1.00"
+    }
+  },
+  {
+    "pk": 3,
+    "fields": {
+      "task": 3,
+      "order": 2,
+      "selected": true
+    },
+    "model": "task.taskinstance"
+  },
+  {
+    "pk": 4,
+    "model": "task.task",
+    "fields": {
+      "taskgroup": 2,
+      "order": 0,
+      "started_on": null,
+      "completed_on": null,
+      "name": "Covering the old roof tiles",
+      "unit": "m\u00b2",
+      "complete": "0.00",
+      "description": "Covering the old roof tiles including transportation and professional removal at the waste disposal.",
+      "qty": "173.00"
+    }
+  },
+  {
+    "pk": 4,
+    "fields": {
+      "task": 4,
+      "order": 0,
+      "selected": true
+    },
+    "model": "task.taskinstance"
+  },
+  {
+    "pk": 5,
+    "model": "task.task",
+    "fields": {
+      "taskgroup": 2,
+      "order": 0,
+      "started_on": null,
+      "completed_on": null,
+      "name": "Keeping old roof tiles",
+      "unit": "m\u00b2",
+      "complete": "0.00",
+      "description": "Keeping the old roof tiles to reuse them.",
+      "qty": "30.00"
+    }
+  },
+  {
+    "pk": 5,
+    "fields": {
+      "task": 5,
+      "order": 1,
+      "selected": true
+    },
+    "model": "task.taskinstance"
+  },
+  {
+    "pk": 6,
+    "model": "task.task",
+    "fields": {
+      "taskgroup": 2,
+      "order": 0,
+      "started_on": null,
+      "completed_on": null,
+      "name": "Covering the old wood construction",
+      "unit": "m\u00b3",
+      "complete": "0.00",
+      "description": "Covering the old wood construction including transportation and professional removal at the waste disposal.",
+      "qty": "17.00"
+    }
+  },
+  {
+    "pk": 6,
+    "fields": {
+      "task": 6,
+      "order": 2,
+      "selected": true
+    },
+    "model": "task.taskinstance"
+  },
+  {
+    "pk": 7,
+    "model": "task.task",
+    "fields": {
+      "taskgroup": 2,
+      "order": 0,
+      "started_on": null,
+      "completed_on": null,
+      "name": "Professional cleaning the truss.",
+      "unit": "pce",
+      "complete": "0.00",
+      "description": "Professional cleaning the truss including vacuuming, wiping and licking everything clean.",
+      "qty": "1.00"
+    }
+  },
+  {
+    "pk": 7,
+    "fields": {
+      "task": 7,
+      "order": 3,
+      "selected": true
+    },
+    "model": "task.taskinstance"
+  },
+  {
+    "pk": 8,
+    "model": "task.task",
+    "fields": {
+      "taskgroup": 3,
+      "order": 0,
+      "started_on": null,
+      "completed_on": null,
+      "name": "Covering the old roof tiles",
+      "unit": "m\u00b2",
+      "complete": "0.00",
+      "description": "Covering the old roof tiles including transportation and professional removal at the waste disposal.",
+      "qty": "173.00"
+    }
+  },
+  {
+    "pk": 8,
+    "fields": {
+      "task": 8,
+      "order": 0,
+      "selected": true
+    },
+    "model": "task.taskinstance"
+  },
+  {
+    "pk": 9,
+    "model": "task.task",
+    "fields": {
+      "taskgroup": 3,
+      "order": 0,
+      "started_on": null,
+      "completed_on": null,
+      "name": "Keeping old roof tiles",
+      "unit": "m\u00b2",
+      "complete": "0.00",
+      "description": "Keeping the old roof tiles to reuse them.",
+      "qty": "30.00"
+    }
+  },
+  {
+    "pk": 9,
+    "fields": {
+      "task": 9,
+      "order": 1,
+      "selected": true
+    },
+    "model": "task.taskinstance"
+  },
+  {
+    "pk": 1,
+    "fields": {
+      "price": "79.36",
+      "task_qty": "0.00",
+      "is_flagged": false,
+      "unit_qty": "1.00",
+      "name": "First week rental.",
+      "billable": "0.00",
+      "unit": "week",
+      "taskinstance": 1,
+      "is_material": false,
+      "is_labor": false
+    },
+    "model": "task.lineitem"
+  },
+  {
+    "pk": 2,
+    "fields": {
+      "price": "24.90",
+      "task_qty": "0.00",
+      "is_flagged": false,
+      "unit_qty": "1.00",
+      "name": "Subsequent week rentals.",
+      "billable": "0.00",
+      "unit": "week",
+      "taskinstance": 2,
+      "is_material": false,
+      "is_labor": false
+    },
+    "model": "task.lineitem"
+  },
+  {
+    "pk": 3,
+    "fields": {
+      "price": "99.00",
+      "task_qty": "0.00",
+      "is_flagged": false,
+      "unit_qty": "1.00",
+      "name": "Individual road sign.",
+      "billable": "0.00",
+      "unit": "pce",
+      "taskinstance": 3,
+      "is_material": false,
+      "is_labor": false
+    },
+    "model": "task.lineitem"
+  },
+  {
+    "pk": 4,
+    "fields": {
+      "price": "12.48",
+      "task_qty": "0.00",
+      "is_flagged": false,
+      "unit_qty": "1.00",
+      "name": "Removal",
+      "billable": "0.00",
+      "unit": "m\u00b2",
+      "taskinstance": 4,
+      "is_material": false,
+      "is_labor": false
+    },
+    "model": "task.lineitem"
+  },
+  {
+    "pk": 5,
+    "fields": {
+      "price": "10.00",
+      "task_qty": "0.00",
+      "is_flagged": false,
+      "unit_qty": "1.00",
+      "name": "Transportation",
+      "billable": "0.00",
+      "unit": "m\u00b2",
+      "taskinstance": 4,
+      "is_material": false,
+      "is_labor": false
+    },
+    "model": "task.lineitem"
+  },
+  {
+    "pk": 6,
+    "fields": {
+      "price": "20.48",
+      "task_qty": "0.00",
+      "is_flagged": false,
+      "unit_qty": "1.00",
+      "name": "Refurbishing a tile.",
+      "billable": "0.00",
+      "unit": "m\u00b2",
+      "taskinstance": 5,
+      "is_material": false,
+      "is_labor": false
+    },
+    "model": "task.lineitem"
+  },
+  {
+    "pk": 7,
+    "fields": {
+      "price": "105.88",
+      "task_qty": "0.00",
+      "is_flagged": false,
+      "unit_qty": "1.00",
+      "name": "Labor",
+      "billable": "0.00",
+      "unit": "m\u00b3",
+      "taskinstance": 6,
+      "is_material": false,
+      "is_labor": false
+    },
+    "model": "task.lineitem"
+  },
+  {
+    "pk": 8,
+    "fields": {
+      "price": "28.99",
+      "task_qty": "0.00",
+      "is_flagged": false,
+      "unit_qty": "100.00",
+      "name": "Labor",
+      "billable": "0.00",
+      "unit": "hrs",
+      "taskinstance": 7,
+      "is_material": false,
+      "is_labor": false
+    },
+    "model": "task.lineitem"
+  },
+  {
+    "pk": 9,
+    "fields": {
+      "price": "22.48",
+      "task_qty": "0.00",
+      "is_flagged": false,
+      "unit_qty": "1.00",
+      "name": "Labor",
+      "billable": "0.00",
+      "unit": "hrs",
+      "taskinstance": 8,
+      "is_material": false,
+      "is_labor": false
+    },
+    "model": "task.lineitem"
+  },
+  {
+    "pk": 10,
+    "fields": {
+      "price": "20.48",
+      "task_qty": "0.00",
+      "is_flagged": false,
+      "unit_qty": "1.00",
+      "name": "Labor",
+      "billable": "0.00",
+      "unit": "hrs",
+      "taskinstance": 9,
+      "is_material": false,
+      "is_labor": false
+    },
+    "model": "task.lineitem"
+  }
 ]

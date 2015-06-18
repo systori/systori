@@ -4,7 +4,6 @@ from ..task.test_models import create_task_data
 
 
 class ResourceTestCaseBase(ResourceTestCase):
-
     def setUp(self):
         super(ResourceTestCaseBase, self).setUp()
         create_task_data(self)
@@ -12,7 +11,6 @@ class ResourceTestCaseBase(ResourceTestCase):
 
 
 class ProjectResourceTest(ResourceTestCaseBase):
-
     url = '/api/v1/project/'
 
     def test_get_projects(self):
@@ -29,7 +27,7 @@ class ProjectResourceTest(ResourceTestCaseBase):
         self.assertEqual(sorted(expected_keys), sorted(keys))
 
     def test_update_project(self):
-        url = self.url+'{}/'.format(Project.objects.first().pk)
+        url = self.url + '{}/'.format(Project.objects.first().pk)
         data = {"name": "updated proj", "description": "updated desc"}
         resp = self.api_client.put(url, data=data, format='json')
         self.assertHttpAccepted(resp)
@@ -47,4 +45,3 @@ class ProjectResourceTest(ResourceTestCaseBase):
         proj = Project.objects.order_by('id').last()
         self.assertEqual("new proj", proj.name)
         self.assertEqual("new desc", proj.description)
-

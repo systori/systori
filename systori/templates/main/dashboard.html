@@ -4,110 +4,113 @@
 {% block sidebar %}{% include "main/sidebar.html" %}{% endblock %}
 
 {% block content %}
-<h1 class="page-header">{% trans 'Dashboard' %}</h1>
+  <h1 class="page-header">{% trans 'Dashboard' %}</h1>
 
-<h2 class="sub-header">{% trans "Projects" %}</h2>
-<div id="map-canvas" style="height: 400px;"></div>
+  <h2 class="sub-header">{% trans "Projects" %}</h2>
+  <div id="map-canvas" style="height: 400px;"></div>
 
-<h2 class="sub-header">{% trans "Flagged Items" %}</h2>
-<div class="table-responsive">
-  <table class="table table-striped">
-    <thead>
+  <h2 class="sub-header">{% trans "Flagged Items" %}</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
       <tr>
         <th>{% trans "Job" %}</th>
         <th>{% trans "Line Item" %}</th>
       </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
       {% for lineitem in flagged_lineitems.all %}
-      <tr>
-        <td nowrap><a href="{% url 'tasks' lineitem.project.id lineitem.job.id %}#lineitem-{{ lineitem.id }}">{{ lineitem.job }}</a></td>
-        <td width="100%">{{ lineitem.name }}</td>
-      </tr>
+        <tr>
+          <td nowrap><a
+              href="{% url 'tasks' lineitem.project.id lineitem.job.id %}#lineitem-{{ lineitem.id }}">{{ lineitem.job }}</a>
+          </td>
+          <td width="100%">{{ lineitem.name }}</td>
+        </tr>
       {% endfor %}
-    </tbody>
-  </table>
-</div>
+      </tbody>
+    </table>
+  </div>
 
 {% endblock %}
 
-{% block extra_js%}
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&sensor=false"></script>
-<script type="text/javascript">
-$(document).ready(function () {
+{% block extra_js %}
+  <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&sensor=false"></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
 
-    var locations = [
-    {% for site in job_sites %}
-        ['<a href="{% url "project.view" site.project.id %}">{{ site.project.name }}<br />{{ site|addslashes }}</a><br />{{ site.address }}<br />{{ site.city }}<br /><b>{{ site.project.get_phase_display }}</b>',
-        {{ site.latitude }}, {{ site.longitude }}, "{{ site.project.phase }}"],
-    {% endfor %}
-    ];
+      var locations = [
+        {% for site in job_sites %}
+          ['<a href="{% url "project.view" site.project.id %}">{{ site.project.name }}<br />{{ site|addslashes }}</a><br />{{ site.address }}<br />{{ site.city }}<br /><b>{{ site.project.get_phase_display }}</b>',
+            {{ site.latitude }}, {{ site.longitude }}, "{{ site.project.phase }}"],
+        {% endfor %}
+      ];
 
-    var map = new google.maps.Map($('#map-canvas')[0]);
-    var bounds = new google.maps.LatLngBounds();
-    var infowindow = new google.maps.InfoWindow();
+      var map = new google.maps.Map($('#map-canvas')[0]);
+      var bounds = new google.maps.LatLngBounds();
+      var infowindow = new google.maps.InfoWindow();
 
-    function Pin(color, opacity) {
+      function Pin(color, opacity) {
         return {
-            path: 'M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z',
-            fillColor: color,
-            fillOpacity: opacity,
-            scale: 1.4,
-            strokeColor: 'black',
-            strokeWeight: 0.5
+          path: 'M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z',
+          fillColor: color,
+          fillOpacity: opacity,
+          scale: 1.4,
+          strokeColor: 'black',
+          strokeWeight: 0.5
         }
-    }
+      }
 
-    pinkPin = Pin("HotPink", 0.9);
-    redPin = Pin("FireBrick", 0.9);
-    bluePin = Pin("DodgerBlue", 0.9);
-    greenPin = Pin("green", 0.9);
-    yellowPin = Pin("Gold", 0.9);
-    greyPin = Pin("GhostWhite", 0.2);
+      pinkPin = Pin("HotPink", 0.9);
+      redPin = Pin("FireBrick", 0.9);
+      bluePin = Pin("DodgerBlue", 0.9);
+      greenPin = Pin("green", 0.9);
+      yellowPin = Pin("Gold", 0.9);
+      greyPin = Pin("GhostWhite", 0.2);
 
 
-    for (i = 0; i< locations.length; i++) {
+      for (i = 0; i < locations.length; i++) {
         if (locations[i][3] === 'prospective') {
-            locations[i][3] = pinkPin;
+          locations[i][3] = pinkPin;
         } else if (locations[i][3] === 'tendering') {
-            locations[i][3] = yellowPin;
+          locations[i][3] = yellowPin;
         } else if (locations[i][3] === 'planning') {
-            locations[i][3] = greenPin;
+          locations[i][3] = greenPin;
         } else if (locations[i][3] === 'executing') {
-            locations[i][3] = bluePin;
+          locations[i][3] = bluePin;
         } else if (locations[i][3] === 'settlement') {
-            locations[i][3] = redPin;
+          locations[i][3] = redPin;
         } else if (locations[i][3] === 'warranty') {
-            locations[i][3] = greyPin;
+          locations[i][3] = greyPin;
         } else {
-            locations[i][3] = greyPin; // finished
+          locations[i][3] = greyPin; // finished
         }
-    }
+      }
 
-    for (i = 0; i < locations.length; i++) {
+      for (i = 0; i < locations.length; i++) {
         var marker = new google.maps.Marker({
-            position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-            map: map,
-            icon: locations[i][3]
+          position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+          map: map,
+          icon: locations[i][3]
         });
 
         bounds.extend(marker.position);
 
-        google.maps.event.addListener(marker, 'click', (function(marker, i) {
-            return function() {
-                infowindow.setContent(locations[i][0]);
-                infowindow.open(map, marker);
-            }
+        google.maps.event.addListener(marker, 'click', (function (marker, i) {
+          return function () {
+            infowindow.setContent(locations[i][0]);
+            infowindow.open(map, marker);
+          }
         })(marker, i));
-    }
+      }
 
-    map.fitBounds(bounds);
+      map.fitBounds(bounds);
 
-    var listener = google.maps.event.addListener(map, "idle", function () {
+      var listener = google.maps.event.addListener(map, "idle", function () {
         map.setZoom(11);
         google.maps.event.removeListener(listener);
-    });
+      });
 
-});
-</script>
-{% endblock extra_js%}
+    });
+  </script>
+{% endblock extra_js %}

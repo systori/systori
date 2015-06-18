@@ -6,6 +6,7 @@ from ..task.models import Job, TaskGroup, Task, TaskInstance
 from ..accounting.models import Account
 from .models import Project, JobSite
 
+
 def get(el, path, default=None, required=False, element_only=False):
     parts = path.split('.')
     if hasattr(el, parts[0]):
@@ -20,10 +21,12 @@ def get(el, path, default=None, required=False, element_only=False):
     else:
         return default
 
+
 """
  <GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/200407">
  <GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA83/3.2">
 """
+
 
 def gaeb_validator(request):
     try:
@@ -31,6 +34,7 @@ def gaeb_validator(request):
     except:
         raise ValidationError(_("""File {} can\'t be imported. Please
         Contact Support.""".format(request.name)))
+
 
 def gaeb_validate(file):
     tree = objectify.parse(file)
@@ -57,7 +61,7 @@ def gaeb_import(file):
     label = root.PrjInfo.LblPrj
     project = Project.objects.create(name=label)
     try:
-        first_job_no = int(root.Award.BoQ.BoQInfo.Name)-1
+        first_job_no = int(root.Award.BoQ.BoQInfo.Name) - 1
         project.job_offset = first_job_no if first_job_no >= 0 else 0
     except:
         pass
@@ -84,9 +88,9 @@ def gaeb_import(file):
             taskgroup.save()
         job.save()
     project.save()
-    project.account = Account.objects.create(account_type=Account.ASSET, code=str(10000+project.id))
-    jobsite = JobSite(project=project, name="Gaeb-Baustelle", address="Pettenkoferstr. 10", city="Mannheim", postal_code="68169")
+    project.account = Account.objects.create(account_type=Account.ASSET, code=str(10000 + project.id))
+    jobsite = JobSite(project=project, name="Gaeb-Baustelle", address="Pettenkoferstr. 10", city="Mannheim",
+                      postal_code="68169")
     jobsite.save()
     project.save()
     return project
-

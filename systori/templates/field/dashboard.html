@@ -2,42 +2,45 @@
 {% load i18n staticfiles %}
 
 {% block container %}
-<div class="container">
+  <div class="container">
 
-  {% if user.has_staff %}
+    {% if user.has_staff %}
 
-  <div class="panel panel-primary">
+      <div class="panel panel-primary">
 
-    <div class="panel-heading">
-      {% trans 'Manage' %}
-    </div>    
+        <div class="panel-heading">
+          {% trans 'Manage' %}
+        </div>
 
-    <div class="list-group">
-      <a href="{% url 'field.projects' %}" class="list-group-item">{% trans 'Projects' %} <span class="pull-right">&raquo;</span></a>
-      <a href="{% url 'field.planning' %}" class="list-group-item">{% trans 'Planning' %} <span class="pull-right">&raquo;</span></a>
+        <div class="list-group">
+          <a href="{% url 'field.projects' %}" class="list-group-item">{% trans 'Projects' %} <span
+              class="pull-right">&raquo;</span></a>
+          <a href="{% url 'field.planning' %}" class="list-group-item">{% trans 'Planning' %} <span
+              class="pull-right">&raquo;</span></a>
+        </div>
+
+      </div>
+
+    {% endif %}
+
+    <div class="day-separator">
+      {% now "l" %}, {% now "DATE_FORMAT" %}
+      {% if user.is_laborer or user.is_foreman %}
+        <a href="{% url 'field.projects' %}"
+           class="btn btn-default btn-contextual btn-add-plan">{% trans "Projects" %} &raquo;</a>
+      {% endif %}
     </div>
 
+    {% for plan in todays_plans %}
+
+      {% include "field/dailyplan.html" with dailyplan=plan %}
+
+    {% empty %}
+
+      <p>{% trans "You have not been assigned to any job sites today." %}</p>
+
+    {% endfor %}
+
+
   </div>
-
-  {% endif %}
-
-  <div class="day-separator">
-    {%  now "l" %}, {% now "DATE_FORMAT" %}
-    {% if user.is_laborer or user.is_foreman %}
-      <a href="{% url 'field.projects' %}" class="btn btn-default btn-contextual btn-add-plan">{% trans "Projects" %} &raquo;</a>
-    {% endif %}
-  </div>
-
-{% for plan in todays_plans %}
-
-  {% include "field/dailyplan.html" with dailyplan=plan %}
- 
-{% empty %}
-
-  <p>{% trans "You have not been assigned to any job sites today." %}</p>
-
-{% endfor %}
-
-
-</div>
 {% endblock %}

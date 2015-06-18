@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 
+
 class ProjectConfig(AppConfig):
     name = 'systori.apps.project'
 

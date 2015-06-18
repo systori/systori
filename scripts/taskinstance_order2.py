@@ -1,8 +1,10 @@
 import os
 import re
 import unicodedata
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
 import django
+
 django.setup()
 
 from systori.apps.task.models import *

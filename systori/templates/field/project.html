@@ -2,61 +2,67 @@
 {% load i18n staticfiles field_app %}
 
 {% block container %}
-<div class="container">
+  <div class="container">
 
-  <div class="row back-buttons">
-    <div class="col-xs-8"><a href="{% url 'field.projects' %}" class="btn btn-default btn-block btn-back">&laquo; {% trans 'Projects' %}</a></div>
-    <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
-  </div>
-
-  <div class="panel panel-default">
-
-    <div class="panel-heading">
-      {{ project.name }}
-    </div>
-    
-    <div class="panel-body">
-      {{ project.description }}
+    <div class="row back-buttons">
+      <div class="col-xs-8"><a href="{% url 'field.projects' %}"
+                               class="btn btn-default btn-block btn-back">&laquo; {% trans 'Projects' %}</a></div>
+      <div class="col-xs-4"><a href="{% url 'field.dashboard' %}"
+                               class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
     </div>
 
-  </div>
+    <div class="panel panel-default">
 
-{% if not first_daily_plan or first_daily_plan and first_daily_plan.day != selected_day %}
-  <div class="day-separator">
-    {% include "field/project_datepicker.html" with day=selected_day %}
-    {% if user.is_staff and selected_day >= today %}
-      <a href="{% add_daily_plan_url project selected_day %}?origin={{request.path}}#{{dailyplan.jobsite.project.id}}" class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
+      <div class="panel-heading">
+        {{ project.name }}
+      </div>
+
+      <div class="panel-body">
+        {{ project.description }}
+      </div>
+
+    </div>
+
+    {% if not first_daily_plan or first_daily_plan and first_daily_plan.day != selected_day %}
+      <div class="day-separator">
+        {% include "field/project_datepicker.html" with day=selected_day %}
+        {% if user.is_staff and selected_day >= today %}
+          <a href="{% add_daily_plan_url project selected_day %}?origin={{ request.path }}#{{ dailyplan.jobsite.project.id }}"
+             class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
+        {% endif %}
+      </div>
+      {% if user.is_staff and selected_day >= today and latest_daily_plan.day < selected_day %}
+        <a href="{% url 'field.dailyplan.generate' project.id selected_day.isoformat latest_daily_plan.day.isoformat %}"
+           class="btn btn-primary">{% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}
+          .{% endblocktrans %}</a>
+      {% elif user.is_staff and selected_day < today %}
+        <div>{% trans 'Cannot change the past.' %}</div>
+      {% else %}
+        <div>{% blocktrans with day=selected_day %}No daily plans exist for {{ day }}.{% endblocktrans %}</div>
+      {% endif %}
     {% endif %}
+
+    {% for day, plans in daily_plans %}
+
+      <div class="day-separator {% if day == today %}today{% endif %}">
+        {% if day == selected_day %}
+          {% include "field/project_datepicker.html" with day=day %}
+        {% else %}
+          {{ day|date:"l" }}, {{ day|date:"DATE_FORMAT" }}
+        {% endif %}
+        {% if user.is_staff and day >= today %}
+          <a href="{% add_daily_plan_url project day %}?origin={{ request.path }}#{{ dailyplan.jobsite.project.id }}"
+             class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
+        {% endif %}
+      </div>
+
+      {% for plan in plans %}
+
+        {% include "field/dailyplan.html" with dailyplan=plan %}
+
+      {% endfor %}
+
+    {% endfor %}
+
   </div>
-  {% if user.is_staff and selected_day >= today and latest_daily_plan.day < selected_day %}
-    <a href="{% url 'field.dailyplan.generate' project.id selected_day.isoformat latest_daily_plan.day.isoformat %}" class="btn btn-primary">{% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
-  {% elif user.is_staff and selected_day < today %}
-    <div>{% trans 'Cannot change the past.' %}</div>
-  {% else %}
-    <div>{% blocktrans with day=selected_day %}No daily plans exist for {{day}}.{% endblocktrans %}</div>
-  {% endif %}
-{% endif %}
-
-{% for day, plans in daily_plans %}
-
-  <div class="day-separator {% if day == today %}today{% endif %}">
-  {% if day == selected_day %}
-    {% include "field/project_datepicker.html" with day=day %}
-  {% else %}
-    {{ day|date:"l" }}, {{ day|date:"DATE_FORMAT" }}
-  {% endif %}
-    {% if user.is_staff and day >= today %}
-      <a href="{% add_daily_plan_url project day %}?origin={{request.path}}#{{dailyplan.jobsite.project.id}}" class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
-    {% endif %}
-  </div>
-  
-  {% for plan in plans %}
-
-  {% include "field/dailyplan.html" with dailyplan=plan %}
-
-  {% endfor %}
-
-{% endfor %}
-
-</div>
 {% endblock %}

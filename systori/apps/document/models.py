@@ -7,7 +7,6 @@ from jsonfield import JSONField
 
 
 class Document(models.Model):
-
     json = JSONField(default={})
     json_version = models.CharField(max_length=5)
     amount = models.DecimalField(_("Amount"), max_digits=12, decimal_places=2)
@@ -52,7 +51,7 @@ class Proposal(Document):
     @property
     def is_approved(self):
         return self.status == Proposal.APPROVED
-    
+
     @transition(field=status, source=SENT, target=DECLINED, custom={'label': _("Decline")})
     def decline(self):
         pass
@@ -152,7 +151,7 @@ class DocumentTemplate(models.Model):
         for key in result:
             value = result[key]
             for var in vars:
-                value = value.replace('['+str(var)+']', str(vars[var]))
+                value = value.replace('[' + str(var) + ']', str(vars[var]))
             result[key] = value
         return result
 

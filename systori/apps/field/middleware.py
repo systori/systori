@@ -1,8 +1,8 @@
 from datetime import date
 from ..project.models import JobSite, DailyPlan
 
-class FieldMiddleware:
 
+class FieldMiddleware:
     def process_view(self, request, view, args, kwargs):
         if 'jobsite_pk' in kwargs:
             request.jobsite = JobSite.objects.get(pk=kwargs['jobsite_pk'])

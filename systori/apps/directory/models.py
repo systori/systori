@@ -2,8 +2,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
-class Contact(models.Model):
 
+class Contact(models.Model):
     projects = models.ManyToManyField('project.Project', through='ProjectContact', related_name="contacts")
 
     business = models.CharField(_("Business"), max_length=512, blank=True)
@@ -31,8 +31,8 @@ class Contact(models.Model):
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)
 
-class ProjectContact(models.Model):
 
+class ProjectContact(models.Model):
     CUSTOMER = "customer"
     CONTRACTOR = "contractor"
     SUPPLIER = "supplier"
@@ -57,7 +57,7 @@ class ProjectContact(models.Model):
         verbose_name = _("Project Contact")
         verbose_name_plural = _("Project Contacts")
         ordering = ['association', 'id']
-    
+
     def save(self, **kwargs):
         if self.is_billable:
             self.project.project_contacts.update(is_billable=False)

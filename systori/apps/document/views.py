@@ -16,7 +16,6 @@ from .type import proposal, invoice, evidence
 
 
 class DocumentRenderView(SingleObjectMixin, View):
-
     def get(self, request, *args, **kwargs):
         return HttpResponse(self.pdf(), content_type='application/pdf')
 
@@ -49,10 +48,9 @@ class ProposalCreate(CreateView):
         return kwargs
 
     def form_valid(self, form):
-
         form.cleaned_data['jobs'] = [
             Job.prefetch(job.id) for job in form.cleaned_data['jobs']
-        ]
+            ]
 
         amount = Decimal(0.0)
         for job in form.cleaned_data['jobs']:
@@ -120,7 +118,6 @@ class InvoiceCreate(CreateView):
         return kwargs
 
     def form_valid(self, form):
-
         project = Project.prefetch(self.request.project.id)
 
         # update account balance with any new work that's been done

@@ -147,6 +147,7 @@ class CompanyMiddleware:
     You could also come up with other methods.
 
     """
+
     def process_request(self, request):
         FORBIDDEN = HttpResponseForbidden(_('You may not select that schema'))
         # Ways of changing the schema.
@@ -242,9 +243,9 @@ class CompanyMiddleware:
                 # Can we see if there is already a pending message for this
                 # request that has the same content as us?
                 messages.error(request,
-                    _("You must select a schema to access that resource"),
-                    fail_silently=True
-                )
+                               _("You must select a schema to access that resource"),
+                               fail_silently=True
+                               )
                 return HttpResponseRedirect('..')
         # I'm not sure we ever really hit this one, but it's worth keeping
         # here just in case we've missed something.

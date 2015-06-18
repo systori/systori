@@ -21,17 +21,18 @@ class JobTransition(SingleObjectMixin, View):
                 break
 
         if transition:
-          getattr(self.object, transition.name)()
-          self.object.save()
+            getattr(self.object, transition.name)()
+            self.object.save()
 
         return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
 
 
 class JobEstimateModification(SingleObjectMixin, View):
     model = Job
+
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        assert kwargs['action'] in ['increase','decrease','reset']
+        assert kwargs['action'] in ['increase', 'decrease', 'reset']
         self.object.estimate_total_modify(request.user, kwargs['action'])
         return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
 
@@ -105,5 +106,6 @@ class JobUpdate(UpdateView):
 
 class JobDelete(DeleteView):
     model = Job
+
     def get_success_url(self):
         return self.object.project.get_absolute_url()

@@ -15,4 +15,3 @@ class Access(models.Model):
 
     is_employee = models.BooleanField(default=True)
     is_accountant = models.BooleanField(default=False)
-

@@ -1,5 +1,5 @@
 body {
-  padding-top:70px;
+  padding-top: 70px;
 }
 
 .sub-header {
@@ -11,6 +11,7 @@ body {
 .sidebar {
   display: none;
 }
+
 @media (min-width: 768px) {
   .sidebar {
     position: fixed;
@@ -34,10 +35,12 @@ body {
   margin-bottom: 20px;
   margin-left: -20px;
 }
+
 .nav-sidebar > li > a {
   padding-right: 20px;
   padding-left: 20px;
 }
+
 .nav-sidebar > .active > a,
 .nav-sidebar > .active > a:hover,
 .nav-sidebar > .active > a:focus {
@@ -45,19 +48,20 @@ body {
   background-color: #428bca;
 }
 
-
 /*
  * Main content
  */
 
 .main {
 }
+
 @media (min-width: 768px) {
   .main {
     padding-right: 40px;
     padding-left: 40px;
   }
 }
+
 .main .page-header {
   margin-top: 0;
 }
@@ -65,14 +69,14 @@ body {
 /*
  * Day Based Overview
  */
- 
+
 .overview-wrapper {
-	display:flex;
-	flex-wrap: wrap;
-	justify-content: flex-start;
-	flex-direction: column;
-	height: 30vw;
-	width: 100vw;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  flex-direction: column;
+  height: 30vw;
+  width: 100vw;
 }
 
 .overview-box {
@@ -83,30 +87,31 @@ body {
 }
 
 .foreman_crown {
-	position:relative;
-	top:-2px;
+  position: relative;
+  top: -2px;
 }
+
 .foreman_crown:after {
-	content: "♔";
+  content: "♔";
 }
 
-.panel-custom  {
-	padding: 2px 10px 2px 10px;
+.panel-custom {
+  padding: 2px 10px 2px 10px;
 }
 
-.notes-container{
-	display:flex;
-	width:100vw;
-	position:fixed;
-	bottom:0px;
+.notes-container {
+  display: flex;
+  width: 100vw;
+  position: fixed;
+  bottom: 0px;
 }
 
 .notes-box {
-	margin: 10px;
-	width:100vw;
+  margin: 10px;
+  width: 100vw;
 }
 
 .notes-project {
-	color: rgb(250,0,0);
-	font-weight:bold;
+  color: rgb(250, 0, 0);
+  font-weight: bold;
 }

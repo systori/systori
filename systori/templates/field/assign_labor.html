@@ -2,48 +2,51 @@
 {% load i18n staticfiles field_app %}
 
 {% block container %}
-<style>
-.state-icon {
-    left: -5px;
-}
-</style>
+  <style>
+    .state-icon {
+      left: -5px;
+    }
+  </style>
 
-<form method="post">{% csrf_token %}
-<input type="hidden" name="origin" value="{{request.GET.origin}}" />
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="origin" value="{{ request.GET.origin }}"/>
 
-<div class="container">
+    <div class="container">
 
 
-  <div class="row back-buttons">
-    <div class="col-xs-6"><a href="{% url 'field.planning' %}#{{ jobsite.project.id }}" class="btn btn-default btn-block btn-back">&laquo; {% trans 'Planning' %}</a></div>
-    <div class="col-xs-6"><a href="{% url 'field.project' jobsite.project.id dailyplan.day.isoformat %}" class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
-  </div>
+      <div class="row back-buttons">
+        <div class="col-xs-6"><a href="{% url 'field.planning' %}#{{ jobsite.project.id }}"
+                                 class="btn btn-default btn-block btn-back">&laquo; {% trans 'Planning' %}</a></div>
+        <div class="col-xs-6"><a href="{% url 'field.project' jobsite.project.id dailyplan.day.isoformat %}"
+                                 class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
+      </div>
 
-  <div class="panel panel-default">
+      <div class="panel panel-default">
 
-    <div class="panel-heading">
-      {% trans 'Labor' %} - {{ jobsite.name }} - {{ dailyplan.day|date:'DATE_FORMAT' }}
-    </div>
-
-    <div class="list-group">
-    {% for worker in workers %}
-      <label class="list-group-item">
-        {% if worker.plan_count > 0 %}<span class="badge">{{ worker.plan_count }}</span>{% endif %}
-        <input type="checkbox" value="{{worker.id}}" name="workers" {% if worker.assigned %}checked{% endif %}/> {{ worker.get_full_name }}
-      </label>
-    {% endfor %}
-    </div>
-
-    <div class="panel-footer clearfix">
-        <div class="pull-right">
-            <button class="btn btn-primary" type="submit">{% trans "Assign" %}</button>
+        <div class="panel-heading">
+          {% trans 'Labor' %} - {{ jobsite.name }} - {{ dailyplan.day|date:'DATE_FORMAT' }}
         </div>
+
+        <div class="list-group">
+          {% for worker in workers %}
+            <label class="list-group-item">
+              {% if worker.plan_count > 0 %}<span class="badge">{{ worker.plan_count }}</span>{% endif %}
+              <input type="checkbox" value="{{ worker.id }}" name="workers"
+                     {% if worker.assigned %}checked{% endif %}/> {{ worker.get_full_name }}
+            </label>
+          {% endfor %}
+        </div>
+
+        <div class="panel-footer clearfix">
+          <div class="pull-right">
+            <button class="btn btn-primary" type="submit">{% trans "Assign" %}</button>
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
-  </div>
-
-</div>
-
-</form>
+  </form>
 
 {% endblock %}

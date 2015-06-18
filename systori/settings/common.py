@@ -31,6 +31,7 @@ LOGIN_REDIRECT_URL = '/'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+
 BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, '../'))
 PROJECTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, '../'))
@@ -93,11 +94,12 @@ MIDDLEWARE_CLASSES = (
 )
 
 from django.conf import global_settings
-TEMPLATE_CONTEXT_PROCESSORS =\
+
+TEMPLATE_CONTEXT_PROCESSORS = \
     global_settings.TEMPLATE_CONTEXT_PROCESSORS + (
-    'django.core.context_processors.request',
-    'django_mobile.context_processors.flavour',
-)
+        'django.core.context_processors.request',
+        'django_mobile.context_processors.flavour',
+    )
 
 ROOT_URLCONF = 'systori.urls'
 
@@ -122,7 +124,7 @@ LATEX_WORKING_DIR = os.path.join(BASE_DIR, 'templates/document/latex')
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'ENGINE': 'boardinghouse.backends.postgres',
     }
 }
@@ -136,8 +138,8 @@ gettext_noop = lambda s: s
 LANGUAGES = (
     ('de', gettext_noop('Deutsch')),
     ('en', gettext_noop('English')),
-#    ('uk', gettext_noop('Українською')),
-#    ('ru', gettext_noop('По-русски')),
+    #    ('uk', gettext_noop('Українською')),
+    #    ('ru', gettext_noop('По-русски')),
 )
 
 TIME_ZONE = 'Europe/Berlin'

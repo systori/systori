@@ -4,7 +4,8 @@
 {% block sidebar %}{% include "main/sidebar.html" with section='projects' %}{% endblock %}
 
 {% block content %}
-  <p><a href="{% url 'project.create' %}">{% trans "Create" %}</a> {% trans "or" %} <a href="{% url 'project.import' %}">{% trans "Import" %}</a></p>
+  <p><a href="{% url 'project.create' %}">{% trans "Create" %}</a> {% trans "or" %} <a
+      href="{% url 'project.import' %}">{% trans "Import" %}</a></p>
 
   {% for phase, projects in project_groups.items %}
     {% if projects %}
@@ -13,14 +14,14 @@
   {% endfor %}
 
   <p>
-  {% if not phase_filter %}
+    {% if not phase_filter %}
       <a href="{% url 'projects' 'finished' %}">
-      {% trans "Finished" as finished_phase %}
-      {% blocktrans with phase=finished_phase %}Show {{phase}} Projects{% endblocktrans %}
+        {% trans "Finished" as finished_phase %}
+        {% blocktrans with phase=finished_phase %}Show {{ phase }} Projects{% endblocktrans %}
       </a>
-  {% elif phase_filter %}
+    {% elif phase_filter %}
       <a href="{% url 'projects' %}">{% trans 'Show All Projects' %}</a>
-  {% endif %}
+    {% endif %}
   </p>
 
 {% endblock content %}
