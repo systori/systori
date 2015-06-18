@@ -377,14 +377,15 @@ class FieldAssignLabor(TemplateView):
                 INNER JOIN project_dailyplan ON (project_teammember.dailyplan_id = project_dailyplan.id)
             WHERE
                 project_teammember.user_id = user_user.id AND
-                project_dailyplan.day = current_date
+                project_dailyplan.day = %s
         """
+        dailyplan = self.request.dailyplan
+        params = (dailyplan.day,)
         context['workers'] = User.objects\
                                 .filter(Q(is_laborer=True) | Q(is_foreman=True))\
-                                .extra(select={'plan_count': plan_count})\
+                                .extra(select={'plan_count': plan_count}, select_params=params)\
                                 .order_by('plan_count', 'username')
         context['assigned'] = []
-        dailyplan = self.request.dailyplan
         if dailyplan.id: context['assigned'] = dailyplan.users.all()
         return context
 
