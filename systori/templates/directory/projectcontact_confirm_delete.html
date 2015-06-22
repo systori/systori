@@ -5,8 +5,7 @@
 
 {% block content %}
   <form method="post">{% csrf_token %}
-    <p>{% blocktrans with object=object.contact %}Are you sure you want to remove "{{ object }}" from this
-      project?{% endblocktrans %}</p>
+    <p>{% blocktrans with object=object.contact %}Are you sure you want to remove "{{ object }}" from this project?{% endblocktrans %}</p>
     <input type="submit" value="{% trans 'Confirm' %}"/>
   </form>
 {% endblock %}

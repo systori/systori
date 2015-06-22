@@ -32,8 +32,7 @@ def gaeb_validator(request):
     try:
         gaeb_validate(request.file)
     except:
-        raise ValidationError(_("""File {} can\'t be imported. Please
-        Contact Support.""".format(request.name)))
+        raise ValidationError(_("File %s can't be imported. Please Contact Support.") % request.name)
 
 
 def gaeb_validate(file):

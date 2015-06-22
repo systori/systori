@@ -28,12 +28,10 @@
         <div class="pull-right">
           {% if in_current_dailyplan %}
             <a href="{% url 'field.dailyplan.task.remove' jobsite.id dailyplan.url_id task.id %}?origin={{ request.GET.origin }}"
-               class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Remove task from {{ jobsite }}
-              .{% endblocktrans %}</a>
+               class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Remove task from {{ jobsite }}.{% endblocktrans %}</a>
           {% else %}
             <a href="{% url 'field.dailyplan.task.add' jobsite.id dailyplan.url_id task.id %}?origin={{ request.GET.origin }}"
-               class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Add task to {{ jobsite }}
-              .{% endblocktrans %}</a>
+               class="btn btn-primary">{% blocktrans with jobsite=jobsite.name %}Add task to {{ jobsite }}.{% endblocktrans %}</a>
           {% endif %}
         </div>
       </div>
