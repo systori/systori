@@ -19,7 +19,13 @@
  */
 
 function str_or_null(mystr) {
+  if (mystr == 'prefix-ago') {
+    return null;
+  } else if (mystr == 'prefix-from-now') {
+    return null;
+  } else {
   return (mystr != "null") ? mystr : null;
+  }
 }
 
 (function (factory) {
