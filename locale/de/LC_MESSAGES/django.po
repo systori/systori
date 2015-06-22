@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-22 14:07+0200\n"
+"POT-Creation-Date: 2015-06-22 20:06+0200\n"
 "PO-Revision-Date: 2015-06-22 14:11+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -272,8 +272,7 @@ msgstr "Rechnung"
 msgid "Date"
 msgstr "Datum"
 
-#: systori/apps/document/models.py:27
-#: systori/templates/field/job_list.html:17
+#: systori/apps/document/models.py:27 systori/templates/field/job_list.html:17
 #: systori/templates/project/project_detail.html:24
 #: systori/templates/project/project_detail.html:85
 #: systori/templates/project/project_planning.html:230
@@ -1240,6 +1239,10 @@ msgstr "vor"
 msgid "Updated"
 msgstr "Aktualisiert"
 
+#: systori/templates/main/day_based_overview.html:32
+msgid "less than a minute ago"
+msgstr "vor weniger als einer Minute"
+
 #: systori/templates/main/sidebar.html:8
 msgid "Templates"
 msgstr "Vorlagen"
@@ -1256,90 +1259,85 @@ msgstr "Konten"
 msgid "Job Templates"
 msgstr "Los-Vorlagen"
 
-#: systori/templates/main/timeago_js.html:51
+#: systori/templates/main/timeago_js.html:61
 msgctxt "jquery.timeago"
 msgid "prefix-ago"
 msgstr "vor"
 
-#: systori/templates/main/timeago_js.html:52
+#: systori/templates/main/timeago_js.html:62
 msgctxt "jquery.timeago"
 msgid "prefix-from-now"
 msgstr "in"
 
-#: systori/templates/main/timeago_js.html:53
+#: systori/templates/main/timeago_js.html:63
 msgctxt "jquery.timeago"
 msgid "ago"
-msgstr "null" 
+msgstr "null"
 
-#: systori/templates/main/timeago_js.html:54
+#: systori/templates/main/timeago_js.html:64
 msgctxt "jquery.timeago"
 msgid "from now"
 msgstr "seit gerade eben"
 
-#: systori/templates/main/timeago_js.html:55
+#: systori/templates/main/timeago_js.html:65
 msgctxt "jquery.timeago"
 msgid "any moment now"
 msgstr "gerade jetzt"
 
-#: systori/templates/main/timeago_js.html:56
+#: systori/templates/main/timeago_js.html:66
 msgctxt "jquery.timeago"
 msgid "less than a minute"
 msgstr "weniger als einer Minute"
 
-#: systori/templates/main/timeago_js.html:57
+#: systori/templates/main/timeago_js.html:67
 msgctxt "jquery.timeago"
 msgid "about a minute"
 msgstr "ungefähr eine Minute"
 
-#: systori/templates/main/timeago_js.html:58
-#, python-format
+#: systori/templates/main/timeago_js.html:68
 msgctxt "jquery.timeago"
-msgid "%%d minutes"
-msgstr "%%d Minuten"
+msgid "{} minutes"
+msgstr "{} Minuten"
 
-#: systori/templates/main/timeago_js.html:59
+#: systori/templates/main/timeago_js.html:69
 msgctxt "jquery.timeago"
 msgid "about an hour"
 msgstr "ungefähr eine Stunde"
 
-#: systori/templates/main/timeago_js.html:60
-#, python-format
+#: systori/templates/main/timeago_js.html:70
 msgctxt "jquery.timeago"
-msgid "about %%d hours"
-msgstr "ungefähr %%d Stunden"
+msgid "about {} hours"
+msgstr "ungefähr {} Stunden"
 
-#: systori/templates/main/timeago_js.html:61
+#: systori/templates/main/timeago_js.html:71
 msgctxt "jquery.timeago"
 msgid "a day"
 msgstr "ein Tag"
 
-#: systori/templates/main/timeago_js.html:62
-#, python-format
+#: systori/templates/main/timeago_js.html:72
 msgctxt "jquery.timeago"
-msgid "%%d days"
-msgstr "%%d Tage"
+msgid "{} days"
+msgstr "{} Tage"
 
-#: systori/templates/main/timeago_js.html:63
+#: systori/templates/main/timeago_js.html:73
 msgctxt "jquery.timeago"
 msgid "about a month"
 msgstr "ungefähr ein Monat"
 
-#: systori/templates/main/timeago_js.html:64
-#, python-format
+#: systori/templates/main/timeago_js.html:74
 msgctxt "jquery.timeago"
-msgid "%%d months"
-msgstr "%%d Monate"
+msgid "{} months"
+msgstr "{} Monate"
 
-#: systori/templates/main/timeago_js.html:65
+#: systori/templates/main/timeago_js.html:75
 msgctxt "jquery.timeago"
 msgid "about a year"
 msgstr "ungefähr ein Jahr"
 
-#: systori/templates/main/timeago_js.html:66
-#, python-format
+#: systori/templates/main/timeago_js.html:76
 msgctxt "jquery.timeago"
-msgid "%%d years"
-msgstr "%%d Jahre"
+msgid "{} years"
+msgstr "{} Jahre"
 
 #: systori/templates/project/project_detail.html:34
 msgid "Billable Amount"
