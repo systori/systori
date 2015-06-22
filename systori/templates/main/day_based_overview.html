@@ -98,12 +98,20 @@
 
   function page_reload()
   {
-    $.get(window.location)
-    .done( function() {
-      window.location.reload();
-    })
-    .fail(function() {
-      console.log("reload failed");
+    $.ajax({
+      type: "GET",
+      url: window.location,
+      success: function() {
+        window.location.reload();
+      },
+      error: function() {
+        console.log("error reloading page.");
+      },
+      statusCode: {
+        404: function() { console.log("404"); },
+        501: function() { console.log("501"); },
+        502: function() { console.log("502"); }
+      }
     });
   };
 
