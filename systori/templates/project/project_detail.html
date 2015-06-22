@@ -256,9 +256,7 @@
               {% with balance=project.new_amount_with_balance|money %}
 
                 {% if project.new_amount_to_debit > 0 %}
-                  {% blocktrans with new_amount=project.new_amount_to_debit|money balance=balance %}Debit
-                    {{ new_amount }} for newly finished work and create a new invoice for
-                    {{ balance }}{% endblocktrans %}
+                  {% blocktrans with new_amount=project.new_amount_to_debit|money balance=balance %}Debit {{ new_amount }} for newly finished work and create a new invoice for {{ balance }}{% endblocktrans %}
                 {% else %}
                   {% blocktrans with balance=balance %}Create a new invoice for {{ balance }}{% endblocktrans %}
                 {% endif %}

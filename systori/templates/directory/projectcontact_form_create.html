@@ -4,8 +4,9 @@
 {% block sidebar %}{% include "project/sidebar.html" with section='contacts' %}{% endblock %}
 
 {% block content %}
-  <h2 class="sub-header">{% blocktrans with project_name=project.name %}Create and then add contact to
-    {{ project_name }}{% endblocktrans %}</h2>
+  <h2 class="sub-header">
+    {% blocktrans with project_name=project.name %}Create and then add contact to {{ project_name }}{% endblocktrans %}
+  </h2>
   <form method="post">{% csrf_token %}
     {{ project_contact_form.as_p }}
     {{ form.as_p }}

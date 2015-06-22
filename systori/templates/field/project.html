@@ -33,8 +33,7 @@
       </div>
       {% if user.is_staff and selected_day >= today and latest_daily_plan.day < selected_day %}
         <a href="{% url 'field.dailyplan.generate' project.id selected_day.isoformat latest_daily_plan.day.isoformat %}"
-           class="btn btn-primary">{% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}
-          .{% endblocktrans %}</a>
+           class="btn btn-primary">{% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
       {% elif user.is_staff and selected_day < today %}
         <div>{% trans 'Cannot change the past.' %}</div>
       {% else %}
