@@ -1,9 +1,10 @@
 {% extends "base.html" %}
-{% load i18n customformatting %}
+{% load static i18n l10n customformatting %}
+{% get_current_language as LANGUAGE_CODE %}
 {% debug %}
+
 {% block head %}
   {{ block.super }}
-  <meta http-equiv="refresh" content="3">
 {% endblock %}
 
 {% block header %}
@@ -25,10 +26,10 @@
 
         <ul class="nav navbar-nav">
           <li><a href="{{ previous_day_url }}">{% trans 'back' %}</a></li>
-          <li><a>{{ request.selected_day }}</a></li>
+          <li><a>{{ request.selected_day|date:"l" }} {{ request.selected_day|localize }}</a></li>
           <li><a href="{{ next_day_url }}">{% trans 'next' %}</a></li>
-          <!-- <li><a onclick="DoFullScreen()">fullscreen</a></li> -->
         </ul>
+        <a class="navbar-brand pull-right">Update <span class="timeago" title="{% now "c" %}">{% now "c" %}</span></a>
 
       </div>
     </div>
@@ -84,33 +85,28 @@
 {% endblock %}
 
 {% block extra_js %}
+  <script src="{% static "js/jquery.timeago.js" %}"></script>
+  {% if LANGUAGE_CODE == 'de' %}
+  <script src="{% static "js/timeago_locale/jquery.timeago.de.js" %}"></script>
+  {% endif %}
   <script type="text/javascript">
-    function DoFullScreen() {
+  $(document).ready(function(){
+    setInterval(function() {page_reload()}, 5000);
 
-      var isInFullScreen = (document.fullScreenElement && document.fullScreenElement !== null) ||    // alternative standard method
-          (document.mozFullScreen || document.webkitIsFullScreen);
+    $("span.timeago").timeago();
 
-      var docElm = document.documentElement;
-      if (!isInFullScreen) {
-
-        if (docElm.requestFullscreen) {
-          docElm.requestFullscreen();
-        }
-        else if (docElm.mozRequestFullScreen) {
-          docElm.mozRequestFullScreen();
-        }
-        else if (docElm.webkitRequestFullScreen) {
-          docElm.webkitRequestFullScreen();
-        }
-      }
-    }
-
-    var dailyplans = $('.dailyplan');
-    console.dir(dailyplans);
-
-    dailyplans.forEach(function (plan) {
-      return console.log(plan);
     });
+
+  function page_reload()
+  {
+    $.get(window.location)
+    .done( function() {
+      window.location.reload();
+    })
+    .fail(function() {
+      console.log("reload failed");
+    });
+  };
 
   </script>
 {% endblock %}
