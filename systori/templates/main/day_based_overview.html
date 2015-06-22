@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static i18n l10n customformatting %}
-{% get_current_language as LANGUAGE_CODE %}
+
 {% debug %}
 
 {% block head %}
@@ -86,9 +86,9 @@
 
 {% block extra_js %}
   <script src="{% static "js/jquery.timeago.js" %}"></script>
-  {% if LANGUAGE_CODE == 'de' %}
-  <script src="{% static "js/timeago_locale/jquery.timeago.de.js" %}"></script>
-  {% endif %}
+
+  {% include "main/timeago_js.html" %}
+
   <script type="text/javascript">
   $(document).ready(function(){
     setInterval(function() {page_reload()}, 5000);
