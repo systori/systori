@@ -1269,22 +1269,22 @@ msgstr "in"
 #: systori/templates/main/timeago_js.html:53
 msgctxt "jquery.timeago"
 msgid "ago"
-msgstr ""
+msgstr "null" 
 
 #: systori/templates/main/timeago_js.html:54
 msgctxt "jquery.timeago"
 msgid "from now"
-msgstr ""
+msgstr "seit gerade eben"
 
 #: systori/templates/main/timeago_js.html:55
 msgctxt "jquery.timeago"
 msgid "any moment now"
-msgstr ""
+msgstr "gerade jetzt"
 
 #: systori/templates/main/timeago_js.html:56
 msgctxt "jquery.timeago"
 msgid "less than a minute"
-msgstr "weniger als eine Minute"
+msgstr "weniger als einer Minute"
 
 #: systori/templates/main/timeago_js.html:57
 msgctxt "jquery.timeago"

@@ -29,7 +29,7 @@
           <li><a>{{ request.selected_day|date:"l" }} {{ request.selected_day|localize }}</a></li>
           <li><a href="{{ next_day_url }}">{% trans 'next' %}</a></li>
         </ul>
-        <a class="navbar-brand pull-right">{% trans 'Updated' %} <span class="timeago" title="{% now "c" %}">{% now "c" %}</span></a>
+        <a class="navbar-brand pull-right">Update <span class="timeago" title="{% now "c" %}">{% now "c" %}</span></a>
 
       </div>
     </div>
@@ -85,7 +85,6 @@
 {% endblock %}
 
 {% block extra_js %}
-  <script src="{% static "js/jquery.timeago.js" %}"></script>
 
   {% include "main/timeago_js.html" %}
 
