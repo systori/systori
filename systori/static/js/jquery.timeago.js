@@ -70,7 +70,19 @@
           throw 'timeago allowPast and allowFuture settings can not both be set to false.';
       }
 
-      var $l = this.settings.strings;
+      // Fix for Using the Django Translation Engine @marius
+      var customStrings;
+      if (this.settings.strings == "prefix-ago" || this.settings.strings == "" ) {
+        customStrings = null;
+      } else if (this.settings.strings == "prefix-from-now" || this.settings.strings == "" ) {
+        customStrings = null;
+      } else if (this.settings.strings == "") {
+        customStrings = null;
+      } else {
+        customStrings = this.settings.strings;
+      }
+      var $l = customStrings;
+
       var prefix = $l.prefixAgo;
       var suffix = $l.suffixAgo;
       if (this.settings.allowFuture) {

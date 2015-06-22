@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <script type="text/javascript">
 
 /**
@@ -46,22 +48,22 @@
       localeTitle: false,
       cutoff: 0,
       strings: {
-        prefixAgo: null,
-        prefixFromNow: null,
-        suffixAgo: {% trans "ago" %},
-        suffixFromNow: {% trans "from now" %},
-        inPast: {% trans 'any moment now' %},
-        seconds: {% trans "less than a minute" %},
-        minute: {% trans "about a minute" %},
-        minutes: {% trans "%d minutes" %},
-        hour: {% trans "about an hour" %},
-        hours: {% trans "about %d hours" %},
-        day:{% trans  "a day" %},
-        days: {% trans "%d days" %},
-        month: {% trans "about a month" %},
-        months: {% trans "%d months" %},
-        year: {% trans "about a year" %},
-        years: {% trans "%d years" %},
+        prefixAgo: {% trans "prefix-ago" context "jquery.timeago" %},
+        prefixFromNow: {% trans "prefix-from-now" context "jquery.timeago" %},
+        suffixAgo: {% trans "ago" context "jquery.timeago" %},
+        suffixFromNow: {% trans "from now" context "jquery.timeago" %},
+        inPast: {% trans 'any moment now' context "jquery.timeago" %},
+        seconds: {% trans "less than a minute" context "jquery.timeago" %},
+        minute: {% trans "about a minute" context "jquery.timeago" %},
+        minutes: {% trans "%d minutes" context "jquery.timeago" %},
+        hour: {% trans "about an hour" context "jquery.timeago" %},
+        hours: {% trans "about %d hours" context "jquery.timeago" %},
+        day:{% trans  "a day" context "jquery.timeago" %},
+        days: {% trans "%d days" context "jquery.timeago" %},
+        month: {% trans "about a month" context "jquery.timeago" %},
+        months: {% trans "%d months" context "jquery.timeago" %},
+        year: {% trans "about a year" context "jquery.timeago" %},
+        years: {% trans "%d years" context "jquery.timeago" %},
         wordSeparator: " ",
         numbers: []
       }
