@@ -7,34 +7,33 @@
   <h2 class="sub-header">
     {% blocktrans with project_name=project.name %}Add Contact to {{ project_name }}{% endblocktrans %}
   </h2>
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>#</th>
+      <th>{% trans 'Contact' %}</th>
+      <th>{% trans 'Association' %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for contact in contact_list %}
       <tr>
-        <th>#</th>
-        <th>{% trans 'Contact' %}</th>
-        <th>{% trans 'Association' %}</th>
+        <td>{{ contact.id }}</td>
+        <td><a
+            href="{% url 'contact.view' contact.id %}">{{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }}</a>
+        </td>
+        <td>
+          <form method="post">{% csrf_token %}
+            <input type="hidden" name="project" value="{{ project.id }}"/>
+            <input type="hidden" name="contact" value="{{ contact.id }}"/>
+            {{ form.association }}
+            <input type="submit" value="{% trans 'Add' %}"/>
+          </form>
+        </td>
       </tr>
-      </thead>
-      <tbody>
-      {% for contact in contact_list %}
-        <tr>
-          <td>{{ contact.id }}</td>
-          <td><a
-              href="{% url 'contact.view' contact.id %}">{{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }}</a>
-          </td>
-          <td>
-            <form method="post">{% csrf_token %}
-              <input type="hidden" name="project" value="{{ project.id }}"/>
-              <input type="hidden" name="contact" value="{{ contact.id }}"/>
-              {{ form.association }}
-              <input type="submit" value="{% trans 'Add' %}"/>
-            </form>
-          </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-    <a href="{% url 'project.contact.create' project.id %}">{% trans 'Create' %}</a>
-  </div>
+    {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'project.contact.create' project.id %}">{% trans 'Create' %}</a>
+
 {% endblock content %}

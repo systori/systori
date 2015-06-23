@@ -75,17 +75,17 @@
   <div class="container">
 
     <div class="row back-buttons">
-      <div class="col-xs-8"><a href="{% url 'field.project' project.id %}"
+      <div class="col-xs-8"><a href="{% url 'field.project' project.id %}?copy_source_date={{ request.GET.copy_source_date }}"
                                class="btn btn-default btn-block btn-back">&laquo; {{ project.name }}</a></div>
       <div class="col-xs-4"><a href="{% url 'field.dashboard' %}"
                                class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
     </div>
 
     <div class="row back-buttons">
-      <div class="col-xs-4"><a href="{% url 'field.project.calendar' project.id previous_month %}"
+      <div class="col-xs-4"><a href="{% url 'field.project.calendar' project.id previous_month %}?copy_source_date={{ request.GET.copy_source_date }}"
                                class="btn btn-default btn-block">&laquo; {{ previous_month|date:"F" }}</a></div>
       <div class="col-xs-4 btn">{{ selected_day|date:"F Y" }}</div>
-      <div class="col-xs-4 text-right"><a href="{% url 'field.project.calendar' project.id next_month %}"
+      <div class="col-xs-4 text-right"><a href="{% url 'field.project.calendar' project.id next_month %}?copy_source_date={{ request.GET.copy_source_date }}"
                                           class="btn btn-default btn-block">{{ next_month|date:"F" }} &raquo;</a></div>
     </div>
 

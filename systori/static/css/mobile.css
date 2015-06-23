@@ -55,15 +55,24 @@ body {
 }
 
 .btn-contextual {
+  position: absolute;
+  font-size: 14pt;
   padding: 3px 10px;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  bottom: 0px;
 }
 
 .day-separator a.btn-add-plan {
-  position: absolute;
-  bottom: 0px;
   right: 0px;
-  border-bottom-left-radius: 0px;
-  border-bottom-right-radius: 0px;
+}
+
+.day-separator a.btn-copy-plan {
+  right: 45px;
+}
+
+.day-separator a.btn-paste-plan {
+  right: 90px;
 }
 
 #percent {

@@ -10,26 +10,24 @@
   <div id="map-canvas" style="height: 400px;"></div>
 
   <h2 class="sub-header">{% trans "Flagged Items" %}</h2>
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>{% trans "Job" %}</th>
+      <th>{% trans "Line Item" %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for lineitem in flagged_lineitems.all %}
       <tr>
-        <th>{% trans "Job" %}</th>
-        <th>{% trans "Line Item" %}</th>
+        <td nowrap><a
+            href="{% url 'tasks' lineitem.project.id lineitem.job.id %}#lineitem-{{ lineitem.id }}">{{ lineitem.job }}</a>
+        </td>
+        <td width="100%">{{ lineitem.name }}</td>
       </tr>
-      </thead>
-      <tbody>
-      {% for lineitem in flagged_lineitems.all %}
-        <tr>
-          <td nowrap><a
-              href="{% url 'tasks' lineitem.project.id lineitem.job.id %}#lineitem-{{ lineitem.id }}">{{ lineitem.job }}</a>
-          </td>
-          <td width="100%">{{ lineitem.name }}</td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    {% endfor %}
+    </tbody>
+  </table>
 
 {% endblock %}
 
