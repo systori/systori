@@ -424,16 +424,18 @@ class FieldAssignLabor(TemplateView):
 
         redirect = project_success_url(request)
         if not dailyplan.id:
+
+            if new_assignments:
+                dailyplan.save()
+
             origin = urlquote(_origin_success_url(request, ''))
+
             redirect = reverse('field.dailyplan.assign-tasks',
                                args=[dailyplan.jobsite.id, dailyplan.url_id]) + \
                                '?origin=' + origin
 
             if not new_assignments:
                 return HttpResponseRedirect(redirect)
-
-            else:
-                dailyplan.save()
 
         previous_assignments = dailyplan.users.values_list('id', flat=True)
 
@@ -515,16 +517,18 @@ class FieldAssignEquipment(TemplateView):
 
         redirect = project_success_url(request)
         if not dailyplan.id:
+
+            if new_assignments:
+                dailyplan.save()
+
             origin = urlquote(_origin_success_url(request, ''))
+
             redirect = reverse('field.dailyplan.assign-equipment',
                                args=[dailyplan.jobsite.id, dailyplan.url_id]) + \
                                '?origin=' + origin
 
             if not new_assignments:
                 return HttpResponseRedirect(redirect)
-
-            else:
-                dailyplan.save()
 
         previous_assignments = dailyplan.equipment.values_list('id', flat=True)
 
