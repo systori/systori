@@ -19,13 +19,8 @@
  */
 
 function str_or_null(mystr) {
-  if (mystr == 'prefix-ago') {
-    return null;
-  } else if (mystr == 'prefix-from-now') {
-    return null;
-  } else {
-  return (mystr != "null") ? mystr : null;
-  }
+  var nulls = ['null', 'prefix-ago', 'prefix-from-now'];
+  return $.inArray(mystr, nulls)>-1 ? null : mystr;
 }
 
 (function (factory) {
@@ -62,18 +57,18 @@ function str_or_null(mystr) {
         prefixFromNow: str_or_null("{% trans "prefix-from-now" context "jquery.timeago" %}"),
         suffixAgo: str_or_null("{% trans "ago" context "jquery.timeago" %}"),
         suffixFromNow: str_or_null("{% trans "from now" context "jquery.timeago" %}"),
-        inPast: str_or_null("{% trans 'any moment now' context "jquery.timeago" %}"),
+        inPast: str_or_null("{% trans "any moment now" context "jquery.timeago" %}"),
         seconds: str_or_null("{% trans "less than a minute" context "jquery.timeago" %}"),
         minute: str_or_null("{% trans "about a minute" context "jquery.timeago" %}"),
-        minutes: str_or_null("{% trans "%d minutes" context "jquery.timeago" %}"),
+        minutes: str_or_null("{% trans "{} minutes" context "jquery.timeago" %}"),
         hour: str_or_null("{% trans "about an hour" context "jquery.timeago" %}"),
-        hours: str_or_null("{% trans "about %d hours" context "jquery.timeago" %}"),
+        hours: str_or_null("{% trans "about {} hours" context "jquery.timeago" %}"),
         day: str_or_null("{% trans  "a day" context "jquery.timeago" %}"),
-        days: str_or_null("{% trans "%d days" context "jquery.timeago" %}"),
+        days: str_or_null("{% trans "{} days" context "jquery.timeago" %}"),
         month: str_or_null("{% trans "about a month" context "jquery.timeago" %}"),
-        months: str_or_null("{% trans "%d months" context "jquery.timeago" %}"),
+        months: str_or_null("{% trans "{} months" context "jquery.timeago" %}"),
         year: str_or_null("{% trans "about a year" context "jquery.timeago" %}"),
-        years: str_or_null("{% trans "%d years" context "jquery.timeago" %}"),
+        years: str_or_null("{% trans "{} years" context "jquery.timeago" %}"),
         wordSeparator: " ",
         numbers: []
       }
@@ -107,7 +102,7 @@ function str_or_null(mystr) {
       function substitute(stringOrFunction, number) {
         var string = $.isFunction(stringOrFunction) ? stringOrFunction(number, distanceMillis) : stringOrFunction;
         var value = ($l.numbers && $l.numbers[number]) || number;
-        return string.replace(/%d/i, value);
+        return string.replace(/{}/, value);
       }
 
       var words = seconds < 45 && substitute($l.seconds, Math.round(seconds)) ||

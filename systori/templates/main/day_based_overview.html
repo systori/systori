@@ -29,7 +29,7 @@
           <li><a>{{ request.selected_day|date:"l" }} {{ request.selected_day|localize }}</a></li>
           <li><a href="{{ next_day_url }}">{% trans 'next' %}</a></li>
         </ul>
-        <a class="navbar-brand pull-right">{% trans 'Updated' %} <span class="timeago" title="{% now "c" %}">{% now "c" %}</span></a>
+        <a class="navbar-brand pull-right">{% trans 'Updated' %} <span class="timeago" title="{% now "c" %}">{% trans "less than a minute ago" %}</span></a>
 
       </div>
     </div>
@@ -99,7 +99,7 @@
   function page_reload()
   {
     $.ajax({
-      type: "GET",
+      type: "HEAD",
       url: window.location,
       success: function() {
         window.location.reload();
