@@ -98,7 +98,7 @@ class Job(BetterOrderedModel):
     def propose(self):
         pass
 
-    @transition(field=status, source=PROPOSED, target=APPROVED)
+    @transition(field=status, source=[PROPOSED, DRAFT], target=APPROVED)
     def approve(self):
         pass
 
