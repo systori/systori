@@ -12,7 +12,7 @@ from .models import Proposal, Invoice, DocumentTemplate
 from .forms import ProposalForm, InvoiceForm
 from ..accounting import skr03
 
-from .type import proposal, invoice, evidence
+from .type import proposal, invoice, evidence, specification
 
 
 class DocumentRenderView(SingleObjectMixin, View):
@@ -22,6 +22,16 @@ class DocumentRenderView(SingleObjectMixin, View):
     def pdf(self):
         raise NotImplementedError
 
+
+# Specification
+
+
+class SpecificationPDF(DocumentRenderView):
+    model = Proposal
+
+    def pdf(self):
+        json = self.get_object().json
+        return specification.render(json, self.kwargs['format'])
 
 # Proposal
 

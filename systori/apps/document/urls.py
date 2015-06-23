@@ -4,6 +4,9 @@ from .views import *
 
 urlpatterns = patterns('',
 
+                       url(r'^project-(?P<project_pk>\d+)/specification-(?P<format>(email|print))-(?P<pk>\d+).pdf$',
+                           office_auth(SpecificationPDF.as_view()), name='specification.pdf'),
+
                        url(r'^project-(?P<project_pk>\d+)/create-proposal$', office_auth(ProposalCreate.as_view()),
                            name='proposal.create'),
                        url(r'^project-(?P<project_pk>\d+)/proposal-(?P<pk>\d+)$', office_auth(ProposalView.as_view()),
