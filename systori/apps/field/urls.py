@@ -29,8 +29,7 @@ project_urls = patterns('',
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})?$', field_auth(FieldProjectView.as_view()), name='field.project'),
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/pick-jobsite$', field_auth(FieldPickJobSite.as_view()), name='field.dailyplan.pick-jobsite'),
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/calendar$', field_auth(FieldProjectCalendar.as_view()), name='field.project.calendar'),
-    url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/pick-copy-date/(?P<source_day>\d{4}-\d{2}-\d{2})$', field_auth(FieldPickCopyDate.as_view()), name='field.dailyplan.pick-copy-date'),
-    url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/perform-copy-from/(?P<source_day>\d{4}-\d{2}-\d{2})$', field_auth(FieldPerformCopyFromDate.as_view()), name='field.dailyplan.perform-copy-from-date'),
+    url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/copy/(?P<source_day>\d{4}-\d{2}-\d{2})$', field_auth(FieldCopyPasteDailyPlans.as_view()), name='field.dailyplan.copy-paste'),
 )
 
 urlpatterns = patterns('',

@@ -3,6 +3,7 @@ from calendar import LocaleHTMLCalendar, month_name
 from itertools import groupby
 from django.http import HttpResponseRedirect
 from django.db.models import Q, Count
+from django.utils.http import urlquote
 from django.utils.formats import to_locale, get_language
 from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView
 from django.views.generic.detail import SingleObjectMixin
@@ -23,7 +24,7 @@ def _origin_success_url(request, alternate):
 
 def project_success_url(request):
     return _origin_success_url(request,
-                               reverse('field.project', args=[request.jobsite.project.id]))
+           reverse('field.project', args=[request.jobsite.project.id]))
 
 
 def task_success_url(request, task):
@@ -138,6 +139,7 @@ class FieldProjectView(DetailView):
             grouped_by_days.insert(0, (selected_day, []))
 
         context['daily_plans'] = grouped_by_days
+        context['latest_daily_plan'] = DailyPlan.objects.filter(jobsite__project=project).first()
         context['today'] = date.today()
 
         return context
@@ -198,41 +200,15 @@ class FieldProjectCalendar(TemplateView):
         context['calendar'] = FieldHTMLCalendar(
             project, day.year, day.month,
             previous, context['next_month'],
-            lambda day_date: reverse('field.project', args=[project.id, day_date.isoformat()])
+            lambda day_date:
+                reverse('field.project', args=[project.id, day_date.isoformat()]) +
+                '?copy_source_date=' + self.request.GET.get('copy_source_date','')
         ).render()
 
         return context
 
 
-class FieldPickCopyDate(TemplateView):
-
-    template_name = "field/pick_copy_date.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(FieldPickCopyDate, self).get_context_data(**kwargs)
-
-        project = self.request.project
-        day = date(*map(int, kwargs['source_day'].split('-')))
-
-        context['source_day'] = day
-
-        previous = date(day.year, day.month, 1) - timedelta(days=1)
-        context['previous_month'] = date(previous.year, previous.month, 1)
-
-        next = date(day.year, day.month, 25) + timedelta(days=10)
-        context['next_month'] = date(next.year, next.month, 1)
-
-        selected_day = self.request.selected_day.isoformat()
-        context['calendar'] = FieldHTMLCalendar(
-            project, day.year, day.month,
-            previous, context['next_month'],
-            lambda day_date: reverse('field.dailyplan.perform-copy-from-date', args=[project.id, selected_day, day_date.isoformat()])
-        ).render()
-
-        return context
-
-
-class FieldPerformCopyFromDate(View):
+class FieldCopyPasteDailyPlans(View):
 
     def get(self, request, *args, **kwargs):
 
@@ -258,6 +234,7 @@ class FieldPerformCopyFromDate(View):
 
 
 class FieldGenerateAllDailyPlans(View):
+
     def get(self, request, *args, **kwargs):
 
         selected_day = request.selected_day
@@ -447,10 +424,10 @@ class FieldAssignLabor(TemplateView):
 
         redirect = project_success_url(request)
         if not dailyplan.id:
-            origin = request.GET.get('origin') or request.POST.get('origin')
+            origin = urlquote(_origin_success_url(request, ''))
             redirect = reverse('field.dailyplan.assign-tasks',
                                args=[dailyplan.jobsite.id, dailyplan.url_id]) + \
-                       '?origin=' + origin if origin else ''
+                               '?origin=' + origin
 
             if not new_assignments:
                 return HttpResponseRedirect(redirect)
@@ -538,10 +515,10 @@ class FieldAssignEquipment(TemplateView):
 
         redirect = project_success_url(request)
         if not dailyplan.id:
-            origin = request.GET.get('origin') or request.POST.get('origin')
+            origin = urlquote(_origin_success_url(request, ''))
             redirect = reverse('field.dailyplan.assign-equipment',
                                args=[dailyplan.jobsite.id, dailyplan.url_id]) + \
-                       '?origin=' + origin if origin else ''
+                               '?origin=' + origin
 
             if not new_assignments:
                 return HttpResponseRedirect(redirect)
