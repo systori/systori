@@ -23,41 +23,42 @@
 
     </div>
 
-    {% if not first_daily_plan or first_daily_plan and first_daily_plan.day != selected_day %}
-      <div class="day-separator">
-        {% include "field/project_datepicker.html" with day=selected_day %}
-        {% if user.is_staff and selected_day >= today %}
-          <a href="{% add_daily_plan_url project selected_day %}?origin={{ request.path }}#{{ dailyplan.jobsite.project.id }}"
-             class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
-        {% endif %}
-      </div>
-      {% if user.is_staff and selected_day >= today and latest_daily_plan.day < selected_day %}
-        <a href="{% url 'field.dailyplan.generate' project.id selected_day.isoformat latest_daily_plan.day.isoformat %}"
-           class="btn btn-primary">{% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
-      {% elif user.is_staff and selected_day < today %}
-        <div>{% trans 'Cannot change the past.' %}</div>
-      {% else %}
-        <div>{% blocktrans with day=selected_day %}No daily plans exist for {{ day }}.{% endblocktrans %}</div>
-      {% endif %}
-    {% endif %}
-
     {% for day, plans in daily_plans %}
 
       <div class="day-separator {% if day == today %}today{% endif %}">
+
         {% if day == selected_day %}
           {% include "field/project_datepicker.html" with day=day %}
         {% else %}
           {{ day|date:"l" }}, {{ day|date:"DATE_FORMAT" }}
         {% endif %}
+
         {% if user.is_staff and day >= today %}
+          <a href="{% url 'field.dailyplan.pick-copy-date' project.id selected_day.isoformat selected_day.isoformat %}"
+             class="btn btn-primary btn-contextual btn-copy-plan"><span class="glyphicon glyphicon-duplicate"></span></a>
           <a href="{% add_daily_plan_url project day %}?origin={{ request.path }}#{{ dailyplan.jobsite.project.id }}"
-             class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
+             class="btn btn-primary btn-contextual btn-add-plan"><span class="glyphicon glyphicon-plus"></span></a>
         {% endif %}
+
       </div>
 
       {% for plan in plans %}
 
         {% include "field/dailyplan.html" with dailyplan=plan %}
+
+      {% empty %}
+
+        {% comment %}Only selected_day could be empty.{% endcomment %}
+
+        {% if user.is_staff and day < today %}
+
+          <div>{% trans 'Cannot change the past.' %}</div>
+
+        {% else %}
+
+          <div>{% blocktrans with day=day %}No daily plans exist for {{ day }}.{% endblocktrans %}</div>
+
+        {% endif %}
 
       {% endfor %}
 

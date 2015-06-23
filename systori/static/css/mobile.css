@@ -59,9 +59,19 @@ body {
 }
 
 .day-separator a.btn-add-plan {
+  font-size: 14pt;
   position: absolute;
   bottom: 0px;
   right: 0px;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.day-separator a.btn-copy-plan {
+  font-size: 14pt;
+  position: absolute;
+  bottom: 0px;
+  right: 50px;
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
 }

@@ -133,8 +133,10 @@ class FieldProjectView(DetailView):
         for day, plans in groupby(daily_plans, lambda o: o.day):
             grouped_by_days.append((day, list(plans)))
 
-        context['first_daily_plan'] = daily_plans.first()
-        context['latest_daily_plan'] = DailyPlan.objects.filter(jobsite__project=project).first()
+        # make sure the first record is always the selected_day even if none exists
+        if not grouped_by_days or grouped_by_days[0][0] != selected_day:
+            grouped_by_days.insert(0, (selected_day, []))
+
         context['daily_plans'] = grouped_by_days
         context['today'] = date.today()
 
@@ -142,12 +144,13 @@ class FieldProjectView(DetailView):
 
 
 class FieldHTMLCalendar(LocaleHTMLCalendar):
-    def __init__(self, project, year, month, start_date, end_date):
+    def __init__(self, project, year, month, start_date, end_date, make_link):
         super(FieldHTMLCalendar, self).__init__(locale=(to_locale(get_language()), 'utf-8'))
         self.project = project
         self.year = year
         self.month = month
         self.today = date.today()
+        self.make_link = make_link
 
         plans = DailyPlan.objects \
             .filter(jobsite__project=project,
@@ -172,7 +175,7 @@ class FieldHTMLCalendar(LocaleHTMLCalendar):
                 self.cssclasses[weekday] + \
                 (' today' if self.today == day_date else '') + \
                 (' scheduled' if day_date in self.plans else ''),
-                reverse('field.project', args=[self.project.id, day_date.isoformat()]),
+                self.make_link(day_date),
                 day, self.plans.get(day_date, '')
             )
 
@@ -192,18 +195,50 @@ class FieldProjectCalendar(TemplateView):
         next = date(day.year, day.month, 25) + timedelta(days=10)
         context['next_month'] = date(next.year, next.month, 1)
 
-        context['calendar'] = FieldHTMLCalendar(project, day.year, day.month,
-                                                previous, context['next_month']).render()
+        context['calendar'] = FieldHTMLCalendar(
+            project, day.year, day.month,
+            previous, context['next_month'],
+            lambda day_date: reverse('field.project', args=[project.id, day_date.isoformat()])
+        ).render()
 
         return context
 
 
-class FieldGenerateProjectDailyPlans(View):
+class FieldPickCopyDate(TemplateView):
+
+    template_name = "field/pick_copy_date.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(FieldPickCopyDate, self).get_context_data(**kwargs)
+
+        project = self.request.project
+        day = date(*map(int, kwargs['source_day'].split('-')))
+
+        context['source_day'] = day
+
+        previous = date(day.year, day.month, 1) - timedelta(days=1)
+        context['previous_month'] = date(previous.year, previous.month, 1)
+
+        next = date(day.year, day.month, 25) + timedelta(days=10)
+        context['next_month'] = date(next.year, next.month, 1)
+
+        selected_day = self.request.selected_day.isoformat()
+        context['calendar'] = FieldHTMLCalendar(
+            project, day.year, day.month,
+            previous, context['next_month'],
+            lambda day_date: reverse('field.dailyplan.perform-copy-from-date', args=[project.id, selected_day, day_date.isoformat()])
+        ).render()
+
+        return context
+
+
+class FieldPerformCopyFromDate(View):
+
     def get(self, request, *args, **kwargs):
 
         project = request.project
         selected_day = request.selected_day
-        other_day = date(*map(int, kwargs['other_day'].split('-')))
+        other_day = date(*map(int, kwargs['source_day'].split('-')))
 
         for oldplan in DailyPlan.objects.filter(jobsite__project=project, day=other_day):
 
