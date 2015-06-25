@@ -2,6 +2,15 @@
 {% load i18n staticfiles field_app %}
 
 {% block container %}
+  <style>
+    .panel-heading {
+      position: relative;
+    }
+    .panel-heading > a[name] {
+      position: absolute;
+      top: -50px;
+    }
+  </style>
   <div class="container">
 
     <div class="row back-buttons">
@@ -23,41 +32,69 @@
 
     </div>
 
-    {% if not first_daily_plan or first_daily_plan and first_daily_plan.day != selected_day %}
-      <div class="day-separator">
-        {% include "field/project_datepicker.html" with day=selected_day %}
-        {% if user.is_staff and selected_day >= today %}
-          <a href="{% add_daily_plan_url project selected_day %}?origin={{ request.path }}#{{ dailyplan.jobsite.project.id }}"
-             class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
-        {% endif %}
-      </div>
-      {% if user.is_staff and selected_day >= today and latest_daily_plan.day < selected_day %}
-        <a href="{% url 'field.dailyplan.generate' project.id selected_day.isoformat latest_daily_plan.day.isoformat %}"
-           class="btn btn-primary">{% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
-      {% elif user.is_staff and selected_day < today %}
-        <div>{% trans 'Cannot change the past.' %}</div>
-      {% else %}
-        <div>{% blocktrans with day=selected_day %}No daily plans exist for {{ day }}.{% endblocktrans %}</div>
-      {% endif %}
-    {% endif %}
-
     {% for day, plans in daily_plans %}
 
+      <a name="day-{{ day.isoformat }}"></a>
+
       <div class="day-separator {% if day == today %}today{% endif %}">
+
         {% if day == selected_day %}
           {% include "field/project_datepicker.html" with day=day %}
         {% else %}
-          {{ day|date:"l" }}, {{ day|date:"DATE_FORMAT" }}
+          {{ day|date:"D" }}, {{ day|date:"DATE_FORMAT" }}
         {% endif %}
-        {% if user.is_staff and day >= today %}
-          <a href="{% add_daily_plan_url project day %}?origin={{ request.path }}#{{ dailyplan.jobsite.project.id }}"
-             class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
+
+        {% if user.is_staff %}
+
+          {% if day.isoformat != request.GET.copy_source_date %}
+
+          {% if day >= today and request.GET.copy_source_date %}
+          <a href="{% url 'field.dailyplan.copy-paste' project.id day.isoformat request.GET.copy_source_date %}"
+             class="btn btn-success btn-contextual btn-paste-plan"><span class="glyphicon glyphicon-save-file"></span></a>
+          {% endif %}
+
+          {% if plans %}
+          <a href="?copy_source_date={{ day.isoformat }}"
+             class="btn btn-primary btn-contextual btn-copy-plan"><span class="glyphicon glyphicon-duplicate"></span></a>
+          {% endif %}
+
+          {% else %}
+
+            <a class="btn btn-primary btn-contextual btn-copy-plan disabled"><span class="glyphicon glyphicon-duplicate"></span></a>
+
+          {% endif %}
+
+          {% if day >= today %}
+          <a href="{% add_daily_plan_url project day %}?origin={{ request.path }}%23day-{{ day.isoformat }}"
+             class="btn btn-primary btn-contextual btn-add-plan"><span class="glyphicon glyphicon-plus"></span></a>
+          {% endif %}
+
         {% endif %}
+
       </div>
 
       {% for plan in plans %}
 
         {% include "field/dailyplan.html" with dailyplan=plan %}
+
+      {% empty %}
+
+        {% comment %}Only selected_day could be empty.{% endcomment %}
+
+        {% if user.is_staff and day < today %}
+
+          <div>{% trans 'Cannot change the past.' %}</div>
+
+        {% elif user.is_staff and day >= today and latest_daily_plan %}
+
+          <a href="{% url 'field.dailyplan.copy-paste' project.id day.isoformat latest_daily_plan.day.isoformat %}"
+             class="btn btn-primary">{% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
+
+        {% else %}
+
+          <div>{% blocktrans with day=day %}No daily plans exist for {{ day }}.{% endblocktrans %}</div>
+
+        {% endif %}
 
       {% endfor %}
 

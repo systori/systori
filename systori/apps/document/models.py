@@ -44,7 +44,7 @@ class Proposal(Document):
     def send(self):
         pass
 
-    @transition(field=status, source=SENT, target=APPROVED, custom={'label': _("Approve")})
+    @transition(field=status, source=[SENT, DECLINED], target=APPROVED, custom={'label': _("Approve")})
     def approve(self):
         pass
 
@@ -52,7 +52,7 @@ class Proposal(Document):
     def is_approved(self):
         return self.status == Proposal.APPROVED
 
-    @transition(field=status, source=SENT, target=DECLINED, custom={'label': _("Decline")})
+    @transition(field=status, source=[SENT, APPROVED], target=DECLINED, custom={'label': _("Decline")})
     def decline(self):
         pass
 

@@ -59,7 +59,7 @@ class Project(models.Model):
     def is_prospective(self):
         return self.phase == Project.PROSPECTIVE
 
-    @transition(field=phase, source=PROSPECTIVE, target=TENDERING)
+    @transition(field=phase, source="*", target=TENDERING)
     def begin_tendering(self):
         pass
 
@@ -67,7 +67,7 @@ class Project(models.Model):
     def is_tendering(self):
         return self.phase == Project.TENDERING
 
-    @transition(field=phase, source=TENDERING, target=PLANNING)
+    @transition(field=phase, source="*", target=PLANNING)
     def begin_planning(self):
         pass
 
@@ -75,7 +75,7 @@ class Project(models.Model):
     def is_planning(self):
         return self.phase == Project.PLANNING
 
-    @transition(field=phase, source=PLANNING, target=EXECUTING)
+    @transition(field=phase, source="*", target=EXECUTING)
     def begin_executing(self):
         pass
 
@@ -83,11 +83,11 @@ class Project(models.Model):
     def is_executing(self):
         return self.phase == Project.PLANNING
 
-    @transition(field=phase, source=EXECUTING, target=SETTLEMENT)
+    @transition(field=phase, source="*", target=SETTLEMENT)
     def begin_settlement(self):
         pass
 
-    @transition(field=phase, source=SETTLEMENT, target=WARRANTY)
+    @transition(field=phase, source="*", target=WARRANTY)
     def begin_warranty(self):
         pass
 
