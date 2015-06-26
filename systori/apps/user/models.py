@@ -6,11 +6,16 @@ from django.utils.functional import cached_property
 
 
 class User(AbstractUser):
+    email = models.EmailField(_('email address'), blank=True, unique=True)
+
     is_foreman = models.BooleanField(_('Foreman'), default=False,
                                      help_text=_('Foremen can manage laborers.'))
 
     is_laborer = models.BooleanField(_('Laborer'), default=True,
                                      help_text=_('Laborer has limited access to the system.'))
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name']
 
     @cached_property
     def todays_plans(self):
