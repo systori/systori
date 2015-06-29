@@ -401,7 +401,7 @@ class FieldAssignLabor(TemplateView):
         workers = User.objects \
             .filter(Q(is_laborer=True) | Q(is_foreman=True)) \
             .extra(select={'plan_count': plan_count}, select_params=params) \
-            .order_by('plan_count', 'username') \
+            .order_by('plan_count', 'first_name') \
             .all()
 
         assigned_workers = []

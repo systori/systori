@@ -19,7 +19,7 @@
     {% for user in user_list %}
       <tr>
         <td>{{ user.get_full_name }}</td>
-        <td>{{ user.email }}</td>
+        <td>{% if user.email %}{{ user.email }}{% else %}-{% endif %}</td>
         <td>
           {% if user.has_staff %}
             {% trans 'Staff' %}
