@@ -31,8 +31,8 @@ class InvoiceForm(forms.ModelForm):
     doc_template = forms.ModelChoiceField(
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.INVOICE), required=False)
-    add_terms = forms.BooleanField(label=_('Add Terms'), initial=True,
-                                   required=False)
+    add_terms = forms.BooleanField(label=_('Add Terms'), initial=True, required=False)
+    is_final = forms.BooleanField(label=_('Is Final Invoice?'), initial=False, required=False)
 
     title = forms.CharField(label=_('Title'), initial=_("Invoice"))
     header = forms.CharField(widget=forms.Textarea)
@@ -43,7 +43,7 @@ class InvoiceForm(forms.ModelForm):
 
     class Meta:
         model = Invoice
-        fields = ['doc_template', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes']
+        fields = ['doc_template', 'is_final', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes']
         widgets = {
             'document_date': widgets.DateInput(attrs={'type': 'date'}),
         }

@@ -130,8 +130,11 @@ class InvoiceCreate(CreateView):
     def form_valid(self, form):
         project = Project.prefetch(self.request.project.id)
 
-        # update account balance with any new work that's been done
-        if project.new_amount_to_debit:
+        if form.cleaned_data['is_final']:
+            skr03.final_debit(project)
+
+        elif project.new_amount_to_debit:
+            # update account balance with any new work that's been done
             skr03.partial_debit(project)
 
         form.instance.amount = project.account.balance
