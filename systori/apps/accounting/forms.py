@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 from django.utils.translation import ugettext_lazy as _
 from django.forms import Form, ModelForm, ValidationError
 from django import forms
@@ -10,7 +11,15 @@ class PaymentForm(Form):
     bank_account = forms.ModelChoiceField(label=_('Bank Account'), queryset=Account.objects.banks())
     amount = forms.DecimalField(label=_("Amount"), max_digits=14, decimal_places=4, localize=True)
     received_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
-    is_discounted = forms.BooleanField(label=_('Is discounted?'), initial=False, required=False)
+    discount = forms.TypedChoiceField(
+        label=_('Is discounted?'),
+        coerce=Decimal,
+        choices=[
+            ('0', _('No discount applied')),
+            ('0.03', _('3%')),
+            ('0.1', _('10%')),
+        ]
+    )
 
 
 class AccountForm(ModelForm):

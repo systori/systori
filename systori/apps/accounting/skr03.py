@@ -57,17 +57,17 @@ def partial_credit(projects, payment, received_on=None, bank=None):
     transaction.credit(Account.objects.get(code="1776"), payment - income, received_on=received_on)
 
     transaction.debit(bank, payment)
-    for (project, credit, is_discounted) in projects:
+    for (project, credit, discount) in projects:
         transaction.credit(project.account, credit, is_payment=True, received_on=received_on)  # credit the customer
 
-    for (project, credit, is_discounted) in projects:
+    for (project, credit, discount) in projects:
 
-        if is_discounted:
-            pre_discount_credit = round(credit / (1 - DISCOUNT), 2)  # undo the discount to get original amount invoiced
-            discount = pre_discount_credit - credit
+        if discount > 0:
+            pre_discount_credit = round(credit / (1 - discount), 2)  # undo the discount to get original amount invoiced
+            discount_amount = pre_discount_credit - credit
 
-            transaction.debit(Account.objects.get(code="1710"), discount, received_on=received_on)
-            transaction.credit(project.account, discount, is_discount=True, received_on=received_on)
+            transaction.debit(Account.objects.get(code="1710"), discount_amount, received_on=received_on)
+            transaction.credit(project.account, discount_amount, is_discount=True, received_on=received_on)
 
     transaction.save()
 

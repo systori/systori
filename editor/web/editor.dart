@@ -316,6 +316,43 @@ abstract class EditableElement extends UbrElement {
                 start(focus: false);
         });
 
+        input_views.forEach((Element e) {
+
+            // we listen for paste events and try to clean up the pasted data
+            e.onPaste.listen((Event event) {
+
+                event.preventDefault();
+
+                var data = '';
+
+                if (event.clipboardData.types.contains('text/html')) {
+
+                    data = event.clipboardData.getData('text/html')
+
+                        // div's and p's usually start a new line so we'll convert them to a <br>
+                        .replaceAll(new RegExp(r'<div[^>]*>', caseSensitive: false), '<br>')
+                        .replaceAll(new RegExp(r'<p[^>]*>', caseSensitive: false), '<br>')
+
+                        // cleanup any <br /> or <BR> to <br> for consistency
+                        .replaceAll(new RegExp(r'<br[^>]*>', caseSensitive: false), '<br>')
+
+                        // remove everything else
+                        .replaceAll(new RegExp(r'<(?!br).*?>', caseSensitive: false), '');
+
+                } else {
+
+                    data = event.clipboardData.getData('text/plain');
+
+                }
+
+                // update the input with valid value
+                e.setInnerHtml(data,
+                    validator: new NodeValidatorBuilder.common()..allowElement('br')
+                );
+
+            });
+        });
+
         // recalculate totals when these views are changed
         [qty_view, price_view].where((v) => v != null)
         .forEach((DivElement view) {
@@ -533,21 +570,6 @@ abstract class EditableElement extends UbrElement {
         var data = {
             parent_name: "/api/v1/${parent_name}/${parent_pk}/"
         };
-        input_views.forEach((Element e) {
-            data[e.className] = e.innerHtml
-
-            .replaceAll('<div>', '<br />')
-            .replaceAll('</div>', '')
-
-            // can't support formatting yet
-            .replaceAll(new RegExp(r'<\/?i>'), '')
-            .replaceAll(new RegExp(r'<\/?b>'), '')
-
-            .replaceAll(new RegExp(r'<\/?span.*?>'), '')
-
-            .replaceAll('<br>', '<br />');
-
-        });
         toggle_views.forEach((key, _) {
             data[key] = truthy(key);
         });
