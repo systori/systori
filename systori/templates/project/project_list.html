@@ -4,18 +4,11 @@
 {% block sidebar %}{% include "main/sidebar.html" with section='projects' %}{% endblock %}
 
 {% block content %}
-  <p><a href="{% url 'project.create' %}">{% trans "Create" %}</a> {% trans "or" %} <a
-      href="{% url 'project.import' %}">{% trans "Import" %}</a></p>
-  <div class="row">
-    <div class="col-xs-12">
-      <form class="form-inline">
-          <div class="input-group col-xs-12 col-lg-6">
-            <div class="input-group-addon"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></div>
-            <input type="text" class="form-control" id="filter" placeholder="Filter" />
-          </div>
-      </form>
-    </div>
-  </div>
+  <form action="{% url 'projects' %}">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input type="submit" value="Filter" />
+  </form>
 
   <table class="table table-striped" id="table">
     <thead>
@@ -29,18 +22,18 @@
     </thead>
     <tbody>
       {% for phase, projects in project_groups.items %}
-        {% with phase=projects.0.get_phase_display %}
+        {% with display_phase=projects.0.get_phase_display %}
           {% if projects %}
               <tr style="background-color:
-                {% if forloop.counter == 1 %}#FF97CC;">
-                {% elif forloop.counter == 2 %}#D04242;">
-                {% elif forloop.counter == 3 %}#49A6FF;">
-                {% elif forloop.counter == 4 %}#0F9A0F;">
-                {% elif forloop.counter == 5 %}#FFE039;">
-                {% elif forloop.counter == 6 %}#8C97A2;">
+                {% if phase == "prospective" %} HotPink;">
+                {% elif phase == "tendering" %} Gold;">
+                {% elif phase == "planning" %} Green;">
+                {% elif phase == "executing" %} DodgerBlue;">
+                {% elif phase == "settlement" %} FireBrick;">
+                {% elif phase == "warranty" %} #C6C6CC;">
                 {% else %} inherit;">
                 {% endif %}
-                <td colspan="5" align="center"><b>{{ phase }}</b></td>
+                <td colspan="5" align="center"><b>{{ display_phase }}</b></td>
               </tr>
             {% for project in projects %}
               <tr data-phase="{{ phase }}">
@@ -74,24 +67,5 @@
 {% endblock content %}
 
 {% block extra_js %}
-
-<script type="application/javascript">
-  $("input#filter").keyup(function () {
-      var filter = $(this).val();
-      var regExPattern = "gi";
-      var regEx = new RegExp(filter, regExPattern);
-      $("table tr").each(function () {
-          if($(this).data('phase'))
-          if (
-          $(this).text().search(new RegExp(filter, "i")) < 0
-          && $(this).data('phase').search(regEx) < 0
-          ){
-              $(this).hide();
-          } else {
-              $(this).show();
-          }
-      });
-  });
-</script>
 
 {% endblock %}
