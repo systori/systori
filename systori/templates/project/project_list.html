@@ -1,13 +1,16 @@
 {% extends "frame.html" %}
-{% load i18n %}
+{% load i18n bootstrap %}
 
 {% block sidebar %}{% include "main/sidebar.html" with section='projects' %}{% endblock %}
 
 {% block content %}
-  <form action="{% url 'projects' %}">
+  <form role="form" action="{% url 'projects' %}">
+      <legend>{% trans 'Project Filter' %}</legend>
       {% csrf_token %}
-      {{ form.as_p }}
-      <input type="submit" value="Filter" />
+      {{ form|bootstrap_inline }}
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary" value="Filter">Filter</button>
+      </div>
   </form>
 
   <table class="table table-striped" id="table">

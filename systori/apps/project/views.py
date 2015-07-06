@@ -22,7 +22,6 @@ from django.core.exceptions import ValidationError
 
 
 class ProjectList(FormMixin, ListView):
-    # model = Project
     form_class = FilterForm
     queryset = Project._default_manager.all()
 
@@ -41,37 +40,34 @@ class ProjectList(FormMixin, ListView):
           'data': self.request.GET or None
         }
 
-    def build_filter(self, search_term, search_option):
-        filter = Q()
-
-        searchable_paths = {
-            'projects' : Q(),
-            'contacts' : Q(),
-            'jobs' : Q()
-        }
-        search_terms = search_term.split(' ')
-        for term in search_terms:
-            searchable_paths['projects'] &= Q(name__icontains=term) | Q(description__icontains=term) | \
-                                            Q(jobsites__name__icontains=term) | \
-                                            Q(jobsites__city__icontains=term)
-            searchable_paths['contacts'] &= Q(contacts__first_name__icontains=term) | \
-                                            Q(contacts__last_name__icontains=term) | \
-                                            Q(contacts__business__icontains=term)
-            searchable_paths['jobs'] &= Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
-                                        Q(jobs__taskgroups__name__icontains=term) | \
-                                        Q(jobs__taskgroups__description__icontains=term) | \
-                                        Q(jobs__taskgroups__tasks__name__icontains=term) | \
-                                        Q(jobs__taskgroups__tasks__description__icontains=term)
-
-        filter &= searchable_paths[search_option]
-        return filter
-
     def get_queryset(self, search_term=None, search_option=None):
-        query = Project.objects.prefetch_related('jobsites').exclude(is_template=True)
+        query = Project.objects.without_template().prefetch_related('jobsites')
 
         if search_term:
-            return query.filter(self.build_filter(search_term=search_term,
-                                                  search_option=search_option)).distinct()
+            project_filter = Q()
+
+            searchable_paths = {
+                'projects' : Q(),
+                'contacts' : Q(),
+                'jobs' : Q()
+            }
+            search_terms = search_term.split(' ')
+            for term in search_terms:
+                searchable_paths['projects'] &= Q(name__icontains=term) | Q(description__icontains=term) | \
+                                                Q(jobsites__name__icontains=term) | \
+                                                Q(jobsites__city__icontains=term)
+                searchable_paths['contacts'] &= Q(contacts__first_name__icontains=term) | \
+                                                Q(contacts__last_name__icontains=term) | \
+                                                Q(contacts__business__icontains=term)
+                searchable_paths['jobs'] &= Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
+                                            Q(jobs__taskgroups__name__icontains=term) | \
+                                            Q(jobs__taskgroups__description__icontains=term) | \
+                                            Q(jobs__taskgroups__tasks__name__icontains=term) | \
+                                            Q(jobs__taskgroups__tasks__description__icontains=term)
+
+            project_filter &= searchable_paths[search_option]
+
+            return query.filter(project_filter).distinct()
         else:
             return super(ProjectList, self).get_queryset()
 

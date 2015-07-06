@@ -39,5 +39,5 @@ class FilterForm(Form):
         ('jobs', "{} -> {}".format(_('Projects'),_('Jobs')) )
     }
 
-    search_option = forms.ChoiceField(choices=OPTIONS, initial=['projects'])
+    search_option = forms.ChoiceField(choices=OPTIONS, initial='projects')
     search_term = forms.CharField(label=_('Filter'), max_length=50)
