@@ -29,18 +29,18 @@
         <ul class="nav navbar-nav">
 
           <li class="dropdown">
-            {% if companies|length > 1 %}
-              <a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown">{{ company.name }} <b
+            {% if available_companies|length > 1 %}
+              <a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown">{{ selected_company.name }} <b
                   class="caret"></b></a>
               <ul class="dropdown-menu">
-                {% for available_company in companies %}
-                  {% if available_company.schema != company.schema %}
+                {% for available_company in available_companies %}
+                  {% if available_company.schema != selected_company.schema %}
                     <li><a href="/?__schema={{ available_company.schema }}">{{ available_company.name }}</a></li>
                   {% endif %}
                 {% endfor %}
               </ul>
             {% else %}
-              <a class="navbar-brand" href="/">{{ company.name }}</a>
+              <a class="navbar-brand" href="/">{{ selected_company.name }}</a>
             {% endif %}
           </li>
 

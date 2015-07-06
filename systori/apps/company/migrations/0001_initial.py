@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 from django.conf import settings
-import boardinghouse.base
+import tuath.base
 import django.core.validators
 
 
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(boardinghouse.base.SharedSchemaMixin, models.Model),
+            bases=(tuath.base.SharedSchemaMixin, models.Model),
         ),
         migrations.AddField(
             model_name='access',

@@ -1,1 +1,1 @@
-from boardinghouse.management.commands.migrate import Command
+from tuath.management.commands.migrate import Command

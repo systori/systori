@@ -5,7 +5,8 @@
 
 {% block content %}
   <form method="post">{% csrf_token %}
-    {{ form.as_p }}
+    {{ user_form.as_p }}
+    {{ access_form.as_p }}
     <input type="submit" value="{% trans 'Save' %}"/>
   </form>
 {% endblock %}

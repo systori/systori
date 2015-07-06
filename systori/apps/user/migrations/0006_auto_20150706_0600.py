@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='user',
-            options={'verbose_name_plural': 'users', 'verbose_name': 'user', 'ordering': ('first_name',)},
+            options={'ordering': ('first_name',), 'verbose_name': 'user', 'verbose_name_plural': 'users'},
         ),
         migrations.AlterModelManagers(
             name='user',
@@ -24,9 +24,24 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name='user',
+            name='is_active',
+        ),
+        migrations.RemoveField(
+            model_name='user',
+            name='is_foreman',
+        ),
+        migrations.RemoveField(
+            model_name='user',
+            name='is_laborer',
+        ),
+        migrations.RemoveField(
+            model_name='user',
+            name='is_staff',
+        ),
+        migrations.RemoveField(
+            model_name='user',
             name='username',
         ),
-
         # Altering email column is a two step process, first we allow NULLs in email,
         # second update all blank emails to be NULL, then finally apply
         # the unique constraint.
@@ -43,5 +58,4 @@ class Migration(migrations.Migration):
             name='email',
             field=models.EmailField(verbose_name='email address', null=True, blank=True, unique=True, max_length=254),
         ),
-
     ]

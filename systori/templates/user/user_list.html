@@ -16,22 +16,22 @@
     </tr>
     </thead>
     <tbody>
-    {% for user in user_list %}
+    {% for access in access_list %}
       <tr>
-        <td>{{ user.get_full_name }}</td>
-        <td>{% if user.email %}{{ user.email }}{% else %}-{% endif %}</td>
+        <td>{{ access.user.get_full_name }}</td>
+        <td>{% if access.user.email %}{{ access.user.email }}{% else %}-{% endif %}</td>
         <td>
-          {% if user.has_staff %}
+          {% if access.has_staff %}
             {% trans 'Staff' %}
-          {% elif user.has_foreman %}
+          {% elif access.has_foreman %}
             {% trans 'Foreman' %}
-          {% elif user.has_laborer %}
+          {% elif access.has_laborer %}
             {% trans 'Laborer' %}
           {% endif %}
         </td>
         <td>
-          <a href="{% url 'user.edit' user.id %}">{% trans "Edit" %}</a>
-          <a href="{% url 'user.remove' user.id %}">{% trans "Delete" %}</a>
+          <a href="{% url 'user.edit' access.user.id %}">{% trans "Edit" %}</a>
+          <a href="{% url 'user.remove' access.user.id %}">{% trans "Delete" %}</a>
         </td>
       </tr>
     {% endfor %}

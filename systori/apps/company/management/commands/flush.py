@@ -1,1 +1,1 @@
-from boardinghouse.management.commands.flush import Command
+from tuath.management.commands.flush import Command
