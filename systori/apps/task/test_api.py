@@ -7,7 +7,7 @@ class ResourceTestCaseBase(ResourceTestCase):
     def setUp(self):
         super(ResourceTestCaseBase, self).setUp()
         create_task_data(self)
-        self.api_client.client.login(username='lex', password='pass')
+        self.api_client.client.login(username='lex@damoti.com', password='pass')
 
 
 class JobOrderResourceTest(ResourceTestCaseBase):

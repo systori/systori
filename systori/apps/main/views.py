@@ -8,6 +8,7 @@ from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
 from ..field.utils import get_workday
+from ..user.authorization import get_access_object
 
 
 class OfficeDashboard(TemplateView):
@@ -27,7 +28,7 @@ class IndexView(View):
     def dispatch(self, request, *args, **kwargs):
         user = request.user
         if user.is_authenticated():
-            if get_flavour() == 'full' and user.has_staff:
+            if get_flavour() == 'full' and get_access_object(request).has_staff:
                 view = OfficeDashboard.as_view()
             else:
                 view = FieldDashboard.as_view()

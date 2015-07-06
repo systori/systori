@@ -1,10 +1,13 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from ..company.models import Company
 from ..project.models import *
 from .models import *
 
 
 def create_contact_data(self):
+    self.company = Company.objects.create(schema="test", name="Test")
+    self.company.activate()
     self.project = Project.objects.create(name="my project")
     self.contact = Contact.objects.create(first_name="Ludwig", last_name="von Mises")
 
@@ -29,6 +32,8 @@ class ContactProjectTests(TestCase):
 
 class BillableContactTests(TestCase):
     def setUp(self):
+        self.company = Company.objects.create(schema="test", name="Test")
+        self.company.activate()
         self.project = Project.objects.create(name="my project")
         self.pc1 = ProjectContact.objects.create(project=self.project, contact=
         Contact.objects.create(first_name="A 1", last_name="B 1"))
