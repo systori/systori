@@ -1,7 +1,6 @@
 import os
 from distutils.version import LooseVersion as V
 from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
-import requests
 
 from version import VERSION
 
@@ -116,6 +115,7 @@ REPO = 'https://api.bitbucket.org/1.0/repositories/damoti/systori/'
 
 
 def current_issues():
+    import requests
     r = requests.get(REPO + 'issues?status=new', auth=get_bitbucket_login())
     print
     r.status_code
