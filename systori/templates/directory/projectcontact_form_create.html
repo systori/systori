@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n %}
+{% load i18n bootstrap %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='contacts' %}{% endblock %}
 
@@ -7,9 +7,12 @@
   <h2 class="sub-header">
     {% blocktrans with project_name=project.name %}Create and then add contact to {{ project_name }}{% endblocktrans %}
   </h2>
-  <form method="post">{% csrf_token %}
-    {{ project_contact_form.as_p }}
-    {{ form.as_p }}
-    <input type="submit" value="{% trans "Create" %}"/>
+  <form role="form" method="post">
+      {% csrf_token %}
+      {{ project_contact_form|bootstrap }}
+      {{ form|bootstrap }}
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary" value="{% trans "Create" %}">{% trans "Create" %}</button>
+      </div>
   </form>
 {% endblock content %}
