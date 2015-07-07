@@ -7,7 +7,8 @@ cache:
 before_install:
   - sudo apt-get install fabric
 install:
-  - pip install --upgrade -r requirements/common.pip
+  - pip install -r requirements/common.pip
+#  - pip install --upgrade -r requirements/common.pip
 before_script:
   - fab init_settings:env_name=testing
 script:
