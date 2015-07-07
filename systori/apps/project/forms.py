@@ -34,8 +34,8 @@ class JobSiteForm(ModelForm):
 
 class FilterForm(Form):
     OPTIONS = {
-        ('contacts', _("Reduce Resulset to ProjectContacs only.")),
-        ('jobs', _(""))
+        ('contacts', _("Reduce Resultset to ProjectContacs only.")),
+        ('jobs', _("Reduce Resultset to Jobs only."))
     }
 
     #search_option = forms.ChoiceField(choices=OPTIONS, initial='projects')
