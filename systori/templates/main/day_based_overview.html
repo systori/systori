@@ -49,11 +49,11 @@
           {% for worker in plan.workers.all %}
             {% if worker.is_foreman %}
               <div class="panel-body panel-custom">
-                {{ worker.user.get_full_name }} <span style="color:#4ABEF7;">♔</span>
+                {{ worker.access.user.get_full_name }} <span style="color:#4ABEF7;">♔</span>
               </div>
             {% else %}
               <div class="panel-body panel-custom">
-                {{ worker.user.get_full_name }}
+                {{ worker.access.user.get_full_name }}
               </div>
             {% endif %}
           {% endfor %}

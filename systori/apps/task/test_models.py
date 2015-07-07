@@ -9,10 +9,13 @@ from .models import *
 User = get_user_model()
 
 
-def create_task_data(self, create_user=True):
-    self.company = Company.objects.create(schema="test", name="Test")
+def create_task_data(self, create_user=True, create_company=True):
+    if create_company:
+        self.company = Company.objects.create(schema="test", name="Test")
+        self.company.activate()
     if create_user:
-        self.user = User.objects.create_user('lex', 'lex@damoti.com', 'pass')
+        self.user = User.objects.create_user('lex@damoti.com', 'pass')
+        Access.objects.create(user=self.user, company=self.company)
     self.template_project = Project.objects.create(name="Template Project", is_template=True)
     self.project = Project.objects.create(name="my project")
     self.project2 = Project.objects.create(name="my project 2")

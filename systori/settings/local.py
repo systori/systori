@@ -23,5 +23,8 @@ STATICFILES_DIRS += (
 )
 
 DATABASES['default'].update({
-    'NAME': 'systori_local'
+    'NAME': 'systori_local',
+    'TEST': {
+        'SERIALIZE': False
+    }
 })

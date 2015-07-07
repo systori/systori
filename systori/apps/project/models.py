@@ -288,7 +288,7 @@ class DailyPlan(models.Model):
     """
     jobsite = models.ForeignKey(JobSite, related_name="dailyplans")
     day = models.DateField(_("Day"), default=date.today)
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='TeamMember', related_name="dailyplans")
+    accesses = models.ManyToManyField('company.Access', through='TeamMember', related_name="dailyplans")
     tasks = models.ManyToManyField('task.Task', related_name="dailyplans")
     equipment = models.ManyToManyField('equipment.Equipment', related_name="dailyplans")
 
@@ -313,8 +313,8 @@ class TeamMember(models.Model):
         if they are a foreman or a regular worker.
     """
     dailyplan = models.ForeignKey(DailyPlan, related_name="workers")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="assignments")
+    access = models.ForeignKey('company.Access', related_name="assignments")
     is_foreman = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ['-is_foreman', 'user__first_name']
+        ordering = ['-is_foreman', 'access__user__first_name']

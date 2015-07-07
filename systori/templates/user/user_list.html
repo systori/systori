@@ -1,0 +1,40 @@
+{% extends "frame.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "main/sidebar.html" with section='users' %}{% endblock %}
+
+{% block content %}
+  <a href="{% url 'user.add' %}">{% trans "Add" %}</a>
+  <h2 class="sub-header">{% trans 'Users' %}</h2>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>{% trans 'Name' %}</th>
+      <th>{% trans 'Email' %}</th>
+      <th>{% trans 'Role' %}</th>
+      <th>{% trans 'Actions' %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for access in access_list %}
+      <tr>
+        <td>{{ access.user.get_full_name }}</td>
+        <td>{% if access.user.email %}{{ access.user.email }}{% else %}-{% endif %}</td>
+        <td>
+          {% if access.has_staff %}
+            {% trans 'Staff' %}
+          {% elif access.has_foreman %}
+            {% trans 'Foreman' %}
+          {% elif access.has_laborer %}
+            {% trans 'Laborer' %}
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'user.edit' access.user.id %}">{% trans "Edit" %}</a>
+          <a href="{% url 'user.remove' access.user.id %}">{% trans "Delete" %}</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock content %}

@@ -6,7 +6,8 @@ DEFAULT_COUNTRY = "Deutschland"
 
 GOOGLE_MAPS_API_KEY = "AIzaSyAEhGj7BuZtHzx8lHow-cm6lTCja1txOX4"
 
-BOARDINGHOUSE_SCHEMA_MODEL = 'company.Company'
+SCHEMA_MODEL = 'company.Company'
+SCHEMA_USER_RELATED_NAME = 'companies'
 
 SHARED_MODELS = [
     'company.access',
@@ -82,7 +83,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'systori.apps.company.middleware.CompanyMiddleware',
+    'tuath.middleware.SchemaMiddleware',
+    'systori.apps.company.middleware.AccessMiddleware',
     'systori.apps.project.middleware.ProjectMiddleware',
     'systori.apps.field.middleware.FieldMiddleware'
 )
@@ -119,7 +121,7 @@ LATEX_WORKING_DIR = os.path.join(BASE_DIR, 'templates/document/latex')
 DATABASES = {
     'default': {
         # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'ENGINE': 'boardinghouse.backends.postgres',
+        'ENGINE': 'tuath.backends.postgres',
     }
 }
 

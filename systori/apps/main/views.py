@@ -25,9 +25,8 @@ class OfficeDashboard(TemplateView):
 
 class IndexView(View):
     def dispatch(self, request, *args, **kwargs):
-        user = request.user
-        if user.is_authenticated():
-            if get_flavour() == 'full' and user.has_staff:
+        if request.user.is_authenticated():
+            if get_flavour() == 'full' and request.access.has_staff:
                 view = OfficeDashboard.as_view()
             else:
                 view = FieldDashboard.as_view()

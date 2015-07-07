@@ -364,7 +364,7 @@ class TaskInstance(BetterOrderedModel):
         if action in ['increase', 'decrease']:
             correction = correction or LineItem(taskinstance=self, is_correction=True, price=0)
             correction.name = _("Price correction from %(user)s on %(date)s") % \
-                              {'user': user.username, 'date': date_format(datetime.now())}
+                              {'user': user.get_full_name(), 'date': date_format(datetime.now())}
             correction.unit_qty = 1.0
             correction.unit = _("correction")
             direction = {'increase': 1, 'decrease': -1}[action]
@@ -529,7 +529,7 @@ class ProgressReport(models.Model):
 
     task = models.ForeignKey(Task, related_name="progressreports")
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="filedreports")
+    access = models.ForeignKey('company.Access', related_name="filedreports")
 
     @property
     def complete_percent(self):
