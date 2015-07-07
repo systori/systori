@@ -1,6 +1,8 @@
+from datetime import date
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.utils.functional import cached_property
 from tuath.models import AbstractSchema
 
 
@@ -42,4 +44,8 @@ class Access(models.Model):
     @property
     def has_laborer(self):
         return self.is_laborer or self.has_foreman
+
+    @cached_property
+    def todays_plans(self):
+        return self.dailyplans.filter(day=date.today())
 

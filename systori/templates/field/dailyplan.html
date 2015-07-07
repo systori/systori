@@ -31,7 +31,7 @@
     {% for worker in dailyplan.workers.all %}
 
       <div class="list-group-item nav nav-pills">
-        {{ worker.user.get_full_name }}
+        {{ worker.access.user.get_full_name }}
 
         {% if access.is_staff %}
           <span class="pull-right">
@@ -48,7 +48,7 @@
           {% trans 'Laborer' %}
         {% endif %}
 
-        {% if user.is_staff %}
+        {% if access.is_staff %}
           </a>
           <a href="{% url 'field.dailyplan.member-remove' jobsite.id dailyplan.url_id worker.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
              class="btn btn-default btn-sm">
@@ -71,7 +71,7 @@
 
 
 
-    {% if user.is_staff %}
+    {% if access.is_staff %}
       <a class="list-group-item sub-header clearfix"
          href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
     {% else %}
@@ -80,7 +80,7 @@
 
     {% trans "Equipment" %}
 
-    {% if user.is_staff %}
+    {% if access.is_staff %}
       <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
     {% else %}
       </div>
@@ -102,7 +102,7 @@
 
   {% if 'planning' not in request.path or request.session.is_planning_tasks %}
 
-    {% if user.is_staff %}
+    {% if access.is_staff %}
       <a class="list-group-item sub-header clearfix"
          href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
     {% else %}
@@ -111,7 +111,7 @@
 
   {% trans "Tasks" %}
 
-  {% if user.is_staff %}
+  {% if access.is_staff %}
     <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
   {% else %}
     </div>
@@ -144,12 +144,12 @@
 
 
   {% if 'planning' not in request.path or request.session.is_planning_notes %}
-    {% if user.has_staff or dailyplan.notes %}
+    {% if access.has_staff or dailyplan.notes %}
 
       <div class="list-group-item sub-header">{% trans "Notes" %}</div>
 
       <div class="panel-body">
-        {% if user.has_staff %}
+        {% if access.has_staff %}
           <form action="{% url 'field.dailyplan.save.notes' dailyplan.id %}" method="post">{% csrf_token %}
             <input type="hidden" name="origin" value="{{ request.path }}#plan-{{ dailyplan.id }}"/>
             <textarea rows="4" style="width: 100%;" name="notes">{{ dailyplan.notes }}</textarea>
@@ -165,14 +165,14 @@
   {% endif %}
 
 
-  {% if not user.has_staff %}
+  {% if not access.has_staff %}
 
     <div class="panel-footer clearfix">
 
-      {% if user in dailyplan.users.all %}
+      {% if access in dailyplan.accesses.all %}
 
         {% for worker in dailyplan.workers.all %}
-          {% if worker.user == user %}
+          {% if worker.access == access%}
             <a href="{% url 'field.dailyplan.self.remove' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
                class="btn btn-default">Remove yourself from this assignment.</a>
           {% endif %}

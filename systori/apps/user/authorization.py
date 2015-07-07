@@ -9,14 +9,11 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 
 from ..company.models import Access
 
-def get_access_object(request):
-    return Access.objects.get(user=request.user, company=request.company)
-
 def office_auth(view):
     def is_authorized(request):
         if not request.user.is_authenticated():
             return False  # redirect to login
-        if get_access_object(request).has_staff:
+        if request.access.has_staff:
             return True  # all good
         raise PermissionDenied  # logged in but not allowed
 
@@ -27,7 +24,7 @@ def field_auth(view):
     def is_authorized(request):
         if not request.user.is_authenticated():
             return False  # redirect to login
-        if get_access_object(request).has_laborer:
+        if request.access.has_laborer:
             return True  # all good
         raise PermissionDenied  # logged in but not allowed
 

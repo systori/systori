@@ -95,7 +95,7 @@
       <ul class="list-group">
         {% for report in task.progressreports.all %}
           <li class="list-group-item clearfix"><span
-              class="badge">{{ report.complete|stringformat:'d' }} {{ task.unit }} / {{ report.complete_percent }}%</span>{{ report.timestamp }}<br/>{{ report.user.get_full_name }}
+              class="badge">{{ report.complete|stringformat:'d' }} {{ task.unit }} / {{ report.complete_percent }}%</span>{{ report.timestamp }}<br/>{{ report.access.user.get_full_name }}
               {% if report.comment %}<br/>{{ report.comment }}{% endif %}</li>
         {% endfor %}
       </ul>
