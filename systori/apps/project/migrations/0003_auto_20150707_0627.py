@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(to='company.Access', null=True, related_name='assignments')
         ),
         migrations.RunSQL(
-            "update mehr_handwerk.project_teammember tbl set access_id = ca.id from company_access ca where ca.user_id=tbl.user_id and ca.company_id='mehr_handwerk'"
+            "UPDATE project_teammember tbl SET access_id = ca.id FROM company_access ca WHERE ca.user_id=tbl.user_id AND ca.company_id='mehr_handwerk'"
         ),
         migrations.AlterField(
             model_name='teammember',

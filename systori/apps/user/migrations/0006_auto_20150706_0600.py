@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
             field=models.EmailField(null=True),
         ),
         migrations.RunSQL(
-            "update user_user set email=null where email=''"
+            "UPDATE user_user SET email=null WHERE email=''"
         ),
         migrations.AlterField(
             model_name='user',

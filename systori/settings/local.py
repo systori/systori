@@ -1,4 +1,4 @@
-from .common import *
+from .testing import *
 
 DEBUG = True
 TEMPLATE_DEBUG = True
@@ -23,8 +23,5 @@ STATICFILES_DIRS += (
 )
 
 DATABASES['default'].update({
-    'NAME': 'systori_local',
-    'TEST': {
-        'SERIALIZE': False
-    }
+    'NAME': 'systori_local'
 })
