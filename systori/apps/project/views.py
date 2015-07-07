@@ -46,26 +46,31 @@ class ProjectList(FormMixin, ListView):
         if search_term:
             project_filter = Q()
 
-            searchable_paths = {
-                'projects' : Q(),
-                'contacts' : Q(),
-                'jobs' : Q()
-            }
+            searchable_paths = {}
+
             search_terms = search_term.split(' ')
             for term in search_terms:
-                searchable_paths['projects'] &= Q(name__icontains=term) | Q(description__icontains=term) | \
-                                                Q(jobsites__name__icontains=term) | \
-                                                Q(jobsites__city__icontains=term)
-                searchable_paths['contacts'] &= Q(contacts__first_name__icontains=term) | \
-                                                Q(contacts__last_name__icontains=term) | \
-                                                Q(contacts__business__icontains=term)
-                searchable_paths['jobs'] &= Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
-                                            Q(jobs__taskgroups__name__icontains=term) | \
-                                            Q(jobs__taskgroups__description__icontains=term) | \
-                                            Q(jobs__taskgroups__tasks__name__icontains=term) | \
-                                            Q(jobs__taskgroups__tasks__description__icontains=term)
+                searchable_paths[term] = Q()
 
-            project_filter &= searchable_paths[search_option]
+                if 'contacts' and 'jobs' not in search_option:
+                    searchable_paths[term] |= Q(name__icontains=term) | Q(description__icontains=term) | \
+                                              Q(jobsites__name__icontains=term) | \
+                                              Q(jobsites__city__icontains=term)
+
+                if 'contacts' in search_option:
+                    searchable_paths[term] |= Q(contacts__first_name__icontains=term) | \
+                                              Q(contacts__last_name__icontains=term) | \
+                                              Q(contacts__business__icontains=term)
+
+                if 'jobs' in search_option:
+                    searchable_paths[term] |= Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
+                                              Q(jobs__taskgroups__name__icontains=term) | \
+                                              Q(jobs__taskgroups__description__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__name__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__description__icontains=term)
+
+            for key in searchable_paths.keys():
+                project_filter &= searchable_paths[key]
 
             return query.filter(project_filter).distinct()
         else:
@@ -79,9 +84,12 @@ class ProjectList(FormMixin, ListView):
         form = self.get_form(self.get_form_class())
 
         self.object_list = self.get_queryset().exclude(is_template=True)
+
         if form.is_valid():
             self.object_list = self.get_queryset(search_term=form.cleaned_data['search_term'],
                                                  search_option=form.cleaned_data['search_option'])
+        else:
+            self.object_list = self.get_queryset()
 
         if kwargs['phase_filter']:
             assert kwargs['phase_filter'] in self.phase_order

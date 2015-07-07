@@ -34,10 +34,11 @@ class JobSiteForm(ModelForm):
 
 class FilterForm(Form):
     OPTIONS = {
-        ('projects', _('Projects')),
-        ('contacts', "{} -> {}".format(_('Projects'),_('Contacts')) ),
-        ('jobs', "{} -> {}".format(_('Projects'),_('Jobs')) )
+        ('contacts', _("Reduce Resulset to ProjectContacs only.")),
+        ('jobs', _(""))
     }
 
-    search_option = forms.ChoiceField(choices=OPTIONS, initial='projects')
+    #search_option = forms.ChoiceField(choices=OPTIONS, initial='projects')
+    search_option = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+                                              choices=OPTIONS, required=False)
     search_term = forms.CharField(label=_('Filter'), max_length=50)
