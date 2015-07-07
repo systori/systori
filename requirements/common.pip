@@ -17,5 +17,6 @@ jsonfield
 # rlextra doesn't work if installed in-place (-e)
 git+ssh://git@bitbucket.org/damoti/rlextra.git#egg=rlextra
 
--e ../django-tuath
+-e git+ssh://git@bitbucket.org/damoti/django-tuath.git#egg=django-tuath
+#-e ../django-tuath
 #-e ../django-boardinghouse
