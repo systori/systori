@@ -24,7 +24,24 @@ class UserList(ListView):
             prefetch_related('user')
 
 
-class UserAdd(CreateView):
+class UserView(DetailView):
+    model = User
+
+
+class UserFormRenderer:
+    def render_forms(self, user_form, access_form):
+        return self.render_to_response(self.get_context_data(
+            user_form=user_form, access_form=access_form))
+
+    def get_cleaned_forms(self, user=None, access=None):
+        user_form = UserForm(self.request.POST, instance=user)
+        user_form.full_clean()
+        access_form = AccessForm(self.request.POST, instance=access)
+        access_form.full_clean()
+        return user_form, access_form
+
+
+class UserAdd(CreateView, UserFormRenderer):
     model = User
     success_url = reverse_lazy('users')
 
@@ -35,12 +52,9 @@ class UserAdd(CreateView):
     def post(self, request, *args, **kwargs):
         self.object = None
 
-        user_form = UserForm(request.POST)
-        user_form.full_clean()
+        user_form, access_form = self.get_cleaned_forms()
 
-        access_form = AccessForm(request.POST)
-        access_form.full_clean()
-
+        # Before we do anything else make sure the forms are actually valid.
         if not user_form.is_valid() or not access_form.is_valid():
             return self.render_forms(user_form, access_form)
 
@@ -48,34 +62,30 @@ class UserAdd(CreateView):
 
         user = None
         if email:
+            # Check if a user with this email already exists.
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
                 pass
 
         if not user:
+            # User doesn't already exist, lets create them.
             user = user_form.save()
 
-        if not Access.objects.filter(user=user,company=request.company).exists():
-            access_form.instance.company = request.company
-            access_form.instance.user = user
-            access_form.save()
-        else:
+        elif Access.objects.filter(user=user, company=request.company).exists():
+            # User exists and already has an access object for this company.
             user_form.add_error('email', _('This user is already a member of this company.'))
             return self.render_forms(user_form, access_form)
 
+        # Finally create the access object for this user and company combination.
+        access_form.instance.company = request.company
+        access_form.instance.user = user
+        access_form.save()
+
         return HttpResponseRedirect(self.success_url)
 
-    def render_forms(self, user_form, access_form):
-        return self.render_to_response(self.get_context_data(
-            user_form=user_form, access_form=access_form))
 
-
-class UserView(DetailView):
-    model = User
-
-
-class UserUpdate(UpdateView):
+class UserUpdate(UpdateView, UserFormRenderer):
     model = User
     success_url = reverse_lazy('users')
 
@@ -88,23 +98,14 @@ class UserUpdate(UpdateView):
         user = self.object = self.get_object()
         access = Access.objects.get(user=user, company=request.company)
 
-        user_form = UserForm(request.POST, instance=user)
-        user_form.full_clean()
-
-        access_form = AccessForm(request.POST, instance=access)
-        access_form.full_clean()
+        user_form, access_form = self.get_cleaned_forms(user, access)
 
         if user_form.is_valid() and access_form.is_valid():
             user_form.save()
             access_form.save()
             return HttpResponseRedirect(self.success_url)
-
         else:
             return self.render_forms(user_form, access_form)
-
-    def render_forms(self, user_form, access_form):
-        return self.render_to_response(self.get_context_data(
-            user_form=user_form, access_form=access_form))
 
 
 class UserRemove(DeleteView):

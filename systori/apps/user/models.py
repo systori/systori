@@ -1,11 +1,9 @@
-from datetime import date
 from django.db import models
 from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser, PermissionsMixin
 )
 from django.core.mail import send_mail
 from django.utils.translation import ugettext_lazy as _
-from django.utils.functional import cached_property
 from django.utils import timezone
 
 
@@ -45,10 +43,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = _('user')
         verbose_name_plural = _('users')
         ordering = ('first_name',)
-
-    @cached_property
-    def todays_plans(self):
-        return self.dailyplans.filter(day=date.today())
 
     def get_full_name(self):
         full_name = '%s %s' % (self.first_name, self.last_name)

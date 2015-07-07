@@ -50,7 +50,7 @@ def dashboard_success_url(request):
 
 def delete_when_empty(dailyplan):
     if dailyplan.tasks.count() == 0 and \
-                    dailyplan.users.count() == 0 and \
+                    dailyplan.accesses.count() == 0 and \
                     dailyplan.equipment.count() == 0:
         dailyplan.delete()
         return True
@@ -63,9 +63,9 @@ class FieldDashboard(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(FieldDashboard, self).get_context_data(**kwargs)
 
-        context['todays_plans'] = self.request.user.todays_plans.all()
+        context['todays_plans'] = self.request.access.todays_plans.all()
 
-        context['previous_plans'] = self.request.user.dailyplans \
+        context['previous_plans'] = self.request.access.dailyplans \
             .filter(day__gt=days_ago(5)) \
             .exclude(day=date.today()).all()
 
@@ -226,7 +226,7 @@ class FieldCopyPasteDailyPlans(View):
             for oldmember in oldplan.workers.all():
                 TeamMember.objects.create(
                     dailyplan=newplan,
-                    user=oldmember.user,
+                    access=oldmember.access,
                     is_foreman=oldmember.is_foreman
                 )
 
@@ -252,7 +252,7 @@ class FieldGenerateAllDailyPlans(View):
             for oldmember in oldplan.workers.all():
                 TeamMember.objects.create(
                     dailyplan=newplan,
-                    user=oldmember.user,
+                    access=oldmember.access,
                     is_foreman=oldmember.is_foreman
                 )
 
@@ -301,7 +301,7 @@ class FieldTaskView(UpdateView):
 
         if 'complete' in form.changed_data or form.cleaned_data['comment']:
             ProgressReport.objects.create(
-                user=self.request.user,
+                access=self.request.access,
                 task=self.object,
                 complete=self.object.complete,
                 comment=form.cleaned_data['comment']
@@ -349,12 +349,12 @@ class FieldAddSelfToDailyPlan(View):
         if not dailyplan.id: dailyplan.save()
 
         already_assigned = \
-            TeamMember.objects.filter(dailyplan=dailyplan, user=self.request.user).exists()
+            TeamMember.objects.filter(dailyplan=dailyplan, access=self.request.access).exists()
 
         if not already_assigned:
             TeamMember.objects.create(
                 dailyplan=dailyplan,
-                user=request.user,
+                access=request.access,
                 is_foreman=True if kwargs['role'] == 'foreman' else False
             )
 
@@ -367,7 +367,7 @@ class FieldRemoveSelfFromDailyPlan(View):
     def get(self, request, *args, **kwargs):
         TeamMember.objects.filter(
             dailyplan=request.dailyplan,
-            user=request.user
+            access=request.access
         ).delete()
 
         delete_when_empty(request.dailyplan)
@@ -385,7 +385,7 @@ class FieldAssignLabor(TemplateView):
 
         assigned = []
         if dailyplan.id:
-            assigned = dailyplan.users.all()
+            assigned = dailyplan.accesses.all()
 
         plan_count = """
             SELECT
@@ -394,7 +394,7 @@ class FieldAssignLabor(TemplateView):
                 project_teammember
                 INNER JOIN project_dailyplan ON (project_teammember.dailyplan_id = project_dailyplan.id)
             WHERE
-                project_teammember.user_id = user_user.id AND
+                project_teammember.access_id = company_access.id AND
                 project_dailyplan.day = %s
         """
         params = (dailyplan.day,)
@@ -437,14 +437,14 @@ class FieldAssignLabor(TemplateView):
             if not new_assignments:
                 return HttpResponseRedirect(redirect)
 
-        previous_assignments = dailyplan.users.values_list('id', flat=True)
+        previous_assignments = dailyplan.accesses.values_list('id', flat=True)
 
         # Add new assignments
         for worker in new_assignments:
             if worker not in previous_assignments:
                 TeamMember.objects.create(
                     dailyplan=dailyplan,
-                    user_id=worker
+                    access_id=worker
                 )
 
         # Remove unchecked assignments
@@ -452,7 +452,7 @@ class FieldAssignLabor(TemplateView):
             if worker not in new_assignments:
                 TeamMember.objects.filter(
                     dailyplan=dailyplan,
-                    user_id=worker
+                    access_id=worker
                 ).delete()
 
         delete_when_empty(dailyplan)

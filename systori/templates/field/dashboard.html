@@ -4,7 +4,7 @@
 {% block container %}
   <div class="container">
 
-    {% if user.has_staff %}
+    {% if access.has_staff %}
 
       <div class="panel panel-primary">
 
@@ -25,7 +25,7 @@
 
     <div class="day-separator">
       {% now "l" %}, {% now "DATE_FORMAT" %}
-      {% if user.is_laborer or user.is_foreman %}
+      {% if access.is_laborer or access.is_foreman %}
         <a href="{% url 'field.projects' %}"
            class="btn btn-default btn-contextual btn-add-plan">{% trans "Projects" %} &raquo;</a>
       {% endif %}

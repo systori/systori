@@ -529,7 +529,7 @@ class ProgressReport(models.Model):
 
     task = models.ForeignKey(Task, related_name="progressreports")
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="filedreports")
+    access = models.ForeignKey('company.Access', related_name="filedreports")
 
     @property
     def complete_percent(self):

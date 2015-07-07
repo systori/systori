@@ -85,6 +85,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'tuath.middleware.SchemaMiddleware',
+    'systori.apps.company.middleware.AccessMiddleware',
     'systori.apps.project.middleware.ProjectMiddleware',
     'systori.apps.field.middleware.FieldMiddleware'
 )
