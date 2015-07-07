@@ -7,3 +7,5 @@ script:
   - python setup.py test
 notifications:
   hipchat: c0d0f5b33bd732300040609176b55c@systori
+addons:
+  ssh_known_hosts: bitbucket.org
