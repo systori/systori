@@ -13,7 +13,7 @@
 
     <div class="list-group">
 
-      {% if user.is_staff %}
+      {% if access.is_staff %}
         <a class="list-group-item sub-header clearfix"
            href="{% url 'field.dailyplan.assign-labor' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
       {% else %}
@@ -22,7 +22,7 @@
 
       {% trans "Workers" %}
 
-      {% if user.is_staff %}
+      {% if access.is_staff %}
         <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
       {% else %}
         </div>
@@ -33,7 +33,7 @@
       <div class="list-group-item nav nav-pills">
         {{ worker.user.get_full_name }}
 
-        {% if user.is_staff %}
+        {% if access.is_staff %}
           <span class="pull-right">
           <div class="btn-group" role="group">
           <a href="{% url 'field.dailyplan.toggle-role' jobsite.id dailyplan.url_id worker.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
