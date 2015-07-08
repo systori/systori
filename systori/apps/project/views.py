@@ -93,7 +93,7 @@ class ProjectList(FormMixin, ListView):
 
             return query.without_template().filter(project_filter).distinct()
         else:
-            return super(ProjectList, self).get_queryset()
+            return query.without_template().all()
 
 
     def get(self, request, *args, **kwargs):
