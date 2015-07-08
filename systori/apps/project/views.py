@@ -45,71 +45,48 @@ class ProjectList(FormMixin, ListView):
 
         if search_term:
             project_filter = Q()
-
             searchable_paths = {}
 
             search_terms = search_term.split(' ')
             for term in search_terms:
+                project_query = Q(name__icontains=term) | Q(description__icontains=term) | \
+                                Q(jobsites__name__icontains=term) | \
+                                Q(jobsites__address__icontains=term) | \
+                                Q(jobsites__city__icontains=term)
+                jobs_query =  Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
+                              Q(jobs__taskgroups__name__icontains=term) | \
+                              Q(jobs__taskgroups__description__icontains=term) | \
+                              Q(jobs__taskgroups__tasks__name__icontains=term) | \
+                              Q(jobs__taskgroups__tasks__description__icontains=term) | \
+                              Q(jobs__taskgroups__tasks__taskinstances__name__icontains=term) | \
+                              Q(jobs__taskgroups__tasks__taskinstances__description__icontains=term) | \
+                              Q(jobs__taskgroups__tasks__taskinstances__lineitems__name=term)
+                contacts_query =  Q(contacts__business__icontains=term) | \
+                                  Q(contacts__first_name__icontains=term) | \
+                                  Q(contacts__last_name__icontains=term) | \
+                                  Q(contacts__phone__icontains=term) | \
+                                  Q(contacts__email__icontains=term) | \
+                                  Q(contacts__website__icontains=term) | \
+                                  Q(contacts__address__icontains=term) | \
+                                  Q(contacts__notes__icontains=term) | \
+                                  Q(project_contacts__association__icontains=term)
+                                  #Q(project_contacts__notes__icontains=term)
                 searchable_paths[term] = Q()
 
                 if not search_option:
-                    searchable_paths[term] |= Q(name__icontains=term) | Q(description__icontains=term) | \
-                                              Q(jobsites__name__icontains=term) | \
-                                              Q(jobsites__address__icontains=term) | \
-                                              Q(jobsites__city__icontains=term)
-                    searchable_paths[term] |= Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
-                                              Q(jobs__taskgroups__name__icontains=term) | \
-                                              Q(jobs__taskgroups__description__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__name__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__description__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__taskinstances__name__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__taskinstances__description__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__taskinstances__lineitems__name=term)
-                    searchable_paths[term] |= Q(contacts__business__icontains=term) | \
-                                              Q(contacts__first_name__icontains=term) | \
-                                              Q(contacts__last_name__icontains=term) | \
-                                              Q(contacts__phone__icontains=term) | \
-                                              Q(contacts__email__icontains=term) | \
-                                              Q(contacts__website__icontains=term) | \
-                                              Q(contacts__address__icontains=term) | \
-                                              Q(contacts__notes__icontains=term) | \
-                                              Q(project_contacts__association__icontains=term)
-                                              #Q(project_contacts__notes__icontains=term)
+                    searchable_paths[term] |= project_query
+                    searchable_paths[term] |= jobs_query
+                    searchable_paths[term] |= contacts_query
 
                 if 'contacts' in search_option:
-                    searchable_paths[term] |= Q(contacts__business__icontains=term) | \
-                                              Q(contacts__first_name__icontains=term) | \
-                                              Q(contacts__last_name__icontains=term) | \
-                                              Q(contacts__phone__icontains=term) | \
-                                              Q(contacts__email__icontains=term) | \
-                                              Q(contacts__website__icontains=term) | \
-                                              Q(contacts__address__icontains=term) | \
-                                              Q(contacts__notes__icontains=term) | \
-                                              Q(project_contacts__association__icontains=term)
-                                              # Q(project_contacts__notes__icontains=term)
+                    searchable_paths[term] |= contacts_query
 
                 if 'jobs' in search_option:
-                    searchable_paths[term] |= Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
-                                              Q(jobs__taskgroups__name__icontains=term) | \
-                                              Q(jobs__taskgroups__description__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__name__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__description__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__taskinstances__name__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__taskinstances__description__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__taskinstances__lineitems__name=term)
+                    searchable_paths[term] |= jobs_query
 
                 if 'jobs' in search_option and 'contacts' in search_option:
-                    searchable_paths[term] |= Q(contacts__first_name__icontains=term) | \
-                                              Q(contacts__last_name__icontains=term) | \
-                                              Q(contacts__business__icontains=term)
-                    searchable_paths[term] |= Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
-                                              Q(jobs__taskgroups__name__icontains=term) | \
-                                              Q(jobs__taskgroups__description__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__name__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__description__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__taskinstances__name__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__taskinstances__description__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__taskinstances__lineitems__name=term)
+                    searchable_paths[term] |= contacts_query
+                    searchable_paths[term] |= jobs_query
 
             for key in searchable_paths.keys():
                 project_filter &= searchable_paths[key]
