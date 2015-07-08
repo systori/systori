@@ -60,8 +60,11 @@ class ProjectList(FormMixin, ListView):
                     searchable_paths[term] |= Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
                                               Q(jobs__taskgroups__name__icontains=term) | \
                                               Q(jobs__taskgroups__description__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__name__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__description__icontains=term) | \
                                               Q(jobs__taskgroups__tasks__taskinstances__name__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__taskinstances__description__icontains=term)
+                                              Q(jobs__taskgroups__tasks__taskinstances__description__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__taskinstances__lineitems__name=term)
                     searchable_paths[term] |= Q(contacts__business__icontains=term) | \
                                               Q(contacts__first_name__icontains=term) | \
                                               Q(contacts__last_name__icontains=term) | \
@@ -90,9 +93,12 @@ class ProjectList(FormMixin, ListView):
                                               Q(jobs__taskgroups__name__icontains=term) | \
                                               Q(jobs__taskgroups__description__icontains=term) | \
                                               Q(jobs__taskgroups__tasks__name__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__description__icontains=term)
+                                              Q(jobs__taskgroups__tasks__description__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__taskinstances__name__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__taskinstances__description__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__taskinstances__lineitems__name=term)
 
-                if 'jobs' and 'contacts' in search_option:
+                if 'jobs' in search_option and 'contacts' in search_option:
                     searchable_paths[term] |= Q(contacts__first_name__icontains=term) | \
                                               Q(contacts__last_name__icontains=term) | \
                                               Q(contacts__business__icontains=term)
@@ -100,7 +106,10 @@ class ProjectList(FormMixin, ListView):
                                               Q(jobs__taskgroups__name__icontains=term) | \
                                               Q(jobs__taskgroups__description__icontains=term) | \
                                               Q(jobs__taskgroups__tasks__name__icontains=term) | \
-                                              Q(jobs__taskgroups__tasks__description__icontains=term)
+                                              Q(jobs__taskgroups__tasks__description__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__taskinstances__name__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__taskinstances__description__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__taskinstances__lineitems__name=term)
 
             for key in searchable_paths.keys():
                 project_filter &= searchable_paths[key]
