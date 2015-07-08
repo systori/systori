@@ -6,6 +6,7 @@
 .settings/
 bitbucket.login
 __pycache__
+.coverage
 documents/
 systori/settings/__init__.py
 editor/pubspec.lock

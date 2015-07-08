@@ -1,3 +1,6 @@
+[![Build Status](https://magnum.travis-ci.com/systori/systori.svg?token=euxuNjuxx7RiAnuoQpWu&branch=dev)](https://magnum.travis-ci.com/systori/systori)
+[![Coverage Status](https://coveralls.io/repos/systori/systori/badge.svg?branch=dev&service=github&t=VAhuEl)](https://coveralls.io/github/systori/systori?branch=dev)
+
 ## About Systori
 
 Systori is a suite of tools for craftsmen to create project estimates, to manage those projects and generate invoices.
