@@ -52,17 +52,50 @@ class ProjectList(FormMixin, ListView):
             for term in search_terms:
                 searchable_paths[term] = Q()
 
-                if 'contacts' and 'jobs' not in search_option:
+                if not search_option:
                     searchable_paths[term] |= Q(name__icontains=term) | Q(description__icontains=term) | \
                                               Q(jobsites__name__icontains=term) | \
+                                              Q(jobsites__address__icontains=term) | \
                                               Q(jobsites__city__icontains=term)
+                    searchable_paths[term] |= Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
+                                              Q(jobs__taskgroups__name__icontains=term) | \
+                                              Q(jobs__taskgroups__description__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__taskinstances__name__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__taskinstances__description__icontains=term)
+                    searchable_paths[term] |= Q(contacts__business__icontains=term) | \
+                                              Q(contacts__first_name__icontains=term) | \
+                                              Q(contacts__last_name__icontains=term) | \
+                                              Q(contacts__phone__icontains=term) | \
+                                              Q(contacts__email__icontains=term) | \
+                                              Q(contacts__website__icontains=term) | \
+                                              Q(contacts__address__icontains=term) | \
+                                              Q(contacts__notes__icontains=term) | \
+                                              Q(project_contacts__association__icontains=term)
+                                              #Q(project_contacts__notes__icontains=term)
 
                 if 'contacts' in search_option:
+                    searchable_paths[term] |= Q(contacts__business__icontains=term) | \
+                                              Q(contacts__first_name__icontains=term) | \
+                                              Q(contacts__last_name__icontains=term) | \
+                                              Q(contacts__phone__icontains=term) | \
+                                              Q(contacts__email__icontains=term) | \
+                                              Q(contacts__website__icontains=term) | \
+                                              Q(contacts__address__icontains=term) | \
+                                              Q(contacts__notes__icontains=term) | \
+                                              Q(project_contacts__association__icontains=term)
+                                              # Q(project_contacts__notes__icontains=term)
+
+                if 'jobs' in search_option:
+                    searchable_paths[term] |= Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
+                                              Q(jobs__taskgroups__name__icontains=term) | \
+                                              Q(jobs__taskgroups__description__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__name__icontains=term) | \
+                                              Q(jobs__taskgroups__tasks__description__icontains=term)
+
+                if 'jobs' and 'contacts' in search_option:
                     searchable_paths[term] |= Q(contacts__first_name__icontains=term) | \
                                               Q(contacts__last_name__icontains=term) | \
                                               Q(contacts__business__icontains=term)
-
-                if 'jobs' in search_option:
                     searchable_paths[term] |= Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
                                               Q(jobs__taskgroups__name__icontains=term) | \
                                               Q(jobs__taskgroups__description__icontains=term) | \
@@ -72,7 +105,7 @@ class ProjectList(FormMixin, ListView):
             for key in searchable_paths.keys():
                 project_filter &= searchable_paths[key]
 
-            return query.filter(project_filter).distinct()
+            return query.without_template().filter(project_filter).distinct()
         else:
             return super(ProjectList, self).get_queryset()
 
@@ -89,7 +122,7 @@ class ProjectList(FormMixin, ListView):
             self.object_list = self.get_queryset(search_term=form.cleaned_data['search_term'],
                                                  search_option=form.cleaned_data['search_option'])
         else:
-            self.object_list = self.get_queryset()
+            self.object_list = self.get_queryset().without_template()
 
         if kwargs['phase_filter']:
             assert kwargs['phase_filter'] in self.phase_order
