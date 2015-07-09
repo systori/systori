@@ -1,11 +1,12 @@
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings.testing")
 import django
 django.setup()
 
 import sys
 import unittest
-from django.test import LiveServerTestCase
+from django.test import SimpleTestCase
+from django.test.testcases import LiveServerThread, _StaticFilesHandler
 from selenium import webdriver
 from sauceclient import SauceClient
 
@@ -21,15 +22,17 @@ SAUCE_BROWSERS = [
 ]
 
 
-class SystoriUITestCase(LiveServerTestCase):
+class BaseTestCase(SimpleTestCase):
+
+    @property
+    def live_server_url(self):
+        return 'http://%s:%s' % (
+            self.server.host, self.server.port)
 
     def setUp(self):
-        if not hasattr(self, 'driver'):
-            self.driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")#
         self.driver.implicitly_wait(30)
 
-
-class LoginTests(SystoriUITestCase):
+class LoginTests(BaseTestCase):
 
     def test_login(self):
         self.driver.get(self.live_server_url)
@@ -50,13 +53,14 @@ class LoginTests(SystoriUITestCase):
 #        assert 'I am some other page content' in body.text
 
 
-def make_suite(driver, sauce=None):
+def make_suite(driver, server, sauce=None):
     suite = unittest.findTestCases(sys.modules[__name__])
     suite.sauce = sauce
     suite.driver = driver
     for subsuite in suite:
         for test in subsuite:
             test.driver = driver
+            test.server = server
     return suite
 
 
@@ -71,6 +75,7 @@ def sauce_update(suite, result):
 
 
 def run_tests(runner, suite, cleanup, keep_open):
+
     name = '{platform} {browserName} {version}'.format(**suite.driver.desired_capabilities)
     print("Starting: {}".format(name))
 
@@ -89,17 +94,30 @@ def run_tests(runner, suite, cleanup, keep_open):
         print("Failed: {}".format(name))
 
 
+def start_django():
+    server = LiveServerThread('localhost', range(8100, 8200), _StaticFilesHandler)
+    server.daemon = True
+    server.start()
+    return server
+
+
 def main(driver_names, keep_open, not_parallel):
 
+    server = start_django()
+
+    # while django is starting we setup the webdrivers...
+    drivers = []
     suites = []
 
     if 'chrome' in driver_names:
         chrome = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
-        suites.append((make_suite(chrome), None))
+        drivers.append(chrome)
+        suites.append((make_suite(chrome, server), None))
 
     if 'firefox' in driver_names:
         firefox = webdriver.Firefox()
-        suites.append((make_suite(firefox), None))
+        drivers.append(firefox)
+        suites.append((make_suite(firefox, server), None))
 
     if 'saucelabs' in driver_names:
         username = os.environ.get('SAUCE_USERNAME', "systori_ci")
@@ -118,7 +136,17 @@ def main(driver_names, keep_open, not_parallel):
                 },
                 command_executor=sauce_url
             )
-            suites.append((make_suite(saucelabs, sauce), sauce_update))
+            drivers.append(saucelabs)
+            suites.append((make_suite(saucelabs, server, sauce), sauce_update))
+
+    # if django is still not ready, then we wait...
+    server.is_ready.wait()
+
+    # if django couldn't start, quit() the webdrivers and raise error
+    if server.error:
+        for driver in drivers:
+            driver.quit()
+        raise server.error
 
     from concurrent.futures import ThreadPoolExecutor
     with ThreadPoolExecutor(max_workers=4) as executor:
@@ -129,6 +157,9 @@ def main(driver_names, keep_open, not_parallel):
             else:
                 executor.submit(run_tests, runner, suite, cleanup, keep_open)
 
+    # all done, stop django
+    server.terminate()
+    server.join()
 
 if __name__ == "__main__":
     import argparse

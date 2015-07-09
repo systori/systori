@@ -11,8 +11,12 @@
 
     <title>{% block title %}systori{% endblock %}</title>
 
+    {% comment %}
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/flick/jquery-ui.css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    {% endcomment %}
+    <link rel="stylesheet" href="{% static "css/jquery-ui.css" %}">
+    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
     <link href="{% block custom_css %}{% static "css/main.css" %}{% endblock %}" rel="stylesheet">
   {% endblock %}
 </head>
@@ -89,9 +93,14 @@
 
 {% block container %}{% endblock container %}
 
+{% comment %}
 <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
 <script src="//code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+{% endcomment %}
+<script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
+<script src="{% static "js/jquery-ui.min.js" %}"></script>
+<script src="{% static "js/bootstrap.min.js" %}"></script>
 
 {% block lang_js %}
   <script src="{% static "js/language_picker.js" %}"></script>{% endblock lang_js %}

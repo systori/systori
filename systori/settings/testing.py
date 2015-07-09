@@ -1,8 +1,8 @@
 from .common import *
 import sys
 
-DEBUG = False
-TEMPLATE_DEBUG = False
+DEBUG = True
+TEMPLATE_DEBUG = True
 
 DATABASES['default'].update({
     'NAME': 'systori',
