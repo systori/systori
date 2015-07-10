@@ -18,11 +18,11 @@ TRAVIS_BUILD_NUMBER = os.environ.get('TRAVIS_BUILD_NUMBER', 1)
 CHROME_VERSION = "43.0"
 SAUCE_BROWSERS = [
 
-    #("OS X 10.10", "safari", "8.0"), BROKEN FOR NOW
-    ("OS X 10.10", "chrome", CHROME_VERSION),
+    ("OS X 10.10", "safari", "8.0"), # BROKEN FOR NOW
+    #("OS X 10.10", "chrome", CHROME_VERSION),
 
-    ("Windows 7",  "internet explorer", "11.0"),
-    ("Windows 7",  "chrome", CHROME_VERSION),
+    #("Windows 7",  "internet explorer", "11.0"),
+    #("Windows 7",  "chrome", CHROME_VERSION),
 
 ]
 
@@ -99,19 +99,16 @@ def main(driver_names, keep_open, not_parallel):
     server = start_django()
 
     # while django is starting we setup the webdrivers...
-    drivers = []
     suites = []
 
     if 'chrome' in driver_names:
         chrome = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
         chrome.implicitly_wait(SELENIUM_WAIT_TIME)
-        drivers.append(chrome)
         suites.append((make_suite(chrome, server), None))
 
     if 'firefox' in driver_names:
         firefox = webdriver.Firefox()
         firefox.implicitly_wait(SELENIUM_WAIT_TIME)
-        drivers.append(firefox)
         suites.append((make_suite(firefox, server), None))
 
     if 'saucelabs' in driver_names:
@@ -132,7 +129,6 @@ def main(driver_names, keep_open, not_parallel):
                 command_executor=sauce_url
             )
             saucelabs.implicitly_wait(SELENIUM_WAIT_TIME)
-            drivers.append(saucelabs)
             suites.append((make_suite(saucelabs, server, sauce), sauce_update))
 
     # if django is still not ready, then we wait...
@@ -140,8 +136,8 @@ def main(driver_names, keep_open, not_parallel):
 
     # if django couldn't start, quit() the webdrivers and raise error
     if server.error:
-        for driver in drivers:
-            driver.quit()
+        for suite, cleanup in suites:
+            suite.driver.quit()
         raise server.error
 
     from concurrent.futures import ThreadPoolExecutor
