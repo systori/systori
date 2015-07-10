@@ -8,7 +8,8 @@ cache:
     - $HOME/virtualenv
 
 before_install:
-  - sudo apt-get install fabric language-pack-de
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq fabric language-pack-de
   - sudo dpkg-reconfigure locales
   - curl http://storage.googleapis.com/dart-archive/channels/stable/release/latest/sdk/dartsdk-linux-x64-release.zip > $HOME/dartsdk.zip
   - unzip $HOME/dartsdk.zip -d $HOME > /dev/null
