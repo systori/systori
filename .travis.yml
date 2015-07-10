@@ -20,7 +20,7 @@ install:
 
 before_script:
   - fab init_settings:env_name=testing
-  - cd editor && pub get && pub build
+  - cd editor && pub get && pub build && cd ..
 
 script:
   - coverage run -p --branch --source=systori manage.py test systori
