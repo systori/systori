@@ -6,9 +6,14 @@ python:
 cache:
   directories:
     - $HOME/virtualenv
+    - $HOME/.pub-cache
 
 before_install:
   - sudo apt-get install fabric
+    - wget -O /tmp/dartsdk.zip http://storage.googleapis.com/dart-archive/channels/stable/release/latest/sdk/dartsdk-linux-x64-release.zip
+    - unzip /tmp/dartsdk.zip /tmp
+    - export DART_SDK=/tmp/dart-sdk
+    - export PATH=$DART_SDK/bin:$PATH
 
 install:
   - pip install --upgrade pip
@@ -16,9 +21,10 @@ install:
 
 before_script:
   - fab init_settings:env_name=testing
+  - cd editor && pub get && pub build
 
 script:
-  - coverage run -p --branch --source=systori manage.py test
+  - coverage run -p --branch --source=systori manage.py test systori
   - coverage run -p --branch --source=systori uitest.py saucelabs
 
 after_script:

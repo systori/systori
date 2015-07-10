@@ -4,9 +4,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings.testing")
 import django
 django.setup()
 
-import sys
 import unittest
-from django.test import SimpleTestCase
 from django.test.testcases import LiveServerThread, _StaticFilesHandler
 from django.test.runner import setup_databases
 from selenium import webdriver
@@ -29,43 +27,19 @@ SAUCE_BROWSERS = [
 ]
 
 
-class BaseTestCase(SimpleTestCase):
-
-    @property
-    def live_server_url(self):
-        return 'http://%s:%s' % (
-            self.server.host, self.server.port)
-
-    def setUp(self):
-        self.driver.implicitly_wait(30)
-
-
-class LoginTests(BaseTestCase):
-
-    def test_login(self):
-
-        self.driver.get(self.live_server_url)
-        assert "systori" in self.driver.title
-
-        username = self.driver.find_element_by_id('input_username')
-        username.send_keys('test@systori.com')
-        password = self.driver.find_element_by_id('input_password')
-        password.send_keys('pass')
-        self.driver.find_element_by_tag_name('button').click()
-
-        body = self.driver.find_element_by_xpath('//body')
-        assert 'Pinnwand' in body.text
+SELENIUM_WAIT_TIME = 10 # max seconds to wait for page to load before failing
 
 
 def make_suite(driver, server, sauce=None):
-    suite = unittest.findTestCases(sys.modules[__name__])
-    suite.sauce = sauce
-    suite.driver = driver
-    for subsuite in suite:
-        for test in subsuite:
-            test.driver = driver
-            test.server = server
-    return suite
+    main_suite = unittest.defaultTestLoader.discover('uitests')
+    main_suite.sauce = sauce
+    main_suite.driver = driver
+    for suite in main_suite:
+        for sub_suite in suite:
+            for test in sub_suite:
+                test.driver = driver
+                test.server = server
+    return main_suite
 
 
 def sauce_update(suite, result):
@@ -113,7 +87,7 @@ def setup_test_data():
     company.activate()
     user = User.objects.create_user('test@systori.com', 'pass')
     Access.objects.create(user=user, company=company, is_staff=True)
-    template_project = Project.objects.create(name="Template Project", is_template=True)
+    Project.objects.create(name="Template Project", is_template=True)
 
 
 def main(driver_names, keep_open, not_parallel):
@@ -130,11 +104,13 @@ def main(driver_names, keep_open, not_parallel):
 
     if 'chrome' in driver_names:
         chrome = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
+        chrome.implicitly_wait(SELENIUM_WAIT_TIME)
         drivers.append(chrome)
         suites.append((make_suite(chrome, server), None))
 
     if 'firefox' in driver_names:
         firefox = webdriver.Firefox()
+        firefox.implicitly_wait(SELENIUM_WAIT_TIME)
         drivers.append(firefox)
         suites.append((make_suite(firefox, server), None))
 
@@ -155,6 +131,7 @@ def main(driver_names, keep_open, not_parallel):
                 },
                 command_executor=sauce_url
             )
+            saucelabs.implicitly_wait(SELENIUM_WAIT_TIME)
             drivers.append(saucelabs)
             suites.append((make_suite(saucelabs, server, sauce), sauce_update))
 

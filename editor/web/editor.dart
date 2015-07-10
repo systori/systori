@@ -570,6 +570,21 @@ abstract class EditableElement extends UbrElement {
         var data = {
             parent_name: "/api/v1/${parent_name}/${parent_pk}/"
         };
+        input_views.forEach((Element e) {
+            data[e.className] = e.innerHtml
+
+            .replaceAll('<div>', '<br />')
+            .replaceAll('</div>', '')
+
+            // can't support formatting yet
+            .replaceAll(new RegExp(r'<\/?i>'), '')
+            .replaceAll(new RegExp(r'<\/?b>'), '')
+
+            .replaceAll(new RegExp(r'<\/?span.*?>'), '')
+
+            .replaceAll('<br>', '<br />');
+
+        });
         toggle_views.forEach((key, _) {
             data[key] = truthy(key);
         });
