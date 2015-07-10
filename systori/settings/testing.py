@@ -1,6 +1,8 @@
 from .common import *
 import sys
 
+GOOGLE_MAPS_API_KEY = "AIzaSyDvwtHHJ_FrNVkbKoHoWh2r2E5PtV5rmLY"
+
 DEBUG = True
 TEMPLATE_DEBUG = True
 

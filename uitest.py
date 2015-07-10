@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings.testing")
 import django
@@ -7,6 +8,7 @@ import sys
 import unittest
 from django.test import SimpleTestCase
 from django.test.testcases import LiveServerThread, _StaticFilesHandler
+from django.test.runner import setup_databases
 from selenium import webdriver
 from sauceclient import SauceClient
 
@@ -37,25 +39,22 @@ class BaseTestCase(SimpleTestCase):
     def setUp(self):
         self.driver.implicitly_wait(30)
 
+
 class LoginTests(BaseTestCase):
 
     def test_login(self):
+
         self.driver.get(self.live_server_url)
         assert "systori" in self.driver.title
-#        comments = self.driver.find_element_by_id('comments')
-#        comments.send_keys('Hello! I am some example comments.'
-#                           ' I should be in the page after submitting the form')
-#        self.driver.find_element_by_id('submit').click()
-#
-#        commented = self.driver.find_element_by_id('your_comments')
-#        assert ('Your comments: Hello! I am some example comments.'
-#                ' I should be in the page after submitting the form'
-#                in commented.text)
-#        body = self.driver.find_element_by_xpath('//body')
-#        assert 'I am some other page content' not in body.text
-#        self.driver.find_elements_by_link_text('i am a link')[0].click()
-#        body = self.driver.find_element_by_xpath('//body')
-#        assert 'I am some other page content' in body.text
+
+        username = self.driver.find_element_by_id('input_username')
+        username.send_keys('test@systori.com')
+        password = self.driver.find_element_by_id('input_password')
+        password.send_keys('pass')
+        self.driver.find_element_by_tag_name('button').click()
+
+        body = self.driver.find_element_by_xpath('//body')
+        assert 'Pinnwand' in body.text
 
 
 def make_suite(driver, server, sauce=None):
@@ -106,7 +105,22 @@ def start_django():
     return server
 
 
+def setup_test_data():
+    from systori.apps.company.models import Company, Access
+    from systori.apps.user.models import User
+    from systori.apps.project.models import Project
+    company = Company.objects.create(schema="test", name="Test")
+    company.activate()
+    user = User.objects.create_user('test@systori.com', 'pass')
+    Access.objects.create(user=user, company=company, is_staff=True)
+    template_project = Project.objects.create(name="Template Project", is_template=True)
+
+
 def main(driver_names, keep_open, not_parallel):
+
+    setup_databases(verbosity=True, interactive=False, keepdb=False)
+
+    setup_test_data()
 
     server = start_django()
 
@@ -165,6 +179,7 @@ def main(driver_names, keep_open, not_parallel):
     # all done, stop django
     server.terminate()
     server.join()
+
 
 if __name__ == "__main__":
     import argparse
