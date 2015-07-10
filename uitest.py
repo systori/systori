@@ -10,24 +10,24 @@ from django.test.runner import setup_databases
 from selenium import webdriver
 from sauceclient import SauceClient
 
-
 TRAVIS_JOB_NUMBER = os.environ.get('TRAVIS_JOB_NUMBER', 1)
 TRAVIS_BUILD_NUMBER = os.environ.get('TRAVIS_BUILD_NUMBER', 1)
-
 
 CHROME_VERSION = "43.0"
 SAUCE_BROWSERS = [
 
-    ("OS X 10.10", "safari", "8.0"), # BROKEN FOR NOW
+    #("OS X 10.10", "safari", "8.0"),
     #("OS X 10.10", "chrome", CHROME_VERSION),
 
     #("Windows 7",  "internet explorer", "11.0"),
-    #("Windows 7",  "chrome", CHROME_VERSION),
+    ("Windows 7",  "chrome", CHROME_VERSION),
 
 ]
 
+SELENIUM_WAIT_TIME = 15 # max seconds to wait for page to load before failing
 
-SELENIUM_WAIT_TIME = 10 # max seconds to wait for page to load before failing
+SAUCE_PORTS = [8003, 8031, 8765]
+# per: https://docs.saucelabs.com/reference/sauce-connect/#can-i-access-applications-on-localhost-
 
 
 def make_suite(driver, server, sauce=None):
@@ -73,7 +73,7 @@ def run_tests(runner, suite, cleanup, keep_open):
 
 
 def start_django():
-    server = LiveServerThread('localhost', range(8100, 8200), _StaticFilesHandler)
+    server = LiveServerThread('localhost', SAUCE_PORTS, _StaticFilesHandler)
     server.daemon = True
     server.start()
     return server
