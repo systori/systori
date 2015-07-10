@@ -11,7 +11,7 @@ from selenium import webdriver
 from sauceclient import SauceClient
 
 
-TRAVIS_JOB_NUMBER = os.environ.get('TRAVIS_JOB_NUMBER', 123)
+TRAVIS_JOB_NUMBER = os.environ.get('TRAVIS_JOB_NUMBER', 1)
 TRAVIS_BUILD_NUMBER = os.environ.get('TRAVIS_BUILD_NUMBER', 1)
 
 

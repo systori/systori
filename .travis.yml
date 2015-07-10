@@ -1,25 +1,33 @@
 language: python
+
 python:
   - "3.4"
+
 cache:
   directories:
     - $HOME/virtualenv
-addons:
-  sauce_connect: true
+
 before_install:
   - sudo apt-get install fabric
+
 install:
   - pip install --upgrade pip
   - pip install --upgrade -r requirements/dev.pip
+
 before_script:
   - fab init_settings:env_name=testing
+
 script:
   - coverage run --source=systori manage.py test
   - coverage run --source=systori uitest.py saucelabs
+
 after_script:
   - coveralls
+
 notifications:
   hipchat: c0d0f5b33bd732300040609176b55c@systori
   email: false
+
 addons:
   ssh_known_hosts: bitbucket.org
+  sauce_connect: true
