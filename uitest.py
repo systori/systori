@@ -10,10 +10,15 @@ from django.test.testcases import LiveServerThread, _StaticFilesHandler
 from selenium import webdriver
 from sauceclient import SauceClient
 
+
+TRAVIS_JOB_NUMBER = os.environ.get('TRAVIS_JOB_NUMBER', 123)
+TRAVIS_BUILD_NUMBER = os.environ.get('TRAVIS_BUILD_NUMBER', 1)
+
+
 CHROME_VERSION = "43.0"
 SAUCE_BROWSERS = [
 
-    ("OS X 10.10", "safari", "8.0"),
+    #("OS X 10.10", "safari", "8.0"), BROKEN FOR NOW
     ("OS X 10.10", "chrome", CHROME_VERSION),
 
     ("Windows 7",  "internet explorer", "11.0"),
@@ -65,7 +70,7 @@ def make_suite(driver, server, sauce=None):
 
 
 def sauce_update(suite, result):
-    build_num = suite.driver.desired_capabilities['build']
+    build_num = TRAVIS_BUILD_NUMBER
     if result.wasSuccessful():
         suite.sauce.jobs.update_job(suite.driver.session_id,
             passed=True, build_num=build_num, public="share")
@@ -131,8 +136,8 @@ def main(driver_names, keep_open, not_parallel):
                     "platform": platform,
                     "browserName": browser,
                     "version": version,
-                    "tunnel-identifier": os.environ.get('TRAVIS_JOB_NUMBER', 1),
-                    "build": os.environ.get('TRAVIS_BUILD_NUMBER', 1)
+                    "tunnel-identifier": TRAVIS_JOB_NUMBER,
+                    "build": TRAVIS_BUILD_NUMBER
                 },
                 command_executor=sauce_url
             )
