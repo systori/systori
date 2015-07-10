@@ -18,10 +18,11 @@ before_script:
   - fab init_settings:env_name=testing
 
 script:
-  - coverage run --source=systori manage.py test
-  - coverage run --source=systori uitest.py saucelabs
+  - coverage run -p --branch --source=systori manage.py test
+  - coverage run -p --branch --source=systori uitest.py saucelabs
 
 after_script:
+  - coverage combine
   - coveralls
 
 notifications:
