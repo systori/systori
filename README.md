@@ -76,7 +76,7 @@ $ workon systori
 
 ## Development Environment
 
-For development of systori we've standardized on PyDev (if you prefer a different IDE and know how to set it up and maintain it, you're welcome to skip this section.).
+For development of systori you can use either PyCharm or PyDev.
 
 
 ### Install Oracle Java 7
@@ -88,7 +88,30 @@ $ sudo apt-get install oracle-java7-installer
 ```
 
 
-### Eclipse
+### Option 1. PyCharm
+
+1. Get PyCharm: https://www.jetbrains.com/pycharm/download/
+
+2. Extract PyCharm.
+
+3. Install Dart plugin.
+
+#### Database Access
+
+If you want to use the Database tool in PyCharm to access the local database it's easiest if you disable password authentication in postgresql.
+
+Edit pg_hba.conf, `sudo vi /etc/postgresql/9.3/main/pg_hba.conf` changing the host 127.0.0.1 line to be:
+
+    host    all             all             127.0.0.1/32            trust
+
+Then restart postgres, `/etc/init.d/postgresql restart`.
+
+You should now be able to connect and browse the `systori_local` database.
+
+
+### Option 2. Eclipse
+
+#### Install Eclipse
 
 1. Download latest [Eclipse IDE for Java Developers](http://www.eclipse.org/downloads/)
 
@@ -133,7 +156,7 @@ $ sudo apt-get install oracle-java7-installer
 1. Open file manager (Nautilus) and find the file you created above. Drag the file onto the Ubuntu Unity side bar.
 
 
-### PyDev & Plugins
+#### Install Plugins
 
 1. Start eclipse, open menu: ```Help -> Install New Software...```
 
@@ -158,11 +181,31 @@ $ sudo apt-get install oracle-java7-installer
 
     * Location: **http://vrapper.sourceforge.net/update-site/stable**
 
+1. Add Mylyn Bitbucket update site and install it:
 
-### PyDev Tips & Tricks
+    * Name: **Mylyn Bitbucket**
 
-To be done.
+    * Location: **http://babelserver.org/mylyn-bitbucket/**
 
+1. Add Dart Editor update site and install it:
+
+    * Name: **Dart Editor**
+
+    * Location: **http://www.dartlang.org/eclipse/update/channels/dev/**
+
+### Code guidelines ###
+
+Indentation [spaces]:
+
+Language : Tab size : Indent : Continuation indent
+
+* Pyhton : 4 : 4 : 8
+
+* Dart : 4 : 4 : 8
+
+* HTML : 2 : 2 : 4
+
+* CSS : 2 : 2 : 4
 
 ### Contribution guidelines ###
 
