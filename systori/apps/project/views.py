@@ -1,14 +1,17 @@
 from collections import OrderedDict
+from functools import reduce
+from operator import or_
 from django.http import HttpResponseRedirect
 from django.views.generic import View, TemplateView, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView, FormMixin
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
+from django.db.models import Q
 
 from .models import Project, JobSite
 from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
-from .forms import JobSiteForm
+from .forms import JobSiteForm, FilterForm
 from ..task.models import Job, TaskGroup, Task
 from ..directory.models import ProjectContact
 from ..document.models import Invoice, DocumentTemplate
@@ -18,8 +21,9 @@ from .gaeb_utils import gaeb_import
 from django.core.exceptions import ValidationError
 
 
-class ProjectList(TemplateView):
-    template_name = 'project/project_list.html'
+class ProjectList(FormMixin, ListView):
+    form_class = FilterForm
+    queryset = Project._default_manager.all()
 
     phase_order = [
         "prospective",
@@ -31,22 +35,94 @@ class ProjectList(TemplateView):
         "finished"
     ]
 
-    def get_context_data(self, **kwargs):
-        context = super(ProjectList, self).get_context_data(**kwargs)
+    def get_form_kwargs(self):
+        return {
+          'data': self.request.GET or None
+        }
 
+    def get_queryset(self, search_term=None, search_option=None):
         query = Project.objects.without_template().prefetch_related('jobsites')
-        if kwargs['phase_filter']:
-            assert kwargs['phase_filter'] in self.phase_order
-            query = query.filter(phase=kwargs['phase_filter'])
+
+        if search_term:
+            project_filter = Q()
+            searchable_paths = {}
+
+            search_terms = search_term.split(' ')
+            for term in search_terms:
+                project_query = Q(name__icontains=term) | Q(description__icontains=term) | \
+                                Q(jobsites__name__icontains=term) | \
+                                Q(jobsites__address__icontains=term) | \
+                                Q(jobsites__city__icontains=term)
+                jobs_query =  Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
+                              Q(jobs__taskgroups__name__icontains=term) | \
+                              Q(jobs__taskgroups__description__icontains=term) | \
+                              Q(jobs__taskgroups__tasks__name__icontains=term) | \
+                              Q(jobs__taskgroups__tasks__description__icontains=term) | \
+                              Q(jobs__taskgroups__tasks__taskinstances__name__icontains=term) | \
+                              Q(jobs__taskgroups__tasks__taskinstances__description__icontains=term) | \
+                              Q(jobs__taskgroups__tasks__taskinstances__lineitems__name=term)
+                contacts_query =  Q(contacts__business__icontains=term) | \
+                                  Q(contacts__first_name__icontains=term) | \
+                                  Q(contacts__last_name__icontains=term) | \
+                                  Q(contacts__phone__icontains=term) | \
+                                  Q(contacts__email__icontains=term) | \
+                                  Q(contacts__website__icontains=term) | \
+                                  Q(contacts__address__icontains=term) | \
+                                  Q(contacts__notes__icontains=term) | \
+                                  Q(project_contacts__association__icontains=term)
+                                  #Q(project_contacts__notes__icontains=term)
+                searchable_paths[term] = Q()
+
+                if not search_option:
+                    searchable_paths[term] |= project_query
+                    searchable_paths[term] |= jobs_query
+                    searchable_paths[term] |= contacts_query
+
+                if 'contacts' in search_option:
+                    searchable_paths[term] |= contacts_query
+
+                if 'jobs' in search_option:
+                    searchable_paths[term] |= jobs_query
+
+                if 'jobs' in search_option and 'contacts' in search_option:
+                    searchable_paths[term] |= contacts_query
+                    searchable_paths[term] |= jobs_query
+
+            for key in searchable_paths.keys():
+                project_filter &= searchable_paths[key]
+
+            return query.without_template().filter(project_filter).distinct()
         else:
-            query = query.exclude(phase=Project.FINISHED)
+            return query.without_template().all()
+
+
+    def get(self, request, *args, **kwargs):
 
         project_groups = OrderedDict([(phase, []) for phase in self.phase_order])
-        for project in query.all():
+
+        form = self.get_form(self.get_form_class())
+
+        self.object_list = self.get_queryset().exclude(is_template=True)
+
+        if form.is_valid():
+            self.object_list = self.get_queryset(search_term=form.cleaned_data['search_term'],
+                                                 search_option=form.cleaned_data['search_option'])
+        else:
+            self.object_list = self.get_queryset().without_template()
+
+        if kwargs['phase_filter']:
+            assert kwargs['phase_filter'] in self.phase_order
+            self.object_list = self.object_list.filter(phase=kwargs['phase_filter'])
+        else:
+            self.object_list = self.object_list.exclude(phase=Project.FINISHED)
+
+        for project in self.object_list:
             project_groups[project.phase].append(project)
 
+        context = super(ProjectList, self).get_context_data(form=form, **kwargs)
         context['project_groups'] = project_groups
-        return context
+
+        return self.render_to_response(context)
 
 
 class ProjectView(DetailView):

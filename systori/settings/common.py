@@ -59,6 +59,7 @@ INSTALLED_APPS = (
     'tastypie',
     'django_mobile',
     'ordered_model',
+    'bootstrapform',
     'systori.lib',
     'systori.apps.user',
     'systori.apps.project',
