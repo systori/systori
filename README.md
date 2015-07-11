@@ -88,7 +88,7 @@ $ sudo apt-get install oracle-java7-installer
 ```
 
 
-### Option 1. PyCharm
+### PyCharm
 
 1. Get PyCharm: https://www.jetbrains.com/pycharm/download/
 
