@@ -2,6 +2,8 @@
 .idea/dataSources.ids
 .idea/dataSources.local.xml
 .idea/dataSources.xml
+.idea/systori.iml
+.idea/dictionaries/
 *.pyc
 .settings/
 bitbucket.login

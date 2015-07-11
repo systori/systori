@@ -1,11 +1,14 @@
 {% extends "frame.html" %}
-{% load i18n %}
+{% load i18n bootstrap %}
 
 {% block sidebar %}{% include "main/sidebar.html" with section='equipment' %}{% endblock %}
 
 {% block content %}
-  <form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="{% trans 'Save' %}"/>
+  <form role="form" method="post">
+      {% csrf_token %}
+      {{ form|bootstrap }}
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+      </div>
   </form>
 {% endblock %}

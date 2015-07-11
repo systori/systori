@@ -2,13 +2,13 @@ import os
 import re
 import unicodedata
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ubrblik.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
 import django
 
 django.setup()
 
-from ubrblik.apps.task.models import *
-from ubrblik.apps.project.models import *
+from systori.apps.task.models import *
+from systori.apps.project.models import *
 
 p22 = Project.objects.get(id=22)
 
