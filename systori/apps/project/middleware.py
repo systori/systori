@@ -5,7 +5,9 @@ class ProjectMiddleware:
     def process_view(self, request, view, args, kwargs):
         if request.company:
             if 'project_pk' in kwargs:
-                request.project = Project.objects.get(pk=kwargs['project_pk'])
+                request.project = Project.objects \
+                    .prefetch_related("jobsites") \
+                    .get(pk=kwargs['project_pk'])
             else:
                 request.project = Project.objects.template().get()
 

@@ -2,7 +2,7 @@ from datetime import timedelta, date
 from calendar import LocaleHTMLCalendar, month_name
 from itertools import groupby
 from django.http import HttpResponseRedirect
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Prefetch
 from django.utils.http import urlquote
 from django.utils.formats import to_locale, get_language
 from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView
@@ -57,6 +57,14 @@ def delete_when_empty(dailyplan):
     return False
 
 
+def daily_plan_objects():
+    return DailyPlan.objects \
+        .select_related("jobsite__project") \
+        .prefetch_related(Prefetch("workers", queryset=TeamMember.objects.select_related("access__user"))) \
+        .prefetch_related("equipment") \
+        .prefetch_related("tasks")
+
+
 class FieldDashboard(TemplateView):
     template_name = "field/dashboard.html"
 
@@ -91,10 +99,7 @@ class FieldPlanning(TemplateView):
         context['next_day_url'] = reverse('field.planning', args=[context['next_day'].isoformat()])
 
         context['selected_day'] = selected_day
-        context['selected_plans'] = DailyPlan.objects \
-            .prefetch_related("jobsite__project__jobsites") \
-            .prefetch_related("workers__access__user") \
-            .prefetch_related("equipment") \
+        context['selected_plans'] = daily_plan_objects() \
             .filter(day=selected_day) \
             .order_by('jobsite__project_id') \
             .all()
@@ -121,6 +126,9 @@ class FieldProjectView(DetailView):
     pk_url_kwarg = 'project_pk'
     template_name = "field/project.html"
 
+    def get_object(self):
+        return self.request.project
+
     def get_context_data(self, **kwargs):
         context = super(FieldProjectView, self).get_context_data(**kwargs)
 
@@ -128,10 +136,10 @@ class FieldProjectView(DetailView):
             self.request.selected_day = find_next_workday(date.today())
         selected_day = self.request.selected_day
 
-        project = self.get_object()
+        project = self.object
 
-        daily_plans = DailyPlan.objects \
-            .filter(jobsite__project=project) \
+        daily_plans = daily_plan_objects() \
+            .filter(jobsite__in=project.jobsites.all()) \
             .filter(day__lte=selected_day) \
             .filter(day__gte=selected_day - timedelta(days=3)) \
             .all()
@@ -145,7 +153,7 @@ class FieldProjectView(DetailView):
             grouped_by_days.insert(0, (selected_day, []))
 
         context['daily_plans'] = grouped_by_days
-        context['latest_daily_plan'] = DailyPlan.objects.filter(jobsite__project=project).first()
+        context['latest_daily_plan'] = daily_plan_objects().filter(jobsite__in=project.jobsites.all()).first()
         context['today'] = date.today()
 
         return context

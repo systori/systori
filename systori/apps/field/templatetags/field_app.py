@@ -17,7 +17,7 @@ def equipment_dailyplans_count(equipment, date):
 
 @register.simple_tag
 def add_daily_plan_url(project, date):
-    if project.jobsites.count() == 1:
+    if len(project.jobsites.all()) == 1:
         jobsite = project.jobsites.all()[0]
         return reverse('field.dailyplan.assign-labor', args=[jobsite.id, DailyPlan(day=date).url_id])
     else:
