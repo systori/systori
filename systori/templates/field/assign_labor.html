@@ -32,7 +32,7 @@
             <label class="list-group-item">
               {% if worker.plan_count > 0 %}<span class="badge">{{ worker.plan_count }}</span>{% endif %}
               <input type="checkbox" value="{{ worker.id }}" name="workers"
-                     {% if worker.assigned %}checked{% endif %}/> {{ worker.get_full_name }}
+                     {% if worker.assigned %}checked{% endif %}/> {{ worker.user.get_full_name }}
             </label>
           {% endfor %}
         </div>

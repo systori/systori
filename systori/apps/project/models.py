@@ -95,9 +95,9 @@ class Project(models.Model):
     def finish(self):
         pass
 
-    def phases(self, user):
+    def phases(self, access):
         phases = []
-        available = list(self.get_available_user_phase_transitions(user))
+        available = list(self.get_available_user_phase_transitions(access.user))
         is_past = True
         for name, label in self.PHASE_CHOICES:
 
@@ -144,9 +144,9 @@ class Project(models.Model):
     def stop(self):
         pass
 
-    def states(self, user):
+    def states(self, access):
         states = []
-        available = list(self.get_available_user_state_transitions(user))
+        available = list(self.get_available_user_state_transitions(access.user))
         for name, label in self.STATE_CHOICES:
 
             transition_name = None

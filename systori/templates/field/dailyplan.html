@@ -13,7 +13,7 @@
 
     <div class="list-group">
 
-      {% if access.is_staff %}
+      {% if access.has_staff %}
         <a class="list-group-item sub-header clearfix"
            href="{% url 'field.dailyplan.assign-labor' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
       {% else %}
@@ -22,7 +22,7 @@
 
       {% trans "Workers" %}
 
-      {% if access.is_staff %}
+      {% if access.has_staff %}
         <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
       {% else %}
         </div>
@@ -33,7 +33,7 @@
       <div class="list-group-item nav nav-pills">
         {{ worker.access.user.get_full_name }}
 
-        {% if access.is_staff %}
+        {% if access.has_staff %}
           <span class="pull-right">
           <div class="btn-group" role="group">
           <a href="{% url 'field.dailyplan.toggle-role' jobsite.id dailyplan.url_id worker.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
@@ -48,7 +48,7 @@
           {% trans 'Laborer' %}
         {% endif %}
 
-        {% if access.is_staff %}
+        {% if access.has_staff %}
           </a>
           <a href="{% url 'field.dailyplan.member-remove' jobsite.id dailyplan.url_id worker.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
              class="btn btn-default btn-sm">
@@ -71,7 +71,7 @@
 
 
 
-    {% if access.is_staff %}
+    {% if access.has_staff %}
       <a class="list-group-item sub-header clearfix"
          href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
     {% else %}
@@ -80,7 +80,7 @@
 
     {% trans "Equipment" %}
 
-    {% if access.is_staff %}
+    {% if access.has_staff %}
       <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
     {% else %}
       </div>
@@ -102,7 +102,7 @@
 
   {% if 'planning' not in request.path or request.session.is_planning_tasks %}
 
-    {% if access.is_staff %}
+    {% if access.has_staff %}
       <a class="list-group-item sub-header clearfix"
          href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
     {% else %}
@@ -111,7 +111,7 @@
 
   {% trans "Tasks" %}
 
-  {% if access.is_staff %}
+  {% if access.has_staff %}
     <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
   {% else %}
     </div>

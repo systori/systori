@@ -8,7 +8,7 @@ from django.utils.formats import to_locale, get_language
 from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
-from ..user.models import User
+from ..company.models import Access
 from ..project.models import Project, DailyPlan, JobSite, TeamMember
 from ..task.models import Job, Task, ProgressReport
 from ..equipment.models import Equipment
@@ -91,7 +91,13 @@ class FieldPlanning(TemplateView):
         context['next_day_url'] = reverse('field.planning', args=[context['next_day'].isoformat()])
 
         context['selected_day'] = selected_day
-        context['selected_plans'] = DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id').all()
+        context['selected_plans'] = DailyPlan.objects \
+            .prefetch_related("jobsite__project__jobsites") \
+            .prefetch_related("workers__access__user") \
+            .prefetch_related("equipment") \
+            .filter(day=selected_day) \
+            .order_by('jobsite__project_id') \
+            .all()
         context['is_selected_today'] = selected_day == date.today()
         context['is_selected_future'] = selected_day > date.today()
 
@@ -398,10 +404,12 @@ class FieldAssignLabor(TemplateView):
                 project_dailyplan.day = %s
         """
         params = (dailyplan.day,)
-        workers = User.objects \
+        workers = Access.objects \
+            .prefetch_related("user") \
+            .filter(company=self.request.company) \
             .filter(Q(is_laborer=True) | Q(is_foreman=True)) \
             .extra(select={'plan_count': plan_count}, select_params=params) \
-            .order_by('plan_count', 'first_name') \
+            .order_by('plan_count', 'user__first_name') \
             .all()
 
         assigned_workers = []

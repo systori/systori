@@ -6,7 +6,7 @@ DEBUG = True
 TEMPLATE_DEBUG = True
 
 DATABASES['default'].update({
-    'NAME': 'systori_continuous_integration',
+    'NAME': 'systori_testing',
     'TEST': {
         'SERIALIZE': False
     }

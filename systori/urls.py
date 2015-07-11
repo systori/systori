@@ -1,8 +1,5 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.contrib import admin
-
-admin.autodiscover()
 
 urlpatterns = patterns('',
 
@@ -11,7 +8,6 @@ urlpatterns = patterns('',
     url(r'^api/', include('systori.apps.document.api')),
 
     url(r'^i18n/', include('django.conf.urls.i18n')),
-    url(r'^admin/', include(admin.site.urls)),
 
     url(r'', include('systori.apps.project.urls')),
     url(r'', include('systori.apps.directory.urls')),

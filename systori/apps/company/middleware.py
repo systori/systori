@@ -5,7 +5,7 @@ class AccessMiddleware:
 
     def process_view(self, request, view, args, kwargs):
         if request.user.is_authenticated() and request.company:
-            request.access = Access.objects.get(user=request.user, company=request.company)
+            request.access = Access.objects.prefetch_related("user").get(user=request.user, company=request.company)
         else:
             request.access = None
 
