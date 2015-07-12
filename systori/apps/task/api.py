@@ -101,13 +101,23 @@ class AutoCompleteModelResourceMixin:
         if not search_string:
             raise ValidationError("Search string is empty.")
 
+        search_terms = search_string.split(' ')
+        searchable_paths = {}
+
+        for term in search_terms:
+            searchable_paths[term] = Q(name__icontains=term) | Q(description__icontains=term)
+
+        autocomplete_filter = Q()
+        for key in searchable_paths.keys():
+            autocomplete_filter &= searchable_paths[key]
+
         query = self._meta.queryset. \
-            filter(Q(name__icontains=search_string) | Q(description__icontains=search_string))
+            filter(autocomplete_filter).order_by('name','description').distinct('name','description')
 
         query = self.add_prefetching(query)
 
         template = get_template('task/{}_autocomplete.html'.format(self._meta.resource_name))
-        context = Context({'objects': query[:20]})
+        context = Context({'objects': query[:5]})
         rendered = template.render(context).encode('utf-8')
 
         return http.HttpResponse(rendered)

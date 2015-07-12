@@ -41,6 +41,15 @@ class ProjectList(FormMixin, ListView):
         }
 
     def get_queryset(self, search_term=None, search_option=None):
+        '''
+        this function builds a query from multiple Q() objects to have a search behaviour like
+        (TERM_A = project_name OR project_description OR ...)
+        AND
+        (TERM_B = project_name OR project_description OR ...)
+        :param search_term: a single string with search terms, will get split by whitespace
+        :param search_option: select where to search (project, jobs, projectContacts)
+        :return: a query filter
+        '''
         query = Project.objects.without_template().prefetch_related('jobsites')
 
         if search_term:
