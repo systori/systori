@@ -4,19 +4,35 @@ body {
   background-position-y: 300px;
   background-position-x: center;
 
-  padding-top: 10px;
+
   padding-bottom: 10px;
 }
 
 .container {
   padding-right: 10px;
   padding-left: 10px;
+  padding-top: 5px;
+}
+
+.field-nav {
+  right:0;
+  left:0;
+  padding: 0 10px 0 10px;
+  padding-top: 5px;
+  position: fixed;
+  z-index: 2;
+  background-color: white;
+}
+
+.field-container {
+  margin-top: 100px;
+  z-index: 1;
 }
 
 .row.back-buttons {
   margin-left: -5px;
   margin-right: -5px;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
 }
 
 .row.back-buttons > div {
@@ -46,7 +62,7 @@ body {
   font-size: 14pt;
   font-weight: bold;
   border-bottom: 2px solid #333;
-  margin: 10px 0px 10px 0px;
+  margin: 2px 0px 2px 0px;
   position: relative;
 }
 
@@ -81,6 +97,10 @@ body {
 
 input[name="complete"] {
   text-align: right;
+}
+
+.list-group-item {
+  padding: 2px 5px 2px 5px;
 }
 
 .list-group-item.sub-header {

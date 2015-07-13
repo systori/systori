@@ -12,61 +12,67 @@
     }
     .panel-heading > a[name] {
       position: absolute;
-      top: -50px;
+      top: -138px;
     }
   </style>
   <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="field-nav">
+          <div class="row back-buttons">
+            <div class="col-xs-4"><a href="{% url 'field.dashboard' %}"
+                                     class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
+            <div class="col-xs-4"><a href="{% url 'field.projects' %}" class="btn btn-default btn-block"
+                                     style="text-align: center;">&uarr; {% trans 'Projects' %}</a></div>
+            <div class="col-xs-2"><a href="{% url 'field.planning.toggle' selected_day.isoformat 'tasks' %}"
+                                     class="btn btn-default btn-block {% if request.session.is_planning_tasks %}active{% endif %}"
+                                     style="text-align: center;"><span class="glyphicon glyphicon-list"
+                                                                       aria-hidden="true"></span></a></div>
+            <div class="col-xs-2"><a href="{% url 'field.planning.toggle' selected_day.isoformat 'notes' %}"
+                                     class="btn btn-default btn-block {% if request.session.is_planning_notes %}active{% endif %}"
+                                     style="text-align: center;"><span class="glyphicon glyphicon-paperclip"
+                                                                       aria-hidden="true"></span></a></div>
+          </div>
 
-    <div class="row back-buttons">
-      <div class="col-xs-4"><a href="{% url 'field.dashboard' %}"
-                               class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
-      <div class="col-xs-4"><a href="{% url 'field.projects' %}" class="btn btn-default btn-block"
-                               style="text-align: center;">&uarr; {% trans 'Projects' %}</a></div>
-      <div class="col-xs-2"><a href="{% url 'field.planning.toggle' selected_day.isoformat 'tasks' %}"
-                               class="btn btn-default btn-block {% if request.session.is_planning_tasks %}active{% endif %}"
-                               style="text-align: center;"><span class="glyphicon glyphicon-list"
-                                                                 aria-hidden="true"></span></a></div>
-      <div class="col-xs-2"><a href="{% url 'field.planning.toggle' selected_day.isoformat 'notes' %}"
-                               class="btn btn-default btn-block {% if request.session.is_planning_notes %}active{% endif %}"
-                               style="text-align: center;"><span class="glyphicon glyphicon-paperclip"
-                                                                 aria-hidden="true"></span></a></div>
-    </div>
-
-    <div class="row back-buttons">
-      <div class="col-xs-4"><a href="{{ previous_day_url }}"
-                               class="btn btn-default btn-block">&laquo; {{ previous_day|date:"N j" }}</a></div>
-      <div class="col-xs-4 date-header">{{ selected_day|date:"DATE_FORMAT" }}<br/>{{ selected_day|date:"l" }}</div>
-      <div class="col-xs-4 text-right"><a href="{{ next_day_url }}"
-                                          class="btn btn-default btn-block">{{ next_day|date:"N j" }} &raquo;</a></div>
-    </div>
-
-    {% for plan in selected_plans %}
-
-      {% ifchanged plan.jobsite.project.id %}
-
-        <a name="project-{{ plan.jobsite.project.id }}"></a>
-
-        <div class="day-separator">
-          {{ plan.jobsite.project.name }}
-          {% if access.has_staff and plan.day >= today %}
-            <a href="{% add_daily_plan_url plan.jobsite.project plan.day %}?origin={{ request.path }}%23project-{{ plan.jobsite.project.id }}"
-               class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
-          {% endif %}
+          <div class="row back-buttons">
+            <div class="col-xs-4"><a href="{{ previous_day_url }}"
+                                     class="btn btn-default btn-block">&laquo; {{ previous_day|date:"N j" }}</a></div>
+            <div class="col-xs-4 date-header">{{ selected_day|date:"DATE_FORMAT" }}<br/>{{ selected_day|date:"l" }}</div>
+            <div class="col-xs-4 text-right"><a href="{{ next_day_url }}"
+                                                class="btn btn-default btn-block">{{ next_day|date:"N j" }} &raquo;</a></div>
+          </div>
         </div>
+      </div>
+    </div>
 
-      {% endifchanged %}
+    <div class="field-container">
+      {% for plan in selected_plans %}
 
-      {% include "field/dailyplan.html" with dailyplan=plan %}
+        {% ifchanged plan.jobsite.project.id %}
 
-    {% empty %}
+          <a name="project-{{ plan.jobsite.project.id }}"></a>
+
+          <div class="day-separator">
+            {{ plan.jobsite.project.name }}
+            {% if access.has_staff and plan.day >= today %}
+              <a href="{% add_daily_plan_url plan.jobsite.project plan.day %}?origin={{ request.path }}%23project-{{ plan.jobsite.project.id }}"
+                 class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
+            {% endif %}
+          </div>
+
+        {% endifchanged %}
+
+        {% include "field/dailyplan.html" with dailyplan=plan %}
+
+      {% empty %}
 
 
-      {% if access.has_staff and selected_day >= today and latest_daily_plan.day < selected_day %}
-        <a href="{% url 'field.planning.generate' selected_day %}" class="btn btn-primary">
-          {% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
-      {% endif %}
+        {% if access.has_staff and selected_day >= today and latest_daily_plan.day < selected_day %}
+          <a href="{% url 'field.planning.generate' selected_day %}" class="btn btn-primary">
+            {% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
+        {% endif %}
 
-    {% endfor %}
-
+      {% endfor %}
+    </div>
   </div>
 {% endblock %}
