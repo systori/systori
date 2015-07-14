@@ -113,6 +113,7 @@
                 {% elif phase == "executing" %} DodgerBlue;">
                 {% elif phase == "settlement" %} FireBrick;">
                 {% elif phase == "warranty" %} #C6C6CC;">
+                {% elif phase == "finished" %} #EEEEEE;">
                 {% else %} inherit;">
                 {% endif %}
                 <td colspan="5" align="center"><b>{{ display_phase }}</b></td>
@@ -126,7 +127,6 @@
                     <span class="badge">{{ project_contact.get_association_display }}</span>
                     {{ project_contact.contact.first_name }} {{ project_contact.contact.last_name }}
                   {% endfor %}
-
                 </td>
                 <td width="15%">
                   <a href="{% url 'project.edit' project.id %}">{% trans "Edit" %}</a>
@@ -151,8 +151,14 @@
     {% endif %}
   </p>
 
+{% endif %}
 {% endblock content %}
 
 {% block extra_js %}
-
+<script type="text/javascript">
+  $('#tabbed_projects a').click(function (e) {
+    e.preventDefault()
+    $(this).tab('show')
+  })
+</script>
 {% endblock %}
