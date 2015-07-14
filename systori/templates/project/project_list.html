@@ -31,6 +31,65 @@
     </div>
   </div>
 
+{% if project_list.count > 20 %}
+
+  <ul id="tabbed_projects" class="nav nav-tabs" role="tablist">
+  {% for phase, projects in project_groups.items %}
+      <li role="presentation" {% if forloop.counter == 1 %}class="active"{% endif %}>
+        <a style="border-bottom: 3px solid
+                {% if phase == "prospective" %} HotPink;"
+                {% elif phase == "tendering" %} Gold;"
+                {% elif phase == "planning" %} Green;"
+                {% elif phase == "executing" %} DodgerBlue;"
+                {% elif phase == "settlement" %} FireBrick;"
+                {% elif phase == "warranty" %} #C6C6CC;"
+                {% elif phase == "finished" %} #EEEEEE;"
+                {% else %} inherit;"
+                {% endif %}
+      href="#{{ phase }}" aria-controls="{{ phase }}" role="tab" data-toggle="tab">{{ projects.0.get_phase_display }}</a>
+      </li>
+  {% endfor %}
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    {%  for phase, projects in project_groups.items %}
+      <div role="tabpanel" class="tab-pane {% if forloop.counter == 1 %}active{% endif %}" id="{{ phase }}">
+
+        <table class="table table-striped" id="table">
+        <thead>
+        <tr>
+          <th class="hidden-xs">#</th>
+          <th>{% trans 'Name' %}</th>
+          <th>{% trans 'City' %}</th>
+          <th>{% trans 'State' %}</th>
+          <th>{% trans 'Actions' %}</th>
+        </tr>
+        </thead>
+        <tbody>
+          {% if projects %}
+            {% for project in projects %}
+              <tr data-phase="{{ phase }}">
+                <td width="5%" class="hidden-xs">{{ project.id }}</td>
+                <td width="40%"><a href="{% url 'project.view' project.id %}">{{ project }}</a></td>
+                <td width="30%">{{ project.jobsites.all.0.city }}</td>
+                <td width="10%">{{ project.get_state_display }}</td>
+                <td width="15%">
+                  <a href="{% url 'project.edit' project.id %}">{% trans "Edit" %}</a>
+                  <a href="{% url 'project.delete' project.id %}">{% trans "Delete" %}</a>
+                </td>
+              </tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+        </table>
+
+      </div>
+    {% endfor %}
+  </div>
+
+{% else %}
+
   <table class="table table-striped" id="table">
     <thead>
     <tr>
@@ -52,6 +111,7 @@
                 {% elif phase == "executing" %} DodgerBlue;">
                 {% elif phase == "settlement" %} FireBrick;">
                 {% elif phase == "warranty" %} #C6C6CC;">
+                {% elif phase == "finished" %} #EEEEEE;">
                 {% else %} inherit;">
                 {% endif %}
                 <td colspan="5" align="center"><b>{{ display_phase }}</b></td>
@@ -85,8 +145,14 @@
     {% endif %}
   </p>
 
+{% endif %}
 {% endblock content %}
 
 {% block extra_js %}
-
+<script type="text/javascript">
+  $('#tabbed_projects a').click(function (e) {
+    e.preventDefault()
+    $(this).tab('show')
+  })
+</script>
 {% endblock %}

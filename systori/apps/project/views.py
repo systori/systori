@@ -123,7 +123,8 @@ class ProjectList(FormMixin, ListView):
             assert kwargs['phase_filter'] in self.phase_order
             self.object_list = self.object_list.filter(phase=kwargs['phase_filter'])
         else:
-            self.object_list = self.object_list.exclude(phase=Project.FINISHED)
+            #self.object_list = self.object_list.exclude(phase=Project.FINISHED)
+            self.object_list = self.object_list
 
         for project in self.object_list:
             project_groups[project.phase].append(project)
