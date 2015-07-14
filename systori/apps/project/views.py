@@ -50,7 +50,8 @@ class ProjectList(FormMixin, ListView):
         :param search_option: select where to search (project, jobs, projectContacts)
         :return: a query filter
         '''
-        query = Project.objects.without_template().prefetch_related('jobsites')
+        query = Project.objects.without_template().prefetch_related('jobsites')\
+                .prefetch_related('project_contacts__contact')
 
         if search_term:
             project_filter = Q()

@@ -62,3 +62,9 @@ class ProjectContact(models.Model):
         if self.is_billable:
             self.project.project_contacts.update(is_billable=False)
         return super(ProjectContact, self).save(**kwargs)
+
+    # stolen from http://stackoverflow.com/questions/5730211/how-does-get-field-display-in-django-work
+    @property
+    def _get_field_display(self, field):
+        value = getattr(self, field.attname)
+        return force_unicode(dict(field.flatchoices).get(value, value), strings_only=True)
