@@ -12,6 +12,6 @@ DATABASES['default'].update({
     'USER': 'www-data'
 })
 
- # Settings for making Systori all https                                         
- SESSION_COOKIE_SECURE = True                                                    
- CSRF_COOKIE_SECURE = True
+# Settings for making Systori all https                                         
+SESSION_COOKIE_SECURE = True                                                    
+CSRF_COOKIE_SECURE = True
