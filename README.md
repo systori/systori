@@ -40,7 +40,7 @@ $ sudo -u postgres createuser --superuser [YOUR_LINUX_USERNAME]
 Now change into the directory where you'd like to install systori and run the following commands:
 
 ```
-$ git clone git@bitbucket.org:damoti/systori.git
+$ git clone git@github.com:systori/systori.git
 $ cd systori/
 $ mkvirtualenv -a `pwd` -p /usr/bin/python3 systori
 $ pip install -r requirements/dev.pip
