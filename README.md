@@ -14,7 +14,9 @@ Desktop client side is written using Django templates and [Dart](https://www.dar
 ## How do I get set up?
 
 ### Workstation
-
+```
+sudo apt-get install git mercurial
+```
 This guide assumes you are on the most recent **Ubuntu LTS** linux system and that you already have git and SSH keys setup with github.com.
 
 You will need PostgreSQL, Python3 and some other tools installed with apt-get:
