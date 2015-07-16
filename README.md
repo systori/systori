@@ -15,7 +15,7 @@ Desktop client side is written using Django templates and [Dart](https://www.dar
 
 ### Workstation
 
-This guide assumes you are on the most recent **Ubuntu LTS** linux system and that you already have git and SSH keys setup with bitbucket.org.
+This guide assumes you are on the most recent **Ubuntu LTS** linux system and that you already have git and SSH keys setup with github.com.
 
 You will need PostgreSQL, Python3 and some other tools installed with apt-get:
 
@@ -23,7 +23,7 @@ You will need PostgreSQL, Python3 and some other tools installed with apt-get:
 $ sudo apt-get install\
  postgresql postgresql-contrib postgresql-server-dev-all\
  python-pip python-dev python3-dev\
- texlive-full python3-lxml git
+ texlive-full python3-lxml
 $ sudo apt-get build-dep python3-lxml
 $ sudo pip install --upgrade fabric virtualenvwrapper
 $ source /usr/local/bin/virtualenvwrapper.sh
