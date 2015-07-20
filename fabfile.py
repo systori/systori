@@ -79,7 +79,7 @@ def localdb_from_productiondb():
 
 
 def init_settings(env_name='local'):
-    assert env_name in ['dev', 'production', 'local', 'testing']
+    assert env_name in ['dev', 'production', 'local', 'travis']
     if os.path.exists('systori/settings/__init__.py'):
         print('Settings have already been initialized.')
     else:
