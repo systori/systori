@@ -49,6 +49,7 @@ class JobManager(BaseManager.from_queryset(JobQuerySet)):
 
 class Job(BetterOrderedModel):
     name = models.CharField(_('Job Name'), max_length=512)
+    code = models.CharField(_('Code'), max_length=128)
     description = models.TextField(_('Description'), blank=True)
 
     taskgroup_offset = models.PositiveSmallIntegerField(_("Task Group Offset"), default=0)
@@ -158,15 +159,21 @@ class Job(BetterOrderedModel):
         return self._total_calc('billable')
 
     @property
-    def code(self):
-        return str(self.order + 1 + self.project.job_offset).zfill(self.project.job_zfill)
+    def full_code(self):
+        return self.code
 
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        super(Job, self).save(*args, **kwargs)
+        self.code = str(self.order + 1 + self.project.job_offset).zfill(self.project.job_zfill)
+        super(Job, self).save()
+
 
 class TaskGroup(BetterOrderedModel):
     name = models.CharField(_("Name"), max_length=512)
+    code = models.CharField(_('Code'), max_length=128)
     description = models.TextField(blank=True)
 
     job = models.ForeignKey(Job, related_name="taskgroups")
@@ -225,14 +232,11 @@ class TaskGroup(BetterOrderedModel):
         return self.fixed_price_billable
 
     @property
-    def code(self):
-        parent_code = self.job.code
-        offset = self.job.taskgroup_offset
-        self_code = str(self.order + 1 + offset).zfill(self.job.project.taskgroup_zfill)
-        return '{}.{}'.format(parent_code, self_code)
+    def full_code(self):
+        return '{}.{}'.format(self.job.full_code, self.code)
 
     def __str__(self):
-        return '{} {}'.format(self.code, self.name)
+        return '{} {}'.format(self.full_code, self.name)
 
     def clone_to(self, new_job, new_order):
         tasks = self.tasks.all()
@@ -243,9 +247,15 @@ class TaskGroup(BetterOrderedModel):
         for task in tasks:
             task.clone_to(self, task.order)
 
+    def save(self, *args, **kwargs):
+        super(TaskGroup, self).save(*args, **kwargs)
+        self.code = str(self.order + 1 + self.job.taskgroup_offset).zfill(self.job.project.taskgroup_zfill)
+        super(TaskGroup, self).save()
+
 
 class Task(BetterOrderedModel):
     name = models.CharField(_("Name"), max_length=512)
+    code = models.CharField(_('Code'), max_length=128)
     description = models.TextField()
 
     # tracking completion of this task by a quantifiable indicator, an estimate
@@ -287,10 +297,6 @@ class Task(BetterOrderedModel):
                 return instance
         raise self.taskinstances.model.DoesNotExist
 
-    @cached_property
-    def instance_count(self):
-        return self.taskinstances.count()
-
     @property
     def complete_percent(self):
         return int(self.complete / self.qty * 100)
@@ -316,10 +322,8 @@ class Task(BetterOrderedModel):
         return self.instance.time_and_materials_billable
 
     @property
-    def code(self):
-        parent_code = self.taskgroup.code
-        self_code = str(self.order + 1).zfill(self.taskgroup.job.project.task_zfill)
-        return '{}.{}'.format(parent_code, self_code)
+    def full_code(self):
+        return '{}.{}'.format(self.taskgroup.full_code, self.code)
 
     def __str__(self):
         return '{} {}'.format(self.code, self.name)
@@ -332,6 +336,11 @@ class Task(BetterOrderedModel):
         self.save()
         for taskinstance in taskinstances:
             taskinstance.clone_to(self, taskinstance.order)
+
+    def save(self, *args, **kwargs):
+        super(Task, self).save(*args, **kwargs)
+        self.code = str(self.order + 1).zfill(self.taskgroup.job.project.task_zfill)
+        super(Task, self).save()
 
 
 class TaskInstance(BetterOrderedModel):
@@ -427,14 +436,17 @@ class TaskInstance(BetterOrderedModel):
 
     @property
     def code(self):
-        parent_code = self.task.code
-        if self.task.instance_count > 1:
-            return '{}{}'.format(parent_code, ascii_lowercase[self.order])
+        if self.task.taskinstances.count() > 1:
+            return ascii_lowercase[self.order]
         else:
-            return parent_code
+            return ''
+
+    @property
+    def full_code(self):
+        return '{}{}'.format(self.task.full_code, self.code)
 
     def __str__(self):
-        return '{} {}'.format(self.code, self.name)
+        return '{} {}'.format(self.full_code, self.name)
 
     def clone_to(self, new_task, new_order):
         lineitems = self.lineitems.all()
