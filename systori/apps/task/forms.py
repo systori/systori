@@ -9,7 +9,7 @@ class JobForm(forms.ModelForm):
 
     class Meta:
         model = Job
-        fields = ['name', 'description', 'billing_method', 'job_template', 'taskgroup_offset']
+        fields = ['job_code', 'name', 'description', 'billing_method', 'job_template', 'taskgroup_offset']
 
 
 class JobTemplateForm(forms.ModelForm):

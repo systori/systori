@@ -21,7 +21,7 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         object = objects[0]
         keys = object.keys()
         expected_keys = [
-            'id', 'name', 'description', 'order', 'project', 'billing_method', 'status', 'taskgroup_offset',
+            'id', 'job_code', 'name', 'description', 'order', 'project', 'billing_method', 'status', 'taskgroup_offset',
             'resource_uri'
         ]
         self.assertEqual(sorted(expected_keys), sorted(keys))

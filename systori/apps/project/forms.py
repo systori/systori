@@ -12,7 +12,7 @@ class ProjectCreateForm(ModelForm):
 
     class Meta:
         model = Project
-        fields = ['name', 'description', 'job_zfill', 'taskgroup_zfill', 'task_zfill', 'job_offset',
+        fields = ['name', 'description', 'job_zfill', 'taskgroup_zfill', 'task_zfill',
                   'address', 'postal_code', 'city']
 
 
@@ -23,7 +23,7 @@ class ProjectImportForm(forms.Form):
 class ProjectUpdateForm(ModelForm):
     class Meta:
         model = Project
-        fields = ['name', 'description', 'job_zfill', 'taskgroup_zfill', 'task_zfill', 'job_offset']
+        fields = ['name', 'description', 'job_zfill', 'taskgroup_zfill', 'task_zfill']
 
 
 class JobSiteForm(ModelForm):

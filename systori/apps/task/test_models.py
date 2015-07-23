@@ -19,8 +19,8 @@ def create_task_data(self, create_user=True, create_company=True):
     self.template_project = Project.objects.create(name="Template Project", is_template=True)
     self.project = Project.objects.create(name="my project")
     self.project2 = Project.objects.create(name="my project 2")
-    self.job = Job.objects.create(name="Default", project=self.project)
-    self.job2 = Job.objects.create(name="Default 2", project=self.project)
+    self.job = Job.objects.create(job_code=1, name="Default", project=self.project)
+    self.job2 = Job.objects.create(job_code=2, name="Default 2", project=self.project)
     self.group = TaskGroup.objects.create(name="my group", job=self.job)
     self.group2 = TaskGroup.objects.create(name="my group 2", job=self.job)
     self.task = Task.objects.create(name="my task one", qty=10, taskgroup=self.group)
@@ -55,7 +55,7 @@ class TaskInstanceTotalTests(TestCase):
 class JobQuerySetTests(TestCase):
     def setUp(self):
         create_task_data(self)
-        self.job2 = Job.objects.create(name="Empty Job", project=self.project)
+        self.job2 = Job.objects.create(job_code=3, name="Empty Job", project=self.project)
 
     def test_zero_total(self):
         jobs = Job.objects.filter(pk=self.job2.id)
@@ -74,18 +74,6 @@ class JobQuerySetTests(TestCase):
         self.assertEqual(round(Decimal(960 * 1.19), 2), round(jobs.estimate_gross_total(), 2))
 
 
-class JobOffsetTests(TestCase):
-    def setUp(self):
-        create_task_data(self)
-
-    def test_no_offset(self):
-        self.assertEqual('1', self.job.code)
-
-    def test_offset_4(self):
-        self.project.job_offset = 4
-        self.assertEqual('5', self.job.code)
-
-
 class TaskGroupOffsetTests(TestCase):
     def setUp(self):
         create_task_data(self)
@@ -94,10 +82,23 @@ class TaskGroupOffsetTests(TestCase):
         self.assertEqual('1.1', self.group.code)
 
     def test_offset_4(self):
-        self.project.job_offset = 2
         self.job.taskgroup_offset = 3
-        self.assertEqual('3.4', self.group.code)
+        self.assertEqual('1.4', self.group.code)
 
+
+class CodeTests(TestCase):
+    def setUp(self):
+        create_task_data(self)
+
+    def test_default_code(self):
+        self.assertEqual('1', self.job.code)
+        self.assertEqual('1.1', self.group.code)
+        self.assertEqual('1.1.1', self.task.code)
+        self.assertEqual('1.1.1', self.task.instance.code)
+        TaskInstance.objects.create(task=self.task)
+        task = Task.objects.get(id=self.task.id)
+        self.assertEqual('1.1.1a', task.instance.code)
+        self.assertEqual('1.1.1b', task.taskinstances.all()[1].code)
 
 class JobEstimateModificationTests(TestCase):
     def setUp(self):
@@ -148,7 +149,7 @@ class TaskCloneTests(TestCase):
         create_task_data(self)
 
     def test_clone(self):
-        new_job = Job.objects.create(name="New", project=self.project)
+        new_job = Job.objects.create(job_code=5, name="New", project=self.project)
         self.assertEqual(new_job.taskgroups.count(), 0)
         self.job.clone_to(new_job)
 

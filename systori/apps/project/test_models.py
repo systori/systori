@@ -63,3 +63,4 @@ class ProjectPhaseTests(TestCase):
         self.project.refresh_from_db()
         self.assertEquals('Executing', self.project.get_phase_display())
         self.assertEquals('Active', self.project.get_state_display())
+

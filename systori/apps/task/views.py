@@ -3,6 +3,7 @@ from django.views.generic import View, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse
+from django.db.models import Max
 
 from .models import *
 from .forms import JobForm, JobTemplateForm
@@ -82,7 +83,9 @@ class JobCreate(CreateView):
 
     def get_form_kwargs(self):
         kwargs = super(JobCreate, self).get_form_kwargs()
-        kwargs['instance'] = Job(project=self.request.project)
+        project = self.request.project
+        max_code = project.jobs.all().aggregate(code=Max('job_code'))['code'] or 0
+        kwargs['instance'] = Job(job_code=max_code+1, project=project)
         return kwargs
 
     def form_valid(self, form):
