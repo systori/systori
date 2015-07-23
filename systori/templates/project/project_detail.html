@@ -38,7 +38,7 @@
     {% for job in project.jobs.all %}
       <tr data-move="{% url 'api_dispatch_move' 'v1' 'job' job.id %}">
         <td style="cursor: pointer;" class="handle"><span class="glyphicon glyphicon-menu-hamburger"></span></td>
-        <td><a href="{% url 'tasks' project.id job.id %}">{{ job }}</a></td>
+        <td><a href="{% url 'tasks' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
         <td>{{ job.get_status_display }}</td>
         <td style="text-align: right;">
           {{ job.estimate_total|money }} &nbsp;
@@ -94,7 +94,7 @@
         <td>{{ doc.get_status_display }}</td>
         <td>
           {% for job in doc.jobs.all %}
-            {{ job }}<br/>
+            {{ job.code }} {{ job }}<br/>
           {% endfor %}
         </td>
         <td>{{ doc.amount|money }}</td>

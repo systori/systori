@@ -64,18 +64,3 @@ class ProjectPhaseTests(TestCase):
         self.assertEquals('Executing', self.project.get_phase_display())
         self.assertEquals('Active', self.project.get_state_display())
 
-
-class JobCodeTests(TestCase):
-    def setUp(self):
-        activate('en')
-        create_task_data(self)
-
-    def test_default_jobcode(self):
-        self.assertEqual('1', self.job.full_code)
-        self.assertEqual('1.1', self.group.full_code)
-        self.assertEqual('1.1.1', self.task.full_code)
-        self.assertEqual('1.1.1', self.task.instance.full_code)
-        TaskInstance.objects.create(task=self.task)
-        task = Task.objects.get(id=self.task.id)
-        self.assertEqual('1.1.1a', task.instance.full_code)
-        self.assertEqual('1.1.1b', task.taskinstances.all()[1].full_code)
