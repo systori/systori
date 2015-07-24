@@ -29,8 +29,6 @@ class Project(models.Model):
     taskgroup_zfill = models.PositiveSmallIntegerField(_("Task Group Code Zero Fill"), default=1)
     task_zfill = models.PositiveSmallIntegerField(_("Task Code Zero Fill"), default=1)
 
-    job_offset = models.PositiveSmallIntegerField(_("Job Offset"), default=0)
-
     account = models.OneToOneField('accounting.Account', related_name="project", null=True)
 
     objects = ProjectQuerySet.as_manager()

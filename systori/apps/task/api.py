@@ -117,7 +117,7 @@ class AutoCompleteModelResourceMixin:
         query = self.add_prefetching(query)
 
         template = get_template('task/{}_autocomplete.html'.format(self._meta.resource_name))
-        context = Context({'objects': query[:5]})
+        context = Context({'objects': query[:15]})
         rendered = template.render(context).encode('utf-8')
 
         return http.HttpResponse(rendered)

@@ -18,8 +18,8 @@ if False:  # Enable Profile Panel
     )
 
 STATICFILES_DIRS += (
-    ('editor', os.path.join(ROOT_DIR, 'editor/web')),
-    # ('editor', os.path.join(ROOT_DIR, 'editor/build/web')),
+    #('editor', os.path.join(ROOT_DIR, 'editor/web')),
+     ('editor', os.path.join(ROOT_DIR, 'editor/build/web')),
 )
 
 DATABASES['default'].update({

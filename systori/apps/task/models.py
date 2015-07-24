@@ -47,8 +47,9 @@ class JobManager(BaseManager.from_queryset(JobQuerySet)):
     use_for_related_fields = True
 
 
-class Job(BetterOrderedModel):
+class Job(models.Model):
     name = models.CharField(_('Job Name'), max_length=512)
+    job_code = models.PositiveSmallIntegerField(_('Code'), default=0)
     description = models.TextField(_('Description'), blank=True)
 
     taskgroup_offset = models.PositiveSmallIntegerField(_("Task Group Offset"), default=0)
@@ -65,7 +66,6 @@ class Job(BetterOrderedModel):
     billing_method = models.CharField(_('Billing Method'), max_length=128, choices=BILLING_METHOD, default=FIXED_PRICE)
 
     project = models.ForeignKey('project.Project', related_name="jobs")
-    order_with_respect_to = 'project'
 
     DRAFT = "draft"
     PROPOSED = "proposed"
@@ -88,7 +88,7 @@ class Job(BetterOrderedModel):
     class Meta:
         verbose_name = _("Job")
         verbose_name_plural = _("Job")
-        ordering = ['order']
+        ordering = ['job_code']
 
     @transition(field=status, source="*", target=DRAFT)
     def draft(self):
@@ -159,7 +159,7 @@ class Job(BetterOrderedModel):
 
     @property
     def code(self):
-        return str(self.order + 1 + self.project.job_offset).zfill(self.project.job_zfill)
+        return str(self.job_code).zfill(self.project.job_zfill)
 
     def __str__(self):
         return self.name
@@ -286,10 +286,6 @@ class Task(BetterOrderedModel):
             if instance.selected:
                 return instance
         raise self.taskinstances.model.DoesNotExist
-
-    @cached_property
-    def instance_count(self):
-        return self.taskinstances.count()
 
     @property
     def complete_percent(self):
@@ -428,7 +424,7 @@ class TaskInstance(BetterOrderedModel):
     @property
     def code(self):
         parent_code = self.task.code
-        if self.task.instance_count > 1:
+        if self.task.taskinstances.count() > 1:
             return '{}{}'.format(parent_code, ascii_lowercase[self.order])
         else:
             return parent_code

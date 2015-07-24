@@ -1,13 +1,12 @@
 psycopg2
+
 django==1.8
-
-#django-tastypie
--e git+https://github.com/django-tastypie/django-tastypie.git#egg=django-tastypie
-
+django-tastypie
 django-ordered-model
 django-fsm
 django_mobile
 django-bootstrap-form
+
 geopy
 lxml
 jsonfield
