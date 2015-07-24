@@ -21,7 +21,7 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         object = objects[0]
         keys = object.keys()
         expected_keys = [
-            'id', 'job_code', 'name', 'description', 'order', 'project', 'billing_method', 'status', 'taskgroup_offset',
+            'id', 'job_code', 'name', 'description', 'project', 'billing_method', 'status', 'taskgroup_offset',
             'resource_uri'
         ]
         self.assertEqual(sorted(expected_keys), sorted(keys))
@@ -39,40 +39,14 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         data = {
             "project": "/api/v1/project/{}/".format(self.project.id),
             "name": "new job",
-            "description": "new desc"
+            "description": "new desc",
+            "job_code": 99
         }
         resp = self.api_client.post(self.url, data=data, format='json')
         self.assertHttpCreated(resp)
         job = Job.objects.last()
         self.assertEqual("new job", job.name)
         self.assertEqual("new desc", job.description)
-
-    def test_move(self):
-        first, second = Job.objects.all()
-
-        def update_first_second():
-            nonlocal first, second
-            first = Job.objects.get(pk=first.pk)
-            second = Job.objects.get(pk=second.pk)
-
-        self.assertEqual(0, first.order)
-        self.assertEqual(1, second.order)
-
-        url = self.url + '{}/move/'.format(first.pk)
-
-        # move down
-        resp = self.api_client.get(url, data={"position": 1})
-        self.assertHttpAccepted(resp)
-        update_first_second()
-        self.assertEqual(1, first.order)
-        self.assertEqual(0, second.order)
-
-        # move up 
-        resp = self.api_client.get(url, data={"position": 0})
-        self.assertHttpAccepted(resp)
-        update_first_second()
-        self.assertEqual(0, first.order)
-        self.assertEqual(1, second.order)
 
 
 class TaskGroupResourceTest(ResourceTestCaseBase):

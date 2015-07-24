@@ -47,7 +47,7 @@ class JobManager(BaseManager.from_queryset(JobQuerySet)):
     use_for_related_fields = True
 
 
-class Job(BetterOrderedModel):
+class Job(models.Model):
     name = models.CharField(_('Job Name'), max_length=512)
     job_code = models.PositiveSmallIntegerField(_('Code'), default=0)
     description = models.TextField(_('Description'), blank=True)
@@ -66,7 +66,6 @@ class Job(BetterOrderedModel):
     billing_method = models.CharField(_('Billing Method'), max_length=128, choices=BILLING_METHOD, default=FIXED_PRICE)
 
     project = models.ForeignKey('project.Project', related_name="jobs")
-    order_with_respect_to = 'project'
 
     DRAFT = "draft"
     PROPOSED = "proposed"
@@ -89,7 +88,7 @@ class Job(BetterOrderedModel):
     class Meta:
         verbose_name = _("Job")
         verbose_name_plural = _("Job")
-        ordering = ['order']
+        ordering = ['job_code']
 
     @transition(field=status, source="*", target=DRAFT)
     def draft(self):

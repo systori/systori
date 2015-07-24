@@ -25,7 +25,6 @@
   <table class="table table-striped">
     <thead>
     <tr>
-      <th style="width: 30px;"><span class="glyphicon glyphicon-sort"></span></th>
       <th>{% trans "Name" %}</th>
       <th>{% trans "Status" %}</th>
       <th style="text-align: right; padding-right: 100px; width: 200px;">{% trans "Total" %}</th>
@@ -36,8 +35,7 @@
     </thead>
     <tbody id="job-table">
     {% for job in project.jobs.all %}
-      <tr data-move="{% url 'api_dispatch_move' 'v1' 'job' job.id %}">
-        <td style="cursor: pointer;" class="handle"><span class="glyphicon glyphicon-menu-hamburger"></span></td>
+      <tr>
         <td><a href="{% url 'tasks' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
         <td>{{ job.get_status_display }}</td>
         <td style="text-align: right;">
@@ -355,20 +353,3 @@
   </table>
   <a href="{% url 'jobsite.create' project.id %}">{% trans "Create" %}</a>
 {% endblock %}
-
-{% block extra_js %}
-  <script type="text/javascript">
-    $("#job-table").sortable({
-      handle: ".handle",
-      update: function (event, ui) {
-        $.ajax({
-          type: 'GET',
-          headers: {'X-CSRFToken': '{{ csrf_token }}'},
-          data: {'position': ui.item.index()},
-          url: ui.item.data('move'),
-          async: false
-        });
-      }
-    });
-  </script>
-{% endblock extra_js %}

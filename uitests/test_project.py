@@ -63,5 +63,5 @@ class ProjectTests(BaseTestCase):
         self.driver.refresh()
 
         # editor total should be the same as the dashboard total (sans currency symbol)
-        job_total = self.driver.find_element_by_xpath('//tbody[@id="job-table"]//td[4]').text
+        job_total = self.driver.find_element_by_xpath('//tbody[@id="job-table"]//td[3]').text
         self.assertEqual(total, job_total.strip()[:-2])
