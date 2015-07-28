@@ -6,6 +6,7 @@ urlpatterns = patterns('',
     url(r'^api/', include('systori.apps.project.api')),
     url(r'^api/', include('systori.apps.task.api')),
     url(r'^api/', include('systori.apps.document.api')),
+    url(r'^api/', include('systori.apps.directory.api')),
 
     url(r'^i18n/', include('django.conf.urls.i18n')),
 

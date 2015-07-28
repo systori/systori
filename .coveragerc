@@ -1,0 +1,9 @@
+[run]
+branch = True
+source =
+  systori
+omit =
+  systori/wsgi.py
+  systori/settings/*
+  systori/apps/*/migrations/*
+  systori/apps/*/management/*
