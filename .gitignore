@@ -9,6 +9,7 @@
 bitbucket.login
 __pycache__
 .coverage
+htmlcov
 documents/
 systori/settings/__init__.py
 editor/pubspec.lock

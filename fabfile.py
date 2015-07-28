@@ -92,6 +92,7 @@ def init_settings(env_name='local'):
 def make_messages():
     local('./manage.py makemessages -l de -e tex,html,py')
 
+
 def get_dart():
     is_64bits = sys.maxsize > 2**32
     BIN_DIR = os.path.expanduser('~/bin')

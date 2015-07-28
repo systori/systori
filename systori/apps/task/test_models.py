@@ -14,7 +14,7 @@ def create_task_data(self, create_user=True, create_company=True):
         self.company = Company.objects.create(schema="test", name="Test")
         self.company.activate()
     if create_user:
-        self.user = User.objects.create_user('lex@damoti.com', 'pass')
+        self.user = User.objects.create_superuser('lex@damoti.com', 'pass')
         Access.objects.create(user=self.user, company=self.company)
     self.template_project = Project.objects.create(name="Template Project", is_template=True)
     self.project = Project.objects.create(name="my project")
