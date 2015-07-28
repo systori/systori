@@ -177,7 +177,7 @@ class Transaction(models.Model):
         return self._total('debit') == self._total('credit')
 
     def save(self):
-        assert self.is_balanced
+        assert self.is_balanced, "{} != {}".format(self._total('debit'), self._total('credit'))
         super(Transaction, self).save()
         for item in self._entries:
             item[1].transaction = self

@@ -1,8 +1,8 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from ..user.authorization import field_auth
 from .views import *
 
-dailyplan_urls = patterns('',
+dailyplan_urls = [
 
     # assign-labor
     url(r'^labor$', field_auth(FieldAssignLabor.as_view()), name='field.dailyplan.assign-labor'),
@@ -23,16 +23,16 @@ dailyplan_urls = patterns('',
     url(r'^add-self-as-(?P<role>(foreman|laborer))$', field_auth(FieldAddSelfToDailyPlan.as_view()), name='field.dailyplan.self.add'),
     url(r'^remove-self$', field_auth(FieldRemoveSelfFromDailyPlan.as_view()), name='field.dailyplan.self.remove'),
 
-)
+]
 
-project_urls = patterns('',
+project_urls = [
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})?$', field_auth(FieldProjectView.as_view()), name='field.project'),
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/pick-jobsite$', field_auth(FieldPickJobSite.as_view()), name='field.dailyplan.pick-jobsite'),
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/calendar$', field_auth(FieldProjectCalendar.as_view()), name='field.project.calendar'),
     url(r'^(?P<selected_day>\d{4}-\d{2}-\d{2})/copy/(?P<source_day>\d{4}-\d{2}-\d{2})$', field_auth(FieldCopyPasteDailyPlans.as_view()), name='field.dailyplan.copy-paste'),
-)
+]
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$', field_auth(FieldDashboard.as_view()), name='field.dashboard'),
     url(r'^projects$', field_auth(FieldProjectList.as_view()), name='field.projects'),
     url(r'^project-(?P<project_pk>\d+)/', include(project_urls)),
@@ -41,4 +41,4 @@ urlpatterns = patterns('',
     url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})?$', field_auth(FieldPlanning.as_view()), name='field.planning'),
     url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})/generate$', field_auth(FieldGenerateAllDailyPlans.as_view()), name='field.planning.generate'),
     url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})/toggle/(?P<toggle>(tasks|notes))$', field_auth(FieldPlanningToggle.as_view()), name='field.planning.toggle'),
-)
+]
