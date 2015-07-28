@@ -70,6 +70,45 @@ class ProjectTests(BaseTestCase):
 
         time.sleep(1)  # give it a second to catchup
 
+        for i in range(3):
+            self.send_keys(Keys.SHIFT + Keys.ENTER)
+            time.sleep(0.5)
+
+        # edit task group
+        self.send_keys("Task Group 2" + Keys.TAB)
+        self.send_keys("Group one description." + Keys.SHIFT + Keys.ENTER)
+
+        time.sleep(1)  # give it a second to catchup
+
+        # edit task
+        self.send_keys("Task 2" + Keys.TAB)
+        self.send_keys("1" + Keys.TAB)
+        self.send_keys("m²" + Keys.TAB)
+        self.send_keys("task description" + Keys.SHIFT + Keys.ENTER)
+
+        time.sleep(1)  # give it two seconds to catchup
+
+        # edit line item
+        self.send_keys("Line Item 1" + Keys.TAB)
+        time.sleep(0.5)
+        self.send_keys("20,0" + Keys.TAB)
+        time.sleep(0.5)
+        self.send_keys("m" + Keys.TAB)
+        time.sleep(0.5)
+        self.send_keys("7,50" + Keys.SHIFT + Keys.ENTER)
+
+        time.sleep(1)
+
+        self.send_keys("Line Item 2" + Keys.TAB)
+        time.sleep(0.5)
+        self.send_keys("10,0" + Keys.TAB)
+        time.sleep(0.5)
+        self.send_keys("m³" + Keys.TAB)
+        time.sleep(0.5)
+        self.send_keys("10" + Keys.SHIFT + Keys.ENTER)
+
+        time.sleep(2)
+
         # check that the editor has calculated the total correctly
         total = self.driver.find_element_by_xpath('//ubr-taskgroup[1]//div[@class="total"][1]').text
         total_cleaned = total.replace(',', '_').replace('.', ',').replace('_', '.')
@@ -153,12 +192,13 @@ class ProjectTests(BaseTestCase):
         time.sleep(0.5)
 
         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[2]/td[1]/a[1]').click()
+        self.driver.find_element_by_xpath('//*[@id="id_document_date"]').send_keys('07/27/2015')
         self.driver.find_element_by_xpath('//*[@id="id_invoice_no"]').send_keys('1234/04|ä@1"2!')
         self.driver.find_element_by_xpath('//*[@id="id_header"]').send_keys('So much, very much Money.')
         self.driver.find_element_by_xpath('//*[@id="id_footer"]').send_keys('So much, very much Money.')
         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[10]/button').click()
 
-        invoice_total = self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[2]/td[4]').text[:-2]
+        invoice_total = self.driver.find_element_by_class_name('add-total-amount').text[:-2]
         invoice_total_cleaned = invoice_total.replace(',', '_').replace('.', ',').replace('_', '.')
         self.assertEqual(float(invoice_total_cleaned), float(total_cleaned)*1.19)
         time.sleep(0.5)
@@ -186,8 +226,9 @@ class ProjectTests(BaseTestCase):
         self.driver.find_element_by_xpath('//*[@id="id_footer"]').send_keys('So much, very much Money.')
         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[10]/button').click()
 
-        invoice_total = self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[5]/td[4]').text[:-2]
-        self.assertEqual(invoice_total, '1.206,50')
+        invoice_total = self.driver.find_elements_by_class_name('invoice-amount')[1].text[:-2]
+        invoice_total = float(invoice_total.replace('.', '').replace('_', '.'))
+        self.assertEqual(invoice_total, 1206.50)
         time.sleep(0.5)
 
         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[7]/td[1]/a[2]').click()
