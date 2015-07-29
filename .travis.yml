@@ -24,8 +24,8 @@ before_script:
   - cd editor && pub get && pub build && cd ..
 
 script:
-  - coverage run -p --branch --source=systori manage.py test systori
-  - coverage run -p --branch --source=systori uitest.py saucelabs
+  - coverage run -p manage.py test systori
+  - coverage run -p uitest.py saucelabs
 
 after_script:
   - coverage combine
