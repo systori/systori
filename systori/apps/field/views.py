@@ -277,7 +277,7 @@ class FieldGenerateAllDailyPlans(View):
 
 
 class FieldPickJobSite(TemplateView):
-    template_name = "field/job_list.html"
+    template_name = "field/jobsite_list.html"
 
 
 class FieldJobList(TemplateView):
