@@ -1,8 +1,8 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from ..user.authorization import office_auth
 from .views import *
 
-urlpatterns = patterns('',
+urlpatterns = [
 
     url(r'^project-(?P<project_pk>\d+)/specification-(?P<format>(email|print))-(?P<pk>\d+).pdf$', office_auth(SpecificationPDF.as_view()), name='specification.pdf'),
 
@@ -25,4 +25,4 @@ urlpatterns = patterns('',
     url(r'^templates/document-template-(?P<pk>\d+)/edit$', office_auth(DocumentTemplateUpdate.as_view()), name='document-template.edit'),
     url(r'^templates/document-template-(?P<pk>\d+)/delete$', office_auth(DocumentTemplateDelete.as_view()), name='document-template.delete'),
 
-)
+]
