@@ -62,7 +62,7 @@ def partial_credit(projects, payment, received_on=None, bank=None):
 
     # debit the bank account (asset)
     # (+) "good thing", money in the bank is always good
-    transaction.debit(bank, payment)
+    transaction.debit(bank, round(payment, 2))
 
     for (project, credit, discount) in projects:
 
@@ -86,13 +86,13 @@ def partial_credit(projects, payment, received_on=None, bank=None):
 
             # credit the tax payments account (liability), increasing the liability
             # (+) "bad thing", tax have to be paid eventually
-            transaction.credit(Account.objects.get(code="1776"), credit - income, received_on=received_on)
+            transaction.credit(Account.objects.get(code="1776"), round(credit - income, 2), received_on=received_on)
 
         if discount > 0:
 
             # extract the original amount invoiced (sans discount)
             pre_discount_credit = round(credit / (1 - discount), 2)
-            discount_amount = pre_discount_credit - credit
+            discount_amount = round(pre_discount_credit - credit, 2)
 
             # credit the customer account (asset), decreasing their balance
             # (-) "bad thing", customer owes us less money
@@ -102,7 +102,7 @@ def partial_credit(projects, payment, received_on=None, bank=None):
                 # Discount after final invoice has a few more steps involved.
 
                 discount_income = round(discount_amount / (1 + TAX_RATE), 2)
-                discount_taxes = discount_amount - discount_income
+                discount_taxes = round(discount_amount - discount_income, 2)
 
                 # debit the cash discounts account (income), decreasing the income
                 # (-) "bad thing", less income :-(
