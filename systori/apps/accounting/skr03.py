@@ -23,20 +23,29 @@ def create_chart_of_accounts(self=None):
     self.tax_payments = Account.objects.create(account_type=Account.LIABILITY, code="1776")
 
     self.income = Account.objects.create(account_type=Account.INCOME, code="8400")
+    self.cash_discount = Account.objects.create(account_type=Account.INCOME, code="8736")
 
     self.bank = Account.objects.create(account_type=Account.ASSET, code="1200")
 
 
 def partial_debit(project):
-    """ Attempts to debit the customer account with any new work that was done since last debit. """
+    """ Debit the customer account with any new work that was done since last debit. """
 
     amount = project.new_amount_to_debit
 
-    if not amount: return
+    if not amount:
+        return
 
     transaction = Transaction()
-    transaction.debit(project.account, amount)  # debit the customer
+
+    # debit the customer account (asset), this increases their balance
+    # (+) "good thing", customer owes us more money
+    transaction.debit(project.account, amount)
+
+    # credit the promised payments account (liability), increasing the liability
+    # (+) "bad thing", customer owing us money is a liability
     transaction.credit(Account.objects.get(code="1710"), amount)
+
     transaction.save()
 
 
@@ -44,30 +53,71 @@ def partial_credit(projects, payment, received_on=None, bank=None):
     """ Applies a payment to a list of customer accounts. Including discounts on a per account basis. """
 
     assert isinstance(payment, Decimal)
+    assert payment == sum([p[1] for p in projects])
 
-    if bank is None: bank = Account.objects.get(code="1200")
-    if received_on is None: received_on = date.today()
-
-    income = round(payment / (1 + TAX_RATE), 2)
+    bank = bank or Account.objects.get(code="1200")
+    received_on = received_on or date.today()
 
     transaction = Transaction()
 
-    transaction.debit(Account.objects.get(code="1710"), payment, received_on=received_on)
-    transaction.credit(Account.objects.get(code="1718"), income, received_on=received_on)
-    transaction.credit(Account.objects.get(code="1776"), payment - income, received_on=received_on)
-
+    # debit the bank account (asset)
+    # (+) "good thing", money in the bank is always good
     transaction.debit(bank, payment)
-    for (project, credit, discount) in projects:
-        transaction.credit(project.account, credit, is_payment=True, received_on=received_on)  # credit the customer
 
     for (project, credit, discount) in projects:
+
+        # extract the income part from the payment (sans tax)
+        income = round(credit / (1 + TAX_RATE), 2)
+
+        # credit the customer account (asset), decreasing their balance
+        # (-) "bad thing", customer owes us less money
+        transaction.credit(project.account, credit, is_payment=True, received_on=received_on)
+
+        if not project.is_settlement:
+            # Accounting prior to final invoice has a bunch more steps involved.
+
+            # debit the promised payments account (liability), decreasing the liability
+            # (-) "good thing", customer paying debt reduces liability
+            transaction.debit(Account.objects.get(code="1710"), credit, received_on=received_on)
+
+            # credit the partial payments account (liability), increasing the liability
+            # (+) "bad thing", we are on the hook to finish and deliver the service or product
+            transaction.credit(Account.objects.get(code="1718"), income, received_on=received_on)
+
+            # credit the tax payments account (liability), increasing the liability
+            # (+) "bad thing", tax have to be paid eventually
+            transaction.credit(Account.objects.get(code="1776"), credit - income, received_on=received_on)
 
         if discount > 0:
-            pre_discount_credit = round(credit / (1 - discount), 2)  # undo the discount to get original amount invoiced
+
+            # extract the original amount invoiced (sans discount)
+            pre_discount_credit = round(credit / (1 - discount), 2)
             discount_amount = pre_discount_credit - credit
 
-            transaction.debit(Account.objects.get(code="1710"), discount_amount, received_on=received_on)
+            # credit the customer account (asset), decreasing their balance
+            # (-) "bad thing", customer owes us less money
             transaction.credit(project.account, discount_amount, is_discount=True, received_on=received_on)
+
+            if project.is_settlement:
+                # Discount after final invoice has a few more steps involved.
+
+                discount_income = round(discount_amount / (1 + TAX_RATE), 2)
+                discount_taxes = discount_amount - discount_income
+
+                # debit the cash discounts account (income), decreasing the income
+                # (-) "bad thing", less income :-(
+                transaction.debit(Account.objects.get(code="8736"), discount_income, received_on=received_on)
+
+                # debit the tax payments account (liability), decreasing the liability
+                # (-) "good thing", less taxes to pay
+                transaction.debit(Account.objects.get(code="1776"), discount_taxes, received_on=received_on)
+
+            else:
+                # Discount prior to final invoice is simpler.
+
+                # debit the promised payments account (liability), decreasing the liability
+                # (-) "good thing", customer paying debt reduces liability
+                transaction.debit(Account.objects.get(code="1710"), discount_amount, received_on=received_on)
 
     transaction.save()
 
@@ -89,8 +139,16 @@ def final_debit(project):
     amount = new_amount + unpaid_amount
     income = round(amount / (1 + TAX_RATE), 2)
 
+    # debit the customer account (asset), this increases their balance
+    # (+) "good thing", customer owes us more money
     transaction.debit(project.account, amount)
+
+    # credit the income account (income), this increases the balance
+    # (+) "good thing", income is good
     transaction.credit(Account.objects.get(code="8400"), income)
+
+    # credit the tax payments account (liability), increasing the liability
+    # (+) "bad thing", will have to be paid in taxes eventually
     transaction.credit(Account.objects.get(code="1776"), amount - income)
 
     payments = project.account.payments().total
@@ -98,7 +156,12 @@ def final_debit(project):
     if payments:
         pre_tax_payments = round(payments * -1 / (1 + TAX_RATE), 2)
 
+        # debit the partial payments account (liability), decreasing the liability
+        # (-) "good thing", product or service has been completed and delivered
         transaction.debit(Account.objects.get(code="1718"), pre_tax_payments)
+
+        # credit the income account (income), this increases the balance
+        # (+) "good thing", income is good
         transaction.credit(Account.objects.get(code="8400"), pre_tax_payments)
 
     transaction.save()

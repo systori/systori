@@ -167,9 +167,9 @@ class TestMultiAccountPartialCredit(TestCase):
         self.assertEquals(round(Decimal(480) * Decimal(1.19), 2), self.project2.account.balance)
         self.assertEquals(round(Decimal(960) * Decimal(1.19), 2), Account.objects.get(code="1710").balance)
         partial_credit([
-            (self.project, Decimal(480) * Decimal(1.19), Decimal(0)),
-            (self.project2, Decimal(432) * Decimal(1.19), Decimal(0.1))
-        ], Decimal(480) * Decimal(1.19) + Decimal(432) * Decimal(1.19))
+            (self.project, round(Decimal(480) * Decimal(1.19), 2), Decimal(0)),
+            (self.project2, round(Decimal(432) * Decimal(1.19), 2), Decimal(0.1))
+        ], round(Decimal(480) * Decimal(1.19) + Decimal(432) * Decimal(1.19), 2))
         self.assertEquals(Decimal(0), self.project.account.balance)
         self.assertEquals(Decimal(0), self.project2.account.balance)
         self.assertEquals(Decimal(0), Account.objects.get(code="1710").balance)
@@ -257,6 +257,39 @@ class TestFinalDebit(TestCase):
         self.assertEquals(round(payment * Decimal(0.19) + Decimal(560.00) * Decimal(0.19), 2),
                           Account.objects.get(code="1776").balance)
         self.assertEquals(0, Account.objects.get(code="1718").balance)
+
+
+class TestPaymentAfterFinalDebit(TestCase):
+    def setUp(self):
+        create_data(self)
+
+    def test_payment_after_final_invoice_with_previous_debit(self):
+        self.task.complete = 5
+        self.task.save()
+        partial_debit(self.project)
+        first_payment = round(Decimal(100.00) * Decimal(1.19), 2)
+        partial_credit([(self.project, first_payment, Decimal(0))], first_payment)
+
+        self.task.complete += 5
+        self.task.save()
+        final_debit(self.project)
+
+        self.project.begin_settlement()
+
+        second_payment = round(Decimal(860.00) * Decimal(1.19) * Decimal(.9), 2)
+
+        partial_credit([(self.project, second_payment, Decimal(.1))], second_payment)
+
+        income = round((first_payment+second_payment) / Decimal(1+.19), 2)
+        taxes = round((first_payment+second_payment) - income, 2)
+
+        self.assertEquals(Decimal(0), self.project.account.balance)
+        self.assertEquals(Decimal(0), Account.objects.get(code="1710").balance)
+        self.assertEquals(Decimal(0), Account.objects.get(code="1718").balance)
+        self.assertEquals(taxes, Account.objects.get(code="1776").balance)
+        self.assertEquals(first_payment+second_payment, Account.objects.get(code="1200").balance)
+        self.assertEquals(round(Decimal(960.00), 2), Account.objects.get(code="8400").balance)
+        self.assertEquals(round(Decimal(860)*Decimal(1.19)/Decimal(1+.19) * Decimal(-.1), 2), Account.objects.get(code="8736").balance)
 
 
 class TestDeleteTransaction(TestCase):
