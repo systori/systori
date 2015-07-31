@@ -1,6 +1,8 @@
+from datetime import date
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from ..document.models import Proposal
+from ..company.models import Access
 from ..task.models import Job
 
 
@@ -20,3 +22,9 @@ def job_save_handler(sender, instance, created, **kwargs):
     if instance.is_started and instance.project.is_planning:
         instance.project.begin_executing()
         instance.project.save()
+
+
+@receiver(post_save, sender=Access)
+def access_save_handler(sender, instance, created, **kwargs):
+    if not instance.is_active:
+        instance.assignments.filter(dailyplan__day__gte=date.today()).delete()

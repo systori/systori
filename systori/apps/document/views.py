@@ -133,6 +133,7 @@ class InvoiceCreate(CreateView):
         if form.cleaned_data['is_final']:
             skr03.final_debit(project)
             project.begin_settlement()
+            project.save()
 
         elif project.new_amount_to_debit:
             # update account balance with any new work that's been done
