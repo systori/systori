@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import os
+from systori import settings
+settings.INSTALLED_APPS = [a for a in settings.INSTALLED_APPS if a != 'debug_toolbar']
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
 import django
 django.setup()
