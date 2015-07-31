@@ -9,6 +9,7 @@ from django.test.testcases import LiveServerThread, _StaticFilesHandler
 from django.test.runner import setup_databases
 from selenium import webdriver
 from sauceclient import SauceClient
+from systori.apps.accounting.skr03 import create_chart_of_accounts
 
 TRAVIS_JOB_NUMBER = os.environ.get('TRAVIS_JOB_NUMBER', 1)
 TRAVIS_BUILD_NUMBER = os.environ.get('TRAVIS_BUILD_NUMBER', 1)
@@ -85,8 +86,11 @@ def setup_test_data():
     from systori.apps.project.models import Project
     company = Company.objects.create(schema="test", name="Test")
     company.activate()
-    user = User.objects.create_user('test@systori.com', 'pass')
+    user = User.objects.create_user('test@systori.com', 'pass', first_name="Standard", last_name="Worker")
     Access.objects.create(user=user, company=company, is_staff=True)
+    user = User.objects.create_user('test2@systori.com', 'pass', first_name="Standard2", last_name="Worker2")
+    Access.objects.create(user=user, company=company, is_staff=True)
+    create_chart_of_accounts()
     Project.objects.create(name="Template Project", is_template=True)
 
 
