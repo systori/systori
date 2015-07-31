@@ -80,10 +80,15 @@ class ProjectTests(BaseTestCase):
             self.send_keys(Keys.SHIFT + Keys.ENTER)
             time.sleep(0.5)
 
-        # edit task group
+        # get second taskgroup with autocompleter and set quantity
         self.send_keys("Ta")
         time.sleep(0.5)
         self.send_keys(Keys.ARROW_DOWN + Keys.ENTER)
+        time.sleep(0.2)
+        self.driver.find_element_by_xpath('//*[@id="task-editor"]/ubr-taskgroup[2]/ubr-task/div/div[1]/div[3]').clear()
+        self.driver.find_element_by_xpath('//*[@id="task-editor"]/ubr-taskgroup[2]/ubr-task/div/div[1]/div[3]').send_keys('2,5')
+        self.send_keys(Keys.TAB)
+        self.send_keys(Keys.ARROW_UP) # set focus to Element above to trigger save
 
         time.sleep(2)
         self.driver.refresh()
@@ -144,8 +149,6 @@ class ProjectTests(BaseTestCase):
 
         self.assertEqual('1.000,00 €',
                          self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr/td[4]').text)
-
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr/td[7]/div/button[2]').click()
         self.assertEqual('Neu',
                          self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr/td[2]').text)
         time.sleep(0.5)
@@ -171,7 +174,9 @@ class ProjectTests(BaseTestCase):
         self.driver.find_element_by_xpath('/html/body/div/div[1]/div[1]/a').click()
         self.driver.find_element_by_xpath('/html/body/div/div[1]/div/div/div[1]/div[1]/a').click()
         self.driver.get(self.live_server_url+'/project-2')
-        time.sleep(0.5)
+        time.sleep(0.2)
+        self.assertEqual('500,00',
+                         self.driver.find_element_by_xpath('//*[@id="job-table"]/tr/td[5]').text[:-2])
 
         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[2]/td[1]/a[1]').click()
         self.driver.find_element_by_xpath('//*[@id="id_document_date"]').send_keys(following_day(2).strftime('%m-%d-%Y'))
@@ -180,9 +185,8 @@ class ProjectTests(BaseTestCase):
         self.driver.find_element_by_xpath('//*[@id="id_footer"]').send_keys('So much, very much Money.')
         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[10]/button').click()
 
-        invoice_total = self.driver.find_element_by_class_name('add-total-amount').text[:-2]
-        invoice_total_cleaned = invoice_total.replace(',', '_').replace('.', ',').replace('_', '.')
-        #self.assertEqual(float(invoice_total_cleaned), float(total_cleaned)*1.19)
+        self.assertEqual('595,00',
+                         self.driver.find_element_by_class_name('add-total-amount').text[:-2])
         time.sleep(0.5)
 
         # receive first payment
@@ -216,10 +220,6 @@ class ProjectTests(BaseTestCase):
         self.driver.find_element_by_xpath('//*[@id="id_header"]').send_keys('So much, very much Money.')
         self.driver.find_element_by_xpath('//*[@id="id_footer"]').send_keys('So much, very much Money.')
         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[10]/button').click()
-
-        #invoice_total = self.driver.find_elements_by_class_name('invoice-amount')[1].text[:-2]
-        #invoice_total = float(invoice_total.replace('.', '').replace('_', '.'))
-        #self.assertEqual(invoice_total, 1206.50)
         time.sleep(0.5)
 
         # receive second payment
@@ -234,26 +234,20 @@ class ProjectTests(BaseTestCase):
         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[5]/button').click()
         time.sleep(0.5)
 
-        #self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[9]/td[1]/a[1]').click()
-        #self.driver.find_element_by_xpath('//*[@id="id_is_final"]').click()
-        #self.driver.find_element_by_xpath('//*[@id="id_document_date"]').send_keys(following_day(6).strftime('%m-%d-%Y'))
-        #self.driver.find_element_by_xpath('//*[@id="id_invoice_no"]').send_keys('1236/07|ä@1"2!')
-        #self.driver.find_element_by_xpath('//*[@id="id_title"]').clear()
-        #self.driver.find_element_by_xpath('//*[@id="id_title"]').send_keys('Final Invoice')
-        #self.driver.find_element_by_xpath('//*[@id="id_header"]').send_keys('So much, very much Money. Final')
-        #self.driver.find_element_by_xpath('//*[@id="id_footer"]').send_keys('So much, very much Money. Final')
-        #self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[10]/button').click()
-        #time.sleep(0.5)
-
-        #self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[11]/td[1]/a').click()
-        #account3 = Select(self.driver.find_element_by_xpath('//*[@id="id_bank_account"]'))
-        #account3.select_by_visible_text('1200 - ')
-        #self.driver.find_element_by_xpath('//*[@id="id_amount"]').send_keys('948.51')
-        #self.driver.find_element_by_xpath('//*[@id="id_received_on"]').clear()
-        #self.driver.find_element_by_xpath('//*[@id="id_received_on"]').send_keys(following_day(7).strftime('%m-%d-%Y'))
-        #self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[5]/button').click()
-        #time.sleep(0.5)
-
+        # test project filter
         self.driver.get(self.live_server_url+'/projects')
         self.driver.find_element_by_xpath('//*[@id="id_search_term"]').send_keys('project')
         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/div/div[1]/form/div[3]/button').click()
+        self.driver.find_element_by_xpath('//*[@id="table"]/tbody/tr[2]/td[2]/a').click()
+
+        #check accounts
+        self.driver.get(self.live_server_url+'/accounts')
+        self.assertEqual('1.172,15 €',
+                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[1]/tbody/tr/td[3]').text)
+        self.assertEqual('187,15 €',
+                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr[3]/td[4]').text)
+        self.assertEqual('1.000,00 €',
+                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr[4]/td[4]').text)
+        self.assertEqual('-15,00 €',
+                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr[5]/td[4]').text)
+
