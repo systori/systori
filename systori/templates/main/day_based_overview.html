@@ -46,6 +46,9 @@
           <div class="panel-heading panel-custom">
             {{ plan.jobsite.project.name }}
           </div>
+          <div class="panel-body panel-custom" style="background-color:rgba(50,250,50,0.2); color:rgba(15,15,15,0.7);">
+            {{ plan.jobsite.address }} - {{ plan.jobsite.city }}
+          </div>
           {% for worker in plan.workers.all %}
             {% if worker.is_foreman %}
               <div class="panel-body panel-custom">
