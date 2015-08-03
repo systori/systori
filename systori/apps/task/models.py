@@ -325,6 +325,10 @@ class Task(BetterOrderedModel):
         self.pk = None
         self.taskgroup = new_taskgroup
         self.order = new_order
+        self.qty = 0.0
+        self.complete = 0.0
+        self.started_on = None
+        self.completed_on = None
         self.save()
         for taskinstance in taskinstances:
             taskinstance.clone_to(self, taskinstance.order)
@@ -433,13 +437,14 @@ class TaskInstance(BetterOrderedModel):
         return '{} {}'.format(self.code, self.name)
 
     def clone_to(self, new_task, new_order):
-        lineitems = self.lineitems.all()
+        lineitems = self.lineitems.exclude(is_correction=True).all()
         self.pk = None
         self.task = new_task
         self.order = new_order
         self.save()
         for lineitem in lineitems:
             lineitem.pk = None
+            lineitem.is_flagged = False
             lineitem.taskinstance = self
             lineitem.save()
 

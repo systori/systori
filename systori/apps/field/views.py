@@ -277,7 +277,7 @@ class FieldGenerateAllDailyPlans(View):
 
 
 class FieldPickJobSite(TemplateView):
-    template_name = "field/job_list.html"
+    template_name = "field/jobsite_list.html"
 
 
 class FieldJobList(TemplateView):
@@ -415,6 +415,7 @@ class FieldAssignLabor(TemplateView):
         workers = Access.objects \
             .prefetch_related("user") \
             .filter(company=self.request.company) \
+            .filter(is_active=True) \
             .filter(Q(is_laborer=True) | Q(is_foreman=True)) \
             .extra(select={'plan_count': plan_count}, select_params=params) \
             .order_by('plan_count', 'user__first_name') \

@@ -51,13 +51,23 @@ class Project(models.Model):
         (FINISHED, pgettext_lazy('phase', "Finished"))
     )
 
+    # Floating phases support moving between each other relatively
+    # freely and consequence free. Once you get to SETTLEMENT phase
+    # then legal/accounting stuff kick in and it's not a good idea
+    # to move back to the floating phases.
+    FLOATING_PHASES = [PROSPECTIVE, TENDERING, PLANNING, EXECUTING]
+
     phase = FSMField(default=PROSPECTIVE, choices=PHASE_CHOICES)
+
+    @transition(field=phase, source=FLOATING_PHASES, target=PROSPECTIVE)
+    def begin_prospecting(self):
+        pass
 
     @property
     def is_prospective(self):
         return self.phase == Project.PROSPECTIVE
 
-    @transition(field=phase, source="*", target=TENDERING)
+    @transition(field=phase, source=FLOATING_PHASES, target=TENDERING)
     def begin_tendering(self):
         pass
 
@@ -65,7 +75,7 @@ class Project(models.Model):
     def is_tendering(self):
         return self.phase == Project.TENDERING
 
-    @transition(field=phase, source="*", target=PLANNING)
+    @transition(field=phase, source=FLOATING_PHASES, target=PLANNING)
     def begin_planning(self):
         pass
 
@@ -73,25 +83,37 @@ class Project(models.Model):
     def is_planning(self):
         return self.phase == Project.PLANNING
 
-    @transition(field=phase, source="*", target=EXECUTING)
+    @transition(field=phase, source=FLOATING_PHASES, target=EXECUTING)
     def begin_executing(self):
         pass
 
     @property
     def is_executing(self):
-        return self.phase == Project.PLANNING
+        return self.phase == Project.EXECUTING
 
-    @transition(field=phase, source="*", target=SETTLEMENT)
+    @transition(field=phase, source=FLOATING_PHASES, target=SETTLEMENT)
     def begin_settlement(self):
         pass
 
-    @transition(field=phase, source="*", target=WARRANTY)
+    @property
+    def is_settlement(self):
+        return self.phase == Project.SETTLEMENT
+
+    @transition(field=phase, source=FLOATING_PHASES+[SETTLEMENT], target=WARRANTY)
     def begin_warranty(self):
         pass
+
+    @property
+    def is_warranty(self):
+        return self.phase == Project.WARRANTY
 
     @transition(field=phase, source="*", target=FINISHED)
     def finish(self):
         pass
+
+    @property
+    def is_finished(self):
+        return self.phase == Project.FINISHED
 
     def phases(self, access):
         phases = []

@@ -156,9 +156,10 @@ class ProjectCreate(CreateView):
     def form_valid(self, form):
         response = super(ProjectCreate, self).form_valid(form)
 
-        TaskGroup.objects.create(name='',
-                                 job=Job.objects.create(name=_('Default'), project=self.object)
-                                 )
+        TaskGroup.objects.create(
+            name='',
+            job=Job.objects.create(job_code=1, name=_('Default'), project=self.object)
+        )
 
         jobsite = JobSite()
         jobsite.project = self.object

@@ -11,9 +11,8 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq fabric language-pack-de
   - sudo dpkg-reconfigure locales
-  - curl http://storage.googleapis.com/dart-archive/channels/stable/release/latest/sdk/dartsdk-linux-x64-release.zip > $HOME/dartsdk.zip
-  - unzip $HOME/dartsdk.zip -d $HOME > /dev/null
-  - export DART_SDK="$HOME/dart-sdk"
+  - fab get_dart
+  - export DART_SDK="$HOME/bin/dart-sdk"
   - export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
 
 install:
@@ -25,12 +24,16 @@ before_script:
   - cd editor && pub get && pub build && cd ..
 
 script:
-  - coverage run -p --branch --source=systori manage.py test systori
-  - coverage run -p --branch --source=systori uitest.py saucelabs
+  - coverage run -p manage.py test systori
+  - coverage run -p uitest.py saucelabs
 
 after_script:
   - coverage combine
   - coveralls
+
+branches:
+  only:
+    - dev
 
 notifications:
   hipchat: c0d0f5b33bd732300040609176b55c@systori

@@ -1,4 +1,5 @@
 import os
+import sys
 from distutils.version import LooseVersion as V
 from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
 
@@ -90,6 +91,21 @@ def init_settings(env_name='local'):
 
 def make_messages():
     local('./manage.py makemessages -l de -e tex,html,py')
+
+
+def get_dart():
+    is_64bits = sys.maxsize > 2**32
+    BIN_DIR = os.path.expanduser('~/bin')
+    if not os.path.exists(BIN_DIR):
+        os.mkdir(BIN_DIR)
+    url = "http://storage.googleapis.com/dart-archive/channels/stable/release/latest/sdk/dartsdk-linux-%s-release.zip"\
+            % ('x64' if is_64bits else 'ia32')
+    with lcd(BIN_DIR):
+        local("curl %s > dartsdk.zip" % url)
+        local("unzip -qo dartsdk.zip")
+    print("Add to your .bashrc")
+    print('export DART_SDK="%s"' % os.path.join(BIN_DIR, 'dart-sdk'))
+    print('export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"')
 
 
 def make_editor():

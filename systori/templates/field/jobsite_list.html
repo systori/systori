@@ -1,0 +1,30 @@
+{% extends "field/base.html" %}
+{% load i18n staticfiles field_app %}
+
+{% block container %}
+  <div class="container">
+
+    <div class="row back-buttons">
+      <div class="col-xs-6"><a href="{% url 'field.planning' request.dailyplan.day.isoformat %}#project-{{ project.id }}"
+                               class="btn btn-default btn-block btn-back">&laquo; {% trans 'Planning' %}</a></div>
+      <div class="col-xs-6"><a href="{% url 'field.project' project.id dailyplan.day.isoformat %}"
+                               class="btn btn-default btn-block btn-back">&laquo; {{ project.name }}</a></div>
+    </div>
+
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        {% trans 'Job Sites' %}
+      </div>
+
+      <ul class="list-group">
+        {% for jobsite in project.jobsites.all %}
+          <a href="{% add_daily_plan_url project selected_day jobsite %}?origin={{ request.GET.origin|urlencode }}"
+             class="list-group-item clearfix">{{ jobsite.name }} <span class="pull-right">&raquo;</span></a>
+        {% endfor %}
+      </ul>
+
+    </div>
+
+  </div>
+{% endblock %}

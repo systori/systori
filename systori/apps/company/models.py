@@ -31,7 +31,8 @@ class Access(models.Model):
 
     is_active = models.BooleanField(_('active'), default=True,
                                     help_text=_('Designates whether this user should be treated as '
-                                                'active. Unselect this instead of deleting accounts.'))
+                                                'active. Unselect this instead of deleting accounts. '
+                                                'This will remove user from any present and future daily plans.'))
 
     @property
     def has_staff(self):
