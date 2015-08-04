@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-04 11:11+0200\n"
+"POT-Creation-Date: 2015-08-04 14:49+0200\n"
 "PO-Revision-Date: 2015-07-11 15:41+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -41,7 +41,6 @@ msgid "Is discounted?"
 msgstr "Wurde Skonto gezogen?"
 
 #: systori/apps/accounting/forms.py:18
-#| msgid "Discount applied"
 msgid "No discount applied"
 msgstr "Skonto abgezogen"
 
@@ -156,14 +155,10 @@ msgid "accountant"
 msgstr "Buchhalter"
 
 #: systori/apps/company/models.py:32
-#| msgid "Active"
 msgid "active"
 msgstr "aktiv"
 
 #: systori/apps/company/models.py:33
-#| msgid ""
-#| "Designates whether this user should be treated as active. Unselect this "
-#| "instead of deleting accounts."
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts. This will remove user from any present and "
@@ -541,9 +536,9 @@ msgstr "offener Zahlungsbetrag"
 msgid "Please indicate the correct invoice number on your payment."
 msgstr "Bitte verwenden Sie diese Nr. bei der Zahlung."
 
-#: systori/apps/document/type/invoice.py:161
-msgid "Measurement Listing of Invoice No. %(invoice_no)s from %(invoice_date)s"
-msgstr "Aufmaßzusammenstellung zur Rechnung %(invoice_no)s vom %(invoice_date)s."
+#: systori/apps/document/type/invoice.py:163
+msgid "Itemized listing for Invoice No. {}"
+msgstr "Einzelaufstellung für Rechnung Nr. {}"
 
 #: systori/apps/document/type/proposal.py:56
 #: systori/apps/document/type/specification.py:54
@@ -1254,8 +1249,7 @@ msgid "Accounts"
 msgstr "Konten"
 
 #: systori/templates/main/sidebar.html:18
-#: systori/templates/user/user_list.h
-#| msgid "User"
+#: systori/templates/user/user_list.html:8
 msgid "Users"
 msgstr "Benutzer"
 
@@ -1475,7 +1469,6 @@ msgid "Save &uarr; List"
 msgstr "Speichern &uarr; Liste"
 
 #: systori/templates/project/project_list.html:10
-#| msgid "Project Name"
 msgid "Project Filter"
 msgstr "Projektbezeichnung"
 

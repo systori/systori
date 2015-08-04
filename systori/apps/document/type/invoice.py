@@ -158,10 +158,11 @@ def render(invoice, format):
 
             PageBreak(),
 
-            Paragraph(_("Measurement Listing of Invoice No. %(invoice_no)s from %(invoice_date)s")
-                        % {'invoice_no':invoice['invoice_no'], 'invoice_date':invoice_date}, stylesheet['h2']),
+	    Paragraph(invoice_date, stylesheet['NormalRight']),
 
-            Spacer(0, 2*mm),
+            Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
+
+            Spacer(0, 4*mm),
 
             collate_tasks(invoice, doc.width),
 
