@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-04 14:49+0200\n"
+"POT-Creation-Date: 2015-08-04 18:29+0200\n"
 "PO-Revision-Date: 2015-07-11 15:41+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -95,7 +95,7 @@ msgstr "Nummer"
 #: systori/templates/main/templates.html:33
 #: systori/templates/project/project_detail.html:28
 #: systori/templates/project/project_detail.html:296
-#: systori/templates/project/project_detail.html:327
+#: systori/templates/project/project_detail.html:329
 #: systori/templates/project/project_list.html:63
 #: systori/templates/project/project_list.html:100
 #: systori/templates/user/user_list.html:12
@@ -168,6 +168,7 @@ msgstr ""
 "im Normalfall die bessere Option als den Benutzer zu löschen."
 
 #: systori/apps/directory/models.py:9
+#: systori/templates/directory/contact_list.html:13
 msgid "Business"
 msgstr "Firma"
 
@@ -198,7 +199,7 @@ msgstr "Webseite"
 
 #: systori/apps/directory/models.py:19 systori/apps/project/forms.py:9
 #: systori/apps/project/models.py:274
-#: systori/templates/project/project_detail.html:328
+#: systori/templates/project/project_detail.html:330
 msgid "Address"
 msgstr "Adresse"
 
@@ -209,7 +210,7 @@ msgstr "PLZ"
 
 #: systori/apps/directory/models.py:21 systori/apps/project/forms.py:11
 #: systori/apps/project/models.py:275
-#: systori/templates/project/project_detail.html:329
+#: systori/templates/project/project_detail.html:331
 msgid "City"
 msgstr "Stadt"
 
@@ -217,7 +218,18 @@ msgstr "Stadt"
 msgid "Country"
 msgstr "Land"
 
-#: systori/apps/directory/models.py:24 systori/apps/directory/models.py:54
+#: systori/apps/directory/models.py:24
+msgid "auto-generate address label"
+msgstr "Adressfeld automatisch generieren."
+
+#: systori/apps/directory/models.py:25
+#: systori/templates/project/project_detail.html:297
+#, fuzzy
+#| msgid "Address"
+msgid "Address Label"
+msgstr "Adresse"
+
+#: systori/apps/directory/models.py:27 systori/apps/directory/models.py:57
 #: systori/apps/document/models.py:15
 #: systori/templates/document/evidence_detail.html:10
 #: systori/templates/document/invoice_detail.html:11
@@ -228,7 +240,7 @@ msgstr "Land"
 msgid "Notes"
 msgstr "Notizen"
 
-#: systori/apps/directory/models.py:27
+#: systori/apps/directory/models.py:30
 #: systori/templates/directory/contact_list.html:12
 #: systori/templates/directory/projectcontact_form_add.html:14
 #: systori/templates/project/project_list.html:64
@@ -236,48 +248,48 @@ msgstr "Notizen"
 msgid "Contact"
 msgstr "Kontakt"
 
-#: systori/apps/directory/models.py:28
+#: systori/apps/directory/models.py:31
 #: systori/templates/project/project_detail.html:291
 #: systori/templates/project/sidebar.html:18
 msgid "Contacts"
 msgstr "Kontakte"
 
-#: systori/apps/directory/models.py:42
+#: systori/apps/directory/models.py:45
 msgid "Customer"
 msgstr "Kunde"
 
-#: systori/apps/directory/models.py:43
+#: systori/apps/directory/models.py:46
 msgid "Contractor"
 msgstr "Vertragspartner"
 
-#: systori/apps/directory/models.py:44
+#: systori/apps/directory/models.py:47
 msgid "Supplier"
 msgstr "Lieferant"
 
-#: systori/apps/directory/models.py:45
+#: systori/apps/directory/models.py:48
 msgid "Architect"
 msgstr "Architekt"
 
-#: systori/apps/directory/models.py:46
+#: systori/apps/directory/models.py:49
 msgid "Other"
 msgstr "Andere"
 
-#: systori/apps/directory/models.py:48
+#: systori/apps/directory/models.py:51
 #: systori/templates/directory/contact_detail.html:20
 #: systori/templates/directory/projectcontact_form_add.html:15
-#: systori/templates/project/project_detail.html:297
+#: systori/templates/project/project_detail.html:298
 msgid "Association"
 msgstr "Verknüpfung"
 
-#: systori/apps/directory/models.py:49
+#: systori/apps/directory/models.py:52
 msgid "Is Billable?"
 msgstr "Abrechenbar"
 
-#: systori/apps/directory/models.py:57
+#: systori/apps/directory/models.py:60
 msgid "Project Contact"
 msgstr "Projektkontakt"
 
-#: systori/apps/directory/models.py:58
+#: systori/apps/directory/models.py:61
 msgid "Project Contacts"
 msgstr "Projektkontakte"
 
@@ -687,12 +699,12 @@ msgid "Site Name"
 msgstr "Vorname"
 
 #: systori/apps/project/models.py:279
-#: systori/templates/project/project_detail.html:330
+#: systori/templates/project/project_detail.html:332
 msgid "Latitude"
 msgstr "Breitengrad"
 
 #: systori/apps/project/models.py:280
-#: systori/templates/project/project_detail.html:330
+#: systori/templates/project/project_detail.html:332
 msgid "Longitude"
 msgstr "Längengrad"
 
@@ -799,7 +811,7 @@ msgid "correction"
 msgstr "Korrektur"
 
 #: systori/apps/task/models.py:462
-#: systori/templates/project/project_detail.html:298
+#: systori/templates/project/project_detail.html:299
 msgid "Billable"
 msgstr "Abrechenbar"
 
@@ -942,15 +954,15 @@ msgstr "Saldo"
 
 #: systori/templates/accounting/account_list.html:14
 #: systori/templates/accounting/account_list.html:43
-#: systori/templates/directory/contact_list.html:13
+#: systori/templates/directory/contact_list.html:14
 #: systori/templates/equipment/equipment_list.html:13
 #: systori/templates/main/templates.html:12
 #: systori/templates/main/templates.html:35
 #: systori/templates/project/project_detail.html:33
 #: systori/templates/project/project_detail.html:85
 #: systori/templates/project/project_detail.html:186
-#: systori/templates/project/project_detail.html:299
-#: systori/templates/project/project_detail.html:331
+#: systori/templates/project/project_detail.html:300
+#: systori/templates/project/project_detail.html:333
 #: systori/templates/project/project_list.html:65
 #: systori/templates/project/project_list.html:102
 #: systori/templates/user/user_list.html:15
@@ -959,12 +971,12 @@ msgstr "Aktionen"
 
 #: systori/templates/accounting/account_list.html:24
 #: systori/templates/accounting/account_list.html:54
-#: systori/templates/directory/contact_list.html:24
+#: systori/templates/directory/contact_list.html:26
 #: systori/templates/equipment/equipment_list.html:22
 #: systori/templates/main/templates.html:20
 #: systori/templates/main/templates.html:44
 #: systori/templates/project/project_detail.html:62
-#: systori/templates/project/project_detail.html:344
+#: systori/templates/project/project_detail.html:346
 #: systori/templates/project/project_list.html:81
 #: systori/templates/project/project_list.html:132
 #: systori/templates/user/user_list.html:33
@@ -972,7 +984,7 @@ msgid "Edit"
 msgstr "Bearbeiten"
 
 #: systori/templates/accounting/account_list.html:26
-#: systori/templates/directory/contact_list.html:25
+#: systori/templates/directory/contact_list.html:27
 #: systori/templates/equipment/equipment_list.html:23
 #: systori/templates/main/templates.html:21
 #: systori/templates/main/templates.html:45
@@ -980,7 +992,7 @@ msgstr "Bearbeiten"
 #: systori/templates/project/project_detail.html:121
 #: systori/templates/project/project_detail.html:207
 #: systori/templates/project/project_detail.html:231
-#: systori/templates/project/project_detail.html:346
+#: systori/templates/project/project_detail.html:348
 #: systori/templates/project/project_list.html:82
 #: systori/templates/project/project_list.html:133
 #: systori/templates/user/user_list.html:34
@@ -990,7 +1002,7 @@ msgstr "Löschen"
 #: systori/templates/accounting/account_list.html:33
 #: systori/templates/directory/projectcontact_form_add.html:30
 #: systori/templates/field/planning.html:59
-#: systori/templates/project/project_detail.html:319
+#: systori/templates/project/project_detail.html:321
 #: systori/templates/user/user_list.html:7
 msgid "Add"
 msgstr "Hinzufügen"
@@ -1020,6 +1032,13 @@ msgstr "Abmelden"
 msgid "Contact Details"
 msgstr "Kontaktdetails"
 
+#: systori/templates/directory/contact_detail.html:7
+#: systori/templates/field/dailyplan.html:26
+#: systori/templates/field/dailyplan.html:84
+#: systori/templates/field/dailyplan.html:115
+msgid "edit"
+msgstr "bearbeiten"
+
 #: systori/templates/directory/contact_detail.html:14
 msgid "Associated Projects"
 msgstr "Verknüpfte Projekte"
@@ -1029,7 +1048,7 @@ msgstr "Verknüpfte Projekte"
 msgid "Directory"
 msgstr "Adressbuch"
 
-#: systori/templates/directory/contact_list.html:31
+#: systori/templates/directory/contact_list.html:33
 #: systori/templates/directory/projectcontact_form_add.html:37
 #: systori/templates/directory/projectcontact_form_create.html:15
 #: systori/templates/equipment/equipment_list.html:29
@@ -1037,7 +1056,7 @@ msgstr "Adressbuch"
 #: systori/templates/main/templates.html:51
 #: systori/templates/project/project_detail.html:71
 #: systori/templates/project/project_detail.html:129
-#: systori/templates/project/project_detail.html:354
+#: systori/templates/project/project_detail.html:356
 #: systori/templates/project/project_list.html:28
 msgid "Create"
 msgstr "Erstellen"
@@ -1126,12 +1145,6 @@ msgstr "Pinnwand"
 msgid "Workers"
 msgstr "Arbeiter"
 
-#: systori/templates/field/dailyplan.html:26
-#: systori/templates/field/dailyplan.html:84
-#: systori/templates/field/dailyplan.html:115
-msgid "edit"
-msgstr "bearbeiten"
-
 #: systori/templates/field/dailyplan.html:67
 msgid "No workers have been assigned."
 msgstr "Keine Arbeiter zugewiesen."
@@ -1167,7 +1180,7 @@ msgid "You have not been assigned to any job sites today."
 msgstr "Du bist noch keinem Einsatzort zugeteilt."
 
 #: systori/templates/field/jobsite_list.html:17
-#: systori/templates/project/project_detail.html:322
+#: systori/templates/project/project_detail.html:324
 msgid "Job Sites"
 msgstr "Einsatzorte"
 
@@ -1452,11 +1465,11 @@ msgstr "Keine Positionen verfügbar."
 msgid "Add Payment"
 msgstr "Zahlung hinzufügen"
 
-#: systori/templates/project/project_detail.html:311
+#: systori/templates/project/project_detail.html:313
 msgid "Set Billable"
 msgstr "Abrechenbar"
 
-#: systori/templates/project/project_detail.html:312
+#: systori/templates/project/project_detail.html:314
 msgid "Remove"
 msgstr "Entfernen"
 

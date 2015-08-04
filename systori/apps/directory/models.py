@@ -21,7 +21,7 @@ class Contact(models.Model):
     city = models.CharField(_("City"), max_length=512)
     country = models.CharField(_("Country"), max_length=512, default=settings.DEFAULT_COUNTRY)
 
-    is_address_label_generated = models.BooleanField(default=True)
+    is_address_label_generated = models.BooleanField(_("auto-generate address label"), default=True)
     address_label = models.TextField(_("Address Label"), blank=True)
 
     notes = models.TextField(_("Notes"), blank=True)
