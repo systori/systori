@@ -130,7 +130,7 @@ def render(invoice, format):
 
             Paragraph(force_break(invoice.get('address_label', None) or """\
             {business}
-            z.H. {salutation} {first_name} {last_name}
+            {salutation} {first_name} {last_name}
             {address}
             {postal_code} {city}
             """.format(**invoice)), stylesheet['Normal']),
