@@ -158,13 +158,16 @@ def render(invoice, format):
 
             PageBreak(),
 
-            Paragraph(_("Aufmaß Zusammenstellung"), stylesheet['h2']),
+            Paragraph(_("Measurement Listing of Invoice No. %(invoice_no)s from %(invoice_date)s")
+                        % {'invoice_no':invoice['invoice_no'], 'invoice_date':invoice_date}, stylesheet['h4']),
+
+            Spacer(0, 2*mm),
 
             collate_tasks(invoice, doc.width),
 
-            collate_tasks_total(invoice, doc.width),
+            Spacer(0, 4*mm),
 
-            Spacer(0, 10*mm),
+            collate_tasks_total(invoice, doc.width),
 
             ]
 
