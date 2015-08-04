@@ -159,7 +159,7 @@ def render(invoice, format):
             PageBreak(),
 
             Paragraph(_("Measurement Listing of Invoice No. %(invoice_no)s from %(invoice_date)s")
-                        % {'invoice_no':invoice['invoice_no'], 'invoice_date':invoice_date}, stylesheet['h4']),
+                        % {'invoice_no':invoice['invoice_no'], 'invoice_date':invoice_date}, stylesheet['h2']),
 
             Spacer(0, 2*mm),
 
