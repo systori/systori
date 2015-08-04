@@ -4,7 +4,7 @@ from datetime import date
 from reportlab.lib.units import mm
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus import Paragraph, Spacer, KeepTogether
+from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
 from reportlab.lib import colors
 
 from django.utils.formats import date_format
@@ -150,17 +150,25 @@ def render(invoice, format):
 
             Spacer(0, 4*mm),
 
-            collate_tasks(invoice, doc.width),
-
-            collate_tasks_total(invoice, doc.width),
-
-            Spacer(0, 10*mm),
-
             collate_payments(invoice, doc.width),
 
             Spacer(0, 4*mm),
 
             KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal'])),
+
+            PageBreak(),
+
+	    Paragraph(invoice_date, stylesheet['NormalRight']),
+
+            Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
+
+            Spacer(0, 4*mm),
+
+            collate_tasks(invoice, doc.width),
+
+            Spacer(0, 4*mm),
+
+            collate_tasks_total(invoice, doc.width),
 
             ]
 
