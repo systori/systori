@@ -159,7 +159,7 @@ def render(proposal, with_line_items, format):
 
             Paragraph(force_break(proposal.get('address_label', None) or """\
             {business}
-            z.H. {salutation} {first_name} {last_name}
+            {salutation} {first_name} {last_name}
             {address}
             {postal_code} {city}
             """.format(**proposal)), stylesheet['Normal']),
