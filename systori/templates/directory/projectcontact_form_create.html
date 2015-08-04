@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n bootstrap %}
+{% load i18n bootstrap staticfiles %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='contacts' %}{% endblock %}
 
@@ -16,3 +16,7 @@
       </div>
   </form>
 {% endblock content %}
+
+{% block extra_js %}
+  <script src="{% static "js/address_label_generator.js" %}"></script>
+{% endblock extra_js %}

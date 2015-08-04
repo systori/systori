@@ -128,7 +128,7 @@ def render(invoice, format):
         doc = SystoriDocument(buffer, debug=DEBUG_DOCUMENT)
         flowables = [
 
-            Paragraph(force_break("""\
+            Paragraph(force_break(invoice.get('address_label', None) or """\
             {business}
             z.H. {salutation} {first_name} {last_name}
             {address}
@@ -195,7 +195,8 @@ def serialize(project, form):
         'address': contact.address,
         'postal_code': contact.postal_code,
         'city': contact.city,
-        
+        'address_label': contact.address_label,
+
         'total_gross': project.billable_gross_total,
         'total_base': project.billable_total,
         'total_tax': project.billable_tax_total,

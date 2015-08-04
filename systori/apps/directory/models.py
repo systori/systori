@@ -21,12 +21,15 @@ class Contact(models.Model):
     city = models.CharField(_("City"), max_length=512)
     country = models.CharField(_("Country"), max_length=512, default=settings.DEFAULT_COUNTRY)
 
+    is_address_label_generated = models.BooleanField(default=True)
+    address_label = models.TextField(_("Address Label"), blank=True)
+
     notes = models.TextField(_("Notes"), blank=True)
 
     class Meta:
         verbose_name = _("Contact")
         verbose_name_plural = _("Contacts")
-        ordering = ['business', 'last_name']
+        ordering = ['first_name', 'last_name']
 
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)

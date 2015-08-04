@@ -10,6 +10,7 @@
     <tr>
       <th>#</th>
       <th>{% trans 'Contact' %}</th>
+      <th>{% trans 'Business' %}</th>
       <th>{% trans 'Actions' %}</th>
     </tr>
     </thead>
@@ -20,6 +21,7 @@
         <td><a
             href="{% url 'contact.view' contact.id %}">{{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }}</a>
         </td>
+        <td>{{ contact.business }}</td>
         <td>
           <a href="{% url 'contact.edit' contact.id %}">{% trans "Edit" %}</a>
           <a href="{% url 'contact.delete' contact.id %}">{% trans "Delete" %}</a>
