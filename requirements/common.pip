@@ -18,3 +18,6 @@ git+ssh://git@bitbucket.org/damoti/rlextra.git#egg=rlextra
 
 -e git+ssh://git@bitbucket.org/damoti/django-tuath.git#egg=django-tuath
 #-e ../django-tuath
+
+-e git+https://github.com/damoti/pyth.git@pyth-py3#egg=pyth
+#-e ../pyth
