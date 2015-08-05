@@ -1,4 +1,7 @@
 import re
+from io import BytesIO
+from pyth.plugins.rtf15.reader import Rtf15Reader
+from pyth.plugins.plaintext.writer import PlaintextWriter
 
 
 # P83 Tag Praser
@@ -33,34 +36,72 @@ def get_content_attrs(match):
     attrs.update(attr_dict(Beschreibung.search(content).group('content')))
     return content, attrs
 
+
+def rtf_to_text(value):
+    if len(value) == 0: return value
+    rtf_doc = Rtf15Reader.read(BytesIO(value.encode('latin_1')))
+    txt_doc = BytesIO()
+    PlaintextWriter.write(rtf_doc, txt_doc, encoding='latin_1')
+    return txt_doc.getvalue().decode('latin_1')
+
+
 # Build up the structure and convert it into something
 # Systori can use...
 
-data = open('gaeb2000_file.p83', encoding='latin_1').read()
-content = LV.search(data).group('content')
-project = {
-    'attrs': attr_dict(LVInfo.search(content).group('content')),
-    'jobs': []
-}
+def parse_p83_file(filename):
+    data = open(filename, encoding='latin_1').read()
+    content = LV.search(data).group('content')
 
-for job in LVBereich.finditer(content):
-    job_content, job_attrs = get_content_attrs(job)
-    print('Job:', job_attrs['Kurztext'])
+    project_dict = {
+        'attrs': attr_dict(LVInfo.search(content).group('content')),
+        'jobs': []
+    }
+
+    for _ in LVBereich.finditer(content):
+
+        for job in LVBereich.finditer(_.group('content')):
+            job_content, job_attrs = get_content_attrs(job)
+            job_dict = {'attrs': job_attrs, 'taskgroups': []}
+            job_dict['attrs']['Langtext'] = rtf_to_text(job_dict['attrs']['Langtext'])
+            project_dict['jobs'].append(job_dict)
+
+            for taskgroup in LVBereich.finditer(job_content):
+                taskgroup_content, taskgroup_attrs = get_content_attrs(taskgroup)
+                taskgroup_dict = {'attrs': taskgroup_attrs, 'tasks': []}
+                taskgroup_dict['attrs']['Langtext'] = rtf_to_text(taskgroup_dict['attrs']['Langtext'])
+                job_dict['taskgroups'].append(taskgroup_dict)
+
+                for task in Position.finditer(taskgroup_content):
+                    task_content, task_attrs = get_content_attrs(task)
+                    task_dict = {'attrs': task_attrs}
+                    task_dict['attrs']['Langtext'] = rtf_to_text(task_dict['attrs']['Langtext'])
+                    taskgroup_dict['tasks'].append(task_dict)
+
+    return project_dict
+
+
+if __name__ == '__main__':
+    project = parse_p83_file('gaeb2000_file.p83')
+
+    print("Project:")
+    for key, value in project['attrs'].items():
+        print(" {}: {}".format(key, value))
     print()
 
-    for taskgroup in LVBereich.finditer(job_content):
-        taskgroup_content, taskgroup_attrs = get_content_attrs(taskgroup)
-        print()
-        print(' Task Group:', taskgroup_attrs['Kurztext'])
-        for key, value in taskgroup_attrs.items():
-            if key in ['Langtext', 'Kurztext', 'Bez']: continue
-            print('  {}: {}'.format(key, value))
+    for job in project['jobs']:
+        print("Job:")
+        for key, value in job['attrs'].items():
+            print(" {}: {}".format(key, value))
         print()
 
-        for task in Position.finditer(taskgroup_content):
-            task_content, task_attrs = get_content_attrs(task)
-            print('   Task:', task_attrs['Kurztext'])
-            for key, value in task_attrs.items():
-                if key in ['Langtext', 'Kurztext']: continue
-                print('     {}: {}'.format(key, value))
+        for taskgroup in job['taskgroups']:
+            print("    Task Group:")
+            for key, value in taskgroup['attrs'].items():
+                print("     {}: {}".format(key, value))
             print()
+
+            for task in taskgroup['tasks']:
+                print("      Task:")
+                for key, value in task['attrs'].items():
+                    print("       {}: {}".format(key, value))
+                print()
