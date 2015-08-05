@@ -157,9 +157,9 @@ def render(proposal, with_line_items, format):
 
         flowables = [
 
-            Paragraph(force_break("""\
+            Paragraph(force_break(proposal.get('address_label', None) or """\
             {business}
-            z.H. {salutation} {first_name} {last_name}
+            {salutation} {first_name} {last_name}
             {address}
             {postal_code} {city}
             """.format(**proposal)), stylesheet['Normal']),
@@ -212,6 +212,7 @@ def serialize(project, form):
         'address': contact.address,
         'postal_code': contact.postal_code,
         'city': contact.city,
+        'address_label': contact.address_label,
 
         'total_gross': form.instance.amount * (TAX_RATE+1),
         'total_base': form.instance.amount,

@@ -128,9 +128,9 @@ def render(invoice, format):
         doc = SystoriDocument(buffer, debug=DEBUG_DOCUMENT)
         flowables = [
 
-            Paragraph(force_break("""\
+            Paragraph(force_break(invoice.get('address_label', None) or """\
             {business}
-            z.H. {salutation} {first_name} {last_name}
+            {salutation} {first_name} {last_name}
             {address}
             {postal_code} {city}
             """.format(**invoice)), stylesheet['Normal']),
@@ -158,10 +158,11 @@ def render(invoice, format):
 
             PageBreak(),
 
-            Paragraph(_("Measurement Listing of Invoice No. %(invoice_no)s from %(invoice_date)s")
-                        % {'invoice_no':invoice['invoice_no'], 'invoice_date':invoice_date}, stylesheet['h2']),
+	    Paragraph(invoice_date, stylesheet['NormalRight']),
 
-            Spacer(0, 2*mm),
+            Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
+
+            Spacer(0, 4*mm),
 
             collate_tasks(invoice, doc.width),
 
@@ -202,7 +203,8 @@ def serialize(project, form):
         'address': contact.address,
         'postal_code': contact.postal_code,
         'city': contact.city,
-        
+        'address_label': contact.address_label,
+
         'total_gross': project.billable_gross_total,
         'total_base': project.billable_total,
         'total_tax': project.billable_tax_total,

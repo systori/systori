@@ -104,7 +104,7 @@ def render(proposal, format):
 
             Paragraph(force_break("""\
             {business}
-            z.H. {salutation} {first_name} {last_name}
+            {salutation} {first_name} {last_name}
             {address}
             {postal_code} {city}
             """.format(**proposal)), stylesheet['Normal']),
