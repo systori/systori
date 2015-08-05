@@ -6,6 +6,7 @@
 .idea/dictionaries/
 *.pyc
 .settings/
+Systori.egg-info
 bitbucket.login
 __pycache__
 .coverage
