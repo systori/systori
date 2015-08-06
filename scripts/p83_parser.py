@@ -1,8 +1,12 @@
 import re
+import string
 from io import BytesIO
 from pyth.plugins.rtf15.reader import Rtf15Reader
 from pyth.plugins.plaintext.writer import PlaintextWriter
 
+
+# string translate thing to cleanup the [Langtext]s
+tr = str.maketrans(string.whitespace, ' '*len(string.whitespace))
 
 # P83 Tag Praser
 # Looks for begin tag, looks for end tag,
@@ -62,19 +66,19 @@ def parse_p83_file(filename):
         for job in LVBereich.finditer(_.group('content')):
             job_content, job_attrs = get_content_attrs(job)
             job_dict = {'attrs': job_attrs, 'taskgroups': []}
-            job_dict['attrs']['Langtext'] = rtf_to_text(job_dict['attrs']['Langtext'])
+            job_dict['attrs']['Langtext'] = re.sub("\s\s+", " ", (rtf_to_text(job_dict['attrs']['Langtext'])).translate(tr))
             project_dict['jobs'].append(job_dict)
 
             for taskgroup in LVBereich.finditer(job_content):
                 taskgroup_content, taskgroup_attrs = get_content_attrs(taskgroup)
                 taskgroup_dict = {'attrs': taskgroup_attrs, 'tasks': []}
-                taskgroup_dict['attrs']['Langtext'] = rtf_to_text(taskgroup_dict['attrs']['Langtext'])
+                taskgroup_dict['attrs']['Langtext'] = re.sub("\s\s+", " ", (rtf_to_text(taskgroup_dict['attrs']['Langtext'])).translate(tr))
                 job_dict['taskgroups'].append(taskgroup_dict)
 
                 for task in Position.finditer(taskgroup_content):
                     task_content, task_attrs = get_content_attrs(task)
                     task_dict = {'attrs': task_attrs}
-                    task_dict['attrs']['Langtext'] = rtf_to_text(task_dict['attrs']['Langtext'])
+                    task_dict['attrs']['Langtext'] = re.sub("\s\s+", " ", (rtf_to_text(task_dict['attrs']['Langtext'])).translate(tr))
                     taskgroup_dict['tasks'].append(task_dict)
 
     return project_dict
