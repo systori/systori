@@ -1,9 +1,17 @@
 import re
-
+import string
 from io import BytesIO
 from pyth.plugins.rtf15.reader import Rtf15Reader
 from pyth.plugins.plaintext.writer import PlaintextWriter
 
+import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
+import django
+django.setup()
+
+
+# string translate thing to cleanup the [Langtext]s
+tr = str.maketrans(string.whitespace, ' '*len(string.whitespace))
 
 # P83 Tag Praser
 # Looks for begin tag, looks for end tag,
@@ -82,6 +90,19 @@ def parse_p83_file(filename):
 
 
 if __name__ == '__main__':
+    from systori.apps.company.models import Company
+    Company.objects.get(schema="mehr_handwerk").activate()
+
+    from systori.apps.project.models import Project, Job
+    from systori.apps.task.models import TaskGroup, Task, TaskInstance, LineItem
+    import decimal
+
+    p41 = Project.objects.get(id=41)
+
+    for job in p41.jobs.all():
+        job.job_code += 1
+        job.save()
+
     project = parse_p83_file('gaeb2000_file.p83')
 
     print("Project:")
@@ -94,15 +115,43 @@ if __name__ == '__main__':
         for key, value in job['attrs'].items():
             print(" {}: {}".format(key, value))
         print()
+        _job = Job.objects.create(
+            project = p41,
+            job_code = int(job['attrs']['Oz'][3:4]),
+            name = job['attrs']['Kurztext'],
+            description = job['attrs']['Langtext']
+        )
+        _job.save()
 
         for taskgroup in job['taskgroups']:
             print("    Task Group:")
             for key, value in taskgroup['attrs'].items():
                 print("     {}: {}".format(key, value))
             print()
+            _taskgroup = TaskGroup.objects.create(
+                job = _job,
+                #code = int(taskgroup['attrs']['Oz'][4:6]),
+                name = taskgroup['attrs']['Bez'],
+                description = taskgroup['attrs']['Langtext']
+            )
+            _taskgroup.save()
 
             for task in taskgroup['tasks']:
                 print("      Task:")
                 for key, value in task['attrs'].items():
                     print("       {}: {}".format(key, value))
                 print()
+                _task = Task.objects.create(
+                    taskgroup = _taskgroup,
+                    #code = int(task['attrs']['Oz'][6:10])
+                    name = task['attrs']['Kurztext'],
+                    description = task['attrs']['Langtext'],
+                    qty = decimal.Decimal(task['attrs']['Menge'].replace(".","").replace(",",".")),
+                    unit = task['attrs']['ME']
+                )
+                _taskinstance = TaskInstance.objects.create(task=_task, selected=True)
+                LineItem.objects.create(taskinstance = _taskinstance, name = 'Preis aus LV')
+                _taskinstance.save()
+                _task.save()
+
+    p41.save()
