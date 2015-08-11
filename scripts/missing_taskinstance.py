@@ -7,9 +7,11 @@ import django
 
 django.setup()
 
+from systori.apps.company.models import Company
 from systori.apps.task.models import *
 from systori.apps.project.models import *
 
+c = Company.objects.get(schema=input("Company Schema:")).activate()
 p = Project.objects.get(id=input("Project ID: "))
 
 for job in p.jobs.all():

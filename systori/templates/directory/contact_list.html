@@ -9,7 +9,8 @@
     <thead>
     <tr>
       <th>#</th>
-      <th>{% trans 'Contact' %}</th>
+      <th>{% trans 'Last Name' %}</th>
+      <th>{% trans 'First Name' %}</th>
       <th>{% trans 'Business' %}</th>
       <th>{% trans 'Actions' %}</th>
     </tr>
@@ -17,14 +18,15 @@
     <tbody>
     {% for contact in contact_list %}
       <tr>
-        <td>{{ contact.id }}</td>
         <td><a
-            href="{% url 'contact.view' contact.id %}">{{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }}</a>
+            href="{% url 'contact.view' contact.id %}">{{ contact.id }}</a></td>
+        <td>{{ contact.last_name }}</td>
+        <td>{{ contact.first_name }}</td>
         </td>
         <td>{{ contact.business }}</td>
         <td>
-          <a href="{% url 'contact.edit' contact.id %}">{% trans "Edit" %}</a>
-          <a href="{% url 'contact.delete' contact.id %}">{% trans "Delete" %}</a>
+          <a href="{% url 'contact.edit' contact.id %}"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+          <a href="{% url 'contact.delete' contact.id %}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
         </td>
       </tr>
     {% endfor %}
