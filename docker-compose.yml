@@ -1,0 +1,21 @@
+db:
+  image: postgres
+  ports:
+    - "5432:5432"
+
+web:
+  environment:
+    DJANGO_SETTINGS_MODULE: systori.settings.docker
+    # LANG: ru_RU.UTF-8
+    # LC_ALL: ru_RU.UTF-8
+    # LC_CTYPE: ru_RU.UTF-8
+    PYTHONIOENCODING: utf-8
+  build: .
+  command: python3 manage.py runserver 0.0.0.0:8000
+  # command: fab project_run
+  volumes:
+    - .:/systori
+  ports:
+    - "8000:8000"
+  links:
+    - db
