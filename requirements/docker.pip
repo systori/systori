@@ -1,0 +1,24 @@
+psycopg2
+
+django==1.8
+django-tastypie
+django-ordered-model
+django-fsm
+django_mobile
+django-bootstrap-form
+
+geopy
+lxml
+jsonfield
+
+hg+https://bitbucket.org/rptlab/reportlab
+hg+https://bitbucket.org/rptlab/preppy
+# rlextra doesn't work if installed in-place (-e)
+git+ssh://git@bitbucket.org/damoti/rlextra.git
+
+git+ssh://git@bitbucket.org/damoti/django-tuath.git
+#-e ../django-tuath
+
+-e git+https://github.com/damoti/pyth.git@pyth-py3#egg=pyth
+#-e ../pyth
+-r dev.pip

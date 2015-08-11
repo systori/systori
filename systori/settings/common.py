@@ -1,3 +1,4 @@
+# encoding=utf-8
 # Systori Settings
 
 # Pre-populates all addresses and used by geocoding
