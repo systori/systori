@@ -5,11 +5,12 @@ from django.forms import Form, ModelForm, ValidationError
 from django import forms
 from .models import *
 from .skr03 import *
+from .fields import SmartDecimalField
 
 
 class PaymentForm(Form):
     bank_account = forms.ModelChoiceField(label=_('Bank Account'), queryset=Account.objects.banks())
-    amount = forms.DecimalField(label=_("Amount"), max_digits=14, decimal_places=4, localize=True)
+    amount = SmartDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
     received_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
     discount = forms.TypedChoiceField(
         label=_('Is discounted?'),
@@ -34,9 +35,7 @@ class BankAccountForm(ModelForm):
         fields = ['code', 'name']
 
     def __init__(self, *args, instance=None, **kwargs):
-
         if instance is None:  # create form
-
             banks = Account.objects.banks().order_by('-code')
             if banks.exists():
                 next_code = int(banks.first().code) + 1
@@ -48,9 +47,7 @@ class BankAccountForm(ModelForm):
                 kwargs['initial'] = {'code': str(next_code)}
 
             kwargs['instance'] = Account(account_type=Account.ASSET)
-
         else:
-
             kwargs['instance'] = instance
 
         super(BankAccountForm, self).__init__(*args, **kwargs)
