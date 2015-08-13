@@ -1,6 +1,5 @@
-from decimal import Decimal, DecimalException
 import re
-from django.utils import formats
+from decimal import Decimal, DecimalException
 from django.utils.encoding import smart_text
 from django import forms
 from django.forms import ValidationError
