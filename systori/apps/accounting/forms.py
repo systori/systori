@@ -10,7 +10,7 @@ from .fields import SmartDecimalField
 
 class PaymentForm(Form):
     bank_account = forms.ModelChoiceField(label=_('Bank Account'), queryset=Account.objects.banks())
-    amount = SmartDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
+    amount = SmartDecimalField(label=_("Amount"), max_digits=14, decimal_places=4, localize=True)
     received_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
     discount = forms.TypedChoiceField(
         label=_('Is discounted?'),
