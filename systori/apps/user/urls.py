@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^user-(?P<pk>\d+)$', office_auth(UserView.as_view()), name='user.view'),
     url(r'^user-(?P<pk>\d+)/edit$', office_auth(UserUpdate.as_view()), name='user.edit'),
     url(r'^user-(?P<pk>\d+)/remove$', office_auth(UserRemove.as_view()), name='user.remove'),
+    url(r'^user-(?P<pk>\d+)/generate-password$', office_auth(UserGeneratePassword.as_view()), name='user.generate.password'),
 ]

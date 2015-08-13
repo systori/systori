@@ -110,3 +110,17 @@ class UserUpdate(UpdateView, UserFormRenderer):
 
 class UserRemove(DeleteView):
     model = Access
+
+
+class UserGeneratePassword(DetailView):
+    model = User
+    template_name = "user/password_generator.html"
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+        new_password = User.objects.make_random_password()
+        self.object.set_password(new_password)
+        self.object.save()
+        context['new_password'] = new_password
+        return self.render_to_response(context)
