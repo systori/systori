@@ -2,6 +2,7 @@
 {% load i18n l10n customformatting project %}
 
 {% block content %}
+  <h2 class="sub-header">{% trans 'Project' %}</h2>
 
   <div class="pull-right">
     {% project_states as states %}
@@ -20,6 +21,7 @@
           >{{ label }}</a>
     {% endfor %}
   </div>
+  <p><a href="{% url 'itemized_listing.pdf' project.id 'email' %}">{% trans "Itemized listing" %}</a></p>
 
   <h2 class="sub-header">{% trans "Jobs" %}</h2>
   <table class="table table-striped">
