@@ -3,9 +3,9 @@ from decimal import Decimal
 from django.utils.translation import ugettext_lazy as _
 from django.forms import Form, ModelForm, ValidationError
 from django import forms
+from systori.lib.fields import SmartDecimalField
 from .models import *
 from .skr03 import *
-from .fields import SmartDecimalField
 
 
 class PaymentForm(Form):
