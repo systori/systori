@@ -42,13 +42,11 @@ class SmartDecimalField(forms.DecimalField):
         than max_digits in the number, and no more than decimal_places digits
         after the decimal point.
         """
-        print('BONG')
         if value in self.empty_values:
             return None
         if self.localize:
             value = sanitize_separators(value)
         value = smart_text(value).strip()
-        print(value)
         try:
             value = Decimal(value)
         except DecimalException:
