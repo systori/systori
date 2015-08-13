@@ -13,6 +13,9 @@ from .forms import ContactForm, ProjectContactForm
 class DirectoryList(ListView):
     model = Contact
 
+    def get_queryset(self):
+        return self.model.objects.order_by('last_name').all()
+
 
 class ProjectContactSetBillable(SingleObjectMixin, View):
     model = ProjectContact
