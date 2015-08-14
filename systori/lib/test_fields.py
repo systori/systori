@@ -2,14 +2,14 @@ from decimal import Decimal
 from django.test import TestCase
 from django.utils.translation import activate
 from django.core.exceptions import ValidationError
-from .fields import SmartDecimalField, sanitize_separators
+from .fields import LocalizedDecimalField, sanitize_separators
 
 
-class SmartDecimalFieldTest(TestCase):
+class LocalizedDecimalFieldTest(TestCase):
 
     def test_to_python_de(self):
         activate('de')
-        field = SmartDecimalField(localize=True)
+        field = LocalizedDecimalField(localize=True)
 
         self.assertEqual(field.to_python('10000,5001'), Decimal('10000.5001'))
         self.assertEqual(field.to_python('10.000.000,50'), Decimal('10000000.50'))
@@ -18,7 +18,7 @@ class SmartDecimalFieldTest(TestCase):
 
     def test_to_python_en(self):
         activate('en')
-        field = SmartDecimalField(localize=True)
+        field = LocalizedDecimalField(localize=True)
 
         self.assertEqual(field.to_python('10000.5001'), Decimal('10000.5001'))
         self.assertEqual(field.to_python('10,000,000.50'), Decimal('10000000.50'))

@@ -32,7 +32,7 @@ def sanitize_separators(value):
     return value
 
 
-class SmartDecimalField(forms.DecimalField):
+class LocalizedDecimalField(forms.DecimalField):
     widget = forms.TextInput
 
     def to_python(self, value):
@@ -44,8 +44,7 @@ class SmartDecimalField(forms.DecimalField):
         """
         if value in self.empty_values:
             return None
-        if self.localize:
-            value = sanitize_separators(value)
+        value = sanitize_separators(value)
         value = smart_text(value).strip()
         try:
             value = Decimal(value)

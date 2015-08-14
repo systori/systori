@@ -3,14 +3,14 @@ from decimal import Decimal
 from django.utils.translation import ugettext_lazy as _
 from django.forms import Form, ModelForm, ValidationError
 from django import forms
-from systori.lib.fields import SmartDecimalField
+from systori.lib.fields import LocalizedDecimalField
 from .models import *
 from .skr03 import *
 
 
 class PaymentForm(Form):
     bank_account = forms.ModelChoiceField(label=_('Bank Account'), queryset=Account.objects.banks())
-    amount = SmartDecimalField(label=_("Amount"), max_digits=14, decimal_places=4, localize=True)
+    amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
     received_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
     discount = forms.TypedChoiceField(
         label=_('Is discounted?'),
