@@ -244,10 +244,10 @@ class LandscapeStationaryCanvas(StationaryCanvas):
 
 class SystoriDocument(BaseDocTemplate):
 
-    def __init__(self, buffer, debug=False):
+    def __init__(self, buffer, topMargin=55*mm, debug=False):
         super(SystoriDocument, self).__init__(buffer,
                                               pagesize=A4,
-                                              topMargin=55*mm,
+                                              topMargin=topMargin,
                                               bottomMargin=22*mm,
                                               leftMargin=25*mm,
                                               rightMargin=62*mm,
@@ -275,19 +275,6 @@ class SystoriDocument(BaseDocTemplate):
             PageTemplate(id='Later', frames=frame, onPage=self.onLaterPages, pagesize=self.pagesize)
         ])
         super(SystoriDocument, self).build(flowables, canvasmaker=canvasmaker)
-
-
-class SystoriDocumentWithoutFirstPage(SystoriDocument):
-
-    def __init__(self, buffer, debug=False):
-        super(SystoriDocument, self).__init__(buffer,
-                                              pagesize=A4,
-                                              topMargin=39*mm,
-                                              bottomMargin=22*mm,
-                                              leftMargin=25*mm,
-                                              rightMargin=62*mm,
-                                              showBoundary=debug
-                                              )
 
 
 class ContinuationTable(Table):

@@ -7,12 +7,55 @@ from reportlab.platypus import Paragraph, Spacer
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
-from .style import SystoriDocumentWithoutFirstPage, stylesheet
+from .style import SystoriDocument, stylesheet
 from .style import PortraitStationaryCanvasWithoutFirstPage
 from .invoice import collate_tasks, collate_tasks_total
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
+def serialize(project):
+
+    for job in project.billable_jobs:
+        job_dict = {
+            'code': job.code,
+            'name': job.name,
+            'taskgroups': []
+        }
+
+        for taskgroup in job.billable_taskgroups:
+            taskgroup_dict = {
+                'code': taskgroup.code,
+                'name': taskgroup.name,
+                'description': taskgroup.description,
+                'total': taskgroup.billable_total,
+                'tasks': []
+            }
+            job_dict['taskgroups'].append(taskgroup_dict)
+
+            for task in taskgroup.billable_tasks:
+                task_dict = {
+                    'code': task.instance.code,
+                    'name': task.instance.full_name,
+                    'description': task.instance.full_description,
+                    'complete': task.complete,
+                    'unit': task.unit,
+                    'price': task.instance.unit_price,
+                    'total': task.fixed_price_billable,
+                    'lineitems': []
+                }
+                taskgroup_dict['tasks'].append(task_dict)
+
+                for lineitem in task.instance.lineitems.all():
+                    lineitem_dict = {
+                        'name': lineitem.name,
+                        'qty': lineitem.unit_qty,
+                        'unit': lineitem.unit,
+                        'price': lineitem.price,
+                        'price_per': lineitem.price_per_task_unit,
+                    }
+                    task_dict['lineitems'].append(lineitem_dict)
+
+    return job_dict
 
 def render(project, format):
 
@@ -40,50 +83,9 @@ def render(project, format):
             'total_tax': project.billable_tax_total,
         }
 
-        itemized_listing['jobs'] = []
+        itemized_listing['jobs'] = [serialize(project)]
 
-        for job in project.billable_jobs:
-            job_dict = {
-                'code': job.code,
-                'name': job.name,
-                'taskgroups': []
-            }
-            itemized_listing['jobs'].append(job_dict)
-
-            for taskgroup in job.billable_taskgroups:
-                taskgroup_dict = {
-                    'code': taskgroup.code,
-                    'name': taskgroup.name,
-                    'description': taskgroup.description,
-                    'total': taskgroup.billable_total,
-                    'tasks': []
-                }
-                job_dict['taskgroups'].append(taskgroup_dict)
-
-                for task in taskgroup.billable_tasks:
-                    task_dict = {
-                        'code': task.instance.code,
-                        'name': task.instance.full_name,
-                        'description': task.instance.full_description,
-                        'complete': task.complete,
-                        'unit': task.unit,
-                        'price': task.instance.unit_price,
-                        'total': task.fixed_price_billable,
-                        'lineitems': []
-                    }
-                    taskgroup_dict['tasks'].append(task_dict)
-
-                    for lineitem in task.instance.lineitems.all():
-                        lineitem_dict = {
-                            'name': lineitem.name,
-                            'qty': lineitem.unit_qty,
-                            'unit': lineitem.unit,
-                            'price': lineitem.price,
-                            'price_per': lineitem.price_per_task_unit,
-                        }
-                        task_dict['lineitems'].append(lineitem_dict)
-
-        doc = SystoriDocumentWithoutFirstPage(buffer, debug=DEBUG_DOCUMENT)
+        doc = SystoriDocument(buffer, topMargin=39*mm, debug=DEBUG_DOCUMENT)
 
         flowables = [
 
