@@ -27,7 +27,8 @@
     <tr>
       <th>{% trans "Name" %}</th>
       <th>{% trans "Status" %}</th>
-      <th style="text-align: right; padding-right: 100px; width: 200px;">{% trans "Total" %}</th>
+      <th style="text-align: right;">{% trans "Total" %}</th>
+      <th></th>
       <th>{% trans "Billing Method" %}</th>
       <th>{% trans "Billable Amount" %}</th>
       <th>{% trans "Actions" %}</th>
@@ -39,7 +40,9 @@
         <td><a href="{% url 'tasks' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
         <td>{{ job.get_status_display }}</td>
         <td style="text-align: right;">
-          {{ job.estimate_total|money }} &nbsp;
+          {{ job.estimate_total|money }}
+        </td>
+        <td>
           <div class="btn-group">
             <a class="btn btn-default btn-xs" href="{% url 'job.estimate' project.id job.id 'increase' %}"
                title="{% blocktrans with percent=job.ESTIMATE_INCREMENT_DISPLAY %}Increase estimate by {{ percent }}.{% endblocktrans %}"><span
@@ -53,7 +56,7 @@
           </div>
         </td>
         <td>{{ job.get_billing_method_display }}</td>
-        <td>{{ job.billable_total|money }}</td>
+        <td style="text-align: right;">{{ job.billable_total|money }}</td>
         <td>
           {% for state in job.get_available_status_transitions %}
             <a href="{% url 'job.transition' project.id job.id state.name %}">{{ state.custom.label }}</a>
@@ -66,6 +69,17 @@
         </td>
       </tr>
     {% endfor %}
+    {% if project.jobs.count > 1 %}
+      <tr>
+        <td></td>
+        <td></td>
+        <td style="text-align: right;"><b>{{ project.estimate_total|money }}</b></td>
+        <td></td>
+        <td></td>
+        <td style="text-align: right;"><b>{{ project.billable_total|money }}</b></td>
+        <td></td>
+      </tr>
+    {% endif %}
     </tbody>
   </table>
   <a href="{% url 'job.create' project.id %}">{% trans "Create" %}</a>
@@ -98,7 +112,7 @@
         <td>{{ doc.amount|money }}</td>
         <td>{{ doc.created_on|localize }}</td>
         <td>{{ doc.notes }}</td>
-        <td>
+        <td style="min-width: 100px;">
           <div class="btn-group">
             <button type="button" class="btn btn-default">{% trans 'PDF' %}</button>
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
