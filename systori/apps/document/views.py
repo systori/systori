@@ -140,7 +140,7 @@ class InvoiceCreate(CreateView):
             skr03.partial_debit(project)
 
         form.instance.amount = project.account.balance
-        form.instance.json = invoice.serialize(project, form)
+        form.instance.json = invoice.serialize(project, form.cleaned_data)
         form.instance.json_version = form.instance.json['version']
 
         return super(InvoiceCreate, self).form_valid(form)

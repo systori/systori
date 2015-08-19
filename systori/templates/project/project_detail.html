@@ -21,7 +21,9 @@
           >{{ label }}</a>
     {% endfor %}
   </div>
+  {% if project.has_billable_contact %}
   <p><a href="{% url 'itemized_listing.pdf' project.id 'email' %}">{% trans "Itemized listing" %}</a></p>
+  {% endif %}
 
   <h2 class="sub-header">{% trans "Jobs" %}</h2>
   <table class="table table-striped">
