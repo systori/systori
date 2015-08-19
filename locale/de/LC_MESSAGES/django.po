@@ -919,12 +919,12 @@ msgstr "Menge"
 #: systori/templates/accounting/account_detail.html:28
 #: systori/templates/project/project_detail.html:184
 msgid "Debit"
-msgstr "Debitor"
+msgstr "Soll"
 
 #: systori/templates/accounting/account_detail.html:29
 #: systori/templates/project/project_detail.html:185
 msgid "Credit"
-msgstr "Kreditor"
+msgstr "Haben"
 
 #: systori/templates/accounting/account_form.html:14
 #: systori/templates/accounting/payment_form.html:10
@@ -1421,7 +1421,7 @@ msgstr "berechnet"
 
 #: systori/templates/project/project_detail.html:215
 msgid "Debit for new work completed to date."
-msgstr "Debitor für neu fertiggestellte Arbeit."
+msgstr "Soll für neu fertiggestellte Arbeit."
 
 #: systori/templates/project/project_detail.html:249
 msgid "Debits"
@@ -1437,7 +1437,7 @@ msgstr "debitierbar"
 
 #: systori/templates/project/project_detail.html:253
 msgid "Invoiceable"
-msgstr "berechenbar"
+msgstr "Forderung"
 
 #: systori/templates/project/project_detail.html:263
 #, python-format
