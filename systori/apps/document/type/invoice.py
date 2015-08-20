@@ -181,7 +181,7 @@ def render(invoice, format):
         return buffer.getvalue()
 
 
-def serialize(project, form):
+def serialize(project, additional_information):
 
     contact = project.billable_contact.contact
 
@@ -189,12 +189,12 @@ def serialize(project, form):
 
         'version': '1.0',
 
-        'title': form.cleaned_data['title'],
-        'date': form.cleaned_data['document_date'],
-        'invoice_no': form.cleaned_data['invoice_no'],
+        'title': additional_information.get('title',''),
+        'date': additional_information.get('document_date'),
+        'invoice_no': additional_information.get('invoice_no'),
 
-        'header': form.cleaned_data['header'],
-        'footer': form.cleaned_data['footer'],
+        'header': additional_information.get('header'),
+        'footer': additional_information.get('footer'),
 
         'business': contact.business,
         'salutation': contact.salutation,
@@ -215,7 +215,7 @@ def serialize(project, form):
 
     }
 
-    if form.cleaned_data['add_terms']:
+    if additional_information.get('add_terms', False):
         invoice['add_terms'] = True  # TODO: Calculate the terms.
 
     invoice['jobs'] = []

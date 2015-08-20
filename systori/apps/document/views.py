@@ -12,7 +12,7 @@ from .models import Proposal, Invoice, DocumentTemplate
 from .forms import ProposalForm, InvoiceForm
 from ..accounting import skr03
 
-from .type import proposal, invoice, evidence, specification
+from .type import proposal, invoice, evidence, specification, itemized_listing
 
 
 class DocumentRenderView(SingleObjectMixin, View):
@@ -140,7 +140,7 @@ class InvoiceCreate(CreateView):
             skr03.partial_debit(project)
 
         form.instance.amount = project.account.balance
-        form.instance.json = invoice.serialize(project, form)
+        form.instance.json = invoice.serialize(project, form.cleaned_data)
         form.instance.json_version = form.instance.json['version']
 
         return super(InvoiceCreate, self).form_valid(form)
@@ -186,6 +186,15 @@ class EvidencePDF(DocumentRenderView):
         job = Job.prefetch(self.get_object().id)
         return evidence.render(job)
 
+
+# Itemized List
+
+class ItemizedListingPDF(DocumentRenderView):
+    model = Project
+
+    def pdf(self):
+        project = Project.prefetch(self.kwargs['project_pk'])
+        return itemized_listing.render(project, self.kwargs['format'])
 
 # Document Template
 
