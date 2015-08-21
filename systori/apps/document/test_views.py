@@ -100,7 +100,6 @@ class EvidenceViewTests(DocumentTestCase):
 
     def test_generate_evidence(self):
         response = self.client.get(reverse('evidence.pdf', args=[
-            self.project.id,
-            self.project.jobs.first().id
+            self.project.id
         ]))
         self.assertEqual(200, response.status_code)
