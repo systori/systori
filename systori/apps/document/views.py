@@ -180,11 +180,11 @@ class InvoiceDelete(DeleteView):
 
 
 class EvidencePDF(DocumentRenderView):
-    model = Job
+    model = Project
 
     def pdf(self):
-        job = Job.prefetch(self.get_object().id)
-        return evidence.render(job)
+        project = Project.prefetch(self.kwargs['project_pk'])
+        return evidence.render(project)
 
 
 # Itemized List

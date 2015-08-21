@@ -20,7 +20,7 @@ from .style import p, b, br, nr
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-def render(job):
+def render(project):
 
     with BytesIO() as buffer:
 
@@ -31,41 +31,40 @@ def render(job):
 
         pages = []
 
-        for taskgroup in job.billable_taskgroups:
+        for job in project.billable_jobs:
+            for taskgroup in job.billable_taskgroups:
+                for task in taskgroup.billable_tasks:
 
-            for task in taskgroup.billable_tasks:
+                    pages.append(Table([[b(_('Evidence Sheet')), nr(proposal_date)]]))
 
-                pages.append(Table([[b(_('Evidence Sheet')), nr(proposal_date)]]))
+                    pages.append(Table([
+                        [b(_('Project')), p('%s / %s / %s' % (job.project, job.name, taskgroup.name))]
+                    ],
+                        colWidths=[30*mm, None],
+                        style=[
+                            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                        ]
+                    ))
 
-                pages.append(Table([
-                    [b(_('Project')), p('%s / %s / %s' % (job.project, job.name, taskgroup.name))]
-                ],
-                    colWidths=[30*mm, None],
-                    style=[
-                        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                    ]
-                ))
+                    pages.append(Table([
+                        [b(_('Code')), p(task.code),
+                         br(_('Task')), p(task.name)],
+                        [b(_('P-Amount')), '%s %s' % (ubrdecimal(task.qty), task.unit),
+                         br(_('UP')), money(task.unit_price)]
+                    ],
+                        colWidths=[30*mm, 70*mm, 30*mm, None],
+                        style=TableStyle([
+                            ('SPAN', (3, 0), (-1, 0)),
+                        ])
+                    ))
 
-                pages.append(Table([
-                    [b(_('Code')), p(task.code),
-                     br(_('Task')), p(task.name)],
-                    [b(_('P-Amount')), '%s %s' % (ubrdecimal(task.qty), task.unit),
-                     br(_('Amount')), '%s %s' % (ubrdecimal(task.complete), task.unit),
-                     br(_('UP')), money(task.unit_price)]
-                ],
-                    colWidths=[30*mm, None, None, None, None, None],
-                    style=TableStyle([
-                        ('SPAN', (3, 0), (-1, 0)),
-                    ])
-                ))
+                    t = Table([['']*COLS]*ROWS, colWidths=[5*mm]*COLS, rowHeights=[5*mm]*ROWS)
+                    t.setStyle(TableStyle([
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey)
+                    ]))
+                    pages.append(t)
 
-                t = Table([['']*COLS]*ROWS, colWidths=[5*mm]*COLS, rowHeights=[5*mm]*ROWS)
-                t.setStyle(TableStyle([
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey)
-                ]))
-                pages.append(t)
-
-                pages.append(PageBreak())
+                    pages.append(PageBreak())
 
         if not pages:
             pages.append(b(_('There are no billable Tasks available.')))

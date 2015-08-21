@@ -2,28 +2,41 @@
 {% load i18n l10n customformatting project %}
 
 {% block content %}
-  <h2 class="sub-header">{% trans 'Project' %}</h2>
+  <table class="table table-striped">
+  <tbody>
+    <tr>
+      <td>
+        <div class="pull-right">
+          {% project_states as states %}
+          {% for name, label, is_current, transition in states %}
+            <a {% if transition %}href="{% url 'project.transition.state' project.id transition %}"{% endif %}
+               class="btn btn-xs btn-{% if is_current %}success{% else %}primary{% endif %} {% if is_current %}active{% endif %}{% if not transition and not is_current %}disabled{% endif %}"
+                >{{ label }}</a>
+          {% endfor %}
 
-  <div class="pull-right">
-    {% project_states as states %}
-    {% for name, label, is_current, transition in states %}
-      <a {% if transition %}href="{% url 'project.transition.state' project.id transition %}"{% endif %}
-         class="btn btn-xs btn-{% if is_current %}success{% else %}primary{% endif %} {% if is_current %}active{% endif %}{% if not transition and not is_current %}disabled{% endif %}"
-          >{{ label }}</a>
-    {% endfor %}
+          &nbsp; &nbsp; &nbsp; &nbsp;
 
-    &nbsp; &nbsp; &nbsp; &nbsp;
-
-    {% project_phases as phases %}
-    {% for name, label, is_current, is_past, transition in phases %}
-      <a {% if transition %}href="{% url 'project.transition.phase' project.id transition %}"{% endif %}
-         class="btn btn-xs btn-{% if is_past %}default{% elif is_current %}success{% else %}primary{% endif %} {% if is_current %}active{% endif %}{% if not transition and not is_current %}disabled{% endif %}"
-          >{{ label }}</a>
-    {% endfor %}
-  </div>
-  {% if project.has_billable_contact %}
-  <p><a href="{% url 'itemized_listing.pdf' project.id 'email' %}">{% trans "Itemized listing" %}</a></p>
-  {% endif %}
+          {% project_phases as phases %}
+          {% for name, label, is_current, is_past, transition in phases %}
+            <a {% if transition %}href="{% url 'project.transition.phase' project.id transition %}"{% endif %}
+               class="btn btn-xs btn-{% if is_past %}default{% elif is_current %}success{% else %}primary{% endif %} {% if is_current %}active{% endif %}{% if not transition and not is_current %}disabled{% endif %}"
+                >{{ label }}</a>
+          {% endfor %}
+        </div>
+      </td>
+    </tr>
+    {% if project.has_billable_contact %}
+    <tr>
+      <td>
+        <div class="btn-group pull-right" role="group">
+          <a type="button" class="btn btn-default" href="{% url 'itemized_listing.pdf' project.id 'email' %}">{% trans "Itemized listing" %}</a>
+          <a type="button" class="btn btn-default" href="{% url 'evidence.pdf' project.id %}">{% trans "Evidence preprinted form" %}</a>
+        </div>
+      </td>
+    </tr>
+    {% endif %}
+  </tbody>
+  </table>
 
   <h2 class="sub-header">{% trans "Jobs" %}</h2>
   <table class="table table-striped">
@@ -69,7 +82,6 @@
             <a href="{% url 'job.edit' project.id job.id %}">{% trans "Edit" %}</a>
             <a href="{% url 'job.delete' project.id job.id %}">{% trans "Delete" %}</a>
           {% endif %}
-          <a href="{% url 'evidence.pdf' project.id job.id %}">{% trans "Evidence" %}</a>
         </td>
       </tr>
     {% endfor %}

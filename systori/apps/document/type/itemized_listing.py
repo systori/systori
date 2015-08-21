@@ -10,8 +10,7 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.apps.accounting.constants import TAX_RATE
-from systori.apps.document.forms import InvoiceForm
-from systori.lib.templatetags.customformatting import money, ubrdecimal
+from systori.lib.templatetags.customformatting import money
 
 from .style import SystoriDocument, stylesheet, TableFormatter, ContinuationTable
 from .style import PortraitStationaryCanvasWithoutFirstPage
@@ -58,70 +57,6 @@ def collate_payments(invoice, available_width):
 
     return t.get_table(ContinuationTable, repeatRows=1)
 
-# def serialize(project):
-#
-#     jobs_dict_list = []
-#
-#     for job in project.billable_jobs:
-#         job_dict = {
-#             'code': job.code,
-#             'name': job.name,
-#             'taskgroups': []
-#         }
-#
-#         for taskgroup in job.billable_taskgroups:
-#             taskgroup_dict = {
-#                 'code': taskgroup.code,
-#                 'name': taskgroup.name,
-#                 'description': taskgroup.description,
-#                 'total': taskgroup.billable_total,
-#                 'tasks': []
-#             }
-#             job_dict['taskgroups'].append(taskgroup_dict)
-#
-#             for task in taskgroup.billable_tasks:
-#                 task_dict = {
-#                     'code': task.instance.code,
-#                     'name': task.instance.full_name,
-#                     'description': task.instance.full_description,
-#                     'complete': task.complete,
-#                     'unit': task.unit,
-#                     'price': task.instance.unit_price,
-#                     'total': task.fixed_price_billable,
-#                     'lineitems': []
-#                 }
-#                 taskgroup_dict['tasks'].append(task_dict)
-#
-#                 for lineitem in task.instance.lineitems.all():
-#                     lineitem_dict = {
-#                         'name': lineitem.name,
-#                         'qty': lineitem.unit_qty,
-#                         'unit': lineitem.unit,
-#                         'price': lineitem.price,
-#                         'price_per': lineitem.price_per_task_unit,
-#                     }
-#                     task_dict['lineitems'].append(lineitem_dict)
-#         jobs_dict_list.append(job_dict)
-#
-#     transactions = []
-#
-#     for record_type, _, record in get_transactions_table(project):
-#
-#         if record_type in ('payment', 'discount'):
-#
-#             txn = {
-#                 'type': record_type,
-#                 'amount': record.amount,
-#                 'amount_base': record.amount_base,
-#                 'amount_tax': record.amount_tax
-#             }
-#
-#             if record_type == 'payment':
-#                 txn['received_on'] = record.received_on
-#
-#             transactions.append(txn)
-#
-#    return (jobs_dict_list, transactions)
 
 def render(project, format):
 
