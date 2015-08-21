@@ -2,24 +2,41 @@
 {% load i18n l10n customformatting project %}
 
 {% block content %}
+  <table class="table table-striped">
+  <tbody>
+    <tr>
+      <td>
+        <div class="pull-right">
+          {% project_states as states %}
+          {% for name, label, is_current, transition in states %}
+            <a {% if transition %}href="{% url 'project.transition.state' project.id transition %}"{% endif %}
+               class="btn btn-xs btn-{% if is_current %}success{% else %}primary{% endif %} {% if is_current %}active{% endif %}{% if not transition and not is_current %}disabled{% endif %}"
+                >{{ label }}</a>
+          {% endfor %}
 
-  <div class="pull-right">
-    {% project_states as states %}
-    {% for name, label, is_current, transition in states %}
-      <a {% if transition %}href="{% url 'project.transition.state' project.id transition %}"{% endif %}
-         class="btn btn-xs btn-{% if is_current %}success{% else %}primary{% endif %} {% if is_current %}active{% endif %}{% if not transition and not is_current %}disabled{% endif %}"
-          >{{ label }}</a>
-    {% endfor %}
+          &nbsp; &nbsp; &nbsp; &nbsp;
 
-    &nbsp; &nbsp; &nbsp; &nbsp;
-
-    {% project_phases as phases %}
-    {% for name, label, is_current, is_past, transition in phases %}
-      <a {% if transition %}href="{% url 'project.transition.phase' project.id transition %}"{% endif %}
-         class="btn btn-xs btn-{% if is_past %}default{% elif is_current %}success{% else %}primary{% endif %} {% if is_current %}active{% endif %}{% if not transition and not is_current %}disabled{% endif %}"
-          >{{ label }}</a>
-    {% endfor %}
-  </div>
+          {% project_phases as phases %}
+          {% for name, label, is_current, is_past, transition in phases %}
+            <a {% if transition %}href="{% url 'project.transition.phase' project.id transition %}"{% endif %}
+               class="btn btn-xs btn-{% if is_past %}default{% elif is_current %}success{% else %}primary{% endif %} {% if is_current %}active{% endif %}{% if not transition and not is_current %}disabled{% endif %}"
+                >{{ label }}</a>
+          {% endfor %}
+        </div>
+      </td>
+    </tr>
+    {% if project.has_billable_contact %}
+    <tr>
+      <td>
+        <div class="btn-group pull-right" role="group">
+          <a type="button" class="btn btn-default" href="{% url 'itemized_listing.pdf' project.id 'email' %}">{% trans "Itemized listing" %}</a>
+          <a type="button" class="btn btn-default" href="{% url 'evidence.pdf' project.id %}">{% trans "Evidence preprinted form" %}</a>
+        </div>
+      </td>
+    </tr>
+    {% endif %}
+  </tbody>
+  </table>
 
   <h2 class="sub-header">{% trans "Jobs" %}</h2>
   <table class="table table-striped">
@@ -27,7 +44,8 @@
     <tr>
       <th>{% trans "Name" %}</th>
       <th>{% trans "Status" %}</th>
-      <th style="text-align: right; padding-right: 100px; width: 200px;">{% trans "Total" %}</th>
+      <th style="text-align: right;">{% trans "Total" %}</th>
+      <th></th>
       <th>{% trans "Billing Method" %}</th>
       <th>{% trans "Billable Amount" %}</th>
       <th>{% trans "Actions" %}</th>
@@ -39,7 +57,9 @@
         <td><a href="{% url 'tasks' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
         <td>{{ job.get_status_display }}</td>
         <td style="text-align: right;">
-          {{ job.estimate_total|money }} &nbsp;
+          {{ job.estimate_total|money }}
+        </td>
+        <td>
           <div class="btn-group">
             <a class="btn btn-default btn-xs" href="{% url 'job.estimate' project.id job.id 'increase' %}"
                title="{% blocktrans with percent=job.ESTIMATE_INCREMENT_DISPLAY %}Increase estimate by {{ percent }}.{% endblocktrans %}"><span
@@ -53,7 +73,7 @@
           </div>
         </td>
         <td>{{ job.get_billing_method_display }}</td>
-        <td>{{ job.billable_total|money }}</td>
+        <td style="text-align: right;">{{ job.billable_total|money }}</td>
         <td>
           {% for state in job.get_available_status_transitions %}
             <a href="{% url 'job.transition' project.id job.id state.name %}">{{ state.custom.label }}</a>
@@ -62,10 +82,20 @@
             <a href="{% url 'job.edit' project.id job.id %}">{% trans "Edit" %}</a>
             <a href="{% url 'job.delete' project.id job.id %}">{% trans "Delete" %}</a>
           {% endif %}
-          <a href="{% url 'evidence.pdf' project.id job.id %}">{% trans "Evidence" %}</a>
         </td>
       </tr>
     {% endfor %}
+    {% if project.jobs.count > 1 %}
+      <tr>
+        <td></td>
+        <td></td>
+        <td style="text-align: right;"><b>{{ project.estimate_total|money }}</b></td>
+        <td></td>
+        <td></td>
+        <td style="text-align: right;"><b>{{ project.billable_total|money }}</b></td>
+        <td></td>
+      </tr>
+    {% endif %}
     </tbody>
   </table>
   <a href="{% url 'job.create' project.id %}">{% trans "Create" %}</a>
@@ -98,7 +128,7 @@
         <td>{{ doc.amount|money }}</td>
         <td>{{ doc.created_on|localize }}</td>
         <td>{{ doc.notes }}</td>
-        <td>
+        <td style="min-width: 100px;">
           <div class="btn-group">
             <button type="button" class="btn btn-default">{% trans 'PDF' %}</button>
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
