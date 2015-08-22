@@ -34,7 +34,7 @@ def deploy(env_name='dev'):
 
             run('git pull')
 
-            with cd('editor'):
+            with cd('systori/dart'):
                 run('/usr/lib/dart/bin/pub get')
                 run('/usr/lib/dart/bin/pub build')
 
@@ -108,8 +108,8 @@ def get_dart():
     print('export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"')
 
 
-def make_editor():
-    with lcd('editor'):
+def make_dart():
+    with lcd('systori/dart'):
         local('pub build --mode=debug')
 
 

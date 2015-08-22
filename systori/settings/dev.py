@@ -4,7 +4,7 @@ DEBUG = True
 TEMPLATE_DEBUG = True
 
 STATICFILES_DIRS += (
-    ('editor', 'editor/build/web'),
+    ('dart', 'systori/dart/build/web'),
 )
 
 DATABASES['default'].update({

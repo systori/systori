@@ -6,7 +6,7 @@ TEMPLATE_DEBUG = False
 ALLOWED_HOSTS = ['systori.com']
 
 STATICFILES_DIRS += (
-    ('editor', 'editor/build/web'),
+    ('dart', 'systori/dart/build/web'),
 )
 
 DATABASES['default'].update({

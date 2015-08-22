@@ -13,7 +13,7 @@ DATABASES['default'].update({
 })
 
 STATICFILES_DIRS += (
-    ('editor', os.path.join(ROOT_DIR, 'editor/build/web')),
+    ('dart', os.path.join(ROOT_DIR, 'systori/dart/build/web')),
 )
 
 PASSWORD_HASHERS = (

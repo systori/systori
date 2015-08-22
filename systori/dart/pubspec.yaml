@@ -1,7 +1,7 @@
-name: 'systori_editor'
+name: systori
 version: 0.0.1
 description: >
-  Task editor for systori.
+  Systori components written in Dart.
 dependencies:
   intl: any
   collection: any
