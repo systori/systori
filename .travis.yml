@@ -21,7 +21,7 @@ install:
 
 before_script:
   - fab init_settings:env_name=travis
-  - cd editor && pub get && pub build && cd ..
+  - cd systori/dart && pub get && pub build && cd ../..
 
 script:
   - coverage run -p manage.py test systori
