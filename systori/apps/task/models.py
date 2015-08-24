@@ -54,6 +54,8 @@ class Job(models.Model):
 
     taskgroup_offset = models.PositiveSmallIntegerField(_("Task Group Offset"), default=0)
 
+    account = models.OneToOneField('accounting.Account', related_name="job", null=True)
+
     ESTIMATE_INCREMENT = 0.05
     ESTIMATE_INCREMENT_DISPLAY = '{:.0%}'.format(ESTIMATE_INCREMENT)
 
@@ -160,6 +162,23 @@ class Job(models.Model):
     @property
     def code(self):
         return str(self.job_code).zfill(self.project.job_zfill)
+
+    @property
+    def new_amount_to_debit(self):
+        """ This function returns the amount that can be debited to the customers
+            account based on work done since the last time the customer account was debited.
+        """
+        # total cost of all complete work so far (with tax)
+        billable = round(self.billable_total * (1 + TAX_RATE), 2)
+
+        # total we have already charged the customer
+        already_debited = round(self.account.debits().total, 2)
+
+        return billable - already_debited
+
+    @property
+    def new_amount_with_balance(self):
+        return self.new_amount_to_debit + self.account.balance
 
     def __str__(self):
         return self.name

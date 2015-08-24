@@ -20,7 +20,7 @@ class ProjectTotalTests(TestCase):
 
     def test_nonzero(self):
         project = Project.objects.get(pk=self.project.pk)
-        self.assertEqual(960, project.estimate_total)
+        self.assertEqual(1920, project.estimate_total)
 
 
 class ProjectPhaseTests(TestCase):

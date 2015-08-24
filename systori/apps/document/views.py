@@ -131,15 +131,17 @@ class InvoiceCreate(CreateView):
         project = Project.prefetch(self.request.project.id)
 
         if form.cleaned_data['is_final']:
-            skr03.final_debit(project)
+            for job in project.jobs.all():
+                skr03.final_debit(job)
             project.begin_settlement()
             project.save()
 
         elif project.new_amount_to_debit:
             # update account balance with any new work that's been done
-            skr03.partial_debit(project)
+            for job in project.jobs.all():
+                skr03.partial_debit(job)
 
-        form.instance.amount = project.account.balance
+        form.instance.amount = project.balance
         form.instance.json = invoice.serialize(project, form.cleaned_data)
         form.instance.json_version = form.instance.json['version']
 

@@ -15,7 +15,6 @@ from .forms import JobSiteForm, FilterForm
 from ..task.models import Job, TaskGroup, Task
 from ..directory.models import ProjectContact
 from ..document.models import Invoice, DocumentTemplate
-from ..accounting.models import create_account_for_project
 from ..accounting.utils import get_transactions_table
 from .gaeb_utils import gaeb_import
 from django.core.exceptions import ValidationError
@@ -168,9 +167,6 @@ class ProjectCreate(CreateView):
         jobsite.city = form.cleaned_data['city']
         jobsite.postal_code = form.cleaned_data['postal_code']
         jobsite.save()
-
-        self.object.account = create_account_for_project(self.object)
-        self.object.save()
 
         return response
 

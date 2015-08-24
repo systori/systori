@@ -31,6 +31,11 @@ def create_task_data(self, create_user=True, create_company=True):
     TaskInstance.objects.create(task=self.task2, selected=True)
     self.lineitem2 = LineItem.objects.create(name="my line item 2", unit_qty=0, price=0,
                                              taskinstance=self.task2.instance)
+    self.group3 = TaskGroup.objects.create(name="my group", job=self.job2)
+    self.task3 = Task.objects.create(name="my task one", qty=10, taskgroup=self.group3)
+    TaskInstance.objects.create(task=self.task3, selected=True)
+    self.lineitem3 = LineItem.objects.create(name="my line item 1", unit_qty=8, price=12,
+                                            taskinstance=self.task3.instance)
 
 
 class TaskInstanceTotalTests(TestCase):
@@ -68,10 +73,10 @@ class JobQuerySetTests(TestCase):
 
     def test_nonzero_total(self):
         jobs = Job.objects
-        self.assertEqual(Decimal(960), jobs.estimate_total())
+        self.assertEqual(Decimal(1920), jobs.estimate_total())
         self.assertEqual(Decimal(0), jobs.billable_total())
-        self.assertEqual(round(Decimal(960 * .19), 2), round(jobs.estimate_tax_total(), 2))
-        self.assertEqual(round(Decimal(960 * 1.19), 2), round(jobs.estimate_gross_total(), 2))
+        self.assertEqual(round(Decimal(1920 * .19), 2), round(jobs.estimate_tax_total(), 2))
+        self.assertEqual(round(Decimal(1920 * 1.19), 2), round(jobs.estimate_gross_total(), 2))
 
 
 class TaskGroupOffsetTests(TestCase):

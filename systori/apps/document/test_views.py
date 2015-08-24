@@ -12,8 +12,8 @@ class DocumentTestCase(TestCase):
         create_data(self)
         self.task.complete = 5
         self.task.save()
-        partial_debit(self.project)
-        partial_credit([(self.project, Decimal(400), Decimal(0))], Decimal(400))
+        partial_debit(self.job)
+        partial_credit([(self.job, Decimal(400), Decimal(0))], Decimal(400))
         ProjectContact.objects.create(
             project=self.project,
             contact=Contact.objects.create(first_name="Ludwig", last_name="von Mises"),

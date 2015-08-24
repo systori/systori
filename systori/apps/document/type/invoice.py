@@ -209,9 +209,9 @@ def serialize(project, additional_information):
         'total_base': project.billable_total,
         'total_tax': project.billable_tax_total,
 
-        'balance_gross': project.account.balance,
-        'balance_base': project.account.balance_base,
-        'balance_tax': project.account.balance_tax,
+        'balance_gross': project.balance,
+        'balance_base': project.balance_base,
+        'balance_tax': project.balance_tax,
 
     }
 
