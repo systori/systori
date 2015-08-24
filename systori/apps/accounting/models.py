@@ -83,7 +83,7 @@ class Transaction(BaseTransaction):
         at least two entries to two different accounts).
     """
 
-    Entry = Entry
+    entry_class = Entry
 
     def discounts_to_account(self, account):
         return self.entries.filter(account=account).filter(is_discount=True)

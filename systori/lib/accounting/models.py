@@ -101,7 +101,7 @@ class BaseTransaction(models.Model):
     """ A transaction is a collection of accounting entries (usually
         at least two entries to two different accounts).
     """
-    Entry = None # Must be defined in subclass.
+    entry_class = None # Must be defined in subclass.
     recorded_on = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
     notes = models.TextField(blank=True)
 
@@ -113,12 +113,12 @@ class BaseTransaction(models.Model):
         self._entries = []
 
     def debit(self, account, amount, **kwargs):
-        entry = self.Entry(account=account, amount=account.as_debit(amount), **kwargs)
+        entry = self.entry_class(account=account, amount=account.as_debit(amount), **kwargs)
         self._entries.append(('debit', entry))
         return entry
 
     def credit(self, account, amount, **kwargs):
-        entry = self.Entry(account=account, amount=account.as_credit(amount), **kwargs)
+        entry = self.entry_class(account=account, amount=account.as_credit(amount), **kwargs)
         self._entries.append(('credit', entry))
         return entry
 
