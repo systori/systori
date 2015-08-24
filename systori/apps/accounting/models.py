@@ -34,7 +34,7 @@ class AccountManager(BaseManager.from_queryset(AccountQuerySet)):
     use_for_related_fields = True
 
 
-class Account(BaseAccount()):
+class Account(BaseAccount):
     objects = AccountManager()
 
     class Meta:
@@ -66,7 +66,7 @@ class Account(BaseAccount()):
         return self.credits().filter(is_discount=True)
 
 
-class Entry(BaseEntry()):
+class Entry(BaseEntry):
     """ Represents a debit or credit to an account. """
 
     @property
@@ -78,10 +78,12 @@ class Entry(BaseEntry()):
         return round(self.amount_base * TAX_RATE, 2)
 
 
-class Transaction(BaseTransaction(Entry)):
+class Transaction(BaseTransaction):
     """ A transaction is a collection of accounting entries (usually
         at least two entries to two different accounts).
     """
+
+    Entry = Entry
 
     def discounts_to_account(self, account):
         return self.entries.filter(account=account).filter(is_discount=True)
