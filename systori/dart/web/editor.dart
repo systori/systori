@@ -3,7 +3,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:collection/equality.dart';
-import 'package:scroll/scroll.dart';
 
 // https://github.com/jpedrosa/reluzir/blob/master/parseleadingint/lib/parseleadingint.dart
 class ParseLeadingInt {
