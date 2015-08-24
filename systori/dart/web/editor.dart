@@ -3,6 +3,40 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:collection/equality.dart';
+import 'package:scroll/scroll.dart';
+
+// https://github.com/jpedrosa/reluzir/blob/master/parseleadingint/lib/parseleadingint.dart
+class ParseLeadingInt {
+  static parse(s, {orZero: false}) {
+    var i = 0, negative = false, c, cc = s.codeUnits, len = cc.length, n = 0;
+    if (len > 0) {
+      if (cc[0] == 45) { // -
+        negative = true;
+        i++;
+      }
+      for (; i < len; i++) {
+        c = cc[i];
+        if (c < 48 || c > 57) { // 0-9
+          break;
+        }
+      }
+      if (negative && i == 1) {
+        if (!orZero) {
+          throw "Cannot parse the leading int for '-'";
+        }
+      } else if (i == len) {
+        n = int.parse(s);
+      } else if (i > 0) {
+        n = int.parse(s.substring(0, i));
+      } else if (!orZero) {
+        throw "Cannot parse the leading int for '${s}'";
+      }
+    } else if (!orZero) {
+      throw "Cannot parse the leading int for empty string ('')";
+    }
+    return n;
+  }
+}
 
 
 final Repository repository = new Repository();
@@ -167,6 +201,10 @@ class AutoComplete extends HtmlElement {
         if (previous != null) {
             children.forEach((e) => e.classes.clear());
             previous.classes.add('active');
+            var height = ParseLeadingInt.parse(this.style.top, orZero: true) + previous.getBoundingClientRect().height;
+            this.style.top = "${height}px";
+        } else {
+            this.style.top = "20px";
         }
     }
 
@@ -179,6 +217,11 @@ class AutoComplete extends HtmlElement {
             if (next != null) {
                 children.forEach((e) => e.classes.clear());
                 next.classes.add('active');
+                var height = ParseLeadingInt.parse(this.style.top, orZero: true) - current.getBoundingClientRect().height;
+                this.style.top = "${height}px";
+            }
+            else {
+                // pass
             }
         }
     }
@@ -389,12 +432,16 @@ abstract class EditableElement extends UbrElement {
                     ..collapseToEnd();
             });
         });
+    }
 
+    attached() {
+        this.scrollIntoView(ScrollAlignment.CENTER);
     }
 
     use_autocompleter() {
         var editor_row = this.querySelector(":scope>.editor>.editor-row");
         autocompleter = document.createElement('ubr-autocomplete');
+        autocompleter.style.width = "${document.querySelector(".code").getBoundingClientRect().width*6}px";
         editor_row.insertAdjacentElement('afterend', autocompleter);
         autocompleter.onSelected.listen(autocomplete_option_selected);
         name_view.onBlur.listen(autocompleter.handleBlur);
@@ -455,6 +502,7 @@ abstract class EditableElement extends UbrElement {
                     stop_n_save();
                     next();
                     cleanup();
+                    this.scrollIntoView();
                 }
                 break;
 
@@ -466,6 +514,7 @@ abstract class EditableElement extends UbrElement {
                     stop_n_save();
                     previous();
                     cleanup();
+                    this.scrollIntoView(ScrollAlignment.BOTTOM);
                 }
                 break;
 
