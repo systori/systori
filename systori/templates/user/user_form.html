@@ -6,6 +6,19 @@
 {% block content %}
   <form method="post">{% csrf_token %}
     {{ user_form|bootstrap }}
+    {% if user.id %}
+    <div class="form-group">
+      <label class="control-label" for="id_password">{% trans 'Current Password Hash' %} - <a href="{% url 'user.generate.password' user.id %}">{% trans "Generate New Password" %}</a></label>
+      <div>
+        {% if user.password %}
+          {{ user.password }}
+        {% else %}
+          {% trans 'No password set.' %}</b>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+    <br/>
     {{ access_form|bootstrap }}
     <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
   </form>

@@ -198,6 +198,13 @@ class StationaryCanvas(canvas.Canvas):
         super(StationaryCanvas, self).showPage()
 
 
+class StationaryCanvasWithoutFirstPage(StationaryCanvas):
+
+    def showPage(self):
+        self.doForm(self.page_info[1])
+        super(StationaryCanvas, self).showPage()
+
+
 class NumberedCanvas(canvas.Canvas):
 
     def __init__(self, *args, **kwargs):
@@ -227,16 +234,20 @@ class PortraitStationaryCanvas(StationaryCanvas, NumberedCanvas):
     stationary_filename = "soft_briefbogen_2014.pdf"
 
 
+class PortraitStationaryCanvasWithoutFirstPage(StationaryCanvasWithoutFirstPage, NumberedCanvas):
+    stationary_filename = "soft_briefbogen_2014.pdf"
+
+
 class LandscapeStationaryCanvas(StationaryCanvas):
     stationary_filename = "softronic2_landscape.pdf"
 
 
 class SystoriDocument(BaseDocTemplate):
 
-    def __init__(self, buffer, debug=False):
+    def __init__(self, buffer, topMargin=55*mm, debug=False):
         super(SystoriDocument, self).__init__(buffer,
                                               pagesize=A4,
-                                              topMargin=55*mm,
+                                              topMargin=topMargin,
                                               bottomMargin=22*mm,
                                               leftMargin=25*mm,
                                               rightMargin=62*mm,

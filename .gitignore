@@ -13,8 +13,8 @@ __pycache__
 htmlcov
 documents/
 systori/settings/__init__.py
-editor/pubspec.lock
-editor/packages/
-editor/web/packages
-editor/build/
-editor/.pub/
+systori/dart/pubspec.lock
+systori/dart/packages/
+systori/dart/web/packages
+systori/dart/build/
+systori/dart/.pub/

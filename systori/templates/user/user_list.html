@@ -32,6 +32,7 @@
         <td>
           <a href="{% url 'user.edit' access.user.id %}">{% trans "Edit" %}</a>
           <a href="{% url 'user.remove' access.user.id %}">{% trans "Delete" %}</a>
+          <a href="{% url 'user.generate.password' access.user.id %}">{% trans "Generate Password" %}</a>
         </td>
       </tr>
     {% endfor %}
