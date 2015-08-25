@@ -3,15 +3,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:collection/equality.dart';
+import 'common.dart';
 
 
 final Repository repository = new Repository();
-NumberFormat CURRENCY = new NumberFormat("#,###,###,##0.00#");
-NumberFormat DECIMAL = new NumberFormat("#,###,###,##0.####");
-
-double parse_currency(String value) => value.length > 0 ? CURRENCY.parse(value) : 0;
-
-double parse_decimal(String value) => value.length > 0 ? DECIMAL.parse(value) : 0;
 
 enum InputMode {
     TASK,
