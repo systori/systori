@@ -98,14 +98,24 @@ def get_dart():
     BIN_DIR = os.path.expanduser('~/bin')
     if not os.path.exists(BIN_DIR):
         os.mkdir(BIN_DIR)
-    url = "http://storage.googleapis.com/dart-archive/channels/stable/release/latest/sdk/dartsdk-linux-%s-release.zip"\
-            % ('x64' if is_64bits else 'ia32')
+    url = (
+        'http://storage.googleapis.com/dart-archive/channels'
+        '/stable/release/latest/sdk/dartsdk-linux-%s-release.zip'
+    ) % ('x64' if is_64bits else 'ia32')
     with lcd(BIN_DIR):
         local("curl %s > dartsdk.zip" % url)
         local("unzip -qo dartsdk.zip")
-    print("Add to your .bashrc")
-    print('export DART_SDK="%s"' % os.path.join(BIN_DIR, 'dart-sdk'))
-    print('export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"')
+    env_lines = """\
+export DART_SDK="%s"
+export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
+""" % os.path.join(BIN_DIR, 'dart-sdk')
+    bash_rc_file = os.path.expanduser('~/.bashrc')
+    if not os.path.exists(bash_rc_file):
+        print("Add to your environment:")
+        print(env_lines)
+    elif not 'DART_SDK' in open(bash_rc_file, 'r').read():
+        with open(bash_rc_file, 'a') as file_handle:
+            file_handle.write(env_lines)
 
 
 def make_dart():
