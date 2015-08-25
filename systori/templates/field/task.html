@@ -107,25 +107,8 @@
 
 
 {% block extra_js %}
-  <script type="text/javascript">
-    $(document).ready(function () {
-      var range = $('#completion-range');
-      var complete = $('input[name="complete"]');
-      var percent = $('#percent');
-      var max = range.attr('max');
-      range.on('input', function () {
-        percent.text(Math.round(range.val() / max * 100) + '%');
-        complete.val(range.val());
-      });
-      complete.on('keyup', function () {
-        if (complete.val() == '') {
-          percent.text('0%');
-          range.val(0);
-        } else {
-          percent.text(Math.round(complete.val() / max * 100) + '%');
-          range.val(complete.val());
-        }
-      });
-    });
-  </script>
+  <script type="application/dart" src="{% static "dart/field.dart" %}"></script>
+  <script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
+  <script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
+  <script src="{% static "dart/packages/browser/dart.js" %}"></script>
 {% endblock extra_js %}
