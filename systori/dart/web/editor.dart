@@ -408,7 +408,13 @@ abstract class EditableElement extends UbrElement {
     }
 
     attached() {
-        this.scrollIntoView(ScrollAlignment.TOP);
+        var offset = window.innerHeight - this.getBoundingClientRect().top;
+        print(offset);
+        if (offset < window.innerHeight/2) {
+            this.scrollIntoView(ScrollAlignment.TOP);
+        } else {
+            this.scrollIntoView(ScrollAlignment.CENTER);
+        }
     }
 
     use_autocompleter() {
