@@ -16,7 +16,7 @@ void main() {
         double range_position = double.parse(e.currentTarget.value);
         int percent_value = (range_position / complete_range_max * 100).round();
         percent_label.innerHtml = '$percent_value%';
-        complete_input.value = DECIMAL.format(range_position);
+        complete_input.value = CURRENCY.format(range_position);
     });
 
     complete_input.onKeyUp.listen((e) {
@@ -24,7 +24,7 @@ void main() {
         double parsed_input;
         if (input == '') {
             percent_label.innerHtml = '0%';
-            complete_range_slider.value = '0';
+            complete_range_slider.value = CURRENCY.format(0);
         } else {
             try {
                 parsed_input = parse_decimal(input);
