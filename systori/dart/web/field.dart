@@ -7,7 +7,7 @@ void main() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
 
     InputElement complete_range_slider = querySelector('#completion-range');
-    HtmlElement complete_input = querySelector('input[name="complete"]');
+    InputElement complete_input = querySelector('input[name="complete"]');
     HtmlElement percent_label = querySelector('#percent');
     double complete_range_max = double.parse(complete_range_slider.attributes['max']);
 
@@ -22,8 +22,7 @@ void main() {
         if (input == '') {
             percent_label.innerHtml = '0%';
             complete_range_slider.value = '0';
-        }
-        else {
+        } else {
             double parsed_input = parse_decimal(input);
             int percent_value = (parsed_input / complete_range_max * 100).round();
             percent_label.innerHtml = '$percent_value%';
