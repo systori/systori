@@ -56,7 +56,7 @@
             {% endif %}
             <div class="input-group input-group-lg">
               <span class="input-group-addon" id="percent">{{ task.complete_percent }}%</span>
-              <input type="text" class="form-control" name="complete" value="{{ task.complete|localize }}">
+              <input type="text" class="form-control" name="complete" value="{{ task.complete|ubrdecimal }}">
               <span class="input-group-addon">{{ task.unit }}</span>
             </div>
             <input type="range" id="completion-range" min="0" max="{{ task.qty|stringformat:'d' }}"
