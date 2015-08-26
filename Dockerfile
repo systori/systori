@@ -4,9 +4,14 @@ ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE systori.settings.docker
 
 RUN apt-get update
-RUN apt-get install -y git python3-pip python-pip python-dev locales mercurial
+RUN apt-get install -y libcurl4-openssl-dev git python3-pip python-pip python-dev locales mercurial
 RUN apt-get install -y postgresql-contrib postgresql-server-dev-all
 RUN apt-get install -y python3-lxml python3-dev libyaml-dev
+RUN apt-get install -y apt-transport-https curl unzip
+RUN sh -c 'curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -'
+RUN sh -c 'curl https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list'
+RUN apt-get update
+RUN apt-get install -y dart
 
 RUN mkdir /systori
 
@@ -27,5 +32,6 @@ ENV LC_ALL en_US.UTF-8
 WORKDIR /systori/
 ADD ./ /systori/
 # RUN pip3 install --upgrade pip
-RUN pip3 install -r ./requirements/dev.pip
+RUN pip3 install -r ./requirements/docker.pip
 RUN pip2 install Fabric
+RUN fab get_dart

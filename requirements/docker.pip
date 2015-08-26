@@ -17,8 +17,10 @@ hg+https://bitbucket.org/rptlab/preppy
 git+ssh://git@bitbucket.org/damoti/rlextra.git
 
 git+ssh://git@bitbucket.org/damoti/django-tuath.git
-#-e ../django-tuath
 
--e git+https://github.com/damoti/pyth.git@pyth-py3#egg=pyth
-#-e ../pyth
--r dev.pip
+git+https://github.com/damoti/pyth.git@pyth-py3
+django-debug-toolbar
+coveralls
+selenium
+git+https://github.com/cgoldberg/sauceclient.git#egg=sauceclient
+django-extensions==1.5.5
