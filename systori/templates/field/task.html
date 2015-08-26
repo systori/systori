@@ -47,9 +47,16 @@
           </div>
 
           <div class="panel-body">
+            {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+              <span class="sr-only">Errors:</span>
+                {{ form.errors }}
+            </div>
+            {% endif %}
             <div class="input-group input-group-lg">
               <span class="input-group-addon" id="percent">{{ task.complete_percent }}%</span>
-              <input type="text" class="form-control" name="complete" value="{{ task.complete|stringformat:'d' }}">
+              <input type="text" class="form-control" name="complete" value="{{ task.complete|localize }}">
               <span class="input-group-addon">{{ task.unit }}</span>
             </div>
             <input type="range" id="completion-range" min="0" max="{{ task.qty|stringformat:'d' }}"
@@ -63,7 +70,7 @@
             <div class="pull-right">
               <input type="hidden" name="origin"
                      value="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id task.taskgroup.job.id %}"/>
-              <input type="submit" class="btn btn-primary" value="{% trans 'Save Progress' %}"/>
+              <input type="submit" class="btn btn-primary" id="task-submit" value="{% trans 'Save Progress' %}"/>
             </div>
           </div>
 
