@@ -273,6 +273,10 @@ class JobElement extends UbrElement {
 
     int get child_offset => int.parse(dataset['taskgroup-offset']);
 
+    double get total => total_view != null ? parse_currency(total_view.text) : 0.0;
+
+    set total(double calculated) => total_view.text = CURRENCY.format(calculated);
+
     JobElement.created(): super.created() {
     }
 }
@@ -544,7 +548,9 @@ abstract class EditableElement extends UbrElement {
                     event.preventDefault();
                     delete();
                     stop();
-                    next();
+                    if (!next(include_children: false)){
+                        previous();
+                    }
 
                     var saved_parent = this.parent;
 
@@ -712,29 +718,35 @@ abstract class EditableElement extends UbrElement {
         }
     }
 
-    void next() {
+    bool next({bool include_children: false}) {
         var match;
 
-        // try child elements
-        if (child_element != null) {
-            match = this.querySelector(child_element);
-            if (match is EditableElement) {
-                return match.start();
+        if (include_children) {
+            // try child elements
+            if (child_element != null) {
+                match = this.querySelector(child_element);
+                if (match is EditableElement) {
+                    match.start();
+                    return true;
+                }
             }
         }
 
         // now try siblings
         match = this.nextElementSibling;
         if (match is EditableElement) {
-            return match.start();
+            match.start();
+            return true;
         }
 
         // visit the ancestors
         var ancestor = parent;
         while (ancestor is EditableElement) {
             var sibling = ancestor.nextElementSibling;
-            if (sibling is EditableElement)
-                return sibling.start();
+            if (sibling is EditableElement) {
+                sibling.start();
+                return true;
+            }
             ancestor = ancestor.parent;
         }
 
