@@ -6,7 +6,6 @@ from ..task.models import Task
 
 class CompletionForm(forms.ModelForm):
     comment = forms.CharField(required=False)
-    # qty = LocalizedDecimalField(max_digits=14, decimal_places=4)
     complete = LocalizedDecimalField(max_digits=14, decimal_places=4)
 
     class Meta:
