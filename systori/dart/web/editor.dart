@@ -136,6 +136,8 @@ class Repository {
 
 class AutoComplete extends HtmlElement {
 
+    final int offsetFromTop = 20;
+
     StreamController<Map> controller = new StreamController<Map>();
 
     get onSelected => controller.stream;
@@ -152,6 +154,7 @@ class AutoComplete extends HtmlElement {
             return;
         }
         children = stringToDocumentFragment(html).children;
+        style.top = "${offsetFromTop}px";
         style.display = 'block';
     }
 
@@ -162,6 +165,7 @@ class AutoComplete extends HtmlElement {
         if (previous != null) {
             children.forEach((e) => e.classes.clear());
             previous.classes.add('active');
+            this.style.top = "${previous.offsetTop * -1 + offsetFromTop}px";
         }
     }
 
@@ -174,6 +178,7 @@ class AutoComplete extends HtmlElement {
             if (next != null) {
                 children.forEach((e) => e.classes.clear());
                 next.classes.add('active');
+                this.style.top = "${next.offsetTop * -1 + offsetFromTop}px";
             }
         }
     }
@@ -246,6 +251,10 @@ class JobElement extends UbrElement {
     int get child_zfill => int.parse(dataset['taskgroup-zfill']);
 
     int get child_offset => int.parse(dataset['taskgroup-offset']);
+
+    double get total => total_view != null ? parse_currency(total_view.text) : 0.0;
+
+    set total(double calculated) => total_view.text = CURRENCY.format(calculated);
 
     JobElement.created(): super.created() {
     }
@@ -384,7 +393,15 @@ abstract class EditableElement extends UbrElement {
                     ..collapseToEnd();
             });
         });
+    }
 
+    attached() {
+       offset_scroll();
+    }
+
+    offset_scroll(){
+        this.scrollIntoView(ScrollAlignment.TOP);
+        window.scrollBy(0,-280);
     }
 
     use_autocompleter() {
@@ -450,6 +467,7 @@ abstract class EditableElement extends UbrElement {
                     stop_n_save();
                     next();
                     cleanup();
+                    this.scrollIntoView();
                 }
                 break;
 
@@ -461,6 +479,7 @@ abstract class EditableElement extends UbrElement {
                     stop_n_save();
                     previous();
                     cleanup();
+                    this.scrollIntoView();
                 }
                 break;
 
@@ -497,13 +516,20 @@ abstract class EditableElement extends UbrElement {
                 }
                 break;
 
+            case KeyCode.ESC:
+                if (autocompleter != null) {
+                    event.preventDefault();
+                    autocompleter.handleBlur();
+                }
+                break;
+
             case KeyCode.DELETE:
                 if (event.shiftKey) {
                     if (!can_delete()) break;
                     event.preventDefault();
                     delete();
                     stop();
-                    next();
+                    next(include_children: false) || previous();
 
                     var saved_parent = this.parent;
 
@@ -515,7 +541,6 @@ abstract class EditableElement extends UbrElement {
 
                     break;
                 }
-
         }
     }
 
@@ -525,6 +550,9 @@ abstract class EditableElement extends UbrElement {
             case KeyCode.DOWN:
             case KeyCode.ENTER:
             case KeyCode.DELETE:
+            case KeyCode.LEFT:
+            case KeyCode.RIGHT:
+            case KeyCode.ESC:
                 break;
             default:
                 var search = name_view.text.trim();
@@ -647,7 +675,7 @@ abstract class EditableElement extends UbrElement {
         }
     }
 
-    void previous() {
+    bool previous() {
         var match;
 
         // try siblings
@@ -658,41 +686,53 @@ abstract class EditableElement extends UbrElement {
                 if (subelements.isEmpty) break;
                 match = subelements.last as EditableElement;
             }
-            return match.start();
+            match.start();
+            return true;
         }
 
         // try parent
         match = this.parent;
         if (match is EditableElement) {
-            return match.start();
+            match.start();
+            return true;
         }
+
+        return false;
     }
 
-    void next() {
+    bool next({bool include_children: false}) {
         var match;
 
-        // try child elements
-        if (child_element != null) {
-            match = this.querySelector(child_element);
-            if (match is EditableElement) {
-                return match.start();
+        if (include_children) {
+            // try child elements
+            if (child_element != null) {
+                match = this.querySelector(child_element);
+                if (match is EditableElement) {
+                    match.start();
+                    return true;
+                }
             }
         }
 
         // now try siblings
         match = this.nextElementSibling;
         if (match is EditableElement) {
-            return match.start();
+            match.start();
+            return true;
         }
 
         // visit the ancestors
         var ancestor = parent;
         while (ancestor is EditableElement) {
             var sibling = ancestor.nextElementSibling;
-            if (sibling is EditableElement)
-                return sibling.start();
+            if (sibling is EditableElement) {
+                sibling.start();
+                return true;
+            }
             ancestor = ancestor.parent;
         }
+
+        return false;
 
     }
 
