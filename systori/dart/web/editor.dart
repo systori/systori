@@ -461,7 +461,7 @@ abstract class EditableElement extends UbrElement {
                     autocompleter.handleDown();
                 } else {
                     stop_n_save();
-                    next(include_children: true);
+                    next();
                     cleanup();
                     this.scrollIntoView();
                 }
@@ -696,7 +696,7 @@ abstract class EditableElement extends UbrElement {
         return false;
     }
 
-    bool next({bool include_children: false}) {
+    bool next({bool include_children: true}) {
         var match;
 
         if (include_children) {
