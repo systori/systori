@@ -20,9 +20,6 @@
     }
   </style>
   {% include "project/sidebar.html" with section='jobs' %}
-  <ul class="list-group">
-  <li class="list-group-item">{% trans 'Total' %} <span class="badge" id="estimate_total">{{ job.estimate_total|money }}</span></li>
-  </ul>
 {% endblock %}
 
 {% block content %}

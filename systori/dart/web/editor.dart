@@ -252,10 +252,6 @@ class JobElement extends UbrElement {
 
     int get child_offset => int.parse(dataset['taskgroup-offset']);
 
-    double get total => total_view != null ? parse_currency(total_view.text) : 0.0;
-
-    set total(double calculated) => total_view.text = CURRENCY.format(calculated);
-
     JobElement.created(): super.created() {
     }
 }
