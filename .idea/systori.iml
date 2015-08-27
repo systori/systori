@@ -17,6 +17,9 @@
       <excludeFolder url="file://$MODULE_DIR$/editor/build" />
       <excludeFolder url="file://$MODULE_DIR$/editor/packages" />
       <excludeFolder url="file://$MODULE_DIR$/editor/web/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/systori/dart/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/systori/dart/build" />
+      <excludeFolder url="file://$MODULE_DIR$/systori/dart/web/packages" />
     </content>
     <orderEntry type="jdk" jdkName="systori-python" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
