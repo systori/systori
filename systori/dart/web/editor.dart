@@ -20,11 +20,6 @@ enum InputMode {
 
 InputMode INPUT_MODE = InputMode.LINEITEM;
 
-ubr_scroll(el){
-    el.scrollIntoView(ScrollAlignment.TOP);
-    window.scrollBy(0,-280);
-}
-
 
 DocumentFragment stringToDocumentFragment(html) {
     var tmp = document.createDocumentFragment();
@@ -417,8 +412,12 @@ abstract class EditableElement extends UbrElement {
     }
 
     attached() {
-        //this.scrollIntoView(ScrollAlignment.TOP);
-        ubr_scroll(this);
+       offset_scroll();
+    }
+
+    offset_scroll(){
+        this.scrollIntoView(ScrollAlignment.TOP);
+        window.scrollBy(0,-280);
     }
 
     use_autocompleter() {
@@ -534,11 +533,9 @@ abstract class EditableElement extends UbrElement {
                 break;
 
             case KeyCode.ESC:
-
                 if (autocompleter != null) {
                     event.preventDefault();
                     autocompleter.handleEscape();
-
                 }
                 break;
 
@@ -749,6 +746,8 @@ abstract class EditableElement extends UbrElement {
             }
             ancestor = ancestor.parent;
         }
+
+        return false;
 
     }
 
