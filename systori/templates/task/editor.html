@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n l10n staticfiles %}
+{% load i18n l10n staticfiles customformatting %}
 
 {% block title %}{{ project.name }} > {{ job.name }}{% endblock %}
 {% block head_navbar %}
@@ -20,12 +20,19 @@
     }
   </style>
   {% include "project/sidebar.html" with section='jobs' %}
+  <ul class="list-group">
+  <li class="list-group-item">{% trans 'Total' %} <span class="badge" id="estimate_total">{{ job.estimate_total|money }}</span></li>
+  </ul>
 {% endblock %}
 
 {% block content %}
   <style>
 
     #task-editor {
+    }
+
+    .main {
+      margin-bottom:250px;
     }
 
     ubr-taskgroup,
@@ -316,8 +323,14 @@
       position: absolute;
       background: white;
       left: 80px;
-      width: 310px;
+      width: 480px;
       border: 1px solid lightgrey;
+      top: 20px;
+      -webkit-transition: top 0.1s;
+      -moz-transition: top 0.1s;
+      -ms-transition: top 0.1s;
+      -o-transition: top 0.1s;
+      transition: top 0.1s;
     }
 
     ubr-autocomplete > div {
