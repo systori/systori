@@ -461,7 +461,7 @@ abstract class EditableElement extends UbrElement {
                     autocompleter.handleDown();
                 } else {
                     stop_n_save();
-                    next();
+                    next(include_children: true);
                     cleanup();
                     this.scrollIntoView();
                 }
