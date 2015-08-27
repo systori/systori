@@ -174,8 +174,7 @@ class AutoComplete extends HtmlElement {
             children.forEach((e) => e.classes.clear());
             previous.classes.add('active');
             this.style.top = "20px";
-        }
-        else if (previous != null) {
+        } else if (previous != null) {
             children.forEach((e) => e.classes.clear());
             previous.classes.add('active');
             this.style.top = "-${previous.offsetTop}px";
@@ -192,9 +191,6 @@ class AutoComplete extends HtmlElement {
                 children.forEach((e) => e.classes.clear());
                 next.classes.add('active');
                 this.style.top = "-${next.offsetTop}px";
-            }
-            else {
-                // pass
             }
         }
     }
@@ -545,9 +541,7 @@ abstract class EditableElement extends UbrElement {
                     event.preventDefault();
                     delete();
                     stop();
-                    if (!next(include_children: false)){
-                        previous();
-                    }
+                    next(include_children: false) || previous();
 
                     var saved_parent = this.parent;
 
@@ -694,7 +688,7 @@ abstract class EditableElement extends UbrElement {
         }
     }
 
-    void previous() {
+    bool previous() {
         var match;
 
         // try siblings
@@ -705,14 +699,18 @@ abstract class EditableElement extends UbrElement {
                 if (subelements.isEmpty) break;
                 match = subelements.last as EditableElement;
             }
-            return match.start();
+            match.start();
+            return true;
         }
 
         // try parent
         match = this.parent;
         if (match is EditableElement) {
-            return match.start();
+            match.start();
+            return true;
         }
+
+        return false;
     }
 
     bool next({bool include_children: false}) {
