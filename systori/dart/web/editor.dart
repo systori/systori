@@ -141,6 +141,8 @@ class Repository {
 
 class AutoComplete extends HtmlElement {
 
+    final int offsetFromTop = 20;
+
     StreamController<Map> controller = new StreamController<Map>();
 
     get onSelected => controller.stream;
@@ -157,27 +159,18 @@ class AutoComplete extends HtmlElement {
             return;
         }
         children = stringToDocumentFragment(html).children;
+        style.top = "${offsetFromTop}px";
         style.display = 'block';
-    }
-
-    handleEscape() {
-        this.style.top = '20px';
-        children.forEach((e) => e.classes.clear());
-        handleBlur();
     }
 
     handleUp() {
         var current = this.querySelector('.active');
         if (current == null) return;
         var previous = current.previousElementSibling;
-        if (previous != null && previous.previousElementSibling == null) {
+        if (previous != null) {
             children.forEach((e) => e.classes.clear());
             previous.classes.add('active');
-            this.style.top = "20px";
-        } else if (previous != null) {
-            children.forEach((e) => e.classes.clear());
-            previous.classes.add('active');
-            this.style.top = "-${previous.offsetTop}px";
+            this.style.top = "${previous.offsetTop * -1 + offsetFromTop}px";
         }
     }
 
@@ -190,7 +183,7 @@ class AutoComplete extends HtmlElement {
             if (next != null) {
                 children.forEach((e) => e.classes.clear());
                 next.classes.add('active');
-                this.style.top = "-${next.offsetTop}px";
+                this.style.top = "${next.offsetTop * -1 + offsetFromTop}px";
             }
         }
     }
@@ -531,7 +524,7 @@ abstract class EditableElement extends UbrElement {
             case KeyCode.ESC:
                 if (autocompleter != null) {
                     event.preventDefault();
-                    autocompleter.handleEscape();
+                    autocompleter.handleBlur();
                 }
                 break;
 
@@ -567,7 +560,6 @@ abstract class EditableElement extends UbrElement {
             case KeyCode.ESC:
                 break;
             default:
-                autocompleter.style.top = "20px";
                 var search = name_view.text.trim();
                 if (search.length > 1) {
                     repository.autocomplete(object_name, search).then((data) {
