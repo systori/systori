@@ -1,13 +1,17 @@
+import json
 from datetime import date, timedelta
-from django.views.generic import View, TemplateView, ListView
+from django.views.generic import View, TemplateView
 from django.contrib.auth.views import login
 from django_mobile import get_flavour
 from django.conf import settings
+from django.core import serializers
 from django.core.urlresolvers import reverse
-from ..project.models import Project, JobSite, DailyPlan
+from django.db.models import Prefetch
+from django.http import HttpResponse
+from ..project.models import Project, JobSite, DailyPlan, TeamMember
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
-from ..field.utils import get_workday
+
 
 
 class OfficeDashboard(TemplateView):
@@ -65,3 +69,25 @@ class DayBasedOverviewView(TemplateView):
         context['is_selected_future'] = selected_day > date.today()
 
         return context
+
+
+class DailyPlanViewJson(View):
+
+    def get(selfself, request, *args, **kwargs):
+        selected_day = request.selected_day
+
+        data = []
+        for dailyplan in DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id').all():
+            data.append({
+                "id":dailyplan.id,
+                "project":dailyplan.jobsite.project.name,
+                "jobsite":dailyplan.jobsite.name,
+                "address":dailyplan.jobsite.address,
+                "city":dailyplan.jobsite.city,
+                "postal_code":dailyplan.jobsite.postal_code,
+                "workers":[[worker.access.user.first_name, worker.access.user.last_name]
+                           for worker in dailyplan.workers.all()],
+                "equipment":[equipment.name for equipment in dailyplan.equipment.all()],
+                "notes":dailyplan.notes})
+
+        return HttpResponse(json.dumps(data), content_type='application/json')
