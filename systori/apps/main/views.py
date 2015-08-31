@@ -77,7 +77,7 @@ class DailyPlanViewJson(View):
         selected_day = request.selected_day
 
         data = []
-        for dailyplan in DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id').all():
+        for dailyplan in DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id'):
             data.append({
                 "id":dailyplan.id,
                 "project":dailyplan.jobsite.project.name,

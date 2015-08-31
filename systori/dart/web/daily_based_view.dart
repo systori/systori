@@ -3,13 +3,6 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'dart:async';
 
-void init() {
-    DateTime date = new DateTime.now();
-
-    setSelectDay(date);
-    setupEventHandlers();
-    loadData(date);
-}
 
 void setSelectDay(date) {
     InputElement select_day = document.querySelector('#select_day');
@@ -48,17 +41,21 @@ void createElements(String data) {
     if (parsedData.length != 0) {
         parsedData.forEach((el) {
             DivElement div = new DivElement();
+            SpanElement icon_flag = new SpanElement();
+            icon_flag.classes.addAll(['glyphicon','glyphicon-flag']);
+            icon_flag.attributes['area-hidden'] = 'true';
             div.classes.add('dailyplan');
             DivElement p = new DivElement();
-            p.text = el['project'];
+            p.append(icon_flag);
+            p.appendText(el['project']);
             p.classes.add('project');
             div.append(p);
+            SpanElement icon_worker = new SpanElement();
+            icon_worker.classes.addAll(['glyphicon','glyphicon-user']);
+            icon_worker.attributes['area-hidden'] = 'true';
+            div.append(icon_worker);
             el['workers'].forEach((worker) {
-                SpanElement s = new SpanElement();
-                s.classes.addAll(['glyphicon','glyphicon-user']);
-                s.attributes['area-hidden'] = 'true';
                 DivElement w = new DivElement();
-                w.append(s);
                 w.appendText("${worker[0]} ${worker[1]}");
                 w.classes.add('worker');
                 div.append(w);
@@ -99,61 +96,44 @@ void setDisplayWeekday(DateTime date) {
     for (String weekday in weekdays) {
         translated_weekdays.add(document.querySelector('#$weekday').text);
     };
-    switch (date.weekday) {
-        case 1:
-            display_weekday.innerHtml = translated_weekdays[0];
-            display_weekday.style.color= "black";
-            break;
-        case 2:
-            display_weekday.innerHtml = translated_weekdays[1];
-            display_weekday.style.color= "black";
-            break;
-        case 3:
-            display_weekday.innerHtml = translated_weekdays[2];
-            display_weekday.style.color= "black";
-            break;
-        case 4:
-            display_weekday.innerHtml = translated_weekdays[3];
-            display_weekday.style.color= "black";
-            break;
-        case 5:
-            display_weekday.innerHtml = translated_weekdays[4];
-            display_weekday.style.color= "black";
-            break;
-        case 6:
-            display_weekday.innerHtml = translated_weekdays[5];
-            display_weekday.style.color= "red";
-            break;
-        case 7:
-            display_weekday.innerHtml = translated_weekdays[6];
-            display_weekday.style.color= "red";
-            break;
-    }
+    var colors = ['black', 'black', 'black', 'black', 'black', 'red', 'red'];
+    display_weekday.innerHtml = translated_weekdays[date.weekday - 1];
+    display_weekday.style.color = colors[date.weekday - 1];
 
 }
 
-void checkDateTimeRelevance(DateTime date, Function fn) {
+bool checkDateTimeRelevance(DateTime date) {
     // this function checks the DateTime object and jumps to the next day when the
-    // conditions match. f.e. we don't need to display today but tomorrow if it's past 16 o'clock
+    // conditions match. f.e. we don't need to display today but tomorrow if it's past 15 o'clock
     // applies to autorefresh only
-    if (date.hour > 23 || date.weekday > 5) {
-        fn(date.add(new Duration(days:1)));
+    if (date.hour > 15 || date.weekday > 5) {
+        return true;
     } else {
-        fn(date);
+        return false;
     }
 }
 
 void setAutorefresh() {
     const fiveSec = const Duration(seconds:5);
-    var loadDataCallback = ((Timer t) {
-        if (!document.querySelector('#autorefresh').checked) t.cancel();
+    new Timer.periodic(fiveSec, (Timer t) {
+        if (!document.querySelector('#autorefresh').checked) {
+            t.cancel();
+            return;
+        }
         DateTime date = new DateTime.now();
-        checkDateTimeRelevance(date, loadData);
+        if(checkDateTimeRelevance(date)){
+            loadData(date.add(new Duration(days:1)));
+        } else {
+            loadData(date);
+        }
     });
-    Timer timer = new Timer.periodic(fiveSec, (Timer t) => loadDataCallback(t));
 }
 
 void main() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
-    init();
+    DateTime date = new DateTime.now();
+
+    setSelectDay(date);
+    setupEventHandlers();
+    loadData(date);
 }
