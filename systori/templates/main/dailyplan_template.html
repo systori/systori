@@ -1,0 +1,55 @@
+{% load i18n l10n %}
+
+{% if object %}
+<div class='dailyplan'>
+    <div class='project'>
+      <span class='glyphicon glyphicon-flag' area-hidden='true'></span>
+      {{ object.jobsite.project.name }}
+    </div>
+
+  <table id="dailyplan-table">
+    <tbody>
+        <tr>
+            <td class='area-icon'>
+                <span class='glyphicon glyphicon-map-marker' area-hidden='true'>
+            </td>
+            <td class='area-content'>
+                <div>{{ object.jobsite.name }}</div>
+                <div>{{ object.jobsite.address }}</div>
+                <div>{{ object.jobsite.postal_code }} {{ object.jobsite.city }}</div>
+            </td>
+        </tr>
+        <tr>
+            <td class='area-icon'>
+                <span class='glyphicon glyphicon-user' area-hidden='true'>
+            </td>
+            <td class='area-content'>
+                {% for worker in object.workers.all %}
+                <div>{{ worker.access.user.get_full_name }}</div>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td class='area-icon'>
+                <span class='glyphicon glyphicon-knight' area-hidden='true'>
+            </td>
+            <td class='area-content'>
+                {% for equipment in dailyplan.equipment.all %}
+                <div>{{ equipment }}</div>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td class='area-icon'>
+                <span class='glyphicon glyphicon-pencil' area-hidden='true'>
+            </td>
+            <td class='area-content'>
+                <div>{{ object.notes }}</div>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+</div>
+{% else %}
+  {% trans 'no data available.' %}
+{% endif %}

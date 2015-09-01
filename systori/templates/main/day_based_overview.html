@@ -144,7 +144,7 @@
 
 
 body {
-  background-color:#fff;
+  background-color:#555;
 }
 
 #dailyplan-header {
@@ -156,7 +156,21 @@ body {
   box-sizing: border-box;
   border-bottom: 2px solid #f0ad4e;
   z-index:2;
-  background-color:inherit;
+  background-color:#333;
+  color:#fefefe;
+  display:flex;
+  justify-content:center;
+}
+
+#dailyplan-header * {
+  margin: 0px 10px 0px 10px;
+  align-self: center;
+}
+#dailyplan-header span {
+  font-size:35px;
+}
+#dailyplan-header button {
+  background-color:#80B2FF;
 }
 
 #dailyplan-container {
@@ -172,18 +186,35 @@ body {
 .dailyplan {
   position:relative;
   box-sizing: border-box;
-  background-color: #FFD4EA;
+  background-color: #e2edff;
   min-width:250px;
-  padding:20px;
   margin:10px;
   border-radius: 5px 5px 5px 5px;
   border: 0px solid #000000;
 }
 .project {
-
+  display:flex;
+  justify-content: center;
+  padding: 20px 10px 20px 10px;
+  background: -moz-linear-gradient(top, rgba(128,178,255,0) 0%, rgba(128,178,255,1) 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(128,178,255,0)), color-stop(100%,rgba(128,178,255,1)));
+  background: -webkit-linear-gradient(top, rgba(128,178,255,0) 0%,rgba(128,178,255,1) 100%);
+  background: -o-linear-gradient(top, rgba(128,178,255,0) 0%,rgba(128,178,255,1) 100%);
+  background: -ms-linear-gradient(top, rgba(128,178,255,0) 0%,rgba(128,178,255,1) 100%);
+  background: linear-gradient(to bottom, rgba(128,178,255,0) 0%,rgba(128,178,255,1) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ff69b4', endColorstr='#ff69b4',GradientType=0 );
 }
-.worker {
-
+.project .glyphicon {
+  margin-right:15px;
+}
+.area-icon {
+  float:left;
+}
+.area-content {
+}
+table#dailyplan-table {
+    border-collapse:separate;
+    border-spacing:15px 10px;
 }
 </style>
 {% endblock %}
@@ -207,23 +238,14 @@ body {
 </div>
 
   <div id="dailyplan-header">
-    <button type="button" id="previous_day">previous Day</button>
-    <button type="button" id="next_day">next Day</button>
-    <input type="date" id="select_day"><span id="weekday"></span></input>
-    <input type="checkbox" id="autorefresh">{% trans 'autorefresh' %}</input>
+    <button type="button" id="previous_day">{% trans 'back' %}</button>
+    <button type="button" id="next_day">{% trans 'next' %}</button>
+    <span id="selected_date" data-date="{{ request.selected_day|date:"Y-m-d" }}">{{ request.selected_day|date:"l" }} {{ request.selected_day|localize }}</span>
+    <div><input type="checkbox" id="autorefresh">{% trans 'autorefresh' %}</div>
   </div>
   <div id="dailyplan-container">
   </div>
 
-  <div id="translated_weekdays" style="visibility: hidden;">
-    <span id="sunday">{% trans 'Sunday' %}</span>
-    <span id="monday">{% trans 'Monday' %}</span>
-    <span id="tuesday">{% trans 'Tuesday' %}</span>
-    <span id="wednesday">{% trans 'Wednesday' %}</span>
-    <span id="thursday">{% trans 'Thursday' %}</span>
-    <span id="friday">{% trans 'Friday' %}</span>
-    <span id="saturday">{% trans 'Saturday' %}</span>
-  </div>
 {% endblock %}
 
 {% block extra_js %}

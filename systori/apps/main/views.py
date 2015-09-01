@@ -1,14 +1,17 @@
 import json
 from datetime import date, timedelta
 from django.views.generic import View, TemplateView
+from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.views import login
 from django_mobile import get_flavour
 from django.conf import settings
-from django.core import serializers
+from django.template import defaultfilters
 from django.core.urlresolvers import reverse
-from django.db.models import Prefetch
+
 from django.http import HttpResponse
-from ..project.models import Project, JobSite, DailyPlan, TeamMember
+from django.template.loader import get_template
+from django.template import Context
+from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
 
@@ -71,23 +74,29 @@ class DayBasedOverviewView(TemplateView):
         return context
 
 
-class DailyPlanViewJson(View):
+class DailyPlanView(SingleObjectMixin, View):
+    model = DailyPlan
 
-    def get(selfself, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        template = get_template("main/dailyplan_template.html")
+        context = Context({'object' : self.object})
+        rendered = template.render(context).encode('utf-8')
+        return HttpResponse(rendered)
+
+
+class DailyPlansPerDayJson(View):
+
+    def get(self, request, *args, **kwargs):
         selected_day = request.selected_day
 
-        data = []
-        for dailyplan in DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id'):
-            data.append({
-                "id":dailyplan.id,
-                "project":dailyplan.jobsite.project.name,
-                "jobsite":dailyplan.jobsite.name,
-                "address":dailyplan.jobsite.address,
-                "city":dailyplan.jobsite.city,
-                "postal_code":dailyplan.jobsite.postal_code,
-                "workers":[[worker.access.user.first_name, worker.access.user.last_name]
-                           for worker in dailyplan.workers.all()],
-                "equipment":[equipment.name for equipment in dailyplan.equipment.all()],
-                "notes":dailyplan.notes})
+        data = {}
+        data['selected_date'] = []
+        data['selected_date'].append(defaultfilters.date(selected_day, 'Y-m-d'))
+        data['selected_date'].append(defaultfilters.date(selected_day, 'l d. M Y'))
+        data['dailyplan_ids'] = []
+        for dailyplan in DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id').all():
+            data['dailyplan_ids'].append(dailyplan.id)
 
         return HttpResponse(json.dumps(data), content_type='application/json')
