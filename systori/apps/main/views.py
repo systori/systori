@@ -10,6 +10,8 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.template.loader import get_template
 from django.template import Context
+from rest_framework import viewsets
+from .serializers import DailyPlanSerializer
 
 from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
@@ -100,3 +102,8 @@ class DailyPlansPerDayJson(View):
             data['dailyplan_ids'].append(dailyplan.id)
 
         return HttpResponse(json.dumps(data), content_type='application/json')
+
+
+class DailyPlanViewSet(viewsets.ModelViewSet):
+    queryset = DailyPlan.objects.all()
+    serializer_class = DailyPlanSerializer
