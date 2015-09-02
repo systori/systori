@@ -75,14 +75,14 @@
   -webkit-animation: pulse 750ms ease-in infinite;
   -moz-animation: pulse 750ms ease-in infinite;
   animation: pulse 750ms ease-in infinite;
-  border-top: 27px solid hotpink;
+  border-top: 27px solid #80B2FF;
   border-left: 15px solid transparent;
   border-right: 15px solid transparent;
   border-bottom: 0px;
 }
 .tri.invert {
   border-top: 0px;
-  border-bottom: 27px solid hotpink;
+  border-bottom: 27px solid #80B2FF;
   border-left: 15px solid transparent;
   border-right: 15px solid transparent;
 }
@@ -167,8 +167,19 @@ body {
   align-self: center;
 }
 #dailyplan-header span {
-  font-size:35px;
+  font-size:14px;
 }
+@media screen and (min-width: 500px) {
+  #dailyplan-header span {
+    font-size:20px;
+  }
+}
+@media screen and (min-width: 650px) {
+  #dailyplan-header span {
+    font-size:35px;
+  }
+}
+
 #dailyplan-header button {
   background-color:#80B2FF;
 }
@@ -191,6 +202,11 @@ body {
   margin:10px;
   border-radius: 5px 5px 5px 5px;
   border: 0px solid #000000;
+}
+@media screen and (min-width: 1200px) {
+  .dailyplan {
+    font-size:22px;
+  }
 }
 .project {
   display:flex;
@@ -241,7 +257,7 @@ table#dailyplan-table {
     <button type="button" id="previous_day">{% trans 'back' %}</button>
     <button type="button" id="next_day">{% trans 'next' %}</button>
     <span id="selected_date" data-date="{{ request.selected_day|date:"Y-m-d" }}">{{ request.selected_day|date:"l" }} {{ request.selected_day|localize }}</span>
-    <div><input type="checkbox" id="autorefresh">{% trans 'autorefresh' %}</div>
+    <div><input type="checkbox" id="autorefresh" checked>{% trans 'autorefresh' %}</div>
   </div>
   <div id="dailyplan-container">
   </div>

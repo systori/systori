@@ -11,7 +11,7 @@
     <tbody>
         <tr>
             <td class='area-icon'>
-                <span class='glyphicon glyphicon-map-marker' area-hidden='true'>
+                <span class='glyphicon glyphicon-map-marker' area-hidden='true'></span>
             </td>
             <td class='area-content'>
                 <div>{{ object.jobsite.name }}</div>
@@ -21,21 +21,25 @@
         </tr>
         <tr>
             <td class='area-icon'>
-                <span class='glyphicon glyphicon-user' area-hidden='true'>
+                <span class='glyphicon glyphicon-user' area-hidden='true'></span>
             </td>
             <td class='area-content'>
                 {% for worker in object.workers.all %}
                 <div>{{ worker.access.user.get_full_name }}</div>
+                {% empty %}
+                <div>{% trans 'no workers assigned.' %}</div>
                 {% endfor %}
             </td>
         </tr>
         <tr>
             <td class='area-icon'>
-                <span class='glyphicon glyphicon-knight' area-hidden='true'>
+                <span class='glyphicon glyphicon-knight' area-hidden='true'></span>
             </td>
             <td class='area-content'>
                 {% for equipment in dailyplan.equipment.all %}
                 <div>{{ equipment }}</div>
+                {% empty %}
+                <div>{% trans 'no equipment assigned.' %}</div>
                 {% endfor %}
             </td>
         </tr>

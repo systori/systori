@@ -7,10 +7,10 @@ from django_mobile import get_flavour
 from django.conf import settings
 from django.template import defaultfilters
 from django.core.urlresolvers import reverse
-
 from django.http import HttpResponse
 from django.template.loader import get_template
 from django.template import Context
+
 from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
 from ..field.views import FieldDashboard

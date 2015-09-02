@@ -36,14 +36,19 @@ void loadData(DateTime date) {
 
     var url = "http://localhost:8000/dailyplans-json/${rfc_date}";
 
-    // call the web server asynchronously
-    var request = HttpRequest.getString(url).then(onDataLoaded);
+    var httpRequest = new HttpRequest();
+    httpRequest
+        ..open('GET', url)
+        ..onLoadEnd.listen((e) => onDataLoaded(httpRequest))
+        ..send('');
 }
 
-void onDataLoaded(String responseText) {
-    String jsonString = responseText;
-    createElements(jsonString);
-    hide_spinner();
+void onDataLoaded(HttpRequest request) {
+    if (request.status == 200) {
+        createElements(request.responseText);
+        hide_spinner();
+    }
+
 }
 
 void loadDailyPlan(int id) {
@@ -144,4 +149,5 @@ void main() {
 
     setupEventHandlers();
     loadData(date);
+    setAutorefresh();
 }
