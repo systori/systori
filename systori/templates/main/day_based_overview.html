@@ -1,122 +1,272 @@
 {% extends "base.html" %}
 {% load static i18n l10n customformatting %}
 
-{% debug %}
-
 {% block head %}
-  {{ block.super }}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{% static "img/favicon.png" %}">
+    <link rel="apple-touch-icon" href="{% static "img/apple-touch-icon-180x180-precomposed.png" %}"/>
+
+    <title>{% block title %}systori{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+    <link href="{% block custom_css %}{% static "css/main.css" %}{% endblock %}" rel="stylesheet">
+<style>
+
+#loader {
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+  background-color:black;
+  z-index:3;
+}
+
+@-webkit-keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  16.666% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@-moz-keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  16.666% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  16.666% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.triangles {
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  height: 81px;
+  width: 90px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+}
+
+.tri {
+  position: absolute;
+  -webkit-animation: pulse 750ms ease-in infinite;
+  -moz-animation: pulse 750ms ease-in infinite;
+  animation: pulse 750ms ease-in infinite;
+  border-top: 27px solid #80B2FF;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 0px;
+}
+.tri.invert {
+  border-top: 0px;
+  border-bottom: 27px solid #80B2FF;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+}
+.tri:nth-child(1) {
+  left: 30px;
+}
+.tri:nth-child(2) {
+  left: 15px;
+  top: 27px;
+  -webkit-animation-delay: -125ms;
+  -moz-animation-delay: -125ms;
+  animation-delay: -125ms;
+}
+.tri:nth-child(3) {
+  left: 30px;
+  top: 27px;
+}
+.tri:nth-child(4) {
+  left: 45px;
+  top: 27px;
+  -webkit-animation-delay: -625ms;
+  -moz-animation-delay: -625ms;
+  animation-delay: -625ms;
+}
+.tri:nth-child(5) {
+  top: 54px;
+  -webkit-animation-delay: -250ms;
+  -moz-animation-delay: -250ms;
+  animation-delay: -250ms;
+}
+.tri:nth-child(6) {
+  top: 54px;
+  left: 15px;
+  -webkit-animation-delay: -250ms;
+  -moz-animation-delay: -250ms;
+  animation-delay: -250ms;
+}
+.tri:nth-child(7) {
+  top: 54px;
+  left: 30px;
+  -webkit-animation-delay: -375ms;
+  -moz-animation-delay: -375ms;
+  animation-delay: -375ms;
+}
+.tri:nth-child(8) {
+  top: 54px;
+  left: 45px;
+  -webkit-animation-delay: -500ms;
+  -moz-animation-delay: -500ms;
+  animation-delay: -500ms;
+}
+.tri:nth-child(9) {
+  top: 54px;
+  left: 60px;
+  -webkit-animation-delay: -500ms;
+  -moz-animation-delay: -500ms;
+  animation-delay: -500ms;
+}
+
+
+body {
+  background-color:#555;
+}
+
+#dailyplan-header {
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:50px;
+  box-sizing: border-box;
+  border-bottom: 2px solid #f0ad4e;
+  z-index:2;
+  background-color:#333;
+  color:#fefefe;
+  display:flex;
+  justify-content:center;
+}
+
+#dailyplan-header * {
+  margin: 0px 10px 0px 10px;
+  align-self: center;
+}
+#dailyplan-header span {
+  font-size:14px;
+}
+@media screen and (min-width: 500px) {
+  #dailyplan-header span {
+    font-size:20px;
+  }
+}
+@media screen and (min-width: 650px) {
+  #dailyplan-header span {
+    font-size:35px;
+  }
+}
+
+#dailyplan-header button {
+  background-color:#80B2FF;
+}
+
+#dailyplan-container {
+  position:relative;
+  height: 100%;
+  box-sizing: border-box;
+  display:flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: space-around;
+  align-content: center;
+}
+.dailyplan {
+  position:relative;
+  box-sizing: border-box;
+  background-color: #e2edff;
+  min-width:250px;
+  margin:10px;
+  border-radius: 5px 5px 5px 5px;
+  border: 0px solid #000000;
+}
+@media screen and (min-width: 1200px) {
+  .dailyplan {
+    font-size:22px;
+  }
+}
+.project {
+  display:flex;
+  justify-content: center;
+  padding: 20px 10px 20px 10px;
+  background: -moz-linear-gradient(top, rgba(128,178,255,0) 0%, rgba(128,178,255,1) 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(128,178,255,0)), color-stop(100%,rgba(128,178,255,1)));
+  background: -webkit-linear-gradient(top, rgba(128,178,255,0) 0%,rgba(128,178,255,1) 100%);
+  background: -o-linear-gradient(top, rgba(128,178,255,0) 0%,rgba(128,178,255,1) 100%);
+  background: -ms-linear-gradient(top, rgba(128,178,255,0) 0%,rgba(128,178,255,1) 100%);
+  background: linear-gradient(to bottom, rgba(128,178,255,0) 0%,rgba(128,178,255,1) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ff69b4', endColorstr='#ff69b4',GradientType=0 );
+}
+.project .glyphicon {
+  margin-right:15px;
+}
+.area-icon {
+  float:left;
+}
+.area-content {
+}
+table#dailyplan-table {
+    border-collapse:separate;
+    border-spacing:15px 10px;
+}
+</style>
 {% endblock %}
 
-{% block header %}
-  <div style="font-size:20px; height:100%; position:fixed;">
-  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="margin:0px;">
-    <div class="container-fluid">
-
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                aria-expanded="false" aria-controls="navbar">
-          <span class="sr-only">{% trans 'Toggle navigation' %}</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="/">Systori</a>
-      </div>
-      <div id="navbar" class="navbar-collapse collapse">
-
-        <ul class="nav navbar-nav">
-          <li><a href="{{ previous_day_url }}">{% trans 'back' %}</a></li>
-          <li><a>{{ request.selected_day|date:"l" }} {{ request.selected_day|localize }}</a></li>
-          <li><a href="{{ next_day_url }}">{% trans 'next' %}</a></li>
-        </ul>
-        <a class="navbar-brand pull-right">{% trans 'Updated' %} <span class="timeago" title="{% now "c" %}">{% trans "less than a minute ago" %}</span></a>
-
-      </div>
-    </div>
-  </nav>
-{% endblock %}
-
+{% block header %}{% endblock %}
 
 {% block container %}
 
-  <div class="overview-wrapper">
-    {% for plan in selected_plans %}
-      <div class="overview-box">
-        <div class="panel panel-default dailyplan" data-id="{{ plan.id }}">
-          <div class="panel-heading panel-custom">
-            {{ plan.jobsite.project.name }}
-          </div>
-          <div class="panel-body panel-custom" style="background-color:rgba(50,250,50,0.2); color:rgba(15,15,15,0.7);">
-            {{ plan.jobsite.address }} - {{ plan.jobsite.city }}
-          </div>
-          {% for worker in plan.workers.all %}
-            {% if worker.is_foreman %}
-              <div class="panel-body panel-custom">
-                {{ worker.access.user.get_full_name }} <span style="color:#4ABEF7;">♔</span>
-              </div>
-            {% else %}
-              <div class="panel-body panel-custom">
-                {{ worker.access.user.get_full_name }}
-              </div>
-            {% endif %}
-          {% endfor %}
-          {% for equipment in plan.equipment.all %}
-            <div class="panel-body panel-custom">
-              {{ equipment }} <span style="color:#4ABEF7;">♘</span>
-            </div>
-          {% endfor %}
-        </div>
-        </ul>
-      </div>
-    {% endfor %}
+<div id="loader">
+  <div class='triangles'>
+    <div class='tri invert'></div>
+    <div class='tri invert'></div>
+    <div class='tri'></div>
+    <div class='tri invert'></div>
+    <div class='tri invert'></div>
+    <div class='tri'></div>
+    <div class='tri invert'></div>
+    <div class='tri'></div>
+    <div class='tri invert'></div>
   </div>
-  <div class="notes-container">
-    <div class="notes-box">
-      <div class="panel panel-info">
-        <div class="panel-heading">{% trans 'Notes' %}</div>
-        <div class="panel-body">
-          {% for plan in selected_plans %}
-            {% if plan.notes %}
-              &#9733; <span class="notes-project">{{ plan.jobsite.project.name }}</span> {{ plan.notes }}
-            {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-    </div>
+</div>
+
+  <div id="dailyplan-header">
+    <button type="button" id="previous_day">{% trans 'back' %}</button>
+    <button type="button" id="next_day">{% trans 'next' %}</button>
+    <span id="selected_date" data-date="{{ request.selected_day|date:"Y-m-d" }}">{{ request.selected_day|date:"l" }} {{ request.selected_day|localize }}</span>
+    <div><input type="checkbox" id="autorefresh" checked>{% trans 'autorefresh' %}</div>
   </div>
+  <div id="dailyplan-container">
   </div>
+
 {% endblock %}
 
 {% block extra_js %}
-
-  {% include "main/timeago_js.html" %}
-
-  <script type="text/javascript">
-  $(document).ready(function(){
-    setInterval(function() {page_reload()}, 5000);
-
-    $("span.timeago").timeago();
-
-    });
-
-  function page_reload()
-  {
-    $.ajax({
-      type: "HEAD",
-      url: window.location,
-      success: function() {
-        window.location.reload();
-      },
-      error: function() {
-        console.log("error reloading page.");
-      },
-      statusCode: {
-        404: function() { console.log("404"); },
-        501: function() { console.log("501"); },
-        502: function() { console.log("502"); }
-      }
-    });
-  };
-
-  </script>
+  <script type="application/dart" src="{% static "dart/daily_based_view.dart" %}"></script>
+  <script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
+  <script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
+  <script src="{% static "dart/packages/browser/dart.js" %}"></script>
 {% endblock %}

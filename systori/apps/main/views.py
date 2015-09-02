@@ -1,13 +1,22 @@
+import json
 from datetime import date, timedelta
-from django.views.generic import View, TemplateView, ListView
+from django.views.generic import View, TemplateView
+from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.views import login
 from django_mobile import get_flavour
 from django.conf import settings
+from django.template import defaultfilters
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
+from django.template.loader import get_template
+from django.template import Context
+from rest_framework import viewsets
+from .serializers import DailyPlanSerializer
+
 from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
-from ..field.utils import get_workday
+
 
 
 class OfficeDashboard(TemplateView):
@@ -65,3 +74,36 @@ class DayBasedOverviewView(TemplateView):
         context['is_selected_future'] = selected_day > date.today()
 
         return context
+
+
+class DailyPlanView(SingleObjectMixin, View):
+    model = DailyPlan
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        template = get_template("main/dailyplan_template.html")
+        context = Context({'object' : self.object})
+        rendered = template.render(context).encode('utf-8')
+        return HttpResponse(rendered)
+
+
+class DailyPlansPerDayJson(View):
+
+    def get(self, request, *args, **kwargs):
+        selected_day = request.selected_day
+
+        data = {}
+        data['selected_date'] = []
+        data['selected_date'].append(defaultfilters.date(selected_day, 'Y-m-d'))
+        data['selected_date'].append(defaultfilters.date(selected_day, 'l d. M Y'))
+        data['dailyplan_ids'] = []
+        for dailyplan in DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id').all():
+            data['dailyplan_ids'].append(dailyplan.id)
+
+        return HttpResponse(json.dumps(data), content_type='application/json')
+
+
+class DailyPlanViewSet(viewsets.ModelViewSet):
+    queryset = DailyPlan.objects.all()
+    serializer_class = DailyPlanSerializer
