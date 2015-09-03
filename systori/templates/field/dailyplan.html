@@ -165,7 +165,7 @@
   {% endif %}
 
 
-  {% if is_assigned dailyplan access %}
+  {% if not access.has_staff %}
 
     <div class="panel-footer clearfix">
 
