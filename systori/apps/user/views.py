@@ -1,19 +1,22 @@
-from django.views.generic import *
+from django.views import generic
+from django.views.i18n import set_language
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 from .forms import *
-
+from .forms import LanguageForm
 from .models import *
 from ..company.models import *
 
 
-class SettingsView(TemplateView):
+class SettingsView(generic.TemplateView):
     template_name = "user/settings.html"
 
 
-class UserList(ListView):
+class UserList(generic.ListView):
     model = Access
     template_name = 'user/user_list.html'
 
@@ -24,7 +27,7 @@ class UserList(ListView):
             prefetch_related('user')
 
 
-class UserView(DetailView):
+class UserView(generic.DetailView):
     model = User
 
 
@@ -41,7 +44,7 @@ class UserFormRenderer:
         return user_form, access_form
 
 
-class UserAdd(CreateView, UserFormRenderer):
+class UserAdd(generic.CreateView, UserFormRenderer):
     model = User
     success_url = reverse_lazy('users')
 
@@ -85,7 +88,7 @@ class UserAdd(CreateView, UserFormRenderer):
         return HttpResponseRedirect(self.success_url)
 
 
-class UserUpdate(UpdateView, UserFormRenderer):
+class UserUpdate(generic.UpdateView, UserFormRenderer):
     model = User
     success_url = reverse_lazy('users')
 
@@ -108,11 +111,11 @@ class UserUpdate(UpdateView, UserFormRenderer):
             return self.render_forms(user_form, access_form)
 
 
-class UserRemove(DeleteView):
+class UserRemove(generic.DeleteView):
     model = Access
 
 
-class UserGeneratePassword(DetailView):
+class UserGeneratePassword(generic.DetailView):
     model = User
     template_name = "user/password_generator.html"
 
@@ -124,3 +127,13 @@ class UserGeneratePassword(DetailView):
         self.object.save()
         context['new_password'] = new_password
         return self.render_to_response(context)
+
+
+class SetLanguageView(generic.View):
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        form = LanguageForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+        return set_language(request)
