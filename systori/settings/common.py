@@ -77,7 +77,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'systori.middleware.locale.ForceDefaultLanguageMiddleware',
     'systori.middleware.mobile.UbrMobileDetectionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'systori.apps.user.middleware.SetLanguageMiddleware',
