@@ -55,3 +55,10 @@ class AccessForm(ModelForm):
     class Meta:
         model = Access
         fields = ['is_active', 'is_staff', 'is_foreman', 'is_laborer']
+
+
+class LanguageForm(ModelForm):
+
+    class Meta:
+        model = User
+        fields = ['language']

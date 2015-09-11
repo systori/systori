@@ -5,6 +5,7 @@ from django.contrib.auth.models import (
 from django.core.mail import send_mail
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+from django.conf import settings
 
 
 class UserManager(BaseUserManager):
@@ -29,10 +30,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     first_name = models.CharField(_('first name'), max_length=30, blank=True)
     last_name = models.CharField(_('last name'), max_length=30, blank=True)
-
     email = models.EmailField(_('email address'), unique=True, null=True, blank=True)
-
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+    language = models.CharField(_('language'), choices=settings.LANGUAGES, max_length=2, blank=True)
 
     objects = UserManager()
 
