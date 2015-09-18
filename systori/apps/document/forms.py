@@ -10,9 +10,9 @@ class ProposalForm(forms.ModelForm):
             document_type=DocumentTemplate.PROPOSAL), required=False)
     add_terms = forms.BooleanField(label=_('Add Terms'),
                                    initial=True, required=False)
-
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
+
 
     def __init__(self, *args, **kwargs):
         super(ProposalForm, self).__init__(*args, **kwargs)
@@ -22,6 +22,18 @@ class ProposalForm(forms.ModelForm):
         model = Proposal
         fields = ['doc_template', 'document_date', 'header', 'footer',
                   'jobs', 'add_terms', 'notes']
+        widgets = {
+            'document_date': widgets.DateInput(attrs={'type': 'date'}),
+        }
+
+
+class ProposalUpdateForm(forms.ModelForm):
+    header = forms.CharField(widget=forms.Textarea)
+    footer = forms.CharField(widget=forms.Textarea)
+
+    class Meta:
+        model = Proposal
+        fields = ['document_date', 'header', 'footer', 'notes']
         widgets = {
             'document_date': widgets.DateInput(attrs={'type': 'date'}),
         }

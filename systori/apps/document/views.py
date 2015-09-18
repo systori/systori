@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from ..project.models import Project
 from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate
-from .forms import ProposalForm, InvoiceForm
+from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm
 from ..accounting import skr03
 
 from .type import proposal, invoice, evidence, specification, itemized_listing
@@ -48,12 +48,18 @@ class ProposalPDF(DocumentRenderView):
         return proposal.render(json, self.request.GET.get('with_lineitems', False), self.kwargs['format'])
 
 
-class ProposalCreate(CreateView):
+class ProposalEditViewMixin:
     model = Proposal
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
+
+
+class ProposalCreate(ProposalEditViewMixin, CreateView):
     form_class = ProposalForm
 
     def get_form_kwargs(self):
-        kwargs = super(ProposalCreate, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.model(project=self.request.project)
         return kwargs
 
@@ -70,10 +76,24 @@ class ProposalCreate(CreateView):
         form.instance.json = proposal.serialize(self.request.project, form)
         form.instance.json_version = form.instance.json['version']
 
-        return super(ProposalCreate, self).form_valid(form)
+        return super().form_valid(form)
 
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+
+class ProposalUpdate(ProposalEditViewMixin, UpdateView):
+    form_class = ProposalUpdateForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial'] = self.object.json
+        return kwargs
+
+    def get_queryset(self):
+        return super().get_queryset().filter(project=self.request.project)
+
+    def form_valid(self, form):
+        proposal.update(self.object, form.cleaned_data)
+        self.object.save()
+        return super().form_valid(form)
 
 
 class ProposalTransition(SingleObjectMixin, View):

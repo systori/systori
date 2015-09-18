@@ -149,6 +149,7 @@
           {% endfor %}
           {% if doc.status == doc.NEW %}
             <a href="{% url 'proposal.delete' project.id doc.id %}">{% trans "Delete" %}</a>
+            <a href="{% url 'proposal.update' project.id doc.id %}">{% trans "Edit" %}</a>
           {% endif %}
         </td>
       </tr>
