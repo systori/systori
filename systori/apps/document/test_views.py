@@ -125,6 +125,30 @@ class InvoiceViewTests(DocumentTestCase):
         ]))
         self.assertEqual(200, response.status_code)        
 
+    def test_update_invoice(self):
+
+        invoice = Invoice.objects.create(
+            project=self.project,
+            document_date=timezone.now(),
+            json={'header': 'header', 'footer': 'footer'},
+            notes='notes',
+            amount=1000
+        )
+        response = self.client.post(reverse('invoice.update', args=[self.project.id, invoice.id]), {
+            'document_date': '2015-07-28',
+            'header': 'new header',
+            'footer': 'new footer',
+            'notes': 'new notes'
+        })
+        self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
+
+        invoice.refresh_from_db()
+        self.assertEqual(invoice.document_date, date(2015, 7, 28))
+        self.assertEqual(invoice.json['header'], 'new header')
+        self.assertEqual(invoice.json['footer'], 'new footer')
+        self.assertEqual(invoice.notes, 'new notes')
+
 
 class EvidenceViewTests(DocumentTestCase):
 

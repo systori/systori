@@ -59,3 +59,15 @@ class InvoiceForm(forms.ModelForm):
         widgets = {
             'document_date': widgets.DateInput(attrs={'type': 'date'}),
         }
+
+
+class InvoiceUpdateForm(forms.ModelForm):
+    header = forms.CharField(widget=forms.Textarea)
+    footer = forms.CharField(widget=forms.Textarea)
+
+    class Meta:
+        model = Invoice
+        fields = ['document_date', 'header', 'footer', 'notes']
+        widgets = {
+            'document_date': widgets.DateInput(attrs={'type': 'date'}),
+        }

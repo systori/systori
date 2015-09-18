@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from ..project.models import Project
 from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate
-from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm
+from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm
 from ..accounting import skr03
 
 from .type import proposal, invoice, evidence, specification, itemized_listing
@@ -48,15 +48,9 @@ class ProposalPDF(DocumentRenderView):
         return proposal.render(json, self.request.GET.get('with_lineitems', False), self.kwargs['format'])
 
 
-class ProposalEditViewMixin:
-    model = Proposal
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
-
-
-class ProposalCreate(ProposalEditViewMixin, CreateView):
+class ProposalCreate(CreateView):
     form_class = ProposalForm
+    model = Proposal
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -78,9 +72,13 @@ class ProposalCreate(ProposalEditViewMixin, CreateView):
 
         return super().form_valid(form)
 
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
 
-class ProposalUpdate(ProposalEditViewMixin, UpdateView):
+
+class ProposalUpdate(UpdateView):
     form_class = ProposalUpdateForm
+    model = Proposal
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -94,6 +92,9 @@ class ProposalUpdate(ProposalEditViewMixin, UpdateView):
         proposal.update(self.object, form.cleaned_data)
         self.object.save()
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
 
 
 class ProposalTransition(SingleObjectMixin, View):
@@ -164,6 +165,27 @@ class InvoiceCreate(CreateView):
         form.instance.json_version = form.instance.json['version']
 
         return super(InvoiceCreate, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
+
+
+class InvoiceUpdate(UpdateView):
+    model = Invoice
+    form_class = InvoiceUpdateForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial'] = self.object.json
+        return kwargs
+
+    def get_queryset(self):
+        return super().get_queryset().filter(project=self.request.project)
+
+    def form_valid(self, form):
+        invoice.update(self.object, form.cleaned_data)
+        self.object.save()
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])

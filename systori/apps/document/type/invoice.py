@@ -15,6 +15,7 @@ from systori.apps.accounting.utils import get_transactions_table
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b, nr
 from .style import PortraitStationaryCanvas
+from .utils import update_instance
 from . import font
 
 
@@ -280,3 +281,7 @@ def serialize(project, additional_information):
             invoice['transactions'].append(txn)
 
     return invoice
+
+
+def update(instance, data):
+    return update_instance(instance, data, {'document_date': 'date'})
