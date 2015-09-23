@@ -105,6 +105,7 @@ class CodeTests(TestCase):
         self.assertEqual('1.1.1a', task.instance.code)
         self.assertEqual('1.1.1b', task.taskinstances.all()[1].code)
 
+
 class JobEstimateModificationTests(TestCase):
     def setUp(self):
         create_task_data(self)
@@ -205,3 +206,12 @@ class TestJobTransitions(TestCase):
         proposal.delete()
         self.job.refresh_from_db()
         self.assertEquals('Draft', self.job.get_status_display())
+
+
+class TaskTest(TestCase):
+
+    def test_complete_percent(self):
+        task = Task(complete=10, qty=0)
+        self.assertEqual(task.complete_percent, 0)
+        task.qty = 10
+        self.assertEqual(task.complete_percent, 100)

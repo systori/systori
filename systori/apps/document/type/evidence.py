@@ -31,9 +31,9 @@ def render(project):
 
         pages = []
 
-        for job in project.billable_jobs:
-            for taskgroup in job.billable_taskgroups:
-                for task in taskgroup.billable_tasks:
+        for job in project.jobs.all():
+            for taskgroup in job.taskgroups.all():
+                for task in taskgroup.tasks.all():
 
                     pages.append(Table([[b(_('Evidence Sheet')), nr(proposal_date)]]))
 
@@ -47,10 +47,10 @@ def render(project):
                     ))
 
                     pages.append(Table([
-                        [b(_('Code')), p(task.code),
-                         br(_('Task')), p(task.name)],
-                        [b(_('P-Amount')), '%s %s' % (ubrdecimal(task.qty), task.unit),
-                         br(_('UP')), money(task.unit_price)]
+                        [b(_('Code')), p(task.code.strip()),
+                         br(_('Task')), p(task.name[:60].strip())],
+                        [b(_('P-Amount')), '%s %s' % (ubrdecimal(task.qty).strip(), task.unit.strip()),
+                         br(_('UP')), money(task.unit_price).strip()]
                     ],
                         colWidths=[30*mm, 70*mm, 30*mm, None],
                         style=TableStyle([

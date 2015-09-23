@@ -308,7 +308,7 @@ class Task(BetterOrderedModel):
 
     @property
     def complete_percent(self):
-        return int(self.complete / self.qty * 100)
+        return int(self.complete / self.qty * 100) if self.qty else 0
 
     @property
     def unit_price(self):

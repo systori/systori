@@ -358,6 +358,9 @@ class DailyPlan(models.Model):
     def url_id(self):
         return '{}-{}'.format(self.day.isoformat(), self.id or 0)
 
+    def is_worker_assigned(self, worker):
+        return self.workers.filter(access=worker).exists()
+
     class Meta:
         ordering = ['-day']
 

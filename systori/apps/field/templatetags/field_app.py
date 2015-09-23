@@ -22,3 +22,7 @@ def add_daily_plan_url(project, date, jobsite=None):
         return reverse('field.dailyplan.assign-labor', args=[jobsite.id, DailyPlan(day=date).url_id])
     else:
         return reverse('field.dailyplan.pick-jobsite', args=[project.id, date.isoformat()])
+
+@register.simple_tag
+def is_assigned(plan, access):
+    return DailyPlan.is_worker_assigned(plan, access)

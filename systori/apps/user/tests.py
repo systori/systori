@@ -6,17 +6,18 @@ from .forms import UserForm
 from ..company.models import Company, Access
 
 
-def create_user_data(self):
-    self.company = Company.objects.create(schema="test", name="Test")
-    self.company.activate()
-    self.user = User.objects.create_superuser('test@damoti.com', 'pass')
-    Access.objects.create(user=self.user, company=self.company)
-
-
-class TestUserForm(TestCase):
+class CreateUserDataMixin:
 
     def setUp(self):
-        create_user_data(self)
+        self.company = Company.objects.create(schema="test", name="Test")
+        self.company.activate()
+        self.password = 'pass'
+        self.username = 'test@damoti.com'
+        self.user = User.objects.create_superuser(self.username, self.password)
+        Access.objects.create(user=self.user, company=self.company)
+
+
+class TestUserForm(CreateUserDataMixin, TestCase):
 
     def test_clean(self):
         activate('en')

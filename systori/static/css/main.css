@@ -74,8 +74,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  flex-direction: column;
-  height: 30vw;
+  flex-direction: row;
   width: 100vw;
 }
 
