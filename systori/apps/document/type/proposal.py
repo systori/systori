@@ -198,7 +198,7 @@ def serialize(project, form):
 
     proposal = {
 
-        'version': '1.0',
+        'version': '1.1',
 
         'date': form.cleaned_data['document_date'],
 
@@ -227,6 +227,7 @@ def serialize(project, form):
 
     for job in form.cleaned_data['jobs']:
         job_dict = {
+            'id': job.id,
             'code': job.code,
             'name': job.name,
             'taskgroups': []
@@ -235,6 +236,7 @@ def serialize(project, form):
 
         for taskgroup in job.taskgroups.all():
             taskgroup_dict = {
+                'id': taskgroup.id,
                 'code': taskgroup.code,
                 'name': taskgroup.name,
                 'description': taskgroup.description,
@@ -248,6 +250,7 @@ def serialize(project, form):
                 for instance in task.taskinstances.all():
 
                     task_dict = {
+                        'id': task.id,
                         'code': instance.code,
                         'name': instance.full_name,
                         'description': instance.full_description,
@@ -263,6 +266,7 @@ def serialize(project, form):
 
                     for lineitem in task.instance.lineitems.all():
                         lineitem_dict = {
+                            'id': lineitem.id,
                             'name': lineitem.name,
                             'qty': lineitem.unit_qty,
                             'unit': lineitem.unit,

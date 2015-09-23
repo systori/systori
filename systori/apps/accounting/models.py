@@ -55,14 +55,16 @@ class Account(BaseAccount):
         """ This method should only be used on customer accounts (trade debtors).
             It returns all credit entries marked as payment.
         """
-        self.job  # Raises DoesNotExist exception if no job exists to prevent misuse of this method.
+        # TODO: uncomment
+        #self.job  # Raises DoesNotExist exception if no job exists to prevent misuse of this method.
         return self.credits().filter(is_payment=True)
 
     def discounts(self):
         """ This method should only be used on customer accounts (trade debtors).
             It returns all credit entries marked as discount.
         """
-        self.job  # Raises DoesNotExist exception if no job exists to prevent misuse of this method.
+        # TODO: uncomment
+        #self.job  # Raises DoesNotExist exception if no job exists to prevent misuse of this method.
         return self.credits().filter(is_discount=True)
 
 

@@ -158,7 +158,7 @@ def render(invoice, format):
 
             PageBreak(),
 
-	    Paragraph(invoice_date, stylesheet['NormalRight']),
+            Paragraph(invoice_date, stylesheet['NormalRight']),
 
             Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
 
@@ -170,7 +170,7 @@ def render(invoice, format):
 
             collate_tasks_total(invoice, doc.width),
 
-            ]
+        ]
 
         if format == 'print':
             doc.build(flowables)
@@ -187,7 +187,7 @@ def serialize(project, additional_information):
 
     invoice = {
 
-        'version': '1.0',
+        'version': '1.1',
 
         'title': additional_information.get('title',''),
         'date': additional_information.get('document_date'),
@@ -222,6 +222,7 @@ def serialize(project, additional_information):
 
     for job in project.billable_jobs:
         job_dict = {
+            'id': job.id,
             'code': job.code,
             'name': job.name,
             'taskgroups': []
@@ -230,6 +231,7 @@ def serialize(project, additional_information):
 
         for taskgroup in job.billable_taskgroups:
             taskgroup_dict = {
+                'id': taskgroup.id,
                 'code': taskgroup.code,
                 'name': taskgroup.name,
                 'description': taskgroup.description,
@@ -240,6 +242,7 @@ def serialize(project, additional_information):
 
             for task in taskgroup.billable_tasks:
                 task_dict = {
+                    'id': task.id,
                     'code': task.instance.code,
                     'name': task.instance.full_name,
                     'description': task.instance.full_description,
@@ -253,6 +256,7 @@ def serialize(project, additional_information):
 
                 for lineitem in task.instance.lineitems.all():
                     lineitem_dict = {
+                        'id': lineitem.id,
                         'name': lineitem.name,
                         'qty': lineitem.unit_qty,
                         'unit': lineitem.unit,
