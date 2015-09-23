@@ -28,6 +28,8 @@ class Project(models.Model):
     taskgroup_zfill = models.PositiveSmallIntegerField(_("Task Group Code Zero Fill"), default=1)
     task_zfill = models.PositiveSmallIntegerField(_("Task Code Zero Fill"), default=1)
 
+    account = models.OneToOneField('accounting.Account', related_name="project", null=True)
+
     objects = ProjectQuerySet.as_manager()
 
     PROSPECTIVE = "prospective"
@@ -259,6 +261,20 @@ class Project(models.Model):
         amount = Decimal(0.0)
         for job in self.jobs.all():
             amount += job.new_amount_with_balance
+        return amount
+
+    @property
+    def debits(self):
+        amount = Decimal(0.0)
+        for job in self.jobs.all():
+            amount += job.account.debits().total
+        return amount
+
+    @property
+    def credits(self):
+        amount = Decimal(0.0)
+        for job in self.jobs.all():
+            amount += job.account.credits().total
         return amount
 
     @property

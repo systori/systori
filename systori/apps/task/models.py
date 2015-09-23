@@ -54,7 +54,7 @@ class Job(models.Model):
 
     taskgroup_offset = models.PositiveSmallIntegerField(_("Task Group Offset"), default=0)
 
-    account = models.OneToOneField('accounting.Account', related_name="job", null=True)
+    account = models.OneToOneField('accounting.Account', related_name="job", null=True, on_delete=models.SET_NULL)
 
     ESTIMATE_INCREMENT = 0.05
     ESTIMATE_INCREMENT_DISPLAY = '{:.0%}'.format(ESTIMATE_INCREMENT)
