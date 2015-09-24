@@ -1,5 +1,7 @@
 from django.forms import ModelForm, Form
+from django.forms.models import inlineformset_factory
 from django import forms
+from ..accounting.models import Transaction, Entry
 from .models import Project, JobSite
 from .gaeb_utils import gaeb_validator
 from django.utils.translation import ugettext_lazy as _
@@ -41,3 +43,12 @@ class FilterForm(Form):
     search_option = forms.MultipleChoiceField(label=_('Limits'), widget=forms.CheckboxSelectMultiple,
                                               choices=OPTIONS, required=False)
     search_term = forms.CharField(label=_('Search'), max_length=50, required=False)
+
+
+class EntryForm(ModelForm):
+    class Meta:
+        model = Entry
+        fields = ['amount', 'is_payment', 'is_discount']
+
+
+EntryFormSet = inlineformset_factory(Transaction, Entry, form=EntryForm, extra=0)

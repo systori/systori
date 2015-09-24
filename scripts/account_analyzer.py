@@ -10,6 +10,9 @@ def get_transactions_table_original(project):
     return all_the_things
 
 
+SHOW_SKIPPED = False
+
+
 def migrate_accounts():
     from systori.apps.project.models import Project
     from systori.apps.accounting.models import Account, Transaction, create_account_for_job
@@ -17,10 +20,6 @@ def migrate_accounts():
     from systori.apps.task.models import Job
 
     from systori.lib.templatetags.customformatting import money
-
-
-    SHOW_SKIPPED = False
-
 
     for project in Project.objects.without_template():
         project.account.code = int(project.account.code) + 1000
