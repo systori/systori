@@ -95,7 +95,7 @@ def collate_payments(invoice, available_width):
     t.style.append(('BOTTOMPADDING', (0, 1), (-1, -1), 3*mm))
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
     t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
-    t.style.append(('VALIGN', (0, 0), (-1, -1), "TOP"))
+    t.style.append(('VALIGN', (0, 0), (-1, -1), "BOTTOM"))
 
     t.style.append(('LINEBELOW', (0, 0), (-1, 0), 0.25, colors.black))
     t.style.append(('LINEAFTER', (0, 0), (-2, -1), 0.25, colors.black))
@@ -109,7 +109,7 @@ def collate_payments(invoice, available_width):
         row = ['', money(payment['amount']), money(payment['amount_base']), money(payment['amount_tax'])]
         if payment['type'] == 'payment':
             received_on = date_format(date(*map(int, payment['received_on'].split('-'))), use_l10n=True)
-            row[0] = _('Your Payment on')+' '+received_on
+            row[0] = Paragraph(_('Your Payment on')+' '+received_on, stylesheet['Normal'])
         elif payment['type'] == 'discount':
             row[0] = _('Discount Applied')
         t.row(*row)
