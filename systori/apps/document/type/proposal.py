@@ -61,8 +61,6 @@ def collate_tasks(proposal, available_width):
                 t.row('', '', ubrdecimal(task['qty']), p(task['unit']), money(task['price']), task_total_column)
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
 
-                t.row_style('BOTTOMPADDING', 0, -1, 10)
-
             t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
                   '', '', '', money(taskgroup['total']))
             t.row_style('FONTNAME', 0, -1, font.bold)
@@ -119,7 +117,7 @@ def collate_lineitems(proposal, available_width):
                 for chunk in chunk_text(task['description']):
                     t.row('', p(chunk))
 
-                t.row_style('BOTTOMPADDING', 0, -1, 10)
+                #t.row_style('BOTTOMPADDING', 0, -1, 10)  seems to have no effect @elmcrest 09/2015
 
                 pages.append(t.get_table(ContinuationTable))
 

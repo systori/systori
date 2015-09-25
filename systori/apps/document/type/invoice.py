@@ -31,10 +31,7 @@ def collate_tasks(invoice, available_width):
     t.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
 
     t.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
-    t.row_style('FONTNAME', 0, -1, font.bold)
-    t.row_style('ALIGNMENT', 2, 3, "CENTER")
-    t.row_style('ALIGNMENT', 4, -1, "RIGHT")
-    t.row_style('SPAN', 2, 3)
+
 
     for job in invoice['jobs']:
         t.row(b(job['code']), b(job['name']))
@@ -51,7 +48,7 @@ def collate_tasks(invoice, available_width):
                 t.row('', '', ubrdecimal(task['complete']), p(task['unit']), money(task['price']), money(task['total']))
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
 
-                t.row_style('BOTTOMPADDING', 0, -1, 10)
+                #t.row_style('BOTTOMPADDING', 0, -1, 10)
 
                 t.keep_previous_n_rows_together(2)
 
@@ -90,12 +87,10 @@ def collate_tasks_total(invoice, available_width):
 def collate_payments(invoice, available_width):
 
     t = TableFormatter([0, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
-    t.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
-    t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
-    t.style.append(('BOTTOMPADDING', (0, 1), (-1, -1), 3*mm))
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
     t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
     t.style.append(('VALIGN', (0, 0), (-1, -1), "BOTTOM"))
+    t.style.append(('RIGHTPADDING', (3, 0), (3, -1), 0))
 
     t.style.append(('LINEBELOW', (0, 0), (-1, 0), 0.25, colors.black))
     t.style.append(('LINEAFTER', (0, 0), (-2, -1), 0.25, colors.black))

@@ -285,10 +285,10 @@ class ContinuationTable(Table):
         self.canv.setFont(font.italic, 10)
 
         if getattr(self, '_splitCount', 0) > 1:
-            self.canv.drawString(0, self._height + 2*mm, '... '+_('Continuation'))
+            self.canv.drawString(0, self._height + 5*mm, '... '+_('Continuation'))
 
         if getattr(self, '_splitCount', 0) >= 1 and not hasattr(self, '_lastTable'):
-            self.canv.drawRightString(self._width, -2*mm, _('Continuation')+' ...')
+            self.canv.drawRightString(self._width, -7*mm, _('Continuation')+' ...')
 
         self.canv.restoreState()
 
@@ -324,6 +324,10 @@ class TableFormatter:
         self.columns = columns
         self.lines = []
         self.style = [
+            ('TOPPADDING', (0, 0), (-1, -1), 5),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0),
             ('FONTNAME', (0, 0), (-1, -1), self.font),
             ('FONTSIZE', (0, 0), (-1, -1), self.font_size)
         ]
