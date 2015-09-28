@@ -47,8 +47,8 @@
       <th style="text-align: right;">{% trans "Total" %}</th>
       <th></th>
       <th>{% trans "Billing Method" %}</th>
-      <th>{% trans "Billable Amount" %}</th>
-      <th>{% trans "Actions" %}</th>
+      <th style="text-align: right;">{% trans "Billable Amount" %}</th>
+      <th style="text-align: right;">{% trans "Actions" %}</th>
     </tr>
     </thead>
     <tbody id="job-table">
@@ -74,7 +74,7 @@
         </td>
         <td>{{ job.get_billing_method_display }}</td>
         <td style="text-align: right;">{{ job.billable_total|money }}</td>
-        <td>
+        <td style="text-align: right;">
           {% for state in job.get_available_status_transitions %}
             <a href="{% url 'job.transition' project.id job.id state.name %}">{{ state.custom.label }}</a>
           {% endfor %}
@@ -217,7 +217,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for record_type, date, record in transactions %}
+    {% for record_type, date, record, job in transactions %}
       {% if record_type == "invoice" %}
         <tr class="info">
           <td>{{ record.get_status_display }}</td>
@@ -242,7 +242,7 @@
         <tr>
           <td>&nbsp;</td>
           <td>{{ record.received_on|localize }}</td>
-          <td>{% trans 'Debit for new work completed to date.' %}</td>
+          <td>{% blocktrans with job_name=job.name %}Debit for new work completed to date in {{job_name}}.{% endblocktrans %}</td>
           <td align="right">&nbsp;</td>
           <td align="right">{{ record.amount|money }}</td>
           <td align="right">&nbsp;</td>
@@ -307,9 +307,9 @@
         {% endif %}
         | &nbsp; <a href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
       </td>
-      <td class="add-total-amount">{{ project.account.debits.total|money }}</td>
-      <td class="equals-total-amount">{{ project.account.credits.total|money }}</td>
-      <td class="add-total-amount">{{ project.account.balance|money }}</td>
+      <td class="add-total-amount">{{ project.debits|money }}</td>
+      <td class="equals-total-amount">{{ project.credits|money }}</td>
+      <td class="add-total-amount">{{ project.balance|money }}</td>
       <td class="equals-total-amount">{{ project.new_amount_to_debit|money }}</td>
       <td align="right" style="font-weight: bold;">{{ project.new_amount_with_balance|money }}</td>
     </tr>

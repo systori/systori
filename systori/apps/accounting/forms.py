@@ -1,17 +1,18 @@
 from datetime import date
 from decimal import Decimal
 from django.utils.translation import ugettext_lazy as _
+from django.forms.formsets import formset_factory
+from django.forms.formsets import BaseFormSet
 from django.forms import Form, ModelForm, ValidationError
 from django import forms
 from systori.lib.fields import LocalizedDecimalField
-from .models import *
-from .skr03 import *
+from ..task.models import Job
+from .skr03 import Account
 
 
-class PaymentForm(Form):
-    bank_account = forms.ModelChoiceField(label=_('Bank Account'), queryset=Account.objects.banks())
+class AccountSplitForm(Form):
+    job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
     amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
-    received_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
     discount = forms.TypedChoiceField(
         label=_('Is discounted?'),
         coerce=Decimal,
@@ -21,6 +22,28 @@ class PaymentForm(Form):
             ('0.1', _('10%')),
         ]
     )
+
+
+class BaseAccountSplitFormSet(BaseFormSet):
+
+    def __init__(self, payment, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.payment = payment
+
+    def clean(self):
+        splits = Decimal(0.0)
+        for form in self.forms:
+            splits += form.cleaned_data['amount']
+        if splits != self.payment:
+            raise forms.ValidationError(_("The sum of splits must equal the payment amount."))
+
+AccountSplitFormSet = formset_factory(AccountSplitForm, formset=BaseAccountSplitFormSet, extra=0)
+
+
+class PaymentForm(Form):
+    bank_account = forms.ModelChoiceField(label=_("Bank Account"), queryset=Account.objects.banks())
+    amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
+    received_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
 
 
 class AccountForm(ModelForm):

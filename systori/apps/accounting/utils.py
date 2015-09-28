@@ -12,9 +12,9 @@ def get_transactions_table(project):
     # Now we add the discounts
     transactions = []
     for r_type, r_date, payment, job in all_the_things:
-        transactions.append((r_type, r_date, payment))
+        transactions.append((r_type, r_date, payment, job))
         if r_type != 'payment': continue
         for discount in payment.transaction.discounts_to_account(job.account).all():
-            transactions.append(('discount', r_date, discount))
+            transactions.append(('discount', r_date, discount, job))
 
     return transactions

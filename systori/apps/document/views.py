@@ -123,7 +123,7 @@ class InvoiceCreate(CreateView):
     form_class = InvoiceForm
 
     def get_form_kwargs(self):
-        kwargs = super(InvoiceCreate, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.model(project=self.request.project)
         return kwargs
 
@@ -145,7 +145,7 @@ class InvoiceCreate(CreateView):
         form.instance.json = invoice.serialize(project, form.cleaned_data)
         form.instance.json_version = form.instance.json['version']
 
-        return super(InvoiceCreate, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])

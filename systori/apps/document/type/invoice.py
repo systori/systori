@@ -267,7 +267,7 @@ def serialize(project, additional_information):
 
     invoice['transactions'] = []
 
-    for record_type, _, record in get_transactions_table(project):
+    for record_type, _, record, job in get_transactions_table(project):
 
         if record_type in ('payment', 'discount'):
 

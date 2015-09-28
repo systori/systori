@@ -3,8 +3,7 @@
 
 {% block content %}
   {% for formset in formsets %}
-    <form role="form" method="post">
-    {% csrf_token %}
+    <form role="form" method="post">{% csrf_token %}
     <input type="hidden" name="transaction_id" value="{{ formset.instance.id }}" />
     {{ formset.management_form }}
     <div class="page-header">
