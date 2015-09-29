@@ -12,48 +12,29 @@ class PaymentCreate(FormView):
     form_class = PaymentForm
     template_name = 'accounting/payment_form.html'
 
-    def get_split_forms(self, payment=0.0, data=None):
-        return AccountSplitFormSet(payment, data=data, initial=[
-            {
-                'job': job,
-                'amount': Decimal(0.0),
-                'discount': Decimal(0)
-            }
-            for job in self.request.project.jobs.all()
-        ])
+    def get_split_forms(self):
+        return PaymentSplitFormSet(self.request.POST, jobs=self.request.project.jobs.all())
 
     def get(self, request, *args, **kwargs):
-        form = self.get_form()
-        split_forms = self.get_split_forms()
-        return self.render_to_response(self.get_context_data(form=form, split=split_forms))
+        return self.render_to_response(
+            self.get_context_data(
+                form=kwargs.get('form', self.get_form()),
+                split=kwargs.get('split', self.get_split_forms()))
+        )
 
     def post(self, request, *args, **kwargs):
 
         form = self.get_form()
-        split_forms = None
+        split_forms = self.get_split_forms()
+        split_forms.set_payment_form(form)
 
-        if form.is_valid():
+        if form.is_valid() and split_forms.is_valid():
 
-            bank = form.cleaned_data['bank_account']
-            payment = form.cleaned_data['amount']
-            received_on = form.cleaned_data['received_on']
+            split_forms.save()
 
-            split_forms = self.get_split_forms(payment, request.POST)
+            return HttpResponseRedirect(self.get_success_url())
 
-            if split_forms.is_valid():
-
-                splits = []
-                for split in split_forms:
-                    job = split.cleaned_data['job']
-                    amount = split.cleaned_data['amount']
-                    discount = split.cleaned_data['discount']
-                    splits.append((job, amount, discount))
-
-                partial_credit(splits, payment, received_on, bank)
-
-                return HttpResponseRedirect(self.get_success_url())
-
-        return self.render_to_response(self.get_context_data(form=form, split=split_forms or self.get_split_forms()))
+        return self.get(form=form, split=split_forms)
 
     def get_success_url(self):
         return self.request.project.get_absolute_url()
