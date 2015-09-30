@@ -16,9 +16,9 @@ class PaymentForm(Form):
     received_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
 
 
-class PaymentSplitForm(Form):
+class SplitPaymentForm(Form):
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
-    amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
+    amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4, required=False)
     discount = forms.TypedChoiceField(
         label=_('Is discounted?'),
         coerce=Decimal,
@@ -30,46 +30,45 @@ class PaymentSplitForm(Form):
     )
 
 
-class BasePaymentSplitFormSet(BaseFormSet):
+class BaseSplitPaymentFormSet(BaseFormSet):
 
     def __init__(self, *args, **kwargs):
-        kwargs['initial'] = [
-            {
-                'job': job,
-                'amount': Decimal(0.0),
-                'discount': Decimal(0)
-            }
-            for job in kwargs.pop('jobs')
-        ]
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, prefix='split', initial=[{'job': job} for job in kwargs.pop('jobs', [])], **kwargs)
+        self.payment_form = PaymentForm(*args, **kwargs)
 
-    def set_payment_form(self, form):
-        self.payment_form = form
+    def is_valid(self):
+        payment_valid = self.payment_form.is_valid()
+        splits_valid = super().is_valid()
+        return payment_valid and splits_valid
 
     def clean(self):
         splits = Decimal(0.0)
         for form in self.forms:
-            splits += form.cleaned_data['amount']
-        if splits != self.payment_form.cleaned_data['amount']:
+            if form.cleaned_data['amount']:
+                splits += form.cleaned_data['amount']
+        payment = self.payment_form.cleaned_data.get('amount', Decimal(0.0))
+        if splits != payment:
             raise forms.ValidationError(_("The sum of splits must equal the payment amount."))
 
     def get_splits(self):
         splits = []
         for split in self.forms:
-            job = split.cleaned_data['job']
-            amount = split.cleaned_data['amount']
-            discount = split.cleaned_data['discount']
-            splits.append((job, amount, discount))
+            if split.cleaned_data['amount']:
+                job = split.cleaned_data['job']
+                amount = split.cleaned_data['amount']
+                discount = split.cleaned_data['discount']
+                splits.append((job, amount, discount))
         return splits
 
     def save(self):
-        splits = self.get_splits()
-        bank = self.payment_form.cleaned_data['bank_account']
-        payment = self.payment_form.cleaned_data['amount']
-        received_on = self.payment_form.cleaned_data['received_on']
-        partial_credit(splits, payment, received_on, bank)
+        partial_credit(
+            self.get_splits(),
+            self.payment_form.cleaned_data['amount'],
+            self.payment_form.cleaned_data['received_on'],
+            self.payment_form.cleaned_data['bank_account']
+        )
 
-PaymentSplitFormSet = formset_factory(PaymentSplitForm, formset=BasePaymentSplitFormSet, extra=0)
+SplitPaymentFormSet = formset_factory(SplitPaymentForm, formset=BaseSplitPaymentFormSet, extra=0)
 
 
 class AccountForm(ModelForm):

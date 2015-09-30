@@ -5,36 +5,21 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from .models import *
 from .forms import *
-from .skr03 import *
 
 
 class PaymentCreate(FormView):
-    form_class = PaymentForm
+    form_class = SplitPaymentFormSet
     template_name = 'accounting/payment_form.html'
 
-    def get_split_forms(self):
-        return PaymentSplitFormSet(self.request.POST, jobs=self.request.project.jobs.all())
+    def get_form_kwargs(self):
+        kwargs = {'jobs': self.request.project.jobs.all()}
+        if self.request.method == 'POST':
+            kwargs['data'] = self.request.POST
+        return kwargs
 
-    def get(self, request, *args, **kwargs):
-        return self.render_to_response(
-            self.get_context_data(
-                form=kwargs.get('form', self.get_form()),
-                split=kwargs.get('split', self.get_split_forms()))
-        )
-
-    def post(self, request, *args, **kwargs):
-
-        form = self.get_form()
-        split_forms = self.get_split_forms()
-        split_forms.set_payment_form(form)
-
-        if form.is_valid() and split_forms.is_valid():
-
-            split_forms.save()
-
-            return HttpResponseRedirect(self.get_success_url())
-
-        return self.get(form=form, split=split_forms)
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
 
     def get_success_url(self):
         return self.request.project.get_absolute_url()

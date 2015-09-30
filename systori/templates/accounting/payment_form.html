@@ -6,10 +6,10 @@
 {% block content %}
   <form method="post">{% csrf_token %}
 
-    {{ form|bootstrap }}
+    {{ form.payment_form|bootstrap }}
 
-    <div class="form-group {% if split.non_form_errors %}has-error{% endif %}">
-    {{ split.management_form }}
+    <div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
+    {{ form.management_form }}
     <table class="table table-striped">
       <thead>
       <tr>
@@ -20,17 +20,17 @@
       </tr>
       </thead>
       <tbody>
-      {% for form in split %}
+      {% for split in form.forms %}
         <tr>
-          <td>{{ form.job }}{{ form.initial.job.name }}</td>
-          <td style="text-align: right;">{{ form.initial.job.account.balance|money }}</td>
-          <td style="text-align: right;" data-balance="{{ form.initial.job.account.balance }}">{{ form.amount }}</td>
-          <td>{{ form.discount }}</td>
+          <td>{{ split.job }}{{ split.initial.job.name }}</td>
+          <td style="text-align: right;">{{ split.initial.job.account.balance|money }}</td>
+          <td style="text-align: right;" data-balance="{{ split.initial.job.account.balance }}">{{ split.amount }}</td>
+          <td>{{ split.discount }}</td>
         </tr>
       {% endfor %}
       </tbody>
     </table>
-    {% for error in split.non_form_errors %}
+    {% for error in form.non_form_errors %}
       <span class="help-block ">{{ error }}</span>
     {% endfor %}
     </div>
