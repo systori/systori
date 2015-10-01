@@ -1,7 +1,7 @@
 {% extends "project.html" %}
-{% load i18n bootstrap customformatting %}
+{% load i18n staticfiles bootstrap customformatting ubrutils %}
 
-{% block sidebar %}{% include "project/sidebar.html" with section='invoices-and-payments' %}{% endblock %}
+{% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
 {% block content %}
   <form method="post">{% csrf_token %}
@@ -24,7 +24,11 @@
         <tr>
           <td>{{ split.job }}{{ split.initial.job.name }}</td>
           <td style="text-align: right;">{{ split.initial.job.account.balance|money }}</td>
-          <td style="text-align: right;" data-balance="{{ split.initial.job.account.balance }}">{{ split.amount }}</td>
+          <td class="split-input" style="text-align: right;"
+              data-balance="{{ split.initial.job.account.balance }}"
+              data-ratio="{{ split.initial.job.account.balance|divide:project.balance }}">
+            {{ split.amount }}
+          </td>
           <td>{{ split.discount }}</td>
         </tr>
       {% endfor %}
@@ -40,3 +44,10 @@
     </div>
   </form>
 {% endblock %}
+
+{% block extra_js %}
+  <script type="application/dart" src="{% static "dart/split_payment.dart" %}"></script>
+  <script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
+  <script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
+  <script src="{% static "dart/packages/browser/dart.js" %}"></script>
+{% endblock extra_js %}
