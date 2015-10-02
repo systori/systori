@@ -3,7 +3,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.forms import widgets
 
 from .models import Proposal, Invoice, DocumentTemplate, Letterhead
-from .letterhead_utils import analyse_or_save
+from .letterhead_utils import clean_letterhead_pdf
+
 
 class ProposalForm(forms.ModelForm):
     doc_template = forms.ModelChoiceField(
@@ -77,10 +78,10 @@ class InvoiceUpdateForm(forms.ModelForm):
 class LetterheadCreateForm(forms.ModelForm):
 
     def clean(self):
-        analyse_or_save(self.cleaned_data.get('letterhead_pdf'))
+        clean_letterhead_pdf(self.cleaned_data.get('letterhead_pdf'))
 
     def save(self):
-        analyse_or_save(self.cleaned_data.get('letterhead_pdf'), save=True)
+        return clean_letterhead_pdf(self.cleaned_data.get('letterhead_pdf'), save=True)
 
     class Meta:
         model = Letterhead

@@ -6,8 +6,7 @@ from reportlab.lib.units import cm, inch
 from .models import Letterhead
 
 
-
-def analyse_or_save(file, save=False):
+def clean_letterhead_pdf(file, save=False):
     """
     this method expects a File and tries to determine some metadata - at the moment it's supporting PDF only.
     page size = MediaBox regarding http://partners.adobe.com/public/developer/en/pdf/PDFReference.pdf page 88
@@ -68,6 +67,6 @@ def analyse_or_save(file, save=False):
     if save:
         letterhead = Letterhead.objects.create(**letterhead_user_specification)
         letterhead.save()
-        return True
+        return letterhead
 
     return True

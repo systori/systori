@@ -12,9 +12,8 @@ from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate, Letterhead
 from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm, LetterheadCreateForm, LetterheadUpdateForm
 from ..accounting import skr03
-
 from .type import proposal, invoice, evidence, specification, itemized_listing
-from .letterhead_utils import analyse_or_save
+
 
 class DocumentRenderView(SingleObjectMixin, View):
     def get(self, request, *args, **kwargs):
@@ -279,6 +278,9 @@ class LetterheadView(DetailView):
 class LetterheadCreate(CreateView):
     form_class = LetterheadCreateForm
     model = Letterhead
+
+    def get_success_url(self):
+        return reverse('letterhead.view', args=[self.object.id])
 
 
 class LetterheadUpdate(UpdateView):

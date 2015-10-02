@@ -1,5 +1,6 @@
 from datetime import timedelta, date
 from decimal import Decimal
+import os
 
 from django.test import TestCase, Client
 from django.utils import timezone
@@ -162,17 +163,23 @@ class EvidenceViewTests(DocumentTestCase):
 class LetterheadCreateTests(DocumentTestCase):
 
     def test_post(self):
-        response = self.client.post(
-            reverse('letterhead.create'),
-            {
-                'document_unit': Letterhead.mm,
-                'top_margin': 10,
-                'right_margin': 10,
-                'bottom_margin': 10,
-                'left_margin': 10,
-                'letterhead_pdf': None,
-                'document_format': Letterhead.A4,
-                'orientation': Letterhead.PORTRAIT
-            }
+        letterhead_count = Letterhead.objects.count()
+        with open('systori/apps/document/test_data/letterhead.pdf', 'rb') as lettehead_pdf:
+            response = self.client.post(
+                reverse('letterhead.create'),
+                {
+                    'document_unit': Letterhead.mm,
+                    'top_margin': 10,
+                    'right_margin': 10,
+                    'bottom_margin': 10,
+                    'left_margin': 10,
+                    'letterhead_pdf': lettehead_pdf,
+                    'document_format': Letterhead.A4,
+                    'orientation': Letterhead.PORTRAIT
+                }
+            )
+        self.assertEqual(Letterhead.objects.count(), letterhead_count + 1)
+        self.assertRedirects(
+            response, 
+            reverse('letterhead.view', args=[Letterhead.objects.latest('pk').pk])
         )
-        self.assertRedirects(response, reverse('letterhead.view', args=[Letterhead.objects.latest('pk')]))
