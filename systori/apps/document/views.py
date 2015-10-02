@@ -2,18 +2,19 @@ from decimal import Decimal
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import View
+from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, ModelFormMixin
 from django.core.urlresolvers import reverse, reverse_lazy
 
 from ..project.models import Project
 from ..task.models import Job
-from .models import Proposal, Invoice, DocumentTemplate
-from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm
+from .models import Proposal, Invoice, DocumentTemplate, Letterhead
+from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm, LetterheadCreateForm, LetterheadUpdateForm
 from ..accounting import skr03
 
 from .type import proposal, invoice, evidence, specification, itemized_listing
-
+from .letterhead_utils import analyse_or_save
 
 class DocumentRenderView(SingleObjectMixin, View):
     def get(self, request, *args, **kwargs):
@@ -231,12 +232,14 @@ class EvidencePDF(DocumentRenderView):
 
 # Itemized List
 
+
 class ItemizedListingPDF(DocumentRenderView):
     model = Project
 
     def pdf(self):
         project = Project.prefetch(self.kwargs['project_pk'])
         return itemized_listing.render(project, self.kwargs['format'])
+
 
 # Document Template
 
@@ -260,3 +263,31 @@ class DocumentTemplateUpdate(UpdateView):
 class DocumentTemplateDelete(DeleteView):
     model = DocumentTemplate
     success_url = reverse_lazy('templates')
+
+
+# Letterhead
+
+
+class LetterheadList(ListView):
+    model = Letterhead
+
+
+class LetterheadView(DetailView):
+    model = Letterhead
+
+
+class LetterheadCreate(CreateView):
+    form_class = LetterheadCreateForm
+    model = Letterhead
+
+
+class LetterheadUpdate(UpdateView):
+    model = Letterhead
+    form_class = LetterheadUpdateForm
+    fields = '__all__'
+    success_url = reverse_lazy('letterheads.list')
+
+
+class LetterheadDelete(DeleteView):
+    model = Letterhead
+    success_url = reverse_lazy('letterheads.list')

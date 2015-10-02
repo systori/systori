@@ -1,0 +1,24 @@
+{% extends "frame.html" %}
+{% load i18n bootstrap %}
+
+{% block sidebar %}{% include "main/sidebar.html" %}{% endblock %}
+
+{% block content %}
+  <table>
+    <tr>
+      <td>
+        <form role="form" enctype="multipart/form-data"  method="post">
+            {% csrf_token %}
+            {{ form|bootstrap }}
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+            </div>
+        </form>
+      </td>
+      <td valign="top"><br/><br/>
+        {% for key, val in form.instance.vars.items %}
+          <b>[{{ key }}]</b> &nbsp; {{ val }}<br/>
+        {% endfor %}
+    </tr>
+  </table>
+{% endblock %}

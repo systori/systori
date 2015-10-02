@@ -157,3 +157,47 @@ class DocumentTemplate(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Letterhead(models.Model):
+    """
+    This Class is responsible for letting the User Upload letterheads/stationaries for his company. In best case it's a
+    real PDF with vector based graphics. Can affect printable documents like 'Invoice' or 'Proposal'.
+    """
+    name = models.CharField(_('Name'), max_length=512)
+
+    mm = "mm"
+    cm = "cm"
+    DOCUMENT_UNIT = (
+        (mm, "mm"),
+        (cm, "cm"),
+    )
+    document_unit = models.CharField(_('Document Unit'), max_length=5,
+                                     choices=DOCUMENT_UNIT, default=mm)
+
+    top_margin = models.DecimalField(_('Top Margin'), max_digits=4, decimal_places=2)
+    right_margin = models.DecimalField(_('Right Margin'), max_digits=4, decimal_places=2)
+    bottom_margin = models.DecimalField(_('Bottom Margin'), max_digits=4, decimal_places=2)
+    left_margin = models.DecimalField(_('Left Margin'), max_digits=4, decimal_places=2)
+
+    letterhead_pdf = models.FileField(_('Letterhead PDF'), upload_to='letterhead', max_length=100)
+
+    A4 = "A4"
+    DOCUMENT_FORMAT = (
+        (A4, _("A4")),
+    )
+    document_format = models.CharField(_('Pagesize'), max_length=30,
+                                       choices=DOCUMENT_FORMAT, default=A4)
+
+    PORTRAIT = "portrait"
+    LANDSCAPE = "landscape"
+    ORIENTATION = (
+        (PORTRAIT, _("Portrait")),
+        (LANDSCAPE, _("Landscape"))
+    )
+    orientation = models.CharField(_('Orientation'), max_length=15,
+                                   choices=ORIENTATION, default=PORTRAIT)
+
+    def get_absolute_url(self):
+        return '/letterheads/letterhead-{}'.format(self.id)
+

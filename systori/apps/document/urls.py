@@ -29,4 +29,10 @@ urlpatterns = [
     url(r'^templates/document-template-(?P<pk>\d+)/edit$', office_auth(DocumentTemplateUpdate.as_view()), name='document-template.edit'),
     url(r'^templates/document-template-(?P<pk>\d+)/delete$', office_auth(DocumentTemplateDelete.as_view()), name='document-template.delete'),
 
+    url(r'^letterheads$', office_auth(LetterheadList.as_view()), name='letterheads.list'),
+    url(r'^letterheads/create-letterhead$', office_auth(LetterheadCreate.as_view()), name='letterhead.create'),
+    url(r'^letterheads/letterhead-(?P<pk>\d+)$', office_auth(LetterheadView.as_view()), name='letterhead.update'),
+    url(r'^letterheads/letterhead-(?P<pk>\d+)/update$', office_auth(LetterheadUpdate.as_view()), name='letterhead.update'),
+    url(r'^letterheads/letterhead-(?P<pk>\d+)/delete$', office_auth(LetterheadDelete.as_view()), name='letterhead.delete'),
+
 ]

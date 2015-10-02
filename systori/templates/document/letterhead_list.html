@@ -1,0 +1,12 @@
+{% extends "frame.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "main/sidebar.html" with section="templates" %}{% endblock %}
+
+{% block content %}
+
+  {% for object in object_list %}
+  <h2>{{ object.name }}</h2>
+  {% endfor %}
+
+{% endblock %}

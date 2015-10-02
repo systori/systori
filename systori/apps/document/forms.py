@@ -1,8 +1,9 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from .models import Proposal, Invoice, DocumentTemplate
 from django.forms import widgets
 
+from .models import Proposal, Invoice, DocumentTemplate, Letterhead
+from .letterhead_utils import analyse_or_save
 
 class ProposalForm(forms.ModelForm):
     doc_template = forms.ModelChoiceField(
@@ -71,3 +72,22 @@ class InvoiceUpdateForm(forms.ModelForm):
         widgets = {
             'document_date': widgets.DateInput(attrs={'type': 'date'}),
         }
+
+
+class LetterheadCreateForm(forms.ModelForm):
+
+    def clean(self):
+        analyse_or_save(self.cleaned_data.get('letterhead_pdf'))
+
+    def save(self):
+        analyse_or_save(self.cleaned_data.get('letterhead_pdf'), save=True)
+
+    class Meta:
+        model = Letterhead
+        fields = ['letterhead_pdf']
+
+
+class LetterheadUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Letterhead
+        exclude = []

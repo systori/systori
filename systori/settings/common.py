@@ -161,8 +161,8 @@ USE_THOUSAND_SEPARATOR = True
 STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, '../static'))
 
 STATIC_URL = '/static/'
-MEDIA_ROOT = ''
-MEDIA_URL = ''
+MEDIA_ROOT = 'media/'
+MEDIA_URL = '/media/'
 
 STATICFILES_DIRS = (
     ('js', 'systori/static/js'),
