@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from ..accounting.test_skr03 import create_data
 from ..accounting.skr03 import partial_credit, partial_debit
 from ..directory.models import Contact, ProjectContact
-from .models import Proposal, Invoice
+from .models import Proposal, Invoice, Letterhead
 from .views import ProposalUpdate
 
 
@@ -157,3 +157,22 @@ class EvidenceViewTests(DocumentTestCase):
             self.project.id
         ]))
         self.assertEqual(200, response.status_code)
+
+
+class LetterheadCreateTests(DocumentTestCase):
+
+    def test_post(self):
+        response = self.client.post(
+            reverse('letterhead.create'),
+            {
+                'document_unit': Letterhead.mm,
+                'top_margin': 10,
+                'right_margin': 10,
+                'bottom_margin': 10,
+                'left_margin': 10,
+                'letterhead_pdf': None,
+                'document_format': Letterhead.A4,
+                'orientation': Letterhead.PORTRAIT
+            }
+        )
+        self.assertRedirects(response, reverse('letterhead.view', args=[Letterhead.objects.latest('pk')]))

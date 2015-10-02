@@ -1,6 +1,8 @@
 from collections import OrderedDict
 from datetime import date
+
 from django.db import models
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from jsonfield import JSONField
@@ -199,5 +201,4 @@ class Letterhead(models.Model):
                                    choices=ORIENTATION, default=PORTRAIT)
 
     def get_absolute_url(self):
-        return '/letterheads/letterhead-{}'.format(self.id)
-
+        return reverse('letterhead.view', args=[self.id])
