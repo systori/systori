@@ -6,8 +6,10 @@ from reportlab.lib.pagesizes import A6, A5, A4, A3, A2, A1, A0, LETTER, LEGAL, E
 from reportlab.lib.units import mm, cm, inch
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.platypus import Paragraph, Table, TableStyle, PageBreak
-from reportlab.pdfgen.canvas import Canvas
+from reportlab.pdfgen import canvas
 from reportlab.lib import colors
+
+from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
 
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
@@ -45,13 +47,23 @@ DOCUMENT_FORMAT = {
 
 
 class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
-    def __init__(self, stationary_filename="soft_briefbogen_2014.pdf", *args, **kwargs):
-        super(LetterheadCanvas, self).__init__(*args, **kwargs)
+    def __init__(self, *args, stationary_filename="soft_briefbogen_2014.pdf", **kwargs):
         self.stationary_filename = stationary_filename
+        super(LetterheadCanvas, self).__init__(*args, **kwargs)
+
+def call_stationary(filename):
+    return LetterheadCanvas(stationary_filename=filename)
+
+
+class PortraitStationaryCanvas(StationaryCanvas, NumberedCanvas):
+    stationary_filename = "soft_briefbogen_2014.pdf"
 
 
 def render(letterhead):
     document_unit = DOCUMENT_UNIT.get(letterhead.document_unit)
+
+    def systori_canvasmaker():
+        return LetterheadCanvas
 
     with BytesIO() as buffer:
 
@@ -67,8 +79,7 @@ def render(letterhead):
                 rightMargin = float(letterhead.right_margin)*document_unit,
                 showBoundary=True)
 
-        canvas = LetterheadCanvas()
 
-        doc.build(pages, canvasmaker=canvas)
+        doc.build(pages, canvasmaker=systori_canvasmaker)
 
         return buffer.getvalue()
