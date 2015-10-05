@@ -34,5 +34,6 @@ urlpatterns = [
     url(r'^letterheads/letterhead-(?P<pk>\d+)$', office_auth(LetterheadView.as_view()), name='letterhead.view'),
     url(r'^letterheads/letterhead-(?P<pk>\d+)/update$', office_auth(LetterheadUpdate.as_view()), name='letterhead.update'),
     url(r'^letterheads/letterhead-(?P<pk>\d+)/delete$', office_auth(LetterheadDelete.as_view()), name='letterhead.delete'),
+    url(r'^letterheads/letterhead-(?P<pk>\d+)/preview$', office_auth(LetterheadPreview.as_view()), name='letterhead.preview'),
 
 ]

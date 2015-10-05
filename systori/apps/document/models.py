@@ -170,9 +170,11 @@ class Letterhead(models.Model):
 
     mm = "mm"
     cm = "cm"
+    inch = "inch"
     DOCUMENT_UNIT = (
         (mm, "mm"),
         (cm, "cm"),
+        (inch, "inch")
     )
     document_unit = models.CharField(_('Document Unit'), max_length=5,
                                      choices=DOCUMENT_UNIT, default=mm)
@@ -184,9 +186,41 @@ class Letterhead(models.Model):
 
     letterhead_pdf = models.FileField(_('Letterhead PDF'), upload_to='letterhead', max_length=100)
 
+    A6 = "A6"
+    A5 = "A5"
     A4 = "A4"
+    A3 = "A3"
+    A2 = "A2"
+    A1 = "A1"
+    A0 = "A0"
+    LETTER = "LETTER"
+    LEGAL = "LEGAL"
+    ELEVENSEVENTEEN = "ELEVENSEVENTEEN"
+    B6 = "B6"
+    B5 = "B5"
+    B4 = "B4"
+    B3 = "B3"
+    B2 = "B2"
+    B1 = "B1"
+    B0 = "B0"
     DOCUMENT_FORMAT = (
+        (A6, _("A6")),
+        (A5, _("A5")),
         (A4, _("A4")),
+        (A3, _("A3")),
+        (A2, _("A2")),
+        (A1, _("A1")),
+        (A0, _("A0")),
+        (LETTER, _("LETTER")),
+        (LEGAL, _("LEGAL")),
+        (ELEVENSEVENTEEN, _("ELEVENSEVENTEEN")),
+        (B6, _("B6")),
+        (B5, _("B5")),
+        (B4, _("B4")),
+        (B3, _("B3")),
+        (B2, _("B2")),
+        (B1, _("B1")),
+        (B0, _("B0")),
     )
     document_format = models.CharField(_('Pagesize'), max_length=30,
                                        choices=DOCUMENT_FORMAT, default=A4)
@@ -199,6 +233,3 @@ class Letterhead(models.Model):
     )
     orientation = models.CharField(_('Orientation'), max_length=15,
                                    choices=ORIENTATION, default=PORTRAIT)
-
-    def get_absolute_url(self):
-        return reverse('letterhead.view', args=[self.id])

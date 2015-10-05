@@ -5,8 +5,28 @@
 
 {% block content %}
 
-  {% for object in object_list %}
-  <h2>{{ object.name }}</h2>
-  {% endfor %}
+   <h2 class="sub-header">{% trans 'Letterhead' %}</h2>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>{% trans 'Name' %}</th>
+      <th>{% trans 'Use for' %}</th>
+      <th>{% trans 'Actions' %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for object in object_list %}
+      <tr>
+        <td><a href="{% url 'letterhead.view' object.id %}">{{ object.name }}</a></td>
+        <td>{{ object }}</td>
+        <td>
+          <a href="{% url 'letterhead.update' object.id %}">{% trans "Edit" %}</a>
+          <a href="{% url 'letterhead.delete' object.id %}">{% trans "Delete" %}</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'letterhead.create' %}">{% trans "Create" %}</a>
 
 {% endblock %}

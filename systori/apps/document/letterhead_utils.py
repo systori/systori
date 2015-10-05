@@ -40,10 +40,10 @@ def clean_letterhead_pdf(file, save=False):
         (_BW*4, _BH*4): 'B0'
     }
 
-    pdf = PdfFileReader(file)
+    page = PdfFileReader(file).getPage(0)
 
-    rounded_width = round(pdf.getPage(0).mediaBox.getWidth())
-    rounded_height = round(pdf.getPage(0).mediaBox.getHeight())
+    rounded_width = round(page.mediaBox.getWidth())
+    rounded_height = round(page.mediaBox.getHeight())
 
     letterhead_user_specification = {}
     # defaults
@@ -66,6 +66,7 @@ def clean_letterhead_pdf(file, save=False):
 
     if save:
         letterhead = Letterhead.objects.create(**letterhead_user_specification)
+        letterhead.name = _("Letterhead {}").format(letterhead.id)
         letterhead.save()
         return letterhead
 

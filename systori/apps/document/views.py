@@ -12,7 +12,7 @@ from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate, Letterhead
 from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm, LetterheadCreateForm, LetterheadUpdateForm
 from ..accounting import skr03
-from .type import proposal, invoice, evidence, specification, itemized_listing
+from .type import proposal, invoice, evidence, specification, itemized_listing, letterhead
 
 
 class DocumentRenderView(SingleObjectMixin, View):
@@ -280,16 +280,22 @@ class LetterheadCreate(CreateView):
     model = Letterhead
 
     def get_success_url(self):
-        return reverse('letterhead.view', args=[self.object.id])
+        return reverse('letterhead.update', args=[self.object.id])
 
 
 class LetterheadUpdate(UpdateView):
     model = Letterhead
     form_class = LetterheadUpdateForm
-    fields = '__all__'
-    success_url = reverse_lazy('letterheads.list')
+
+    def get_success_url(self):
+        return reverse('letterhead.update', args=[self.object.id])
 
 
 class LetterheadDelete(DeleteView):
     model = Letterhead
     success_url = reverse_lazy('letterheads.list')
+
+
+class LetterheadPreview(DocumentRenderView):
+    def pdf(self):
+        return letterhead.render(letterhead=Letterhead.objects.get(id=self.kwargs.get('pk')))
