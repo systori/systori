@@ -183,8 +183,7 @@ class StationaryCanvas(canvas.Canvas):
 
     def __init__(self, *args, **kwargs):
         super(StationaryCanvas, self).__init__(*args, **kwargs)
-        static_dir = os.path.join(settings.BASE_DIR, 'static')
-        cover_pdf_path = os.path.join(static_dir, self.stationary_filename)
+        cover_pdf_path = os.path.join(settings.MEDIA_ROOT, self.stationary_filename)
         cover_pdf = open_and_read(cover_pdf_path)
 
         self.page_info, self.page_content = storeFormsInMemory(cover_pdf, prefix='stationary', all=True)

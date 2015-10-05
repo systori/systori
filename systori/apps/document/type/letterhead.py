@@ -47,29 +47,22 @@ DOCUMENT_FORMAT = {
 
 
 class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
-    def __init__(self, *args, stationary_filename="soft_briefbogen_2014.pdf", **kwargs):
-        self.stationary_filename = stationary_filename
+    def __init__(self, filename, *args, **kwargs):
+        self.stationary_filename = filename
         super(LetterheadCanvas, self).__init__(*args, **kwargs)
-
-def call_stationary(filename):
-    return LetterheadCanvas(stationary_filename=filename)
-
-
-class PortraitStationaryCanvas(StationaryCanvas, NumberedCanvas):
-    stationary_filename = "soft_briefbogen_2014.pdf"
 
 
 def render(letterhead):
     document_unit = DOCUMENT_UNIT.get(letterhead.document_unit)
 
-    def systori_canvasmaker():
-        return LetterheadCanvas
+    def canvas_maker(*args, **kwargs):
+        return LetterheadCanvas(letterhead.letterhead_pdf.name, *args, **kwargs)
 
     with BytesIO() as buffer:
 
         pages = []
 
-        pages.append(b(_('There are no billable Tasks available.')))
+        pages.append(b(_('The borders are shown only here, or some other Message.')))
 
         doc = SimpleDocTemplate(buffer,
                 pagesize = DOCUMENT_FORMAT[letterhead.document_format],
@@ -80,6 +73,6 @@ def render(letterhead):
                 showBoundary=True)
 
 
-        doc.build(pages, canvasmaker=systori_canvasmaker)
+        doc.build(pages, canvasmaker=canvas_maker)
 
         return buffer.getvalue()
