@@ -1,5 +1,6 @@
 from io import BytesIO
 from datetime import date
+from decimal import Decimal
 
 from reportlab.lib.units import mm
 from reportlab.lib.enums import TA_RIGHT
@@ -156,6 +157,8 @@ def render(invoice, format):
 
             KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal'])),
 
+            # todo get rid of the following when it's a flat invoice.
+
             PageBreak(),
 
 	    Paragraph(invoice_date, stylesheet['NormalRight']),
@@ -215,15 +218,13 @@ def serialize(project, additional_information, prepayment_splits=None):
 
         invoice.update({
 
-        # TODO: needs to be calculated....
-
-        'total_gross': additional_information.get('amount', ''),
+        'total_gross': additional_information.get('amount', '')*Decimal(1.19),
         'total_base': additional_information.get('amount', ''),
-        'total_tax': additional_information.get('amount', ''),
+        'total_tax': additional_information.get('amount', '')*Decimal(1.19) - additional_information.get('amount', ''),
 
-        'balance_gross': additional_information.get('amount', ''),
+        'balance_gross': additional_information.get('amount', '')*Decimal(1.19),
         'balance_base': additional_information.get('amount', ''),
-        'balance_tax': additional_information.get('amount', ''),
+        'balance_tax': additional_information.get('amount', '')*Decimal(1.19) -additional_information.get('amount', ''),
 
         })
 
