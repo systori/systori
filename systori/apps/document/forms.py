@@ -1,7 +1,13 @@
+from decimal import Decimal
 from django import forms
-from django.utils.translation import ugettext_lazy as _
-from .models import Proposal, Invoice, DocumentTemplate
 from django.forms import widgets
+from django.forms import Form
+from django.forms.formsets import formset_factory
+from django.forms.formsets import BaseFormSet
+from django.utils.translation import ugettext_lazy as _
+from systori.lib.fields import LocalizedDecimalField
+from .models import Proposal, Invoice, DocumentTemplate
+from ..task.models import Job
 
 
 class ProposalForm(forms.ModelForm):
@@ -13,9 +19,8 @@ class ProposalForm(forms.ModelForm):
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
 
-
     def __init__(self, *args, **kwargs):
-        super(ProposalForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['jobs'].queryset = self.instance.project.jobs_for_proposal
 
     class Meta:
@@ -50,9 +55,6 @@ class InvoiceForm(forms.ModelForm):
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
 
-    def __init__(self, *args, **kwargs):
-        super(InvoiceForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = Invoice
         fields = ['doc_template', 'is_final', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes']
@@ -71,3 +73,50 @@ class InvoiceUpdateForm(forms.ModelForm):
         widgets = {
             'document_date': widgets.DateInput(attrs={'type': 'date'}),
         }
+
+
+class PrepaymentForm(InvoiceForm):
+    amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
+    is_final = None
+
+    class Meta(InvoiceForm.Meta):
+        exclude = ['is_final']
+
+
+class SplitPrepaymentForm(Form):
+    job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
+    amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4, required=False)
+
+
+class BaseSplitPaymentFormSet(BaseFormSet):
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.pop('instance')
+        super().__init__(*args, prefix='split', initial=[{'job': job} for job in kwargs.pop('jobs', [])], **kwargs)
+        self.payment_form = PrepaymentForm(*args, instance=instance, **kwargs)
+
+    def is_valid(self):
+        payment_valid = self.payment_form.is_valid()
+        splits_valid = super().is_valid()
+        return payment_valid and splits_valid
+
+    def clean(self):
+        splits = Decimal(0.0)
+        for form in self.forms:
+            if form.cleaned_data['amount']:
+                splits += form.cleaned_data['amount']
+        payment = self.payment_form.cleaned_data.get('amount', Decimal(0.0))
+        if splits != payment:
+            raise forms.ValidationError(_("The sum of splits must equal the prepayment amount."))
+
+    def get_splits(self):
+        splits = []
+        for split in self.forms:
+            if split.cleaned_data['amount']:
+                job = split.cleaned_data['job']
+                amount = split.cleaned_data['amount']
+                splits.append((job, amount))
+        return splits
+
+
+PrepaymentInvoiceFormSet = formset_factory(SplitPrepaymentForm, formset=BaseSplitPaymentFormSet, extra=0)

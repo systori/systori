@@ -1,0 +1,44 @@
+{% extends "document/invoice_form.html" %}
+{% load i18n bootstrap staticfiles %}
+
+{% block content %}
+  <form role="form" method="post">{% csrf_token %}
+
+      {{ form.payment_form|bootstrap }}
+
+      <div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
+      {{ form.management_form }}
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>{% trans 'Job' %}</th>
+          <th style="text-align: right;">{% trans 'Prepay' %}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for split in form.forms %}
+          <tr>
+            <td>{{ split.job }}{{ split.initial.job.name }}</td>
+            <td class="split-input" style="text-align: right;">{{ split.amount }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% for error in form.non_form_errors %}
+        <span class="help-block ">{{ error }}</span>
+      {% endfor %}
+      </div>
+
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+      </div>
+  </form>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script type="application/dart" src="{% static "dart/split_prepayment.dart" %}"></script>
+  <script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
+  <script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
+  <script src="{% static "dart/packages/browser/dart.js" %}"></script>
+{% endblock extra_js %}
