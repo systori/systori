@@ -1,3 +1,6 @@
+lorem_100 = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.<br></br>At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.<br></br>"
+
+
 from io import BytesIO
 from datetime import date
 
@@ -5,7 +8,9 @@ from reportlab.lib.pagesizes import A6, A5, A4, A3, A2, A1, A0, LETTER, LEGAL, E
     B0, landscape
 from reportlab.lib.units import mm, cm, inch
 from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph, Table, TableStyle, PageBreak
+from reportlab.lib.enums import TA_RIGHT
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 
@@ -16,8 +21,8 @@ from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 
-from .style import LandscapeStationaryCanvas, StationaryCanvas, NumberedCanvas
-from .style import p, b, br, nr
+from .style import stylesheet, LandscapeStationaryCanvas, StationaryCanvas, NumberedCanvas, SystoriDocument
+from .style import p, b, br, nr, force_break, heading_and_date
 
 DOCUMENT_UNIT = {
     "mm": mm,
@@ -47,31 +52,54 @@ DOCUMENT_FORMAT = {
 
 
 class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
-    def __init__(self, filename, *args, **kwargs):
-        self.stationary_filename = filename
+    def __init__(self, letterhead_pages, *args, **kwargs):
+        self.stationary_pages = letterhead_pages
         super(LetterheadCanvas, self).__init__(*args, **kwargs)
 
 
 def render(letterhead):
     document_unit = DOCUMENT_UNIT.get(letterhead.document_unit)
+    invoice_date = date_format(date(*map(int, '2016-01-31'.split('-'))), use_l10n=True)
+
+    letterhead_pages = [letterhead.letterhead_page1, letterhead.letterhead_page2, letterhead.letterhead_pageN,
+                        letterhead.letterhead_pageZ]
 
     def canvas_maker(*args, **kwargs):
-        return LetterheadCanvas(letterhead.letterhead_pdf.name, *args, **kwargs)
+        return LetterheadCanvas(letterhead_pages, *args, **kwargs)
 
     with BytesIO() as buffer:
 
         pages = []
 
-        pages.append(b(_('The borders are shown only here, or some other Message.')))
+        doc = SystoriDocument(buffer,
+            pagesize = DOCUMENT_FORMAT[letterhead.document_format],
+            topMargin = float(letterhead.top_margin)*document_unit,
+            bottomMargin = float(letterhead.bottom_margin)*document_unit,
+            leftMargin = float(letterhead.left_margin)*document_unit,
+            rightMargin = float(letterhead.right_margin)*document_unit,
+            debug=letterhead.debug)
 
-        doc = SimpleDocTemplate(buffer,
-                pagesize = DOCUMENT_FORMAT[letterhead.document_format],
-                topMargin = float(letterhead.top_margin)*document_unit,
-                bottomMargin = float(letterhead.bottom_margin)*document_unit,
-                leftMargin = float(letterhead.left_margin)*document_unit,
-                rightMargin = float(letterhead.right_margin)*document_unit,
-                showBoundary=True)
+        pages.extend([
+            Paragraph(force_break("""Musterfirma GmbH
+            Herr Max Mustermann
+            Musterstraße 123
+            65321 Musterhausen
+            """), stylesheet['Normal']),
+            Spacer(0, 22*mm),
 
+            heading_and_date(_("Invoice"),invoice_date, doc.width, debug=letterhead.debug),
+            Spacer(0, 4*mm),
+
+            Paragraph(_("Invoice No.")+" 00000815", stylesheet['NormalRight']),
+            Paragraph(_("Please indicate the correct invoice number on your payment."),
+                      ParagraphStyle('', parent=stylesheet['Small'], alignment=TA_RIGHT)),
+            Spacer(0, 1*mm),
+            Paragraph(force_break('Dear Sir or Madam...'), stylesheet['Normal']),
+
+            Spacer(0, 4*mm),
+            Paragraph(force_break(lorem_100), stylesheet['Normal']),
+            Paragraph(force_break(lorem_100*17), stylesheet['Normal']),
+            ])
 
         doc.build(pages, canvasmaker=canvas_maker)
 

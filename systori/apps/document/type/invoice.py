@@ -14,12 +14,12 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 from systori.apps.accounting.utils import get_transactions_table
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b, nr
-from .style import PortraitStationaryCanvas
+from .style import PortraitStationaryCanvas, heading_and_date
 from .utils import update_instance
 from . import font
 
 
-DEBUG_DOCUMENT = False  # Shows boxes in rendered output
+DEBUG_DOCUMENT = True  # Shows boxes in rendered output
 
 
 def collate_tasks(invoice, available_width):
@@ -133,11 +133,10 @@ def render(invoice, format):
 
             Spacer(0, 18*mm),
 
-            Paragraph(invoice.get('title') or _("Invoice"), stylesheet['h2']),
+            heading_and_date(invoice.get('title') or _("Invoice"),invoice_date, doc.width, debug=DEBUG_DOCUMENT),
 
             Spacer(0, 4*mm),
 
-            Paragraph(invoice_date, stylesheet['NormalRight']),
             Paragraph(_("Invoice No.")+" "+invoice['invoice_no'], stylesheet['NormalRight']),
             Paragraph(_("Please indicate the correct invoice number on your payment."),
                       ParagraphStyle('', parent=stylesheet['Small'], alignment=TA_RIGHT)),
@@ -154,7 +153,7 @@ def render(invoice, format):
 
             PageBreak(),
 
-	    Paragraph(invoice_date, stylesheet['NormalRight']),
+	        Paragraph(invoice_date, stylesheet['NormalRight']),
 
             Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
 

@@ -184,7 +184,10 @@ class Letterhead(models.Model):
     bottom_margin = models.DecimalField(_('Bottom Margin'), max_digits=4, decimal_places=2)
     left_margin = models.DecimalField(_('Left Margin'), max_digits=4, decimal_places=2)
 
-    letterhead_pdf = models.FileField(_('Letterhead PDF'), upload_to='letterhead', max_length=100)
+    letterhead_page1 = models.FileField(_('Letterhead First Page'), upload_to='letterhead', max_length=100)
+    letterhead_page2 = models.FileField(_('Letterhead Second Page'), upload_to='letterhead', max_length=100, blank=True)
+    letterhead_pageN = models.FileField(_('Letterhead Following Pages'), upload_to='letterhead', max_length=100, blank=True)
+    letterhead_pageZ = models.FileField(_('Letterhead Last Page Z'), upload_to='letterhead', max_length=100, blank=True)
 
     A6 = "A6"
     A5 = "A5"
@@ -233,3 +236,5 @@ class Letterhead(models.Model):
     )
     orientation = models.CharField(_('Orientation'), max_length=15,
                                    choices=ORIENTATION, default=PORTRAIT)
+
+    debug = models.BooleanField(_("Debug Mode"), default=True)

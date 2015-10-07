@@ -25,7 +25,11 @@
   </div>
 
   <div class="col-lg-9" style="display:table-cell;float: none;">
+    {% if object %}
     <embed src="{% url 'letterhead.preview' object.id %}" width="100%" height="100%" type='application/pdf'>
+    {% else %}
+    <p>{% trans 'No Letterhead available.' %}</p>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

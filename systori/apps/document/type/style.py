@@ -175,25 +175,37 @@ def br(txt):
 def nr(txt):
     return Paragraph(str(txt), stylesheet['NormalRight'])
 
+def heading_and_date(heading, date, available_width, debug=False):
+
+    t = TableFormatter([0, 1], available_width, debug=debug)
+    t.style.append(('GRID', (0, 0), (-1, -1), 1, colors.transparent))
+    t.row(Paragraph(heading, stylesheet['h2']), Paragraph(date, stylesheet['NormalRight']))
+    t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
+    t.style.append(('RIGHTPADDING', (0,0), (-1,-1), 0))
+
+    return t.get_table(Table)
 
 
 class StationaryCanvas(canvas.Canvas):
 
-    stationary_filename = None
+    stationary_pages = None
 
     def __init__(self, *args, **kwargs):
         super(StationaryCanvas, self).__init__(*args, **kwargs)
-        cover_pdf_path = os.path.join(settings.MEDIA_ROOT, self.stationary_filename)
-        cover_pdf = open_and_read(cover_pdf_path)
+        cover_pdf_page1 = os.path.join(settings.MEDIA_ROOT, self.stationary_pages[0].name)
+        cover_pdf_page2 = os.path.join(settings.MEDIA_ROOT, self.stationary_pages[1].name)
+        cover_pdf_pagen = os.path.join(settings.MEDIA_ROOT, self.stationary_pages[2].name)
+        cover_pdf_pagez = os.path.join(settings.MEDIA_ROOT, self.stationary_pages[3].name)
+        cover_pdf_page1 = open_and_read(cover_pdf_page1)
 
-        self.page_info, self.page_content = storeFormsInMemory(cover_pdf, prefix='stationary', all=True)
+        self.page_info_page1, self.page_content = storeFormsInMemory(cover_pdf_page1, all=True)
         restoreFormsInMemory(self.page_content, self)
 
     def showPage(self):
-        if self._pageNumber > 1 and len(self.page_info) > 1:
-            self.doForm(self.page_info[1])
+        if self._pageNumber > 1 and len(self.page_info_page1) > 1:
+            self.doForm(self.page_info_page1[0])
         else:
-            self.doForm(self.page_info[0])
+            self.doForm(self.page_info_page1[0])
         super(StationaryCanvas, self).showPage()
 
 
@@ -225,7 +237,7 @@ class NumberedCanvas(canvas.Canvas):
 
     def draw_page_number(self, page_count):
         self.setFont(font.normal, 10)
-        self.drawRightString(145*mm, 10*mm,
+        self.drawRightString(149*mm, 10*mm,
                              '{} {} {} {}'.format(_("Page"), self._pageNumber, _("of"), page_count))
 
 
@@ -243,13 +255,13 @@ class LandscapeStationaryCanvas(StationaryCanvas):
 
 class SystoriDocument(BaseDocTemplate):
 
-    def __init__(self, buffer, topMargin=55*mm, debug=False):
+    def __init__(self, buffer, pagesize, topMargin, bottomMargin, leftMargin, rightMargin, debug=False):
         super(SystoriDocument, self).__init__(buffer,
-                                              pagesize=A4,
+                                              pagesize=pagesize,
                                               topMargin=topMargin,
-                                              bottomMargin=22*mm,
-                                              leftMargin=25*mm,
-                                              rightMargin=62*mm,
+                                              bottomMargin=bottomMargin,
+                                              leftMargin=leftMargin,
+                                              rightMargin=rightMargin,
                                               showBoundary=debug
                                               )
 

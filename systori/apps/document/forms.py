@@ -85,7 +85,7 @@ class LetterheadCreateForm(forms.ModelForm):
 
     class Meta:
         model = Letterhead
-        fields = ['letterhead_pdf']
+        fields = ['letterhead_page1']
 
 
 class LetterheadUpdateForm(forms.ModelForm):
