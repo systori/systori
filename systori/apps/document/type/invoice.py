@@ -1,3 +1,12 @@
+"""
+JSON Version Log
+================
+1.1
+ - Added is_flat_invoice attribute.
+1.0
+ - Initial Version.
+"""
+
 from io import BytesIO
 from datetime import date
 
@@ -215,18 +224,27 @@ def serialize(project, additional_information, is_flat_invoice=False):
 
     if is_flat_invoice:
 
-        base = additional_information['amount']
-        gross = round(base / (1 + TAX_RATE), 2)
-        tax = base - gross
+        # this should always match the Dart implementation in flat_invoice.dart
+        amount = additional_information['amount']
+        if additional_information['is_tax_included']:
+            net = amount / (1 + TAX_RATE)
+            gross_amount = amount
+            net_amount = net
+            tax_amount = amount - net
+        else:
+            tax = amount * TAX_RATE
+            gross_amount = amount + tax
+            net_amount = amount
+            tax_amount = tax
 
         invoice.update({
-            'total_gross': gross,
-            'total_base': base,
-            'total_tax': tax,
+            'total_gross': gross_amount,
+            'total_base': net_amount,
+            'total_tax': tax_amount,
 
-            'balance_gross': gross,
-            'balance_base': base,
-            'balance_tax': tax,
+            'balance_gross': gross_amount,
+            'balance_base': net_amount,
+            'balance_tax': tax_amount,
 
             'is_flat_invoice': True
         })

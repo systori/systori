@@ -11,6 +11,7 @@ from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate
 from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm, FlatInvoiceForm
 from ..accounting import skr03
+from ..accounting.constants import TAX_RATE
 
 from .type import proposal, invoice, evidence, specification, itemized_listing
 
@@ -174,6 +175,12 @@ class FlatInvoiceCreate(CreateView):
     model = Invoice
     form_class = FlatInvoiceForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_flat_invoice'] = True
+        context['TAX_RATE'] = TAX_RATE
+        return context
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.model(project=self.request.project)
@@ -181,6 +188,7 @@ class FlatInvoiceCreate(CreateView):
 
     def form_valid(self, form):
         form.instance.json = invoice.serialize(form.instance.project, form.cleaned_data, is_flat_invoice=True)
+        form.instance.amount = form.instance.json['total_gross']
         form.instance.json_version = form.instance.json['version']
         return super().form_valid(form)
 

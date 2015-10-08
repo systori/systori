@@ -60,10 +60,12 @@ class InvoiceForm(forms.ModelForm):
 
 class FlatInvoiceForm(InvoiceForm):
     amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
+    is_tax_included = forms.BooleanField(label=_('Is tax already included?'), initial=False, required=False)
     is_final = None
 
     class Meta(InvoiceForm.Meta):
-        fields = ['doc_template', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes', 'amount']
+        fields = ['doc_template', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes',
+                  'amount', 'is_tax_included']
 
 
 class InvoiceUpdateForm(forms.ModelForm):
