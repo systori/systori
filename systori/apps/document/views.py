@@ -9,8 +9,9 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from ..project.models import Project
 from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate
-from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm
+from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm, FlatInvoiceForm
 from ..accounting import skr03
+from ..accounting.constants import TAX_RATE
 
 from .type import proposal, invoice, evidence, specification, itemized_listing
 
@@ -144,7 +145,7 @@ class InvoiceCreate(CreateView):
     form_class = InvoiceForm
 
     def get_form_kwargs(self):
-        kwargs = super(InvoiceCreate, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.model(project=self.request.project)
         return kwargs
 
@@ -164,7 +165,32 @@ class InvoiceCreate(CreateView):
         form.instance.json = invoice.serialize(project, form.cleaned_data)
         form.instance.json_version = form.instance.json['version']
 
-        return super(InvoiceCreate, self).form_valid(form)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
+
+
+class FlatInvoiceCreate(CreateView):
+    model = Invoice
+    form_class = FlatInvoiceForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_flat_invoice'] = True
+        context['TAX_RATE'] = TAX_RATE
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.model(project=self.request.project)
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.json = invoice.serialize(form.instance.project, form.cleaned_data, is_flat_invoice=True)
+        form.instance.amount = form.instance.json['total_gross']
+        form.instance.json_version = form.instance.json['version']
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])
