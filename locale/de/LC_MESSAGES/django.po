@@ -225,10 +225,8 @@ msgstr "Adressfeld automatisch generieren."
 
 #: systori/apps/directory/models.py:25
 #: systori/templates/project/project_detail.html:330
-#, fuzzy
-#| msgid "Address"
 msgid "Address Label"
-msgstr "Adresse"
+msgstr "Adressfeld"
 
 #: systori/apps/directory/models.py:27 systori/apps/directory/models.py:57
 #: systori/apps/document/models.py:15
@@ -874,10 +872,8 @@ msgid "Password"
 msgstr "Passwort"
 
 #: systori/apps/user/forms.py:15
-#, fuzzy
-#| msgid "Association"
 msgid "Password confirmation"
-msgstr "Verknüpfung"
+msgstr "Passwort bestätigen"
 
 #: systori/apps/user/forms.py:16
 msgid "Enter the same password as above, for verification."
@@ -1525,10 +1521,8 @@ msgid "No jobs available to invoice."
 msgstr "Keine Positionen verfügbar."
 
 #: systori/templates/project/project_detail.html:310
-#, fuzzy
-#| msgid "Is Final Invoice?"
 msgid "Create Flat Invoice"
-msgstr "Schlussrechnung"
+msgstr "Pauschalrechnung erstellen"
 
 #: systori/templates/project/project_detail.html:311
 msgid "Add Payment"
@@ -1644,10 +1638,8 @@ msgid "Sign in"
 msgstr "Anmelden"
 
 #: systori/templates/user/password_generator.html:8
-#, fuzzy
-#| msgid "Password"
 msgid "New Password"
-msgstr "Passwort"
+msgstr "Neues Passwort"
 
 #: systori/templates/user/user_form.html:11
 msgid "Current Password Hash"
@@ -1670,10 +1662,8 @@ msgid "Staff"
 msgstr "Administration"
 
 #: systori/templates/user/user_list.html:35
-#, fuzzy
-#| msgid "Password"
 msgid "Generate Password"
-msgstr "Passwort"
+msgstr "Passwort generieren"
 
 msgid "Evidence"
 msgstr "Aufmaß"
