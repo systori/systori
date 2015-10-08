@@ -1,3 +1,12 @@
+"""
+JSON Version Log
+================
+1.1
+ - Added is_flat_invoice attribute.
+1.0
+ - Initial Version.
+"""
+
 from io import BytesIO
 from datetime import date
 
@@ -12,6 +21,7 @@ from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 from systori.apps.accounting.utils import get_transactions_table
+from systori.apps.accounting.constants import TAX_RATE
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b, nr
 from .style import PortraitStationaryCanvas
@@ -100,7 +110,7 @@ def collate_payments(invoice, available_width):
 
     t.row(_("Invoice Total"), money(invoice['total_gross']), money(invoice['total_base']), money(invoice['total_tax']))
 
-    for payment in invoice['transactions']:
+    for payment in invoice.get('transactions', []):
         row = ['', money(payment['amount']), money(payment['amount_base']), money(payment['amount_tax'])]
         if payment['type'] == 'payment':
             received_on = date_format(date(*map(int, payment['received_on'].split('-'))), use_l10n=True)
@@ -118,6 +128,8 @@ def collate_payments(invoice, available_width):
 def render(invoice, format):
 
     with BytesIO() as buffer:
+
+        is_flat_invoice = invoice.get('is_flat_invoice', False)
 
         invoice_date = date_format(date(*map(int, invoice['date'].split('-'))), use_l10n=True)
 
@@ -152,19 +164,24 @@ def render(invoice, format):
 
             KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal'])),
 
-            PageBreak(),
+        ]
 
-	    Paragraph(invoice_date, stylesheet['NormalRight']),
+        if not is_flat_invoice:
+            flowables += [
 
-            Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
+                PageBreak(),
 
-            Spacer(0, 4*mm),
+                Paragraph(invoice_date, stylesheet['NormalRight']),
 
-            collate_tasks(invoice, doc.width),
+                Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
 
-            Spacer(0, 4*mm),
+                Spacer(0, 4*mm),
 
-            collate_tasks_total(invoice, doc.width),
+                collate_tasks(invoice, doc.width),
+
+                Spacer(0, 4*mm),
+
+                collate_tasks_total(invoice, doc.width),
 
             ]
 
@@ -173,17 +190,16 @@ def render(invoice, format):
         else:
             doc.build(flowables, canvasmaker=PortraitStationaryCanvas)
 
-
         return buffer.getvalue()
 
 
-def serialize(project, additional_information):
+def serialize(project, additional_information, is_flat_invoice=False):
 
     contact = project.billable_contact.contact
 
     invoice = {
 
-        'version': '1.0',
+        'version': '1.1',
 
         'title': additional_information.get('title',''),
         'date': additional_information.get('document_date'),
@@ -201,6 +217,41 @@ def serialize(project, additional_information):
         'city': contact.city,
         'address_label': contact.address_label,
 
+    }
+
+    if additional_information.get('add_terms', False):
+        invoice['add_terms'] = True  # TODO: Calculate the terms.
+
+    if is_flat_invoice:
+
+        # this should always match the Dart implementation in flat_invoice.dart
+        amount = additional_information['amount']
+        if additional_information['is_tax_included']:
+            net = amount / (1 + TAX_RATE)
+            gross_amount = amount
+            net_amount = net
+            tax_amount = amount - net
+        else:
+            tax = amount * TAX_RATE
+            gross_amount = amount + tax
+            net_amount = amount
+            tax_amount = tax
+
+        invoice.update({
+            'total_gross': gross_amount,
+            'total_base': net_amount,
+            'total_tax': tax_amount,
+
+            'balance_gross': gross_amount,
+            'balance_base': net_amount,
+            'balance_tax': tax_amount,
+
+            'is_flat_invoice': True
+        })
+
+        return invoice
+
+    invoice.update({
         'total_gross': project.billable_gross_total,
         'total_base': project.billable_total,
         'total_tax': project.billable_tax_total,
@@ -208,11 +259,7 @@ def serialize(project, additional_information):
         'balance_gross': project.account.balance,
         'balance_base': project.account.balance_base,
         'balance_tax': project.account.balance_tax,
-
-    }
-
-    if additional_information.get('add_terms', False):
-        invoice['add_terms'] = True  # TODO: Calculate the terms.
+    })
 
     invoice['jobs'] = []
 
