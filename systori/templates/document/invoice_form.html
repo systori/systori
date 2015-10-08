@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n bootstrap staticfiles %}
+{% load i18n bootstrap staticfiles l10n %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
@@ -19,7 +19,7 @@
         </tr>
         <tr>
           <td>{% trans 'Tax' %}</td>
-          <td id="tax-amount" style="text-align: right;" data-tax-rate="{{ TAX_RATE }}">-</td>
+          <td id="tax-amount" style="text-align: right;" data-tax-rate="{{ TAX_RATE|localize }}">-</td>
         </tr>
       </table>
       {% endif %}
