@@ -307,7 +307,7 @@
             {% trans "No billable contact defined." %}
           {% endif %}
         {% endif %}
-        | <a href="{% url 'flat.invoice.create' project.id %}">{% trans "Create Flat Invoice" %}</a>
+        {% if project.invoices.count == 0 %}| <a href="{% url 'flat.invoice.create' project.id %}">{% trans "Create Flat Invoice" %}</a> {% endif %}
         | <a href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
       </td>
       <td class="add-total-amount">{{ project.account.debits.total|money }}</td>
