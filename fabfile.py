@@ -231,3 +231,16 @@ def _merge_this():
         local('git push origin :%s' % branch)
     local('git branch -d %s' % branch)
     local('git push')
+
+
+def link_dart():
+    with open('systori/dart/.packages', 'r') as packages:
+        for package in packages:
+            if package.startswith('#'):
+                continue
+            package_name, location = package.strip().split(':', 1)
+            location = '/' + location.lstrip('file:///')
+            try:
+                os.symlink(location, os.path.join('systori/dart/web/packages', package_name))
+            except OSError, exc:
+                print exc
