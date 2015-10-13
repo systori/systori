@@ -1,4 +1,5 @@
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 from django.db import models
 from django.db.models.manager import BaseManager
 from datetime import date
@@ -101,9 +102,17 @@ class BaseTransaction(models.Model):
     """ A transaction is a collection of accounting entries (usually
         at least two entries to two different accounts).
     """
-    entry_class = None # Must be defined in subclass.
-    recorded_on = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
+    entry_class = None  # Must be defined in subclass.
     notes = models.TextField(blank=True)
+
+    # when this transaction was entered into the system
+    recorded_on = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
+    # for payments, this is when a payment is received
+    received_on = models.DateField(_("Date Received"), default=date.today)
+
+    # finalized transactions cannot be edited
+    finalized_on = models.DateField(_("Date Finalized"), null=True)
+    is_finalized = models.BooleanField(_("Finalized"), default=False)
 
     class Meta:
         abstract = True
@@ -129,16 +138,21 @@ class BaseTransaction(models.Model):
     def is_balanced(self):
         return self._total('debit') == self._total('credit')
 
-    def save(self):
+    @property
+    def is_reconciled(self):
+        return self.entries.filter(is_reconciled=True).exists()
+
+    def save(self, **kwargs):
         assert self.is_balanced, "{} != {}".format(self._total('debit'), self._total('credit'))
-        super(BaseTransaction, self).save()
+        super().save(**kwargs)
         for item in self._entries:
             item[1].transaction = self
             item[1].save()
 
-    @property
-    def is_reconciled(self):
-        return self.entries.filter(is_reconciled=True).exists()
+    def finalize(self):
+        self.is_finalized = True
+        self.finalized_on = timezone.now()
+        self.save()
 
 
 class EntryQuerySet(models.QuerySet):
@@ -155,21 +169,40 @@ class EntryManager(BaseManager.from_queryset(EntryQuerySet)):
 
 
 class BaseEntry(models.Model):
-    """ Represents a debit or credit to an account. """
+    """ Represents a debit or credit to an account.
+    """
 
     transaction = models.ForeignKey('Transaction', related_name="entries")
     account = models.ForeignKey('Account', related_name="entries")
 
     amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=4, default=0.0)
 
-    is_payment = models.BooleanField(_("Payment"), default=False)
-    received_on = models.DateField(_("Date Received"), default=date.today)
+    PAYMENT = "payment"
+    DISCOUNT = "discount"
+    WORK_DEBIT = "work-debit"
+    FLAT_DEBIT = "flat-debit"
+    OTHER = "other"
 
-    is_discount = models.BooleanField(_("Discount"), default=False)
+    ENTRY_TYPE = (
+        (PAYMENT, _("Payment")),
+        (DISCOUNT, _("Discount")),
+        (WORK_DEBIT, _("Work Debit")),
+        (FLAT_DEBIT, _("Flat Debit")),
+        (OTHER, _("Other")),
+    )
+    # entry_type is only useful in the context of a customer account
+    # entries in all other accounts will just be of type 'other'
+    entry_type = models.CharField(_('Entry Type'), max_length=32, choices=ENTRY_TYPE, default=OTHER)
 
+    # for bank entries
+    reconciled_on = models.DateField(_("Date Reconciled"), null=True)
     is_reconciled = models.BooleanField(_("Reconciled"), default=False)
 
     objects = EntryManager()
+
+    class Meta:
+        abstract = True
+        ordering = ['transaction__recorded_on', 'id']
 
     def is_credit(self):
         return self.account.is_credit_amount(self.amount)
@@ -180,6 +213,7 @@ class BaseEntry(models.Model):
     def absolute_amount(self):
         return abs(self.amount)
 
-    class Meta:
-        abstract = True
-        ordering = ['transaction__recorded_on', 'id']
+    def reconcile(self):
+        self.is_reconciled = True
+        self.reconciled_on = timezone.now()
+        self.save()

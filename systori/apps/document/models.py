@@ -66,6 +66,9 @@ class Invoice(Document):
     invoice_no = models.CharField(_("Invoice No."), max_length=30)
     project = models.ForeignKey("project.Project", related_name="invoices")
 
+    # an invoice must have an associated debit transaction
+    transaction = models.ForeignKey('accounting.Transaction', null=True, related_name="invoice")
+
     NEW = "new"
     SENT = "sent"
     PAID = "paid"
@@ -82,7 +85,7 @@ class Invoice(Document):
 
     @transition(field=status, source=NEW, target=SENT, custom={'label': _("Send")})
     def send(self):
-        pass
+        self.transaction.finalize()
 
     @transition(field=status, source=SENT, target=PAID, custom={'label': _("Pay")})
     def pay(self):

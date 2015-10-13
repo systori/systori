@@ -4,7 +4,7 @@ from decimal import Decimal
 def get_transactions_table_original(project):
     debits = [('debit', d.transaction.recorded_on.date(), d) for d in project.account.debits().all()]
     invoices = [('invoice', i.document_date, i) for i in project.invoices.all()]
-    payments = [('payment', p.received_on, p) for p in project.account.payments().all()]
+    payments = [('payment', p.transaction.received_on, p) for p in project.account.payments().all()]
     all_the_things = debits + invoices + payments
     all_the_things.sort(key=lambda i: i[1])
     return all_the_things

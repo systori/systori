@@ -57,7 +57,7 @@ class Account(BaseAccount):
         """
         # TODO: uncomment
         #self.job  # Raises DoesNotExist exception if no job exists to prevent misuse of this method.
-        return self.credits().filter(is_payment=True)
+        return self.credits().filter(entry_type=Entry.PAYMENT)
 
     def discounts(self):
         """ This method should only be used on customer accounts (trade debtors).
@@ -65,11 +65,10 @@ class Account(BaseAccount):
         """
         # TODO: uncomment
         #self.job  # Raises DoesNotExist exception if no job exists to prevent misuse of this method.
-        return self.credits().filter(is_discount=True)
+        return self.credits().filter(entry_type=Entry.DISCOUNT)
 
 
 class Entry(BaseEntry):
-    """ Represents a debit or credit to an account. """
 
     @property
     def amount_base(self):
@@ -81,13 +80,10 @@ class Entry(BaseEntry):
 
 
 class Transaction(BaseTransaction):
-    """ A transaction is a collection of accounting entries (usually
-        at least two entries to two different accounts).
-    """
 
     entry_class = Entry
 
     def discounts_to_account(self, account):
-        return self.entries.filter(account=account).filter(is_discount=True)
+        return self.entries.filter(account=account).filter(entry_type=Entry.DISCOUNT)
 
 

@@ -40,7 +40,7 @@ def partial_debit(job):
 
     # debit the customer account (asset), this increases their balance
     # (+) "good thing", customer owes us more money
-    transaction.debit(job.account, amount)
+    transaction.debit(job.account, amount, entry_type=Entry.WORK_DEBIT)
 
     # credit the promised payments account (liability), increasing the liability
     # (+) "bad thing", customer owing us money is a liability
@@ -58,7 +58,7 @@ def partial_credit(jobs, payment, received_on=None, bank=None):
     bank = bank or Account.objects.get(code="1200")
     received_on = received_on or date.today()
 
-    transaction = Transaction()
+    transaction = Transaction(received_on=received_on)
 
     # debit the bank account (asset)
     # (+) "good thing", money in the bank is always good
@@ -71,22 +71,22 @@ def partial_credit(jobs, payment, received_on=None, bank=None):
 
         # credit the customer account (asset), decreasing their balance
         # (-) "bad thing", customer owes us less money
-        transaction.credit(job.account, credit, is_payment=True, received_on=received_on)
+        transaction.credit(job.account, credit, entry_type=Entry.PAYMENT)
 
         if not job.project.is_settlement:
             # Accounting prior to final invoice has a bunch more steps involved.
 
             # debit the promised payments account (liability), decreasing the liability
             # (-) "good thing", customer paying debt reduces liability
-            transaction.debit(Account.objects.get(code="1710"), credit, received_on=received_on)
+            transaction.debit(Account.objects.get(code="1710"), credit)
 
             # credit the partial payments account (liability), increasing the liability
             # (+) "bad thing", we are on the hook to finish and deliver the service or product
-            transaction.credit(Account.objects.get(code="1718"), income, received_on=received_on)
+            transaction.credit(Account.objects.get(code="1718"), income)
 
             # credit the tax payments account (liability), increasing the liability
             # (+) "bad thing", tax have to be paid eventually
-            transaction.credit(Account.objects.get(code="1776"), round(credit - income, 2), received_on=received_on)
+            transaction.credit(Account.objects.get(code="1776"), round(credit - income, 2))
 
         if discount > 0:
 
@@ -96,7 +96,7 @@ def partial_credit(jobs, payment, received_on=None, bank=None):
 
             # credit the customer account (asset), decreasing their balance
             # (-) "bad thing", customer owes us less money
-            transaction.credit(job.account, discount_amount, is_discount=True, received_on=received_on)
+            transaction.credit(job.account, discount_amount, entry_type=Entry.DISCOUNT)
 
             if job.project.is_settlement:
                 # Discount after final invoice has a few more steps involved.
@@ -106,18 +106,18 @@ def partial_credit(jobs, payment, received_on=None, bank=None):
 
                 # debit the cash discounts account (income), decreasing the income
                 # (-) "bad thing", less income :-(
-                transaction.debit(Account.objects.get(code="8736"), discount_income, received_on=received_on)
+                transaction.debit(Account.objects.get(code="8736"), discount_income)
 
                 # debit the tax payments account (liability), decreasing the liability
                 # (-) "good thing", less taxes to pay
-                transaction.debit(Account.objects.get(code="1776"), discount_taxes, received_on=received_on)
+                transaction.debit(Account.objects.get(code="1776"), discount_taxes)
 
             else:
                 # Discount prior to final invoice is simpler.
 
                 # debit the promised payments account (liability), decreasing the liability
                 # (-) "good thing", customer paying debt reduces liability
-                transaction.debit(Account.objects.get(code="1710"), discount_amount, received_on=received_on)
+                transaction.debit(Account.objects.get(code="1710"), discount_amount)
 
     transaction.save()
 

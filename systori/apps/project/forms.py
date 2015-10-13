@@ -48,7 +48,7 @@ class FilterForm(Form):
 class EntryForm(ModelForm):
     class Meta:
         model = Entry
-        fields = ['amount', 'is_payment', 'is_discount']
+        fields = ['amount', 'entry_type']
 
 
 EntryFormSet = inlineformset_factory(Transaction, Entry, form=EntryForm, extra=0)

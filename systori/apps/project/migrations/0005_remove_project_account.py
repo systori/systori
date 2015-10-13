@@ -26,6 +26,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('project', '0004_remove_project_job_offset'),
         ('task', '0005_job_account'),
+        ('accounting', '0004_auto_20151013_0730')
     ]
 
     operations = [
