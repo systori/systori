@@ -504,7 +504,11 @@ abstract class EditableElement extends UbrElement {
                     if (INPUT_MODE == InputMode.TASK && object_name == 'task') {
                         new_sibling();
                     } else if (child_element != null) {
-                        new_child();
+                        if (INPUT_MODE == InputMode.LINEITEM && object_name == 'task' && event.altKey) {
+                            new_child();
+                        } else {
+                            new_child_with_a_child();
+                        }
                     } else {
                         new_sibling();
                     }
@@ -648,8 +652,8 @@ abstract class EditableElement extends UbrElement {
         }
     }
 
-    void save() {
-        if (is_modified() && !is_blank()) {
+    void save({bool force_empty: false}) {
+        if (is_modified() && (force_empty || !is_blank())) {
             var data = toMap();
             if (pk != null) {
                 repository.update(object_name, pk, data);
@@ -671,7 +675,7 @@ abstract class EditableElement extends UbrElement {
         }
     }
 
-    bool previous() {
+    bool previous({bool include_parent: true}) {
         var match;
 
         // try siblings
@@ -686,11 +690,13 @@ abstract class EditableElement extends UbrElement {
             return true;
         }
 
-        // try parent
-        match = this.parent;
-        if (match is EditableElement) {
-            match.start();
-            return true;
+        if (include_parent) {
+            // try parent
+            match = this.parent;
+            if (match is EditableElement) {
+                match.start();
+                return true;
+            }
         }
 
         return false;
@@ -746,6 +752,18 @@ abstract class EditableElement extends UbrElement {
         item.start();
     }
 
+    void new_child_with_a_child() {
+        EditableElement item = document.createElement(child_element);
+        var editor = this.querySelector(":scope>.editor");
+        insertBefore(item, editor.nextElementSibling);
+        recalculate_code();
+        classes.remove('empty');
+        item.save(force_empty: true);
+        item.start();
+        item.new_child();
+        item.hide_if_no_siblings();
+    }
+
     void new_sibling() {
         EditableElement item = document.createElement(nodeName);
         insertAdjacentElement('afterend', item);
@@ -762,6 +780,22 @@ abstract class EditableElement extends UbrElement {
     children_total_sum() {
         var items = this.querySelectorAll(child_element).map((e) => e.total);
         return items.fold(0, (a, b) => a + b);
+    }
+
+    void hide_if_no_siblings() {
+        if (!previous(include_parent: false) && !next(include_children: false)) {
+            hide_editor();
+        }
+    }
+
+    void hide_editor() {
+        var editor = this.querySelector(":scope>.editor");
+        editor.classes.add('hidden');
+    }
+
+    void show_editor() {
+        var editor = this.querySelector(":scope>.editor");
+        editor.classes.remove('hidden');
     }
 
 }
@@ -881,6 +915,7 @@ class TaskInstanceElement extends EditableElement {
     double get total => children_total_sum();
 
     TaskInstanceElement.created(): super.created() {
+        hide_if_no_siblings();
     }
 
     recalculate_code() {
