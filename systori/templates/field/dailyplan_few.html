@@ -1,0 +1,196 @@
+{% load i18n staticfiles field_app %}
+
+{% with jobsite=dailyplan.jobsite %}
+
+  <div class="panel panel-success">
+    <div class="panel-heading">
+      <a name="plan-{{  dailyplan.id }}"></a>
+      <h3>Bormann</h3>
+      <div class="pull-right dailyplan-number"># {{ dailyplan.id }}</div>
+      {{ jobsite.name }}<br/>
+      {{ jobsite.address }} {{ jobsite.city }}
+    </div>
+
+    <div class="list-group">
+
+      {% if access.has_staff %}
+        <a class="list-group-item sub-header clearfix"
+           href="{% url 'field.dailyplan.assign-labor' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+      {% else %}
+        <div class="list-group-item sub-header">
+      {% endif %}
+
+      {% trans "Workers" %}
+
+      {% if access.has_staff %}
+        <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
+      {% else %}
+        </div>
+      {% endif %}
+
+    {% for worker in dailyplan.workers.all %}
+
+      <div class="list-group-item nav nav-pills">
+        {{ worker.access.user.get_full_name }}
+
+        {% if access.has_staff %}
+          <span class="pull-right">
+          <div class="btn-group" role="group">
+          <a href="{% url 'field.dailyplan.toggle-role' jobsite.id dailyplan.url_id worker.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
+             class="btn btn-default btn-sm">
+        {% else %}
+          <span class="pull-right">
+        {% endif %}
+
+        {% if worker.is_foreman %}
+          {% trans 'Foreman' %}
+        {% else %}
+          {% trans 'Laborer' %}
+        {% endif %}
+
+        {% if access.has_staff %}
+          </a>
+          <a href="{% url 'field.dailyplan.member-remove' jobsite.id dailyplan.url_id worker.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
+             class="btn btn-default btn-sm">
+            <span class="glyphicon glyphicon-remove" style="color:red;"></span>
+          </a>
+          </div></span>
+        {% else %}
+          </span>
+        {% endif %}
+
+      </div>
+
+    {% empty %}
+
+      <div class="list-group-item">
+        {% trans "No workers have been assigned." %}
+      </div>
+
+    {% endfor %}
+
+
+
+    {% if access.has_laborer %}
+      <a class="list-group-item sub-header clearfix"
+         href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+    {% else %}
+      <div class="list-group-item sub-header">
+    {% endif %}
+
+    {% trans "Equipment" %}
+
+    {% if access.has_laborer %}
+      <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
+    {% else %}
+      </div>
+    {% endif %}
+
+  {% for equipment in dailyplan.equipment.all %}
+
+    <div class="list-group-item nav nav-pills">
+      {{ equipment }}
+    </div>
+
+  {% empty %}
+
+    <div class="list-group-item">
+      {% trans "No equipment has been assigned." %}
+    </div>
+
+  {% endfor %}
+
+  {% if 'planning' not in request.path or request.session.is_planning_tasks %}
+
+    {% if access.has_laborer %}
+      <a class="list-group-item sub-header clearfix"
+         href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+    {% else %}
+      <div class="list-group-item sub-header">
+    {% endif %}
+
+  {% trans "Tasks" %}
+
+  {% if access.has_laborer %}
+    <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
+  {% else %}
+    </div>
+  {% endif %}
+
+    {% for task in dailyplan.tasks.all %}
+
+      <a href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
+         class="list-group-item clearfix">
+        {{ task.name }}
+        {% if task.complete_percent > 0 %}
+          <span class="badge">{{ task.complete_percent }}%</span>
+        {% else %}
+          <span class="pull-right">&raquo;</span>
+        {% endif %}
+      </a>
+
+    {% empty %}
+
+      <div class="list-group-item">
+        {% trans "No tasks have been assigned." %}
+      </div>
+
+    {% endfor %}
+
+  {% endif %}
+
+  </div>
+
+
+
+  {% if 'planning' not in request.path or request.session.is_planning_notes %}
+    {% if access.has_laborer or dailyplan.notes %}
+
+      <div class="list-group-item sub-header">{% trans "Notes" %}</div>
+
+      <div class="panel-body">
+        {% if access.has_laborer %}
+          <form action="{% url 'field.dailyplan.save.notes' dailyplan.id %}" method="post">{% csrf_token %}
+            <input type="hidden" name="origin" value="{{ request.path }}#plan-{{ dailyplan.id }}"/>
+            <textarea rows="4" style="width: 100%;" name="notes">{{ dailyplan.notes }}</textarea>
+            <input type="submit" class="btn btn-default" value="{% trans 'Save' %}"/>
+          </form>
+        {% else %}
+          {{ dailyplan.notes }}
+        {% endif %}
+
+      </div>
+
+    {% endif %}
+  {% endif %}
+
+
+  {% if not access.has_staff %}
+
+    <div class="panel-footer clearfix">
+
+      {% if access in dailyplan.accesses.all %}
+
+        {% for worker in dailyplan.workers.all %}
+          {% if worker.access == access%}
+            <a href="{% url 'field.dailyplan.self.remove' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
+               class="btn btn-default">Remove yourself from this assignment.</a>
+          {% endif %}
+        {% endfor %}
+
+      {% else %}
+
+        <a href="{% url 'field.dailyplan.self.add' jobsite.id dailyplan.url_id 'foreman' %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
+           class="btn btn-default">{% blocktrans %}Add yourself as <b>foreman</b>.{% endblocktrans %}</a>
+        <a href="{% url 'field.dailyplan.self.add' jobsite.id dailyplan.url_id 'laborer' %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
+           class="btn btn-default">{% blocktrans %}Add yourself as <b>laborer</b>.{% endblocktrans %}</a>
+
+      {% endif %}
+
+    </div>
+
+  {% endif %}
+
+  </div>
+
+{% endwith %}
