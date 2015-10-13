@@ -56,14 +56,6 @@ def clean_letterhead_pdf(file, save=False):
     letterhead_user_specification['right_margin_page2'] = 25
     letterhead_user_specification['bottom_margin_page2'] = 25
     letterhead_user_specification['left_margin_page2'] = 25
-    letterhead_user_specification['top_margin_pageN'] = 25
-    letterhead_user_specification['right_margin_pageN'] = 25
-    letterhead_user_specification['bottom_margin_pageN'] = 25
-    letterhead_user_specification['left_margin_pageN'] = 25
-    letterhead_user_specification['top_margin_pageZ'] = 25
-    letterhead_user_specification['right_margin_pageZ'] = 25
-    letterhead_user_specification['bottom_margin_pageZ'] = 25
-    letterhead_user_specification['left_margin_pageZ'] = 25
     letterhead_user_specification['document_unit'] = 'mm'
 
 

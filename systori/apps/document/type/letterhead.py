@@ -70,11 +70,20 @@ def render(letterhead):
 
         doc = SystoriDocument(buffer,
             pagesize = DOCUMENT_FORMAT[letterhead.document_format],
-            topMargin = float(letterhead.top_margin_page1)*document_unit,
-            bottomMargin = float(letterhead.bottom_margin_page1)*document_unit,
-            leftMargin = float(letterhead.left_margin_page1)*document_unit,
-            rightMargin = float(letterhead.right_margin_page1)*document_unit,
             debug=letterhead.debug)
+
+        frame1 = {
+            'top_padding' : float(letterhead.top_margin_page1)*document_unit,
+            'bottom_padding' : float(letterhead.bottom_margin_page1)*document_unit,
+            'left_padding' : float(letterhead.left_margin_page1)*document_unit,
+            'right_padding' : float(letterhead.right_margin_page1)*document_unit,
+        }
+        frame2 = {
+            'top_padding' : float(letterhead.top_margin_page2)*document_unit,
+            'bottom_padding' : float(letterhead.bottom_margin_page2)*document_unit,
+            'left_padding' : float(letterhead.left_margin_page2)*document_unit,
+            'right_padding' : float(letterhead.right_margin_page2)*document_unit,
+        }
 
         pages.extend([
             Paragraph(force_break("""Musterfirma GmbH
@@ -98,6 +107,6 @@ def render(letterhead):
             Paragraph(force_break(lorem_100*17), stylesheet['Normal']),
             ])
 
-        doc.build(pages, canvasmaker=canvas_maker)
+        doc.build(pages, frame1=frame1, frame2=frame2, canvasmaker=canvas_maker)
 
         return buffer.getvalue()
