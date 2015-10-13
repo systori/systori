@@ -168,6 +168,8 @@ class Letterhead(models.Model):
     """
     name = models.CharField(_('Name'), max_length=512)
 
+    letterhead_pdf = models.FileField(_('Letterhead PDF'), upload_to='letterhead', max_length=100)
+
     mm = "mm"
     cm = "cm"
     inch = "inch"
@@ -179,15 +181,15 @@ class Letterhead(models.Model):
     document_unit = models.CharField(_('Document Unit'), max_length=5,
                                      choices=DOCUMENT_UNIT, default=mm)
 
-    top_margin = models.DecimalField(_('Top Margin'), max_digits=4, decimal_places=2)
-    right_margin = models.DecimalField(_('Right Margin'), max_digits=4, decimal_places=2)
-    bottom_margin = models.DecimalField(_('Bottom Margin'), max_digits=4, decimal_places=2)
-    left_margin = models.DecimalField(_('Left Margin'), max_digits=4, decimal_places=2)
+    top_margin_page1 = models.DecimalField(_('Top Margin Page 1'), max_digits=4, decimal_places=2)
+    right_margin_page1 = models.DecimalField(_('Right Margin Page 1'), max_digits=4, decimal_places=2)
+    bottom_margin_page1 = models.DecimalField(_('Bottom Margin Page 1'), max_digits=4, decimal_places=2)
+    left_margin_page1 = models.DecimalField(_('Left Margin Page 1'), max_digits=4, decimal_places=2)
 
-    letterhead_page1 = models.FileField(_('Letterhead First Page'), upload_to='letterhead', max_length=100)
-    letterhead_page2 = models.FileField(_('Letterhead Second Page'), upload_to='letterhead', max_length=100, blank=True)
-    letterhead_pageN = models.FileField(_('Letterhead Following Pages'), upload_to='letterhead', max_length=100, blank=True)
-    letterhead_pageZ = models.FileField(_('Letterhead Last Page Z'), upload_to='letterhead', max_length=100, blank=True)
+    top_margin_page2 = models.DecimalField(_('Top Margin Page 2'), max_digits=4, decimal_places=2)
+    right_margin_page2 = models.DecimalField(_('Right Margin Page 2'), max_digits=4, decimal_places=2)
+    bottom_margin_page2 = models.DecimalField(_('Bottom Margin Page 2'), max_digits=4, decimal_places=2)
+    left_margin_page2 = models.DecimalField(_('Left Margin Page 2'), max_digits=4, decimal_places=2)
 
     A6 = "A6"
     A5 = "A5"

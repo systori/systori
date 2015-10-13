@@ -192,18 +192,15 @@ class StationaryCanvas(canvas.Canvas):
 
     def __init__(self, *args, **kwargs):
         super(StationaryCanvas, self).__init__(*args, **kwargs)
-        cover_pdf_page1 = os.path.join(settings.MEDIA_ROOT, self.stationary_pages[0].name)
-        cover_pdf_page2 = os.path.join(settings.MEDIA_ROOT, self.stationary_pages[1].name)
-        cover_pdf_pagen = os.path.join(settings.MEDIA_ROOT, self.stationary_pages[2].name)
-        cover_pdf_pagez = os.path.join(settings.MEDIA_ROOT, self.stationary_pages[3].name)
-        cover_pdf_page1 = open_and_read(cover_pdf_page1)
+        cover_pdf = os.path.join(settings.MEDIA_ROOT, self.stationary_pages.name)
+        cover_pdf = open_and_read(cover_pdf)
 
-        self.page_info_page1, self.page_content = storeFormsInMemory(cover_pdf_page1, all=True)
+        self.page_info_page1, self.page_content = storeFormsInMemory(cover_pdf, all=True)
         restoreFormsInMemory(self.page_content, self)
 
     def showPage(self):
         if self._pageNumber > 1 and len(self.page_info_page1) > 1:
-            self.doForm(self.page_info_page1[0])
+            self.doForm(self.page_info_page1[1])
         else:
             self.doForm(self.page_info_page1[0])
         super(StationaryCanvas, self).showPage()
@@ -277,13 +274,17 @@ class SystoriDocument(BaseDocTemplate):
 
     def build(self, flowables, canvasmaker=NumberedCanvas):
         self._calc()
-        frame = Frame(self.leftMargin, self.bottomMargin,
+        frame1 = Frame(self.leftMargin, self.bottomMargin,
+                      self.width, self.height,
+                      leftPadding=0, bottomPadding=0,
+                      rightPadding=0, topPadding=0)
+        frame2 = Frame(self.leftMargin, self.bottomMargin,
                       self.width, self.height,
                       leftPadding=0, bottomPadding=0,
                       rightPadding=0, topPadding=0)
         self.addPageTemplates([
-            PageTemplate(id='First', frames=frame, onPage=self.onFirstPage, pagesize=self.pagesize),
-            PageTemplate(id='Later', frames=frame, onPage=self.onLaterPages, pagesize=self.pagesize)
+            PageTemplate(id='First', frames=frame1, onPage=self.onFirstPage, pagesize=self.pagesize),
+            PageTemplate(id='Later', frames=frame2, onPage=self.onLaterPages, pagesize=self.pagesize)
         ])
         super(SystoriDocument, self).build(flowables, canvasmaker=canvasmaker)
 

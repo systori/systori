@@ -52,8 +52,8 @@ DOCUMENT_FORMAT = {
 
 
 class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
-    def __init__(self, letterhead_pages, *args, **kwargs):
-        self.stationary_pages = letterhead_pages
+    def __init__(self, letterhead_pdf, *args, **kwargs):
+        self.stationary_pages = letterhead_pdf
         super(LetterheadCanvas, self).__init__(*args, **kwargs)
 
 
@@ -61,11 +61,8 @@ def render(letterhead):
     document_unit = DOCUMENT_UNIT.get(letterhead.document_unit)
     invoice_date = date_format(date(*map(int, '2016-01-31'.split('-'))), use_l10n=True)
 
-    letterhead_pages = [letterhead.letterhead_page1, letterhead.letterhead_page2, letterhead.letterhead_pageN,
-                        letterhead.letterhead_pageZ]
-
     def canvas_maker(*args, **kwargs):
-        return LetterheadCanvas(letterhead_pages, *args, **kwargs)
+        return LetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
 
     with BytesIO() as buffer:
 
@@ -73,10 +70,10 @@ def render(letterhead):
 
         doc = SystoriDocument(buffer,
             pagesize = DOCUMENT_FORMAT[letterhead.document_format],
-            topMargin = float(letterhead.top_margin)*document_unit,
-            bottomMargin = float(letterhead.bottom_margin)*document_unit,
-            leftMargin = float(letterhead.left_margin)*document_unit,
-            rightMargin = float(letterhead.right_margin)*document_unit,
+            topMargin = float(letterhead.top_margin_page1)*document_unit,
+            bottomMargin = float(letterhead.bottom_margin_page1)*document_unit,
+            leftMargin = float(letterhead.left_margin_page1)*document_unit,
+            rightMargin = float(letterhead.right_margin_page1)*document_unit,
             debug=letterhead.debug)
 
         pages.extend([
