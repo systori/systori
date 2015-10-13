@@ -17,6 +17,7 @@ class PaymentForm(Form):
         coerce=Decimal,
         choices=[
             ('0', _('No discount applied')),
+            ('0.02', _('2%')),
             ('0.03', _('3%')),
             ('0.1', _('10%')),
         ]
