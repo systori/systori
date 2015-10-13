@@ -1,12 +1,3 @@
-"""
-JSON Version Log
-================
-1.1
- - Added is_flat_invoice attribute.
-1.0
- - Initial Version.
-"""
-
 from io import BytesIO
 from datetime import date
 
@@ -21,7 +12,6 @@ from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 from systori.apps.accounting.utils import get_transactions_table
-from systori.apps.accounting.constants import TAX_RATE
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b, nr
 from .style import PortraitStationaryCanvas
@@ -41,7 +31,10 @@ def collate_tasks(invoice, available_width):
     t.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
 
     t.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
-
+    t.row_style('FONTNAME', 0, -1, font.bold)
+    t.row_style('ALIGNMENT', 2, 3, "CENTER")
+    t.row_style('ALIGNMENT', 4, -1, "RIGHT")
+    t.row_style('SPAN', 2, 3)
 
     for job in invoice['jobs']:
         t.row(b(job['code']), b(job['name']))
@@ -58,7 +51,7 @@ def collate_tasks(invoice, available_width):
                 t.row('', '', ubrdecimal(task['complete']), p(task['unit']), money(task['price']), money(task['total']))
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
 
-                #t.row_style('BOTTOMPADDING', 0, -1, 10)
+                t.row_style('BOTTOMPADDING', 0, -1, 10)
 
                 t.keep_previous_n_rows_together(2)
 
@@ -97,10 +90,12 @@ def collate_tasks_total(invoice, available_width):
 def collate_payments(invoice, available_width):
 
     t = TableFormatter([0, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
+    t.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
+    t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
+    t.style.append(('BOTTOMPADDING', (0, 1), (-1, -1), 3*mm))
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
     t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
     t.style.append(('VALIGN', (0, 0), (-1, -1), "BOTTOM"))
-    t.style.append(('RIGHTPADDING', (3, 0), (3, -1), 0))
 
     t.style.append(('LINEBELOW', (0, 0), (-1, 0), 0.25, colors.black))
     t.style.append(('LINEAFTER', (0, 0), (-2, -1), 0.25, colors.black))
@@ -110,7 +105,7 @@ def collate_payments(invoice, available_width):
 
     t.row(_("Invoice Total"), money(invoice['total_gross']), money(invoice['total_base']), money(invoice['total_tax']))
 
-    for payment in invoice.get('transactions', []):
+    for payment in invoice['transactions']:
         row = ['', money(payment['amount']), money(payment['amount_base']), money(payment['amount_tax'])]
         if payment['type'] == 'payment':
             received_on = date_format(date(*map(int, payment['received_on'].split('-'))), use_l10n=True)
@@ -128,8 +123,6 @@ def collate_payments(invoice, available_width):
 def render(invoice, format):
 
     with BytesIO() as buffer:
-
-        is_flat_invoice = invoice.get('is_flat_invoice', False)
 
         invoice_date = date_format(date(*map(int, invoice['date'].split('-'))), use_l10n=True)
 
@@ -164,24 +157,19 @@ def render(invoice, format):
 
             KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal'])),
 
-        ]
+            PageBreak(),
 
-        if not is_flat_invoice:
-            flowables += [
+	    Paragraph(invoice_date, stylesheet['NormalRight']),
 
-                PageBreak(),
+            Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
 
-                Paragraph(invoice_date, stylesheet['NormalRight']),
+            Spacer(0, 4*mm),
 
-                Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
+            collate_tasks(invoice, doc.width),
 
-                Spacer(0, 4*mm),
+            Spacer(0, 4*mm),
 
-                collate_tasks(invoice, doc.width),
-
-                Spacer(0, 4*mm),
-
-                collate_tasks_total(invoice, doc.width),
+            collate_tasks_total(invoice, doc.width),
 
             ]
 
@@ -190,16 +178,17 @@ def render(invoice, format):
         else:
             doc.build(flowables, canvasmaker=PortraitStationaryCanvas)
 
+
         return buffer.getvalue()
 
 
-def serialize(project, additional_information, is_flat_invoice=False):
+def serialize(project, additional_information):
 
     contact = project.billable_contact.contact
 
     invoice = {
 
-        'version': '1.1',
+        'version': '1.0',
 
         'title': additional_information.get('title',''),
         'date': additional_information.get('document_date'),
@@ -217,41 +206,6 @@ def serialize(project, additional_information, is_flat_invoice=False):
         'city': contact.city,
         'address_label': contact.address_label,
 
-    }
-
-    if additional_information.get('add_terms', False):
-        invoice['add_terms'] = True  # TODO: Calculate the terms.
-
-    if is_flat_invoice:
-
-        # this should always match the Dart implementation in flat_invoice.dart
-        amount = additional_information['amount']
-        if additional_information['is_tax_included']:
-            net = amount / (1 + TAX_RATE)
-            gross_amount = amount
-            net_amount = net
-            tax_amount = amount - net
-        else:
-            tax = amount * TAX_RATE
-            gross_amount = amount + tax
-            net_amount = amount
-            tax_amount = tax
-
-        invoice.update({
-            'total_gross': gross_amount,
-            'total_base': net_amount,
-            'total_tax': tax_amount,
-
-            'balance_gross': gross_amount,
-            'balance_base': net_amount,
-            'balance_tax': tax_amount,
-
-            'is_flat_invoice': True
-        })
-
-        return invoice
-
-    invoice.update({
         'total_gross': project.billable_gross_total,
         'total_base': project.billable_total,
         'total_tax': project.billable_tax_total,
@@ -259,7 +213,11 @@ def serialize(project, additional_information, is_flat_invoice=False):
         'balance_gross': project.account.balance,
         'balance_base': project.account.balance_base,
         'balance_tax': project.account.balance_tax,
-    })
+
+    }
+
+    if additional_information.get('add_terms', False):
+        invoice['add_terms'] = True  # TODO: Calculate the terms.
 
     invoice['jobs'] = []
 

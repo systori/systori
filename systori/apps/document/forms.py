@@ -1,8 +1,7 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from django.forms import widgets
-from systori.lib.fields import LocalizedDecimalField
 from .models import Proposal, Invoice, DocumentTemplate
+from django.forms import widgets
 
 
 class ProposalForm(forms.ModelForm):
@@ -14,8 +13,9 @@ class ProposalForm(forms.ModelForm):
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
 
+
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(ProposalForm, self).__init__(*args, **kwargs)
         self.fields['jobs'].queryset = self.instance.project.jobs_for_proposal
 
     class Meta:
@@ -50,22 +50,15 @@ class InvoiceForm(forms.ModelForm):
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
 
+    def __init__(self, *args, **kwargs):
+        super(InvoiceForm, self).__init__(*args, **kwargs)
+
     class Meta:
         model = Invoice
         fields = ['doc_template', 'is_final', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes']
         widgets = {
             'document_date': widgets.DateInput(attrs={'type': 'date'}),
         }
-
-
-class FlatInvoiceForm(InvoiceForm):
-    amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
-    is_tax_included = forms.BooleanField(label=_('Is tax already included?'), initial=False, required=False)
-    is_final = None
-
-    class Meta(InvoiceForm.Meta):
-        fields = ['doc_template', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes',
-                  'amount', 'is_tax_included']
 
 
 class InvoiceUpdateForm(forms.ModelForm):
