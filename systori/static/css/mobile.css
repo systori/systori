@@ -99,10 +99,6 @@ input[name="complete"] {
   text-align: right;
 }
 
-.list-group-item {
-  padding: 2px 5px 2px 5px;
-}
-
 .list-group-item.sub-header {
   background-color: #eee;
   color: #777;
