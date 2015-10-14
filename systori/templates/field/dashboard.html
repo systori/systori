@@ -33,7 +33,11 @@
 
     {% for plan in todays_plans %}
 
-      {% include "field/dailyplan_few.html" with dailyplan=plan %}
+          <div class="day-separator">
+            {{ plan.jobsite.project.name }}
+          </div>
+
+      {% include "field/dailyplan.html" with dailyplan=plan %}
 
     {% empty %}
 
