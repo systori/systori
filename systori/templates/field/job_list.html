@@ -5,9 +5,11 @@
   <div class="container">
 
     <div class="row back-buttons">
-      <div class="col-xs-6"><a href="{% url 'field.planning' request.dailyplan.day.isoformat %}#project-{{ jobsite.project.id }}"
+      <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo;
+        {% trans 'Dashboard' %}</a></div>
+      <div class="col-xs-4"><a href="{% url 'field.planning' request.dailyplan.day.isoformat %}#project-{{ jobsite.project.id }}"
                                class="btn btn-default btn-block btn-back">&laquo; {% trans 'Planning' %}</a></div>
-      <div class="col-xs-6"><a href="{% url 'field.project' jobsite.project.id dailyplan.day.isoformat %}"
+      <div class="col-xs-4"><a href="{% url 'field.project' jobsite.project.id dailyplan.day.isoformat %}"
                                class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
     </div>
 

@@ -174,7 +174,7 @@
         {% for worker in dailyplan.workers.all %}
           {% if worker.access == access%}
             <a href="{% url 'field.dailyplan.self.remove' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
-               class="btn btn-default">Remove yourself from this assignment.</a>
+               class="btn btn-default">{% trans 'Remove yourself from this assignment.' %}</a>
           {% endif %}
         {% endfor %}
 
