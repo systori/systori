@@ -81,6 +81,8 @@ class Entry(BaseEntry):
 
 class Transaction(BaseTransaction):
 
+    invoice = models.ForeignKey('document.Invoice', null=True, related_name="transactions")
+
     entry_class = Entry
 
     def discounts_to_account(self, account):

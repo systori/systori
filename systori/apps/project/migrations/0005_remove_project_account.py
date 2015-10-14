@@ -18,7 +18,7 @@ def convert_project_account_to_job_account(apps, schema_editor):
 
     for company in Company.objects.all():
         company.activate()
-        migrate_accounts()
+        #migrate_accounts()
 
 
 class Migration(migrations.Migration):

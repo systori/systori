@@ -66,9 +66,6 @@ class Invoice(Document):
     invoice_no = models.CharField(_("Invoice No."), max_length=30)
     project = models.ForeignKey("project.Project", related_name="invoices")
 
-    # an invoice must have an associated debit transaction
-    transaction = models.ForeignKey('accounting.Transaction', null=True, related_name="invoice")
-
     NEW = "new"
     SENT = "sent"
     PAID = "paid"

@@ -27,6 +27,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('accounting', '0002_auto_20150730_0445'),
+        ('document', '0002_auto_20150615_0046'),
     ]
 
     operations = [
@@ -54,6 +55,11 @@ class Migration(migrations.Migration):
             model_name='transaction',
             name='received_on',
             field=models.DateField(default=datetime.date.today, verbose_name='Date Received'),
+        ),
+        migrations.AddField(
+            model_name='transaction',
+            name='invoice',
+            field=models.ForeignKey(related_name='transactions', to='document.Invoice', null=True),
         ),
         migrations.RunPython(migrate_entry_type),
     ]
