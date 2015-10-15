@@ -1,5 +1,6 @@
 from io import BytesIO
 from datetime import date
+from decimal import Decimal
 
 from reportlab.lib.units import mm
 from reportlab.lib.enums import TA_RIGHT
@@ -39,6 +40,9 @@ def collate_tasks(invoice, available_width):
     for job in invoice['jobs']:
         t.row(b(job['code']), b(job['name']))
         t.row_style('SPAN', 1, -1)
+        if 'amount' in job:
+            t.row('', '', '', '', '', money(job['amount']))
+            t.row_style('ALIGNMENT', 1, -1, "RIGHT")
 
         for taskgroup in job['taskgroups']:
             t.row(b(taskgroup['code']), b(taskgroup['name']))
@@ -105,14 +109,15 @@ def collate_payments(invoice, available_width):
 
     t.row(_("Invoice Total"), money(invoice['total_gross']), money(invoice['total_base']), money(invoice['total_tax']))
 
-    for payment in invoice['transactions']:
-        row = ['', money(payment['amount']), money(payment['amount_base']), money(payment['amount_tax'])]
-        if payment['type'] == 'payment':
-            received_on = date_format(date(*map(int, payment['received_on'].split('-'))), use_l10n=True)
-            row[0] = Paragraph(_('Your Payment on')+' '+received_on, stylesheet['Normal'])
-        elif payment['type'] == 'discount':
-            row[0] = _('Discount Applied')
-        t.row(*row)
+    if 'transactions' in invoice:
+        for payment in invoice['transactions']:
+            row = ['', money(payment['amount']), money(payment['amount_base']), money(payment['amount_tax'])]
+            if payment['type'] == 'payment':
+                received_on = date_format(date(*map(int, payment['received_on'].split('-'))), use_l10n=True)
+                row[0] = Paragraph(_('Your Payment on')+' '+received_on, stylesheet['Normal'])
+            elif payment['type'] == 'discount':
+                row[0] = _('Discount Applied')
+            t.row(*row)
 
     t.row(_("Remaining amount"), money(invoice['balance_gross']), money(invoice['balance_base']), money(invoice['balance_tax']))
     t.row_style('FONTNAME', 0, -1, font.bold)
@@ -157,6 +162,8 @@ def render(invoice, format):
 
             KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal'])),
 
+            # todo get rid of the following when it's a flat invoice.
+
             PageBreak(),
 
 	    Paragraph(invoice_date, stylesheet['NormalRight']),
@@ -182,7 +189,7 @@ def render(invoice, format):
         return buffer.getvalue()
 
 
-def serialize(project, additional_information):
+def serialize(project, additional_information, prepayment_splits=None):
 
     contact = project.billable_contact.contact
 
@@ -205,6 +212,39 @@ def serialize(project, additional_information):
         'postal_code': contact.postal_code,
         'city': contact.city,
         'address_label': contact.address_label,
+    }
+
+    if additional_information.get('add_terms', False):
+        invoice['add_terms'] = True  # TODO: Calculate the terms.
+
+    invoice['jobs'] = []
+
+    if prepayment_splits:
+
+        invoice.update({
+
+        'total_gross': additional_information.get('amount', '')*Decimal(1.19),
+        'total_base': additional_information.get('amount', ''),
+        'total_tax': additional_information.get('amount', '')*Decimal(1.19) - additional_information.get('amount', ''),
+
+        'balance_gross': additional_information.get('amount', '')*Decimal(1.19),
+        'balance_base': additional_information.get('amount', ''),
+        'balance_tax': additional_information.get('amount', '')*Decimal(1.19) -additional_information.get('amount', ''),
+
+        })
+
+        for job, amount in prepayment_splits:
+            job_dict = {
+                'code': job.code,
+                'name': job.name,
+                'amount': amount,
+                'taskgroups': []
+            }
+            invoice['jobs'].append(job_dict)
+
+    else:
+
+        invoice.update({
 
         'total_gross': project.billable_gross_total,
         'total_base': project.billable_total,
@@ -214,71 +254,66 @@ def serialize(project, additional_information):
         'balance_base': project.account.balance_base,
         'balance_tax': project.account.balance_tax,
 
-    }
+        })
 
-    if additional_information.get('add_terms', False):
-        invoice['add_terms'] = True  # TODO: Calculate the terms.
-
-    invoice['jobs'] = []
-
-    for job in project.billable_jobs:
-        job_dict = {
-            'code': job.code,
-            'name': job.name,
-            'taskgroups': []
-        }
-        invoice['jobs'].append(job_dict)
-
-        for taskgroup in job.billable_taskgroups:
-            taskgroup_dict = {
-                'code': taskgroup.code,
-                'name': taskgroup.name,
-                'description': taskgroup.description,
-                'total': taskgroup.billable_total,
-                'tasks': []
+        for job in project.billable_jobs:
+            job_dict = {
+                'code': job.code,
+                'name': job.name,
+                'taskgroups': []
             }
-            job_dict['taskgroups'].append(taskgroup_dict)
+            invoice['jobs'].append(job_dict)
 
-            for task in taskgroup.billable_tasks:
-                task_dict = {
-                    'code': task.instance.code,
-                    'name': task.instance.full_name,
-                    'description': task.instance.full_description,
-                    'complete': task.complete,
-                    'unit': task.unit,
-                    'price': task.instance.unit_price,
-                    'total': task.fixed_price_billable,
-                    'lineitems': []
+            for taskgroup in job.billable_taskgroups:
+                taskgroup_dict = {
+                    'code': taskgroup.code,
+                    'name': taskgroup.name,
+                    'description': taskgroup.description,
+                    'total': taskgroup.billable_total,
+                    'tasks': []
                 }
-                taskgroup_dict['tasks'].append(task_dict)
+                job_dict['taskgroups'].append(taskgroup_dict)
 
-                for lineitem in task.instance.lineitems.all():
-                    lineitem_dict = {
-                        'name': lineitem.name,
-                        'qty': lineitem.unit_qty,
-                        'unit': lineitem.unit,
-                        'price': lineitem.price,
-                        'price_per': lineitem.price_per_task_unit,
+                for task in taskgroup.billable_tasks:
+                    task_dict = {
+                        'code': task.instance.code,
+                        'name': task.instance.full_name,
+                        'description': task.instance.full_description,
+                        'complete': task.complete,
+                        'unit': task.unit,
+                        'price': task.instance.unit_price,
+                        'total': task.fixed_price_billable,
+                        'lineitems': []
                     }
-                    task_dict['lineitems'].append(lineitem_dict)
+                    taskgroup_dict['tasks'].append(task_dict)
 
-    invoice['transactions'] = []
+                    for lineitem in task.instance.lineitems.all():
+                        lineitem_dict = {
+                            'name': lineitem.name,
+                            'qty': lineitem.unit_qty,
+                            'unit': lineitem.unit,
+                            'price': lineitem.price,
+                            'price_per': lineitem.price_per_task_unit,
+                        }
+                        task_dict['lineitems'].append(lineitem_dict)
 
-    for record_type, _, record in get_transactions_table(project):
+        invoice['transactions'] = []
 
-        if record_type in ('payment', 'discount'):
+        for record_type, _, record in get_transactions_table(project):
 
-            txn = {
-                'type': record_type,
-                'amount': record.amount,
-                'amount_base': record.amount_base,
-                'amount_tax': record.amount_tax
-            }
+            if record_type in ('payment', 'discount'):
 
-            if record_type == 'payment':
-                txn['received_on'] = record.received_on
+                txn = {
+                    'type': record_type,
+                    'amount': record.amount,
+                    'amount_base': record.amount_base,
+                    'amount_tax': record.amount_tax
+                }
 
-            invoice['transactions'].append(txn)
+                if record_type == 'payment':
+                    txn['received_on'] = record.received_on
+
+                invoice['transactions'].append(txn)
 
     return invoice
 

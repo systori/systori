@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.http import HttpResponse, HttpResponseRedirect
-from django.views.generic import View
+from django.views.generic import View, FormView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from ..project.models import Project
 from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate
-from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm
+from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm, PrepaymentInvoiceFormSet
 from ..accounting import skr03
 
 from .type import proposal, invoice, evidence, specification, itemized_listing
@@ -144,7 +144,7 @@ class InvoiceCreate(CreateView):
     form_class = InvoiceForm
 
     def get_form_kwargs(self):
-        kwargs = super(InvoiceCreate, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.model(project=self.request.project)
         return kwargs
 
@@ -164,7 +164,33 @@ class InvoiceCreate(CreateView):
         form.instance.json = invoice.serialize(project, form.cleaned_data)
         form.instance.json_version = form.instance.json['version']
 
-        return super(InvoiceCreate, self).form_valid(form)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
+
+
+class PrepaymentInvoiceCreate(CreateView):
+    model = Invoice
+    form_class = PrepaymentInvoiceFormSet
+    template_name = 'document/invoice_prepayment_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = {
+            'jobs': self.request.project.jobs.all(),
+            'instance': self.model(project=self.request.project),
+        }
+        if self.request.method == 'POST':
+            kwargs['data'] = self.request.POST
+        return kwargs
+
+    def form_valid(self, form):
+        project = Project.prefetch(self.request.project.id)
+        instance = form.payment_form.instance
+        instance.amount = form.payment_form.cleaned_data['amount']
+        instance.json = invoice.serialize(project, form.payment_form.cleaned_data, prepayment_splits=form.get_splits())
+        instance.json_version = instance.json['version']
+        return super().form_valid(form.payment_form)
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])
