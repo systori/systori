@@ -204,6 +204,27 @@
   </style>
 
 
+  <style>
+  .invoice-sequence {
+    width: 400px;
+  }
+  .invoice {
+    width: 100%;
+    border:
+  }
+  </style>
+  <h2 class="sub-header">{% trans "Invoices" %}</h2>
+  {% for parent_invoice in parent_invoices %}
+  <div class="invoice-sequence">
+    {% include "document/invoice_card.html" with invoice=parent_invoice %}
+    {% for invoice in parent_invoice.invoices.all %}
+      {% include "document/invoice_card.html" with invoice=invoice %}
+    {% endfor %}
+  </div>
+  {% endfor %}
+  <br/>
+
+
   <h2 class="sub-header">{% trans "Transactions" %}</h2>
   <table class="table">
     <thead>

@@ -15,7 +15,7 @@ SHOW_SKIPPED = False
 
 def migrate_accounts():
     from systori.apps.project.models import Project
-    from systori.apps.accounting.models import Account, Transaction, create_account_for_job
+    from systori.apps.accounting.models import Account, Transaction, Entry, create_account_for_job
     from systori.apps.accounting.skr03 import partial_credit
     from systori.apps.task.models import Job
 
@@ -26,7 +26,8 @@ def migrate_accounts():
         project.account.save()
 
     for job in Job.objects.all():
-        job.account.delete()
+        if job.account:
+            job.account.delete()
 
     for job in Job.objects.all():
         job.account = create_account_for_job(job)
@@ -34,39 +35,84 @@ def migrate_accounts():
 
     for project in Project.objects.without_template().order_by('id'):
 
-        print("Project #{} - {}".format(project.id, project.name))
+        if not project.invoices.exists():
+            if project.account.entries.exists():
+                if SHOW_SKIPPED:
+                    print("Project #{} - {}".format(project.id, project.name))
+                    print('  !!! Has entries but no invoices. !!!')
+                    print('')
+            else:
+                if SHOW_SKIPPED:
+                    print("Project #{} - {}".format(project.id, project.name))
+                    print('  !!! No invoices and no entries. !!!')
+                    print('')
+            continue
 
+
+        no_json = False
         for invoice in project.invoices.all():
-
-            print(' Invoice {}'.format(invoice.invoice_no))
             if not invoice.json:
-                print('  !!! No json for invoice. !!!')
+                no_json = True
+                if SHOW_SKIPPED:
+                    print("Project #{} - {}".format(project.id, project.name))
+                    print('  !!! Old invoices, no json. !!!')
+                    print('')
                 break
 
+        if no_json:
+            continue
+
+        print("\nProject #{} - {}".format(project.id, project.name))
+
+        parent_invoice = None
+        for invoice in project.invoices.all():
+
+            if not parent_invoice:
+                parent_invoice = invoice
+            else:
+                invoice.parent = parent_invoice
+
+            print("\n Invoice #{} - {}".format(invoice.id, invoice.invoice_no))
             invoice_amount = Decimal(0.0)
+            pre_tax_invoice = Decimal(0.0)
 
             for json_job in invoice.json.get('jobs', []):
 
                 job = project.jobs.get(name=json_job['name'], job_code=int(json_job['code']))
 
-                amount = Decimal(0)
+                pre_tax_amount = Decimal(0.0)
                 for json_taskgroup in json_job['taskgroups']:
-                    amount += Decimal(json_taskgroup['total'])
-                amount *= Decimal(1.19)
+                    pre_tax_amount += Decimal(json_taskgroup['total'])
+
+                amount = round(pre_tax_amount * Decimal(1.19), 2)
                 already_debited = round(job.account.debits().total, 2)
+
                 amount -= already_debited
 
                 invoice_amount += amount
+                pre_tax_invoice += pre_tax_amount
 
                 if amount > Decimal(0.0):
                     transaction = Transaction(recorded_on=invoice.created_on, invoice=invoice)
-                    transaction.debit(job.account, amount)
+                    transaction.debit(job.account, amount, entry_type=Entry.WORK_DEBIT)
                     transaction.credit(Account.objects.get(code="1710"), amount)
                     transaction.save()
-                    print('  {:<50} {:>15}'.format(job.name, money(amount)))
+                    print('  {:<50} {:>15} {:>15}'.format(job.name, money(amount), money(pre_tax_amount)))
 
-            print('  {:<50} {:>15} {:>15}'.format('', money(invoice_amount), money(invoice.amount)))
+            print('  {:<50} {:>15} {:>15}'.format('', '-'*10, '-'*10))
+            print('  {:<50} {:>15} {:>15}'.format('', money(invoice_amount), money(pre_tax_invoice)))
+            if round(invoice.amount, 2) != round(invoice_amount, 2):
+                if invoice.id in [31, 37, 38, 46, 47, 51, 54, 55, 56, 60]:  # i've manually checked these invoices - lex
+                    # TODO WARNING: submitted github tickets about these: 47
+                    # 37, 46, 54, 55 - rounding errors, off by one penny
+                    # 56, 60 - all these had the 'balance' remaining instead of how much was actually debited
+                    # 31, 38 - debit was correct but invoice had wrong amount, not sure why
+                    # 51 - not even sure what happened here but i think the new invoice_amount is correct
+                    invoice.amount = invoice_amount
+                else:
+                    raise ArithmeticError('{} != {}'.format(money(round(invoice.amount, 2)), money(round(invoice_amount, 2))))
 
+            invoice.save()
 
 
 #        if not project.account.entries.exists():

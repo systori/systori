@@ -7,18 +7,11 @@ from django.utils.translation import activate
 
 
 def convert_project_account_to_job_account(apps, schema_editor):
-
     activate('en')
-
-    from systori.apps.project.models import Project
     from systori.apps.company.models import Company
     from scripts.account_analyzer import migrate_accounts
-
-    OldProject = apps.get_model('project', 'Project')
-
-    for company in Company.objects.all():
-        company.activate()
-        #migrate_accounts()
+    Company.objects.get(schema='mehr_handwerk').activate()
+    migrate_accounts()
 
 
 class Migration(migrations.Migration):

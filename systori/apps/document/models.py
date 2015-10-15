@@ -65,6 +65,7 @@ class Proposal(Document):
 class Invoice(Document):
     invoice_no = models.CharField(_("Invoice No."), max_length=30)
     project = models.ForeignKey("project.Project", related_name="invoices")
+    parent = models.ForeignKey("self", related_name="invoices", null=True)
 
     NEW = "new"
     SENT = "sent"

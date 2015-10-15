@@ -88,4 +88,6 @@ class Transaction(BaseTransaction):
     def discounts_to_account(self, account):
         return self.entries.filter(account=account).filter(entry_type=Entry.DISCOUNT)
 
-
+    @property
+    def debit_entry(self):
+        return self.entries.filter(entry_type__in=[Entry.WORK_DEBIT, Entry.FLAT_DEBIT]).first()

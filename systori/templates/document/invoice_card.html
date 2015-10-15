@@ -1,0 +1,27 @@
+{% load i18n customformatting %}
+<div class="panel panel-default invoice">
+  <div class="panel-heading">
+    <div class="row">
+    <div class="col-md-4">{{ invoice.invoice_no }}</div>
+    <div class="col-md-4 text-center">{{ invoice.status }}</div>
+    <div class="col-md-4"></div>
+    </div>
+  </div>
+  <table class="table" width="100%">
+  {% for transaction in invoice.transactions.all %}
+    <tr>
+      {% with debit=transaction.debit_entry %}
+      <td>{{ debit.account.job.name }}</td>
+      <td style="text-align: right;">{{ debit.amount|money }}</td>
+      {% endwith %}
+    </tr>
+  {% endfor %}
+    <tr>
+      <td></td>
+      <td style="text-align: right; font-weight: bold;">{{ invoice.amount|money }}</td>
+    </tr>
+  </table>
+  <div class="panel-footer">
+    hi
+  </div>
+</div>

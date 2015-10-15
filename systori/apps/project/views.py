@@ -142,6 +142,7 @@ class ProjectView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(ProjectView, self).get_context_data(**kwargs)
         context['transactions'] = get_transactions_table(self.object)
+        context['parent_invoices'] = self.object.invoices.filter(parent=None).all()
         return context
 
     def get_queryset(self):
