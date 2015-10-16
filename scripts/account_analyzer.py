@@ -65,7 +65,13 @@ def migrate_accounts():
         print("\nProject #{} - {}".format(project.id, project.name))
 
         parent_invoice = None
-        for invoice in project.invoices.all():
+        total_invoices = project.invoices.count()
+        for i_invoice, invoice in enumerate(project.invoices.all()):
+
+            if i_invoice < total_invoices-1:
+                invoice.status = invoice.SENT
+            else:
+                invoice.status = invoice.DRAFT
 
             if not parent_invoice:
                 parent_invoice = invoice

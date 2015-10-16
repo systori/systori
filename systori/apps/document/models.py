@@ -67,31 +67,19 @@ class Invoice(Document):
     project = models.ForeignKey("project.Project", related_name="invoices")
     parent = models.ForeignKey("self", related_name="invoices", null=True)
 
-    NEW = "new"
+    DRAFT = "draft"
     SENT = "sent"
-    PAID = "paid"
-    DISPUTED = "disputed"
 
     STATE_CHOICES = (
-        (NEW, _("New")),
+        (DRAFT, _("Draft")),
         (SENT, _("Sent")),
-        (PAID, _("Paid")),
-        (DISPUTED, _("Disputed"))
     )
 
-    status = FSMField(default=NEW, choices=STATE_CHOICES)
+    status = FSMField(default=DRAFT, choices=STATE_CHOICES)
 
-    @transition(field=status, source=NEW, target=SENT, custom={'label': _("Send")})
+    @transition(field=status, source=DRAFT, target=SENT, custom={'label': _("Send")})
     def send(self):
         self.transaction.finalize()
-
-    @transition(field=status, source=SENT, target=PAID, custom={'label': _("Pay")})
-    def pay(self):
-        pass
-
-    @transition(field=status, source=SENT, target=DISPUTED, custom={'label': _("Dispute")})
-    def dispute(self):
-        pass
 
     class Meta:
         verbose_name = _("Invoice")

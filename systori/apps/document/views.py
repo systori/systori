@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.http import HttpResponse, HttpResponseRedirect
-from django.views.generic import View
+from django.views.generic import View, FormView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from ..project.models import Project
 from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate
-from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm, FlatInvoiceForm
+from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm
 from ..accounting import skr03
 from ..accounting.constants import TAX_RATE
 
@@ -144,10 +144,27 @@ class InvoiceCreate(CreateView):
     model = Invoice
     form_class = InvoiceForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TAX_RATE'] = TAX_RATE
+        return context
+
     def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['instance'] = self.model(project=self.request.project)
+        kwargs = {
+            'jobs': self.request.project.jobs.all(),
+            'instance': self.model(project=self.request.project),
+        }
+        if self.request.method == 'POST':
+            kwargs['data'] = self.request.POST
         return kwargs
+
+    def form_valid(self, form):
+        project = Project.prefetch(self.request.project.id)
+        instance = form.payment_form.instance
+        instance.amount = form.payment_form.cleaned_data['amount']
+        instance.json = invoice.serialize(project, form.payment_form.cleaned_data, prepayment_splits=form.get_splits())
+        instance.json_version = instance.json['version']
+        return super().form_valid(form.payment_form)
 
     def form_valid(self, form):
         project = Project.prefetch(self.request.project.id)
@@ -173,34 +190,28 @@ class InvoiceCreate(CreateView):
         return reverse('project.view', args=[self.object.project.id])
 
 
-class FlatInvoiceCreate(CreateView):
+class InvoiceUpdate(UpdateView):
     model = Invoice
-    form_class = FlatInvoiceForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['is_flat_invoice'] = True
-        context['TAX_RATE'] = TAX_RATE
-        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['instance'] = self.model(project=self.request.project)
+        kwargs['initial'] = self.object.json
         return kwargs
 
+    def get_queryset(self):
+        return super().get_queryset().filter(project=self.request.project)
+
     def form_valid(self, form):
-        form.instance.json = invoice.serialize(form.instance.project, form.cleaned_data, is_flat_invoice=True)
-        form.instance.amount = form.instance.json['total_gross']
-        form.instance.json_version = form.instance.json['version']
+        invoice.update(self.object, form.cleaned_data)
+        self.object.save()
         return super().form_valid(form)
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])
 
 
-class InvoiceUpdate(UpdateView):
+class InvoiceRecalculate(UpdateView):
     model = Invoice
-    form_class = InvoiceUpdateForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

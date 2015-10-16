@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='entry',
             name='entry_type',
-            field=models.CharField(choices=[('payment', 'Payment'), ('discount', 'Discount'), ('work-debit', 'Work Debit'), ('flat-debit', 'Flat Debit'), ('other', 'Other')], default='other', verbose_name='Entry Type', max_length=32),
+            field=models.CharField(choices=[('payment', 'Payment'), ('discount', 'Discount'), ('work-debit', 'Work Debit'), ('flat-debit', 'Flat Debit'), ('adjustment', 'Adjustment'), ('other', 'Other')], default='other', verbose_name='Entry Type', max_length=32),
         ),
         migrations.AddField(
             model_name='entry',

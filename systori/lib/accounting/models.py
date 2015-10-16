@@ -181,6 +181,7 @@ class BaseEntry(models.Model):
     DISCOUNT = "discount"
     WORK_DEBIT = "work-debit"
     FLAT_DEBIT = "flat-debit"
+    ADJUSTMENT = "adjustment"
     OTHER = "other"
 
     ENTRY_TYPE = (
@@ -188,6 +189,7 @@ class BaseEntry(models.Model):
         (DISCOUNT, _("Discount")),
         (WORK_DEBIT, _("Work Debit")),
         (FLAT_DEBIT, _("Flat Debit")),
+        (ADJUSTMENT, _("Adjustment")),
         (OTHER, _("Other")),
     )
     # entry_type is only useful in the context of a customer account

@@ -1,9 +1,9 @@
 {% load i18n customformatting %}
-<div class="panel panel-default invoice">
+<div class="panel panel-{% if invoice.status == invoice.DRAFT %}primary{% else %}success{% endif %} invoice">
   <div class="panel-heading">
     <div class="row">
     <div class="col-md-4">{{ invoice.invoice_no }}</div>
-    <div class="col-md-4 text-center">{{ invoice.status }}</div>
+    <div class="col-md-4 text-center">{{ invoice.get_status_display }}</div>
     <div class="col-md-4"></div>
     </div>
   </div>
@@ -21,7 +21,14 @@
       <td style="text-align: right; font-weight: bold;">{{ invoice.amount|money }}</td>
     </tr>
   </table>
+  {% if invoice.status == invoice.DRAFT %}
   <div class="panel-footer">
-    hi
+    <a href="{% url 'invoice.recalculate' project.id invoice.id %}">{% trans "Recalculate" %}</a>
+    <a href="{% url 'invoice.update' project.id invoice.id %}">{% trans "Edit" %}</a>
+    {% for state in record.get_available_status_transitions %}
+      <a href="{% url 'invoice.transition' project.id invoice.id state.name %}">{{ state.custom.label }}</a>
+    {% endfor %}
+    <a href="{% url 'invoice.delete' project.id invoice.id %}">{% trans "Delete" %}</a>
   </div>
+  {% endif %}
 </div>

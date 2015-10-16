@@ -207,6 +207,8 @@
   <style>
   .invoice-sequence {
     width: 400px;
+    float: left;
+    padding-right: 40px;
   }
   .invoice {
     width: 100%;
@@ -214,6 +216,7 @@
   }
   </style>
   <h2 class="sub-header">{% trans "Invoices" %}</h2>
+  <div class="clearfix">
   {% for parent_invoice in parent_invoices %}
   <div class="invoice-sequence">
     {% include "document/invoice_card.html" with invoice=parent_invoice %}
@@ -222,6 +225,12 @@
     {% endfor %}
   </div>
   {% endfor %}
+  <div class="invoice-sequence">
+    <a class="btn btn-default" href="{% url 'invoice.create' project.id %}" style="width: 100%">
+      {% trans 'Create New Invoice' %}
+    </a>
+  </div>
+  </div>
   <br/>
 
 
@@ -328,7 +337,6 @@
             {% trans "No billable contact defined." %}
           {% endif %}
         {% endif %}
-        | <a href="{% url 'flat.invoice.create' project.id %}">{% trans "Create Flat Invoice" %}</a>
         | <a href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
       </td>
       <td class="add-total-amount">{{ project.debits|money }}</td>

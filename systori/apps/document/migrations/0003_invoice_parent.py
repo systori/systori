@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+import django_fsm
 
 
 class Migration(migrations.Migration):
@@ -15,5 +16,10 @@ class Migration(migrations.Migration):
             model_name='invoice',
             name='parent',
             field=models.ForeignKey(related_name='invoices', to='document.Invoice', null=True),
+        ),
+        migrations.AlterField(
+            model_name='invoice',
+            name='status',
+            field=django_fsm.FSMField(max_length=50, choices=[('draft', 'Draft'), ('sent', 'Sent')], default='draft'),
         ),
     ]
