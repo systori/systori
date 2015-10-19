@@ -252,13 +252,13 @@ class LandscapeStationaryCanvas(StationaryCanvas):
 
 class SystoriDocument(BaseDocTemplate):
 
-    def __init__(self, buffer, pagesize, debug=False):
+    def __init__(self, buffer, bottomMargin, leftMargin, rightMargin, pagesize, topMargin=55*mm, debug=False):
         super(SystoriDocument, self).__init__(buffer,
                                               pagesize=pagesize,
-                                              topMargin=0,
-                                              bottomMargin=0,
-                                              leftMargin=0,
-                                              rightMargin=0,
+                                              topMargin=topMargin,
+                                              bottomMargin=bottomMargin,
+                                              leftMargin=leftMargin,
+                                              rightMargin=rightMargin,
                                               showBoundary=debug
                                               )
 
@@ -272,19 +272,19 @@ class SystoriDocument(BaseDocTemplate):
         self._handle_pageBegin()
         self._handle_nextPageTemplate('Later')
 
-    def build(self, flowables, frame1=None, frame2=None,  canvasmaker=NumberedCanvas):
+    def build(self, flowables, canvasmaker=NumberedCanvas):
         self._calc()
-        frame1 = Frame(self.leftMargin, self.bottomMargin,
+        frame = Frame(self.leftMargin, self.bottomMargin,
                       self.width, self.height,
-                      leftPadding=frame1['left_padding'], bottomPadding=frame1['right_padding'],
-                      rightPadding=frame1['right_padding'], topPadding=frame1['top_padding'])
-        frame2 = Frame(self.leftMargin, self.bottomMargin,
-                      self.width, self.height,
-                      leftPadding=frame2['left_padding'], bottomPadding=frame2['right_padding'],
-                      rightPadding=frame2['right_padding'], topPadding=frame2['top_padding'])
+                      leftPadding=0, bottomPadding=0,
+                      rightPadding=0, topPadding=0)
+        frame_later = Frame(self.leftMargin, self.bottomMargin,
+                            self.width, self.height,
+                            leftPadding=0, bottomPadding=0,
+                            rightPadding=0, topPadding=0)
         self.addPageTemplates([
-            PageTemplate(id='First', frames=frame1, onPage=self.onFirstPage, pagesize=self.pagesize),
-            PageTemplate(id='Later', frames=frame2, onPage=self.onLaterPages, pagesize=self.pagesize)
+            PageTemplate(id='First', frames=frame, onPage=self.onFirstPage, pagesize=self.pagesize),
+            PageTemplate(id='Later', frames=frame_later, onPage=self.onLaterPages, pagesize=self.pagesize)
         ])
         super(SystoriDocument, self).build(flowables, canvasmaker=canvasmaker)
 

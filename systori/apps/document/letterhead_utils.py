@@ -48,14 +48,11 @@ def clean_letterhead_pdf(file, save=False):
     letterhead_user_specification = {}
     # defaults
     letterhead_user_specification['letterhead_pdf'] = file
-    letterhead_user_specification['top_margin_page1'] = 25
-    letterhead_user_specification['right_margin_page1'] = 25
-    letterhead_user_specification['bottom_margin_page1'] = 25
-    letterhead_user_specification['left_margin_page1'] = 25
-    letterhead_user_specification['top_margin_page2'] = 25
-    letterhead_user_specification['right_margin_page2'] = 25
-    letterhead_user_specification['bottom_margin_page2'] = 25
-    letterhead_user_specification['left_margin_page2'] = 25
+    letterhead_user_specification['top_margin'] = 25
+    letterhead_user_specification['right_margin'] = 25
+    letterhead_user_specification['bottom_margin'] = 25
+    letterhead_user_specification['left_margin'] = 25
+    letterhead_user_specification['top_margin_next'] = 25
     letterhead_user_specification['document_unit'] = 'mm'
 
 

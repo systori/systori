@@ -181,15 +181,11 @@ class Letterhead(models.Model):
     document_unit = models.CharField(_('Document Unit'), max_length=5,
                                      choices=DOCUMENT_UNIT, default=mm)
 
-    top_margin_page1 = models.DecimalField(_('Top Margin Page 1'), max_digits=4, decimal_places=2)
-    right_margin_page1 = models.DecimalField(_('Right Margin Page 1'), max_digits=4, decimal_places=2)
-    bottom_margin_page1 = models.DecimalField(_('Bottom Margin Page 1'), max_digits=4, decimal_places=2)
-    left_margin_page1 = models.DecimalField(_('Left Margin Page 1'), max_digits=4, decimal_places=2)
-
-    top_margin_page2 = models.DecimalField(_('Top Margin Page 2'), max_digits=4, decimal_places=2)
-    right_margin_page2 = models.DecimalField(_('Right Margin Page 2'), max_digits=4, decimal_places=2)
-    bottom_margin_page2 = models.DecimalField(_('Bottom Margin Page 2'), max_digits=4, decimal_places=2)
-    left_margin_page2 = models.DecimalField(_('Left Margin Page 2'), max_digits=4, decimal_places=2)
+    top_margin = models.DecimalField(_('Top Margin'), max_digits=4, decimal_places=2)
+    right_margin = models.DecimalField(_('Right Margin'), max_digits=4, decimal_places=2)
+    bottom_margin = models.DecimalField(_('Bottom Margin'), max_digits=4, decimal_places=2)
+    left_margin = models.DecimalField(_('Left Margin'), max_digits=4, decimal_places=2)
+    top_margin_next = models.DecimalField(_('Top Margin Next'), max_digits=4, decimal_places=2)
 
     A6 = "A6"
     A5 = "A5"
