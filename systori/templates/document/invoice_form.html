@@ -6,37 +6,68 @@
 {% block content %}
   <form role="form" method="post">{% csrf_token %}
 
-      {{ form.details_form|bootstrap }}
+      {{ form.document|bootstrap }}
 
       <div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
       {{ form.management_form }}
-      <table class="table table-striped">
+
+      <style>
+        table th:not(.job-invoiced),
+        table td:not(.job-invoiced) {
+          text-align: right;
+          min-width: 100px;
+        }
+        table th.job-name,
+        table td.job-name {
+          text-align: left;
+        }
+        table th.job-flat {
+          text-align: center;
+        }
+        .job-row:not(.invoiced) {
+          color: lightgray;
+        }
+        .job-row:not(.invoiced) .job-debit>span{
+          visibility: hidden;
+        }
+
+      </style>
+      <table is="job-table" class="table table-striped">
         <thead>
         <tr>
-          <th></th>
-          <th>{% trans 'Job' %}</th>
-          <th style="text-align: right;">{% trans 'Estimate' %}</th>
-          <th style="text-align: right;">{% trans 'Flat' %}</th>
-          <th style="text-align: right;">{% trans 'Itemized' %}</th>
-          <th style="text-align: right;">{% trans 'Debit' %}</th>
-          <th style="text-align: right;">{% trans 'Debited' %}</th>
-          <th style="text-align: right;">{% trans 'Balance' %}</th>
+          <th class="job-invoiced"></th>
+          <th class="job-name">{% trans 'Job' %}</th>
+          <th class="job-estimate">{% trans 'Estimate' %}</th>
+          <th class="job-flat" nowrap>{% trans 'Flat Invoice' %}</th>
+          <th class="job-itemized" nowrap>{% trans 'Itemized Invoice' %}</th>
+          <th class="job-debit">{% trans 'Debit' %}</th>
+          <th class="job-debited">{% trans 'Debited' %}</th>
+          <th class="job-balance">{% trans 'Balance' %}</th>
         </tr>
         </thead>
         <tbody>
         {% for job_form in form.forms %}
-          <tr>
-            <td>{{ job_form.is_invoiced }}</td>
-            <td>{{ job_form.job }}{{ job_form.initial.job.name }}</td>
-            <td style="text-align: right;">{{ job_form.initial.job.estimate_total|money }}</td>
-            <td style="text-align: right;">{{ job_form.amount }}</td>
-            <td style="text-align: right;">{{ job_form.initial.job.billable_total|money }}</td>
-            <td style="text-align: right;"></td>
-            <td style="text-align: right;">{{ job_form.initial.job.account.debits.total|money }}</td>
-            <td style="text-align: right;">{{ job_form.initial.job.account.balance|money }}</td>
-            <td></td>
+          <tr is="job-row" class="job-row {% if job_form.is_invoiced.value %}invoiced{% endif %}">
+            <td class="job-invoiced">{{ job_form.is_invoiced }}</td>
+            <td class="job-name">{{ job_form.job }}{{ job_form.initial.job.name }}</td>
+            <td class="job-estimate" data-amount="{{ job_form.estimate }}">{{ job_form.estimate|ubrdecimal:2 }}</td>
+            <td class="job-flat">{{ job_form.flat_amount }}</td>
+            <td class="job-itemized" data-amount="{{ job_form.itemized }}">{{ job_form.itemized|ubrdecimal:2 }}</td>
+            <td class="job-debit">{{ job_form.debit_amount }}<span>{{ job_form.debit_amount_decimal|ubrdecimal:2 }}</span></td>
+            <td class="job-debited" data-amount="{{ job_form.debited }}">{{ job_form.debited_w_debit|ubrdecimal:2 }}</td>
+            <td class="job-balance" data-amount="{{ job_form.balance }}">{{ job_form.balance_w_debit|ubrdecimal:2 }}</td>
           </tr>
         {% endfor %}
+          <tr class="job-table-totals">
+            <td class="job-invoiced"></td>
+            <td class="job-name"></td>
+            <td class="job-estimate">{{ form.estimate_total|ubrdecimal:2 }}</td>
+            <td class="job-flat"></td>
+            <td class="job-itemized">{{ form.itemized_total|ubrdecimal:2 }}</td>
+            <td class="job-debit">{{ form.debit_total|ubrdecimal:2 }}</td>
+            <td class="job-debited">{{ form.debited_total|ubrdecimal:2 }}</td>
+            <td class="job-balance">{{ form.balance_total|ubrdecimal:2 }}</td>
+          </tr>
         </tbody>
       </table>
       {% for error in form.non_form_errors %}

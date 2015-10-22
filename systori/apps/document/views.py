@@ -10,7 +10,6 @@ from ..project.models import Project
 from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate
 from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm
-from ..accounting import skr03
 from ..accounting.constants import TAX_RATE
 
 from .type import proposal, invoice, evidence, specification, itemized_listing
@@ -150,41 +149,14 @@ class InvoiceCreate(CreateView):
         return context
 
     def get_form_kwargs(self):
+        jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems').all()
         kwargs = {
-            'jobs': self.request.project.jobs.all(),
+            'jobs': jobs,
             'instance': self.model(project=self.request.project),
         }
         if self.request.method == 'POST':
             kwargs['data'] = self.request.POST
         return kwargs
-
-    def form_valid(self, form):
-        project = Project.prefetch(self.request.project.id)
-        instance = form.payment_form.instance
-        instance.amount = form.payment_form.cleaned_data['amount']
-        instance.json = invoice.serialize(project, form.payment_form.cleaned_data, prepayment_splits=form.get_splits())
-        instance.json_version = instance.json['version']
-        return super().form_valid(form.payment_form)
-
-    def form_valid(self, form):
-        project = Project.prefetch(self.request.project.id)
-
-        if form.cleaned_data['is_final']:
-            for job in project.jobs.all():
-                skr03.final_debit(job)
-            project.begin_settlement()
-            project.save()
-
-        elif project.new_amount_to_debit:
-            # update account balance with any new work that's been done
-            for job in project.jobs.all():
-                skr03.partial_debit(job)
-
-        form.instance.amount = project.balance
-        form.instance.json = invoice.serialize(project, form.cleaned_data)
-        form.instance.json_version = form.instance.json['version']
-
-        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])

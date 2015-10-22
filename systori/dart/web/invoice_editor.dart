@@ -3,11 +3,139 @@ import 'package:intl/intl.dart';
 import 'common.dart';
 
 
-NumberFormat AMOUNT = new NumberFormat("#,###,###,##0.00");
-NumberFormat SPLIT = new NumberFormat("#,###,###,##0.00");
+class JobTable extends TableElement {
+    TableCellElement estimate_total;
+    TableCellElement itemized_total;
+    TableCellElement debit_total;
+    TableCellElement debited_total;
+    TableCellElement balance_total;
+
+    JobTable.created() : super.created() {
+        TableRowElement totals = this.querySelector(":scope tr.job-table-totals");
+        this.estimate_total = totals.querySelector(":scope>.job-estimate");
+        this.itemized_total = totals.querySelector(":scope>.job-itemized");
+        this.debit_total = totals.querySelector(":scope>.job-debit");
+        this.debited_total = totals.querySelector(":scope>.job-debited");
+        this.balance_total = totals.querySelector(":scope>.job-balance");
+    }
+
+    recalculate() {
+        double estimate = 0.0;
+        double itemized = 0.0;
+        double debit = 0.0;
+        double debited = 0.0;
+        double balance = 0.0;
+
+        var invoiced = this.querySelectorAll(":scope tr.job-row.invoiced");
+        for (JobRow row in invoiced) {
+            estimate += row.estimate;
+            itemized += row.itemized;
+            debit += row.debit_amount;
+            debited += row.original_debited;
+            balance += row.original_balance;
+        }
+        debited += debit;
+        balance += debit;
+
+        estimate_total.text = CURRENCY.format(estimate);
+        itemized_total.text = CURRENCY.format(itemized);
+        debit_total.text = CURRENCY.format(debit);
+        debited_total.text = CURRENCY.format(debited);
+        balance_total.text = CURRENCY.format(balance);
+    }
+}
+
+class JobRow extends TableRowElement {
+
+    CheckboxInputElement is_invoiced_input;
+    TextInputElement flat_amount_input;
+    HiddenInputElement debit_amount_input;
+
+    TableCellElement debit_cell;
+    TableCellElement debited_cell;
+    TableCellElement balance_cell;
+
+    double estimate;
+    double itemized;
+    double original_debited;
+    double original_balance;
+
+    bool get is_invoiced => is_invoiced_input.checked;
+
+    double get debit_amount => double.parse(debit_amount_input.value);
+    set debit_amount(double amount) {
+        this.debit_amount_input.value = amount.toString();
+        this.debit_cell.text = CURRENCY.format(amount);
+        this.debited_cell.text = CURRENCY.format(amount+original_debited);
+        this.balance_cell.text = CURRENCY.format(amount+original_balance);
+        (parent.parent as JobTable).recalculate();
+    }
+
+    JobRow.created() : super.created() {
+        this.is_invoiced_input = this.querySelector(":scope>.job-invoiced>input");
+        this.is_invoiced_input.onChange.listen(invoicing_toggled);
+        this.flat_amount_input = this.querySelector(":scope>.job-flat>input");
+        this.flat_amount_input.onKeyUp.listen(flat_amount_changed);
+        this.debit_amount_input = this.querySelector(":scope>.job-debit>input");
+
+        this.debit_cell = this.querySelector(":scope>.job-debit>span");
+        this.debited_cell = this.querySelector(":scope>.job-debited");
+        this.balance_cell = this.querySelector(":scope>.job-balance");
+
+        this.estimate = double.parse(this.querySelector(":scope>.job-estimate").dataset['amount']);
+        this.itemized = double.parse(this.querySelector(":scope>.job-itemized").dataset['amount']);
+        this.original_debited = double.parse(debited_cell.dataset['amount']);
+        this.original_balance = double.parse(balance_cell.dataset['amount']);
+    }
+
+    double calculate_debit() {
+        double debit = 0.0;
+        if (this.flat_amount_input.value.length > 0) {
+            double flat_amount = 0.0;
+            try {
+                flat_amount = parse_decimal(this.flat_amount_input.value);
+            } on FormatException catch (e) {}
+            if (flat_amount > this.itemized) {
+                debit = flat_amount - this.original_debited;
+                if (debit > 0.0) {
+                    return debit;
+                }
+            }
+        }
+        if (this.itemized > this.original_debited) {
+            debit = this.itemized - this.original_debited;
+        }
+        return debit;
+
+    }
+
+    invoicing_toggled(Event e) {
+        if (is_invoiced ) {
+            classes.add('invoiced');
+            debit_amount = calculate_debit();
+            flat_amount_input.disabled = false;
+        } else {
+            classes.remove('invoiced');
+            debit_amount = 0.0;
+            flat_amount_input.disabled = true;
+        }
+    }
+
+    flat_amount_changed(Event e) {
+        debit_amount = calculate_debit();
+    }
+
+}
 
 void main() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
+    document.registerElement('job-table', JobTable, extendsTag:'table');
+    document.registerElement('job-row', JobRow, extendsTag:'tr');
+
+
+    /*
+NumberFormat AMOUNT = new NumberFormat("#,###,###,##0.00");
+NumberFormat SPLIT = new NumberFormat("#,###,###,##0.00");
 
     InputElement amount_input = querySelector('input[name="amount"]');
     CheckboxInputElement is_tax_included_input = querySelector('input[name="is_tax_included"]');
@@ -45,4 +173,5 @@ void main() {
     update_table(null);
     amount_input.onKeyUp.listen(update_table);
     is_tax_included_input.onChange.listen(update_table);
+    */
 }
