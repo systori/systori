@@ -28,19 +28,19 @@ class JobQuerySet(models.QuerySet):
         return sum([job.estimate_total for job in self])
 
     def estimate_tax_total(self):
-        return self.estimate_total() * TAX_RATE
+        return round(self.estimate_total() * TAX_RATE, 2)
 
     def estimate_gross_total(self):
-        return self.estimate_total() * (TAX_RATE + 1)
+        return round(self.estimate_total() * (TAX_RATE + 1), 2)
 
     def billable_total(self):
         return sum([job.billable_total for job in self])
 
     def billable_tax_total(self):
-        return self.billable_total() * TAX_RATE
+        return round(self.billable_total() * TAX_RATE, 2)
 
     def billable_gross_total(self):
-        return self.billable_total() * (TAX_RATE + 1)
+        return round(self.billable_total() * (TAX_RATE + 1), 2)
 
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
@@ -308,7 +308,7 @@ class Task(BetterOrderedModel):
 
     @property
     def complete_percent(self):
-        return int(self.complete / self.qty * 100) if self.qty else 0
+        return round(self.complete / self.qty * 100) if self.qty else 0
 
     @property
     def unit_price(self):
@@ -416,13 +416,13 @@ class TaskInstance(BetterOrderedModel):
     # to complete this task.
     @property
     def fixed_price_estimate(self):
-        return self.unit_price * self.task.qty
+        return round(self.unit_price * self.task.qty, 2)
 
     # For fixed price billing, returns the price based
     # on what has been completed.
     @property
     def fixed_price_billable(self):
-        return self.unit_price * self.task.complete
+        return round(self.unit_price * self.task.complete, 2)
 
     # For time and materials billing, returns
     # the estimated amount that will been expended by
@@ -513,19 +513,19 @@ class LineItem(models.Model):
     # of this line item per 1 unit of the parent task.
     @property
     def price_per_task_unit(self):
-        return self.price * self.unit_qty
+        return round(self.price * self.unit_qty, 2)
 
     # For time and materials billing, returns the estimated price
     # of this line item to complete the entire task.
     @property
     def time_and_materials_estimate(self):
-        return self.price * self.task_qty
+        return round(self.price * self.task_qty, 2)
 
     # For time and materials billing, returns
     # the total amount that has been expended.
     @property
     def time_and_materials_billable(self):
-        return self.price * self.billable
+        return round(self.price * self.billable, 2)
 
     @property
     def job(self):
@@ -553,7 +553,7 @@ class ProgressReport(models.Model):
 
     @property
     def complete_percent(self):
-        return int(self.complete / self.task.qty * 100)
+        return round(self.complete / self.task.qty * 100)
 
     class Meta:
         verbose_name = _("Progress Report")

@@ -122,12 +122,12 @@ class BaseTransaction(models.Model):
         self._entries = []
 
     def debit(self, account, amount, **kwargs):
-        entry = self.entry_class(account=account, amount=account.as_debit(amount), **kwargs)
+        entry = self.entry_class(account=account, amount=account.as_debit(round(amount, 2)), **kwargs)
         self._entries.append(('debit', entry))
         return entry
 
     def credit(self, account, amount, **kwargs):
-        entry = self.entry_class(account=account, amount=account.as_credit(amount), **kwargs)
+        entry = self.entry_class(account=account, amount=account.as_credit(round(amount, 2)), **kwargs)
         self._entries.append(('credit', entry))
         return entry
 
@@ -175,7 +175,7 @@ class BaseEntry(models.Model):
     transaction = models.ForeignKey('Transaction', related_name="entries")
     account = models.ForeignKey('Account', related_name="entries")
 
-    amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=4, default=0.0)
+    amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=2, default=0.0)
 
     PAYMENT = "payment"
     DISCOUNT = "discount"

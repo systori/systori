@@ -31,6 +31,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name='entry',
+            name='amount',
+            field=models.DecimalField(default=0.0, decimal_places=2, max_digits=14, verbose_name='Amount'),
+        ),
         migrations.AddField(
             model_name='entry',
             name='entry_type',

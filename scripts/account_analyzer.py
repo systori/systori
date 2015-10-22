@@ -108,10 +108,10 @@ def migrate_accounts():
             print('  {:<50} {:>15} {:>15}'.format('', '-'*10, '-'*10))
             print('  {:<50} {:>15} {:>15}'.format('', money(invoice_amount), money(pre_tax_invoice)))
             if round(invoice.amount, 2) != round(invoice_amount, 2):
-                if invoice.id in [31, 37, 38, 46, 47, 51, 54, 55, 56, 60]:  # i've manually checked these invoices - lex
+                if invoice.id in [31, 37, 38, 46, 47, 51, 54, 55, 56, 60, 63]:  # i've manually checked these invoices - lex
                     # TODO WARNING: submitted github tickets about these: 47
                     # 37, 46, 54, 55 - rounding errors, off by one penny
-                    # 56, 60 - all these had the 'balance' remaining instead of how much was actually debited
+                    # 56, 60, 63 - all these had the 'balance' remaining instead of how much was actually debited
                     # 31, 38 - debit was correct but invoice had wrong amount, not sure why
                     # 51 - not even sure what happened here but i think the new invoice_amount is correct
                     invoice.amount = invoice_amount
