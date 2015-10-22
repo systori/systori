@@ -66,7 +66,7 @@ def render(letterhead):
 
     with BytesIO() as buffer:
 
-        pages = []
+        flowables = []
 
         doc = SystoriDocument(buffer,
             pagesize = DOCUMENT_FORMAT[letterhead.document_format],
@@ -76,7 +76,7 @@ def render(letterhead):
             rightMargin = float(letterhead.right_margin)*document_unit,
             debug=letterhead.debug)
 
-        pages.extend([
+        flowables.extend([
             Paragraph(force_break("""Musterfirma GmbH
             Herr Max Mustermann
             Musterstraße 123
@@ -98,6 +98,6 @@ def render(letterhead):
             Paragraph(force_break(lorem_100*17), stylesheet['Normal']),
             ])
 
-        doc.build(pages, canvasmaker=canvas_maker)
+        doc.build(flowables, canvasmaker=canvas_maker)
 
         return buffer.getvalue()
