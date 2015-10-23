@@ -16,7 +16,7 @@ SHOW_SKIPPED = False
 def migrate_accounts():
     from systori.apps.project.models import Project
     from systori.apps.accounting.models import Account, Transaction, Entry, create_account_for_job
-    from systori.apps.accounting.skr03 import partial_credit
+    from systori.apps.accounting.constants import TAX_RATE
     from systori.apps.task.models import Job
 
     from systori.lib.templatetags.customformatting import money
@@ -91,7 +91,7 @@ def migrate_accounts():
                     pre_tax_amount += Decimal(json_taskgroup['total'])
 
                 amount = round(pre_tax_amount * Decimal(1.19), 2)
-                already_debited = round(job.account.debits().total, 2)
+                already_debited = job.account.debits().total
 
                 amount -= already_debited
 
@@ -120,6 +120,144 @@ def migrate_accounts():
 
             invoice.save()
 
+        for payment in project.account.payments().all():
+
+            transaction = payment.transaction
+            entries = transaction.entries.all()
+            print("\n Converting Payment Transaction #{} (entries: {}) - {}".format(transaction.id, len(entries), money(abs(payment.amount))))
+
+            bank_entry, project_entry, promised_entry, partial_entry, tax_entry,\
+                discount_entry, discount_promised_entry, cash_discount_entry = (None,)*8
+            if len(entries) == 2:
+                bank_entry = entries[0]
+                project_entry = entries[1]
+            elif len(entries) == 5:
+                if entries[0].account.account_type == Account.ASSET:
+                    if entries[3].account.code == "8736": # payment + discount on final invoice
+                        bank_entry = entries[0]
+                        project_entry = entries[1]
+                        discount_entry = entries[2]
+                        cash_discount_entry = entries[3]
+                        tax_entry = entries[4]
+                    else:
+                        bank_entry = entries[0]
+                        project_entry = entries[1]
+                        promised_entry = entries[2]
+                        partial_entry = entries[3]
+                        tax_entry = entries[4]
+                else: # old style
+                    promised_entry = entries[0]
+                    partial_entry = entries[1]
+                    tax_entry = entries[2]
+                    bank_entry = entries[3]
+                    project_entry = entries[4]
+            elif len(entries) == 7:
+                if entries[0].account.account_type == Account.ASSET:
+                    bank_entry = entries[0]
+                    project_entry = entries[1]
+                    promised_entry = entries[2]
+                    partial_entry = entries[3]
+                    tax_entry = entries[4]
+                    discount_entry = entries[5]
+                    discount_promised_entry = entries[6]
+                else: # old style
+                    promised_entry = entries[0]
+                    partial_entry = entries[1]
+                    tax_entry = entries[2]
+                    bank_entry = entries[3]
+                    project_entry = entries[4]
+                    discount_promised_entry = entries[5]
+                    discount_entry = entries[6]
+            else:
+                raise NotImplementedError("Dono what to do with this many entries...")
+
+            assert bank_entry.account.account_type == Account.ASSET
+            assert project_entry.account.id == project.account.id
+            assert promised_entry is None or promised_entry.account.code == "1710"
+            assert partial_entry is None or partial_entry.account.code == "1718"
+            assert cash_discount_entry is None or cash_discount_entry.account.code == "8736"
+            assert tax_entry is None or tax_entry.account.code == "1776"
+            assert discount_entry is None or discount_entry.account.id == project.account.id
+            assert discount_promised_entry is None or discount_promised_entry.account.code == "1710"
+
+            transaction.id = None  # start new transaction from previous
+            transaction.debit(bank_entry.account, bank_entry.amount)
+
+            project_balance = project.balance
+            sorted_jobs = [(round(job.account.balance/project_balance,3), job.account.balance, job) for job in project.jobs.all() if job.account.balance > Decimal(0.0)]
+            sorted_jobs.sort()
+            print('\n   Splitting payment into job accounts...')
+            percent_total = Decimal(0.0)
+            for job in sorted_jobs:
+                percent_total += job[0]
+                print('    {:>5}% {}'.format(round(job[0]*100, 1), job[2].name))
+            print('    {:>5}'.format('-'*6))
+            print('    {:>5}%\n'.format(round(percent_total*100, 1)))
+
+            remaining_payment_amount = payment_amount = Decimal(abs(project_entry.amount))
+            remaining_discount_amount = discount_amount = Decimal(0.0)
+            discount_percent = 0.0
+            if discount_entry:
+                remaining_discount_amount = discount_amount = Decimal(abs(discount_entry.amount))
+                discount_percent = round(remaining_discount_amount/(remaining_payment_amount+remaining_discount_amount), 3)
+
+            job_credits_sum = Decimal(0.0)
+
+            last_job_idx = len(sorted_jobs)-1
+            for idx, (job_percent, job_balance, job) in enumerate(sorted_jobs):
+
+                # TODO: Add support final payments.
+                # TODO: Add entry groupings per job.
+
+                if idx == last_job_idx:  # use whatever is left on last job
+                    assert job_balance >= (remaining_payment_amount+remaining_discount_amount)
+                    job_credit = remaining_payment_amount
+                    job_discount = remaining_discount_amount
+                else:
+                    job_credit = round(payment_amount * job_percent, 2)
+                    job_discount = round(discount_amount * job_percent, 2)
+                    assert round(1-job_credit/(job_credit+job_discount), 3) == discount_percent
+
+                job_income = round(job_credit / (1 + TAX_RATE), 2)
+
+                job_credits_sum += job_credit
+
+                transaction.credit(job.account, job_credit, entry_type=Entry.PAYMENT)
+                transaction.debit(Account.objects.get(code="1710"), job_credit)
+                transaction.credit(Account.objects.get(code="1718"), job_income)
+                transaction.credit(Account.objects.get(code="1776"), round(job_credit - job_income, 2))
+
+                if discount_entry:
+                    transaction.credit(job.account, job_discount, entry_type=Entry.DISCOUNT)
+                    transaction.debit(Account.objects.get(code="1710"), job_discount)
+
+                remaining_payment_amount -= job_credit
+                remaining_discount_amount -= job_discount
+
+            print('\n   {:<70} {:>15} {:>15}'.format('New transaction entries...', 'debits', 'credits'))
+            for entry in transaction._entries:
+
+                entry_title = entry[1].account.code+' '
+                if entry[1].entry_type in [Entry.PAYMENT, Entry.DISCOUNT]:
+                    entry_title += entry[1].account.job.name
+                else:
+                    entry_title += entry[1].account.name
+
+                if entry[1].is_debit():
+                    print('   {:<70} {:>15} {:>15}'.format(entry_title, money(abs(entry[1].amount)), ''))
+                else:
+                    print('   {:<70} {:>15} {:>15}'.format(entry_title, '', money(abs(entry[1].amount))))
+            print('   {:<70} {:>15} {:>15}'.format('', '-'*10, '-'*10))
+            print('   {:<70} {:>15} {:>15}'.format('', money(transaction._total('debit')), money(transaction._total('credit'))))
+
+            # lets make sure we exactly used up the entire amount
+            assert remaining_payment_amount == 0.0
+            assert remaining_discount_amount == 0.0
+
+            assert job_credits_sum == payment_amount
+
+            # save() also does some validation
+            transaction.save()
 
 #        if not project.account.entries.exists():
 #            if SHOW_SKIPPED:
