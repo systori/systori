@@ -168,6 +168,7 @@ class Letterhead(models.Model):
     """
     name = models.CharField(_('Name'), max_length=512)
 
+    # todo: Delete not needed PDF Binaries from FS. Make sure that they are not needed (Use Count?)
     letterhead_pdf = models.FileField(_('Letterhead PDF'), upload_to='letterhead', max_length=100)
 
     mm = "mm"

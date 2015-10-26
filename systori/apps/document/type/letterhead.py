@@ -21,7 +21,7 @@ from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 
-from .style import stylesheet, LandscapeStationaryCanvas, StationaryCanvas, NumberedCanvas, SystoriDocument
+from .style import stylesheet, LetterheadCanvas, SystoriDocument
 from .style import p, b, br, nr, force_break, heading_and_date
 
 DOCUMENT_UNIT = {
@@ -51,15 +51,16 @@ DOCUMENT_FORMAT = {
 }
 
 
-class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
-    def __init__(self, letterhead_pdf, *args, **kwargs):
-        self.stationary_pages = letterhead_pdf
-        super(LetterheadCanvas, self).__init__(*args, **kwargs)
-
-
 def render(letterhead):
-    document_unit = DOCUMENT_UNIT.get(letterhead.document_unit)
+    document_unit = DOCUMENT_UNIT[letterhead.document_unit]
+    pagesize = DOCUMENT_FORMAT[letterhead.document_format]
+    page_width = pagesize[0]
+    table_width = page_width - float(letterhead.right_margin)*document_unit\
+                             - float(letterhead.left_margin)*document_unit
+
     invoice_date = date_format(date(*map(int, '2016-01-31'.split('-'))), use_l10n=True)
+
+
 
     def canvas_maker(*args, **kwargs):
         return LetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
@@ -68,13 +69,7 @@ def render(letterhead):
 
         flowables = []
 
-        doc = SystoriDocument(buffer,
-            pagesize = DOCUMENT_FORMAT[letterhead.document_format],
-            topMargin = float(letterhead.top_margin)*document_unit,
-            bottomMargin = float(letterhead.bottom_margin)*document_unit,
-            leftMargin = float(letterhead.left_margin)*document_unit,
-            rightMargin = float(letterhead.right_margin)*document_unit,
-            debug=letterhead.debug)
+        doc = SystoriDocument(buffer, pagesize = pagesize, debug=letterhead.debug)
 
         flowables.extend([
             Paragraph(force_break("""Musterfirma GmbH
@@ -84,7 +79,7 @@ def render(letterhead):
             """), stylesheet['Normal']),
             Spacer(0, 22*mm),
 
-            heading_and_date(_("Invoice"),invoice_date, doc.width, debug=letterhead.debug),
+            heading_and_date(_("Invoice"), invoice_date, table_width, debug=letterhead.debug),
             Spacer(0, 4*mm),
 
             Paragraph(_("Invoice No.")+" 00000815", stylesheet['NormalRight']),
@@ -98,6 +93,6 @@ def render(letterhead):
             Paragraph(force_break(lorem_100*17), stylesheet['Normal']),
             ])
 
-        doc.build(flowables, canvasmaker=canvas_maker)
+        doc.build(flowables, canvasmaker=canvas_maker, letterhead=letterhead)
 
         return buffer.getvalue()
