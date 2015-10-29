@@ -205,12 +205,11 @@ class StationaryCanvas(canvas.Canvas):
         restoreFormsInMemory(self.page_content, self)
 
     def showPage(self):
+        if self._pageNumber > 1 and len(self.page_info_page1) > 1:
+            self.doForm(self.page_info_page1[1])
+        else:
+            self.doForm(self.page_info_page1[0])
         super().showPage()
-        #if self._pageNumber > 1 and len(self.page_info_page1) > 1:
-        #    self.doForm(self.page_info_page1[1])
-        #else:
-        #    self.doForm(self.page_info_page1[0])
-        self.doForm(self.page_info_page1[0])
 
 
 class StationaryCanvasWithoutFirstPage(StationaryCanvas):
@@ -262,6 +261,10 @@ class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
         self.stationary_pages = letterhead_pdf
         super(LetterheadCanvas, self).__init__(*args, **kwargs)
 
+    def draw_page_number(self, page_count):
+        self.setFont(font.normal, 10)
+        self.drawRightString(25*mm, 10*mm,
+                             '{} {} {} {}'.format(_("Page"), self._pageNumber, _("of"), page_count))
 
 class SystoriDocument(BaseDocTemplate):
 
