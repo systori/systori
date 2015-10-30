@@ -77,7 +77,7 @@ def render(letterhead):
             Musterstraße 123
             65321 Musterhausen
             """), stylesheet['Normal']),
-            Spacer(0, 22*mm),
+            Spacer(0, 25*mm),
 
             heading_and_date(_("Invoice"), invoice_date, table_width, debug=letterhead.debug),
             Spacer(0, 4*mm),

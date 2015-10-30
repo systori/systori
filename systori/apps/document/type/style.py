@@ -263,7 +263,8 @@ class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
 
     def draw_page_number(self, page_count):
         self.setFont(font.normal, 10)
-        self.drawRightString(25*mm, 10*mm,
+        # dynamically positioning based on frame dimensions. string is placed underneath the frame aligned right.
+        self.drawRightString(self._doctemplate.frame._x1 + self._doctemplate.frame._aW, self._doctemplate.frame._y1 - 17,
                              '{} {} {} {}'.format(_("Page"), self._pageNumber, _("of"), page_count))
 
 class SystoriDocument(BaseDocTemplate):

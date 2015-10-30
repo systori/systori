@@ -148,6 +148,8 @@ def collate_lineitems(proposal, available_width):
 
 def render(proposal, with_line_items, format):
 
+    #letterhead = Letterhead.objects.get(active=True)
+
     with BytesIO() as buffer:
 
         proposal_date = date_format(date(*map(int, proposal['date'].split('-'))), use_l10n=True)

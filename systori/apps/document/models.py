@@ -2,7 +2,6 @@ from collections import OrderedDict
 from datetime import date
 
 from django.db import models
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from jsonfield import JSONField
@@ -25,6 +24,8 @@ class Document(models.Model):
 
 
 class Proposal(Document):
+    letterhead = models.ForeignKey('document.Letterhead', related_name="proposal_documents")
+
     project = models.ForeignKey("project.Project", related_name="proposals")
     jobs = models.ManyToManyField("task.Job", verbose_name=_('Jobs'), related_name="proposals")
 
@@ -65,6 +66,8 @@ class Proposal(Document):
 
 
 class Invoice(Document):
+    letterhead = models.ForeignKey('document.Letterhead', related_name="invoice_documents")
+
     invoice_no = models.CharField(_("Invoice No."), max_length=30)
     project = models.ForeignKey("project.Project", related_name="invoices")
 
