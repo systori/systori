@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from datetime import date
 from django.db import models
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from jsonfield import JSONField
@@ -157,3 +158,22 @@ class DocumentTemplate(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class DocumentSettings(models.Model):
+    language = models.CharField(_('language'), unique=True, default=settings.LANGUAGE_CODE, choices=settings.LANGUAGES, max_length=2)
+
+    proposal_text = models.ForeignKey(DocumentTemplate, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    invoice_text = models.ForeignKey(DocumentTemplate, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+
+    #proposal_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    #invoice_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    #evidence_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    #itemized_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+
+    @staticmethod
+    def get_for_language(lang):
+        try:
+            return DocumentSettings.objects.get(language=lang)
+        except DocumentSettings.DoesNotExist:
+            return None

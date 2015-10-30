@@ -8,8 +8,9 @@ from django.core.urlresolvers import reverse, reverse_lazy
 
 from ..project.models import Project
 from ..task.models import Job
-from .models import Proposal, Invoice, DocumentTemplate
-from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm, FlatInvoiceForm
+from .models import Proposal, Invoice, DocumentTemplate, DocumentSettings
+from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm,\
+                   FlatInvoiceForm, DocumentSettingsForm
 from ..accounting import skr03
 from ..accounting.constants import TAX_RATE
 
@@ -285,4 +286,24 @@ class DocumentTemplateUpdate(UpdateView):
 
 class DocumentTemplateDelete(DeleteView):
     model = DocumentTemplate
+    success_url = reverse_lazy('templates')
+
+
+# Document Settings
+
+
+class DocumentSettingsCreate(CreateView):
+    model = DocumentSettings
+    form_class = DocumentSettingsForm
+    success_url = reverse_lazy('templates')
+
+
+class DocumentSettingsUpdate(UpdateView):
+    model = DocumentSettings
+    form_class = DocumentSettingsForm
+    success_url = reverse_lazy('templates')
+
+
+class DocumentSettingsDelete(DeleteView):
+    model = DocumentSettings
     success_url = reverse_lazy('templates')

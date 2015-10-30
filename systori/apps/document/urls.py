@@ -30,4 +30,8 @@ urlpatterns = [
     url(r'^templates/document-template-(?P<pk>\d+)/edit$', office_auth(DocumentTemplateUpdate.as_view()), name='document-template.edit'),
     url(r'^templates/document-template-(?P<pk>\d+)/delete$', office_auth(DocumentTemplateDelete.as_view()), name='document-template.delete'),
 
+    url(r'^templates/create-document-settings$', office_auth(DocumentSettingsCreate.as_view()), name='document-settings.create'),
+    url(r'^templates/document-settings-(?P<pk>\d+)/edit$', office_auth(DocumentSettingsUpdate.as_view()), name='document-settings.edit'),
+    url(r'^templates/document-settings-(?P<pk>\d+)/delete$', office_auth(DocumentSettingsDelete.as_view()), name='document-settings.delete'),
+
 ]
