@@ -14,7 +14,7 @@ from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
 from .forms import JobSiteForm, FilterForm
 from ..task.models import Job, TaskGroup, Task
 from ..directory.models import ProjectContact
-from ..document.models import Invoice, DocumentTemplate
+from ..document.models import Invoice, DocumentTemplate, DocumentSettings
 from ..accounting.models import create_account_for_project
 from ..accounting.utils import get_transactions_table
 from .gaeb_utils import gaeb_import
@@ -262,6 +262,7 @@ class TemplatesView(TemplateView):
         context = super(TemplatesView, self).get_context_data(**kwargs)
         context['jobs'] = Project.objects.template().get().jobs.all()
         context['documents'] = DocumentTemplate.objects.all()
+        context['document_settings'] = DocumentSettings.objects.all()
         return context
 
 

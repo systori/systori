@@ -49,4 +49,41 @@
     </tbody>
   </table>
   <a href="{% url 'document-template.create' %}">{% trans "Create" %}</a>
+
+
+  <h2 class="sub-header">{% trans "Document Settings" %}</h2>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th></th>
+      <th colspan="2">{% trans "Text" %}</th>
+      <th colspan="3">{% trans "Letterhead" %}</th>
+      <th></th>
+    </tr>
+    <tr>
+      <th>{% trans "Language" %}</th>
+      <th>{% trans "Proposal" %}</th>
+      <th>{% trans "Invoice" %}</th>
+      <th>{% trans "Proposal" %}</th>
+      <th>{% trans "Invoice" %}</th>
+      <th>{% trans "Evidence" %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for docsetting in document_settings %}
+      <tr>
+        <td>{{ docsetting.get_language_display }}</td>
+        <td>{{ docsetting.proposal_text.name }}</td>
+        <td>{{ docsetting.invoice_text.name }}</td>
+        <td>..</td>
+        <td>..</td>
+        <td>
+          <a href="{% url 'document-settings.edit' docsetting.id %}">{% trans "Edit" %}</a>
+          <a href="{% url 'document-settings.delete' docsetting.id %}">{% trans "Delete" %}</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'document-settings.create' %}">{% trans "Create" %}</a>
 {% endblock %}
