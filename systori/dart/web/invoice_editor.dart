@@ -49,9 +49,11 @@ class JobRow extends TableRowElement {
 
     CheckboxInputElement is_invoiced_input;
     TextInputElement flat_amount_input;
+    HiddenInputElement is_flat_input;
     HiddenInputElement debit_amount_input;
+    TextAreaElement debit_comment_input;
 
-    TableCellElement debit_cell;
+    DivElement debit_amount_div;
     TableCellElement debited_cell;
     TableCellElement balance_cell;
 
@@ -65,7 +67,7 @@ class JobRow extends TableRowElement {
     double get debit_amount => double.parse(debit_amount_input.value);
     set debit_amount(double amount) {
         this.debit_amount_input.value = amount.toString();
-        this.debit_cell.text = CURRENCY.format(amount);
+        this.debit_amount_div.text = CURRENCY.format(amount);
         this.debited_cell.text = CURRENCY.format(amount+original_debited);
         this.balance_cell.text = CURRENCY.format(amount+original_balance);
         (parent.parent as JobTable).recalculate();
@@ -74,11 +76,13 @@ class JobRow extends TableRowElement {
     JobRow.created() : super.created() {
         this.is_invoiced_input = this.querySelector(":scope>.job-invoiced>input");
         this.is_invoiced_input.onChange.listen(invoicing_toggled);
-        this.flat_amount_input = this.querySelector(":scope>.job-flat>input");
+        this.is_flat_input = this.querySelector(":scope>.job-flat>input[type='hidden']");
+        this.flat_amount_input = this.querySelector(":scope>.job-flat>input[type='text']");
         this.flat_amount_input.onKeyUp.listen(flat_amount_changed);
         this.debit_amount_input = this.querySelector(":scope>.job-debit>input");
 
-        this.debit_cell = this.querySelector(":scope>.job-debit>span");
+        this.debit_amount_div = this.querySelector(":scope>.job-debit>.job-debit-amount");
+        this.debit_comment_input = this.querySelector(":scope>.job-debit>.job-debit-comment");
         this.debited_cell = this.querySelector(":scope>.job-debited");
         this.balance_cell = this.querySelector(":scope>.job-balance");
 
@@ -88,7 +92,7 @@ class JobRow extends TableRowElement {
         this.original_balance = double.parse(balance_cell.dataset['amount']);
     }
 
-    double calculate_debit() {
+    update_debit() {
         double debit = 0.0;
         if (this.flat_amount_input.value.length > 0) {
             double flat_amount = 0.0;
@@ -98,22 +102,26 @@ class JobRow extends TableRowElement {
             if (flat_amount > this.itemized) {
                 debit = flat_amount - this.original_debited;
                 if (debit > 0.0) {
-                    return debit;
+                    debit_amount = debit;
+                    is_flat_input.value = "True";
+                    classes.add('flat');
+                    return;
                 }
             }
         }
         if (this.itemized > this.original_debited) {
             debit = this.itemized - this.original_debited;
         }
-        return debit;
-
+        debit_amount = debit;
+        is_flat_input.value = "False";
+        classes.remove('flat');
     }
 
     invoicing_toggled(Event e) {
-        if (is_invoiced ) {
+        if (is_invoiced) {
             classes.add('invoiced');
-            debit_amount = calculate_debit();
             flat_amount_input.disabled = false;
+            update_debit();
         } else {
             classes.remove('invoiced');
             debit_amount = 0.0;
@@ -122,7 +130,7 @@ class JobRow extends TableRowElement {
     }
 
     flat_amount_changed(Event e) {
-        debit_amount = calculate_debit();
+        update_debit();
     }
 
 }

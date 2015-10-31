@@ -28,25 +28,26 @@ def create_chart_of_accounts(self=None):
     self.bank = Account.objects.create(account_type=Account.ASSET, code="1200")
 
 
-def partial_debit(job):
-    """ Debit the customer account with any new work that was done since last debit. """
-
-    amount = job.new_amount_to_debit
+def partial_debit(invoice, job, amount, is_flat):
+    """ Debit the customer account with any new work completed or flat invoice. """
 
     if not amount:
         return
 
-    transaction = Transaction()
+    transaction = Transaction(recorded_on=invoice.created_on, invoice=invoice)
 
     # debit the customer account (asset), this increases their balance
     # (+) "good thing", customer owes us more money
-    transaction.debit(job.account, amount, entry_type=Entry.WORK_DEBIT)
+    transaction.debit(job.account, amount,
+                      entry_type=Entry.FLAT_DEBIT if is_flat else Entry.WORK_DEBIT)
 
     # credit the promised payments account (liability), increasing the liability
     # (+) "bad thing", customer owing us money is a liability
     transaction.credit(Account.objects.get(code="1710"), amount)
 
     transaction.save()
+
+    return transaction
 
 
 def partial_credit(jobs, payment, received_on=None, bank=None):

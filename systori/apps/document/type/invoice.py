@@ -193,7 +193,7 @@ def render(invoice, format):
         return buffer.getvalue()
 
 
-def serialize(project, additional_information, is_flat_invoice=False):
+def serialize(project, data):
 
     contact = project.billable_contact.contact
 
@@ -201,12 +201,12 @@ def serialize(project, additional_information, is_flat_invoice=False):
 
         'version': '1.1',
 
-        'title': additional_information.get('title',''),
-        'date': additional_information.get('document_date'),
-        'invoice_no': additional_information.get('invoice_no'),
+        'title': data['title'],
+        'date': data['document_date'],
+        'invoice_no': data['invoice_no'],
 
-        'header': additional_information.get('header'),
-        'footer': additional_information.get('footer'),
+        'header': data['header'],
+        'footer': data['footer'],
 
         'business': contact.business,
         'salutation': contact.salutation,
@@ -217,60 +217,52 @@ def serialize(project, additional_information, is_flat_invoice=False):
         'city': contact.city,
         'address_label': contact.address_label,
 
+        'total_gross': data['total_gross'],
+        'total_base': data['total_base'],
+        'total_tax': data['total_tax'],
+
+        'balance_gross': data['balance_gross'],
+        'balance_base': data['balance_base'],
+        'balance_tax': data['balance_tax'],
+
+        'debits': []
     }
 
-    if additional_information.get('add_terms', False):
+    if data.get('add_terms', False):
         invoice['add_terms'] = True  # TODO: Calculate the terms.
 
-    if is_flat_invoice:
+    for debit in data['debits']:
 
-        # this should always match the Dart implementation in flat_invoice.dart
-        amount = additional_information['amount']
-        if additional_information['is_tax_included']:
-            net = amount / (1 + TAX_RATE)
-            gross_amount = amount
-            net_amount = net
-            tax_amount = amount - net
-        else:
-            tax = amount * TAX_RATE
-            gross_amount = amount + tax
-            net_amount = amount
-            tax_amount = tax
+        job = debit.pop('job')
 
-        invoice.update({
-            'total_gross': gross_amount,
-            'total_base': net_amount,
-            'total_tax': tax_amount,
-
-            'balance_gross': gross_amount,
-            'balance_base': net_amount,
-            'balance_tax': tax_amount,
-
-            'is_flat_invoice': True
-        })
-
-        return invoice
-
-    invoice.update({
-        'total_gross': project.billable_gross_total,
-        'total_base': project.billable_total,
-        'total_tax': project.billable_tax_total,
-
-        'balance_gross': project.account.balance,
-        'balance_base': project.account.balance_base,
-        'balance_tax': project.account.balance_tax,
-    })
-
-    invoice['jobs'] = []
-
-    for job in project.billable_jobs:
-        job_dict = {
-            'id': job.id,
+        debit.update({
+            'job.id': job.id,
             'code': job.code,
             'name': job.name,
             'taskgroups': []
-        }
-        invoice['jobs'].append(job_dict)
+        })
+        invoice['debits'].append(debit)
+
+        debit['transactions'] = []
+
+        for record_type, _, record, job in get_transactions_table(job):
+
+            if record_type in ('payment', 'discount'):
+
+                txn = {
+                    'type': record_type,
+                    'amount': record.amount,
+                    'amount_base': record.amount_base,
+                    'amount_tax': record.amount_tax
+                }
+
+                if record_type == 'payment':
+                    txn['received_on'] = record.received_on
+
+                debit['transactions'].append(txn)
+
+        if debit['is_flat']:
+            continue
 
         for taskgroup in job.billable_taskgroups:
             taskgroup_dict = {
@@ -281,7 +273,7 @@ def serialize(project, additional_information, is_flat_invoice=False):
                 'total': taskgroup.billable_total,
                 'tasks': []
             }
-            job_dict['taskgroups'].append(taskgroup_dict)
+            debit['taskgroups'].append(taskgroup_dict)
 
             for task in taskgroup.billable_tasks:
                 task_dict = {
@@ -308,26 +300,4 @@ def serialize(project, additional_information, is_flat_invoice=False):
                     }
                     task_dict['lineitems'].append(lineitem_dict)
 
-    invoice['transactions'] = []
-
-    for record_type, _, record, job in get_transactions_table(project):
-
-        if record_type in ('payment', 'discount'):
-
-            txn = {
-                'type': record_type,
-                'amount': record.amount,
-                'amount_base': record.amount_base,
-                'amount_tax': record.amount_tax
-            }
-
-            if record_type == 'payment':
-                txn['received_on'] = record.received_on
-
-            invoice['transactions'].append(txn)
-
     return invoice
-
-
-def update(instance, data):
-    return update_instance(instance, data, {'document_date': 'date'})

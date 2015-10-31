@@ -139,14 +139,9 @@ class InvoicePDF(DocumentRenderView):
         return invoice.render(json, self.kwargs['format'])
 
 
-class InvoiceCreate(CreateView):
+class InvoiceFormMixin:
     model = Invoice
     form_class = InvoiceForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['TAX_RATE'] = TAX_RATE
-        return context
 
     def get_form_kwargs(self):
         jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems').all()
@@ -159,47 +154,18 @@ class InvoiceCreate(CreateView):
         return kwargs
 
     def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+        return reverse('project.view', args=[self.request.project.id])
 
 
-class InvoiceUpdate(UpdateView):
-    model = Invoice
+class InvoiceCreate(InvoiceFormMixin, CreateView):
+    pass
 
+
+class InvoiceUpdate(InvoiceFormMixin, UpdateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['initial'] = self.object.json
+        kwargs['instance'] = self.object
         return kwargs
-
-    def get_queryset(self):
-        return super().get_queryset().filter(project=self.request.project)
-
-    def form_valid(self, form):
-        invoice.update(self.object, form.cleaned_data)
-        self.object.save()
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
-
-
-class InvoiceRecalculate(UpdateView):
-    model = Invoice
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['initial'] = self.object.json
-        return kwargs
-
-    def get_queryset(self):
-        return super().get_queryset().filter(project=self.request.project)
-
-    def form_valid(self, form):
-        invoice.update(self.object, form.cleaned_data)
-        self.object.save()
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
 
 
 class InvoiceTransition(SingleObjectMixin, View):

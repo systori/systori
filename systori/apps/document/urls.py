@@ -19,7 +19,6 @@ urlpatterns = [
     url(r'^project-(?P<project_pk>\d+)/invoice-(?P<pk>\d+)/transition/(?P<transition>\w+)$', office_auth(InvoiceTransition.as_view()), name='invoice.transition'),
     url(r'^project-(?P<project_pk>\d+)/invoice-(?P<pk>\d+)/update$', office_auth(InvoiceUpdate.as_view()), name='invoice.update'),
     url(r'^project-(?P<project_pk>\d+)/invoice-(?P<pk>\d+)/delete$', office_auth(InvoiceDelete.as_view()), name='invoice.delete'),
-    url(r'^project-(?P<project_pk>\d+)/invoice-(?P<pk>\d+)/recalculate$', office_auth(InvoiceRecalculate.as_view()), name='invoice.recalculate'),
 
     url(r'^project-(?P<project_pk>\d+)/evidence.pdf$', office_auth(EvidencePDF.as_view()), name='evidence.pdf'),
 

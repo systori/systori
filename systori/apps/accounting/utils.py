@@ -1,13 +1,13 @@
-def get_transactions_table(project):
+def get_transactions_table(job):
 
     # Flatten and sort list of debits + invoices + payments
     #debits = []
-    invoices = [('invoice', i.document_date, i, None) for i in project.invoices.all()]
-    payments = []
+    #invoices = [('invoice', i.document_date, i, None) for i in project.invoices.all()]
+    #payments = []
     #for job in project.jobs.all():
         #debits.extend([('debit', d.transaction.recorded_on.date(), d, job) for d in job.account.debits().all()])
         #payments.extend([('payment', p.received_on, p, job) for p in job.account.payments().all()])
-    all_the_things = invoices + payments
+    all_the_things = []#invoices + payments
     all_the_things.sort(key=lambda i: i[1])
 
     # Now we add the discounts

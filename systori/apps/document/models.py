@@ -9,7 +9,7 @@ from jsonfield import JSONField
 class Document(models.Model):
     json = JSONField(default={})
     json_version = models.CharField(max_length=5)
-    amount = models.DecimalField(_("Amount"), max_digits=12, decimal_places=2)
+    amount = models.DecimalField(_("Amount"), default=0.0, max_digits=12, decimal_places=2)
     created_on = models.DateTimeField(auto_now_add=True)
     document_date = models.DateField(_("Date"), default=date.today, blank=True)
     notes = models.TextField(_("Notes"), blank=True, null=True)

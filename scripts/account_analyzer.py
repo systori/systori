@@ -108,11 +108,12 @@ def migrate_accounts():
             print('  {:<50} {:>15} {:>15}'.format('', '-'*10, '-'*10))
             print('  {:<50} {:>15} {:>15}'.format('', money(invoice_amount), money(pre_tax_invoice)))
             if round(invoice.amount, 2) != round(invoice_amount, 2):
-                if invoice.id in [31, 37, 38, 46, 47, 51, 54, 55, 56, 60, 63]:  # i've manually checked these invoices - lex
+                if invoice.id in [31, 37, 38, 46, 47, 51, 54, 55, 56, 60, 63, 67]:  # i've manually checked these invoices - lex
                     # TODO WARNING: submitted github tickets about these: 47
                     # 37, 46, 54, 55 - rounding errors, off by one penny
                     # 56, 60, 63 - all these had the 'balance' remaining instead of how much was actually debited
                     # 31, 38 - debit was correct but invoice had wrong amount, not sure why
+                    # 67 - amounts slightly off
                     # 51 - not even sure what happened here but i think the new invoice_amount is correct
                     invoice.amount = invoice_amount
                 else:
@@ -194,12 +195,15 @@ def migrate_accounts():
             print('    {:>5}'.format('-'*6))
             print('    {:>5}%\n'.format(round(percent_total*100, 1)))
 
+
             remaining_payment_amount = payment_amount = Decimal(abs(project_entry.amount))
             remaining_discount_amount = discount_amount = Decimal(0.0)
             discount_percent = 0.0
             if discount_entry:
                 remaining_discount_amount = discount_amount = Decimal(abs(discount_entry.amount))
                 discount_percent = round(remaining_discount_amount/(remaining_payment_amount+remaining_discount_amount), 3)
+
+            print('\n   Discount: {} ({}%)\n'.format(money(discount_amount), round(discount_percent*100, 1)))
 
             job_credits_sum = Decimal(0.0)
 
@@ -254,9 +258,11 @@ def migrate_accounts():
             assert remaining_payment_amount == 0.0
             assert remaining_discount_amount == 0.0
 
+            # other checks...
+            assert transaction._total('debit') == payment_amount*2 + discount_amount
             assert job_credits_sum == payment_amount
 
-            # save() also does some validation
+            # save() also checks that all debits == all credits
             transaction.save()
 
 #        if not project.account.entries.exists():
