@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from datetime import date
+from decimal import Decimal
 
 from django.db import models
 from django.conf import settings
@@ -186,47 +187,29 @@ class Letterhead(models.Model):
     document_unit = models.CharField(_('Document Unit'), max_length=5,
                                      choices=DOCUMENT_UNIT, default=mm)
 
-    top_margin = models.DecimalField(_('Top Margin'), max_digits=4, decimal_places=2)
-    right_margin = models.DecimalField(_('Right Margin'), max_digits=4, decimal_places=2)
-    bottom_margin = models.DecimalField(_('Bottom Margin'), max_digits=4, decimal_places=2)
-    left_margin = models.DecimalField(_('Left Margin'), max_digits=4, decimal_places=2)
-    top_margin_next = models.DecimalField(_('Top Margin Next'), max_digits=4, decimal_places=2)
+    top_margin = models.DecimalField(_('Top Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
+    right_margin = models.DecimalField(_('Right Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
+    bottom_margin = models.DecimalField(_('Bottom Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
+    left_margin = models.DecimalField(_('Left Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
+    top_margin_next = models.DecimalField(_('Top Margin Next'), max_digits=4, decimal_places=2, default=Decimal("25"))
 
-    A6 = "A6"
     A5 = "A5"
     A4 = "A4"
     A3 = "A3"
-    A2 = "A2"
-    A1 = "A1"
-    A0 = "A0"
     LETTER = "LETTER"
     LEGAL = "LEGAL"
     ELEVENSEVENTEEN = "ELEVENSEVENTEEN"
-    B6 = "B6"
     B5 = "B5"
     B4 = "B4"
-    B3 = "B3"
-    B2 = "B2"
-    B1 = "B1"
-    B0 = "B0"
     DOCUMENT_FORMAT = (
-        (A6, _("A6")),
         (A5, _("A5")),
         (A4, _("A4")),
         (A3, _("A3")),
-        (A2, _("A2")),
-        (A1, _("A1")),
-        (A0, _("A0")),
         (LETTER, _("LETTER")),
         (LEGAL, _("LEGAL")),
         (ELEVENSEVENTEEN, _("ELEVENSEVENTEEN")),
-        (B6, _("B6")),
         (B5, _("B5")),
         (B4, _("B4")),
-        (B3, _("B3")),
-        (B2, _("B2")),
-        (B1, _("B1")),
-        (B0, _("B0")),
     )
     document_format = models.CharField(_('Pagesize'), max_length=30,
                                        choices=DOCUMENT_FORMAT, default=A4)
@@ -249,10 +232,10 @@ class DocumentSettings(models.Model):
     proposal_text = models.ForeignKey(DocumentTemplate, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     invoice_text = models.ForeignKey(DocumentTemplate, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
 
-    #proposal_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
-    #invoice_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
-    #evidence_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
-    #itemized_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    proposal_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    invoice_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    evidence_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    itemized_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
 
     @staticmethod
     def get_for_language(lang):

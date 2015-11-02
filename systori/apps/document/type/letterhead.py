@@ -4,8 +4,7 @@ lorem_100 = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam n
 from io import BytesIO
 from datetime import date
 
-from reportlab.lib.pagesizes import A6, A5, A4, A3, A2, A1, A0, LETTER, LEGAL, ELEVENSEVENTEEN, B6, B5, B4, B3, B2, B1,\
-    B0, landscape
+from reportlab.lib.pagesizes import A5, A4, A3, LETTER, LEGAL, ELEVENSEVENTEEN, B5, B4, landscape
 from reportlab.lib.units import mm, cm, inch
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.enums import TA_RIGHT
@@ -31,36 +30,35 @@ DOCUMENT_UNIT = {
 }
 
 DOCUMENT_FORMAT = {
-    "A6" : A6,
     "A5" : A5,
     "A4" : A4,
     "A3" : A3,
-    "A2" : A2,
-    "A1" : A1,
-    "A0" : A0,
     "LETTER" : LETTER,
     "LEGAL" : LEGAL,
     "ELEVENSEVENTEEN" : ELEVENSEVENTEEN,
-    "B6" : B6,
     "B5" : B5,
     "B4" : B4,
-    "B3" : B3,
-    "B2" : B2,
-    "B1" : B1,
-    "B0" : B0,
+}
+
+PORTRAIT = "portrait"
+LANDSCAPE = "landscape"
+ORIENTATION = {
+    PORTRAIT : _("Portrait"),
+    LANDSCAPE : _("Landscape"),
 }
 
 
 def render(letterhead):
     document_unit = DOCUMENT_UNIT[letterhead.document_unit]
-    pagesize = DOCUMENT_FORMAT[letterhead.document_format]
+    if letterhead.orientation == 'landscape':
+        pagesize = landscape(DOCUMENT_FORMAT[letterhead.document_format])
+    else:
+        pagesize = DOCUMENT_FORMAT[letterhead.document_format]
     page_width = pagesize[0]
     table_width = page_width - float(letterhead.right_margin)*document_unit\
                              - float(letterhead.left_margin)*document_unit
 
     invoice_date = date_format(date(*map(int, '2016-01-31'.split('-'))), use_l10n=True)
-
-
 
     def canvas_maker(*args, **kwargs):
         return LetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
@@ -85,7 +83,7 @@ def render(letterhead):
             Paragraph(_("Invoice No.")+" 00000815", stylesheet['NormalRight']),
             Paragraph(_("Please indicate the correct invoice number on your payment."),
                       ParagraphStyle('', parent=stylesheet['Small'], alignment=TA_RIGHT)),
-            Spacer(0, 1*mm),
+            Spacer(0, 10*mm),
             Paragraph(force_break('Dear Sir or Madam...'), stylesheet['Normal']),
 
             Spacer(0, 4*mm),
