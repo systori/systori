@@ -82,7 +82,7 @@ class InvoiceDebitForm(Form):
         self.setup_accounting_data()
         self.fields['job'].queryset = self.job.project.jobs.all()
         self.fields['flat_amount'].widget.attrs['class'] = 'form-control'
-        if not self['is_invoiced'].value():
+        if str(self['is_invoiced'].value()) == 'False':
             self.fields['flat_amount'].widget.attrs['disabled'] = True
         self.fields['debit_comment'].widget.attrs['class'] = 'job-debit-comment form-control'
         del self.fields['debit_comment'].widget.attrs['cols']
@@ -117,32 +117,36 @@ class InvoiceDebitForm(Form):
         self.latest_itemized = round(self.job.billable_total * (1+TAX_RATE), 2)
 
         if 'transaction_id' in self.initial:
+            # debit_amount comes in as a float from JSONField and as a string from form submission
+            # but we need it as a Decimal for pretty much everything
             self.debit_amount_decimal = Decimal(self['debit_amount'].value())
 
-            # this means the debit is already included, so we subtract to get base totals
+            # this debit is already in accounting system, so we subtract it to get pre-debit totals
+            self.original_debit_amount = Decimal(self.initial['debit_amount'])
             self.latest_debited = self.job.account.debits().total
             self.latest_balance = self.job.account.balance
-            self.latest_debited_base = self.latest_debited - self.debit_amount_decimal
-            self.latest_balance_base = self.latest_balance - self.debit_amount_decimal
+            self.latest_debited_base = self.latest_debited - self.original_debit_amount
+            self.latest_balance_base = self.latest_balance - self.original_debit_amount
+
+            # update debit_amount for itemized invoices in case 'work completed' has changed
+            if str(self.initial['is_flat']) == 'False':
+                updated_debit = self.latest_itemized - self.latest_debited_base
+                self.debit_amount_decimal = updated_debit if updated_debit > 0 else Decimal(0.0)
 
             # previous values come from json, could be different from latest values
-            self.previous_debited = self.initial['debited']
-            self.previous_balance = self.initial['balance']
-            self.previous_estimate = self.initial['estimate']
-            self.previous_itemized = self.initial['itemized']
+            self.previous_debited = Decimal(self.initial['debited'])
+            self.previous_balance = Decimal(self.initial['balance'])
+            self.previous_estimate = Decimal(self.initial['estimate'])
+            self.previous_itemized = Decimal(self.initial['itemized'])
 
         else:
             # no transactions exists yet so the totals don't include debit, we add to final totals
             self.latest_debited_base = self.job.account.debits().total
             self.latest_balance_base = self.job.account.balance
-
-            if self['is_invoiced'].value() and not self['debit_amount'].value():
-                # sets the debit_amount when the create invoice form loads for the very first time
+            if str(self['is_invoiced'].value()) == 'True' and str(self['is_flat'].value()) == 'False':
                 possible_debit = self.latest_itemized - self.latest_debited_base
-                if possible_debit > 0:
-                    self.initial['debit_amount'] = possible_debit
-            self.debit_amount_decimal = Decimal(self['debit_amount'].value())
-
+                self.initial['debit_amount'] = possible_debit if possible_debit > 0 else Decimal(0.0)
+            self.original_debit_amount = self.debit_amount_decimal = Decimal(self['debit_amount'].value())
             self.latest_debited = self.latest_debited_base + self.debit_amount_decimal
             self.latest_balance = self.latest_balance_base + self.debit_amount_decimal
 
@@ -151,6 +155,13 @@ class InvoiceDebitForm(Form):
             self.previous_balance = self.latest_balance
             self.previous_estimate = self.latest_estimate
             self.previous_itemized = self.latest_itemized
+
+        # used to show user what has changed since last time invoice was created/edited
+        self.diff_debited = self.latest_debited - self.previous_debited
+        self.diff_balance = self.latest_balance - self.previous_balance
+        self.diff_estimate = self.latest_estimate - self.previous_estimate
+        self.diff_itemized = self.latest_itemized - self.previous_itemized
+        self.diff_debit_amount = self.debit_amount_decimal - self.original_debit_amount
 
 
 class BaseInvoiceForm(BaseFormSet):
@@ -204,19 +215,21 @@ class BaseInvoiceForm(BaseFormSet):
             if debit_form.cleaned_data['is_invoiced']:
                 debit = debit_form.get_dict()
                 t = skr03.partial_debit(invoice, debit['job'], debit['debit_amount'], debit['is_flat'])
-                debit['transaction_id'] = t.id
+                debit['transaction_id'] = t.id if t else None
                 debits.append(debit)
 
         data = self.invoice_form.cleaned_data
 
+        del data['doc_template']  # don't need this
+
         data['debits'] = debits
 
         data['total_gross'] = self.debit_total
-        data['total_base'] = self.debit_total / (1 + TAX_RATE)
+        data['total_base'] = round(self.debit_total / (1+TAX_RATE), 2)
         data['total_tax'] = data['total_gross'] - data['total_base']
 
         data['balance_gross'] = self.balance_total
-        data['balance_base'] = self.balance_total / (1 + TAX_RATE)
+        data['balance_base'] = round(self.balance_total / (1+TAX_RATE), 2)
         data['balance_tax'] = data['balance_gross'] - data['balance_base']
 
         project = Project.prefetch(invoice.project.id)

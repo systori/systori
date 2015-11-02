@@ -43,7 +43,7 @@ def collate_tasks(invoice, available_width):
     t.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
 
 
-    for job in invoice['jobs']:
+    for job in invoice['debits']:
         t.row(b(job['code']), b(job['name']))
         t.row_style('SPAN', 1, -1)
 
@@ -81,7 +81,7 @@ def collate_tasks_total(invoice, available_width):
     t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
 
-    for job in invoice['jobs']:
+    for job in invoice['debits']:
         for taskgroup in job['taskgroups']:
             t.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
                   money(taskgroup['total']))

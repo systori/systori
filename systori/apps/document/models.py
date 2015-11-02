@@ -77,9 +77,10 @@ class Invoice(Document):
 
     status = FSMField(default=DRAFT, choices=STATE_CHOICES)
 
-    @transition(field=status, source=DRAFT, target=SENT, custom={'label': _("Send")})
+    @transition(field=status, source=DRAFT, target=SENT, custom={'label': _("Mark Sent")})
     def send(self):
-        self.transaction.finalize()
+        for transaction in self.transactions.all():
+            transaction.finalize()
 
     class Meta:
         verbose_name = _("Invoice")
