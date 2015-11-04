@@ -12,14 +12,12 @@ from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate, Letterhead
 from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm, LetterheadCreateForm, LetterheadUpdateForm
 from ..accounting import skr03
-from .type import proposal, invoice, evidence, specification, itemized_listing, letterhead
+from .type import proposal, invoice, evidence, itemized_listing, letterhead
 from .models import Proposal, Invoice, DocumentTemplate, DocumentSettings
 from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm,\
                    FlatInvoiceForm, DocumentSettingsForm
 from ..accounting import skr03
 from ..accounting.constants import TAX_RATE
-
-from .type import proposal, invoice, evidence, specification, itemized_listing
 
 
 class DocumentRenderView(SingleObjectMixin, View):
@@ -134,7 +132,8 @@ class InvoicePDF(DocumentRenderView):
 
     def pdf(self):
         json = self.get_object().json
-        return invoice.render(json, self.kwargs['format'])
+        letterhead = self.get_object().letterhead
+        return invoice.render(json, letterhead, self.kwargs['format'])
 
 
 class InvoiceCreate(CreateView):

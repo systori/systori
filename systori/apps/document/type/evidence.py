@@ -13,7 +13,7 @@ from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 
-from .style import LandscapeStationaryCanvas
+from .style import LetterheadCanvas
 from .style import p, b, br, nr
 
 

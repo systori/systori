@@ -231,13 +231,6 @@ class StationaryCanvas(canvas.Canvas):
         super().showPage()
 
 
-class StationaryCanvasWithoutFirstPage(StationaryCanvas):
-
-    def showPage(self):
-        self.doForm(self.page_info[1])
-        super(StationaryCanvas, self).showPage()
-
-
 class NumberedCanvas(canvas.Canvas):
 
     def __init__(self, *args, **kwargs):
@@ -259,33 +252,25 @@ class NumberedCanvas(canvas.Canvas):
 
     def draw_page_number(self, page_count):
         self.setFont(font.normal, 10)
-        self.drawRightString(149*mm, 10*mm,
-                             '{} {} {} {}'.format(_("Page"), self._pageNumber, _("of"), page_count))
-
-
-class PortraitStationaryCanvas(StationaryCanvas, NumberedCanvas):
-    stationary_filename = "soft_briefbogen_2014.pdf"
-
-
-class PortraitStationaryCanvasWithoutFirstPage(StationaryCanvasWithoutFirstPage, NumberedCanvas):
-    stationary_filename = "soft_briefbogen_2014.pdf"
-
-
-class LandscapeStationaryCanvas(StationaryCanvas):
-    stationary_filename = "softronic2_landscape.pdf"
-
-
-class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
-    def __init__(self, letterhead_pdf, *args, **kwargs):
-        self.stationary_pages = letterhead_pdf
-        super(LetterheadCanvas, self).__init__(*args, **kwargs)
-
-    def draw_page_number(self, page_count):
-        self.setFont(font.normal, 10)
         # dynamically positioning based on frame dimensions. string is placed underneath the frame aligned right.
         self.drawRightString(self._doctemplate.frame._x1 + self._doctemplate.frame._aW,
                              self._doctemplate.frame._y1 - 25,
                              '{} {} {} {}'.format(_("Page"), self._pageNumber, _("of"), page_count))
+
+
+class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
+
+    def __init__(self, letterhead_pdf, *args, **kwargs):
+        self.stationary_pages = letterhead_pdf
+        super(LetterheadCanvas, self).__init__(*args, **kwargs)
+
+
+class LetterheadCanvasWithoutFirstPage(StationaryCanvas, NumberedCanvas):
+
+    def __init__(self, letterhead_pdf, *args, **kwargs):
+        self.stationary_pages = letterhead_pdf
+        super(LetterheadCanvasWithoutFirstPage, self).__init__(*args, **kwargs)
+
 
 class SystoriDocument(BaseDocTemplate):
 
