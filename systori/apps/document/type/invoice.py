@@ -1,6 +1,9 @@
 """
 JSON Version Log
 ================
+1.2
+ - major refactoring, renamed fields, added new fields
+ - coincided with project to job based account switch
 1.1
  - Added is_flat_invoice attribute.
 1.0
@@ -87,9 +90,9 @@ def collate_tasks_total(invoice, available_width):
                   money(taskgroup['total']))
     t.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
 
-    t.row(_("Total without VAT"), money(invoice['total_base']))
-    t.row("19,00% "+_("VAT"), money(invoice['total_tax']))
-    t.row(_("Total including VAT"), money(invoice['total_gross']))
+    t.row(_("Total without VAT"), money(invoice['debited_net']))
+    t.row("19,00% "+_("VAT"), money(invoice['debited_tax']))
+    t.row(_("Total including VAT"), money(invoice['debited_gross']))
 
     return t.get_table()
 
@@ -108,7 +111,7 @@ def collate_payments(invoice, available_width):
     t.row('', _("gross pay"), _("consideration"), _("VAT"))
     t.row_style('FONTNAME', 0, -1, font.bold)
 
-    t.row(_("Invoice Total"), money(invoice['total_gross']), money(invoice['total_base']), money(invoice['total_tax']))
+    t.row(_("Invoice Total"), money(invoice['debited_gross']), money(invoice['debited_net']), money(invoice['debited_tax']))
 
     for payment in invoice.get('transactions', []):
         row = ['', money(payment['amount']), money(payment['amount_base']), money(payment['amount_tax'])]
@@ -119,7 +122,7 @@ def collate_payments(invoice, available_width):
             row[0] = _('Discount Applied')
         t.row(*row)
 
-    t.row(_("Remaining amount"), money(invoice['balance_gross']), money(invoice['balance_base']), money(invoice['balance_tax']))
+    t.row(_("Remaining amount"), money(invoice['balance_gross']), money(invoice['balance_net']), money(invoice['balance_tax']))
     t.row_style('FONTNAME', 0, -1, font.bold)
 
     return t.get_table(ContinuationTable, repeatRows=1)
@@ -199,7 +202,7 @@ def serialize(project, data):
 
     invoice = {
 
-        'version': '1.1',
+        'version': '1.2',
 
         'title': data['title'],
         'date': data['document_date'],
@@ -217,12 +220,19 @@ def serialize(project, data):
         'city': contact.city,
         'address_label': contact.address_label,
 
-        'total_gross': data['total_gross'],
-        'total_base': data['total_base'],
-        'total_tax': data['total_tax'],
+        # debits created solely as a result of this invoice
+        'debit_gross': data['debit_gross'],
+        'debit_net': data['debit_net'],
+        'debit_tax': data['debit_tax'],
 
+        # all debits for jobs on this invoice (including debit above)
+        'debited_gross': data['debited_gross'],
+        'debited_net': data['debited_net'],
+        'debited_tax': data['debited_tax'],
+
+        # balance for all jobs on this invoice
         'balance_gross': data['balance_gross'],
-        'balance_base': data['balance_base'],
+        'balance_net': data['balance_net'],
         'balance_tax': data['balance_tax'],
 
         'debits': []

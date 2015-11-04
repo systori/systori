@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from itertools import chain
 from datetime import date
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -82,11 +83,14 @@ class Invoice(Document):
         for transaction in self.transactions.all():
             transaction.finalize()
 
+    def get_invoices(self):
+        assert self.parent is None  # make sure this is a parent invoice
+        return chain([self], self.invoices.all())
+
     class Meta:
         verbose_name = _("Invoice")
         verbose_name_plural = _("Invoices")
         ordering = ['id']
-
 
 class SampleContact:
     salutation = _('Mr')

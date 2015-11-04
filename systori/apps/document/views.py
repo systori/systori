@@ -158,7 +158,24 @@ class InvoiceFormMixin:
 
 
 class InvoiceCreate(InvoiceFormMixin, CreateView):
-    pass
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        instance = kwargs['instance']
+        if 'previous_invoice_id' in self.request.GET:
+            previous_id = int(self.request.GET['previous_invoice_id'])
+            previous = Invoice.objects.get(id=previous_id)
+            instance.parent = previous.parent if previous.parent else previous
+            # copy all the basic stuff from previous invoice
+            for field in ['title', 'header', 'footer', 'add_terms']:
+                instance.json[field] = previous.json[field]
+            # copy the list of jobs
+            instance.json['debits'] = [
+                {'job.id': debit['job.id']}
+                for debit in previous.json['debits']
+            ]
+        else:
+            instance.json['debits'] = []
+        return kwargs
 
 
 class InvoiceUpdate(InvoiceFormMixin, UpdateView):

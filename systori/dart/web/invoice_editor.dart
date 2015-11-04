@@ -66,7 +66,7 @@ class JobRow extends TableRowElement {
 
     double get debit_amount => double.parse(debit_amount_input.value);
     set debit_amount(double amount) {
-        this.debit_amount_input.value = amount.toString();
+        this.debit_amount_input.value = amount.toStringAsFixed(2);
         this.debit_amount_div.text = CURRENCY.format(amount);
         this.debited_cell.text = CURRENCY.format(amount+original_debited);
         this.balance_cell.text = CURRENCY.format(amount+original_balance);

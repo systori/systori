@@ -49,6 +49,7 @@ class ProposalUpdateForm(forms.ModelForm):
 
 
 class InvoiceDocumentForm(forms.ModelForm):
+    parent = forms.ModelChoiceField(queryset=Invoice.objects.none(), required=False, widget=forms.HiddenInput())
     doc_template = forms.ModelChoiceField(
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.INVOICE), required=False)
@@ -61,19 +62,23 @@ class InvoiceDocumentForm(forms.ModelForm):
 
     class Meta:
         model = Invoice
-        fields = ['doc_template', 'is_final', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes']
+        fields = ['parent', 'doc_template', 'is_final', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes']
         widgets = {
             'document_date': widgets.DateInput(attrs={'type': 'date'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['parent'].queryset = Invoice.objects.filter(project=self.instance.project)
 
 
 class InvoiceDebitForm(Form):
 
     is_invoiced = forms.BooleanField(initial=True)
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.none(), widget=forms.HiddenInput())
-    flat_amount = LocalizedDecimalField(label=_("Flat"), max_digits=14, decimal_places=4, required=False)
+    flat_amount = LocalizedDecimalField(label=_("Flat"), max_digits=14, decimal_places=2, required=False)
     is_flat = forms.BooleanField(initial=False, required=False, widget=forms.HiddenInput())
-    debit_amount = forms.DecimalField(label=_("Debit"), initial=Decimal(0.0), max_digits=14, decimal_places=4, required=False, widget=forms.HiddenInput())
+    debit_amount = forms.DecimalField(label=_("Debit"), initial=Decimal(0.0), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
     debit_comment = forms.CharField(widget=forms.Textarea, required=False)
 
     def __init__(self, *args, **kwargs):
@@ -119,10 +124,10 @@ class InvoiceDebitForm(Form):
         if 'transaction_id' in self.initial:
             # debit_amount comes in as a float from JSONField and as a string from form submission
             # but we need it as a Decimal for pretty much everything
-            self.debit_amount_decimal = Decimal(self['debit_amount'].value())
+            self.debit_amount_decimal = Decimal(str(self['debit_amount'].value()))
 
             # this debit is already in accounting system, so we subtract it to get pre-debit totals
-            self.original_debit_amount = Decimal(self.initial['debit_amount'])
+            self.original_debit_amount = Decimal(str(self.initial['debit_amount']))
             self.latest_debited = self.job.account.debits().total
             self.latest_balance = self.job.account.balance
             self.latest_debited_base = self.latest_debited - self.original_debit_amount
@@ -132,6 +137,7 @@ class InvoiceDebitForm(Form):
             if str(self.initial['is_flat']) == 'False':
                 updated_debit = self.latest_itemized - self.latest_debited_base
                 self.debit_amount_decimal = updated_debit if updated_debit > 0 else Decimal(0.0)
+                self.initial['debit_amount'] = self.debit_amount_decimal
 
             # previous values come from json, could be different from latest values
             self.previous_debited = Decimal(self.initial['debited'])
@@ -140,13 +146,13 @@ class InvoiceDebitForm(Form):
             self.previous_itemized = Decimal(self.initial['itemized'])
 
         else:
-            # no transactions exists yet so the totals don't include debit, we add to final totals
+            # no transactions exist yet so the totals don't include debit, we add to final totals
             self.latest_debited_base = self.job.account.debits().total
             self.latest_balance_base = self.job.account.balance
             if str(self['is_invoiced'].value()) == 'True' and str(self['is_flat'].value()) == 'False':
                 possible_debit = self.latest_itemized - self.latest_debited_base
                 self.initial['debit_amount'] = possible_debit if possible_debit > 0 else Decimal(0.0)
-            self.original_debit_amount = self.debit_amount_decimal = Decimal(self['debit_amount'].value())
+            self.original_debit_amount = self.debit_amount_decimal = Decimal(str(self['debit_amount'].value()))
             self.latest_debited = self.latest_debited_base + self.debit_amount_decimal
             self.latest_balance = self.latest_balance_base + self.debit_amount_decimal
 
@@ -185,9 +191,12 @@ class BaseInvoiceForm(BaseFormSet):
 
     def get_initial(self, invoice, jobs):
         initial = []
-        previous_debits = invoice.json['debits'] if invoice.id else {}
+        previous_debits = invoice.json['debits']
         for job in jobs:
-            job_dict = {'job': job}
+            job_dict = {
+                'job': job,
+                'is_invoiced': False if previous_debits else True
+            }
             for debit in previous_debits:
                 if debit['job.id'] == job.id:
                     job_dict = debit
@@ -206,7 +215,15 @@ class BaseInvoiceForm(BaseFormSet):
         invoice = self.invoice_form.instance
 
         if not invoice.id:
+            # we need to save the invoice to get an id generated
+            # so that the transactions have something to reference
+            # but this is a bit ugly because json still contains
+            # Job instances and those can't be serialized to json
+            # so we need to temporarily empty out the json field
+            json = invoice.json
+            invoice.json = {}
             invoice.save()
+            invoice.json = json
         else:
             invoice.transactions.all().delete()
 
@@ -224,18 +241,22 @@ class BaseInvoiceForm(BaseFormSet):
 
         data['debits'] = debits
 
-        data['total_gross'] = self.debit_total
-        data['total_base'] = round(self.debit_total / (1+TAX_RATE), 2)
-        data['total_tax'] = data['total_gross'] - data['total_base']
+        data['debit_gross'] = self.debit_total
+        data['debit_net'] = round(self.debit_total / (1+TAX_RATE), 2)
+        data['debit_tax'] = data['debit_gross'] - data['debit_net']
+
+        data['debited_gross'] = self.debited_total
+        data['debited_net'] = round(self.debited_total / (1+TAX_RATE), 2)
+        data['debited_tax'] = data['debited_gross'] - data['debited_net']
 
         data['balance_gross'] = self.balance_total
-        data['balance_base'] = round(self.balance_total / (1+TAX_RATE), 2)
-        data['balance_tax'] = data['balance_gross'] - data['balance_base']
+        data['balance_net'] = round(self.balance_total / (1+TAX_RATE), 2)
+        data['balance_tax'] = data['balance_gross'] - data['balance_net']
 
         project = Project.prefetch(invoice.project.id)
         json = invoice_lib.serialize(project, data)
 
-        invoice.amount = data['total_gross']
+        invoice.amount = data['debit_gross']
         invoice.json = json
         invoice.json_version = json['version']
         invoice.save()

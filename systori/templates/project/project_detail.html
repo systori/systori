@@ -205,31 +205,46 @@
 
 
   <style>
+  .invoice-columns {
+    white-space: nowrap;
+  }
+  .invoice-columns p {
+    white-space: normal;
+  }
   .invoice-sequence {
+    vertical-align: top;
+    display: inline-block;
     width: 400px;
-    float: left;
     padding-right: 40px;
   }
   .invoice {
     width: 100%;
-    border:
   }
   </style>
   <h2 class="sub-header">{% trans "Invoices" %}</h2>
-  <div class="clearfix">
-  {% for parent_invoice in parent_invoices %}
-  <div class="invoice-sequence">
-    {% include "document/invoice_card.html" with invoice=parent_invoice %}
-    {% for invoice in parent_invoice.invoices.all %}
-      {% include "document/invoice_card.html" with invoice=invoice %}
+  <div class="invoice-columns clearfix">
+    {% for parent_invoice in parent_invoices %}
+    <div class="invoice-sequence">
+      {% for invoice in parent_invoice.get_invoices %}
+        {% include "document/invoice_card.html" with invoice=invoice %}
+        {% if forloop.last %}
+          {% if invoice.status == invoice.SENT %}
+          <a class="btn btn-default" href="{% url 'invoice.create' project.id %}?previous_invoice_id={{ invoice.id }}" style="width: 100%">
+            {% trans 'Create next invoice in this sequence.' %}
+          </a>
+          {% else %}
+            <p>{% trans 'Last invoice in sequence must be marked as sent before a new one can be created.' %}</p>
+          {% endif %}
+        {% endif %}
+        {% empty %}
+      {% endfor %}
+    </div>
     {% endfor %}
-  </div>
-  {% endfor %}
-  <div class="invoice-sequence">
-    <a class="btn btn-default" href="{% url 'invoice.create' project.id %}" style="width: 100%">
-      {% trans 'Create New Invoice' %}
-    </a>
-  </div>
+    <div class="invoice-sequence">
+      <a class="btn btn-default" href="{% url 'invoice.create' project.id %}" style="width: 100%">
+        {% trans 'Start new invoice sequence.' %}
+      </a>
+    </div>
   </div>
   <br/>
 

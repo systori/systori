@@ -16,15 +16,15 @@
   {% endfor %}
     <tr style="text-align: right;">
       <td>{% trans "Gross" %}:</td>
-      <td style="font-weight: bold;">{{ invoice.json.total_gross|money }}</td>
+      <td style="font-weight: bold;">{{ invoice.json.debit_gross|money }}</td>
     </tr>
     <tr style="text-align: right;">
-      <td>{% trans "Base" %}:</td>
-      <td>{{ invoice.json.total_base|money }}</td>
+      <td>{% trans "Net" %}:</td>
+      <td>{{ invoice.json.debit_net|money }}</td>
     </tr>
     <tr style="text-align: right;">
       <td>{% trans "VAT" %}:</td>
-      <td>{{ invoice.json.total_tax|money }}</td>
+      <td>{{ invoice.json.debit_tax|money }}</td>
     </tr>
   </table>
   <div class="panel-footer" style="text-align: right;">

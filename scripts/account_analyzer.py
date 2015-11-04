@@ -13,7 +13,7 @@ def get_transactions_table_original(project):
 SHOW_SKIPPED = False
 
 
-def migrate_accounts():
+def migrate_accounts(company):
     from systori.apps.project.models import Project
     from systori.apps.accounting.models import Account, Transaction, Entry, create_account_for_job
     from systori.apps.accounting.constants import TAX_RATE
@@ -82,9 +82,14 @@ def migrate_accounts():
             invoice_amount = Decimal(0.0)
             pre_tax_invoice = Decimal(0.0)
 
-            for json_job in invoice.json.get('jobs', []):
+            invoice.json['debits'] = invoice.json.pop('jobs')
+            for json_job in invoice.json['debits']:
 
                 job = project.jobs.get(name=json_job['name'], job_code=int(json_job['code']))
+                json_job['job.id'] = job.id
+                json_job['is_invoiced'] = True
+                json_job['flat_amount'] = 0.0
+                json_job['is_flat'] = False
 
                 pre_tax_amount = Decimal(0.0)
                 for json_taskgroup in json_job['taskgroups']:
@@ -96,28 +101,47 @@ def migrate_accounts():
                 amount -= already_debited
 
                 invoice_amount += amount
-                pre_tax_invoice += pre_tax_amount
+                pre_tax_invoice += round(amount / (1+TAX_RATE), 2)
+
+                json_job['debit_amount'] = amount
+                json_job['debit_comment'] = ""
+                json_job['debited'] = already_debited
+                json_job['balance'] = 0.0  # we don't have payments yet
+                json_job['estimate'] = round(job.estimate_total * (1+TAX_RATE), 2)
+                json_job['itemized'] = round(job.billable_total * (1+TAX_RATE), 2)
 
                 if amount > Decimal(0.0):
                     transaction = Transaction(recorded_on=invoice.created_on, invoice=invoice)
                     transaction.debit(job.account, amount, entry_type=Entry.WORK_DEBIT)
                     transaction.credit(Account.objects.get(code="1710"), amount)
                     transaction.save()
+                    json_job['transaction_id'] = transaction.id
                     print('  {:<50} {:>15} {:>15}'.format(job.name, money(amount), money(pre_tax_amount)))
 
             print('  {:<50} {:>15} {:>15}'.format('', '-'*10, '-'*10))
             print('  {:<50} {:>15} {:>15}'.format('', money(invoice_amount), money(pre_tax_invoice)))
             if round(invoice.amount, 2) != round(invoice_amount, 2):
-                if invoice.id in [31, 37, 38, 46, 47, 51, 54, 55, 56, 60, 63, 67]:  # i've manually checked these invoices - lex
-                    # TODO WARNING: submitted github tickets about these: 47
+                # i've manually checked these invoices - lex
+                # for Demo project we just do the fix without checking
+                if invoice.id in [31, 37, 38, 46, 47, 51, 54, 55, 56, 60, 63, 67, 69] or company.name == 'Demo':
                     # 37, 46, 54, 55 - rounding errors, off by one penny
-                    # 56, 60, 63 - all these had the 'balance' remaining instead of how much was actually debited
+                    # 56, 60, 63, 69 - all these had the 'balance' remaining instead of how much was actually debited
                     # 31, 38 - debit was correct but invoice had wrong amount, not sure why
                     # 67 - amounts slightly off
                     # 51 - not even sure what happened here but i think the new invoice_amount is correct
                     invoice.amount = invoice_amount
                 else:
                     raise ArithmeticError('{} != {}'.format(money(round(invoice.amount, 2)), money(round(invoice_amount, 2))))
+
+            invoice.json['version'] = '1.2'
+            invoice.json['title'] = invoice.json.get('title', '')
+            invoice.json['debit_gross'] = invoice_amount
+            invoice.json['debit_net'] = pre_tax_invoice
+            invoice.json['debit_tax'] = invoice_amount - pre_tax_invoice
+            invoice.json['debited_gross'] = invoice.json.pop('total_gross')
+            invoice.json['debited_net'] = invoice.json.pop('total_base')
+            invoice.json['debited_tax'] = invoice.json.pop('total_tax')
+            invoice.json['balance_net'] = invoice.json.pop('balance_base')
 
             invoice.save()
 
@@ -357,5 +381,6 @@ if __name__ == '__main__':
     import django
     django.setup()
     from systori.apps.company.models import *
-    Company.objects.get(schema='mehr_handwerk').activate()
-    migrate_accounts()
+    company = Company.objects.get(schema='mehr_handwerk')
+    company.activate()
+    migrate_accounts(company)
