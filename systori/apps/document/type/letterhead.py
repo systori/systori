@@ -1,51 +1,19 @@
 lorem_100 = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.<br></br>At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.<br></br>"
 
-
 from io import BytesIO
 from datetime import date
 
-from reportlab.lib.pagesizes import A5, A4, A3, LETTER, LEGAL, ELEVENSEVENTEEN, B5, B4, landscape
-from reportlab.lib.units import mm, cm, inch
-from reportlab.platypus import SimpleDocTemplate
+from reportlab.lib.pagesizes import landscape
+from reportlab.lib.units import mm
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
-from reportlab.pdfgen import canvas
-from reportlab.lib import colors
-
-from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
-
+from reportlab.platypus import Paragraph, Spacer
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
-from systori.lib.templatetags.customformatting import ubrdecimal, money
-
 from .style import stylesheet, LetterheadCanvas, SystoriDocument
-from .style import p, b, br, nr, force_break, heading_and_date
-
-DOCUMENT_UNIT = {
-    "mm": mm,
-    "cm": cm,
-    "inch": inch
-}
-
-DOCUMENT_FORMAT = {
-    "A5" : A5,
-    "A4" : A4,
-    "A3" : A3,
-    "LETTER" : LETTER,
-    "LEGAL" : LEGAL,
-    "ELEVENSEVENTEEN" : ELEVENSEVENTEEN,
-    "B5" : B5,
-    "B4" : B4,
-}
-
-PORTRAIT = "portrait"
-LANDSCAPE = "landscape"
-ORIENTATION = {
-    PORTRAIT : _("Portrait"),
-    LANDSCAPE : _("Landscape"),
-}
+from .style import force_break, heading_and_date
+from .style import DOCUMENT_FORMAT, DOCUMENT_UNIT
 
 
 def render(letterhead):
@@ -67,7 +35,7 @@ def render(letterhead):
 
         flowables = []
 
-        doc = SystoriDocument(buffer, pagesize = pagesize, debug=letterhead.debug)
+        doc = SystoriDocument(buffer, pagesize=pagesize, debug=letterhead.debug)
 
         flowables.extend([
             Paragraph(force_break("""Musterfirma GmbH

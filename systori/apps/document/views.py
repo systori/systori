@@ -30,16 +30,6 @@ class DocumentRenderView(SingleObjectMixin, View):
         raise NotImplementedError
 
 
-# Specification
-
-
-class SpecificationPDF(DocumentRenderView):
-    model = Proposal
-
-    def pdf(self):
-        json = self.get_object().json
-        return specification.render(json, self.kwargs['format'])
-
 # Proposal
 
 
@@ -52,7 +42,8 @@ class ProposalPDF(DocumentRenderView):
 
     def pdf(self):
         json = self.get_object().json
-        return proposal.render(json, self.request.GET.get('with_lineitems', False), self.kwargs['format'])
+        letterhead = self.get_object().letterhead
+        return proposal.render(json, letterhead, self.request.GET.get('with_lineitems', False), self.kwargs['format'])
 
 
 class ProposalCreate(CreateView):

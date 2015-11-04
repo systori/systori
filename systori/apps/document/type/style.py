@@ -128,10 +128,10 @@ from django.utils.translation import ugettext as _
 from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
 
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A5, A4, A3, LETTER, LEGAL, ELEVENSEVENTEEN, B5, B4
 
 from reportlab.platypus import BaseDocTemplate, PageTemplate
-from reportlab.platypus import Frame, Paragraph, Table
+from reportlab.platypus import Frame, Paragraph, Table, Spacer
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm, cm, inch
 from reportlab.lib import colors
@@ -141,6 +141,25 @@ DOCUMENT_UNIT = {
     "cm": cm,
     "inch": inch
 }
+
+DOCUMENT_FORMAT = {
+    "A5" : A5,
+    "A4" : A4,
+    "A3" : A3,
+    "LETTER" : LETTER,
+    "LEGAL" : LEGAL,
+    "ELEVENSEVENTEEN" : ELEVENSEVENTEEN,
+    "B5" : B5,
+    "B4" : B4,
+}
+
+PORTRAIT = "portrait"
+LANDSCAPE = "landscape"
+ORIENTATION = {
+    PORTRAIT : _("Portrait"),
+    LANDSCAPE : _("Landscape"),
+}
+
 
 
 def chunk_text(txt, max_length=1500):
@@ -264,7 +283,8 @@ class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
     def draw_page_number(self, page_count):
         self.setFont(font.normal, 10)
         # dynamically positioning based on frame dimensions. string is placed underneath the frame aligned right.
-        self.drawRightString(self._doctemplate.frame._x1 + self._doctemplate.frame._aW, self._doctemplate.frame._y1 - 17,
+        self.drawRightString(self._doctemplate.frame._x1 + self._doctemplate.frame._aW,
+                             self._doctemplate.frame._y1 - 25,
                              '{} {} {} {}'.format(_("Page"), self._pageNumber, _("of"), page_count))
 
 class SystoriDocument(BaseDocTemplate):
@@ -327,10 +347,12 @@ class ContinuationTable(Table):
         self.canv.setFont(font.italic, 10)
 
         if getattr(self, '_splitCount', 0) > 1:
-            self.canv.drawString(0, self._height + 5*mm, '... '+_('Continuation'))
+            #self.canv.drawString(0, self._height + 5*mm, '... '+_('Continuation'))
+            pass
 
         if getattr(self, '_splitCount', 0) >= 1 and not hasattr(self, '_lastTable'):
-            self.canv.drawRightString(self._width, -7*mm, _('Continuation')+' ...')
+            #self.canv.drawRightString(self._width, -7*mm, _('Continuation')+' ...')
+            self.canv.drawString(0, -20, _('Continuation')+' ...')
 
         self.canv.restoreState()
 
@@ -421,3 +443,27 @@ class TableFormatter:
     def keep_previous_n_rows_together(self, n):
         self.style.append(('NOSPLIT', (0, self._row_num-n+1), (0, self._row_num)))
 
+    def keep_next_n_rows_together(self, n):
+        self.style.append(('NOSPLIT', (0, self._row_num+n-1), (0, self._row_num)))
+
+
+def get_address_label(document):
+    if document.get('business') is '':
+        return Paragraph(force_break(document.get('address_label', None) or """\
+        {salutation} {first_name} {last_name}
+        {address}
+        {postal_code} {city}
+        """.format(**document)), stylesheet['Normal'])
+    else:
+        return Paragraph(force_break(document.get('address_label', None) or """\
+        {business}
+        {salutation} {first_name} {last_name}
+        {address}
+        {postal_code} {city}
+        """.format(**document)), stylesheet['Normal'])
+
+def get_address_label_spacer(document):
+    if document.get('business') is '':
+        return Spacer(0, 30*mm)
+    else:
+        return Spacer(0, 26*mm)

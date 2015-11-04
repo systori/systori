@@ -2,6 +2,8 @@ from io import BytesIO
 from datetime import date
 
 from reportlab.lib.units import mm
+from reportlab.lib.utils import simpleSplit
+from reportlab.lib.pagesizes import landscape
 from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
 from reportlab.lib import colors
 
@@ -12,7 +14,9 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable
 from .style import stylesheet, chunk_text, force_break, p, b
-from .style import PortraitStationaryCanvas
+from .style import LetterheadCanvas
+from .style import DOCUMENT_FORMAT, DOCUMENT_UNIT
+from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .utils import update_instance
 from . import font
 
@@ -36,6 +40,8 @@ def collate_tasks(proposal, available_width):
     t.row_style('ALIGNMENT', 4, -1, "RIGHT")
     t.row_style('SPAN', 2, 3)
 
+    description_width = sum(t.get_widths()[1:6])
+
     for job in proposal['jobs']:
         t.row(b(job['code']), b(job['name']))
         t.row_style('SPAN', 1, -1)
@@ -43,14 +49,17 @@ def collate_tasks(proposal, available_width):
         for taskgroup in job['taskgroups']:
             t.row(b(taskgroup['code']), b(taskgroup['name']))
             t.row_style('SPAN', 1, -1)
+            t.keep_next_n_rows_together(2)
 
             for task in taskgroup['tasks']:
                 t.row(p(task['code']), p(task['name']))
                 t.row_style('SPAN', 1, -2)
 
-                for chunk in chunk_text(task['description']):
-                    t.row('', p(chunk))
-                    t.row_style('SPAN', 1, -2)
+                lines = simpleSplit(task['description'], font.font_name, t.font_size, description_width)
+                for line in lines:
+                    t.row('', p(line))
+                    t.row_style('SPAN', 1, -1)
+                    t.row_style('TOPPADDING', 0, -1, 1)
 
                 task_total_column = money(task['total'])
                 if task['is_optional']:
@@ -60,12 +69,14 @@ def collate_tasks(proposal, available_width):
 
                 t.row('', '', ubrdecimal(task['qty']), p(task['unit']), money(task['price']), task_total_column)
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
+                t.keep_previous_n_rows_together(3)
 
             t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
                   '', '', '', money(taskgroup['total']))
             t.row_style('FONTNAME', 0, -1, font.bold)
             t.row_style('ALIGNMENT', -1, -1, "RIGHT")
             t.row_style('SPAN', 1, 4)
+            t.row_style('VALIGN', 0, -1, "BOTTOM")
 
             t.row('')
 
@@ -117,7 +128,7 @@ def collate_lineitems(proposal, available_width):
                 for chunk in chunk_text(task['description']):
                     t.row('', p(chunk))
 
-                #t.row_style('BOTTOMPADDING', 0, -1, 10)  seems to have no effect @elmcrest 09/2015
+                # t.row_style('BOTTOMPADDING', 0, -1, 10)  seems to have no effect @elmcrest 09/2015
 
                 pages.append(t.get_table(ContinuationTable))
 
@@ -146,28 +157,32 @@ def collate_lineitems(proposal, available_width):
     return pages
 
 
-def render(proposal, with_line_items, format):
+def render(proposal, letterhead, with_line_items, format):
 
-    #letterhead = Letterhead.objects.get(active=True)
+    def canvas_maker(*args, **kwargs):
+        return LetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
 
     with BytesIO() as buffer:
+        document_unit = DOCUMENT_UNIT[letterhead.document_unit]
+        if letterhead.orientation == 'landscape':
+            pagesize = landscape(DOCUMENT_FORMAT[letterhead.document_format])
+        else:
+            pagesize = DOCUMENT_FORMAT[letterhead.document_format]
+        page_width = pagesize[0]
+        table_width = page_width - float(letterhead.right_margin)*document_unit\
+                                 - float(letterhead.left_margin)*document_unit
 
         proposal_date = date_format(date(*map(int, proposal['date'].split('-'))), use_l10n=True)
 
-        doc = SystoriDocument(buffer, debug=DEBUG_DOCUMENT)
+        doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         flowables = [
 
-            Paragraph(force_break(proposal.get('address_label', None) or """\
-            {business}
-            {salutation} {first_name} {last_name}
-            {address}
-            {postal_code} {city}
-            """.format(**proposal)), stylesheet['Normal']),
+            get_address_label(proposal),
 
-            Spacer(0, 18*mm),
+            get_address_label_spacer(proposal),
 
-            Paragraph(proposal_date, stylesheet['NormalRight']),
+            heading_and_date(proposal.get('title') or _("Proposal"), proposal_date, table_width, debug=DEBUG_DOCUMENT),
 
             Spacer(0, 4*mm),
 
@@ -175,20 +190,20 @@ def render(proposal, with_line_items, format):
 
             Spacer(0, 4*mm),
 
-            collate_tasks(proposal, doc.width),
+            collate_tasks(proposal, table_width),
 
-            collate_tasks_total(proposal, doc.width),
+            collate_tasks_total(proposal, table_width),
 
             Spacer(0, 10*mm),
 
             KeepTogether(Paragraph(force_break(proposal['footer']), stylesheet['Normal'])),
 
-            ] + (collate_lineitems(proposal, doc.width) if with_line_items else [])
+            ] + (collate_lineitems(proposal, table_width) if with_line_items else [])
 
         if format == 'print':
-            doc.build(flowables)
+            doc.build(flowables, letterhead=letterhead)
         else:
-            doc.build(flowables, canvasmaker=PortraitStationaryCanvas)
+            doc.build(flowables, canvasmaker=canvas_maker, letterhead=letterhead)
 
         return buffer.getvalue()
 
