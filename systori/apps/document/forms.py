@@ -74,7 +74,7 @@ class InvoiceDocumentForm(forms.ModelForm):
 
 class InvoiceDebitForm(Form):
 
-    is_invoiced = forms.BooleanField(initial=True)
+    is_invoiced = forms.BooleanField(initial=True, required=False)
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.none(), widget=forms.HiddenInput())
     flat_amount = LocalizedDecimalField(label=_("Flat"), max_digits=14, decimal_places=2, required=False)
     is_flat = forms.BooleanField(initial=False, required=False, widget=forms.HiddenInput())
