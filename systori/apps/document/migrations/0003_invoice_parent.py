@@ -17,6 +17,11 @@ class Migration(migrations.Migration):
             name='parent',
             field=models.ForeignKey(related_name='invoices', to='document.Invoice', null=True),
         ),
+        migrations.AddField(
+            model_name='invoice',
+            name='transaction',
+            field=models.OneToOneField(null=True, to='accounting.Transaction', related_name='invoice'),
+        ),
         migrations.AlterField(
             model_name='invoice',
             name='status',

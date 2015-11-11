@@ -68,6 +68,9 @@ class Invoice(Document):
     project = models.ForeignKey("project.Project", related_name="invoices")
     parent = models.ForeignKey("self", related_name="invoices", null=True)
 
+    transaction = models.OneToOneField('accounting.Transaction', related_name="invoice", null=True, on_delete=models.SET_NULL)
+
+
     DRAFT = "draft"
     SENT = "sent"
 

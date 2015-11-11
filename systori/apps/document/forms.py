@@ -102,7 +102,7 @@ class InvoiceDebitForm(Form):
     def get_dict(self):
         """
         This dictionary later becomes the 'initial' value to this form when
-        editing the invoice. 'job' and 'transaction_id' are also added later.
+        editing the invoice.
         """
         return {
             'job': self.job,
@@ -121,7 +121,7 @@ class InvoiceDebitForm(Form):
         self.latest_estimate = round(self.job.estimate_total * (1+TAX_RATE), 2)
         self.latest_itemized = round(self.job.billable_total * (1+TAX_RATE), 2)
 
-        if 'transaction_id' in self.initial:
+        if self.initial['is_booked']:
             # debit_amount comes in as a float from JSONField and as a string from form submission
             # but we need it as a Decimal for pretty much everything
             self.debit_amount_decimal = Decimal(str(self['debit_amount'].value()))
@@ -193,15 +193,20 @@ class BaseInvoiceForm(BaseFormSet):
         initial = []
         previous_debits = invoice.json['debits']
         for job in jobs:
+
             job_dict = {
-                'job': job,
-                'is_invoiced': False if previous_debits else True
+                'is_invoiced': False if previous_debits else True,
+                'is_booked': False
             }
+
             for debit in previous_debits:
                 if debit['job.id'] == job.id:
                     job_dict = debit
-                    job_dict['job'] = job
+                    job_dict['is_booked'] = True
                     break
+
+            job_dict['job'] = job
+
             initial.append(job_dict)
         return initial
 
@@ -214,26 +219,15 @@ class BaseInvoiceForm(BaseFormSet):
 
         invoice = self.invoice_form.instance
 
-        if not invoice.id:
-            # we need to save the invoice to get an id generated
-            # so that the transactions have something to reference
-            # but this is a bit ugly because json still contains
-            # Job instances and those can't be serialized to json
-            # so we need to temporarily empty out the json field
-            json = invoice.json
-            invoice.json = {}
-            invoice.save()
-            invoice.json = json
-        else:
-            invoice.transactions.all().delete()
+        if invoice.transaction_id:
+            invoice.transaction.delete()
 
         debits = []
         for debit_form in self.forms:
             if debit_form.cleaned_data['is_invoiced']:
-                debit = debit_form.get_dict()
-                t = skr03.partial_debit(invoice, debit['job'], debit['debit_amount'], debit['is_flat'])
-                debit['transaction_id'] = t.id if t else None
-                debits.append(debit)
+                debits.append(debit_form.get_dict())
+
+        invoice.transaction = skr03.partial_debit([(debit['job'], debit['debit_amount'], debit['is_flat']) for debit in debits])
 
         data = self.invoice_form.cleaned_data
 

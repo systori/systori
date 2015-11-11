@@ -15,7 +15,7 @@ from .forms import JobSiteForm, FilterForm
 from ..task.models import Job, TaskGroup, Task
 from ..directory.models import ProjectContact
 from ..document.models import Invoice, DocumentTemplate
-from ..accounting.utils import get_transactions_table
+from ..accounting.utils import get_transactions_for_jobs
 from ..accounting.models import Transaction, create_account_for_job
 from .gaeb_utils import gaeb_import
 from django.core.exceptions import ValidationError
@@ -141,8 +141,8 @@ class ProjectView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ProjectView, self).get_context_data(**kwargs)
-        context['transactions'] = get_transactions_table(self.object)
-        context['parent_invoices'] = self.object.invoices.filter(parent=None).all()
+        context['transactions'] = get_transactions_for_jobs(self.object.jobs.all())
+        context['parent_invoices'] = self.object.invoices.filter(parent=None).prefetch_related('invoices').all()
         return context
 
     def get_queryset(self):

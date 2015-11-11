@@ -40,3 +40,8 @@ def money(decimal):
     if type(decimal) is str: decimal = Decimal(decimal)
     locale.setlocale(locale.LC_ALL, (to_locale(get_language()), 'utf-8'))
     return locale.currency(decimal, True, True)
+
+
+@register.filter
+def negate(value):
+    return -value

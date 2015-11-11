@@ -114,6 +114,15 @@ class BaseTransaction(models.Model):
     finalized_on = models.DateField(_("Date Finalized"), null=True)
     is_finalized = models.BooleanField(_("Finalized"), default=False)
 
+    INVOICE = "invoice"
+    PAYMENT = "payment"
+
+    TRANSACTION_TYPE = (
+        (INVOICE, _("Invoice")),
+        (PAYMENT, _("Payment")),
+    )
+    transaction_type = models.CharField(_('Transaction Type'), null=True, max_length=32, choices=TRANSACTION_TYPE)
+
     class Meta:
         abstract = True
 

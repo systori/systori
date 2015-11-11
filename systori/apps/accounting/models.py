@@ -6,6 +6,7 @@ from decimal import Decimal
 from .constants import *
 
 from systori.lib.accounting.models import BaseAccount, BaseTransaction, BaseEntry
+from ..task.models import Job
 
 
 def create_account_for_job(job):
@@ -44,6 +45,15 @@ class Account(BaseAccount):
         return '{} - {}'.format(self.code, self.name)
 
     @property
+    def is_bank(self):
+        if self.account_type == self.ASSET:
+            try:
+                self.job
+            except Job.DoesNotExist:
+                return True
+        return False
+
+    @property
     def balance_base(self):
         return round(self.balance / (1 + TAX_RATE), 2)
 
@@ -70,6 +80,8 @@ class Account(BaseAccount):
 
 class Entry(BaseEntry):
 
+    job = models.ForeignKey('task.Job', null=True, related_name="+")
+
     @property
     def amount_base(self):
         return round(self.amount / (1 + TAX_RATE), 2)
@@ -80,8 +92,6 @@ class Entry(BaseEntry):
 
 
 class Transaction(BaseTransaction):
-
-    invoice = models.ForeignKey('document.Invoice', null=True, related_name="transactions")
 
     entry_class = Entry
 

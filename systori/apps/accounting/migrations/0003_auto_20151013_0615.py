@@ -61,10 +61,5 @@ class Migration(migrations.Migration):
             name='received_on',
             field=models.DateField(default=datetime.date.today, verbose_name='Date Received'),
         ),
-        migrations.AddField(
-            model_name='transaction',
-            name='invoice',
-            field=models.ForeignKey(related_name='transactions', to='document.Invoice', null=True),
-        ),
         migrations.RunPython(migrate_entry_type),
     ]

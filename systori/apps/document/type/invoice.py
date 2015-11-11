@@ -23,7 +23,7 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
-from systori.apps.accounting.utils import get_transactions_table
+from systori.apps.accounting.utils import get_transactions_for_jobs
 from systori.apps.accounting.constants import TAX_RATE
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b, nr
@@ -114,7 +114,7 @@ def collate_payments(invoice, available_width):
     t.row(_("Invoice Total"), money(invoice['debited_gross']), money(invoice['debited_net']), money(invoice['debited_tax']))
 
     for payment in invoice.get('transactions', []):
-        row = ['', money(payment['amount']), money(payment['amount_base']), money(payment['amount_tax'])]
+        row = ['', money(payment['jobs_total']), money(payment['amount_base']), money(payment['amount_tax'])]
         if payment['type'] == 'payment':
             received_on = date_format(date(*map(int, payment['received_on'].split('-'))), use_l10n=True)
             row[0] = Paragraph(_('Your Payment on')+' '+received_on, stylesheet['Normal'])
@@ -211,6 +211,8 @@ def serialize(project, data):
         'header': data['header'],
         'footer': data['footer'],
 
+        'is_final': data['is_final'],
+
         'business': contact.business,
         'salutation': contact.salutation,
         'first_name': contact.first_name,
@@ -241,6 +243,8 @@ def serialize(project, data):
     if data.get('add_terms', False):
         invoice['add_terms'] = True  # TODO: Calculate the terms.
 
+    invoice['transactions'] = get_transactions_for_jobs([d['job'] for d in data['debits']])
+
     for debit in data['debits']:
 
         job = debit.pop('job')
@@ -252,24 +256,6 @@ def serialize(project, data):
             'taskgroups': []
         })
         invoice['debits'].append(debit)
-
-        debit['transactions'] = []
-
-        for record_type, _, record, job in get_transactions_table(job):
-
-            if record_type in ('payment', 'discount'):
-
-                txn = {
-                    'type': record_type,
-                    'amount': record.amount,
-                    'amount_base': record.amount_base,
-                    'amount_tax': record.amount_tax
-                }
-
-                if record_type == 'payment':
-                    txn['received_on'] = record.received_on
-
-                debit['transactions'].append(txn)
 
         if debit['is_flat']:
             continue

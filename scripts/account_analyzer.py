@@ -82,6 +82,8 @@ def migrate_accounts(company):
             invoice_amount = Decimal(0.0)
             pre_tax_invoice = Decimal(0.0)
 
+            transaction = Transaction(recorded_on=invoice.created_on, transaction_type=Transaction.INVOICE)
+
             invoice.json['debits'] = invoice.json.pop('jobs')
             for json_job in invoice.json['debits']:
 
@@ -111,11 +113,8 @@ def migrate_accounts(company):
                 json_job['itemized'] = round(job.billable_total * (1+TAX_RATE), 2)
 
                 if amount > Decimal(0.0):
-                    transaction = Transaction(recorded_on=invoice.created_on, invoice=invoice)
-                    transaction.debit(job.account, amount, entry_type=Entry.WORK_DEBIT)
-                    transaction.credit(Account.objects.get(code="1710"), amount)
-                    transaction.save()
-                    json_job['transaction_id'] = transaction.id
+                    transaction.debit(job.account, amount, entry_type=Entry.WORK_DEBIT, job=job)
+                    transaction.credit(Account.objects.get(code="1710"), amount, job=job)
                     print('  {:<50} {:>15} {:>15}'.format(job.name, money(amount), money(pre_tax_amount)))
 
             print('  {:<50} {:>15} {:>15}'.format('', '-'*10, '-'*10))
@@ -123,15 +122,18 @@ def migrate_accounts(company):
             if round(invoice.amount, 2) != round(invoice_amount, 2):
                 # i've manually checked these invoices - lex
                 # for Demo project we just do the fix without checking
-                if invoice.id in [31, 37, 38, 46, 47, 51, 54, 55, 56, 60, 63, 67, 69] or company.name == 'Demo':
+                if invoice.id in [31, 37, 38, 46, 47, 51, 54, 55, 56, 60, 63, 67, 69, 70, 71] or company.name == 'Demo':
                     # 37, 46, 54, 55 - rounding errors, off by one penny
-                    # 56, 60, 63, 69 - all these had the 'balance' remaining instead of how much was actually debited
+                    # 56, 60, 63, 69, 71 - all these had the 'balance' remaining instead of how much was actually debited
                     # 31, 38 - debit was correct but invoice had wrong amount, not sure why
-                    # 67 - amounts slightly off
+                    # 67, 70 - amounts slightly off
                     # 51 - not even sure what happened here but i think the new invoice_amount is correct
                     invoice.amount = invoice_amount
                 else:
                     raise ArithmeticError('{} != {}'.format(money(round(invoice.amount, 2)), money(round(invoice_amount, 2))))
+
+            transaction.save()
+            invoice.transaction = transaction
 
             invoice.json['version'] = '1.2'
             invoice.json['title'] = invoice.json.get('title', '')
@@ -206,6 +208,7 @@ def migrate_accounts(company):
             assert discount_promised_entry is None or discount_promised_entry.account.code == "1710"
 
             transaction.id = None  # start new transaction from previous
+            transaction.transaction_type = transaction.PAYMENT
             transaction.debit(bank_entry.account, bank_entry.amount)
 
             project_balance = project.balance
@@ -235,7 +238,6 @@ def migrate_accounts(company):
             for idx, (job_percent, job_balance, job) in enumerate(sorted_jobs):
 
                 # TODO: Add support final payments.
-                # TODO: Add entry groupings per job.
 
                 if idx == last_job_idx:  # use whatever is left on last job
                     assert job_balance >= (remaining_payment_amount+remaining_discount_amount)
@@ -250,14 +252,14 @@ def migrate_accounts(company):
 
                 job_credits_sum += job_credit
 
-                transaction.credit(job.account, job_credit, entry_type=Entry.PAYMENT)
-                transaction.debit(Account.objects.get(code="1710"), job_credit)
-                transaction.credit(Account.objects.get(code="1718"), job_income)
-                transaction.credit(Account.objects.get(code="1776"), round(job_credit - job_income, 2))
+                transaction.credit(job.account, job_credit, entry_type=Entry.PAYMENT, job=job)
+                transaction.debit(Account.objects.get(code="1710"), job_credit, job=job)
+                transaction.credit(Account.objects.get(code="1718"), job_income, job=job)
+                transaction.credit(Account.objects.get(code="1776"), round(job_credit - job_income, 2), job=job)
 
                 if discount_entry:
-                    transaction.credit(job.account, job_discount, entry_type=Entry.DISCOUNT)
-                    transaction.debit(Account.objects.get(code="1710"), job_discount)
+                    transaction.credit(job.account, job_discount, entry_type=Entry.DISCOUNT, job=job)
+                    transaction.debit(Account.objects.get(code="1710"), job_discount, job=job)
 
                 remaining_payment_amount -= job_credit
                 remaining_discount_amount -= job_discount

@@ -28,22 +28,25 @@ def create_chart_of_accounts(self=None):
     self.bank = Account.objects.create(account_type=Account.ASSET, code="1200")
 
 
-def partial_debit(invoice, job, amount, is_flat):
+def partial_debit(debits):
     """ Debit the customer account with any new work completed or flat invoice. """
 
-    if not amount:
-        return
+    transaction = Transaction()
 
-    transaction = Transaction(recorded_on=invoice.created_on, invoice=invoice)
+    for job, amount, is_flat in debits:
 
-    # debit the customer account (asset), this increases their balance
-    # (+) "good thing", customer owes us more money
-    transaction.debit(job.account, amount,
-                      entry_type=Entry.FLAT_DEBIT if is_flat else Entry.WORK_DEBIT)
+        if not amount:
+            continue
 
-    # credit the promised payments account (liability), increasing the liability
-    # (+) "bad thing", customer owing us money is a liability
-    transaction.credit(Account.objects.get(code="1710"), amount)
+        # debit the customer account (asset), this increases their balance
+        # (+) "good thing", customer owes us more money
+        transaction.debit(job.account, amount,
+                          entry_type=Entry.FLAT_DEBIT if is_flat else Entry.WORK_DEBIT,
+                          job=job)
+
+        # credit the promised payments account (liability), increasing the liability
+        # (+) "bad thing", customer owing us money is a liability
+        transaction.credit(Account.objects.get(code="1710"), amount, job=job)
 
     transaction.save()
 
@@ -59,7 +62,7 @@ def partial_credit(jobs, payment, received_on=None, bank=None):
     bank = bank or Account.objects.get(code="1200")
     received_on = received_on or date.today()
 
-    transaction = Transaction(received_on=received_on)
+    transaction = Transaction(received_on=received_on, transaction_type=Transaction.PAYMENT)
 
     # debit the bank account (asset)
     # (+) "good thing", money in the bank is always good
@@ -72,22 +75,22 @@ def partial_credit(jobs, payment, received_on=None, bank=None):
 
         # credit the customer account (asset), decreasing their balance
         # (-) "bad thing", customer owes us less money
-        transaction.credit(job.account, credit, entry_type=Entry.PAYMENT)
+        transaction.credit(job.account, credit, entry_type=Entry.PAYMENT, job=job)
 
         if not job.project.is_settlement:
             # Accounting prior to final invoice has a bunch more steps involved.
 
             # debit the promised payments account (liability), decreasing the liability
             # (-) "good thing", customer paying debt reduces liability
-            transaction.debit(Account.objects.get(code="1710"), credit)
+            transaction.debit(Account.objects.get(code="1710"), credit, job=job)
 
             # credit the partial payments account (liability), increasing the liability
             # (+) "bad thing", we are on the hook to finish and deliver the service or product
-            transaction.credit(Account.objects.get(code="1718"), income)
+            transaction.credit(Account.objects.get(code="1718"), income, job=job)
 
             # credit the tax payments account (liability), increasing the liability
             # (+) "bad thing", tax have to be paid eventually
-            transaction.credit(Account.objects.get(code="1776"), round(credit - income, 2))
+            transaction.credit(Account.objects.get(code="1776"), round(credit - income, 2), job=job)
 
         if discount > 0:
 
@@ -97,7 +100,7 @@ def partial_credit(jobs, payment, received_on=None, bank=None):
 
             # credit the customer account (asset), decreasing their balance
             # (-) "bad thing", customer owes us less money
-            transaction.credit(job.account, discount_amount, entry_type=Entry.DISCOUNT)
+            transaction.credit(job.account, discount_amount, entry_type=Entry.DISCOUNT, job=job)
 
             if job.project.is_settlement:
                 # Discount after final invoice has a few more steps involved.
@@ -107,18 +110,18 @@ def partial_credit(jobs, payment, received_on=None, bank=None):
 
                 # debit the cash discounts account (income), decreasing the income
                 # (-) "bad thing", less income :-(
-                transaction.debit(Account.objects.get(code="8736"), discount_income)
+                transaction.debit(Account.objects.get(code="8736"), discount_income, job=job)
 
                 # debit the tax payments account (liability), decreasing the liability
                 # (-) "good thing", less taxes to pay
-                transaction.debit(Account.objects.get(code="1776"), discount_taxes)
+                transaction.debit(Account.objects.get(code="1776"), discount_taxes, job=job)
 
             else:
                 # Discount prior to final invoice is simpler.
 
                 # debit the promised payments account (liability), decreasing the liability
                 # (-) "good thing", customer paying debt reduces liability
-                transaction.debit(Account.objects.get(code="1710"), discount_amount)
+                transaction.debit(Account.objects.get(code="1710"), discount_amount, job=job)
 
     transaction.save()
 
