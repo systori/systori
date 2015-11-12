@@ -11,6 +11,7 @@ JSON Version Log
 """
 
 from io import BytesIO
+from decimal import Decimal
 from datetime import date
 
 from reportlab.lib.units import mm
@@ -114,9 +115,10 @@ def collate_payments(invoice, available_width):
     t.row(_("Invoice Total"), money(invoice['debited_gross']), money(invoice['debited_net']), money(invoice['debited_tax']))
 
     for payment in invoice.get('transactions', []):
-        row = ['', money(payment['jobs_total']), money(payment['amount_base']), money(payment['amount_tax'])]
+        payment_net = round(Decimal(payment['jobs_total'])/(1+TAX_RATE), 2)
+        row = ['', money(payment['jobs_total']), money(payment_net), money(Decimal(payment['jobs_total'])-payment_net)]
         if payment['type'] == 'payment':
-            received_on = date_format(date(*map(int, payment['received_on'].split('-'))), use_l10n=True)
+            received_on = date_format(date(*map(int, payment['date'].split('-'))), use_l10n=True)
             row[0] = Paragraph(_('Your Payment on')+' '+received_on, stylesheet['Normal'])
         elif payment['type'] == 'discount':
             row[0] = _('Discount Applied')

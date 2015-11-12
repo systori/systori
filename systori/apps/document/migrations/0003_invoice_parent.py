@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoice',
             name='transaction',
-            field=models.OneToOneField(null=True, to='accounting.Transaction', related_name='invoice'),
+            field=models.OneToOneField(related_name='invoice', null=True, on_delete=models.deletion.SET_NULL, to='accounting.Transaction'),
         ),
         migrations.AlterField(
             model_name='invoice',

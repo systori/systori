@@ -27,7 +27,7 @@ class PaymentSplitFormTests(AccountingTestCase):
 
             'bank_account': Account.objects.banks().first().id,
             'amount': '2',
-            'received_on': '2015-01-01',
+            'transacted_on': '2015-01-01',
 
             'split-0-job': self.job.id,
             'split-0-amount': '1',
@@ -46,7 +46,7 @@ class PaymentSplitFormTests(AccountingTestCase):
 
             'bank_account': Account.objects.banks().first().id,
             'amount': '2',
-            'received_on': '2015-01-01',
+            'transacted_on': '2015-01-01',
 
             'split-0-job': self.job.id,
             'split-0-amount': '2',
@@ -65,7 +65,7 @@ class PaymentSplitFormTests(AccountingTestCase):
 
             'bank_account': Account.objects.banks().first().id,
             'amount': '',
-            'received_on': '2015-01-01',
+            'transacted_on': '2015-01-01',
 
             'split-0-job': self.job.id,
             'split-0-amount': '',

@@ -105,14 +105,15 @@ class BaseTransaction(models.Model):
     entry_class = None  # Must be defined in subclass.
     notes = models.TextField(blank=True)
 
-    # when this transaction was entered into the system
-    recorded_on = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
-    # for payments, this is when a payment is received
-    received_on = models.DateField(_("Date Received"), default=date.today)
+    # this is when a payment is received or invoice is dated
+    transacted_on = models.DateField(_("Date Transacted"), default=date.today)
 
     # finalized transactions cannot be edited
     finalized_on = models.DateField(_("Date Finalized"), null=True)
     is_finalized = models.BooleanField(_("Finalized"), default=False)
+
+    # when this transaction was entered into the system
+    recorded_on = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
 
     INVOICE = "invoice"
     PAYMENT = "payment"
@@ -149,7 +150,10 @@ class BaseTransaction(models.Model):
 
     @property
     def is_reconciled(self):
-        return self.entries.filter(is_reconciled=True).exists()
+        for entry in self.entries.all():
+            if entry.is_reconciled:
+                return True
+        return False
 
     def save(self, **kwargs):
         assert self.is_balanced, "{} != {}".format(self._total('debit'), self._total('credit'))

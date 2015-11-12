@@ -1,13 +1,5 @@
 from decimal import Decimal
-
-
-def get_transactions_table_original(project):
-    debits = [('debit', d.transaction.recorded_on.date(), d) for d in project.account.debits().all()]
-    invoices = [('invoice', i.document_date, i) for i in project.invoices.all()]
-    payments = [('payment', p.transaction.received_on, p) for p in project.account.payments().all()]
-    all_the_things = debits + invoices + payments
-    all_the_things.sort(key=lambda i: i[1])
-    return all_the_things
+from systori.apps.accounting.utils import get_transactions_for_jobs
 
 
 SHOW_SKIPPED = False
@@ -78,14 +70,14 @@ def migrate_accounts(company):
             else:
                 invoice.parent = parent_invoice
 
-            print("\n Invoice #{} - {}".format(invoice.id, invoice.invoice_no))
+            print("\n Invoice #{} - {} - {}".format(invoice.id, invoice.invoice_no, invoice.document_date.isoformat()))
             invoice_amount = Decimal(0.0)
             pre_tax_invoice = Decimal(0.0)
 
-            transaction = Transaction(recorded_on=invoice.created_on, transaction_type=Transaction.INVOICE)
+            transaction = Transaction(transacted_on=invoice.document_date, recorded_on=invoice.created_on, transaction_type=Transaction.INVOICE)
 
-            invoice.json['debits'] = invoice.json.pop('jobs')
-            for json_job in invoice.json['debits']:
+            invoice.json['debits'] = []
+            for json_job in invoice.json.pop('jobs'):
 
                 job = project.jobs.get(name=json_job['name'], job_code=int(json_job['code']))
                 json_job['job.id'] = job.id
@@ -113,6 +105,7 @@ def migrate_accounts(company):
                 json_job['itemized'] = round(job.billable_total * (1+TAX_RATE), 2)
 
                 if amount > Decimal(0.0):
+                    invoice.json['debits'].append(json_job)
                     transaction.debit(job.account, amount, entry_type=Entry.WORK_DEBIT, job=job)
                     transaction.credit(Account.objects.get(code="1710"), amount, job=job)
                     print('  {:<50} {:>15} {:>15}'.format(job.name, money(amount), money(pre_tax_amount)))
@@ -290,6 +283,14 @@ def migrate_accounts(company):
 
             # save() also checks that all debits == all credits
             transaction.save()
+
+        # Now that we have invoices and payments migrated to the new system we can
+        # generate the new transaction history tables...
+        print('\n\n   Calculating transaction histories....')
+        for invoice in project.invoices.all():
+            jobs = Job.objects.filter(id__in=[debit['job.id'] for debit in invoice.json['debits']])
+            invoice.json['transactions'] = get_transactions_for_jobs(jobs, invoice.document_date)
+            invoice.save()
 
 #        if not project.account.entries.exists():
 #            if SHOW_SKIPPED:

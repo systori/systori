@@ -202,7 +202,7 @@ class BaseInvoiceForm(BaseFormSet):
             for debit in previous_debits:
                 if debit['job.id'] == job.id:
                     job_dict = debit
-                    job_dict['is_booked'] = True
+                    job_dict['is_booked'] = debit.get('is_booked', True)
                     break
 
             job_dict['job'] = job

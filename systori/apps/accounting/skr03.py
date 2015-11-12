@@ -10,22 +10,17 @@ from .constants import *
 # http://www.ledger-cli.org/3.0/doc/ledger3.html
 
 
-DEBTOR_CODE_RANGE = (10000, 69999)
-
-BANK_CODE_RANGE = (1200, 1288)
-
-
 def create_chart_of_accounts(self=None):
     if not self: self = type('', (), {})()
 
-    self.promised_payments = Account.objects.create(account_type=Account.LIABILITY, code="1710")
-    self.partial_payments = Account.objects.create(account_type=Account.LIABILITY, code="1718")
-    self.tax_payments = Account.objects.create(account_type=Account.LIABILITY, code="1776")
+    self.promised_payments = Account.objects.create(account_type=Account.LIABILITY, code=SKR03_PROMISED_PAYMENTS_CODE)
+    self.partial_payments = Account.objects.create(account_type=Account.LIABILITY, code=SKR03_PARTIAL_PAYMENTS_CODE)
+    self.tax_payments = Account.objects.create(account_type=Account.LIABILITY, code=SKR03_TAX_PAYMENTS_CODE)
 
-    self.income = Account.objects.create(account_type=Account.INCOME, code="8400")
-    self.cash_discount = Account.objects.create(account_type=Account.INCOME, code="8736")
+    self.income = Account.objects.create(account_type=Account.INCOME, code=SKR03_INCOME_CODE)
+    self.cash_discount = Account.objects.create(account_type=Account.INCOME, code=SKR03_CASH_DISCOUNT_CODE)
 
-    self.bank = Account.objects.create(account_type=Account.ASSET, code="1200")
+    self.bank = Account.objects.create(account_type=Account.ASSET, code=SKR03_BANK_CODE)
 
 
 def partial_debit(debits):
@@ -46,23 +41,23 @@ def partial_debit(debits):
 
         # credit the promised payments account (liability), increasing the liability
         # (+) "bad thing", customer owing us money is a liability
-        transaction.credit(Account.objects.get(code="1710"), amount, job=job)
+        transaction.credit(Account.objects.get(code=SKR03_PROMISED_PAYMENTS_CODE), amount, job=job)
 
     transaction.save()
 
     return transaction
 
 
-def partial_credit(jobs, payment, received_on=None, bank=None):
+def partial_credit(jobs, payment, transacted_on=None, bank=None):
     """ Applies a payment to a list of customer accounts. Including discounts on a per account basis. """
 
     assert isinstance(payment, Decimal)
     assert payment == sum([p[1] for p in jobs])
 
-    bank = bank or Account.objects.get(code="1200")
-    received_on = received_on or date.today()
+    bank = bank or Account.objects.get(code=SKR03_BANK_CODE)
+    transacted_on = transacted_on or date.today()
 
-    transaction = Transaction(received_on=received_on, transaction_type=Transaction.PAYMENT)
+    transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.PAYMENT)
 
     # debit the bank account (asset)
     # (+) "good thing", money in the bank is always good
@@ -82,15 +77,15 @@ def partial_credit(jobs, payment, received_on=None, bank=None):
 
             # debit the promised payments account (liability), decreasing the liability
             # (-) "good thing", customer paying debt reduces liability
-            transaction.debit(Account.objects.get(code="1710"), credit, job=job)
+            transaction.debit(Account.objects.get(code=SKR03_PROMISED_PAYMENTS_CODE), credit, job=job)
 
             # credit the partial payments account (liability), increasing the liability
             # (+) "bad thing", we are on the hook to finish and deliver the service or product
-            transaction.credit(Account.objects.get(code="1718"), income, job=job)
+            transaction.credit(Account.objects.get(code=SKR03_PARTIAL_PAYMENTS_CODE), income, job=job)
 
             # credit the tax payments account (liability), increasing the liability
             # (+) "bad thing", tax have to be paid eventually
-            transaction.credit(Account.objects.get(code="1776"), round(credit - income, 2), job=job)
+            transaction.credit(Account.objects.get(code=SKR03_TAX_PAYMENTS_CODE), round(credit - income, 2), job=job)
 
         if discount > 0:
 
@@ -110,18 +105,18 @@ def partial_credit(jobs, payment, received_on=None, bank=None):
 
                 # debit the cash discounts account (income), decreasing the income
                 # (-) "bad thing", less income :-(
-                transaction.debit(Account.objects.get(code="8736"), discount_income, job=job)
+                transaction.debit(Account.objects.get(code=SKR03_CASH_DISCOUNT_CODE), discount_income, job=job)
 
                 # debit the tax payments account (liability), decreasing the liability
                 # (-) "good thing", less taxes to pay
-                transaction.debit(Account.objects.get(code="1776"), discount_taxes, job=job)
+                transaction.debit(Account.objects.get(code=SKR03_TAX_PAYMENTS_CODE), discount_taxes, job=job)
 
             else:
                 # Discount prior to final invoice is simpler.
 
                 # debit the promised payments account (liability), decreasing the liability
                 # (-) "good thing", customer paying debt reduces liability
-                transaction.debit(Account.objects.get(code="1710"), discount_amount, job=job)
+                transaction.debit(Account.objects.get(code=SKR03_PROMISED_PAYMENTS_CODE), discount_amount, job=job)
 
     transaction.save()
 

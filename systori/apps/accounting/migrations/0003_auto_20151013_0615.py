@@ -18,7 +18,7 @@ def migrate_entry_type(apps, schema_editor):
             else:
                 entry.entry_type = 'other'
             if entry.received_on:
-                entry.transaction.received_on = entry.received_on
+                entry.transaction.transacted_on = entry.received_on
                 entry.transaction.save()
             entry.save()
 
@@ -58,8 +58,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='transaction',
-            name='received_on',
-            field=models.DateField(default=datetime.date.today, verbose_name='Date Received'),
+            name='transacted_on',
+            field=models.DateField(verbose_name='Date Transacted', default=datetime.date.today),
         ),
         migrations.RunPython(migrate_entry_type),
     ]

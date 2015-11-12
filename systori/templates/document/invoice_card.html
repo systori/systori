@@ -7,7 +7,7 @@
       <div class="col-md-4 text-right">{{ invoice.document_date }}</div>
     </div>
   </div>
-  <table class="table" width="100%">
+  <table class="table">
   {% for debit in invoice.json.debits %}
     <tr>
       <td>{{ debit.name }}</td>

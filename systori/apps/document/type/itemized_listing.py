@@ -43,7 +43,7 @@ def collate_payments(invoice, available_width):
     for payment in invoice['transactions']:
         row = ['', money(payment['amount']), money(payment['amount_base']), money(payment['amount_tax'])]
         if payment['type'] == 'payment':
-            received_on = date_format(payment['received_on'], use_l10n=True)
+            received_on = date_format(payment['transacted_on'], use_l10n=True)
             row[0] = Paragraph(_('Your Payment on')+' '+received_on, stylesheet['Normal'])
         elif payment['type'] == 'discount':
             row[0] = _('Discount Applied')

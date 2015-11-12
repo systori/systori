@@ -83,8 +83,7 @@ class Invoice(Document):
 
     @transition(field=status, source=DRAFT, target=SENT, custom={'label': _("Mark Sent")})
     def send(self):
-        for transaction in self.transactions.all():
-            transaction.finalize()
+        self.transaction.finalize()
 
     def get_invoices(self):
         assert self.parent is None  # make sure this is a parent invoice

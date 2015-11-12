@@ -13,7 +13,7 @@ from .skr03 import Account, partial_credit
 class PaymentForm(Form):
     bank_account = forms.ModelChoiceField(label=_("Bank Account"), queryset=Account.objects.banks())
     amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
-    received_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
+    transacted_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
 
 
 class SplitPaymentForm(Form):
@@ -64,7 +64,7 @@ class BaseSplitPaymentFormSet(BaseFormSet):
         partial_credit(
             self.get_splits(),
             self.payment_form.cleaned_data['amount'],
-            self.payment_form.cleaned_data['received_on'],
+            self.payment_form.cleaned_data['transacted_on'],
             self.payment_form.cleaned_data['bank_account']
         )
 

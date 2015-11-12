@@ -170,7 +170,7 @@ class InvoiceCreate(InvoiceFormMixin, CreateView):
                 instance.json[field] = previous.json[field]
             # copy the list of jobs
             instance.json['debits'] = [
-                {'job.id': debit['job.id']}
+                {'job.id': debit['job.id'], 'is_booked': False}
                 for debit in previous.json['debits']
             ]
         else:
