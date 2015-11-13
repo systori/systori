@@ -252,12 +252,25 @@
   <br/>
 
 
+  <style>
+  .payment-table .job-row {
+    font-size: 75%;
+    color: gray;
+    text-align: right;
+  }
+  .payment-table .job-row.last {
+    border-bottom: 2px solid #ddd;
+  }
+  </style>
   <h2 class="sub-header">{% trans "Payments" %}</h2>
-  <table class="table">
+  <table class="table payment-table">
     <thead>
     <tr>
       <th>{% trans 'Date' %}</th>
       <th>{% trans 'Payment' %}</th>
+      <th class="text-right">{% trans 'Applied' %}</th>
+      <th class="text-right">{% trans 'Discount' %}</th>
+      <th class="text-right">{% trans 'Total Credit' %}</th>
       <th class="text-right" colspan="3">{% trans 'Actions' %}</th>
     </tr>
     </thead>
@@ -266,34 +279,29 @@
       {% if transaction.type == 'payment' %}
       <tr>
         <td>{{ transaction.date|localize }}</td>
-        <td>
-          {% if transaction.jobs_total == transaction.transaction_total %}
-            {% blocktrans with amount=transaction.transaction_total|negate|money %}Applied entire payment of {{ amount }} to:{% endblocktrans %}
-          {% else %}
-            {% blocktrans with amount=transaction.transaction_total|negate|money %}Applied part of payment {{ amount }} to:{% endblocktrans %}
-          {% endif %}
-
-          <table>
-            {% for job in transaction.jobs.values %}
-            <tr>
-              <td>{{ job.name }}</td>
-              <td>{{ job.amount|money }}</td>
-            </tr>
-            {% endfor %}
-          </table>
-
-        </td>
-        <td align="right" colspan="3">
+        <td>{{ transaction.payment_received|negate|money }}</td>
+        <td class="text-right">{{ transaction.payment_applied|negate|money }}</td>
+        <td class="text-right">{{ transaction.discount_applied|negate|money }}</td>
+        <td class="text-right">{{ transaction.gross|negate|money }}</td>
+        <td class="text-right">
           {% if not transaction.is_reconciled %}
             <a href="{% url 'payment.delete' project.id transaction.id %}">{% trans "Delete" %}</a>
           {% endif %}
         </td>
       </tr>
+      {% for job in transaction.jobs.values %}
+        <tr class="job-row {% if forloop.last %}last{% endif %}">
+          <td colspan="2">{{ job.name }}</td>
+          <td>{{ job.payment_applied|negate|money }}</td>
+          <td>{{ job.discount_applied|negate|money }}</td>
+          <td>{{ job.gross|negate|money }}</td>
+          <td></td>
+        </tr>
+      {% endfor %}
       {% endif %}
     {% endfor %}
     </tbody>
   </table>
-  <br/>
   <a href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
 
 

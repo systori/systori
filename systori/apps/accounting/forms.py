@@ -8,6 +8,7 @@ from django import forms
 from systori.lib.fields import LocalizedDecimalField
 from ..task.models import Job
 from .skr03 import Account, partial_credit
+from .constants import BANK_CODE_RANGE
 
 
 class PaymentForm(Form):

@@ -109,23 +109,25 @@ def collate_payments(invoice, available_width):
     t.style.append(('LINEBELOW', (0, 0), (-1, 0), 0.25, colors.black))
     t.style.append(('LINEAFTER', (0, 0), (-2, -1), 0.25, colors.black))
 
-    t.row('', _("gross pay"), _("consideration"), _("VAT"))
+    t.row('', _("gross"), _("consideration"), _("tax"))
     t.row_style('FONTNAME', 0, -1, font.bold)
 
-    t.row(_("Invoice Total"), money(invoice['debited_gross']), money(invoice['debited_net']), money(invoice['debited_tax']))
-
-    for payment in invoice.get('transactions', []):
-        payment_net = round(Decimal(payment['jobs_total'])/(1+TAX_RATE), 2)
-        row = ['', money(payment['jobs_total']), money(payment_net), money(Decimal(payment['jobs_total'])-payment_net)]
-        if payment['type'] == 'payment':
-            received_on = date_format(date(*map(int, payment['date'].split('-'))), use_l10n=True)
-            row[0] = Paragraph(_('Your Payment on')+' '+received_on, stylesheet['Normal'])
-        elif payment['type'] == 'discount':
-            row[0] = _('Discount Applied')
+    for txn in invoice['transactions']:
+        row = []
+        transacted_on = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
+        if txn['type'] == 'payment':
+            row += [Paragraph(_('Your Payment on')+' '+transacted_on, stylesheet['Normal'])]
+        elif txn['type'] == 'invoice':
+            row += [Paragraph(_('Invoice from ')+' '+transacted_on, stylesheet['Normal'])]
+        else:
+            raise NotImplemented()
+        for col in ['gross', 'net', 'tax']:
+            row += [money(txn[col]) if txn[col] else '']
         t.row(*row)
 
-    t.row(_("Remaining amount"), money(invoice['balance_gross']), money(invoice['balance_net']), money(invoice['balance_tax']))
-    t.row_style('FONTNAME', 0, -1, font.bold)
+    #t.row(_("Invoice Total"), money(invoice['debited_gross']), money(invoice['debited_net']), money(invoice['debited_tax']))
+    #t.row(_("Remaining amount"), money(invoice['balance_gross']), money(invoice['balance_net']), money(invoice['balance_tax']))
+    #t.row_style('FONTNAME', 0, -1, font.bold)
 
     return t.get_table(ContinuationTable, repeatRows=1)
 

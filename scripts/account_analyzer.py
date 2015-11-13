@@ -1,5 +1,6 @@
 from decimal import Decimal
 from systori.apps.accounting.utils import get_transactions_for_jobs
+from systori.apps.document.models import Invoice
 
 
 SHOW_SKIPPED = False
@@ -103,9 +104,9 @@ def migrate_accounts(company):
                 json_job['balance'] = 0.0  # we don't have payments yet
                 json_job['estimate'] = round(job.estimate_total * (1+TAX_RATE), 2)
                 json_job['itemized'] = round(job.billable_total * (1+TAX_RATE), 2)
+                invoice.json['debits'].append(json_job)
 
                 if amount > Decimal(0.0):
-                    invoice.json['debits'].append(json_job)
                     transaction.debit(job.account, amount, entry_type=Entry.WORK_DEBIT, job=job)
                     transaction.credit(Account.objects.get(code="1710"), amount, job=job)
                     print('  {:<50} {:>15} {:>15}'.format(job.name, money(amount), money(pre_tax_amount)))
@@ -200,62 +201,127 @@ def migrate_accounts(company):
             assert discount_entry is None or discount_entry.account.id == project.account.id
             assert discount_promised_entry is None or discount_promised_entry.account.code == "1710"
 
+#            if transaction.id == 100:
+#                pass
+
             transaction.id = None  # start new transaction from previous
             transaction.transaction_type = transaction.PAYMENT
             transaction.debit(bank_entry.account, bank_entry.amount)
 
-            project_balance = project.balance
-            sorted_jobs = [(round(job.account.balance/project_balance,3), job.account.balance, job) for job in project.jobs.all() if job.account.balance > Decimal(0.0)]
-            sorted_jobs.sort()
-            print('\n   Splitting payment into job accounts...')
-            percent_total = Decimal(0.0)
-            for job in sorted_jobs:
-                percent_total += job[0]
-                print('    {:>5}% {}'.format(round(job[0]*100, 1), job[2].name))
-            print('    {:>5}'.format('-'*6))
-            print('    {:>5}%\n'.format(round(percent_total*100, 1)))
+            # lets try paying previous invoice
 
+            invoice = Invoice.objects.filter(project=project, document_date__lte=transaction.transacted_on).order_by('-document_date').first()
+            if invoice and invoice.amount >= (bank_entry.amount+(-discount_entry.amount if discount_entry else 0)-Decimal(.01)):
 
-            remaining_payment_amount = payment_amount = Decimal(abs(project_entry.amount))
-            remaining_discount_amount = discount_amount = Decimal(0.0)
-            discount_percent = 0.0
-            if discount_entry:
-                remaining_discount_amount = discount_amount = Decimal(abs(discount_entry.amount))
-                discount_percent = round(remaining_discount_amount/(remaining_payment_amount+remaining_discount_amount), 3)
+                print('\n   Applying payment to previous invoice #{} - {} - {} - {}...'.format(invoice.id, invoice.invoice_no, invoice.document_date, money(invoice.amount)))
 
-            print('\n   Discount: {} ({}%)\n'.format(money(discount_amount), round(discount_percent*100, 1)))
-
-            job_credits_sum = Decimal(0.0)
-
-            last_job_idx = len(sorted_jobs)-1
-            for idx, (job_percent, job_balance, job) in enumerate(sorted_jobs):
-
-                # TODO: Add support final payments.
-
-                if idx == last_job_idx:  # use whatever is left on last job
-                    assert job_balance >= (remaining_payment_amount+remaining_discount_amount)
-                    job_credit = remaining_payment_amount
-                    job_discount = remaining_discount_amount
-                else:
-                    job_credit = round(payment_amount * job_percent, 2)
-                    job_discount = round(discount_amount * job_percent, 2)
-                    assert round(1-job_credit/(job_credit+job_discount), 3) == discount_percent
-
-                job_income = round(job_credit / (1 + TAX_RATE), 2)
-
-                job_credits_sum += job_credit
-
-                transaction.credit(job.account, job_credit, entry_type=Entry.PAYMENT, job=job)
-                transaction.debit(Account.objects.get(code="1710"), job_credit, job=job)
-                transaction.credit(Account.objects.get(code="1718"), job_income, job=job)
-                transaction.credit(Account.objects.get(code="1776"), round(job_credit - job_income, 2), job=job)
-
+                remaining_payment_amount = payment_amount = Decimal(abs(bank_entry.amount))
+                remaining_discount_amount = discount_amount = Decimal(0.0)
+                discount_percent = 0.0
                 if discount_entry:
-                    transaction.credit(job.account, job_discount, entry_type=Entry.DISCOUNT, job=job)
-                    transaction.debit(Account.objects.get(code="1710"), job_discount, job=job)
+                    remaining_discount_amount = discount_amount = Decimal(abs(discount_entry.amount))
+                    discount_percent = round(remaining_discount_amount/(remaining_payment_amount+remaining_discount_amount), 3)
 
-                remaining_payment_amount -= job_credit
-                remaining_discount_amount -= job_discount
+                print('\n   Discount: {} ({}%)\n'.format(money(discount_amount), round(discount_percent*100, 1)))
+
+                job_credits_sum = Decimal(0.0)
+
+                non_zero_debits = [debit for debit in invoice.json['debits'] if debit['debit_amount'] > 0.0]
+                last_debit_idx = len(non_zero_debits)-1
+                for debit_idx, debit in enumerate(non_zero_debits):
+
+                    job = Job.objects.get(id=debit['job.id'])
+
+                    debit_amount = Decimal(debit['debit_amount'])
+                    if job.account.balance >= (remaining_payment_amount+remaining_discount_amount) <= debit_amount or \
+                       last_debit_idx == debit_idx:
+                        job_credit = remaining_payment_amount
+                        job_discount = remaining_discount_amount
+                    else:
+                        if debit_amount > job.account.balance < (remaining_payment_amount+remaining_discount_amount):
+                            job_credit = job.account.balance
+                        else:
+                            job_credit = debit_amount
+                        if discount_entry:
+                            job_discount = round(job_credit * discount_percent, 2)
+                            job_credit -= job_discount
+
+                    assert (job_credit+job_discount-Decimal('0.01')) <= job.account.balance
+
+                    job_income = round(job_credit / (1 + TAX_RATE), 2)
+
+                    job_credits_sum += job_credit
+
+                    transaction.credit(job.account, job_credit, entry_type=Entry.PAYMENT, job=job)
+                    transaction.debit(Account.objects.get(code="1710"), job_credit, job=job)
+                    transaction.credit(Account.objects.get(code="1718"), job_income, job=job)
+                    transaction.credit(Account.objects.get(code="1776"), round(job_credit - job_income, 2), job=job)
+
+                    if discount_entry:
+                        transaction.credit(job.account, job_discount, entry_type=Entry.DISCOUNT, job=job)
+                        transaction.debit(Account.objects.get(code="1710"), job_discount, job=job)
+
+                    remaining_payment_amount -= job_credit
+                    remaining_discount_amount -= job_discount
+
+                    if not remaining_payment_amount:
+                        break
+
+            else:
+
+                # paying previous invoice didn't work, so lets go back to splitting the payment
+
+                project_balance = project.balance
+                sorted_jobs = [(round(job.account.balance/project_balance,3), job.account.balance, job) for job in project.jobs.all() if job.account.balance > Decimal(0.0)]
+                sorted_jobs.sort()
+                print('\n   Splitting payment into job accounts...')
+                percent_total = Decimal(0.0)
+                for job in sorted_jobs:
+                    percent_total += job[0]
+                    print('    {:>5}% {}'.format(round(job[0]*100, 1), job[2].name))
+                print('    {:>5}'.format('-'*6))
+                print('    {:>5}%\n'.format(round(percent_total*100, 1)))
+
+                remaining_payment_amount = payment_amount = Decimal(abs(project_entry.amount))
+                remaining_discount_amount = discount_amount = Decimal(0.0)
+                discount_percent = 0.0
+                if discount_entry:
+                    remaining_discount_amount = discount_amount = Decimal(abs(discount_entry.amount))
+                    discount_percent = round(remaining_discount_amount/(remaining_payment_amount+remaining_discount_amount), 3)
+
+                print('\n   Discount: {} ({}%)\n'.format(money(discount_amount), round(discount_percent*100, 1)))
+
+                job_credits_sum = Decimal(0.0)
+
+                last_job_idx = len(sorted_jobs)-1
+                for idx, (job_percent, job_balance, job) in enumerate(sorted_jobs):
+
+                    # TODO: Add support final payments.
+
+                    if idx == last_job_idx:  # use whatever is left on last job
+                        assert job_balance >= (remaining_payment_amount+remaining_discount_amount)
+                        job_credit = remaining_payment_amount
+                        job_discount = remaining_discount_amount
+                    else:
+                        job_credit = round(payment_amount * job_percent, 2)
+                        job_discount = round(discount_amount * job_percent, 2)
+                        assert round(1-job_credit/(job_credit+job_discount), 3) == discount_percent
+
+                    job_income = round(job_credit / (1 + TAX_RATE), 2)
+
+                    job_credits_sum += job_credit
+
+                    transaction.credit(job.account, job_credit, entry_type=Entry.PAYMENT, job=job)
+                    transaction.debit(Account.objects.get(code="1710"), job_credit, job=job)
+                    transaction.credit(Account.objects.get(code="1718"), job_income, job=job)
+                    transaction.credit(Account.objects.get(code="1776"), round(job_credit - job_income, 2), job=job)
+
+                    if discount_entry:
+                        transaction.credit(job.account, job_discount, entry_type=Entry.DISCOUNT, job=job)
+                        transaction.debit(Account.objects.get(code="1710"), job_discount, job=job)
+
+                    remaining_payment_amount -= job_credit
+                    remaining_discount_amount -= job_discount
 
             print('\n   {:<70} {:>15} {:>15}'.format('New transaction entries...', 'debits', 'credits'))
             for entry in transaction._entries:
@@ -287,6 +353,7 @@ def migrate_accounts(company):
         # Now that we have invoices and payments migrated to the new system we can
         # generate the new transaction history tables...
         print('\n\n   Calculating transaction histories....')
+        project = Project.objects.get(id=project.id)
         for invoice in project.invoices.all():
             jobs = Job.objects.filter(id__in=[debit['job.id'] for debit in invoice.json['debits']])
             invoice.json['transactions'] = get_transactions_for_jobs(jobs, invoice.document_date)
@@ -383,6 +450,7 @@ if __name__ == '__main__':
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
     import django
     django.setup()
+    from systori.apps.accounting.utils import get_transactions_for_jobs
     from systori.apps.company.models import *
     company = Company.objects.get(schema='mehr_handwerk')
     company.activate()

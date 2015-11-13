@@ -46,10 +46,9 @@ class Account(BaseAccount):
 
     @property
     def is_bank(self):
-        if self.account_type == self.ASSET:
-            try:
-                self.job
-            except Job.DoesNotExist:
+        if self.code.isdigit():
+            code = int(self.code)
+            if BANK_CODE_RANGE[0] <= code <= BANK_CODE_RANGE[1]:
                 return True
         return False
 
