@@ -201,7 +201,7 @@ class BaseInvoiceForm(BaseFormSet):
 
             for debit in previous_debits:
                 if debit['job.id'] == job.id:
-                    job_dict = debit
+                    job_dict = debit.copy()
                     job_dict['is_booked'] = debit.get('is_booked', True)
                     break
 
@@ -219,7 +219,7 @@ class BaseInvoiceForm(BaseFormSet):
 
         invoice = self.invoice_form.instance
 
-        if invoice.transaction_id:
+        if invoice.transaction:
             invoice.transaction.delete()
 
         debits = []
@@ -228,6 +228,7 @@ class BaseInvoiceForm(BaseFormSet):
                 debits.append(debit_form.get_dict())
 
         invoice.transaction = skr03.partial_debit([(debit['job'], debit['debit_amount'], debit['is_flat']) for debit in debits])
+        invoice.save()
 
         data = self.invoice_form.cleaned_data
 

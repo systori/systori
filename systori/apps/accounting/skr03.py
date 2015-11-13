@@ -26,7 +26,7 @@ def create_chart_of_accounts(self=None):
 def partial_debit(debits):
     """ Debit the customer account with any new work completed or flat invoice. """
 
-    transaction = Transaction()
+    transaction = Transaction(transaction_type=Transaction.INVOICE)
 
     for job, amount, is_flat in debits:
 
