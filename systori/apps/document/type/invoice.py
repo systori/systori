@@ -100,34 +100,69 @@ def collate_tasks_total(invoice, available_width):
 
 def collate_payments(invoice, available_width):
 
-    t = TableFormatter([0, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
+    t = TableFormatter([0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
     t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
-    t.style.append(('VALIGN', (0, 0), (-1, -1), "BOTTOM"))
-    t.style.append(('RIGHTPADDING', (3, 0), (3, -1), 0))
+    t.style.append(('VALIGN', (0, 0), (-2, -1), "TOP"))
+    t.style.append(('VALIGN', (-1, 0), (-1, -1), "BOTTOM"))
+    t.style.append(('RIGHTPADDING', (-1, 0), (-1, -2), 0))
 
     t.style.append(('LINEBELOW', (0, 0), (-1, 0), 0.25, colors.black))
-    t.style.append(('LINEAFTER', (0, 0), (-2, -1), 0.25, colors.black))
+    t.style.append(('LINEABOVE', (0, -1), (-1, -1), 0.25, colors.black))
+    t.style.append(('LINEAFTER', (0, 0), (-2, -2), 0.25, colors.black))
 
-    t.row('', _("gross"), _("consideration"), _("tax"))
+    t.row('', _("consideration"), _("tax"), _("gross"), _("balance"))
     t.row_style('FONTNAME', 0, -1, font.bold)
 
-    for txn in invoice['transactions']:
-        row = []
-        transacted_on = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
-        if txn['type'] == 'payment':
-            row += [Paragraph(_('Your Payment on')+' '+transacted_on, stylesheet['Normal'])]
-        elif txn['type'] == 'invoice':
-            row += [Paragraph(_('Invoice from ')+' '+transacted_on, stylesheet['Normal'])]
-        else:
-            raise NotImplemented()
-        for col in ['gross', 'net', 'tax']:
-            row += [money(txn[col]) if txn[col] else '']
-        t.row(*row)
+    last_txn_idx = len(invoice['transactions'])-1
+    for txn_idx, txn in enumerate(invoice['transactions']):
 
-    #t.row(_("Invoice Total"), money(invoice['debited_gross']), money(invoice['debited_net']), money(invoice['debited_tax']))
-    #t.row(_("Remaining amount"), money(invoice['balance_gross']), money(invoice['balance_net']), money(invoice['balance_tax']))
-    #t.row_style('FONTNAME', 0, -1, font.bold)
+        row = []
+        rows_to_keep = 0
+
+        description = {
+            'payment': _('Payment'),
+            'invoice': _('Partial Invoice'),
+            'final-invoice': _('Final Invoice')
+        }[txn['type']]
+
+        if txn.get('invoice_id', None) == invoice['id']:
+            description = _('This Invoice')
+
+        row += [description]
+
+        for col in ['net', 'tax']:
+            row += [money(txn[col]) if txn[col] else '']
+
+        if txn.get('discount_applied', 0):
+            row += [money(txn['payment_applied'])]
+        else:
+            row += [money(txn['gross'])]
+
+        t.row(*row)
+        rows_to_keep += 1
+
+        if txn.get('discount_applied', 0):
+            t.row(_('Discount'), '', '', money(txn['discount_applied']))
+            rows_to_keep += 1
+
+        row = [date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True), '', '', '', '']
+        if not txn_idx == last_txn_idx:
+            # otherwise balance would be duplicated in the 'Please Pay' box
+            row[-1] = money(txn['balance'])
+
+        t.row(*row)
+        rows_to_keep += 1
+        t.row_style('LINEBELOW', 0, -1, 0.25, colors.lightgrey)
+
+        t.keep_previous_n_rows_together(rows_to_keep)
+
+    t.row('', '', '', _('Please Pay'), ' '+money(invoice['balance_gross']))
+    t.row_style('FONTNAME', 0, -1, font.bold)
+    t.row_style('LINEABOVE', -1, -1, 0.5, colors.black)
+    t.row_style('LINEBELOW', -1, -1, 0.5, colors.black)
+    t.row_style('LINEAFTER', -2, -1, 0.5, colors.black)
+    [t.row_style(side+'PADDING', -2, -1, 5) for side in ['LEFT', 'RIGHT', 'BOTTOM', 'TOP']]
 
     return t.get_table(ContinuationTable, repeatRows=1)
 
@@ -200,13 +235,15 @@ def render(invoice, format):
         return buffer.getvalue()
 
 
-def serialize(project, data):
+def serialize(invoice, data):
 
-    contact = project.billable_contact.contact
+    contact = invoice.project.billable_contact.contact
 
     invoice = {
 
         'version': '1.2',
+
+        'id': invoice.id,
 
         'title': data['title'],
         'date': data['document_date'],

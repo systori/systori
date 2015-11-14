@@ -93,6 +93,7 @@ class Entry(BaseEntry):
 class Transaction(BaseTransaction):
 
     entry_class = Entry
+    account_class = Account
 
     def discounts_to_account(self, account):
         return self.entries.filter(account=account).filter(entry_type=Entry.DISCOUNT)

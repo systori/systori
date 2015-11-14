@@ -103,6 +103,8 @@ class BaseTransaction(models.Model):
         at least two entries to two different accounts).
     """
     entry_class = None  # Must be defined in subclass.
+    account_class = None  # Must be defined in subclass.
+
     notes = models.TextField(blank=True)
 
     # this is when a payment is received or invoice is dated
@@ -116,10 +118,12 @@ class BaseTransaction(models.Model):
     recorded_on = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
 
     INVOICE = "invoice"
+    FINAL_INVOICE = "final-invoice"
     PAYMENT = "payment"
 
     TRANSACTION_TYPE = (
         (INVOICE, _("Invoice")),
+        (FINAL_INVOICE, _("Final Invoice")),
         (PAYMENT, _("Payment")),
     )
     transaction_type = models.CharField(_('Transaction Type'), null=True, max_length=32, choices=TRANSACTION_TYPE)
@@ -132,11 +136,15 @@ class BaseTransaction(models.Model):
         self._entries = []
 
     def debit(self, account, amount, **kwargs):
+        if type(account) is str:
+            account = self.account_class.objects.get(code=account)
         entry = self.entry_class(account=account, amount=account.as_debit(round(amount, 2)), **kwargs)
         self._entries.append(('debit', entry))
         return entry
 
     def credit(self, account, amount, **kwargs):
+        if type(account) is str:
+            account = self.account_class.objects.get(code=account)
         entry = self.entry_class(account=account, amount=account.as_credit(round(amount, 2)), **kwargs)
         self._entries.append(('credit', entry))
         return entry
@@ -194,6 +202,7 @@ class BaseEntry(models.Model):
     DISCOUNT = "discount"
     WORK_DEBIT = "work-debit"
     FLAT_DEBIT = "flat-debit"
+    FINAL_DEBIT = "final-debit"
     ADJUSTMENT = "adjustment"
     OTHER = "other"
 
@@ -202,6 +211,7 @@ class BaseEntry(models.Model):
         (DISCOUNT, _("Discount")),
         (WORK_DEBIT, _("Work Debit")),
         (FLAT_DEBIT, _("Flat Debit")),
+        (FINAL_DEBIT, _("Final Debit")),
         (ADJUSTMENT, _("Adjustment")),
         (OTHER, _("Other")),
     )
@@ -217,7 +227,7 @@ class BaseEntry(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['transaction__recorded_on', 'id']
+        ordering = ['transaction__transacted_on', 'id']
 
     def is_credit(self):
         return self.account.is_credit_amount(self.amount)

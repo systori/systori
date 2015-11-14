@@ -227,10 +227,14 @@ class BaseInvoiceForm(BaseFormSet):
             if debit_form.cleaned_data['is_invoiced']:
                 debits.append(debit_form.get_dict())
 
-        invoice.transaction = skr03.partial_debit([(debit['job'], debit['debit_amount'], debit['is_flat']) for debit in debits])
-        invoice.save()
-
         data = self.invoice_form.cleaned_data
+
+        skr03_debits = [(debit['job'], debit['debit_amount'], debit['is_flat']) for debit in debits]
+        if data['is_final']:
+            invoice.transaction = skr03.final_debit(skr03_debits)
+        else:
+            invoice.transaction = skr03.partial_debit(skr03_debits)
+        invoice.save()
 
         del data['doc_template']  # don't need this
 
@@ -248,8 +252,7 @@ class BaseInvoiceForm(BaseFormSet):
         data['balance_net'] = round(self.balance_total / (1+TAX_RATE), 2)
         data['balance_tax'] = data['balance_gross'] - data['balance_net']
 
-        project = Project.prefetch(invoice.project.id)
-        json = invoice_lib.serialize(project, data)
+        json = invoice_lib.serialize(invoice, data)
 
         invoice.amount = data['debit_gross']
         invoice.json = json

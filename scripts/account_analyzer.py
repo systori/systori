@@ -1,6 +1,5 @@
 from decimal import Decimal
-from systori.apps.accounting.utils import get_transactions_for_jobs
-from systori.apps.document.models import Invoice
+from datetime import timedelta
 
 
 SHOW_SKIPPED = False
@@ -9,8 +8,11 @@ SHOW_SKIPPED = False
 def migrate_accounts(company):
     from systori.apps.project.models import Project
     from systori.apps.accounting.models import Account, Transaction, Entry, create_account_for_job
-    from systori.apps.accounting.constants import TAX_RATE
+    from systori.apps.accounting.constants import TAX_RATE, SKR03_INCOME_CODE
+    from systori.apps.accounting.utils import get_transactions_for_jobs
+    from systori.apps.accounting import skr03
     from systori.apps.task.models import Job
+    from systori.apps.document.models import Invoice
 
     from systori.lib.templatetags.customformatting import money
 
@@ -57,6 +59,8 @@ def migrate_accounts(company):
 
         print("\nProject #{} - {}".format(project.id, project.name))
 
+        final_debits = []
+
         parent_invoice = None
         total_invoices = project.invoices.count()
         for i_invoice, invoice in enumerate(project.invoices.all()):
@@ -75,9 +79,42 @@ def migrate_accounts(company):
             invoice_amount = Decimal(0.0)
             pre_tax_invoice = Decimal(0.0)
 
-            transaction = Transaction(transacted_on=invoice.document_date, recorded_on=invoice.created_on, transaction_type=Transaction.INVOICE)
+            if invoice.id == 47:
+                pass
+
+            match_criteria = [
+                {'recorded_on__startswith': invoice.created_on.isoformat(' ')[:19]},
+                {'recorded_on__startswith': invoice.created_on.isoformat(' ')[:18]},
+                #{'recorded_on__gte': invoice.created_on-timedelta(minutes=2),
+                # 'recorded_on__lte': invoice.created_on+timedelta(minutes=2)},
+            ]
+            print('  Finding corresponding transaction...')
+            print('  >{}'.format(invoice.created_on.isoformat(' ')))
+            old_transaction = None
+            for criteria in match_criteria:
+                for key, val in criteria.items():
+                    print('  ?{} :{}'.format(val, key))
+                matches = Transaction.objects.filter(entries__account=project.account).filter(**criteria).distinct()
+                if matches.count() == 1:
+                    old_transaction = matches.get()
+                    print('  !{}'.format(old_transaction.recorded_on))
+                    break
+                elif matches.count() == 0:
+                    print('  No matches.')
+                elif matches.count() > 1:
+                    print('  Multiple matches:')
+                    for match in matches:
+                        print('   {}'.format(match.recorded_on))
+
+            invoice.json['is_final'] = False
+            if old_transaction:
+                for entry in old_transaction.entries.all():
+                    if entry.account.code == SKR03_INCOME_CODE:
+                        invoice.json['is_final'] = True
+                        break
 
             invoice.json['debits'] = []
+            debits = []
             for json_job in invoice.json.pop('jobs'):
 
                 job = project.jobs.get(name=json_job['name'], job_code=int(json_job['code']))
@@ -94,6 +131,8 @@ def migrate_accounts(company):
                 already_debited = job.account.debits().total
 
                 amount -= already_debited
+                if amount < Decimal(0.0):
+                    amount = Decimal(0.0)
 
                 invoice_amount += amount
                 pre_tax_invoice += round(amount / (1+TAX_RATE), 2)
@@ -107,29 +146,34 @@ def migrate_accounts(company):
                 invoice.json['debits'].append(json_job)
 
                 if amount > Decimal(0.0):
-                    transaction.debit(job.account, amount, entry_type=Entry.WORK_DEBIT, job=job)
-                    transaction.credit(Account.objects.get(code="1710"), amount, job=job)
                     print('  {:<50} {:>15} {:>15}'.format(job.name, money(amount), money(pre_tax_amount)))
+
+                if invoice.json['is_final'] or amount > Decimal(0.0):
+                    debits.append((job, amount, False))
 
             print('  {:<50} {:>15} {:>15}'.format('', '-'*10, '-'*10))
             print('  {:<50} {:>15} {:>15}'.format('', money(invoice_amount), money(pre_tax_invoice)))
             if round(invoice.amount, 2) != round(invoice_amount, 2):
                 # i've manually checked these invoices - lex
                 # for Demo project we just do the fix without checking
-                if invoice.id in [31, 37, 38, 46, 47, 51, 54, 55, 56, 60, 63, 67, 69, 70, 71] or company.name == 'Demo':
+                if invoice.id in [31, 37, 38, 46, 47, 51, 54, 55, 56, 60, 62, 63, 67, 69, 70, 71] or company.name == 'Demo':
                     # 37, 46, 54, 55 - rounding errors, off by one penny
                     # 56, 60, 63, 69, 71 - all these had the 'balance' remaining instead of how much was actually debited
                     # 31, 38 - debit was correct but invoice had wrong amount, not sure why
                     # 67, 70 - amounts slightly off
                     # 51 - not even sure what happened here but i think the new invoice_amount is correct
+                    # 62 - off by $6, probably work completed was reduced since last invoice/payment
                     invoice.amount = invoice_amount
                 else:
                     raise ArithmeticError('{} != {}'.format(money(round(invoice.amount, 2)), money(round(invoice_amount, 2))))
 
-            transaction.save()
-            invoice.transaction = transaction
+            if invoice.json['is_final']:
+                final_debits.append((invoice, debits))
+            else:
+                invoice.transaction = skr03.partial_debit(debits, invoice.document_date)
 
             invoice.json['version'] = '1.2'
+            invoice.json['id'] = invoice.id
             invoice.json['title'] = invoice.json.get('title', '')
             invoice.json['debit_gross'] = invoice_amount
             invoice.json['debit_net'] = pre_tax_invoice
@@ -201,8 +245,13 @@ def migrate_accounts(company):
             assert discount_entry is None or discount_entry.account.id == project.account.id
             assert discount_promised_entry is None or discount_promised_entry.account.code == "1710"
 
-#            if transaction.id == 100:
-#                pass
+            if transaction.id == 121:
+                # this payment is supposed to be a refund, or we're not sure
+                # will need to be fixed later
+                continue
+
+            if transaction.id == 121:
+                pass
 
             transaction.id = None  # start new transaction from previous
             transaction.transaction_type = transaction.PAYMENT
@@ -349,6 +398,13 @@ def migrate_accounts(company):
 
             # save() also checks that all debits == all credits
             transaction.save()
+
+        if project.id == 59:
+            pass
+
+        for invoice, debits in final_debits:
+            invoice.transaction = skr03.final_debit(debits, invoice.document_date)
+            invoice.save()
 
         # Now that we have invoices and payments migrated to the new system we can
         # generate the new transaction history tables...

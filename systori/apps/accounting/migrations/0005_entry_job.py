@@ -12,6 +12,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterModelOptions(
+            name='entry',
+            options={'ordering': ['transaction__transacted_on', 'id']},
+        ),
         migrations.AddField(
             model_name='entry',
             name='job',
@@ -20,6 +24,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='transaction',
             name='transaction_type',
-            field=models.CharField(max_length=32, null=True, choices=[('invoice', 'Invoice'), ('payment', 'Payment')], verbose_name='Transaction Type'),
+            field=models.CharField(max_length=32, null=True, choices=[('invoice', 'Invoice'), ('final-invoice', 'Final Invoice'), ('payment', 'Payment')], verbose_name='Transaction Type'),
         ),
     ]

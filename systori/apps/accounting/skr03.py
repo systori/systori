@@ -23,10 +23,11 @@ def create_chart_of_accounts(self=None):
     self.bank = Account.objects.create(account_type=Account.ASSET, code=SKR03_BANK_CODE)
 
 
-def partial_debit(debits):
+def partial_debit(debits, transacted_on=None):
     """ Debit the customer account with any new work completed or flat invoice. """
 
-    transaction = Transaction(transaction_type=Transaction.INVOICE)
+    transacted_on = transacted_on or date.today()
+    transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.INVOICE)
 
     for job, amount, is_flat in debits:
 
@@ -41,7 +42,7 @@ def partial_debit(debits):
 
         # credit the promised payments account (liability), increasing the liability
         # (+) "bad thing", customer owing us money is a liability
-        transaction.credit(Account.objects.get(code=SKR03_PROMISED_PAYMENTS_CODE), amount, job=job)
+        transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, amount, job=job)
 
     transaction.save()
 
@@ -77,15 +78,15 @@ def partial_credit(jobs, payment, transacted_on=None, bank=None):
 
             # debit the promised payments account (liability), decreasing the liability
             # (-) "good thing", customer paying debt reduces liability
-            transaction.debit(Account.objects.get(code=SKR03_PROMISED_PAYMENTS_CODE), credit, job=job)
+            transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, credit, job=job)
 
             # credit the partial payments account (liability), increasing the liability
             # (+) "bad thing", we are on the hook to finish and deliver the service or product
-            transaction.credit(Account.objects.get(code=SKR03_PARTIAL_PAYMENTS_CODE), income, job=job)
+            transaction.credit(SKR03_PARTIAL_PAYMENTS_CODE, income, job=job)
 
             # credit the tax payments account (liability), increasing the liability
             # (+) "bad thing", tax have to be paid eventually
-            transaction.credit(Account.objects.get(code=SKR03_TAX_PAYMENTS_CODE), round(credit - income, 2), job=job)
+            transaction.credit(SKR03_TAX_PAYMENTS_CODE, round(credit - income, 2), job=job)
 
         if discount > 0:
 
@@ -105,62 +106,66 @@ def partial_credit(jobs, payment, transacted_on=None, bank=None):
 
                 # debit the cash discounts account (income), decreasing the income
                 # (-) "bad thing", less income :-(
-                transaction.debit(Account.objects.get(code=SKR03_CASH_DISCOUNT_CODE), discount_income, job=job)
+                transaction.debit(SKR03_CASH_DISCOUNT_CODE, discount_income, job=job)
 
                 # debit the tax payments account (liability), decreasing the liability
                 # (-) "good thing", less taxes to pay
-                transaction.debit(Account.objects.get(code=SKR03_TAX_PAYMENTS_CODE), discount_taxes, job=job)
+                transaction.debit(SKR03_TAX_PAYMENTS_CODE, discount_taxes, job=job)
 
             else:
                 # Discount prior to final invoice is simpler.
 
                 # debit the promised payments account (liability), decreasing the liability
                 # (-) "good thing", customer paying debt reduces liability
-                transaction.debit(Account.objects.get(code=SKR03_PROMISED_PAYMENTS_CODE), discount_amount, job=job)
+                transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, discount_amount, job=job)
 
     transaction.save()
 
 
-def final_debit(job):
+def final_debit(debits, transacted_on=None):
     """ Similar to partial_debit but also handles a lot of different accounting situations to prepare
         customer's account for final invoice generation.
     """
 
-    transaction = Transaction()
+    transacted_on = transacted_on or date.today()
+    transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.FINAL_INVOICE)
 
-    unpaid_amount = job.account.balance
-    if unpaid_amount > 0:
-        # reset balance, we'll add unpaid_amount back into a final debit to customer
-        transaction.debit(Account.objects.get(code="1710"), unpaid_amount)
-        transaction.credit(job.account, unpaid_amount)
+    for job, new_amount, is_flat in debits:
 
-    new_amount = job.new_amount_to_debit
-    amount = new_amount + unpaid_amount
-    income = round(amount / (1 + TAX_RATE), 2)
+        unpaid_amount = job.account.balance
+        if unpaid_amount > 0:
+            # reset balance, we'll add unpaid_amount back into a final debit to customer
+            transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, unpaid_amount, job=job)
+            transaction.credit(job.account, unpaid_amount, entry_type=Entry.ADJUSTMENT, job=job)
 
-    # debit the customer account (asset), this increases their balance
-    # (+) "good thing", customer owes us more money
-    transaction.debit(job.account, amount)
+        amount = new_amount + unpaid_amount
+        income = round(amount / (1 + TAX_RATE), 2)
 
-    # credit the income account (income), this increases the balance
-    # (+) "good thing", income is good
-    transaction.credit(Account.objects.get(code="8400"), income)
+        # debit the customer account (asset), this increases their balance
+        # (+) "good thing", customer owes us more money
+        transaction.debit(job.account, amount, entry_type=Entry.FINAL_DEBIT, job=job)
 
-    # credit the tax payments account (liability), increasing the liability
-    # (+) "bad thing", will have to be paid in taxes eventually
-    transaction.credit(Account.objects.get(code="1776"), amount - income)
-
-    payments = job.account.payments().total
-
-    if payments:
-        pre_tax_payments = round(payments * -1 / (1 + TAX_RATE), 2)
-
-        # debit the partial payments account (liability), decreasing the liability
-        # (-) "good thing", product or service has been completed and delivered
-        transaction.debit(Account.objects.get(code="1718"), pre_tax_payments)
+        # credit the tax payments account (liability), increasing the liability
+        # (+) "bad thing", will have to be paid in taxes eventually
+        transaction.credit(SKR03_TAX_PAYMENTS_CODE, amount - income, job=job)
 
         # credit the income account (income), this increases the balance
         # (+) "good thing", income is good
-        transaction.credit(Account.objects.get(code="8400"), pre_tax_payments)
+        transaction.credit(SKR03_INCOME_CODE, income, job=job)
+
+        partial_payments_account = Account.objects.get(code=SKR03_PARTIAL_PAYMENTS_CODE)
+        consideration = partial_payments_account.entries.filter(job=job).total
+
+        if consideration:
+
+            # debit the partial payments account (liability), decreasing the liability
+            # (-) "good thing", product or service has been completed and delivered
+            transaction.debit(SKR03_PARTIAL_PAYMENTS_CODE, consideration, job=job)
+
+            # credit the income account (income), this increases the balance
+            # (+) "good thing", income is good
+            transaction.credit(SKR03_INCOME_CODE, consideration, job=job)
 
     transaction.save()
+
+    return transaction
