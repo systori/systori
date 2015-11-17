@@ -56,7 +56,7 @@
       <tr>
         <td><a href="{% url 'tasks' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
         <td>{{ job.get_status_display }}</td>
-        <td style="text-align: right;">
+        <td style="text-align: right; white-space: nowrap;">
           {{ job.estimate_total|money }}
         </td>
         <td>
@@ -73,7 +73,7 @@
           </div>
         </td>
         <td>{{ job.get_billing_method_display }}</td>
-        <td style="text-align: right;">{{ job.billable_total|money }}</td>
+        <td style="text-align: right; white-space: nowrap;">{{ job.billable_total|money }}</td>
         <td style="text-align: right;">
           {% for state in job.get_available_status_transitions %}
             <a href="{% url 'job.transition' project.id job.id state.name %}">{{ state.custom.label }}</a>

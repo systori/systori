@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q
 
+from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Project, JobSite
 from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm, EntryFormSet
 from .forms import JobSiteForm, FilterForm
@@ -144,7 +145,7 @@ class ProjectView(DetailView):
         context = super(ProjectView, self).get_context_data(**kwargs)
         context['transactions'] = get_transactions_for_jobs(self.object.jobs.all())
         context['parent_invoices'] = self.object.invoices.filter(parent=None).prefetch_related('invoices').all()
-        context['TAX_RATE_DISPLAY'] = '{}%'.format(TAX_RATE*100)
+        context['TAX_RATE_DISPLAY'] = '{}%'.format(ubrdecimal(TAX_RATE*100, 2))
         return context
 
     def get_queryset(self):
