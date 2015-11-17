@@ -71,6 +71,8 @@ def collate_tasks(proposal, available_width):
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
                 t.keep_previous_n_rows_together(3)
 
+                t.row_style('BOTTOMPADDING', 0, -1, 10)
+
             t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
                   '', '', '', money(taskgroup['total']))
             t.row_style('FONTNAME', 0, -1, font.bold)

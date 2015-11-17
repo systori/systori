@@ -186,8 +186,6 @@ def render(invoice, letterhead, format):
         table_width = page_width - float(letterhead.right_margin)*document_unit\
                                  - float(letterhead.left_margin)*document_unit
 
-        is_flat_invoice = invoice.get('is_flat_invoice', False)
-
         invoice_date = date_format(date(*map(int, invoice['date'].split('-'))), use_l10n=True)
 
         doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
@@ -215,31 +213,27 @@ def render(invoice, letterhead, format):
 
             KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal'])),
 
+            PageBreak(),
+
+            Paragraph(invoice_date, stylesheet['NormalRight']),
+
+            Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
+
+            Spacer(0, 4*mm),
+
+            collate_tasks(invoice, table_width),
+
+            Spacer(0, 4*mm),
+
+            collate_tasks_total(invoice, table_width),
+
         ]
-
-        if not is_flat_invoice:
-            flowables += [
-
-                PageBreak(),
-
-                Paragraph(invoice_date, stylesheet['NormalRight']),
-
-                Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
-
-                Spacer(0, 4*mm),
-
-                collate_tasks(invoice, table_width),
-
-                Spacer(0, 4*mm),
-
-                collate_tasks_total(invoice, table_width),
-
-            ]
 
         if format == 'print':
             doc.build(flowables, letterhead=letterhead)
         else:
             doc.build(flowables, canvasmaker=canvas_maker, letterhead=letterhead)
+
 
         return buffer.getvalue()
 

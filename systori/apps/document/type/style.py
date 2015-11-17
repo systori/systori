@@ -373,10 +373,6 @@ class TableFormatter:
         self.columns = columns
         self.lines = []
         self.style = [
-            ('TOPPADDING', (0, 0), (-1, -1), 5),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
             ('FONTNAME', (0, 0), (-1, -1), self.font),
             ('FONTSIZE', (0, 0), (-1, -1), self.font_size)
         ]

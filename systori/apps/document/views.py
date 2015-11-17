@@ -13,7 +13,7 @@ from .models import Proposal, Invoice, DocumentTemplate, Letterhead, DocumentSet
 from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
 from ..accounting.constants import TAX_RATE
 
-from .type import proposal, invoice, evidence, itemized_listing
+from .type import proposal, invoice, evidence, letterhead, itemized_listing
 
 
 class DocumentRenderView(SingleObjectMixin, View):
