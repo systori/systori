@@ -138,6 +138,8 @@ def migrate_accounts(company):
                 pre_tax_invoice += round(amount / (1+TAX_RATE), 2)
 
                 json_job['debit_amount'] = amount
+                json_job['debit_net'] = round(amount / (1+TAX_RATE), 2)
+                json_job['debit_tax'] = amount - json_job['debit_net']
                 json_job['debit_comment'] = ""
                 json_job['debited'] = already_debited
                 json_job['balance'] = 0.0  # we don't have payments yet

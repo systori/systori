@@ -11,13 +11,9 @@
   {% for debit in invoice.json.debits %}
     <tr>
       <td>{{ debit.name }}</td>
-      <td style="text-align: right;">{{ debit.debit_amount|money }}</td>
+      <td style="text-align: right;">{{ debit.debit_net|money }}</td>
     </tr>
   {% endfor %}
-    <tr style="text-align: right;">
-      <td>{% trans "Gross" %}:</td>
-      <td style="font-weight: bold;">{{ invoice.json.debit_gross|money }}</td>
-    </tr>
     <tr style="text-align: right;">
       <td>{% trans "Net" %}:</td>
       <td>{{ invoice.json.debit_net|money }}</td>
@@ -25,6 +21,10 @@
     <tr style="text-align: right;">
       <td>{% trans "VAT" %}:</td>
       <td>{{ invoice.json.debit_tax|money }}</td>
+    </tr>
+    <tr style="text-align: right;">
+      <td>{% trans "Gross" %}:</td>
+      <td style="font-weight: bold;">{{ invoice.json.debit_gross|money }}</td>
     </tr>
   </table>
   <div class="panel-footer" style="text-align: right;">

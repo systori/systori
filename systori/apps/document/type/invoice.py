@@ -299,6 +299,8 @@ def serialize(invoice, data):
             'name': job.name,
             'taskgroups': []
         })
+        debit['debit_net'] = round(debit['debit_amount'] / (1+TAX_RATE), 2)
+        debit['debit_tax'] = debit['debit_amount'] - debit['debit_net']
         invoice['debits'].append(debit)
 
         if debit['is_flat']:
