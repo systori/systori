@@ -17,6 +17,7 @@ from ..directory.models import ProjectContact
 from ..document.models import Invoice, DocumentTemplate, DocumentSettings
 from ..accounting.utils import get_transactions_for_jobs
 from ..accounting.models import Transaction, create_account_for_job
+from ..accounting.constants import TAX_RATE
 from .gaeb_utils import gaeb_import
 from django.core.exceptions import ValidationError
 
@@ -143,6 +144,7 @@ class ProjectView(DetailView):
         context = super(ProjectView, self).get_context_data(**kwargs)
         context['transactions'] = get_transactions_for_jobs(self.object.jobs.all())
         context['parent_invoices'] = self.object.invoices.filter(parent=None).prefetch_related('invoices').all()
+        context['TAX_RATE_DISPLAY'] = '{}%'.format(TAX_RATE*100)
         return context
 
     def get_queryset(self):
