@@ -67,14 +67,6 @@ class InvoiceDocumentForm(forms.ModelForm):
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        default_text = DocumentSettings.get_for_language(settings.LANGUAGE_CODE)
-        if default_text and default_text.invoice_text:
-            rendered = default_text.invoice_text.render(self.instance.project)
-            self.initial['header'] = rendered['header']
-            self.initial['footer'] = rendered['footer']
-
     class Meta:
         model = Invoice
         fields = ['parent', 'doc_template', 'is_final', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes']
@@ -85,6 +77,12 @@ class InvoiceDocumentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['parent'].queryset = Invoice.objects.filter(project=self.instance.project)
+        if not self.initial.get('header', None) or not self.initial.get('footer', None):
+            default_text = DocumentSettings.get_for_language(settings.LANGUAGE_CODE)
+            if default_text and default_text.invoice_text:
+                rendered = default_text.invoice_text.render(self.instance.project)
+                self.initial['header'] = rendered['header']
+                self.initial['footer'] = rendered['footer']
 
 
 class InvoiceDebitForm(Form):
@@ -273,6 +271,7 @@ class BaseInvoiceForm(BaseFormSet):
         invoice.json = json
         invoice.json_version = json['version']
         invoice.save()
+
 
 InvoiceForm = formset_factory(InvoiceDebitForm, formset=BaseInvoiceForm, extra=0)
 

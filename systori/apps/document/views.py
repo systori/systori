@@ -9,10 +9,11 @@ from django.core.urlresolvers import reverse, reverse_lazy
 
 from ..project.models import Project
 from ..task.models import Job
-from ..accounting.constants import TAX_RATE
 from .models import Proposal, Invoice, DocumentTemplate, Letterhead, DocumentSettings
 from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
-import systori.apps.document.type as type_lib
+from ..accounting.constants import TAX_RATE
+
+from .type import proposal, invoice, evidence, itemized_listing
 
 
 class DocumentRenderView(SingleObjectMixin, View):
@@ -36,7 +37,7 @@ class ProposalPDF(DocumentRenderView):
     def pdf(self):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
-        return type_lib.proposal.render(json, letterhead, self.request.GET.get('with_lineitems', False), self.kwargs['format'])
+        return proposal.render(json, letterhead, self.request.GET.get('with_lineitems', False), self.kwargs['format'])
 
 
 class ProposalCreate(CreateView):
@@ -58,7 +59,7 @@ class ProposalCreate(CreateView):
             amount += job.estimate_total
 
         form.instance.amount = amount
-        form.instance.json = type_lib.proposal.serialize(self.request.project, form)
+        form.instance.json = proposal.serialize(self.request.project, form)
         form.instance.json_version = form.instance.json['version']
 
         return super().form_valid(form)
@@ -80,7 +81,7 @@ class ProposalUpdate(UpdateView):
         return super().get_queryset().filter(project=self.request.project)
 
     def form_valid(self, form):
-        type_lib.proposal.update(self.object, form.cleaned_data)
+        proposal.update(self.object, form.cleaned_data)
         self.object.save()
         return super().form_valid(form)
 
@@ -128,7 +129,7 @@ class InvoicePDF(DocumentRenderView):
     def pdf(self):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
-        return type_lib.invoice.render(json, letterhead, self.kwargs['format'])
+        return invoice.render(json, letterhead, self.kwargs['format'])
 
 
 class InvoiceFormMixin:
@@ -212,19 +213,17 @@ class EvidencePDF(DocumentRenderView):
 
     def pdf(self):
         project = Project.prefetch(self.kwargs['project_pk'])
-        return type_lib.evidence.render(project)
+        return evidence.render(project)
 
 
 # Itemized List
-
 
 class ItemizedListingPDF(DocumentRenderView):
     model = Project
 
     def pdf(self):
         project = Project.prefetch(self.kwargs['project_pk'])
-        return type_lib.itemized_listing.render(project, self.kwargs['format'])
-
+        return itemized_listing.render(project, self.kwargs['format'])
 
 # Document Template
 
@@ -284,7 +283,7 @@ class LetterheadDelete(DeleteView):
 
 class LetterheadPreview(DocumentRenderView):
     def pdf(self):
-        return type_lib.letterhead.render(letterhead=Letterhead.objects.get(id=self.kwargs.get('pk')))
+        return letterhead.render(letterhead=Letterhead.objects.get(id=self.kwargs.get('pk')))
 
 
 # Document Settings

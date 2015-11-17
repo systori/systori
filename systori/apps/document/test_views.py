@@ -1,6 +1,5 @@
 from datetime import timedelta, date
 from decimal import Decimal
-import os
 
 from django.test import TestCase, Client
 from django.utils import timezone
