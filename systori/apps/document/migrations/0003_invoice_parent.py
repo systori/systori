@@ -8,7 +8,7 @@ import django_fsm
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('document', '0002_auto_20150615_0046'),
+        ('document', '0003_auto_20151030_1121'),
     ]
 
     operations = [

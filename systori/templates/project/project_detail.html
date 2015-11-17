@@ -138,8 +138,8 @@
             <ul class="dropdown-menu" role="menu">
               <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a></li>
               <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a></li>
-              <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'Line Items' %}</a></li>
-              <li><a href="{% url 'specification.pdf' project.id 'print' doc.id %}">{% trans 'Specification' %}</a></li>
+              <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}?with_lineitems=1">{% trans 'with Line Items Email' %}</a></li>
+              <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'with Line Items Print' %}</a></li>
             </ul>
           </div>
         </td>

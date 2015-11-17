@@ -1,5 +1,6 @@
 from datetime import timedelta, date
 from decimal import Decimal
+import os
 
 from django.test import TestCase, Client
 from django.utils import timezone
@@ -8,7 +9,7 @@ from django.core.urlresolvers import reverse
 from ..accounting.test_skr03 import create_data
 from ..accounting.skr03 import partial_credit, partial_debit
 from ..directory.models import Contact, ProjectContact
-from .models import Proposal, Invoice
+from .models import Proposal, Invoice, Letterhead
 from .views import ProposalUpdate
 
 
@@ -157,3 +158,28 @@ class EvidenceViewTests(DocumentTestCase):
             self.project.id
         ]))
         self.assertEqual(200, response.status_code)
+
+
+class LetterheadCreateTests(DocumentTestCase):
+
+    def test_post(self):
+        letterhead_count = Letterhead.objects.count()
+        with open('systori/apps/document/test_data/letterhead.pdf', 'rb') as lettehead_pdf:
+            response = self.client.post(
+                reverse('letterhead.create'),
+                {
+                    'document_unit': Letterhead.mm,
+                    'top_margin': 10,
+                    'right_margin': 10,
+                    'bottom_margin': 10,
+                    'left_margin': 10,
+                    'letterhead_pdf': lettehead_pdf,
+                    'document_format': Letterhead.A4,
+                    'orientation': Letterhead.PORTRAIT
+                }
+            )
+        self.assertEqual(Letterhead.objects.count(), letterhead_count + 1)
+        self.assertRedirects(
+            response, 
+            reverse('letterhead.view', args=[Letterhead.objects.latest('pk').pk])
+        )

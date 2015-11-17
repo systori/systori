@@ -8,6 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('document', '0003_auto_20151030_1121'),
         ('accounting', '0002_auto_20150730_0445'),
         ('task', '0004_auto_20150724_0617'),
     ]

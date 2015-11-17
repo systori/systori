@@ -1,17 +1,19 @@
 from decimal import Decimal
 from django import forms
+from django.conf import settings
 from django.forms import widgets
 from django.forms import Form, ValidationError
 from django.forms.formsets import formset_factory
 from django.forms.formsets import BaseFormSet
 from django.utils.translation import ugettext_lazy as _
 from systori.lib.fields import LocalizedDecimalField
-from .models import Proposal, Invoice, DocumentTemplate
+from .models import Proposal, Invoice, DocumentTemplate, Letterhead, DocumentSettings
 from ..project.models import Project
 from ..task.models import Job
 from ..accounting import skr03
 from ..accounting.constants import TAX_RATE
 from .type import invoice as invoice_lib
+from .letterhead_utils import clean_letterhead_pdf
 
 
 class ProposalForm(forms.ModelForm):
@@ -26,6 +28,11 @@ class ProposalForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['jobs'].queryset = self.instance.project.jobs_for_proposal
+        default_text = DocumentSettings.get_for_language(settings.LANGUAGE_CODE)
+        if default_text and default_text.proposal_text:
+            rendered = default_text.proposal_text.render(self.instance.project)
+            self.initial['header'] = rendered['header']
+            self.initial['footer'] = rendered['footer']
 
     class Meta:
         model = Proposal
@@ -59,6 +66,14 @@ class InvoiceDocumentForm(forms.ModelForm):
     title = forms.CharField(label=_('Title'), initial=_("Invoice"))
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        default_text = DocumentSettings.get_for_language(settings.LANGUAGE_CODE)
+        if default_text and default_text.invoice_text:
+            rendered = default_text.invoice_text.render(self.instance.project)
+            self.initial['header'] = rendered['header']
+            self.initial['footer'] = rendered['footer']
 
     class Meta:
         model = Invoice
@@ -259,5 +274,35 @@ class BaseInvoiceForm(BaseFormSet):
         invoice.json_version = json['version']
         invoice.save()
 
-
 InvoiceForm = formset_factory(InvoiceDebitForm, formset=BaseInvoiceForm, extra=0)
+
+
+class LetterheadCreateForm(forms.ModelForm):
+
+    def clean(self):
+        clean_letterhead_pdf(self.cleaned_data.get('letterhead_pdf'))
+
+    def save(self):
+        return clean_letterhead_pdf(self.cleaned_data.get('letterhead_pdf'), save=True)
+
+    class Meta:
+        model = Letterhead
+        fields = ['letterhead_pdf']
+
+
+class LetterheadUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Letterhead
+        exclude = []
+
+
+class DocumentSettingsForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['proposal_text'].queryset = DocumentTemplate.objects.filter(document_type=DocumentTemplate.PROPOSAL)
+        self.fields['invoice_text'].queryset = DocumentTemplate.objects.filter(document_type=DocumentTemplate.INVOICE)
+
+    class Meta:
+        model = DocumentSettings
+        fields = '__all__'

@@ -15,6 +15,8 @@ from decimal import Decimal
 from datetime import date
 
 from reportlab.lib.units import mm
+from reportlab.lib.utils import simpleSplit
+from reportlab.lib.pagesizes import landscape
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
@@ -27,8 +29,10 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 from systori.apps.accounting.utils import get_transactions_for_jobs
 from systori.apps.accounting.constants import TAX_RATE
 
-from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b, nr
-from .style import PortraitStationaryCanvas
+from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b
+from .style import LetterheadCanvas
+from .style import DOCUMENT_FORMAT, DOCUMENT_UNIT
+from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .utils import update_instance
 from . import font
 
@@ -46,6 +50,7 @@ def collate_tasks(invoice, available_width):
 
     t.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
 
+    description_width = sum(t.get_widths()[1:6])
 
     for job in invoice['debits']:
         t.row(b(job['code']), b(job['name']))
@@ -54,6 +59,7 @@ def collate_tasks(invoice, available_width):
         for taskgroup in job['taskgroups']:
             t.row(b(taskgroup['code']), b(taskgroup['name']))
             t.row_style('SPAN', 1, -1)
+            t.keep_next_n_rows_together(2)
 
             for task in taskgroup['tasks']:
                 t.row(p(task['code']), p(task['name']))
@@ -61,9 +67,6 @@ def collate_tasks(invoice, available_width):
 
                 t.row('', '', ubrdecimal(task['complete']), p(task['unit']), money(task['price']), money(task['total']))
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
-
-                #t.row_style('BOTTOMPADDING', 0, -1, 10)
-
                 t.keep_previous_n_rows_together(2)
 
             t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
@@ -71,6 +74,7 @@ def collate_tasks(invoice, available_width):
             t.row_style('FONTNAME', 0, -1, font.bold)
             t.row_style('ALIGNMENT', -1, -1, "RIGHT")
             t.row_style('SPAN', 1, 4)
+            t.row_style('VALIGN', 0, -1, "BOTTOM")
 
             t.row('')
 
@@ -167,31 +171,36 @@ def collate_payments(invoice, available_width):
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def render(invoice, format):
+def render(invoice, letterhead, format):
+
+    def canvas_maker(*args, **kwargs):
+        return LetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
 
     with BytesIO() as buffer:
+        document_unit = DOCUMENT_UNIT[letterhead.document_unit]
+        if letterhead.orientation == 'landscape':
+            pagesize = landscape(DOCUMENT_FORMAT[letterhead.document_format])
+        else:
+            pagesize = DOCUMENT_FORMAT[letterhead.document_format]
+        page_width = pagesize[0]
+        table_width = page_width - float(letterhead.right_margin)*document_unit\
+                                 - float(letterhead.left_margin)*document_unit
 
         is_flat_invoice = invoice.get('is_flat_invoice', False)
 
         invoice_date = date_format(date(*map(int, invoice['date'].split('-'))), use_l10n=True)
 
-        doc = SystoriDocument(buffer, debug=DEBUG_DOCUMENT)
+        doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
         flowables = [
 
-            Paragraph(force_break(invoice.get('address_label', None) or """\
-            {business}
-            {salutation} {first_name} {last_name}
-            {address}
-            {postal_code} {city}
-            """.format(**invoice)), stylesheet['Normal']),
+            get_address_label(invoice),
 
-            Spacer(0, 18*mm),
+            get_address_label_spacer(invoice),
 
-            Paragraph(invoice.get('title') or _("Invoice"), stylesheet['h2']),
+            heading_and_date(invoice.get('title') or _("Invoice"), invoice_date, table_width, debug=DEBUG_DOCUMENT),
 
-            Spacer(0, 4*mm),
+            Spacer(0, 6*mm),
 
-            Paragraph(invoice_date, stylesheet['NormalRight']),
             Paragraph(_("Invoice No.")+" "+invoice['invoice_no'], stylesheet['NormalRight']),
             Paragraph(_("Please indicate the correct invoice number on your payment."),
                       ParagraphStyle('', parent=stylesheet['Small'], alignment=TA_RIGHT)),
@@ -200,7 +209,7 @@ def render(invoice, format):
 
             Spacer(0, 4*mm),
 
-            collate_payments(invoice, doc.width),
+            collate_payments(invoice, table_width),
 
             Spacer(0, 4*mm),
 
@@ -219,18 +228,18 @@ def render(invoice, format):
 
                 Spacer(0, 4*mm),
 
-                collate_tasks(invoice, doc.width),
+                collate_tasks(invoice, table_width),
 
                 Spacer(0, 4*mm),
 
-                collate_tasks_total(invoice, doc.width),
+                collate_tasks_total(invoice, table_width),
 
             ]
 
         if format == 'print':
-            doc.build(flowables)
+            doc.build(flowables, letterhead=letterhead)
         else:
-            doc.build(flowables, canvasmaker=PortraitStationaryCanvas)
+            doc.build(flowables, canvasmaker=canvas_maker, letterhead=letterhead)
 
         return buffer.getvalue()
 
