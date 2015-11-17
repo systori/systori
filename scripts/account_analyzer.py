@@ -259,7 +259,7 @@ def migrate_accounts(company):
 
             # lets try paying previous invoice
 
-            invoice = Invoice.objects.filter(project=project, document_date__lte=transaction.transacted_on).order_by('-document_date').first()
+            invoice = Invoice.objects.filter(project=project, document_date__lt=transaction.transacted_on).order_by('-document_date').first()
             if invoice and invoice.amount >= (bank_entry.amount+(-discount_entry.amount if discount_entry else 0)-Decimal(.01)):
 
                 print('\n   Applying payment to previous invoice #{} - {} - {} - {}...'.format(invoice.id, invoice.invoice_no, invoice.document_date, money(invoice.amount)))
