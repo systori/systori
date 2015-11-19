@@ -5,20 +5,21 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from .models import *
 from .forms import *
-from .skr03 import *
 
 
 class PaymentCreate(FormView):
-    form_class = PaymentForm
+    form_class = SplitPaymentFormSet
     template_name = 'accounting/payment_form.html'
 
+    def get_form_kwargs(self):
+        kwargs = {'jobs': self.request.project.jobs.all()}
+        if self.request.method == 'POST':
+            kwargs['data'] = self.request.POST
+        return kwargs
+
     def form_valid(self, form):
-        amount = form.cleaned_data['amount']
-        discount = form.cleaned_data['discount']
-        received_on = form.cleaned_data['received_on']
-        bank = form.cleaned_data['bank_account']
-        partial_credit([(self.request.project, amount, discount)], amount, received_on, bank)
-        return super(PaymentCreate, self).form_valid(form)
+        form.save()
+        return super().form_valid(form)
 
     def get_success_url(self):
         return self.request.project.get_absolute_url()

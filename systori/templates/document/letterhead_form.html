@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n bootstrap %}
+
+
+{% block container %}
+<div class="container-fluid" style="display:table;">
+  <div class="col-lg-3" style="display:table-cell;float: none;">
+    <table>
+      <tr>
+        <td>
+          <form role="form" enctype="multipart/form-data"  method="post">
+              {% csrf_token %}
+              {{ form|bootstrap }}
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+              </div>
+          </form>
+        </td>
+        <td valign="top"><br/><br/>
+          {% for key, val in form.instance.vars.items %}
+            <b>[{{ key }}]</b> &nbsp; {{ val }}<br/>
+          {% endfor %}
+      </tr>
+    </table>
+  </div>
+
+  <div class="col-lg-9" style="display:table-cell;float: none;">
+    {% if object %}
+    <embed src="{% url 'letterhead.preview' object.id %}" width="100%" height="100%" type='application/pdf'>
+    {% else %}
+    <p>{% trans 'No Letterhead available.' %}</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

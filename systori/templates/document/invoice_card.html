@@ -1,0 +1,50 @@
+{% load i18n customformatting %}
+<div class="panel panel-{% if invoice.status == invoice.DRAFT %}primary{% else %}success{% endif %} invoice">
+  <div class="panel-heading">
+    <div class="row">
+      <div class="col-md-4">{{ invoice.invoice_no }}</div>
+      <div class="col-md-4 text-center">{{ invoice.get_status_display }}</div>
+      <div class="col-md-4 text-right">{{ invoice.document_date }}</div>
+    </div>
+  </div>
+  <table class="table">
+  {% for debit in invoice.json.debits %}
+    <tr>
+      <td>{{ debit.name }}</td>
+      <td style="text-align: right; white-space: nowrap;">{{ debit.debit_net|money }}</td>
+    </tr>
+  {% endfor %}
+    <tr style="text-align: right; white-space: nowrap;">
+      <td>{% trans "Net" %}:</td>
+      <td>{{ invoice.json.debit_net|money }}</td>
+    </tr>
+    <tr style="text-align: right; white-space: nowrap;">
+      <td>{% trans "VAT" %} {{ TAX_RATE_DISPLAY }}:</td>
+      <td>{{ invoice.json.debit_tax|money }}</td>
+    </tr>
+    <tr style="text-align: right; white-space: nowrap;">
+      <td>{% trans "Gross" %}:</td>
+      <td style="font-weight: bold;">{{ invoice.json.debit_gross|money }}</td>
+    </tr>
+  </table>
+  <div class="panel-footer" style="text-align: right;">
+    {% if invoice.status == invoice.DRAFT %}
+    <a class="btn btn-sm btn-default pull-left" href="{% url 'invoice.delete' project.id invoice.id %}">{% trans "Delete" %}</a>
+    {% for state in invoice.get_available_status_transitions %}
+      <a class="btn btn-sm btn-default" href="{% url 'invoice.transition' project.id invoice.id state.name %}">{{ state.custom.label }}</a>
+    {% endfor %}
+    <a class="btn btn-sm btn-default" href="{% url 'invoice.update' project.id invoice.id %}">{% trans "Edit" %}</a>
+    {% endif %}
+    <div class="btn-group">
+      <a class="btn btn-sm btn-default" href="{% url 'invoice.pdf' project.id 'print' invoice.id %}">{% trans 'PDF' %}</a>
+      <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
+      <ul class="dropdown-menu">
+        <li><a href="{% url 'invoice.pdf' project.id 'email' invoice.id %}">{% trans 'Email' %}</a></li>
+        <li><a href="{% url 'invoice.pdf' project.id 'print' invoice.id %}">{% trans 'Print' %}</a></li>
+      </ul>
+    </div>
+  </div>
+</div>

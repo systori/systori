@@ -15,11 +15,13 @@
       <sourceFolder url="file://$MODULE_DIR$/systori" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/systori/dart/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/systori/dart/build" />
+      <excludeFolder url="file://$MODULE_DIR$/systori/dart/packages" />
       <excludeFolder url="file://$MODULE_DIR$/systori/dart/web/packages" />
     </content>
-    <orderEntry type="jdk" jdkName="systori-python" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.4.0 virtualenv at ~/.virtualenvs/systori" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="application" />
+    <orderEntry type="library" name="Dart Packages" level="project" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />

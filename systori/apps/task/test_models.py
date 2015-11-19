@@ -16,6 +16,7 @@ def create_task_data(self, create_user=True, create_company=True):
     if create_user:
         self.user = User.objects.create_superuser('lex@damoti.com', 'pass')
         Access.objects.create(user=self.user, company=self.company)
+    self.letterhead = Letterhead.objects.create(name="Test Letterhead", letterhead_pdf='media/letterhead/letterhead.pdf')
     self.template_project = Project.objects.create(name="Template Project", is_template=True)
     self.project = Project.objects.create(name="my project")
     self.project2 = Project.objects.create(name="my project 2")
@@ -31,6 +32,11 @@ def create_task_data(self, create_user=True, create_company=True):
     TaskInstance.objects.create(task=self.task2, selected=True)
     self.lineitem2 = LineItem.objects.create(name="my line item 2", unit_qty=0, price=0,
                                              taskinstance=self.task2.instance)
+    self.group3 = TaskGroup.objects.create(name="my group", job=self.job2)
+    self.task3 = Task.objects.create(name="my task one", qty=10, taskgroup=self.group3)
+    TaskInstance.objects.create(task=self.task3, selected=True)
+    self.lineitem3 = LineItem.objects.create(name="my line item 1", unit_qty=8, price=12,
+                                            taskinstance=self.task3.instance)
 
 
 class TaskInstanceTotalTests(TestCase):
@@ -68,10 +74,10 @@ class JobQuerySetTests(TestCase):
 
     def test_nonzero_total(self):
         jobs = Job.objects
-        self.assertEqual(Decimal(960), jobs.estimate_total())
+        self.assertEqual(Decimal(1920), jobs.estimate_total())
         self.assertEqual(Decimal(0), jobs.billable_total())
-        self.assertEqual(round(Decimal(960 * .19), 2), round(jobs.estimate_tax_total(), 2))
-        self.assertEqual(round(Decimal(960 * 1.19), 2), round(jobs.estimate_gross_total(), 2))
+        self.assertEqual(round(Decimal(1920 * .19), 2), round(jobs.estimate_tax_total(), 2))
+        self.assertEqual(round(Decimal(1920 * 1.19), 2), round(jobs.estimate_gross_total(), 2))
 
 
 class TaskGroupOffsetTests(TestCase):
@@ -170,13 +176,13 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Draft', self.job.get_status_display())
 
     def test_job_proposed(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())
 
     def test_job_approved(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         proposal.send()
         proposal.approve()
@@ -184,7 +190,7 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Approved', self.job.get_status_display())
 
     def test_job_declined(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())
@@ -194,7 +200,7 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Draft', self.job.get_status_display())
 
     def test_job_after_proposal_deleted(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())

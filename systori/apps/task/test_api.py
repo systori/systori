@@ -135,9 +135,9 @@ class TaskResourceTest(ResourceTestCaseBase):
             "target": "/api/v1/taskgroup/{}/".format(self.group.id),
             "pos": 1
         }
-        self.assertEqual(1, Task.objects.filter(name=self.task.name).count())
-        response = self.api_client.post(url, data=data, format='json')
         self.assertEqual(2, Task.objects.filter(name=self.task.name).count())
+        response = self.api_client.post(url, data=data, format='json')
+        self.assertEqual(3, Task.objects.filter(name=self.task.name).count())
         new_task = Task.objects.get(taskgroup=self.group.id, order=1)
         self.assertContains(response, '<ubr-task data-pk="{0}">'.format(new_task.id), 1, 201)
 

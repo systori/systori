@@ -1,4 +1,5 @@
 import locale
+from decimal import Decimal
 from django.template.defaultfilters import stringfilter
 from django.utils.formats import get_format, get_language, number_format, to_locale
 from django import template
@@ -9,6 +10,9 @@ register = template.Library()
 @register.filter
 def ubrdecimal(decimal, decimal_pos=4):
     if decimal == '': return ''
+
+    if type(decimal) is str:
+        decimal = Decimal(decimal)
 
     decimal = round(decimal, decimal_pos)
 
@@ -33,5 +37,11 @@ def ubrdecimal(decimal, decimal_pos=4):
 
 @register.filter
 def money(decimal):
+    if type(decimal) is str: decimal = Decimal(decimal)
     locale.setlocale(locale.LC_ALL, (to_locale(get_language()), 'utf-8'))
     return locale.currency(decimal, True, True)
+
+
+@register.filter
+def negate(value):
+    return -value

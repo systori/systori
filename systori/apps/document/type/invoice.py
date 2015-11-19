@@ -1,7 +1,22 @@
+"""
+JSON Version Log
+================
+1.2
+ - major refactoring, renamed fields, added new fields
+ - coincided with project to job based account switch
+1.1
+ - Added is_flat_invoice attribute.
+1.0
+ - Initial Version.
+"""
+
 from io import BytesIO
+from decimal import Decimal
 from datetime import date
 
 from reportlab.lib.units import mm
+from reportlab.lib.utils import simpleSplit
+from reportlab.lib.pagesizes import landscape
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
@@ -11,10 +26,13 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
-from systori.apps.accounting.utils import get_transactions_table
+from systori.apps.accounting.utils import get_transactions_for_jobs
+from systori.apps.accounting.constants import TAX_RATE
 
-from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b, nr
-from .style import PortraitStationaryCanvas
+from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b
+from .style import LetterheadCanvas
+from .style import DOCUMENT_FORMAT, DOCUMENT_UNIT
+from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .utils import update_instance
 from . import font
 
@@ -31,18 +49,17 @@ def collate_tasks(invoice, available_width):
     t.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
 
     t.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
-    t.row_style('FONTNAME', 0, -1, font.bold)
-    t.row_style('ALIGNMENT', 2, 3, "CENTER")
-    t.row_style('ALIGNMENT', 4, -1, "RIGHT")
-    t.row_style('SPAN', 2, 3)
 
-    for job in invoice['jobs']:
+    description_width = sum(t.get_widths()[1:6])
+
+    for job in invoice['debits']:
         t.row(b(job['code']), b(job['name']))
         t.row_style('SPAN', 1, -1)
 
         for taskgroup in job['taskgroups']:
             t.row(b(taskgroup['code']), b(taskgroup['name']))
             t.row_style('SPAN', 1, -1)
+            t.keep_next_n_rows_together(2)
 
             for task in taskgroup['tasks']:
                 t.row(p(task['code']), p(task['name']))
@@ -50,9 +67,6 @@ def collate_tasks(invoice, available_width):
 
                 t.row('', '', ubrdecimal(task['complete']), p(task['unit']), money(task['price']), money(task['total']))
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
-
-                t.row_style('BOTTOMPADDING', 0, -1, 10)
-
                 t.keep_previous_n_rows_together(2)
 
             t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
@@ -60,6 +74,7 @@ def collate_tasks(invoice, available_width):
             t.row_style('FONTNAME', 0, -1, font.bold)
             t.row_style('ALIGNMENT', -1, -1, "RIGHT")
             t.row_style('SPAN', 1, 4)
+            t.row_style('VALIGN', 0, -1, "BOTTOM")
 
             t.row('')
 
@@ -74,75 +89,116 @@ def collate_tasks_total(invoice, available_width):
     t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
 
-    for job in invoice['jobs']:
+    for job in invoice['debits']:
         for taskgroup in job['taskgroups']:
             t.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
                   money(taskgroup['total']))
     t.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
 
-    t.row(_("Total without VAT"), money(invoice['total_base']))
-    t.row("19,00% "+_("VAT"), money(invoice['total_tax']))
-    t.row(_("Total including VAT"), money(invoice['total_gross']))
+    t.row(_("Total without VAT"), money(invoice['debited_net']))
+    t.row("19,00% "+_("VAT"), money(invoice['debited_tax']))
+    t.row(_("Total including VAT"), money(invoice['debited_gross']))
 
     return t.get_table()
 
 
 def collate_payments(invoice, available_width):
 
-    t = TableFormatter([0, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
-    t.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
-    t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
-    t.style.append(('BOTTOMPADDING', (0, 1), (-1, -1), 3*mm))
+    t = TableFormatter([0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
     t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
-    t.style.append(('VALIGN', (0, 0), (-1, -1), "BOTTOM"))
+    t.style.append(('VALIGN', (0, 0), (-2, -1), "TOP"))
+    t.style.append(('VALIGN', (-1, 0), (-1, -1), "BOTTOM"))
+    t.style.append(('RIGHTPADDING', (-1, 0), (-1, -2), 0))
 
     t.style.append(('LINEBELOW', (0, 0), (-1, 0), 0.25, colors.black))
-    t.style.append(('LINEAFTER', (0, 0), (-2, -1), 0.25, colors.black))
+    t.style.append(('LINEABOVE', (0, -1), (-1, -1), 0.25, colors.black))
+    t.style.append(('LINEAFTER', (0, 0), (-2, -2), 0.25, colors.black))
 
-    t.row('', _("gross pay"), _("consideration"), _("VAT"))
+    t.row('', _("consideration"), _("tax"), _("gross"), _("balance"))
     t.row_style('FONTNAME', 0, -1, font.bold)
 
-    t.row(_("Invoice Total"), money(invoice['total_gross']), money(invoice['total_base']), money(invoice['total_tax']))
+    last_txn_idx = len(invoice['transactions'])-1
+    for txn_idx, txn in enumerate(invoice['transactions']):
 
-    for payment in invoice['transactions']:
-        row = ['', money(payment['amount']), money(payment['amount_base']), money(payment['amount_tax'])]
-        if payment['type'] == 'payment':
-            received_on = date_format(date(*map(int, payment['received_on'].split('-'))), use_l10n=True)
-            row[0] = Paragraph(_('Your Payment on')+' '+received_on, stylesheet['Normal'])
-        elif payment['type'] == 'discount':
-            row[0] = _('Discount Applied')
+        row = []
+        rows_to_keep = 0
+
+        description = {
+            'payment': _('Payment'),
+            'invoice': _('Partial Invoice'),
+            'final-invoice': _('Final Invoice')
+        }[txn['type']]
+
+        if txn.get('invoice_id', None) == invoice['id']:
+            description = _('This Invoice')
+
+        row += [description]
+
+        for col in ['net', 'tax']:
+            row += [money(txn[col]) if txn[col] else '']
+
+        if txn.get('discount_applied', 0):
+            row += [money(txn['payment_applied'])]
+        else:
+            row += [money(txn['gross'])]
+
         t.row(*row)
+        rows_to_keep += 1
 
-    t.row(_("Remaining amount"), money(invoice['balance_gross']), money(invoice['balance_base']), money(invoice['balance_tax']))
+        if txn.get('discount_applied', 0):
+            t.row(_('Discount'), '', '', money(txn['discount_applied']))
+            rows_to_keep += 1
+
+        row = [date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True), '', '', '', '']
+        if not txn_idx == last_txn_idx:
+            # otherwise balance would be duplicated in the 'Please Pay' box
+            row[-1] = money(txn['balance'])
+
+        t.row(*row)
+        rows_to_keep += 1
+        t.row_style('LINEBELOW', 0, -1, 0.25, colors.lightgrey)
+
+        t.keep_previous_n_rows_together(rows_to_keep)
+
+    t.row('', '', '', _('Please Pay'), ' '+money(invoice['balance_gross']))
     t.row_style('FONTNAME', 0, -1, font.bold)
+    t.row_style('LINEABOVE', -1, -1, 0.5, colors.black)
+    t.row_style('LINEBELOW', -1, -1, 0.5, colors.black)
+    t.row_style('LINEAFTER', -2, -1, 0.5, colors.black)
+    [t.row_style(side+'PADDING', -2, -1, 5) for side in ['LEFT', 'RIGHT', 'BOTTOM', 'TOP']]
 
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def render(invoice, format):
+def render(invoice, letterhead, format):
+
+    def canvas_maker(*args, **kwargs):
+        return LetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
 
     with BytesIO() as buffer:
+        document_unit = DOCUMENT_UNIT[letterhead.document_unit]
+        if letterhead.orientation == 'landscape':
+            pagesize = landscape(DOCUMENT_FORMAT[letterhead.document_format])
+        else:
+            pagesize = DOCUMENT_FORMAT[letterhead.document_format]
+        page_width = pagesize[0]
+        table_width = page_width - float(letterhead.right_margin)*document_unit\
+                                 - float(letterhead.left_margin)*document_unit
 
         invoice_date = date_format(date(*map(int, invoice['date'].split('-'))), use_l10n=True)
 
-        doc = SystoriDocument(buffer, debug=DEBUG_DOCUMENT)
+        doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
         flowables = [
 
-            Paragraph(force_break(invoice.get('address_label', None) or """\
-            {business}
-            {salutation} {first_name} {last_name}
-            {address}
-            {postal_code} {city}
-            """.format(**invoice)), stylesheet['Normal']),
+            get_address_label(invoice),
 
-            Spacer(0, 18*mm),
+            get_address_label_spacer(invoice),
 
-            Paragraph(invoice.get('title') or _("Invoice"), stylesheet['h2']),
+            heading_and_date(invoice.get('title') or _("Invoice"), invoice_date, table_width, debug=DEBUG_DOCUMENT),
 
-            Spacer(0, 4*mm),
+            Spacer(0, 6*mm),
 
-            Paragraph(invoice_date, stylesheet['NormalRight']),
             Paragraph(_("Invoice No.")+" "+invoice['invoice_no'], stylesheet['NormalRight']),
             Paragraph(_("Please indicate the correct invoice number on your payment."),
                       ParagraphStyle('', parent=stylesheet['Small'], alignment=TA_RIGHT)),
@@ -151,7 +207,7 @@ def render(invoice, format):
 
             Spacer(0, 4*mm),
 
-            collate_payments(invoice, doc.width),
+            collate_payments(invoice, table_width),
 
             Spacer(0, 4*mm),
 
@@ -159,43 +215,47 @@ def render(invoice, format):
 
             PageBreak(),
 
-	    Paragraph(invoice_date, stylesheet['NormalRight']),
+            Paragraph(invoice_date, stylesheet['NormalRight']),
 
             Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
 
             Spacer(0, 4*mm),
 
-            collate_tasks(invoice, doc.width),
+            collate_tasks(invoice, table_width),
 
             Spacer(0, 4*mm),
 
-            collate_tasks_total(invoice, doc.width),
+            collate_tasks_total(invoice, table_width),
 
-            ]
+        ]
 
         if format == 'print':
-            doc.build(flowables)
+            doc.build(flowables, letterhead=letterhead)
         else:
-            doc.build(flowables, canvasmaker=PortraitStationaryCanvas)
+            doc.build(flowables, canvasmaker=canvas_maker, letterhead=letterhead)
 
 
         return buffer.getvalue()
 
 
-def serialize(project, additional_information):
+def serialize(invoice, data):
 
-    contact = project.billable_contact.contact
+    contact = invoice.project.billable_contact.contact
 
     invoice = {
 
-        'version': '1.0',
+        'version': '1.2',
 
-        'title': additional_information.get('title',''),
-        'date': additional_information.get('document_date'),
-        'invoice_no': additional_information.get('invoice_no'),
+        'id': invoice.id,
 
-        'header': additional_information.get('header'),
-        'footer': additional_information.get('footer'),
+        'title': data['title'],
+        'date': data['document_date'],
+        'invoice_no': data['invoice_no'],
+
+        'header': data['header'],
+        'footer': data['footer'],
+
+        'is_final': data['is_final'],
 
         'business': contact.business,
         'salutation': contact.salutation,
@@ -206,41 +266,60 @@ def serialize(project, additional_information):
         'city': contact.city,
         'address_label': contact.address_label,
 
-        'total_gross': project.billable_gross_total,
-        'total_base': project.billable_total,
-        'total_tax': project.billable_tax_total,
+        # debits created solely as a result of this invoice
+        'debit_gross': data['debit_gross'],
+        'debit_net': data['debit_net'],
+        'debit_tax': data['debit_tax'],
 
-        'balance_gross': project.account.balance,
-        'balance_base': project.account.balance_base,
-        'balance_tax': project.account.balance_tax,
+        # all debits for jobs on this invoice (including debit above)
+        'debited_gross': data['debited_gross'],
+        'debited_net': data['debited_net'],
+        'debited_tax': data['debited_tax'],
 
+        # balance for all jobs on this invoice
+        'balance_gross': data['balance_gross'],
+        'balance_net': data['balance_net'],
+        'balance_tax': data['balance_tax'],
+
+        'debits': []
     }
 
-    if additional_information.get('add_terms', False):
+    if data.get('add_terms', False):
         invoice['add_terms'] = True  # TODO: Calculate the terms.
 
-    invoice['jobs'] = []
+    invoice['transactions'] = get_transactions_for_jobs([d['job'] for d in data['debits']])
 
-    for job in project.billable_jobs:
-        job_dict = {
+    for debit in data['debits']:
+
+        job = debit.pop('job')
+
+        debit.update({
+            'job.id': job.id,
             'code': job.code,
             'name': job.name,
             'taskgroups': []
-        }
-        invoice['jobs'].append(job_dict)
+        })
+        debit['debit_net'] = round(debit['debit_amount'] / (1+TAX_RATE), 2)
+        debit['debit_tax'] = debit['debit_amount'] - debit['debit_net']
+        invoice['debits'].append(debit)
+
+        if debit['is_flat']:
+            continue
 
         for taskgroup in job.billable_taskgroups:
             taskgroup_dict = {
+                'id': taskgroup.id,
                 'code': taskgroup.code,
                 'name': taskgroup.name,
                 'description': taskgroup.description,
                 'total': taskgroup.billable_total,
                 'tasks': []
             }
-            job_dict['taskgroups'].append(taskgroup_dict)
+            debit['taskgroups'].append(taskgroup_dict)
 
             for task in taskgroup.billable_tasks:
                 task_dict = {
+                    'id': task.id,
                     'code': task.instance.code,
                     'name': task.instance.full_name,
                     'description': task.instance.full_description,
@@ -254,6 +333,7 @@ def serialize(project, additional_information):
 
                 for lineitem in task.instance.lineitems.all():
                     lineitem_dict = {
+                        'id': lineitem.id,
                         'name': lineitem.name,
                         'qty': lineitem.unit_qty,
                         'unit': lineitem.unit,
@@ -262,26 +342,4 @@ def serialize(project, additional_information):
                     }
                     task_dict['lineitems'].append(lineitem_dict)
 
-    invoice['transactions'] = []
-
-    for record_type, _, record in get_transactions_table(project):
-
-        if record_type in ('payment', 'discount'):
-
-            txn = {
-                'type': record_type,
-                'amount': record.amount,
-                'amount_base': record.amount_base,
-                'amount_tax': record.amount_tax
-            }
-
-            if record_type == 'payment':
-                txn['received_on'] = record.received_on
-
-            invoice['transactions'].append(txn)
-
     return invoice
-
-
-def update(instance, data):
-    return update_instance(instance, data, {'document_date': 'date'})

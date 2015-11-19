@@ -8,11 +8,9 @@ from django.core.urlresolvers import reverse, reverse_lazy
 
 from ..project.models import Project
 from ..task.models import Job
-from .models import Proposal, Invoice, DocumentTemplate
-from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, InvoiceUpdateForm
-from ..accounting import skr03
-
-from .type import proposal, invoice, evidence, specification, itemized_listing
+from .models import Proposal, Invoice, DocumentTemplate, Letterhead, DocumentSettings
+from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
+from .type import proposal, invoice, evidence, letterhead, itemized_listing
 
 
 class DocumentRenderView(SingleObjectMixin, View):
@@ -22,16 +20,6 @@ class DocumentRenderView(SingleObjectMixin, View):
     def pdf(self):
         raise NotImplementedError
 
-
-# Specification
-
-
-class SpecificationPDF(DocumentRenderView):
-    model = Proposal
-
-    def pdf(self):
-        json = self.get_object().json
-        return specification.render(json, self.kwargs['format'])
 
 # Proposal
 
@@ -45,7 +33,8 @@ class ProposalPDF(DocumentRenderView):
 
     def pdf(self):
         json = self.get_object().json
-        return proposal.render(json, self.request.GET.get('with_lineitems', False), self.kwargs['format'])
+        letterhead = self.get_object().letterhead
+        return proposal.render(json, letterhead, self.request.GET.get('with_lineitems', False), self.kwargs['format'])
 
 
 class ProposalCreate(CreateView):
@@ -66,6 +55,7 @@ class ProposalCreate(CreateView):
         for job in form.cleaned_data['jobs']:
             amount += job.estimate_total
 
+        form.instance.letterhead = Letterhead.objects.first()
         form.instance.amount = amount
         form.instance.json = proposal.serialize(self.request.project, form)
         form.instance.json_version = form.instance.json['version']
@@ -136,59 +126,54 @@ class InvoicePDF(DocumentRenderView):
 
     def pdf(self):
         json = self.get_object().json
-        return invoice.render(json, self.kwargs['format'])
+        letterhead = self.get_object().letterhead
+        return invoice.render(json, letterhead, self.kwargs['format'])
 
 
-class InvoiceCreate(CreateView):
+class InvoiceFormMixin:
     model = Invoice
     form_class = InvoiceForm
 
     def get_form_kwargs(self):
-        kwargs = super(InvoiceCreate, self).get_form_kwargs()
-        kwargs['instance'] = self.model(project=self.request.project)
+        jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems').all()
+        kwargs = {
+            'jobs': jobs,
+            'instance': self.model(project=self.request.project),
+        }
+        if self.request.method == 'POST':
+            kwargs['data'] = self.request.POST
         return kwargs
 
-    def form_valid(self, form):
-        project = Project.prefetch(self.request.project.id)
-
-        if form.cleaned_data['is_final']:
-            skr03.final_debit(project)
-            project.begin_settlement()
-            project.save()
-
-        elif project.new_amount_to_debit:
-            # update account balance with any new work that's been done
-            skr03.partial_debit(project)
-
-        form.instance.amount = project.account.balance
-        form.instance.json = invoice.serialize(project, form.cleaned_data)
-        form.instance.json_version = form.instance.json['version']
-
-        return super(InvoiceCreate, self).form_valid(form)
-
     def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+        return reverse('project.view', args=[self.request.project.id])
 
 
-class InvoiceUpdate(UpdateView):
-    model = Invoice
-    form_class = InvoiceUpdateForm
-
+class InvoiceCreate(InvoiceFormMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['initial'] = self.object.json
+        instance = kwargs['instance']
+        if 'previous_invoice_id' in self.request.GET:
+            previous_id = int(self.request.GET['previous_invoice_id'])
+            previous = Invoice.objects.get(id=previous_id)
+            instance.parent = previous.parent if previous.parent else previous
+            # copy all the basic stuff from previous invoice
+            for field in ['title', 'header', 'footer', 'add_terms']:
+                instance.json[field] = previous.json[field]
+            # copy the list of jobs
+            instance.json['debits'] = [
+                {'job.id': debit['job.id'], 'is_booked': False}
+                for debit in previous.json['debits']
+            ]
+        else:
+            instance.json['debits'] = []
         return kwargs
 
-    def get_queryset(self):
-        return super().get_queryset().filter(project=self.request.project)
 
-    def form_valid(self, form):
-        invoice.update(self.object, form.cleaned_data)
-        self.object.save()
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+class InvoiceUpdate(InvoiceFormMixin, UpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.object
+        return kwargs
 
 
 class InvoiceTransition(SingleObjectMixin, View):
@@ -260,3 +245,57 @@ class DocumentTemplateUpdate(UpdateView):
 class DocumentTemplateDelete(DeleteView):
     model = DocumentTemplate
     success_url = reverse_lazy('templates')
+
+
+# Letterhead
+
+
+class LetterheadView(DetailView):
+    model = Letterhead
+
+
+class LetterheadCreate(CreateView):
+    form_class = LetterheadCreateForm
+    model = Letterhead
+
+    def get_success_url(self):
+        return reverse('letterhead.update', args=[self.object.id])
+
+
+class LetterheadUpdate(UpdateView):
+    model = Letterhead
+    form_class = LetterheadUpdateForm
+
+    def get_success_url(self):
+        return reverse('letterhead.update', args=[self.object.id])
+
+
+class LetterheadDelete(DeleteView):
+    model = Letterhead
+    success_url = reverse_lazy('templates')
+
+
+class LetterheadPreview(DocumentRenderView):
+    def pdf(self):
+        return letterhead.render(letterhead=Letterhead.objects.get(id=self.kwargs.get('pk')))
+
+
+# Document Settings
+
+
+class DocumentSettingsCreate(CreateView):
+    model = DocumentSettings
+    form_class = DocumentSettingsForm
+    success_url = reverse_lazy('templates')
+
+
+class DocumentSettingsUpdate(UpdateView):
+    model = DocumentSettings
+    form_class = DocumentSettingsForm
+    success_url = reverse_lazy('templates')
+
+
+class DocumentSettingsDelete(DeleteView):
+    model = DocumentSettings
+    success_url = reverse_lazy('templates')
+

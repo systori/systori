@@ -1,0 +1,39 @@
+{% extends "project.html" %}
+{% load i18n l10n customformatting project %}
+
+{% block content %}
+  {% for formset in formsets %}
+    <form role="form" method="post">{% csrf_token %}
+    <input type="hidden" name="transaction_id" value="{{ formset.instance.id }}" />
+    {{ formset.management_form }}
+    <div class="page-header">
+      <h1><small>#{{ formset.instance.id }}</small> {{ formset.instance.recorded_on|date:"DATE_FORMAT" }}</h1>
+    </div>
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th>{% trans 'Account' %}</th>
+        <th>{% trans 'Credit' %}</th>
+        <th>{% trans 'Debit' %}</th>
+        <th>{% trans 'Is Payment?' %}</th>
+        <th>{% trans 'Is Discount?' %}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for form in formset %}
+        <tr>
+          <td>{{ form.id }}{{ form.instance.account.code }} - {{ form.instance.account.name }}</td>
+          <td>{% if form.instance.is_credit %}{{ form.amount }}{% endif %}</td>
+          <td>{% if form.instance.is_debit %}{{ form.amount }}{% endif %}</td>
+          <td>{{ form.is_payment }}</td>
+          <td>{{ form.is_discount }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <div style="text-align: right;">
+      <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+    </div>
+    </form>
+  {% endfor %}
+{% endblock %}
