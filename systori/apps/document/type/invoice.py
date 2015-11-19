@@ -183,21 +183,32 @@ def collate_payments(invoice, available_width):
     t.style.append(('LINEABOVE', (0, -1), (-1, -1), 0.25, colors.black))
     t.style.append(('LINEAFTER', (0, 0), (-2, -2), 0.25, colors.black))
 
-    t.row('', _("gross"), _("consideration"), _("tax"))
+    t.row('', _("consideration"), _("tax"), _("gross"))
     t.row_style('FONTNAME', 0, -1, font.bold)
 
-    t.row(_('Project progress'), money(invoice['debited_gross']), money(invoice['debited_net']), money(invoice['debited_tax']))
+    t.row(_('Project progress'), money(invoice['debited_net']), money(invoice['debited_tax']), money(invoice['debited_gross']))
 
     last_txn_idx = len(invoice['transactions'])-1
     for txn_idx, txn in enumerate(invoice['transactions']):
 
-        if txn['type'] != 'payment':
+        if txn.get('invoice_id', None) == invoice['id']:
             continue
 
-        pay_day = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
-        t.row(p(_('Payment') + '<br />' + pay_day), money(txn['gross']), money(-txn['net']), money(-txn['tax']))
+        if txn['type'] == 'payment':
+            pay_day = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
+            t.row(p(_('Payment on {date}').format(date=pay_day)), money(-txn['net']), money(-txn['tax']), money(txn['payment_applied']))
+            if txn['discount_applied']:
+                discount_net = round(Decimal(txn['discount_applied']) / (1+TAX_RATE), 2)
+                discount_tax = Decimal(txn['discount_applied']) - discount_net
+                t.row(p(_('  Discount applied')), money(discount_net), money(discount_tax), money(txn['discount_applied']))
+        elif txn['type'] == 'invoice' and txn['invoice_status'] != 'paid':
+            invoice_day = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
+            invoice_net = Decimal(txn['net']) if txn['net'] else round(Decimal(txn['gross']) / (1+TAX_RATE), 2)
+            invoice_tax = Decimal(txn['tax']) if txn['tax'] else Decimal(txn['gross']) - invoice_net
+            description = _("{invoice} from {date}").format(invoice=txn['invoice_title'], date=invoice_day)
+            t.row(p(description), money(-invoice_net), money(-invoice_tax),  money(-txn['gross']))
 
-    t.row(_('Please Pay'), money(invoice['balance_gross']), money(invoice['balance_net']), money(invoice['balance_tax']))
+    t.row(_('This Invoice'), money(invoice['debit_net']), money(invoice['debit_tax']), money(invoice['debit_gross']))
     t.row_style('FONTNAME', 0, -1, font.bold)
 
     return t.get_table(ContinuationTable, repeatRows=1)

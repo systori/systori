@@ -80,10 +80,12 @@ class Invoice(Document):
 
     DRAFT = "draft"
     SENT = "sent"
+    PAID = "paid"
 
     STATE_CHOICES = (
         (DRAFT, _("Draft")),
         (SENT, _("Sent")),
+        (PAID, _("Paid")),
     )
 
     status = FSMField(default=DRAFT, choices=STATE_CHOICES)
@@ -91,6 +93,10 @@ class Invoice(Document):
     @transition(field=status, source=DRAFT, target=SENT, custom={'label': _("Mark Sent")})
     def send(self):
         self.transaction.finalize()
+
+    @transition(field=status, source=SENT, target=PAID, custom={'label': _("Mark Paid")})
+    def pay(self):
+        pass
 
     def get_invoices(self):
         assert self.parent is None  # make sure this is a parent invoice
