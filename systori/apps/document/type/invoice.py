@@ -102,7 +102,7 @@ def collate_tasks_total(invoice, available_width):
     return t.get_table()
 
 
-def collate_payments(invoice, available_width):
+def collate_history(invoice, available_width):
 
     t = TableFormatter([0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
@@ -167,6 +167,38 @@ def collate_payments(invoice, available_width):
     t.row_style('LINEBELOW', -1, -1, 0.5, colors.black)
     t.row_style('LINEAFTER', -2, -1, 0.5, colors.black)
     [t.row_style(side+'PADDING', -2, -1, 5) for side in ['LEFT', 'RIGHT', 'BOTTOM', 'TOP']]
+
+    return t.get_table(ContinuationTable, repeatRows=1)
+
+
+def collate_payments(invoice, available_width):
+
+    t = TableFormatter([0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
+    t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
+    t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
+    t.style.append(('VALIGN', (0, 0), (-1, -1), "TOP"))
+    t.style.append(('RIGHTPADDING', (-1, 0), (-1, -2), 0))
+
+    t.style.append(('LINEBELOW', (0, 0), (-1, 0), 0.25, colors.black))
+    t.style.append(('LINEABOVE', (0, -1), (-1, -1), 0.25, colors.black))
+    t.style.append(('LINEAFTER', (0, 0), (-2, -2), 0.25, colors.black))
+
+    t.row('', _("gross"), _("consideration"), _("tax"))
+    t.row_style('FONTNAME', 0, -1, font.bold)
+
+    t.row(_('Project progress'), money(invoice['debited_gross']), money(invoice['debited_net']), money(invoice['debited_tax']))
+
+    last_txn_idx = len(invoice['transactions'])-1
+    for txn_idx, txn in enumerate(invoice['transactions']):
+
+        if txn['type'] != 'payment':
+            continue
+
+        pay_day = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
+        t.row(p(_('Payment') + '<br />' + pay_day), money(txn['gross']), money(-txn['net']), money(-txn['tax']))
+
+    t.row(_('Please Pay'), money(invoice['balance_gross']), money(invoice['balance_net']), money(invoice['balance_tax']))
+    t.row_style('FONTNAME', 0, -1, font.bold)
 
     return t.get_table(ContinuationTable, repeatRows=1)
 
