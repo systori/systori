@@ -204,7 +204,7 @@ def collate_payments(invoice, available_width):
             invoice_tax = Decimal(txn['tax']) if txn['tax'] else Decimal(txn['gross']) - invoice_net
             t.row(p(_('Invoice from ') + invoice_day), money(-invoice_net), money(-invoice_tax),  money(-txn['gross']))
 
-    t.row('This Invoice', money(invoice['debit_net']), money(invoice['debit_tax']), money(invoice['debit_gross']))
+    t.row(_('This Invoice'), money(invoice['debit_net']), money(invoice['debit_tax']), money(invoice['debit_gross']))
     t.row_style('FONTNAME', 0, -1, font.bold)
 
     return t.get_table(ContinuationTable, repeatRows=1)
