@@ -231,7 +231,7 @@
       {% for invoice in parent_invoice.get_invoices %}
         {% include "document/invoice_card.html" with invoice=invoice %}
         {% if forloop.last %}
-          {% if invoice.status == invoice.SENT %}
+          {% if invoice.status == invoice.SENT or invoice.status == invoice.PAID %}
           <a class="btn btn-default" href="{% url 'invoice.create' project.id %}?previous_invoice_id={{ invoice.id }}" style="width: 100%">
             {% trans 'Create next invoice in this sequence.' %}
           </a>

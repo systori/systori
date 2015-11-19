@@ -52,7 +52,8 @@ def get_transactions_for_jobs(jobs, transacted_on_or_before=None):
         if txn.transaction_type in (txn.INVOICE, txn.FINAL_INVOICE):
             txn_dict.update({
                 'invoice_id': txn.invoice.id,
-                'invoice_amount': txn.invoice.amount
+                'invoice_amount': txn.invoice.amount,
+                'invoice_status': txn.invoice.status
             })
 
         elif txn.transaction_type == txn.PAYMENT:
