@@ -20,7 +20,7 @@ class ProjectTotalTests(TestCase):
 
     def test_nonzero(self):
         project = Project.objects.get(pk=self.project.pk)
-        self.assertEqual(960, project.estimate_total)
+        self.assertEqual(1920, project.estimate_total)
 
 
 class ProjectPhaseTests(TestCase):
@@ -33,13 +33,13 @@ class ProjectPhaseTests(TestCase):
         self.assertEquals('Active', self.project.get_state_display())
 
     def test_project_with_proposal(self):
-        Proposal.objects.create(amount=99, project=self.project)
+        Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
         self.project.refresh_from_db()
         self.assertEquals('Tendering', self.project.get_phase_display())
         self.assertEquals('Active', self.project.get_state_display())
 
     def test_project_with_approved_proposal(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
         proposal.send();
         proposal.save()
         proposal.approve();
@@ -50,7 +50,7 @@ class ProjectPhaseTests(TestCase):
 
     def test_project_with_started_job(self):
         # first get to planning
-        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
         proposal.send();
         proposal.save()
         proposal.approve();

@@ -68,9 +68,9 @@
         <tbody>
           {% if projects %}
             {% for project in projects %}
-              <tr data-phase="{{ phase }}">
+              <tr id="project_{{ project.id }}">
                 <td width="3%" class="hidden-xs">{{ project.id }}</td>
-                <td width="35%"><a href="{% url 'project.view' project.id %}">{{ project }}</a></td>
+                <td width="35%"><a href="{% url 'project.view' project.id %}" class="project-link" data-hash="{{ phase }}_{{ project.id }}">{{ project }}</a></td>
                 <td width="47%">
                   {% for project_contact in project.project_contacts.all %}
                     <span class="badge">{{ project_contact.get_association_display }}</span>
@@ -156,9 +156,34 @@
 
 {% block extra_js %}
 <script type="text/javascript">
+$(function() {
+
+  var hash = window.location.hash;
+  if (hash) {
+    var project_id;
+    if (hash.indexOf('_') > -1) {
+      var hash_parts = hash.split('_');
+      hash = hash_parts[0];
+      project_id = hash_parts[1];
+    }
+    $('ul.nav a[href="' + hash + '"]').tab('show');
+    if (project_id) {
+      $('#project_'+project_id).addClass('info');
+    }
+  }
+
   $('#tabbed_projects a').click(function (e) {
-    e.preventDefault()
-    $(this).tab('show')
+    $(this).tab('show');
+    var scrollmem = $('body').scrollTop();
+    window.location.hash = this.hash;
+    $('html,body').scrollTop(scrollmem);
   })
+
+  $('.project-link').click(function(e) {
+    window.location.hash = $(this).data('hash');
+  });
+
+});
+
 </script>
 {% endblock %}

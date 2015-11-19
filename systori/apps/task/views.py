@@ -5,6 +5,8 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse
 from django.db.models import Max
 
+from ..accounting.models import create_account_for_job
+
 from .models import *
 from .forms import JobForm, JobTemplateForm
 
@@ -93,6 +95,10 @@ class JobCreate(CreateView):
         if isinstance(form, JobForm) and form.cleaned_data['job_template']:
             tmpl = form.cleaned_data['job_template']
             tmpl.clone_to(self.object)
+
+        self.object.account = create_account_for_job(self.object)
+        self.object.save()
+
         return response
 
     def get_success_url(self):

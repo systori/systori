@@ -4,6 +4,7 @@
 .idea/dataSources.xml
 .idea/systori.iml
 .idea/dictionaries/
+.idea/libraries/
 *.pyc
 .settings/
 Systori.egg-info
@@ -19,4 +20,5 @@ systori/dart/web/packages
 systori/dart/build/
 systori/dart/.pub/
 systori/dart/.packages
+media/
 systori/dart/pub-cache

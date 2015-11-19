@@ -9,16 +9,16 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q
 
+from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Project, JobSite
-from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
+from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm, EntryFormSet
 from .forms import JobSiteForm, FilterForm
-from ..task.models import Job, TaskGroup, Task
-from ..directory.models import ProjectContact
-from ..document.models import Invoice, DocumentTemplate
-from ..accounting.models import create_account_for_project
-from ..accounting.utils import get_transactions_table
+from ..task.models import Job, TaskGroup
+from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
+from ..accounting.utils import get_transactions_for_jobs
+from ..accounting.models import Transaction, create_account_for_job
+from ..accounting.constants import TAX_RATE
 from .gaeb_utils import gaeb_import
-from django.core.exceptions import ValidationError
 
 
 class ProjectList(FormMixin, ListView):
@@ -141,7 +141,9 @@ class ProjectView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ProjectView, self).get_context_data(**kwargs)
-        context['transactions'] = get_transactions_table(self.object)
+        context['transactions'] = get_transactions_for_jobs(self.object.jobs.all())
+        context['parent_invoices'] = self.object.invoices.filter(parent=None).prefetch_related('invoices').all()
+        context['TAX_RATE_DISPLAY'] = '{}%'.format(ubrdecimal(TAX_RATE*100, 2))
         return context
 
     def get_queryset(self):
@@ -156,10 +158,11 @@ class ProjectCreate(CreateView):
     def form_valid(self, form):
         response = super(ProjectCreate, self).form_valid(form)
 
-        TaskGroup.objects.create(
-            name='',
-            job=Job.objects.create(job_code=1, name=_('Default'), project=self.object)
-        )
+        job = Job.objects.create(job_code=1, name=_('Default'), project=self.object)
+        job.account = create_account_for_job(job)
+        job.save()
+
+        TaskGroup.objects.create(name='', job=job)
 
         jobsite = JobSite()
         jobsite.project = self.object
@@ -168,9 +171,6 @@ class ProjectCreate(CreateView):
         jobsite.city = form.cleaned_data['city']
         jobsite.postal_code = form.cleaned_data['postal_code']
         jobsite.save()
-
-        self.object.account = create_account_for_project(self.object)
-        self.object.save()
 
         return response
 
@@ -262,6 +262,8 @@ class TemplatesView(TemplateView):
         context = super(TemplatesView, self).get_context_data(**kwargs)
         context['jobs'] = Project.objects.template().get().jobs.all()
         context['documents'] = DocumentTemplate.objects.all()
+        context['document_settings'] = DocumentSettings.objects.all()
+        context['letterheads'] = Letterhead.objects.all()
         return context
 
 
@@ -300,3 +302,30 @@ class JobSiteDelete(DeleteView):
 
     def get_success_url(self):
         return self.object.project.get_absolute_url()
+
+
+class TransactionEditor(TemplateView):
+    template_name = 'project/transaction_editor.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        transaction_ids = []
+        for job in self.request.project.jobs.all():
+            transaction_ids.extend(job.account.entries.all().values_list('transaction_id', flat=True))
+        transaction_ids = list(set(transaction_ids))
+
+        formsets = []
+        for transaction in Transaction.objects.filter(id__in=transaction_ids).order_by('id'):
+            formsets.append(EntryFormSet(instance=transaction))
+        for formset in formsets:
+            for form in formset:
+                print(form)
+        context['formsets'] = formsets
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        formset = EntryFormSet(request.POST, instance=Transaction.objects.get(id=request.POST['transaction_id']))
+        formset.save()
+        return super().get(request, *args, **kwargs)

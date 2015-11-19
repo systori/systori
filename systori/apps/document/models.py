@@ -1,6 +1,10 @@
 from collections import OrderedDict
+from itertools import chain
 from datetime import date
+from decimal import Decimal
+
 from django.db import models
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from jsonfield import JSONField
@@ -9,7 +13,7 @@ from jsonfield import JSONField
 class Document(models.Model):
     json = JSONField(default={})
     json_version = models.CharField(max_length=5)
-    amount = models.DecimalField(_("Amount"), max_digits=12, decimal_places=2)
+    amount = models.DecimalField(_("Amount"), default=0.0, max_digits=12, decimal_places=2)
     created_on = models.DateTimeField(auto_now_add=True)
     document_date = models.DateField(_("Date"), default=date.today, blank=True)
     notes = models.TextField(_("Notes"), blank=True, null=True)
@@ -23,6 +27,8 @@ class Document(models.Model):
 
 
 class Proposal(Document):
+    letterhead = models.ForeignKey('document.Letterhead', related_name="proposal_documents")
+
     project = models.ForeignKey("project.Project", related_name="proposals")
     jobs = models.ManyToManyField("task.Job", verbose_name=_('Jobs'), related_name="proposals")
 
@@ -63,40 +69,37 @@ class Proposal(Document):
 
 
 class Invoice(Document):
+    letterhead = models.ForeignKey('document.Letterhead', related_name="invoice_documents")
+
     invoice_no = models.CharField(_("Invoice No."), max_length=30)
     project = models.ForeignKey("project.Project", related_name="invoices")
+    parent = models.ForeignKey("self", related_name="invoices", null=True)
 
-    NEW = "new"
+    transaction = models.OneToOneField('accounting.Transaction', related_name="invoice", null=True, on_delete=models.SET_NULL)
+
+
+    DRAFT = "draft"
     SENT = "sent"
-    PAID = "paid"
-    DISPUTED = "disputed"
 
     STATE_CHOICES = (
-        (NEW, _("New")),
+        (DRAFT, _("Draft")),
         (SENT, _("Sent")),
-        (PAID, _("Paid")),
-        (DISPUTED, _("Disputed"))
     )
 
-    status = FSMField(default=NEW, choices=STATE_CHOICES)
+    status = FSMField(default=DRAFT, choices=STATE_CHOICES)
 
-    @transition(field=status, source=NEW, target=SENT, custom={'label': _("Send")})
+    @transition(field=status, source=DRAFT, target=SENT, custom={'label': _("Mark Sent")})
     def send(self):
-        pass
+        self.transaction.finalize()
 
-    @transition(field=status, source=SENT, target=PAID, custom={'label': _("Pay")})
-    def pay(self):
-        pass
-
-    @transition(field=status, source=SENT, target=DISPUTED, custom={'label': _("Dispute")})
-    def dispute(self):
-        pass
+    def get_invoices(self):
+        assert self.parent is None  # make sure this is a parent invoice
+        return chain([self], self.invoices.all())
 
     class Meta:
         verbose_name = _("Invoice")
         verbose_name_plural = _("Invoices")
         ordering = ['id']
-
 
 class SampleContact:
     salutation = _('Mr')
@@ -157,3 +160,83 @@ class DocumentTemplate(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Letterhead(models.Model):
+    """
+    This Class is responsible for letting the User Upload letterheads/stationaries for his company. In best case it's a
+    real PDF with vector based graphics. Can affect printable documents like 'Invoice' or 'Proposal'.
+    """
+    name = models.CharField(_('Name'), max_length=512)
+
+    # todo: Delete not needed PDF Binaries from FS. Make sure that they are not needed (Use Count?)
+    letterhead_pdf = models.FileField(_('Letterhead PDF'), upload_to='letterhead', max_length=100)
+
+    mm = "mm"
+    cm = "cm"
+    inch = "inch"
+    DOCUMENT_UNIT = (
+        (mm, "mm"),
+        (cm, "cm"),
+        (inch, "inch")
+    )
+    document_unit = models.CharField(_('Document Unit'), max_length=5,
+                                     choices=DOCUMENT_UNIT, default=mm)
+
+    top_margin = models.DecimalField(_('Top Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
+    right_margin = models.DecimalField(_('Right Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
+    bottom_margin = models.DecimalField(_('Bottom Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
+    left_margin = models.DecimalField(_('Left Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
+    top_margin_next = models.DecimalField(_('Top Margin Next'), max_digits=4, decimal_places=2, default=Decimal("25"))
+
+    A5 = "A5"
+    A4 = "A4"
+    A3 = "A3"
+    LETTER = "LETTER"
+    LEGAL = "LEGAL"
+    ELEVENSEVENTEEN = "ELEVENSEVENTEEN"
+    B5 = "B5"
+    B4 = "B4"
+    DOCUMENT_FORMAT = (
+        (A5, _("A5")),
+        (A4, _("A4")),
+        (A3, _("A3")),
+        (LETTER, _("LETTER")),
+        (LEGAL, _("LEGAL")),
+        (ELEVENSEVENTEEN, _("ELEVENSEVENTEEN")),
+        (B5, _("B5")),
+        (B4, _("B4")),
+    )
+    document_format = models.CharField(_('Pagesize'), max_length=30,
+                                       choices=DOCUMENT_FORMAT, default=A4)
+
+    PORTRAIT = "portrait"
+    LANDSCAPE = "landscape"
+    ORIENTATION = (
+        (PORTRAIT, _("Portrait")),
+        (LANDSCAPE, _("Landscape"))
+    )
+    orientation = models.CharField(_('Orientation'), max_length=15,
+                                   choices=ORIENTATION, default=PORTRAIT)
+
+    debug = models.BooleanField(_("Debug Mode"), default=True)
+
+
+class DocumentSettings(models.Model):
+    language = models.CharField(_('language'), unique=True, default=settings.LANGUAGE_CODE, choices=settings.LANGUAGES, max_length=2)
+
+    proposal_text = models.ForeignKey(DocumentTemplate, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    invoice_text = models.ForeignKey(DocumentTemplate, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+
+    proposal_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    invoice_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    evidence_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    itemized_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+
+    @staticmethod
+    def get_for_language(lang):
+        try:
+            return DocumentSettings.objects.get(language=lang)
+        except DocumentSettings.DoesNotExist:
+            return None
+

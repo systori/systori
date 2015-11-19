@@ -3,6 +3,7 @@ from datetime import date
 from decimal import Decimal
 
 from reportlab.lib.units import mm
+from reportlab.lib.pagesizes import landscape
 from reportlab.lib import colors
 from reportlab.platypus import Paragraph, Spacer
 
@@ -13,8 +14,11 @@ from systori.apps.accounting.constants import TAX_RATE
 from systori.lib.templatetags.customformatting import money
 
 from .style import SystoriDocument, stylesheet, TableFormatter, ContinuationTable
-from .style import PortraitStationaryCanvasWithoutFirstPage
+from .style import LetterheadCanvasWithoutFirstPage
+from .style import DOCUMENT_FORMAT, DOCUMENT_UNIT
 from .invoice import collate_tasks, collate_tasks_total, serialize
+
+from systori.apps.document.models import DocumentSettings
 
 from . import font
 
@@ -44,7 +48,7 @@ def collate_payments(invoice, available_width):
     for payment in invoice['transactions']:
         row = ['', money(payment['amount']), money(payment['amount_base']), money(payment['amount_tax'])]
         if payment['type'] == 'payment':
-            received_on = date_format(payment['received_on'], use_l10n=True)
+            received_on = date_format(payment['transacted_on'], use_l10n=True)
             row[0] = Paragraph(_('Your Payment on')+' '+received_on, stylesheet['Normal'])
         elif payment['type'] == 'discount':
             row[0] = _('Discount Applied')
@@ -60,13 +64,26 @@ def collate_payments(invoice, available_width):
 
 def render(project, format):
 
+    letterhead = DocumentSettings.objects.first().itemized_letterhead
+
+    def canvas_maker(*args, **kwargs):
+        return LetterheadCanvasWithoutFirstPage(letterhead.letterhead_pdf, *args, **kwargs)
+
     with BytesIO() as buffer:
+        document_unit = DOCUMENT_UNIT[letterhead.document_unit]
+        if letterhead.orientation == 'landscape':
+            pagesize = landscape(DOCUMENT_FORMAT[letterhead.document_format])
+        else:
+            pagesize = DOCUMENT_FORMAT[letterhead.document_format]
+        page_width = pagesize[0]
+        table_width = page_width - float(letterhead.right_margin)*document_unit\
+                                 - float(letterhead.left_margin)*document_unit
 
         today = date_format(date.today(), use_l10n=True)
 
         itemized_listing = serialize(project, {})
 
-        doc = SystoriDocument(buffer, topMargin=39*mm, debug=DEBUG_DOCUMENT)
+        doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         flowables = [
 
@@ -77,21 +94,21 @@ def render(project, format):
 
             Spacer(0, 10*mm),
 
-            collate_payments(itemized_listing, doc.width),
+            collate_payments(itemized_listing, table_width),
 
             Spacer(0, 10*mm),
 
-            collate_tasks(itemized_listing, doc.width),
+            collate_tasks(itemized_listing, table_width),
 
             Spacer(0, 4*mm),
 
-            collate_tasks_total(itemized_listing, doc.width),
+            collate_tasks_total(itemized_listing, table_width),
             ]
 
         if format == 'print':
-            doc.build(flowables)
+            doc.build(flowables, letterhead=letterhead)
         else:
-            doc.build(flowables, canvasmaker=PortraitStationaryCanvasWithoutFirstPage)
+            doc.build(flowables, letterhead=letterhead, canvasmaker=canvas_maker)
 
 
         return buffer.getvalue()

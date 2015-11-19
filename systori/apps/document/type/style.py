@@ -128,13 +128,38 @@ from django.utils.translation import ugettext as _
 from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
 
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A5, A4, A3, LETTER, LEGAL, ELEVENSEVENTEEN, B5, B4
 
 from reportlab.platypus import BaseDocTemplate, PageTemplate
-from reportlab.platypus import Frame, Paragraph, Table
+from reportlab.platypus import Frame, Paragraph, Table, Spacer
 from reportlab.pdfgen import canvas
-from reportlab.lib.units import mm
+from reportlab.lib.units import mm, cm, inch
 from reportlab.lib import colors
+
+DOCUMENT_UNIT = {
+    "mm": mm,
+    "cm": cm,
+    "inch": inch
+}
+
+DOCUMENT_FORMAT = {
+    "A5" : A5,
+    "A4" : A4,
+    "A3" : A3,
+    "LETTER" : LETTER,
+    "LEGAL" : LEGAL,
+    "ELEVENSEVENTEEN" : ELEVENSEVENTEEN,
+    "B5" : B5,
+    "B4" : B4,
+}
+
+PORTRAIT = "portrait"
+LANDSCAPE = "landscape"
+ORIENTATION = {
+    PORTRAIT : _("Portrait"),
+    LANDSCAPE : _("Landscape"),
+}
+
 
 
 def chunk_text(txt, max_length=1500):
@@ -175,34 +200,35 @@ def br(txt):
 def nr(txt):
     return Paragraph(str(txt), stylesheet['NormalRight'])
 
+def heading_and_date(heading, date, available_width, debug=False):
+
+    t = TableFormatter([0, 1], available_width, debug=debug)
+    t.style.append(('GRID', (0, 0), (-1, -1), 1, colors.transparent))
+    t.row(Paragraph(heading, stylesheet['h2']), Paragraph(date, stylesheet['NormalRight']))
+    t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
+    t.style.append(('RIGHTPADDING', (0,0), (-1,-1), 0))
+
+    return t.get_table(Table)
 
 
 class StationaryCanvas(canvas.Canvas):
 
-    stationary_filename = None
+    stationary_pages = None
 
     def __init__(self, *args, **kwargs):
         super(StationaryCanvas, self).__init__(*args, **kwargs)
-        static_dir = os.path.join(settings.BASE_DIR, 'static')
-        cover_pdf_path = os.path.join(static_dir, self.stationary_filename)
-        cover_pdf = open_and_read(cover_pdf_path)
+        cover_pdf = os.path.join(settings.MEDIA_ROOT, self.stationary_pages.name)
+        cover_pdf = open_and_read(cover_pdf)
 
-        self.page_info, self.page_content = storeFormsInMemory(cover_pdf, prefix='stationary', all=True)
+        self.page_info_page1, self.page_content = storeFormsInMemory(cover_pdf, all=True)
         restoreFormsInMemory(self.page_content, self)
 
     def showPage(self):
-        if self._pageNumber > 1 and len(self.page_info) > 1:
-            self.doForm(self.page_info[1])
+        if self._pageNumber > 1 and len(self.page_info_page1) > 1:
+            self.doForm(self.page_info_page1[1])
         else:
-            self.doForm(self.page_info[0])
-        super(StationaryCanvas, self).showPage()
-
-
-class StationaryCanvasWithoutFirstPage(StationaryCanvas):
-
-    def showPage(self):
-        self.doForm(self.page_info[1])
-        super(StationaryCanvas, self).showPage()
+            self.doForm(self.page_info_page1[0])
+        super().showPage()
 
 
 class NumberedCanvas(canvas.Canvas):
@@ -226,31 +252,35 @@ class NumberedCanvas(canvas.Canvas):
 
     def draw_page_number(self, page_count):
         self.setFont(font.normal, 10)
-        self.drawRightString(145*mm, 10*mm,
+        # dynamically positioning based on frame dimensions. string is placed underneath the frame aligned right.
+        self.drawRightString(self._doctemplate.frame._x1 + self._doctemplate.frame._aW,
+                             self._doctemplate.frame._y1 - 25,
                              '{} {} {} {}'.format(_("Page"), self._pageNumber, _("of"), page_count))
 
 
-class PortraitStationaryCanvas(StationaryCanvas, NumberedCanvas):
-    stationary_filename = "soft_briefbogen_2014.pdf"
+class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
+
+    def __init__(self, letterhead_pdf, *args, **kwargs):
+        self.stationary_pages = letterhead_pdf
+        super(LetterheadCanvas, self).__init__(*args, **kwargs)
 
 
-class PortraitStationaryCanvasWithoutFirstPage(StationaryCanvasWithoutFirstPage, NumberedCanvas):
-    stationary_filename = "soft_briefbogen_2014.pdf"
+class LetterheadCanvasWithoutFirstPage(StationaryCanvas, NumberedCanvas):
 
-
-class LandscapeStationaryCanvas(StationaryCanvas):
-    stationary_filename = "softronic2_landscape.pdf"
+    def __init__(self, letterhead_pdf, *args, **kwargs):
+        self.stationary_pages = letterhead_pdf
+        super(LetterheadCanvasWithoutFirstPage, self).__init__(*args, **kwargs)
 
 
 class SystoriDocument(BaseDocTemplate):
 
-    def __init__(self, buffer, topMargin=55*mm, debug=False):
+    def __init__(self, buffer, pagesize, debug=False):
         super(SystoriDocument, self).__init__(buffer,
-                                              pagesize=A4,
-                                              topMargin=topMargin,
-                                              bottomMargin=22*mm,
-                                              leftMargin=25*mm,
-                                              rightMargin=62*mm,
+                                              pagesize=pagesize,
+                                              topMargin=0,
+                                              bottomMargin=0,
+                                              leftMargin=0,
+                                              rightMargin=0,
                                               showBoundary=debug
                                               )
 
@@ -264,15 +294,32 @@ class SystoriDocument(BaseDocTemplate):
         self._handle_pageBegin()
         self._handle_nextPageTemplate('Later')
 
-    def build(self, flowables, canvasmaker=NumberedCanvas):
+    def build(self, flowables, letterhead, canvasmaker=NumberedCanvas):
+        document_unit = DOCUMENT_UNIT[letterhead.document_unit]
         self._calc()
-        frame = Frame(self.leftMargin, self.bottomMargin,
-                      self.width, self.height,
+
+        # Frame(x, y, width, height, padding...)
+        frame = Frame(float(letterhead.left_margin)*document_unit,
+                      float(letterhead.bottom_margin)*document_unit,
+                      self.width - float(letterhead.right_margin)*document_unit
+                                 - float(letterhead.left_margin)*document_unit,
+                      self.height - float(letterhead.top_margin)*document_unit
+                                  - float(letterhead.bottom_margin)*document_unit,
                       leftPadding=0, bottomPadding=0,
                       rightPadding=0, topPadding=0)
+        frame_later = Frame(float(letterhead.left_margin)*document_unit,
+                            float(letterhead.bottom_margin)*document_unit,
+                            self.width - float(letterhead.right_margin)*document_unit
+                                       - float(letterhead.left_margin)*document_unit,
+                            self.height - float(letterhead.top_margin_next)*document_unit
+                                        - float(letterhead.bottom_margin)*document_unit,
+                            leftPadding=0, bottomPadding=0,
+                            rightPadding=0, topPadding=0)
+
         self.addPageTemplates([
-            PageTemplate(id='First', frames=frame, onPage=self.onFirstPage, pagesize=self.pagesize),
-            PageTemplate(id='Later', frames=frame, onPage=self.onLaterPages, pagesize=self.pagesize)
+            PageTemplate(id='First', frames=frame, onPage=self.onFirstPage, pagesize=self.pagesize,
+                         autoNextPageTemplate=True),
+            PageTemplate(id='Later', frames=frame_later, onPage=self.onLaterPages, pagesize=self.pagesize)
         ])
         super(SystoriDocument, self).build(flowables, canvasmaker=canvasmaker)
 
@@ -285,10 +332,12 @@ class ContinuationTable(Table):
         self.canv.setFont(font.italic, 10)
 
         if getattr(self, '_splitCount', 0) > 1:
-            self.canv.drawString(0, self._height + 2*mm, '... '+_('Continuation'))
+            #self.canv.drawString(0, self._height + 5*mm, '... '+_('Continuation'))
+            pass
 
         if getattr(self, '_splitCount', 0) >= 1 and not hasattr(self, '_lastTable'):
-            self.canv.drawRightString(self._width, -2*mm, _('Continuation')+' ...')
+            #self.canv.drawRightString(self._width, -7*mm, _('Continuation')+' ...')
+            self.canv.drawString(0, -20, _('Continuation')+' ...')
 
         self.canv.restoreState()
 
@@ -375,3 +424,27 @@ class TableFormatter:
     def keep_previous_n_rows_together(self, n):
         self.style.append(('NOSPLIT', (0, self._row_num-n+1), (0, self._row_num)))
 
+    def keep_next_n_rows_together(self, n):
+        self.style.append(('NOSPLIT', (0, self._row_num+n-1), (0, self._row_num)))
+
+
+def get_address_label(document):
+    if document.get('business') is '':
+        return Paragraph(force_break(document.get('address_label', None) or """\
+        {salutation} {first_name} {last_name}
+        {address}
+        {postal_code} {city}
+        """.format(**document)), stylesheet['Normal'])
+    else:
+        return Paragraph(force_break(document.get('address_label', None) or """\
+        {business}
+        {salutation} {first_name} {last_name}
+        {address}
+        {postal_code} {city}
+        """.format(**document)), stylesheet['Normal'])
+
+def get_address_label_spacer(document):
+    if document.get('business') is '':
+        return Spacer(0, 30*mm)
+    else:
+        return Spacer(0, 26*mm)

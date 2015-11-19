@@ -47,8 +47,8 @@
       <th style="text-align: right;">{% trans "Total" %}</th>
       <th></th>
       <th>{% trans "Billing Method" %}</th>
-      <th>{% trans "Billable Amount" %}</th>
-      <th>{% trans "Actions" %}</th>
+      <th style="text-align: right;">{% trans "Billable Amount" %}</th>
+      <th style="text-align: right;">{% trans "Actions" %}</th>
     </tr>
     </thead>
     <tbody id="job-table">
@@ -56,7 +56,7 @@
       <tr>
         <td><a href="{% url 'tasks' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
         <td>{{ job.get_status_display }}</td>
-        <td style="text-align: right;">
+        <td style="text-align: right; white-space: nowrap;">
           {{ job.estimate_total|money }}
         </td>
         <td>
@@ -73,8 +73,8 @@
           </div>
         </td>
         <td>{{ job.get_billing_method_display }}</td>
-        <td style="text-align: right;">{{ job.billable_total|money }}</td>
-        <td>
+        <td style="text-align: right; white-space: nowrap;">{{ job.billable_total|money }}</td>
+        <td style="text-align: right;">
           {% for state in job.get_available_status_transitions %}
             <a href="{% url 'job.transition' project.id job.id state.name %}">{{ state.custom.label }}</a>
           {% endfor %}
@@ -138,8 +138,8 @@
             <ul class="dropdown-menu" role="menu">
               <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a></li>
               <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a></li>
-              <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'Line Items' %}</a></li>
-              <li><a href="{% url 'specification.pdf' project.id 'print' doc.id %}">{% trans 'Specification' %}</a></li>
+              <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}?with_lineitems=1">{% trans 'with Line Items Email' %}</a></li>
+              <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'with Line Items Print' %}</a></li>
             </ul>
           </div>
         </td>
@@ -204,120 +204,105 @@
   </style>
 
 
-  <h2 class="sub-header">{% trans "Transactions" %}</h2>
-  <table class="table">
+  <style>
+  .invoice-columns {
+    white-space: nowrap;
+  }
+  .invoice-columns * {
+    white-space: normal;
+  }
+  .invoice-sequence {
+    vertical-align: top;
+    display: inline-block;
+    width: 400px;
+    padding-right: 40px;
+  }
+  .invoice {
+    width: 100%;
+  }
+  </style>
+  <h2 class="sub-header">{% trans "Invoices" %}</h2>
+  {% if not project.has_billable_contact %}
+    {% trans "No billable contact defined." %}
+  {% endif %}
+  <div class="invoice-columns clearfix">
+    {% for parent_invoice in parent_invoices %}
+    <div class="invoice-sequence">
+      {% for invoice in parent_invoice.get_invoices %}
+        {% include "document/invoice_card.html" with invoice=invoice %}
+        {% if forloop.last %}
+          {% if invoice.status == invoice.SENT %}
+          <a class="btn btn-default" href="{% url 'invoice.create' project.id %}?previous_invoice_id={{ invoice.id }}" style="width: 100%">
+            {% trans 'Create next invoice in this sequence.' %}
+          </a>
+          {% else %}
+            <p>{% trans 'Last invoice in sequence must be marked as sent before a new one can be created.' %}</p>
+          {% endif %}
+        {% endif %}
+        {% empty %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+    <div class="invoice-sequence">
+      <a class="btn btn-default" href="{% url 'invoice.create' project.id %}" style="width: 100%">
+        {% trans 'Start new invoice sequence.' %}
+      </a>
+    </div>
+  </div>
+  <br/>
+
+
+  <style>
+  .payment-table .job-row {
+    font-size: 75%;
+    color: gray;
+    text-align: right;
+  }
+  .payment-table .job-row.last {
+    border-bottom: 2px solid #ddd;
+  }
+  </style>
+  <h2 class="sub-header">{% trans "Payments" %}</h2>
+  <table class="table payment-table">
     <thead>
     <tr>
-      <th>{% trans 'Status' %}</th>
       <th>{% trans 'Date' %}</th>
-      <th>{% trans 'Transaction' %}</th>
-      <th class="text-right">{% trans 'Invoiced' %}</th>
-      <th class="text-right">{% trans 'Debit' %}</th>
-      <th class="text-right">{% trans 'Credit' %}</th>
+      <th>{% trans 'Payment' %}</th>
+      <th class="text-right">{% trans 'Applied' %}</th>
+      <th class="text-right">{% trans 'Discount' %}</th>
+      <th class="text-right">{% trans 'Total Credit' %}</th>
       <th class="text-right" colspan="3">{% trans 'Actions' %}</th>
     </tr>
     </thead>
     <tbody>
-    {% for record_type, date, record in transactions %}
-      {% if record_type == "invoice" %}
-        <tr class="info">
-          <td>{{ record.get_status_display }}</td>
-          <td>{{ record.document_date|localize }}</td>
-          <td>{% trans 'Invoice' %} {{ record.invoice_no }}</td>
-          <td align="right">{{ record.amount|money }}</td>
-          <td align="right">&nbsp;</td>
-          <td align="right">&nbsp;</td>
-          <td align="right" colspan="3">
-            <a href="{% url 'invoice.pdf' project.id 'email' record.id %}">{% trans 'Email PDF' %}</a>
-            <a href="{% url 'invoice.pdf' project.id 'print' record.id %}">{% trans 'Print PDF' %}</a>
-            &nbsp; | &nbsp;
-            {% for state in record.get_available_status_transitions %}
-              <a href="{% url 'invoice.transition' project.id record.id state.name %}">{{ state.custom.label }}</a>
-            {% endfor %}
-            {% if record.status == record.NEW %}
-              <a href="{% url 'invoice.delete' project.id record.id %}">{% trans "Delete" %}</a>
-              <a href="{% url 'invoice.update' project.id record.id %}">{% trans "Edit" %}</a>
-            {% endif %}
-          </td>
+    {% for transaction in transactions %}
+      {% if transaction.type == 'payment' %}
+      <tr>
+        <td>{{ transaction.date|localize }}</td>
+        <td>{{ transaction.payment_received|negate|money }}</td>
+        <td class="text-right">{{ transaction.payment_applied|negate|money }}</td>
+        <td class="text-right">{{ transaction.discount_applied|negate|money }}</td>
+        <td class="text-right">{{ transaction.gross|negate|money }}</td>
+        <td class="text-right">
+          {% if not transaction.is_reconciled %}
+            <a href="{% url 'payment.delete' project.id transaction.id %}">{% trans "Delete" %}</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% for job in transaction.jobs.values %}
+        <tr class="job-row {% if forloop.last %}last{% endif %}">
+          <td colspan="2">{{ job.name }}</td>
+          <td>{{ job.payment_applied|negate|money }}</td>
+          <td>{{ job.discount_applied|negate|money }}</td>
+          <td>{{ job.gross|negate|money }}</td>
+          <td></td>
         </tr>
-      {% elif record_type == "debit" %}
-        <tr>
-          <td>&nbsp;</td>
-          <td>{{ record.received_on|localize }}</td>
-          <td>{% trans 'Debit for new work completed to date.' %}</td>
-          <td align="right">&nbsp;</td>
-          <td align="right">{{ record.amount|money }}</td>
-          <td align="right">&nbsp;</td>
-          <td colspan="3">&nbsp;</td>
-        </tr>
-      {% elif record_type == "payment" %}
-        <tr class="success">
-          <td>&nbsp;</td>
-          <td>{{ record.received_on|localize }}</td>
-          <td>{% trans 'Payment' %}</td>
-          <td align="right">&nbsp;</td>
-          <td align="right">&nbsp;</td>
-          <td align="right">{{ record.amount|money }}</td>
-          <td align="right" colspan="3">
-            {% if not record.transaction.is_reconciled %}
-              <a href="{% url 'payment.delete' project.id record.transaction.id %}">{% trans "Delete" %}</a>
-            {% endif %}
-          </td>
-        </tr>
-      {% elif record_type == "discount" %}
-        <tr>
-          <td>&nbsp;</td>
-          <td>&nbsp;</td>
-          <td>{% trans 'Discount' %}</td>
-          <td align="right">&nbsp;</td>
-          <td align="right">&nbsp;</td>
-          <td align="right">{{ record.amount|money }}</td>
-          <td colspan="3">&nbsp;</td>
-        </tr>
+      {% endfor %}
       {% endif %}
     {% endfor %}
-    <tr>
-      <td colspan="4">&nbsp;<br/>&nbsp;</td>
-      <td class="tnx-table-label">{% trans 'Debits' %}</td>
-      <td class="tnx-table-label">{% trans 'Credits' %}</td>
-      <td class="tnx-table-label">{% trans 'Balance' %}</td>
-      <td class="tnx-table-label">{% trans 'Debitable' %}</td>
-      <td class="tnx-table-label">{% trans 'Invoiceable' %}</td>
-    </tr>
-    <tr>
-      <td colspan="4">
-        {% if project.is_billable and project.has_billable_contact %}
-          {% if project.new_amount_with_balance > 0 %}
-            <a href="{% url 'invoice.create' project.id %}">
-              {% with balance=project.new_amount_with_balance|money %}
-
-                {% if project.new_amount_to_debit > 0 %}
-                  {% blocktrans with new_amount=project.new_amount_to_debit|money balance=balance %}Debit {{ new_amount }} for newly finished work and create a new invoice for {{ balance }}{% endblocktrans %}
-                {% else %}
-                  {% blocktrans with balance=balance %}Create a new invoice for {{ balance }}{% endblocktrans %}
-                {% endif %}
-              {% endwith %}
-            </a> &nbsp;
-          {% else %}
-            {% trans "No previous balance or new work available for invoicing." %}
-          {% endif %}
-        {% else %}
-          {% trans "No jobs available to invoice." %}
-          {% if not project.has_billable_contact %}
-            {% trans "No billable contact defined." %}
-          {% endif %}
-        {% endif %}
-        | &nbsp; <a href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
-      </td>
-      <td class="add-total-amount">{{ project.account.debits.total|money }}</td>
-      <td class="equals-total-amount">{{ project.account.credits.total|money }}</td>
-      <td class="add-total-amount">{{ project.account.balance|money }}</td>
-      <td class="equals-total-amount">{{ project.new_amount_to_debit|money }}</td>
-      <td align="right" style="font-weight: bold;">{{ project.new_amount_with_balance|money }}</td>
-    </tr>
     </tbody>
   </table>
-  <br/>
+  <a href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
 
 
   <h2 class="sub-header">{% trans "Contacts" %}</h2>
