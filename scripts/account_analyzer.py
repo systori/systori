@@ -51,6 +51,10 @@ def migrate_accounts(company):
                 break
 
         if no_json:
+            for invoice in project.invoices.all():
+                if not invoice.json:
+                    invoice.json = {'debit_net': 0, 'debit_tax': 0, 'debit_gross': 0}
+                    invoice.save()
             continue
 
         print("\nProject #{} - {}".format(project.id, project.name))
