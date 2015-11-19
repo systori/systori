@@ -6,6 +6,7 @@ from django.forms import Form, ValidationError
 from django.forms.formsets import formset_factory
 from django.forms.formsets import BaseFormSet
 from django.utils.translation import ugettext_lazy as _
+from django.db.transaction import atomic
 from systori.lib.fields import LocalizedDecimalField
 from .models import Proposal, Invoice, DocumentTemplate, Letterhead, DocumentSettings
 from ..project.models import Project
@@ -228,6 +229,7 @@ class BaseInvoiceForm(BaseFormSet):
         debits_valid = super().is_valid()
         return invoice_valid and debits_valid
 
+    @atomic
     def save(self):
 
         invoice = self.invoice_form.instance

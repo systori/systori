@@ -1,6 +1,8 @@
+import os
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.utils.translation import activate
+from django.conf import settings
 from ..company.models import *
 from ..project.models import *
 from ..document.models import *
@@ -16,7 +18,8 @@ def create_task_data(self, create_user=True, create_company=True):
     if create_user:
         self.user = User.objects.create_superuser('lex@damoti.com', 'pass')
         Access.objects.create(user=self.user, company=self.company)
-    self.letterhead = Letterhead.objects.create(name="Test Letterhead", letterhead_pdf='media/letterhead/letterhead.pdf')
+    letterhead_pdf = os.path.join(settings.BASE_DIR, 'apps/document/test_data/letterhead.pdf')
+    self.letterhead = Letterhead.objects.create(name="Test Letterhead", letterhead_pdf=letterhead_pdf)
     self.template_project = Project.objects.create(name="Template Project", is_template=True)
     self.project = Project.objects.create(name="my project")
     self.project2 = Project.objects.create(name="my project 2")

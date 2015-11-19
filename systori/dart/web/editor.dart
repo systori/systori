@@ -134,6 +134,7 @@ class Repository {
 
 }
 
+
 class AutoComplete extends HtmlElement {
 
     final int offsetFromTop = 20;
@@ -451,6 +452,81 @@ abstract class EditableElement extends UbrElement {
         return true;
     }
 
+    void handle_down_key(KeyboardEvent event) {
+        this.stop_n_save();
+        this.next();
+        this.cleanup();
+        this.scrollIntoView();
+    }
+
+    void handle_up_key(KeyboardEvent event) {
+        this.stop_n_save();
+        this.previous();
+        this.cleanup();
+        this.scrollIntoView();
+    }
+
+    void handle_enter_key(KeyboardEvent event) {
+        if (event.shiftKey) {
+            event.preventDefault();
+
+            if (is_blank()) {
+                this.new_parent_sibling();
+                return;
+            } else {
+                this.stop_n_save();
+            }
+
+            if (event.ctrlKey) {
+                this.new_parent_sibling();
+                return;
+            }
+
+            if (INPUT_MODE == InputMode.TASK && object_name == 'task') {
+                this.new_sibling();
+            } else if (child_element != null) {
+                if (INPUT_MODE == InputMode.LINEITEM && object_name == 'task') {
+                    if (event.altKey) {
+                        this.new_child();
+                    } else {
+                        var children = this.querySelectorAll(this.child_element);
+                        if (children.length > 0) {
+                            children.last.new_child();
+                        } else {
+                            this.new_child_with_a_child();
+                        }
+                    }
+                } else {
+                    this.new_child();
+                }
+            } else {
+                this.new_sibling();
+            }
+        }
+    }
+
+    void handle_esc_key(KeyboardEvent event) {
+    }
+
+    void handle_delete_key(KeyboardEvent event) {
+        if (event.shiftKey) {
+            if (!this.can_delete()) return;
+            event.preventDefault();
+            this.delete();
+            this.stop();
+            this.next(include_children: false) || this.previous();
+
+            var saved_parent = this.parent;
+
+            this.remove();
+
+            if (saved_parent.querySelector(":scope>${nodeName}") == null) {
+                saved_parent.classes.add('empty');
+            }
+        }
+
+    }
+
     void handle_input(KeyboardEvent event) {
 
         switch (event.keyCode) {
@@ -460,11 +536,9 @@ abstract class EditableElement extends UbrElement {
                 if (autocompleter != null && autocompleter.isActive) {
                     autocompleter.handleDown();
                 } else {
-                    stop_n_save();
-                    next();
-                    cleanup();
-                    this.scrollIntoView();
+                    this.handle_down_key(event);
                 }
+
                 break;
 
             case KeyCode.UP:
@@ -472,43 +546,18 @@ abstract class EditableElement extends UbrElement {
                 if (autocompleter != null && autocompleter.isActive) {
                     autocompleter.handleUp();
                 } else {
-                    stop_n_save();
-                    previous();
-                    cleanup();
-                    this.scrollIntoView();
+                    this.handle_up_key(event);
                 }
                 break;
 
             case KeyCode.ENTER:
-
                 if (autocompleter != null && autocompleter.isActive && autocompleter.hasSelection) {
                     event.preventDefault();
-                    stop();
+                    this.stop();
                     autocompleter.handleEnter();
 
-                } else if (event.shiftKey) {
-                    event.preventDefault();
-
-                    if (is_blank()) {
-                        new_parent_sibling();
-                        break;
-                    } else {
-                        stop_n_save();
-                    }
-
-                    if (event.ctrlKey) {
-                        new_parent_sibling();
-                        break;
-                    }
-
-                    if (INPUT_MODE == InputMode.TASK && object_name == 'task') {
-                        new_sibling();
-                    } else if (child_element != null) {
-                        new_child();
-                    } else {
-                        new_sibling();
-                    }
-
+                } else {
+                    this.handle_enter_key(event);
                 }
                 break;
 
@@ -516,27 +565,14 @@ abstract class EditableElement extends UbrElement {
                 if (autocompleter != null) {
                     event.preventDefault();
                     autocompleter.handleBlur();
+                } else {
+                    this.handle_esc_key(event);
                 }
                 break;
 
             case KeyCode.DELETE:
-                if (event.shiftKey) {
-                    if (!can_delete()) break;
-                    event.preventDefault();
-                    delete();
-                    stop();
-                    next(include_children: false) || previous();
-
-                    var saved_parent = this.parent;
-
-                    remove();
-
-                    if (saved_parent.querySelector(":scope>${nodeName}") == null) {
-                        saved_parent.classes.add('empty');
-                    }
-
-                    break;
-                }
+                this.handle_delete_key(event);
+                break;
         }
     }
 
@@ -648,8 +684,8 @@ abstract class EditableElement extends UbrElement {
         }
     }
 
-    void save() {
-        if (is_modified() && !is_blank()) {
+    void save({bool force_empty: false}) {
+        if (is_modified() && (force_empty || !is_blank())) {
             var data = toMap();
             if (pk != null) {
                 repository.update(object_name, pk, data);
@@ -671,7 +707,7 @@ abstract class EditableElement extends UbrElement {
         }
     }
 
-    bool previous() {
+    bool previous({bool include_parent: true}) {
         var match;
 
         // try siblings
@@ -686,11 +722,13 @@ abstract class EditableElement extends UbrElement {
             return true;
         }
 
-        // try parent
-        match = this.parent;
-        if (match is EditableElement) {
-            match.start();
-            return true;
+        if (include_parent) {
+            // try parent
+            match = this.parent;
+            if (match is EditableElement) {
+                match.start();
+                return true;
+            }
         }
 
         return false;
@@ -762,6 +800,16 @@ abstract class EditableElement extends UbrElement {
     children_total_sum() {
         var items = this.querySelectorAll(child_element).map((e) => e.total);
         return items.fold(0, (a, b) => a + b);
+    }
+
+    void hide_editor() {
+        var editor = this.querySelector(":scope>.editor");
+        editor.classes.add('hidden');
+    }
+
+    void show_editor() {
+        var editor = this.querySelector(":scope>.editor");
+        editor.classes.remove('hidden');
     }
 
 }
@@ -850,19 +898,31 @@ class TaskElement extends EditableElement {
             data['selected'] = true;
             repository.insert(child_name, data).then((new_pk) {
                 item.pk = new_pk;
-                item.new_child();
+                // item.new_child();
                 // <-- starts a new line item
             });
 
             classes.remove('empty');
 
-            // Use Case 2:
+        // Use Case 2:
         } else {
-
             super.new_child();
-
         }
+    }
 
+    void new_sibling() {
+        super.new_sibling();
+    }    
+
+    void new_child_with_a_child() {
+        EditableElement item = document.createElement(child_element);
+        var editor = this.querySelector(":scope>.editor");
+        insertBefore(item, editor.nextElementSibling);
+        classes.remove('empty');
+        item.save(force_empty: true);
+        item.start();
+        item.new_child();
+        this.recalculate_code();
     }
 
     children_total_sum() {
@@ -917,6 +977,16 @@ class LineItemElement extends EditableElement {
 
     void new_parent_sibling() {
         (parent.parent as EditableElement).new_sibling();
+    }
+
+    void handle_delete_key(event) {
+        var saved_parent = this.parent;
+
+        super.handle_delete_key(event);
+        if (saved_parent.can_delete()) {
+            saved_parent.delete();
+            saved_parent.remove();
+        }
     }
 
 }

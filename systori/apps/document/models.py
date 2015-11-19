@@ -77,7 +77,6 @@ class Invoice(Document):
 
     transaction = models.OneToOneField('accounting.Transaction', related_name="invoice", null=True, on_delete=models.SET_NULL)
 
-
     DRAFT = "draft"
     SENT = "sent"
     PAID = "paid"

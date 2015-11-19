@@ -34,6 +34,7 @@
     {% for state in invoice.get_available_status_transitions %}
       <a class="btn btn-sm btn-default" href="{% url 'invoice.transition' project.id invoice.id state.name %}">{{ state.custom.label }}</a>
     {% endfor %}
+    {% if 'id' in invoice.json %}
     {% if invoice.status == invoice.DRAFT %}
     <a class="btn btn-sm btn-default" href="{% url 'invoice.update' project.id invoice.id %}">{% trans "Edit" %}</a>
     {% endif %}
@@ -48,5 +49,8 @@
         <li><a href="{% url 'invoice.pdf' project.id 'print' invoice.id %}">{% trans 'Print' %}</a></li>
       </ul>
     </div>
+    {% else %}
+    <a class="btn btn-sm btn-danger">NO JSON!</a>
+    {% endif %}
   </div>
 </div>

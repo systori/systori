@@ -202,7 +202,8 @@ class InvoiceDelete(DeleteView):
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
         success_url = self.get_success_url()
-        self.object.transaction.delete()
+        if self.object.transaction:
+            self.object.transaction.delete()
         self.object.delete()
         return HttpResponseRedirect(success_url)
 
