@@ -1707,7 +1707,7 @@ msgstr "Kein Kontakt für eine Abrechnung definiert."
 
 #: systori/templates/project/project_detail.html:236
 msgid "Create next invoice in this sequence."
-msgstr "Neue Rechnung in Höhe von %(balance)s erstellen."
+msgstr "Neue Rechnung in dieser Folge erstellen."
 
 #: systori/templates/project/project_detail.html:239
 msgid ""
