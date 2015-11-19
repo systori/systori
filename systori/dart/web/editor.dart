@@ -776,7 +776,7 @@ abstract class EditableElement extends UbrElement {
             // linteitems don't support ordering so always insert line items at end
             append(item);
         } else {
-            var editor = this.querySelector(":scope >. editor");
+            var editor = this.querySelector(":scope>.editor");
             insertBefore(item, editor.nextElementSibling);
         }
         recalculate_code();
@@ -916,7 +916,7 @@ class TaskElement extends EditableElement {
 
     void new_child_with_a_child() {
         EditableElement item = document.createElement(child_element);
-        var editor = this.querySelector(":scope > .editor");
+        var editor = this.querySelector(":scope>.editor");
         insertBefore(item, editor.nextElementSibling);
         classes.remove('empty');
         item.save(force_empty: true);
