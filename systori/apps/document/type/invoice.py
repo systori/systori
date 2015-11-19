@@ -191,9 +191,12 @@ def collate_payments(invoice, available_width):
     last_txn_idx = len(invoice['transactions'])-1
     for txn_idx, txn in enumerate(invoice['transactions']):
 
+        if txn.get('invoice_id', None) == invoice['id']:
+            continue
+
         if txn['type'] == 'payment':
             pay_day = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
-            t.row(p(_('Payment on') + ' ' + pay_day), money(-txn['net']), money(-txn['tax']), money(txn['payment_applied']))
+            t.row(p(_('Payment on {date}').format(date=pay_day)), money(-txn['net']), money(-txn['tax']), money(txn['payment_applied']))
             if txn['discount_applied']:
                 discount_net = round(Decimal(txn['discount_applied']) / (1+TAX_RATE), 2)
                 discount_tax = Decimal(txn['discount_applied']) - discount_net
@@ -202,7 +205,8 @@ def collate_payments(invoice, available_width):
             invoice_day = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
             invoice_net = Decimal(txn['net']) if txn['net'] else round(Decimal(txn['gross']) / (1+TAX_RATE), 2)
             invoice_tax = Decimal(txn['tax']) if txn['tax'] else Decimal(txn['gross']) - invoice_net
-            t.row(p(_('Invoice from ') + invoice_day), money(-invoice_net), money(-invoice_tax),  money(-txn['gross']))
+            description = _("{invoice} from {date}").format(invoice=txn['invoice_title'], date=invoice_day)
+            t.row(p(description), money(-invoice_net), money(-invoice_tax),  money(-txn['gross']))
 
     t.row(_('This Invoice'), money(invoice['debit_net']), money(invoice['debit_tax']), money(invoice['debit_gross']))
     t.row_style('FONTNAME', 0, -1, font.bold)

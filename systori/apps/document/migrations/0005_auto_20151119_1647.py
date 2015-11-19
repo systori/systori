@@ -16,6 +16,7 @@ def add_status_to_invoice_tx_in_json(apps, schema_editor):
                 for tx in invoice.json['transactions']:
                     if tx['type'] in ('invoice', 'final-invoice'):
                         tx['invoice_status'] = 'paid'
+                        tx['invoice_title'] = Invoice.objects.get(id=tx['invoice_id']).json['title']
                 invoice.save()
 
 
