@@ -1,5 +1,5 @@
 {% load i18n customformatting %}
-<div class="panel panel-{% if invoice.status == invoice.DRAFT %}primary{% else %}success{% endif %} invoice">
+<div class="panel panel-{% if invoice.status == invoice.DRAFT %}primary{% elif invoice.status == invoice.SENT %}info{% else %}success{% endif %} invoice">
   <div class="panel-heading">
     <div class="row">
       <div class="col-md-4">{{ invoice.invoice_no }}</div>
@@ -16,23 +16,25 @@
   {% endfor %}
     <tr style="text-align: right; white-space: nowrap;">
       <td>{% trans "Net" %}:</td>
-      <td>{{ invoice.json.debit_net|money }}</td>
+      <td style="text-align: right; white-space: nowrap;">{{ invoice.json.debit_net|money }}</td>
     </tr>
     <tr style="text-align: right; white-space: nowrap;">
       <td>{% trans "VAT" %} {{ TAX_RATE_DISPLAY }}:</td>
-      <td>{{ invoice.json.debit_tax|money }}</td>
+      <td style="text-align: right; white-space: nowrap;">{{ invoice.json.debit_tax|money }}</td>
     </tr>
     <tr style="text-align: right; white-space: nowrap;">
       <td>{% trans "Gross" %}:</td>
-      <td style="font-weight: bold;">{{ invoice.json.debit_gross|money }}</td>
+      <td style="font-weight: bold; text-align: right; white-space: nowrap;">{{ invoice.json.debit_gross|money }}</td>
     </tr>
   </table>
   <div class="panel-footer" style="text-align: right;">
     {% if invoice.status == invoice.DRAFT %}
     <a class="btn btn-sm btn-default pull-left" href="{% url 'invoice.delete' project.id invoice.id %}">{% trans "Delete" %}</a>
+    {% endif %}
     {% for state in invoice.get_available_status_transitions %}
       <a class="btn btn-sm btn-default" href="{% url 'invoice.transition' project.id invoice.id state.name %}">{{ state.custom.label }}</a>
     {% endfor %}
+    {% if invoice.status == invoice.DRAFT %}
     <a class="btn btn-sm btn-default" href="{% url 'invoice.update' project.id invoice.id %}">{% trans "Edit" %}</a>
     {% endif %}
     <div class="btn-group">
