@@ -235,6 +235,8 @@ class BaseInvoiceForm(BaseFormSet):
         if invoice.transaction:
             invoice.transaction.delete()
 
+        invoice.letterhead = Letterhead.objects.first()
+
         debits = []
         for debit_form in self.forms:
             if debit_form.cleaned_data['is_invoiced']:

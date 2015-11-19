@@ -13,14 +13,12 @@ from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Project, JobSite
 from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm, EntryFormSet
 from .forms import JobSiteForm, FilterForm
-from ..task.models import Job, TaskGroup, Task
-from ..directory.models import ProjectContact
-from ..document.models import Invoice, DocumentTemplate, DocumentSettings
+from ..task.models import Job, TaskGroup
+from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
 from ..accounting.utils import get_transactions_for_jobs
 from ..accounting.models import Transaction, create_account_for_job
 from ..accounting.constants import TAX_RATE
 from .gaeb_utils import gaeb_import
-from django.core.exceptions import ValidationError
 
 
 class ProjectList(FormMixin, ListView):
@@ -265,6 +263,7 @@ class TemplatesView(TemplateView):
         context['jobs'] = Project.objects.template().get().jobs.all()
         context['documents'] = DocumentTemplate.objects.all()
         context['document_settings'] = DocumentSettings.objects.all()
+        context['letterheads'] = Letterhead.objects.all()
         return context
 
 

@@ -2,7 +2,6 @@ from decimal import Decimal
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import View
-from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -11,8 +10,6 @@ from ..project.models import Project
 from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate, Letterhead, DocumentSettings
 from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
-from ..accounting.constants import TAX_RATE
-
 from .type import proposal, invoice, evidence, letterhead, itemized_listing
 
 
@@ -58,6 +55,7 @@ class ProposalCreate(CreateView):
         for job in form.cleaned_data['jobs']:
             amount += job.estimate_total
 
+        form.instance.letterhead = Letterhead.objects.first()
         form.instance.amount = amount
         form.instance.json = proposal.serialize(self.request.project, form)
         form.instance.json_version = form.instance.json['version']
@@ -252,10 +250,6 @@ class DocumentTemplateDelete(DeleteView):
 # Letterhead
 
 
-class LetterheadList(ListView):
-    model = Letterhead
-
-
 class LetterheadView(DetailView):
     model = Letterhead
 
@@ -278,7 +272,7 @@ class LetterheadUpdate(UpdateView):
 
 class LetterheadDelete(DeleteView):
     model = Letterhead
-    success_url = reverse_lazy('letterheads.list')
+    success_url = reverse_lazy('templates')
 
 
 class LetterheadPreview(DocumentRenderView):

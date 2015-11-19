@@ -86,4 +86,28 @@
     </tbody>
   </table>
   <a href="{% url 'document-settings.create' %}">{% trans "Create" %}</a>
+
+
+  <h2 class="sub-header">{% trans 'Letterhead' %}</h2>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>{% trans 'Name' %}</th>
+      <th>{% trans 'Actions' %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for object in letterheads %}
+      <tr>
+        <td><a href="{% url 'letterhead.view' object.id %}">{{ object.name }}</a></td>
+        <td>
+          <a href="{% url 'letterhead.update' object.id %}">{% trans "Edit" %}</a>
+          <a href="{% url 'letterhead.delete' object.id %}">{% trans "Delete" %}</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'letterhead.create' %}">{% trans "Create" %}</a>
+
 {% endblock %}

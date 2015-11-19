@@ -16,6 +16,7 @@ def create_task_data(self, create_user=True, create_company=True):
     if create_user:
         self.user = User.objects.create_superuser('lex@damoti.com', 'pass')
         Access.objects.create(user=self.user, company=self.company)
+    self.letterhead = Letterhead.objects.create(name="Test Letterhead", letterhead_pdf='media/letterhead/letterhead.pdf')
     self.template_project = Project.objects.create(name="Template Project", is_template=True)
     self.project = Project.objects.create(name="my project")
     self.project2 = Project.objects.create(name="my project 2")
@@ -175,13 +176,13 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Draft', self.job.get_status_display())
 
     def test_job_proposed(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())
 
     def test_job_approved(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         proposal.send()
         proposal.approve()
@@ -189,7 +190,7 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Approved', self.job.get_status_display())
 
     def test_job_declined(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())
@@ -199,7 +200,7 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Draft', self.job.get_status_display())
 
     def test_job_after_proposal_deleted(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project)
+        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())

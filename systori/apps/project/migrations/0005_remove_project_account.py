@@ -25,8 +25,4 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(convert_project_account_to_job_account),
-#        migrations.RemoveField(
-#            model_name='project',
-#            name='account',
-#        ),
     ]

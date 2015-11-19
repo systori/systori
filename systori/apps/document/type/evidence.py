@@ -16,6 +16,8 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 from .style import LetterheadCanvas
 from .style import p, b, br, nr
 
+from ..models import Letterhead
+
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
@@ -76,6 +78,10 @@ def render(project):
                 leftMargin = 11*mm,
                 rightMargin = 11*mm)
 
-        doc.build(pages, canvasmaker=LandscapeStationaryCanvas)
+        letterhead = Letterhead.objects.first()
+        def canvas_maker(*args, **kwargs):
+            return LetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
+
+        doc.build(pages, canvasmaker=canvas_maker)
 
         return buffer.getvalue()

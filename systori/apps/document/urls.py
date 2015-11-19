@@ -27,12 +27,11 @@ urlpatterns = [
     url(r'^templates/document-template-(?P<pk>\d+)/edit$', office_auth(DocumentTemplateUpdate.as_view()), name='document-template.edit'),
     url(r'^templates/document-template-(?P<pk>\d+)/delete$', office_auth(DocumentTemplateDelete.as_view()), name='document-template.delete'),
 
-    url(r'^letterheads$', office_auth(LetterheadList.as_view()), name='letterheads.list'),
-    url(r'^letterheads/create-letterhead$', office_auth(LetterheadCreate.as_view()), name='letterhead.create'),
-    url(r'^letterheads/letterhead-(?P<pk>\d+)$', office_auth(LetterheadView.as_view()), name='letterhead.view'),
-    url(r'^letterheads/letterhead-(?P<pk>\d+)/update$', office_auth(LetterheadUpdate.as_view()), name='letterhead.update'),
-    url(r'^letterheads/letterhead-(?P<pk>\d+)/delete$', office_auth(LetterheadDelete.as_view()), name='letterhead.delete'),
-    url(r'^letterheads/letterhead-(?P<pk>\d+)/preview$', office_auth(LetterheadPreview.as_view()), name='letterhead.preview'),
+    url(r'^templates/create-letterhead$', office_auth(LetterheadCreate.as_view()), name='letterhead.create'),
+    url(r'^templates/letterhead-(?P<pk>\d+)$', office_auth(LetterheadView.as_view()), name='letterhead.view'),
+    url(r'^templates/letterhead-(?P<pk>\d+)/update$', office_auth(LetterheadUpdate.as_view()), name='letterhead.update'),
+    url(r'^templates/letterhead-(?P<pk>\d+)/delete$', office_auth(LetterheadDelete.as_view()), name='letterhead.delete'),
+    url(r'^templates/letterhead-(?P<pk>\d+)/preview$', office_auth(LetterheadPreview.as_view()), name='letterhead.preview'),
 
     url(r'^templates/create-document-settings$', office_auth(DocumentSettingsCreate.as_view()), name='document-settings.create'),
     url(r'^templates/document-settings-(?P<pk>\d+)/edit$', office_auth(DocumentSettingsUpdate.as_view()), name='document-settings.edit'),
