@@ -125,7 +125,7 @@
             {{ job.code }} {{ job }}<br/>
           {% endfor %}
         </td>
-        <td>{{ doc.amount|money }}</td>
+        <td style="text-align: right; white-space: nowrap;">{{ doc.amount|money }}</td>
         <td>{{ doc.created_on|localize }}</td>
         <td>{{ doc.notes }}</td>
         <td style="min-width: 100px;">
