@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-11-19 12:23+0100\n"
+"POT-Creation-Date: 2015-11-19 16:14+0100\n"
 "PO-Revision-Date: 2015-07-11 15:41+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -255,7 +255,7 @@ msgstr "Titel"
 
 #: systori/apps/document/forms.py:66 systori/apps/document/models.py:100
 #: systori/apps/document/models.py:123
-#: systori/apps/document/type/invoice.py:198
+#: systori/apps/document/type/invoice.py:230
 #: systori/apps/document/type/letterhead.py:48
 #: systori/lib/accounting/models.py:125
 #: systori/templates/document/invoice_form.html:9
@@ -345,7 +345,7 @@ msgid "Proposals"
 msgstr "Angebote"
 
 #: systori/apps/document/models.py:74
-#: systori/apps/document/type/invoice.py:202
+#: systori/apps/document/type/invoice.py:234
 #: systori/apps/document/type/letterhead.py:51
 msgid "Invoice No."
 msgstr "Re-Nr."
@@ -370,11 +370,11 @@ msgstr "Herr"
 
 #: systori/apps/document/models.py:106
 msgid "John"
-msgstr "Stefan"
+msgstr "Max"
 
 #: systori/apps/document/models.py:107
 msgid "Smith"
-msgstr "Schmidt"
+msgstr "Mustermann"
 
 #: systori/apps/document/models.py:115 systori/apps/document/models.py:170
 #: systori/apps/equipment/models.py:6 systori/apps/task/models.py:188
@@ -413,12 +413,12 @@ msgstr "Dokumententyp"
 
 #: systori/apps/document/models.py:129
 msgid "Document Template"
-msgstr "Los-Vorlage"
+msgstr "Dokumentenvorlage"
 
 #: systori/apps/document/models.py:130
 #: systori/templates/main/templates.html:29
 msgid "Document Templates"
-msgstr "Los-Vorlagen"
+msgstr "Dokumentenvorlagen"
 
 #: systori/apps/document/models.py:142
 msgid "salutation"
@@ -462,7 +462,7 @@ msgstr "Abstand Links"
 
 #: systori/apps/document/models.py:190
 msgid "Top Margin Next"
-msgstr "Abstand Oben weiter Seite"
+msgstr "Abstand Oben nächste Seite"
 
 #: systori/apps/document/models.py:201
 msgid "A5"
@@ -510,7 +510,7 @@ msgstr "Querformat"
 
 #: systori/apps/document/models.py:219
 msgid "Orientation"
-msgstr "Buchung"
+msgstr "Format"
 
 #: systori/apps/document/models.py:222
 msgid "Debug Mode"
@@ -599,23 +599,27 @@ msgid "Total including VAT"
 msgstr "Summe brutto"
 
 #: systori/apps/document/type/invoice.py:118
+#: systori/apps/document/type/invoice.py:186
 #: systori/apps/document/type/itemized_listing.py:40
 msgid "consideration"
-msgstr "Entgeld"
+msgstr "Nettosumme"
 
 #: systori/apps/document/type/invoice.py:118
+#: systori/apps/document/type/invoice.py:186
 msgid "tax"
 msgstr "MWSt"
 
 #: systori/apps/document/type/invoice.py:118
+#: systori/apps/document/type/invoice.py:186
 msgid "gross"
-msgstr "Summe"
+msgstr "Bruttosumme"
 
 #: systori/apps/document/type/invoice.py:118
 msgid "balance"
 msgstr "Saldo"
 
 #: systori/apps/document/type/invoice.py:128
+#: systori/apps/document/type/invoice.py:198
 #: systori/lib/accounting/models.py:127 systori/lib/accounting/models.py:210
 #: systori/templates/project/project_detail.html:270
 msgid "Payment"
@@ -641,21 +645,26 @@ msgid "Discount"
 msgstr "Skonto"
 
 #: systori/apps/document/type/invoice.py:164
+#: systori/apps/document/type/invoice.py:200
 msgid "Please Pay"
 msgstr "Bitte bezahlen"
 
-#: systori/apps/document/type/invoice.py:203
+#: systori/apps/document/type/invoice.py:189
+msgid "Project progress"
+msgstr "Leistungsstand"
+
+#: systori/apps/document/type/invoice.py:235
 #: systori/apps/document/type/letterhead.py:52
 msgid "Please indicate the correct invoice number on your payment."
 msgstr "Bitte verwenden Sie diese Nr. bei der Zahlung."
 
-#: systori/apps/document/type/invoice.py:220
+#: systori/apps/document/type/invoice.py:252
 msgid "Itemized listing for Invoice No. {}"
 msgstr "Einzelaufstellung für Rechnung Nr. {}"
 
 #: systori/apps/document/type/itemized_listing.py:40
 msgid "gross pay"
-msgstr "Bruttoentgeld"
+msgstr "Bruttosumme"
 
 #: systori/apps/document/type/itemized_listing.py:44
 msgid "Job Performance"
@@ -1713,8 +1722,6 @@ msgid "Start new invoice sequence."
 msgstr "Starte eine neue Rechnungsfolge."
 
 #: systori/templates/project/project_detail.html:265
-#, fuzzy
-#| msgid "Payment"
 msgid "Payments"
 msgstr "Zahlung"
 
@@ -1876,160 +1883,3 @@ msgstr "Administration"
 #: systori/templates/user/user_list.html:35
 msgid "Generate Password"
 msgstr "Passwort generieren"
-
-#~ msgid "Use for"
-#~ msgstr "Benutzt für"
-
-#~ msgid "Date Received"
-#~ msgstr "Eingangsdatum"
-
-#~ msgid "Paid"
-#~ msgstr "bezahlt"
-
-#~ msgid "Pay"
-#~ msgstr "Bezahlen"
-
-#~ msgid "Dispute"
-#~ msgstr "Unklar"
-
-#~ msgid "Invoice Total"
-#~ msgstr "Gesamtbetrag"
-
-#~ msgid "Remaining amount"
-#~ msgstr "offener Zahlungsbetrag"
-
-#~ msgid "Specification"
-#~ msgstr "Leistungsverzeichnis"
-
-#~ msgid "Transactions"
-#~ msgstr "Buchungen"
-
-#~ msgid "Invoiced"
-#~ msgstr "berechnet"
-
-#~ msgid "Debit for new work completed to date."
-#~ msgstr "Soll für neu fertiggestellte Arbeit."
-
-#~ msgid "Credits"
-#~ msgstr "Kreditoren"
-
-#~ msgid "Debitable"
-#~ msgstr "debitierbar"
-
-#~ msgid "Invoiceable"
-#~ msgstr "Forderung"
-
-#~ msgid ""
-#~ "Debit %(new_amount)s for newly finished work and create a new invoice for "
-#~ "%(balance)s"
-#~ msgstr ""
-#~ "%(new_amount)s buchen und neu fertiggestellt Arbeit in Rechnung stellen "
-#~ "für %(balance)s"
-
-#~ msgid "No previous balance or new work available for invoicing."
-#~ msgstr "Kein Saldo oder neu fertiggestellte Arbeit abrechenbar."
-
-#~ msgid "No jobs available to invoice."
-#~ msgstr "Keine Positionen verfügbar."
-
-#~ msgid "Is tax already included?"
-#~ msgstr "Brutto"
-
-#~ msgid "Create Flat Invoice"
-#~ msgstr "Pauschalrechnung erstellen"
-
-#~ msgid "Job Offset"
-#~ msgstr "Los Nr. Offset"
-
-#~ msgid "Discount applied"
-#~ msgstr "Skonto abgezogen"
-
-#~ msgid "alternate"
-#~ msgstr "Alternativ"
-
-#~ msgid "State"
-#~ msgstr "Status"
-
-#~ msgid "You may not select that schema"
-#~ msgstr "Sie dürfen das nicht auswählen."
-
-#~ msgid "Company changed to %s"
-#~ msgstr "Firma auf %s gewechselt."
-
-#~ msgid "Company deselected"
-#~ msgstr "Firma abgewählt."
-
-#~ msgid "You must select a schema to access that resource"
-#~ msgstr "Zum Zugang dieser Ressource muss ein Schema gewählt sein."
-
-#~ msgid "You may not select that company"
-#~ msgstr "Sie dürfen diese Firma nicht auswählen."
-
-#~ msgid "Personal info"
-#~ msgstr "Persönliche Info"
-
-#~ msgid "Permissions"
-#~ msgstr "Erlaubnisse"
-
-#~ msgid "Important dates"
-#~ msgstr "Wichtige Daten"
-
-#~ msgid "Basic"
-#~ msgstr "Standard"
-
-#~ msgid "Extended"
-#~ msgstr "Erweitert"
-
-#~ msgid "Import"
-#~ msgstr "Import"
-
-#~ msgid "Template"
-#~ msgstr "Vorlagen"
-
-#~ msgid "Evidences"
-#~ msgstr "Aufmaße"
-
-#~ msgid "Canceled"
-#~ msgstr "abgebrochen"
-
-#~ msgid "Value"
-#~ msgstr "Betrag"
-
-#~ msgid "License Plate"
-#~ msgstr "Kennzeichen"
-
-#~ msgid "Vehicle Details"
-#~ msgstr "Fahrzeugsdetails"
-
-#~ msgid "Vehicles"
-#~ msgstr "Fahrzeuge"
-
-#~ msgid "Vehicle"
-#~ msgstr "Fahrzeug"
-
-#~ msgid "Today"
-#~ msgstr "heute"
-
-#~ msgid "Add Job Site"
-#~ msgstr "Einsatzort hinzufügen"
-
-#~ msgid "Nothing planned for today yet."
-#~ msgstr "Für heute wurde noch nichts geplant."
-
-#~ msgid "Job Site"
-#~ msgstr "Einsatzort"
-
-#~ msgid "Assign Labor"
-#~ msgstr "Mitarbeiter verknüpfen"
-
-#~ msgid "Username"
-#~ msgstr "Benutzername"
-
-#~ msgid "ToDos"
-#~ msgstr "ToDos"
-
-#~ msgid "method of payment"
-#~ msgstr "Zahlungsbedingungen"
-
-#~ msgid "validity"
-#~ msgstr "Gültigkeit"
