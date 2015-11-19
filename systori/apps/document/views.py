@@ -199,6 +199,13 @@ class InvoiceTransition(SingleObjectMixin, View):
 class InvoiceDelete(DeleteView):
     model = Invoice
 
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.transaction.delete()
+        self.object.delete()
+        return HttpResponseRedirect(success_url)
+
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])
 
