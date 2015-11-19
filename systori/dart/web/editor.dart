@@ -452,21 +452,21 @@ abstract class EditableElement extends UbrElement {
         return true;
     }
 
-    handle_down_key(KeyboardEvent event) {
+    void handle_down_key(KeyboardEvent event) {
         this.stop_n_save();
         this.next();
         this.cleanup();
         this.scrollIntoView();
     }
 
-    handle_up_key(KeyboardEvent event) {
+    void handle_up_key(KeyboardEvent event) {
         this.stop_n_save();
         this.previous();
         this.cleanup();
         this.scrollIntoView();
     }
 
-    handle_enter_key(KeyboardEvent event) {
+    void handle_enter_key(KeyboardEvent event) {
         if (event.shiftKey) {
             event.preventDefault();
 
@@ -489,7 +489,12 @@ abstract class EditableElement extends UbrElement {
                     if (event.altKey) {
                         this.new_child();
                     } else {
-                        this.new_child_with_a_child();
+                        var children = this.querySelectorAll(this.child_element);
+                        if (children.length > 0) {
+                            children.last.new_child();
+                        } else {
+                            this.new_child_with_a_child();
+                        }
                     }
                 } else {
                     this.new_child();
@@ -500,10 +505,10 @@ abstract class EditableElement extends UbrElement {
         }
     }
 
-    handle_esc_key(KeyboardEvent event) {
+    void handle_esc_key(KeyboardEvent event) {
     }
 
-    handle_delete_key(KeyboardEvent event) {
+    void handle_delete_key(KeyboardEvent event) {
         if (event.shiftKey) {
             if (!this.can_delete()) return;
             event.preventDefault();
@@ -771,7 +776,7 @@ abstract class EditableElement extends UbrElement {
             // linteitems don't support ordering so always insert line items at end
             append(item);
         } else {
-            var editor = this.querySelector(":scope>.editor");
+            var editor = this.querySelector(":scope >. editor");
             insertBefore(item, editor.nextElementSibling);
         }
         recalculate_code();
@@ -795,16 +800,6 @@ abstract class EditableElement extends UbrElement {
     children_total_sum() {
         var items = this.querySelectorAll(child_element).map((e) => e.total);
         return items.fold(0, (a, b) => a + b);
-    }
-
-    void toggle_if_has_siblings() {
-        // Why is this.parent null?
-        print('${this.previousElementSibling}, ${this.nextElementSibling}, ${this.parent}');
-        if (!(this.previousElementSibling is EditableElement || this.nextElementSibling is EditableElement)) {
-            this.hide_editor();
-        } else {
-            this.show_editor();
-        }
     }
 
     void hide_editor() {
@@ -921,13 +916,12 @@ class TaskElement extends EditableElement {
 
     void new_child_with_a_child() {
         EditableElement item = document.createElement(child_element);
-        var editor = this.querySelector(":scope>.editor");
+        var editor = this.querySelector(":scope > .editor");
         insertBefore(item, editor.nextElementSibling);
         classes.remove('empty');
         item.save(force_empty: true);
         item.start();
         item.new_child();
-        item.toggle_if_has_siblings();
         this.recalculate_code();
     }
 
@@ -947,7 +941,6 @@ class TaskInstanceElement extends EditableElement {
     double get total => children_total_sum();
 
     TaskInstanceElement.created(): super.created() {
-        this.toggle_if_has_siblings();
     }
 
     recalculate_code() {
