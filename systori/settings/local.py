@@ -18,8 +18,8 @@ if False:  # Enable Profile Panel
     )
 
 STATICFILES_DIRS += (
-    #('dart', os.path.join(ROOT_DIR, 'systori/dart/web')),
-     ('dart', os.path.join(ROOT_DIR, 'systori/dart/build/web')),
+     ('dart', os.path.join(ROOT_DIR, 'systori/dart/web')),
+    #('dart', os.path.join(ROOT_DIR, 'systori/dart/build/web')),
 )
 
 DATABASES['default'].update({

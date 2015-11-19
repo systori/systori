@@ -159,9 +159,9 @@ USE_THOUSAND_SEPARATOR = True
 
 # this is where files are copied when running ./manage.py collectstatic
 STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, '../static'))
-
 STATIC_URL = '/static/'
-MEDIA_ROOT = ''
+
+MEDIA_ROOT = os.path.normpath(os.path.join(BASE_DIR, 'media'))
 MEDIA_URL = ''
 
 STATICFILES_DIRS = (

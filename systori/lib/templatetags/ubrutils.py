@@ -10,4 +10,6 @@ def random_pick(*opts):
 
 @register.filter
 def divide(numerator, denominator):
+    if not denominator:
+        return denominator
     return round(numerator / denominator, 8)
