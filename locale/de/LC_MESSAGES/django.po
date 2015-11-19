@@ -644,7 +644,7 @@ msgstr "Schlussrechnung"
 #: systori/apps/document/type/invoice.py:134
 #: systori/apps/document/type/invoice.py:211
 msgid "This Invoice"
-msgstr "Zahlbetrag dieser Rechnung"
+msgstr "Zahlbetrag"
 
 #: systori/apps/document/type/invoice.py:150
 #: systori/lib/accounting/models.py:211
