@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-11-18 18:38+0100\n"
+"POT-Creation-Date: 2015-11-19 12:23+0100\n"
 "PO-Revision-Date: 2015-07-11 15:41+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -356,7 +356,7 @@ msgstr "Entwurf"
 
 #: systori/apps/document/models.py:91
 msgid "Mark Sent"
-msgstr "Sendedatum"
+msgstr "Als versendet markieren"
 
 #: systori/apps/document/models.py:101
 #: systori/templates/project/project_detail.html:224
@@ -382,10 +382,10 @@ msgstr "Schmidt"
 #: systori/apps/task/models.py:472 systori/lib/accounting/models.py:33
 #: systori/templates/accounting/account_list.html:12
 #: systori/templates/accounting/account_list.html:41
-#: systori/templates/document/letterhead_list.html:12
 #: systori/templates/equipment/equipment_list.html:12
 #: systori/templates/main/templates.html:11
 #: systori/templates/main/templates.html:33
+#: systori/templates/main/templates.html:95
 #: systori/templates/project/project_detail.html:45
 #: systori/templates/project/project_detail.html:313
 #: systori/templates/project/project_detail.html:346
@@ -520,11 +520,11 @@ msgstr ""
 msgid "language"
 msgstr "Sprache"
 
-#: systori/apps/document/type/evidence.py:38
+#: systori/apps/document/type/evidence.py:40
 msgid "Evidence Sheet"
 msgstr "Aufmaßblatt"
 
-#: systori/apps/document/type/evidence.py:41
+#: systori/apps/document/type/evidence.py:43
 #: systori/apps/document/type/itemized_listing.py:92
 #: systori/apps/project/models.py:191
 #: systori/templates/directory/contact_detail.html:19
@@ -532,27 +532,27 @@ msgstr "Aufmaßblatt"
 msgid "Project"
 msgstr "Projekt"
 
-#: systori/apps/document/type/evidence.py:50 systori/apps/task/models.py:52
+#: systori/apps/document/type/evidence.py:52 systori/apps/task/models.py:52
 #: systori/lib/accounting/models.py:32
 #: systori/templates/accounting/account_list.html:11
 #: systori/templates/accounting/account_list.html:40
 msgid "Code"
 msgstr "Nummer"
 
-#: systori/apps/document/type/evidence.py:51 systori/apps/task/models.py:290
+#: systori/apps/document/type/evidence.py:53 systori/apps/task/models.py:290
 #: systori/apps/task/models.py:291
 msgid "Task"
 msgstr "Position"
 
-#: systori/apps/document/type/evidence.py:52
+#: systori/apps/document/type/evidence.py:54
 msgid "P-Amount"
 msgstr "LV-Menge"
 
-#: systori/apps/document/type/evidence.py:53
+#: systori/apps/document/type/evidence.py:55
 msgid "UP"
 msgstr "EP"
 
-#: systori/apps/document/type/evidence.py:70
+#: systori/apps/document/type/evidence.py:72
 msgid "There are no billable Tasks available."
 msgstr "Es sind keine abrechenbare Positionen verfügbar."
 
@@ -623,7 +623,7 @@ msgstr "Zahlung"
 
 #: systori/apps/document/type/invoice.py:129
 msgid "Partial Invoice"
-msgstr "Schlussrechnung"
+msgstr "Abschlagsrechnung"
 
 #: systori/apps/document/type/invoice.py:130
 #: systori/lib/accounting/models.py:126
@@ -632,7 +632,7 @@ msgstr "Schlussrechnung"
 
 #: systori/apps/document/type/invoice.py:134
 msgid "This Invoice"
-msgstr "Rechnung"
+msgstr "Diese Rechnung"
 
 #: systori/apps/document/type/invoice.py:150
 #: systori/lib/accounting/models.py:211
@@ -837,11 +837,11 @@ msgstr "Längengrad"
 msgid "Day"
 msgstr "Tag"
 
-#: systori/apps/project/views.py:163
+#: systori/apps/project/views.py:161
 msgid "Default"
 msgstr "Default"
 
-#: systori/apps/project/views.py:171
+#: systori/apps/project/views.py:169
 msgid "Main Site"
 msgstr "Baustelle"
 
@@ -1159,10 +1159,10 @@ msgstr "Saldo"
 #: systori/templates/accounting/account_list.html:14
 #: systori/templates/accounting/account_list.html:43
 #: systori/templates/directory/contact_list.html:15
-#: systori/templates/document/letterhead_list.html:14
 #: systori/templates/equipment/equipment_list.html:13
 #: systori/templates/main/templates.html:12
 #: systori/templates/main/templates.html:35
+#: systori/templates/main/templates.html:96
 #: systori/templates/project/project_detail.html:51
 #: systori/templates/project/project_detail.html:115
 #: systori/templates/project/project_detail.html:274
@@ -1177,11 +1177,11 @@ msgstr "Aktionen"
 #: systori/templates/accounting/account_list.html:24
 #: systori/templates/accounting/account_list.html:54
 #: systori/templates/document/invoice_card.html:36
-#: systori/templates/document/letterhead_list.html:23
 #: systori/templates/equipment/equipment_list.html:22
 #: systori/templates/main/templates.html:20
 #: systori/templates/main/templates.html:44
 #: systori/templates/main/templates.html:81
+#: systori/templates/main/templates.html:104
 #: systori/templates/project/project_detail.html:82
 #: systori/templates/project/project_detail.html:152
 #: systori/templates/project/project_detail.html:363
@@ -1193,11 +1193,11 @@ msgstr "Bearbeiten"
 
 #: systori/templates/accounting/account_list.html:26
 #: systori/templates/document/invoice_card.html:32
-#: systori/templates/document/letterhead_list.html:24
 #: systori/templates/equipment/equipment_list.html:23
 #: systori/templates/main/templates.html:21
 #: systori/templates/main/templates.html:45
 #: systori/templates/main/templates.html:82
+#: systori/templates/main/templates.html:105
 #: systori/templates/project/project_detail.html:83
 #: systori/templates/project/project_detail.html:151
 #: systori/templates/project/project_detail.html:288
@@ -1264,11 +1264,11 @@ msgstr "Adressbuch"
 #: systori/templates/directory/contact_list.html:35
 #: systori/templates/directory/projectcontact_form_add.html:37
 #: systori/templates/directory/projectcontact_form_create.html:15
-#: systori/templates/document/letterhead_list.html:30
 #: systori/templates/equipment/equipment_list.html:29
 #: systori/templates/main/templates.html:27
 #: systori/templates/main/templates.html:51
 #: systori/templates/main/templates.html:88
+#: systori/templates/main/templates.html:111
 #: systori/templates/project/project_detail.html:101
 #: systori/templates/project/project_detail.html:160
 #: systori/templates/project/project_detail.html:373
@@ -1356,15 +1356,6 @@ msgstr "Abrechenbar"
 #: systori/templates/document/letterhead_form.html:31
 msgid "No Letterhead available."
 msgstr "Kein Briefpapier verfügbar."
-
-#: systori/templates/document/letterhead_list.html:8
-#: systori/templates/main/templates.html:60
-msgid "Letterhead"
-msgstr "Briefpapier"
-
-#: systori/templates/document/letterhead_list.html:13
-msgid "Use for"
-msgstr "Benutzt für"
 
 #: systori/templates/document/proposal_detail.html:8
 msgid "Proposal Details"
@@ -1553,6 +1544,11 @@ msgstr "Los-Vorlagen"
 msgid "Text"
 msgstr ""
 
+#: systori/templates/main/templates.html:60
+#: systori/templates/main/templates.html:91
+msgid "Letterhead"
+msgstr "Briefpapier"
+
 #: systori/templates/main/templates.html:64
 msgid "Language"
 msgstr "Sprache"
@@ -1708,16 +1704,22 @@ msgstr "Neue Rechnung in Höhe von %(balance)s erstellen."
 msgid ""
 "Last invoice in sequence must be marked as sent before a new one can be "
 "created."
-msgstr "Bevor eine neue Rechnung erstellt werden kann, muss die vorherige als versendet markiert werden."
+msgstr ""
+"Bevor eine neue Rechnung erstellt werden kann, muss die vorherige als "
+"versendet markiert werden."
 
 #: systori/templates/project/project_detail.html:248
 msgid "Start new invoice sequence."
 msgstr "Starte eine neue Rechnungsfolge."
 
 #: systori/templates/project/project_detail.html:265
-#msgid "Payment"
-#msgstr "Gesamtzahlung"
+#, fuzzy
+#| msgid "Payment"
+msgid "Payments"
+msgstr "Zahlung"
 
+# msgid "Payment"
+# msgstr "Gesamtzahlung"
 #: systori/templates/project/project_detail.html:271
 msgid "Applied"
 msgstr "Anteil"
@@ -1875,156 +1877,159 @@ msgstr "Administration"
 msgid "Generate Password"
 msgstr "Passwort generieren"
 
-msgid "Date Received"
-msgstr "Eingangsdatum"
+#~ msgid "Use for"
+#~ msgstr "Benutzt für"
 
-msgid "Paid"
-msgstr "bezahlt"
+#~ msgid "Date Received"
+#~ msgstr "Eingangsdatum"
 
-msgid "Pay"
-msgstr "Bezahlen"
+#~ msgid "Paid"
+#~ msgstr "bezahlt"
 
-msgid "Dispute"
-msgstr "Unklar"
+#~ msgid "Pay"
+#~ msgstr "Bezahlen"
 
-msgid "Invoice Total"
-msgstr "Gesamtbetrag"
+#~ msgid "Dispute"
+#~ msgstr "Unklar"
 
-msgid "Remaining amount"
-msgstr "offener Zahlungsbetrag"
+#~ msgid "Invoice Total"
+#~ msgstr "Gesamtbetrag"
 
-msgid "Specification"
-msgstr "Leistungsverzeichnis"
+#~ msgid "Remaining amount"
+#~ msgstr "offener Zahlungsbetrag"
 
-msgid "Transactions"
-msgstr "Buchungen"
+#~ msgid "Specification"
+#~ msgstr "Leistungsverzeichnis"
 
-msgid "Invoiced"
-msgstr "berechnet"
+#~ msgid "Transactions"
+#~ msgstr "Buchungen"
 
-msgid "Debit for new work completed to date."
-msgstr "Soll für neu fertiggestellte Arbeit."
+#~ msgid "Invoiced"
+#~ msgstr "berechnet"
 
-msgid "Credits"
-msgstr "Kreditoren"
+#~ msgid "Debit for new work completed to date."
+#~ msgstr "Soll für neu fertiggestellte Arbeit."
 
-msgid "Debitable"
-msgstr "debitierbar"
+#~ msgid "Credits"
+#~ msgstr "Kreditoren"
 
-msgid "Invoiceable"
-msgstr "Forderung"
+#~ msgid "Debitable"
+#~ msgstr "debitierbar"
 
-msgid ""
-"Debit %(new_amount)s for newly finished work and create a new invoice for "
-"%(balance)s"
-msgstr ""
-"%(new_amount)s buchen und neu fertiggestellt Arbeit in Rechnung stellen "
-"für %(balance)s"
+#~ msgid "Invoiceable"
+#~ msgstr "Forderung"
 
-msgid "No previous balance or new work available for invoicing."
-msgstr "Kein Saldo oder neu fertiggestellte Arbeit abrechenbar."
+#~ msgid ""
+#~ "Debit %(new_amount)s for newly finished work and create a new invoice for "
+#~ "%(balance)s"
+#~ msgstr ""
+#~ "%(new_amount)s buchen und neu fertiggestellt Arbeit in Rechnung stellen "
+#~ "für %(balance)s"
 
-msgid "No jobs available to invoice."
-msgstr "Keine Positionen verfügbar."
+#~ msgid "No previous balance or new work available for invoicing."
+#~ msgstr "Kein Saldo oder neu fertiggestellte Arbeit abrechenbar."
 
-msgid "Is tax already included?"
-msgstr "Brutto"
+#~ msgid "No jobs available to invoice."
+#~ msgstr "Keine Positionen verfügbar."
 
-msgid "Create Flat Invoice"
-msgstr "Pauschalrechnung erstellen"
+#~ msgid "Is tax already included?"
+#~ msgstr "Brutto"
 
-msgid "Job Offset"
-msgstr "Los Nr. Offset"
+#~ msgid "Create Flat Invoice"
+#~ msgstr "Pauschalrechnung erstellen"
 
-msgid "Discount applied"
-msgstr "Skonto abgezogen"
+#~ msgid "Job Offset"
+#~ msgstr "Los Nr. Offset"
 
-msgid "alternate"
-msgstr "Alternativ"
+#~ msgid "Discount applied"
+#~ msgstr "Skonto abgezogen"
 
-msgid "State"
-msgstr "Status"
+#~ msgid "alternate"
+#~ msgstr "Alternativ"
 
-msgid "You may not select that schema"
-msgstr "Sie dürfen das nicht auswählen."
+#~ msgid "State"
+#~ msgstr "Status"
 
-msgid "Company changed to %s"
-msgstr "Firma auf %s gewechselt."
+#~ msgid "You may not select that schema"
+#~ msgstr "Sie dürfen das nicht auswählen."
 
-msgid "Company deselected"
-msgstr "Firma abgewählt."
+#~ msgid "Company changed to %s"
+#~ msgstr "Firma auf %s gewechselt."
 
-msgid "You must select a schema to access that resource"
-msgstr "Zum Zugang dieser Ressource muss ein Schema gewählt sein."
+#~ msgid "Company deselected"
+#~ msgstr "Firma abgewählt."
 
-msgid "You may not select that company"
-msgstr "Sie dürfen diese Firma nicht auswählen."
+#~ msgid "You must select a schema to access that resource"
+#~ msgstr "Zum Zugang dieser Ressource muss ein Schema gewählt sein."
 
-msgid "Personal info"
-msgstr "Persönliche Info"
+#~ msgid "You may not select that company"
+#~ msgstr "Sie dürfen diese Firma nicht auswählen."
 
-msgid "Permissions"
-msgstr "Erlaubnisse"
+#~ msgid "Personal info"
+#~ msgstr "Persönliche Info"
 
-msgid "Important dates"
-msgstr "Wichtige Daten"
+#~ msgid "Permissions"
+#~ msgstr "Erlaubnisse"
 
-msgid "Basic"
-msgstr "Standard"
+#~ msgid "Important dates"
+#~ msgstr "Wichtige Daten"
 
-msgid "Extended"
-msgstr "Erweitert"
+#~ msgid "Basic"
+#~ msgstr "Standard"
 
-msgid "Import"
-msgstr "Import"
+#~ msgid "Extended"
+#~ msgstr "Erweitert"
 
-msgid "Template"
-msgstr "Vorlagen"
+#~ msgid "Import"
+#~ msgstr "Import"
 
-msgid "Evidences"
-msgstr "Aufmaße"
+#~ msgid "Template"
+#~ msgstr "Vorlagen"
 
-msgid "Canceled"
-msgstr "abgebrochen"
+#~ msgid "Evidences"
+#~ msgstr "Aufmaße"
 
-msgid "Value"
-msgstr "Betrag"
+#~ msgid "Canceled"
+#~ msgstr "abgebrochen"
 
-msgid "License Plate"
-msgstr "Kennzeichen"
+#~ msgid "Value"
+#~ msgstr "Betrag"
 
-msgid "Vehicle Details"
-msgstr "Fahrzeugsdetails"
+#~ msgid "License Plate"
+#~ msgstr "Kennzeichen"
 
-msgid "Vehicles"
-msgstr "Fahrzeuge"
+#~ msgid "Vehicle Details"
+#~ msgstr "Fahrzeugsdetails"
 
-msgid "Vehicle"
-msgstr "Fahrzeug"
+#~ msgid "Vehicles"
+#~ msgstr "Fahrzeuge"
 
-msgid "Today"
-msgstr "heute"
+#~ msgid "Vehicle"
+#~ msgstr "Fahrzeug"
 
-msgid "Add Job Site"
-msgstr "Einsatzort hinzufügen"
+#~ msgid "Today"
+#~ msgstr "heute"
 
-msgid "Nothing planned for today yet."
-msgstr "Für heute wurde noch nichts geplant."
+#~ msgid "Add Job Site"
+#~ msgstr "Einsatzort hinzufügen"
 
-msgid "Job Site"
-msgstr "Einsatzort"
+#~ msgid "Nothing planned for today yet."
+#~ msgstr "Für heute wurde noch nichts geplant."
 
-msgid "Assign Labor"
-msgstr "Mitarbeiter verknüpfen"
+#~ msgid "Job Site"
+#~ msgstr "Einsatzort"
 
-msgid "Username"
-msgstr "Benutzername"
+#~ msgid "Assign Labor"
+#~ msgstr "Mitarbeiter verknüpfen"
 
-msgid "ToDos"
-msgstr "ToDos"
+#~ msgid "Username"
+#~ msgstr "Benutzername"
 
-msgid "method of payment"
-msgstr "Zahlungsbedingungen"
+#~ msgid "ToDos"
+#~ msgstr "ToDos"
 
-msgid "validity"
-msgstr "Gültigkeit"
+#~ msgid "method of payment"
+#~ msgstr "Zahlungsbedingungen"
+
+#~ msgid "validity"
+#~ msgstr "Gültigkeit"
