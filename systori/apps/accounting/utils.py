@@ -19,7 +19,7 @@ def _transaction_sort_key(txn):
     return txn_date+type_weight+txn_id
 
 
-def get_transactions_for_jobs(jobs, transacted_on_or_before=None):
+def get_transactions_for_jobs(jobs, transacted_on_or_before=None, exclude_transaction=None):
     """
     :param jobs: limit transaction details to specific set of jobs
     :param transacted_on_or_before: limit transactions up to and including a certain date
@@ -29,6 +29,8 @@ def get_transactions_for_jobs(jobs, transacted_on_or_before=None):
     txns_query = Transaction.objects.filter(entries__job__in=jobs).distinct()
     if transacted_on_or_before:
         txns_query = txns_query.filter(transacted_on__lte=transacted_on_or_before)
+    if exclude_transaction:
+        txns_query = txns_query.exclude(id=exclude_transaction)
 
     transactions = list(txns_query)
     transactions.sort(key=_transaction_sort_key)
