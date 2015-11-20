@@ -281,15 +281,15 @@ def render(invoice, letterhead, format):
         return buffer.getvalue()
 
 
-def serialize(invoice, data):
+def serialize(invoice_obj, data):
 
-    contact = invoice.project.billable_contact.contact
+    contact = invoice_obj.project.billable_contact.contact
 
     invoice = {
 
         'version': '1.2',
 
-        'id': invoice.id,
+        'id': invoice_obj.id,
 
         'title': data['title'],
         'date': data['document_date'],
@@ -330,7 +330,7 @@ def serialize(invoice, data):
     if data.get('add_terms', False):
         invoice['add_terms'] = True  # TODO: Calculate the terms.
 
-    invoice['transactions'] = get_transactions_for_jobs([d['job'] for d in data['debits']])
+    invoice['transactions'] = get_transactions_for_jobs([d['job'] for d in data['debits']], exclude_transaction=invoice_obj.transaction_id)
 
     for debit in data['debits']:
 
