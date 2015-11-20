@@ -493,7 +493,7 @@ abstract class EditableElement extends UbrElement {
                         if (children.length > 0) {
                             children.last.new_child();
                         } else {
-                            this.new_child_with_a_child();
+                            this.new_child();
                         }
                     }
                 } else {
@@ -892,8 +892,7 @@ class TaskElement extends EditableElement {
             data['selected'] = true;
             repository.insert(child_name, data).then((new_pk) {
                 item.pk = new_pk;
-                // item.new_child();
-                // <-- starts a new line item
+                item.new_child(); // <-- starts a new line item
             });
 
             classes.remove('empty');
@@ -907,17 +906,6 @@ class TaskElement extends EditableElement {
     void new_sibling() {
         super.new_sibling();
     }    
-
-    void new_child_with_a_child() {
-        EditableElement item = document.createElement(child_element);
-        var editor = this.querySelector(":scope > .editor");
-        insertBefore(item, editor.nextElementSibling);
-        classes.remove('empty');
-        item.save(force_empty: true);
-        item.start();
-        item.new_child();
-        this.recalculate_code();
-    }
 
     children_total_sum() {
         TaskInstanceElement first_child = this.querySelector(child_element);
