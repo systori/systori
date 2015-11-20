@@ -493,7 +493,7 @@ abstract class EditableElement extends UbrElement {
                         if (children.length > 0) {
                             children.last.new_child();
                         } else {
-                            this.new_child_with_a_child();
+                            this.new_child();
                         }
                     }
                 } else {
@@ -725,7 +725,10 @@ abstract class EditableElement extends UbrElement {
         if (include_parent) {
             // try parent
             match = this.parent;
-            if (match is EditableElement) {
+            if (match is TaskInstanceElement && match.parent.querySelectorAll(match.parent.child_element).length == 1) {
+                match.previous();
+                return true;
+            } else if (match is EditableElement) {
                 match.start();
                 return true;
             }
@@ -741,7 +744,10 @@ abstract class EditableElement extends UbrElement {
             // try child elements
             if (child_element != null) {
                 match = this.querySelector(child_element);
-                if (match is EditableElement) {
+                if (match is TaskInstanceElement && match.parent.querySelectorAll(match.parent.child_element).length == 1) {
+                    match.next();
+                    return true;
+                } else if (match is EditableElement) {
                     match.start();
                     return true;
                 }
@@ -772,13 +778,7 @@ abstract class EditableElement extends UbrElement {
 
     void new_child() {
         EditableElement item = document.createElement(child_element);
-        if (child_element == "ubr-lineitem") {
-            // linteitems don't support ordering so always insert line items at end
-            append(item);
-        } else {
-            var editor = this.querySelector(":scope>.editor");
-            insertBefore(item, editor.nextElementSibling);
-        }
+        append(item);
         recalculate_code();
         classes.remove('empty');
         item.start();
@@ -898,8 +898,7 @@ class TaskElement extends EditableElement {
             data['selected'] = true;
             repository.insert(child_name, data).then((new_pk) {
                 item.pk = new_pk;
-                // item.new_child();
-                // <-- starts a new line item
+                item.new_child(); // <-- starts a new line item
             });
 
             classes.remove('empty');
@@ -913,17 +912,6 @@ class TaskElement extends EditableElement {
     void new_sibling() {
         super.new_sibling();
     }    
-
-    void new_child_with_a_child() {
-        EditableElement item = document.createElement(child_element);
-        var editor = this.querySelector(":scope>.editor");
-        insertBefore(item, editor.nextElementSibling);
-        classes.remove('empty');
-        item.save(force_empty: true);
-        item.start();
-        item.new_child();
-        this.recalculate_code();
-    }
 
     children_total_sum() {
         TaskInstanceElement first_child = this.querySelector(child_element);
@@ -949,7 +937,6 @@ class TaskInstanceElement extends EditableElement {
     update_totals() {
         (parent as EditableElement).update_totals();
     }
-
 }
 
 class LineItemElement extends EditableElement {

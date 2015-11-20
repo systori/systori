@@ -173,15 +173,16 @@ def collate_history(invoice, available_width):
 
 def collate_payments(invoice, available_width):
 
-    t = TableFormatter([0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
+    t = TableFormatter([0, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
     t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
-    t.style.append(('VALIGN', (0, 0), (-1, -1), "TOP"))
+    t.style.append(('VALIGN', (0, 0), (-1, -1), "BOTTOM"))
     t.style.append(('RIGHTPADDING', (-1, 0), (-1, -2), 0))
+    t.style.append(('LEFTPADDING', (-1, 0), (-1, -2), 0))
 
     t.style.append(('LINEBELOW', (0, 0), (-1, 0), 0.25, colors.black))
     t.style.append(('LINEABOVE', (0, -1), (-1, -1), 0.25, colors.black))
-    t.style.append(('LINEAFTER', (0, 0), (-2, -2), 0.25, colors.black))
+    t.style.append(('LINEAFTER', (0, 1), (-2, -2), 0.25, colors.black))
 
     t.row('', _("consideration"), _("tax"), _("gross"))
     t.row_style('FONTNAME', 0, -1, font.bold)
@@ -209,6 +210,7 @@ def collate_payments(invoice, available_width):
             t.row(p(description), money(-invoice_net), money(-invoice_tax),  money(-txn['gross']))
 
     t.row(_('This Invoice'), money(invoice['debit_net']), money(invoice['debit_tax']), money(invoice['debit_gross']))
+    t.row_style('RIGHTPADDING', -1, -1, 0)
     t.row_style('FONTNAME', 0, -1, font.bold)
 
     return t.get_table(ContinuationTable, repeatRows=1)
@@ -349,7 +351,7 @@ def serialize(invoice_obj, data):
         if debit['is_flat']:
             continue
 
-        for taskgroup in job.billable_taskgroups:
+        for taskgroup in job.taskgroups.all():
             taskgroup_dict = {
                 'id': taskgroup.id,
                 'code': taskgroup.code,
@@ -360,7 +362,7 @@ def serialize(invoice_obj, data):
             }
             debit['taskgroups'].append(taskgroup_dict)
 
-            for task in taskgroup.billable_tasks:
+            for task in taskgroup.tasks.all():
                 task_dict = {
                     'id': task.id,
                     'code': task.instance.code,
