@@ -772,13 +772,7 @@ abstract class EditableElement extends UbrElement {
 
     void new_child() {
         EditableElement item = document.createElement(child_element);
-        if (child_element == "ubr-lineitem") {
-            // linteitems don't support ordering so always insert line items at end
-            append(item);
-        } else {
-            var editor = this.querySelector(":scope >. editor");
-            insertBefore(item, editor.nextElementSibling);
-        }
+        append(item);
         recalculate_code();
         classes.remove('empty');
         item.start();
@@ -950,6 +944,12 @@ class TaskInstanceElement extends EditableElement {
         (parent as EditableElement).update_totals();
     }
 
+    void start({bool focus: true}) {
+        super.start(focus: focus);
+        if(parent.querySelectorAll(parent.child_element).length == 1) {
+            this.previous();
+        }
+    }
 }
 
 class LineItemElement extends EditableElement {
