@@ -725,7 +725,10 @@ abstract class EditableElement extends UbrElement {
         if (include_parent) {
             // try parent
             match = this.parent;
-            if (match is EditableElement) {
+            if (match is TaskInstanceElement && match.parent.querySelectorAll(match.parent.child_element).length == 1) {
+                match.previous();
+                return true;
+            } else if (match is EditableElement) {
                 match.start();
                 return true;
             }
@@ -741,7 +744,10 @@ abstract class EditableElement extends UbrElement {
             // try child elements
             if (child_element != null) {
                 match = this.querySelector(child_element);
-                if (match is EditableElement) {
+                if (match is TaskInstanceElement && match.parent.querySelectorAll(match.parent.child_element).length == 1) {
+                    match.next();
+                    return true;
+                } else if (match is EditableElement) {
                     match.start();
                     return true;
                 }
@@ -930,13 +936,6 @@ class TaskInstanceElement extends EditableElement {
 
     update_totals() {
         (parent as EditableElement).update_totals();
-    }
-
-    void start({bool focus: true}) {
-        super.start(focus: focus);
-        if(parent.querySelectorAll(parent.child_element).length == 1) {
-            this.previous();
-        }
     }
 }
 
