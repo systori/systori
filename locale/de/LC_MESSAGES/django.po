@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-11-19 18:30+0100\n"
+"POT-Creation-Date: 2015-11-20 11:43+0100\n"
 "PO-Revision-Date: 2015-07-11 15:41+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -34,7 +34,7 @@ msgstr "Menge"
 msgid "Received Date"
 msgstr "Erhalten am"
 
-#: systori/apps/accounting/forms.py:21 systori/apps/document/forms.py:91
+#: systori/apps/accounting/forms.py:21 systori/apps/document/forms.py:92
 #: systori/apps/task/models.py:91 systori/apps/task/models.py:92
 #: systori/templates/accounting/payment_form.html:16
 #: systori/templates/document/invoice_form.html:80
@@ -139,7 +139,7 @@ msgid "Phone"
 msgstr "Telefon"
 
 #: systori/apps/directory/models.py:16
-#: systori/templates/document/invoice_card.html:47
+#: systori/templates/document/invoice_card.html:48
 #: systori/templates/user/user_list.html:13
 msgid "Email"
 msgstr "eMail"
@@ -150,7 +150,7 @@ msgstr "Webseite"
 
 #: systori/apps/directory/models.py:19 systori/apps/project/forms.py:11
 #: systori/apps/project/models.py:308
-#: systori/templates/project/project_detail.html:347
+#: systori/templates/project/project_detail.html:354
 msgid "Address"
 msgstr "Adresse"
 
@@ -161,7 +161,7 @@ msgstr "PLZ"
 
 #: systori/apps/directory/models.py:21 systori/apps/project/forms.py:13
 #: systori/apps/project/models.py:309
-#: systori/templates/project/project_detail.html:348
+#: systori/templates/project/project_detail.html:355
 msgid "City"
 msgstr "Stadt"
 
@@ -174,7 +174,7 @@ msgid "auto-generate address label"
 msgstr "Adressfeld automatisch generieren."
 
 #: systori/apps/directory/models.py:25
-#: systori/templates/project/project_detail.html:314
+#: systori/templates/project/project_detail.html:321
 msgid "Address Label"
 msgstr "Adressfeld"
 
@@ -197,7 +197,7 @@ msgid "Contact"
 msgstr "Kontakt"
 
 #: systori/apps/directory/models.py:31
-#: systori/templates/project/project_detail.html:308
+#: systori/templates/project/project_detail.html:315
 #: systori/templates/project/sidebar.html:18
 msgid "Contacts"
 msgstr "Kontakte"
@@ -225,7 +225,7 @@ msgstr "Andere"
 #: systori/apps/directory/models.py:51
 #: systori/templates/directory/contact_detail.html:20
 #: systori/templates/directory/projectcontact_form_add.html:15
-#: systori/templates/project/project_detail.html:315
+#: systori/templates/project/project_detail.html:322
 msgid "Association"
 msgstr "Verknüpfung"
 
@@ -241,21 +241,21 @@ msgstr "Projektkontakt"
 msgid "Project Contacts"
 msgstr "Projektkontakte"
 
-#: systori/apps/document/forms.py:23 systori/apps/document/forms.py:63
+#: systori/apps/document/forms.py:24 systori/apps/document/forms.py:64
 msgid "Add Terms"
 msgstr "AGBs hinzufügen"
 
-#: systori/apps/document/forms.py:64
+#: systori/apps/document/forms.py:65
 msgid "Is Final Invoice?"
 msgstr "Schlussrechnung"
 
-#: systori/apps/document/forms.py:66
+#: systori/apps/document/forms.py:67
 msgid "Title"
 msgstr "Titel"
 
-#: systori/apps/document/forms.py:66 systori/apps/document/models.py:106
-#: systori/apps/document/models.py:129
-#: systori/apps/document/type/invoice.py:241
+#: systori/apps/document/forms.py:67 systori/apps/document/models.py:105
+#: systori/apps/document/models.py:128
+#: systori/apps/document/type/invoice.py:243
 #: systori/apps/document/type/letterhead.py:48
 #: systori/lib/accounting/models.py:125
 #: systori/templates/document/invoice_form.html:9
@@ -265,18 +265,18 @@ msgstr "Titel"
 msgid "Invoice"
 msgstr "Rechnung"
 
-#: systori/apps/document/forms.py:92
+#: systori/apps/document/forms.py:93
 #: systori/templates/document/invoice_form.html:82
 msgid "Flat"
-msgstr "Pauschal"
+msgstr "pauschal"
 
-#: systori/apps/document/forms.py:94
+#: systori/apps/document/forms.py:95
 #: systori/templates/accounting/account_detail.html:28
 #: systori/templates/project/transaction_editor.html:17
 msgid "Debit"
 msgstr "Soll"
 
-#: systori/apps/document/forms.py:113
+#: systori/apps/document/forms.py:114
 msgid "A comment is required for flat invoice."
 msgstr "Eine Anmerkung wird bei einer Pauschalrechnung benötigt."
 
@@ -291,7 +291,7 @@ msgstr "Briefpapier {}"
 #: systori/apps/document/models.py:18
 #: systori/apps/document/type/itemized_listing.py:93
 #: systori/templates/accounting/account_detail.html:26
-#: systori/templates/project/project_detail.html:269
+#: systori/templates/project/project_detail.html:276
 msgid "Date"
 msgstr "Datum"
 
@@ -307,7 +307,7 @@ msgstr "Lose"
 msgid "New"
 msgstr "Neu"
 
-#: systori/apps/document/models.py:42 systori/apps/document/models.py:87
+#: systori/apps/document/models.py:42 systori/apps/document/models.py:86
 msgid "Sent"
 msgstr "Gesendet"
 
@@ -331,7 +331,7 @@ msgstr "als beauftragt markieren"
 msgid "Decline"
 msgstr "als abgelehnt markieren"
 
-#: systori/apps/document/models.py:66 systori/apps/document/models.py:128
+#: systori/apps/document/models.py:66 systori/apps/document/models.py:127
 #: systori/apps/document/type/proposal.py:187
 #: systori/templates/main/templates.html:65
 #: systori/templates/main/templates.html:67
@@ -345,46 +345,46 @@ msgid "Proposals"
 msgstr "Angebote"
 
 #: systori/apps/document/models.py:74
-#: systori/apps/document/type/invoice.py:245
+#: systori/apps/document/type/invoice.py:247
 #: systori/apps/document/type/letterhead.py:51
 msgid "Invoice No."
 msgstr "Re-Nr."
 
-#: systori/apps/document/models.py:86 systori/apps/task/models.py:79
+#: systori/apps/document/models.py:85 systori/apps/task/models.py:79
 msgid "Draft"
 msgstr "Entwurf"
 
-#: systori/apps/document/models.py:88
+#: systori/apps/document/models.py:87
 msgid "Paid"
 msgstr ""
 
-#: systori/apps/document/models.py:93
+#: systori/apps/document/models.py:92
 msgid "Mark Sent"
 msgstr "Als versendet markieren"
 
-#: systori/apps/document/models.py:97
+#: systori/apps/document/models.py:96
 msgid "Mark Paid"
 msgstr ""
 
-#: systori/apps/document/models.py:107
+#: systori/apps/document/models.py:106
 #: systori/templates/project/project_detail.html:224
 #: systori/templates/project/sidebar.html:16
 msgid "Invoices"
 msgstr "Rechnungen"
 
-#: systori/apps/document/models.py:111
+#: systori/apps/document/models.py:110
 msgid "Mr"
 msgstr "Herr"
 
-#: systori/apps/document/models.py:112
+#: systori/apps/document/models.py:111
 msgid "John"
 msgstr "Max"
 
-#: systori/apps/document/models.py:113
+#: systori/apps/document/models.py:112
 msgid "Smith"
 msgstr "Mustermann"
 
-#: systori/apps/document/models.py:121 systori/apps/document/models.py:176
+#: systori/apps/document/models.py:120 systori/apps/document/models.py:175
 #: systori/apps/equipment/models.py:6 systori/apps/task/models.py:188
 #: systori/apps/task/models.py:267 systori/apps/task/models.py:366
 #: systori/apps/task/models.py:472 systori/lib/accounting/models.py:33
@@ -395,136 +395,136 @@ msgstr "Mustermann"
 #: systori/templates/main/templates.html:33
 #: systori/templates/main/templates.html:95
 #: systori/templates/project/project_detail.html:45
-#: systori/templates/project/project_detail.html:313
-#: systori/templates/project/project_detail.html:346
+#: systori/templates/project/project_detail.html:320
+#: systori/templates/project/project_detail.html:353
 #: systori/templates/project/project_list.html:63
 #: systori/templates/project/project_list.html:100
 #: systori/templates/user/user_list.html:12
 msgid "Name"
 msgstr "Name"
 
-#: systori/apps/document/models.py:122
+#: systori/apps/document/models.py:121
 #: systori/templates/document/documenttemplate_detail.html:10
 #: systori/templates/document/letterhead_detail.html:10
 msgid "Header"
 msgstr "Vortext"
 
-#: systori/apps/document/models.py:123
+#: systori/apps/document/models.py:122
 #: systori/templates/document/documenttemplate_detail.html:11
 #: systori/templates/document/letterhead_detail.html:11
 msgid "Footer"
 msgstr "Nachtext"
 
-#: systori/apps/document/models.py:131
+#: systori/apps/document/models.py:130
 msgid "Document Type"
 msgstr "Dokumententyp"
 
-#: systori/apps/document/models.py:135
+#: systori/apps/document/models.py:134
 msgid "Document Template"
 msgstr "Dokumentenvorlage"
 
-#: systori/apps/document/models.py:136
+#: systori/apps/document/models.py:135
 #: systori/templates/main/templates.html:29
 msgid "Document Templates"
 msgstr "Dokumentenvorlagen"
 
-#: systori/apps/document/models.py:148
+#: systori/apps/document/models.py:147
 msgid "salutation"
 msgstr "anrede"
 
-#: systori/apps/document/models.py:149
+#: systori/apps/document/models.py:148
 msgid "firstname"
 msgstr "vorname"
 
-#: systori/apps/document/models.py:150
+#: systori/apps/document/models.py:149
 msgid "lastname"
 msgstr "nachname"
 
-#: systori/apps/document/models.py:151
+#: systori/apps/document/models.py:150
 msgid "name"
 msgstr "name"
 
-#: systori/apps/document/models.py:179
+#: systori/apps/document/models.py:178
 msgid "Letterhead PDF"
 msgstr "Briefpapier PDF"
 
-#: systori/apps/document/models.py:189
+#: systori/apps/document/models.py:188
 msgid "Document Unit"
 msgstr "Dokumententyp"
 
-#: systori/apps/document/models.py:192
+#: systori/apps/document/models.py:191
 msgid "Top Margin"
 msgstr "Abstand Oben"
 
-#: systori/apps/document/models.py:193
+#: systori/apps/document/models.py:192
 msgid "Right Margin"
 msgstr "Abstand Rechts"
 
-#: systori/apps/document/models.py:194
+#: systori/apps/document/models.py:193
 msgid "Bottom Margin"
 msgstr "Abstand Unten"
 
-#: systori/apps/document/models.py:195
+#: systori/apps/document/models.py:194
 msgid "Left Margin"
 msgstr "Abstand Links"
 
-#: systori/apps/document/models.py:196
+#: systori/apps/document/models.py:195
 msgid "Top Margin Next"
 msgstr "Abstand Oben nächste Seite"
 
-#: systori/apps/document/models.py:207
+#: systori/apps/document/models.py:206
 msgid "A5"
 msgstr ""
 
-#: systori/apps/document/models.py:208
+#: systori/apps/document/models.py:207
 msgid "A4"
 msgstr ""
 
-#: systori/apps/document/models.py:209
+#: systori/apps/document/models.py:208
 msgid "A3"
 msgstr ""
 
-#: systori/apps/document/models.py:210
+#: systori/apps/document/models.py:209
 msgid "LETTER"
 msgstr ""
 
-#: systori/apps/document/models.py:211
+#: systori/apps/document/models.py:210
 msgid "LEGAL"
 msgstr ""
 
-#: systori/apps/document/models.py:212
+#: systori/apps/document/models.py:211
 msgid "ELEVENSEVENTEEN"
 msgstr ""
 
-#: systori/apps/document/models.py:213
+#: systori/apps/document/models.py:212
 msgid "B5"
 msgstr ""
 
-#: systori/apps/document/models.py:214
+#: systori/apps/document/models.py:213
 msgid "B4"
 msgstr ""
 
-#: systori/apps/document/models.py:216
+#: systori/apps/document/models.py:215
 msgid "Pagesize"
 msgstr "Seitengröße"
 
-#: systori/apps/document/models.py:222 systori/apps/document/type/style.py:159
+#: systori/apps/document/models.py:221 systori/apps/document/type/style.py:159
 msgid "Portrait"
 msgstr "Hochkant"
 
-#: systori/apps/document/models.py:223 systori/apps/document/type/style.py:160
+#: systori/apps/document/models.py:222 systori/apps/document/type/style.py:160
 msgid "Landscape"
 msgstr "Querformat"
 
-#: systori/apps/document/models.py:225
+#: systori/apps/document/models.py:224
 msgid "Orientation"
 msgstr "Format"
 
-#: systori/apps/document/models.py:228
+#: systori/apps/document/models.py:227
 msgid "Debug Mode"
 msgstr ""
 
-#: systori/apps/document/models.py:232 systori/apps/user/models.py:35
+#: systori/apps/document/models.py:231 systori/apps/user/models.py:35
 msgid "language"
 msgstr "Sprache"
 
@@ -607,18 +607,18 @@ msgid "Total including VAT"
 msgstr "Summe brutto"
 
 #: systori/apps/document/type/invoice.py:118
-#: systori/apps/document/type/invoice.py:186
+#: systori/apps/document/type/invoice.py:187
 #: systori/apps/document/type/itemized_listing.py:40
 msgid "consideration"
 msgstr "Nettosumme"
 
 #: systori/apps/document/type/invoice.py:118
-#: systori/apps/document/type/invoice.py:186
+#: systori/apps/document/type/invoice.py:187
 msgid "tax"
 msgstr "MWSt"
 
 #: systori/apps/document/type/invoice.py:118
-#: systori/apps/document/type/invoice.py:186
+#: systori/apps/document/type/invoice.py:187
 msgid "gross"
 msgstr "Bruttosumme"
 
@@ -628,7 +628,7 @@ msgstr "Saldo"
 
 #: systori/apps/document/type/invoice.py:128
 #: systori/lib/accounting/models.py:127 systori/lib/accounting/models.py:210
-#: systori/templates/project/project_detail.html:270
+#: systori/templates/project/project_detail.html:277
 msgid "Payment"
 msgstr "Zahlung"
 
@@ -642,13 +642,13 @@ msgid "Final Invoice"
 msgstr "Schlussrechnung"
 
 #: systori/apps/document/type/invoice.py:134
-#: systori/apps/document/type/invoice.py:211
+#: systori/apps/document/type/invoice.py:212
 msgid "This Invoice"
 msgstr "Zahlbetrag"
 
 #: systori/apps/document/type/invoice.py:150
 #: systori/lib/accounting/models.py:211
-#: systori/templates/project/project_detail.html:272
+#: systori/templates/project/project_detail.html:279
 msgid "Discount"
 msgstr "Skonto"
 
@@ -656,29 +656,30 @@ msgstr "Skonto"
 msgid "Please Pay"
 msgstr "Zahlbetrag"
 
-#: systori/apps/document/type/invoice.py:189
+#: systori/apps/document/type/invoice.py:190
 msgid "Project progress"
 msgstr "Leistungsstand"
 
-#: systori/apps/document/type/invoice.py:199
+#: systori/apps/document/type/invoice.py:200
+#, python-brace-format
 msgid "Payment on {date}"
 msgstr "Zahlung vom {date}"
 
-#: systori/apps/document/type/invoice.py:203
+#: systori/apps/document/type/invoice.py:204
 msgid "  Discount applied"
 msgstr "Skonto angewendet"
 
-#: systori/apps/document/type/invoice.py:208
+#: systori/apps/document/type/invoice.py:209
 #, python-brace-format
 msgid "{invoice} from {date}"
 msgstr "{invoice} vom {date}"
 
-#: systori/apps/document/type/invoice.py:246
+#: systori/apps/document/type/invoice.py:248
 #: systori/apps/document/type/letterhead.py:52
 msgid "Please indicate the correct invoice number on your payment."
 msgstr "Bitte verwenden Sie diese Nr. bei der Zahlung."
 
-#: systori/apps/document/type/invoice.py:263
+#: systori/apps/document/type/invoice.py:265
 msgid "Itemized listing for Invoice No. {}"
 msgstr "Einzelaufstellung für Rechnung Nr. {}"
 
@@ -853,12 +854,12 @@ msgid "Site Name"
 msgstr "Vorname"
 
 #: systori/apps/project/models.py:313
-#: systori/templates/project/project_detail.html:349
+#: systori/templates/project/project_detail.html:356
 msgid "Latitude"
 msgstr "Breitengrad"
 
 #: systori/apps/project/models.py:314
-#: systori/templates/project/project_detail.html:349
+#: systori/templates/project/project_detail.html:356
 msgid "Longitude"
 msgstr "Längengrad"
 
@@ -956,7 +957,7 @@ msgid "correction"
 msgstr "Korrektur"
 
 #: systori/apps/task/models.py:481
-#: systori/templates/project/project_detail.html:316
+#: systori/templates/project/project_detail.html:323
 msgid "Billable"
 msgstr "Abrechenbar"
 
@@ -1194,9 +1195,9 @@ msgstr "Saldo"
 #: systori/templates/main/templates.html:96
 #: systori/templates/project/project_detail.html:51
 #: systori/templates/project/project_detail.html:115
-#: systori/templates/project/project_detail.html:274
-#: systori/templates/project/project_detail.html:317
-#: systori/templates/project/project_detail.html:350
+#: systori/templates/project/project_detail.html:281
+#: systori/templates/project/project_detail.html:324
+#: systori/templates/project/project_detail.html:357
 #: systori/templates/project/project_list.html:65
 #: systori/templates/project/project_list.html:102
 #: systori/templates/user/user_list.html:15
@@ -1205,7 +1206,7 @@ msgstr "Aktionen"
 
 #: systori/templates/accounting/account_list.html:24
 #: systori/templates/accounting/account_list.html:54
-#: systori/templates/document/invoice_card.html:38
+#: systori/templates/document/invoice_card.html:39
 #: systori/templates/equipment/equipment_list.html:22
 #: systori/templates/main/templates.html:20
 #: systori/templates/main/templates.html:44
@@ -1213,7 +1214,7 @@ msgstr "Aktionen"
 #: systori/templates/main/templates.html:104
 #: systori/templates/project/project_detail.html:82
 #: systori/templates/project/project_detail.html:152
-#: systori/templates/project/project_detail.html:363
+#: systori/templates/project/project_detail.html:370
 #: systori/templates/project/project_list.html:81
 #: systori/templates/project/project_list.html:132
 #: systori/templates/user/user_list.html:33
@@ -1229,8 +1230,8 @@ msgstr "Bearbeiten"
 #: systori/templates/main/templates.html:105
 #: systori/templates/project/project_detail.html:83
 #: systori/templates/project/project_detail.html:151
-#: systori/templates/project/project_detail.html:288
-#: systori/templates/project/project_detail.html:365
+#: systori/templates/project/project_detail.html:295
+#: systori/templates/project/project_detail.html:372
 #: systori/templates/project/project_list.html:82
 #: systori/templates/project/project_list.html:133
 #: systori/templates/user/user_list.html:34
@@ -1240,7 +1241,7 @@ msgstr "Löschen"
 #: systori/templates/accounting/account_list.html:33
 #: systori/templates/directory/projectcontact_form_add.html:30
 #: systori/templates/field/planning.html:59
-#: systori/templates/project/project_detail.html:338
+#: systori/templates/project/project_detail.html:345
 #: systori/templates/user/user_list.html:7
 msgid "Add"
 msgstr "Hinzufügen"
@@ -1300,7 +1301,7 @@ msgstr "Adressbuch"
 #: systori/templates/main/templates.html:111
 #: systori/templates/project/project_detail.html:101
 #: systori/templates/project/project_detail.html:160
-#: systori/templates/project/project_detail.html:373
+#: systori/templates/project/project_detail.html:380
 #: systori/templates/project/project_list.html:28
 msgid "Create"
 msgstr "Erstellen"
@@ -1338,12 +1339,12 @@ msgstr "Netto"
 msgid "Gross"
 msgstr "Summe"
 
-#: systori/templates/document/invoice_card.html:41
+#: systori/templates/document/invoice_card.html:42
 #: systori/templates/project/project_detail.html:133
 msgid "PDF"
 msgstr "PDF"
 
-#: systori/templates/document/invoice_card.html:48
+#: systori/templates/document/invoice_card.html:49
 msgid "Print"
 msgstr "Druck"
 
@@ -1368,19 +1369,19 @@ msgstr "Summe"
 
 #: systori/templates/document/invoice_form.html:81
 msgid "Estimate"
-msgstr "Aufmaß"
+msgstr "angeboten"
 
 #: systori/templates/document/invoice_form.html:83
 msgid "Itemized"
-msgstr "Einzelaufstellung"
+msgstr "Aufmaß"
 
 #: systori/templates/document/invoice_form.html:84
 msgid "New Debit"
-msgstr "Soll"
+msgstr "abrechenbar"
 
 #: systori/templates/document/invoice_form.html:85
 msgid "Billed"
-msgstr "Abrechenbar"
+msgstr "abgerechnet"
 
 #: systori/templates/document/letterhead_form.html:31
 msgid "No Letterhead available."
@@ -1475,7 +1476,7 @@ msgid "You have not been assigned to any job sites today."
 msgstr "Du bist noch keinem Einsatzort zugeteilt."
 
 #: systori/templates/field/jobsite_list.html:19
-#: systori/templates/project/project_detail.html:341
+#: systori/templates/project/project_detail.html:348
 msgid "Job Sites"
 msgstr "Einsatzorte"
 
@@ -1721,15 +1722,16 @@ msgid "No jobs available for new proposal."
 msgstr "Keine Positionen verfügbar."
 
 #: systori/templates/project/project_detail.html:164
-#: systori/templates/project/project_detail.html:226
+#: systori/templates/project/project_detail.html:242
+#: systori/templates/project/project_detail.html:256
 msgid "No billable contact defined."
 msgstr "Kein Kontakt für eine Abrechnung definiert."
 
-#: systori/templates/project/project_detail.html:236
+#: systori/templates/project/project_detail.html:235
 msgid "Create next invoice in this sequence."
 msgstr "Neue Rechnung in dieser Folge erstellen."
 
-#: systori/templates/project/project_detail.html:239
+#: systori/templates/project/project_detail.html:238
 msgid ""
 "Last invoice in sequence must be marked as sent before a new one can be "
 "created."
@@ -1737,33 +1739,33 @@ msgstr ""
 "Bevor eine neue Rechnung erstellt werden kann, muss die vorherige als "
 "versendet markiert werden."
 
-#: systori/templates/project/project_detail.html:248
+#: systori/templates/project/project_detail.html:252
 msgid "Start new invoice sequence."
 msgstr "Starte eine neue Rechnungsfolge."
 
-#: systori/templates/project/project_detail.html:265
+#: systori/templates/project/project_detail.html:272
 msgid "Payments"
 msgstr "Zahlung"
 
 # msgid "Payment"
 # msgstr "Gesamtzahlung"
-#: systori/templates/project/project_detail.html:271
+#: systori/templates/project/project_detail.html:278
 msgid "Applied"
 msgstr "Anteil"
 
-#: systori/templates/project/project_detail.html:273
+#: systori/templates/project/project_detail.html:280
 msgid "Total Credit"
 msgstr "Summe"
 
-#: systori/templates/project/project_detail.html:305
+#: systori/templates/project/project_detail.html:312
 msgid "Add Payment"
 msgstr "Zahlung hinzufügen"
 
-#: systori/templates/project/project_detail.html:330
+#: systori/templates/project/project_detail.html:337
 msgid "Set Billable"
 msgstr "Abrechenbar setzen"
 
-#: systori/templates/project/project_detail.html:331
+#: systori/templates/project/project_detail.html:338
 msgid "Remove"
 msgstr "Entfernen"
 
@@ -1820,11 +1822,11 @@ msgstr "Ist Zahlung?"
 msgid "Is Discount?"
 msgstr "Wurde Skonto gezogen?"
 
-#: systori/templates/task/editor.html:358
+#: systori/templates/task/editor.html:362
 msgid "Stops indenting at the tasks level."
 msgstr "Nur Positionen erstellen."
 
-#: systori/templates/task/editor.html:362
+#: systori/templates/task/editor.html:366
 msgid "Stops indenting at line items level."
 msgstr "Positionen mit Kalkulation erstellen."
 
