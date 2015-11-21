@@ -14,8 +14,8 @@ from systori.apps.accounting.constants import TAX_RATE
 from systori.lib.templatetags.customformatting import money
 
 from .style import SystoriDocument, stylesheet, TableFormatter, ContinuationTable
-from .style import LetterheadCanvasWithoutFirstPage
-from .style import DOCUMENT_FORMAT, DOCUMENT_UNIT
+from .style import LetterheadCanvasWithoutFirstPage, NumberedCanvas
+from .style import calculate_table_width_and_pagesize
 from .invoice import collate_tasks, collate_tasks_total, serialize
 
 from systori.apps.document.models import DocumentSettings
@@ -66,18 +66,8 @@ def render(project, format):
 
     letterhead = DocumentSettings.objects.first().itemized_letterhead
 
-    def canvas_maker(*args, **kwargs):
-        return LetterheadCanvasWithoutFirstPage(letterhead.letterhead_pdf, *args, **kwargs)
-
     with BytesIO() as buffer:
-        document_unit = DOCUMENT_UNIT[letterhead.document_unit]
-        if letterhead.orientation == 'landscape':
-            pagesize = landscape(DOCUMENT_FORMAT[letterhead.document_format])
-        else:
-            pagesize = DOCUMENT_FORMAT[letterhead.document_format]
-        page_width = pagesize[0]
-        table_width = page_width - float(letterhead.right_margin)*document_unit\
-                                 - float(letterhead.left_margin)*document_unit
+        table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
 
         today = date_format(date.today(), use_l10n=True)
 
@@ -103,12 +93,12 @@ def render(project, format):
             Spacer(0, 4*mm),
 
             collate_tasks_total(itemized_listing, table_width),
-            ]
+
+        ]
 
         if format == 'print':
-            doc.build(flowables, letterhead=letterhead)
+            doc.build(flowables, NumberedCanvas, letterhead)
         else:
-            doc.build(flowables, letterhead=letterhead, canvasmaker=canvas_maker)
-
+            doc.build(flowables, LetterheadCanvasWithoutFirstPage.factory(letterhead), letterhead)
 
         return buffer.getvalue()

@@ -15,8 +15,6 @@ from decimal import Decimal
 from datetime import date
 
 from reportlab.lib.units import mm
-from reportlab.lib.utils import simpleSplit
-from reportlab.lib.pagesizes import landscape
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
@@ -30,10 +28,9 @@ from systori.apps.accounting.utils import get_transactions_for_jobs
 from systori.apps.accounting.constants import TAX_RATE
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b
-from .style import LetterheadCanvas
-from .style import DOCUMENT_FORMAT, DOCUMENT_UNIT
+from .style import LetterheadCanvas, NumberedCanvas
+from .style import calculate_table_width_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
-from .utils import update_instance
 from . import font
 
 
@@ -216,24 +213,22 @@ def collate_payments(invoice, available_width):
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
+def has_itemized_debit(debits):
+    for debit in debits:
+        if not debit['is_flat']:
+            return True
+
+
 def render(invoice, letterhead, format):
 
-    def canvas_maker(*args, **kwargs):
-        return LetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
-
     with BytesIO() as buffer:
-        document_unit = DOCUMENT_UNIT[letterhead.document_unit]
-        if letterhead.orientation == 'landscape':
-            pagesize = landscape(DOCUMENT_FORMAT[letterhead.document_format])
-        else:
-            pagesize = DOCUMENT_FORMAT[letterhead.document_format]
-        page_width = pagesize[0]
-        table_width = page_width - float(letterhead.right_margin)*document_unit\
-                                 - float(letterhead.left_margin)*document_unit
+
+        table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
 
         invoice_date = date_format(date(*map(int, invoice['date'].split('-'))), use_l10n=True)
 
         doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
+
         flowables = [
 
             get_address_label(invoice),
@@ -256,7 +251,13 @@ def render(invoice, letterhead, format):
 
             Spacer(0, 4*mm),
 
-            KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal'])),
+            KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal']))
+
+        ]
+
+        if has_itemized_debit(invoice['debits']):
+
+            flowables += [
 
             PageBreak(),
 
@@ -272,13 +273,12 @@ def render(invoice, letterhead, format):
 
             collate_tasks_total(invoice, table_width),
 
-        ]
+            ]
 
         if format == 'print':
-            doc.build(flowables, letterhead=letterhead)
+            doc.build(flowables, NumberedCanvas, letterhead)
         else:
-            doc.build(flowables, canvasmaker=canvas_maker, letterhead=letterhead)
-
+            doc.build(flowables, LetterheadCanvas.factory(letterhead), letterhead)
 
         return buffer.getvalue()
 
