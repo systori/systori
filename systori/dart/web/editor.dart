@@ -969,6 +969,7 @@ class LineItemElement extends EditableElement {
     void handle_delete_key(event) {
         var saved_parent = this.parent;
         super.handle_delete_key(event);
+        saved_parent.update_totals();
         
         if (event.shiftKey && saved_parent.can_delete() && saved_parent.classes.contains('empty')) {
             saved_parent.delete();
