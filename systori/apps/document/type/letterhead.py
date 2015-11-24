@@ -1,9 +1,6 @@
-lorem_100 = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.<br></br>At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.<br></br>"
-
 from io import BytesIO
 from datetime import date
 
-from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import mm
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
@@ -13,23 +10,13 @@ from django.utils.translation import ugettext as _
 
 from .style import stylesheet, LetterheadCanvas, SystoriDocument
 from .style import force_break, heading_and_date
-from .style import DOCUMENT_FORMAT, DOCUMENT_UNIT
+from .style import calculate_table_width_and_pagesize
 
 
 def render(letterhead):
-    document_unit = DOCUMENT_UNIT[letterhead.document_unit]
-    if letterhead.orientation == 'landscape':
-        pagesize = landscape(DOCUMENT_FORMAT[letterhead.document_format])
-    else:
-        pagesize = DOCUMENT_FORMAT[letterhead.document_format]
-    page_width = pagesize[0]
-    table_width = page_width - float(letterhead.right_margin)*document_unit\
-                             - float(letterhead.left_margin)*document_unit
+    table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
 
     invoice_date = date_format(date(*map(int, '2016-01-31'.split('-'))), use_l10n=True)
-
-    def canvas_maker(*args, **kwargs):
-        return LetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
 
     with BytesIO() as buffer:
 
@@ -59,6 +46,8 @@ def render(letterhead):
             Paragraph(force_break(lorem_100*17), stylesheet['Normal']),
             ])
 
-        doc.build(flowables, canvasmaker=canvas_maker, letterhead=letterhead)
+        doc.build(flowables, LetterheadCanvas.factory(letterhead), letterhead)
 
         return buffer.getvalue()
+
+lorem_100 = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.<br></br>At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.<br></br>"

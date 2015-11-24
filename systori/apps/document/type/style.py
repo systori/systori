@@ -1,3 +1,4 @@
+from decimal import Decimal
 from . import font
 
 from reportlab.lib.styles import StyleSheet1, ParagraphStyle
@@ -128,38 +129,21 @@ from django.utils.translation import ugettext as _
 from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
 
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.lib.pagesizes import A5, A4, A3, LETTER, LEGAL, ELEVENSEVENTEEN, B5, B4
 
 from reportlab.platypus import BaseDocTemplate, PageTemplate
 from reportlab.platypus import Frame, Paragraph, Table, Spacer
 from reportlab.pdfgen import canvas
-from reportlab.lib.units import mm, cm, inch
-from reportlab.lib import colors
+from reportlab.lib.units import mm
+from reportlab.lib import colors, pagesizes, units
 
-DOCUMENT_UNIT = {
-    "mm": mm,
-    "cm": cm,
-    "inch": inch
-}
 
-DOCUMENT_FORMAT = {
-    "A5" : A5,
-    "A4" : A4,
-    "A3" : A3,
-    "LETTER" : LETTER,
-    "LEGAL" : LEGAL,
-    "ELEVENSEVENTEEN" : ELEVENSEVENTEEN,
-    "B5" : B5,
-    "B4" : B4,
-}
-
-PORTRAIT = "portrait"
-LANDSCAPE = "landscape"
-ORIENTATION = {
-    PORTRAIT : _("Portrait"),
-    LANDSCAPE : _("Landscape"),
-}
-
+def calculate_table_width_and_pagesize(letterhead):
+    document_unit = getattr(units, letterhead.document_unit)
+    pagesize = getattr(pagesizes, letterhead.document_format)
+    if letterhead.orientation == 'landscape':
+        pagesize = pagesizes.landscape(pagesize)
+    margin = letterhead.left_margin + letterhead.right_margin
+    return pagesize[0] - float(margin) * document_unit, pagesize
 
 
 def chunk_text(txt, max_length=1500):
@@ -216,10 +200,9 @@ class StationaryCanvas(canvas.Canvas):
     stationary_pages = None
 
     def __init__(self, *args, **kwargs):
-        super(StationaryCanvas, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         cover_pdf = os.path.join(settings.MEDIA_ROOT, self.stationary_pages.name)
         cover_pdf = open_and_read(cover_pdf)
-
         self.page_info_page1, self.page_content = storeFormsInMemory(cover_pdf, all=True)
         restoreFormsInMemory(self.page_content, self)
 
@@ -233,56 +216,64 @@ class StationaryCanvas(canvas.Canvas):
 
 class NumberedCanvas(canvas.Canvas):
 
-    def __init__(self, *args, **kwargs):
-        super(NumberedCanvas, self).__init__(*args, **kwargs)
+    def __init__(self, *args, page_number_x, page_number_y, **kwargs):
+        super().__init__(*args, **kwargs)
         self._saved_page_states = []
+        self.page_number_x = page_number_x
+        self.page_number_y = page_number_y
 
     def showPage(self):
+        """ Instead of 'showing' the page we save the render state for later. """
         self._saved_page_states.append(dict(self.__dict__))
         self._startPage()
 
     def save(self):
-        """add page info to each page (page x of y)"""
+        """ Now that we know how many pages there are we can render all of them. """
         num_pages = len(self._saved_page_states)
         for state in self._saved_page_states:
             self.__dict__.update(state)
             self.draw_page_number(num_pages)
-            canvas.Canvas.showPage(self)
-        canvas.Canvas.save(self)
+            super().showPage()
+        super().save()
 
     def draw_page_number(self, page_count):
         self.setFont(font.normal, 10)
-        # dynamically positioning based on frame dimensions. string is placed underneath the frame aligned right.
-        self.drawRightString(self._doctemplate.frame._x1 + self._doctemplate.frame._aW,
-                             self._doctemplate.frame._y1 - 25,
-                             '{} {} {} {}'.format(_("Page"), self._pageNumber, _("of"), page_count))
+        self.drawRightString(self.page_number_x, self.page_number_y,
+                             _("Page {} of {}").format(self._pageNumber, page_count))
 
 
 class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
 
     def __init__(self, letterhead_pdf, *args, **kwargs):
         self.stationary_pages = letterhead_pdf
-        super(LetterheadCanvas, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def factory(letterhead):
+        return lambda *args, **kwargs: LetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
 
 
 class LetterheadCanvasWithoutFirstPage(StationaryCanvas, NumberedCanvas):
 
     def __init__(self, letterhead_pdf, *args, **kwargs):
         self.stationary_pages = letterhead_pdf
-        super(LetterheadCanvasWithoutFirstPage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def factory(letterhead):
+        return lambda *args, **kwargs: LetterheadCanvasWithoutFirstPage(letterhead.letterhead_pdf, *args, **kwargs)
 
 
 class SystoriDocument(BaseDocTemplate):
 
     def __init__(self, buffer, pagesize, debug=False):
-        super(SystoriDocument, self).__init__(buffer,
-                                              pagesize=pagesize,
-                                              topMargin=0,
-                                              bottomMargin=0,
-                                              leftMargin=0,
-                                              rightMargin=0,
-                                              showBoundary=debug
-                                              )
+        super().__init__(buffer,
+                         pagesize=pagesize,
+                         topMargin=0,
+                         bottomMargin=0,
+                         leftMargin=0,
+                         rightMargin=0,
+                         showBoundary=debug)
 
     def onFirstPage(self, canvas, document):
         pass
@@ -294,34 +285,39 @@ class SystoriDocument(BaseDocTemplate):
         self._handle_pageBegin()
         self._handle_nextPageTemplate('Later')
 
-    def build(self, flowables, letterhead, canvasmaker=NumberedCanvas):
-        document_unit = DOCUMENT_UNIT[letterhead.document_unit]
+    def build(self, flowables, canvasmaker=NumberedCanvas, letterhead=None):
         self._calc()
 
+        if letterhead:
+            document_unit = getattr(units, letterhead.document_unit)
+            frame_x = float(letterhead.left_margin) * document_unit
+            frame_y = float(letterhead.bottom_margin) * document_unit
+            frame_width = self.width - float(letterhead.left_margin+letterhead.right_margin) * document_unit
+            frame_height_first = self.height-float(letterhead.top_margin+letterhead.bottom_margin)*document_unit
+            frame_height_later = self.height-float(letterhead.top_margin_next+letterhead.bottom_margin)*document_unit
+            padding = dict.fromkeys(['leftPadding', 'bottomPadding', 'rightPadding', 'topPadding'], 0)
+        else:
+            frame_x = 25
+            frame_y = 25
+            frame_width = self.width - 50
+            frame_height_first = frame_height_later = self.height - 50
+            padding = dict.fromkeys(['leftPadding', 'bottomPadding', 'rightPadding', 'topPadding'], 6)
+
         # Frame(x, y, width, height, padding...)
-        frame = Frame(float(letterhead.left_margin)*document_unit,
-                      float(letterhead.bottom_margin)*document_unit,
-                      self.width - float(letterhead.right_margin)*document_unit
-                                 - float(letterhead.left_margin)*document_unit,
-                      self.height - float(letterhead.top_margin)*document_unit
-                                  - float(letterhead.bottom_margin)*document_unit,
-                      leftPadding=0, bottomPadding=0,
-                      rightPadding=0, topPadding=0)
-        frame_later = Frame(float(letterhead.left_margin)*document_unit,
-                            float(letterhead.bottom_margin)*document_unit,
-                            self.width - float(letterhead.right_margin)*document_unit
-                                       - float(letterhead.left_margin)*document_unit,
-                            self.height - float(letterhead.top_margin_next)*document_unit
-                                        - float(letterhead.bottom_margin)*document_unit,
-                            leftPadding=0, bottomPadding=0,
-                            rightPadding=0, topPadding=0)
+        frame_first = Frame(frame_x, frame_y, frame_width, frame_height_first, **padding)
+        frame_later = Frame(frame_x, frame_y, frame_width, frame_height_later, **padding)
 
         self.addPageTemplates([
-            PageTemplate(id='First', frames=frame, onPage=self.onFirstPage, pagesize=self.pagesize,
-                         autoNextPageTemplate=True),
+            PageTemplate(id='First', frames=frame_first, onPage=self.onFirstPage, pagesize=self.pagesize, autoNextPageTemplate=True),
             PageTemplate(id='Later', frames=frame_later, onPage=self.onLaterPages, pagesize=self.pagesize)
         ])
-        super(SystoriDocument, self).build(flowables, canvasmaker=canvasmaker)
+
+        def page_number_canvas_maker(*args, **kwargs):
+            kwargs['page_number_x'] = frame_x + frame_width
+            kwargs['page_number_y'] = frame_y - 25
+            return canvasmaker(*args, **kwargs)
+
+        super().build(flowables, canvasmaker=page_number_canvas_maker)
 
 
 class ContinuationTable(Table):

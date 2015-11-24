@@ -937,6 +937,10 @@ class TaskInstanceElement extends EditableElement {
     update_totals() {
         (parent as EditableElement).update_totals();
     }
+
+    bool can_delete() {
+        return this.parent.querySelectorAll(this.parent.child_element).length > 1;
+    }
 }
 
 class LineItemElement extends EditableElement {
@@ -968,9 +972,10 @@ class LineItemElement extends EditableElement {
 
     void handle_delete_key(event) {
         var saved_parent = this.parent;
-
         super.handle_delete_key(event);
-        if (saved_parent.can_delete()) {
+        saved_parent.update_totals();
+
+        if (event.shiftKey && saved_parent.can_delete() && saved_parent.classes.contains('empty')) {
             saved_parent.delete();
             saved_parent.remove();
         }

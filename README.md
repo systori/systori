@@ -22,13 +22,13 @@ You will need PostgreSQL, Python3 and some other tools installed with apt-get:
 ```
 $ sudo apt-get install\
  postgresql postgresql-contrib postgresql-server-dev-all\
- python-pip python-dev python3-dev python3-lxml
-$ sudo apt-get build-dep python3-lxml mercurial
+ python-pip python-dev python3-dev python3-lxml mercurial libjpeg-dev
+$ sudo apt-get build-dep python3-lxml
 $ sudo pip install --upgrade fabric virtualenvwrapper
 $ source /usr/local/bin/virtualenvwrapper.sh
 $ echo "source /usr/local/bin/virtualenvwrapper.sh" > ~/.bashrc
 
-$ # install needed locales
+$ sudo apt-get install language-pack-de
 ```
 
 Create a database user; when the databse user name matches your linux user name this allows `psql` and other tools to automatically authenticate you:
