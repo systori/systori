@@ -160,6 +160,10 @@ class Job(models.Model):
         return self._total_calc('billable')
 
     @property
+    def complete_percent(self):
+        return self.billable_total / self.estimate_total * 100
+
+    @property
     def code(self):
         return str(self.job_code).zfill(self.project.job_zfill)
 

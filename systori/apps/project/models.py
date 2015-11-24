@@ -298,6 +298,10 @@ class Project(models.Model):
             amount += job.account.balance_tax
         return amount
 
+    @property
+    def complete_percent(self):
+        return self.billable_total / self.estimate_total * 100
+
 
 class JobSite(models.Model):
     """ A project can have one or more job sites. """

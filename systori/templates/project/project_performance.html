@@ -1,0 +1,139 @@
+{% extends "project.html" %}
+{% load i18n l10n customformatting project %}
+
+{% block sidebar %}
+  <br>
+  <dl class="dl-horizontal">
+    <h4>{% trans 'Project' %}</h4>
+    <table class="table">
+    <tr>
+      <td>{% trans 'offered' %}</td>
+      <td>{{ project.estimate_total|money }}</td>
+    </tr>
+    <tr>
+      <td>{% trans 'billed' %}</td>
+      <td>{{ project.billable_total|money }}</td>
+    </tr>
+    <tr>
+      <td>{% trans 'percent' %}</td>
+      <td>{{ project.complete_percent|ubrdecimal }} %</td>
+    </tr>
+    </table>
+  </dl><br>
+  <dl class="dl-horizontal">
+  {% for job in project.jobs.all %}
+
+        <h6>{{ job.name }}</h6>
+        <table class="table">
+        <tr>
+          <td>{% trans 'offered' %}</td>
+          <td>{{ job.estimate_total|money }}</td>
+        </tr>
+        <tr>
+          <td>{% trans 'billed' %}</td>
+          <td>{{ job.billable_total|money }}</td>
+        </tr>
+        <tr>
+          <td>{% trans 'percent' %}</td>
+          <td>{{ job.complete_percent|ubrdecimal }} %</td>
+        </tr>
+        </table>
+  {% endfor %}
+  </dl>
+{% endblock %}
+
+{% block content %}
+<style>
+
+</style>
+
+<table class="table">
+    <thead>
+        <th>
+            {% trans 'code' %}
+        </th>
+        <th>
+            {% trans 'name' %}
+        </th>
+        <th>
+            {% trans 'offered' %}
+        </th>
+        <th>
+            {% trans 'completed' %}
+        </th>
+        <th>
+            {% trans 'unit' %}
+        </th>
+        <th>
+            {% trans 'unit price' %}
+        </th>
+        <th>
+            {% trans 'sum' %}
+        </th>
+        <th>
+            {% trans 'percent' %}
+        </th>
+    </thead>
+    <tbody>
+    {% for job in project.jobs.all %}
+        <tr style="background-color:rgb(170, 190, 230);">
+            <td>
+                {{ job.code }}
+            </td>
+            <td colspan="2">
+                {{ job.name }}
+            </td>
+            <td colspan="5">
+                {{ job.description|truncatechars:60 }}
+            </td>
+        <tr><td colspan="8"></td></tr>
+        {% for taskgroup in job.taskgroups.all %}
+            <tr style="background-color:rgb(150, 200, 150);">
+                <td>
+                    {{ taskgroup.code }}
+                </td>
+                <td colspan="2">
+                    {{ taskgroup.name }}
+                </td>
+                <td colspan="5">
+                    {{ taskgroup.description|truncatechars:60 }}
+                </td>
+            </tr>
+            <tr><td colspan="5"></td></tr>
+            {% for task in taskgroup.tasks.all %}
+            <tr>
+                <td>
+                    {{ task.code }}
+                </td>
+                <td>
+                    {{ task.name|truncatechars:40 }}
+                </td>
+                <td>
+                    {{ task.qty|ubrdecimal }}
+                </td>
+                <td>
+                    <b>{{ task.complete|ubrdecimal }}</b>
+                </td>
+                <td>
+                    {{ task.unit }}
+                </td>
+                <td>
+                    {{ task.unit_price|ubrdecimal:3 }}
+                </td>
+                <td>
+                    {{ task.fixed_price_billable|ubrdecimal:3 }}
+                </td>
+                <td>
+                    {{ task.complete_percent }} %
+                </td>
+            </tr>
+            <tr><td colspan="8"></td></tr>
+            {% endfor %}
+            <tr style="font-weight: bold;"><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ taskgroup.code }} - {% trans 'total' %}</td><td colspan="2">{{ taskgroup.billable_total|ubrdecimal }}</td></tr>
+        {% endfor %}
+        <tr style="font-weight: bold;"><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ job.code }} - {% trans 'total' %}</td><td colspan="2">{{ job.billable_total|ubrdecimal }}</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

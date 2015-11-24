@@ -217,6 +217,15 @@ class ProjectPlanning(DetailView):
         return context
 
 
+class ProjectPerformance(DetailView):
+    model = Project
+    template_name = 'project/project_performance.html'
+
+    def get_queryset(self):
+        queryset = super(ProjectPerformance, self).get_queryset()
+        return queryset.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
+
+
 class ProjectManualPhaseTransition(SingleObjectMixin, View):
     model = Project
 
