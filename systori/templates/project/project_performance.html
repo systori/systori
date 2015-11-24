@@ -76,7 +76,7 @@
     </thead>
     <tbody>
     {% for job in project.jobs.all %}
-        <tr style="background-color:rgb(170, 190, 230);">
+        <tr style="background-color:#428bca; color:#eee;">
             <td>
                 {{ job.code }}
             </td>
@@ -88,7 +88,7 @@
             </td>
         <tr><td colspan="8"></td></tr>
         {% for taskgroup in job.taskgroups.all %}
-            <tr style="background-color:rgb(150, 200, 150);">
+            <tr style="background-color:rgb(86, 144, 107);color:white;">
                 <td>
                     {{ taskgroup.code }}
                 </td>
