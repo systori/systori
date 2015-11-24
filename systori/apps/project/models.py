@@ -300,7 +300,7 @@ class Project(models.Model):
 
     @property
     def complete_percent(self):
-        return self.billable_total / self.estimate_total * 100
+        return round(self.billable_total / self.estimate_total * 100) if self.estimate_total else 0
 
 
 class JobSite(models.Model):

@@ -217,12 +217,12 @@ class ProjectPlanning(DetailView):
         return context
 
 
-class ProjectPerformance(DetailView):
+class ProjectProgress(DetailView):
     model = Project
-    template_name = 'project/project_performance.html'
+    template_name = 'project/project_progress.html'
 
     def get_queryset(self):
-        queryset = super(ProjectPerformance, self).get_queryset()
+        queryset = super(ProjectProgress, self).get_queryset()
         return queryset.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
 
 

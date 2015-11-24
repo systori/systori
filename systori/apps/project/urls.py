@@ -25,5 +25,5 @@ urlpatterns = [
 
     url(r'^project-(?P<project_pk>\d+)/transactions$', office_auth(TransactionEditor.as_view()), name='project.transactions'),
 
-    url(r'^project-(?P<pk>\d+)/performance$', office_auth(ProjectPerformance.as_view()), name='project.performance'),
+    url(r'^project-(?P<pk>\d+)/progress', office_auth(ProjectProgress.as_view()), name='project.progress'),
 ]
