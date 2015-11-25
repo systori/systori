@@ -6,7 +6,7 @@ from django.test import TestCase, Client
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
-from ..accounting.test_skr03 import create_data
+from ..accounting.test_accounting import create_data
 from ..accounting.skr03 import partial_credit, partial_debit
 from ..directory.models import Contact, ProjectContact
 from .models import Proposal, Invoice, Letterhead

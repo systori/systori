@@ -7,7 +7,7 @@ from django.forms import Form, ModelForm, ValidationError
 from django import forms
 from systori.lib.fields import LocalizedDecimalField
 from ..task.models import Job
-from .skr03 import Account, partial_credit
+from .skr03 import Account, credit_jobs
 from .constants import BANK_CODE_RANGE
 
 
@@ -96,7 +96,7 @@ class BankAccountForm(ModelForm):
                 # set initial only if we were able to compute code within range
                 kwargs['initial'] = {'code': str(next_code)}
 
-            kwargs['instance'] = Account(account_type=Account.ASSET)
+            kwargs['instance'] = Account(account_type=Account.ASSET, asset_type=Account.BANK)
         else:
             kwargs['instance'] = instance
 

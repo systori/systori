@@ -51,6 +51,7 @@ class Job(models.Model):
     name = models.CharField(_('Job Name'), max_length=512)
     job_code = models.PositiveSmallIntegerField(_('Code'), default=0)
     description = models.TextField(_('Description'), blank=True)
+    project = models.ForeignKey('project.Project', related_name="jobs")
 
     taskgroup_offset = models.PositiveSmallIntegerField(_("Task Group Offset"), default=0)
 
@@ -66,8 +67,7 @@ class Job(models.Model):
         (TIME_AND_MATERIALS, _("Time and Materials")),
     )
     billing_method = models.CharField(_('Billing Method'), max_length=128, choices=BILLING_METHOD, default=FIXED_PRICE)
-
-    project = models.ForeignKey('project.Project', related_name="jobs")
+    is_revenue_recognized = models.BooleanField(default=False)
 
     DRAFT = "draft"
     PROPOSED = "proposed"
@@ -82,7 +82,6 @@ class Job(models.Model):
         (STARTED, _("Started")),
         (COMPLETED, _("Completed"))
     )
-
     status = FSMField(default=DRAFT, choices=STATE_CHOICES)
 
     objects = JobManager()

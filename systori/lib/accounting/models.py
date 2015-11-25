@@ -6,6 +6,15 @@ from datetime import date
 from decimal import Decimal
 
 
+class AccountQuerySet(models.QuerySet):
+    def banks(self):
+        return self.filter(asset_type=BaseAccount.BANK)
+
+
+class AccountManager(BaseManager.from_queryset(AccountQuerySet)):
+    use_for_related_fields = True
+
+
 class BaseAccount(models.Model):
     """
                  Debit Credit
@@ -16,6 +25,10 @@ class BaseAccount(models.Model):
 
     http://en.wikipedia.org/wiki/Double-entry_bookkeeping_system
     """
+
+    objects = AccountManager()
+
+    # Account Type
 
     ASSET = "asset"
     LIABILITY = "liability"
@@ -29,6 +42,18 @@ class BaseAccount(models.Model):
         (EXPENSE, _("Expense")),
     )
     account_type = models.CharField(_('Account Type'), max_length=32, choices=ACCOUNT_TYPE)
+
+    # Asset Type (when account.account_type=ASSET)
+
+    BANK = "bank"
+    RECEIVABLE = "receivable"
+
+    ASSET_TYPE = (
+        (BANK, _("Bank")),
+        (RECEIVABLE, _("Accounts Receivable")),
+    )
+    asset_type = models.CharField(_('Asset Type'), null=True, max_length=32, choices=ASSET_TYPE)
+
     code = models.CharField(_('Code'), max_length=32)
     name = models.CharField(_('Name'), max_length=512, blank=True)
 
@@ -40,8 +65,12 @@ class BaseAccount(models.Model):
         return '{} - {}'.format(self.code, self.name)
 
     @property
+    def is_bank(self):
+        return self.asset_type == self.BANK
+
+    @property
     def balance(self):
-        return self.entries.all().total
+        return self.entries.all().balance
 
     DEBIT_ACCOUNTS = (ASSET, EXPENSE)
 
@@ -120,11 +149,13 @@ class BaseTransaction(models.Model):
     INVOICE = "invoice"
     FINAL_INVOICE = "final-invoice"
     PAYMENT = "payment"
+    ADJUSTMENT = "adjustment"
 
     TRANSACTION_TYPE = (
         (INVOICE, _("Invoice")),
         (FINAL_INVOICE, _("Final Invoice")),
         (PAYMENT, _("Payment")),
+        (ADJUSTMENT, _("Adjustment")),
     )
     transaction_type = models.CharField(_('Transaction Type'), null=True, max_length=32, choices=TRANSACTION_TYPE)
 
@@ -178,7 +209,7 @@ class BaseTransaction(models.Model):
 
 class EntryQuerySet(models.QuerySet):
     @property
-    def total(self):
+    def balance(self):
         amount = Decimal(0.0)
         for entry in self:
             amount += entry.amount
@@ -196,7 +227,11 @@ class BaseEntry(models.Model):
     transaction = models.ForeignKey('Transaction', related_name="entries")
     account = models.ForeignKey('Account', related_name="entries")
 
-    amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=2, default=0.0)
+    amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=2)
+    # rate is the percent of discount for entries of type DISCOUNT
+    # rate is the tax for all other entries with gross amount
+    # rate of 0 means this is not a discount and not a gross amount
+    rate = models.DecimalField(_("Rate"), max_digits=14, decimal_places=2, default=0)
 
     PAYMENT = "payment"
     DISCOUNT = "discount"
@@ -211,7 +246,6 @@ class BaseEntry(models.Model):
         (DISCOUNT, _("Discount")),
         (WORK_DEBIT, _("Work Debit")),
         (FLAT_DEBIT, _("Flat Debit")),
-        (FINAL_DEBIT, _("Final Debit")),
         (ADJUSTMENT, _("Adjustment")),
         (OTHER, _("Other")),
     )

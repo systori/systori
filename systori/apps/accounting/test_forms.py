@@ -1,6 +1,31 @@
 from django.test import TestCase
-from .test_skr03 import create_data
+from django.utils.translation import activate
+from .test_accounting import create_data
 from .forms import *
+
+
+class TestBankAccountForm(TestCase):
+    def setUp(self):
+        create_data(self)
+
+    def test_form_initial_incremented_code(self):
+        self.assertEquals(str(BANK_CODE_RANGE[0] + 1), BankAccountForm().initial['code'])
+
+    def test_form_edit_code(self):
+        self.assertEquals("hi", BankAccountForm(instance=Account.objects.create(code="hi")).initial['code'])
+
+    def test_valid_code(self):
+        self.assertTrue(BankAccountForm({'code': '1200'}).is_valid())
+        self.assertTrue(BankAccountForm({'code': '1288'}).is_valid())
+
+    def test_invalid_code(self):
+        activate('en')
+        self.assertFalse(BankAccountForm({'code': 'foo'}).is_valid())
+        self.assertFalse(BankAccountForm({'code': '1199'}).is_valid())
+        self.assertFalse(BankAccountForm({'code': '1289'}).is_valid())
+
+        form = BankAccountForm({'code': '1a'})
+        self.assertEquals('Account code must be a number between 1200 and 1288 inclusive.', form.errors['code'][0])
 
 
 class AccountingTestCase(TestCase):
