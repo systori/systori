@@ -2,9 +2,13 @@ from django.test import TestCase
 from django.db import IntegrityError
 from .models import create_account_for_job
 from .constants import DEBTOR_CODE_RANGE
+from ..task.test_models import create_task_data
 
 
 class TestAccountCodeValidations(TestCase):
+    def setUp(self):
+        create_task_data(self)
+
     def test_creating_account_for_job(self):
         self.job.account = create_account_for_job(self.job)
         self.assertRaisesMessage(IntegrityError,

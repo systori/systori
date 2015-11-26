@@ -10,7 +10,7 @@ def migrate_accounts(company):
     from systori.apps.accounting.models import Account, Transaction, Entry, create_account_for_job
     from systori.apps.accounting.constants import TAX_RATE, SKR03_INCOME_CODE
     from systori.apps.accounting.utils import get_transactions_for_jobs
-    from systori.apps.accounting import skr03
+    from systori.apps.accounting import workflow
     from systori.apps.task.models import Job
     from systori.apps.document.models import Invoice
 
@@ -172,7 +172,7 @@ def migrate_accounts(company):
             if invoice.json['is_final']:
                 final_debits.append((invoice, debits))
             else:
-                invoice.transaction = skr03.partial_debit(debits, invoice.document_date)
+                invoice.transaction = workflow.partial_debit(debits, invoice.document_date)
 
             invoice.json['version'] = '1.2'
             invoice.json['id'] = invoice.id
@@ -402,7 +402,7 @@ def migrate_accounts(company):
             transaction.save()
 
         for invoice, debits in final_debits:
-            invoice.transaction = skr03.final_debit(debits, invoice.document_date)
+            invoice.transaction = workflow.final_debit(debits, invoice.document_date)
             invoice.save()
 
         # Now that we have invoices and payments migrated to the new system we can

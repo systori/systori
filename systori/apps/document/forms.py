@@ -11,7 +11,7 @@ from systori.lib.fields import LocalizedDecimalField
 from .models import Proposal, Invoice, DocumentTemplate, Letterhead, DocumentSettings
 from ..project.models import Project
 from ..task.models import Job
-from ..accounting import skr03
+from ..accounting import workflow
 from ..accounting.constants import TAX_RATE
 from .type import invoice as invoice_lib
 from .letterhead_utils import clean_letterhead_pdf
@@ -248,9 +248,9 @@ class BaseInvoiceForm(BaseFormSet):
 
         skr03_debits = [(debit['job'], debit['debit_amount'], debit['is_flat']) for debit in debits]
         if data['is_final']:
-            invoice.transaction = skr03.final_debit(skr03_debits)
+            invoice.transaction = workflow.final_debit(skr03_debits)
         else:
-            invoice.transaction = skr03.partial_debit(skr03_debits)
+            invoice.transaction = workflow.partial_debit(skr03_debits)
         invoice.save()
 
         del data['doc_template']  # don't need this

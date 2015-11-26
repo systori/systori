@@ -70,7 +70,14 @@ class BaseAccount(models.Model):
 
     @property
     def balance(self):
-        return self.entries.all().balance
+        return self.entries.all().total
+
+    @property
+    def adjusted_debits_total(self):
+        """ adjusted total = all debits - all adjustment credits"""
+        debits = self.debits().total
+        adjustments = self.adjustments().total
+        return debits + adjustments
 
     DEBIT_ACCOUNTS = (ASSET, EXPENSE)
 
@@ -126,6 +133,9 @@ class BaseAccount(models.Model):
         else:
             return self.entries.filter(amount__lt=0)
 
+    def adjustments(self):
+        return self.entries.filter(entry_type=BaseEntry.ADJUSTMENT)
+
 
 class BaseTransaction(models.Model):
     """ A transaction is a collection of accounting entries (usually
@@ -142,6 +152,9 @@ class BaseTransaction(models.Model):
     # finalized transactions cannot be edited
     finalized_on = models.DateField(_("Date Finalized"), null=True)
     is_finalized = models.BooleanField(_("Finalized"), default=False)
+
+    # transaction marks the point in time when revenue became recognized
+    is_revenue_recognized = models.BooleanField(default=False)
 
     # when this transaction was entered into the system
     recorded_on = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
@@ -167,16 +180,20 @@ class BaseTransaction(models.Model):
         self._entries = []
 
     def debit(self, account, amount, **kwargs):
+        assert amount > 0
         if type(account) is str:
             account = self.account_class.objects.get(code=account)
-        entry = self.entry_class(account=account, amount=account.as_debit(round(amount, 2)), **kwargs)
+        debit_amount = account.as_debit(round(amount, 2))
+        entry = self.entry_class(account=account, amount=debit_amount, **kwargs)
         self._entries.append(('debit', entry))
         return entry
 
     def credit(self, account, amount, **kwargs):
+        assert amount > 0
         if type(account) is str:
             account = self.account_class.objects.get(code=account)
-        entry = self.entry_class(account=account, amount=account.as_credit(round(amount, 2)), **kwargs)
+        credit_amount = account.as_credit(round(amount, 2))
+        entry = self.entry_class(account=account, amount=credit_amount, **kwargs)
         self._entries.append(('credit', entry))
         return entry
 
@@ -195,6 +212,7 @@ class BaseTransaction(models.Model):
         return False
 
     def save(self, **kwargs):
+        assert len(self._entries) >= 2  # we're doing 'double' entry accounting here people!
         assert self.is_balanced, "{} != {}".format(self._total('debit'), self._total('credit'))
         super().save(**kwargs)
         for item in self._entries:
@@ -209,7 +227,7 @@ class BaseTransaction(models.Model):
 
 class EntryQuerySet(models.QuerySet):
     @property
-    def balance(self):
+    def total(self):
         amount = Decimal(0.0)
         for entry in self:
             amount += entry.amount

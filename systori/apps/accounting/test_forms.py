@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.utils.translation import activate
-from .test_accounting import create_data
+from .test_workflow import create_data
 from .forms import *
 
 

@@ -62,5 +62,10 @@ class Migration(migrations.Migration):
             name='transaction_type',
             field=models.CharField(max_length=32, choices=[('invoice', 'Invoice'), ('final-invoice', 'Final Invoice'), ('payment', 'Payment'), ('adjustment', 'Adjustment')], verbose_name='Transaction Type', null=True),
         ),
+        migrations.AddField(
+            model_name='transaction',
+            name='is_revenue_recognized',
+            field=models.BooleanField(default=False),
+        ),
         migrations.RunPython(set_missing_values),
     ]

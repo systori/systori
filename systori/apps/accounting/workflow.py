@@ -24,7 +24,9 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
     """
 
     transacted_on = transacted_on or date.today()
-    transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.INVOICE)
+    transaction = Transaction(transacted_on=transacted_on,
+                              transaction_type=Transaction.INVOICE,
+                              is_revenue_recognized=recognize_revenue)
 
     for job, gross, entry_type in debits:
 
@@ -42,7 +44,7 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
                 # Moving Partial Payments
 
                 partial_payments_account = Account.objects.get(code=SKR03_PARTIAL_PAYMENTS_CODE)
-                prior_income = partial_payments_account.entries.filter(job=job).balance
+                prior_income = partial_payments_account.entries.filter(job=job).total
 
                 if prior_income:
 
@@ -81,7 +83,7 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
 
                 # debit the customer account (asset), this increases their balance
                 # (+) "good thing", customer owes us more money
-                transaction.debit(job.account, gross, entry_type=Entry.FINAL_DEBIT, job=job)
+                transaction.debit(job.account, gross, entry_type=entry_type, job=job)
 
                 # credit the tax payments account (liability), increasing the liability
                 # (+) "bad thing", will have to be paid in taxes eventually
@@ -92,14 +94,17 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
                 transaction.credit(SKR03_INCOME_CODE, income, job=job)
 
         else:
+            # Still not recognizing revenue, tracking debits in a promised payments account instead..
 
-            # debit the customer account (asset), this increases their balance
-            # (+) "good thing", customer owes us more money
-            transaction.debit(job.account, gross, entry_type=entry_type, job=job)
+            if gross:
 
-            # credit the promised payments account (liability), increasing the liability
-            # (+) "bad thing", customer owing us money is a liability
-            transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, gross, job=job)
+                # debit the customer account (asset), this increases their balance
+                # (+) "good thing", customer owes us more money
+                transaction.debit(job.account, gross, entry_type=entry_type, job=job)
+
+                # credit the promised payments account (liability), increasing the liability
+                # (+) "bad thing", customer owing us money is a liability
+                transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, gross, job=job)
 
     transaction.save()
 
@@ -107,10 +112,7 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
 
 
 def credit_jobs(splits, payment, transacted_on=None, bank=None):
-    """
-    Applies a payment.
-    Uses progress billing accounting method if
-    """
+    """ Applies a payment or adjustment. """
 
     assert isinstance(payment, Decimal)
     assert payment == sum([p[1] for p in splits])
@@ -122,61 +124,80 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
 
     # debit the bank account (asset)
     # (+) "good thing", money in the bank is always good
-    transaction.debit(bank, payment)
+    if payment > 0:
+        transaction.debit(bank, payment)
 
     for (job, gross, discount, adjustment) in splits:
 
-        # extract the income and tax part from the payment
-        net, tax = extract_net_tax(gross, TAX_RATE)
+        if gross > 0:
 
-        # credit the customer account (asset), decreasing their balance
-        # (-) "bad thing", customer owes us less money
-        transaction.credit(job.account, gross, entry_type=Entry.PAYMENT, job=job)
-
-        if not job.is_revenue_recognized:
-            # Accounting prior to final invoice has a bunch more steps involved.
-
-            # debit the promised payments account (liability), decreasing the liability
-            # (-) "good thing", customer paying debt reduces liability
-            transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, gross, job=job)
-
-            # credit the partial payments account (liability), increasing the liability
-            # (+) "bad thing", we are on the hook to finish and deliver the service or product
-            transaction.credit(SKR03_PARTIAL_PAYMENTS_CODE, net, job=job)
-
-            # credit the tax payments account (liability), increasing the liability
-            # (+) "bad thing", tax have to be paid eventually
-            transaction.credit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
-
-        if discount > 0:
-
-            # extract the original amount invoiced (sans discount)
-            # we cheat a little and use the same function we use to extra net and tax
-            discount_percent = discount / (gross + discount)
+            # extract the income and tax part from the payment
+            net, tax = extract_net_tax(gross, TAX_RATE)
 
             # credit the customer account (asset), decreasing their balance
             # (-) "bad thing", customer owes us less money
-            transaction.credit(job.account, discount, entry_type=Entry.DISCOUNT, job=job, rate=discount_percent)
+            transaction.credit(job.account, gross, entry_type=Entry.PAYMENT, job=job)
 
-            if job.is_revenue_recognized:
-                # Discount after final invoice has a few more steps involved.
-
-                discount_net, discount_tax = extract_net_tax(discount, TAX_RATE)
-
-                # debit the cash discounts account (income), decreasing the income
-                # (-) "bad thing", less income :-(
-                transaction.debit(SKR03_CASH_DISCOUNT_CODE, discount_net, job=job)
-
-                # debit the tax payments account (liability), decreasing the liability
-                # (-) "good thing", less taxes to pay
-                transaction.debit(SKR03_TAX_PAYMENTS_CODE, discount_tax, job=job)
-
-            else:
-                # Discount prior to final invoice is simpler.
+            if not job.is_revenue_recognized:
+                # Accounting prior to final invoice has a bunch more steps involved.
 
                 # debit the promised payments account (liability), decreasing the liability
                 # (-) "good thing", customer paying debt reduces liability
-                transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, discount, job=job)
+                transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, gross, job=job)
+
+                # credit the partial payments account (liability), increasing the liability
+                # (+) "bad thing", we are on the hook to finish and deliver the service or product
+                transaction.credit(SKR03_PARTIAL_PAYMENTS_CODE, net, job=job)
+
+                # credit the tax payments account (liability), increasing the liability
+                # (+) "bad thing", tax have to be paid eventually
+                transaction.credit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
+
+        for reduction_type, reduction in [(Entry.DISCOUNT, discount), (Entry.ADJUSTMENT, adjustment)]:
+
+            if reduction > 0:
+
+                # round down to a tenths of a percent, e.g. 2.5%, this is just informational anyways
+                if reduction_type == Entry.DISCOUNT:
+                    reduction_percent = round(reduction / (gross + reduction), 3)
+                elif reduction_type == Entry.ADJUSTMENT:
+                    # adjustment reduction is on-top of the discount reduction
+                    reduction_percent = round((reduction + discount) / (gross + reduction + discount), 3)
+                else:
+                    raise IntegrityError
+
+                # credit the customer account (asset), decreasing their balance
+                # (-) "bad thing", customer owes us less money
+                transaction.credit(job.account, reduction, entry_type=reduction_type, job=job, rate=reduction_percent)
+
+                if job.is_revenue_recognized:
+                    # Reduction after final invoice has a few more steps involved.
+
+                    reduction_net, reduction_tax = extract_net_tax(reduction, TAX_RATE)
+
+                    if reduction_type == Entry.DISCOUNT:
+                        # debit the cash discount account (income), indirectly subtracts from the income
+                        # (-) "bad thing", less income :-(
+                        transaction.debit(SKR03_CASH_DISCOUNT_CODE, reduction_net, job=job)
+
+                    elif reduction_type == Entry.ADJUSTMENT:
+                        # debit the income account (income), this decreases the balance
+                        # (+) "bad thing", loss in income :-(
+                        transaction.debit(SKR03_INCOME_CODE, reduction_net, job=job)
+
+                    else:
+                        raise IntegrityError
+
+                    # debit the tax payments account (liability), decreasing the liability
+                    # (-) "good thing", less taxes to pay
+                    transaction.debit(SKR03_TAX_PAYMENTS_CODE, reduction_tax, job=job)
+
+                else:
+                    # Reduction prior to final invoice is simpler.
+
+                    # debit the promised payments account (liability), decreasing the liability
+                    # (-) "good thing", customer paying debt reduces liability
+                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, reduction, job=job)
 
     transaction.save()
 

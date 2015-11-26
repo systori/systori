@@ -7,7 +7,7 @@ from django.forms import Form, ModelForm, ValidationError
 from django import forms
 from systori.lib.fields import LocalizedDecimalField
 from ..task.models import Job
-from .skr03 import Account, credit_jobs
+from .workflow import Account, credit_jobs
 from .constants import BANK_CODE_RANGE
 
 

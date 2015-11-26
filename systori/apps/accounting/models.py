@@ -15,7 +15,7 @@ def create_account_for_job(job):
         the newly created Account object.
     """
     # TODO: Add support for recycling account numbers when the maximum has been reached.
-    from .skr03 import DEBTOR_CODE_RANGE
+    from .workflow import DEBTOR_CODE_RANGE
 
     int(job.id)  # raises exception if id is not an int (eg. job hasn't been saved()'ed yet)
     code = DEBTOR_CODE_RANGE[0] + job.id

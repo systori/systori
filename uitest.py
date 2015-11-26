@@ -11,7 +11,7 @@ from django.test.testcases import LiveServerThread, _StaticFilesHandler
 from django.test.runner import setup_databases
 from selenium import webdriver
 from sauceclient import SauceClient
-from systori.apps.accounting.skr03 import create_chart_of_accounts
+from systori.apps.accounting.workflow import create_chart_of_accounts
 
 TRAVIS_JOB_NUMBER = os.environ.get('TRAVIS_JOB_NUMBER', 1)
 TRAVIS_BUILD_NUMBER = os.environ.get('TRAVIS_BUILD_NUMBER', 1)
