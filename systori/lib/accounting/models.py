@@ -69,6 +69,10 @@ class BaseAccount(models.Model):
         return self.asset_type == self.BANK
 
     @property
+    def is_receivable(self):
+        return self.asset_type == self.RECEIVABLE
+
+    @property
     def balance(self):
         return self.entries.all().total
 
@@ -160,13 +164,11 @@ class BaseTransaction(models.Model):
     recorded_on = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
 
     INVOICE = "invoice"
-    FINAL_INVOICE = "final-invoice"
     PAYMENT = "payment"
     ADJUSTMENT = "adjustment"
 
     TRANSACTION_TYPE = (
         (INVOICE, _("Invoice")),
-        (FINAL_INVOICE, _("Final Invoice")),
         (PAYMENT, _("Payment")),
         (ADJUSTMENT, _("Adjustment")),
     )

@@ -163,8 +163,6 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
                 elif reduction_type == Entry.ADJUSTMENT:
                     # adjustment reduction is on-top of the discount reduction
                     reduction_percent = round((reduction + discount) / (gross + reduction + discount), 3)
-                else:
-                    raise IntegrityError
 
                 # credit the customer account (asset), decreasing their balance
                 # (-) "bad thing", customer owes us less money
@@ -184,9 +182,6 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
                         # debit the income account (income), this decreases the balance
                         # (+) "bad thing", loss in income :-(
                         transaction.debit(SKR03_INCOME_CODE, reduction_net, job=job)
-
-                    else:
-                        raise IntegrityError
 
                     # debit the tax payments account (liability), decreasing the liability
                     # (-) "good thing", less taxes to pay

@@ -24,7 +24,7 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
-from systori.apps.accounting.utils import get_transactions_for_jobs
+from systori.apps.accounting.report import get_transaction_report
 from systori.apps.accounting.constants import TAX_RATE
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b
