@@ -430,7 +430,7 @@ msgstr "Gesendet"
 #: systori/apps/document/models.py:43 systori/apps/task/models.py:81
 #: systori/apps/task/models.py:299
 msgid "Approved"
-msgstr "Beauftragt"
+msgstr "beauftragt"
 
 #: systori/apps/document/models.py:49
 msgid "Send"
@@ -1052,15 +1052,15 @@ msgstr "Einheit"
 
 #: systori/apps/task/models.py:300
 msgid "Ready"
-msgstr "Bereit"
+msgstr "bereit"
 
 #: systori/apps/task/models.py:301
 msgid "Running"
-msgstr "Läuft"
+msgstr "läuft"
 
 #: systori/apps/task/models.py:302
 msgid "Done"
-msgstr "Fertig"
+msgstr "fertig"
 
 #: systori/apps/task/models.py:395
 msgid "Task Instance"
