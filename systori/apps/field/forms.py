@@ -10,7 +10,7 @@ class CompletionForm(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ['complete', 'comment']
+        fields = ['complete', 'comment', 'status']
 
 
 class DailyPlanNoteForm(forms.ModelForm):
