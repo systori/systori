@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0005_job_account'),
+        ('task', '0006_task_status'),
     ]
 
     operations = [
