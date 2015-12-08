@@ -5,6 +5,8 @@ from django.db.models.manager import BaseManager
 from datetime import date
 from decimal import Decimal
 
+from .tools import extract_net_tax
+
 
 class AccountQuerySet(models.QuerySet):
     def banks(self):
@@ -228,12 +230,23 @@ class BaseTransaction(models.Model):
 
 
 class EntryQuerySet(models.QuerySet):
+
     @property
     def total(self):
-        amount = Decimal(0.0)
+        amount = Decimal('0.00')
         for entry in self:
             amount += entry.amount
         return amount
+
+    @property
+    def net_tax_gross(self):
+        gross, net, tax = Decimal('0.00'), Decimal('0.00'), Decimal('0.00')
+        for entry in self:
+            _net, _tax = extract_net_tax(entry.amount, entry.tax_rate)
+            net += _net
+            tax += _tax
+            gross += entry.amount
+        return net, tax, gross
 
 
 class EntryManager(BaseManager.from_queryset(EntryQuerySet)):
@@ -248,10 +261,7 @@ class BaseEntry(models.Model):
     account = models.ForeignKey('Account', related_name="entries")
 
     amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=2)
-    # rate is the percent of discount for entries of type DISCOUNT
-    # rate is the tax for all other entries with gross amount
-    # rate of 0 means this is not a discount and not a gross amount
-    rate = models.DecimalField(_("Rate"), max_digits=14, decimal_places=2, default=0)
+    tax_rate = models.DecimalField(_("Tax Rate"), max_digits=14, decimal_places=2, default=0)
 
     PAYMENT = "payment"
     DISCOUNT = "discount"

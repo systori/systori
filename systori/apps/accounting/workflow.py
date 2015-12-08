@@ -64,7 +64,7 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
                 if unpaid_amount > 0:
                     # reset balance, we'll add unpaid_amount back into a final debit to customer
                     transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, unpaid_amount, job=job)
-                    transaction.credit(job.account, unpaid_amount, job=job)
+                    transaction.credit(job.account, unpaid_amount, job=job, tax_rate=TAX_RATE)
 
                 gross += unpaid_amount
                 income, tax = extract_net_tax(gross, TAX_RATE)
@@ -83,7 +83,7 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
 
                 # debit the customer account (asset), this increases their balance
                 # (+) "good thing", customer owes us more money
-                transaction.debit(job.account, gross, entry_type=entry_type, job=job)
+                transaction.debit(job.account, gross, entry_type=entry_type, job=job, tax_rate=TAX_RATE)
 
                 # credit the tax payments account (liability), increasing the liability
                 # (+) "bad thing", will have to be paid in taxes eventually
@@ -100,7 +100,7 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
 
                 # debit the customer account (asset), this increases their balance
                 # (+) "good thing", customer owes us more money
-                transaction.debit(job.account, gross, entry_type=entry_type, job=job)
+                transaction.debit(job.account, gross, entry_type=entry_type, job=job, tax_rate=TAX_RATE)
 
                 # credit the promised payments account (liability), increasing the liability
                 # (+) "bad thing", customer owing us money is a liability
@@ -136,7 +136,7 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
 
             # credit the customer account (asset), decreasing their balance
             # (-) "bad thing", customer owes us less money
-            transaction.credit(job.account, gross, entry_type=Entry.PAYMENT, job=job)
+            transaction.credit(job.account, gross, entry_type=Entry.PAYMENT, job=job, tax_rate=TAX_RATE)
 
             if not job.is_revenue_recognized:
                 # Accounting prior to final invoice has a bunch more steps involved.
@@ -157,16 +157,9 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
 
             if reduction > 0:
 
-                # round down to a tenths of a percent, e.g. 2.5%, this is just informational anyways
-                if reduction_type == Entry.DISCOUNT:
-                    reduction_percent = round(reduction / (gross + reduction), 3)
-                elif reduction_type == Entry.ADJUSTMENT:
-                    # adjustment reduction is on-top of the discount reduction
-                    reduction_percent = round((reduction + discount) / (gross + reduction + discount), 3)
-
                 # credit the customer account (asset), decreasing their balance
                 # (-) "bad thing", customer owes us less money
-                transaction.credit(job.account, reduction, entry_type=reduction_type, job=job, rate=reduction_percent)
+                transaction.credit(job.account, reduction, entry_type=reduction_type, job=job, tax_rate=TAX_RATE)
 
                 if job.is_revenue_recognized:
                     # Reduction after final invoice has a few more steps involved.

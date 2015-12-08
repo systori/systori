@@ -22,11 +22,10 @@ def set_missing_values(apps, schema_editor):
             asset.asset_type = 'bank' if is_bank(asset) else 'receivable'
             asset.save()
         for entry in Entry.objects.all():
-            if entry.entry_type in ("payment", "work-debit", "flat-debit"):
-                entry.rate = Decimal('0.19')
-                entry.save()
-            if entry.entry_type == "final-debit":
-                entry.entry_type = 'work-debit'
+            if entry.entry_type != "other":
+                if entry.entry_type == "final-debit":
+                    entry.entry_type = "work-debit"
+                entry.tax_rate = Decimal('0.19')
                 entry.save()
 
 
@@ -39,8 +38,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='entry',
-            name='rate',
-            field=models.DecimalField(decimal_places=2, max_digits=14, default=0, verbose_name='Rate'),
+            name='tax_rate',
+            field=models.DecimalField(decimal_places=2, max_digits=14, default=0, verbose_name='Tax Rate'),
         ),
         migrations.AlterField(
             model_name='entry',

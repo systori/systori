@@ -79,6 +79,7 @@ def get_transaction_report(jobs, transacted_on_or_before=None):
 
         elif txn.transaction_type == txn.PAYMENT:
             txn_dict.update({
+                'is_reconciled': False,
                 'payment_received': D('0.00'),  # actual amount received from customer
                 'payment_applied_net': D('0.00'),
                 'payment_applied_tax': D('0.00'),
@@ -93,6 +94,7 @@ def get_transaction_report(jobs, transacted_on_or_before=None):
 
             # extract payment entry info
             if txn.transaction_type == txn.PAYMENT and entry.account.is_bank:
+                txn_dict['is_reconciled'] = entry.is_reconciled
                 txn_dict['payment_received'] = entry.amount * -1
                 continue
 

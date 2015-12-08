@@ -9,7 +9,7 @@ def migrate_accounts(company):
     from systori.apps.project.models import Project
     from systori.apps.accounting.models import Account, Transaction, Entry, create_account_for_job
     from systori.apps.accounting.constants import TAX_RATE, SKR03_INCOME_CODE
-    from systori.apps.accounting.utils import get_transactions_for_jobs
+    from systori.apps.accounting.report import get_transactions_for_jobs
     from systori.apps.accounting import workflow
     from systori.apps.task.models import Job
     from systori.apps.document.models import Invoice
@@ -426,7 +426,7 @@ if __name__ == '__main__':
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
     import django
     django.setup()
-    from systori.apps.accounting.utils import get_transactions_for_jobs
+    from systori.apps.accounting.report import get_transactions_for_jobs
     from systori.apps.company.models import *
     company = Company.objects.get(schema='mehr_handwerk')
     company.activate()
