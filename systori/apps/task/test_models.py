@@ -27,7 +27,7 @@ def create_task_data(self, create_user=True, create_company=True):
     self.job2 = Job.objects.create(job_code=2, name="Job B", project=self.project)
     self.group = TaskGroup.objects.create(name="my group", job=self.job)
     self.group2 = TaskGroup.objects.create(name="my group 2", job=self.job)
-    self.task = Task.objects.create(name="my task one", qty=10, taskgroup=self.group)
+    self.task = Task.objects.create(name="my task one", qty=10, taskgroup=self.group, status=Task.RUNNING)
     TaskInstance.objects.create(task=self.task, selected=True)
     self.lineitem = LineItem.objects.create(name="my line item 1", unit_qty=8, price=12,
                                             taskinstance=self.task.instance)
@@ -168,6 +168,7 @@ class TaskCloneTests(TestCase):
         group = job.taskgroups.get(name="my group")
         self.assertNotEqual(group.id, self.group.id)
         self.assertEqual(group.tasks.count(), 2)
+        self.assertFalse(max(group.tasks.values_list('status', flat=True)))
 
 
 class TestJobTransitions(TestCase):

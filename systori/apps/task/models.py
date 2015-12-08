@@ -159,6 +159,10 @@ class Job(models.Model):
         return self._total_calc('billable')
 
     @property
+    def complete_percent(self):
+        return round(self.billable_total / self.estimate_total * 100) if self.estimate_total else 0
+
+    @property
     def code(self):
         return str(self.job_code).zfill(self.project.job_zfill)
 
@@ -285,6 +289,20 @@ class Task(BetterOrderedModel):
     taskgroup = models.ForeignKey(TaskGroup, related_name="tasks")
     order_with_respect_to = 'taskgroup'
 
+    APPROVED = "approved"
+    READY = "ready"
+    RUNNING = "running"
+    DONE = "done"
+
+    STATE_CHOICES = (
+        (APPROVED, _("Approved")),
+        (READY, _("Ready")),
+        (RUNNING, _("Running")),
+        (DONE, _("Done"))
+    )
+
+    status = FSMField(blank=True, choices=STATE_CHOICES)
+
     class Meta:
         verbose_name = _("Task")
         verbose_name_plural = _("Task")
@@ -347,6 +365,7 @@ class Task(BetterOrderedModel):
         self.complete = 0.0
         self.started_on = None
         self.completed_on = None
+        self.status = ''
         self.save()
         for taskinstance in taskinstances:
             taskinstance.clone_to(self, taskinstance.order)
