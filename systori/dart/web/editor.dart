@@ -268,6 +268,8 @@ abstract class EditableElement extends UbrElement {
     DivElement price_view;
     DivElement total_view;
 
+    DivElement hint;
+
     ElementList<DivElement> input_views;
     Map<String, SpanElement> toggle_views = {};
 
@@ -312,6 +314,7 @@ abstract class EditableElement extends UbrElement {
         input_views = this.querySelectorAll(':scope>.editor [contenteditable]');
         streams.add(input_views.onBlur.listen(unfocus));
         input_views.onKeyDown.listen(handle_input);
+        input_views.onKeyUp.listen(handle_input_key_up);
         input_views.onFocus.listen((MouseEvent event) {
             if (!started)
                 start(focus: false);
@@ -390,6 +393,8 @@ abstract class EditableElement extends UbrElement {
                     ..collapseToEnd();
             });
         });
+
+        hint = this.querySelector(":scope>.editor>.editor-hint");
     }
 
     attached() {
@@ -444,8 +449,12 @@ abstract class EditableElement extends UbrElement {
         return !const ListEquality().equals(previous_values, _editable_values());
     }
 
+    bool is_name_blank() {
+        return name_view.text.length == 0;
+    }
+
     bool is_blank() {
-        return name_view.text.length == 0 && pk == null;
+        return this.is_name_blank() && pk == null;
     }
 
     bool can_delete() {
@@ -574,6 +583,10 @@ abstract class EditableElement extends UbrElement {
                 this.handle_delete_key(event);
                 break;
         }
+    }
+
+    void handle_input_key_up(KeyboardEvent event) {
+        this._refresh_hint_context();
     }
 
     void autocomplete(KeyboardEvent event) {
@@ -815,17 +828,30 @@ abstract class EditableElement extends UbrElement {
     }
 
     void show_hint() {
-        var hint = this.querySelector(":scope>.editor>.editor-hint");
         if (hint != null) {
             hint.style.display = 'block';
+            this._refresh_hint_context();
         }
     }
 
     void hide_hint() {
-        var hint = this.querySelector(":scope>.editor>.editor-hint");
         if (hint != null) {
             hint.style.display = 'none';
         }
+    }
+
+    void _refresh_hint_context() {
+        var visible, hidden;
+        if (this.is_name_blank()) {
+            visible = hint.querySelectorAll('.blank');
+            hidden = hint.querySelectorAll('.non-blank');
+        }
+        else {
+            visible = hint.querySelectorAll('.non-blank');
+            hidden = hint.querySelectorAll('.blank');
+        }
+        visible.forEach((e) => e.classes.remove('hidden'));
+        hidden.forEach((e) => e.classes.add('hidden'));
     }
 }
 
