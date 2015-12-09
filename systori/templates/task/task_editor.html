@@ -11,5 +11,12 @@
       <span class="is_optional {{ task.is_optional }} label label-primary">{% trans 'Optional' %}</span>
     </div>
   </div>
+  <div class="editor-hint">
+    {% trans '<span class="label label-default">shift</span> <span class="label label-default">del</span> delete this item' %}
+    <br>
+    {% trans '<span class="label label-default">shift</span> <span class="label label-default">enter</span> new Line Item' %}
+    <br>
+    {% trans '<span class="label label-default">shift</span> <span class="label label-default">alt</span> + <span class="label label-default">enter</span> new Task Instance' %}
+  </div>
   <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ task.description|safe }}</div>
 </div>

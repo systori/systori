@@ -660,6 +660,7 @@ abstract class EditableElement extends UbrElement {
         }
         classes.add('focused');
         started = true;
+        this.show_hint();
     }
 
     void stop_n_save() {
@@ -668,6 +669,7 @@ abstract class EditableElement extends UbrElement {
     }
 
     void stop() {
+        this.hide_hint();
         streams.forEach((s) => s.pause());
         classes.remove('focused');
         started = false;
@@ -812,6 +814,19 @@ abstract class EditableElement extends UbrElement {
         editor.classes.remove('hidden');
     }
 
+    void show_hint() {
+        var hint = this.querySelector(":scope>.editor>.editor-hint");
+        if (hint != null) {
+            hint.style.display = 'block';
+        }
+    }
+
+    void hide_hint() {
+        var hint = this.querySelector(":scope>.editor>.editor-hint");
+        if (hint != null) {
+            hint.style.display = 'none';
+        }
+    }
 }
 
 
@@ -983,10 +998,12 @@ class LineItemElement extends EditableElement {
 
 }
 
+
 setup_input_mode_buttons() {
     querySelector('#input-task-mode').onClick.listen((_) => INPUT_MODE = InputMode.TASK);
     querySelector('#input-lineitem-mode').onClick.listen((_) => INPUT_MODE = InputMode.LINEITEM);
 }
+
 
 void main() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;

@@ -11,4 +11,9 @@
       <span class="is_flagged {{ lineitem.is_flagged }} label label-danger">{% trans 'Flag' %}</span>
     </div>
   </div>
+  <div class="editor-hint">
+    {% trans '<span class="label label-default">shift</span> <span class="label label-default">del</span> delete this item' %}
+    <br>
+    {% trans '<span class="label label-default">shift</span> <span class="label label-default">enter</span> if name is empty, create a new Task Instance; if not empty, create a new Line Item' %}
+  </div>
 </div>
