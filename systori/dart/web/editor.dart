@@ -249,11 +249,31 @@ abstract class UbrElement extends HtmlElement {
 class JobElement extends UbrElement {
     final child_element = "ubr-taskgroup";
 
+    DivElement total_view;
+    DivElement total_tax_view;
+    double tax_rate;
+
     int get child_zfill => int.parse(dataset['taskgroup-zfill']);
 
     int get child_offset => int.parse(dataset['taskgroup-offset']);
 
+    double get total => total_view != null ? parse_currency(total_view.text) : 0.0;
+    double get total_tax => total_tax_view != null ? parse_currency(total_tax_view.text) : 0.0;
+
+    set total(double calculated) => total_view.text = CURRENCY.format(calculated);
+    set total_tax(double calculated) => total_tax_view.text = CURRENCY.format(calculated);
+
     JobElement.created(): super.created() {
+        total_view = this.querySelector(":scope>.job_total");
+        total_tax_view = this.querySelector(":scope>.job_total_tax");
+        tax_rate = double.parse(total_tax_view.dataset['taxRate']);
+    }
+
+    update_totals() {
+        total = document.querySelectorAll(child_element)
+            .map((e) => e.total)
+            .fold(0, (a, b) => a + b);
+        total_tax = total + total * tax_rate;
     }
 }
 
@@ -872,8 +892,11 @@ class TaskGroupElement extends EditableElement {
     }
 
     update_totals() {
-        var items = this.querySelectorAll(child_element).where((e) => e.truthy('is_optional') == false).map((e) => e.total);
-        total = items.fold(0, (a, b) => a + b);
+        total = this.querySelectorAll(child_element)
+            .where((e) => e.truthy('is_optional') == false)
+            .map((e) => e.total)
+            .fold(0, (a, b) => a + b);
+        parent.update_totals();
     }
 
 }
