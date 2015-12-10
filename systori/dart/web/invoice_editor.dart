@@ -47,6 +47,7 @@ class InvoiceDebit extends TableRowElement {
     HiddenInputElement is_override_input;
     TextAreaElement override_comment_input;
 
+    TableCellElement net_estimate_cell;
     TableCellElement net_billable_cell;
     TableCellElement gross_amount_cell;
     TableCellElement gross_debited_cell;
@@ -54,6 +55,7 @@ class InvoiceDebit extends TableRowElement {
 
     double net_amount;
     double gross_amount;
+    double net_estimate;
     double net_billable;
     double new_gross_debited;
     double new_gross_balance;
@@ -73,6 +75,7 @@ class InvoiceDebit extends TableRowElement {
         this.override_comment_input = this.querySelector('[name^="job-"][name\$="-override_comment"]');
 
         this.net_billable_cell = this.querySelector(":scope>.job-billable");
+        this.net_estimate_cell = this.querySelector(":scope>.job-estimated");
         this.gross_amount_cell = this.querySelector(":scope>.job-amount-gross");
         this.gross_debited_cell = this.querySelector(":scope>.job-debited");
         this.gross_balance_cell = this.querySelector(":scope>.job-balance");
@@ -80,6 +83,7 @@ class InvoiceDebit extends TableRowElement {
         this.net_amount = double.parse(net_amount_input.value);
         this.gross_amount = double.parse(gross_amount_cell.dataset['amount']);
         this.net_billable = double.parse(net_billable_cell.dataset['amount']);
+        this.net_estimate = double.parse(net_estimate_cell.dataset['amount']);
         this.new_gross_debited = double.parse(gross_debited_cell.dataset['new']);
         this.new_gross_balance = double.parse(gross_balance_cell.dataset['new']);
         this.base_gross_debited = double.parse(gross_debited_cell.dataset['base']);
@@ -99,7 +103,7 @@ class InvoiceDebit extends TableRowElement {
 
     flat_invoice_range_changed(Event e) {
         double percent = int.parse(flat_invoice_range_input.value)/100;
-        net_amount_input.value = AMOUNT.format(net_billable * percent);
+        net_amount_input.value = AMOUNT.format(net_estimate * percent);
         net_amount_changed(null);
         classes.add('override');
     }
