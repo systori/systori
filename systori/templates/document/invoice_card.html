@@ -11,7 +11,7 @@
   {% for debit in invoice.json.debits %}
     <tr>
       <td>{{ debit.name }}</td>
-      <td style="text-align: right; white-space: nowrap;">{{ debit.debit_net|money }}</td>
+      <td style="text-align: right; white-space: nowrap;">{{ debit.amount_net|money }}</td>
     </tr>
   {% endfor %}
     <tr style="text-align: right; white-space: nowrap;">

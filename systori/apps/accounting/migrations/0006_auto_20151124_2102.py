@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from django.db import models, migrations
 from decimal import Decimal
+from systori.lib.accounting.tools import extract_net_tax
 
 
 def is_bank(account):
@@ -13,14 +14,18 @@ def is_bank(account):
 
 
 def set_missing_values(apps, schema_editor):
+    from systori.apps.company.models import Company
     Account = apps.get_model('accounting', 'Account')
     Entry = apps.get_model('accounting', 'Entry')
-    from systori.apps.company.models import Company
+    Invoice = apps.get_model('document', 'Invoice')
+
     for company in Company.objects.all():
         company.activate()
+
         for asset in Account.objects.filter(account_type='asset'):
             asset.asset_type = 'bank' if is_bank(asset) else 'receivable'
             asset.save()
+
         for entry in Entry.objects.all():
             if entry.entry_type != "other":
                 if entry.entry_type == "final-debit":
@@ -28,11 +33,27 @@ def set_missing_values(apps, schema_editor):
                 entry.tax_rate = Decimal('0.19')
                 entry.save()
 
+        for invoice in Invoice.objects.all():
+            for job in invoice.json.get('debits', []):
+                job['amount_net'] = job['debit_net']
+                job['amount_gross'] = job['debit_amount']
+                job['amount_tax'] = job['debit_tax']
+                job['is_override'] = job['is_flat']
+                job['override_comment'] = job['debit_comment']
+                job['debited_gross'] = job['debited']
+                job['debited_net'], job['debited_tax'] = extract_net_tax(Decimal(job['debited']), Decimal('0.19'))
+                job['balance_gross'] = job['balance']
+                job['balance_net'], job['balance_tax'] = extract_net_tax(Decimal(job['balance']), Decimal('0.19'))
+                job['estimate_net'] = extract_net_tax(Decimal(job['estimate']), Decimal('0.19'))[0]
+                job['itemized_net'] = extract_net_tax(Decimal(job['itemized']), Decimal('0.19'))[0]
+            invoice.save()
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ('accounting', '0005_entry_job'),
+        ('document', '0006_auto_20151119_2148'),
     ]
 
     operations = [

@@ -79,6 +79,10 @@ class BaseAccount(models.Model):
         return self.entries.all().total
 
     @property
+    def balance_net_tax_gross(self):
+        return self.entries.all().net_tax_gross
+
+    @property
     def adjusted_debits_total(self):
         """ adjusted total = all debits - all adjustment credits"""
         debits = self.debits().total

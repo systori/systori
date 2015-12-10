@@ -125,15 +125,19 @@ class BaseInvoiceForm(BaseDebitTransactionForm):
 
         invoice = self.invoice_form.instance
 
-        if invoice.transaction:
-            invoice.transaction.delete()
 
         data = self.invoice_form.cleaned_data
         del data['doc_template']  # don't need this
 
         invoice.letterhead = Letterhead.objects.first()
+
+        old_transaction = invoice.transaction
+
         invoice.transaction = self.save_debits(data['is_final'])
         invoice.save()
+
+        if old_transaction:
+            old_transaction.delete()
 
         data.update(self.get_data())
 
