@@ -248,7 +248,7 @@ class BaseDebitTransactionForm(BaseFormSet):
                 self.debits.append(debit_form.get_initial())
 
         skr03_debits = [(debit['job'], debit['amount_gross'], Entry.FLAT_DEBIT if debit['is_override'] else Entry.WORK_DEBIT) for debit in self.debits]
-        transaction = debit_jobs(skr03_debits, recognize_revenue)
+        transaction = debit_jobs(skr03_debits, recognize_revenue=recognize_revenue)
 
         return transaction
 
