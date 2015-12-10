@@ -250,7 +250,7 @@ class JobElement extends UbrElement {
     final child_element = "ubr-taskgroup";
 
     DivElement total_view;
-    DivElement total_tax_view;
+    DivElement total_gross_view;
     double tax_rate;
 
     int get child_zfill => int.parse(dataset['taskgroup-zfill']);
@@ -258,22 +258,22 @@ class JobElement extends UbrElement {
     int get child_offset => int.parse(dataset['taskgroup-offset']);
 
     double get total => total_view != null ? parse_currency(total_view.text) : 0.0;
-    double get total_tax => total_tax_view != null ? parse_currency(total_tax_view.text) : 0.0;
+    double get total_gross => total_gross_view != null ? parse_currency(total_gross_view.text) : 0.0;
 
     set total(double calculated) => total_view.text = CURRENCY.format(calculated);
-    set total_tax(double calculated) => total_tax_view.text = CURRENCY.format(calculated);
+    set total_gross(double calculated) => total_gross_view.text = CURRENCY.format(calculated);
 
     JobElement.created(): super.created() {
         total_view = this.querySelector(":scope>.job-total");
-        total_tax_view = this.querySelector(":scope>.job-total-tax");
-        tax_rate = double.parse(total_tax_view.dataset['taxRate']);
+        total_gross_view = this.querySelector(":scope>.job-total-gross");
+        tax_rate = double.parse(total_gross_view.dataset['taxRate']);
     }
 
     update_totals() {
         total = document.querySelectorAll(child_element)
             .map((e) => e.total)
             .fold(0, (a, b) => a + b);
-        total_tax = total + total * tax_rate;
+        total_gross = total + total * tax_rate;
     }
 }
 

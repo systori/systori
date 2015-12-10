@@ -5,6 +5,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse
 from django.db.models import Max
 
+from systori.lib.accounting.tools import compute_gross_tax
 from ..accounting.constants import TAX_RATE
 from ..accounting.models import create_account_for_job
 
@@ -53,10 +54,8 @@ class TaskEditor(SingleObjectMixin, ListView):
         context['blank_lineitem'] = LineItem()
         context['tax_rate'] = TAX_RATE
         context['tax_rate_percent'] = TAX_RATE * 100
-        context['job_total'] = round(self.object.estimate_total, 2)
-        context['job_total_tax'] = round(
-            self.object.estimate_total + self.object.estimate_total * TAX_RATE, 2
-        )
+        context['job_total_net'] = self.object.estimate_total
+        context['job_total_gross'], _ = compute_gross_tax(context['job_total_net'], TAX_RATE)
         return context
 
     def get_object(self):

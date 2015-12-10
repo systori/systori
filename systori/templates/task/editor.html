@@ -389,7 +389,7 @@
       text-align: right;
     }
 
-    .job-total, .job-total-tax {
+    .job-total, .job-total-gross {
       text-align: right;
       display: inline-block;
       border-top: 2px solid black;
@@ -427,12 +427,12 @@
 
     <div class="job-total-row">
       <div class="job-total-label">{% trans 'Total' %}</div>
-      <div class="job-total">{{ job_total|ubrdecimal }}</div>
+      <div class="job-total">{{ job_total_net|ubrdecimal }}</div>
     </div>
 
     <div class="job-total-row">
       <div class="job-total-label">{% trans 'incl. tax' %} {{ tax_rate_percent|localize }}%</div>
-      <div class="job-total-tax" data-tax-rate="{{ tax_rate }}">{{ job_total_tax|ubrdecimal }}</div>
+      <div class="job-total-gross" data-tax-rate="{{ tax_rate }}">{{ job_total_gross|ubrdecimal }}</div>
     </div>
   </ubr-job>
 
