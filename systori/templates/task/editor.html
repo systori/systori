@@ -355,6 +355,50 @@
       right: 10px;
     }
 
+    .editor-hint {
+      color: silver;
+      font-style: italic;
+      font-size: 85%;
+      display: none;
+      margin-top: 4px;
+      margin-left: 80px;
+      margin-bottom: 10px;
+    }
+
+    .editor-hint > .label-default {
+      background-color: silver;
+    }
+
+    .editor-hint .hidden {
+      display: none;
+    }
+
+    ubr-lineitem .editor-hint {
+      margin-left: 100px;
+    }
+
+    .job-total-row {
+      width: 900px;
+      margin-bottom: 10px;
+    }
+    
+    .job-total-label {
+      width: 780px;
+      display: inline-block;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    .job-total, .job-total-gross {
+      text-align: right;
+      display: inline-block;
+      border-top: 2px solid black;
+      font-weight: bold;
+      margin-left: 10px;
+      width: 100px;
+    }
+
+
   </style>
 
   <div id="mode-selector" class="btn-group-vertical" data-toggle="buttons">
@@ -381,6 +425,15 @@
       {% include "task/taskgroup_loop.html" with group=blank_taskgroup %}
     {% endfor %}
 
+    <div class="job-total-row">
+      <div class="job-total-label">{% trans 'Total' %}</div>
+      <div class="job-total">{{ job_total_net|ubrdecimal }}</div>
+    </div>
+
+    <div class="job-total-row">
+      <div class="job-total-label">{% trans 'incl. tax' %} {{ tax_rate_percent|localize }}%</div>
+      <div class="job-total-gross" data-tax-rate="{{ tax_rate }}">{{ job_total_gross|ubrdecimal }}</div>
+    </div>
   </ubr-job>
 
   <template id="taskgroup-template">

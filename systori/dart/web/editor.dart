@@ -249,11 +249,31 @@ abstract class UbrElement extends HtmlElement {
 class JobElement extends UbrElement {
     final child_element = "ubr-taskgroup";
 
+    DivElement total_view;
+    DivElement total_gross_view;
+    double tax_rate;
+
     int get child_zfill => int.parse(dataset['taskgroup-zfill']);
 
     int get child_offset => int.parse(dataset['taskgroup-offset']);
 
+    double get total => total_view != null ? parse_currency(total_view.text) : 0.0;
+    double get total_gross => total_gross_view != null ? parse_currency(total_gross_view.text) : 0.0;
+
+    set total(double calculated) => total_view.text = CURRENCY.format(calculated);
+    set total_gross(double calculated) => total_gross_view.text = CURRENCY.format(calculated);
+
     JobElement.created(): super.created() {
+        total_view = this.querySelector(":scope>.job-total");
+        total_gross_view = this.querySelector(":scope>.job-total-gross");
+        tax_rate = double.parse(total_gross_view.dataset['taxRate']);
+    }
+
+    update_totals() {
+        total = document.querySelectorAll(child_element)
+            .map((e) => e.total)
+            .fold(0, (a, b) => a + b);
+        total_gross = total + total * tax_rate;
     }
 }
 
@@ -267,6 +287,8 @@ abstract class EditableElement extends UbrElement {
     DivElement unit_view;
     DivElement price_view;
     DivElement total_view;
+
+    DivElement hint;
 
     ElementList<DivElement> input_views;
     Map<String, SpanElement> toggle_views = {};
@@ -312,6 +334,7 @@ abstract class EditableElement extends UbrElement {
         input_views = this.querySelectorAll(':scope>.editor [contenteditable]');
         streams.add(input_views.onBlur.listen(unfocus));
         input_views.onKeyDown.listen(handle_input);
+        input_views.onKeyUp.listen(handle_input_key_up);
         input_views.onFocus.listen((MouseEvent event) {
             if (!started)
                 start(focus: false);
@@ -390,6 +413,8 @@ abstract class EditableElement extends UbrElement {
                     ..collapseToEnd();
             });
         });
+
+        hint = this.querySelector(":scope>.editor>.editor-hint");
     }
 
     attached() {
@@ -444,8 +469,12 @@ abstract class EditableElement extends UbrElement {
         return !const ListEquality().equals(previous_values, _editable_values());
     }
 
+    bool is_name_blank() {
+        return name_view.text.length == 0;
+    }
+
     bool is_blank() {
-        return name_view.text.length == 0 && pk == null;
+        return this.is_name_blank() && pk == null;
     }
 
     bool can_delete() {
@@ -576,6 +605,10 @@ abstract class EditableElement extends UbrElement {
         }
     }
 
+    void handle_input_key_up(KeyboardEvent event) {
+        this._refresh_hint_context();
+    }
+
     void autocomplete(KeyboardEvent event) {
         switch (event.keyCode) {
             case KeyCode.UP:
@@ -660,6 +693,7 @@ abstract class EditableElement extends UbrElement {
         }
         classes.add('focused');
         started = true;
+        this.show_hint();
     }
 
     void stop_n_save() {
@@ -668,6 +702,7 @@ abstract class EditableElement extends UbrElement {
     }
 
     void stop() {
+        this.hide_hint();
         streams.forEach((s) => s.pause());
         classes.remove('focused');
         started = false;
@@ -812,6 +847,32 @@ abstract class EditableElement extends UbrElement {
         editor.classes.remove('hidden');
     }
 
+    void show_hint() {
+        if (hint != null) {
+            hint.style.display = 'block';
+            this._refresh_hint_context();
+        }
+    }
+
+    void hide_hint() {
+        if (hint != null) {
+            hint.style.display = 'none';
+        }
+    }
+
+    void _refresh_hint_context() {
+        var visible, hidden;
+        if (this.is_name_blank()) {
+            visible = hint.querySelectorAll('.blank');
+            hidden = hint.querySelectorAll('.non-blank');
+        }
+        else {
+            visible = hint.querySelectorAll('.non-blank');
+            hidden = hint.querySelectorAll('.blank');
+        }
+        visible.forEach((e) => e.classes.remove('hidden'));
+        hidden.forEach((e) => e.classes.add('hidden'));
+    }
 }
 
 
@@ -831,8 +892,11 @@ class TaskGroupElement extends EditableElement {
     }
 
     update_totals() {
-        var items = this.querySelectorAll(child_element).where((e) => e.truthy('is_optional') == false).map((e) => e.total);
-        total = items.fold(0, (a, b) => a + b);
+        total = this.querySelectorAll(child_element)
+            .where((e) => e.truthy('is_optional') == false)
+            .map((e) => e.total)
+            .fold(0, (a, b) => a + b);
+        parent.update_totals();
     }
 
 }
@@ -983,10 +1047,12 @@ class LineItemElement extends EditableElement {
 
 }
 
+
 setup_input_mode_buttons() {
     querySelector('#input-task-mode').onClick.listen((_) => INPUT_MODE = InputMode.TASK);
     querySelector('#input-lineitem-mode').onClick.listen((_) => INPUT_MODE = InputMode.LINEITEM);
 }
+
 
 void main() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
