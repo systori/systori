@@ -15,7 +15,7 @@ from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm, Entr
 from .forms import JobSiteForm, FilterForm
 from ..task.models import Job, TaskGroup
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
-from ..accounting.utils import get_transactions_for_jobs
+from ..accounting.report import get_transaction_report
 from ..accounting.models import Transaction, create_account_for_job
 from ..accounting.constants import TAX_RATE
 from .gaeb_utils import gaeb_import
@@ -141,7 +141,7 @@ class ProjectView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ProjectView, self).get_context_data(**kwargs)
-        context['transactions'] = get_transactions_for_jobs(self.object.jobs.all())
+        context['transaction_report'] = get_transaction_report(self.object.jobs.all())
         context['parent_invoices'] = self.object.invoices.filter(parent=None).prefetch_related('invoices').all()
         context['TAX_RATE_DISPLAY'] = '{}%'.format(ubrdecimal(TAX_RATE*100, 2))
         return context
