@@ -14,20 +14,20 @@
 
       <style>
 
-        tr > :nth-child(4), tr > th.invoice {
+        tr > :nth-child(6), tr > th.invoice {
           border-left: 2px solid #ddd;
         }
 
-        tr > :nth-child(6), tr > th.invoice {
+        tr > :nth-child(7), tr > th.invoice {
           border-right: 2px solid #ddd;
         }
 
-        tr > th.invoice, tr > th.totals {
+        tr > th.invoice, tr > th.totals, tr > th.net {
           text-align: center;
         }
 
         tr > .job-name,
-        tr > .job-debit {
+        tr > .job-amount-net {
           min-width: 180px!important;
         }
 
@@ -36,10 +36,10 @@
           min-width: 80px;
         }
 
-        .job-flat > input.form-control {
+        .job-amount-net > input.form-control {
+          display: inline-block;
           margin-top: -6px;
           width: 100px;
-          float: right;
           text-align: right;
         }
 
@@ -47,11 +47,7 @@
           color: lightgray;
         }
 
-        .job-row:not(.invoiced) .job-debit>span{
-          visibility: hidden;
-        }
-
-        textarea.job-debit-comment {
+        textarea.job-override-comment {
           opacity: 1;
           height: 50px;
           width: 100%;
@@ -59,68 +55,92 @@
           transition: all 0.5s ease 0.15s;
         }
 
-        .job-row:not(.invoiced) textarea.job-debit-comment,
-        .job-row:not(.flat) textarea.job-debit-comment {
+        .job-row:not(.invoiced) textarea.job-override-comment,
+        .job-row:not(.override) textarea.job-override-comment {
           opacity: 0;
           height: 1px;
           margin-top: -10px;
         }
 
+        .job-row .itemized-icon {
+          display: none;
+        }
+        .job-row.override .itemized-icon.glyphicon-tag,
+        .job-row:not(.override) .itemized-icon.glyphicon-list {
+          display: inline-block;
+        }
+
       </style>
       <h2 class="sub-header">{% trans "Debits" %}</h2>
-      <table is="job-table" class="table table-striped">
+      <table is="invoice-table" class="table table-striped">
         <thead>
         <tr>
-          <th colspan="3"></th>
-          <th colspan="3" class="invoice">{% trans 'Invoice' %}</th>
-          <th colspan="2" class="totals">{% trans 'Totals' %}</th>
+          <th colspan="2"></th>
+          <th colspan="3" class="net">{% trans 'Net' %}</th>
+          <th colspan="2" class="invoice">{% trans 'This Invoice' %}</th>
+          <th colspan="2" class="totals">{% trans 'All Invoices' %}</th>
         </tr>
         <tr>
           <th class="job-invoiced"></th>
           <th class="job-name">{% trans 'Job' %}</th>
-          <th class="job-estimate">{% trans 'Estimate' %}</th>
-          <th class="job-flat">{% trans 'Flat' %}</th>
-          <th class="job-itemized">{% trans 'Itemized' %}</th>
-          <th class="job-debit bg-info">{% trans 'New Debit' %}</th>
-          <th class="job-debited">{% trans 'Billed' %}</th>
+          <th class="job-estimated">{% trans 'Estimated' %}</th>
+          <th class="job-completed">{% trans 'Completed' %}</th>
+          <th class="job-billable"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> {% trans 'Billable' %}</th>
+          <th class="job-amount-net">{% trans 'Net' %}</th>
+          <th class="job-amount-gross bg-info">{% trans 'Gross' %} 19% {% trans 'VAT' %}</th>
+          <th class="job-debited">{% trans 'Gross Invoiced' %}</th>
           <th class="job-balance">{% trans 'Balance' %}</th>
         </tr>
         </thead>
         <tbody>
-        {% for job_form in form.forms %}
-          <tr is="job-row" class="job-row {% if job_form.is_invoiced.value %}invoiced{% endif %} {% if job_form.is_flat.value %}flat{% endif %}">
-            <td class="job-invoiced">{{ job_form.is_invoiced }}</td>
-            <td class="job-name">{{ job_form.job }}{{ job_form.initial.job.name }}</td>
-            <td class="job-estimate" data-amount="{{ job_form.latest_estimate }}">{{ job_form.latest_estimate|ubrdecimal:2 }}</td>
-            <td class="job-flat {% if job_form.flat_amount.errors %}has-error bg-danger{% endif %}">
-              {{ job_form.is_flat }}
-              {{ job_form.flat_amount }}
-              {% for error in job_form.flat_amount.errors %}
+        {% for debit_form in form.forms %}
+          <tr is="invoice-debit" class="job-row {% if debit_form.is_invoiced.value %}invoiced{% endif %} {% if debit_form.is_override.value %}override{% endif %}">
+            <td class="job-invoiced">{{ debit_form.is_invoiced }}</td>
+            <td class="job-name">{{ debit_form.job }}{{ debit_form.initial.job.name }}</td>
+            <td class="job-estimated" data-amount="{{ debit_form.latest_estimate_net }}">
+              {{ debit_form.latest_estimate_net|ubrdecimal:2 }}<br />
+              <input type="range" min="0" max="50" value="0" step="1" />
+            </td>
+            <td class="job-completed" data-amount="{{ debit_form.latest_itemized_net }}">
+              {{ debit_form.latest_itemized_net|ubrdecimal:2 }}<br />
+              {{ debit_form.latest_percent_complete }}%
+            </td>
+            <td class="job-billable" data-amount="{{ debit_form.debit_amount_net }}">{{ debit_form.debit_amount_net|ubrdecimal:2 }}</td>
+            <td class="job-amount-net {% if debit_form.amount_net.errors or debit_form.override_comment.errors %}has-error bg-danger{% endif %}">
+
+              <span class="glyphicon glyphicon-tag itemized-icon" aria-hidden="true"></span>
+              <span class="glyphicon glyphicon-list itemized-icon" aria-hidden="true"></span>
+              {{ debit_form.amount_net }}
+              {% for error in debit_form.amount_net.errors %}
                 <p class="help-block">{{ error }}</p>
               {% endfor %}
-            </td>
-            <td class="job-itemized" data-amount="{{ job_form.latest_itemized }}">{{ job_form.latest_itemized|ubrdecimal:2 }}</td>
-            <td class="job-debit {% if job_form.debit_comment.errors %}has-error bg-danger{% else %}bg-info{% endif %}">
-              {{ job_form.debit_amount }}
-              <div class="job-debit-amount">{{ job_form.debit_amount_decimal|ubrdecimal:2 }}</div>
-              {{ job_form.debit_comment }}
-              {% for error in job_form.debit_comment.errors %}
+
+              {{ debit_form.is_override }}
+              {{ debit_form.override_comment }}
+              {% for error in debit_form.override_comment.errors %}
                 <p class="help-block">{{ error }}</p>
               {% endfor %}
+
             </td>
-            <td class="job-debited" data-amount="{{ job_form.latest_debited_base }}">{{ job_form.latest_debited|ubrdecimal:2 }}</td>
-            <td class="job-balance" data-amount="{{ job_form.latest_balance_base }}">{{ job_form.latest_balance|ubrdecimal:2 }}</td>
+            <td class="job-amount-gross bg-info" data-amount="{{ debit_form.debit_amount_gross }}">
+              {{ debit_form.debit_amount_gross|ubrdecimal:2 }}
+            </td>
+            <td class="job-debited" data-base="{{ debit_form.base_debited_gross }}" data-new="{{ debit_form.new_debited_gross }}">{{ debit_form.new_debited_gross|ubrdecimal:2 }}</td>
+            <td class="job-balance" data-base="{{ debit_form.base_balance_gross }}" data-new="{{ debit_form.new_balance_gross }}">{{ debit_form.new_balance_gross|ubrdecimal:2 }}</td>
           </tr>
         {% endfor %}
           <tr class="job-table-totals">
             <td class="job-invoiced"></td>
             <td class="job-name"></td>
-            <td class="job-estimate">{{ form.estimate_total|ubrdecimal:2 }}</td>
-            <td class="job-flat"></td>
-            <td class="job-itemized">{{ form.itemized_total|ubrdecimal:2 }}</td>
-            <td class="job-debit">{{ form.debit_total|ubrdecimal:2 }}</td>
-            <td class="job-debited">{{ form.debited_total|ubrdecimal:2 }}</td>
-            <td class="job-balance">{{ form.balance_total|ubrdecimal:2 }}</td>
+            <td class="job-estimated"></td>
+            <td class="job-completed"></td>
+            <td class="job-billable"></td>
+
+            <td class="job-amount-net">{{ form.debit_net_total|ubrdecimal:2 }}</td>
+            <td class="job-amount-gross">{{ form.debit_gross_total|ubrdecimal:2 }}</td>
+
+            <td class="job-debited">{{ form.debited_gross_total|ubrdecimal:2 }}</td>
+            <td class="job-balance">{{ form.balance_gross_total|ubrdecimal:2 }}</td>
           </tr>
         </tbody>
       </table>

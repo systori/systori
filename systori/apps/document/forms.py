@@ -11,8 +11,9 @@ from systori.lib.fields import LocalizedDecimalField
 from .models import Proposal, Invoice, DocumentTemplate, Letterhead, DocumentSettings
 from ..project.models import Project
 from ..task.models import Job
-from ..accounting import skr03
+from ..accounting import workflow
 from ..accounting.constants import TAX_RATE
+from ..accounting.forms import BaseDebitTransactionForm, DebitForm
 from .type import invoice as invoice_lib
 from .letterhead_utils import clean_letterhead_pdf
 
@@ -86,124 +87,14 @@ class InvoiceDocumentForm(forms.ModelForm):
                 self.initial['footer'] = rendered['footer']
 
 
-class InvoiceDebitForm(Form):
-
-    is_invoiced = forms.BooleanField(initial=True, required=False)
-    job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.none(), widget=forms.HiddenInput())
-    flat_amount = LocalizedDecimalField(label=_("Flat"), max_digits=14, decimal_places=2, required=False)
-    is_flat = forms.BooleanField(initial=False, required=False, widget=forms.HiddenInput())
-    debit_amount = forms.DecimalField(label=_("Debit"), initial=Decimal(0.0), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
-    debit_comment = forms.CharField(widget=forms.Textarea, required=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.job = self.initial['job']
-        self.setup_accounting_data()
-        self.fields['job'].queryset = self.job.project.jobs.all()
-        self.fields['flat_amount'].widget.attrs['class'] = 'form-control'
-        if str(self['is_invoiced'].value()) == 'False':
-            self.fields['flat_amount'].widget.attrs['disabled'] = True
-        self.fields['debit_comment'].widget.attrs['class'] = 'job-debit-comment form-control'
-        del self.fields['debit_comment'].widget.attrs['cols']
-        del self.fields['debit_comment'].widget.attrs['rows']
-
-    def clean(self):
-        if self.cleaned_data['is_flat'] and\
-                len(self.cleaned_data['debit_comment']) < 2:
-            self.add_error('debit_comment',
-                    ValidationError(_("A comment is required for flat invoice.")))
-
-    def get_dict(self):
-        """
-        This dictionary later becomes the 'initial' value to this form when
-        editing the invoice.
-        """
-        return {
-            'job': self.job,
-            'is_invoiced': self.cleaned_data['is_invoiced'],
-            'flat_amount': self.cleaned_data['flat_amount'],
-            'is_flat': self.cleaned_data['is_flat'],
-            'debit_amount': self.cleaned_data['debit_amount'],
-            'debit_comment': self.cleaned_data['debit_comment'],
-            'debited': self.latest_debited,
-            'balance': self.latest_balance,
-            'estimate': self.latest_estimate,
-            'itemized': self.latest_itemized,
-        }
-
-    def setup_accounting_data(self):
-        self.latest_estimate = round(self.job.estimate_total * (1+TAX_RATE), 2)
-        self.latest_itemized = round(self.job.billable_total * (1+TAX_RATE), 2)
-
-        if self.initial['is_booked']:
-            # debit_amount comes in as a float from JSONField and as a string from form submission
-            # but we need it as a Decimal for pretty much everything
-            self.debit_amount_decimal = Decimal(str(self['debit_amount'].value()))
-
-            # this debit is already in accounting system, so we subtract it to get pre-debit totals
-            self.original_debit_amount = Decimal(str(self.initial['debit_amount']))
-            self.latest_debited = self.job.account.debits().total
-            self.latest_balance = self.job.account.balance
-            self.latest_debited_base = self.latest_debited - self.original_debit_amount
-            self.latest_balance_base = self.latest_balance - self.original_debit_amount
-
-            # update debit_amount for itemized invoices in case 'work completed' has changed
-            if str(self.initial['is_flat']) == 'False':
-                updated_debit = self.latest_itemized - self.latest_debited_base
-                self.debit_amount_decimal = updated_debit if updated_debit > 0 else Decimal(0.0)
-                self.initial['debit_amount'] = self.debit_amount_decimal
-
-            # previous values come from json, could be different from latest values
-            self.previous_debited = Decimal(self.initial['debited'])
-            self.previous_balance = Decimal(self.initial['balance'])
-            self.previous_estimate = Decimal(self.initial['estimate'])
-            self.previous_itemized = Decimal(self.initial['itemized'])
-
-        else:
-            # no transactions exist yet so the totals don't include debit, we add to final totals
-            self.latest_debited_base = self.job.account.debits().total
-            self.latest_balance_base = self.job.account.balance
-            if str(self['is_invoiced'].value()) == 'True' and str(self['is_flat'].value()) == 'False':
-                possible_debit = self.latest_itemized - self.latest_debited_base
-                self.initial['debit_amount'] = possible_debit if possible_debit > 0 else Decimal(0.0)
-            self.original_debit_amount = self.debit_amount_decimal = Decimal(str(self['debit_amount'].value()))
-            self.latest_debited = self.latest_debited_base + self.debit_amount_decimal
-            self.latest_balance = self.latest_balance_base + self.debit_amount_decimal
-
-            # latest and previous are the same
-            self.previous_debited = self.latest_debited
-            self.previous_balance = self.latest_balance
-            self.previous_estimate = self.latest_estimate
-            self.previous_itemized = self.latest_itemized
-
-        # used to show user what has changed since last time invoice was created/edited
-        self.diff_debited = self.latest_debited - self.previous_debited
-        self.diff_balance = self.latest_balance - self.previous_balance
-        self.diff_estimate = self.latest_estimate - self.previous_estimate
-        self.diff_itemized = self.latest_itemized - self.previous_itemized
-        self.diff_debit_amount = self.debit_amount_decimal - self.original_debit_amount
-
-
-class BaseInvoiceForm(BaseFormSet):
+class BaseInvoiceForm(BaseDebitTransactionForm):
 
     def __init__(self, *args, instance, jobs, **kwargs):
-        super().__init__(*args, prefix='job', initial=self.get_initial(instance, jobs), **kwargs)
+        super().__init__(*args, initial=self.get_initial(instance, jobs), **kwargs)
         self.invoice_form = InvoiceDocumentForm(*args, instance=instance, initial=instance.json, **kwargs)
 
-        self.estimate_total = Decimal(0.0)
-        self.itemized_total = Decimal(0.0)
-        self.debit_total = Decimal(0.0)
-        self.debited_total = Decimal(0.0)
-        self.balance_total = Decimal(0.0)
-        for form in self.forms:
-            if form['is_invoiced'].value():
-                self.estimate_total += form.latest_estimate
-                self.itemized_total += form.latest_itemized
-                self.debit_total += form.debit_amount_decimal
-                self.debited_total += form.latest_debited
-                self.balance_total += form.latest_balance
-
-    def get_initial(self, invoice, jobs):
+    @staticmethod
+    def get_initial(invoice, jobs):
         initial = []
         previous_debits = invoice.json['debits']
         for job in jobs:
@@ -234,40 +125,21 @@ class BaseInvoiceForm(BaseFormSet):
 
         invoice = self.invoice_form.instance
 
-        if invoice.transaction:
-            invoice.transaction.delete()
+
+        data = self.invoice_form.cleaned_data
+        del data['doc_template']  # don't need this
 
         invoice.letterhead = Letterhead.objects.first()
 
-        debits = []
-        for debit_form in self.forms:
-            if debit_form.cleaned_data['is_invoiced']:
-                debits.append(debit_form.get_dict())
+        old_transaction = invoice.transaction
 
-        data = self.invoice_form.cleaned_data
-
-        skr03_debits = [(debit['job'], debit['debit_amount'], debit['is_flat']) for debit in debits]
-        if data['is_final']:
-            invoice.transaction = skr03.final_debit(skr03_debits)
-        else:
-            invoice.transaction = skr03.partial_debit(skr03_debits)
+        invoice.transaction = self.save_debits(data['is_final'])
         invoice.save()
 
-        del data['doc_template']  # don't need this
+        if old_transaction:
+            old_transaction.delete()
 
-        data['debits'] = debits
-
-        data['debit_gross'] = self.debit_total
-        data['debit_net'] = round(self.debit_total / (1+TAX_RATE), 2)
-        data['debit_tax'] = data['debit_gross'] - data['debit_net']
-
-        data['debited_gross'] = self.debited_total
-        data['debited_net'] = round(self.debited_total / (1+TAX_RATE), 2)
-        data['debited_tax'] = data['debited_gross'] - data['debited_net']
-
-        data['balance_gross'] = self.balance_total
-        data['balance_net'] = round(self.balance_total / (1+TAX_RATE), 2)
-        data['balance_tax'] = data['balance_gross'] - data['balance_net']
+        data.update(self.get_data())
 
         json = invoice_lib.serialize(invoice, data)
 
@@ -277,7 +149,7 @@ class BaseInvoiceForm(BaseFormSet):
         invoice.save()
 
 
-InvoiceForm = formset_factory(InvoiceDebitForm, formset=BaseInvoiceForm, extra=0)
+InvoiceForm = formset_factory(DebitForm, formset=BaseInvoiceForm, extra=0)
 
 
 class LetterheadCreateForm(forms.ModelForm):

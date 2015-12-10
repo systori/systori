@@ -32,6 +32,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('document', '0002_auto_20150615_0046'),
+        ('company', '0003_auto_20150730_2333')
     ]
 
     operations = [
