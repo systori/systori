@@ -105,7 +105,7 @@
               {{ debit_form.latest_itemized_net|ubrdecimal:2 }}<br />
               {{ debit_form.latest_percent_complete }}%
             </td>
-            <td class="job-billable" data-amount="{{ debit_form.debit_amount_net }}">{{ debit_form.debit_amount_net|ubrdecimal:2 }}</td>
+            <td class="job-billable" data-amount="{{ debit_form.billable_amount_net }}">{{ debit_form.billable_amount_net|ubrdecimal:2 }}</td>
             <td class="job-amount-net {% if debit_form.amount_net.errors or debit_form.override_comment.errors %}has-error bg-danger{% endif %}">
 
               <span class="glyphicon glyphicon-tag itemized-icon" aria-hidden="true"></span>

@@ -105,8 +105,11 @@ class DebitForm(Form):
             self.latest_percent_complete = round((self.latest_itemized_net / self.latest_estimate_net) * 100, 2)
 
         try:
-            original_debit_amount_net = Decimal(str(self['amount_net'].value()))
-        except InvalidOperation:
+            amount_net_value = self['amount_net'].value()
+            original_debit_amount_net = self['amount_net'].field.to_python(amount_net_value)
+            if original_debit_amount_net is None:
+                original_debit_amount_net = Decimal('0.00')
+        except:
             original_debit_amount_net = Decimal('0.00')
 
         self.debit_amount_net = original_debit_amount_net
@@ -129,15 +132,18 @@ class DebitForm(Form):
             self.base_debited_net, self.base_debited_tax, self.base_debited_gross = self.job.account.debits().net_tax_gross
             self.base_balance_net, self.base_balance_tax, self.base_balance_gross = self.job.account.balance_net_tax_gross
 
+        # subtract the net of all previous debits from all work completed to get amount not yet debited
+        possible_debit_net = self.latest_itemized_net - self.base_debited_net
+        if possible_debit_net > 0:
+            self.billable_amount_net = possible_debit_net
+            self.billable_amount_gross = compute_gross_tax(possible_debit_net, TAX_RATE)[0]
+        else:
+            self.billable_amount_net = Decimal('0.00')
+            self.billable_amount_gross = Decimal('0.00')
+
         if str(self['is_override'].value()) == 'False':
-            # subtract the net of all previous debits from all work completed to get amount not yet debited
-            possible_debit_net = self.latest_itemized_net - self.base_debited_net
-            if possible_debit_net > 0:
-                self.debit_amount_net = self.initial['amount_net'] = possible_debit_net
-                self.debit_amount_gross = compute_gross_tax(possible_debit_net, TAX_RATE)[0]
-            else:
-                self.debit_amount_net = self.initial['amount_net'] = Decimal('0.00')
-                self.debit_amount_gross = Decimal('0.00')
+            self.debit_amount_net = self.initial['amount_net'] = self.billable_amount_net
+            self.debit_amount_gross = self.billable_amount_gross
 
         self.debit_amount_tax = self.debit_amount_gross - self.debit_amount_net
 

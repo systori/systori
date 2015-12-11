@@ -1,7 +1,7 @@
 from decimal import Decimal as D
 from django.test import TestCase
 from systori.apps.field.utils import days_ago
-from .report import get_transaction_report, generate_transaction_table
+from .report import prepare_transaction_report, generate_transaction_table
 from .models import Entry
 from .workflow import debit_jobs, credit_jobs
 from .test_workflow import create_data
@@ -12,7 +12,7 @@ class TestTransactionsTable(TestCase):
         create_data(self)
 
     def tbl(self):
-        txns = get_transaction_report([self.job])
+        txns = prepare_transaction_report([self.job])
         table = generate_transaction_table(txns)
         return [tuple(str(cell) for cell in row[:-1]) for row in table]
 

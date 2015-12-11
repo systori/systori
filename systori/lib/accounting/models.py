@@ -220,7 +220,7 @@ class BaseTransaction(models.Model):
         return False
 
     def save(self, **kwargs):
-        assert len(self._entries) >= 2  # we're doing 'double' entry accounting here people!
+        assert len(self._entries) == 0 or len(self._entries) >= 2
         assert self.is_balanced, "{} != {}".format(self._total('debit'), self._total('credit'))
         super().save(**kwargs)
         for item in self._entries:

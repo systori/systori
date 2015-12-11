@@ -94,7 +94,6 @@ class InvoiceDebit extends TableRowElement {
         if (is_invoiced) {
             classes.add('invoiced');
             net_amount_input.disabled = false;
-            update_debit();
         } else {
             classes.remove('invoiced');
             net_amount_input.disabled = true;
@@ -105,7 +104,6 @@ class InvoiceDebit extends TableRowElement {
         double percent = int.parse(flat_invoice_range_input.value)/100;
         net_amount_input.value = AMOUNT.format(net_estimate * percent);
         net_amount_changed(null);
-        classes.add('override');
     }
 
     net_amount_changed([_]) {
@@ -118,6 +116,14 @@ class InvoiceDebit extends TableRowElement {
         gross_debited_cell.text = AMOUNT.format(new_gross_debited);
         new_gross_balance = base_gross_balance+gross_amount;
         gross_balance_cell.text = AMOUNT.format(new_gross_balance);
+
+        if (net_amount == net_billable) {
+            is_override_input.value = 'False';
+            classes.remove('override');
+        } else {
+            is_override_input.value = 'True';
+            classes.add('override');
+        }
 
         (parent.parent as InvoiceTable).recalculate();
 

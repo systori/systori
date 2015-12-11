@@ -20,7 +20,7 @@ def _transaction_sort_key(txn):
     return txn_date+type_weight+txn_id
 
 
-def get_transaction_report(jobs, transacted_on_or_before=None):
+def prepare_transaction_report(jobs, transacted_on_or_before=None):
     """
     :param jobs: limit transaction details to specific set of jobs
     :param transacted_on_or_before: limit transactions up to and including a certain date

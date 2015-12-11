@@ -24,7 +24,7 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
-from systori.apps.accounting.report import get_transaction_report, generate_transaction_table
+from systori.apps.accounting.report import prepare_transaction_report, generate_transaction_table
 from systori.apps.accounting.constants import TAX_RATE
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b
@@ -330,7 +330,7 @@ def serialize(invoice_obj, data):
     if data.get('add_terms', False):
         invoice['add_terms'] = True  # TODO: Calculate the terms.
 
-    invoice.update(get_transaction_report([d['job'] for d in data['debits']]))
+    invoice.update(prepare_transaction_report([d['job'] for d in data['debits']]))
 
     for debit in data['debits']:
 
