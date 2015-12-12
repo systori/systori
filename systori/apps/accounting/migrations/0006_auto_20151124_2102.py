@@ -35,31 +35,50 @@ def set_missing_values(apps, schema_editor):
                 entry.tax_rate = D('0.19')
                 entry.save()
 
+        invoice_idx = 0
         for invoice in Invoice.objects.all():
             if 'debits' not in invoice.json:
                 continue
+
+            if invoice.id == 62:
+                pass
+
+            # TODO: write some unit tests to make sure that invoices created/updated set the correct document_date
+
+            if invoice.id in [73, 76, 77, 78]:
+                invoice.transaction.transacted_on = invoice.document_date
+                invoice.transaction.save()
+
+            #print(invoice.project_id, invoice.id)
+            assert invoice.transaction.transacted_on == invoice.document_date
 
             jobs = Job.objects.filter(id__in=[d['job.id'] for d in invoice.json['debits']])
             report = prepare_transaction_report(jobs, invoice.document_date)
 
             # make sure none of the totals or balances changed since that would be bad...
-            # TODO: project-106, invoice 62 was off by 6 euros....
-            # TODO: project-106, invoice 67 was off by 7 euros....
-            # TODO: project-106, invoice 70 was off by 1653 euros....
-            # TODO: project-97, invoice 73 was off by 8124 euros....
-            # TODO: project-64, invoice 77, 78 something is wrong on these....
-            if invoice.id not in [29, 31, 37, 39, 40, 44, 46, 47, 54, 55, 60, 62, 63, 67, 70, 71, 73, 77, 78] and company.name != 'Demo':  # these are off by one cent...
+            # project-99 and project-51 need to have invoice recreated to match previously generated invoice
+            # project-106, invoice 62 was off by 6 euros....
+            # project-106, invoice 67 was off by 7 euros....
+            # project-106, invoice 70 was off by 1653 euros....
+            if invoice.id not in [29, 31, 37, 39, 40, 44, 46, 54, 55, 60, 62, 63, 67, 70, 71] and company.name != 'Demo':  # these are off by one cent...
                 for field in ['debited_gross', 'debited_net', 'debited_tax']:
-                    print(invoice.project_id, invoice.id, D(report[field]), round(D(invoice.json[field]), 2), invoice.json[field])
+                    #print(invoice.project_id, invoice.id, D(report[field]), round(D(invoice.json[field]), 2), invoice.json[field])
                     assert D(report[field]) == round(D(invoice.json[field]), 2)
+            elif company.name != 'Demo':
+                invoice_idx += 1
+                for field in ['debited_gross', 'debited_net', 'debited_tax']:
+                    old = round(D(invoice.json[field]), 2)
+                    new = D(report[field])
+                    diff = new-old
+                    if diff != 0:
+                        print('{} | [{p}](https://systori.com/project-{pid}) | [{i}](https://systori.com/project-{pid}/invoice-print-{iid}.pdf) | {} | {} | {} | {}'.format(
+                                invoice_idx, field, old, new, diff,
+                                p=invoice.project.name, pid=invoice.project_id,
+                                i=invoice.json['title'], iid=invoice.id))
 
-            # TODO: project-51 invoice 47 has 0 gross but new report has a value
-            # TODO: project-99 invoice 51 incorrectly calculates the gross
-            # TODO: project-41 invoice 74 has incorrect json for last transaction... but PDF is generated correctly, WTF
-            # TODO: project-64 invoice 78 needs investigating, already mentioned above
-            if invoice.id not in [47, 51, 74, 75, 76, 78] and company.name != 'Demo':
-                print(invoice.project_id, invoice.id, D(report['transactions'][-1]['gross']), round(D(invoice.json['transactions'][-1]['gross']), 2))
-                assert D(report['transactions'][-1]['gross']) == round(D(invoice.json['transactions'][-1]['gross']), 2)
+            if company.name != 'Demo':
+                #print(invoice.project_id, invoice.id, D(report['transactions'][-1]['gross']), round(D(invoice.json['debit_gross']), 2))
+                assert D(report['transactions'][-1]['gross']) == round(D(invoice.json['debit_gross']), 2)
 
             for job in invoice.json['debits']:
                 job['amount_net'] = job['debit_net']
@@ -85,6 +104,7 @@ class Migration(migrations.Migration):
         ('accounting', '0005_entry_job'),
         ('document', '0006_auto_20151119_2148'),
         ('task', '0007_job_is_revenue_recognized'),
+        ('project', '0005_remove_project_account')
     ]
 
     operations = [

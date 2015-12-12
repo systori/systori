@@ -134,16 +134,16 @@ class DebitForm(Form):
 
         # subtract the net of all previous debits from all work completed to get amount not yet debited
         possible_debit_net = self.latest_itemized_net - self.base_debited_net
-        if possible_debit_net > 0:
-            self.billable_amount_net = possible_debit_net
-            self.billable_amount_gross = compute_gross_tax(possible_debit_net, TAX_RATE)[0]
-        else:
-            self.billable_amount_net = Decimal('0.00')
-            self.billable_amount_gross = Decimal('0.00')
+        self.billable_amount_net = possible_debit_net
+        self.billable_amount_gross = compute_gross_tax(possible_debit_net, TAX_RATE)[0]
 
         if str(self['is_override'].value()) == 'False':
-            self.debit_amount_net = self.initial['amount_net'] = self.billable_amount_net
-            self.debit_amount_gross = self.billable_amount_gross
+            if possible_debit_net > 0:
+                self.debit_amount_net = self.initial['amount_net'] = possible_debit_net
+                self.debit_amount_gross = compute_gross_tax(possible_debit_net, TAX_RATE)[0]
+            else:
+                self.debit_amount_net = Decimal('0.00')
+                self.debit_amount_gross = Decimal('0.00')
 
         self.debit_amount_tax = self.debit_amount_gross - self.debit_amount_net
 

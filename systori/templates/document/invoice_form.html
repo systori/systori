@@ -14,11 +14,11 @@
 
       <style>
 
-        tr > :nth-child(6), tr > th.invoice {
+        tr > :nth-child(7), tr > th.invoice {
           border-left: 2px solid #ddd;
         }
 
-        tr > :nth-child(7), tr > th.invoice {
+        tr > :nth-child(8), tr > th.invoice {
           border-right: 2px solid #ddd;
         }
 
@@ -66,7 +66,7 @@
           display: none;
         }
         .job-row.override .itemized-icon.glyphicon-tag,
-        .job-row:not(.override) .itemized-icon.glyphicon-list {
+        .job-row.itemized .itemized-icon.glyphicon-list {
           display: inline-block;
         }
 
@@ -76,15 +76,16 @@
         <thead>
         <tr>
           <th colspan="2"></th>
-          <th colspan="3" class="net">{% trans 'Net' %}</th>
+          <th colspan="4" class="net">{% trans 'Net' %}</th>
           <th colspan="2" class="invoice">{% trans 'This Invoice' %}</th>
           <th colspan="2" class="totals">{% trans 'All Invoices' %}</th>
         </tr>
         <tr>
           <th class="job-invoiced"></th>
           <th class="job-name">{% trans 'Job' %}</th>
-          <th class="job-estimated">{% trans 'Estimated' %}</th>
-          <th class="job-completed">{% trans 'Completed' %}</th>
+          <th class="job-estimated">{% trans 'Estimate' %}</th>
+          <th class="job-completed">{% trans 'Progress' %}</th>
+          <th class="job-billed">{% trans 'Billed' %}</th>
           <th class="job-billable"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> {% trans 'Billable' %}</th>
           <th class="job-amount-net">{% trans 'Net' %}</th>
           <th class="job-amount-gross bg-info">{% trans 'Gross' %} 19% {% trans 'VAT' %}</th>
@@ -94,7 +95,7 @@
         </thead>
         <tbody>
         {% for debit_form in form.forms %}
-          <tr is="invoice-debit" class="job-row {% if debit_form.is_invoiced.value %}invoiced{% endif %} {% if debit_form.is_override.value %}override{% endif %}">
+          <tr is="invoice-debit" class="job-row {% if debit_form.is_invoiced.value %}invoiced{% endif %} {% if debit_form.is_override.value %}override{% elif debit_form.debit_amount_net > 0 and debit_form.debit_amount_net == debit_form.billable_amount_net %}itemized{% endif %}">
             <td class="job-invoiced">{{ debit_form.is_invoiced }}</td>
             <td class="job-name">{{ debit_form.job }}{{ debit_form.initial.job.name }}</td>
             <td class="job-estimated" data-amount="{{ debit_form.latest_estimate_net }}">
@@ -105,7 +106,14 @@
               {{ debit_form.latest_itemized_net|ubrdecimal:2 }}<br />
               {{ debit_form.latest_percent_complete }}%
             </td>
-            <td class="job-billable" data-amount="{{ debit_form.billable_amount_net }}">{{ debit_form.billable_amount_net|ubrdecimal:2 }}</td>
+            <td class="job-billed" data-amount="{{ debit_form.base_debited_net }}">
+              {{ debit_form.base_debited_net|ubrdecimal:2 }}
+            </td>
+            <td class="job-billable" data-amount="{{ debit_form.billable_amount_net }}">
+              {% if debit_form.billable_amount_net < 0 %}<span class="text-danger">{% endif %}
+              {{ debit_form.billable_amount_net|ubrdecimal:2 }}
+              {% if debit_form.billable_amount_net < 0 %}</span>{% endif %}
+            </td>
             <td class="job-amount-net {% if debit_form.amount_net.errors or debit_form.override_comment.errors %}has-error bg-danger{% endif %}">
 
               <span class="glyphicon glyphicon-tag itemized-icon" aria-hidden="true"></span>
@@ -134,6 +142,7 @@
             <td class="job-name"></td>
             <td class="job-estimated"></td>
             <td class="job-completed"></td>
+            <td class="job-billed"></td>
             <td class="job-billable"></td>
 
             <td class="job-amount-net">{{ form.debit_net_total|ubrdecimal:2 }}</td>

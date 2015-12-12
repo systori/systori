@@ -117,12 +117,16 @@ class InvoiceDebit extends TableRowElement {
         new_gross_balance = base_gross_balance+gross_amount;
         gross_balance_cell.text = AMOUNT.format(new_gross_balance);
 
-        if (net_amount == net_billable) {
-            is_override_input.value = 'False';
-            classes.remove('override');
-        } else {
-            is_override_input.value = 'True';
-            classes.add('override');
+        classes.remove('override');
+        classes.remove('itemized');
+        if (net_amount > 0) {
+            if (net_amount == net_billable) {
+                is_override_input.value = 'False';
+                classes.add('itemized');
+            } else {
+                is_override_input.value = 'True';
+                classes.add('override');
+            }
         }
 
         (parent.parent as InvoiceTable).recalculate();
