@@ -155,6 +155,13 @@ class DebitForm(Form):
         self.new_balance_net = self.base_balance_net + self.debit_amount_net
         self.new_balance_tax = self.new_balance_gross + self.new_balance_net
 
+        self.new_debited_percent = 0
+        if self.latest_estimate_net > 0:
+            if self.new_debited_net >= self.latest_estimate_net:
+                self.new_debited_percent = 100
+            else:
+                self.new_debited_percent = round((self.new_debited_net / self.latest_estimate_net) * 100, 2)
+
         if self.initial['is_booked']:
             # previous values come from json, could be different from latest values
             self.previous_debited_gross = Decimal(str(self.initial['debited_gross']))

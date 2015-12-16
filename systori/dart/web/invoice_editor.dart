@@ -8,34 +8,19 @@ NumberFormat AMOUNT = new NumberFormat("#,###,###,##0.00");
 
 class InvoiceTable extends TableElement {
     TableCellElement debit_net_total;
-    TableCellElement debit_gross_total;
-    TableCellElement debited_gross_total;
-    TableCellElement balance_gross_total;
 
     InvoiceTable.created() : super.created() {
         TableRowElement totals = this.querySelector(":scope tr.job-table-totals");
         this.debit_net_total = totals.querySelector(":scope>.job-amount-net");
-        this.debit_gross_total = totals.querySelector(":scope>.job-amount-gross");
-        this.debited_gross_total = totals.querySelector(":scope>.job-debited");
-        this.balance_gross_total = totals.querySelector(":scope>.job-balance");
     }
 
     recalculate() {
         double debit_net = 0.0;
-        double debit_gross = 0.0;
-        double debited = 0.0;
-        double balance = 0.0;
         var invoiced = this.querySelectorAll(":scope tr.job-row.invoiced");
         for (InvoiceDebit row in invoiced) {
             debit_net += row.net_amount;
-            debit_gross += row.gross_amount;
-            debited += row.new_gross_debited;
-            balance += row.new_gross_balance;
         }
         debit_net_total.text = AMOUNT.format(debit_net);
-        debit_gross_total.text = AMOUNT.format(debit_gross);
-        debited_gross_total.text = AMOUNT.format(debited);
-        balance_gross_total.text = AMOUNT.format(balance);
     }
 }
 
@@ -48,46 +33,38 @@ class InvoiceDebit extends TableRowElement {
     TextAreaElement override_comment_input;
 
     TableCellElement net_estimate_cell;
-    TableCellElement net_billable_cell;
-    TableCellElement gross_amount_cell;
-    TableCellElement gross_debited_cell;
-    TableCellElement gross_balance_cell;
+    TableCellElement net_invoiced_cell;
+    TableCellElement net_itemized_cell;
 
-    double net_amount;
-    double gross_amount;
     double net_estimate;
-    double net_billable;
-    double new_gross_debited;
-    double new_gross_balance;
-    double base_gross_debited;
-    double base_gross_balance;
+    double net_invoiced;
+    double net_itemized;
+    double net_amount;
 
     bool get is_invoiced => is_invoiced_input.checked;
 
     InvoiceDebit.created() : super.created() {
         this.is_invoiced_input = this.querySelector('[name^="job-"][name\$="-is_invoiced"]');
         this.is_invoiced_input.onChange.listen(invoicing_toggled);
+
+        this.net_estimate_cell = this.querySelector(":scope>.job-estimated");
+        this.net_estimate = double.parse(net_estimate_cell.dataset['amount']);
+        this.net_invoiced_cell = this.querySelector(":scope>.job-debited");
+        this.net_invoiced = double.parse(net_invoiced_cell.dataset['amount']);
+
         this.flat_invoice_range_input = this.querySelector('[type="range"]');
         this.flat_invoice_range_input.onInput.listen(flat_invoice_range_changed);
+        this.querySelectorAll('.percent-button').onClick.listen(flat_invoice_percent_clicked);
+
+        this.net_itemized_cell = this.querySelector(":scope>.job-itemized");
+        this.net_itemized_cell.onClick.listen(itemized_value_clicked);
+        this.net_itemized = double.parse(net_itemized_cell.dataset['amount']);
+
         this.net_amount_input = this.querySelector('[name^="job-"][name\$="-amount_net"]');
         this.net_amount_input.onKeyUp.listen(net_amount_changed);
+        this.net_amount = double.parse(net_amount_input.value);
         this.is_override_input = this.querySelector('[name^="job-"][name\$="-is_override"]');
         this.override_comment_input = this.querySelector('[name^="job-"][name\$="-override_comment"]');
-
-        this.net_billable_cell = this.querySelector(":scope>.job-billable");
-        this.net_estimate_cell = this.querySelector(":scope>.job-estimated");
-        this.gross_amount_cell = this.querySelector(":scope>.job-amount-gross");
-        this.gross_debited_cell = this.querySelector(":scope>.job-debited");
-        this.gross_balance_cell = this.querySelector(":scope>.job-balance");
-
-        this.net_amount = double.parse(net_amount_input.value);
-        this.gross_amount = double.parse(gross_amount_cell.dataset['amount']);
-        this.net_billable = double.parse(net_billable_cell.dataset['amount']);
-        this.net_estimate = double.parse(net_estimate_cell.dataset['amount']);
-        this.new_gross_debited = double.parse(gross_debited_cell.dataset['new']);
-        this.new_gross_balance = double.parse(gross_balance_cell.dataset['new']);
-        this.base_gross_debited = double.parse(gross_debited_cell.dataset['base']);
-        this.base_gross_balance = double.parse(gross_balance_cell.dataset['base']);
     }
 
     invoicing_toggled(Event e) {
@@ -102,25 +79,47 @@ class InvoiceDebit extends TableRowElement {
 
     flat_invoice_range_changed(Event e) {
         double percent = int.parse(flat_invoice_range_input.value)/100;
-        net_amount_input.value = AMOUNT.format(net_estimate * percent);
-        net_amount_changed(null);
+        double flat = net_estimate * percent - net_invoiced;
+        update_net_amount(flat < 0 ? 0 : flat);
     }
 
-    net_amount_changed([_]) {
+    flat_invoice_percent_clicked(Event e) {
+        double percent = double.parse((e.target as AnchorElement).dataset['percent'])/100;
+        double flat = net_estimate * percent - net_invoiced;
+        update_net_amount(flat < 0 ? 0 : flat);
+        update_range_slider();
+    }
 
-        net_amount = parse_currency(net_amount_input.value);
-        gross_amount = net_amount * 1.19;
+    itemized_value_clicked(Event e) {
+        update_net_amount(net_itemized);
+        update_range_slider();
+    }
 
-        gross_amount_cell.text = AMOUNT.format(gross_amount);
-        new_gross_debited = base_gross_debited+gross_amount;
-        gross_debited_cell.text = AMOUNT.format(new_gross_debited);
-        new_gross_balance = base_gross_balance+gross_amount;
-        gross_balance_cell.text = AMOUNT.format(new_gross_balance);
+    net_amount_changed(Event e) {
+        update_net_amount();
+        update_range_slider();
+    }
 
+    update_range_slider() {
+        var invoiced_total = net_invoiced + net_amount;
+        if (invoiced_total > net_estimate) {
+            flat_invoice_range_input.value = '100';
+        } else {
+            flat_invoice_range_input.value = (invoiced_total / net_estimate * 100).round().toString();
+        }
+    }
+
+    update_net_amount([double amount]) {
+        if (amount != null) {
+            net_amount = amount;
+            net_amount_input.value = AMOUNT.format(amount);
+        } else {
+            net_amount = parse_currency(net_amount_input.value);
+        }
         classes.remove('override');
         classes.remove('itemized');
         if (net_amount > 0) {
-            if (net_amount == net_billable) {
+            if (net_amount == net_itemized) {
                 is_override_input.value = 'False';
                 classes.add('itemized');
             } else {
@@ -128,33 +127,7 @@ class InvoiceDebit extends TableRowElement {
                 classes.add('override');
             }
         }
-
         (parent.parent as InvoiceTable).recalculate();
-
-        /*
-        double debit = 0.0;
-        if (this.flat_amount_input.value.length > 0) {
-            double flat_amount = 0.0;
-            try {
-                flat_amount = parse_decimal(this.flat_amount_input.value);
-            } on FormatException catch (e) {}
-            if (flat_amount > this.itemized) {
-                debit = flat_amount - this.original_debited;
-                if (debit > 0.0) {
-                    debit_amount = debit;
-                    is_flat_input.value = "True";
-                    classes.add('flat');
-                    return;
-                }
-            }
-        }
-        if (this.itemized > this.original_debited) {
-            debit = this.itemized - this.original_debited;
-        }
-        debit_amount = debit;
-        is_flat_input.value = "False";
-        classes.remove('flat');
-        */
     }
 
 }

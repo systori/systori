@@ -134,6 +134,11 @@ class InvoiceFormMixin:
     model = Invoice
     form_class = InvoiceForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['PERCENT_RANGE'] = [5, 20, 25, 30, 50, 75, 100]
+        return context
+
     def get_form_kwargs(self):
         jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems').all()
         kwargs = {
