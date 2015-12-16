@@ -35,12 +35,16 @@ def set_missing_values(apps, schema_editor):
                 entry.tax_rate = D('0.19')
                 entry.save()
 
+            if entry.id in [865, 866]:  # increases discount applied to job account, both entries
+                entry.amount -= D('0.01')
+                entry.save()
+
         invoice_idx = 0
         for invoice in Invoice.objects.all():
             if 'debits' not in invoice.json:
                 continue
 
-            if invoice.id == 62:
+            if invoice.id == 81:
                 pass
 
             # TODO: write some unit tests to make sure that invoices created/updated set the correct document_date
