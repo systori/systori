@@ -226,6 +226,9 @@ class Letterhead(models.Model):
 
     debug = models.BooleanField(_("Debug Mode"), default=True)
 
+    def __str__(self):
+        return self.name
+
 
 class DocumentSettings(models.Model):
     language = models.CharField(_('language'), unique=True, default=settings.LANGUAGE_CODE, choices=settings.LANGUAGES, max_length=2)

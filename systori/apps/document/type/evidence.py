@@ -4,7 +4,7 @@ from datetime import date
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph, Table, TableStyle, PageBreak
+from reportlab.platypus import Table, TableStyle, PageBreak
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
 
@@ -14,16 +14,22 @@ from django.utils.translation import ugettext as _
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 
 from .style import p, b, br, nr
+from .style import calculate_table_width_and_pagesize
+from .style import LetterheadCanvas, SystoriDocument
 
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-def render(project):
+def render(project, letterhead):
 
     with BytesIO() as buffer:
 
+        table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
+
         proposal_date = date_format(date.today(), use_l10n=True)
+
+        doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         COLS = 55
         ROWS = 25
@@ -68,13 +74,6 @@ def render(project):
         if not pages:
             pages.append(b(_('There are no billable Tasks available.')))
 
-        doc = SimpleDocTemplate(buffer,
-                pagesize = landscape(A4),
-                topMargin = 20*mm,
-                bottomMargin = 34*mm,
-                leftMargin = 11*mm,
-                rightMargin = 11*mm)
-
-        doc.build(pages, Canvas)
+        doc.build(pages, LetterheadCanvas.factory(letterhead), letterhead)
 
         return buffer.getvalue()
