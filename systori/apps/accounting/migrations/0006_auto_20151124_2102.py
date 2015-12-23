@@ -35,16 +35,16 @@ def set_missing_values(apps, schema_editor):
                 entry.tax_rate = D('0.19')
                 entry.save()
 
-            if entry.id in [865, 866]:  # increases discount applied to job account, both entries
-                entry.amount -= D('0.01')
-                entry.save()
+            #if entry.id in [865, 866]:  # increases discount applied to job account, both entries
+            #    entry.amount -= D('0.01')
+            #    entry.save()
 
         invoice_idx = 0
         for invoice in Invoice.objects.all():
             if 'debits' not in invoice.json:
                 continue
 
-            if invoice.id == 81:
+            if invoice.id == 54:
                 pass
 
             # TODO: write some unit tests to make sure that invoices created/updated set the correct document_date
@@ -59,17 +59,20 @@ def set_missing_values(apps, schema_editor):
             jobs = Job.objects.filter(id__in=[d['job.id'] for d in invoice.json['debits']])
             report = prepare_transaction_report(jobs, invoice.document_date)
 
-            # make sure none of the totals or balances changed since that would be bad...
-            # project-99 and project-51 need to have invoice recreated to match previously generated invoice
-            # project-106, invoice 62 was off by 6 euros....
-            # project-106, invoice 67 was off by 7 euros....
-            # project-106, invoice 70 was off by 1653 euros....
-            # project-106, invoice 81 was off....
-            if invoice.id not in [29, 31, 37, 39, 40, 44, 46, 54, 55, 60, 62, 63, 67, 70, 71, 81] and company.name != 'Demo':  # these are off by one cent...
-                for field in ['debited_gross', 'debited_net', 'debited_tax']:
-                    #print(invoice.project_id, invoice.id, D(report[field]), round(D(invoice.json[field]), 2), invoice.json[field])
-                    assert D(report[field]) == round(D(invoice.json[field]), 2)
-            elif company.name != 'Demo':
+            debited_net = D('0')
+            for debit in invoice.json['debits']:
+                for taskgroup in debit['taskgroups']:
+                    debited_net += round(D(taskgroup['total']), 2)
+
+            # these actually had the wrong net calculation, probably because invoices used to be entered with gross
+            # 75, 76, 77 = flat invoice
+            if invoice.id not in [44, 46, 63, 69, 74, 75, 76, 77, 78, 81] and company.name != 'Demo':
+                #print(invoice.project_id, invoice.id, debited_net, round(D(invoice.json['debited_net']), 2))
+                assert debited_net == round(D(invoice.json['debited_net']), 2)
+
+            if company.name != 'Demo' and\
+                    (abs(D(report['debited_net']) - round(D(invoice.json['debited_net']), 2)) > 0 or\
+                     abs(D(report['debited_gross']) - round(D(invoice.json['debited_gross']), 2)) > 0):
                 invoice_idx += 1
                 for field in ['debited_gross', 'debited_net', 'debited_tax']:
                     old = round(D(invoice.json[field]), 2)
@@ -82,7 +85,6 @@ def set_missing_values(apps, schema_editor):
                                 i=invoice.json['title'], iid=invoice.id))
 
             if company.name != 'Demo':
-                #print(invoice.project_id, invoice.id, D(report['transactions'][-1]['gross']), round(D(invoice.json['debit_gross']), 2))
                 assert D(report['transactions'][-1]['gross']) == round(D(invoice.json['debit_gross']), 2)
 
             for job in invoice.json['debits']:
@@ -136,7 +138,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='transaction',
             name='transaction_type',
-            field=models.CharField(max_length=32, choices=[('invoice', 'Invoice'), ('final-invoice', 'Final Invoice'), ('payment', 'Payment'), ('adjustment', 'Adjustment')], verbose_name='Transaction Type', null=True),
+            field=models.CharField(verbose_name='Transaction Type', choices=[('invoice', 'Invoice'), ('payment', 'Payment'), ('adjustment', 'Adjustment')], max_length=32, null=True),
         ),
         migrations.AddField(
             model_name='transaction',

@@ -12,34 +12,43 @@ from ..task.models import Job
 from .workflow import Account, credit_jobs, debit_jobs
 from .constants import TAX_RATE, BANK_CODE_RANGE
 from .models import Entry
+from ..document.models import Invoice
 
 
 class PaymentForm(Form):
     bank_account = forms.ModelChoiceField(label=_("Bank Account"), queryset=Account.objects.banks())
     amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
     transacted_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
+    invoice = forms.ModelChoiceField(label=_("Invoice"), queryset=Invoice.objects.all(), widget=forms.HiddenInput(), required=False)
 
 
 class SplitPaymentForm(Form):
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
-    amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4, required=False)
-    discount = forms.TypedChoiceField(
-        label=_('Is discounted?'),
-        coerce=Decimal,
-        choices=[
-            ('0', _('No discount applied')),
-            ('0.02', _('2%')),
-            ('0.03', _('3%')),
-            ('0.1', _('10%')),
-        ]
-    )
+    amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=2, required=False)
+    discount = LocalizedDecimalField(label=_("Discount"), max_digits=14, decimal_places=2, required=False)
+    adjustment = LocalizedDecimalField(label=_("Adjustment"), max_digits=14, decimal_places=2, required=False)
 
 
 class BaseSplitPaymentFormSet(BaseFormSet):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, prefix='split', initial=[{'job': job} for job in kwargs.pop('jobs', [])], **kwargs)
-        self.payment_form = PaymentForm(*args, **kwargs)
+        initial = kwargs.pop('initial', {})
+        super().__init__(*args, prefix='split', initial=self.get_initial(initial.get('invoice'), kwargs.pop('jobs', [])), **kwargs)
+        self.payment_form = PaymentForm(*args, initial=initial, **kwargs)
+
+    @staticmethod
+    def get_initial(invoice, jobs):
+        initial = []
+        previous_debits = invoice.json['debits'] if invoice else []
+        for job in jobs:
+            job_dict = {}
+            for debit in previous_debits:
+                if debit['job.id'] == job.id:
+                    job_dict['amount'] = debit['amount_gross']
+                    break
+            job_dict['job'] = job
+            initial.append(job_dict)
+        return initial
 
     def is_valid(self):
         payment_valid = self.payment_form.is_valid()
@@ -60,9 +69,10 @@ class BaseSplitPaymentFormSet(BaseFormSet):
         for split in self.forms:
             if split.cleaned_data['amount']:
                 job = split.cleaned_data['job']
-                amount = split.cleaned_data['amount']
-                discount = split.cleaned_data['discount']
-                splits.append((job, amount, discount))
+                amount = split.cleaned_data['amount'] or Decimal(0)
+                discount = split.cleaned_data['discount'] or Decimal(0)
+                adjustment = split.cleaned_data['adjustment'] or Decimal(0)
+                splits.append((job, amount, discount, adjustment))
         return splits
 
     def save(self):
@@ -100,9 +110,7 @@ class DebitForm(Form):
 
         self.latest_estimate_net = self.job.estimate_total
         self.latest_itemized_net = self.job.billable_total
-        self.latest_percent_complete = 0
-        if self.latest_estimate_net > 0:
-            self.latest_percent_complete = round((self.latest_itemized_net / self.latest_estimate_net) * 100, 2)
+        self.latest_percent_complete = self.job.complete_percent
 
         try:
             amount_net_value = self['amount_net'].value()

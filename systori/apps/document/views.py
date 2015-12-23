@@ -193,12 +193,14 @@ class InvoiceTransition(SingleObjectMixin, View):
                 transition = t
                 break
 
-        if transition:
+        if transition.name == 'pay':
+            return HttpResponseRedirect(reverse('payment.create', args=[doc.project.id, doc.id]))
+
+        else:
             getattr(doc, transition.name)()
             doc.save()
 
-        return HttpResponseRedirect(reverse('project.view',
-                                            args=[doc.project.id]))
+        return HttpResponseRedirect(reverse('project.view', args=[doc.project.id]))
 
 
 class InvoiceDelete(DeleteView):

@@ -93,7 +93,7 @@ class Invoice(Document):
     def send(self):
         self.transaction.finalize()
 
-    @transition(field=status, source=SENT, target=PAID, custom={'label': _("Mark Paid")})
+    @transition(field=status, source=SENT, target=PAID, custom={'label': _("Pay")})
     def pay(self):
         pass
 

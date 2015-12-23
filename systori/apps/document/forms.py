@@ -125,7 +125,6 @@ class BaseInvoiceForm(BaseDebitTransactionForm):
 
         invoice = self.invoice_form.instance
 
-
         data = self.invoice_form.cleaned_data
         del data['doc_template']  # don't need this
 

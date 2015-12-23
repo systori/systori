@@ -8,28 +8,36 @@
 
     {{ form.payment_form|bootstrap }}
 
+    <style>
+      .numeric-column {
+        text-align: right;
+      }
+    </style>
+
     <div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
     {{ form.management_form }}
     <table class="table table-striped">
       <thead>
       <tr>
         <th>{% trans 'Job' %}</th>
-        <th style="text-align: right;">{% trans 'Balance' %}</th>
-        <th style="text-align: right;">{% trans 'Credit' %}</th>
-        <th>{% trans 'Is Discounted?' %}</th>
+        <th class="numeric-column">{% trans 'Starting Balance' %}</th>
+        <th class="numeric-column">{% trans 'Payment' %}</th>
+        <th class="numeric-column">{% trans 'Discount' %}</th>
+        <th class="numeric-column">{% trans 'Adjustment' %}</th>
       </tr>
       </thead>
       <tbody>
       {% for split in form.forms %}
         <tr>
           <td>{{ split.job }}{{ split.initial.job.name }}</td>
-          <td style="text-align: right;">{{ split.initial.job.account.balance|money }}</td>
-          <td class="split-input" style="text-align: right;"
+          <td class="numeric-column">{{ split.initial.job.account.balance|money }}</td>
+          <td class="numeric-column split-input"
               data-balance="{{ split.initial.job.account.balance }}"
               data-ratio="{{ split.initial.job.account.balance|divide:project.balance }}">
             {{ split.amount }}
           </td>
-          <td>{{ split.discount }}</td>
+          <td class="numeric-column">{{ split.discount }}</td>
+          <td class="numeric-column">{{ split.adjustment }}</td>
         </tr>
       {% endfor %}
       </tbody>

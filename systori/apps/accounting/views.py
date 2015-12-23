@@ -13,6 +13,12 @@ class PaymentCreate(FormView):
 
     def get_form_kwargs(self):
         kwargs = {'jobs': self.request.project.jobs.all()}
+        if 'invoice_pk' in self.kwargs:
+            invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
+            kwargs['initial'] = {
+                'invoice': invoice,
+                'amount': invoice.json['debit_gross'],
+            }
         if self.request.method == 'POST':
             kwargs['data'] = self.request.POST
         return kwargs
