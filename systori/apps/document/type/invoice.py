@@ -324,8 +324,6 @@ def serialize(invoice_obj, data):
     if data.get('add_terms', False):
         invoice['add_terms'] = True  # TODO: Calculate the terms.
 
-    invoice.update(prepare_transaction_report([d['job'] for d in data['debits']]))
-
     for debit in data['debits']:
 
         job = debit.pop('job')

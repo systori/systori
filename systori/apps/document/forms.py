@@ -16,6 +16,7 @@ from ..accounting.constants import TAX_RATE
 from ..accounting.forms import BaseDebitTransactionForm, DebitForm
 from .type import invoice as invoice_lib
 from .letterhead_utils import clean_letterhead_pdf
+from systori.apps.accounting.report import prepare_transaction_report, generate_transaction_table
 
 
 class ProposalForm(forms.ModelForm):
@@ -146,6 +147,15 @@ class BaseInvoiceForm(BaseDebitTransactionForm):
         invoice.json = json
         invoice.json_version = json['version']
         invoice.save()
+
+        self.debits = []
+        for debit_form in self.forms:
+            if debit_form.cleaned_data['is_invoiced']:
+                self.debits.append(debit_form.get_initial())
+
+        invoice.json.update(prepare_transaction_report([d['job'] for d in self.debits]))
+        invoice.save()
+
 
 
 InvoiceForm = formset_factory(DebitForm, formset=BaseInvoiceForm, extra=0)
