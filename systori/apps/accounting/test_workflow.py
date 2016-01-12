@@ -51,13 +51,13 @@ class TestCompletedContractAccountingMethod(TestCase):
         self.assertEquals(job, self.job.account.balance)
 
         if job_debits is None:
-            job_debits = self.job.account.debits().total
+            job_debits = self.job.account.debits().sum
         else:
-            self.assertEquals(job_debits, self.job.account.debits().total)
+            self.assertEquals(job_debits, self.job.account.debits().sum)
 
         if job_adjusted_debits is None:
             job_adjusted_debits = job_debits
-        self.assertEquals(job_adjusted_debits, self.job.account.adjusted_debits_total)
+        self.assertEquals(job_adjusted_debits, self.job.account.adjusted_debits_total.gross)
 
         self.assertEquals(promised, promised_payments().balance)
         self.assertEquals(partial, partial_payments().balance)

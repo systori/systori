@@ -93,20 +93,20 @@
         </thead>
         <tbody>
         {% for debit_form in form.forms %}
-          <tr is="invoice-debit" class="job-row {% if debit_form.is_invoiced.value %}invoiced{% endif %} {% if debit_form.is_override.value %}override{% elif debit_form.debit_amount_net > 0 and debit_form.debit_amount_net == debit_form.billable_amount_net %}itemized{% endif %}">
+          <tr is="invoice-debit" class="job-row {% if debit_form.is_invoiced.value %}invoiced{% endif %} {% if debit_form.is_override.value %}override{% elif debit_form.debit_amount.net > 0 and debit_form.debit_amount.net == debit_form.billable_amount.net %}itemized{% endif %}">
             <td class="job-invoiced">{{ debit_form.is_invoiced }}</td>
             <td class="job-name">{{ debit_form.job }}{{ debit_form.initial.job.name }}</td>
-            <td class="job-estimated" data-amount="{{ debit_form.latest_estimate_net }}">
-              {{ debit_form.latest_estimate_net|ubrdecimal:2 }}
+            <td class="job-estimated" data-amount="{{ debit_form.latest_estimate.net }}">
+              {{ debit_form.latest_estimate.net|ubrdecimal:2 }}
             </td>
-            <td class="job-completed" data-amount="{{ debit_form.latest_itemized_net }}">
-              {{ debit_form.latest_itemized_net|ubrdecimal:2 }}<br />
+            <td class="job-completed" data-amount="{{ debit_form.latest_itemized.net }}">
+              {{ debit_form.latest_itemized.net|ubrdecimal:2 }}<br />
               {{ debit_form.latest_percent_complete }}%
             </td>
-            <td class="job-debited" data-amount="{{ debit_form.base_debited_net }}">
-              {{ debit_form.base_debited_net|ubrdecimal:2 }}<br />
+            <td class="job-debited" data-amount="{{ debit_form.base_debited.net }}">
+              {{ debit_form.base_debited.net|ubrdecimal:2 }}<br />
             </td>
-            <td class="job-flat" data-amount="{{ debit_form.base_debited_net }}">
+            <td class="job-flat" data-amount="{{ debit_form.base_debited.net }}">
                 <input type="range" min="0" max="100" value="{{ debit_form.new_debited_percent }}" step="1" />
                 <div class="btn-group btn-group-justified">
                 {% for percent in PERCENT_RANGE %}
@@ -114,10 +114,10 @@
                 {% endfor %}
                 </div>
             </td>
-            <td class="job-itemized" data-amount="{{ debit_form.billable_amount_net }}">
-              {% if debit_form.billable_amount_net < 0 %}<span class="text-danger">{% endif %}
-              {{ debit_form.billable_amount_net|ubrdecimal:2 }}
-              {% if debit_form.billable_amount_net < 0 %}</span>{% endif %}
+            <td class="job-itemized" data-amount="{{ debit_form.billable_amount.net }}">
+              {% if debit_form.billable_amount.net < 0 %}<span class="text-danger">{% endif %}
+              {{ debit_form.billable_amount.net|ubrdecimal:2 }}
+              {% if debit_form.billable_amount.net < 0 %}</span>{% endif %}
             </td>
             <td class="job-amount-net {% if debit_form.amount_net.errors %}has-error bg-danger{% endif %}">
 
@@ -146,7 +146,7 @@
             <td class="job-debited"></td>
             <td class="job-flat"></td>
             <td class="job-itemized"></td>
-            <td class="job-amount-net">{{ form.debit_net_total|ubrdecimal:2 }}</td>
+            <td class="job-amount-net">{{ form.debit_total.net|ubrdecimal:2 }}</td>
             <td class="job-comment"></td>
           </tr>
         </tbody>

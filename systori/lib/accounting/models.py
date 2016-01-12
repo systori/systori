@@ -5,7 +5,7 @@ from django.db.models.manager import BaseManager
 from datetime import date
 from decimal import Decimal
 
-from .tools import extract_net_tax
+from .tools import Amount
 
 
 class AccountQuerySet(models.QuerySet):
@@ -76,17 +76,17 @@ class BaseAccount(models.Model):
 
     @property
     def balance(self):
-        return self.entries.all().total
+        return self.entries.all().sum
 
     @property
-    def balance_net_tax_gross(self):
-        return self.entries.all().net_tax_gross
+    def balance_amount(self):
+        return self.entries.all().sum_amount
 
     @property
     def adjusted_debits_total(self):
         """ adjusted total = all debits - all adjustment credits"""
-        debits = self.debits().total
-        adjustments = self.adjustments().total
+        debits = self.debits().sum_amount
+        adjustments = self.adjustments().sum_amount
         return debits + adjustments
 
     DEBIT_ACCOUNTS = (ASSET, EXPENSE)
@@ -236,21 +236,19 @@ class BaseTransaction(models.Model):
 class EntryQuerySet(models.QuerySet):
 
     @property
-    def total(self):
-        amount = Decimal('0.00')
+    def sum(self):
+        total = Decimal('0.00')
         for entry in self:
-            amount += entry.amount
-        return amount
+            total += entry.amount
+        return total
 
     @property
-    def net_tax_gross(self):
-        gross, net, tax = Decimal('0.00'), Decimal('0.00'), Decimal('0.00')
+    def sum_amount(self):
+        amount = Amount.zero()
         for entry in self:
-            _net, _tax = extract_net_tax(entry.amount, entry.tax_rate)
-            net += _net
-            tax += _tax
-            gross += entry.amount
-        return net, tax, gross
+            assert entry.tax_rate > Decimal(0)
+            amount += Amount.from_gross(entry.amount, entry.tax_rate)
+        return amount
 
 
 class EntryManager(BaseManager.from_queryset(EntryQuerySet)):
@@ -271,7 +269,6 @@ class BaseEntry(models.Model):
     DISCOUNT = "discount"
     WORK_DEBIT = "work-debit"
     FLAT_DEBIT = "flat-debit"
-    FINAL_DEBIT = "final-debit"
     ADJUSTMENT = "adjustment"
     OTHER = "other"
 

@@ -70,7 +70,6 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
             try:
                 txn_dict.update({
                     'invoice_id': txn.invoice.id,
-                    'invoice_amount': txn.invoice.amount,
                     'invoice_status': txn.invoice.status,
                     'invoice_title': txn.invoice.json['title']
                 })

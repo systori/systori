@@ -9,7 +9,8 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from ..project.models import Project
 from ..task.models import Job
 from .models import Proposal, Invoice, DocumentTemplate, Letterhead, DocumentSettings
-from .forms import ProposalForm, InvoiceForm, ProposalUpdateForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
+from .forms import ProposalForm, ProposalUpdateForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
+from ..accounting.forms import InvoiceForm
 from .type import proposal, invoice, evidence, letterhead, itemized_listing
 
 
@@ -55,10 +56,11 @@ class ProposalCreate(CreateView):
         for job in form.cleaned_data['jobs']:
             amount += job.estimate_total
 
+        data = form.cleaned_data
+        data['amount'] = amount
+
         form.instance.letterhead = Letterhead.objects.first()
-        form.instance.amount = amount
-        form.instance.json = proposal.serialize(self.request.project, form)
-        form.instance.json_version = form.instance.json['version']
+        form.instance.json = proposal.serialize(self.request.project, data)
 
         return super().form_valid(form)
 

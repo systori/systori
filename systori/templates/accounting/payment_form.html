@@ -6,40 +6,72 @@
 {% block content %}
   <form method="post">{% csrf_token %}
 
-    {{ form.payment_form|bootstrap }}
+    {{ form.payment_form.bank_account|bootstrap }}
+    {{ form.payment_form.transacted_on|bootstrap }}
+    {% if form.invoice %}
+      <div class="form-group">
+        <label class="control-label">{% trans "Paying Invoice" %}</label>
+        <div>{{ form.invoice.json.invoice_no }} {{ form.invoice.json.title }}</div>
+      </div>
+    {% endif %}
+    {{ form.payment_form.amount|bootstrap }}
 
     <style>
-      .numeric-column {
+      .job-balance,
+      .job-payment,
+      .job-discount,
+      .job-adjustment,
+      .job-credit {
         text-align: right;
       }
     </style>
 
     <div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
     {{ form.management_form }}
-    <table class="table table-striped">
+    <table is="payment-split-table" class="table table-striped">
       <thead>
       <tr>
-        <th>{% trans 'Job' %}</th>
-        <th class="numeric-column">{% trans 'Starting Balance' %}</th>
-        <th class="numeric-column">{% trans 'Payment' %}</th>
-        <th class="numeric-column">{% trans 'Discount' %}</th>
-        <th class="numeric-column">{% trans 'Adjustment' %}</th>
+        <th class="job-name">{% trans 'Job' %}</th>
+        <th class="job-balance">
+          {% if form.invoice %}
+          {% trans 'Invoiced' %}
+          {% else %}
+          {% trans 'Balance' %}
+          {% endif %}
+        </th>
+        <th class="job-payment">{% trans 'Payment' %}</th>
+        <th class="job-discount">{% trans 'Discount' %} {{ form.payment_form.discount }}</th>
+        <th class="job-adjustment">{% trans 'Adjustment' %}</th>
+        <th class="job-credit">{% trans 'Credit' %}</th>
       </tr>
       </thead>
       <tbody>
       {% for split in form.forms %}
-        <tr>
-          <td>{{ split.job }}{{ split.initial.job.name }}</td>
-          <td class="numeric-column">{{ split.initial.job.account.balance|money }}</td>
-          <td class="numeric-column split-input"
-              data-balance="{{ split.initial.job.account.balance }}"
-              data-ratio="{{ split.initial.job.account.balance|divide:project.balance }}">
-            {{ split.amount }}
+        <tr is="payment-split" class="payment-split-row">
+          <td class="job-name">{{ split.job }}{{ split.initial.job.name }}</td>
+          <td class="job-balance" data-amount="{{ split.balance_amount.gross }}">{{ split.balance_amount.gross|ubrdecimal:2 }}</td>
+          <td class="job-payment" data-amount="{{ split.payment_amount.gross }}">
+            {{ split.payment }}
           </td>
-          <td class="numeric-column">{{ split.discount }}</td>
-          <td class="numeric-column">{{ split.adjustment }}</td>
+          <td class="job-discount" data-amount="{{ split.discount_amount.gross }}">
+            <span class="text">{{ split.discount_amount.gross|ubrdecimal:0 }}</span>
+            {{ split.discount }}
+          </td>
+          <td class="job-adjustment" data-amount="{{ split.adjustment_amount.gross }}">
+            <span class="text">{{ split.adjustment_amount.gross|ubrdecimal:0 }}</span>
+            {{ split.adjustment }}
+          </td>
+          <td class="job-credit" data-amount="{{ split.credit_amount.gross }}">{{ split.credit_amount.gross|ubrdecimal:2 }}</td>
         </tr>
       {% endfor %}
+        <tr class="split-table-totals">
+          <td class="job-name"></td>
+          <td class="job-balance">{{ form.balance_total.gross|ubrdecimal:2 }}</td>
+          <td class="job-payment">{{ form.payment_total.gross|ubrdecimal:2 }}</td>
+          <td class="job-discount">{{ form.discount_total.gross|ubrdecimal:2 }}</td>
+          <td class="job-adjustment">{{ form.adjustment_total.gross|ubrdecimal:2 }}</td>
+          <td class="job-credit">{{ form.credit_total.gross|ubrdecimal:2 }}</td>
+        </tr>
       </tbody>
     </table>
     {% for error in form.non_form_errors %}
