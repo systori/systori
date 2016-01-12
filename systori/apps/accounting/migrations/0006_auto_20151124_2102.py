@@ -20,6 +20,7 @@ def set_missing_values(apps, schema_editor):
     Account = apps.get_model('accounting', 'Account')
     Entry = apps.get_model('accounting', 'Entry')
     Invoice = apps.get_model('document', 'Invoice')
+    Proposal = apps.get_model('document', 'Proposal')
 
     for company in Company.objects.all():
         company.activate()
@@ -103,6 +104,14 @@ def set_missing_values(apps, schema_editor):
             invoice.json.update(report)
 
             invoice.save()
+
+        for proposal in Proposal.objects.all():
+
+            if 'total_gross' not in proposal.json or \
+                    (proposal.json['total_gross'] == 0 and proposal.amount > 0):
+                proposal.json['total_gross'] = proposal.amount
+                proposal.json['total_net'], job['total_tax'] = extract_net_tax(D(proposal.amount), D('0.19'))
+                proposal.save()
 
 
 class Migration(migrations.Migration):
