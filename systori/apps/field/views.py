@@ -313,7 +313,12 @@ class FieldTaskView(UpdateView):
     def form_valid(self, form):
         redirect = super(FieldTaskView, self).form_valid(form)
 
-        if 'complete' in form.changed_data or form.cleaned_data['comment']:
+        complete_filled = 'complete' in form.changed_data
+
+        if complete_filled:
+            self.assign_task_to_user_dailyplan(self.object)
+
+        if complete_filled or form.cleaned_data['comment']:
             ProgressReport.objects.create(
                 access=self.request.access,
                 task=self.object,
@@ -322,6 +327,11 @@ class FieldTaskView(UpdateView):
             )
 
         return redirect
+
+    def assign_task_to_user_dailyplan(self, task):
+        dailyplan = self.request.dailyplan
+        if dailyplan.id and not task.dailyplans.filter(id=dailyplan.id).exists():
+            task.dailyplans.add(dailyplan)
 
     def get_success_url(self):
         return task_success_url(self.request, self.object)
@@ -362,8 +372,8 @@ class FieldAddSelfToDailyPlan(View):
         dailyplan = self.request.dailyplan
         if not dailyplan.id: dailyplan.save()
 
-        already_assigned = \
-            TeamMember.objects.filter(dailyplan=dailyplan, access=self.request.access).exists()
+        already_assigned = TeamMember.objects.filter(
+            dailyplan=dailyplan, access=self.request.access).exists()
 
         if not already_assigned:
             TeamMember.objects.create(
