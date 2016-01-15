@@ -14,6 +14,7 @@ class PaymentSplitTable extends TableElement {
 
     TextInputElement payment_input;
     SelectElement discount_select;
+    CheckboxInputElement adjustment_checkbox;
 
     TableCellElement payment_gross_total;
     TableCellElement discount_gross_total;
@@ -30,14 +31,17 @@ class PaymentSplitTable extends TableElement {
         payment_input.onKeyUp.listen(update_table);
         discount_select = this.querySelector('select[name="discount"]');
         discount_select.onChange.listen(update_table);
+        adjustment_checkbox = this.querySelector('input[name="is_adjusted"]');
+        adjustment_checkbox.onChange.listen(update_table);
     }
 
     update_table(Event e) {
         double discount = 1.0-double.parse(discount_select.value);
         int remaining = (parse_currency(payment_input.value) * 100).round();
+        bool is_adjusted = adjustment_checkbox.checked;
         var rows = this.querySelectorAll(":scope tr.payment-split-row");
         for (PaymentSplit row in rows) {
-            remaining = row.consume_payment(remaining, discount);
+            remaining = row.consume_payment(remaining, discount, is_adjusted);
         }
         recalculate();
     }
@@ -83,6 +87,7 @@ class PaymentSplit extends TableRowElement {
     int discount_gross;
     int adjustment_gross;
     int credit_gross;
+    bool is_adjusted;
 
     //bool get is_adjusted => is_adjusted_input.checked;
 
@@ -118,7 +123,10 @@ class PaymentSplit extends TableRowElement {
     payment_changed([Event e]) {
         payment_gross = (parse_currency(payment_input.value) * 100).round();
 
-        var possible_adjustment = balance_gross - (payment_gross + discount_gross);
+        var possible_adjustment = 0;
+        if (is_adjusted) {
+            possible_adjustment = balance_gross - (payment_gross + discount_gross);
+        }
         adjustment_gross = possible_adjustment > 0 ? possible_adjustment : 0;
 
         discount_input.value = (discount_gross/100).toStringAsFixed(2);
@@ -134,7 +142,8 @@ class PaymentSplit extends TableRowElement {
             (parent.parent as PaymentSplitTable).recalculate();
     }
 
-    int consume_payment(int payment, double discount) {
+    int consume_payment(int payment, double discount, bool is_adjusted) {
+        this.is_adjusted = is_adjusted;
         int discounted_balance = (balance_gross * discount).round();
         discount_gross = balance_gross - discounted_balance;
         if (payment <= 0) {

@@ -32,6 +32,7 @@ class PaymentForm(Form):
                 ('0.1', _('10%')),
             ]
     )
+    is_adjusted = forms.BooleanField(label=_('Apply Adjustment?'), initial=True, required=False)
 
 
 class SplitPaymentForm(Form):
