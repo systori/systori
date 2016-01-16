@@ -14,7 +14,12 @@
         <div>{{ form.invoice.json.invoice_no }} {{ form.invoice.json.title }}</div>
       </div>
     {% endif %}
-    {{ form.payment_form.amount|bootstrap }}
+    <div class="form-group">
+      <label class="control-label" for="{{ form.payment_form.amount.id_for_label }}">{{ form.payment_form.amount.label }}</label>
+      <div>
+        <input class="form-control" id="{{ form.payment_form.amount.id_for_label }}" name="{{ form.payment_form.amount.html_name }}" type="text" value="{{ form.payment_form.amount_value.gross|ubrdecimal:2 }}">
+      </div>
+    </div>
 
     <style>
       .job-balance,
@@ -51,14 +56,14 @@
           <td class="job-name">{{ split.job }}{{ split.initial.job.name }}</td>
           <td class="job-balance" data-amount="{{ split.balance_amount.gross }}">{{ split.balance_amount.gross|ubrdecimal:2 }}</td>
           <td class="job-payment" data-amount="{{ split.payment_amount.gross }}">
-            <input id="{{ split.payment.id_for_label }}" name="{{ split.payment.html_name }}" type="text" value="{{ split.payment.value|ubrdecimal:2 }}">
+            <input id="{{ split.payment.id_for_label }}" name="{{ split.payment.html_name }}" type="text" value="{{ split.payment_amount.gross|ubrdecimal:2 }}">
           </td>
           <td class="job-discount" data-amount="{{ split.discount_amount.gross }}">
-            <span class="text">{{ split.discount_amount.gross|ubrdecimal:0 }}</span>
+            <span class="text">{{ split.discount_amount.gross|ubrdecimal:2 }}</span>
             {{ split.discount }}
           </td>
           <td class="job-adjustment" data-amount="{{ split.adjustment_amount.gross }}">
-            <span class="text">{{ split.adjustment_amount.gross|ubrdecimal:0 }}</span>
+            <span class="text">{{ split.adjustment_amount.gross|ubrdecimal:2 }}</span>
             {{ split.adjustment }}
           </td>
           <td class="job-credit" data-amount="{{ split.credit_amount.gross }}">{{ split.credit_amount.gross|ubrdecimal:2 }}</td>

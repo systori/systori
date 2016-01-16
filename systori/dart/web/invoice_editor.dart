@@ -34,7 +34,7 @@ class InvoiceDebit extends TableRowElement {
 
     TableCellElement net_estimate_cell;
     TableCellElement net_invoiced_cell;
-    TableCellElement net_itemized_cell;
+    AnchorElement net_itemized_anchor;
 
     double net_estimate;
     double net_invoiced;
@@ -56,24 +56,34 @@ class InvoiceDebit extends TableRowElement {
         this.flat_invoice_range_input.onInput.listen(flat_invoice_range_changed);
         this.querySelectorAll('.percent-button').onClick.listen(flat_invoice_percent_clicked);
 
-        this.net_itemized_cell = this.querySelector(":scope>.job-itemized");
-        this.net_itemized_cell.onClick.listen(itemized_value_clicked);
-        this.net_itemized = double.parse(net_itemized_cell.dataset['amount']);
+        this.net_itemized_anchor = this.querySelector(":scope>.job-itemized>a");
+        this.net_itemized_anchor.onClick.listen(itemized_value_clicked);
+        this.net_itemized = double.parse(net_itemized_anchor.dataset['amount']);
 
         this.net_amount_input = this.querySelector('[name^="job-"][name\$="-amount_net"]');
         this.net_amount_input.onKeyUp.listen(net_amount_changed);
-        this.net_amount = double.parse(net_amount_input.value);
+        this.net_amount = parse_currency(net_amount_input.value);
         this.is_override_input = this.querySelector('[name^="job-"][name\$="-is_override"]');
         this.override_comment_input = this.querySelector('[name^="job-"][name\$="-override_comment"]');
     }
 
-    invoicing_toggled(Event e) {
+    invoicing_toggled([Event e]) {
         if (is_invoiced) {
             classes.add('invoiced');
             net_amount_input.disabled = false;
+            flat_invoice_range_input.disabled = false;
+            net_itemized_anchor.classes.remove('disabled');
+            this.querySelectorAll('.percent-button').forEach((e) {
+                e.classes.remove('disabled');
+            });
         } else {
             classes.remove('invoiced');
             net_amount_input.disabled = true;
+            flat_invoice_range_input.disabled = true;
+            net_itemized_anchor.classes.add('disabled');
+            this.querySelectorAll('.percent-button').forEach((e) {
+               e.classes.add('disabled');
+            });
         }
     }
 
@@ -116,6 +126,7 @@ class InvoiceDebit extends TableRowElement {
         } else {
             net_amount = parse_currency(net_amount_input.value);
         }
+        is_override_input.value = 'False';
         classes.remove('override');
         classes.remove('itemized');
         if (net_amount > 0) {

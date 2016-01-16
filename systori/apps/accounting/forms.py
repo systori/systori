@@ -18,6 +18,17 @@ from ..document.type import invoice as invoice_lib
 from .report import prepare_transaction_report
 
 
+def convert_field_to_value(field):
+    try:
+        value = field.value()
+        amount_gross = field.field.to_python(value)
+        if amount_gross is None:
+            amount_gross = D('0.00')
+    except:
+        amount_gross = D('0.00')
+    return Amount.from_gross(amount_gross, TAX_RATE)
+
+
 class PaymentForm(Form):
     bank_account = forms.ModelChoiceField(label=_("Bank Account"), queryset=Account.objects.banks())
     amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
@@ -34,6 +45,10 @@ class PaymentForm(Form):
     )
     is_adjusted = forms.BooleanField(label=_('Apply Adjustment?'), initial=True, required=False)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.amount_value = convert_field_to_value(self['amount'])
+
 
 class SplitPaymentForm(Form):
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
@@ -47,18 +62,13 @@ class SplitPaymentForm(Form):
 
         self.fields['job'].queryset = self.job.project.jobs.all()
 
-        self.balance_amount = self.job.account.balance_amount
-
         for column_name in ['payment', 'discount', 'adjustment']:
-            try:
-                column_value = self[column_name].value()
-                column_amount_gross = self[column_name].field.to_python(column_value)
-                if column_amount_gross is None:
-                    column_amount_gross = D('0.00')
-            except:
-                column_amount_gross = D('0.00')
+            setattr(self, column_name+'_amount', convert_field_to_value(self[column_name]))
 
-            setattr(self, column_name+'_amount', Amount.from_gross(column_amount_gross, TAX_RATE))
+        if 'invoiced' in self.initial:
+            self.balance_amount = Amount.from_gross(self.initial['invoiced'], TAX_RATE)
+        else:
+            self.balance_amount = self.job.account.balance_amount
 
         self.credit_amount = self.payment_amount + self.discount_amount + self.adjustment_amount
 
@@ -89,7 +99,7 @@ class BaseSplitPaymentFormSet(BaseFormSet):
             job_dict = {}
             for debit in previous_debits:
                 if debit['job.id'] == job.id:
-                    job_dict['payment'] = debit['amount_gross']
+                    job_dict['invoiced'] = job_dict['payment'] = D(debit['amount_gross'])
                     break
             job_dict['job'] = job
             initial.append(job_dict)
@@ -190,15 +200,7 @@ class DebitForm(Form):
         self.latest_itemized = Amount.from_net(self.job.billable_total, TAX_RATE)
         self.latest_percent_complete = self.job.complete_percent
 
-        try:
-            amount_net_value = self['amount_net'].value()
-            original_debit_amount_net = self['amount_net'].field.to_python(amount_net_value)
-            if original_debit_amount_net is None:
-                original_debit_amount_net = D('0.00')
-        except:
-            original_debit_amount_net = D('0.00')
-
-        self.debit_amount = Amount.from_net(original_debit_amount_net, TAX_RATE)
+        self.debit_amount = convert_field_to_value(self['amount_net'])
 
         if self.initial['is_booked']:
             # accounting system already has the 'new' amounts since this invoice was booked
