@@ -21,11 +21,12 @@ from .report import prepare_transaction_report
 def convert_field_to_value(field):
     try:
         value = field.value()
-        amount_gross = field.field.to_python(value)
-        if amount_gross is None:
-            amount_gross = D('0.00')
+        amount = field.field.to_python(value)
+        if amount is None:
+            amount = D('0.00')
     except:
-        amount_gross = D('0.00')
+        amount = D('0.00')
+    return amount
     return Amount.from_gross(amount_gross, TAX_RATE)
 
 
@@ -47,7 +48,7 @@ class PaymentForm(Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.amount_value = convert_field_to_value(self['amount'])
+        self.amount_value = Amount.from_gross(convert_field_to_value(self['amount']), TAX_RATE)
 
 
 class SplitPaymentForm(Form):
@@ -63,7 +64,7 @@ class SplitPaymentForm(Form):
         self.fields['job'].queryset = self.job.project.jobs.all()
 
         for column_name in ['payment', 'discount', 'adjustment']:
-            setattr(self, column_name+'_amount', convert_field_to_value(self[column_name]))
+            setattr(self, column_name+'_amount', Amount.from_gross(convert_field_to_value(self[column_name]), TAX_RATE))
 
         if 'invoiced' in self.initial:
             self.balance_amount = Amount.from_gross(self.initial['invoiced'], TAX_RATE)
@@ -200,7 +201,8 @@ class DebitForm(Form):
         self.latest_itemized = Amount.from_net(self.job.billable_total, TAX_RATE)
         self.latest_percent_complete = self.job.complete_percent
 
-        self.debit_amount = convert_field_to_value(self['amount_net'])
+        original_debit_amount_net = convert_field_to_value(self['amount_net'])
+        self.debit_amount = Amount.from_net(original_debit_amount_net, TAX_RATE)
 
         if self.initial['is_booked']:
             # accounting system already has the 'new' amounts since this invoice was booked

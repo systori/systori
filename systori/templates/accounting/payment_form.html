@@ -10,7 +10,7 @@
     {{ form.payment_form.transacted_on|bootstrap }}
     {% if form.invoice %}
       <div class="form-group">
-        <label class="control-label">{% trans "Paying Invoice" %}</label>
+        <label class="control-label">{% trans "Invoice" %}</label>
         <div>{{ form.invoice.json.invoice_no }} {{ form.invoice.json.title }}</div>
       </div>
     {% endif %}
