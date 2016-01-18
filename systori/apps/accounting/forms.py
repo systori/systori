@@ -206,7 +206,7 @@ class DebitForm(Form):
 
         if self.initial['is_booked']:
             # accounting system already has the 'new' amounts since this invoice was booked
-            self.new_debited = self.job.account.debits().sum_amount
+            self.new_debited = self.job.account.adjusted_debits_total
             self.new_balance = self.job.account.balance_amount
 
             # we need to undo the booking to get the 'base' amounts
@@ -216,7 +216,7 @@ class DebitForm(Form):
         else:
             # no transactions exist yet so the account balance and debits don't include this new debit
             # accounting system has the 'base' amounts
-            self.base_debited = self.job.account.debits().sum_amount
+            self.base_debited = self.job.account.adjusted_debits_total
             self.base_balance = self.job.account.balance_amount
 
         # subtract all previous debits from all work completed to get amount not yet debited

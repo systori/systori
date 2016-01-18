@@ -82,20 +82,16 @@ class TestTransactionsTable(TestCase):
         debit_jobs([(self.job, D(28560.00), Entry.WORK_DEBIT)], transacted_on=days_ago(4))
         debit_jobs([(self.job, D(10569.95), Entry.WORK_DEBIT)], transacted_on=days_ago(3))
         debit_jobs([(self.job, D(14045.95), Entry.WORK_DEBIT)], transacted_on=days_ago(2))
-        debit_jobs([(self.job, D(10030.44), Entry.WORK_DEBIT)], transacted_on=days_ago(1))
 
-        credit_jobs([(self.job, D(8925.00), D(0), D(0))], D(8925.00), transacted_on=days_ago(3))
-        credit_jobs([(self.job, D(28560.00), D(0), D(0))], D(28560.00), transacted_on=days_ago(2))
-        credit_jobs([(self.job, D(9500.00), D(421.38), D(5769.52))], D(9500.00), transacted_on=days_ago(1))
+        credit_jobs([(self.job, D(28560.00), D(0), D(0))], D(28560.00), transacted_on=days_ago(3))
+        credit_jobs([(self.job, D(8925.00), D(0), D(1644.95))], D(8925.00), transacted_on=days_ago(2))
 
         self.assertEqual(self.tbl(), [
             ('',             'net',    'tax',   'gross'),
-            ('progress',  '48266.23', '9170.59', '57436.82'),
-            ('payment',  '-7500.00', '-1425.00', '-8925.00'),
+            ('progress',  '43303.32',  '8227.63',  '51530.95'),
             ('payment',  '-24000.00', '-4560.00', '-28560.00'),
-            ('payment',  '-7983.19', '-1516.81', '-9500.00'),
-            ('discount',  '-354.10', '-67.28', '-421.38'),
-            ('invoice',  '-8428.94', '-1601.50', '-10030.44'),
+            ('payment',   '-7500.00', '-1425.00',  '-8925.00'),
+            ('invoice',  '-11803.32', '-2242.63', '-14045.95'),
         ])
 
     def test_two_invoices_no_payment(self):
