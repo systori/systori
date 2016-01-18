@@ -5,6 +5,17 @@ from django.db.models.manager import BaseManager
 from datetime import date
 from decimal import Decimal
 
+from .tools import Amount
+
+
+class AccountQuerySet(models.QuerySet):
+    def banks(self):
+        return self.filter(asset_type=BaseAccount.BANK)
+
+
+class AccountManager(BaseManager.from_queryset(AccountQuerySet)):
+    use_for_related_fields = True
+
 
 class BaseAccount(models.Model):
     """
@@ -16,6 +27,10 @@ class BaseAccount(models.Model):
 
     http://en.wikipedia.org/wiki/Double-entry_bookkeeping_system
     """
+
+    objects = AccountManager()
+
+    # Account Type
 
     ASSET = "asset"
     LIABILITY = "liability"
@@ -29,6 +44,18 @@ class BaseAccount(models.Model):
         (EXPENSE, _("Expense")),
     )
     account_type = models.CharField(_('Account Type'), max_length=32, choices=ACCOUNT_TYPE)
+
+    # Asset Type (when account.account_type=ASSET)
+
+    BANK = "bank"
+    RECEIVABLE = "receivable"
+
+    ASSET_TYPE = (
+        (BANK, _("Bank")),
+        (RECEIVABLE, _("Accounts Receivable")),
+    )
+    asset_type = models.CharField(_('Asset Type'), null=True, max_length=32, choices=ASSET_TYPE)
+
     code = models.CharField(_('Code'), max_length=32)
     name = models.CharField(_('Name'), max_length=512, blank=True)
 
@@ -40,8 +67,27 @@ class BaseAccount(models.Model):
         return '{} - {}'.format(self.code, self.name)
 
     @property
+    def is_bank(self):
+        return self.asset_type == self.BANK
+
+    @property
+    def is_receivable(self):
+        return self.asset_type == self.RECEIVABLE
+
+    @property
     def balance(self):
-        return self.entries.all().total
+        return self.entries.all().sum
+
+    @property
+    def balance_amount(self):
+        return self.entries.all().sum_amount
+
+    @property
+    def adjusted_debits_total(self):
+        """ adjusted total = all debits - all adjustment credits"""
+        debits = self.debits().sum_amount
+        adjustments = self.adjustments().sum_amount
+        return debits + adjustments
 
     DEBIT_ACCOUNTS = (ASSET, EXPENSE)
 
@@ -97,6 +143,9 @@ class BaseAccount(models.Model):
         else:
             return self.entries.filter(amount__lt=0)
 
+    def adjustments(self):
+        return self.entries.filter(entry_type=BaseEntry.ADJUSTMENT)
+
 
 class BaseTransaction(models.Model):
     """ A transaction is a collection of accounting entries (usually
@@ -114,17 +163,20 @@ class BaseTransaction(models.Model):
     finalized_on = models.DateField(_("Date Finalized"), null=True)
     is_finalized = models.BooleanField(_("Finalized"), default=False)
 
+    # transaction marks the point in time when revenue became recognized
+    is_revenue_recognized = models.BooleanField(default=False)
+
     # when this transaction was entered into the system
     recorded_on = models.DateTimeField(_("Date Recorded"), auto_now_add=True)
 
     INVOICE = "invoice"
-    FINAL_INVOICE = "final-invoice"
     PAYMENT = "payment"
+    ADJUSTMENT = "adjustment"
 
     TRANSACTION_TYPE = (
         (INVOICE, _("Invoice")),
-        (FINAL_INVOICE, _("Final Invoice")),
         (PAYMENT, _("Payment")),
+        (ADJUSTMENT, _("Adjustment")),
     )
     transaction_type = models.CharField(_('Transaction Type'), null=True, max_length=32, choices=TRANSACTION_TYPE)
 
@@ -136,16 +188,20 @@ class BaseTransaction(models.Model):
         self._entries = []
 
     def debit(self, account, amount, **kwargs):
+        assert amount > 0
         if type(account) is str:
             account = self.account_class.objects.get(code=account)
-        entry = self.entry_class(account=account, amount=account.as_debit(round(amount, 2)), **kwargs)
+        debit_amount = account.as_debit(round(amount, 2))
+        entry = self.entry_class(account=account, amount=debit_amount, **kwargs)
         self._entries.append(('debit', entry))
         return entry
 
     def credit(self, account, amount, **kwargs):
+        assert amount > 0
         if type(account) is str:
             account = self.account_class.objects.get(code=account)
-        entry = self.entry_class(account=account, amount=account.as_credit(round(amount, 2)), **kwargs)
+        credit_amount = account.as_credit(round(amount, 2))
+        entry = self.entry_class(account=account, amount=credit_amount, **kwargs)
         self._entries.append(('credit', entry))
         return entry
 
@@ -164,6 +220,7 @@ class BaseTransaction(models.Model):
         return False
 
     def save(self, **kwargs):
+        assert len(self._entries) == 0 or len(self._entries) >= 2
         assert self.is_balanced, "{} != {}".format(self._total('debit'), self._total('credit'))
         super().save(**kwargs)
         for item in self._entries:
@@ -177,11 +234,20 @@ class BaseTransaction(models.Model):
 
 
 class EntryQuerySet(models.QuerySet):
+
     @property
-    def total(self):
-        amount = Decimal(0.0)
+    def sum(self):
+        total = Decimal('0.00')
         for entry in self:
-            amount += entry.amount
+            total += entry.amount
+        return total
+
+    @property
+    def sum_amount(self):
+        amount = Amount.zero()
+        for entry in self:
+            assert entry.tax_rate > Decimal(0)
+            amount += Amount.from_gross(entry.amount, entry.tax_rate)
         return amount
 
 
@@ -196,13 +262,13 @@ class BaseEntry(models.Model):
     transaction = models.ForeignKey('Transaction', related_name="entries")
     account = models.ForeignKey('Account', related_name="entries")
 
-    amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=2, default=0.0)
+    amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=2)
+    tax_rate = models.DecimalField(_("Tax Rate"), max_digits=14, decimal_places=2, default=0)
 
     PAYMENT = "payment"
     DISCOUNT = "discount"
     WORK_DEBIT = "work-debit"
     FLAT_DEBIT = "flat-debit"
-    FINAL_DEBIT = "final-debit"
     ADJUSTMENT = "adjustment"
     OTHER = "other"
 
@@ -211,7 +277,6 @@ class BaseEntry(models.Model):
         (DISCOUNT, _("Discount")),
         (WORK_DEBIT, _("Work Debit")),
         (FLAT_DEBIT, _("Flat Debit")),
-        (FINAL_DEBIT, _("Final Debit")),
         (ADJUSTMENT, _("Adjustment")),
         (OTHER, _("Other")),
     )

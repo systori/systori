@@ -1,15 +1,3 @@
-"""
-JSON Version Log
-================
-1.2
- - major refactoring, renamed fields, added new fields
- - coincided with project to job based account switch
-1.1
- - Added is_flat_invoice attribute.
-1.0
- - Initial Version.
-"""
-
 from io import BytesIO
 from decimal import Decimal
 from datetime import date
@@ -24,7 +12,7 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
-from systori.apps.accounting.utils import get_transactions_for_jobs
+from systori.apps.accounting.report import prepare_transaction_report, generate_transaction_table
 from systori.apps.accounting.constants import TAX_RATE
 
 from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b
@@ -93,8 +81,6 @@ def collate_tasks_total(invoice, available_width):
     t.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
 
     t.row(_("Total without VAT"), money(invoice['debited_net']))
-    t.row("19,00% "+_("VAT"), money(invoice['debited_tax']))
-    t.row(_("Total including VAT"), money(invoice['debited_gross']))
 
     return t.get_table()
 
@@ -184,29 +170,27 @@ def collate_payments(invoice, available_width):
     t.row('', _("consideration"), _("tax"), _("gross"))
     t.row_style('FONTNAME', 0, -1, font.bold)
 
-    t.row(_('Project progress'), money(invoice['debited_net']), money(invoice['debited_tax']), money(invoice['debited_gross']))
+    table = generate_transaction_table(invoice)[1:]
+    last_idx = len(table) - 1
+    for idx, row in enumerate(table):
+        txn = row[4]
 
-    last_txn_idx = len(invoice['transactions'])-1
-    for txn_idx, txn in enumerate(invoice['transactions']):
-
-        if txn.get('invoice_id', None) == invoice['id']:
-            continue
-
-        if txn['type'] == 'payment':
+        if txn is None:
+            title = _('Project progress')
+        elif row[0] == 'payment':
             pay_day = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
-            t.row(p(_('Payment on {date}').format(date=pay_day)), money(-txn['net']), money(-txn['tax']), money(txn['payment_applied']))
-            if txn['discount_applied']:
-                discount_net = round(Decimal(txn['discount_applied']) / (1+TAX_RATE), 2)
-                discount_tax = Decimal(txn['discount_applied']) - discount_net
-                t.row(p(_('  Discount applied')), money(discount_net), money(discount_tax), money(txn['discount_applied']))
-        elif txn['type'] == 'invoice' and txn['invoice_status'] != 'paid':
+            title = _('Payment on {date}').format(date=pay_day)
+        elif row[0] == 'discount':
+            title = _('Discount applied')
+        elif row[0] == 'invoice':
             invoice_day = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
-            invoice_net = Decimal(txn['net']) if txn['net'] else round(Decimal(txn['gross']) / (1+TAX_RATE), 2)
-            invoice_tax = Decimal(txn['tax']) if txn['tax'] else Decimal(txn['gross']) - invoice_net
-            description = _("{invoice} from {date}").format(invoice=txn['invoice_title'], date=invoice_day)
-            t.row(p(description), money(-invoice_net), money(-invoice_tax),  money(-txn['gross']))
+            title = _("{invoice} from {date}").format(invoice=txn['invoice_title'], date=invoice_day)
 
-    t.row(_('This Invoice'), money(invoice['debit_net']), money(invoice['debit_tax']), money(invoice['debit_gross']))
+        if idx == last_idx:
+            t.row(b(_('This Invoice')), money(-row[1]), money(-row[2]), money(-row[3]))
+        else:
+            t.row(p(title), money(row[1]), money(row[2]), money(row[3]))
+
     t.row_style('RIGHTPADDING', -1, -1, 0)
     t.row_style('FONTNAME', 0, -1, font.bold)
 
@@ -215,7 +199,7 @@ def collate_payments(invoice, available_width):
 
 def has_itemized_debit(debits):
     for debit in debits:
-        if not debit['is_flat']:
+        if not debit['is_override']:
             return True
 
 
@@ -289,7 +273,7 @@ def serialize(invoice_obj, data):
 
     invoice = {
 
-        'version': '1.2',
+        'version': '1.0',
 
         'id': invoice_obj.id,
 
@@ -317,6 +301,8 @@ def serialize(invoice_obj, data):
         'debit_tax': data['debit_tax'],
 
         # all debits for jobs on this invoice (including debit above)
+        # this is the top 'Project progress' row in history table
+        # set later by calling prepare_transaction_report
         'debited_gross': data['debited_gross'],
         'debited_net': data['debited_net'],
         'debited_tax': data['debited_tax'],
@@ -326,13 +312,17 @@ def serialize(invoice_obj, data):
         'balance_net': data['balance_net'],
         'balance_tax': data['balance_tax'],
 
+        # payment history and prior invoices
+        'transactions': [],
+
+        # debits created with this invoice
+        # used when 'editing' the invoice and to show itemization table
         'debits': []
+
     }
 
     if data.get('add_terms', False):
         invoice['add_terms'] = True  # TODO: Calculate the terms.
-
-    invoice['transactions'] = get_transactions_for_jobs([d['job'] for d in data['debits']], exclude_transaction=invoice_obj.transaction_id)
 
     for debit in data['debits']:
 
@@ -344,11 +334,9 @@ def serialize(invoice_obj, data):
             'name': job.name,
             'taskgroups': []
         })
-        debit['debit_net'] = round(debit['debit_amount'] / (1+TAX_RATE), 2)
-        debit['debit_tax'] = debit['debit_amount'] - debit['debit_net']
         invoice['debits'].append(debit)
 
-        if debit['is_flat']:
+        if debit['is_override']:
             continue
 
         for taskgroup in job.taskgroups.all():

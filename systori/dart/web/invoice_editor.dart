@@ -3,146 +3,153 @@ import 'package:intl/intl.dart';
 import 'common.dart';
 
 
-class JobTable extends TableElement {
-    TableCellElement estimate_total;
-    TableCellElement itemized_total;
-    TableCellElement debit_total;
-    TableCellElement debited_total;
-    TableCellElement balance_total;
+NumberFormat AMOUNT = new NumberFormat("#,###,###,##0.00");
 
-    JobTable.created() : super.created() {
+
+class InvoiceTable extends TableElement {
+    TableCellElement debit_net_total;
+
+    InvoiceTable.created() : super.created() {
         TableRowElement totals = this.querySelector(":scope tr.job-table-totals");
-        this.estimate_total = totals.querySelector(":scope>.job-estimate");
-        this.itemized_total = totals.querySelector(":scope>.job-itemized");
-        this.debit_total = totals.querySelector(":scope>.job-debit");
-        this.debited_total = totals.querySelector(":scope>.job-debited");
-        this.balance_total = totals.querySelector(":scope>.job-balance");
+        this.debit_net_total = totals.querySelector(":scope>.job-amount-net");
     }
 
     recalculate() {
-        double estimate = 0.0;
-        double itemized = 0.0;
-        double debit = 0.0;
-        double debited = 0.0;
-        double balance = 0.0;
-
+        double debit_net = 0.0;
         var invoiced = this.querySelectorAll(":scope tr.job-row.invoiced");
-        for (JobRow row in invoiced) {
-            estimate += row.estimate;
-            itemized += row.itemized;
-            debit += row.debit_amount;
-            debited += row.original_debited;
-            balance += row.original_balance;
+        for (InvoiceDebit row in invoiced) {
+            debit_net += row.net_amount;
         }
-        debited += debit;
-        balance += debit;
-
-        estimate_total.text = CURRENCY.format(estimate);
-        itemized_total.text = CURRENCY.format(itemized);
-        debit_total.text = CURRENCY.format(debit);
-        debited_total.text = CURRENCY.format(debited);
-        balance_total.text = CURRENCY.format(balance);
+        debit_net_total.text = AMOUNT.format(debit_net);
     }
 }
 
-class JobRow extends TableRowElement {
+class InvoiceDebit extends TableRowElement {
 
     CheckboxInputElement is_invoiced_input;
-    TextInputElement flat_amount_input;
-    HiddenInputElement is_flat_input;
-    HiddenInputElement debit_amount_input;
-    TextAreaElement debit_comment_input;
+    RangeInputElement flat_invoice_range_input;
+    TextInputElement net_amount_input;
+    HiddenInputElement is_override_input;
+    TextAreaElement override_comment_input;
 
-    DivElement debit_amount_div;
-    TableCellElement debited_cell;
-    TableCellElement balance_cell;
+    TableCellElement net_estimate_cell;
+    TableCellElement net_invoiced_cell;
+    AnchorElement net_itemized_anchor;
 
-    double estimate;
-    double itemized;
-    double original_debited;
-    double original_balance;
+    double net_estimate;
+    double net_invoiced;
+    double net_itemized;
+    double net_amount;
 
     bool get is_invoiced => is_invoiced_input.checked;
 
-    double get debit_amount => double.parse(debit_amount_input.value);
-    set debit_amount(double amount) {
-        this.debit_amount_input.value = amount.toStringAsFixed(2);
-        this.debit_amount_div.text = CURRENCY.format(amount);
-        this.debited_cell.text = CURRENCY.format(amount+original_debited);
-        this.balance_cell.text = CURRENCY.format(amount+original_balance);
-        (parent.parent as JobTable).recalculate();
-    }
-
-    JobRow.created() : super.created() {
-        this.is_invoiced_input = this.querySelector(":scope>.job-invoiced>input");
+    InvoiceDebit.created() : super.created() {
+        this.is_invoiced_input = this.querySelector('[name^="job-"][name\$="-is_invoiced"]');
         this.is_invoiced_input.onChange.listen(invoicing_toggled);
-        this.is_flat_input = this.querySelector(":scope>.job-flat>input[type='hidden']");
-        this.flat_amount_input = this.querySelector(":scope>.job-flat>input[type='text']");
-        this.flat_amount_input.onKeyUp.listen(flat_amount_changed);
-        this.debit_amount_input = this.querySelector(":scope>.job-debit>input");
 
-        this.debit_amount_div = this.querySelector(":scope>.job-debit>.job-debit-amount");
-        this.debit_comment_input = this.querySelector(":scope>.job-debit>.job-debit-comment");
-        this.debited_cell = this.querySelector(":scope>.job-debited");
-        this.balance_cell = this.querySelector(":scope>.job-balance");
+        this.net_estimate_cell = this.querySelector(":scope>.job-estimated");
+        this.net_estimate = double.parse(net_estimate_cell.dataset['amount']);
+        this.net_invoiced_cell = this.querySelector(":scope>.job-debited");
+        this.net_invoiced = double.parse(net_invoiced_cell.dataset['amount']);
 
-        this.estimate = double.parse(this.querySelector(":scope>.job-estimate").dataset['amount']);
-        this.itemized = double.parse(this.querySelector(":scope>.job-itemized").dataset['amount']);
-        this.original_debited = double.parse(debited_cell.dataset['amount']);
-        this.original_balance = double.parse(balance_cell.dataset['amount']);
+        this.flat_invoice_range_input = this.querySelector('[type="range"]');
+        this.flat_invoice_range_input.onInput.listen(flat_invoice_range_changed);
+        this.querySelectorAll('.percent-button').onClick.listen(flat_invoice_percent_clicked);
+
+        this.net_itemized_anchor = this.querySelector(":scope>.job-itemized>a");
+        this.net_itemized_anchor.onClick.listen(itemized_value_clicked);
+        this.net_itemized = double.parse(net_itemized_anchor.dataset['amount']);
+
+        this.net_amount_input = this.querySelector('[name^="job-"][name\$="-amount_net"]');
+        this.net_amount_input.onKeyUp.listen(net_amount_changed);
+        this.net_amount = parse_currency(net_amount_input.value);
+        this.is_override_input = this.querySelector('[name^="job-"][name\$="-is_override"]');
+        this.override_comment_input = this.querySelector('[name^="job-"][name\$="-override_comment"]');
     }
 
-    update_debit() {
-        double debit = 0.0;
-        if (this.flat_amount_input.value.length > 0) {
-            double flat_amount = 0.0;
-            try {
-                flat_amount = parse_decimal(this.flat_amount_input.value);
-            } on FormatException catch (e) {}
-            if (flat_amount > this.itemized) {
-                debit = flat_amount - this.original_debited;
-                if (debit > 0.0) {
-                    debit_amount = debit;
-                    is_flat_input.value = "True";
-                    classes.add('flat');
-                    return;
-                }
-            }
-        }
-        if (this.itemized > this.original_debited) {
-            debit = this.itemized - this.original_debited;
-        }
-        debit_amount = debit;
-        is_flat_input.value = "False";
-        classes.remove('flat');
-    }
-
-    invoicing_toggled(Event e) {
+    invoicing_toggled([Event e]) {
         if (is_invoiced) {
             classes.add('invoiced');
-            flat_amount_input.disabled = false;
-            update_debit();
+            net_amount_input.disabled = false;
+            flat_invoice_range_input.disabled = false;
+            net_itemized_anchor.classes.remove('disabled');
+            this.querySelectorAll('.percent-button').forEach((e) {
+                e.classes.remove('disabled');
+            });
         } else {
             classes.remove('invoiced');
-            debit_amount = 0.0;
-            flat_amount_input.disabled = true;
+            net_amount_input.disabled = true;
+            flat_invoice_range_input.disabled = true;
+            net_itemized_anchor.classes.add('disabled');
+            this.querySelectorAll('.percent-button').forEach((e) {
+               e.classes.add('disabled');
+            });
         }
     }
 
-    flat_amount_changed(Event e) {
-        update_debit();
+    flat_invoice_range_changed(Event e) {
+        double percent = int.parse(flat_invoice_range_input.value)/100;
+        double flat = net_estimate * percent - net_invoiced;
+        update_net_amount(flat < 0 ? 0 : flat);
+    }
+
+    flat_invoice_percent_clicked(Event e) {
+        double percent = double.parse((e.target as AnchorElement).dataset['percent'])/100;
+        double flat = net_estimate * percent - net_invoiced;
+        update_net_amount(flat < 0 ? 0 : flat);
+        update_range_slider();
+    }
+
+    itemized_value_clicked(Event e) {
+        update_net_amount(net_itemized);
+        update_range_slider();
+    }
+
+    net_amount_changed(Event e) {
+        update_net_amount();
+        update_range_slider();
+    }
+
+    update_range_slider() {
+        var invoiced_total = net_invoiced + net_amount;
+        if (invoiced_total > net_estimate) {
+            flat_invoice_range_input.value = '100';
+        } else {
+            flat_invoice_range_input.value = (invoiced_total / net_estimate * 100).round().toString();
+        }
+    }
+
+    update_net_amount([double amount]) {
+        if (amount != null) {
+            net_amount = amount;
+            net_amount_input.value = AMOUNT.format(amount);
+        } else {
+            net_amount = parse_currency(net_amount_input.value);
+        }
+        is_override_input.value = 'False';
+        classes.remove('override');
+        classes.remove('itemized');
+        if (net_amount > 0) {
+            if (net_amount == net_itemized) {
+                is_override_input.value = 'False';
+                classes.add('itemized');
+            } else {
+                is_override_input.value = 'True';
+                classes.add('override');
+            }
+        }
+        (parent.parent as InvoiceTable).recalculate();
     }
 
 }
 
 void main() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
-    document.registerElement('job-table', JobTable, extendsTag:'table');
-    document.registerElement('job-row', JobRow, extendsTag:'tr');
+    document.registerElement('invoice-table', InvoiceTable, extendsTag:'table');
+    document.registerElement('invoice-debit', InvoiceDebit, extendsTag:'tr');
 
 
     /*
-NumberFormat AMOUNT = new NumberFormat("#,###,###,##0.00");
 NumberFormat SPLIT = new NumberFormat("#,###,###,##0.00");
 
     InputElement amount_input = querySelector('input[name="amount"]');

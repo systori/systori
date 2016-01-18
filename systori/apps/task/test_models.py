@@ -23,11 +23,11 @@ def create_task_data(self, create_user=True, create_company=True):
     self.template_project = Project.objects.create(name="Template Project", is_template=True)
     self.project = Project.objects.create(name="my project")
     self.project2 = Project.objects.create(name="my project 2")
-    self.job = Job.objects.create(job_code=1, name="Default", project=self.project)
-    self.job2 = Job.objects.create(job_code=2, name="Default 2", project=self.project)
+    self.job = Job.objects.create(job_code=1, name="Job A", project=self.project)
+    self.job2 = Job.objects.create(job_code=2, name="Job B", project=self.project)
     self.group = TaskGroup.objects.create(name="my group", job=self.job)
     self.group2 = TaskGroup.objects.create(name="my group 2", job=self.job)
-    self.task = Task.objects.create(name="my task one", qty=10, taskgroup=self.group)
+    self.task = Task.objects.create(name="my task one", qty=10, taskgroup=self.group, status=Task.RUNNING)
     TaskInstance.objects.create(task=self.task, selected=True)
     self.lineitem = LineItem.objects.create(name="my line item 1", unit_qty=8, price=12,
                                             taskinstance=self.task.instance)
@@ -69,18 +69,12 @@ class JobQuerySetTests(TestCase):
     def test_zero_total(self):
         jobs = Job.objects.filter(pk=self.job2.id)
         self.assertEqual(0, jobs.estimate_total())
-        self.assertEqual(0, jobs.estimate_tax_total())
-        self.assertEqual(0, jobs.estimate_gross_total())
         self.assertEqual(0, jobs.billable_total())
-        self.assertEqual(0, jobs.billable_tax_total())
-        self.assertEqual(0, jobs.billable_gross_total())
 
     def test_nonzero_total(self):
         jobs = Job.objects
         self.assertEqual(Decimal(1920), jobs.estimate_total())
         self.assertEqual(Decimal(0), jobs.billable_total())
-        self.assertEqual(round(Decimal(1920 * .19), 2), round(jobs.estimate_tax_total(), 2))
-        self.assertEqual(round(Decimal(1920 * 1.19), 2), round(jobs.estimate_gross_total(), 2))
 
 
 class TaskGroupOffsetTests(TestCase):
@@ -168,6 +162,7 @@ class TaskCloneTests(TestCase):
         group = job.taskgroups.get(name="my group")
         self.assertNotEqual(group.id, self.group.id)
         self.assertEqual(group.tasks.count(), 2)
+        self.assertFalse(max(group.tasks.values_list('status', flat=True)))
 
 
 class TestJobTransitions(TestCase):
@@ -179,13 +174,13 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Draft', self.job.get_status_display())
 
     def test_job_proposed(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
+        proposal = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())
 
     def test_job_approved(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
+        proposal = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         proposal.send()
         proposal.approve()
@@ -193,7 +188,7 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Approved', self.job.get_status_display())
 
     def test_job_declined(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
+        proposal = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())
@@ -203,7 +198,7 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Draft', self.job.get_status_display())
 
     def test_job_after_proposal_deleted(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
+        proposal = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())

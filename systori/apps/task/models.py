@@ -1,15 +1,13 @@
 from decimal import Decimal
 from datetime import datetime
 from string import ascii_lowercase
-from django.db import models, connections
+from django.db import models
 from django.db.models.manager import BaseManager
 from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
 from django.utils.formats import date_format
-from django.conf import settings
 from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
-from ..accounting.constants import TAX_RATE
 
 
 class BetterOrderedModel(OrderedModel):
@@ -17,7 +15,7 @@ class BetterOrderedModel(OrderedModel):
         abstract = True
 
     def save(self, *args, **kwargs):
-        if not self.pk and self.order != None:
+        if not self.pk and self.order is not None:
             qs = self.get_ordering_queryset()
             qs.filter(order__gte=self.order).update(order=models.F('order') + 1)
         super(BetterOrderedModel, self).save(*args, **kwargs)
@@ -27,20 +25,8 @@ class JobQuerySet(models.QuerySet):
     def estimate_total(self):
         return sum([job.estimate_total for job in self])
 
-    def estimate_tax_total(self):
-        return round(self.estimate_total() * TAX_RATE, 2)
-
-    def estimate_gross_total(self):
-        return round(self.estimate_total() * (TAX_RATE + 1), 2)
-
     def billable_total(self):
         return sum([job.billable_total for job in self])
-
-    def billable_tax_total(self):
-        return round(self.billable_total() * TAX_RATE, 2)
-
-    def billable_gross_total(self):
-        return round(self.billable_total() * (TAX_RATE + 1), 2)
 
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
@@ -51,6 +37,7 @@ class Job(models.Model):
     name = models.CharField(_('Job Name'), max_length=512)
     job_code = models.PositiveSmallIntegerField(_('Code'), default=0)
     description = models.TextField(_('Description'), blank=True)
+    project = models.ForeignKey('project.Project', related_name="jobs")
 
     taskgroup_offset = models.PositiveSmallIntegerField(_("Task Group Offset"), default=0)
 
@@ -66,8 +53,7 @@ class Job(models.Model):
         (TIME_AND_MATERIALS, _("Time and Materials")),
     )
     billing_method = models.CharField(_('Billing Method'), max_length=128, choices=BILLING_METHOD, default=FIXED_PRICE)
-
-    project = models.ForeignKey('project.Project', related_name="jobs")
+    is_revenue_recognized = models.BooleanField(default=False)
 
     DRAFT = "draft"
     PROPOSED = "proposed"
@@ -82,7 +68,6 @@ class Job(models.Model):
         (STARTED, _("Started")),
         (COMPLETED, _("Completed"))
     )
-
     status = FSMField(default=DRAFT, choices=STATE_CHOICES)
 
     objects = JobManager()
@@ -161,28 +146,11 @@ class Job(models.Model):
 
     @property
     def complete_percent(self):
-        return round(self.billable_total / self.estimate_total * 100) if self.estimate_total else 0
+        return round((self.billable_total / self.estimate_total) * 100, 2) if self.estimate_total else 0
 
     @property
     def code(self):
         return str(self.job_code).zfill(self.project.job_zfill)
-
-    @property
-    def new_amount_to_debit(self):
-        """ This function returns the amount that can be debited to the customers
-            account based on work done since the last time the customer account was debited.
-        """
-        # total cost of all complete work so far (with tax)
-        billable = round(self.billable_total * (1 + TAX_RATE), 2)
-
-        # total we have already charged the customer
-        already_debited = round(self.account.debits().total, 2)
-
-        return billable - already_debited
-
-    @property
-    def new_amount_with_balance(self):
-        return self.new_amount_to_debit + self.account.balance
 
     def __str__(self):
         return self.name
@@ -290,6 +258,20 @@ class Task(BetterOrderedModel):
     taskgroup = models.ForeignKey(TaskGroup, related_name="tasks")
     order_with_respect_to = 'taskgroup'
 
+    APPROVED = "approved"
+    READY = "ready"
+    RUNNING = "running"
+    DONE = "done"
+
+    STATE_CHOICES = (
+        (APPROVED, _("Approved")),
+        (READY, _("Ready")),
+        (RUNNING, _("Running")),
+        (DONE, _("Done"))
+    )
+
+    status = FSMField(blank=True, choices=STATE_CHOICES)
+
     class Meta:
         verbose_name = _("Task")
         verbose_name_plural = _("Task")
@@ -352,6 +334,7 @@ class Task(BetterOrderedModel):
         self.complete = 0.0
         self.started_on = None
         self.completed_on = None
+        self.status = ''
         self.save()
         for taskinstance in taskinstances:
             taskinstance.clone_to(self, taskinstance.order)
@@ -557,7 +540,7 @@ class ProgressReport(models.Model):
 
     @property
     def complete_percent(self):
-        return round(self.complete / self.task.qty * 100)
+        return round(self.complete / self.task.qty * 100) if self.task.qty else 0
 
     class Meta:
         verbose_name = _("Progress Report")

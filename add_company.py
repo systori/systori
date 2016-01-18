@@ -27,6 +27,6 @@ from systori.apps.project.models import Project
 
 Project.objects.create(name="Template Project", is_template=True)
 
-from systori.apps.accounting.skr03 import create_chart_of_accounts
+from systori.apps.accounting.workflow import create_chart_of_accounts
 
 create_chart_of_accounts()

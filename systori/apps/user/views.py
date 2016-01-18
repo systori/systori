@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from .forms import *
-from .forms import LanguageForm
 from .models import *
 from ..company.models import *
 
@@ -111,8 +110,10 @@ class UserUpdate(generic.UpdateView, UserFormRenderer):
             return self.render_forms(user_form, access_form)
 
 
-class UserRemove(generic.DeleteView):
+class AccessRemove(generic.DeleteView):
     model = Access
+    template_name = "user/access_confirm_delete.html"
+    success_url = reverse_lazy('users')
 
 
 class UserGeneratePassword(generic.DetailView):
