@@ -55,7 +55,7 @@ class SplitPaymentForm(Form):
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
     payment = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=2, required=False)
     discount = LocalizedDecimalField(label=_("Discount"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
-    adjustment = LocalizedDecimalField(label=_("Adjustment"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    adjustment = LocalizedDecimalField(label=_("Adjustment"), max_digits=14, decimal_places=2, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

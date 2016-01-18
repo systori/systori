@@ -277,6 +277,7 @@
       <th>{% trans 'Payment' %}</th>
       <th class="text-right">{% trans 'Applied' %}</th>
       <th class="text-right">{% trans 'Discount' %}</th>
+      <th class="text-right">{% trans 'Adjustment' %}</th>
       <th class="text-right">{% trans 'Total Credit' %}</th>
       <th class="text-right" colspan="3">{% trans 'Actions' %}</th>
     </tr>
@@ -289,6 +290,7 @@
         <td>{{ transaction.payment_received|negate|money }}</td>
         <td class="text-right">{{ transaction.payment_applied_gross|negate|money }}</td>
         <td class="text-right">{{ transaction.discount_applied_gross|negate|money }}</td>
+        <td class="text-right">{{ transaction.adjustment_applied_gross|negate|money }}</td>
         <td class="text-right">{{ transaction.gross|negate|money }}</td>
         <td class="text-right">
           {% if not transaction.is_reconciled %}
@@ -301,6 +303,7 @@
           <td colspan="2">{{ job.name }}</td>
           <td>{{ job.payment_applied_gross|negate|money }}</td>
           <td>{{ job.discount_applied_gross|negate|money }}</td>
+          <td>{{ job.adjustment_applied_gross|negate|money }}</td>
           <td>{{ job.gross|negate|money }}</td>
           <td></td>
         </tr>

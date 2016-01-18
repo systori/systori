@@ -73,12 +73,10 @@ class PaymentSplit extends TableRowElement {
 
     TextInputElement payment_input;
     HiddenInputElement discount_input;
-    HiddenInputElement adjustment_input;
-    //CheckboxInputElement is_adjusted_input;
+    TextInputElement adjustment_input;
 
     SpanElement payment_span;
     SpanElement discount_span;
-    SpanElement adjustment_span;
     TableCellElement credit_cell;
 
     // 1.00 -> 100
@@ -87,9 +85,7 @@ class PaymentSplit extends TableRowElement {
     int discount_gross;
     int adjustment_gross;
     int credit_gross;
-    bool is_adjusted;
-
-    //bool get is_adjusted => is_adjusted_input.checked;
+    bool is_auto_adjusted;
 
     PaymentSplit.created() : super.created() {
 
@@ -98,9 +94,8 @@ class PaymentSplit extends TableRowElement {
 
         TableCellElement payment_cell = this.querySelector(":scope>.job-payment");
         this.payment_input = this.querySelector('[name^="split-"][name\$="-payment"]');
-        this.payment_input.onKeyUp.listen(payment_changed);
+        this.payment_input.onKeyUp.listen(input_changed);
         this.payment_gross = amount_string_to_int(payment_cell.dataset['amount']);
-        //this.payment_gross = double.parse(this.payment_input.value);
 
         TableCellElement discount_cell = this.querySelector(":scope>.job-discount");
         this.discount_input = this.querySelector('[name^="split-"][name\$="-discount"]');
@@ -109,31 +104,26 @@ class PaymentSplit extends TableRowElement {
 
         TableCellElement adjustment_cell = this.querySelector(":scope>.job-adjustment");
         this.adjustment_input = this.querySelector('[name^="split-"][name\$="-adjustment"]');
-        this.adjustment_span = adjustment_cell.querySelector('.text');
+        this.adjustment_input.onKeyUp.listen(input_changed);
         this.adjustment_gross = amount_string_to_int(adjustment_cell.dataset['amount']);
-
-        //this.is_adjusted_input = this.querySelector('[name^="job-"][name\$="-is_adjusted"]');
-        //this.is_adjusted_input.onChange.listen(adjustment_toggled);
 
         credit_cell = this.querySelector(":scope>.job-credit");
         this.credit_gross = amount_string_to_int(credit_cell.dataset['amount']);
 
     }
 
-    payment_changed([Event e]) {
+    input_changed([Event e]) {
         payment_gross = (parse_currency(payment_input.value) * 100).round();
+        adjustment_gross = (parse_currency(adjustment_input.value) * 100).round();
 
-        var possible_adjustment = 0;
-        if (is_adjusted) {
-            possible_adjustment = balance_gross - (payment_gross + discount_gross);
+        if (is_auto_adjusted) {
+            var possible_adjustment = balance_gross - (payment_gross + discount_gross);
+            adjustment_gross = possible_adjustment > 0 ? possible_adjustment : 0;
+            adjustment_input.value = AMOUNT.format(adjustment_gross/100);
         }
-        adjustment_gross = possible_adjustment > 0 ? possible_adjustment : 0;
 
         discount_input.value = (discount_gross/100).toStringAsFixed(2);
         discount_span.text = AMOUNT.format(discount_gross/100);
-
-        adjustment_input.value = (adjustment_gross/100).toStringAsFixed(2);
-        adjustment_span.text = AMOUNT.format(adjustment_gross/100);
 
         credit_gross = payment_gross + discount_gross + adjustment_gross;
         credit_cell.text = AMOUNT.format(credit_gross/100);
@@ -142,8 +132,8 @@ class PaymentSplit extends TableRowElement {
             (parent.parent as PaymentSplitTable).recalculate();
     }
 
-    int consume_payment(int payment, double discount, bool is_adjusted) {
-        this.is_adjusted = is_adjusted;
+    int consume_payment(int payment, double discount, bool is_auto_adjusted) {
+        this.is_auto_adjusted = adjustment_input.readOnly = is_auto_adjusted;
         int discounted_balance = (balance_gross * discount).round();
         discount_gross = balance_gross - discounted_balance;
         if (payment <= 0) {
@@ -157,7 +147,7 @@ class PaymentSplit extends TableRowElement {
                 payment = 0;
             }
         }
-        payment_changed();
+        input_changed();
         return payment;
     }
 

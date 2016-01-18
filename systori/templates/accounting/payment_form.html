@@ -24,8 +24,10 @@
     <style>
       .job-balance,
       .job-payment,
+      .job-payment input,
       .job-discount,
       .job-adjustment,
+      .job-adjustment input,
       .job-credit {
         text-align: right;
       }
@@ -63,8 +65,7 @@
             {{ split.discount }}
           </td>
           <td class="job-adjustment" data-amount="{{ split.adjustment_amount.gross }}">
-            <span class="text">{{ split.adjustment_amount.gross|ubrdecimal:2 }}</span>
-            {{ split.adjustment }}
+            <input id="{{ split.adjustment.id_for_label }}" name="{{ split.adjustment.html_name }}" type="text" value="{{ split.adjustment_amount.gross|ubrdecimal:2 }}" {% if form.payment_form.is_adjusted.value %}readonly{% endif %}>
           </td>
           <td class="job-credit" data-amount="{{ split.credit_amount.gross }}">{{ split.credit_amount.gross|ubrdecimal:2 }}</td>
         </tr>
