@@ -645,7 +645,7 @@ msgstr "Schlussrechnung"
 #: systori/apps/document/type/invoice.py:190
 #: systori/templates/document/invoice_form.html:97
 msgid "This Invoice"
-msgstr "Diese Rechnung"
+msgstr "Zahlbetrag"
 
 #: systori/apps/document/type/invoice.py:147
 msgid "Please Pay"
