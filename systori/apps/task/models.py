@@ -540,7 +540,7 @@ class ProgressReport(models.Model):
 
     @property
     def complete_percent(self):
-        return round(self.complete / self.task.qty * 100)
+        return round(self.complete / self.task.qty * 100) if self.task.qty else 0
 
     class Meta:
         verbose_name = _("Progress Report")
