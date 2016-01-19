@@ -12,8 +12,9 @@
     </div>
   </div>
   <div class="editor-hint">
-    {% trans '<span class="label label-default">shift</span> <span class="label label-default">del</span> delete this item' %}
+    <span class="label label-default">{% trans 'shift' %} </span> <span class="label label-default">{% trans 'del' %}</span> {% trans 'delete this item' %}
     <br>
-    {% trans '<span class="label label-default">shift</span> <span class="label label-default">enter</span> <span class="blank">create a new Task Instance</span><span class="non-blank">create a new Line Item</span>' %}
+    <span class="label label-default">{% trans 'shift' %} </span> <span class="label label-default">{% trans 'enter' %}</span> 
+    <span class="blank">{% trans 'create a new Task Instance' %}</span><span class="non-blank">{% trans 'create a new Line Item' %}</span>
   </div>
 </div>

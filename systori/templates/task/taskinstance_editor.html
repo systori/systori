@@ -7,8 +7,8 @@
   <div class="description" placeholder="{% trans 'description' %}"
        contenteditable>{{ taskinstance.description|safe }}</div>
   <div class="editor-hint">
-    {% trans '<span class="label label-default">shift</span> <span class="label label-default">del</span> delete this item' %}
+    <span class="label label-default">{% trans 'shift' %} </span> <span class="label label-default">{% trans 'del' %}</span> {% trans 'delete this item' %}
     <br>
-    {% trans '<span class="label label-default">shift</span> <span class="label label-default">enter</span> append new Line Item' %}
+    <span class="label label-default">{% trans 'shift' %} </span> <span class="label label-default">{% trans 'enter' %}</span> {% trans 'append a new Line Item' %}
   </div>
 </div>

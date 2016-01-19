@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-18 11:14+0100\n"
+"POT-Creation-Date: 2016-01-18 13:23+0100\n"
 "PO-Revision-Date: 2015-07-11 15:41+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,6 +17,114 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.8.1\n"
+
+#: src/django-tuath/tuath/contrib/invite/admin.py:34
+msgid "status"
+msgstr "Status"
+
+#: src/django-tuath/tuath/contrib/invite/admin.py:39
+msgid "Pending"
+msgstr ""
+
+#: src/django-tuath/tuath/contrib/invite/admin.py:40
+msgid "Expired"
+msgstr ""
+
+#: src/django-tuath/tuath/contrib/invite/admin.py:41
+msgid "Accepted"
+msgstr ""
+
+#: src/django-tuath/tuath/contrib/invite/admin.py:42
+#: systori/apps/document/models.py:42
+msgid "Declined"
+msgstr "Abgelehnt"
+
+#: src/django-tuath/tuath/contrib/invite/admin.py:43
+msgid "Redeemed or Expired"
+msgstr ""
+
+#: src/django-tuath/tuath/contrib/invite/forms.py:11
+msgid "This invitation has already been redeemed."
+msgstr ""
+
+#: src/django-tuath/tuath/contrib/invite/forms.py:12
+msgid "This invitation has expired."
+msgstr ""
+
+#: src/django-tuath/tuath/contrib/invite/forms.py:13
+msgid "This invitation has already been accepted."
+msgstr ""
+
+#: src/django-tuath/tuath/contrib/invite/forms.py:14
+msgid "This invitation has already been declined."
+msgstr ""
+
+#: src/django-tuath/tuath/contrib/invite/models.py:45
+msgid "Email address"
+msgstr "Adresse"
+
+#: src/django-tuath/tuath/contrib/invite/models.py:90
+msgid "DECLINED"
+msgstr ""
+
+#: src/django-tuath/tuath/contrib/invite/models.py:92
+msgid "ACCEPTED"
+msgstr ""
+
+#: src/django-tuath/tuath/contrib/invite/models.py:94
+msgid "EXPIRED"
+msgstr ""
+
+#: src/django-tuath/tuath/contrib/invite/models.py:95
+msgid "PENDING"
+msgstr ""
+
+#: src/django-tuath/tuath/middleware.py:164
+#: src/django-tuath/tuath/middleware.py:260
+msgid "You may not select that schema"
+msgstr ""
+
+#: src/django-tuath/tuath/middleware.py:177
+#, python-format
+msgid "Schema changed to %s"
+msgstr ""
+
+#: src/django-tuath/tuath/middleware.py:179
+msgid "Schema deselected"
+msgstr ""
+
+#: src/django-tuath/tuath/middleware.py:252
+msgid "You must select a schema to access that resource"
+msgstr ""
+
+#: src/django-tuath/tuath/models.py:70
+msgid "The display name of the schema."
+msgstr "Dieser Benutzer ist schon teil dieser Firma."
+
+#: src/django-tuath/tuath/models.py:73
+msgid "Use this instead of deleting schemata."
+msgstr ""
+
+#: src/django-tuath/tuath/models.py:97
+#, python-format
+msgid "Schema %s already in use"
+msgstr ""
+
+#: src/django-tuath/tuath/models.py:99
+msgid "may not change schema after creation."
+msgstr "Nicht die Vergangenheit ändern du kannst."
+
+#: src/django-tuath/tuath/models.py:131
+msgid "Which users may access data from this schema."
+msgstr ""
+
+#: src/django-tuath/tuath/templates/admin/base_site.html:4
+msgid "Django site admin"
+msgstr ""
+
+#: src/django-tuath/tuath/templates/admin/base_site.html:36
+msgid "Django administration"
+msgstr ""
 
 #: systori/apps/accounting/forms.py:34
 msgid "Bank Account"
@@ -323,10 +431,6 @@ msgstr "Gesendet"
 #: systori/apps/task/models.py:267
 msgid "Approved"
 msgstr "beauftragt"
-
-#: systori/apps/document/models.py:42
-msgid "Declined"
-msgstr "Abgelehnt"
 
 #: systori/apps/document/models.py:47
 msgid "Send"
@@ -1075,8 +1179,6 @@ msgid "Accounts Receivable"
 msgstr ""
 
 #: systori/lib/accounting/models.py:57
-
-#| msgid "Asset"
 msgid "Asset Type"
 msgstr "Aktiva"
 
@@ -1286,8 +1388,6 @@ msgstr "Typ"
 
 #: systori/templates/accounting/payment_form.html:44
 #: systori/templates/document/invoice_form.html:94
-
-#| msgid "Invoice"
 msgid "Invoiced"
 msgstr "Rechnung"
 
@@ -1921,49 +2021,62 @@ msgid "Flag"
 msgstr "Markierung"
 
 #: systori/templates/task/lineitem_editor.html:15
+#: systori/templates/task/lineitem_editor.html:17
+#: systori/templates/task/task_editor.html:15
+#: systori/templates/task/task_editor.html:17
+#: systori/templates/task/task_editor.html:19
+#: systori/templates/task/taskgroup_editor.html:10
+#: systori/templates/task/taskgroup_editor.html:12
+#: systori/templates/task/taskinstance_editor.html:10
+#: systori/templates/task/taskinstance_editor.html:12
+msgid "shift"
+msgstr ""
+
+#: systori/templates/task/lineitem_editor.html:15
 #: systori/templates/task/task_editor.html:15
 #: systori/templates/task/taskgroup_editor.html:10
 #: systori/templates/task/taskinstance_editor.html:10
-msgid ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">del</span> delete this item"
+msgid "del"
 msgstr ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">del</span> dieses Element löschen"
+
+#: systori/templates/task/lineitem_editor.html:15
+#: systori/templates/task/task_editor.html:15
+#: systori/templates/task/taskgroup_editor.html:10
+#: systori/templates/task/taskinstance_editor.html:10
+msgid "delete this item"
+msgstr ""
 
 #: systori/templates/task/lineitem_editor.html:17
-msgid ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">enter</span> <span class=\"blank\">create a new Task Instance</"
-"span><span class=\"non-blank\">create a new Line Item</span>"
+#: systori/templates/task/task_editor.html:17
+#: systori/templates/task/task_editor.html:19
+#: systori/templates/task/taskgroup_editor.html:12
+#: systori/templates/task/taskinstance_editor.html:12
+msgid "enter"
 msgstr ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">Enter</span> <span class=\"blank\">neue Position</"
-"span><span class=\"non-blank\">neues Kalkulationselement</span>"
+
+#: systori/templates/task/lineitem_editor.html:18
+msgid "create a new Task Instance"
+msgstr ""
+
+#: systori/templates/task/lineitem_editor.html:18
+msgid "create a new Line Item"
+msgstr ""
 
 #: systori/templates/task/task_editor.html:5
 msgid "task"
 msgstr "Position"
 
 #: systori/templates/task/task_editor.html:17
-msgid ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">enter</span> <span class=\"non-blank\">new Line Item</span><span "
-"class=\"blank\">new Task Group</span>"
+msgid "new Line Item"
 msgstr ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">Enter</span> <span class=\"non-blank\">neues Kalkulationselement</span><span "
-"class=\"blank\">neue Positionsgruppe</span>"
 
 #: systori/templates/task/task_editor.html:19
-msgid ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">alt</span> + <span class=\"label label-default\">enter</span> new "
-"Alternative Task"
+msgid "alt"
 msgstr ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">alt</span> + <span class=\"label label-default\">enter</span> neue "
-"alternative Position"
+
+#: systori/templates/task/task_editor.html:19
+msgid "new Alternative Task"
+msgstr ""
 
 #: systori/templates/task/task_editor.html:21
 #: systori/templates/task/taskgroup_editor.html:8
@@ -1976,24 +2089,16 @@ msgid "task group"
 msgstr "Positionsgruppe"
 
 #: systori/templates/task/taskgroup_editor.html:12
-msgid ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">enter</span> create a new Task"
+msgid "create a new Task"
 msgstr ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">enter</span> neue Position"
 
 #: systori/templates/task/taskinstance_editor.html:5
 msgid "task option"
 msgstr "Alternative"
 
 #: systori/templates/task/taskinstance_editor.html:12
-msgid ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">enter</span> append new Line Item"
+msgid "append a new Line Item"
 msgstr ""
-"<span class=\"label label-default\">shift</span> <span class=\"label label-"
-"default\">enter</span> neues Kalkulationselement"
 
 #: systori/templates/user/login.html:62
 msgid "Your username and password didn't match. Please try again."
@@ -2031,30 +2136,9 @@ msgstr "Administration"
 msgid "Generate Password"
 msgstr "Passwort generieren"
 
-
 #~| msgid "Partial Invoice"
 #~ msgid "Paying Invoice"
 #~ msgstr "Abschlagsrechnung"
-
-
-#~| msgid "Status"
-#~ msgid "status"
-#~ msgstr "Status"
-
-
-#~| msgid "email address"
-#~ msgid "Email address"
-#~ msgstr "Adresse"
-
-
-#~| msgid "This user is already a member of this company."
-#~ msgid "The display name of the schema."
-#~ msgstr "Dieser Benutzer ist schon teil dieser Firma."
-
-
-#~| msgid "Cannot change the past."
-#~ msgid "may not change schema after creation."
-#~ msgstr "Nicht die Vergangenheit ändern du kannst."
 
 #~ msgid "No discount applied"
 #~ msgstr "Skonto abgezogen"
