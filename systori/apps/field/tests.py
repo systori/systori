@@ -23,7 +23,6 @@ class TestFieldTaskView(TestCase):
         jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
         dailyplan = DailyPlan.objects.create(jobsite=jobsite)
         access, _ = Access.objects.get_or_create(user=self.user, company=self.company)
-        TeamMember.objects.create(dailyplan=dailyplan, access=access)
 
         self.client.login(username='lex@damoti.com', password='pass')
 
@@ -37,6 +36,14 @@ class TestFieldTaskView(TestCase):
         self.client.post(
             reverse('field.dailyplan.task', args=['1', dailyplan.url_id, self.task.pk]),
             {'complete': 1}
+        )
+        self.task.refresh_from_db()
+        self.assertFalse(self.task.dailyplans.filter(id=dailyplan.id).exists())
+
+        TeamMember.objects.create(dailyplan=dailyplan, access=access)
+        self.client.post(
+            reverse('field.dailyplan.task', args=['1', dailyplan.url_id, self.task.pk]),
+            {'complete': 2}
         )
         self.task.refresh_from_db()
         self.assertTrue(self.task.dailyplans.filter(id=dailyplan.id).exists())

@@ -330,7 +330,9 @@ class FieldTaskView(UpdateView):
 
     def assign_task_to_user_dailyplan(self, task):
         dailyplan = self.request.dailyplan
-        if dailyplan.id and not task.dailyplans.filter(id=dailyplan.id).exists():
+        user = self.request.user
+        dailyplan_assigned = dailyplan.id and dailyplan.accesses.filter(user=user).exists()
+        if dailyplan_assigned and not task.dailyplans.filter(id=dailyplan.id).exists():
             task.dailyplans.add(dailyplan)
 
     def get_success_url(self):
