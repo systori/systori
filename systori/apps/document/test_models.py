@@ -15,12 +15,12 @@ class ProposalTests(TestCase):
         create_task_data(self)
 
     def test_proposal_new(self):
-        d = Proposal.objects.create(project=self.project, amount=Decimal(0.0), letterhead=self.letterhead)
+        d = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
         self.assertEquals('New', d.get_status_display())
         self.assertEquals(['Send'], [t.custom['label'] for t in d.get_available_status_transitions()])
 
     def test_proposal_send(self):
-        d = Proposal.objects.create(project=self.project, amount=Decimal(0.0), letterhead=self.letterhead)
+        d = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
         d.send();
         d.save()
         d = Proposal.objects.get(pk=d.pk)
@@ -45,7 +45,7 @@ class DocumentTemplateTests(TestCase):
         self.assertEqual("Thanks Ludwig!", r['footer'])
 
     def test_render_german_tpl(self):
-        d = DocumentTemplate.objects.create(name="DocTpl", header="Dear [nachname]", footer="Thanks [vorname]!",
+        d = DocumentTemplate.objects.create(name="DocTpl", header="Dear [Nachname]", footer="Thanks [Vorname]!",
                                             document_type="invoice")
         activate('de')
         r = d.render(self.project)

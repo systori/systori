@@ -6,8 +6,7 @@
   {% block head %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="{% static "img/favicon.png" %}">
-    <link rel="apple-touch-icon" href="{% static "img/apple-touch-icon-180x180-precomposed.png" %}"/>
+    {%  include "favicon_snippet.html" %}
 
     <title>{% block title %}systori{% endblock %}</title>
 

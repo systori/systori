@@ -63,9 +63,8 @@ class ProposalViewTests(DocumentTestCase):
             project=self.project,
             letterhead=self.letterhead,
             document_date=timezone.now(),
-            json={'header': 'header', 'footer': 'footer'},
-            notes='notes',
-            amount=1000
+            json={'header': 'header', 'footer': 'footer', 'total_gross': '0'},
+            notes='notes'
         )
         response = self.client.post(reverse('proposal.update', args=[self.project.id, proposal.id]), {
             'document_date': '2015-07-28',
@@ -127,8 +126,7 @@ class InvoiceViewTests(DocumentTestCase):
             project=self.project,
             document_date=timezone.now(),
             json={'header': 'header', 'footer': 'footer'},
-            notes='notes',
-            amount=1000
+            notes='notes'
         )
         response = self.client.post(reverse('invoice.update', args=[self.project.id, invoice.id]), {
             'document_date': '2015-07-28',

@@ -69,18 +69,12 @@ class JobQuerySetTests(TestCase):
     def test_zero_total(self):
         jobs = Job.objects.filter(pk=self.job2.id)
         self.assertEqual(0, jobs.estimate_total())
-        self.assertEqual(0, jobs.estimate_tax_total())
-        self.assertEqual(0, jobs.estimate_gross_total())
         self.assertEqual(0, jobs.billable_total())
-        self.assertEqual(0, jobs.billable_tax_total())
-        self.assertEqual(0, jobs.billable_gross_total())
 
     def test_nonzero_total(self):
         jobs = Job.objects
         self.assertEqual(Decimal(1920), jobs.estimate_total())
         self.assertEqual(Decimal(0), jobs.billable_total())
-        self.assertEqual(round(Decimal(1920 * .19), 2), round(jobs.estimate_tax_total(), 2))
-        self.assertEqual(round(Decimal(1920 * 1.19), 2), round(jobs.estimate_gross_total(), 2))
 
 
 class TaskGroupOffsetTests(TestCase):
@@ -180,13 +174,13 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Draft', self.job.get_status_display())
 
     def test_job_proposed(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
+        proposal = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())
 
     def test_job_approved(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
+        proposal = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         proposal.send()
         proposal.approve()
@@ -194,7 +188,7 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Approved', self.job.get_status_display())
 
     def test_job_declined(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
+        proposal = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())
@@ -204,7 +198,7 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Draft', self.job.get_status_display())
 
     def test_job_after_proposal_deleted(self):
-        proposal = Proposal.objects.create(amount=99, project=self.project, letterhead=self.letterhead)
+        proposal = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
         self.assertEquals('Proposed', self.job.get_status_display())

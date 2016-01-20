@@ -1,15 +1,3 @@
-"""
-JSON Version Log
-================
-1.2
- - major refactoring, renamed fields, added new fields
- - coincided with project to job based account switch
-1.1
- - Added is_flat_invoice attribute.
-1.0
- - Initial Version.
-"""
-
 from io import BytesIO
 from decimal import Decimal
 from datetime import date
@@ -93,8 +81,6 @@ def collate_tasks_total(invoice, available_width):
     t.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
 
     t.row(_("Total without VAT"), money(invoice['debited_net']))
-    t.row("19,00% "+_("VAT"), money(invoice['debited_tax']))
-    t.row(_("Total including VAT"), money(invoice['debited_gross']))
 
     return t.get_table()
 
@@ -201,7 +187,7 @@ def collate_payments(invoice, available_width):
             title = _("{invoice} from {date}").format(invoice=txn['invoice_title'], date=invoice_day)
 
         if idx == last_idx:
-            t.row(p(_('This Invoice')), money(-row[1]), money(-row[2]), money(-row[3]))
+            t.row(b(_('This Invoice')), money(-row[1]), money(-row[2]), money(-row[3]))
         else:
             t.row(p(title), money(row[1]), money(row[2]), money(row[3]))
 
@@ -287,7 +273,7 @@ def serialize(invoice_obj, data):
 
     invoice = {
 
-        'version': '1.2',
+        'version': '1.0',
 
         'id': invoice_obj.id,
 
@@ -315,6 +301,8 @@ def serialize(invoice_obj, data):
         'debit_tax': data['debit_tax'],
 
         # all debits for jobs on this invoice (including debit above)
+        # this is the top 'Project progress' row in history table
+        # set later by calling prepare_transaction_report
         'debited_gross': data['debited_gross'],
         'debited_net': data['debited_net'],
         'debited_tax': data['debited_tax'],
@@ -324,13 +312,17 @@ def serialize(invoice_obj, data):
         'balance_net': data['balance_net'],
         'balance_tax': data['balance_tax'],
 
+        # payment history and prior invoices
+        'transactions': [],
+
+        # debits created with this invoice
+        # used when 'editing' the invoice and to show itemization table
         'debits': []
+
     }
 
     if data.get('add_terms', False):
         invoice['add_terms'] = True  # TODO: Calculate the terms.
-
-    invoice.update(prepare_transaction_report([d['job'] for d in data['debits']]))
 
     for debit in data['debits']:
 

@@ -29,3 +29,43 @@ class GrossNetConversionTest(TestCase):
             extracted_net, net_tax = extract_net_tax(gross, tax_rate)
             self.assertEqual(original_net, extracted_net)
             self.assertEqual(gross_tax, net_tax)
+
+
+class AmountTests(TestCase):
+
+    def test_default_init(self):
+        a = Amount(D(1), D(2), D(3))
+        self.assertEqual(a.net, D(1))
+        self.assertEqual(a.tax, D(2))
+        self.assertEqual(a.gross, D(3))
+
+    def test_zero_init(self):
+        a = Amount.zero()
+        self.assertEqual(a.net, D(0))
+        self.assertEqual(a.tax, D(0))
+        self.assertEqual(a.gross, D(0))
+
+    def test_from_net_init(self):
+        a = Amount.from_net(D(100), D(0.19))
+        self.assertEqual(a.net, D(100))
+        self.assertEqual(a.tax, D(19))
+        self.assertEqual(a.gross, D(119))
+
+    def test_from_gross_init(self):
+        a = Amount.from_gross(D(119), D(0.19))
+        self.assertEqual(a.net, D(100))
+        self.assertEqual(a.tax, D(19))
+        self.assertEqual(a.gross, D(119))
+
+    def test_ops(self):
+        a = Amount(D(1), D(2), D(3))
+
+        a += a
+        self.assertEqual(a.net, D(2))
+        self.assertEqual(a.tax, D(4))
+        self.assertEqual(a.gross, D(6))
+
+        a -= Amount(D(1), D(1), D(1))
+        self.assertEqual(a.net, D(1))
+        self.assertEqual(a.tax, D(3))
+        self.assertEqual(a.gross, D(5))

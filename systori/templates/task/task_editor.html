@@ -12,11 +12,11 @@
     </div>
   </div>
   <div class="editor-hint">
-    {% trans '<span class="label label-default">shift</span> <span class="label label-default">del</span> delete this item' %}
+    <span class="label label-default">{% trans 'shift' %} </span> <span class="label label-default">{% trans 'del' %}</span> {% trans 'delete this item' %}
     <br>
-    {% trans '<span class="label label-default">shift</span> <span class="label label-default">enter</span> <span class="non-blank">new Line Item</span><span class="blank">new Task Group</span>' %}
+    <span class="label label-default">{% trans 'shift' %} </span> <span class="label label-default">{% trans 'enter' %}</span> {% trans 'new Line Item' %}
     <br>
-    {% trans '<span class="label label-default">shift</span> <span class="label label-default">alt</span> + <span class="label label-default">enter</span> new Alternative Task' %}
+    <span class="label label-default">{% trans 'shift' %} </span> <span class="label label-default">{% trans 'alt' %} </span> <span class="label label-default">{% trans 'enter' %}</span> {% trans 'new Alternative Task' %}
   </div>
   <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ task.description|safe }}</div>
 </div>

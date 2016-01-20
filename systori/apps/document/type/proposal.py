@@ -206,7 +206,7 @@ def render(proposal, letterhead, with_line_items, format):
         return buffer.getvalue()
 
 
-def serialize(project, form):
+def serialize(project, data):
 
     contact = project.billable_contact.contact
 
@@ -214,10 +214,10 @@ def serialize(project, form):
 
         'version': '1.1',
 
-        'date': form.cleaned_data['document_date'],
+        'date': data['document_date'],
 
-        'header': form.cleaned_data['header'],
-        'footer': form.cleaned_data['footer'],
+        'header': data['header'],
+        'footer': data['footer'],
 
         'business': contact.business,
         'salutation': contact.salutation,
@@ -228,18 +228,18 @@ def serialize(project, form):
         'city': contact.city,
         'address_label': contact.address_label,
 
-        'total_gross': form.instance.amount * (TAX_RATE+1),
-        'total_base': form.instance.amount,
-        'total_tax': form.instance.amount * TAX_RATE,
+        'total_gross': data['amount'] * (TAX_RATE+1),
+        'total_base': data['amount'],
+        'total_tax': data['amount'] * TAX_RATE,
 
     }
 
-    if form.cleaned_data['add_terms']:
+    if data['add_terms']:
         proposal['add_terms'] = True  # TODO: Calculate the terms.
 
     proposal['jobs'] = []
 
-    for job in form.cleaned_data['jobs']:
+    for job in data['jobs']:
         job_dict = {
             'id': job.id,
             'code': job.code,

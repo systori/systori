@@ -34,6 +34,12 @@ class Access(models.Model):
                                                 'active. Unselect this instead of deleting accounts. '
                                                 'This will remove user from any present and future daily plans.'))
 
+    @classmethod
+    def grant_superuser_access(cls, user, company):
+        """ Creates a temporary Access object dynamically to allow superusers access to any company. """
+        assert user.is_superuser
+        return cls(user=user, company=company, is_staff=True, is_active=True)
+
     @property
     def has_staff(self):
         return self.is_staff or self.user.is_superuser

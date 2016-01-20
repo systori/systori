@@ -44,17 +44,17 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
                 # Moving Partial Payments
 
                 partial_payments_account = Account.objects.get(code=SKR03_PARTIAL_PAYMENTS_CODE)
-                prior_income = partial_payments_account.entries.filter(job=job).total
+                prior_income = partial_payments_account.entries.filter(job=job).sum
 
                 if prior_income:
 
                     # debit the partial payments account (liability), decreasing the liability
                     # (-) "good thing", product or service has been completed and delivered
-                    transaction.debit(SKR03_PARTIAL_PAYMENTS_CODE, prior_income, job=job)
+                    transaction.debit(SKR03_PARTIAL_PAYMENTS_CODE, prior_income, job=job, tax_rate=TAX_RATE)
 
                     # credit the income account (income), this increases the balance
                     # (+) "good thing", income is good
-                    transaction.credit(SKR03_INCOME_CODE, prior_income, job=job)
+                    transaction.credit(SKR03_INCOME_CODE, prior_income, job=job, tax_rate=TAX_RATE)
 
                 # Moving Promised Payments
 
@@ -63,7 +63,7 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
                 unpaid_amount = job.account.balance
                 if unpaid_amount > 0:
                     # reset balance, we'll add unpaid_amount back into a final debit to customer
-                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, unpaid_amount, job=job)
+                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, unpaid_amount, job=job, tax_rate=TAX_RATE)
                     transaction.credit(job.account, unpaid_amount, job=job, tax_rate=TAX_RATE)
 
                 gross += unpaid_amount
@@ -104,7 +104,7 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
 
                 # credit the promised payments account (liability), increasing the liability
                 # (+) "bad thing", customer owing us money is a liability
-                transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, gross, job=job)
+                transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, gross, job=job, tax_rate=TAX_RATE)
 
     transaction.save()
 
@@ -143,7 +143,7 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
 
                 # debit the promised payments account (liability), decreasing the liability
                 # (-) "good thing", customer paying debt reduces liability
-                transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, gross, job=job)
+                transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, gross, job=job, tax_rate=TAX_RATE)
 
                 # credit the partial payments account (liability), increasing the liability
                 # (+) "bad thing", we are on the hook to finish and deliver the service or product
@@ -185,7 +185,7 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
 
                     # debit the promised payments account (liability), decreasing the liability
                     # (-) "good thing", customer paying debt reduces liability
-                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, reduction, job=job)
+                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, reduction, job=job, tax_rate=TAX_RATE)
 
     transaction.save()
 
