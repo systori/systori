@@ -242,7 +242,7 @@ class NumberedCanvas(canvas.Canvas):
                              _("Page {} of {}").format(self._pageNumber, page_count))
 
 
-class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
+class LetterheadCanvas(StationaryCanvas):
 
     def __init__(self, letterhead_pdf, *args, **kwargs):
         self.stationary_pages = letterhead_pdf
@@ -253,7 +253,7 @@ class LetterheadCanvas(StationaryCanvas, NumberedCanvas):
         return lambda *args, **kwargs: LetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
 
 
-class LetterheadCanvasWithoutFirstPage(StationaryCanvas, NumberedCanvas):
+class NumberedLetterheadCanvas(StationaryCanvas, NumberedCanvas):
 
     def __init__(self, letterhead_pdf, *args, **kwargs):
         self.stationary_pages = letterhead_pdf
@@ -261,10 +261,72 @@ class LetterheadCanvasWithoutFirstPage(StationaryCanvas, NumberedCanvas):
 
     @staticmethod
     def factory(letterhead):
-        return lambda *args, **kwargs: LetterheadCanvasWithoutFirstPage(letterhead.letterhead_pdf, *args, **kwargs)
+        return lambda *args, **kwargs: NumberedLetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
+
+
+class NumberedLetterheadCanvasWithoutFirstPage(StationaryCanvas, NumberedCanvas):
+
+    def __init__(self, letterhead_pdf, *args, **kwargs):
+        self.stationary_pages = letterhead_pdf
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def factory(letterhead):
+        return lambda *args, **kwargs: NumberedLetterheadCanvasWithoutFirstPage(letterhead.letterhead_pdf, *args, **kwargs)
 
 
 class SystoriDocument(BaseDocTemplate):
+
+    def __init__(self, buffer, pagesize, debug=False):
+        super().__init__(buffer,
+                         pagesize=pagesize,
+                         topMargin=0,
+                         bottomMargin=0,
+                         leftMargin=0,
+                         rightMargin=0,
+                         showBoundary=debug)
+
+    def onFirstPage(self, canvas, document):
+        pass
+
+    def onLaterPages(self, canvas, document):
+        pass
+
+    def handle_pageBegin(self):
+        self._handle_pageBegin()
+        self._handle_nextPageTemplate('Later')
+
+    def build(self, flowables, canvasmaker=NumberedCanvas, letterhead=None):
+        self._calc()
+
+        if letterhead:
+            document_unit = getattr(units, letterhead.document_unit)
+            frame_x = float(letterhead.left_margin) * document_unit
+            frame_y = float(letterhead.bottom_margin) * document_unit
+            frame_width = self.width - float(letterhead.left_margin+letterhead.right_margin) * document_unit
+            frame_height_first = self.height-float(letterhead.top_margin+letterhead.bottom_margin)*document_unit
+            frame_height_later = self.height-float(letterhead.top_margin_next+letterhead.bottom_margin)*document_unit
+            padding = dict.fromkeys(['leftPadding', 'bottomPadding', 'rightPadding', 'topPadding'], 0)
+        else:
+            frame_x = 25
+            frame_y = 25
+            frame_width = self.width - 50
+            frame_height_first = frame_height_later = self.height - 50
+            padding = dict.fromkeys(['leftPadding', 'bottomPadding', 'rightPadding', 'topPadding'], 6)
+
+        # Frame(x, y, width, height, padding...)
+        frame_first = Frame(frame_x, frame_y, frame_width, frame_height_first, **padding)
+        frame_later = Frame(frame_x, frame_y, frame_width, frame_height_later, **padding)
+
+        self.addPageTemplates([
+            PageTemplate(id='First', frames=frame_first, onPage=self.onFirstPage, pagesize=self.pagesize, autoNextPageTemplate=True),
+            PageTemplate(id='Later', frames=frame_later, onPage=self.onLaterPages, pagesize=self.pagesize)
+        ])
+
+        super().build(flowables, canvasmaker=canvasmaker)
+
+
+class NumberedSystoriDocument(BaseDocTemplate):
 
     def __init__(self, buffer, pagesize, debug=False):
         super().__init__(buffer,

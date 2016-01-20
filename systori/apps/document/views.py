@@ -228,7 +228,8 @@ class EvidencePDF(DocumentRenderView):
 
     def pdf(self):
         project = Project.prefetch(self.kwargs['project_pk'])
-        return evidence.render(project)
+        letterhead = DocumentSettings.objects.first().evidence_letterhead
+        return evidence.render(project, letterhead)
 
 
 # Itemized List

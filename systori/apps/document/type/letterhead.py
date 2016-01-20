@@ -8,7 +8,7 @@ from reportlab.platypus import Paragraph, Spacer
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
-from .style import stylesheet, LetterheadCanvas, SystoriDocument
+from .style import stylesheet, NumberedLetterheadCanvas, NumberedSystoriDocument
 from .style import force_break, heading_and_date
 from .style import calculate_table_width_and_pagesize
 
@@ -22,7 +22,7 @@ def render(letterhead):
 
         flowables = []
 
-        doc = SystoriDocument(buffer, pagesize=pagesize, debug=letterhead.debug)
+        doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=letterhead.debug)
 
         flowables.extend([
             Paragraph(force_break("""Musterfirma GmbH
@@ -46,7 +46,7 @@ def render(letterhead):
             Paragraph(force_break(lorem_100*17), stylesheet['Normal']),
             ])
 
-        doc.build(flowables, LetterheadCanvas.factory(letterhead), letterhead)
+        doc.build(flowables, NumberedLetterheadCanvas.factory(letterhead), letterhead)
 
         return buffer.getvalue()
 
