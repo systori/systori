@@ -148,7 +148,7 @@ class InvoiceFormMixin:
             'instance': self.model(project=self.request.project),
         }
         if self.request.method == 'POST':
-            kwargs['data'] = self.request.POST
+            kwargs['data'] = self.request.POST.copy()
         return kwargs
 
     def get_success_url(self):
