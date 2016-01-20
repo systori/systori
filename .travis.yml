@@ -25,7 +25,7 @@ before_script:
 
 script:
   - coverage run -p manage.py test systori
-  - coverage run -p uitest.py saucelabs
+#  - coverage run -p uitest.py saucelabs
 
 after_script:
   - coverage combine
@@ -41,4 +41,4 @@ notifications:
 
 addons:
   ssh_known_hosts: bitbucket.org
-  sauce_connect: true
+#  sauce_connect: true
