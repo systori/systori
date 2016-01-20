@@ -45,7 +45,7 @@ class DocumentTemplateTests(TestCase):
         self.assertEqual("Thanks Ludwig!", r['footer'])
 
     def test_render_german_tpl(self):
-        d = DocumentTemplate.objects.create(name="DocTpl", header="Dear [nachname]", footer="Thanks [vorname]!",
+        d = DocumentTemplate.objects.create(name="DocTpl", header="Dear [Nachname]", footer="Thanks [Vorname]!",
                                             document_type="invoice")
         activate('de')
         r = d.render(self.project)

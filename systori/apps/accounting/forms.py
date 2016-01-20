@@ -27,7 +27,6 @@ def convert_field_to_value(field):
     except:
         amount = D('0.00')
     return amount
-    return Amount.from_gross(amount_gross, TAX_RATE)
 
 
 class PaymentForm(Form):
@@ -180,7 +179,7 @@ class DebitForm(Form):
 
     is_invoiced = forms.BooleanField(initial=True, required=False)
     job = forms.ModelChoiceField(queryset=Job.objects.none(), widget=forms.HiddenInput())
-    amount_net = LocalizedDecimalField(initial=D(0.0), max_digits=14, decimal_places=2, required=False)
+    amount_net = LocalizedDecimalField(initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
     is_override = forms.BooleanField(initial=False, required=False, widget=forms.HiddenInput())
     override_comment = forms.CharField(widget=forms.Textarea, required=False)
 
@@ -201,8 +200,9 @@ class DebitForm(Form):
         self.latest_itemized = Amount.from_net(self.job.billable_total, TAX_RATE)
         self.latest_percent_complete = self.job.complete_percent
 
-        original_debit_amount_net = convert_field_to_value(self['amount_net'])
-        self.debit_amount = Amount.from_net(original_debit_amount_net, TAX_RATE)
+        _initial_debit_amount_net = self.initial.get('amount_net', self['amount_net'].field.initial)
+        initial_debit_amount = Amount.from_net(D(_initial_debit_amount_net), TAX_RATE)
+        self.debit_amount = Amount.from_net(convert_field_to_value(self['amount_net']), TAX_RATE)
 
         if self.initial['is_booked']:
             # accounting system already has the 'new' amounts since this invoice was booked
@@ -210,8 +210,8 @@ class DebitForm(Form):
             self.new_balance = self.job.account.balance_amount
 
             # we need to undo the booking to get the 'base' amounts
-            self.base_debited = self.new_debited - self.debit_amount
-            self.base_balance = self.new_balance - self.debit_amount
+            self.base_debited = self.new_debited - initial_debit_amount
+            self.base_balance = self.new_balance - initial_debit_amount
 
         else:
             # no transactions exist yet so the account balance and debits don't include this new debit
@@ -225,9 +225,9 @@ class DebitForm(Form):
         if str(self['is_override'].value()) == 'False':
             if self.billable_amount.net > 0:
                 self.debit_amount = self.billable_amount
-                self.initial['amount_net'] = self.debit_amount.net
             else:
                 self.debit_amount = Amount.zero()
+            self.data['amount_net'] = self.debit_amount.net
 
         # now that we know the correct debit amount we can calculate what the new balance will be
         self.new_debited = self.base_debited + self.debit_amount
@@ -258,7 +258,7 @@ class DebitForm(Form):
         self.diff_balance = self.new_balance - self.previous_balance
         self.diff_estimate = self.latest_estimate - self.previous_estimate
         self.diff_itemized = self.latest_itemized - self.previous_itemized
-        self.diff_debit_amount = self.debit_amount - Amount.from_net(original_debit_amount_net, TAX_RATE)
+        self.diff_debit_amount = self.debit_amount - initial_debit_amount
 
     def clean(self):
         if self.cleaned_data['is_override'] and \
