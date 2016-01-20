@@ -20,7 +20,7 @@ class PaymentCreate(FormView):
                 'amount': invoice.json['debit_gross'],
             }
         if self.request.method == 'POST':
-            kwargs['data'] = self.request.POST
+            kwargs['data'] = self.request.POST.copy()
         return kwargs
 
     def form_valid(self, form):
