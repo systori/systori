@@ -54,8 +54,7 @@ def render(project, letterhead):
                     pages.append(Table([
                         [b(_('Code')), p(task.code.strip()),
                          br(_('Task')), p(task.name[:60].strip())],
-                        [b(_('P-Amount')), '%s %s' % (ubrdecimal(task.qty).strip(), task.unit.strip()),
-                         br(_('UP')), money(task.unit_price).strip()]
+                        [b(_('P-Amount')), '%s %s' % (ubrdecimal(task.qty).strip(), task.unit.strip())]
                     ],
                         colWidths=[30*mm, 70*mm, 30*mm, None],
                         style=TableStyle([

@@ -11,9 +11,9 @@ from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 
-from .style import SystoriDocument, TableFormatter, ContinuationTable
+from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable
 from .style import stylesheet, chunk_text, force_break, p, b
-from .style import LetterheadCanvas, NumberedCanvas
+from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import calculate_table_width_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .utils import update_instance
@@ -172,7 +172,7 @@ def render(proposal, letterhead, with_line_items, format):
 
         proposal_date = date_format(date(*map(int, proposal['date'].split('-'))), use_l10n=True)
 
-        doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
+        doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         flowables = [
 
@@ -201,7 +201,7 @@ def render(proposal, letterhead, with_line_items, format):
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)
         else:
-            doc.build(flowables, LetterheadCanvas.factory(letterhead), letterhead)
+            doc.build(flowables, NumberedLetterheadCanvas.factory(letterhead), letterhead)
 
         return buffer.getvalue()
 

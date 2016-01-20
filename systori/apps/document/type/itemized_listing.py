@@ -13,8 +13,8 @@ from django.utils.translation import ugettext as _
 from systori.apps.accounting.constants import TAX_RATE
 from systori.lib.templatetags.customformatting import money
 
-from .style import SystoriDocument, stylesheet, TableFormatter, ContinuationTable
-from .style import LetterheadCanvasWithoutFirstPage, NumberedCanvas
+from .style import NumberedSystoriDocument, stylesheet, TableFormatter, ContinuationTable
+from .style import NumberedLetterheadCanvasWithoutFirstPage, NumberedCanvas
 from .style import calculate_table_width_and_pagesize
 from .invoice import collate_tasks, collate_tasks_total, serialize
 
@@ -73,7 +73,7 @@ def render(project, format):
 
         itemized_listing = serialize(project, {})
 
-        doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
+        doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         flowables = [
 
@@ -99,6 +99,6 @@ def render(project, format):
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)
         else:
-            doc.build(flowables, LetterheadCanvasWithoutFirstPage.factory(letterhead), letterhead)
+            doc.build(flowables, NumberedLetterheadCanvasWithoutFirstPage.factory(letterhead), letterhead)
 
         return buffer.getvalue()

@@ -15,8 +15,8 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 from systori.apps.accounting.report import prepare_transaction_report, generate_transaction_table
 from systori.apps.accounting.constants import TAX_RATE
 
-from .style import SystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b
-from .style import LetterheadCanvas, NumberedCanvas
+from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b
+from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import calculate_table_width_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
 from . import font
@@ -211,7 +211,7 @@ def render(invoice, letterhead, format):
 
         invoice_date = date_format(date(*map(int, invoice['date'].split('-'))), use_l10n=True)
 
-        doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
+        doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         flowables = [
 
@@ -262,7 +262,7 @@ def render(invoice, letterhead, format):
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)
         else:
-            doc.build(flowables, LetterheadCanvas.factory(letterhead), letterhead)
+            doc.build(flowables, NumberedLetterheadCanvas.factory(letterhead), letterhead)
 
         return buffer.getvalue()
 
