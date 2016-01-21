@@ -5,6 +5,7 @@ from django.views.generic import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
+from django.utils.translation import get_language
 
 from ..project.models import Project
 from ..task.models import Job
@@ -59,7 +60,9 @@ class ProposalCreate(CreateView):
         data = form.cleaned_data
         data['amount'] = amount
 
-        form.instance.letterhead = Letterhead.objects.first()
+        doc_settings = DocumentSettings.get_for_language(get_language())
+
+        form.instance.letterhead = doc_settings.proposal_letterhead
         form.instance.json = proposal.serialize(self.request.project, data)
 
         return super().form_valid(form)
@@ -148,7 +151,7 @@ class InvoiceFormMixin:
             'instance': self.model(project=self.request.project),
         }
         if self.request.method == 'POST':
-            kwargs['data'] = self.request.POST
+            kwargs['data'] = self.request.POST.copy()
         return kwargs
 
     def get_success_url(self):
@@ -228,7 +231,8 @@ class EvidencePDF(DocumentRenderView):
 
     def pdf(self):
         project = Project.prefetch(self.kwargs['project_pk'])
-        letterhead = DocumentSettings.objects.first().evidence_letterhead
+        doc_settings = DocumentSettings.get_for_language(get_language())
+        letterhead = doc_settings.evidence_letterhead
         return evidence.render(project, letterhead)
 
 

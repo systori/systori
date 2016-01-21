@@ -20,6 +20,10 @@ def create_task_data(self, create_user=True, create_company=True):
         Access.objects.create(user=self.user, company=self.company)
     letterhead_pdf = os.path.join(settings.BASE_DIR, 'apps/document/test_data/letterhead.pdf')
     self.letterhead = Letterhead.objects.create(name="Test Letterhead", letterhead_pdf=letterhead_pdf)
+    DocumentSettings.objects.create(language='de',
+                                    evidence_letterhead=self.letterhead,
+                                    proposal_letterhead=self.letterhead,
+                                    invoice_letterhead=self.letterhead)
     self.template_project = Project.objects.create(name="Template Project", is_template=True)
     self.project = Project.objects.create(name="my project")
     self.project2 = Project.objects.create(name="my project 2")

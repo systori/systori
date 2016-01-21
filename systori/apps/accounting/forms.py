@@ -2,6 +2,7 @@ from datetime import date
 from decimal import Decimal as D
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import get_language
 from django.forms.formsets import formset_factory
 from django.forms.formsets import BaseFormSet
 from django.forms import Form, ModelForm, ValidationError, widgets
@@ -372,7 +373,9 @@ class BaseInvoiceForm(BaseFormSet):
         skr03_debits = [(debit['job'], debit['amount_gross'], Entry.FLAT_DEBIT if debit['is_override'] else Entry.WORK_DEBIT) for debit in self.debits]
         invoice.transaction = debit_jobs(skr03_debits, recognize_revenue=data['is_final'])
 
-        invoice.letterhead = Letterhead.objects.first()
+        doc_settings = DocumentSettings.get_for_language(get_language())
+
+        invoice.letterhead = doc_settings.invoice_letterhead
         invoice.json = invoice_lib.serialize(invoice, data)
         invoice.save()
 
