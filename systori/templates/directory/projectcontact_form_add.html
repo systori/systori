@@ -4,36 +4,65 @@
 {% block sidebar %}{% include "project/sidebar.html" with section='contacts' %}{% endblock %}
 
 {% block content %}
+  <div class="input-group"> <span class="input-group-addon">Filter</span>
+    <input id="filter" type="text" class="form-control" placeholder="Type here...">
+</div>
   <h2 class="sub-header">
     {% blocktrans with project_name=project.name %}Add Contact to {{ project_name }}{% endblocktrans %}
   </h2>
-  <table class="table table-striped">
+  <div class="table-responsive">
+  <table class="table table-striped table-condensed">
     <thead>
     <tr>
-      <th>#</th>
-      <th>{% trans 'Contact' %}</th>
-      <th>{% trans 'Association' %}</th>
+      <th class="col-xs-1">#</th>
+      <th class="col-xs-4">{% trans 'Contact' %}</th>
+      <th class="col-xs-5">{% trans 'Business' %}</th>
+      <th class="col-xs-2">{% trans 'Association' %}</th>
     </tr>
     </thead>
-    <tbody>
+    <tbody class="searchable">
     {% for contact in contact_list %}
       <tr>
         <td>{{ contact.id }}</td>
-        <td><a
-            href="{% url 'contact.view' contact.id %}">{{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }}</a>
-        </td>
+        <td><a href="{% url 'contact.view' contact.id %}">
+          {{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }}
+        </a></td>
+        <td><a href="{% url 'contact.view' contact.id %}">
+          {{ contact.business|truncatechars:50 }}
+        </a></td>
         <td>
           <form method="post">{% csrf_token %}
             <input type="hidden" name="project" value="{{ project.id }}"/>
             <input type="hidden" name="contact" value="{{ contact.id }}"/>
-            {{ form.association | bootstrap_inline }}
-            <button type="submit" class="btn btn-primary" value="{% trans 'Add' %}">{% trans 'Add' %}</button>
+            {{ form.association }}
+            <button type="submit" class="btn btn-xs btn-primary" value="{% trans 'Add' %}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></button>
           </form>
         </td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
+  </div>
   <a href="{% url 'project.contact.create' project.id %}">{% trans 'Create' %}</a>
-
 {% endblock content %}
+{% block extra_js %}
+  <script type="application/javascript">
+  $(document).ready(function () {
+
+      (function ($) {
+
+          $('#filter').keyup(function () {
+
+              var rex = new RegExp($(this).val(), 'i');
+              $('.searchable tr').hide();
+              $('.searchable tr').filter(function () {
+                  return rex.test($(this).text());
+              }).show();
+
+          })
+
+      }(jQuery));
+
+  });
+  </script>
+{% endblock extra_js %}
