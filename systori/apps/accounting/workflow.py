@@ -190,6 +190,20 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
     transaction.save()
 
 
+def refund_jobs(refund, apply, refund_total, transacted_on=None):
+
+    transacted_on = transacted_on or date.today()
+
+    transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.REFUND)
+
+    # TODO: figure out how to do the accounting for this
+
+    transaction.save()
+
+    return transaction
+
+
+
 def create_chart_of_accounts(self=None):
     if not self: self = type('', (), {})()
 

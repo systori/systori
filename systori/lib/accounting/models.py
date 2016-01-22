@@ -172,11 +172,13 @@ class BaseTransaction(models.Model):
     INVOICE = "invoice"
     PAYMENT = "payment"
     ADJUSTMENT = "adjustment"
+    REFUND = "refund"
 
     TRANSACTION_TYPE = (
         (INVOICE, _("Invoice")),
         (PAYMENT, _("Payment")),
         (ADJUSTMENT, _("Adjustment")),
+        (REFUND, _("Refund")),
     )
     transaction_type = models.CharField(_('Transaction Type'), null=True, max_length=32, choices=TRANSACTION_TYPE)
 
@@ -269,6 +271,7 @@ class BaseEntry(models.Model):
     DISCOUNT = "discount"
     WORK_DEBIT = "work-debit"
     FLAT_DEBIT = "flat-debit"
+    REFUND_DEBIT = "refund-debit"
     ADJUSTMENT = "adjustment"
     OTHER = "other"
 
@@ -277,6 +280,7 @@ class BaseEntry(models.Model):
         (DISCOUNT, _("Discount")),
         (WORK_DEBIT, _("Work Debit")),
         (FLAT_DEBIT, _("Flat Debit")),
+        (REFUND_DEBIT, _("Refund Debit")),
         (ADJUSTMENT, _("Adjustment")),
         (OTHER, _("Other")),
     )

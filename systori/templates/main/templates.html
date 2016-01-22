@@ -75,8 +75,8 @@
         <td>{{ docsetting.get_language_display }}</td>
         <td>{{ docsetting.proposal_text.name }}</td>
         <td>{{ docsetting.invoice_text.name }}</td>
-        <td>..</td>
-        <td>..</td>
+        <td>{{ docsetting.proposal_letterhead.name }}</td>
+        <td>{{ docsetting.invoice_letterhead.name }}</td>
         <td>
           <a href="{% url 'document-settings.edit' docsetting.id %}">{% trans "Edit" %}</a>
           <a href="{% url 'document-settings.delete' docsetting.id %}">{% trans "Delete" %}</a>

@@ -1,0 +1,33 @@
+{% load i18n bootstrap staticfiles customformatting %}
+
+<div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
+{{ form.management_form }}
+<table is="{{ form.prefix }}-table" class="table table-striped">
+  <thead>
+  <tr>
+    <th class="job-name">{% trans 'Job' %}</th>
+    <th class="job-amount">{% trans 'Amount' %}</th>
+  </tr>
+  </thead>
+  <tbody>
+  {% for job_form in form.forms %}
+    <tr is="job-row" class="job-row">
+      <td class="job-name">{{ job_form.job }}{{ job_form.initial.job.name }}</td>
+      <td class="job-amount {% if job_form.amount.errors %}has-error bg-danger{% endif %}">
+        {{ job_form.amount }}
+        {% for error in job_form.amount.errors %}
+          <p class="help-block">{{ error }}</p>
+        {% endfor %}
+      </td>
+    </tr>
+  {% endfor %}
+    <tr class="job-table-totals">
+      <td class="job-name"></td>
+      <td class="job-amount">{{ form.amount_total|ubrdecimal:2 }}</td>
+    </tr>
+  </tbody>
+</table>
+{% for error in form.non_form_errors %}
+  <span class="help-block ">{{ error }}</span>
+{% endfor %}
+</div>

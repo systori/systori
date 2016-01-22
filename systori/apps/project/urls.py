@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from ..user.authorization import office_auth
 from ..accounting.views import PaymentCreate, PaymentDelete
+from ..document.views import RefundCreate, RefundDelete, RefundPDF
 from .views import *
 
 urlpatterns = [
@@ -23,6 +24,10 @@ urlpatterns = [
     url(r'^project-(?P<project_pk>\d+)/create-payment$', office_auth(PaymentCreate.as_view()), name='payment.create'),
     url(r'^project-(?P<project_pk>\d+)/create-payment-for-invoice/(?P<invoice_pk>\d+)$', office_auth(PaymentCreate.as_view()), name='payment.create'),
     url(r'^project-(?P<project_pk>\d+)/payment-(?P<pk>\d+)/delete$', office_auth(PaymentDelete.as_view()), name='payment.delete'),
+
+    url(r'^project-(?P<project_pk>\d+)/create-refund$', office_auth(RefundCreate.as_view()), name='refund.create'),
+    url(r'^project-(?P<project_pk>\d+)/refund-(?P<pk>\d+)/delete$', office_auth(RefundDelete.as_view()), name='refund.delete'),
+    url(r'^project-(?P<project_pk>\d+)/refund-(?P<format>(email|print))-(?P<pk>\d+).pdf$', office_auth(RefundPDF.as_view()), name='refund.pdf'),
 
     url(r'^project-(?P<project_pk>\d+)/transactions$', office_auth(TransactionEditor.as_view()), name='project.transactions'),
 

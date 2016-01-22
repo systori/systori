@@ -1,0 +1,33 @@
+{% extends "project.html" %}
+{% load i18n bootstrap staticfiles customformatting %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
+
+{% block content %}
+  <form role="form" method="post">{% csrf_token %}
+
+    <h2 class="sub-header">{% trans "Refund" %}</h2>
+    {% include "document/refund_jobs_table.html" with form=form.refund_jobs_form %}
+
+    <h2 class="sub-header">{% trans "Apply" %}</h2>
+    {% include "document/refund_jobs_table.html" with form=form.apply_jobs_form %}
+
+    <h2 class="sub-header">{% trans "Document" %}</h2>
+    <div class="form-group">
+      <label class="control-label">{% trans "Refund Amount" %}</label>
+      <div class="refund-amount">{{ form.refund_amount|ubrdecimal:2 }}</div>
+    </div>
+    {{ form|bootstrap }}
+
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block extra_js %}
+  <script type="application/dart" src="{% static "dart/refund_editor.dart" %}"></script>
+  <script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
+  <script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
+  <script src="{% static "dart/packages/browser/dart.js" %}"></script>
+{% endblock extra_js %}

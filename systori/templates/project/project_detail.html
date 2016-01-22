@@ -315,6 +315,44 @@
   <a href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
 
 
+  <h2 class="sub-header">{% trans "Refunds" %}</h2>
+  <table class="table refund-table">
+    <thead>
+    <tr>
+      <th>{% trans 'Date' %}</th>
+      <th class="text-right">{% trans 'Refund' %}</th>
+      <th>{% trans 'Download' %}</th>
+      <th>{% trans 'Actions' %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for refund in project.refunds.all %}
+      <tr>
+        <td>{{ refund.document_date|localize }}</td>
+        <td class="text-right">{{ refund.json.amount|money }}</td>
+        <td style="min-width: 100px;">
+          <div class="btn-group">
+            <button type="button" class="btn btn-default">{% trans 'PDF' %}</button>
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+              <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="{% url 'refund.pdf' project.id 'email' refund.id %}">{% trans 'Email PDF' %}</a></li>
+              <li><a href="{% url 'refund.pdf' project.id 'print' refund.id %}">{% trans 'Print PDF' %}</a></li>
+            </ul>
+          </div>
+        </td>
+        <td class="text-right">
+          <a href="{% url 'refund.delete' project.id refund.id %}">{% trans "Delete" %}</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'refund.create' project.id %}">{% trans "Add Refund" %}</a>
+
+
   <h2 class="sub-header">{% trans "Contacts" %}</h2>
   <table class="table table-striped">
     <thead>

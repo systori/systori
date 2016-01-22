@@ -11,11 +11,12 @@ from django import forms
 from systori.lib.fields import LocalizedDecimalField
 from systori.lib.accounting.tools import Amount
 from ..task.models import Job
-from .workflow import Account, credit_jobs, debit_jobs
+from .workflow import Account, credit_jobs, debit_jobs, refund_jobs
 from .constants import TAX_RATE, BANK_CODE_RANGE
 from .models import Entry
-from ..document.models import Invoice, DocumentTemplate, DocumentSettings, Letterhead
+from ..document.models import Invoice, Refund, DocumentTemplate, DocumentSettings
 from ..document.type import invoice as invoice_lib
+from ..document.type import refund as refund_lib
 from .report import prepare_transaction_report
 
 
@@ -143,6 +144,92 @@ class BaseSplitPaymentFormSet(BaseFormSet):
             self.invoice.save()
 
 SplitPaymentFormSet = formset_factory(SplitPaymentForm, formset=BaseSplitPaymentFormSet, extra=0)
+
+
+class RefundJobForm(Form):
+    job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
+    amount = LocalizedDecimalField(label=_("Amount"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['job'].queryset = self.initial['job'].project.jobs.all()
+        self.amount_value = convert_field_to_value(self['amount'])
+
+
+class BaseRefundJobFormSet(BaseFormSet):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.amount_total = D('0.00')
+        for form in self.forms:
+            self.amount_total += form.amount_value
+
+    def get_amounts(self):
+        amounts = []
+        for form in self.forms:
+            if form.cleaned_data['amount']:
+                job = form.cleaned_data['job']
+                amount = form.cleaned_data['amount']
+                amounts.append((job, amount))
+        return amounts
+
+RefundJobFormSet = formset_factory(RefundJobForm, formset=BaseRefundJobFormSet, extra=0)
+
+
+class RefundForm(forms.ModelForm):
+    title = forms.CharField(label=_('Title'), initial=_("Refund"))
+    header = forms.CharField(widget=forms.Textarea)
+    footer = forms.CharField(widget=forms.Textarea)
+
+    class Meta:
+        model = Refund
+        fields = ['document_date', 'title', 'header', 'footer']
+        widgets = {
+            'document_date': widgets.DateInput(attrs={'type': 'date'}),
+        }
+
+    def __init__(self, *args, instance, jobs, **kwargs):
+        super().__init__(*args, instance=instance, **kwargs)
+        self.refund_jobs_form = RefundJobFormSet(prefix='refund', initial=self.get_initial(jobs), **kwargs)
+        self.apply_jobs_form = RefundJobFormSet(prefix='apply', initial=self.get_initial(jobs), **kwargs)
+        self.refund_amount = self.refund_jobs_form.amount_total - self.apply_jobs_form.amount_total
+
+    @staticmethod
+    def get_initial(jobs):
+        initial = []
+        for job in jobs:
+            job_dict = {
+                'job': job,
+            }
+            initial.append(job_dict)
+        return initial
+
+    def is_valid(self):
+        return self.refund_jobs_form.is_valid() and\
+               self.apply_jobs_form.is_valid() and\
+               super().is_valid()
+
+    @atomic
+    def save(self):
+
+        refund = self.instance
+
+        refunds = self.refund_jobs_form.get_amounts()
+        apply = self.apply_jobs_form.get_amounts()
+        refund_total = self.refund_jobs_form.amount_total - self.apply_jobs_form.amount_total
+
+        data = self.cleaned_data.copy()
+        data.update({
+            'amount': refund_total
+        })
+
+        refund.transaction = refund_jobs(refunds, apply, refund_total)
+
+        doc_settings = DocumentSettings.get_for_language(get_language())
+
+        refund.letterhead = doc_settings.invoice_letterhead
+        refund.json = refund_lib.serialize(refund, data)
+        refund.save()
 
 
 class InvoiceDocumentForm(forms.ModelForm):
