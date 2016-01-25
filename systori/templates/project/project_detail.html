@@ -130,7 +130,7 @@
         <td>{{ doc.notes }}</td>
         <td style="min-width: 100px;">
           <div class="btn-group">
-            <button type="button" class="btn btn-default">{% trans 'PDF' %}</button>
+            <a class="btn btn-default" href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'PDF' %}</a>
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
               <span class="caret"></span>
               <span class="sr-only">Toggle Dropdown</span>
