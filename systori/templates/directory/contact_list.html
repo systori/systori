@@ -4,6 +4,9 @@
 {% block sidebar %}{% include "main/sidebar.html" with section='directory' %}{% endblock %}
 
 {% block content %}
+  <div class="input-group"> <span class="input-group-addon">Filter</span>
+    <input id="filter" type="text" class="form-control" placeholder="Type here...">
+  </div>
   <h2 class="sub-header">{% trans 'Directory' %}</h2>
   <table class="table table-striped table-condensed">
     <thead>
@@ -15,7 +18,7 @@
       <th style="width:5%;">{% trans 'Actions' %}</th>
     </tr>
     </thead>
-    <tbody>
+    <tbody class="searchable">
     {% for contact in contact_list %}
       <tr>
         <td><a
@@ -34,3 +37,25 @@
   </table>
   <a href="{% url 'contact.create' %}">{% trans "Create" %}</a>
 {% endblock content %}
+
+{% block extra_js %}
+  <script type="application/javascript">
+  $(document).ready(function () {
+
+      (function ($) {
+
+          $('#filter').keyup(function () {
+
+              var rex = new RegExp($(this).val(), 'i');
+              $('.searchable tr').hide();
+              $('.searchable tr').filter(function () {
+                  return rex.test($(this).text());
+              }).show();
+
+          })
+
+      }(jQuery));
+
+  });
+  </script>
+{% endblock extra_js %}
