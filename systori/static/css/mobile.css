@@ -152,10 +152,16 @@ input[type=range]::-webkit-slider-runnable-track {
 input[type=range]::-webkit-slider-thumb {
   height: 50px;
   width: 50px;
-  border: 1px solid #2e6da4;
   border-radius: 6px;
-  background: #337ab7;
   cursor: pointer;
   -webkit-appearance: none;
   margin-top: -20px; /*-19.5px;*/
+  background-image: -webkit-linear-gradient(top, #d1725e 0%, #bc4d36 100%);
+  background-image: -o-linear-gradient(top, #d1725e 0%, #bc4d36 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#d1725e), to(#bc4d36));
+  background-image: linear-gradient(to bottom, #d1725e 0%, #bc4d36 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffd1725e', endColorstr='#ffbc4d36', GradientType=0);
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+  background-repeat: repeat-x;
+  border-color: #b44a33;
 }
