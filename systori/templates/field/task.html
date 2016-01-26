@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n l10n staticfiles customformatting %}
+{% load i18n l10n staticfiles customformatting field_app %}
 
 {% block container %}
   <div class="container">
@@ -90,7 +90,7 @@
       <ul class="list-group">
         {% for lineitem in task.taskinstances.first.lineitems.all %}
           <li class="list-group-item clearfix">{{ lineitem.name }}<span
-              class="pull-right">{{ lineitem.unit_qty|ubrdecimal }} {{ lineitem.unit }}</span></li>
+              class="pull-right">{{ lineitem|task_total|ubrdecimal }} {{ lineitem.unit }}</span></li>
         {% endfor %}
       </ul>
 
