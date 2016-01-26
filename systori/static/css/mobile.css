@@ -165,3 +165,9 @@ input[type=range]::-webkit-slider-thumb {
   background-repeat: repeat-x;
   border-color: #b44a33;
 }
+
+input[type=range]::-webkit-slider-thumb:hover,
+input[type=range]::-webkit-slider-thumb:focus {
+  background-color: #bc4d36;
+  background-position: 0 -15px;
+}
