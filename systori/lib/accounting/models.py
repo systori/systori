@@ -268,6 +268,8 @@ class BaseEntry(models.Model):
     tax_rate = models.DecimalField(_("Tax Rate"), max_digits=14, decimal_places=2, default=0)
 
     PAYMENT = "payment"
+    REFUND_CREDIT = "refund-credit"
+
     DISCOUNT = "discount"
     WORK_DEBIT = "work-debit"
     FLAT_DEBIT = "flat-debit"
@@ -277,6 +279,7 @@ class BaseEntry(models.Model):
 
     ENTRY_TYPE = (
         (PAYMENT, _("Payment")),
+        (REFUND_CREDIT, _("Refund Credit")),
         (DISCOUNT, _("Discount")),
         (WORK_DEBIT, _("Work Debit")),
         (FLAT_DEBIT, _("Flat Debit")),
