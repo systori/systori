@@ -88,7 +88,7 @@
       </div>
 
       <ul class="list-group">
-        {% for lineitem in task.taskinstances.first.lineitems.all %}
+        {% for lineitem in task.instance.lineitems.all %}
           <li class="list-group-item clearfix">{{ lineitem.name }}<span
               class="pull-right">{{ lineitem|task_total|ubrdecimal }} {{ lineitem.unit }}</span></li>
         {% endfor %}
