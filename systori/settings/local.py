@@ -3,11 +3,10 @@ from .common import *
 DEBUG = True
 TEMPLATE_DEBUG = True
 
-INSTALLED_APPS += (
-    'debug_toolbar',
-)
-
-if False:  # Enable Profile Panel
+if True:
+    INSTALLED_APPS += (
+        'debug_toolbar',
+    )
     MIDDLEWARE_CLASSES += (
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     )
@@ -16,6 +15,19 @@ if False:  # Enable Profile Panel
         'debug_toolbar.panels.profiling.ProfilingPanel',
         'debug_toolbar.panels.sql.SQLPanel',
     )
+    DEBUG_TOOLBAR_CONFIG = {
+        'HIDE_IN_STACKTRACES': (
+            'socketserver',
+            'threading',
+            'wsgiref',
+            'debug_toolbar',
+            #'django.contrib.staticfiles',
+            #'django.core.servers',
+            #'django.core.handlers',
+            #'django.db.models.query',
+            #'django.db.models.sql'
+        )
+    }
 
 STATICFILES_DIRS += (
      ('dart', os.path.join(ROOT_DIR, 'systori/dart/web')),
