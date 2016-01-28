@@ -1,0 +1,38 @@
+{% extends "project.html" %}
+{% load i18n l10n customformatting %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
+
+{% block content %}
+
+  <h2>{% trans 'Invoices' %}</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th>{% trans "Date" %}</th>
+        <th>{% trans "Status" %}</th>
+        <th>{% trans "Invoice No." %}</th>
+        <th>{% trans "Project" %}</th>
+        <td>{% trans "Amount" %}</td>
+      </tr>
+      </thead>
+      <tbody>
+      {% for year, months in invoice_group.items %}
+        {% for month, invoices in months.items %}
+          <tr><td colspan="5" class="bg-primary">{{ year }} - {{ month|month_from_int }}</td></tr>
+          {% for invoice in invoices %}
+          <tr>
+            <td>{{ invoice.document_date }}</td>
+            <td>{{ invoice.status }}</td>
+            <td>{{ invoice.invoice_no }}</td>
+            <td>{{ invoice.project }}</td>
+            <td></td>
+          </tr>
+          {% endfor %}
+        {% endfor %}
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

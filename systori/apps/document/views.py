@@ -1,7 +1,8 @@
 from decimal import Decimal
+from collections import OrderedDict
 
 from django.http import HttpResponse, HttpResponseRedirect
-from django.views.generic import View
+from django.views.generic import View, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -124,6 +125,35 @@ class ProposalDelete(DeleteView):
 
 class InvoiceView(DetailView):
     model = Invoice
+
+
+class InvoiceList(ListView):
+    queryset = Invoice._default_manager.all()
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+
+        year_order = [date.year for date in Invoice.objects.dates('document_date', 'year')]
+        month_order = range(1,13)
+
+        invoice_group = OrderedDict()
+        for year in year_order:
+            invoice_group[year] = OrderedDict()
+            for month in month_order:
+                invoice_group[year][month] = []
+
+        for invoice in self.object_list.order_by('document_date'):
+            invoice_group[invoice.document_date.year][invoice.document_date.month].append(invoice)
+
+        for year in year_order:
+            for month in month_order:
+                if not invoice_group[year][month]:
+                    del invoice_group[year][month]
+
+        context = super(InvoiceList, self).get_context_data(**kwargs)
+        context['invoice_group'] = invoice_group
+
+        return self.render_to_response(context)
 
 
 class InvoicePDF(DocumentRenderView):

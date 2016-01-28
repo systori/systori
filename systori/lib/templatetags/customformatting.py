@@ -1,4 +1,5 @@
 import locale
+import calendar
 from decimal import Decimal
 from django.template.defaultfilters import stringfilter
 from django.utils.formats import get_format, get_language, number_format, to_locale
@@ -45,3 +46,8 @@ def money(decimal):
 @register.filter
 def negate(value):
     return -value
+
+
+@register.filter
+def month_from_int(value):
+    return calendar.month_name[value]
