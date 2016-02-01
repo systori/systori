@@ -104,6 +104,25 @@ class Invoice(Document):
         verbose_name_plural = _("Invoices")
         ordering = ['id']
 
+    @property
+    def debited_gross(self):
+        if self.json.get('debited_gross'):
+            return Decimal(self.json['debited_gross'])
+        elif self.json.get('debit_gross'):
+            return Decimal(self.json['debit_gross'])
+        else:
+            return Decimal("0")
+
+    @property
+    def balance_gross(self):
+        if self.json.get('balance_gross'):
+            return Decimal(self.json['balance_gross'])
+        # elif debit_gross for backwards compatibility
+        elif self.json.get('debit_gross'):
+            return Decimal(self.json['debit_gross'])
+        else:
+            return Decimal("0")
+
 
 class Refund(Document):
     letterhead = models.ForeignKey('document.Letterhead', related_name="refund_documents")

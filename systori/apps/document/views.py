@@ -128,33 +128,24 @@ class InvoiceView(DetailView):
 
 
 class InvoiceList(ListView):
-    queryset = Invoice._default_manager.all()
+    model = Invoice
 
-    def get(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-        year_order = [date.year for date in Invoice.objects.dates('document_date', 'year')]
-        month_order = range(1,13)
+        years = OrderedDict()
+        for invoice in self.object_list.order_by('document_date').order_by('invoice_no'):
+            year, month = invoice.document_date.year, invoice.document_date.month
+            if year not in years:
+                years[year] = OrderedDict()
+            if month not in years[year]:
+                years[year][month] = {'invoices': [], 'total': Decimal('0.00')}
+            years[year][month]['invoices'].append(invoice)
+            years[year][month]['total'] += Decimal(invoice.json['debit_gross'])
 
-        invoice_group = OrderedDict()
-        for year in year_order:
-            invoice_group[year] = OrderedDict()
-            for month in month_order:
-                invoice_group[year][month] = []
+        context['invoice_group'] = years
 
-        for invoice in self.object_list.order_by('document_date'):
-            invoice_group[invoice.document_date.year][invoice.document_date.month].append(invoice)
-
-        for year in year_order:
-            for month in month_order:
-                if not invoice_group[year][month]:
-                    del invoice_group[year][month]
-
-        context = super(InvoiceList, self).get_context_data(**kwargs)
-        context['invoice_group'] = invoice_group
-
-        return self.render_to_response(context)
-
+        return context
 
 class InvoicePDF(DocumentRenderView):
     model = Invoice

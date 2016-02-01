@@ -14,22 +14,30 @@
         <th>{% trans "Status" %}</th>
         <th>{% trans "Invoice No." %}</th>
         <th>{% trans "Project" %}</th>
-        <td>{% trans "Amount" %}</td>
+        <th>{% trans "Progress" %}</th>
+        <th>{% trans "Amount" %}</th>
+        <th>{% trans "Payment" %}</th>
+        <th>{% trans "Parent" %}</th>
       </tr>
       </thead>
       <tbody>
       {% for year, months in invoice_group.items %}
-        {% for month, invoices in months.items %}
-          <tr><td colspan="5" class="bg-primary">{{ year }} - {{ month|month_from_int }}</td></tr>
-          {% for invoice in invoices %}
-          <tr>
-            <td>{{ invoice.document_date }}</td>
-            <td>{{ invoice.status }}</td>
-            <td>{{ invoice.invoice_no }}</td>
-            <td>{{ invoice.project }}</td>
-            <td></td>
-          </tr>
+        {% for month_number, month in months.items %}
+          <tr><td colspan="8" class="bg-primary">{{ year }} - {{ month_number|month_from_int }}</td></tr>
+          {% for invoice in month.invoices %}
+            <tr>
+              <td>{{ invoice.document_date }}</td>
+              <td>{{ invoice.get_status_display }}</td>
+              <td>{{ invoice.invoice_no }}</td>
+              <td>{{ invoice.project }}</td>
+              <td style="text-align:right;">{{ invoice.debited_gross|money }}</td>
+              <td style="text-align:right;"><b>{{ invoice.balance_gross|money }}</b></td>
+              <td>{% if invoice.parent %}<span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{ invoice.parent.invoice_no }}{% else %}---{% endif %}</td>
+            </tr>
           {% endfor %}
+            <tr>
+              <td colspan="5" style="text-align:right;">Summe {{ month_number|month_from_int }}:</td><td style="text-align:right;">{{ month.total|money }}</td><td colspan="2"></td>
+            </tr>
         {% endfor %}
       {% endfor %}
       </tbody>
