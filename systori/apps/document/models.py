@@ -105,6 +105,20 @@ class Invoice(Document):
         ordering = ['id']
 
 
+class Refund(Document):
+    letterhead = models.ForeignKey('document.Letterhead', related_name="refund_documents")
+    project = models.ForeignKey("project.Project", related_name="refunds")
+    transaction = models.OneToOneField('accounting.Transaction', related_name="refund", null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        verbose_name = _("Refund")
+        verbose_name_plural = _("Refunds")
+        ordering = ['id']
+
+    def __str__(self):
+        return '{} {}'.format(self.__class__.__name__, self.created_on)
+
+
 class SampleContact:
     salutation = _('Mr')
     first_name = _('John')
@@ -192,6 +206,7 @@ class Letterhead(models.Model):
     bottom_margin = models.DecimalField(_('Bottom Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
     left_margin = models.DecimalField(_('Left Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
     top_margin_next = models.DecimalField(_('Top Margin Next'), max_digits=4, decimal_places=2, default=Decimal("25"))
+    bottom_margin_next = models.DecimalField(_('Bottom Margin Next'), max_digits=4, decimal_places=2, default=Decimal("25"))
 
     A5 = "A5"
     A4 = "A4"

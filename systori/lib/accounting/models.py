@@ -146,6 +146,9 @@ class BaseAccount(models.Model):
     def adjustments(self):
         return self.entries.filter(entry_type=BaseEntry.ADJUSTMENT)
 
+    def payments(self):
+        return self.entries.filter(entry_type=BaseEntry.PAYMENT)
+
 
 class BaseTransaction(models.Model):
     """ A transaction is a collection of accounting entries (usually
@@ -172,11 +175,13 @@ class BaseTransaction(models.Model):
     INVOICE = "invoice"
     PAYMENT = "payment"
     ADJUSTMENT = "adjustment"
+    REFUND = "refund"
 
     TRANSACTION_TYPE = (
         (INVOICE, _("Invoice")),
         (PAYMENT, _("Payment")),
         (ADJUSTMENT, _("Adjustment")),
+        (REFUND, _("Refund")),
     )
     transaction_type = models.CharField(_('Transaction Type'), null=True, max_length=32, choices=TRANSACTION_TYPE)
 
@@ -266,17 +271,22 @@ class BaseEntry(models.Model):
     tax_rate = models.DecimalField(_("Tax Rate"), max_digits=14, decimal_places=2, default=0)
 
     PAYMENT = "payment"
+    REFUND_CREDIT = "refund-credit"
+
     DISCOUNT = "discount"
     WORK_DEBIT = "work-debit"
     FLAT_DEBIT = "flat-debit"
+    REFUND_DEBIT = "refund-debit"
     ADJUSTMENT = "adjustment"
     OTHER = "other"
 
     ENTRY_TYPE = (
         (PAYMENT, _("Payment")),
+        (REFUND_CREDIT, _("Refund Credit")),
         (DISCOUNT, _("Discount")),
         (WORK_DEBIT, _("Work Debit")),
         (FLAT_DEBIT, _("Flat Debit")),
+        (REFUND_DEBIT, _("Refund Debit")),
         (ADJUSTMENT, _("Adjustment")),
         (OTHER, _("Other")),
     )

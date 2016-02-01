@@ -141,14 +141,19 @@ class ProjectView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ProjectView, self).get_context_data(**kwargs)
+        context['proposals'] = self.object.proposals.prefetch_related('jobs__project').all()
+        context['project_contacts'] = self.object.project_contacts.prefetch_related('contact').all()
+        context['jobsites'] = self.object.jobsites.all()
+        context['jobsites_count'] = len(context['jobsites'])
+        context['project_has_billable_contact'] = self.object.has_billable_contact
         context['transaction_report'] = prepare_transaction_report(self.object.jobs.all())
         context['parent_invoices'] = self.object.invoices.filter(parent=None).prefetch_related('invoices').all()
         context['TAX_RATE_DISPLAY'] = '{}%'.format(ubrdecimal(TAX_RATE*100, 2))
         return context
 
     def get_queryset(self):
-        queryset = super(ProjectView, self).get_queryset()
-        return queryset.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
+        return super().get_queryset()\
+            .prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
 
 
 class ProjectCreate(CreateView):

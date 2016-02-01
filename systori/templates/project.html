@@ -1,6 +1,11 @@
 {% extends "frame.html" %}
 {% load i18n %}
 
+{% block open_field_app %}
+  <li><a href="javascript:window.open('{% url 'field.project' project.id %}', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">{% trans 'open field app' %}</a>
+  </li>
+{% endblock %}
+
 {% block title %}{{ project.name }}{% endblock %}
 
 {% block head_navbar %}

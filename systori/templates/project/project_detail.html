@@ -25,7 +25,7 @@
         </div>
       </td>
     </tr>
-    {% if project.has_billable_contact %}
+    {% if project_has_billable_contact %}
     <tr>
       <td>
         <div class="btn-group pull-right" role="group">
@@ -116,7 +116,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for doc in project.proposals.all %}
+    {% for doc in proposals %}
       <tr>
         <td>{{ doc.id }}</td>
         <td>{{ doc.get_status_display }}</td>
@@ -130,7 +130,7 @@
         <td>{{ doc.notes }}</td>
         <td style="min-width: 100px;">
           <div class="btn-group">
-            <button type="button" class="btn btn-default">{% trans 'PDF' %}</button>
+            <a class="btn btn-default" href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'PDF' %}</a>
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
               <span class="caret"></span>
               <span class="sr-only">Toggle Dropdown</span>
@@ -160,7 +160,7 @@
     <a href="{% url 'proposal.create' project.id %}">{% trans "Create" %}</a>
   {% else %}
     {% trans "No jobs available for new proposal." %}
-    {% if not project.has_billable_contact %}
+    {% if not project_has_billable_contact %}
       <p>{% trans "No billable contact defined." %}</p>
     {% endif %}
   {% endif %}
@@ -228,7 +228,7 @@
       {% for invoice in parent_invoice.get_invoices %}
         {% include "document/invoice_card.html" with invoice=invoice %}
         {% if forloop.last %}
-          {% if project.has_billable_contact %}
+          {% if project_has_billable_contact %}
             {% if 'id' in invoice.json %}
             {% if invoice.status == invoice.SENT or invoice.status == invoice.PAID %}
               <a class="btn btn-default" href="{% url 'invoice.create' project.id %}?previous_invoice_id={{ invoice.id }}" style="width: 100%">
@@ -246,7 +246,7 @@
       {% endfor %}
     </div>
     {% endfor %}
-    {% if project.has_billable_contact %}
+    {% if project_has_billable_contact %}
       <div class="invoice-sequence">
         <a class="btn btn-default" href="{% url 'invoice.create' project.id %}" style="width: 100%">
           {% trans 'Start new invoice sequence.' %}
@@ -315,6 +315,48 @@
   <a href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
 
 
+  <h2 class="sub-header">{% trans "Refunds" %}</h2>
+  <table class="table refund-table">
+    <thead>
+    <tr>
+      <th>{% trans 'Date' %}</th>
+      <th class="text-right">{% trans 'Refund' %}</th>
+      <th>{% trans 'Download' %}</th>
+      <th>{% trans 'Actions' %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for refund in project.refunds.all %}
+      <tr>
+        <td>{{ refund.document_date|localize }}</td>
+        <td class="text-right">{{ refund.json.amount|money }}</td>
+        <td style="min-width: 100px;">
+          <div class="btn-group">
+            <button type="button" class="btn btn-default">{% trans 'PDF' %}</button>
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+              <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="{% url 'refund.pdf' project.id 'email' refund.id %}">{% trans 'Email PDF' %}</a></li>
+              <li><a href="{% url 'refund.pdf' project.id 'print' refund.id %}">{% trans 'Print PDF' %}</a></li>
+            </ul>
+          </div>
+        </td>
+        <td class="text-right">
+          <a href="{% url 'refund.delete' project.id refund.id %}">{% trans "Delete" %}</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if project_has_billable_contact %}
+    <a href="{% url 'refund.create' project.id %}">{% trans "Add Refund" %}</a>
+  {% else %}
+    {% trans "No billable contact defined." %}
+  {% endif %}
+
+
   <h2 class="sub-header">{% trans "Contacts" %}</h2>
   <table class="table table-striped">
     <thead>
@@ -328,7 +370,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for contact in project.project_contacts.all %}
+    {% for contact in project_contacts %}
       <tr>
         <td>{{ contact.id }}</td>
         <td><a href="{% url 'contact.view' contact.contact.id %}">{{ contact.contact }}</a></td>
@@ -361,23 +403,21 @@
     </tr>
     </thead>
     <tbody>
-    {% with jobsite_count=project.jobsites.count %}
-      {% for site in project.jobsites.all %}
-        <tr>
-          <td>{{ site.id }}</td>
-          <td>{{ site }}</td>
-          <td>{{ site.address }}</td>
-          <td>{{ site.city }}</td>
-          <td>{{ site.latitude }}<br/>{{ site.longitude }}</td>
-          <td>
-            <a href="{% url 'jobsite.edit' project.id site.id %}">{% trans "Edit" %}</a>
-            {% if jobsite_count > 1 %}
-              <a href="{% url 'jobsite.delete' project.id site.id %}">{% trans "Delete" %}</a>
-            {% endif %}
-          </td>
-        </tr>
-      {% endfor %}
-    {% endwith %}
+    {% for site in jobsites %}
+      <tr>
+        <td>{{ site.id }}</td>
+        <td>{{ site }}</td>
+        <td>{{ site.address }}</td>
+        <td>{{ site.city }}</td>
+        <td>{{ site.latitude }}<br/>{{ site.longitude }}</td>
+        <td>
+          <a href="{% url 'jobsite.edit' project.id site.id %}">{% trans "Edit" %}</a>
+          {% if jobsites_count > 1 %}
+            <a href="{% url 'jobsite.delete' project.id site.id %}">{% trans "Delete" %}</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
     </tbody>
   </table>
   <a href="{% url 'jobsite.create' project.id %}">{% trans "Create" %}</a>

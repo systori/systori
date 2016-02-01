@@ -9,10 +9,10 @@ from django.utils.translation import get_language
 
 from ..project.models import Project
 from ..task.models import Job
-from .models import Proposal, Invoice, DocumentTemplate, Letterhead, DocumentSettings
+from .models import Proposal, Invoice, Refund, DocumentTemplate, Letterhead, DocumentSettings
 from .forms import ProposalForm, ProposalUpdateForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
-from ..accounting.forms import InvoiceForm
-from .type import proposal, invoice, evidence, letterhead, itemized_listing
+from ..accounting.forms import InvoiceForm, RefundForm
+from .type import proposal, invoice, refund, evidence, letterhead, itemized_listing
 
 
 class DocumentRenderView(SingleObjectMixin, View):
@@ -210,6 +210,50 @@ class InvoiceTransition(SingleObjectMixin, View):
 
 class InvoiceDelete(DeleteView):
     model = Invoice
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        if self.object.transaction:
+            self.object.transaction.delete()
+        self.object.delete()
+        return HttpResponseRedirect(success_url)
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.project.id])
+
+
+# Refund
+
+
+class RefundPDF(DocumentRenderView):
+    model = Refund
+
+    def pdf(self):
+        json = self.get_object().json
+        letterhead = self.get_object().letterhead
+        return refund.render(json, letterhead, self.kwargs['format'])
+
+
+class RefundCreate(CreateView):
+    form_class = RefundForm
+    model = Refund
+
+    def get_form_kwargs(self):
+        kwargs = {
+            'jobs': self.request.project.jobs.all(),
+            'instance': self.model(project=self.request.project),
+        }
+        if self.request.method == 'POST':
+            kwargs['data'] = self.request.POST.copy()
+        return kwargs
+
+    def get_success_url(self):
+        return self.request.project.get_absolute_url()
+
+
+class RefundDelete(DeleteView):
+    model = Refund
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()

@@ -23,44 +23,50 @@
 <body>
 
 {% block header %}
-  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+<!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/"><img alt="Systori" src="{% static 'img/systori_logo_nav.svg' %}" style="margin-top:-10px;"></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              {% if available_companies|length > 1 %}
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ selected_company.name }} <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li class="dropdown-header">{% trans 'available Companies' %}</li>
+                  {% for available_company in available_companies %}
+                    {% if available_company.schema != selected_company.schema %}
+                      <li><a href="/?__schema={{ available_company.schema }}">{{ available_company.name }}</a></li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <a class="navbar-brand" href="#">{{ selected_company.name }}</a>
+              {% endif %}
+            </li>
+            <li><a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
+            {% block head_navbar %}{% endblock %}
+          </ul>
 
-    <div class="container-fluid">
-
-      <div id="navbar" class="navbar-collapse collapse">
-
-        <ul class="nav navbar-nav">
-
-          <li class="dropdown">
-            {% if available_companies|length > 1 %}
-              <a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown">{{ selected_company.name }} <b
-                  class="caret"></b></a>
-              <ul class="dropdown-menu">
-                {% for available_company in available_companies %}
-                  {% if available_company.schema != selected_company.schema %}
-                    <li><a href="/?__schema={{ available_company.schema }}">{{ available_company.name }}</a></li>
-                  {% endif %}
-                {% endfor %}
-              </ul>
-            {% else %}
-              <a class="navbar-brand" href="/">{{ selected_company.name }}</a>
-            {% endif %}
-          </li>
-
-          <li><a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
-          {% block head_navbar %}{% endblock %}
-
-        </ul>
-
-        <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+          <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
           <input type="hidden" name="language" value=""/>
         </form>
 
         <ul class="nav navbar-nav navbar-right">
 
+          {% block open_field_app %}
           <li><a
               href="javascript:window.open('{% url 'field.dashboard' %}', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">{% trans 'open field app' %}</a>
           </li>
+          {% endblock %}
 
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ request.user.get_short_name }} <b class="caret"></b></a>
@@ -85,9 +91,10 @@
 
         </ul>
 
+        </div><!--/.nav-collapse -->
       </div>
-    </div>
-  </nav>
+    </nav>
+
 {% endblock %}
 
 {% block container %}{% endblock container %}
