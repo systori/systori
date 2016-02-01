@@ -146,6 +146,9 @@ class BaseAccount(models.Model):
     def adjustments(self):
         return self.entries.filter(entry_type=BaseEntry.ADJUSTMENT)
 
+    def payments(self):
+        return self.entries.filter(entry_type=BaseEntry.PAYMENT)
+
 
 class BaseTransaction(models.Model):
     """ A transaction is a collection of accounting entries (usually

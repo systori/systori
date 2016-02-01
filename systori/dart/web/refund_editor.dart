@@ -46,7 +46,7 @@ class RefundTable extends JobsTable {
 
     update_refund_amount() {
         ApplyTable apply_table = document.querySelector('table[is="apply-table"');
-        int refund = amount_total - apply_table.amount_total;
+        int refund = apply_table != null ? amount_total - apply_table.amount_total : amount_total;
         refund_amount_div.text = AMOUNT.format(refund/100);
     }
 
@@ -68,6 +68,8 @@ class ApplyTable extends JobsTable {
 
 class JobRow extends TableRowElement {
 
+    AnchorElement paid_anchor;
+    AnchorElement overpaid_anchor;
     TextInputElement amount_input;
 
     // 1.00 -> 100
@@ -77,11 +79,21 @@ class JobRow extends TableRowElement {
         this.amount_input = this.querySelector('input[name\$="-amount"]');
         this.amount_input.onKeyUp.listen(input_changed);
         this.amount = (parse_currency(amount_input.value) * 100).round();
+
+        this.paid_anchor = this.querySelector(":scope>.job-paid>a");
+        if (this.paid_anchor != null) this.paid_anchor.onClick.listen(amount_clicked);
+        this.overpaid_anchor = this.querySelector(":scope>.job-overpaid>a");
+        if (this.overpaid_anchor != null) this.overpaid_anchor.onClick.listen(amount_clicked);
     }
 
     input_changed([Event e]) {
         this.amount = (parse_currency(amount_input.value) * 100).round();
         (parent.parent as JobsTable).recalculate();
+    }
+
+    amount_clicked(Event e) {
+        amount_input.value = (e.target as AnchorElement).text;
+        input_changed();
     }
 
 }

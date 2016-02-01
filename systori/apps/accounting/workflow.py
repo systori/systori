@@ -139,15 +139,13 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
 
         if gross > 0:
 
-            # extract the income and tax part from the payment
-            net, tax = extract_net_tax(gross, TAX_RATE)
-
             # credit the customer account (asset), decreasing their balance
             # (-) "bad thing", customer owes us less money
             transaction.credit(job.account, gross, entry_type=Entry.PAYMENT, job=job, tax_rate=TAX_RATE)
 
             if not job.is_revenue_recognized:
-                # Accounting prior to final invoice has a bunch more steps involved.
+                # extract the income and tax part from the payment
+                net, tax = extract_net_tax(gross, TAX_RATE)
 
                 # debit the promised payments account (liability), decreasing the liability
                 # (-) "good thing", customer paying debt reduces liability
@@ -160,6 +158,25 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
                 # credit the tax payments account (liability), increasing the liability
                 # (+) "bad thing", tax have to be paid eventually
                 transaction.credit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
+
+            else:
+                # We are in revenue recognition mode so we need to make sure that
+                # this payment is fully recognized, particularly in cases of overpayment.
+                account_balance = job.account.balance
+                if gross > account_balance:
+
+                    # payment is greater than the already recognized revenue
+                    # calculate the net and taxes for the not yet recognized revenue
+                    unrecognized_amount = gross - account_balance
+                    net, tax = extract_net_tax(unrecognized_amount, TAX_RATE)
+
+                    # credit the income account (income), this increases the balance
+                    # (+) "good thing", income is good
+                    transaction.credit(SKR03_INCOME_CODE, net, job=job)
+
+                    # credit the tax payments account (liability), increasing the liability
+                    # (+) "bad thing", will have to be paid in taxes eventually
+                    transaction.credit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
 
         for reduction_type, reduction in [(Entry.DISCOUNT, discount), (Entry.ADJUSTMENT, adjustment)]:
 

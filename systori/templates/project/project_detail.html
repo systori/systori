@@ -350,7 +350,11 @@
     {% endfor %}
     </tbody>
   </table>
-  <a href="{% url 'refund.create' project.id %}">{% trans "Add Refund" %}</a>
+  {% if project_has_billable_contact %}
+    <a href="{% url 'refund.create' project.id %}">{% trans "Add Refund" %}</a>
+  {% else %}
+    {% trans "No billable contact defined." %}
+  {% endif %}
 
 
   <h2 class="sub-header">{% trans "Contacts" %}</h2>
