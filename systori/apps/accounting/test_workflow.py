@@ -240,16 +240,19 @@ class TestCompletedContractAccountingMethod(TestCase):
         net, tax = extract_net_tax(D(480.00), TAX_RATE)
         self.assert_balances(bank=D(200.00), income=net, tax=tax, job=D(280))
 
-    @skip
-    def test_overpayment_with_recognized_revenue(self):
-        """ Create a debit and transition this job into revenue recognition mode then
+    def test_overpayment_then_new_debit_with_recognized_revenue(self):
+        """ Create a debit transitioning this job into revenue recognition mode then
             enter an overpayment. This tests that the extra portion of the overpayment
-            gets taxes and net calculated.
+            is not taxed and that it takes another debit equaling the overpaid amount
+            to get all taxes and income properly recognized.
         """
         debit_jobs([(self.job, D(480.00), Entry.FLAT_DEBIT)], recognize_revenue=True)
         credit_jobs([(self.job, D(960.00), D(0), D(0))], D(960.00))
-        net, tax = extract_net_tax(D(960.00), TAX_RATE)
+        net, tax = extract_net_tax(D(480.00), TAX_RATE)
         self.assert_balances(bank=D(960.00), income=net, tax=tax, job=D(-480))
+        debit_jobs([(self.job, D(480.00), Entry.FLAT_DEBIT)])
+        net, tax = extract_net_tax(D(960.00), TAX_RATE)
+        self.assert_balances(bank=D(960.00), income=net, tax=tax)
 
     def test_adjusted_payment_matching_debit_with_recognized_revenue(self):
         """ Payment entered to revenue recognized account along with an adjustment
@@ -312,7 +315,6 @@ class TestCompletedContractAccountingMethod(TestCase):
         total_income = income_account().balance + discount_account().balance
         self.assertEqual(total_income, net-net_discount)
 
-    @skip
     def test_refund_to_other_job_and_customer_with_recognized_revenue(self):
         """ Refund one job and apply part of the refund to second job and return the rest to customer. """
         debit_jobs([(self.job, D(480.00), Entry.WORK_DEBIT),
@@ -327,7 +329,6 @@ class TestCompletedContractAccountingMethod(TestCase):
         self.assert_balances(bank=D(680.00), job=D(0), income=net, tax=tax)
         self.assert_balances(bank=D(680.00), job=D(0), income=net, tax=tax, switch_to_job=self.job2)
 
-    @skip
     def test_refund_to_customer_on_final_invoice_after_complicated_transactions(self):
         # we send a partial invoice for $410
         debit_jobs([(self.job, D(210.00), Entry.WORK_DEBIT),
@@ -356,20 +357,13 @@ class TestCompletedContractAccountingMethod(TestCase):
         # customer overpays final invoice by $50
         credit_jobs([(self.job2, D(150.00), D(0), D(0))], D(150.00))
 
-        # TODO: Need to figure out what to do about the extra $50 in terms of taxes.
-        # Credits after final invoice don't create new tax obligation (because it was
-        # created when the final invoice was created) but in the case of overpayment
-        # on final invoice we are getting paid but not recording taxes...
-        # I'm almost thinking we need to figure out the exact amount of overpayment
-        # and do the tax calculation on that portion.... these tests will have to be fixed.
+        # overpayment only affects the job balance, income/tax are unchanged
         self.assert_balances(bank=D(660.00), job=D(0.00), income=net, tax=tax)
         self.assert_balances(bank=D(660.00), job=D(-50.00), income=net, tax=tax, switch_to_job=self.job2)
 
         # refund customer the overpayment
         refund_jobs([(self.job2, D(50.00))], [])
 
-        # If the above tax calculation is done on the excess $50, then it also needs to be undone
-        # when a refund is made, these tests will need to be updated.
         self.assert_balances(bank=D(610.00), job=D(0), income=net, tax=tax)
         self.assert_balances(bank=D(610.00), job=D(0), income=net, tax=tax, switch_to_job=self.job2)
 
