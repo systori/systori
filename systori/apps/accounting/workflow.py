@@ -159,25 +159,6 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
                 # (+) "bad thing", tax have to be paid eventually
                 transaction.credit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
 
-            else:
-                # We are in revenue recognition mode so we need to make sure that
-                # this payment is fully recognized, particularly in cases of overpayment.
-                account_balance = job.account.balance
-                if gross > account_balance:
-
-                    # payment is greater than the already recognized revenue
-                    # calculate the net and taxes for the not yet recognized revenue
-                    unrecognized_amount = gross - account_balance
-                    net, tax = extract_net_tax(unrecognized_amount, TAX_RATE)
-
-                    # credit the income account (income), this increases the balance
-                    # (+) "good thing", income is good
-                    transaction.credit(SKR03_INCOME_CODE, net, job=job)
-
-                    # credit the tax payments account (liability), increasing the liability
-                    # (+) "bad thing", will have to be paid in taxes eventually
-                    transaction.credit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
-
         for reduction_type, reduction in [(Entry.DISCOUNT, discount), (Entry.ADJUSTMENT, adjustment)]:
 
             if reduction > 0:
