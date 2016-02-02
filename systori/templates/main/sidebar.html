@@ -12,7 +12,7 @@
   <li {% if section == 'dailyplans' %}class="active"{% endif %}><a
       href="{% url 'day_based_overview' %}">{% trans 'Daily Plans' %}</a></li>
   <li {% if section == 'progressreports' %}class="active"{% endif %}><a
-      href="{% url 'progressreport.list' %}">{% trans 'Progress Reports' %}</a></li>
+      href="{% url 'project.progress.all' %}">{% trans 'Progress Reports' %}</a></li>
   <li {% if section == 'templates' %}class="active"{% endif %}><a
       href="{% url 'templates' %}">{% trans 'Templates' %}</a></li>
   <li {% if section == 'users' %}class="active"{% endif %}><a
