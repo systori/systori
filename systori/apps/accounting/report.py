@@ -27,7 +27,13 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
     :return: serializable data structure
     """
 
-    txns_query = Transaction.objects.filter(entries__job__in=jobs).distinct()
+    txns_query = Transaction.objects \
+        .filter(entries__job__in=jobs) \
+        .prefetch_related('invoice') \
+        .prefetch_related('entries__job__project') \
+        .prefetch_related('entries__account') \
+        .distinct()
+
     if transacted_on_or_before:
         txns_query = txns_query.filter(transacted_on__lte=transacted_on_or_before)
 
@@ -100,7 +106,7 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
                 'adjustment_applied_gross': D('0.00'),
             })
 
-        for entry in txn.entries.prefetch_related('job', 'account__job__project').all():
+        for entry in txn.entries.all():
 
             # extract payment entry info
             if txn.transaction_type == txn.PAYMENT and entry.account.is_bank:

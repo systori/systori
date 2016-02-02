@@ -303,11 +303,18 @@ class FieldTaskView(UpdateView):
     template_name = "field/task.html"
     form_class = CompletionForm
 
+    def get_queryset(self):
+        return super().get_queryset()\
+            .prefetch_related('taskgroup__job__project') \
+            .prefetch_related('taskinstances__lineitems') \
+            .prefetch_related('dailyplans') \
+            .prefetch_related('progressreports__access__user')
+
     def get_context_data(self, **kwargs):
         context = super(FieldTaskView, self).get_context_data(**kwargs)
-        task = self.get_object()
+        task = self.object
         dailyplan = self.request.dailyplan
-        context['in_current_dailyplan'] = dailyplan.id and task.dailyplans.filter(id=dailyplan.id).exists()
+        context['in_current_dailyplan'] = dailyplan.id and dailyplan in task.dailyplans.all()
         return context
 
     def form_valid(self, form):

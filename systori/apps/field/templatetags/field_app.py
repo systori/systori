@@ -26,3 +26,10 @@ def add_daily_plan_url(project, date, jobsite=None):
 @register.simple_tag
 def is_assigned(plan, access):
     return DailyPlan.is_worker_assigned(plan, access)
+
+@register.filter
+#
+#
+#
+def task_total(lineitem):
+    return lineitem.taskinstance.task.qty * lineitem.unit_qty

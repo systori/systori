@@ -1,10 +1,11 @@
 from decimal import Decimal as D
 from django.test import TestCase
-from systori.lib.accounting.tools import extract_net_tax, compute_gross_tax
+from unittest import skip
+from systori.lib.accounting.tools import extract_net_tax
 from ..task.test_models import create_task_data
 from .models import Account, Transaction, Entry, create_account_for_job
 from .workflow import create_chart_of_accounts
-from .workflow import debit_jobs, credit_jobs
+from .workflow import debit_jobs, credit_jobs, refund_jobs
 from .constants import *
 
 
@@ -161,6 +162,53 @@ class TestCompletedContractAccountingMethod(TestCase):
                              job_debits=D(480.00), job_adjusted_debits=D(480.00),  # used discount instead of adjustments
                              switch_to_job=self.job2)
 
+    def test_refund_to_customer(self):
+        """ Refund some amount from what has already been paid. """
+        debit_jobs([(self.job, D(480.00), Entry.WORK_DEBIT)])
+        credit_jobs([(self.job, D(680.00), D(0), D(0))], D(680.00))
+        refund_jobs([(self.job, D(200.00))], [])
+        net, tax = extract_net_tax(D(480.00), TAX_RATE)
+        self.assert_balances(bank=D(480.00), partial=net, tax=tax)
+
+    def test_refund_to_other_job(self):
+        """ Refund one job and apply the refund to another job. """
+        debit_jobs([(self.job, D(480.00), Entry.WORK_DEBIT),
+                    (self.job2, D(200.00), Entry.WORK_DEBIT)])
+        credit_jobs([(self.job, D(680.00), D(0), D(0))], D(680.00))
+        net, tax = extract_net_tax(D(680.00), TAX_RATE)
+        self.assert_balances(bank=D(680.00), job=D(-200.00), partial=net, tax=tax)
+        self.assert_balances(bank=D(680.00), job=D(200.00), partial=net, tax=tax, switch_to_job=self.job2)
+
+        refund_jobs([(self.job, D(200.00))], [(self.job2, D(200.00))])
+        self.assert_balances(bank=D(680.00), job=D(0), partial=net, tax=tax)
+        self.assert_balances(bank=D(680.00), job=D(0), partial=net, tax=tax, switch_to_job=self.job2)
+
+    def test_refund_to_other_job_and_customer(self):
+        """ Refund one job and apply part of the refund to second job and return the rest to customer. """
+        debit_jobs([(self.job, D(480.00), Entry.WORK_DEBIT),
+                    (self.job2, D(200.00), Entry.WORK_DEBIT)])
+        credit_jobs([(self.job, D(880.00), D(0), D(0))], D(880.00))
+        net, tax = extract_net_tax(D(880.00), TAX_RATE)
+        self.assert_balances(bank=D(880.00), job=D(-400.00), promised=D(-200.00), partial=net, tax=tax)
+        self.assert_balances(bank=D(880.00), job=D(200.00), promised=D(-200.00), partial=net, tax=tax, switch_to_job=self.job2)
+
+        refund_jobs([(self.job, D(400.00))], [(self.job2, D(200.00))])
+
+        # to update the total partial payments and taxes collected we have to
+        # break this down into steps, otherwise we get rounding errors
+        # extract_net_tax(D(680.00)) produces net of '571.43' but accounting system has '571.44'
+        # subtract refunded
+        net_diff, tax_diff = extract_net_tax(D(400.00), TAX_RATE)
+        net -= net_diff
+        tax -= tax_diff
+        # add applied
+        net_diff, tax_diff = extract_net_tax(D(200.00), TAX_RATE)
+        net += net_diff
+        tax += tax_diff
+
+        self.assert_balances(bank=D(680.00), job=D(0), partial=net, tax=tax)
+        self.assert_balances(bank=D(680.00), job=D(0), partial=net, tax=tax, switch_to_job=self.job2)
+
     # After Revenue Recognition
 
     def test_revenue_debits(self):
@@ -191,6 +239,20 @@ class TestCompletedContractAccountingMethod(TestCase):
         # income now includes the previous promised revenue and cash revenue
         net, tax = extract_net_tax(D(480.00), TAX_RATE)
         self.assert_balances(bank=D(200.00), income=net, tax=tax, job=D(280))
+
+    def test_overpayment_then_new_debit_with_recognized_revenue(self):
+        """ Create a debit transitioning this job into revenue recognition mode then
+            enter an overpayment. This tests that the extra portion of the overpayment
+            is not taxed and that it takes another debit equaling the overpaid amount
+            to get all taxes and income properly recognized.
+        """
+        debit_jobs([(self.job, D(480.00), Entry.FLAT_DEBIT)], recognize_revenue=True)
+        credit_jobs([(self.job, D(960.00), D(0), D(0))], D(960.00))
+        net, tax = extract_net_tax(D(480.00), TAX_RATE)
+        self.assert_balances(bank=D(960.00), income=net, tax=tax, job=D(-480))
+        debit_jobs([(self.job, D(480.00), Entry.FLAT_DEBIT)])
+        net, tax = extract_net_tax(D(960.00), TAX_RATE)
+        self.assert_balances(bank=D(960.00), income=net, tax=tax)
 
     def test_adjusted_payment_matching_debit_with_recognized_revenue(self):
         """ Payment entered to revenue recognized account along with an adjustment
@@ -252,6 +314,58 @@ class TestCompletedContractAccountingMethod(TestCase):
 
         total_income = income_account().balance + discount_account().balance
         self.assertEqual(total_income, net-net_discount)
+
+    def test_refund_to_other_job_and_customer_with_recognized_revenue(self):
+        """ Refund one job and apply part of the refund to second job and return the rest to customer. """
+        debit_jobs([(self.job, D(480.00), Entry.WORK_DEBIT),
+                    (self.job2, D(200.00), Entry.WORK_DEBIT)], recognize_revenue=True)
+        credit_jobs([(self.job, D(880.00), D(0), D(0))], D(880.00))
+        net, tax = extract_net_tax(D(680.00), TAX_RATE)  # tax is calculated on debits, not on payments received
+        self.assert_balances(bank=D(880.00), job=D(-400.00), income=net, tax=tax)
+        self.assert_balances(bank=D(880.00), job=D(200.00), income=net, tax=tax, switch_to_job=self.job2)
+
+        refund_jobs([(self.job, D(400.00))], [(self.job2, D(200.00))])
+
+        self.assert_balances(bank=D(680.00), job=D(0), income=net, tax=tax)
+        self.assert_balances(bank=D(680.00), job=D(0), income=net, tax=tax, switch_to_job=self.job2)
+
+    def test_refund_to_customer_on_final_invoice_after_complicated_transactions(self):
+        # we send a partial invoice for $410
+        debit_jobs([(self.job, D(210.00), Entry.WORK_DEBIT),
+                    (self.job2, D(200.00), Entry.WORK_DEBIT)])
+
+        # customer overpays by $100, we apply overpayment to first job
+        credit_jobs([(self.job, D(310.00), D(0), D(0)),
+                     (self.job2, D(200.00), D(0), D(0))], D(510.00))
+
+        # issue final invoice and add $100 extra debit to first job, consuming the overpayment
+        # job2 gets some new work charged as well
+        debit_jobs([(self.job, D(100.00), Entry.WORK_DEBIT),  # gets swallowed by overpayment
+                    (self.job2, D(100.00), Entry.WORK_DEBIT)],  # adds to amount due
+                   recognize_revenue=True)
+
+        # we need to split the extractions to avoid rounding issues
+        # calculate net/tax for the first payment
+        net, tax = extract_net_tax(D(510.00), TAX_RATE)
+        # calculate net/tax for the additional debit added to job2
+        net_diff, tax_diff = extract_net_tax(D(100.00), TAX_RATE)
+        net += net_diff
+        tax += tax_diff
+        self.assert_balances(bank=D(510.00), job=D(0.00), income=net, tax=tax)
+        self.assert_balances(bank=D(510.00), job=D(100.00), income=net, tax=tax, switch_to_job=self.job2)
+
+        # customer overpays final invoice by $50
+        credit_jobs([(self.job2, D(150.00), D(0), D(0))], D(150.00))
+
+        # overpayment only affects the job balance, income/tax are unchanged
+        self.assert_balances(bank=D(660.00), job=D(0.00), income=net, tax=tax)
+        self.assert_balances(bank=D(660.00), job=D(-50.00), income=net, tax=tax, switch_to_job=self.job2)
+
+        # refund customer the overpayment
+        refund_jobs([(self.job2, D(50.00))], [])
+
+        self.assert_balances(bank=D(610.00), job=D(0), income=net, tax=tax)
+        self.assert_balances(bank=D(610.00), job=D(0), income=net, tax=tax, switch_to_job=self.job2)
 
 
 def promised_payments():

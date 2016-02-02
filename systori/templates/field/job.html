@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n staticfiles field_app %}
+{% load i18n staticfiles field_app customformatting %}
 
 {% block container %}
   <div class="container">
@@ -12,8 +12,12 @@
       <div class="col-xs-4"><a href="{% url 'field.project' jobsite.project.id dailyplan.day.isoformat %}"
                                class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
     </div>
-    <div class="panel panel-default">
 
+    <div class="input-group"> <span class="input-group-addon">{% trans 'search' %}</span>
+      <input id="filter" type="text" class="form-control" placeholder={%  trans "Type here..." %}>
+    </div>
+
+    <div class="panel panel-default">
       <div class="panel-heading">
         {{ job.name }} {% trans 'Tasks' %}
       </div>
@@ -21,21 +25,46 @@
       <ul class="list-group">
         {% for taskgroup in job.taskgroups.all %}
           <div class="list-group-item sub-header">{{ taskgroup.code }} {{ taskgroup.name }}</div>
-          {% for task in taskgroup.tasks.all %}
-            {% task_dailyplans_count task dailyplan.day as is_assigned %}
-            <a href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}"
-               class="list-group-item clearfix{% if is_assigned %} list-group-item-success{% endif %}">
-              {{ task.code }} {{ task.name }}
-              {% if task.complete_percent > 0 %}
-                <span class="badge">{{ task.complete_percent }}%</span>
-              {% else %}
-                <span class="pull-right">&raquo;</span>
-              {% endif %}
-            </a>
-          {% endfor %}
+              {% for task in taskgroup.tasks.all %}
+                {% task_dailyplans_count task dailyplan.day as is_assigned %}
+                <a href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}"
+                   class="list-group-item clearfix{% if is_assigned %} list-group-item-success{% endif %} searchable">
+                  {{ task.code }} <b>{{ task.name }}</b><br>
+                  {{ task.description }}<br>
+                  {{ task.qty|ubrdecimal }} - {{ task.unit }}
+                  {% if task.complete_percent > 0 %}
+                    <span class="badge">{{ task.complete_percent }}%</span>
+                  {% else %}
+                    <span class="pull-right">&raquo;</span>
+                  {% endif %}
+                </a>
+              {% endfor %}
         {% endfor %}
       </ul>
 
     </div>
   </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script type="application/javascript">
+  $(document).ready(function () {
+
+      (function ($) {
+
+          $('#filter').keyup(function () {
+
+              var rex = new RegExp($(this).val(), 'i');
+              $('.searchable').hide();
+              $('.searchable').filter(function () {
+                  return rex.test($(this).text());
+              }).show();
+
+          })
+
+      }(jQuery));
+
+  });
+  </script>
+
 {% endblock %}

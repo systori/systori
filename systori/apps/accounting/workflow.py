@@ -28,8 +28,9 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
                               transaction_type=Transaction.INVOICE,
                               is_revenue_recognized=recognize_revenue)
 
-    for job, gross, entry_type in debits:
+    for job, debit_amount, entry_type in debits:
 
+        assert debit_amount >= 0
         assert entry_type in (Entry.WORK_DEBIT, Entry.FLAT_DEBIT)
 
         if recognize_revenue or job.is_revenue_recognized:
@@ -46,7 +47,9 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
                 partial_payments_account = Account.objects.get(code=SKR03_PARTIAL_PAYMENTS_CODE)
                 prior_income = partial_payments_account.entries.filter(job=job).sum
 
-                if prior_income:
+                assert prior_income >= 0  # only way this fails is if total refunds > total payments
+
+                if prior_income > 0:
 
                     # debit the partial payments account (liability), decreasing the liability
                     # (-) "good thing", product or service has been completed and delivered
@@ -60,30 +63,35 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
 
                 # okay, not quite moving, more like clearing the promised payments
                 # we'll add them into the income account a little bit later
-                unpaid_amount = job.account.balance
-                if unpaid_amount > 0:
-                    # reset balance, we'll add unpaid_amount back into a final debit to customer
-                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, unpaid_amount, job=job, tax_rate=TAX_RATE)
-                    transaction.credit(job.account, unpaid_amount, job=job, tax_rate=TAX_RATE)
+                account_balance = job.account.balance
 
-                gross += unpaid_amount
-                income, tax = extract_net_tax(gross, TAX_RATE)
+                if account_balance > 0:
+                    # reset balance, by paying it in full
+                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, account_balance, job=job, tax_rate=TAX_RATE)
+                    transaction.credit(job.account, account_balance, job=job, tax_rate=TAX_RATE)
+
+                elif account_balance < 0:
+                    # we can work with a negative balance but only if there is a current debit pending
+                    # that will get the account back to zero or positive (since we can't have a negative invoice)
+                    assert debit_amount + account_balance >= 0
+                    # reset balance, by refunding it in full
+                    transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, abs(account_balance), job=job, tax_rate=TAX_RATE)
+                    transaction.debit(job.account, abs(account_balance), job=job, tax_rate=TAX_RATE)
+
+                # update the new debit increasing or decreasing it depending on the balance
+                debit_amount += account_balance
 
                 # Now we can mark ourselves as revenue recognized for a job well done! Pun intended.
                 job.is_revenue_recognized = True
                 job.save()
 
-            else:
+            if debit_amount > 0:
 
-                # this job already had its revenue recognized
-
-                income, tax = extract_net_tax(gross, TAX_RATE)
-
-            if gross:
+                income, tax = extract_net_tax(debit_amount, TAX_RATE)
 
                 # debit the customer account (asset), this increases their balance
                 # (+) "good thing", customer owes us more money
-                transaction.debit(job.account, gross, entry_type=entry_type, job=job, tax_rate=TAX_RATE)
+                transaction.debit(job.account, debit_amount, entry_type=entry_type, job=job, tax_rate=TAX_RATE)
 
                 # credit the tax payments account (liability), increasing the liability
                 # (+) "bad thing", will have to be paid in taxes eventually
@@ -96,15 +104,15 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
         else:
             # Still not recognizing revenue, tracking debits in a promised payments account instead..
 
-            if gross:
+            if debit_amount > 0:
 
                 # debit the customer account (asset), this increases their balance
                 # (+) "good thing", customer owes us more money
-                transaction.debit(job.account, gross, entry_type=entry_type, job=job, tax_rate=TAX_RATE)
+                transaction.debit(job.account, debit_amount, entry_type=entry_type, job=job, tax_rate=TAX_RATE)
 
                 # credit the promised payments account (liability), increasing the liability
                 # (+) "bad thing", customer owing us money is a liability
-                transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, gross, job=job, tax_rate=TAX_RATE)
+                transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, debit_amount, job=job, tax_rate=TAX_RATE)
 
     transaction.save()
 
@@ -131,15 +139,13 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
 
         if gross > 0:
 
-            # extract the income and tax part from the payment
-            net, tax = extract_net_tax(gross, TAX_RATE)
-
             # credit the customer account (asset), decreasing their balance
             # (-) "bad thing", customer owes us less money
             transaction.credit(job.account, gross, entry_type=Entry.PAYMENT, job=job, tax_rate=TAX_RATE)
 
             if not job.is_revenue_recognized:
-                # Accounting prior to final invoice has a bunch more steps involved.
+                # extract the income and tax part from the payment
+                net, tax = extract_net_tax(gross, TAX_RATE)
 
                 # debit the promised payments account (liability), decreasing the liability
                 # (-) "good thing", customer paying debt reduces liability
@@ -190,18 +196,71 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
     transaction.save()
 
 
-def refund_jobs(refund, apply, refund_total, transacted_on=None):
+def refund_jobs(refunded, applied, transacted_on=None, bank=None):
 
+    bank = bank or Account.objects.get(code=SKR03_BANK_CODE)
     transacted_on = transacted_on or date.today()
 
     transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.REFUND)
 
-    # TODO: figure out how to do the accounting for this
+    issued_refund = Decimal('0.00')
+
+    for job, refund in refunded:
+
+        issued_refund += refund
+
+        net, tax = extract_net_tax(refund, TAX_RATE)
+
+        # debit the customer account (asset), this increases their balance
+        # (+) "good thing", customer owes us money again
+        transaction.debit(job.account, refund, entry_type=Entry.REFUND_DEBIT, job=job, tax_rate=TAX_RATE)
+
+        if not job.is_revenue_recognized:
+
+            # credit the promised payments account (liability), increasing the liability
+            # (+) "bad thing", customer owing us money again is a liability
+            transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, refund, job=job, tax_rate=TAX_RATE)
+
+            # debit the partial payments account (liability), decreasing the liability
+            # (-) "good thing", no longer liable for the refunded amount in terms of taxes
+            transaction.debit(SKR03_PARTIAL_PAYMENTS_CODE, net, job=job)
+
+            # debit the tax payments account (liability), decreasing the liability
+            # (-) "good thing", less taxes to pay
+            transaction.debit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
+
+    for job, apply in applied:
+
+        issued_refund -= apply
+
+        net, tax = extract_net_tax(apply, TAX_RATE)
+
+        # credit the customer account (asset), decreasing their balance
+        # (-) "bad thing", customer owes us less money
+        transaction.credit(job.account, apply, entry_type=Entry.REFUND_CREDIT, job=job, tax_rate=TAX_RATE)
+
+        if not job.is_revenue_recognized:
+
+            # debit the promised payments account (liability), decreasing the liability
+            # (-) "good thing", customer paying debt reduces liability
+            transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, apply, job=job, tax_rate=TAX_RATE)
+
+            # credit the partial payments account (liability), increasing the liability
+            # (+) "bad thing", we are on the hook to finish and deliver the service or product
+            transaction.credit(SKR03_PARTIAL_PAYMENTS_CODE, net, job=job)
+
+            # credit the tax payments account (liability), increasing the liability
+            # (+) "bad thing", tax have to be paid eventually
+            transaction.credit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
+
+    # credit the bank account (asset)
+    # (-) "bad thing", money leaving the bank
+    if issued_refund > 0:
+        transaction.credit(bank, issued_refund)
 
     transaction.save()
 
     return transaction
-
 
 
 def create_chart_of_accounts(self=None):

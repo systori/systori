@@ -1,20 +1,41 @@
 {% load i18n bootstrap staticfiles customformatting %}
 
 <div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
+
 {{ form.management_form }}
+
+{% if form.forms %}
 <table is="{{ form.prefix }}-table" class="table table-striped">
   <thead>
   <tr>
     <th class="job-name">{% trans 'Job' %}</th>
-    <th class="job-amount">{% trans 'Amount' %}</th>
+    <th class="job-billed">{% trans 'Billed' %}</th>
+    <th class="job-paid">{% trans 'Paid' %}</th>
+      {% if form.prefix == 'refund' %}
+      <th class="job-overpaid">{% trans 'Overpaid' %}</th>
+      {% endif %}
+    <th class="job-amount">
+      {% if form.prefix == 'refund' %}
+      {% trans 'Refund Amount' %}
+      {% else %}
+      {% trans 'Apply Amount' %}
+      {% endif %}
+    </th>
   </tr>
   </thead>
   <tbody>
   {% for job_form in form.forms %}
     <tr is="job-row" class="job-row">
       <td class="job-name">{{ job_form.job }}{{ job_form.initial.job.name }}</td>
+      <td class="job-billed">{{ job_form.billed|ubrdecimal:2 }}</td>
+      {% if form.prefix == 'refund' %}
+        <td class="job-paid"><a class="btn">{{ job_form.paid|ubrdecimal:2 }}</a></td>
+        <td class="job-overpaid"><a class="btn">{{ job_form.overpaid|ubrdecimal:2 }}</a></td>
+      {% elif form.prefix == 'apply' %}
+        <td class="job-paid">{{ job_form.paid|ubrdecimal:2 }}</td>
+      {% endif %}
       <td class="job-amount {% if job_form.amount.errors %}has-error bg-danger{% endif %}">
-        {{ job_form.amount }}
+        <input class="form-control" id="{{ job_form.amount.id_for_label }}" name="{{ job_form.amount.html_name }}" type="text" value="{{ job_form.amount_value|ubrdecimal:2 }}">
         {% for error in job_form.amount.errors %}
           <p class="help-block">{{ error }}</p>
         {% endfor %}
@@ -23,6 +44,12 @@
   {% endfor %}
     <tr class="job-table-totals">
       <td class="job-name"></td>
+      <td class="job-billed">{{ form.billed_total|ubrdecimal:2 }}</td>
+      <td class="job-paid">{{ form.paid_total|ubrdecimal:2 }}</td>
+      {% if form.prefix == 'refund' %}
+        <td class="job-overpaid">{{ form.overpaid_total|ubrdecimal:2 }}</td>
+      {% elif form.prefix == 'apply' %}
+      {% endif %}
       <td class="job-amount">{{ form.amount_total|ubrdecimal:2 }}</td>
     </tr>
   </tbody>
@@ -30,4 +57,9 @@
 {% for error in form.non_form_errors %}
   <span class="help-block ">{{ error }}</span>
 {% endfor %}
+
+{% else %}
+  {% trans 'No jobs available to which part of refund could be applied.' %}
+{% endif %}
+
 </div>

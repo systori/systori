@@ -12,9 +12,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name='entry',
-            name='entry_type',
-            field=models.CharField(choices=[('payment', 'Payment'), ('discount', 'Discount'), ('work-debit', 'Work Debit'), ('flat-debit', 'Flat Debit'), ('refund-debit', 'Refund Debit'), ('adjustment', 'Adjustment'), ('other', 'Other')], max_length=32, verbose_name='Entry Type', default='other'),
+                model_name='entry',
+                name='entry_type',
+                field=models.CharField(default='other', verbose_name='Entry Type', max_length=32, choices=[('payment', 'Payment'), ('refund-credit', 'Refund Credit'), ('discount', 'Discount'), ('work-debit', 'Work Debit'), ('flat-debit', 'Flat Debit'), ('refund-debit', 'Refund Debit'), ('adjustment', 'Adjustment'), ('other', 'Other')]),
         ),
         migrations.AlterField(
             model_name='transaction',
