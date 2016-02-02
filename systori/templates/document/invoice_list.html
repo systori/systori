@@ -16,14 +16,13 @@
         <th>{% trans "Project" %}</th>
         <th>{% trans "Progress" %}</th>
         <th>{% trans "Amount" %}</th>
-        <th>{% trans "Payment" %}</th>
         <th>{% trans "Parent" %}</th>
       </tr>
       </thead>
       <tbody>
       {% for year, months in invoice_group.items %}
         {% for month_number, month in months.items %}
-          <tr><td colspan="8" class="bg-primary">{{ year }} - {{ month_number|month_from_int }}</td></tr>
+          <tr><td colspan="7" class="bg-primary">{{ year }} - {{ month_number|month_from_int }}</td></tr>
           {% for invoice in month.invoices %}
             <tr>
               <td>{{ invoice.document_date }}</td>
@@ -36,7 +35,7 @@
             </tr>
           {% endfor %}
             <tr>
-              <td colspan="5" style="text-align:right;">Summe {{ month_number|month_from_int }}:</td><td style="text-align:right;">{{ month.total|money }}</td><td colspan="2"></td>
+              <td colspan="5" style="text-align:right;">Summe {{ month_number|month_from_int }}:</td><td style="text-align:right;">{{ month.total|money }}</td><td></td>
             </tr>
         {% endfor %}
       {% endfor %}

@@ -141,7 +141,8 @@ class InvoiceList(ListView):
             if month not in years[year]:
                 years[year][month] = {'invoices': [], 'total': Decimal('0.00')}
             years[year][month]['invoices'].append(invoice)
-            years[year][month]['total'] += Decimal(invoice.json['debit_gross'])
+            if invoice.json.get('balance_gross'):
+                years[year][month]['total'] += Decimal(invoice.json['balance_gross'])
 
         context['invoice_group'] = years
 
