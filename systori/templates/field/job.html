@@ -20,8 +20,7 @@
 
       <ul class="list-group">
         {% for taskgroup in job.taskgroups.all %}
-            <button style="width:100%;" class="list-group-item sub-header" data-toggle="collapse" data-target="#taskgroup_{{ forloop.counter }}">{{ taskgroup.code }} {{ taskgroup.name }}</button>
-            <div id="taskgroup_{{ forloop.counter }}" class="collapse">
+          <div class="list-group-item sub-header">{{ taskgroup.code }} {{ taskgroup.name }}</div>
               {% for task in taskgroup.tasks.all %}
                 {% task_dailyplans_count task dailyplan.day as is_assigned %}
                 <a href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}"
@@ -36,7 +35,6 @@
                   {% endif %}
                 </a>
               {% endfor %}
-            </div>
         {% endfor %}
       </ul>
 
