@@ -124,3 +124,10 @@ class JobDelete(DeleteView):
 
     def get_success_url(self):
         return self.object.project.get_absolute_url()
+
+
+class AllProjectsProgress(ListView):
+    model = ProgressReport
+    queryset = model.objects.prefetch_related('task__taskgroup__job__project').prefetch_related('access__user')
+    context_object_name = 'progressreport_list'
+    paginate_by = 30

@@ -296,6 +296,10 @@ class FieldJobView(DetailView):
     pk_url_kwarg = 'job_pk'
     template_name = "field/job.html"
 
+    def get_queryset(self):
+        return super().get_queryset()\
+            .prefetch_related('taskgroups__tasks__progressreports')
+
 
 class FieldTaskView(UpdateView):
     model = Task
