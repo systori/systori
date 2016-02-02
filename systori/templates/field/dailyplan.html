@@ -2,7 +2,7 @@
 
 {% with jobsite=dailyplan.jobsite %}
 
-  <div class="panel panel-success">
+  <div class="panel panel-primary">
 
     <div class="panel-heading">
       <a name="plan-{{  dailyplan.id }}"></a>
@@ -52,7 +52,7 @@
           </a>
           <a href="{% url 'field.dailyplan.member-remove' jobsite.id dailyplan.url_id worker.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
              class="btn btn-default btn-sm">
-            <span class="glyphicon glyphicon-remove" style="color:red;"></span>
+            <span class="glyphicon glyphicon-remove" style="color:#B4004F;"></span>
           </a>
           </div></span>
         {% else %}
