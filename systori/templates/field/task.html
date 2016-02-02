@@ -59,8 +59,8 @@
               <input type="text" class="form-control" name="complete" value="{{ task.complete|ubrdecimal }}">
               <span class="input-group-addon">{{ task.unit }}</span>
             </div>
-            <input type="range" id="completion-range" min="0" max="{{ task.qty|stringformat:'d' }}"
-                   value="{{ task.complete|stringformat:'d' }}" step="1" data-unit="{{ task.unit }}"/>
+            <input type="range" id="completion-range" min="0" max="{{ task.qty|stringformat:".2f" }}"
+                   value="{{ task.complete|stringformat:'d' }}" step="0.01" data-unit="{{ task.unit }}"/>
 
             <div>{% trans 'Comments' %}:</div>
             <textarea rows="4" style="width: 100%;" name="comment"></textarea>
