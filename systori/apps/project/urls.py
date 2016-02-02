@@ -3,7 +3,7 @@ from ..user.authorization import office_auth
 from ..accounting.views import PaymentCreate, PaymentDelete
 from ..document.views import RefundCreate, RefundDelete, RefundPDF
 from .views import *
-from ..task.views import ProgressReportList
+from ..task.views import AllProjectsProgress
 
 urlpatterns = [
 
@@ -33,5 +33,5 @@ urlpatterns = [
     url(r'^project-(?P<project_pk>\d+)/transactions$', office_auth(TransactionEditor.as_view()), name='project.transactions'),
 
     url(r'^project-(?P<pk>\d+)/progress', office_auth(ProjectProgress.as_view()), name='project.progress'),
-    url(r'^progress-reports$', office_auth(ProgressReportList.as_view()), name='progressreport.list'),
+    url(r'^progress$', office_auth(AllProjectsProgress.as_view()), name='project.progress.all'),
 ]

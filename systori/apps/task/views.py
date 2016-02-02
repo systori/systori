@@ -1,11 +1,7 @@
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-
 from django.http import HttpResponseRedirect
 from django.views.generic import View, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic.dates import MonthArchiveView
 from django.core.urlresolvers import reverse
 from django.db.models import Max
 
@@ -130,14 +126,8 @@ class JobDelete(DeleteView):
         return self.object.project.get_absolute_url()
 
 
-class ProgressReportList(ListView):
+class AllProjectsProgress(ListView):
     model = ProgressReport
     queryset = model.objects.prefetch_related('task__taskgroup__job__project').prefetch_related('access__user')
     context_object_name = 'progressreport_list'
     paginate_by = 30
-
-    #def get_queryset(self):
-    #    end = datetime.today()
-    #    start = datetime.today() - relativedelta(months=3)
-    #    queryset = self.model.objects.filter(timestamp__gte=start, timestamp__lte=end).prefetch_related('task__taskgroup__job__project').prefetch_related('access__user')
-    #    return queryset.all()

@@ -10,7 +10,4 @@ urlpatterns = [
     url(r'^job-(?P<pk>\d+)/estimate/(?P<action>\w+)$', office_auth(JobEstimateModification.as_view()), name='job.estimate'),
     url(r'^job-(?P<pk>\d+)/edit$', office_auth(JobUpdate.as_view()), name='job.edit'),
     url(r'^job-(?P<pk>\d+)/delete$', office_auth(JobDelete.as_view()), name='job.delete'),
-
-    # this url is added in apps.project.urls to prevent the leading url fragment
-    #url(r'^progress-reports$', office_auth(ProgressReportList.as_view()), name='progressreport.list'),
 ]
