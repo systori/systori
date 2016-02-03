@@ -39,10 +39,14 @@ class PaymentForm(Form):
     discount = forms.TypedChoiceField(
             label=_('Is discounted?'), coerce=D,
             choices=[
-                ('0.0', _('0%')),
+                ('0.00', _('0%')),
+                ('0.01', _('1%')),
+                ('0.02', _('2%')),
                 ('0.03', _('3%')),
+                ('0.04', _('4%')),
                 ('0.05', _('5%')),
-                ('0.1', _('10%')),
+                ('0.06', _('6%')),
+                ('0.07', _('7%')),
             ]
     )
     is_adjusted = forms.BooleanField(label=_('Apply Adjustment?'), initial=True, required=False)
