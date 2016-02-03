@@ -234,9 +234,6 @@ class FieldCopyPasteDailyPlans(View):
 
             newplan = DailyPlan.objects.create(jobsite=oldplan.jobsite, day=selected_day, notes=oldplan.notes)
 
-            for task in oldplan.tasks.all():
-                newplan.tasks.add(task)
-
             for oldmember in oldplan.workers.all():
                 TeamMember.objects.create(
                     dailyplan=newplan,
@@ -259,9 +256,6 @@ class FieldGenerateAllDailyPlans(View):
             newplan = DailyPlan.objects.create(jobsite=oldplan.jobsite,
                                                day=selected_day,
                                                notes=oldplan.notes)
-
-            for task in oldplan.tasks.all():
-                newplan.tasks.add(task)
 
             for oldmember in oldplan.workers.all():
                 TeamMember.objects.create(
@@ -295,6 +289,10 @@ class FieldJobView(DetailView):
     model = Job
     pk_url_kwarg = 'job_pk'
     template_name = "field/job.html"
+
+    def get_queryset(self):
+        return super().get_queryset()\
+            .prefetch_related('taskgroups__tasks__progressreports')
 
 
 class FieldTaskView(UpdateView):

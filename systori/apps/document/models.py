@@ -225,6 +225,7 @@ class Letterhead(models.Model):
     bottom_margin = models.DecimalField(_('Bottom Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
     left_margin = models.DecimalField(_('Left Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
     top_margin_next = models.DecimalField(_('Top Margin Next'), max_digits=4, decimal_places=2, default=Decimal("25"))
+    bottom_margin_next = models.DecimalField(_('Bottom Margin Next'), max_digits=4, decimal_places=2, default=Decimal("25"))
 
     A5 = "A5"
     A4 = "A4"

@@ -6,6 +6,34 @@
 {% block content %}
   <form role="form" method="post">{% csrf_token %}
 
+    <style>
+    tr > .job-amount,
+    tr > .job-paid,
+    tr > .job-overpaid {
+      text-align: right;
+      min-width: 80px;
+    }
+
+    tr > td.job-paid > a,
+    tr > td.job-overpaid > a {
+      color: black;
+      background-color: transparent;
+      display: block;
+      text-align: right;
+      height: 100%;
+    }
+    tr > td.job-paid > a:hover,
+    tr > td.job-overpaid > a:hover {
+      background-color: #e6e6e6;
+    }
+    tr > .job-amount > input.form-control {
+      display: inline-block;
+      margin-top: -6px;
+      width: 100px;
+      text-align: right;
+    }
+    </style>
+
     <h2 class="sub-header">{% trans "Refund" %}</h2>
     {% include "document/refund_jobs_table.html" with form=form.refund_jobs_form %}
 

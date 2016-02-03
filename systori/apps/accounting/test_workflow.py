@@ -1,5 +1,6 @@
 from decimal import Decimal as D
 from django.test import TestCase
+from unittest import skip
 from systori.lib.accounting.tools import extract_net_tax
 from ..task.test_models import create_task_data
 from .models import Account, Transaction, Entry, create_account_for_job
@@ -239,6 +240,20 @@ class TestCompletedContractAccountingMethod(TestCase):
         net, tax = extract_net_tax(D(480.00), TAX_RATE)
         self.assert_balances(bank=D(200.00), income=net, tax=tax, job=D(280))
 
+    def test_overpayment_then_new_debit_with_recognized_revenue(self):
+        """ Create a debit transitioning this job into revenue recognition mode then
+            enter an overpayment. This tests that the extra portion of the overpayment
+            is not taxed and that it takes another debit equaling the overpaid amount
+            to get all taxes and income properly recognized.
+        """
+        debit_jobs([(self.job, D(480.00), Entry.FLAT_DEBIT)], recognize_revenue=True)
+        credit_jobs([(self.job, D(960.00), D(0), D(0))], D(960.00))
+        net, tax = extract_net_tax(D(480.00), TAX_RATE)
+        self.assert_balances(bank=D(960.00), income=net, tax=tax, job=D(-480))
+        debit_jobs([(self.job, D(480.00), Entry.FLAT_DEBIT)])
+        net, tax = extract_net_tax(D(960.00), TAX_RATE)
+        self.assert_balances(bank=D(960.00), income=net, tax=tax)
+
     def test_adjusted_payment_matching_debit_with_recognized_revenue(self):
         """ Payment entered to revenue recognized account along with an adjustment
             to exactly match the debit.
@@ -342,20 +357,13 @@ class TestCompletedContractAccountingMethod(TestCase):
         # customer overpays final invoice by $50
         credit_jobs([(self.job2, D(150.00), D(0), D(0))], D(150.00))
 
-        # TODO: Need to figure out what to do about the extra $50 in terms of taxes.
-        # Credits after final invoice don't create new tax obligation (because it was
-        # created when the final invoice was created) but in the case of overpayment
-        # on final invoice we are getting paid but not recording taxes...
-        # I'm almost thinking we need to figure out the exact amount of overpayment
-        # and do the tax calculation on that portion.... these tests will have to be fixed.
+        # overpayment only affects the job balance, income/tax are unchanged
         self.assert_balances(bank=D(660.00), job=D(0.00), income=net, tax=tax)
         self.assert_balances(bank=D(660.00), job=D(-50.00), income=net, tax=tax, switch_to_job=self.job2)
 
         # refund customer the overpayment
         refund_jobs([(self.job2, D(50.00))], [])
 
-        # If the above tax calculation is done on the excess $50, then it also needs to be undone
-        # when a refund is made, these tests will need to be updated.
         self.assert_balances(bank=D(610.00), job=D(0), income=net, tax=tax)
         self.assert_balances(bank=D(610.00), job=D(0), income=net, tax=tax, switch_to_job=self.job2)
 

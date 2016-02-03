@@ -216,11 +216,12 @@ class StationaryCanvas(canvas.Canvas):
 
 class NumberedCanvas(canvas.Canvas):
 
-    def __init__(self, *args, page_number_x, page_number_y, **kwargs):
+    def __init__(self, *args, page_number_x, page_number_y, page_number_y_next, **kwargs):
         super().__init__(*args, **kwargs)
         self._saved_page_states = []
         self.page_number_x = page_number_x
         self.page_number_y = page_number_y
+        self.page_number_y_next = page_number_y_next
 
     def showPage(self):
         """ Instead of 'showing' the page we save the render state for later. """
@@ -238,8 +239,12 @@ class NumberedCanvas(canvas.Canvas):
 
     def draw_page_number(self, page_count):
         self.setFont(font.normal, 10)
-        self.drawRightString(self.page_number_x, self.page_number_y,
-                             _("Page {} of {}").format(self._pageNumber, page_count))
+        if self._pageNumber == 1:
+            self.drawRightString(self.page_number_x, self.page_number_y - 20,
+                                 _("Page {} of {}").format(self._pageNumber, page_count))
+        else:
+            self.drawRightString(self.page_number_x, self.page_number_y_next - 20,
+                                 _("Page {} of {}").format(self._pageNumber, page_count))
 
 
 class LetterheadCanvas(StationaryCanvas):
@@ -354,20 +359,22 @@ class NumberedSystoriDocument(BaseDocTemplate):
             document_unit = getattr(units, letterhead.document_unit)
             frame_x = float(letterhead.left_margin) * document_unit
             frame_y = float(letterhead.bottom_margin) * document_unit
+            frame_y_next = float(letterhead.bottom_margin_next) * document_unit
             frame_width = self.width - float(letterhead.left_margin+letterhead.right_margin) * document_unit
             frame_height_first = self.height-float(letterhead.top_margin+letterhead.bottom_margin)*document_unit
-            frame_height_later = self.height-float(letterhead.top_margin_next+letterhead.bottom_margin)*document_unit
+            frame_height_later = self.height-float(letterhead.top_margin_next+letterhead.bottom_margin_next)*document_unit
             padding = dict.fromkeys(['leftPadding', 'bottomPadding', 'rightPadding', 'topPadding'], 0)
         else:
             frame_x = 25
             frame_y = 25
+            frame_y_next = 25
             frame_width = self.width - 50
             frame_height_first = frame_height_later = self.height - 50
             padding = dict.fromkeys(['leftPadding', 'bottomPadding', 'rightPadding', 'topPadding'], 6)
 
         # Frame(x, y, width, height, padding...)
         frame_first = Frame(frame_x, frame_y, frame_width, frame_height_first, **padding)
-        frame_later = Frame(frame_x, frame_y, frame_width, frame_height_later, **padding)
+        frame_later = Frame(frame_x, frame_y_next, frame_width, frame_height_later, **padding)
 
         self.addPageTemplates([
             PageTemplate(id='First', frames=frame_first, onPage=self.onFirstPage, pagesize=self.pagesize, autoNextPageTemplate=True),
@@ -375,8 +382,10 @@ class NumberedSystoriDocument(BaseDocTemplate):
         ])
 
         def page_number_canvas_maker(*args, **kwargs):
+            # Hand over Margins to NumberedCanvas
             kwargs['page_number_x'] = frame_x + frame_width
-            kwargs['page_number_y'] = frame_y - 25
+            kwargs['page_number_y'] = frame_y
+            kwargs['page_number_y_next'] = frame_y_next
             return canvasmaker(*args, **kwargs)
 
         super().build(flowables, canvasmaker=page_number_canvas_maker)

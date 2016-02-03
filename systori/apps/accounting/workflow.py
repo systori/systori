@@ -139,15 +139,13 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
 
         if gross > 0:
 
-            # extract the income and tax part from the payment
-            net, tax = extract_net_tax(gross, TAX_RATE)
-
             # credit the customer account (asset), decreasing their balance
             # (-) "bad thing", customer owes us less money
             transaction.credit(job.account, gross, entry_type=Entry.PAYMENT, job=job, tax_rate=TAX_RATE)
 
             if not job.is_revenue_recognized:
-                # Accounting prior to final invoice has a bunch more steps involved.
+                # extract the income and tax part from the payment
+                net, tax = extract_net_tax(gross, TAX_RATE)
 
                 # debit the promised payments account (liability), decreasing the liability
                 # (-) "good thing", customer paying debt reduces liability

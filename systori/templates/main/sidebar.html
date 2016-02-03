@@ -1,20 +1,22 @@
 {% load i18n %}
 
 <ul class="nav nav-sidebar">
-  <li {% if not section %}class="active"{% endif %}><a href="/">{% trans 'Dashboard' %}</a></li>
-  <li {% if section == 'projects' %}class="active"{% endif %}><a href="{% url 'projects' %}">{% trans 'Projects' %}</a>
-  </li>
-  <li {% if section == 'templates' %}class="active"{% endif %}><a
-      href="{% url 'templates' %}">{% trans 'Templates' %}</a></li>
+  <li {% if not section %}class="active"{% endif %}><a
+      href="/">{% trans 'Dashboard' %}</a></li>
+  <li {% if section == 'projects' %}class="active"{% endif %}><a
+      href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
   <li {% if section == 'directory' %}class="active"{% endif %}><a
       href="{% url 'directory' %}">{% trans 'Directory' %}</a></li>
   <li {% if section == 'equipment' %}class="active"{% endif %}><a
       href="{% url 'equipment.list' %}">{% trans 'Equipment' %}</a></li>
   <li {% if section == 'dailyplans' %}class="active"{% endif %}><a
       href="{% url 'day_based_overview' %}">{% trans 'Daily Plans' %}</a></li>
-  <li {% if section == 'accounts' %}class="active"{% endif %}><a
-      href="{% url 'accounts' %}">{% trans 'Accounts' %}</a>
+  <li {% if section == 'progressreports' %}class="active"{% endif %}><a
+      href="{% url 'project.progress.all' %}">{% trans 'Progress Reports' %}</a></li>
+  <li {% if section == 'templates' %}class="active"{% endif %}><a
+      href="{% url 'templates' %}">{% trans 'Templates' %}</a></li>
   <li {% if section == 'users' %}class="active"{% endif %}><a
-      href="{% url 'users' %}">{% trans 'Users' %}</a>
-  </li>
+      href="{% url 'users' %}">{% trans 'Users' %}</a></li>
+  <li {% if section == 'accounts' %}class="active"{% endif %}><a
+      href="{% url 'accounts' %}">{% trans 'Accounts' %}</a></li>
 </ul>
