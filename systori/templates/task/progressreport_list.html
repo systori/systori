@@ -18,12 +18,17 @@
         {% for report in progressreport_list %}
           <tr>
             <td>{{ report.timestamp|localize }}</td>
-            <td>{{ report.task.taskgroup.job.project }}</td>
+            <td><a href="{% url 'project.view' report.task.taskgroup.job.project.id %}">{{ report.task.taskgroup.job.project }}</a></td>
             <td>{{ report.access.user.get_full_name }}</td>
-            <td>{{ report.task|truncatechars:60 }}</td>
+            <td>
+              <a target="_blank" href="{% url 'tasks' report.task.taskgroup.job.project.id report.task.taskgroup.job.id %}">{{ report.task|truncatechars:60 }}</a>
+            </td>
             <td style="text-align: right;">{{ report.complete|ubrdecimal }}</td>
             <td>{{ report.task.unit }}</td>
           </tr>
+            {% if report.comment %}
+              <tr><td style="text-align:right;">{% trans 'comment' %}</td><td colspan="5">{{ report.comment }}</td></tr>
+            {% endif %}
         {% endfor %}
         {% if is_paginated %}
           <ul class="pagination">
