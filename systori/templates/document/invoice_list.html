@@ -1,7 +1,7 @@
 {% extends "project.html" %}
 {% load i18n l10n customformatting %}
 
-{% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
+{% block sidebar %}{% include "main/sidebar.html" with section='invoices' %}{% endblock %}
 
 {% block content %}
 
@@ -10,11 +10,12 @@
     <table class="table table-striped">
       <thead>
       <tr>
-        <th>{% trans "Date" %}</th>
-        <th>{% trans "Status" %}</th>
-        <th>{% trans "Invoice No." %}</th>
         <th>{% trans "Project" %}</th>
         <th>{% trans "Progress" %}</th>
+        <th>{% trans "Payments" %}</th>
+        <th>{% trans "Date" %}</th>
+        <th>{% trans "Invoice No." %}</th>
+        <th>{% trans "Status" %}</th>
         <th>{% trans "Amount" %}</th>
         <th>{% trans "Parent" %}</th>
       </tr>
@@ -22,20 +23,21 @@
       <tbody>
       {% for year, months in invoice_group.items %}
         {% for month_number, month in months.items %}
-          <tr><td colspan="7" class="bg-primary">{{ year }} - {{ month_number|month_from_int }}</td></tr>
+          <tr><td colspan="8" class="bg-primary">{{ year }} - {{ month_number|month_from_int }}</td></tr>
           {% for invoice in month.invoices %}
             <tr>
-              <td>{{ invoice.document_date }}</td>
-              <td>{{ invoice.get_status_display }}</td>
-              <td>{{ invoice.invoice_no }}</td>
               <td>{{ invoice.project }}</td>
               <td style="text-align:right;">{{ invoice.debited_gross|money }}</td>
+              <td style="text-align:right;">{{ invoice.project.abs_payments|money }}</td>
+              <td>{{ invoice.document_date }}</td>
+              <td>{{ invoice.invoice_no }}</td>
+              <td>{{ invoice.get_status_display }}</td>
               <td style="text-align:right;"><b>{{ invoice.balance_gross|money }}</b></td>
               <td>{% if invoice.parent %}<span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{ invoice.parent.invoice_no }}{% else %}---{% endif %}</td>
             </tr>
           {% endfor %}
             <tr>
-              <td colspan="5" style="text-align:right;">Summe {{ month_number|month_from_int }}:</td><td style="text-align:right;">{{ month.total|money }}</td><td></td>
+              <td colspan="6" style="text-align:right;">Summe {{ month_number|month_from_int }}:</td><td style="text-align:right;">{{ month.total|money }}</td><td></td>
             </tr>
         {% endfor %}
       {% endfor %}
