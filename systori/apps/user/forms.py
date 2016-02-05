@@ -54,7 +54,7 @@ class AccessForm(ModelForm):
 
     class Meta:
         model = Access
-        fields = ['is_active', 'is_staff', 'is_foreman', 'is_laborer']
+        fields = ['is_active', 'is_owner', 'is_staff', 'is_foreman', 'is_laborer']
 
 
 class LanguageForm(ModelForm):

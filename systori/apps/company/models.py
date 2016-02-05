@@ -17,6 +17,9 @@ class Access(models.Model):
     class Meta:
         unique_together = ("company", "user")
 
+    is_owner = models.BooleanField(_('Owner'), default=False,
+                                   help_text=_('Owner has full and unlimited Access to Systori.'))
+
     is_staff = models.BooleanField(_('staff status'), default=False,
                                    help_text=_('Designates whether the user can log into this admin '
                                                'site.'))
@@ -41,8 +44,12 @@ class Access(models.Model):
         return cls(user=user, company=company, is_staff=True, is_active=True)
 
     @property
+    def has_owner(self):
+        return self.is_owner or self.user.is_superuser
+
+    @property
     def has_staff(self):
-        return self.is_staff or self.user.is_superuser
+        return self.is_staff or self.has_owner
 
     @property
     def has_foreman(self):
