@@ -9,6 +9,18 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 
 from ..company.models import Access
 
+
+def owner_auth(view):
+    def is_authorized(request):
+        if not request.user.is_authenticated():
+            return False
+        if request.access.has_owner:
+            return True
+        raise PermissionDenied
+
+    return user_passes_test(is_authorized)(view)
+
+
 def office_auth(view):
     def is_authorized(request):
         if not request.user.is_authenticated():

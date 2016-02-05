@@ -9,12 +9,19 @@
       href="{% url 'directory' %}">{% trans 'Directory' %}</a></li>
   <li {% if section == 'equipment' %}class="active"{% endif %}><a
       href="{% url 'equipment.list' %}">{% trans 'Equipment' %}</a></li>
+
   <li {% if section == 'dailyplans' %}class="active"{% endif %}><a
       href="{% url 'day_based_overview' %}">{% trans 'Daily Plans' %}</a></li>
+
   <li {% if section == 'progressreports' %}class="active"{% endif %}><a
       href="{% url 'project.progress.all' %}">{% trans 'Progress Reports' %}</a></li>
+
+  {% if access.has_owner %}<li {% if section == 'invoices' %}class="active"{% endif %}><a
+      href="{% url 'invoices' %}">{% trans 'Invoices' %}</a></li>{% endif %}
+
   <li {% if section == 'templates' %}class="active"{% endif %}><a
       href="{% url 'templates' %}">{% trans 'Templates' %}</a></li>
+
   <li {% if section == 'users' %}class="active"{% endif %}><a
       href="{% url 'users' %}">{% trans 'Users' %}</a></li>
   <li {% if section == 'accounts' %}class="active"{% endif %}><a

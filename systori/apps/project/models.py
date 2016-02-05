@@ -299,6 +299,13 @@ class Project(models.Model):
         return amount
 
     @property
+    def abs_payments(self):
+        amount = Decimal(0.0)
+        for job in self.jobs.all():
+            amount += job.account.payments().sum
+        return abs(amount)
+
+    @property
     def complete_percent(self):
         return round(self.billable_total / self.estimate_total * 100) if self.estimate_total else 0
 
