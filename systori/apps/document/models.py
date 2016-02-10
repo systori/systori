@@ -259,6 +259,17 @@ class Letterhead(models.Model):
 
     debug = models.BooleanField(_("Debug Mode"), default=True)
 
+    OPEN_SANS = "OpenSans"
+    DROID_SERIF = "droid-serif"
+    TINOS = "tinos"
+    STYLESHEET = (
+        (OPEN_SANS, "Open Sans"),
+        (DROID_SERIF, "Droid Serif"),
+        (TINOS, "Tinos")
+    )
+    stylesheet = models.CharField(_('Font type'), max_length=15,
+                                     choices=STYLESHEET, default=OPEN_SANS)
+
     def __str__(self):
         return self.name
 

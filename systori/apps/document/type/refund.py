@@ -7,7 +7,7 @@ from reportlab.platypus import Paragraph, Spacer, KeepTogether
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
-from .style import NumberedSystoriDocument, stylesheet, force_break, p, b
+from .style import NumberedSystoriDocument, stylesheets, force_break, p, b
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import calculate_table_width_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
@@ -35,11 +35,11 @@ def render(refund, letterhead, format):
 
             Spacer(0, 6*mm),
 
-            Paragraph(force_break(refund['header']), stylesheet['Normal']),
+            Paragraph(force_break(refund['header']), stylesheets['OpenSans']['Normal']),
 
             Spacer(0, 4*mm),
 
-            KeepTogether(Paragraph(force_break(refund['footer']), stylesheet['Normal']))
+            KeepTogether(Paragraph(force_break(refund['footer']), stylesheets['OpenSans']['Normal']))
 
         ]
 

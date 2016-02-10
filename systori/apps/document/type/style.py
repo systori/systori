@@ -1,126 +1,4 @@
-from decimal import Decimal
-from . import font
-
-from reportlab.lib.styles import StyleSheet1, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
-
-stylesheet = StyleSheet1()
-
-stylesheet.add(ParagraphStyle(name='Small',
-                              fontName=font.normal,
-                              fontSize=7,
-                              leading=8.4)
-               )
-
-stylesheet.add(ParagraphStyle(name='Normal',
-                              fontName=font.normal,
-                              fontSize=10,
-                              leading=12)
-               )
-
-stylesheet.add(ParagraphStyle(name='NormalRight',
-                              parent=stylesheet['Normal'],
-                              alignment=TA_RIGHT)
-               )
-
-stylesheet.add(ParagraphStyle(name='Bold',
-                              fontName=font.bold,
-                              fontSize=10,
-                              leading=12)
-               )
-
-stylesheet.add(ParagraphStyle(name='BoldRight',
-                              parent=stylesheet['Bold'],
-                              alignment=TA_RIGHT)
-               )
-
-stylesheet.add(ParagraphStyle(name='BodyText',
-                              parent=stylesheet['Normal'],
-                              spaceBefore=6)
-               )
-
-stylesheet.add(ParagraphStyle(name='Italic',
-                              parent=stylesheet['BodyText'],
-                              fontName=font.italic)
-               )
-
-stylesheet.add(ParagraphStyle(name='Heading1',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=18,
-                              leading=22,
-                              spaceAfter=6),
-               alias='h1')
-
-stylesheet.add(ParagraphStyle(name='Title',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=18,
-                              leading=22,
-                              alignment=TA_CENTER,
-                              spaceAfter=6),
-               alias='title')
-
-stylesheet.add(ParagraphStyle(name='Heading2',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=14,
-                              leading=18,
-                              spaceBefore=12,
-                              spaceAfter=6),
-               alias='h2')
-
-stylesheet.add(ParagraphStyle(name='Heading3',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=12,
-                              leading=14,
-                              spaceBefore=12,
-                              spaceAfter=6),
-               alias='h3')
-
-stylesheet.add(ParagraphStyle(name='Heading4',
-                              parent=stylesheet['Normal'],
-                              fontName=font.boldItalic,
-                              fontSize=10,
-                              leading=12,
-                              spaceBefore=10,
-                              spaceAfter=4),
-               alias='h4')
-
-stylesheet.add(ParagraphStyle(name='Heading5',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=9,
-                              leading=10.8,
-                              spaceBefore=8,
-                              spaceAfter=4),
-               alias='h5')
-
-stylesheet.add(ParagraphStyle(name='Heading6',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=7,
-                              leading=8.4,
-                              spaceBefore=6,
-                              spaceAfter=2),
-               alias='h6')
-
-stylesheet.add(ParagraphStyle(name='Bullet',
-                              parent=stylesheet['Normal'],
-                              firstLineIndent=0,
-                              spaceBefore=3),
-               alias='bu')
-
-stylesheet.add(ParagraphStyle(name='Definition',
-                              parent=stylesheet['Normal'],
-                              firstLineIndent=0,
-                              leftIndent=36,
-                              bulletIndent=0,
-                              spaceBefore=6,
-                              bulletFontName=font.boldItalic),
-               alias='df')
-
+from .stylesheets import stylesheets
 
 import os.path
 from django.conf import settings
@@ -171,24 +49,35 @@ def force_break(txt):
     return txt.replace('\n', '<br />')
 
 
-def p(txt):
-    return Paragraph(txt, stylesheet['Normal'])
+def p(txt, stylesheet):
+    return Paragraph(txt, stylesheets[stylesheet]['Normal'])
 
 
-def b(txt):
-    return Paragraph(txt, stylesheet['Bold'])
+def b(txt, stylesheet):
+    return Paragraph(txt, stylesheets[stylesheet]['Bold'])
 
-def br(txt):
-    return Paragraph(str(txt), stylesheet['BoldRight'])
 
-def nr(txt):
-    return Paragraph(str(txt), stylesheet['NormalRight'])
+def br(txt, stylesheet):
+    return Paragraph(str(txt), stylesheets[stylesheet]['BoldRight'])
 
-def heading_and_date(heading, date, available_width, debug=False):
+
+def nr(txt, stylesheet):
+    return Paragraph(str(txt), stylesheets[stylesheet]['NormalRight'])
+
+
+def fontName_bold(stylesheet):
+    return stylesheets[stylesheet]['Bold'].fontName
+
+
+def fontName_normal(stylesheet):
+    return stylesheets[stylesheet]['Normal'].fontName
+
+
+def heading_and_date(heading, date, available_width, stylesheet, debug=False):
 
     t = TableFormatter([0, 1], available_width, debug=debug)
     t.style.append(('GRID', (0, 0), (-1, -1), 1, colors.transparent))
-    t.row(Paragraph(heading, stylesheet['h2']), Paragraph(date, stylesheet['NormalRight']))
+    t.row(Paragraph(heading, stylesheets[stylesheet]['h2']), Paragraph(date, stylesheets[stylesheet]['NormalRight']))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
     t.style.append(('RIGHTPADDING', (0,0), (-1,-1), 0))
 
@@ -238,7 +127,7 @@ class NumberedCanvas(canvas.Canvas):
         super().save()
 
     def draw_page_number(self, page_count):
-        self.setFont(font.normal, 10)
+        self.setFont('OpenSans-Regular', 10)
         if self._pageNumber == 1:
             self.drawRightString(self.page_number_x, self.page_number_y - 20,
                                  _("Page {} of {}").format(self._pageNumber, page_count))
@@ -396,7 +285,7 @@ class ContinuationTable(Table):
     def draw(self):
 
         self.canv.saveState()
-        self.canv.setFont(font.italic, 10)
+        self.canv.setFont('OpenSans-Italic', 10)
 
         if getattr(self, '_splitCount', 0) > 1:
             #self.canv.drawString(0, self._height + 5*mm, '... '+_('Continuation'))
@@ -428,7 +317,7 @@ class ContinuationTable(Table):
 
 class TableFormatter:
 
-    font = font.normal
+    font = 'OpenSans-Regular'
     font_size = 10
 
     def __init__(self, columns, width, pad=5*mm, trim_ends=True, debug=False):
@@ -496,20 +385,21 @@ class TableFormatter:
         self.style.append(('NOSPLIT', (0, self._row_num+n-1), (0, self._row_num)))
 
 
-def get_address_label(document):
+def get_address_label(document, stylesheet):
     if document.get('business') is '':
         return Paragraph(force_break(document.get('address_label', None) or """\
         {salutation} {first_name} {last_name}
         {address}
         {postal_code} {city}
-        """.format(**document)), stylesheet['Normal'])
+        """.format(**document)), stylesheets[stylesheet]['Normal'])
     else:
         return Paragraph(force_break(document.get('address_label', None) or """\
         {business}
         {salutation} {first_name} {last_name}
         {address}
         {postal_code} {city}
-        """.format(**document)), stylesheet['Normal'])
+        """.format(**document)), stylesheets[stylesheet]['Normal'])
+
 
 def get_address_label_spacer(document):
     if document.get('business') is '':

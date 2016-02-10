@@ -15,7 +15,7 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 from systori.apps.accounting.report import prepare_transaction_report, generate_transaction_table
 from systori.apps.accounting.constants import TAX_RATE
 
-from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b
+from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, stylesheets, force_break, p, b
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import calculate_table_width_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
@@ -223,11 +223,11 @@ def render(invoice, letterhead, format):
 
             Spacer(0, 6*mm),
 
-            Paragraph(_("Invoice No.")+" "+invoice['invoice_no'], stylesheet['NormalRight']),
+            Paragraph(_("Invoice No.") +" " + invoice['invoice_no'], stylesheets['OpenSans']['NormalRight']),
             Paragraph(_("Please indicate the correct invoice number on your payment."),
-                      ParagraphStyle('', parent=stylesheet['Small'], alignment=TA_RIGHT)),
+                      ParagraphStyle('', parent=stylesheets['OpenSans']['Small'], alignment=TA_RIGHT)),
 
-            Paragraph(force_break(invoice['header']), stylesheet['Normal']),
+            Paragraph(force_break(invoice['header']), stylesheets['OpenSans']['Normal']),
 
             Spacer(0, 4*mm),
 
@@ -235,7 +235,7 @@ def render(invoice, letterhead, format):
 
             Spacer(0, 4*mm),
 
-            KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal']))
+            KeepTogether(Paragraph(force_break(invoice['footer']), stylesheets['OpenSans']['Normal']))
 
         ]
 
@@ -245,9 +245,9 @@ def render(invoice, letterhead, format):
 
             PageBreak(),
 
-            Paragraph(invoice_date, stylesheet['NormalRight']),
+            Paragraph(invoice_date, stylesheets['OpenSans']['NormalRight']),
 
-            Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
+            Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheets['OpenSans']['h2']),
 
             Spacer(0, 4*mm),
 

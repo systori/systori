@@ -17,20 +17,39 @@ font_names = [
     "OpenSans-Light",
     "OpenSans-Regular",
     "OpenSans-SemiboldItalic",
-    "OpenSans-Semibold"
+    "OpenSans-Semibold",
+    "droid-serif.bold-italic",
+    "droid-serif.bold",
+    "droid-serif.italic",
+    "droid-serif.regular",
+    "Tinos-700",
+    "Tinos-700italic",
+    "Tinos-italic",
+    "Tinos-regular"
 ]
 for font_name in font_names:
     pdfmetrics.registerFont(TTFont(font_name, font_name+'.ttf'))
 
-normal = 'OpenSans-Regular'
-bold = 'OpenSans-Bold'
-italic = 'OpenSans-Italic'
-boldItalic = 'OpenSans-BoldItalic'
-
 pdfmetrics.registerFontFamily(
     'OpenSans',
-    normal=normal,
-    bold=bold,
-    italic=italic,
-    boldItalic=boldItalic
+    normal='OpenSans-Regular',
+    bold='OpenSans-Bold',
+    italic='OpenSans-Italic',
+    boldItalic='OpenSans-BoldItalic'
+)
+
+pdfmetrics.registerFontFamily(
+    'Droid-Serif',
+    normal="droid-serif.regular",
+    bold="droid-serif.bold",
+    italic="droid-serif.italic",
+    boldItalic="droid-serif.bold-italic"
+)
+
+pdfmetrics.registerFontFamily(
+    'Tinos',
+    normal="Tinos-regular",
+    bold="Tinos-700",
+    italic="Tinos-italic",
+    boldItalic="Tinos-700italic"
 )
