@@ -8,7 +8,7 @@ from reportlab.platypus import Paragraph, Spacer
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
-from .style import stylesheets, NumberedLetterheadCanvas, NumberedSystoriDocument
+from .style import fonts, NumberedLetterheadCanvas, NumberedSystoriDocument
 from .style import force_break, heading_and_date
 from .style import calculate_table_width_and_pagesize
 
@@ -29,21 +29,21 @@ def render(letterhead):
             Herr Max Mustermann
             Musterstraße 123
             65321 Musterhausen
-            """), stylesheets['OpenSans']['Normal']),
+            """), fonts['OpenSans']['Normal']),
             Spacer(0, 25*mm),
 
             heading_and_date(_("Invoice"), invoice_date, table_width, debug=letterhead.debug),
             Spacer(0, 4*mm),
 
-            Paragraph(_("Invoice No.") +" 00000815", stylesheets['OpenSans']['NormalRight']),
+            Paragraph(_("Invoice No.") +" 00000815", fonts['OpenSans']['NormalRight']),
             Paragraph(_("Please indicate the correct invoice number on your payment."),
-                      ParagraphStyle('', parent=stylesheets['OpenSans']['Small'], alignment=TA_RIGHT)),
+                      ParagraphStyle('', parent=fonts['OpenSans']['Small'], alignment=TA_RIGHT)),
             Spacer(0, 10*mm),
-            Paragraph(force_break('Dear Sir or Madam...'), stylesheets['OpenSans']['Normal']),
+            Paragraph(force_break('Dear Sir or Madam...'), fonts['OpenSans']['Normal']),
 
             Spacer(0, 4*mm),
-            Paragraph(force_break(lorem_100), stylesheets['OpenSans']['Normal']),
-            Paragraph(force_break(lorem_100*17), stylesheets['OpenSans']['Normal']),
+            Paragraph(force_break(lorem_100), fonts['OpenSans']['Normal']),
+            Paragraph(force_break(lorem_100*17), fonts['OpenSans']['Normal']),
             ])
 
         doc.build(flowables, NumberedLetterheadCanvas.factory(letterhead), letterhead)

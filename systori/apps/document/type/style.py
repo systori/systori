@@ -1,4 +1,4 @@
-from .stylesheets import stylesheets
+from .font import fonts
 
 import os.path
 from django.conf import settings
@@ -49,35 +49,39 @@ def force_break(txt):
     return txt.replace('\n', '<br />')
 
 
-def p(txt, stylesheet):
-    return Paragraph(txt, stylesheets[stylesheet]['Normal'])
+def p(txt, font):
+    return Paragraph(txt, fonts[font]['Normal'])
 
 
-def b(txt, stylesheet):
-    return Paragraph(txt, stylesheets[stylesheet]['Bold'])
+def b(txt, font):
+    return Paragraph(txt, fonts[font]['Bold'])
 
 
-def br(txt, stylesheet):
-    return Paragraph(str(txt), stylesheets[stylesheet]['BoldRight'])
+def br(txt, font):
+    return Paragraph(str(txt), fonts[font]['BoldRight'])
 
 
-def nr(txt, stylesheet):
-    return Paragraph(str(txt), stylesheets[stylesheet]['NormalRight'])
+def nr(txt, font):
+    return Paragraph(str(txt), fonts[font]['NormalRight'])
 
 
-def fontName_bold(stylesheet):
-    return stylesheets[stylesheet]['Bold'].fontName
+def font_name_bold(font):
+    return fonts[font]['Bold'].fontName
 
 
-def fontName_normal(stylesheet):
-    return stylesheets[stylesheet]['Normal'].fontName
+def font_name_normal(font):
+    return fonts[font]['Normal'].fontName
 
 
-def heading_and_date(heading, date, available_width, stylesheet, debug=False):
+def font_name_italic(font):
+    return fonts[font]['Italic'].fontName
 
-    t = TableFormatter([0, 1], available_width, debug=debug)
+
+def heading_and_date(heading, date, available_width, font, debug=False):
+
+    t = TableFormatter([0, 1], available_width, font, debug=debug)
     t.style.append(('GRID', (0, 0), (-1, -1), 1, colors.transparent))
-    t.row(Paragraph(heading, stylesheets[stylesheet]['h2']), Paragraph(date, stylesheets[stylesheet]['NormalRight']))
+    t.row(Paragraph(heading, fonts[font]['h2']), Paragraph(date, fonts[font]['NormalRight']))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
     t.style.append(('RIGHTPADDING', (0,0), (-1,-1), 0))
 
@@ -105,12 +109,13 @@ class StationaryCanvas(canvas.Canvas):
 
 class NumberedCanvas(canvas.Canvas):
 
-    def __init__(self, *args, page_number_x, page_number_y, page_number_y_next, **kwargs):
+    def __init__(self, *args, page_number_x, page_number_y, page_number_y_next, letterhead_font, **kwargs):
         super().__init__(*args, **kwargs)
         self._saved_page_states = []
         self.page_number_x = page_number_x
         self.page_number_y = page_number_y
         self.page_number_y_next = page_number_y_next
+        self.letterhead_font = letterhead_font
 
     def showPage(self):
         """ Instead of 'showing' the page we save the render state for later. """
@@ -127,7 +132,7 @@ class NumberedCanvas(canvas.Canvas):
         super().save()
 
     def draw_page_number(self, page_count):
-        self.setFont('OpenSans-Regular', 10)
+        self.setFont(font_name_normal(self.letterhead_font), 10)
         if self._pageNumber == 1:
             self.drawRightString(self.page_number_x, self.page_number_y - 20,
                                  _("Page {} of {}").format(self._pageNumber, page_count))
@@ -275,6 +280,7 @@ class NumberedSystoriDocument(BaseDocTemplate):
             kwargs['page_number_x'] = frame_x + frame_width
             kwargs['page_number_y'] = frame_y
             kwargs['page_number_y_next'] = frame_y_next
+            kwargs['letterhead_font'] = letterhead.font
             return canvasmaker(*args, **kwargs)
 
         super().build(flowables, canvasmaker=page_number_canvas_maker)
@@ -285,7 +291,7 @@ class ContinuationTable(Table):
     def draw(self):
 
         self.canv.saveState()
-        self.canv.setFont('OpenSans-Italic', 10)
+        self.canv.setFont(font_name_italic(self.canv.letterhead_font), 10)
 
         if getattr(self, '_splitCount', 0) > 1:
             #self.canv.drawString(0, self._height + 5*mm, '... '+_('Continuation'))
@@ -316,14 +322,13 @@ class ContinuationTable(Table):
 
 
 class TableFormatter:
-
-    font = 'OpenSans-Regular'
     font_size = 10
 
-    def __init__(self, columns, width, pad=5*mm, trim_ends=True, debug=False):
+    def __init__(self, columns, width, font, pad=5*mm, trim_ends=True, debug=False):
         assert columns.count(0) == 1, "Must have exactly one stretch column."
         self._maximums = columns.copy()
         self._available_width = width
+        self.font = font_name_normal(font)
         self._pad = pad
         self._trim_ends = trim_ends
         self.columns = columns
@@ -385,20 +390,20 @@ class TableFormatter:
         self.style.append(('NOSPLIT', (0, self._row_num+n-1), (0, self._row_num)))
 
 
-def get_address_label(document, stylesheet):
+def get_address_label(document, font):
     if document.get('business') is '':
         return Paragraph(force_break(document.get('address_label', None) or """\
         {salutation} {first_name} {last_name}
         {address}
         {postal_code} {city}
-        """.format(**document)), stylesheets[stylesheet]['Normal'])
+        """.format(**document)), fonts[font]['Normal'])
     else:
         return Paragraph(force_break(document.get('address_label', None) or """\
         {business}
         {salutation} {first_name} {last_name}
         {address}
         {postal_code} {city}
-        """.format(**document)), stylesheets[stylesheet]['Normal'])
+        """.format(**document)), fonts[font]['Normal'])
 
 
 def get_address_label_spacer(document):

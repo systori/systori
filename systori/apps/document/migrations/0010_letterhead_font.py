@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='letterhead',
-            name='stylesheet',
-            field=models.CharField(default='OpenSans', max_length=15, choices=[('OpenSans', 'Open Sans'), ('droid-serif', 'Droid Serif'), ('tinos', 'Tinos')], verbose_name='Font type'),
+            name='font',
+            field=models.CharField(verbose_name='Font type', choices=[('OpenSans', 'Open Sans'), ('DroidSerif', 'Droid Serif'), ('Tinos', 'Tinos')], default='OpenSans', max_length=15),
         ),
     ]
