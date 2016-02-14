@@ -267,7 +267,7 @@ class Letterhead(models.Model):
         (DROID_SERIF, "Droid Serif"),
         (TINOS, "Tinos")
     )
-    font = models.CharField(_('Font type'), max_length=15,
+    font = models.CharField(_('Font'), max_length=15,
                             choices=FONT, default=OPEN_SANS)
 
     def __str__(self):

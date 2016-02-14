@@ -3,11 +3,10 @@ from django.conf import settings
 from reportlab import rl_config
 from reportlab.lib.styles import StyleSheet1, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT
-
-rl_config.TTFSearchPath = [os.path.join(settings.BASE_DIR, 'static/fonts')]
-
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+
+rl_config.TTFSearchPath = [os.path.join(settings.BASE_DIR, 'static/fonts')]
 
 font_families = [
     "OpenSans",
@@ -129,3 +128,29 @@ for font_name in font_families:
                                         spaceBefore=6,
                                         bulletFontName='{}-BoldItalic'.format(font_name)),
                          alias='df')
+
+
+class FontManager:
+
+    def __init__(self, font):
+        self.font = fonts[font]
+
+    @property
+    def bold(self):
+        return self.font.byName.get('Bold')
+
+    @property
+    def bold_right(self):
+        return self.font.byName.get('BoldRight')
+
+    @property
+    def normal(self):
+        return self.font.byName.get('Normal')
+
+    @property
+    def normal_right(self):
+        return self.font.byName.get('NormalRight')
+
+    @property
+    def h2(self):
+        return self.font.byName.get('Heading2')

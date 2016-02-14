@@ -50,38 +50,26 @@ def force_break(txt):
 
 
 def p(txt, font):
-    return Paragraph(txt, fonts[font]['Normal'])
+    return Paragraph(txt, font.normal)
 
 
 def b(txt, font):
-    return Paragraph(txt, fonts[font]['Bold'])
+    return Paragraph(txt, font.bold)
 
 
 def br(txt, font):
-    return Paragraph(str(txt), fonts[font]['BoldRight'])
+    return Paragraph(str(txt), font.bold_right)
 
 
 def nr(txt, font):
-    return Paragraph(str(txt), fonts[font]['NormalRight'])
-
-
-def font_name_bold(font):
-    return fonts[font]['Bold'].fontName
-
-
-def font_name_normal(font):
-    return fonts[font]['Normal'].fontName
-
-
-def font_name_italic(font):
-    return fonts[font]['Italic'].fontName
+    return Paragraph(str(txt), font.normal_right)
 
 
 def heading_and_date(heading, date, available_width, font, debug=False):
 
     t = TableFormatter([0, 1], available_width, font, debug=debug)
     t.style.append(('GRID', (0, 0), (-1, -1), 1, colors.transparent))
-    t.row(Paragraph(heading, fonts[font]['h2']), Paragraph(date, fonts[font]['NormalRight']))
+    t.row(Paragraph(heading, font.h2), Paragraph(date, font.normal_right))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
     t.style.append(('RIGHTPADDING', (0,0), (-1,-1), 0))
 
@@ -132,7 +120,8 @@ class NumberedCanvas(canvas.Canvas):
         super().save()
 
     def draw_page_number(self, page_count):
-        self.setFont(font_name_normal(self.letterhead_font), 10)
+        self.setFont('OpenSans-Regular', 10)
+        #Todo: replace with letterhead font
         if self._pageNumber == 1:
             self.drawRightString(self.page_number_x, self.page_number_y - 20,
                                  _("Page {} of {}").format(self._pageNumber, page_count))
@@ -291,7 +280,8 @@ class ContinuationTable(Table):
     def draw(self):
 
         self.canv.saveState()
-        self.canv.setFont(font_name_italic(self.canv.letterhead_font), 10)
+        self.canv.setFont('OpenSans-Italic', 10)
+        #Todo: hand over font object and select font
 
         if getattr(self, '_splitCount', 0) > 1:
             #self.canv.drawString(0, self._height + 5*mm, '... '+_('Continuation'))
@@ -328,14 +318,14 @@ class TableFormatter:
         assert columns.count(0) == 1, "Must have exactly one stretch column."
         self._maximums = columns.copy()
         self._available_width = width
-        self.font = font_name_normal(font)
+        self.font = font.normal
         self._pad = pad
         self._trim_ends = trim_ends
         self.columns = columns
         self.lines = []
         self.style = [
             ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('FONTNAME', (0, 0), (-1, -1), self.font),
+            ('FONTNAME', (0, 0), (-1, -1), self.font.fontName),
             ('FONTSIZE', (0, 0), (-1, -1), self.font_size)
         ]
         if debug:
@@ -355,9 +345,9 @@ class TableFormatter:
 
     def string_width(self, txt):
         if isinstance(txt, str):
-            return stringWidth(txt, self.font, self.font_size)
+            return stringWidth(txt, self.font.fontName, self.font_size)
         else:
-            return stringWidth(txt.text, self.font, self.font_size)
+            return stringWidth(txt.text, self.font.fontName, self.font_size)
 
     def get_widths(self):
 
@@ -396,14 +386,14 @@ def get_address_label(document, font):
         {salutation} {first_name} {last_name}
         {address}
         {postal_code} {city}
-        """.format(**document)), fonts[font]['Normal'])
+        """.format(**document)), font.normal)
     else:
         return Paragraph(force_break(document.get('address_label', None) or """\
         {business}
         {salutation} {first_name} {last_name}
         {address}
         {postal_code} {city}
-        """.format(**document)), fonts[font]['Normal'])
+        """.format(**document)), font.normal)
 
 
 def get_address_label_spacer(document):
