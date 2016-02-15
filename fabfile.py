@@ -19,6 +19,8 @@ deploy_apps = {
 
 
 PROD_DUMP_FILE = 'systori.prod.dump'
+PROD_MEDIA_PATH = '/srv/systori/production'
+PROD_MEDIA_FILE = 'systori.media.tgz'
 
 
 def deploy(env_name='dev'):
@@ -263,3 +265,12 @@ def link_dart():
                 os.symlink(location, os.path.join('systori/dart/web/packages', package_name))
             except OSError, exc:
                 print exc
+
+
+def get_media():
+    with cd(PROD_MEDIA_PATH):
+        run('tar -cz media -f /tmp/' + PROD_MEDIA_FILE)
+    get('/tmp/' + PROD_MEDIA_FILE, PROD_MEDIA_FILE)
+    local('tar xfz ' + PROD_MEDIA_FILE)
+    local('rm ' + PROD_MEDIA_FILE)
+    run('rm /tmp/' + PROD_MEDIA_FILE)

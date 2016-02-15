@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.forms import AuthenticationForm as BaseAuthenticationForm
 from .models import *
 from ..company.models import Access
 
@@ -48,6 +49,10 @@ class UserForm(ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'password1', 'password2']
+
+
+class AuthenticationForm(BaseAuthenticationForm):
+    username = forms.CharField(max_length=254, initial='')
 
 
 class AccessForm(ModelForm):

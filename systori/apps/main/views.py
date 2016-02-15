@@ -1,13 +1,12 @@
 from datetime import date, timedelta
-from django.views.generic import View, TemplateView, ListView
-from django.contrib.auth.views import login
+from django.views.generic import View, TemplateView
 from django_mobile import get_flavour
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
-from ..field.utils import get_workday
 
 
 class OfficeDashboard(TemplateView):
@@ -38,7 +37,7 @@ class IndexView(View):
                 view = FieldDashboard.as_view()
             return view(request, *args, **kwargs)
         else:
-            return login(request, template_name="user/login.html")
+            return HttpResponseRedirect(reverse('login'))
 
 
 class DayBasedOverviewView(TemplateView):
