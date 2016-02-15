@@ -182,8 +182,8 @@ def render(proposal, letterhead, with_line_items, format):
 
             get_address_label_spacer(proposal),
 
-            heading_and_date(proposal.get('title') or _("Proposal"), proposal_date, table_width,
-                             font, debug=DEBUG_DOCUMENT),
+            heading_and_date(proposal.get('title') or _("Proposal"), proposal_date, font,
+                             table_width, debug=DEBUG_DOCUMENT),
 
             Spacer(0, 4*mm),
 

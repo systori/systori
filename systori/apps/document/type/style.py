@@ -65,7 +65,7 @@ def nr(txt, font):
     return Paragraph(str(txt), font.normal_right)
 
 
-def heading_and_date(heading, date, available_width, font, debug=False):
+def heading_and_date(heading, date, font, available_width, debug=False):
 
     t = TableFormatter([0, 1], available_width, font, debug=debug)
     t.style.append(('GRID', (0, 0), (-1, -1), 1, colors.transparent))
