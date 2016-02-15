@@ -134,7 +134,8 @@ DATABASES = {
 
 LANGUAGE_CODE = 'de'
 
-gettext_noop = lambda s: s
+
+def gettext_noop(s): return lambda s: s
 LANGUAGES = (
     ('de', gettext_noop('Deutsch')),
     ('en', gettext_noop('English')),
@@ -161,7 +162,7 @@ USE_THOUSAND_SEPARATOR = True
 STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, '../static'))
 STATIC_URL = '/static/'
 
-MEDIA_ROOT = os.path.normpath(os.path.join(BASE_DIR, 'media'))
+MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, 'media'))
 MEDIA_URL = ''
 
 STATICFILES_DIRS = (
