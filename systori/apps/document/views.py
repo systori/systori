@@ -148,6 +148,7 @@ class InvoiceList(ListView):
 
         return context
 
+
 class InvoicePDF(DocumentRenderView):
     model = Invoice
 
@@ -386,4 +387,3 @@ class DocumentSettingsUpdate(UpdateView):
 class DocumentSettingsDelete(DeleteView):
     model = DocumentSettings
     success_url = reverse_lazy('templates')
-

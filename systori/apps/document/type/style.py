@@ -7,7 +7,7 @@ from django.utils.translation import ugettext as _
 from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
 
 from reportlab.pdfbase.pdfmetrics import stringWidth
-
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import BaseDocTemplate, PageTemplate
 from reportlab.platypus import Frame, Paragraph, Table, Spacer
 from reportlab.pdfgen import canvas
@@ -71,7 +71,7 @@ def heading_and_date(heading, date, available_width, font, debug=False):
     t.style.append(('GRID', (0, 0), (-1, -1), 1, colors.transparent))
     t.row(Paragraph(heading, font.h2), Paragraph(date, font.normal_right))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
-    t.style.append(('RIGHTPADDING', (0,0), (-1,-1), 0))
+    t.style.append(('RIGHTPADDING', (0, 0), (-1, -1), 0))
 
     return t.get_table(Table)
 
@@ -97,13 +97,13 @@ class StationaryCanvas(canvas.Canvas):
 
 class NumberedCanvas(canvas.Canvas):
 
-    def __init__(self, *args, page_number_x, page_number_y, page_number_y_next, letterhead_font, **kwargs):
+    def __init__(self, *args, page_number_x, page_number_y, page_number_y_next, font, **kwargs):
         super().__init__(*args, **kwargs)
         self._saved_page_states = []
         self.page_number_x = page_number_x
         self.page_number_y = page_number_y
         self.page_number_y_next = page_number_y_next
-        self.letterhead_font = letterhead_font
+        self.font = font
 
     def showPage(self):
         """ Instead of 'showing' the page we save the render state for later. """
@@ -120,8 +120,7 @@ class NumberedCanvas(canvas.Canvas):
         super().save()
 
     def draw_page_number(self, page_count):
-        self.setFont('OpenSans-Regular', 10)
-        #Todo: replace with letterhead font
+        self.setFont('{}-Regular'.format(self.font), 10)
         if self._pageNumber == 1:
             self.drawRightString(self.page_number_x, self.page_number_y - 20,
                                  _("Page {} of {}").format(self._pageNumber, page_count))
@@ -160,7 +159,8 @@ class NumberedLetterheadCanvasWithoutFirstPage(StationaryCanvas, NumberedCanvas)
 
     @staticmethod
     def factory(letterhead):
-        return lambda *args, **kwargs: NumberedLetterheadCanvasWithoutFirstPage(letterhead.letterhead_pdf, *args, **kwargs)
+        return lambda *args, **kwargs: NumberedLetterheadCanvasWithoutFirstPage(letterhead.letterhead_pdf,
+                                                                                *args, **kwargs)
 
 
 class SystoriDocument(BaseDocTemplate):
@@ -207,7 +207,8 @@ class SystoriDocument(BaseDocTemplate):
         frame_later = Frame(frame_x, frame_y, frame_width, frame_height_later, **padding)
 
         self.addPageTemplates([
-            PageTemplate(id='First', frames=frame_first, onPage=self.onFirstPage, pagesize=self.pagesize, autoNextPageTemplate=True),
+            PageTemplate(id='First', frames=frame_first, onPage=self.onFirstPage, pagesize=self.pagesize,
+                         autoNextPageTemplate=True),
             PageTemplate(id='Later', frames=frame_later, onPage=self.onLaterPages, pagesize=self.pagesize)
         ])
 
@@ -244,8 +245,9 @@ class NumberedSystoriDocument(BaseDocTemplate):
             frame_y = float(letterhead.bottom_margin) * document_unit
             frame_y_next = float(letterhead.bottom_margin_next) * document_unit
             frame_width = self.width - float(letterhead.left_margin+letterhead.right_margin) * document_unit
-            frame_height_first = self.height-float(letterhead.top_margin+letterhead.bottom_margin)*document_unit
-            frame_height_later = self.height-float(letterhead.top_margin_next+letterhead.bottom_margin_next)*document_unit
+            frame_height_first = self.height - float(letterhead.top_margin+letterhead.bottom_margin)*document_unit
+            frame_height_later = self.height - float(letterhead.top_margin_next+letterhead.bottom_margin_next)\
+                * document_unit
             padding = dict.fromkeys(['leftPadding', 'bottomPadding', 'rightPadding', 'topPadding'], 0)
         else:
             frame_x = 25
@@ -260,7 +262,8 @@ class NumberedSystoriDocument(BaseDocTemplate):
         frame_later = Frame(frame_x, frame_y_next, frame_width, frame_height_later, **padding)
 
         self.addPageTemplates([
-            PageTemplate(id='First', frames=frame_first, onPage=self.onFirstPage, pagesize=self.pagesize, autoNextPageTemplate=True),
+            PageTemplate(id='First', frames=frame_first, onPage=self.onFirstPage, pagesize=self.pagesize,
+                         autoNextPageTemplate=True),
             PageTemplate(id='Later', frames=frame_later, onPage=self.onLaterPages, pagesize=self.pagesize)
         ])
 
@@ -269,7 +272,7 @@ class NumberedSystoriDocument(BaseDocTemplate):
             kwargs['page_number_x'] = frame_x + frame_width
             kwargs['page_number_y'] = frame_y
             kwargs['page_number_y_next'] = frame_y_next
-            kwargs['letterhead_font'] = letterhead.font
+            kwargs['font'] = letterhead.font
             return canvasmaker(*args, **kwargs)
 
         super().build(flowables, canvasmaker=page_number_canvas_maker)
@@ -280,15 +283,15 @@ class ContinuationTable(Table):
     def draw(self):
 
         self.canv.saveState()
-        self.canv.setFont('OpenSans-Italic', 10)
-        #Todo: hand over font object and select font
+        self.canv.setFont('{}-Italic'.format(self.canv.font), 10)
 
         if getattr(self, '_splitCount', 0) > 1:
-            #self.canv.drawString(0, self._height + 5*mm, '... '+_('Continuation'))
+            # if uncommented write ...Continuation line above next table segment
+            # self.canv.drawString(0, self._height + 5*mm, '... '+_('Continuation'))
             pass
 
         if getattr(self, '_splitCount', 0) >= 1 and not hasattr(self, '_lastTable'):
-            #self.canv.drawRightString(self._width, -7*mm, _('Continuation')+' ...')
+            # self.canv.drawRightString(self._width, -7*mm, _('Continuation')+' ...')
             self.canv.drawString(0, -20, _('Continuation')+' ...')
 
         self.canv.restoreState()
@@ -371,6 +374,7 @@ class TableFormatter:
         return len(self.lines)-1
 
     def row_style(self, name, from_column, to_column, *args):
+        args = tuple(arg.fontName if isinstance(arg, ParagraphStyle) else arg for arg in args)
         self.style.append((name, (from_column, self._row_num), (to_column, self._row_num))+args)
 
     def keep_previous_n_rows_together(self, n):

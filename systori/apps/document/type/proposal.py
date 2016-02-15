@@ -34,8 +34,7 @@ def collate_tasks(proposal, font, available_width):
     t.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
 
     t.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
-    import pdb; pdb.set_trace()  # breakpoint 633e4e82 //
-    t.row_style('FONTNAME', 0, -1, font.bold.fontName)
+    t.row_style('FONTNAME', 0, -1, font.bold)
     t.row_style('ALIGNMENT', 2, 3, "CENTER")
     t.row_style('ALIGNMENT', 4, -1, "RIGHT")
     t.row_style('SPAN', 2, 3)
@@ -81,7 +80,7 @@ def collate_tasks(proposal, font, available_width):
 
             t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
                   '', '', '', money(taskgroup['total']))
-            t.row_style('FONTNAME', 0, -1, font.bold.fontName)
+            t.row_style('FONTNAME', 0, -1, font.bold)
             t.row_style('ALIGNMENT', -1, -1, "RIGHT")
             t.row_style('SPAN', 1, 4)
             t.row_style('VALIGN', 0, -1, "BOTTOM")
@@ -158,7 +157,7 @@ def collate_lineitems(proposal, available_width, font):
                 t.row_style('LINEBELOW', 0, -1, 0.25, colors.black)
 
                 t.row('', ubrdecimal(task['qty']), b(task['unit']), '', money(task['total']))
-                t.row_style('FONTNAME', 0, -1, font.bold.fontName)
+                t.row_style('FONTNAME', 0, -1, font.bold)
 
                 pages.append(t.get_table(ContinuationTable))
 
