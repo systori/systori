@@ -11,6 +11,7 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
+from systori.apps.accounting.report import generate_transaction_table
 
 from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, fonts, force_break, p, b
 from .style import NumberedLetterheadCanvas, NumberedCanvas
@@ -24,7 +25,7 @@ DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 def collate_tasks(invoice, font, available_width):
 
-    t = TableFormatter([1, 0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
+    t = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
@@ -64,15 +65,15 @@ def collate_tasks(invoice, font, available_width):
 
 def collate_tasks_total(invoice, font, available_width):
 
-    t = TableFormatter([0, 1], available_width, debug=DEBUG_DOCUMENT)
+    t = TableFormatter([0, 1], available_width, font, debug=DEBUG_DOCUMENT)
     t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     t.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
-    t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold))
+    t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
 
     for job in invoice['debits']:
         for taskgroup in job['taskgroups']:
-            t.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
+            t.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
                   money(taskgroup['total']))
     t.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
 
@@ -83,7 +84,7 @@ def collate_tasks_total(invoice, font, available_width):
 
 def collate_history(invoice, font, available_width):
 
-    t = TableFormatter([0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
+    t = TableFormatter([0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
     t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
     t.style.append(('VALIGN', (0, 0), (-2, -1), "TOP"))
@@ -183,9 +184,9 @@ def collate_payments(invoice, font, available_width):
             title = _("{invoice} from {date}").format(invoice=txn['invoice_title'], date=invoice_day)
 
         if idx == last_idx:
-            t.row(b(_('This Invoice')), money(-row[1]), money(-row[2]), money(-row[3]))
+            t.row(b(_('This Invoice'), font), money(-row[1]), money(-row[2]), money(-row[3]))
         else:
-            t.row(p(title), money(row[1]), money(row[2]), money(row[3]))
+            t.row(p(title, font), money(row[1]), money(row[2]), money(row[3]))
 
     t.row_style('RIGHTPADDING', -1, -1, 0)
     t.row_style('FONTNAME', 0, -1, font.bold)
