@@ -3,6 +3,7 @@ import os
 from random import randint
 from django import template
 from django.conf import settings
+from django.contrib.staticfiles.finders import find
 import posixpath
 
 register = template.Library()
@@ -35,8 +36,7 @@ def random_image(path):
 
     Usage:  <img src='{% random_image "images/whatever/" %}'>
     """
-
-    fullpath = os.path.join(settings.STATIC_ROOT, path)
+    fullpath = find(path)
     filenames = [f for f in os.listdir(fullpath) if is_image_file(f)]
     pick = random.choice(filenames)
     return posixpath.join(settings.STATIC_URL, path, pick)
