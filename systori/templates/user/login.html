@@ -9,7 +9,7 @@
     }
 
     body {
-      background-image: url("http://www.softronic-mannheim.de/static/bg_img/bg_img_{% random_pick 0 1 2 3 5 6 8 9 10 13 14 16 17 %}@2X.jpg");
+      background-image: url("{% random_image "img/bg_img/" %}");
       background-repeat: no-repeat;
       background-position: center;
       background-size: cover;

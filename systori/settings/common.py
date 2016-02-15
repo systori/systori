@@ -2,6 +2,9 @@
 
 # Pre-populates all addresses and used by geocoding
 # for address-> lat/long coordinates.
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import os
+
 DEFAULT_COUNTRY = "Deutschland"
 
 GOOGLE_MAPS_API_KEY = "AIzaSyAEhGj7BuZtHzx8lHow-cm6lTCja1txOX4"
@@ -23,9 +26,6 @@ TASTYPIE_DEFAULT_FORMATS = ['json']
 AUTH_USER_MODEL = 'user.User'
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/'
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, '../'))
