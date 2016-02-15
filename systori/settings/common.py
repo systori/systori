@@ -134,8 +134,7 @@ DATABASES = {
 
 LANGUAGE_CODE = 'de'
 
-
-def gettext_noop(s): return lambda s: s
+gettext_noop = lambda s: s
 LANGUAGES = (
     ('de', gettext_noop('Deutsch')),
     ('en', gettext_noop('English')),
