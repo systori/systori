@@ -264,8 +264,8 @@ class JobElement extends UbrElement {
     set total_gross(double calculated) => total_gross_view.text = CURRENCY.format(calculated);
 
     JobElement.created(): super.created() {
-        total_view = this.querySelector(":scope>.job-total");
-        total_gross_view = this.querySelector(":scope>.job-total-gross");
+        total_view = this.querySelector(".job-total");
+        total_gross_view = this.querySelector(".job-total-gross");
         tax_rate = double.parse(total_gross_view.dataset['taxRate']);
     }
 
