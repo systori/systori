@@ -5,14 +5,22 @@ from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
 
 from version import VERSION
 
+
 version = V(VERSION)
 
+
 env.hosts = ['systori.com']
+
 
 deploy_apps = {
     'dev': ['dev'],
     'production': ['production']
 }
+
+
+PROD_DUMP_FILE = 'systori.prod.dump'
+PROD_MEDIA_PATH = '/srv/systori/production'
+PROD_MEDIA_FILE = 'systori.media.tgz'
 
 
 def deploy(env_name='dev'):
@@ -57,26 +65,39 @@ def localdb_from_bootstrap():
     local('./manage.py loaddata bootstrap')
 
 
-prod_dump_file = 'systori.prod.dump'
-
-
 def fetch_productiondb():
     dbname = 'systori_production'
     # -Fc : custom postgresql compressed format
-    sudo('pg_dump -Fc -x -f /tmp/%s %s' % (prod_dump_file, dbname), user='www-data')
-    get('/tmp/' + prod_dump_file, prod_dump_file)
-    sudo('rm /tmp/' + prod_dump_file)
+    sudo('pg_dump -Fc -x -f /tmp/%s %s' % (PROD_DUMP_FILE, dbname), user='www-data')
+    get('/tmp/' + PROD_DUMP_FILE, PROD_DUMP_FILE)
+    sudo('rm /tmp/' + PROD_DUMP_FILE)
 
 
 def load_productiondb():
     _reset_localdb()
-    local('pg_restore -d systori_local -O ' + prod_dump_file)
+    local('pg_restore -d systori_local -O ' + PROD_DUMP_FILE)
 
 
 def localdb_from_productiondb():
     fetch_productiondb()
     load_productiondb()
-    local('rm ' + prod_dump_file)
+    local('rm ' + PROD_DUMP_FILE)
+
+
+def docker_from_productiondb(container_name='web'):
+    settings = {
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'HOST': 'db_1'
+    }
+    fetch_productiondb()
+    local('docker-compose run {0} dropdb -h {HOST} -U {USER} {NAME}'.format(
+        container_name, **settings))
+    local('docker-compose run {0} createdb -h {HOST} -U {USER} {NAME}'.format(
+        container_name, **settings))
+    local('docker-compose run {0} pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(
+        container_name, PROD_DUMP_FILE, **settings))
+    local('rm ' + PROD_DUMP_FILE)
 
 
 def init_settings(env_name='local'):
@@ -244,3 +265,12 @@ def link_dart():
                 os.symlink(location, os.path.join('systori/dart/web/packages', package_name))
             except OSError, exc:
                 print exc
+
+
+def get_media():
+    with cd(PROD_MEDIA_PATH):
+        run('tar -cz media -f /tmp/' + PROD_MEDIA_FILE)
+    get('/tmp/' + PROD_MEDIA_FILE, PROD_MEDIA_FILE)
+    local('tar xfz ' + PROD_MEDIA_FILE)
+    local('rm ' + PROD_MEDIA_FILE)
+    run('rm /tmp/' + PROD_MEDIA_FILE)

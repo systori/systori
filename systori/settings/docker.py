@@ -2,7 +2,7 @@ import sys
 from .dev import *
 
 SESSION_COOKIE_DOMAIN = None
-SESSION_COOKIE_SECURE = False                                                    
+SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
 DEBUG = True
