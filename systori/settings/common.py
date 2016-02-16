@@ -158,10 +158,10 @@ USE_THOUSAND_SEPARATOR = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 # this is where files are copied when running ./manage.py collectstatic
-STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, '../static'))
+STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, '..', 'static'))
 STATIC_URL = '/static/'
 
-MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, 'media'))
+MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, '..', 'media'))
 MEDIA_URL = ''
 
 STATICFILES_DIRS = (
