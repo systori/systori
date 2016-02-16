@@ -48,7 +48,7 @@ def collate_tasks(proposal, available_width):
         for taskgroup in job['taskgroups']:
             t.row(b(taskgroup['code']), b(taskgroup['name']))
             t.row_style('SPAN', 1, -1)
-            t.keep_next_n_rows_together(2)
+            #t.keep_next_n_rows_together(2)
             lines = simpleSplit(taskgroup['description'], font.font_name, t.font_size, description_width)
             for line in lines:
                 t.row('', p(line))
@@ -74,7 +74,7 @@ def collate_tasks(proposal, available_width):
 
                 t.row('', '', ubrdecimal(task['qty']), p(task['unit']), money(task['price']), task_total_column)
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
-                t.keep_previous_n_rows_together(3)
+                #t.keep_previous_n_rows_together(3)
 
                 t.row_style('BOTTOMPADDING', 0, -1, 10)
 
