@@ -148,13 +148,14 @@ class InvoiceList(ListView):
 
         return context
 
+
 class InvoicePDF(DocumentRenderView):
     model = Invoice
 
     def pdf(self):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
-        return invoice.render(json, letterhead, self.kwargs['format'])
+        return invoice.render(json, letterhead, self.request.GET.get('payment_details', False), self.kwargs['format'])
 
 
 class InvoiceFormMixin:

@@ -154,7 +154,7 @@ def collate_history(invoice, available_width):
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def collate_payments(invoice, available_width):
+def collate_payments(invoice, available_width, show_payment_details):
 
     t = TableFormatter([0, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
@@ -191,6 +191,20 @@ def collate_payments(invoice, available_width):
         else:
             t.row(p(title), money(row[1]), money(row[2]), money(row[3]))
 
+            def small_row(*args):
+                t.row(*[Paragraph(c, stylesheet['SmallRight']) for c in args])
+
+            if show_payment_details and row[0] == 'payment':
+                for job in txn['jobs'].values():
+                    small_row(job['name'], money(job['net']), money(job['tax']), money(job['gross']))
+
+            if show_payment_details and row[0] == 'invoice':
+                for job in txn['jobs'].values():
+                    unpaid_gross = job['gross'] - job['paid_gross']
+                    if unpaid_gross > 0:
+                        small_row(job['name'], money(-(job['net']-job['paid_net'])), money(-(job['tax']-job['paid_tax'])), money(unpaid_gross))
+
+
     t.row_style('RIGHTPADDING', -1, -1, 0)
     t.row_style('FONTNAME', 0, -1, font.bold)
 
@@ -203,7 +217,7 @@ def has_itemized_debit(debits):
             return True
 
 
-def render(invoice, letterhead, format):
+def render(invoice, letterhead, show_payment_details, format):
 
     with BytesIO() as buffer:
 
@@ -231,7 +245,7 @@ def render(invoice, letterhead, format):
 
             Spacer(0, 4*mm),
 
-            collate_payments(invoice, table_width),
+            collate_payments(invoice, table_width, show_payment_details),
 
             Spacer(0, 4*mm),
 
