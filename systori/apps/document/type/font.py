@@ -154,3 +154,7 @@ class FontManager:
     @property
     def h2(self):
         return self.font.byName.get('Heading2')
+
+    @property
+    def small(self):
+        return self.font.byName.get('Small')

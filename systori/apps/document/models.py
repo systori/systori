@@ -73,7 +73,8 @@ class Invoice(Document):
     project = models.ForeignKey("project.Project", related_name="invoices")
     parent = models.ForeignKey("self", related_name="invoices", null=True)
 
-    transaction = models.OneToOneField('accounting.Transaction', related_name="invoice", null=True, on_delete=models.SET_NULL)
+    transaction = models.OneToOneField('accounting.Transaction', related_name="invoice", null=True,
+                                       on_delete=models.SET_NULL)
 
     DRAFT = "draft"
     SENT = "sent"
@@ -127,7 +128,8 @@ class Invoice(Document):
 class Refund(Document):
     letterhead = models.ForeignKey('document.Letterhead', related_name="refund_documents")
     project = models.ForeignKey("project.Project", related_name="refunds")
-    transaction = models.OneToOneField('accounting.Transaction', related_name="refund", null=True, on_delete=models.SET_NULL)
+    transaction = models.OneToOneField('accounting.Transaction', related_name="refund", null=True,
+                                       on_delete=models.SET_NULL)
 
     class Meta:
         verbose_name = _("Refund")
@@ -220,12 +222,13 @@ class Letterhead(models.Model):
     document_unit = models.CharField(_('Document Unit'), max_length=5,
                                      choices=DOCUMENT_UNIT, default=mm)
 
-    top_margin = models.DecimalField(_('Top Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
-    right_margin = models.DecimalField(_('Right Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
-    bottom_margin = models.DecimalField(_('Bottom Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
-    left_margin = models.DecimalField(_('Left Margin'), max_digits=4, decimal_places=2, default=Decimal("25"))
-    top_margin_next = models.DecimalField(_('Top Margin Next'), max_digits=4, decimal_places=2, default=Decimal("25"))
-    bottom_margin_next = models.DecimalField(_('Bottom Margin Next'), max_digits=4, decimal_places=2, default=Decimal("25"))
+    top_margin = models.DecimalField(_('Top Margin'), max_digits=5, decimal_places=2, default=Decimal("25"))
+    right_margin = models.DecimalField(_('Right Margin'), max_digits=5, decimal_places=2, default=Decimal("25"))
+    bottom_margin = models.DecimalField(_('Bottom Margin'), max_digits=5, decimal_places=2, default=Decimal("25"))
+    left_margin = models.DecimalField(_('Left Margin'), max_digits=5, decimal_places=2, default=Decimal("25"))
+    top_margin_next = models.DecimalField(_('Top Margin Next'), max_digits=5, decimal_places=2, default=Decimal("25"))
+    bottom_margin_next = models.DecimalField(_('Bottom Margin Next'), max_digits=5, decimal_places=2,
+                                             default=Decimal("25"))
 
     A5 = "A5"
     A4 = "A4"
@@ -275,15 +278,22 @@ class Letterhead(models.Model):
 
 
 class DocumentSettings(models.Model):
-    language = models.CharField(_('language'), unique=True, default=settings.LANGUAGE_CODE, choices=settings.LANGUAGES, max_length=2)
+    language = models.CharField(_('language'), unique=True, default=settings.LANGUAGE_CODE,
+                                choices=settings.LANGUAGES, max_length=2)
 
-    proposal_text = models.ForeignKey(DocumentTemplate, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
-    invoice_text = models.ForeignKey(DocumentTemplate, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    proposal_text = models.ForeignKey(DocumentTemplate, null=True, blank=True, on_delete=models.SET_NULL,
+                                      related_name="+")
+    invoice_text = models.ForeignKey(DocumentTemplate, null=True, blank=True, on_delete=models.SET_NULL,
+                                     related_name="+")
 
-    proposal_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
-    invoice_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
-    evidence_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
-    itemized_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    proposal_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL,
+                                            related_name="+")
+    invoice_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL,
+                                           related_name="+")
+    evidence_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL,
+                                            related_name="+")
+    itemized_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL,
+                                            related_name="+")
 
     @staticmethod
     def get_for_language(lang):

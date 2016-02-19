@@ -125,23 +125,23 @@ def collate_lineitems(proposal, available_width, font):
 
                 pages.append(PageBreak())
 
-                t = TableFormatter([1, 0], available_width, debug=DEBUG_DOCUMENT)
+                t = TableFormatter([1, 0], available_width, font, debug=DEBUG_DOCUMENT)
                 t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
                 t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
                 t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
 
-                t.row(b(job['code']), b(job['name']))
-                t.row(b(taskgroup['code']), b(taskgroup['name']))
-                t.row(p(task['code']), p(task['name']))
+                t.row(b(job['code'], font), b(job['name'], font))
+                t.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
+                t.row(p(task['code'], font), p(task['name'], font))
 
                 for chunk in chunk_text(task['description']):
-                    t.row('', p(chunk))
+                    t.row('', p(chunk, font))
 
                 # t.row_style('BOTTOMPADDING', 0, -1, 10)  seems to have no effect @elmcrest 09/2015
 
                 pages.append(t.get_table(ContinuationTable))
 
-                t = TableFormatter([0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
+                t = TableFormatter([0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
                 t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
                 t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
                 t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
@@ -149,16 +149,16 @@ def collate_lineitems(proposal, available_width, font):
                 t.style.append(('ALIGNMENT', (3, 0), (-1, -1), 'RIGHT'))
 
                 for lineitem in task['lineitems']:
-                    t.row(p(lineitem['name']),
+                    t.row(p(lineitem['name'], font),
                           ubrdecimal(lineitem['qty']),
-                          p(lineitem['unit']),
+                          p(lineitem['unit'], font),
                           money(lineitem['price']),
                           money(lineitem['price_per'])
                           )
 
                 t.row_style('LINEBELOW', 0, -1, 0.25, colors.black)
 
-                t.row('', ubrdecimal(task['qty']), b(task['unit']), '', money(task['total']))
+                t.row('', ubrdecimal(task['qty']), b(task['unit'], font), '', money(task['total']))
                 t.row_style('FONTNAME', 0, -1, font.bold)
 
                 pages.append(t.get_table(ContinuationTable))
