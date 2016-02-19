@@ -206,7 +206,7 @@ def collate_payments(invoice, available_width, show_payment_details):
                 for job in txn['jobs'].values():
                     unpaid_gross = job['gross'] - job['paid_gross']
                     if unpaid_gross > 0:
-                        small_row(job['name'], money(-(job['net']-job['paid_net'])), money(-(job['tax']-job['paid_tax'])), money(unpaid_gross))
+                        small_row(job['name'], money(-(job['net']-job['paid_net'])), money(-(job['tax']-job['paid_tax'])), money(-unpaid_gross))
 
 
     t.row_style('RIGHTPADDING', -1, -1, 0)
