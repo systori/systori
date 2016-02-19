@@ -196,7 +196,11 @@ def collate_payments(invoice, available_width, show_payment_details):
 
             if show_payment_details and row[0] == 'payment':
                 for job in txn['jobs'].values():
-                    small_row(job['name'], money(job['net']), money(job['tax']), money(job['gross']))
+                    small_row(job['name'], money(job['payment_applied_net']), money(job['payment_applied_tax']), money(job['payment_applied_gross']))
+
+            if show_payment_details and row[0] == 'discount':
+                for job in txn['jobs'].values():
+                    small_row(job['name'], money(job['discount_applied_net']), money(job['discount_applied_tax']), money(job['discount_applied_gross']))
 
             if show_payment_details and row[0] == 'invoice':
                 for job in txn['jobs'].values():
