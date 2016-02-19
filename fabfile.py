@@ -59,12 +59,6 @@ def _reset_localdb():
     local('createdb systori_local')
 
 
-def localdb_from_bootstrap():
-    _reset_localdb()
-    local('./manage.py migrate')
-    local('./manage.py loaddata bootstrap')
-
-
 def fetch_productiondb():
     dbname = 'systori_production'
     # -Fc : custom postgresql compressed format
@@ -78,10 +72,19 @@ def load_productiondb():
     local('pg_restore -d systori_local -O ' + PROD_DUMP_FILE)
 
 
-def localdb_from_productiondb():
+def get_db():
     fetch_productiondb()
     load_productiondb()
     local('rm ' + PROD_DUMP_FILE)
+
+
+def get_media():
+    with cd(PROD_MEDIA_PATH):
+        run('tar -cz media -f /tmp/' + PROD_MEDIA_FILE)
+    get('/tmp/' + PROD_MEDIA_FILE, PROD_MEDIA_FILE)
+    local('tar xfz ' + PROD_MEDIA_FILE)
+    local('rm ' + PROD_MEDIA_FILE)
+    run('rm /tmp/' + PROD_MEDIA_FILE)
 
 
 def docker_from_productiondb(container_name='web'):
@@ -137,6 +140,19 @@ export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
     elif not 'DART_SDK' in open(bash_rc_file, 'r').read():
         with open(bash_rc_file, 'a') as file_handle:
             file_handle.write(env_lines)
+
+
+def link_dart():
+    with open('systori/dart/.packages', 'r') as packages:
+        for package in packages:
+            if package.startswith('#'):
+                continue
+            package_name, location = package.strip().split(':', 1)
+            location = '/' + location.lstrip('file:///')
+            try:
+                os.symlink(location, os.path.join('systori/dart/web/packages', package_name))
+            except OSError, exc:
+                print exc
 
 
 def make_dart():
@@ -252,25 +268,3 @@ def _merge_this():
         local('git push origin :%s' % branch)
     local('git branch -d %s' % branch)
     local('git push')
-
-
-def link_dart():
-    with open('systori/dart/.packages', 'r') as packages:
-        for package in packages:
-            if package.startswith('#'):
-                continue
-            package_name, location = package.strip().split(':', 1)
-            location = '/' + location.lstrip('file:///')
-            try:
-                os.symlink(location, os.path.join('systori/dart/web/packages', package_name))
-            except OSError, exc:
-                print exc
-
-
-def get_media():
-    with cd(PROD_MEDIA_PATH):
-        run('tar -cz media -f /tmp/' + PROD_MEDIA_FILE)
-    get('/tmp/' + PROD_MEDIA_FILE, PROD_MEDIA_FILE)
-    local('tar xfz ' + PROD_MEDIA_FILE)
-    local('rm ' + PROD_MEDIA_FILE)
-    run('rm /tmp/' + PROD_MEDIA_FILE)
