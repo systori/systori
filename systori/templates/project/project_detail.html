@@ -157,17 +157,21 @@
           </td>
         </tr>
       {% endfor %}
+        <tr>
+          <td colspan="8">
+            {% if project.has_jobs_for_proposal %}
+              <a href="{% url 'proposal.create' project.id %}">{% trans "Create" %}</a>
+            {% else %}
+              {% trans "No jobs available for new proposal." %}
+              {% if not project_has_billable_contact %}
+                <p>{% trans "No billable contact defined." %}</p>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
-  {% if project.has_jobs_for_proposal %}
-    <a href="{% url 'proposal.create' project.id %}">{% trans "Create" %}</a>
-  {% else %}
-    {% trans "No jobs available for new proposal." %}
-    {% if not project_has_billable_contact %}
-      <p>{% trans "No billable contact defined." %}</p>
-    {% endif %}
-  {% endif %}
 
   <style>
     .table > tbody > tr > td.tnx-table-label {
