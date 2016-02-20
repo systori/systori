@@ -104,7 +104,7 @@
 
 
   <h2 class="sub-header">{% trans "Proposals" %}</h2>
-  <div class="table-responsive">
+  <div class="table-responsive" style="padding-bottom:110px;">
     <table class="table table-striped">
       <thead>
       <tr>
@@ -226,7 +226,7 @@
   }
   </style>
   <h2 class="sub-header">{% trans "Invoices" %}</h2>
-  <div class="table-responsive">
+  <div class="table-responsive" style="padding-bottom:110px;">
     <div class="invoice-columns clearfix">
       {% for parent_invoice in parent_invoices %}
       <div class="invoice-sequence">
@@ -324,7 +324,7 @@
 
 
   <h2 class="sub-header">{% trans "Refunds" %}</h2>
-  <div class="table-responsive">
+  <div class="table-responsive" style="padding-bottom:110px;">
     <table class="table refund-table">
       <thead>
       <tr>
@@ -437,3 +437,6 @@
 
 {% endblock %}
 
+
+{% block extra_js %}
+{% endblock %}
