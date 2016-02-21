@@ -160,7 +160,7 @@
         <tr>
           <td colspan="8">
             {% if project.has_jobs_for_proposal %}
-              <a href="{% url 'proposal.create' project.id %}">{% trans "Create" %}</a>
+              <a href="{% url 'proposal.create' project.id %}">{% trans "Create Proposal" %}</a>
             {% else %}
               {% trans "No jobs available for new proposal." %}
               {% if not project_has_billable_contact %}
