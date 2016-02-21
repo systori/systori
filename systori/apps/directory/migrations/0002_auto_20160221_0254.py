@@ -20,6 +20,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='contact',
             name='projects',
-            field=models.ManyToManyField(to='project.Project', through='directory.ProjectContact', related_name='contacts'),
+            field=models.ManyToManyField(through='directory.ProjectContact', to='project.Project', related_name='contacts'),
         ),
     ]
