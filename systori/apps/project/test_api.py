@@ -1,9 +1,10 @@
-from tastypie.test import ResourceTestCase
+from django.test import TestCase
+from tastypie.test import ResourceTestCaseMixin
 from .models import Project
 from ..task.test_models import create_task_data
 
 
-class ResourceTestCaseBase(ResourceTestCase):
+class ResourceTestCaseBase(ResourceTestCaseMixin, TestCase):
     def setUp(self):
         super(ResourceTestCaseBase, self).setUp()
         create_task_data(self)
