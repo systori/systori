@@ -17,7 +17,7 @@
     <div class="panel panel-default">
 
       <div class="panel-heading">
-        {{ task.code }} {{ task.name }}
+        {{ task.code }} {{ task.name }} {% if task.is_optional %} <span class="label label-warning">{% trans 'Optional' %}</span> {% endif %}
       </div>
 
       <div class="panel-body">

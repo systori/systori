@@ -104,7 +104,7 @@
 
 
   <h2 class="sub-header">{% trans "Proposals" %}</h2>
-  <div class="table-responsive">
+  <div class="table-responsive" style="padding-bottom:110px;">
     <table class="table table-striped" id="proposals-table">
       <thead>
       <tr>
@@ -133,16 +133,16 @@
           <td>{{ doc.notes }}</td>
           <td style="min-width: 100px;">
             <div class="btn-group">
-              <a class="btn btn-default" href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'PDF' %}</a>
+              <a target="_blank" class="btn btn-default" href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'PDF' %}</a>
               <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                 <span class="caret"></span>
                 <span class="sr-only">Toggle Dropdown</span>
               </button>
               <ul class="dropdown-menu" role="menu">
-                <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a></li>
-                <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a></li>
-                <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}?with_lineitems=1">{% trans 'with Line Items Email' %}</a></li>
-                <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'with Line Items Print' %}</a></li>
+                <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a></li>
+                <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a></li>
+                <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'email' doc.id %}?with_lineitems=1">{% trans 'with Line Items Email' %}</a></li>
+                <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'with Line Items Print' %}</a></li>
               </ul>
             </div>
           </td>
@@ -157,17 +157,21 @@
           </td>
         </tr>
       {% endfor %}
+        <tr>
+          <td colspan="8">
+            {% if project.has_jobs_for_proposal %}
+              <a href="{% url 'proposal.create' project.id %}">{% trans "Create" %}</a>
+            {% else %}
+              {% trans "No jobs available for new proposal." %}
+              {% if not project_has_billable_contact %}
+                <p>{% trans "No billable contact defined." %}</p>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
-  {% if project.has_jobs_for_proposal %}
-    <a href="{% url 'proposal.create' project.id %}">{% trans "Create Proposal" %}</a>
-  {% else %}
-    {% trans "No jobs available for new proposal." %}
-    {% if not project_has_billable_contact %}
-      <p>{% trans "No billable contact defined." %}</p>
-    {% endif %}
-  {% endif %}
 
   <style>
     .table > tbody > tr > td.tnx-table-label {
@@ -226,7 +230,7 @@
   }
   </style>
   <h2 class="sub-header">{% trans "Invoices" %}</h2>
-  <div class="table-responsive">
+  <div class="table-responsive" style="padding-bottom:110px;">
     <div class="invoice-columns clearfix">
       {% for parent_invoice in parent_invoices %}
       <div class="invoice-sequence">
@@ -324,7 +328,7 @@
 
 
   <h2 class="sub-header">{% trans "Refunds" %}</h2>
-  <div class="table-responsive">
+  <div class="table-responsive" style="padding-bottom:110px;">
     <table class="table" id="refunds-table">
       <thead>
       <tr>
@@ -347,8 +351,8 @@
                 <span class="sr-only">Toggle Dropdown</span>
               </button>
               <ul class="dropdown-menu" role="menu">
-                <li><a href="{% url 'refund.pdf' project.id 'email' refund.id %}">{% trans 'Email PDF' %}</a></li>
-                <li><a href="{% url 'refund.pdf' project.id 'print' refund.id %}">{% trans 'Print PDF' %}</a></li>
+                <li><a target="_blank" href="{% url 'refund.pdf' project.id 'email' refund.id %}">{% trans 'Email PDF' %}</a></li>
+                <li><a target="_blank" href="{% url 'refund.pdf' project.id 'print' refund.id %}">{% trans 'Print PDF' %}</a></li>
               </ul>
             </div>
           </td>
@@ -437,3 +441,6 @@
 
 {% endblock %}
 
+
+{% block extra_js %}
+{% endblock %}
