@@ -49,6 +49,8 @@ def deploy(env_name='dev'):
             with prefix('source ../bin/activate'):
                 run('pip install -q -U -r requirements/%s.pip' % env_name)
                 sudo('./manage.py migrate --noinput', user='www-data')
+                #sudo('psql -f reset_migrations.sql systori_production', user='www-data')
+                #sudo('./manage.py migrate --noinput --fake', user='www-data')
                 run('./manage.py collectstatic --noinput --verbosity 0')
 
         sudo('service uwsgi start systori_' + app)
@@ -59,8 +61,8 @@ def _reset_localdb():
     local('createdb systori_local')
 
 
-def fetch_productiondb():
-    dbname = 'systori_production'
+def fetch_productiondb(env_name='dev'):
+    dbname = 'systori_'+env_name
     # -Fc : custom postgresql compressed format
     sudo('pg_dump -Fc -x -f /tmp/%s %s' % (PROD_DUMP_FILE, dbname), user='www-data')
     get('/tmp/' + PROD_DUMP_FILE, PROD_DUMP_FILE)
