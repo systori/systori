@@ -126,12 +126,13 @@ class PaymentSplit extends TableRowElement {
         discount_input.value = (discount_gross/100).toStringAsFixed(2);
         discount_span.text = AMOUNT.format(discount_gross/100);
 
-        adjustment_gross = 0;
         if (table.is_auto_adjusted) {
             var possible_adjustment = balance_gross - (payment_gross + discount_gross);
             adjustment_gross = possible_adjustment > 0 ? possible_adjustment : 0;
+            adjustment_input.value = AMOUNT.format(adjustment_gross/100);
+        } else {
+            adjustment_gross = (parse_currency(adjustment_input.value) * 100).round();
         }
-        adjustment_input.value = AMOUNT.format(adjustment_gross/100);
 
         credit_gross = payment_gross + discount_gross + adjustment_gross;
         credit_cell.text = AMOUNT.format(credit_gross/100);

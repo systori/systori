@@ -29,7 +29,7 @@
                 {% task_dailyplans_count task dailyplan.day as is_assigned %}
                 <a href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}"
                    class="list-group-item clearfix{% if is_assigned %} list-group-item-success{% endif %} searchable">
-                  {{ task.code }} <b>{{ task.name }}</b><br>
+                  {{ task.code }} <b>{{ task.name }}</b> {% if task.is_optional %} <span class="label label-warning">{% trans 'Optional' %}</span> {% endif %}<br>
                   {{ task.description }}<br>
                   {{ task.qty|ubrdecimal }} - {{ task.unit }}
                   {% if task.complete_percent > 0 %}

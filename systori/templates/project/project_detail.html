@@ -40,7 +40,7 @@
 
   <h2 class="sub-header">{% trans "Jobs" %}</h2>
   <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table table-striped" id="jobs-table">
       <thead>
       <tr>
         <th>{% trans "Name" %}</th>
@@ -52,7 +52,7 @@
         <th style="text-align: right;">{% trans "Actions" %}</th>
       </tr>
       </thead>
-      <tbody id="job-table">
+      <tbody>
       {% for job in project.jobs.all %}
         <tr>
           <td><a href="{% url 'tasks' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
@@ -100,12 +100,12 @@
       </tbody>
     </table>
   </div>
-  <a href="{% url 'job.create' project.id %}">{% trans "Create" %}</a>
+  <a href="{% url 'job.create' project.id %}">{% trans "Create Job" %}</a>
 
 
   <h2 class="sub-header">{% trans "Proposals" %}</h2>
-  <div class="table-responsive">
-    <table class="table table-striped">
+  <div class="table-responsive" style="padding-bottom:110px;">
+    <table class="table table-striped" id="proposals-table">
       <thead>
       <tr>
         <th>#</th>
@@ -133,16 +133,16 @@
           <td>{{ doc.notes }}</td>
           <td style="min-width: 100px;">
             <div class="btn-group">
-              <a class="btn btn-default" href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'PDF' %}</a>
+              <a target="_blank" class="btn btn-default" href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'PDF' %}</a>
               <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                 <span class="caret"></span>
                 <span class="sr-only">Toggle Dropdown</span>
               </button>
               <ul class="dropdown-menu" role="menu">
-                <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a></li>
-                <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a></li>
-                <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}?with_lineitems=1">{% trans 'with Line Items Email' %}</a></li>
-                <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'with Line Items Print' %}</a></li>
+                <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a></li>
+                <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a></li>
+                <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'email' doc.id %}?with_lineitems=1">{% trans 'with Line Items Email' %}</a></li>
+                <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'with Line Items Print' %}</a></li>
               </ul>
             </div>
           </td>
@@ -157,17 +157,21 @@
           </td>
         </tr>
       {% endfor %}
+        <tr>
+          <td colspan="8">
+            {% if project.has_jobs_for_proposal %}
+              <a href="{% url 'proposal.create' project.id %}">{% trans "Create" %}</a>
+            {% else %}
+              {% trans "No jobs available for new proposal." %}
+              {% if not project_has_billable_contact %}
+                <p>{% trans "No billable contact defined." %}</p>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
-  {% if project.has_jobs_for_proposal %}
-    <a href="{% url 'proposal.create' project.id %}">{% trans "Create" %}</a>
-  {% else %}
-    {% trans "No jobs available for new proposal." %}
-    {% if not project_has_billable_contact %}
-      <p>{% trans "No billable contact defined." %}</p>
-    {% endif %}
-  {% endif %}
 
   <style>
     .table > tbody > tr > td.tnx-table-label {
@@ -226,7 +230,7 @@
   }
   </style>
   <h2 class="sub-header">{% trans "Invoices" %}</h2>
-  <div class="table-responsive">
+  <div class="table-responsive" style="padding-bottom:110px;">
     <div class="invoice-columns clearfix">
       {% for parent_invoice in parent_invoices %}
       <div class="invoice-sequence">
@@ -266,18 +270,18 @@
 
 
   <style>
-  .payment-table .job-row {
+  #payments-table .job-row {
     font-size: 75%;
     color: gray;
     text-align: right;
   }
-  .payment-table .job-row.last {
+  #payments-table .job-row.last {
     border-bottom: 2px solid #ddd;
   }
   </style>
   <h2 class="sub-header">{% trans "Payments" %}</h2>
   <div class="table-responsive">
-    <table class="table payment-table">
+    <table class="table" id="payments-table">
       <thead>
       <tr>
         <th>{% trans 'Date' %}</th>
@@ -324,8 +328,8 @@
 
 
   <h2 class="sub-header">{% trans "Refunds" %}</h2>
-  <div class="table-responsive">
-    <table class="table refund-table">
+  <div class="table-responsive" style="padding-bottom:110px;">
+    <table class="table" id="refunds-table">
       <thead>
       <tr>
         <th>{% trans 'Date' %}</th>
@@ -347,8 +351,8 @@
                 <span class="sr-only">Toggle Dropdown</span>
               </button>
               <ul class="dropdown-menu" role="menu">
-                <li><a href="{% url 'refund.pdf' project.id 'email' refund.id %}">{% trans 'Email PDF' %}</a></li>
-                <li><a href="{% url 'refund.pdf' project.id 'print' refund.id %}">{% trans 'Print PDF' %}</a></li>
+                <li><a target="_blank" href="{% url 'refund.pdf' project.id 'email' refund.id %}">{% trans 'Email PDF' %}</a></li>
+                <li><a target="_blank" href="{% url 'refund.pdf' project.id 'print' refund.id %}">{% trans 'Print PDF' %}</a></li>
               </ul>
             </div>
           </td>
@@ -369,7 +373,7 @@
 
 <h2 class="sub-header">{% trans "Contacts" %}</h2>
   <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table table-striped" id="contacts-table">
       <thead>
       <tr>
         <th>#</th>
@@ -399,11 +403,11 @@
       </tbody>
     </table>
   </div>
-  <a href="{% url 'project.contact.add' project.id %}">{% trans "Add" %}</a>
+  <a href="{% url 'project.contact.add' project.id %}">{% trans "Add Contact" %}</a>
 
  <h2 class="sub-header">{% trans "Job Sites" %}</h2>
   <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table table-striped" id="job-sites-table">
       <thead>
       <tr>
         <th>#</th>
@@ -433,7 +437,10 @@
       </tbody>
     </table>
   </div>
-  <a href="{% url 'jobsite.create' project.id %}">{% trans "Create" %}</a>
+  <a href="{% url 'jobsite.create' project.id %}">{% trans "Create Job Site" %}</a>
 
 {% endblock %}
 
+
+{% block extra_js %}
+{% endblock %}

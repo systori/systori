@@ -3,26 +3,24 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 import datetime
-from django.conf import settings
 import django_fsm
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('equipment', '0001_initial'),
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('accounting', '0001_initial'),
+        ('equipment', '0001_initial'),
+        ('company', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
             name='DailyPlan',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('day', models.DateField(verbose_name='Day', default=datetime.date.today)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
+                ('day', models.DateField(default=datetime.date.today, verbose_name='Day')),
                 ('notes', models.TextField(blank=True)),
-                ('equipment', models.ManyToManyField(to='equipment.Equipment', related_name='dailyplans')),
             ],
             options={
                 'ordering': ['-day'],
@@ -31,53 +29,62 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='JobSite',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('name', models.CharField(verbose_name='Site Name', max_length=512)),
-                ('address', models.CharField(verbose_name='Address', max_length=512)),
-                ('city', models.CharField(verbose_name='City', max_length=512)),
-                ('postal_code', models.CharField(verbose_name='Postal Code', max_length=512)),
-                ('country', models.CharField(verbose_name='Country', default='Deutschland', max_length=512)),
-                ('latitude', models.FloatField(verbose_name='Latitude', blank=True, null=True)),
-                ('longitude', models.FloatField(verbose_name='Longitude', blank=True, null=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
+                ('name', models.CharField(max_length=512, verbose_name='Site Name')),
+                ('address', models.CharField(max_length=512, verbose_name='Address')),
+                ('city', models.CharField(max_length=512, verbose_name='City')),
+                ('postal_code', models.CharField(max_length=512, verbose_name='Postal Code')),
+                ('country', models.CharField(max_length=512, default='Deutschland', verbose_name='Country')),
+                ('latitude', models.FloatField(null=True, verbose_name='Latitude', blank=True)),
+                ('longitude', models.FloatField(null=True, verbose_name='Longitude', blank=True)),
             ],
         ),
         migrations.CreateModel(
             name='Project',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('name', models.CharField(verbose_name='Project Name', max_length=512)),
-                ('description', models.TextField(verbose_name='Project Description', blank=True, null=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
+                ('name', models.CharField(max_length=512, verbose_name='Project Name')),
+                ('description', models.TextField(null=True, verbose_name='Project Description', blank=True)),
                 ('is_template', models.BooleanField(default=False)),
-                ('job_zfill', models.PositiveSmallIntegerField(verbose_name='Job Code Zero Fill', default=1)),
-                ('taskgroup_zfill', models.PositiveSmallIntegerField(verbose_name='Task Group Code Zero Fill', default=1)),
-                ('task_zfill', models.PositiveSmallIntegerField(verbose_name='Task Code Zero Fill', default=1)),
-                ('job_offset', models.PositiveSmallIntegerField(verbose_name='Job Offset', default=0)),
-                ('phase', django_fsm.FSMField(choices=[('prospective', 'Prospective'), ('tendering', 'Tendering'), ('planning', 'Planning'), ('executing', 'Executing'), ('settlement', 'Settlement'), ('warranty', 'Warranty'), ('finished', 'Finished')], default='prospective', max_length=50)),
-                ('state', django_fsm.FSMField(choices=[('active', 'Active'), ('paused', 'Paused'), ('disputed', 'Disputed'), ('stopped', 'Stopped')], default='active', max_length=50)),
+                ('job_zfill', models.PositiveSmallIntegerField(default=1, verbose_name='Job Code Zero Fill')),
+                ('taskgroup_zfill', models.PositiveSmallIntegerField(default=1, verbose_name='Task Group Code Zero Fill')),
+                ('task_zfill', models.PositiveSmallIntegerField(default=1, verbose_name='Task Code Zero Fill')),
+                ('phase', django_fsm.FSMField(max_length=50, default='prospective', choices=[('prospective', 'Prospective'), ('tendering', 'Tendering'), ('planning', 'Planning'), ('executing', 'Executing'), ('settlement', 'Settlement'), ('warranty', 'Warranty'), ('finished', 'Finished')])),
+                ('state', django_fsm.FSMField(max_length=50, default='active', choices=[('active', 'Active'), ('paused', 'Paused'), ('disputed', 'Disputed'), ('stopped', 'Stopped')])),
                 ('account', models.OneToOneField(to='accounting.Account', related_name='project', null=True)),
             ],
             options={
-                'verbose_name_plural': 'Projects',
                 'ordering': ['name'],
                 'verbose_name': 'Project',
+                'verbose_name_plural': 'Projects',
             },
         ),
         migrations.CreateModel(
             name='TeamMember',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('is_foreman', models.BooleanField(default=False)),
+                ('access', models.ForeignKey(to='company.Access', related_name='assignments')),
                 ('dailyplan', models.ForeignKey(to='project.DailyPlan', related_name='workers')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='assignments')),
             ],
             options={
-                'ordering': ['-is_foreman', 'user__first_name'],
+                'ordering': ['-is_foreman', 'access__user__first_name'],
             },
         ),
         migrations.AddField(
             model_name='jobsite',
             name='project',
             field=models.ForeignKey(to='project.Project', related_name='jobsites'),
+        ),
+        migrations.AddField(
+            model_name='dailyplan',
+            name='accesses',
+            field=models.ManyToManyField(through='project.TeamMember', to='company.Access', related_name='dailyplans'),
+        ),
+        migrations.AddField(
+            model_name='dailyplan',
+            name='equipment',
+            field=models.ManyToManyField(to='equipment.Equipment', related_name='dailyplans'),
         ),
         migrations.AddField(
             model_name='dailyplan',

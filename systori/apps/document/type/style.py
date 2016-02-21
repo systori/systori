@@ -12,6 +12,11 @@ stylesheet.add(ParagraphStyle(name='Small',
                               leading=8.4)
                )
 
+stylesheet.add(ParagraphStyle(name='SmallRight',
+                              parent=stylesheet['Small'],
+                              alignment=TA_RIGHT)
+               )
+
 stylesheet.add(ParagraphStyle(name='Normal',
                               fontName=font.normal,
                               fontSize=10,
