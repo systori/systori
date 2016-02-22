@@ -33,7 +33,7 @@
         }
 
         tr > .job-name {
-          min-width: 180px!important;
+          min-width: 180px !important;
         }
 
         tr > .job-amount-net > input.form-control {
@@ -121,7 +121,7 @@
                 </div>
             </td>
             <td class="job-itemized">
-              <a data-amount="{{ debit_form.billable_amount.net }}"
+              <a name="btn_set_itemized" data-amount="{{ debit_form.billable_amount.net }}"
                  class="btn {% if not debit_form.is_invoiced.value %}disabled{% endif %}">
               {% if debit_form.billable_amount.net < 0 %}<span class="text-danger">{% endif %}
               {{ debit_form.billable_amount.net|ubrdecimal:2 }}
@@ -166,7 +166,7 @@
       </div>
 
       <div class="form-group">
-        <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+        <button name="save" type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
       </div>
   </form>
 {% endblock %}

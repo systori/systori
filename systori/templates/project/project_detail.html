@@ -74,7 +74,7 @@
             </div>
           </td>
           <td>{{ job.get_billing_method_display }}</td>
-          <td style="text-align: right; white-space: nowrap;">{{ job.billable_total|money }}</td>
+          <td id="billable_amount_{{forloop.counter0}}" style="text-align: right; white-space: nowrap;">{{ job.billable_total|money }}</td>
           <td style="text-align: right;">
             {% for state in job.get_available_status_transitions %}
               <a href="{% url 'job.transition' project.id job.id state.name %}">{{ state.custom.label }}</a>
@@ -257,7 +257,7 @@
       {% endfor %}
       {% if project.has_billable_contact %}
         <div class="invoice-sequence">
-          <a class="btn btn-default" href="{% url 'invoice.create' project.id %}" style="width: 100%">
+          <a name="create_invoice" class="btn btn-default" href="{% url 'invoice.create' project.id %}" style="width: 100%">
             {% trans 'Start new invoice sequence.' %}
           </a>
         </div>
@@ -324,7 +324,7 @@
       </tbody>
     </table>
   </div>
-  <a href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
+  <a  name="add_payment" href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
 
 
   <h2 class="sub-header">{% trans "Refunds" %}</h2>

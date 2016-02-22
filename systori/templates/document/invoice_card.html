@@ -24,7 +24,7 @@
     </tr>
     <tr style="text-align: right; white-space: nowrap;">
       <td>{% trans "Gross" %}:</td>
-      <td style="font-weight: bold; text-align: right; white-space: nowrap;">{{ invoice.json.debit_gross|money }}</td>
+      <td name="debit_gross" style="font-weight: bold; text-align: right; white-space: nowrap;">{{ invoice.json.debit_gross|money }}</td>
     </tr>
   </table>
   <div class="panel-footer" style="text-align: right;">
@@ -32,7 +32,7 @@
     <a class="btn btn-sm btn-default pull-left" href="{% url 'invoice.delete' project.id invoice.id %}">{% trans "Delete" %}</a>
     {% endif %}
     {% for state in invoice.get_available_status_transitions %}
-      <a class="btn btn-sm btn-default" href="{% url 'invoice.transition' project.id invoice.id state.name %}">{{ state.custom.label }}</a>
+      <a name="status_button" class="btn btn-sm btn-default" href="{% url 'invoice.transition' project.id invoice.id state.name %}">{{ state.custom.label }}</a>
     {% endfor %}
     {% if 'id' in invoice.json %}
     {% if invoice.status == invoice.DRAFT %}
