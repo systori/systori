@@ -116,6 +116,17 @@ class ProjectTests(BaseTestCase):
         self.driver.find_element_by_css_selector('a[href="/field/project-2/{}?copy_source_date="]'
                                                  .format(following_day(1).strftime('%Y-%m-%d'))).click()
         self.driver.find_element_by_xpath('/html/body/div/div[3]/a[2]').click()
+
+
+        # go to date picker
+        # self.find_class('day-picker').click()
+        # next_day = following_day(1).strftime('%Y-%m-%d')
+        # pick a date
+        # self.find_xpath('//a[contains(@href, "{}")]'.format(next_day)).click()
+
+        # copy plan
+        # self.find_class('btn-copy-plan').click()
+
         self.driver.find_element_by_xpath('/html/body/form/div/div[2]/div[2]/label[1]/input').click()
         self.driver.find_element_by_xpath('/html/body/form/div/div[2]/div[3]/div/button').click()
 
