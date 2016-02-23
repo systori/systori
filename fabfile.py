@@ -61,7 +61,7 @@ def _reset_localdb():
     local('createdb systori_local')
 
 
-def fetch_db(env_name='dev'):
+def fetch_db(env_name='production'):
     dbname = 'systori_'+env_name
     # -Fc : custom postgresql compressed format
     sudo('pg_dump -Fc -x -f /tmp/%s %s' % (PROD_DUMP_FILE, dbname), user='www-data')
@@ -74,7 +74,7 @@ def load_db():
     local('pg_restore -d systori_local -O ' + PROD_DUMP_FILE)
 
 
-def get_db(env_name='dev'):
+def get_db(env_name='production'):
     fetch_db(env_name)
     load_db()
     local('rm ' + PROD_DUMP_FILE)
