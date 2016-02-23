@@ -61,7 +61,7 @@ def _reset_localdb():
     local('createdb systori_local')
 
 
-def fetch_productiondb(env_name='dev'):
+def fetch_db(env_name='dev'):
     dbname = 'systori_'+env_name
     # -Fc : custom postgresql compressed format
     sudo('pg_dump -Fc -x -f /tmp/%s %s' % (PROD_DUMP_FILE, dbname), user='www-data')
@@ -69,14 +69,14 @@ def fetch_productiondb(env_name='dev'):
     sudo('rm /tmp/' + PROD_DUMP_FILE)
 
 
-def load_productiondb():
+def load_db():
     _reset_localdb()
     local('pg_restore -d systori_local -O ' + PROD_DUMP_FILE)
 
 
-def get_db():
-    fetch_productiondb()
-    load_productiondb()
+def get_db(env_name='dev'):
+    fetch_db(env_name)
+    load_db()
     local('rm ' + PROD_DUMP_FILE)
 
 
@@ -95,7 +95,7 @@ def docker_from_productiondb(container_name='web'):
         'USER': 'postgres',
         'HOST': 'db_1'
     }
-    fetch_productiondb()
+    fetch_db()
     local('docker-compose run {0} dropdb -h {HOST} -U {USER} {NAME}'.format(
         container_name, **settings))
     local('docker-compose run {0} createdb -h {HOST} -U {USER} {NAME}'.format(
