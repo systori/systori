@@ -164,7 +164,6 @@ def collate_payments(invoice, available_width, show_payment_details):
     t.style.append(('LEFTPADDING', (-1, 0), (-1, -2), 0))
 
     t.style.append(('LINEBELOW', (0, 0), (-1, 0), 0.25, colors.black))
-    t.style.append(('LINEABOVE', (0, -1), (-1, -1), 0.25, colors.black))
     t.style.append(('LINEAFTER', (0, 1), (-2, -2), 0.25, colors.black))
 
     t.row('', _("consideration"), _("tax"), _("gross"))
@@ -188,25 +187,26 @@ def collate_payments(invoice, available_width, show_payment_details):
 
         if idx == last_idx:
             t.row(b(_('This Invoice')), money(-row[1]), money(-row[2]), money(-row[3]))
+            t.row_style('LINEABOVE', 0, -1, 0.25, colors.black)
         else:
             t.row(p(title), money(row[1]), money(row[2]), money(row[3]))
 
-            def small_row(*args):
-                t.row(*[Paragraph(c, stylesheet['SmallRight']) for c in args])
+        def small_row(*args):
+            t.row(*[Paragraph(c, stylesheet['SmallRight']) for c in args])
 
-            if show_payment_details and row[0] == 'payment':
-                for job in txn['jobs'].values():
-                    small_row(job['name'], money(job['payment_applied_net']), money(job['payment_applied_tax']), money(job['payment_applied_gross']))
+        if show_payment_details and row[0] == 'payment':
+            for job in txn['jobs'].values():
+                small_row(job['name'], money(job['payment_applied_net']), money(job['payment_applied_tax']), money(job['payment_applied_gross']))
 
-            if show_payment_details and row[0] == 'discount':
-                for job in txn['jobs'].values():
-                    small_row(job['name'], money(job['discount_applied_net']), money(job['discount_applied_tax']), money(job['discount_applied_gross']))
+        if show_payment_details and row[0] == 'discount':
+            for job in txn['jobs'].values():
+                small_row(job['name'], money(job['discount_applied_net']), money(job['discount_applied_tax']), money(job['discount_applied_gross']))
 
-            if show_payment_details and row[0] == 'invoice':
-                for job in txn['jobs'].values():
-                    unpaid_gross = job['gross'] - job['paid_gross']
-                    if unpaid_gross > 0:
-                        small_row(job['name'], money(-(job['net']-job['paid_net'])), money(-(job['tax']-job['paid_tax'])), money(-unpaid_gross))
+        if show_payment_details and row[0] == 'invoice':
+            for job in txn['jobs'].values():
+                unpaid_gross = job['gross'] - job['paid_gross']
+                if unpaid_gross > 0:
+                    small_row(job['name'], money(-(job['net']-job['paid_net'])), money(-(job['tax']-job['paid_tax'])), money(-unpaid_gross))
 
 
     t.row_style('RIGHTPADDING', -1, -1, 0)
