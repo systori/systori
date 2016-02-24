@@ -18,7 +18,6 @@ deploy_apps = {
 }
 
 
-PROD_DUMP_FILE = 'systori.prod.dump'
 PROD_MEDIA_PATH = '/srv/systori/production'
 PROD_MEDIA_FILE = 'systori.media.tgz'
 
@@ -90,7 +89,8 @@ def get_media():
     run('rm /tmp/' + PROD_MEDIA_FILE)
 
 
-def docker_from_productiondb(container_name='web', env_name='production'):
+def docker_get_db(container_name='web', env_name='production'):
+    dump_file = 'systori.'+env_name+'.dump'
     settings = {
         'NAME': 'postgres',
         'USER': 'postgres',
@@ -102,8 +102,8 @@ def docker_from_productiondb(container_name='web', env_name='production'):
     local('docker-compose run {0} createdb -h {HOST} -U {USER} {NAME}'.format(
         container_name, **settings))
     local('docker-compose run {0} pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(
-        container_name, PROD_DUMP_FILE, **settings))
-    local('rm ' + PROD_DUMP_FILE)
+        container_name, dump_file, **settings))
+    local('rm ' + dump_file)
 
 
 def init_settings(env_name='local'):
