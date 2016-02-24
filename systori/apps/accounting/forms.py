@@ -275,6 +275,7 @@ class AdjustJobForm(Form):
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
     correction = LocalizedDecimalField(label=_("Correction"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
     adjustment = LocalizedDecimalField(label=_("Adjustment"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    adjustment_gross = forms.DecimalField(label=_("Adjustment Gross"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -289,6 +290,7 @@ class AdjustJobForm(Form):
         self.initial['correction'] = self.invoiced_amount
         self.correction_value = convert_field_to_value(self['correction'])
         self.adjustment_value = convert_field_to_value(self['adjustment'])
+        self.adjustment_gross_value = convert_field_to_value(self['adjustment_gross'])
 
     def clean(self):
         if self.cleaned_data['correction'] > self.invoiced_amount:
@@ -306,10 +308,12 @@ class BaseAdjustJobFormSet(BaseFormSet):
         self.adjustment_form = AdjustmentForm(*args, initial=initial, **kwargs)
         self.correction_total = D('0.00')
         self.adjustment_total = D('0.00')
+        self.adjustment_gross_total = D('0.00')
         self.invoiced_total = D('0.00')
         for form in self.forms:
             self.correction_total += form.correction_value
             self.adjustment_total += form.adjustment_value
+            self.adjustment_gross_total += form.adjustment_gross_value
             self.invoiced_total += form.invoiced_amount
 
     def get_initial(self, jobs):
@@ -330,7 +334,7 @@ class BaseAdjustJobFormSet(BaseFormSet):
         for form in self.forms:
             if form.cleaned_data['adjustment']:
                 job = form.cleaned_data['job']
-                adjustment = form.cleaned_data['adjustment']
+                adjustment = form.cleaned_data['adjustment_gross']
                 amounts.append((job, D(0), D(0), adjustment))
         return amounts
 

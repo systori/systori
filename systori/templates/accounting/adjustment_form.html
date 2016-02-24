@@ -18,7 +18,8 @@
       .job-correction,
       .job-correction input,
       .job-adjustment,
-      .job-adjustment input {
+      .job-adjustment input,
+      .job-adjustment-gross {
         text-align: right;
       }
     </style>
@@ -31,7 +32,8 @@
         <th class="job-name">{% trans 'Job' %}</th>
         <th class="job-invoiced">{% trans 'Invoiced' %}</th>
         <th class="job-correction">{% trans 'Correction' %}</th>
-        <th class="job-adjustment">{% trans 'Adjustment' %}</th>
+        <th class="job-adjustment">{% trans 'Adjustment Net' %}</th>
+        <th class="job-adjustment-gross">{% trans 'Adjustment Gross' %}</th>
       </tr>
       </thead>
       <tbody>
@@ -45,6 +47,10 @@
           <td class="job-adjustment">
             <input id="{{ adjustment.adjustment.id_for_label }}" name="{{ adjustment.adjustment.html_name }}" type="text" value="{{ adjustment.adjustment_value|ubrdecimal:2 }}">
           </td>
+          <td class="job-adjustment-gross">
+            <span>{{ adjustment.adjustment_gross_value|ubrdecimal:2 }}</span>
+            {{ adjustment.adjustment_gross }}
+          </td>
         </tr>
       {% endfor %}
         <tr class="adjustment-table-totals">
@@ -52,6 +58,7 @@
           <td class="job-invoiced">{{ form.invoiced_total|ubrdecimal:2 }}</td>
           <td class="job-correction">{{ form.correction_total|ubrdecimal:2 }}</td>
           <td class="job-adjustment">{{ form.adjustment_total|ubrdecimal:2 }}</td>
+          <td class="job-adjustment-gross">{{ form.adjustment_gross_total|ubrdecimal:2 }}</td>
         </tr>
       </tbody>
     </table>
