@@ -10,10 +10,6 @@
 </style>
 {% endblock %}
 
-{% block body_start %}
-<body onresize="resizePanel()">
-{% endblock %}
-
 {% block header %}
   <div style="font-size:20px; height:100%; position:relative;">
   <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="margin:0px;">
@@ -47,7 +43,7 @@
 {% block container %}
 
 <div class="container-fluid">
-  <div class="row row-eq-height">
+  <div class="row equal-height-panels">
     {% for plan in selected_plans %}
       <div class="col-xs-12 col-sm-6 col-md-4 col-lg-2">
         <div class="panel panel-primary" data-id="{{ plan.id }}">
@@ -71,7 +67,7 @@
         </div>
       </div>
       {% if forloop.counter|divisibleby:6 %}
-      </div> <div class="row">
+      </div> <div class="row equal-height-panels">
       {% endif %}
     {% endfor %}
   </div>
@@ -81,14 +77,12 @@
 {% block extra_js %}
 
   {% include "main/timeago_js.html" %}
+  {% include "main/match-height_js.html" %}
 
   <script type="text/javascript">
-    window.onload = function resizePanel(){
-        var h = $("#panel-2").height();
-        $("#panel-1").height(h); // add a line like this for each panel you want to resize
-    }
-
-  // $(document).ready(function(){
+  
+  $(document).ready(function(){
+    $('.equal-height-panels .panel').matchHeight();
   //   setInterval(function() {page_reload()}, 5000);
 
   //   $("span.timeago").timeago();
@@ -112,7 +106,7 @@
   //       502: function() { console.log("502"); }
   //     }
   //   });
-  // };
+  });
 
   </script>
 {% endblock %}
