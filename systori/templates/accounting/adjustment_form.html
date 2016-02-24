@@ -4,7 +4,7 @@
 {% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
 {% block content %}
-  <form method="post">{% csrf_token %}
+  <form method="post" autocomplete="off">{% csrf_token %}
 
     {% if form.invoice %}
       <div class="form-group">
