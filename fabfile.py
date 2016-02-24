@@ -89,13 +89,13 @@ def get_media():
     run('rm /tmp/' + PROD_MEDIA_FILE)
 
 
-def docker_from_productiondb(container_name='web'):
+def docker_from_productiondb(container_name='web', env_name='production'):
     settings = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'HOST': 'db_1'
     }
-    fetch_db()
+    fetch_db(env_name)
     local('docker-compose run {0} dropdb -h {HOST} -U {USER} {NAME}'.format(
         container_name, **settings))
     local('docker-compose run {0} createdb -h {HOST} -U {USER} {NAME}'.format(
