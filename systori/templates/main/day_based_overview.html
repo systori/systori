@@ -47,22 +47,23 @@
     {% for plan in selected_plans %}
       <div class="col-xs-12 col-sm-6 col-md-4 col-lg-2">
         <div class="panel panel-primary" data-id="{{ plan.id }}">
-          <div class="panel-heading">{{ plan.jobsite.project.name }}</div>
+          <div class="panel-heading fit-text">{{ plan.jobsite.project.name }}</div>
           <div class="panel-body">
-            <h6>{{ plan.jobsite.name }}</h6>
-            <h4>{{ plan.jobsite.address }} - {{ plan.jobsite.city }}</h4>
+            <h4><small>{{ plan.jobsite.name }}</small></h4>
+            <h4 class="fit-text">{{ plan.jobsite.address }}</h4>
+            <h4>{{ plan.jobsite.city }}</h4>
             <hr>
           {% for worker in plan.workers.all %}
-            <h5>{{ worker.access.user.get_full_name }}</h5>
+            <h5 class="fit-text">{{ worker.access.user.get_full_name }}</h5>
           {% endfor %}
             <hr>
           {% for equipment in plan.equipment.all %}
-            <h5>{{ equipment }}</h5>
+            <h5 class="fit-text">{{ equipment }}</h5>
           {% endfor %}
+          {% if plan.notes %}
             <hr>
-          {% for note in plan.notes %}
-            <h4><small>{{ plan.notes }}</small></h4>
-          {% endfor %}
+            <h4 class="fit-text"><small>{{ plan.notes }}</small></h4>
+          {% endif %}
           </div>
         </div>
       </div>
@@ -78,11 +79,14 @@
 
   {% include "main/timeago_js.html" %}
   {% include "main/match-height_js.html" %}
+  {% include "main/fittext_js.html" %}
 
   <script type="text/javascript">
   
   $(document).ready(function(){
     $('.equal-height-panels .panel').matchHeight();
+
+    jQuery(".fit-text").fitText(1.3);
   //   setInterval(function() {page_reload()}, 5000);
 
   //   $("span.timeago").timeago();
