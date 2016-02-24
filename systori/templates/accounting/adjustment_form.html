@@ -1,0 +1,74 @@
+{% extends "project.html" %}
+{% load i18n staticfiles bootstrap customformatting ubrutils %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
+
+{% block content %}
+  <form method="post">{% csrf_token %}
+
+    {% if form.invoice %}
+      <div class="form-group">
+        <label class="control-label">{% trans "Invoice" %}</label>
+        <div>{{ form.invoice.json.invoice_no }} {{ form.invoice.json.title }}</div>
+      </div>
+    {% endif %}
+
+    <style>
+      .job-invoiced,
+      .job-correction,
+      .job-correction input,
+      .job-adjustment,
+      .job-adjustment input {
+        text-align: right;
+      }
+    </style>
+
+    <div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
+    {{ form.management_form }}
+    <table is="adjustment-table" class="table table-striped">
+      <thead>
+      <tr>
+        <th class="job-name">{% trans 'Job' %}</th>
+        <th class="job-invoiced">{% trans 'Invoiced' %}</th>
+        <th class="job-correction">{% trans 'Correction' %}</th>
+        <th class="job-adjustment">{% trans 'Adjustment' %}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for adjustment in form.forms %}
+        <tr is="adjustment-row" class="adjustment-row">
+          <td class="job-name">{{ adjustment.job }}{{ adjustment.initial.job.name }}</td>
+          <td class="job-invoiced" data-amount="{{ adjustment.invoiced_amount }}">{{ adjustment.invoiced_amount|ubrdecimal:2 }}</td>
+          <td class="job-correction">
+            <input id="{{ adjustment.correction.id_for_label }}" name="{{ adjustment.correction.html_name }}" type="text" value="{{ adjustment.correction_value|ubrdecimal:2 }}">
+          </td>
+          <td class="job-adjustment">
+            <input id="{{ adjustment.adjustment.id_for_label }}" name="{{ adjustment.adjustment.html_name }}" type="text" value="{{ adjustment.adjustment_value|ubrdecimal:2 }}">
+          </td>
+        </tr>
+      {% endfor %}
+        <tr class="adjustment-table-totals">
+          <td class="job-name"></td>
+          <td class="job-invoiced">{{ form.invoiced_total|ubrdecimal:2 }}</td>
+          <td class="job-correction">{{ form.correction_total|ubrdecimal:2 }}</td>
+          <td class="job-adjustment">{{ form.adjustment_total|ubrdecimal:2 }}</td>
+        </tr>
+      </tbody>
+    </table>
+    {% for error in form.non_form_errors %}
+      <span class="help-block ">{{ error }}</span>
+    {% endfor %}
+    </div>
+
+    <div class="form-group">
+      <button name="save" type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block extra_js %}
+  <script type="application/dart" src="{% static "dart/adjustment_editor.dart" %}"></script>
+  <script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
+  <script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
+  <script src="{% static "dart/packages/browser/dart.js" %}"></script>
+{% endblock extra_js %}

@@ -262,7 +262,7 @@ def generate_transaction_table(data, cols=('net', 'tax', 'gross')):
                     'tax': txn['tax'] - txn['paid_tax']
                 }
                 t += [(txn['type'],)+tuple(-vals[col] for col in cols)+(txn,)]
-        else:
+        elif txn['payment_applied_gross'] != 0 or txn['discount_applied_gross'] != 0:
             t += [(txn['type'],)+tuple(txn['payment_applied_'+col] for col in cols)+(txn,)]
             if txn['discount_applied_gross'] != 0:
                 t += [('discount',)+tuple(txn['discount_applied_'+col] for col in cols)+(txn,)]

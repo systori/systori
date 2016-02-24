@@ -267,6 +267,83 @@ class RefundForm(forms.ModelForm):
         refund.save()
 
 
+class AdjustmentForm(Form):
+    invoice = forms.ModelChoiceField(label=_("Invoice"), queryset=Invoice.objects.all(), widget=forms.HiddenInput(), required=False)
+
+
+class AdjustJobForm(Form):
+    job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
+    correction = LocalizedDecimalField(label=_("Correction"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    adjustment = LocalizedDecimalField(label=_("Adjustment"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.job = self.initial['job']
+        self.fields['job'].queryset = self.job.project.jobs.all()
+        self.fields['correction'].widget.attrs['class'] = 'form-control'
+        self.fields['adjustment'].widget.attrs['class'] = 'form-control'
+        if 'invoiced' in self.initial:
+            self.invoiced_amount = self.initial['invoiced']
+        else:
+            self.invoiced_amount = self.job.billable_total
+        self.initial['correction'] = self.invoiced_amount
+        self.correction_value = convert_field_to_value(self['correction'])
+        self.adjustment_value = convert_field_to_value(self['adjustment'])
+
+    def clean(self):
+        if self.cleaned_data['correction'] > self.invoiced_amount:
+            self.add_error('correction', ValidationError(_("Correction cannot be greater than invoiced amount.")))
+        if self.cleaned_data['adjustment'] > self.invoiced_amount:
+            self.add_error('adjustment', ValidationError(_("Adjustment cannot be greater than invoiced amount.")))
+
+
+class BaseAdjustJobFormSet(BaseFormSet):
+
+    def __init__(self, *args, **kwargs):
+        initial = kwargs.pop('initial', {})
+        self.invoice = initial.get('invoice')
+        super().__init__(*args, initial=self.get_initial(kwargs.pop('jobs', [])), **kwargs)
+        self.adjustment_form = AdjustmentForm(*args, initial=initial, **kwargs)
+        self.correction_total = D('0.00')
+        self.adjustment_total = D('0.00')
+        self.invoiced_total = D('0.00')
+        for form in self.forms:
+            self.correction_total += form.correction_value
+            self.adjustment_total += form.adjustment_value
+            self.invoiced_total += form.invoiced_amount
+
+    def get_initial(self, jobs):
+        initial = []
+        previous_debits = self.invoice.json['debits'] if self.invoice else []
+        for job in jobs:
+            job_dict = {}
+            for debit in previous_debits:
+                if debit['job.id'] == job.id:
+                    job_dict['invoiced'] = D(debit['debited_net'])
+                    break
+            job_dict['job'] = job
+            initial.append(job_dict)
+        return initial
+
+    def get_credit_tuples(self):
+        amounts = []
+        for form in self.forms:
+            if form.cleaned_data['adjustment']:
+                job = form.cleaned_data['job']
+                adjustment = form.cleaned_data['adjustment']
+                amounts.append((job, D(0), D(0), adjustment))
+        return amounts
+
+    def save(self):
+        credit_jobs(self.get_credit_tuples(), D(0))
+        #if self.invoice and not self.invoice.status == Invoice.PAID:
+        #    self.invoice.pay()
+        #    self.invoice.save()
+
+
+AdjustJobFormSet = formset_factory(AdjustJobForm, formset=BaseAdjustJobFormSet, extra=0)
+
+
 class InvoiceDocumentForm(forms.ModelForm):
     parent = forms.ModelChoiceField(queryset=Invoice.objects.none(), required=False, widget=forms.HiddenInput())
     doc_template = forms.ModelChoiceField(

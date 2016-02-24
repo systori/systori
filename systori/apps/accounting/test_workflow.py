@@ -123,6 +123,14 @@ class TestCompletedContractAccountingMethod(TestCase):
                              job=D(100.00), promised=D(100.00),  # <- owed balance because adjustment wasn't enough
                              job_debits=D(600.00), job_adjusted_debits=D(580.00))  # <- 20.00 adjusted
 
+    def test_adjustment_only(self):
+        """ Only adjustment entered. """
+        debit_jobs([(self.job, D(600.00), Entry.WORK_DEBIT)])
+        credit_jobs([(self.job, D(0), D(0), D(400.00))], D(0))
+        self.assert_balances(bank=D(0), partial=D(0), tax=D(0),  # <- cash
+                             job=D(200.00), promised=D(200.00),  # <- owed balance because adjustment wasn't enough
+                             job_debits=D(600.00), job_adjusted_debits=D(200.00))
+
     def test_discounted_payment_matching_debit(self):
         """ Payment entered along with a discount to exactly match the debit. """
         debit_jobs([(self.job, D(500.00), Entry.WORK_DEBIT)])

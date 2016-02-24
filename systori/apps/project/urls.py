@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from ..user.authorization import office_auth
 from ..accounting.views import PaymentCreate, PaymentDelete
+from ..accounting.views import AdjustmentCreate, AdjustmentDelete
 from ..document.views import RefundCreate, RefundDelete, RefundPDF
 from .views import *
 from ..task.views import AllProjectsProgress
@@ -25,6 +26,10 @@ urlpatterns = [
     url(r'^project-(?P<project_pk>\d+)/create-payment$', office_auth(PaymentCreate.as_view()), name='payment.create'),
     url(r'^project-(?P<project_pk>\d+)/create-payment-for-invoice/(?P<invoice_pk>\d+)$', office_auth(PaymentCreate.as_view()), name='payment.create'),
     url(r'^project-(?P<project_pk>\d+)/payment-(?P<pk>\d+)/delete$', office_auth(PaymentDelete.as_view()), name='payment.delete'),
+
+    url(r'^project-(?P<project_pk>\d+)/create-adjustment$', office_auth(AdjustmentCreate.as_view()), name='adjustment.create'),
+    url(r'^project-(?P<project_pk>\d+)/create-adjustment-for-invoice/(?P<invoice_pk>\d+)$', office_auth(AdjustmentCreate.as_view()), name='adjustment.create'),
+    url(r'^project-(?P<project_pk>\d+)/adjustment-(?P<pk>\d+)/delete$', office_auth(AdjustmentDelete.as_view()), name='adjustment.delete'),
 
     url(r'^project-(?P<project_pk>\d+)/create-refund$', office_auth(RefundCreate.as_view()), name='refund.create'),
     url(r'^project-(?P<project_pk>\d+)/refund-(?P<pk>\d+)/delete$', office_auth(RefundDelete.as_view()), name='refund.delete'),
