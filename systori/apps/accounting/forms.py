@@ -285,7 +285,7 @@ class AdjustJobForm(Form):
         if 'invoiced' in self.initial:
             self.invoiced_amount = self.initial['invoiced']
         else:
-            self.invoiced_amount = self.job.billable_total
+            self.invoiced_amount = self.job.account.adjusted_debits_total.net
         self.initial['correction'] = self.invoiced_amount
         self.correction_value = convert_field_to_value(self['correction'])
         self.adjustment_value = convert_field_to_value(self['adjustment'])
