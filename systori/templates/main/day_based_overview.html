@@ -83,7 +83,6 @@
 {% endblock %}
 {% block extra_js %}
 
-  {% include "main/timeago_js.html" %}
   {% include "main/match-height_js.html" %}
   {% include "main/fittext_js.html" %}
 
@@ -96,7 +95,7 @@
 
     $("#progress").animate({
        width: "0%"
-    }, 10000, function() {
+    }, 15000, function() {
       page_reload();
       }
     );
@@ -113,6 +112,7 @@
       },
       error: function() {
         console.log("error reloading page.");
+        setTimeout(page_reload, 60000);
       },
       statusCode: {
         404: function() { console.log("404"); },
