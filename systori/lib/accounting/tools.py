@@ -6,24 +6,28 @@ from decimal import ROUND_HALF_UP
 DEFAULT_ROUNDING = ROUND_HALF_UP
 
 
-def compute_gross_tax(net, tax_rate, rounding=DEFAULT_ROUNDING):
+def round(num, rounding=DEFAULT_ROUNDING):
+    return num.quantize(Decimal('0.01'), rounding=rounding)
+
+
+def compute_gross_tax(net, tax_rate):
     assert isinstance(net, Decimal)
     assert isinstance(tax_rate, Decimal)
 
-    tax = (net * tax_rate).quantize(Decimal('0.01'), rounding=rounding)
+    tax = round(net * tax_rate)
 
     gross = net + tax
 
     return gross, tax
 
 
-def extract_net_tax(gross, tax_rate, rounding=DEFAULT_ROUNDING):
+def extract_net_tax(gross, tax_rate):
     assert isinstance(gross, Decimal)
     assert isinstance(tax_rate, Decimal)
 
     inverse_rate = Decimal('1.0') + (Decimal('1.0') / tax_rate)
 
-    tax = (gross / inverse_rate).quantize(Decimal('0.01'), rounding=rounding)
+    tax = round(gross / inverse_rate)
 
     net = gross - tax
 

@@ -88,7 +88,22 @@ class TestTransactionsTable(TestCase):
                                                            # 0 payment not shown
         ])
 
-    def test_project_150_issue_01_17_2016(self):
+    def test_invoices_with_adjustment_and_payment_project_41_issue_2016_02_24(self):
+        debit_jobs([(self.job, D(1190.00), Entry.WORK_DEBIT)], transacted_on=days_ago(6))
+        credit_jobs([(self.job, D(1190.00), 0, 0)], D(1190.00), transacted_on=days_ago(5))
+        debit_jobs([(self.job, D(1019.00), Entry.WORK_DEBIT)], transacted_on=days_ago(4))
+        credit_jobs([(self.job, D(0), D(0), D(900.00))], D(0), transacted_on=days_ago(3))
+        credit_jobs([(self.job, D(119.00), D(0), D(0.00))], D(119.00), transacted_on=days_ago(2))
+        debit_jobs([(self.job, D(119.00), Entry.WORK_DEBIT)], transacted_on=days_ago(1))
+        self.assertEqual(self.tbl(), [
+            ('',             'net',    'tax',   'gross'),
+            ('progress',  '1200.00',  '228.00',  '1428.00'),
+            ('payment',  '-1000.00', '-190.00', '-1190.00'),
+            ('payment',  '-100.00', '-19.00', '-119.00'),
+            ('invoice',  '-100.00', '-19.00', '-119.00'),
+        ])
+
+    def test_project_150_issue_2016_01_17(self):
         debit_jobs([(self.job, D(28560.00), Entry.WORK_DEBIT)], transacted_on=days_ago(4))
         debit_jobs([(self.job, D(10569.95), Entry.WORK_DEBIT)], transacted_on=days_ago(3))
         debit_jobs([(self.job, D(14045.95), Entry.WORK_DEBIT)], transacted_on=days_ago(2))

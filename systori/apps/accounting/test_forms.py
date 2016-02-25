@@ -34,6 +34,7 @@ class TestBankAccountForm(TestCase):
 class SplitPaymentFormTests(TestCase):
 
     def setUp(self):
+        activate('en')
         create_data(self)
         self.task.complete = 5
         self.task.save()
@@ -52,7 +53,7 @@ class SplitPaymentFormTests(TestCase):
 
             'bank_account': Account.objects.banks().first().id,
             'amount': '2',
-            'discount': '0.0',
+            'discount': '0.00',
             'transacted_on': '2015-01-01',
 
             'split-0-job': self.job.id,
@@ -72,7 +73,7 @@ class SplitPaymentFormTests(TestCase):
 
             'bank_account': Account.objects.banks().first().id,
             'amount': '2',
-            'discount': '0.0',
+            'discount': '0.00',
             'transacted_on': '2015-01-01',
 
             'split-0-job': self.job.id,
@@ -92,7 +93,7 @@ class SplitPaymentFormTests(TestCase):
 
             'bank_account': Account.objects.banks().first().id,
             'amount': '',
-            'discount': '0.0',
+            'discount': '0.00',
             'transacted_on': '2015-01-01',
 
             'split-0-job': self.job.id,
@@ -160,7 +161,7 @@ class DebitFormTests(TestCase):
         self.task.save()
 
     def test_initial_load_not_booked(self):
-        form = DebitForm(data={'is_override': False}, initial={'job': self.job, 'is_invoiced': True, 'is_booked': False})
+        form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': False, 'is_override': False})
         self.assertEqual(D('480.00'), form['amount_net'].value())
         self.assertEqual(D('571.20'), form.debit_amount.gross)
 
@@ -168,15 +169,14 @@ class DebitFormTests(TestCase):
         debit_jobs([(self.job, D(571.20), Entry.WORK_DEBIT)])
         # now there is nothing new to invoice, we invoiced the full amount already
         # is_booked: False, means this form is not associated with the previous debit
-        form = DebitForm(data={'is_override': False}, initial={'job': self.job, 'is_invoiced': True, 'is_booked': False})
+        form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': False, 'is_override': False})
         self.assertEqual(D('0.00'), form['amount_net'].value())
         self.assertEqual(D('0.00'), form.debit_amount.gross)
 
     def test_reload_with_amount_changed_while_editing(self):
         # this form starts off with initial amount_net of 100
         form = DebitForm(
-            data={'is_override': False},
-            initial={'job': self.job, 'is_invoiced': True, 'is_booked': False, 'amount_net': '100.00'}
+            initial={'job': self.job, 'is_invoiced': True, 'is_booked': False, 'amount_net': '100.00', 'is_override': False}
         )
         # the actual itemized amount is actually 480, so the form auto-updates the amount_net to 480
         self.assertEqual(D('480.00'), form['amount_net'].value())
@@ -185,8 +185,7 @@ class DebitFormTests(TestCase):
     def test_initial_load_after_booking(self):
         debit_jobs([(self.job, D(571.20), Entry.WORK_DEBIT)])
         # is_booked: True, means this form is associated with the previous debit
-        form = DebitForm(data={'is_override': False},
-                         initial={'job': self.job, 'is_invoiced': True, 'is_booked': True,
+        form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': True, 'is_override': False,
                                   'amount_net': '480.00',
                                   'debited_gross': '571.20', 'balance_gross': '571.20',
                                   'estimate_net': '480.00', 'itemized_net': '480.00'})
@@ -196,8 +195,7 @@ class DebitFormTests(TestCase):
     def test_initial_load_after_booking_with_net_increase(self):
         debit_jobs([(self.job, D(452.20), Entry.WORK_DEBIT)])
         # is_booked: True, means this form is associated with the previous debit
-        form = DebitForm(data={'is_override': False},
-                         initial={'job': self.job, 'is_invoiced': True, 'is_booked': True,
+        form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': True, 'is_override': False,
                                   'amount_net': '380.00',
                                   'debited_gross': '452.20', 'balance_gross': '452.20',
                                   'estimate_net': '960.00', 'itemized_net': '380.00'})
@@ -212,8 +210,7 @@ class DebitFormTests(TestCase):
         debit_jobs([(self.job, D(452.20), Entry.WORK_DEBIT)])
         credit_jobs([(self.job, D(119.00), D(0), D(119.00))], D(119.00))
         # is_booked: True, means this form is associated with the previous debit
-        form = DebitForm(data={'is_override': False},
-                         initial={'job': self.job, 'is_invoiced': True, 'is_booked': True,
+        form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': True, 'is_override': False,
                                   'amount_net': '380.00',
                                   'debited_gross': '452.20', 'balance_gross': '452.20',
                                   'estimate_net': '960.00', 'itemized_net': '380.00'})
