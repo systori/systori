@@ -38,8 +38,6 @@
         <div class="nav navbar-text progress pull-right" style="width: 300px;">
             <div id="progress" role="progressbar" style="background-color: #d1725e; height:100%;"></div>
         </div>
-        <!-- <a class="navbar-brand pull-right">{% trans 'Updated' %} <span class="timeago" title="{% now "c" %}">{% trans "less than a minute ago" %}</span></a> -->
-
       </div>
     </div>
   </nav>
@@ -51,21 +49,28 @@
 <div class="container-fluid">
   <div class="row equal-height-panels">
     {% for plan in selected_plans %}
+
       <div class="col-xs-12 col-sm-6 col-md-4 col-lg-2">
         <div class="panel panel-primary" data-id="{{ plan.id }}">
+
           <div class="panel-heading fit-text">{{ plan.jobsite.project.name }}</div>
           <div class="panel-body">
             <h4><small>{{ plan.jobsite.name }}</small></h4>
             <h4 class="fit-text">{{ plan.jobsite.address }}</h4>
             <h4>{{ plan.jobsite.city }}</h4>
             <hr>
+
           {% for worker in plan.workers.all %}
             <h5 class="fit-text text-info">{{ worker.access.user.get_full_name }}</h5>
           {% endfor %}
-            <hr>
-          {% for equipment in plan.equipment.all %}
-            <h5 class="fit-text text-warning">{{ equipment }}</h5>
-          {% endfor %}
+            
+          {% if plan.equipment.count > 0 %}
+          <hr>
+            {% for equipment in plan.equipment.all %}
+              <h5 class="fit-text text-warning">{{ equipment }}</h5>
+            {% endfor %}
+          {% endif %}
+
           {% if plan.notes %}
             <hr>
             <h4 class="fit-text text-danger">{{ plan.notes }}</h4>
@@ -76,6 +81,7 @@
       {% if forloop.counter|divisibleby:6 %}
       </div> <div class="row equal-height-panels">
       {% endif %}
+
     {% endfor %}
   </div>
 </div>
