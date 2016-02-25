@@ -156,16 +156,17 @@ class RefundJobForm(Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['job'].queryset = self.initial['job'].project.jobs.all()
-        self.fields['amount'].widget.attrs['class'] = 'form-control'
+        self.invoiced_value = self.initial['job'].account.adjusted_debits_total.gross
+        self.payments_value = self.initial['job'].account.adjusted_credits_total.gross * -1
+        self.overpaid_value = max(D('0.00'), self.payments_value - self.invoiced_value)
+        self.underpaid_value = max(D('0.00'), self.invoiced_value - self.payments_value)
+        if 'refund' in self.prefix:
+            self.initial['amount'] = self.overpaid_value
         self.amount_value = convert_field_to_value(self['amount'])
-        self.billed = self.initial['job'].account.adjusted_debits_total.gross
-        self.paid = abs(self.initial['job'].account.payments().sum)
-        self.overpaid = max(D('0.00'), self.paid - self.billed)
 
     def clean(self):
         if 'refund' in self.prefix:
-            if self.cleaned_data['amount'] > self.paid:
+            if self.cleaned_data['amount'] > self.payments_value:
                 self.add_error('amount', ValidationError(_("Cannot refund more than has been paid.")))
 
 
@@ -175,14 +176,16 @@ class BaseRefundJobFormSet(BaseFormSet):
         self.applicable_refund_total = kwargs.pop('refund_total', D('0.00'))
         super().__init__(*args, **kwargs)
         self.amount_total = D('0.00')
-        self.billed_total = D('0.00')
-        self.paid_total = D('0.00')
+        self.invoiced_total = D('0.00')
+        self.payments_total = D('0.00')
         self.overpaid_total = D('0.00')
+        self.underpaid_total = D('0.00')
         for form in self.forms:
             self.amount_total += form.amount_value
-            self.billed_total += form.billed
-            self.paid_total += form.paid
-            self.overpaid_total += form.overpaid
+            self.invoiced_total += form.invoiced_value
+            self.payments_total += form.payments_value
+            self.overpaid_total += form.overpaid_value
+            self.underpaid_total += form.underpaid_value
 
     def get_amounts(self):
         amounts = []
@@ -223,7 +226,7 @@ class RefundForm(forms.ModelForm):
         if len(jobs) <= 1:
             not_overpaid_jobs = []  # if there is only one job, no sense to allow applying to the same job
         else:
-            not_overpaid_jobs = [form.initial['job'] for form in self.refund_jobs_form.forms if form.overpaid <= 0]
+            not_overpaid_jobs = [form.initial['job'] for form in self.refund_jobs_form.forms if form.overpaid_value <= 0]
         self.apply_jobs_form = RefundJobFormSet(refund_total=self.refund_jobs_form.amount_total,
                                                 prefix='apply', initial=self.get_initial(not_overpaid_jobs),
                                                 **kwargs)

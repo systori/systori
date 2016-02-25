@@ -9,17 +9,19 @@
   <thead>
   <tr>
     <th class="job-name">{% trans 'Job' %}</th>
-    <th class="job-billed">{% trans 'Billed' %}</th>
+    <th class="job-invoiced">{% trans 'Invoiced' %}</th>
     <th class="job-paid">{% trans 'Paid' %}</th>
-      {% if form.prefix == 'refund' %}
-      <th class="job-overpaid">{% trans 'Overpaid' %}</th>
-      {% endif %}
+    {% if form.prefix == 'refund' %}
+    <th class="job-overpaid">{% trans 'Overpaid' %}</th>
+    {% elif form.prefix == 'apply' %}
+    <th class="job-underpaid">{% trans 'Underpaid' %}</th>
+    {% endif %}
     <th class="job-amount">
-      {% if form.prefix == 'refund' %}
+    {% if form.prefix == 'refund' %}
       {% trans 'Refund Amount' %}
-      {% else %}
+    {% else %}
       {% trans 'Apply Amount' %}
-      {% endif %}
+    {% endif %}
     </th>
   </tr>
   </thead>
@@ -27,12 +29,13 @@
   {% for job_form in form.forms %}
     <tr is="job-row" class="job-row">
       <td class="job-name">{{ job_form.job }}{{ job_form.initial.job.name }}</td>
-      <td class="job-billed">{{ job_form.billed|ubrdecimal:2 }}</td>
+      <td class="job-invoiced">{{ job_form.invoiced_value|ubrdecimal:2 }}</td>
       {% if form.prefix == 'refund' %}
-        <td class="job-paid"><a class="btn">{{ job_form.paid|ubrdecimal:2 }}</a></td>
-        <td class="job-overpaid"><a class="btn">{{ job_form.overpaid|ubrdecimal:2 }}</a></td>
+        <td class="job-paid"><a class="btn">{{ job_form.payments_value|ubrdecimal:2 }}</a></td>
+        <td class="job-overpaid"><a class="btn">{{ job_form.overpaid_value|ubrdecimal:2 }}</a></td>
       {% elif form.prefix == 'apply' %}
-        <td class="job-paid">{{ job_form.paid|ubrdecimal:2 }}</td>
+        <td class="job-paid">{{ job_form.payments_value|ubrdecimal:2 }}</td>
+        <td class="job-underpaid">{{ job_form.underpaid_value|ubrdecimal:2 }}</td>
       {% endif %}
       <td class="job-amount {% if job_form.amount.errors %}has-error bg-danger{% endif %}">
         <input class="form-control" id="{{ job_form.amount.id_for_label }}" name="{{ job_form.amount.html_name }}" type="text" value="{{ job_form.amount_value|ubrdecimal:2 }}">
@@ -44,11 +47,12 @@
   {% endfor %}
     <tr class="job-table-totals">
       <td class="job-name"></td>
-      <td class="job-billed">{{ form.billed_total|ubrdecimal:2 }}</td>
-      <td class="job-paid">{{ form.paid_total|ubrdecimal:2 }}</td>
+      <td class="job-invoiced">{{ form.invoiced_total|ubrdecimal:2 }}</td>
+      <td class="job-paid">{{ form.payments_total|ubrdecimal:2 }}</td>
       {% if form.prefix == 'refund' %}
         <td class="job-overpaid">{{ form.overpaid_total|ubrdecimal:2 }}</td>
       {% elif form.prefix == 'apply' %}
+        <td class="job-underpaid">{{ form.underpaid_total|ubrdecimal:2 }}</td>
       {% endif %}
       <td class="job-amount">{{ form.amount_total|ubrdecimal:2 }}</td>
     </tr>

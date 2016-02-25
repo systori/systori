@@ -8,14 +8,17 @@
 
     <style>
     tr > .job-amount,
+    tr > .job-invoiced,
     tr > .job-paid,
-    tr > .job-overpaid {
+    tr > .job-overpaid,
+    tr > .job-underpaid {
       text-align: right;
       min-width: 80px;
     }
 
     tr > td.job-paid > a,
-    tr > td.job-overpaid > a {
+    tr > td.job-overpaid > a,
+    tr > td.job-underpaid > a {
       color: black;
       background-color: transparent;
       display: block;
@@ -23,7 +26,8 @@
       height: 100%;
     }
     tr > td.job-paid > a:hover,
-    tr > td.job-overpaid > a:hover {
+    tr > td.job-overpaid > a:hover,
+    tr > td.job-underpaid > a:hover {
       background-color: #e6e6e6;
     }
     tr > .job-amount > input.form-control {

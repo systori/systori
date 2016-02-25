@@ -89,6 +89,15 @@ class BaseAccount(models.Model):
         adjustments = self.adjustments().sum_amount
         return debits + adjustments
 
+    @property
+    def adjusted_credits_total(self):
+        """ adjusted total = all credits - all adjustment credits
+            basically all payments and any other credits, excluding adjustments
+        """
+        credits = self.credits().sum_amount
+        adjustments = self.adjustments().sum_amount
+        return credits - adjustments
+
     DEBIT_ACCOUNTS = (ASSET, EXPENSE)
 
     @property

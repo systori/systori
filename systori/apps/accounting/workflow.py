@@ -95,7 +95,8 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False):
 
                 # credit the tax payments account (liability), increasing the liability
                 # (+) "bad thing", will have to be paid in taxes eventually
-                transaction.credit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
+                if tax > 0:  # when the refund is very small (like 0.01) there is no tax
+                    transaction.credit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
 
                 # credit the income account (income), this increases the balance
                 # (+) "good thing", income is good
@@ -227,7 +228,8 @@ def refund_jobs(refunded, applied, transacted_on=None, bank=None):
 
             # debit the tax payments account (liability), decreasing the liability
             # (-) "good thing", less taxes to pay
-            transaction.debit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
+            if tax > 0:  # when the refund is very small (like 0.01) there is no tax
+                transaction.debit(SKR03_TAX_PAYMENTS_CODE, tax, job=job)
 
     for job, apply in applied:
 
