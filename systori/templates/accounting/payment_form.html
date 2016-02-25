@@ -4,7 +4,7 @@
 {% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
 {% block content %}
-  <form method="post">{% csrf_token %}
+  <form method="post" autocomplete="off">{% csrf_token %}
 
     {{ form.payment_form.bank_account|bootstrap }}
     {{ form.payment_form.transacted_on|bootstrap }}

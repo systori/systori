@@ -9,7 +9,7 @@ from django.forms import Form, ModelForm, ValidationError, widgets
 from django.db.transaction import atomic
 from django import forms
 from systori.lib.fields import LocalizedDecimalField
-from systori.lib.accounting.tools import Amount
+from systori.lib.accounting.tools import Amount, round as _round
 from ..task.models import Job
 from .workflow import Account, credit_jobs, debit_jobs, refund_jobs
 from .constants import TAX_RATE, BANK_CODE_RANGE
@@ -275,6 +275,7 @@ class AdjustJobForm(Form):
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
     correction = LocalizedDecimalField(label=_("Correction"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
     adjustment = LocalizedDecimalField(label=_("Adjustment"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    adjustment_gross = forms.DecimalField(label=_("Adjustment Gross"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -285,10 +286,11 @@ class AdjustJobForm(Form):
         if 'invoiced' in self.initial:
             self.invoiced_amount = self.initial['invoiced']
         else:
-            self.invoiced_amount = self.job.billable_total
+            self.invoiced_amount = self.job.account.adjusted_debits_total.net
         self.initial['correction'] = self.invoiced_amount
         self.correction_value = convert_field_to_value(self['correction'])
         self.adjustment_value = convert_field_to_value(self['adjustment'])
+        self.adjustment_gross_value = convert_field_to_value(self['adjustment_gross'])
 
     def clean(self):
         if self.cleaned_data['correction'] > self.invoiced_amount:
@@ -306,10 +308,12 @@ class BaseAdjustJobFormSet(BaseFormSet):
         self.adjustment_form = AdjustmentForm(*args, initial=initial, **kwargs)
         self.correction_total = D('0.00')
         self.adjustment_total = D('0.00')
+        self.adjustment_gross_total = D('0.00')
         self.invoiced_total = D('0.00')
         for form in self.forms:
             self.correction_total += form.correction_value
             self.adjustment_total += form.adjustment_value
+            self.adjustment_gross_total += form.adjustment_gross_value
             self.invoiced_total += form.invoiced_amount
 
     def get_initial(self, jobs):
@@ -330,7 +334,7 @@ class BaseAdjustJobFormSet(BaseFormSet):
         for form in self.forms:
             if form.cleaned_data['adjustment']:
                 job = form.cleaned_data['job']
-                adjustment = form.cleaned_data['adjustment']
+                adjustment = form.cleaned_data['adjustment_gross']
                 amounts.append((job, D(0), D(0), adjustment))
         return amounts
 
@@ -400,8 +404,8 @@ class DebitForm(Form):
         self.latest_itemized = Amount.from_net(self.job.billable_total, TAX_RATE)
         self.latest_percent_complete = self.job.complete_percent
 
-        _initial_debit_amount_net = self.initial.get('amount_net', self['amount_net'].field.initial)
-        initial_debit_amount = Amount.from_net(D(_initial_debit_amount_net), TAX_RATE)
+        _initial_debit_amount_net = _round(D(self.initial.get('amount_net', self['amount_net'].field.initial)))
+        initial_debit_amount = Amount.from_net(_initial_debit_amount_net, TAX_RATE)
         self.debit_amount = Amount.from_net(convert_field_to_value(self['amount_net']), TAX_RATE)
 
         if self.initial['is_booked']:
@@ -427,7 +431,10 @@ class DebitForm(Form):
                 self.debit_amount = self.billable_amount
             else:
                 self.debit_amount = Amount.zero()
-            self.data['amount_net'] = self.debit_amount.net
+            # we want this updated on first load (self.initial) and subsequent reloads (self.data)
+            self.initial['amount_net'] = self.debit_amount.net
+            if self.data:
+                self.data['amount_net'] = self.initial['amount_net']
 
         # now that we know the correct debit amount we can calculate what the new balance will be
         self.new_debited = self.base_debited + self.debit_amount

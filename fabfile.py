@@ -18,7 +18,6 @@ deploy_apps = {
 }
 
 
-PROD_DUMP_FILE = 'systori.prod.dump'
 PROD_MEDIA_PATH = '/srv/systori/production'
 PROD_MEDIA_FILE = 'systori.media.tgz'
 
@@ -63,21 +62,22 @@ def _reset_localdb():
 
 def fetch_db(env_name='production'):
     dbname = 'systori_'+env_name
+    dump_file = 'systori.'+env_name+'.dump'
     # -Fc : custom postgresql compressed format
-    sudo('pg_dump -Fc -x -f /tmp/%s %s' % (PROD_DUMP_FILE, dbname), user='www-data')
-    get('/tmp/' + PROD_DUMP_FILE, PROD_DUMP_FILE)
-    sudo('rm /tmp/' + PROD_DUMP_FILE)
+    sudo('pg_dump -Fc -x -f /tmp/%s %s' % (dump_file, dbname), user='www-data')
+    get('/tmp/' + dump_file, dump_file)
+    sudo('rm /tmp/' + dump_file)
 
 
-def load_db():
+def load_db(env_name):
     _reset_localdb()
-    local('pg_restore -d systori_local -O ' + PROD_DUMP_FILE)
+    local('pg_restore -d systori_local -O systori.'+env_name+'.dump')
 
 
 def get_db(env_name='production'):
     fetch_db(env_name)
-    load_db()
-    local('rm ' + PROD_DUMP_FILE)
+    load_db(env_name)
+    local('rm systori.'+env_name+'.dump')
 
 
 def get_media():
@@ -89,20 +89,21 @@ def get_media():
     run('rm /tmp/' + PROD_MEDIA_FILE)
 
 
-def docker_from_productiondb(container_name='web'):
+def docker_get_db(container_name='web', env_name='production'):
+    dump_file = 'systori.'+env_name+'.dump'
     settings = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'HOST': 'db_1'
     }
-    fetch_db()
+    fetch_db(env_name)
     local('docker-compose run {0} dropdb -h {HOST} -U {USER} {NAME}'.format(
         container_name, **settings))
     local('docker-compose run {0} createdb -h {HOST} -U {USER} {NAME}'.format(
         container_name, **settings))
     local('docker-compose run {0} pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(
-        container_name, PROD_DUMP_FILE, **settings))
-    local('rm ' + PROD_DUMP_FILE)
+        container_name, dump_file, **settings))
+    local('rm ' + dump_file)
 
 
 def init_settings(env_name='local'):
