@@ -5,6 +5,12 @@
 
 {% block head %}
   {{ block.super }}
+<style type="text/css">
+#progress {
+  -webkit-transition: none !important;
+  transition: none !important;
+}
+</style>
 {% endblock %}
 
 {% block header %}
@@ -29,8 +35,9 @@
           <li><a>{{ request.selected_day|date:"l" }} {{ request.selected_day|localize }}</a></li>
           <li><a href="{{ next_day_url }}">{% trans 'next' %}</a></li>
         </ul>
-        <a class="navbar-brand pull-right">{% trans 'Updated' %} <span class="timeago" title="{% now "c" %}">{% trans "less than a minute ago" %}</span></a>
-
+        <div class="nav navbar-text progress pull-right" style="width: 300px;">
+            <div id="progress" role="progressbar" style="background-color: #d1725e; height:100%;"></div>
+        </div>
       </div>
     </div>
   </nav>
@@ -39,66 +46,67 @@
 
 {% block container %}
 
-  <div class="overview-wrapper">
+<div class="container-fluid">
+  <div class="row equal-height-panels">
     {% for plan in selected_plans %}
-      <div class="overview-box">
-        <div class="panel panel-default dailyplan" data-id="{{ plan.id }}">
-          <div class="panel-heading panel-custom">
-            {{ plan.jobsite.project.name }}
-          </div>
-          <div class="panel-body panel-custom" style="background-color:rgba(50,250,50,0.2); color:rgba(15,15,15,0.7);">
-            {{ plan.jobsite.name }} </br>
-            {{ plan.jobsite.address }} - {{ plan.jobsite.city }}
-          </div>
+
+      <div class="col-xs-12 col-sm-6 col-md-4 col-lg-2">
+        <div class="panel panel-primary" data-id="{{ plan.id }}">
+
+          <div class="panel-heading fit-text">{{ plan.jobsite.project.name }}</div>
+          <div class="panel-body">
+            <h4><small>{{ plan.jobsite.name }}</small></h4>
+            <h4 class="fit-text">{{ plan.jobsite.address }}</h4>
+            <h4>{{ plan.jobsite.city }}</h4>
+            <hr>
+
           {% for worker in plan.workers.all %}
-            {% if worker.is_foreman %}
-              <div class="panel-body panel-custom">
-                {{ worker.access.user.get_full_name }} <span style="color:#4ABEF7;">♔</span>
-              </div>
-            {% else %}
-              <div class="panel-body panel-custom">
-                {{ worker.access.user.get_full_name }}
-              </div>
-            {% endif %}
+            <h5 class="fit-text text-info">{{ worker.access.user.get_full_name }}</h5>
           {% endfor %}
-          {% for equipment in plan.equipment.all %}
-            <div class="panel-body panel-custom">
-              {{ equipment }} <span style="color:#4ABEF7;">♘</span>
-            </div>
-          {% endfor %}
+            
+          {% if plan.equipment.count > 0 %}
+          <hr>
+            {% for equipment in plan.equipment.all %}
+              <h5 class="fit-text text-warning">{{ equipment }}</h5>
+            {% endfor %}
+          {% endif %}
+
+          {% if plan.notes %}
+            <hr>
+            <h4 class="fit-text text-danger">{{ plan.notes }}</h4>
+          {% endif %}
+          </div>
         </div>
-        </ul>
       </div>
+      {% if forloop.counter|divisibleby:6 %}
+      </div> <div class="row equal-height-panels">
+      {% endif %}
+
     {% endfor %}
   </div>
-  <div class="notes-container">
-    <div class="notes-box">
-      <div class="panel panel-info">
-        <div class="panel-heading">{% trans 'Notes' %}</div>
-        <div class="panel-body">
-          {% for plan in selected_plans %}
-            {% if plan.notes %}
-              &#9733; <span class="notes-project">{{ plan.jobsite.project.name }}</span> {{ plan.notes }}
-            {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </div>
-  </div>
-{% endblock %}
+</div>
 
+{% endblock %}
 {% block extra_js %}
 
-  {% include "main/timeago_js.html" %}
+  {% include "main/match-height_js.html" %}
+  {% include "main/fittext_js.html" %}
 
   <script type="text/javascript">
+  
   $(document).ready(function(){
-    setInterval(function() {page_reload()}, 5000);
+    $('.equal-height-panels .panel').matchHeight();
 
-    $("span.timeago").timeago();
+    jQuery(".fit-text").fitText(1.3);
 
-    });
+    $("#progress").animate({
+       width: "0%"
+    }, 15000, function() {
+      page_reload();
+      }
+    );
+  
+  });
 
   function page_reload()
   {
@@ -110,6 +118,7 @@
       },
       error: function() {
         console.log("error reloading page.");
+        setTimeout(page_reload, 60000);
       },
       statusCode: {
         404: function() { console.log("404"); },
@@ -118,6 +127,8 @@
       }
     });
   };
+
+  
 
   </script>
 {% endblock %}
