@@ -9,7 +9,7 @@ from django.forms import Form, ModelForm, ValidationError, widgets
 from django.db.transaction import atomic
 from django import forms
 from systori.lib.fields import LocalizedDecimalField
-from systori.lib.accounting.tools import Amount, round as _round
+from systori.lib.accounting.tools import Amount, compute_gross_tax, round as _round
 from ..task.models import Job
 from .workflow import Account, credit_jobs, debit_jobs, refund_jobs
 from .constants import TAX_RATE, BANK_CODE_RANGE
@@ -273,7 +273,7 @@ class AdjustmentForm(Form):
 
 class AdjustJobForm(Form):
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
-    correction = LocalizedDecimalField(label=_("Correction"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    approved = LocalizedDecimalField(label=_("Approved"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
     adjustment = LocalizedDecimalField(label=_("Adjustment"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
     adjustment_gross = forms.DecimalField(label=_("Adjustment Gross"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
 
@@ -281,21 +281,25 @@ class AdjustJobForm(Form):
         super().__init__(*args, **kwargs)
         self.job = self.initial['job']
         self.fields['job'].queryset = self.job.project.jobs.all()
-        self.fields['correction'].widget.attrs['class'] = 'form-control'
-        self.fields['adjustment'].widget.attrs['class'] = 'form-control'
+
         if 'invoiced' in self.initial:
-            self.invoiced_amount = self.initial['invoiced']
+            self.invoiced_value = self.initial['invoiced']
         else:
-            self.invoiced_amount = self.job.account.adjusted_debits_total.net
-        self.initial['correction'] = self.invoiced_amount
-        self.correction_value = convert_field_to_value(self['correction'])
+            self.invoiced_value = self.job.account.adjusted_debits_total.net
+        self.initial['approved'] = self.invoiced_value
+        self.billable_value = self.job.billable_total
+
+        if self.billable_value < self.invoiced_value:
+            adjustment = self.invoiced_value - self.billable_value
+            self.initial['adjustment'] = adjustment
+            self.initial['adjustment_gross'] = compute_gross_tax(adjustment, TAX_RATE)[0]
+
+        self.approved_value = convert_field_to_value(self['approved'])
         self.adjustment_value = convert_field_to_value(self['adjustment'])
         self.adjustment_gross_value = convert_field_to_value(self['adjustment_gross'])
 
     def clean(self):
-        if self.cleaned_data['correction'] > self.invoiced_amount:
-            self.add_error('correction', ValidationError(_("Correction cannot be greater than invoiced amount.")))
-        if self.cleaned_data['adjustment'] > self.invoiced_amount:
+        if self.cleaned_data['adjustment'] > self.invoiced_value:
             self.add_error('adjustment', ValidationError(_("Adjustment cannot be greater than invoiced amount.")))
 
 
@@ -306,15 +310,17 @@ class BaseAdjustJobFormSet(BaseFormSet):
         self.invoice = initial.get('invoice')
         super().__init__(*args, initial=self.get_initial(kwargs.pop('jobs', [])), **kwargs)
         self.adjustment_form = AdjustmentForm(*args, initial=initial, **kwargs)
-        self.correction_total = D('0.00')
+        self.approved_total = D('0.00')
+        self.billable_total = D('0.00')
         self.adjustment_total = D('0.00')
         self.adjustment_gross_total = D('0.00')
         self.invoiced_total = D('0.00')
         for form in self.forms:
-            self.correction_total += form.correction_value
+            self.approved_total += form.approved_value
             self.adjustment_total += form.adjustment_value
             self.adjustment_gross_total += form.adjustment_gross_value
-            self.invoiced_total += form.invoiced_amount
+            self.billable_total += form.billable_value
+            self.invoiced_total += form.invoiced_value
 
     def get_initial(self, jobs):
         initial = []
