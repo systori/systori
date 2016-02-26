@@ -49,7 +49,6 @@ class PaymentForm(Form):
                 ('0.07', _('7%')),
             ]
     )
-    is_adjusted = forms.BooleanField(label=_('Apply Adjustment?'), initial=True, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -60,7 +59,6 @@ class SplitPaymentForm(Form):
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
     payment = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=2, required=False)
     discount = LocalizedDecimalField(label=_("Discount"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
-    adjustment = LocalizedDecimalField(label=_("Adjustment"), max_digits=14, decimal_places=2, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -68,7 +66,7 @@ class SplitPaymentForm(Form):
 
         self.fields['job'].queryset = self.job.project.jobs.all()
 
-        for column_name in ['payment', 'discount', 'adjustment']:
+        for column_name in ['payment', 'discount']:
             setattr(self, column_name+'_amount', Amount.from_gross(convert_field_to_value(self[column_name]), TAX_RATE))
 
         if 'invoiced' in self.initial:
@@ -76,7 +74,7 @@ class SplitPaymentForm(Form):
         else:
             self.balance_amount = self.job.account.balance_amount
 
-        self.credit_amount = self.payment_amount + self.discount_amount + self.adjustment_amount
+        self.credit_amount = self.payment_amount + self.discount_amount
 
 
 class BaseSplitPaymentFormSet(BaseFormSet):
@@ -89,13 +87,11 @@ class BaseSplitPaymentFormSet(BaseFormSet):
         self.balance_total = Amount.zero()
         self.payment_total = Amount.zero()
         self.discount_total = Amount.zero()
-        self.adjustment_total = Amount.zero()
         self.credit_total = Amount.zero()
         for form in self.forms:
             self.balance_total += form.balance_amount
             self.payment_total += form.payment_amount
             self.discount_total += form.discount_amount
-            self.adjustment_total += form.adjustment_amount
             self.credit_total += form.credit_amount
 
     def get_initial(self, jobs):
@@ -132,8 +128,7 @@ class BaseSplitPaymentFormSet(BaseFormSet):
                 job = split.cleaned_data['job']
                 payment = split.cleaned_data['payment'] or D(0)
                 discount = split.cleaned_data['discount'] or D(0)
-                adjustment = split.cleaned_data['adjustment'] or D(0)
-                splits.append((job, payment, discount, adjustment))
+                splits.append((job, payment, discount, D(0)))
         return splits
 
     def save(self):
