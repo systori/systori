@@ -1,7 +1,7 @@
 import locale
 import calendar
 from decimal import Decimal
-from django.template.defaultfilters import stringfilter
+from django.utils.safestring import mark_safe
 from django.utils.formats import get_format, get_language, number_format, to_locale
 from django import template
 
@@ -46,6 +46,17 @@ def money(decimal):
 @register.filter
 def negate(value):
     return -value
+
+
+@register.filter
+def color_pos_neg(value):
+    if value == 0:
+        return ''
+    elif value > 0:
+        color = 'green'
+    else:
+        color = 'red'
+    return mark_safe('<span style="color: %s;">%s</span>' % (color, ubrdecimal(value, 2)))
 
 
 @register.filter

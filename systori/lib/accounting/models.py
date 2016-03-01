@@ -83,20 +83,46 @@ class BaseAccount(models.Model):
         return self.entries.all().sum_amount
 
     @property
-    def adjusted_debits_total(self):
-        """ adjusted total = all debits - all adjustment credits"""
-        debits = self.debits().sum_amount
-        adjustments = self.adjustments().sum_amount
-        return debits + adjustments
+    def invoiced_total(self):
+        """ adjusted total = all debits - adjustments """
+        charges = self.charges().sum_amount          # positive number
+        adjustments = self.adjustments().sum_amount  # negative number
+        return charges + adjustments
+
+    def charges(self):
+        return self.entries.filter(entry_type__in=(BaseEntry.WORK_DEBIT, BaseEntry.FLAT_DEBIT))
+
+    def adjustments(self):
+        return self.entries.filter(entry_type=BaseEntry.ADJUSTMENT)
 
     @property
-    def adjusted_credits_total(self):
-        """ adjusted total = all credits - all adjustment credits
-            basically all payments and any other credits, excluding adjustments
+    def received_total(self):
+        """ adjusted total = all credits - refunds
+            basically all payments and discounts minus any refunds
         """
-        credits = self.credits().sum_amount
-        adjustments = self.adjustments().sum_amount
-        return credits - adjustments
+        payments = self.payments().sum_amount  # negative number
+        refunds = self.refunds().sum_amount    # positive number
+        return payments + refunds
+
+    def payments(self):
+        return self.entries.filter(entry_type__in=(BaseEntry.PAYMENT, BaseEntry.DISCOUNT, BaseEntry.REFUND_CREDIT))
+
+    def refunds(self):
+        return self.entries.filter(entry_type=BaseEntry.REFUND)
+
+    def debits(self):
+        """ Get all debit entries for this account. """
+        if self.is_debit_account:
+            return self.entries.filter(amount__gt=0)
+        else:
+            return self.entries.filter(amount__lt=0)
+
+    def credits(self):
+        """ Get all credit entries for this account. """
+        if self.is_credit_account:
+            return self.entries.filter(amount__gt=0)
+        else:
+            return self.entries.filter(amount__lt=0)
 
     DEBIT_ACCOUNTS = (ASSET, EXPENSE)
 
@@ -137,26 +163,6 @@ class BaseAccount(models.Model):
             return True
         else:
             return False
-
-    def debits(self):
-        """ Get all debit entries for this account. """
-        if self.is_debit_account:
-            return self.entries.filter(amount__gt=0)
-        else:
-            return self.entries.filter(amount__lt=0)
-
-    def credits(self):
-        """ Get all credit entries for this account. """
-        if self.is_credit_account:
-            return self.entries.filter(amount__gt=0)
-        else:
-            return self.entries.filter(amount__lt=0)
-
-    def adjustments(self):
-        return self.entries.filter(entry_type=BaseEntry.ADJUSTMENT)
-
-    def payments(self):
-        return self.entries.filter(entry_type=BaseEntry.PAYMENT)
 
 
 class BaseTransaction(models.Model):
@@ -279,14 +285,17 @@ class BaseEntry(models.Model):
     amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=2)
     tax_rate = models.DecimalField(_("Tax Rate"), max_digits=14, decimal_places=2, default=0)
 
+    # decrease: pay down a customer account
     PAYMENT = "payment"
-    REFUND_CREDIT = "refund-credit"
-
     DISCOUNT = "discount"
+    ADJUSTMENT = "adjustment"
+    REFUND_CREDIT = "refund-credit"  # apply a refund from another job to this job
+
+    # increase: increase the customers debt
     WORK_DEBIT = "work-debit"
     FLAT_DEBIT = "flat-debit"
-    REFUND_DEBIT = "refund-debit"
-    ADJUSTMENT = "adjustment"
+    REFUND = "refund"  # if customer overpays, this brings account back to zero
+
     OTHER = "other"
 
     ENTRY_TYPE = (
@@ -295,7 +304,7 @@ class BaseEntry(models.Model):
         (DISCOUNT, _("Discount")),
         (WORK_DEBIT, _("Work Debit")),
         (FLAT_DEBIT, _("Flat Debit")),
-        (REFUND_DEBIT, _("Refund Debit")),
+        (REFUND, _("Refund")),
         (ADJUSTMENT, _("Adjustment")),
         (OTHER, _("Other")),
     )

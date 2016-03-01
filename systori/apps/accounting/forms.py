@@ -9,7 +9,7 @@ from django.forms import Form, ModelForm, ValidationError, widgets
 from django.db.transaction import atomic
 from django import forms
 from systori.lib.fields import LocalizedDecimalField
-from systori.lib.accounting.tools import Amount, compute_gross_tax, round as _round
+from systori.lib.accounting.tools import Amount, compute_gross_tax, extract_net_tax, round as _round
 from ..task.models import Job
 from .workflow import Account, credit_jobs, debit_jobs, refund_jobs
 from .constants import TAX_RATE, BANK_CODE_RANGE
@@ -151,8 +151,8 @@ class RefundJobForm(Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.invoiced_value = self.initial['job'].account.adjusted_debits_total.gross
-        self.payments_value = self.initial['job'].account.adjusted_credits_total.gross * -1
+        self.invoiced_value = self.initial['job'].account.invoiced_total.gross
+        self.payments_value = self.initial['job'].account.received_total.gross * -1
         self.overpaid_value = max(D('0.00'), self.payments_value - self.invoiced_value)
         self.underpaid_value = max(D('0.00'), self.invoiced_value - self.payments_value)
         if 'refund' in self.prefix:
@@ -274,27 +274,64 @@ class AdjustJobForm(Form):
     approved = LocalizedDecimalField(label=_("Approved"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
     adjustment = LocalizedDecimalField(label=_("Adjustment"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
     adjustment_gross = forms.DecimalField(label=_("Adjustment Gross"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    refund = forms.DecimalField(label=_("Refund"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    refund_credit = forms.DecimalField(label=_("Apply"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.job = self.initial['job']
         self.fields['job'].queryset = self.job.project.jobs.all()
 
+        # Paid Column
+        self.received_amount = self.job.account.received_total
+        self.received_value = self.received_amount.net * -1
+
+        # Invoiced Column
         if 'invoiced' in self.initial:
-            self.invoiced_value = self.initial['invoiced']
+            self.invoiced_amount = Amount.from_net(self.initial['invoiced'], TAX_RATE)
         else:
-            self.invoiced_value = self.job.account.adjusted_debits_total.net
-        self.initial['approved'] = self.invoiced_value
+            self.invoiced_amount = self.job.account.invoiced_total
+        self.invoiced_value = self.invoiced_amount.net
+        self.invoiced_diff_value = self.invoiced_value - self.received_value
+
+        # Billable Column
         self.billable_value = self.job.billable_total
+        self.billable_amount = Amount.from_net(self.billable_value, TAX_RATE)
+        self.billable_diff_value = self.billable_value - self.invoiced_value
+
+        self.initial['approved'] = self.invoiced_value
 
         if self.billable_value < self.invoiced_value:
             adjustment = self.invoiced_value - self.billable_value
             self.initial['adjustment'] = adjustment
-            self.initial['adjustment_gross'] = compute_gross_tax(adjustment, TAX_RATE)[0]
+            adjustment_gross = self.invoiced_amount.gross - self.billable_amount.gross
+            self.initial['adjustment_gross'] = adjustment_gross
+
+        received_payments = self.received_amount.gross * -1
+        if self.billable_amount.gross < received_payments:
+            refund = received_payments - self.billable_amount.gross
+            self.initial['refund'] = refund
+            if refund > self.initial['adjustment_gross']:
+                self.initial['adjustment_gross'] = D('0.00')
+            else:
+                self.initial['adjustment_gross'] -= refund
 
         self.approved_value = convert_field_to_value(self['approved'])
         self.adjustment_value = convert_field_to_value(self['adjustment'])
         self.adjustment_gross_value = convert_field_to_value(self['adjustment_gross'])
+        self.refund_value = convert_field_to_value(self['refund'])
+        self.refund_credit_value = convert_field_to_value(self['refund_credit'])
+
+    def consume_refund(self, refund):
+        received_payments = self.received_amount.gross * -1
+        if self.billable_amount.gross > received_payments:
+            consumable = self.billable_amount.gross - received_payments
+            if refund < consumable:
+                consumable = refund
+            self.initial['refund_credit'] = consumable
+            self.refund_credit_value = convert_field_to_value(self['refund_credit'])
+            refund -= consumable
+        return refund
 
     def clean(self):
         if self.cleaned_data['adjustment'] > self.invoiced_value:
@@ -307,18 +344,30 @@ class BaseAdjustJobFormSet(BaseFormSet):
         initial = kwargs.pop('initial', {})
         self.invoice = initial.get('invoice')
         super().__init__(*args, initial=self.get_initial(kwargs.pop('jobs', [])), **kwargs)
+        self.calculate_refund()
         self.adjustment_form = AdjustmentForm(*args, initial=initial, **kwargs)
-        self.approved_total = D('0.00')
+        self.received_total = D('0.00')
+        self.invoiced_total = D('0.00')
+        self.invoiced_diff_total = D('0.00')
         self.billable_total = D('0.00')
+        self.billable_diff_total = D('0.00')
+        self.approved_total = D('0.00')
         self.adjustment_total = D('0.00')
         self.adjustment_gross_total = D('0.00')
-        self.invoiced_total = D('0.00')
+        self.refund_total = D('0.00')
+        self.refund_net_total = D('0.00')
+        self.refund_credit_total = D('0.00')
         for form in self.forms:
+            self.received_total += form.received_value
+            self.invoiced_total += form.invoiced_value
+            self.invoiced_diff_total += form.invoiced_diff_value
+            self.billable_total += form.billable_value
+            self.billable_diff_total += form.billable_diff_value
             self.approved_total += form.approved_value
             self.adjustment_total += form.adjustment_value
             self.adjustment_gross_total += form.adjustment_gross_value
-            self.billable_total += form.billable_value
-            self.invoiced_total += form.invoiced_value
+            self.refund_total += form.refund_value
+            self.refund_credit_total += form.refund_credit_value
 
     def get_initial(self, jobs):
         initial = []
@@ -333,17 +382,26 @@ class BaseAdjustJobFormSet(BaseFormSet):
             initial.append(job_dict)
         return initial
 
+    def calculate_refund(self):
+        refund_total = D('0.00')
+        for form in self.forms:
+            refund_total += form.refund_value
+        for form in self.forms:
+            refund_total = form.consume_refund(refund_total)
+
     def get_credit_tuples(self):
         amounts = []
         for form in self.forms:
             if form.cleaned_data['adjustment']:
                 job = form.cleaned_data['job']
                 adjustment = form.cleaned_data['adjustment_gross']
-                amounts.append((job, D(0), D(0), adjustment))
+                refund = form.cleaned_data['refund']
+                refund_credit = form.cleaned_data['refund_credit']
+                amounts.append((job, adjustment, refund, refund_credit))
         return amounts
 
     def save(self):
-        credit_jobs(self.get_credit_tuples(), D(0))
+        refund_jobs(self.get_credit_tuples())
         #if self.invoice and not self.invoice.status == Invoice.PAID:
         #    self.invoice.pay()
         #    self.invoice.save()
@@ -414,7 +472,7 @@ class DebitForm(Form):
 
         if self.initial['is_booked']:
             # accounting system already has the 'new' amounts since this invoice was booked
-            self.new_debited = self.job.account.adjusted_debits_total
+            self.new_debited = self.job.account.invoiced_total
             self.new_balance = self.job.account.balance_amount
 
             # we need to undo the booking to get the 'base' amounts
@@ -424,7 +482,7 @@ class DebitForm(Form):
         else:
             # no transactions exist yet so the account balance and debits don't include this new debit
             # accounting system has the 'base' amounts
-            self.base_debited = self.job.account.adjusted_debits_total
+            self.base_debited = self.job.account.invoiced_total
             self.base_balance = self.job.account.balance_amount
 
         # subtract all previous debits from all work completed to get amount not yet debited

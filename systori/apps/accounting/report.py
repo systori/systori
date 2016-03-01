@@ -87,7 +87,7 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
             except ObjectDoesNotExist:
                 pass
 
-        elif txn.transaction_type == txn.PAYMENT:
+        elif txn.transaction_type in (txn.PAYMENT, txn.ADJUSTMENT):
             txn_dict.update({
                 'is_reconciled': False,
 
@@ -133,7 +133,7 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
                     'tax': D('0.00'),
                     'gross': D('0.00'),
                 }
-                if txn.transaction_type == txn.PAYMENT:
+                if txn.transaction_type in (txn.PAYMENT, txn.ADJUSTMENT):
                     txn_dict['jobs'][job.id].update({
                         'payment_applied_net': D('0.00'),
                         'payment_applied_tax': D('0.00'),
@@ -160,7 +160,7 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
             job_dict['tax'] += entry_tax
             job_dict['gross'] += entry_gross
 
-            if entry.entry_type == entry.ADJUSTMENT:
+            if entry.entry_type == (entry.ADJUSTMENT, entry.REFUND):
                 # adjustments reduce the total debited
                 report['debited_net'] += entry_net
                 report['debited_tax'] += entry_tax
@@ -173,7 +173,7 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
                 job_dict['adjustment_applied_tax'] += entry_tax
                 job_dict['adjustment_applied_gross'] += entry_gross
 
-            elif entry.entry_type == entry.PAYMENT:
+            elif entry.entry_type in (entry.PAYMENT, entry.REFUND_CREDIT):
                 txn_dict['payment_applied_net'] += entry_net
                 txn_dict['payment_applied_tax'] += entry_tax
                 txn_dict['payment_applied_gross'] += entry_gross
@@ -190,14 +190,14 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
                 job_dict['discount_applied_gross'] += entry_gross
 
         for job in txn_dict['jobs'].values():
-            if txn.transaction_type == txn.PAYMENT:
+            if txn.transaction_type in (txn.PAYMENT, txn.ADJUSTMENT):
                 jid = job['job.id']
                 payments[jid]['net'] += job['net']
                 payments[jid]['tax'] += job['tax']
                 payments[jid]['gross'] += job['gross']
 
         report['transactions'].append(txn_dict)
-        if txn.transaction_type != txn.PAYMENT:
+        if txn.transaction_type not in (txn.PAYMENT, txn.ADJUSTMENT):
             report['debited_net'] += txn_dict['net']
             report['debited_tax'] += txn_dict['tax']
             report['debited_gross'] += txn_dict['gross']
@@ -262,7 +262,7 @@ def generate_transaction_table(data, cols=('net', 'tax', 'gross')):
                     'tax': txn['tax'] - txn['paid_tax']
                 }
                 t += [(txn['type'],)+tuple(-vals[col] for col in cols)+(txn,)]
-        elif txn['type'] == Transaction.INVOICE and\
+        elif txn['type'] == Transaction.PAYMENT and\
                 (txn['payment_applied_gross'] != 0 or txn['discount_applied_gross'] != 0):
             t += [(txn['type'],)+tuple(txn['payment_applied_'+col] for col in cols)+(txn,)]
             if txn['discount_applied_gross'] != 0:

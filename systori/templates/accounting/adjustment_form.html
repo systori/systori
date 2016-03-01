@@ -14,16 +14,19 @@
     {% endif %}
 
     <style>
+      .job-paid,
       .job-invoiced,
       .job-billable,
       .job-approved,
       .job-approved input,
       .job-adjustment,
       .job-adjustment input,
-      .job-adjustment-gross {
+      .job-adjustment-gross,
+      .job-refund,
+      .job-refund-credit {
         text-align: right;
       }
-      .job-invoiced, .job-adjustment-gross {
+      .job-paid, .job-adjustment-gross {
         border-left: 2px solid #ddd;
       }
       .net-header {
@@ -46,24 +49,28 @@
       <thead>
       <tr>
         <th></th>
-        <th class="net-header" colspan="4">{% trans 'Net' %}</th>
-        <th class="gross-header">{% trans 'Gross' %}</th>
+        <th class="net-header" colspan="5">{% trans 'Net' %}</th>
+        <th class="gross-header" colspan="3">{% trans 'Gross' %}</th>
       </tr>
       <tr>
         <th class="job-name">{% trans 'Job' %}</th>
+        <th class="job-paid">{% trans 'Paid' %}</th>
         <th class="job-invoiced">{% trans 'Invoiced' %}</th>
         <th class="job-billable">{% trans 'Billable' %}</th>
         <th class="job-approved">{% trans 'Approved' %}</th>
         <th class="job-adjustment">{% trans 'Adjustment' %}</th>
         <th class="job-adjustment-gross">{% trans 'Adjustment' %}</th>
+        <th class="job-refund">{% trans 'Refund' %}</th>
+        <th class="job-refund-credit">{% trans 'Applied Refund' %}</th>
       </tr>
       </thead>
       <tbody>
       {% for adjustment in form.forms %}
         <tr is="adjustment-row" class="adjustment-row">
           <td class="job-name">{{ adjustment.job }}{{ adjustment.initial.job.name }}</td>
-          <td class="job-invoiced" data-amount="{{ adjustment.invoiced_value }}">{{ adjustment.invoiced_value|ubrdecimal:2 }}</td>
-          <td class="job-billable" data-amount="{{ adjustment.billable_value }}">{{ adjustment.billable_value|ubrdecimal:2 }}</td>
+          <td class="job-paid" data-amount="{{ adjustment.received_value }}">{{ adjustment.received_value|ubrdecimal:2 }}</td>
+          <td class="job-invoiced" data-amount="{{ adjustment.invoiced_value }}">{{ adjustment.invoiced_value|ubrdecimal:2 }}<br />{{ adjustment.invoiced_diff_value|color_pos_neg }}</td>
+          <td class="job-billable" data-amount="{{ adjustment.billable_value }}">{{ adjustment.billable_value|ubrdecimal:2 }}<br />{{ adjustment.billable_diff_value|color_pos_neg }}</td>
           <td class="job-approved">
             <input class="form-control" id="{{ adjustment.approved.id_for_label }}" name="{{ adjustment.approved.html_name }}" type="text" value="{{ adjustment.approved_value|ubrdecimal:2 }}">
           </td>
@@ -74,15 +81,26 @@
             <span>{{ adjustment.adjustment_gross_value|ubrdecimal:2 }}</span>
             {{ adjustment.adjustment_gross }}
           </td>
+          <td class="job-refund">
+            <span>{{ adjustment.refund_value|ubrdecimal:2 }}</span>
+            {{ adjustment.refund }}
+          </td>
+          <td class="job-refund-credit">
+            <span>{{ adjustment.refund_credit_value|ubrdecimal:2 }}</span>
+            {{ adjustment.refund_credit }}
+          </td>
         </tr>
       {% endfor %}
         <tr class="adjustment-table-totals">
           <td class="job-name"></td>
-          <td class="job-invoiced">{{ form.invoiced_total|ubrdecimal:2 }}</td>
-          <td class="job-billable">{{ form.billable_total|ubrdecimal:2 }}</td>
+          <td class="job-paid">{{ form.received_total|ubrdecimal:2 }}</td>
+          <td class="job-invoiced">{{ form.invoiced_total|ubrdecimal:2 }}<br />{{ form.invoiced_diff_total|color_pos_neg }}</td>
+          <td class="job-billable">{{ form.billable_total|ubrdecimal:2 }}<br />{{ form.billable_diff_total|color_pos_neg }}</td>
           <td class="job-approved">{{ form.approved_total|ubrdecimal:2 }}</td>
           <td class="job-adjustment">{{ form.adjustment_total|ubrdecimal:2 }}</td>
           <td class="job-adjustment-gross">{{ form.adjustment_gross_total|ubrdecimal:2 }}</td>
+          <td class="job-refund">{{ form.refund_total|ubrdecimal:2 }}</td>
+          <td class="job-refund-credit">{{ form.refund_credit_total|ubrdecimal:2 }}</td>
         </tr>
       </tbody>
     </table>
