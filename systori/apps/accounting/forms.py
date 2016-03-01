@@ -11,7 +11,7 @@ from django import forms
 from systori.lib.fields import LocalizedDecimalField
 from systori.lib.accounting.tools import Amount, compute_gross_tax, extract_net_tax, round as _round
 from ..task.models import Job
-from .workflow import Account, credit_jobs, debit_jobs, refund_jobs
+from .workflow import Account, credit_jobs, debit_jobs, adjust_jobs
 from .constants import TAX_RATE, BANK_CODE_RANGE
 from .models import Entry
 from ..document.models import Invoice, Refund, DocumentTemplate, DocumentSettings
@@ -392,16 +392,15 @@ class BaseAdjustJobFormSet(BaseFormSet):
     def get_credit_tuples(self):
         amounts = []
         for form in self.forms:
-            if form.cleaned_data['adjustment']:
-                job = form.cleaned_data['job']
-                adjustment = form.cleaned_data['adjustment_gross']
-                refund = form.cleaned_data['refund']
-                refund_credit = form.cleaned_data['refund_credit']
-                amounts.append((job, adjustment, refund, refund_credit))
+            job = form.cleaned_data['job']
+            adjustment = form.cleaned_data['adjustment_gross']
+            refund = form.cleaned_data['refund']
+            refund_credit = form.cleaned_data['refund_credit']
+            amounts.append((job, adjustment, refund, refund_credit))
         return amounts
 
     def save(self):
-        refund_jobs(self.get_credit_tuples())
+        adjust_jobs(self.get_credit_tuples())
         #if self.invoice and not self.invoice.status == Invoice.PAID:
         #    self.invoice.pay()
         #    self.invoice.save()

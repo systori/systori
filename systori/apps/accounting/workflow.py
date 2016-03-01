@@ -197,12 +197,12 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None):
     transaction.save()
 
 
-def refund_jobs(jobs, transacted_on=None, bank=None):
+def adjust_jobs(jobs, transacted_on=None, bank=None):
 
     bank = bank or Account.objects.get(code=SKR03_BANK_CODE)
     transacted_on = transacted_on or date.today()
 
-    transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.REFUND)
+    transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.ADJUSTMENT)
 
     for job, adjustment, refund, refund_credit in jobs:
 

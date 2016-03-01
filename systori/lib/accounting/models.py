@@ -87,7 +87,8 @@ class BaseAccount(models.Model):
         """ adjusted total = all debits - adjustments """
         charges = self.charges().sum_amount          # positive number
         adjustments = self.adjustments().sum_amount  # negative number
-        return charges + adjustments
+        refunds = self.refunds().sum_amount          # positive number
+        return charges - refunds + adjustments
 
     def charges(self):
         return self.entries.filter(entry_type__in=(BaseEntry.WORK_DEBIT, BaseEntry.FLAT_DEBIT))
