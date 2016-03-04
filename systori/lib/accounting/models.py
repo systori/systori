@@ -2,8 +2,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from django.db import models
 from django.db.models.manager import BaseManager
+from django.core.exceptions import ObjectDoesNotExist
 from datetime import date
-from decimal import Decimal
 
 from .tools import Amount
 
@@ -79,51 +79,30 @@ class BaseAccount(models.Model):
         return self.entries.all().sum
 
     @property
-    def balance_amount(self):
-        return self.entries.all().sum_amount
+    def invoiced(self):
+        """ all invoices minus any adjustments """
+        return self.entries.all().invoice.sum
 
     @property
-    def invoiced_total(self):
-        """ adjusted total = all debits - adjustments """
-        charges = self.charges().sum_amount          # positive number
-        adjustments = self.adjustments().sum_amount  # negative number
-        refunds = self.refunds().sum_amount          # positive number
-        return charges - refunds + adjustments
-
-    def charges(self):
-        return self.entries.filter(entry_type__in=(BaseEntry.WORK_DEBIT, BaseEntry.FLAT_DEBIT))
-
-    def adjustments(self):
-        return self.entries.filter(entry_type=BaseEntry.ADJUSTMENT)
+    def paid(self):
+        """ all payments and discounts minus any refunds """
+        return self.entries.all().payment.sum
 
     @property
-    def received_total(self):
-        """ adjusted total = all credits - refunds
-            basically all payments and discounts minus any refunds
-        """
-        payments = self.payments().sum_amount  # negative number
-        refunds = self.refunds().sum_amount    # positive number
-        return payments + refunds
-
-    def payments(self):
-        return self.entries.filter(entry_type__in=(BaseEntry.PAYMENT, BaseEntry.DISCOUNT, BaseEntry.REFUND_CREDIT))
-
-    def refunds(self):
-        return self.entries.filter(entry_type=BaseEntry.REFUND)
-
     def debits(self):
         """ Get all debit entries for this account. """
         if self.is_debit_account:
-            return self.entries.filter(amount__gt=0)
+            return self.entries.filter(value__gt=0)
         else:
-            return self.entries.filter(amount__lt=0)
+            return self.entries.filter(value__lt=0)
 
+    @property
     def credits(self):
         """ Get all credit entries for this account. """
         if self.is_credit_account:
-            return self.entries.filter(amount__gt=0)
+            return self.entries.filter(value__gt=0)
         else:
-            return self.entries.filter(amount__lt=0)
+            return self.entries.filter(value__lt=0)
 
     DEBIT_ACCOUNTS = (ASSET, EXPENSE)
 
@@ -137,30 +116,30 @@ class BaseAccount(models.Model):
     def is_credit_account(self):
         return self.account_type in self.CREDIT_ACCOUNTS
 
-    def as_debit(self, amount):
-        """ Convert the 'amount' into correct positive/negative number based on double-entry accounting rules. """
+    def as_debit(self, value):
+        """ Convert the 'value' into correct positive/negative number based on double-entry accounting rules. """
         if self.is_debit_account:
-            return amount
+            return value
         else:
-            return amount * -1
+            return value * -1
 
-    def is_debit_amount(self, amount):
-        if (self.is_debit_account and amount > 0) or \
-                (self.is_credit_account and amount < 0):
+    def is_debit_value(self, value):
+        if (self.is_debit_account and value > 0) or \
+                (self.is_credit_account and value < 0):
             return True
         else:
             return False
 
-    def as_credit(self, amount):
-        """ Convert the 'amount' into correct positive/negative number based on double-entry accounting rules. """
+    def as_credit(self, value):
+        """ Convert the 'value' into correct positive/negative number based on double-entry accounting rules. """
         if self.is_credit_account:
-            return amount
+            return value
         else:
-            return amount * -1
+            return value * -1
 
-    def is_credit_amount(self, amount):
-        if (self.is_debit_account and amount < 0) or \
-                (self.is_credit_account and amount > 0):
+    def is_credit_value(self, value):
+        if (self.is_debit_account and value < 0) or \
+                (self.is_credit_account and value > 0):
             return True
         else:
             return False
@@ -208,26 +187,40 @@ class BaseTransaction(models.Model):
         super(BaseTransaction, self).__init__(*args, **kwargs)
         self._entries = []
 
-    def debit(self, account, amount, **kwargs):
-        assert amount > 0
+    def debit(self, account, value, **kwargs):
+        assert value > 0
         if type(account) is str:
             account = self.account_class.objects.get(code=account)
-        debit_amount = account.as_debit(round(amount, 2))
-        entry = self.entry_class(account=account, amount=debit_amount, **kwargs)
+        debit_value = account.as_debit(round(value, 2))
+        entry = self.entry_class(account=account, value=debit_value, **kwargs)
         self._entries.append(('debit', entry))
         return entry
 
-    def credit(self, account, amount, **kwargs):
-        assert amount > 0
+    def credit(self, account, value, **kwargs):
+        assert value > 0
         if type(account) is str:
             account = self.account_class.objects.get(code=account)
-        credit_amount = account.as_credit(round(amount, 2))
-        entry = self.entry_class(account=account, amount=credit_amount, **kwargs)
+        credit_value = account.as_credit(round(value, 2))
+        entry = self.entry_class(account=account, value=credit_value, **kwargs)
         self._entries.append(('credit', entry))
         return entry
 
     def _total(self, column):
-        return sum([abs(item[1].amount) for item in self._entries if item[0] == column])
+        return sum([abs(item[1].value) for item in self._entries if item[0] == column])
+
+    def _show_table(self):
+        from systori.lib.templatetags.customformatting import money
+        for entry in self._entries:
+            acct, value = entry[1].account, entry[1].value
+            try:
+                acct_name = acct.code + ' ' + acct.job.name
+            except ObjectDoesNotExist:
+                acct_name = acct.code + ' ' + acct.name
+            if entry[0] == 'debit':
+                print(' {:<25} {:>10} {:>10}'.format(acct_name, money(value), ''))
+            else:
+                print(' {:<25} {:>10} {:>10}'.format(acct_name, '', money(value)))
+        print(' {:>25} {:>10} {:>10}'.format('total:', money(self._total('debit')), money(self._total('credit'))))
 
     @property
     def is_balanced(self):
@@ -240,8 +233,9 @@ class BaseTransaction(models.Model):
                 return True
         return False
 
-    def save(self, **kwargs):
+    def save(self, debug=False, **kwargs):
         assert len(self._entries) == 0 or len(self._entries) >= 2
+        if debug: self._show_table()
         assert self.is_balanced, "{} != {}".format(self._total('debit'), self._total('credit'))
         super().save(**kwargs)
         for item in self._entries:
@@ -257,18 +251,20 @@ class BaseTransaction(models.Model):
 class EntryQuerySet(models.QuerySet):
 
     @property
-    def sum(self):
-        total = Decimal('0.00')
-        for entry in self:
-            total += entry.amount
-        return total
+    def invoice(self):
+        """ Queryset of all debit entries - adjustments, sum of which is the total invoiced. """
+        return self.filter(entry_type__in=BaseEntry.DEBIT_TYPES+(BaseEntry.ADJUSTMENT,))
 
     @property
-    def sum_amount(self):
+    def payment(self):
+        """ Queryset of all credit entries - refunds, sum of which is the total collected cash. """
+        return self.filter(entry_type__in=BaseEntry.PAYMENT_TYPES+(BaseEntry.REFUND,))
+
+    @property
+    def sum(self):
         amount = Amount.zero()
         for entry in self:
-            assert entry.tax_rate > Decimal(0)
-            amount += Amount.from_gross(entry.amount, entry.tax_rate)
+            amount += entry.amount
         return amount
 
 
@@ -277,25 +273,28 @@ class EntryManager(BaseManager.from_queryset(EntryQuerySet)):
 
 
 class BaseEntry(models.Model):
-    """ Represents a debit or credit to an account.
+    """ Represents the tax, net or gross portion of a debit or credit to an account.
     """
 
     transaction = models.ForeignKey('Transaction', related_name="entries")
     account = models.ForeignKey('Account', related_name="entries")
 
-    amount = models.DecimalField(_("Amount"), max_digits=14, decimal_places=2)
-    tax_rate = models.DecimalField(_("Tax Rate"), max_digits=14, decimal_places=2, default=0)
+    value = models.DecimalField(_("Value"), max_digits=14, decimal_places=2)
 
-    # decrease: pay down a customer account
+    # Entry Type
+
+    # credits: decrease or pay down a customers debt
     PAYMENT = "payment"
     DISCOUNT = "discount"
-    ADJUSTMENT = "adjustment"
     REFUND_CREDIT = "refund-credit"  # apply a refund from another job to this job
+    PAYMENT_TYPES = (PAYMENT, DISCOUNT, REFUND_CREDIT)
+    ADJUSTMENT = "adjustment"  # if customer is over-invoiced, this brings account back to billable
 
-    # increase: increase the customers debt
-    WORK_DEBIT = "work-debit"
-    FLAT_DEBIT = "flat-debit"
-    REFUND = "refund"  # if customer overpays, this brings account back to zero
+    # debits: increase the customers debt
+    WORK_DEBIT = "work-debit"  # debit value calculated from completed tasks
+    FLAT_DEBIT = "flat-debit"  # flat fee debit, not based on tasks
+    DEBIT_TYPES = (WORK_DEBIT, FLAT_DEBIT)
+    REFUND = "refund"  # if customer over-pays, this brings account back to what was invoiced or could be billed
 
     OTHER = "other"
 
@@ -313,6 +312,19 @@ class BaseEntry(models.Model):
     # entries in all other accounts will just be of type 'other'
     entry_type = models.CharField(_('Entry Type'), max_length=32, choices=ENTRY_TYPE, default=OTHER)
 
+    # Value Type
+
+    NET = "net"
+    TAX = "tax"
+    GROSS = "gross"
+
+    VALUE_TYPE = (
+        (NET, _("Net")),
+        (TAX, _("Tax")),
+        (GROSS, _("Gross")),
+    )
+    value_type = models.CharField(_("Value Type"), max_length=32, choices=VALUE_TYPE)
+
     # for bank entries
     reconciled_on = models.DateField(_("Date Reconciled"), null=True)
     is_reconciled = models.BooleanField(_("Reconciled"), default=False)
@@ -323,14 +335,29 @@ class BaseEntry(models.Model):
         abstract = True
         ordering = ['transaction__transacted_on', 'id']
 
+    @property
     def is_credit(self):
-        return self.account.is_credit_amount(self.amount)
+        return self.account.is_credit_value(self.value)
 
+    @property
     def is_debit(self):
-        return self.account.is_debit_amount(self.amount)
+        return self.account.is_debit_value(self.value)
 
-    def absolute_amount(self):
-        return abs(self.amount)
+    @property
+    def is_net(self):
+        return self.value_type == self.NET
+
+    @property
+    def is_tax(self):
+        return self.value_type == self.TAX
+
+    @property
+    def is_gross(self):
+        return self.value_type == self.GROSS
+
+    @property
+    def amount(self):
+        return Amount.from_entry(self)
 
     def reconcile(self):
         self.is_reconciled = True

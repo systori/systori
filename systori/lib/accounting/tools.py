@@ -50,13 +50,49 @@ class Amount:
         gross, tax = compute_gross_tax(net, tax_rate)
         return Amount(net, tax, gross)
 
-    def __init__(self, net, tax, gross):
+    @staticmethod
+    def from_entry(entry):
+        return Amount(
+            net=entry.value if entry.is_net else Decimal('0.00'),
+            tax=entry.value if entry.is_tax else Decimal('0.00'),
+            gross=entry.value if entry.is_gross else None
+        )
+
+    def __init__(self, net, tax, gross=None):
         assert isinstance(net, Decimal)
         assert isinstance(tax, Decimal)
-        assert isinstance(gross, Decimal)
+        assert gross is None or isinstance(gross, Decimal)
         self.net = net
         self.tax = tax
         self.gross = gross
+        self.gross_was_calculated = False
+        if gross is None:
+            self.gross = self.net + self.tax
+            self.gross_was_calculated = True
+
+    @property
+    def negate(self):
+        return Amount(
+            net=self.net*-1,
+            tax=self.tax*-1,
+            gross=self.gross*-1
+        )
+
+    @property
+    def net_amount(self):
+        return Amount(
+            net=self.net,
+            tax=Decimal(0),
+            gross=self.net
+        )
+
+    @property
+    def tax_amount(self):
+        return Amount(
+            net=Decimal(0),
+            tax=self.tax,
+            gross=self.tax
+        )
 
     def __sub__(self, other):
         assert isinstance(other, Amount)
@@ -73,3 +109,6 @@ class Amount:
                 tax=self.tax+other.tax,
                 gross=self.gross+other.gross
         )
+
+    def __repr__(self):
+        return "Amount(net=%r, tax=%r, gross=%r)" % (self.net, self.tax, self.gross)
