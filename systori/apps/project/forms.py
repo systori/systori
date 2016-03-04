@@ -44,11 +44,3 @@ class FilterForm(Form):
                                               choices=OPTIONS, required=False)
     search_term = forms.CharField(label=_('Search'), max_length=50, required=False)
 
-
-class EntryForm(ModelForm):
-    class Meta:
-        model = Entry
-        fields = ['amount', 'entry_type']
-
-
-EntryFormSet = inlineformset_factory(Transaction, Entry, form=EntryForm, extra=0)
