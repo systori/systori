@@ -170,13 +170,11 @@ class BaseTransaction(models.Model):
     INVOICE = "invoice"
     PAYMENT = "payment"
     ADJUSTMENT = "adjustment"
-    REFUND = "refund"
 
     TRANSACTION_TYPE = (
         (INVOICE, _("Invoice")),
         (PAYMENT, _("Payment")),
         (ADJUSTMENT, _("Adjustment")),
-        (REFUND, _("Refund")),
     )
     transaction_type = models.CharField(_('Transaction Type'), null=True, max_length=32, choices=TRANSACTION_TYPE)
 
@@ -253,12 +251,12 @@ class EntryQuerySet(models.QuerySet):
     @property
     def invoice(self):
         """ Queryset of all debit entries - adjustments, sum of which is the total invoiced. """
-        return self.filter(entry_type__in=BaseEntry.DEBIT_TYPES+(BaseEntry.ADJUSTMENT,))
+        return self.filter(entry_type__in=BaseEntry.TYPES_FOR_INVOICED_SUM)
 
     @property
     def payment(self):
         """ Queryset of all credit entries - refunds, sum of which is the total collected cash. """
-        return self.filter(entry_type__in=BaseEntry.PAYMENT_TYPES+(BaseEntry.REFUND,))
+        return self.filter(entry_type__in=BaseEntry.TYPES_FOR_PAID_SUM)
 
     @property
     def sum(self):
@@ -295,6 +293,12 @@ class BaseEntry(models.Model):
     FLAT_DEBIT = "flat-debit"  # flat fee debit, not based on tasks
     DEBIT_TYPES = (WORK_DEBIT, FLAT_DEBIT)
     REFUND = "refund"  # if customer over-pays, this brings account back to what was invoiced or could be billed
+
+    # If you take a sum of all TYPES_FOR_INVOICED_SUM entries you'll end up with the actual invoiced amount.
+    TYPES_FOR_INVOICED_SUM = DEBIT_TYPES + (ADJUSTMENT,)
+
+    # If you take a sum of all TYPES_FOR_PAID_SUM entries you'll end up with the total cash collected.
+    TYPES_FOR_PAID_SUM = PAYMENT_TYPES + (REFUND,)
 
     OTHER = "other"
 

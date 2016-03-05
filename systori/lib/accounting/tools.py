@@ -111,4 +111,4 @@ class Amount:
         )
 
     def __repr__(self):
-        return "Amount(net=%r, tax=%r, gross=%r)" % (self.net, self.tax, self.gross)
+        return "Amount(net=%s, tax=%s, gross=%s)" % (self.net, self.tax, self.gross)

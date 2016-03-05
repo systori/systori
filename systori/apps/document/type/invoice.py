@@ -291,8 +291,6 @@ def serialize(invoice_obj, data):
 
     invoice = {
 
-        'version': '1.0',
-
         'id': invoice_obj.id,
 
         'title': data['title'],

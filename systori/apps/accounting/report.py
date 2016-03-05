@@ -1,8 +1,6 @@
-from decimal import Decimal as D
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Transaction
-from systori.lib.accounting.tools import extract_net_tax
-from .constants import *
+from systori.lib.accounting.tools import Amount
 
 
 def _transaction_sort_key(txn):
@@ -41,22 +39,12 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
     transactions.sort(key=_transaction_sort_key)
 
     report = {
-        # progress
-        'debited_net': D('0.00'),
-        'debited_tax': D('0.00'),
-        'debited_gross': D('0.00'),
-        # payments and invoices
+        'invoiced': Amount.zero(),
         'transactions': [],
     }
 
     # aggregates all payments per job, used by auto-pay algorithm later
-    payments = {
-        job.id: {
-            'net': D('0.00'),
-            'tax': D('0.00'),
-            'gross': D('0.00')
-        } for job in jobs
-    }
+    payments = {job.id: Amount.zero() for job in jobs}
 
     for txn in transactions:
 
@@ -64,19 +52,13 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
             'id': txn.id,
             'type': txn.transaction_type,
             'date': txn.transacted_on,
-
-            'net': D('0.00'),
-            'tax': D('0.00'),
-            'gross': D('0.00'),
-
+            'amount': Amount.zero(),
             'jobs': {}
         }
 
         if txn.transaction_type == txn.INVOICE:
             txn_dict.update({
-                'paid_net': D('0.00'),
-                'paid_tax': D('0.00'),
-                'paid_gross': D('0.00'),
+                'paid': Amount.zero()
             })
             try:
                 txn_dict.update({
@@ -87,32 +69,15 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
             except ObjectDoesNotExist:
                 pass
 
-        elif txn.transaction_type in (txn.PAYMENT, txn.ADJUSTMENT):
+        elif txn.transaction_type == txn.PAYMENT:
             txn_dict.update({
-                'is_reconciled': False,
-
-                'payment_received': D('0.00'),  # actual amount received from customer
-
-                'payment_applied_net': D('0.00'),
-                'payment_applied_tax': D('0.00'),
-                'payment_applied_gross': D('0.00'),  # part of payment applied to this set of 'jobs'
-
-                'discount_applied_net': D('0.00'),
-                'discount_applied_tax': D('0.00'),
-                'discount_applied_gross': D('0.00'),  # discount applied to this set of 'jobs'
-
-                'adjustment_applied_net': D('0.00'),
-                'adjustment_applied_tax': D('0.00'),
-                'adjustment_applied_gross': D('0.00'),
+                'payment': Amount.zero(),   # part of payment applied to this set of 'jobs'
+                'discount': Amount.zero(),  # discount applied to this set of 'jobs'
             })
+        else:
+            raise NotImplementedError('Unsupported transaction type: %s' % (txn.transaction_type,))
 
         for entry in txn.entries.all():
-
-            # extract payment entry info
-            if txn.transaction_type == txn.PAYMENT and entry.account.is_bank:
-                txn_dict['is_reconciled'] = entry.is_reconciled
-                txn_dict['payment_received'] = entry.amount * -1
-                continue
 
             # we only work with receivable accounts from here on out
             if not entry.account.is_receivable:
@@ -129,78 +94,34 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
                     'job.id': job.id,
                     'code': job.code,
                     'name': job.name,
-                    'net': D('0.00'),
-                    'tax': D('0.00'),
-                    'gross': D('0.00'),
+                    'amount': Amount.zero()
                 }
                 if txn.transaction_type in (txn.PAYMENT, txn.ADJUSTMENT):
                     txn_dict['jobs'][job.id].update({
-                        'payment_applied_net': D('0.00'),
-                        'payment_applied_tax': D('0.00'),
-                        'payment_applied_gross': D('0.00'),
-
-                        'discount_applied_net': D('0.00'),
-                        'discount_applied_tax': D('0.00'),
-                        'discount_applied_gross': D('0.00'),
-
-                        'adjustment_applied_net': D('0.00'),
-                        'adjustment_applied_tax': D('0.00'),
-                        'adjustment_applied_gross': D('0.00'),
+                        'payment': Amount.zero(),  # actual amount received from customer
+                        'discount': Amount.zero()  # discount applied to this set of 'jobs'
                     })
-
-            entry_gross = entry.amount
-            entry_net, entry_tax = extract_net_tax(entry_gross, TAX_RATE)
 
             job_dict = txn_dict['jobs'][job.id]
 
-            txn_dict['net'] += entry_net
-            txn_dict['tax'] += entry_tax
-            txn_dict['gross'] += entry_gross
-            job_dict['net'] += entry_net
-            job_dict['tax'] += entry_tax
-            job_dict['gross'] += entry_gross
+            txn_dict['amount'] += entry.amount
+            job_dict['amount'] += entry.amount
 
-            if entry.entry_type == (entry.ADJUSTMENT, entry.REFUND):
-                # adjustments reduce the total debited
-                report['debited_net'] += entry_net
-                report['debited_tax'] += entry_tax
-                report['debited_gross'] += entry_gross
-
-                txn_dict['adjustment_applied_net'] += entry_net
-                txn_dict['adjustment_applied_tax'] += entry_tax
-                txn_dict['adjustment_applied_gross'] += entry_gross
-                job_dict['adjustment_applied_net'] += entry_net
-                job_dict['adjustment_applied_tax'] += entry_tax
-                job_dict['adjustment_applied_gross'] += entry_gross
-
-            elif entry.entry_type in (entry.PAYMENT, entry.REFUND_CREDIT):
-                txn_dict['payment_applied_net'] += entry_net
-                txn_dict['payment_applied_tax'] += entry_tax
-                txn_dict['payment_applied_gross'] += entry_gross
-                job_dict['payment_applied_net'] += entry_net
-                job_dict['payment_applied_tax'] += entry_tax
-                job_dict['payment_applied_gross'] += entry_gross
+            if entry.entry_type == entry.PAYMENT:
+                txn_dict['payment'] += entry.amount
+                job_dict['payment'] += entry.amount
 
             elif entry.entry_type == entry.DISCOUNT:
-                txn_dict['discount_applied_net'] += entry_net
-                txn_dict['discount_applied_tax'] += entry_tax
-                txn_dict['discount_applied_gross'] += entry_gross
-                job_dict['discount_applied_net'] += entry_net
-                job_dict['discount_applied_tax'] += entry_tax
-                job_dict['discount_applied_gross'] += entry_gross
+                txn_dict['discount'] += entry.amount
+                job_dict['discount'] += entry.amount
 
-        for job in txn_dict['jobs'].values():
-            if txn.transaction_type in (txn.PAYMENT, txn.ADJUSTMENT):
-                jid = job['job.id']
-                payments[jid]['net'] += job['net']
-                payments[jid]['tax'] += job['tax']
-                payments[jid]['gross'] += job['gross']
+            if entry.entry_type in entry.PAYMENT_TYPES+(entry.ADJUSTMENT,):
+                payments[job.id] += entry.amount
+
+            if entry.entry_type in entry.TYPES_FOR_INVOICED_SUM:
+                report['invoiced'] += entry.amount
 
         report['transactions'].append(txn_dict)
-        if txn.transaction_type not in (txn.PAYMENT, txn.ADJUSTMENT):
-            report['debited_net'] += txn_dict['net']
-            report['debited_tax'] += txn_dict['tax']
-            report['debited_gross'] += txn_dict['gross']
 
     # Automated Payment Algorithm
     # We start with a total of all payments the customer has made to a
@@ -215,34 +136,24 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
         for job in invoice['jobs'].values():
             payment = payments[job['job.id']]
 
-            if payment['gross'] == 0:
-                job['paid_net'] = D('0.00')
-                job['paid_tax'] = D('0.00')
-                job['paid_gross'] = D('0.00')
+            if payment.gross == 0:
+                job['paid'] = Amount.zero()
                 continue  # payments used up
 
-            elif job['gross'] >= -payment['gross']:
+            elif job['amount'].gross >= payment.negate.gross:
                 # payments left is less than the invoiced amount...
                 # pay invoice with all that's left
-                job['paid_gross'] = -payment['gross']
-                job['paid_net'] = -payment['net']
-                job['paid_tax'] = -payment['tax']
+                job['paid'] = payment.negate
 
             else:
                 # still have enough payments left to cover the entire invoice...
                 # pay the invoice in full
-                job['paid_gross'] = job['gross']
-                job['paid_net'] = job['net']
-                job['paid_tax'] = job['tax']
+                job['paid'] = job['amount']
 
             # reduce payment total by how much was applied to this invoice
-            payment['gross'] += job['paid_gross']
-            payment['net'] += job['paid_net']
-            payment['tax'] += job['paid_tax']
+            payments[job['job.id']] += job['paid']
 
-            invoice['paid_net'] += job['paid_net']
-            invoice['paid_tax'] += job['paid_tax']
-            invoice['paid_gross'] += job['paid_gross']
+            invoice['paid'] += job['paid']
 
     return report
 
@@ -250,23 +161,19 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
 def generate_transaction_table(data, cols=('net', 'tax', 'gross')):
     t = []
     t += [('',)+cols+(None,)]
-    t += [('progress',)+tuple(data['debited_'+col] for col in cols)+(None,)]
+    t += [('progress',)+tuple(getattr(data['invoiced'], col) for col in cols)+(None,)]
 
     for txn in data['transactions']:
         if txn['type'] == Transaction.INVOICE:
             # only show invoice if it's not fully paid
-            if txn['paid_gross'] < txn['gross']:
-                vals = {
-                    'gross': txn['gross'] - txn['paid_gross'],
-                    'net': txn['net'] - txn['paid_net'],
-                    'tax': txn['tax'] - txn['paid_tax']
-                }
-                t += [(txn['type'],)+tuple(-vals[col] for col in cols)+(txn,)]
+            if txn['paid'].gross < txn['amount'].gross:
+                amount = (txn['amount'] - txn['paid']).negate
+                t += [(txn['type'],)+tuple(getattr(amount, col) for col in cols)+(txn,)]
         elif txn['type'] == Transaction.PAYMENT and\
-                (txn['payment_applied_gross'] != 0 or txn['discount_applied_gross'] != 0):
-            t += [(txn['type'],)+tuple(txn['payment_applied_'+col] for col in cols)+(txn,)]
-            if txn['discount_applied_gross'] != 0:
-                t += [('discount',)+tuple(txn['discount_applied_'+col] for col in cols)+(txn,)]
+                (txn['payment'].gross != 0 or txn['discount'].gross != 0):
+            t += [(txn['type'],)+tuple(getattr(txn['payment'], col) for col in cols)+(txn,)]
+            if txn['discount'].gross != 0:
+                t += [('discount',)+tuple(getattr(txn['discount'], col) for col in cols)+(txn,)]
 
     return t
 
