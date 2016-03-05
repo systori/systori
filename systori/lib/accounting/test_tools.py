@@ -1,3 +1,4 @@
+import json
 from decimal import Decimal as D
 from django.test import TestCase
 from .tools import *
@@ -38,6 +39,12 @@ class AmountTests(TestCase):
         self.assertEqual(a.net, D(1))
         self.assertEqual(a.tax, D(2))
         self.assertEqual(a.gross, D(3))
+        self.assertFalse(a.gross_was_calculated)
+
+    def test_gross_calculated(self):
+        a = Amount(D(3), D(2))
+        self.assertEqual(a.gross, D(5))
+        self.assertTrue(a.gross_was_calculated)
 
     def test_zero_init(self):
         a = Amount.zero()
@@ -69,3 +76,29 @@ class AmountTests(TestCase):
         self.assertEqual(a.net, D(1))
         self.assertEqual(a.tax, D(3))
         self.assertEqual(a.gross, D(5))
+
+
+class AmountJSONTests(TestCase):
+
+    def test_serialize(self):
+        invoiced = {'invoiced': Amount(D(1000), D(190))}
+        j = json.dumps(invoiced, cls=JSONEncoder)
+        l = json.loads(j)
+        self.assertEquals({"invoiced": {"_amount_": {"tax": 190.0, "net": 1000.0, "gross": 1190.0}}}, l)
+
+    def test_deserialize(self):
+        l = json.loads('{"invoiced": {"_amount_": {"tax": 190.0, "net": 1000.0, "gross": 1190.0}}}',
+                       object_hook=Amount.object_hook, parse_float=Decimal)
+        self.assertIsInstance(l['invoiced'], Amount)
+        self.assertEqual(D(190), l['invoiced'].tax)
+        self.assertEqual(D(1000), l['invoiced'].net)
+        self.assertEqual(D(1190), l['invoiced'].gross)
+
+    def test_round_trip(self):
+        invoiced = {'invoiced': Amount(D(1000), D(190))}
+        j = json.dumps(invoiced, cls=JSONEncoder)
+        l = json.loads(j, object_hook=Amount.object_hook, parse_float=Decimal)
+        self.assertIsInstance(l['invoiced'], Amount)
+        self.assertEqual(D(190), l['invoiced'].tax)
+        self.assertEqual(D(1000), l['invoiced'].net)
+        self.assertEqual(D(1190), l['invoiced'].gross)

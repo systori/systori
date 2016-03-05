@@ -1,7 +1,7 @@
 from decimal import Decimal as D
 from django.test import TestCase
 from django.utils.translation import activate
-from .test_workflow import create_data
+from .test_workflow import create_data, A
 from .forms import *
 from .models import Entry
 
@@ -166,7 +166,7 @@ class DebitFormTests(TestCase):
         self.assertEqual(D('571.20'), form.debit_amount.gross)
 
     def test_initial_load_nothing_to_bill(self):
-        debit_jobs([(self.job, D(571.20), Entry.WORK_DEBIT)])
+        debit_jobs([(self.job, A(571.20), Entry.WORK_DEBIT)])
         # now there is nothing new to invoice, we invoiced the full amount already
         # is_booked: False, means this form is not associated with the previous debit
         form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': False, 'is_override': False})
@@ -183,7 +183,7 @@ class DebitFormTests(TestCase):
         self.assertEqual(D('380.00'), form.diff_debit_amount.net)
 
     def test_initial_load_after_booking(self):
-        debit_jobs([(self.job, D(571.20), Entry.WORK_DEBIT)])
+        debit_jobs([(self.job, A(571.20), Entry.WORK_DEBIT)])
         # is_booked: True, means this form is associated with the previous debit
         form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': True, 'is_override': False,
                                   'amount_net': '480.00',
@@ -193,7 +193,7 @@ class DebitFormTests(TestCase):
         self.assertEqual(D('571.20'), form.debit_amount.gross)
 
     def test_initial_load_after_booking_with_net_increase(self):
-        debit_jobs([(self.job, D(452.20), Entry.WORK_DEBIT)])
+        debit_jobs([(self.job, A(452.20), Entry.WORK_DEBIT)])
         # is_booked: True, means this form is associated with the previous debit
         form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': True, 'is_override': False,
                                   'amount_net': '380.00',
@@ -207,8 +207,8 @@ class DebitFormTests(TestCase):
         self.assertEqual(D('100.00'), form.diff_itemized.net)
 
     def test_that_adjusted_payments_has_higher_amount_net(self):
-        debit_jobs([(self.job, D(452.20), Entry.WORK_DEBIT)])
-        credit_jobs([(self.job, D(119.00), D(0), D(119.00))], D(119.00))
+        debit_jobs([(self.job, A(452.20), Entry.WORK_DEBIT)])
+        credit_jobs([(self.job, A(119.00), A(0), A(119.00))], D(119.00))
         # is_booked: True, means this form is associated with the previous debit
         form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': True, 'is_override': False,
                                   'amount_net': '380.00',

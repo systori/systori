@@ -9,9 +9,12 @@ from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from jsonfield import JSONField
 
+from systori.lib.accounting.tools import Amount, JSONEncoder
+
 
 class Document(models.Model):
-    json = JSONField(default={})
+    json = JSONField(default={}, dump_kwargs={'cls': JSONEncoder},
+                     load_kwargs={'object_hook': Amount.object_hook, 'parse_float': Decimal})
     created_on = models.DateTimeField(auto_now_add=True)
     document_date = models.DateField(_("Date"), default=date.today, blank=True)
     notes = models.TextField(_("Notes"), blank=True, null=True)

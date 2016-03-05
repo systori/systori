@@ -72,7 +72,7 @@ class SplitPaymentForm(Form):
         if 'invoiced' in self.initial:
             self.balance_amount = Amount.from_gross(self.initial['invoiced'], TAX_RATE)
         else:
-            self.balance_amount = self.job.account.balance_amount
+            self.balance_amount = self.job.account.balance
 
         self.credit_amount = self.payment_amount + self.discount_amount
 
@@ -471,8 +471,8 @@ class DebitForm(Form):
 
         if self.initial['is_booked']:
             # accounting system already has the 'new' amounts since this invoice was booked
-            self.new_debited = self.job.account.invoiced_total
-            self.new_balance = self.job.account.balance_amount
+            self.new_debited = self.job.account.invoiced
+            self.new_balance = self.job.account.balance
 
             # we need to undo the booking to get the 'base' amounts
             self.base_debited = self.new_debited - initial_debit_amount
@@ -481,8 +481,8 @@ class DebitForm(Form):
         else:
             # no transactions exist yet so the account balance and debits don't include this new debit
             # accounting system has the 'base' amounts
-            self.base_debited = self.job.account.invoiced_total
-            self.base_balance = self.job.account.balance_amount
+            self.base_debited = self.job.account.invoiced
+            self.base_balance = self.job.account.balance
 
         # subtract all previous debits from all work completed to get amount not yet debited
         self.billable_amount = self.latest_itemized - self.base_debited
@@ -637,7 +637,7 @@ class BaseInvoiceForm(BaseFormSet):
         if invoice.transaction:
             invoice.transaction.delete()
 
-        skr03_debits = [(debit['job'], debit['amount_gross'], Entry.FLAT_DEBIT if debit['is_override'] else Entry.WORK_DEBIT) for debit in self.debits]
+        skr03_debits = [(debit['job'], Amount.from_gross(debit['amount_gross'], TAX_RATE), Entry.FLAT_DEBIT if debit['is_override'] else Entry.WORK_DEBIT) for debit in self.debits]
         invoice.transaction = debit_jobs(skr03_debits, recognize_revenue=data['is_final'])
 
         doc_settings = DocumentSettings.get_for_language(get_language())

@@ -1,5 +1,7 @@
 from decimal import Decimal
 from decimal import ROUND_HALF_UP
+from jsonfield.encoder import JSONEncoder as BaseJSONEncoder
+
 
 # German tax authorities require rounding up from the half cent.
 # For example: 0.985 = 0.99
@@ -112,3 +114,22 @@ class Amount:
 
     def __repr__(self):
         return "Amount(net=%s, tax=%s, gross=%s)" % (self.net, self.tax, self.gross)
+
+    # JSON Serialization & Deserialization
+
+    @property
+    def to_json(self):
+        return {'_amount_': {'net': self.net, 'tax': self.tax, 'gross': self.gross}}
+
+    @staticmethod
+    def object_hook(value):
+        if '_amount_' in value:
+            return Amount(**value['_amount_'])
+        return value
+
+
+class JSONEncoder(BaseJSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Amount):
+            return obj.to_json
+        return super().default(obj)
