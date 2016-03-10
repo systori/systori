@@ -56,6 +56,34 @@ def split_gross_entries(apps, schema_editor):
                         entry.save()
 
 
+def recalculate_invoices(apps, schema_editor):
+    from systori.apps.company.models import Company
+    from systori.apps.document.models import Invoice
+    from systori.apps.task.models import Job
+    from systori.apps.accounting.report import prepare_transaction_report
+
+    for company in Company.objects.all():
+        company.activate()
+
+        for invoice in Invoice.objects.all():
+            if 'debits' not in invoice.json:
+                print('skipping invoice #{}'.format(invoice.id))
+                continue
+            job_ids = [debit['job.id'] for debit in invoice.json['debits']]
+            jobs = Job.objects.filter(id__in=job_ids)
+            new_json = prepare_transaction_report(jobs, invoice.document_date)
+            print(invoice.id)
+            if invoice.id == 85:
+                pass
+            # TODO: Fix failing asserts.
+            print(len(new_json['transactions']), len(invoice.json['transactions']))
+            #assert len(new_json['transactions']) == len(invoice.json['transactions'])
+            print(new_json['invoiced'].gross, invoice.json['debited_gross'])
+            #assert new_json['invoiced'].gross == invoice.json['debited_gross']
+            invoice.json.update(new_json)
+            invoice.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -88,5 +116,11 @@ class Migration(migrations.Migration):
             model_name='entry',
             name='tax_rate',
         ),
-        migrations.RunPython(split_gross_entries)
+        migrations.AlterField(
+            model_name='transaction',
+            name='transaction_type',
+            field=models.CharField(max_length=32, null=True, verbose_name='Transaction Type', choices=[('invoice', 'Invoice'), ('payment', 'Payment'), ('adjustment', 'Adjustment')]),
+        ),
+        migrations.RunPython(split_gross_entries),
+        migrations.RunPython(recalculate_invoices)
     ]

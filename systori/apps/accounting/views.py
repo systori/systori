@@ -23,6 +23,11 @@ class PaymentCreate(FormView):
             kwargs['data'] = self.request.POST.copy()
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TAX_RATE'] = TAX_RATE
+        return context
+
     def form_valid(self, form):
         form.save()
         return super().form_valid(form)
@@ -89,7 +94,7 @@ class AccountList(TemplateView):
     template_name = 'accounting/account_list.html'
 
     def get_context_data(self, **kwargs):
-        context = super(AccountList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['banks'] = Account.objects.banks()
         context['other'] = Account.objects.exclude(account_type=Account.ASSET)
         return context

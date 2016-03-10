@@ -56,7 +56,9 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
             'jobs': {}
         }
 
-        if txn.transaction_type == txn.INVOICE:
+        # TODO: needed for migration, replace with commented line after deployment
+        #if txn.transaction_type == txn.INVOICE:
+        if txn.transaction_type in (txn.INVOICE, 'final-invoice'):
             txn_dict.update({
                 'paid': Amount.zero()
             })

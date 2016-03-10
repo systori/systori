@@ -284,12 +284,10 @@
     <table class="table" id="payments-table">
       <thead>
       <tr>
-        <th>{% trans 'Date' %}</th>
-        <th>{% trans 'Payment' %}</th>
-        <th class="text-right">{% trans 'Applied' %}</th>
+        <th>{% trans 'Date' %} / {% trans 'Job' %}</th>
+        <th class="text-right">{% trans 'Payment' %}</th>
         <th class="text-right">{% trans 'Discount' %}</th>
-        <th class="text-right">{% trans 'Adjustment' %}</th>
-        <th class="text-right">{% trans 'Total Credit' %}</th>
+        <th class="text-right">{% trans 'Applied' %}</th>
         <th class="text-right" colspan="3">{% trans 'Actions' %}</th>
       </tr>
       </thead>
@@ -298,11 +296,9 @@
         {% if transaction.type == 'payment' %}
         <tr>
           <td>{{ transaction.date|localize }}</td>
-          <td>{{ transaction.payment_received|negate|money }}</td>
-          <td class="text-right">{{ transaction.payment_applied_gross|negate|money }}</td>
-          <td class="text-right">{{ transaction.discount_applied_gross|negate|money }}</td>
-          <td class="text-right">{{ transaction.adjustment_applied_gross|negate|money }}</td>
-          <td class="text-right">{{ transaction.gross|negate|money }}</td>
+          <td class="text-right">{{ transaction.payment.negate.gross|money }}</td>
+          <td class="text-right">{{ transaction.discount.negate.gross|money }}</td>
+          <td class="text-right">{{ transaction.amount.negate.gross|money }}</td>
           <td class="text-right">
             {% if not transaction.is_reconciled %}
               <a href="{% url 'payment.delete' project.id transaction.id %}">{% trans "Delete" %}</a>
@@ -311,11 +307,10 @@
         </tr>
         {% for job in transaction.jobs.values %}
           <tr class="job-row {% if forloop.last %}last{% endif %}">
-            <td colspan="2">{{ job.name }}</td>
-            <td>{{ job.payment_applied_gross|negate|money }}</td>
-            <td>{{ job.discount_applied_gross|negate|money }}</td>
-            <td>{{ job.adjustment_applied_gross|negate|money }}</td>
-            <td>{{ job.gross|negate|money }}</td>
+            <td>{{ job.name }}</td>
+            <td>{{ job.payment.negate.gross|money }}</td>
+            <td>{{ job.discount.negate.gross|money }}</td>
+            <td>{{ job.amount.negate.gross|money }}</td>
             <td></td>
           </tr>
         {% endfor %}

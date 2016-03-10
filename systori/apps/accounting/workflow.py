@@ -151,14 +151,16 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None, debug=False):
             # credit the customer account (asset), decreasing their balance
             # (-) "bad thing", customer owes us less money
             transaction.credit(job.account, amount.net, entry_type=Entry.PAYMENT, job=job, value_type=Entry.NET)
-            transaction.credit(job.account, amount.tax, entry_type=Entry.PAYMENT, job=job, value_type=Entry.TAX)
+            if amount.tax > 0:
+                transaction.credit(job.account, amount.tax, entry_type=Entry.PAYMENT, job=job, value_type=Entry.TAX)
 
             if not job.is_revenue_recognized:
 
                 # debit the promised payments account (liability), decreasing the liability
                 # (-) "good thing", customer paying debt reduces liability
                 transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, amount.net, job=job, value_type=Entry.NET)
-                transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, amount.tax, job=job, value_type=Entry.TAX)
+                if amount.tax > 0:
+                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, amount.tax, job=job, value_type=Entry.TAX)
 
                 # credit the partial payments account (liability), increasing the liability
                 # (+) "bad thing", we are on the hook to finish and deliver the service or product
@@ -166,7 +168,8 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None, debug=False):
 
                 # credit the tax payments account (liability), increasing the liability
                 # (+) "bad thing", tax have to be paid eventually
-                transaction.credit(SKR03_TAX_PAYMENTS_CODE, amount.tax, job=job, value_type=Entry.TAX)
+                if amount.tax > 0:
+                    transaction.credit(SKR03_TAX_PAYMENTS_CODE, amount.tax, job=job, value_type=Entry.TAX)
 
         for reduction_type, reduction in [(Entry.DISCOUNT, discount), (Entry.ADJUSTMENT, adjustment)]:
 
@@ -175,7 +178,8 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None, debug=False):
                 # credit the customer account (asset), decreasing their balance
                 # (-) "bad thing", customer owes us less money
                 transaction.credit(job.account, reduction.net, entry_type=reduction_type, job=job, value_type=Entry.NET)
-                transaction.credit(job.account, reduction.tax, entry_type=reduction_type, job=job, value_type=Entry.TAX)
+                if reduction.tax > 0:
+                    transaction.credit(job.account, reduction.tax, entry_type=reduction_type, job=job, value_type=Entry.TAX)
 
                 if job.is_revenue_recognized:
                     # Reduction after final invoice has a few more steps involved.
@@ -192,7 +196,8 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None, debug=False):
 
                     # debit the tax payments account (liability), decreasing the liability
                     # (-) "good thing", less taxes to pay
-                    transaction.debit(SKR03_TAX_PAYMENTS_CODE, reduction.tax, job=job, value_type=Entry.TAX)
+                    if reduction.tax > 0:
+                        transaction.debit(SKR03_TAX_PAYMENTS_CODE, reduction.tax, job=job, value_type=Entry.TAX)
 
                 else:
                     # Reduction prior to final invoice is simpler.
@@ -200,7 +205,8 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None, debug=False):
                     # debit the promised payments account (liability), decreasing the liability
                     # (-) "good thing", customer paying debt reduces liability
                     transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, reduction.net, job=job, value_type=Entry.NET)
-                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, reduction.tax, job=job, value_type=Entry.TAX)
+                    if reduction.tax > 0:
+                        transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, reduction.tax, job=job, value_type=Entry.TAX)
 
     transaction.save(debug=debug)
 

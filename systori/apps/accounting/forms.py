@@ -57,8 +57,14 @@ class PaymentForm(Form):
 
 class SplitPaymentForm(Form):
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
-    payment = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=2, required=False)
-    discount = LocalizedDecimalField(label=_("Discount"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+
+    payment_net = LocalizedDecimalField(label=_("Amount Net"), max_digits=14, decimal_places=2, required=False)
+    payment_tax = LocalizedDecimalField(label=_("Amount Tax"), max_digits=14, decimal_places=2, required=False)
+    payment_gross = LocalizedDecimalField(label=_("Amount Gross"), max_digits=14, decimal_places=2, required=False)
+
+    discount_net = LocalizedDecimalField(label=_("Discount Net"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    discount_tax = LocalizedDecimalField(label=_("Discount Tax"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    discount_gross = LocalizedDecimalField(label=_("Discount Gross"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -67,10 +73,13 @@ class SplitPaymentForm(Form):
         self.fields['job'].queryset = self.job.project.jobs.all()
 
         for column_name in ['payment', 'discount']:
-            setattr(self, column_name+'_amount', Amount.from_gross(convert_field_to_value(self[column_name]), TAX_RATE))
+            net = convert_field_to_value(self[column_name+'_net'])
+            tax = convert_field_to_value(self[column_name+'_tax'])
+            gross = convert_field_to_value(self[column_name+'_gross'])
+            setattr(self, column_name+'_amount', Amount(net, tax, gross))
 
         if 'invoiced' in self.initial:
-            self.balance_amount = Amount.from_gross(self.initial['invoiced'], TAX_RATE)
+            self.balance_amount = self.initial['invoiced']
         else:
             self.balance_amount = self.job.account.balance
 
@@ -101,7 +110,7 @@ class BaseSplitPaymentFormSet(BaseFormSet):
             job_dict = {}
             for debit in previous_debits:
                 if debit['job.id'] == job.id:
-                    job_dict['invoiced'] = job_dict['payment'] = D(debit['amount_gross'])
+                    job_dict['invoiced'] = job_dict['payment'] = debit['amount']
                     break
             job_dict['job'] = job
             initial.append(job_dict)
@@ -113,22 +122,19 @@ class BaseSplitPaymentFormSet(BaseFormSet):
         return payment_valid and splits_valid
 
     def clean(self):
-        splits = D(0.0)
+        splits = Amount.zero()
         for form in self.forms:
-            if form.cleaned_data['payment']:
-                splits += form.cleaned_data['payment']
+            splits += form.payment_amount
         payment = self.payment_form.cleaned_data.get('amount', D(0.0))
-        if splits != payment:
+        if splits.gross != payment:
             raise forms.ValidationError(_("The sum of splits must equal the payment amount."))
 
     def get_splits(self):
         splits = []
         for split in self.forms:
-            if split.cleaned_data['payment']:
+            if split.payment_amount.gross > 0:
                 job = split.cleaned_data['job']
-                payment = split.cleaned_data['payment'] or D(0)
-                discount = split.cleaned_data['discount'] or D(0)
-                splits.append((job, payment, discount, D(0)))
+                splits.append((job, split.payment_amount,  split.discount_amount, Amount.zero()))
         return splits
 
     def save(self):
