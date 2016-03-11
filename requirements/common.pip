@@ -21,5 +21,3 @@ jsonfield
 
 -e git+https://github.com/damoti/pyth.git@pyth-py3#egg=pyth
 #-e ../pyth
-
-factory-boy==2.6.1
