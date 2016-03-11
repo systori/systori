@@ -1,0 +1,1836 @@
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+<link rel="apple-touch-icon" sizes="57x57" href="/static/img/favicon/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/static/img/favicon/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/static/img/favicon/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/static/img/favicon/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/static/img/favicon/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/static/img/favicon/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/static/img/favicon/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/static/img/favicon/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/img/favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-194x194.png" sizes="194x194">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/static/img/favicon/android-chrome-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="/static/img/favicon/manifest.json">
+<link rel="mask-icon" href="/static/img/favicon/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="msapplication-TileImage" content="/static/img/favicon/mstile-144x144.png">
+<meta name="theme-color" content="#ffffff">
+
+    <title>Test Project > Test Job</title>
+
+    
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+    <link href="/static/css/main.css" rel="stylesheet">
+  
+</head>
+
+
+<body>
+
+
+
+<!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/"><img alt="Systori" src="/static/img/systori_logo_nav.svg" style="margin-top:-10px;"></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">cuKIwwlmmFuYLte <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li class="dropdown-header">available Companies</li>
+                  
+                    
+                  
+                    
+                      <li><a href="/?__schema=duqzmotfgs">ZxnQWrGiMvwWOdN</a></li>
+                    
+                  
+                </ul>
+              
+            </li>
+            <li><a href="/projects/">Projekte</a></li>
+            
+  <li><a href="/project-1">Test Project</a></li>
+  <li class="active"><a href="/project-1/job-1/tasks">Test Job</a></li>
+
+          </ul>
+
+          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='O96XA1RFT02ZMTM1i91n0ePO0VyGs6Lo' />
+          <input type="hidden" name="language" value=""/>
+        </form>
+
+        <ul class="nav navbar-nav navbar-right">
+
+          
+  <li><a href="javascript:window.open('/field/project-1/', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">öffne Field App</a>
+  </li>
+
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">xXgRdyjgjpaKbHj <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="/settings">Einstellungen</a></li>
+              <li><a href="/logout">Abmelden</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">de<b class="caret"></b></a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
+              
+              
+                
+              
+                
+                  <li><a class="language-link" href="#"
+                         data-language="en">English</a></li>
+                
+              
+            </ul>
+          </li>
+
+        </ul>
+
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+
+
+  <div class="container-fluid" style="padding-bottom:100px;">
+    <div class="row">
+      <div class="col-sm-3 col-md-2 sidebar">
+        
+  <style>
+    @media (max-width: 1269px) {
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        margin-left: 0px;
+      }
+    }
+  </style>
+  
+
+
+  <ul class="nav nav-sidebar">
+    <li ><a
+        href="/project-1">Projektkarte</a></li>
+    <li class="active"><a
+        href="/project-1#jobs">Lose</a></li>
+    <li ><a
+        href="/project-1/plan">Plan</a></li>
+    <li ><a
+        href="/project-1#proposals">Angebote</a></li>
+    <li ><a
+        href="/project-1#invoices">Rechnungen</a></li>
+    <li ><a
+        href="/project-1#contacts">Kontakte</a></li>
+  </ul>
+
+
+      </div>
+      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        
+  <style>
+
+    #task-editor {
+    }
+
+    .main {
+      margin-bottom:250px;
+    }
+
+    ubr-taskgroup,
+    ubr-task,
+    ubr-taskinstance,
+    ubr-lineitem {
+      display: block;
+      position: relative;
+    }
+
+    .editor {
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .editor-row {
+      display: -webkit-flex;
+      display: flex;
+    }
+
+    /* task group & task */
+
+    .code {
+      width: 80px;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    .description {
+      margin-left: 80px;
+      padding-right: 10px;
+      width: 612px;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    .qty {
+      width: 90px;
+      text-align: right;
+      align-self: flex-end;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    .unit {
+      width: 90px;
+      padding-left: 4px;
+      align-self: flex-end;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    .price {
+      width: 90px;
+      text-align: right;
+      padding-right: 4px;
+      align-self: flex-end;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    .total {
+      width: 90px;
+      font-weight: bold;
+      text-align: right;
+      padding-right: 4px;
+      margin-left: 10px;
+      align-self: flex-end;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    .labels {
+      padding-left: 20px;
+      align-self: flex-end;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    .labels > .label:hover {
+      cursor: pointer;
+    }
+
+    .labels > .label.False {
+      display: none;
+      background-color: #F0F0F0;
+    }
+
+    .editor:hover > .editor-row > .labels > .label.False {
+      display: inline;
+    }
+
+    /* task group */
+
+    ubr-taskgroup > .editor .name {
+      font-weight: bold;
+      width: 700px;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    ubr-taskgroup > .editor .total {
+      width: 100px;
+      border: 1px solid black;
+      background-color: #fff;
+      z-index: 2;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    ubr-taskgroup:not(.empty) > .editor:after {
+      display: block;
+      position: absolute;
+      content: "";
+      border-left: 1px solid #e9e9e9;
+      top: 0px;
+      bottom: 0px;
+      left: 791px;
+      z-index: 1;
+    }
+
+    /* task */
+
+    ubr-task:not(:last-child):after {
+      display: block;
+      position: absolute;
+      content: "";
+      border-left: 1px solid #e9e9e9;
+      top: 0px;
+      bottom: 0px;
+      left: 791px;
+      z-index: 1;
+    }
+
+    ubr-task > .editor {
+      padding-bottom: 0px;
+    }
+
+    ubr-task > .editor .code {
+      padding-left: 10px;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    ubr-task > .editor .name {
+      width: 420px;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    ubr-task > .editor .price {
+      position: relative;
+      font-weight: bold;
+      border: 1px solid black;
+      margin-left: 10px;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    ubr-task > .editor .price:before {
+      display: block;
+      position: absolute;
+      content: "x";
+      width: 180px;
+      height: 1px;
+      padding-right: 2px;
+      border-top: 1px solid #e9e9e9;
+      top: -1px;
+      left: -181px;
+      color: #e9e9e9;
+      font-size: 8px;
+      text-align: right;
+    }
+
+    ubr-task > .editor .price:after {
+      display: block;
+      position: absolute;
+      content: "=";
+      width: 10px;
+      padding-left: 2px;
+      border-top: 1px solid #e9e9e9;
+      top: 1px;
+      right: -11px;
+      color: #e9e9e9;
+      font-size: 8px;
+      text-align: left;
+    }
+
+    ubr-task > .editor .total {
+      width: 100px;
+      border: 1px solid #e9e9e9;
+      background-color: #fff;
+      z-index: 2;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    ubr-task > .editor .total:before {
+      display: block;
+      position: absolute;
+      content: "+";
+      height: 10px;
+      top: -10px;
+      color: #e9e9e9;
+      font-size: 9px;
+      text-align: left;
+      padding-left: 2px;
+    }
+
+    ubr-task > .editor .description {
+      padding-bottom: 15px;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    ubr-task:not(.empty) > .editor .description {
+      padding-bottom: 20px;
+      border-right: 1px solid #e9e9e9;
+    }
+
+    /* task instance */
+
+    ubr-taskinstance > .editor .name {
+      width: 612px;
+      padding-right: 10px;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    ubr-taskinstance:nth-of-type(1) > .editor {
+      width: 692px;
+      border-right: 1px solid #e9e9e9;
+    }
+
+    ubr-taskinstance:nth-of-type(1) > ubr-lineitem > .editor .total {
+      border: 1px solid #e9e9e9;
+    }
+
+    ubr-taskinstance:nth-of-type(1) > ubr-lineitem > .editor .total:before {
+      display: block;
+      position: absolute;
+      content: "+";
+      height: 10px;
+      border-left: 1px solid #e9e9e9;
+      top: -10px;
+      color: #e9e9e9;
+      font-size: 9px;
+      text-align: left;
+      padding-left: 2px;
+    }
+
+    ubr-taskinstance:last-of-type {
+      padding-bottom: 40px;
+    }
+
+    ubr-taskinstance:only-of-type > .editor {
+      display: none;
+    }
+
+    /* line item */
+
+    ubr-lineitem .name {
+      width: 310px;
+      margin-left: 100px;
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    ubr-lineitem .price {
+      flex-shrink: 0;
+      -webkit-flex-shrink: 0;
+    }
+
+    ubr-lineitem > a {
+      position: absolute;
+      top: -150px;
+    }
+
+    div[contenteditable][placeholder]:empty:before {
+      content: attr(placeholder);
+      font-style: italic;
+      color: #d9d9d9;
+    }
+
+    div[contenteditable][placeholder]:empty:focus:before {
+      content: "";
+    }
+
+    ubr-autocomplete {
+      z-index: 100;
+      display: none;
+      position: absolute;
+      background: white;
+      left: 80px;
+      width: 480px;
+      border: 1px solid lightgrey;
+      top: 20px;
+      -webkit-transition: top 0.1s;
+      -moz-transition: top 0.1s;
+      -ms-transition: top 0.1s;
+      -o-transition: top 0.1s;
+      transition: top 0.1s;
+    }
+
+    ubr-autocomplete > div {
+      border-bottom: 1px solid lightgrey;
+    }
+
+    /*
+    ubr-autocomplete > div:hover {
+      background: #FFE8D9;
+      cursor: pointer;
+    }
+    */
+
+    ubr-autocomplete > div.active {
+      background: orange;
+    }
+
+    #mode-selector {
+      position: fixed;
+      top: 60px;
+      right: 10px;
+    }
+
+    .editor-hint {
+      color: silver;
+      font-style: italic;
+      font-size: 85%;
+      display: none;
+      margin-top: 4px;
+      margin-left: 80px;
+      margin-bottom: 10px;
+    }
+
+    .editor-hint > .label-default {
+      background-color: silver;
+    }
+
+    .editor-hint .hidden {
+      display: none;
+    }
+
+    ubr-lineitem .editor-hint {
+      margin-left: 100px;
+    }
+
+    .job-total-row {
+      width: 900px;
+      margin-bottom: 10px;
+    }
+    
+    .job-total-label {
+      width: 780px;
+      display: inline-block;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    .job-total, .job-total-gross {
+      text-align: right;
+      display: inline-block;
+      border-top: 2px solid black;
+      font-weight: bold;
+      margin-left: 10px;
+      width: 100px;
+    }
+
+
+  </style>
+
+  <div id="mode-selector" class="btn-group-vertical" data-toggle="buttons">
+    <label id="input-task-mode" class="btn btn-default btn-sm"
+           title="Nur Positionen erstellen.">
+      <input type="radio" name="input-mode"><span class="glyphicon glyphicon-step-forward"></span>
+    </label>
+    <label id="input-lineitem-mode" class="btn btn-default btn-sm active"
+           title="Positionen mit Kalkulation erstellen.">
+      <input type="radio" name="input-mode"><span class="glyphicon glyphicon-fast-forward"></span>
+    </label>
+  </div>
+
+  <ubr-job id="task-editor"
+           data-pk="1"
+           data-code="0"
+           data-taskgroup-offset="0"
+           data-taskgroup-zfill="1"
+           data-task-zfill="1">
+
+    
+      <ubr-taskgroup
+    
+    class="empty">
+  
+<div class="editor">
+  <div class="editor-row">
+    <div class="code">0.1</div>
+    <div class="name" placeholder="Positionsgruppe" contenteditable></div>
+    <div class="total">0,00</div>
+  </div>
+  <div class="description" placeholder="Beschreibung" contenteditable></div>
+  <div class="editor-hint">
+    <span class="label label-default">Shift </span> <span class="label label-default">Entf</span> dieses Element löschen
+    <br>
+    <span class="label label-default">Shift </span> <span class="label label-default">Enter</span> neue Position
+  </div>
+</div>
+  
+</ubr-taskgroup>
+    
+
+    <div class="job-total-row">
+      <div class="job-total-label">Summe</div>
+      <div class="job-total">0,00</div>
+    </div>
+
+    <div class="job-total-row">
+      <div class="job-total-label">inkl. MWSt 19,00%</div>
+      <div class="job-total-gross" data-tax-rate="0.19">0,00</div>
+    </div>
+  </ubr-job>
+
+  <template id="taskgroup-template">
+    
+<div class="editor">
+  <div class="editor-row">
+    <div class="code">0.1</div>
+    <div class="name" placeholder="Positionsgruppe" contenteditable></div>
+    <div class="total">0,00</div>
+  </div>
+  <div class="description" placeholder="Beschreibung" contenteditable></div>
+  <div class="editor-hint">
+    <span class="label label-default">Shift </span> <span class="label label-default">Entf</span> dieses Element löschen
+    <br>
+    <span class="label label-default">Shift </span> <span class="label label-default">Enter</span> neue Position
+  </div>
+</div>
+  </template>
+
+  <template id="task-template">
+    
+<div class="editor">
+  <div class="editor-row">
+    <div class="code"></div>
+    <div class="name" placeholder="Position" contenteditable></div>
+    <div class="qty" placeholder="Menge" contenteditable>0,00</div>
+    <div class="unit" placeholder="Einheit" contenteditable></div>
+    <div class="price"></div>
+    <div class="total"></div>
+    <div class="labels">
+      <span class="is_optional False label label-primary">Bedarf</span>
+    </div>
+  </div>
+  <div class="editor-hint">
+    <span class="label label-default">Shift </span> <span class="label label-default">Entf</span> dieses Element löschen
+    <br>
+    <span class="label label-default">Shift </span> <span class="label label-default">Enter</span> neues Kalkulationselement
+    <br>
+    <span class="label label-default">Shift </span> <span class="label label-default">alt </span> <span class="label label-default">Enter</span> neue Alternativposition
+  </div>
+  <div class="description" placeholder="Beschreibung" contenteditable></div>
+</div>
+  </template>
+
+  <template id="taskinstance-template">
+    
+<div class="editor">
+  <div class="editor-row">
+    <div class="code"></div>
+    <div class="name" placeholder="Alternative" contenteditable></div>
+  </div>
+  <div class="description" placeholder="Beschreibung"
+       contenteditable></div>
+  <div class="editor-hint">
+    <span class="label label-default">Shift </span> <span class="label label-default">Entf</span> dieses Element löschen
+    <br>
+    <span class="label label-default">Shift </span> <span class="label label-default">Enter</span> neues Kalkulationselement
+  </div>
+</div>
+  </template>
+
+  <template id="lineitem-template">
+    
+<a name="lineitem-None"></a>
+<div class="editor">
+  <div class="editor-row">
+    <div class="name" placeholder="Kalkulationselement" contenteditable></div>
+    <div class="qty" placeholder="Menge" contenteditable>0,00</div>
+    <div class="unit" placeholder="Einheit" contenteditable></div>
+    <div class="price" placeholder="Preis" contenteditable>0,00</div>
+    <div class="total">0,00</div>
+    <div class="labels">
+      <span class="is_flagged False label label-danger">Markierung</span>
+    </div>
+  </div>
+  <div class="editor-hint">
+    <span class="label label-default">Shift </span> <span class="label label-default">Entf</span> dieses Element löschen
+    <br>
+    <span class="label label-default">Shift </span> <span class="label label-default">Enter</span> 
+    <span class="blank">neue Position erstellen</span><span class="non-blank">neues Kalkulationselement</span>
+  </div>
+</div>
+  </template>
+
+
+      </div>
+    </div>
+  </div>
+
+
+
+<script src="/static/js/jquery-1.11.2.min.js"></script>
+<script src="/static/js/jquery-ui.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+
+
+  <script src="/static/js/language_picker.js"></script>
+
+  <script type="application/dart" src="/static/dart/editor.dart"></script>
+  <script src="/static/dart/packages/web_components/webcomponents.min.js"></script>
+  <script src="/static/dart/packages/web_components/dart_support.js"></script>
+  <script src="/static/dart/packages/browser/dart.js"></script>
+
+
+
+<link rel="stylesheet" href="/static/debug_toolbar/css/print.css" type="text/css" media="print" />
+<link rel="stylesheet" href="/static/debug_toolbar/css/toolbar.css" type="text/css" />
+
+<!-- Prevent our copy of jQuery from registering as an AMD module on sites that use RequireJS. -->
+<script src="/static/debug_toolbar/js/jquery_pre.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="/static/debug_toolbar/js/jquery_post.js"></script>
+
+<script src="/static/debug_toolbar/js/toolbar.js"></script>
+<div id="djDebug" hidden="hidden" dir="ltr"
+     data-store-id="None" data-render-panel-url="/__debug__/render_panel/"
+     >
+	<div hidden="hidden" id="djDebugToolbar">
+		<ul id="djDebugPanelList">
+			
+			<li><a id="djHideToolBarButton" href="#" title="Toolbar ausblenden">Ausblenden &#187;</a></li>
+			
+			
+				<li class="djDebugPanelButton">
+					<input type="checkbox" data-cookie="djdtTimerPanel" checked="checked" title="Für nächste und die darauffolgenden Anfragen deaktivieren" />
+					
+						<a href="#" title="Zeit" class="TimerPanel">
+					
+					Zeit
+					
+					
+						<br /><small>CPU: 416.00ms (426.83ms)</small>
+					
+					
+					
+						</a>
+					
+				</li>
+			
+				<li class="djDebugPanelButton">
+					<input type="checkbox" data-cookie="djdtSQLPanel" checked="checked" title="Für nächste und die darauffolgenden Anfragen deaktivieren" />
+					
+						<a href="#" title="SQL queries from 1 connection" class="SQLPanel">
+					
+					SQL
+					
+					
+						<br /><small>9 queries in 7.05ms</small>
+					
+					
+					
+						</a>
+					
+				</li>
+			
+		</ul>
+	</div>
+	<div hidden="hidden" id="djDebugToolbarHandle">
+		<span title="Toolbar einblenden" id="djShowToolBarButton">&#171;</span>
+	</div>
+	
+		
+			<div id="TimerPanel" class="djdt-panelContent">
+				<div class="djDebugPanelTitle">
+					<a href="" class="djDebugClose"></a>
+					<h3>Zeit</h3>
+				</div>
+				<div class="djDebugPanelContent">
+					
+					<div class="djdt-scroll">
+<h4>Ressourcenverwendung</h4>
+<table>
+	<colgroup>
+		<col class="djdt-width-20"/>
+		<col/>
+	</colgroup>
+	<thead>
+		<tr>
+			<th>Ressource</th>
+			<th>Wert</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr class="djDebugOdd">
+				<td>CPU-Zeit Benutzer</td>
+				<td>380.000 ms</td>
+			</tr>
+		
+			<tr class="djDebugEven">
+				<td>CPU-Zeit System</td>
+				<td>36.000 ms</td>
+			</tr>
+		
+			<tr class="djDebugOdd">
+				<td>CPU-Zeit gesamt</td>
+				<td>416.000 ms</td>
+			</tr>
+		
+			<tr class="djDebugEven">
+				<td>Verstrichene Zeit</td>
+				<td>426.835 ms</td>
+			</tr>
+		
+			<tr class="djDebugOdd">
+				<td>Kontextwechsel</td>
+				<td>8 freiwillig, 15 unfreiwillig</td>
+			</tr>
+		
+	</tbody>
+</table>
+
+<!-- This hidden div is populated and displayed by code in toolbar.timer.js -->
+<div id="djDebugBrowserTiming" hidden="hidden">
+	<h4>Browserzeit</h4>
+	<table>
+		<colgroup>
+			<col class="djdt-width-20"/>
+			<col class="djdt-width-60"/>
+			<col class="djdt-width-20"/>
+		</colgroup>
+		<thead>
+			<tr>
+				<th>Timing-Attribut</th>
+				<th class="timeline">Verlauf</th>
+				<th class="djdt-time">Millisekunden seit Seitenaufruf (plus Dauer)</th>
+			</tr>
+		</thead>
+		<tbody id="djDebugBrowserTimingTableBody">
+		</tbody>
+	</table>
+</div>
+<script src="/static/debug_toolbar/js/toolbar.timer.js"></script>
+</div>
+					
+				</div>
+			</div>
+		
+	
+		
+			<div id="SQLPanel" class="djdt-panelContent">
+				<div class="djDebugPanelTitle">
+					<a href="" class="djDebugClose"></a>
+					<h3>SQL queries from 1 connection</h3>
+				</div>
+				<div class="djDebugPanelContent">
+					
+					<div class="djdt-scroll">
+<div class="djdt-clearfix">
+	<ul class="djdt-stats">
+		
+			<li>
+				<strong class="djdt-label"><span data-background-color="rgb(256.0, 0, 0)" class="djdt-color">&#160;</span> default</strong>
+				<span class="djdt-info">7.05 ms (9 Abfragen
+				
+					including 2 duplicates
+				)</span>
+			</li>
+		
+	</ul>
+</div>
+
+
+	<table>
+		<thead>
+			<tr>
+				<th class="djdt-color">&#160;</th>
+				<th class="query" colspan="2">Abfrage</th>
+				<th class="timeline">Verlauf</th>
+				<th class="djdt-time">Zeit (ms)</th>
+				<th class="djdt-actions">Aktion</th>
+			</tr>
+		</thead>
+		<tbody>
+			
+				<tr class="djDebugHoverable djDebugOdd" id="sqlMain_1">
+					<td class="djdt-color"><span data-background-color="rgb(256.0, 0, 0)">&#160;</span></td>
+					<td class="djdt-toggle">
+						<a class="djToggleSwitch" data-toggle-name="sqlMain" data-toggle-id="1" data-toggle-open="+" data-toggle-close="-" href="">+</a>
+					</td>
+					<td class="query">
+						<div class="djDebugSqlWrap">
+							<div class="djDebugSql"><strong>SELECT</strong> <a class="djDebugUncollapsed djDebugToggle" href="#">&#8226;&#8226;&#8226;</a> <a class="djDebugCollapsed djDebugToggle" href="#">&quot;company_access&quot;.&quot;id&quot;, &quot;company_access&quot;.&quot;company_id&quot;, &quot;company_access&quot;.&quot;user_id&quot;, &quot;company_access&quot;.&quot;is_owner&quot;, &quot;company_access&quot;.&quot;is_staff&quot;, &quot;company_access&quot;.&quot;is_foreman&quot;, &quot;company_access&quot;.&quot;is_laborer&quot;, &quot;company_access&quot;.&quot;is_accountant&quot;, &quot;company_access&quot;.&quot;is_active&quot;, &quot;user_user&quot;.&quot;id&quot;, &quot;user_user&quot;.&quot;password&quot;, &quot;user_user&quot;.&quot;last_login&quot;, &quot;user_user&quot;.&quot;is_superuser&quot;, &quot;user_user&quot;.&quot;first_name&quot;, &quot;user_user&quot;.&quot;last_name&quot;, &quot;user_user&quot;.&quot;email&quot;, &quot;user_user&quot;.&quot;date_joined&quot;, &quot;user_user&quot;.&quot;language&quot;</a> <strong>FROM</strong> &quot;company_access&quot; <strong>INNER JOIN</strong> &quot;user_user&quot; <strong>ON</strong> ( &quot;company_access&quot;.&quot;user_id&quot; = &quot;user_user&quot;.&quot;id&quot; ) <strong>WHERE</strong> (&quot;company_access&quot;.&quot;user_id&quot; = 2117 <strong>AND</strong> &quot;company_access&quot;.&quot;company_id&quot; = &#39;xwldcbrlrs&#39;)</div>
+						</div>
+						
+					</td>
+					<td class="timeline">
+						<div class="djDebugTimeline"><div class="djDebugLineChart" data-left="0%"><strong data-width="10.827443952253745%" data-background-color="#800000">10.827443952253745%</strong></div></div>
+					</td>
+					<td class="djdt-time">
+						0.76
+					</td>
+					<td class="djdt-actions">
+
+					
+						
+							<form method="post">
+								<input name="sql" type="hidden" value="SELECT &quot;company_access&quot;.&quot;id&quot;, &quot;company_access&quot;.&quot;company_id&quot;, &quot;company_access&quot;.&quot;user_id&quot;, &quot;company_access&quot;.&quot;is_owner&quot;, &quot;company_access&quot;.&quot;is_staff&quot;, &quot;company_access&quot;.&quot;is_foreman&quot;, &quot;company_access&quot;.&quot;is_laborer&quot;, &quot;company_access&quot;.&quot;is_accountant&quot;, &quot;company_access&quot;.&quot;is_active&quot;, &quot;user_user&quot;.&quot;id&quot;, &quot;user_user&quot;.&quot;password&quot;, &quot;user_user&quot;.&quot;last_login&quot;, &quot;user_user&quot;.&quot;is_superuser&quot;, &quot;user_user&quot;.&quot;first_name&quot;, &quot;user_user&quot;.&quot;last_name&quot;, &quot;user_user&quot;.&quot;email&quot;, &quot;user_user&quot;.&quot;date_joined&quot;, &quot;user_user&quot;.&quot;language&quot; FROM &quot;company_access&quot; INNER JOIN &quot;user_user&quot; ON ( &quot;company_access&quot;.&quot;user_id&quot; = &quot;user_user&quot;.&quot;id&quot; ) WHERE (&quot;company_access&quot;.&quot;user_id&quot; = 2117 AND &quot;company_access&quot;.&quot;company_id&quot; = &#39;xwldcbrlrs&#39;)" /><input name="raw_sql" type="hidden" value="SELECT &quot;company_access&quot;.&quot;id&quot;, &quot;company_access&quot;.&quot;company_id&quot;, &quot;company_access&quot;.&quot;user_id&quot;, &quot;company_access&quot;.&quot;is_owner&quot;, &quot;company_access&quot;.&quot;is_staff&quot;, &quot;company_access&quot;.&quot;is_foreman&quot;, &quot;company_access&quot;.&quot;is_laborer&quot;, &quot;company_access&quot;.&quot;is_accountant&quot;, &quot;company_access&quot;.&quot;is_active&quot;, &quot;user_user&quot;.&quot;id&quot;, &quot;user_user&quot;.&quot;password&quot;, &quot;user_user&quot;.&quot;last_login&quot;, &quot;user_user&quot;.&quot;is_superuser&quot;, &quot;user_user&quot;.&quot;first_name&quot;, &quot;user_user&quot;.&quot;last_name&quot;, &quot;user_user&quot;.&quot;email&quot;, &quot;user_user&quot;.&quot;date_joined&quot;, &quot;user_user&quot;.&quot;language&quot; FROM &quot;company_access&quot; INNER JOIN &quot;user_user&quot; ON ( &quot;company_access&quot;.&quot;user_id&quot; = &quot;user_user&quot;.&quot;id&quot; ) WHERE (&quot;company_access&quot;.&quot;user_id&quot; = %s AND &quot;company_access&quot;.&quot;company_id&quot; = %s)" /><input name="params" type="hidden" value="[2117, &quot;xwldcbrlrs&quot;]" /><input name="alias" type="hidden" value="default" /><input name="duration" type="hidden" value="0.7634162902832031" /><input name="hash" type="hidden" value="a2e0711e861225846f163606c69a65d4bc00b822" />
+
+								<button formaction="/__debug__/sql_select/" class="remoteCall">Sel</button>
+								<button formaction="/__debug__/sql_explain/" class="remoteCall">Expl</button>
+
+								
+							</form>
+						
+					
+					</td>
+				</tr>
+				<tr class="djUnselected djDebugHoverable djDebugOdd djToggleDetails_1" id="sqlDetails_1">
+					<td colspan="2"></td>
+					<td colspan="4">
+						<div class="djSQLDetailsDiv">
+							<p><strong>Verbindung:</strong> default</p>
+							
+							
+							
+								<pre class="djdt-stack"><span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">&lt;module&gt;</span>(<span class="djdt-lineno">63</span>)
+  <span class="djdt-code">generate_pages()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">generate_pages</span>(<span class="djdt-lineno">48</span>)
+  <span class="djdt-code">editor = client.get(reverse(&#39;tasks&#39;, args=[data.project.id, data.job.id]))</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">500</span>)
+  <span class="djdt-code">**extra)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">303</span>)
+  <span class="djdt-code">return self.generic(&#39;GET&#39;, path, secure=secure, **r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">generic</span>(<span class="djdt-lineno">379</span>)
+  <span class="djdt-code">return self.request(**r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">request</span>(<span class="djdt-lineno">448</span>)
+  <span class="djdt-code">response = self.handler(environ)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">__call__</span>(<span class="djdt-lineno">122</span>)
+  <span class="djdt-code">response = self.get_response(request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/core/handlers/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">get_response</span>(<span class="djdt-lineno">125</span>)
+  <span class="djdt-code">response = middleware_method(request, callback, callback_args, callback_kwargs)</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/company/</span><span class="djdt-file">middleware.py</span> in <span class="djdt-func">process_view</span>(<span class="djdt-lineno">10</span>)
+  <span class="djdt-code">request.access = Access.objects.select_related(&quot;user&quot;).get(user=request.user, company=request.company)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">328</span>)
+  <span class="djdt-code">num = len(clone)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">__len__</span>(<span class="djdt-lineno">144</span>)
+  <span class="djdt-code">self._fetch_all()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_fetch_all</span>(<span class="djdt-lineno">965</span>)
+  <span class="djdt-code">self._result_cache = list(self.iterator())</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">iterator</span>(<span class="djdt-lineno">238</span>)
+  <span class="djdt-code">results = compiler.execute_sql()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/sql/</span><span class="djdt-file">compiler.py</span> in <span class="djdt-func">execute_sql</span>(<span class="djdt-lineno">829</span>)
+  <span class="djdt-code">cursor.execute(sql, params)</span></pre>
+							
+							
+						</div>
+					</td>
+				</tr>
+			
+				<tr class="djDebugHoverable djDebugEven" id="sqlMain_2">
+					<td class="djdt-color"><span data-background-color="rgb(256.0, 0, 0)">&#160;</span></td>
+					<td class="djdt-toggle">
+						<a class="djToggleSwitch" data-toggle-name="sqlMain" data-toggle-id="2" data-toggle-open="+" data-toggle-close="-" href="">+</a>
+					</td>
+					<td class="query">
+						<div class="djDebugSqlWrap">
+							<div class="djDebugSql"><strong>SELECT</strong> <a class="djDebugUncollapsed djDebugToggle" href="#">&#8226;&#8226;&#8226;</a> <a class="djDebugCollapsed djDebugToggle" href="#">&quot;project_project&quot;.&quot;id&quot;, &quot;project_project&quot;.&quot;name&quot;, &quot;project_project&quot;.&quot;description&quot;, &quot;project_project&quot;.&quot;is_template&quot;, &quot;project_project&quot;.&quot;job_zfill&quot;, &quot;project_project&quot;.&quot;taskgroup_zfill&quot;, &quot;project_project&quot;.&quot;task_zfill&quot;, &quot;project_project&quot;.&quot;account_id&quot;, &quot;project_project&quot;.&quot;phase&quot;, &quot;project_project&quot;.&quot;state&quot;</a> <strong>FROM</strong> &quot;project_project&quot; <strong>WHERE</strong> &quot;project_project&quot;.&quot;id&quot; = 1</div>
+						</div>
+						
+					</td>
+					<td class="timeline">
+						<div class="djDebugTimeline"><div class="djDebugLineChart" data-left="10.827443952253745%"><strong data-width="10.06029350422813%" data-background-color="#008000">8.971020863625604%</strong></div></div>
+					</td>
+					<td class="djdt-time">
+						0.63
+					</td>
+					<td class="djdt-actions">
+
+					
+						
+							<form method="post">
+								<input name="sql" type="hidden" value="SELECT &quot;project_project&quot;.&quot;id&quot;, &quot;project_project&quot;.&quot;name&quot;, &quot;project_project&quot;.&quot;description&quot;, &quot;project_project&quot;.&quot;is_template&quot;, &quot;project_project&quot;.&quot;job_zfill&quot;, &quot;project_project&quot;.&quot;taskgroup_zfill&quot;, &quot;project_project&quot;.&quot;task_zfill&quot;, &quot;project_project&quot;.&quot;account_id&quot;, &quot;project_project&quot;.&quot;phase&quot;, &quot;project_project&quot;.&quot;state&quot; FROM &quot;project_project&quot; WHERE &quot;project_project&quot;.&quot;id&quot; = 1" /><input name="raw_sql" type="hidden" value="SELECT &quot;project_project&quot;.&quot;id&quot;, &quot;project_project&quot;.&quot;name&quot;, &quot;project_project&quot;.&quot;description&quot;, &quot;project_project&quot;.&quot;is_template&quot;, &quot;project_project&quot;.&quot;job_zfill&quot;, &quot;project_project&quot;.&quot;taskgroup_zfill&quot;, &quot;project_project&quot;.&quot;task_zfill&quot;, &quot;project_project&quot;.&quot;account_id&quot;, &quot;project_project&quot;.&quot;phase&quot;, &quot;project_project&quot;.&quot;state&quot; FROM &quot;project_project&quot; WHERE &quot;project_project&quot;.&quot;id&quot; = %s" /><input name="params" type="hidden" value="[1]" /><input name="alias" type="hidden" value="default" /><input name="duration" type="hidden" value="0.6325244903564453" /><input name="hash" type="hidden" value="6c4a911f18685321eb773908e669b758318d5f7c" />
+
+								<button formaction="/__debug__/sql_select/" class="remoteCall">Sel</button>
+								<button formaction="/__debug__/sql_explain/" class="remoteCall">Expl</button>
+
+								
+							</form>
+						
+					
+					</td>
+				</tr>
+				<tr class="djUnselected djDebugHoverable djDebugEven djToggleDetails_2" id="sqlDetails_2">
+					<td colspan="2"></td>
+					<td colspan="4">
+						<div class="djSQLDetailsDiv">
+							<p><strong>Verbindung:</strong> default</p>
+							
+							
+							
+								<pre class="djdt-stack"><span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">&lt;module&gt;</span>(<span class="djdt-lineno">63</span>)
+  <span class="djdt-code">generate_pages()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">generate_pages</span>(<span class="djdt-lineno">48</span>)
+  <span class="djdt-code">editor = client.get(reverse(&#39;tasks&#39;, args=[data.project.id, data.job.id]))</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">500</span>)
+  <span class="djdt-code">**extra)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">303</span>)
+  <span class="djdt-code">return self.generic(&#39;GET&#39;, path, secure=secure, **r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">generic</span>(<span class="djdt-lineno">379</span>)
+  <span class="djdt-code">return self.request(**r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">request</span>(<span class="djdt-lineno">448</span>)
+  <span class="djdt-code">response = self.handler(environ)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">__call__</span>(<span class="djdt-lineno">122</span>)
+  <span class="djdt-code">response = self.get_response(request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/core/handlers/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">get_response</span>(<span class="djdt-lineno">125</span>)
+  <span class="djdt-code">response = middleware_method(request, callback, callback_args, callback_kwargs)</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/project/</span><span class="djdt-file">middleware.py</span> in <span class="djdt-func">process_view</span>(<span class="djdt-lineno">10</span>)
+  <span class="djdt-code">.get(pk=kwargs[&#39;project_pk&#39;])</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">328</span>)
+  <span class="djdt-code">num = len(clone)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">__len__</span>(<span class="djdt-lineno">144</span>)
+  <span class="djdt-code">self._fetch_all()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_fetch_all</span>(<span class="djdt-lineno">965</span>)
+  <span class="djdt-code">self._result_cache = list(self.iterator())</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">iterator</span>(<span class="djdt-lineno">238</span>)
+  <span class="djdt-code">results = compiler.execute_sql()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/sql/</span><span class="djdt-file">compiler.py</span> in <span class="djdt-func">execute_sql</span>(<span class="djdt-lineno">829</span>)
+  <span class="djdt-code">cursor.execute(sql, params)</span></pre>
+							
+							
+						</div>
+					</td>
+				</tr>
+			
+				<tr class="djDebugHoverable djDebugOdd" id="sqlMain_3">
+					<td class="djdt-color"><span data-background-color="rgb(256.0, 0, 0)">&#160;</span></td>
+					<td class="djdt-toggle">
+						<a class="djToggleSwitch" data-toggle-name="sqlMain" data-toggle-id="3" data-toggle-open="+" data-toggle-close="-" href="">+</a>
+					</td>
+					<td class="query">
+						<div class="djDebugSqlWrap">
+							<div class="djDebugSql"><strong>SELECT</strong> <a class="djDebugUncollapsed djDebugToggle" href="#">&#8226;&#8226;&#8226;</a> <a class="djDebugCollapsed djDebugToggle" href="#">&quot;project_jobsite&quot;.&quot;id&quot;, &quot;project_jobsite&quot;.&quot;project_id&quot;, &quot;project_jobsite&quot;.&quot;name&quot;, &quot;project_jobsite&quot;.&quot;address&quot;, &quot;project_jobsite&quot;.&quot;city&quot;, &quot;project_jobsite&quot;.&quot;postal_code&quot;, &quot;project_jobsite&quot;.&quot;country&quot;, &quot;project_jobsite&quot;.&quot;latitude&quot;, &quot;project_jobsite&quot;.&quot;longitude&quot;</a> <strong>FROM</strong> &quot;project_jobsite&quot; <strong>WHERE</strong> &quot;project_jobsite&quot;.&quot;project_id&quot; <strong>IN</strong> (1)</div>
+						</div>
+						
+					</td>
+					<td class="timeline">
+						<div class="djDebugTimeline"><div class="djDebugLineChart" data-left="19.79846481587935%"><strong data-width="13.335863057593391%" data-background-color="#000080">10.695566902241909%</strong></div></div>
+					</td>
+					<td class="djdt-time">
+						0.75
+					</td>
+					<td class="djdt-actions">
+
+					
+						
+							<form method="post">
+								<input name="sql" type="hidden" value="SELECT &quot;project_jobsite&quot;.&quot;id&quot;, &quot;project_jobsite&quot;.&quot;project_id&quot;, &quot;project_jobsite&quot;.&quot;name&quot;, &quot;project_jobsite&quot;.&quot;address&quot;, &quot;project_jobsite&quot;.&quot;city&quot;, &quot;project_jobsite&quot;.&quot;postal_code&quot;, &quot;project_jobsite&quot;.&quot;country&quot;, &quot;project_jobsite&quot;.&quot;latitude&quot;, &quot;project_jobsite&quot;.&quot;longitude&quot; FROM &quot;project_jobsite&quot; WHERE &quot;project_jobsite&quot;.&quot;project_id&quot; IN (1)" /><input name="raw_sql" type="hidden" value="SELECT &quot;project_jobsite&quot;.&quot;id&quot;, &quot;project_jobsite&quot;.&quot;project_id&quot;, &quot;project_jobsite&quot;.&quot;name&quot;, &quot;project_jobsite&quot;.&quot;address&quot;, &quot;project_jobsite&quot;.&quot;city&quot;, &quot;project_jobsite&quot;.&quot;postal_code&quot;, &quot;project_jobsite&quot;.&quot;country&quot;, &quot;project_jobsite&quot;.&quot;latitude&quot;, &quot;project_jobsite&quot;.&quot;longitude&quot; FROM &quot;project_jobsite&quot; WHERE &quot;project_jobsite&quot;.&quot;project_id&quot; IN (%s)" /><input name="params" type="hidden" value="[1]" /><input name="alias" type="hidden" value="default" /><input name="duration" type="hidden" value="0.7541179656982422" /><input name="hash" type="hidden" value="75206669817de3b07a3532fe259a00aaeb7589d7" />
+
+								<button formaction="/__debug__/sql_select/" class="remoteCall">Sel</button>
+								<button formaction="/__debug__/sql_explain/" class="remoteCall">Expl</button>
+
+								
+							</form>
+						
+					
+					</td>
+				</tr>
+				<tr class="djUnselected djDebugHoverable djDebugOdd djToggleDetails_3" id="sqlDetails_3">
+					<td colspan="2"></td>
+					<td colspan="4">
+						<div class="djSQLDetailsDiv">
+							<p><strong>Verbindung:</strong> default</p>
+							
+							
+							
+								<pre class="djdt-stack"><span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">&lt;module&gt;</span>(<span class="djdt-lineno">63</span>)
+  <span class="djdt-code">generate_pages()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">generate_pages</span>(<span class="djdt-lineno">48</span>)
+  <span class="djdt-code">editor = client.get(reverse(&#39;tasks&#39;, args=[data.project.id, data.job.id]))</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">500</span>)
+  <span class="djdt-code">**extra)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">303</span>)
+  <span class="djdt-code">return self.generic(&#39;GET&#39;, path, secure=secure, **r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">generic</span>(<span class="djdt-lineno">379</span>)
+  <span class="djdt-code">return self.request(**r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">request</span>(<span class="djdt-lineno">448</span>)
+  <span class="djdt-code">response = self.handler(environ)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">__call__</span>(<span class="djdt-lineno">122</span>)
+  <span class="djdt-code">response = self.get_response(request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/core/handlers/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">get_response</span>(<span class="djdt-lineno">125</span>)
+  <span class="djdt-code">response = middleware_method(request, callback, callback_args, callback_kwargs)</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/project/</span><span class="djdt-file">middleware.py</span> in <span class="djdt-func">process_view</span>(<span class="djdt-lineno">10</span>)
+  <span class="djdt-code">.get(pk=kwargs[&#39;project_pk&#39;])</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">328</span>)
+  <span class="djdt-code">num = len(clone)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">__len__</span>(<span class="djdt-lineno">144</span>)
+  <span class="djdt-code">self._fetch_all()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_fetch_all</span>(<span class="djdt-lineno">967</span>)
+  <span class="djdt-code">self._prefetch_related_objects()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_prefetch_related_objects</span>(<span class="djdt-lineno">591</span>)
+  <span class="djdt-code">prefetch_related_objects(self._result_cache, self._prefetch_related_lookups)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">prefetch_related_objects</span>(<span class="djdt-lineno">1516</span>)
+  <span class="djdt-code">obj_list, additional_lookups = prefetch_one_level(obj_list, prefetcher, lookup, level)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">prefetch_one_level</span>(<span class="djdt-lineno">1615</span>)
+  <span class="djdt-code">prefetcher.get_prefetch_queryset(instances, lookup.get_current_queryset(level)))</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/fields/</span><span class="djdt-file">related.py</span> in <span class="djdt-func">get_prefetch_queryset</span>(<span class="djdt-lineno">729</span>)
+  <span class="djdt-code">for rel_obj in queryset:</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">__iter__</span>(<span class="djdt-lineno">162</span>)
+  <span class="djdt-code">self._fetch_all()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_fetch_all</span>(<span class="djdt-lineno">965</span>)
+  <span class="djdt-code">self._result_cache = list(self.iterator())</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">iterator</span>(<span class="djdt-lineno">238</span>)
+  <span class="djdt-code">results = compiler.execute_sql()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/sql/</span><span class="djdt-file">compiler.py</span> in <span class="djdt-func">execute_sql</span>(<span class="djdt-lineno">829</span>)
+  <span class="djdt-code">cursor.execute(sql, params)</span></pre>
+							
+							
+						</div>
+					</td>
+				</tr>
+			
+				<tr class="djDebugHoverable djDebugEven" id="sqlMain_4">
+					<td class="djdt-color"><span data-background-color="rgb(256.0, 0, 0)">&#160;</span></td>
+					<td class="djdt-toggle">
+						<a class="djToggleSwitch" data-toggle-name="sqlMain" data-toggle-id="4" data-toggle-open="+" data-toggle-close="-" href="">+</a>
+					</td>
+					<td class="query">
+						<div class="djDebugSqlWrap">
+							<div class="djDebugSql"><strong>SELECT</strong> <a class="djDebugUncollapsed djDebugToggle" href="#">&#8226;&#8226;&#8226;</a> <a class="djDebugCollapsed djDebugToggle" href="#">&quot;task_job&quot;.&quot;id&quot;, &quot;task_job&quot;.&quot;name&quot;, &quot;task_job&quot;.&quot;job_code&quot;, &quot;task_job&quot;.&quot;description&quot;, &quot;task_job&quot;.&quot;project_id&quot;, &quot;task_job&quot;.&quot;taskgroup_offset&quot;, &quot;task_job&quot;.&quot;account_id&quot;, &quot;task_job&quot;.&quot;billing_method&quot;, &quot;task_job&quot;.&quot;is_revenue_recognized&quot;, &quot;task_job&quot;.&quot;status&quot;</a> <strong>FROM</strong> &quot;task_job&quot; <strong>WHERE</strong> &quot;task_job&quot;.&quot;id&quot; = 1</div>
+						</div>
+						
+					</td>
+					<td class="timeline">
+						<div class="djDebugTimeline"><div class="djDebugLineChart" data-left="30.494031718121256%"><strong data-width="17.21235709073218%" data-background-color="#808000">11.963615460048018%</strong></div></div>
+					</td>
+					<td class="djdt-time">
+						0.84
+					</td>
+					<td class="djdt-actions">
+
+					
+						
+							<form method="post">
+								<input name="sql" type="hidden" value="SELECT &quot;task_job&quot;.&quot;id&quot;, &quot;task_job&quot;.&quot;name&quot;, &quot;task_job&quot;.&quot;job_code&quot;, &quot;task_job&quot;.&quot;description&quot;, &quot;task_job&quot;.&quot;project_id&quot;, &quot;task_job&quot;.&quot;taskgroup_offset&quot;, &quot;task_job&quot;.&quot;account_id&quot;, &quot;task_job&quot;.&quot;billing_method&quot;, &quot;task_job&quot;.&quot;is_revenue_recognized&quot;, &quot;task_job&quot;.&quot;status&quot; FROM &quot;task_job&quot; WHERE &quot;task_job&quot;.&quot;id&quot; = 1" /><input name="raw_sql" type="hidden" value="SELECT &quot;task_job&quot;.&quot;id&quot;, &quot;task_job&quot;.&quot;name&quot;, &quot;task_job&quot;.&quot;job_code&quot;, &quot;task_job&quot;.&quot;description&quot;, &quot;task_job&quot;.&quot;project_id&quot;, &quot;task_job&quot;.&quot;taskgroup_offset&quot;, &quot;task_job&quot;.&quot;account_id&quot;, &quot;task_job&quot;.&quot;billing_method&quot;, &quot;task_job&quot;.&quot;is_revenue_recognized&quot;, &quot;task_job&quot;.&quot;status&quot; FROM &quot;task_job&quot; WHERE &quot;task_job&quot;.&quot;id&quot; = %s" /><input name="params" type="hidden" value="[1]" /><input name="alias" type="hidden" value="default" /><input name="duration" type="hidden" value="0.8435249328613281" /><input name="hash" type="hidden" value="ddfeb2b270fb0ff6cd5153b501a9ad5468631cdd" />
+
+								<button formaction="/__debug__/sql_select/" class="remoteCall">Sel</button>
+								<button formaction="/__debug__/sql_explain/" class="remoteCall">Expl</button>
+
+								
+							</form>
+						
+					
+					</td>
+				</tr>
+				<tr class="djUnselected djDebugHoverable djDebugEven djToggleDetails_4" id="sqlDetails_4">
+					<td colspan="2"></td>
+					<td colspan="4">
+						<div class="djSQLDetailsDiv">
+							<p><strong>Verbindung:</strong> default</p>
+							
+							
+							
+								<pre class="djdt-stack"><span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">&lt;module&gt;</span>(<span class="djdt-lineno">63</span>)
+  <span class="djdt-code">generate_pages()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">generate_pages</span>(<span class="djdt-lineno">48</span>)
+  <span class="djdt-code">editor = client.get(reverse(&#39;tasks&#39;, args=[data.project.id, data.job.id]))</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">500</span>)
+  <span class="djdt-code">**extra)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">303</span>)
+  <span class="djdt-code">return self.generic(&#39;GET&#39;, path, secure=secure, **r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">generic</span>(<span class="djdt-lineno">379</span>)
+  <span class="djdt-code">return self.request(**r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">request</span>(<span class="djdt-lineno">448</span>)
+  <span class="djdt-code">response = self.handler(environ)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">__call__</span>(<span class="djdt-lineno">122</span>)
+  <span class="djdt-code">response = self.get_response(request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/core/handlers/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">get_response</span>(<span class="djdt-lineno">132</span>)
+  <span class="djdt-code">response = wrapped_callback(request, *callback_args, **callback_kwargs)</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/user/</span><span class="djdt-file">authorization.py</span> in <span class="djdt-func">_wrapped_view</span>(<span class="djdt-lineno">57</span>)
+  <span class="djdt-code">return view_func(request, *args, **kwargs)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/views/generic/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">view</span>(<span class="djdt-lineno">71</span>)
+  <span class="djdt-code">return self.dispatch(request, *args, **kwargs)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/views/generic/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">dispatch</span>(<span class="djdt-lineno">89</span>)
+  <span class="djdt-code">return handler(request, *args, **kwargs)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/views/generic/</span><span class="djdt-file">list.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">159</span>)
+  <span class="djdt-code">self.object_list = self.get_queryset()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/task/</span><span class="djdt-file">views.py</span> in <span class="djdt-func">get_queryset</span>(<span class="djdt-lineno">66</span>)
+  <span class="djdt-code">self.object = self.get_object()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/task/</span><span class="djdt-file">views.py</span> in <span class="djdt-func">get_object</span>(<span class="djdt-lineno">63</span>)
+  <span class="djdt-code">return super(TaskEditor, self).get_object(queryset)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/views/generic/</span><span class="djdt-file">detail.py</span> in <span class="djdt-func">get_object</span>(<span class="djdt-lineno">53</span>)
+  <span class="djdt-code">obj = queryset.get()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">328</span>)
+  <span class="djdt-code">num = len(clone)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">__len__</span>(<span class="djdt-lineno">144</span>)
+  <span class="djdt-code">self._fetch_all()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_fetch_all</span>(<span class="djdt-lineno">965</span>)
+  <span class="djdt-code">self._result_cache = list(self.iterator())</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">iterator</span>(<span class="djdt-lineno">238</span>)
+  <span class="djdt-code">results = compiler.execute_sql()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/sql/</span><span class="djdt-file">compiler.py</span> in <span class="djdt-func">execute_sql</span>(<span class="djdt-lineno">829</span>)
+  <span class="djdt-code">cursor.execute(sql, params)</span></pre>
+							
+							
+						</div>
+					</td>
+				</tr>
+			
+				<tr class="djDebugHoverable djDebugOdd" id="sqlMain_5">
+					<td class="djdt-color"><span data-background-color="rgb(256.0, 0, 0)">&#160;</span></td>
+					<td class="djdt-toggle">
+						<a class="djToggleSwitch" data-toggle-name="sqlMain" data-toggle-id="5" data-toggle-open="+" data-toggle-close="-" href="">+</a>
+					</td>
+					<td class="query">
+						<div class="djDebugSqlWrap">
+							<div class="djDebugSql"><strong>SELECT</strong> <a class="djDebugUncollapsed djDebugToggle" href="#">&#8226;&#8226;&#8226;</a> <a class="djDebugCollapsed djDebugToggle" href="#">&quot;project_project&quot;.&quot;id&quot;, &quot;project_project&quot;.&quot;name&quot;, &quot;project_project&quot;.&quot;description&quot;, &quot;project_project&quot;.&quot;is_template&quot;, &quot;project_project&quot;.&quot;job_zfill&quot;, &quot;project_project&quot;.&quot;taskgroup_zfill&quot;, &quot;project_project&quot;.&quot;task_zfill&quot;, &quot;project_project&quot;.&quot;account_id&quot;, &quot;project_project&quot;.&quot;phase&quot;, &quot;project_project&quot;.&quot;state&quot;</a> <strong>FROM</strong> &quot;project_project&quot; <strong>WHERE</strong> &quot;project_project&quot;.&quot;id&quot; <strong>IN</strong> (1) <strong>ORDER</strong> <strong>BY</strong> &quot;project_project&quot;.&quot;name&quot; <strong>ASC</strong></div>
+						</div>
+						
+					</td>
+					<td class="timeline">
+						<div class="djDebugTimeline"><div class="djDebugLineChart" data-left="42.457647178169275%"><strong data-width="19.439384145266498%" data-background-color="#008080">11.185879011260273%</strong></div></div>
+					</td>
+					<td class="djdt-time">
+						0.79
+					</td>
+					<td class="djdt-actions">
+
+					
+						
+							<form method="post">
+								<input name="sql" type="hidden" value="SELECT &quot;project_project&quot;.&quot;id&quot;, &quot;project_project&quot;.&quot;name&quot;, &quot;project_project&quot;.&quot;description&quot;, &quot;project_project&quot;.&quot;is_template&quot;, &quot;project_project&quot;.&quot;job_zfill&quot;, &quot;project_project&quot;.&quot;taskgroup_zfill&quot;, &quot;project_project&quot;.&quot;task_zfill&quot;, &quot;project_project&quot;.&quot;account_id&quot;, &quot;project_project&quot;.&quot;phase&quot;, &quot;project_project&quot;.&quot;state&quot; FROM &quot;project_project&quot; WHERE &quot;project_project&quot;.&quot;id&quot; IN (1) ORDER BY &quot;project_project&quot;.&quot;name&quot; ASC" /><input name="raw_sql" type="hidden" value="SELECT &quot;project_project&quot;.&quot;id&quot;, &quot;project_project&quot;.&quot;name&quot;, &quot;project_project&quot;.&quot;description&quot;, &quot;project_project&quot;.&quot;is_template&quot;, &quot;project_project&quot;.&quot;job_zfill&quot;, &quot;project_project&quot;.&quot;taskgroup_zfill&quot;, &quot;project_project&quot;.&quot;task_zfill&quot;, &quot;project_project&quot;.&quot;account_id&quot;, &quot;project_project&quot;.&quot;phase&quot;, &quot;project_project&quot;.&quot;state&quot; FROM &quot;project_project&quot; WHERE &quot;project_project&quot;.&quot;id&quot; IN (%s) ORDER BY &quot;project_project&quot;.&quot;name&quot; ASC" /><input name="params" type="hidden" value="[1]" /><input name="alias" type="hidden" value="default" /><input name="duration" type="hidden" value="0.7886886596679688" /><input name="hash" type="hidden" value="052bb025120bb808823b770ca84cc1f5659d431d" />
+
+								<button formaction="/__debug__/sql_select/" class="remoteCall">Sel</button>
+								<button formaction="/__debug__/sql_explain/" class="remoteCall">Expl</button>
+
+								
+							</form>
+						
+					
+					</td>
+				</tr>
+				<tr class="djUnselected djDebugHoverable djDebugOdd djToggleDetails_5" id="sqlDetails_5">
+					<td colspan="2"></td>
+					<td colspan="4">
+						<div class="djSQLDetailsDiv">
+							<p><strong>Verbindung:</strong> default</p>
+							
+							
+							
+								<pre class="djdt-stack"><span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">&lt;module&gt;</span>(<span class="djdt-lineno">63</span>)
+  <span class="djdt-code">generate_pages()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">generate_pages</span>(<span class="djdt-lineno">48</span>)
+  <span class="djdt-code">editor = client.get(reverse(&#39;tasks&#39;, args=[data.project.id, data.job.id]))</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">500</span>)
+  <span class="djdt-code">**extra)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">303</span>)
+  <span class="djdt-code">return self.generic(&#39;GET&#39;, path, secure=secure, **r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">generic</span>(<span class="djdt-lineno">379</span>)
+  <span class="djdt-code">return self.request(**r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">request</span>(<span class="djdt-lineno">448</span>)
+  <span class="djdt-code">response = self.handler(environ)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">__call__</span>(<span class="djdt-lineno">122</span>)
+  <span class="djdt-code">response = self.get_response(request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/core/handlers/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">get_response</span>(<span class="djdt-lineno">132</span>)
+  <span class="djdt-code">response = wrapped_callback(request, *callback_args, **callback_kwargs)</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/user/</span><span class="djdt-file">authorization.py</span> in <span class="djdt-func">_wrapped_view</span>(<span class="djdt-lineno">57</span>)
+  <span class="djdt-code">return view_func(request, *args, **kwargs)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/views/generic/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">view</span>(<span class="djdt-lineno">71</span>)
+  <span class="djdt-code">return self.dispatch(request, *args, **kwargs)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/views/generic/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">dispatch</span>(<span class="djdt-lineno">89</span>)
+  <span class="djdt-code">return handler(request, *args, **kwargs)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/views/generic/</span><span class="djdt-file">list.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">159</span>)
+  <span class="djdt-code">self.object_list = self.get_queryset()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/task/</span><span class="djdt-file">views.py</span> in <span class="djdt-func">get_queryset</span>(<span class="djdt-lineno">66</span>)
+  <span class="djdt-code">self.object = self.get_object()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/task/</span><span class="djdt-file">views.py</span> in <span class="djdt-func">get_object</span>(<span class="djdt-lineno">63</span>)
+  <span class="djdt-code">return super(TaskEditor, self).get_object(queryset)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/views/generic/</span><span class="djdt-file">detail.py</span> in <span class="djdt-func">get_object</span>(<span class="djdt-lineno">53</span>)
+  <span class="djdt-code">obj = queryset.get()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">328</span>)
+  <span class="djdt-code">num = len(clone)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">__len__</span>(<span class="djdt-lineno">144</span>)
+  <span class="djdt-code">self._fetch_all()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_fetch_all</span>(<span class="djdt-lineno">967</span>)
+  <span class="djdt-code">self._prefetch_related_objects()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_prefetch_related_objects</span>(<span class="djdt-lineno">591</span>)
+  <span class="djdt-code">prefetch_related_objects(self._result_cache, self._prefetch_related_lookups)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">prefetch_related_objects</span>(<span class="djdt-lineno">1516</span>)
+  <span class="djdt-code">obj_list, additional_lookups = prefetch_one_level(obj_list, prefetcher, lookup, level)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">prefetch_one_level</span>(<span class="djdt-lineno">1627</span>)
+  <span class="djdt-code">all_related_objects = list(rel_qs)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">__iter__</span>(<span class="djdt-lineno">162</span>)
+  <span class="djdt-code">self._fetch_all()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_fetch_all</span>(<span class="djdt-lineno">965</span>)
+  <span class="djdt-code">self._result_cache = list(self.iterator())</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">iterator</span>(<span class="djdt-lineno">238</span>)
+  <span class="djdt-code">results = compiler.execute_sql()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/sql/</span><span class="djdt-file">compiler.py</span> in <span class="djdt-func">execute_sql</span>(<span class="djdt-lineno">829</span>)
+  <span class="djdt-code">cursor.execute(sql, params)</span></pre>
+							
+							
+						</div>
+					</td>
+				</tr>
+			
+				<tr class="djDebugHoverable djDebugEven" id="sqlMain_6">
+					<td class="djdt-color"><span data-background-color="rgb(256.0, 0, 0)">&#160;</span></td>
+					<td class="djdt-toggle">
+						<a class="djToggleSwitch" data-toggle-name="sqlMain" data-toggle-id="6" data-toggle-open="+" data-toggle-close="-" href="">+</a>
+					</td>
+					<td class="query">
+						<div class="djDebugSqlWrap">
+							<div class="djDebugSql"><strong>SELECT</strong> <a class="djDebugUncollapsed djDebugToggle" href="#">&#8226;&#8226;&#8226;</a> <a class="djDebugCollapsed djDebugToggle" href="#">&quot;task_taskgroup&quot;.&quot;id&quot;, &quot;task_taskgroup&quot;.&quot;order&quot;, &quot;task_taskgroup&quot;.&quot;name&quot;, &quot;task_taskgroup&quot;.&quot;description&quot;, &quot;task_taskgroup&quot;.&quot;job_id&quot;</a> <strong>FROM</strong> &quot;task_taskgroup&quot; <strong>WHERE</strong> &quot;task_taskgroup&quot;.&quot;job_id&quot; = 1 <strong>ORDER</strong> <strong>BY</strong> &quot;task_taskgroup&quot;.&quot;order&quot; <strong>ASC</strong></div>
+						</div>
+						
+							<strong>Duplicated 2 times.
+							</strong>
+						
+					</td>
+					<td class="timeline">
+						<div class="djDebugTimeline"><div class="djDebugLineChart" data-left="53.64352618942955%"><strong data-width="25.84433583777081%" data-background-color="#800080">11.980522774152098%</strong></div></div>
+					</td>
+					<td class="djdt-time">
+						0.84
+					</td>
+					<td class="djdt-actions">
+
+					
+						
+							<form method="post">
+								<input name="sql" type="hidden" value="SELECT &quot;task_taskgroup&quot;.&quot;id&quot;, &quot;task_taskgroup&quot;.&quot;order&quot;, &quot;task_taskgroup&quot;.&quot;name&quot;, &quot;task_taskgroup&quot;.&quot;description&quot;, &quot;task_taskgroup&quot;.&quot;job_id&quot; FROM &quot;task_taskgroup&quot; WHERE &quot;task_taskgroup&quot;.&quot;job_id&quot; = 1 ORDER BY &quot;task_taskgroup&quot;.&quot;order&quot; ASC" /><input name="raw_sql" type="hidden" value="SELECT &quot;task_taskgroup&quot;.&quot;id&quot;, &quot;task_taskgroup&quot;.&quot;order&quot;, &quot;task_taskgroup&quot;.&quot;name&quot;, &quot;task_taskgroup&quot;.&quot;description&quot;, &quot;task_taskgroup&quot;.&quot;job_id&quot; FROM &quot;task_taskgroup&quot; WHERE &quot;task_taskgroup&quot;.&quot;job_id&quot; = %s ORDER BY &quot;task_taskgroup&quot;.&quot;order&quot; ASC" /><input name="params" type="hidden" value="[1]" /><input name="alias" type="hidden" value="default" /><input name="duration" type="hidden" value="0.8447170257568359" /><input name="hash" type="hidden" value="cc12329948a286fa464ee8ae99d445e75d9a8c63" />
+
+								<button formaction="/__debug__/sql_select/" class="remoteCall">Sel</button>
+								<button formaction="/__debug__/sql_explain/" class="remoteCall">Expl</button>
+
+								
+							</form>
+						
+					
+					</td>
+				</tr>
+				<tr class="djUnselected djDebugHoverable djDebugEven djToggleDetails_6" id="sqlDetails_6">
+					<td colspan="2"></td>
+					<td colspan="4">
+						<div class="djSQLDetailsDiv">
+							<p><strong>Verbindung:</strong> default</p>
+							
+							
+							
+								<pre class="djdt-stack"><span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">&lt;module&gt;</span>(<span class="djdt-lineno">63</span>)
+  <span class="djdt-code">generate_pages()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">generate_pages</span>(<span class="djdt-lineno">48</span>)
+  <span class="djdt-code">editor = client.get(reverse(&#39;tasks&#39;, args=[data.project.id, data.job.id]))</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">500</span>)
+  <span class="djdt-code">**extra)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">303</span>)
+  <span class="djdt-code">return self.generic(&#39;GET&#39;, path, secure=secure, **r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">generic</span>(<span class="djdt-lineno">379</span>)
+  <span class="djdt-code">return self.request(**r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">request</span>(<span class="djdt-lineno">448</span>)
+  <span class="djdt-code">response = self.handler(environ)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">__call__</span>(<span class="djdt-lineno">122</span>)
+  <span class="djdt-code">response = self.get_response(request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/core/handlers/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">get_response</span>(<span class="djdt-lineno">132</span>)
+  <span class="djdt-code">response = wrapped_callback(request, *callback_args, **callback_kwargs)</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/user/</span><span class="djdt-file">authorization.py</span> in <span class="djdt-func">_wrapped_view</span>(<span class="djdt-lineno">57</span>)
+  <span class="djdt-code">return view_func(request, *args, **kwargs)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/views/generic/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">view</span>(<span class="djdt-lineno">71</span>)
+  <span class="djdt-code">return self.dispatch(request, *args, **kwargs)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/views/generic/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">dispatch</span>(<span class="djdt-lineno">89</span>)
+  <span class="djdt-code">return handler(request, *args, **kwargs)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/views/generic/</span><span class="djdt-file">list.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">174</span>)
+  <span class="djdt-code">context = self.get_context_data()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/task/</span><span class="djdt-file">views.py</span> in <span class="djdt-func">get_context_data</span>(<span class="djdt-lineno">57</span>)
+  <span class="djdt-code">context[&#39;job_total_net&#39;] = self.object.estimate_total</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/task/</span><span class="djdt-file">models.py</span> in <span class="djdt-func">estimate_total</span>(<span class="djdt-lineno">141</span>)
+  <span class="djdt-code">return self._total_calc(&#39;estimate&#39;)</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/apps/task/</span><span class="djdt-file">models.py</span> in <span class="djdt-func">_total_calc</span>(<span class="djdt-lineno">131</span>)
+  <span class="djdt-code">for taskgroup in self.taskgroups.all():</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">__iter__</span>(<span class="djdt-lineno">162</span>)
+  <span class="djdt-code">self._fetch_all()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_fetch_all</span>(<span class="djdt-lineno">965</span>)
+  <span class="djdt-code">self._result_cache = list(self.iterator())</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">iterator</span>(<span class="djdt-lineno">238</span>)
+  <span class="djdt-code">results = compiler.execute_sql()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/sql/</span><span class="djdt-file">compiler.py</span> in <span class="djdt-func">execute_sql</span>(<span class="djdt-lineno">829</span>)
+  <span class="djdt-code">cursor.execute(sql, params)</span></pre>
+							
+							
+						</div>
+					</td>
+				</tr>
+			
+				<tr class="djDebugHoverable djDebugOdd" id="sqlMain_7">
+					<td class="djdt-color"><span data-background-color="rgb(256.0, 0, 0)">&#160;</span></td>
+					<td class="djdt-toggle">
+						<a class="djToggleSwitch" data-toggle-name="sqlMain" data-toggle-id="7" data-toggle-open="+" data-toggle-close="-" href="">+</a>
+					</td>
+					<td class="query">
+						<div class="djDebugSqlWrap">
+							<div class="djDebugSql"><strong>SELECT</strong> <a class="djDebugUncollapsed djDebugToggle" href="#">&#8226;&#8226;&#8226;</a> <a class="djDebugCollapsed djDebugToggle" href="#">&quot;company_company&quot;.&quot;schema&quot;, &quot;company_company&quot;.&quot;name&quot;, &quot;company_company&quot;.&quot;is_active&quot;</a> <strong>FROM</strong> &quot;company_company&quot; <strong>WHERE</strong> &quot;company_company&quot;.&quot;schema&quot; = &#39;xwldcbrlrs&#39;</div>
+						</div>
+						
+					</td>
+					<td class="timeline">
+						<div class="djDebugTimeline"><div class="djDebugLineChart" data-left="65.62404896358164%"><strong data-width="26.06728310053118%" data-background-color="#808080">8.960876475163156%</strong></div></div>
+					</td>
+					<td class="djdt-time">
+						0.63
+					</td>
+					<td class="djdt-actions">
+
+					
+						
+							<form method="post">
+								<input name="sql" type="hidden" value="SELECT &quot;company_company&quot;.&quot;schema&quot;, &quot;company_company&quot;.&quot;name&quot;, &quot;company_company&quot;.&quot;is_active&quot; FROM &quot;company_company&quot; WHERE &quot;company_company&quot;.&quot;schema&quot; = &#39;xwldcbrlrs&#39;" /><input name="raw_sql" type="hidden" value="SELECT &quot;company_company&quot;.&quot;schema&quot;, &quot;company_company&quot;.&quot;name&quot;, &quot;company_company&quot;.&quot;is_active&quot; FROM &quot;company_company&quot; WHERE &quot;company_company&quot;.&quot;schema&quot; = %s" /><input name="params" type="hidden" value="[&quot;xwldcbrlrs&quot;]" /><input name="alias" type="hidden" value="default" /><input name="duration" type="hidden" value="0.6318092346191406" /><input name="hash" type="hidden" value="1b32ad4e8459721706ed29880f808f9ab390c036" />
+
+								<button formaction="/__debug__/sql_select/" class="remoteCall">Sel</button>
+								<button formaction="/__debug__/sql_explain/" class="remoteCall">Expl</button>
+
+								
+							</form>
+						
+					
+					</td>
+				</tr>
+				<tr class="djUnselected djDebugHoverable djDebugOdd djToggleDetails_7" id="sqlDetails_7">
+					<td colspan="2"></td>
+					<td colspan="4">
+						<div class="djSQLDetailsDiv">
+							<p><strong>Verbindung:</strong> default</p>
+							
+							
+							
+								<pre class="djdt-stack"><span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">&lt;module&gt;</span>(<span class="djdt-lineno">63</span>)
+  <span class="djdt-code">generate_pages()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">generate_pages</span>(<span class="djdt-lineno">48</span>)
+  <span class="djdt-code">editor = client.get(reverse(&#39;tasks&#39;, args=[data.project.id, data.job.id]))</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">500</span>)
+  <span class="djdt-code">**extra)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">303</span>)
+  <span class="djdt-code">return self.generic(&#39;GET&#39;, path, secure=secure, **r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">generic</span>(<span class="djdt-lineno">379</span>)
+  <span class="djdt-code">return self.request(**r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">request</span>(<span class="djdt-lineno">448</span>)
+  <span class="djdt-code">response = self.handler(environ)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">__call__</span>(<span class="djdt-lineno">122</span>)
+  <span class="djdt-code">response = self.get_response(request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/core/handlers/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">get_response</span>(<span class="djdt-lineno">164</span>)
+  <span class="djdt-code">response = response.render()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">response.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">158</span>)
+  <span class="djdt-code">self.content = self.rendered_content</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">response.py</span> in <span class="djdt-func">rendered_content</span>(<span class="djdt-lineno">135</span>)
+  <span class="djdt-code">content = template.render(context, self._request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/backends/</span><span class="djdt-file">django.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">74</span>)
+  <span class="djdt-code">return self.template.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">208</span>)
+  <span class="djdt-code">with context.bind_template(self):</span>
+<span class="djdt-path">/usr/lib/python3.4/</span><span class="djdt-file">contextlib.py</span> in <span class="djdt-func">__enter__</span>(<span class="djdt-lineno">59</span>)
+  <span class="djdt-code">return next(self.gen)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">context.py</span> in <span class="djdt-func">bind_template</span>(<span class="djdt-lineno">235</span>)
+  <span class="djdt-code">updates.update(processor(self.request))</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/src/django-tuath/tuath/</span><span class="djdt-file">context_processors.py</span> in <span class="djdt-func">schemata</span>(<span class="djdt-lineno">30</span>)
+  <span class="djdt-code">selected_schema = get_schema_model().objects.get(schema=selected_schema)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">manager.py</span> in <span class="djdt-func">manager_method</span>(<span class="djdt-lineno">127</span>)
+  <span class="djdt-code">return getattr(self.get_queryset(), name)(*args, **kwargs)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">328</span>)
+  <span class="djdt-code">num = len(clone)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">__len__</span>(<span class="djdt-lineno">144</span>)
+  <span class="djdt-code">self._fetch_all()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_fetch_all</span>(<span class="djdt-lineno">965</span>)
+  <span class="djdt-code">self._result_cache = list(self.iterator())</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">iterator</span>(<span class="djdt-lineno">238</span>)
+  <span class="djdt-code">results = compiler.execute_sql()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/sql/</span><span class="djdt-file">compiler.py</span> in <span class="djdt-func">execute_sql</span>(<span class="djdt-lineno">829</span>)
+  <span class="djdt-code">cursor.execute(sql, params)</span></pre>
+							
+							
+						</div>
+					</td>
+				</tr>
+			
+				<tr class="djDebugHoverable djDebugEven" id="sqlMain_8">
+					<td class="djdt-color"><span data-background-color="rgb(256.0, 0, 0)">&#160;</span></td>
+					<td class="djdt-toggle">
+						<a class="djToggleSwitch" data-toggle-name="sqlMain" data-toggle-id="8" data-toggle-open="+" data-toggle-close="-" href="">+</a>
+					</td>
+					<td class="query">
+						<div class="djDebugSqlWrap">
+							<div class="djDebugSql"><strong>SELECT</strong> <a class="djDebugUncollapsed djDebugToggle" href="#">&#8226;&#8226;&#8226;</a> <a class="djDebugCollapsed djDebugToggle" href="#">&quot;company_company&quot;.&quot;schema&quot;, &quot;company_company&quot;.&quot;name&quot;, &quot;company_company&quot;.&quot;is_active&quot;</a> <strong>FROM</strong> &quot;company_company&quot; <strong>INNER JOIN</strong> &quot;company_access&quot; <strong>ON</strong> ( &quot;company_company&quot;.&quot;schema&quot; = &quot;company_access&quot;.&quot;company_id&quot; ) <strong>WHERE</strong> (&quot;company_access&quot;.&quot;user_id&quot; = 2117 <strong>AND</strong> &quot;company_company&quot;.&quot;is_active&quot; = <strong>true</strong>)</div>
+						</div>
+						
+					</td>
+					<td class="timeline">
+						<div class="djDebugTimeline"><div class="djDebugLineChart" data-left="74.5849254387448%"><strong data-width="49.015433741351785%" data-background-color="#400000">12.457309031887194%</strong></div></div>
+					</td>
+					<td class="djdt-time">
+						0.88
+					</td>
+					<td class="djdt-actions">
+
+					
+						
+							<form method="post">
+								<input name="sql" type="hidden" value="SELECT &quot;company_company&quot;.&quot;schema&quot;, &quot;company_company&quot;.&quot;name&quot;, &quot;company_company&quot;.&quot;is_active&quot; FROM &quot;company_company&quot; INNER JOIN &quot;company_access&quot; ON ( &quot;company_company&quot;.&quot;schema&quot; = &quot;company_access&quot;.&quot;company_id&quot; ) WHERE (&quot;company_access&quot;.&quot;user_id&quot; = 2117 AND &quot;company_company&quot;.&quot;is_active&quot; = true)" /><input name="raw_sql" type="hidden" value="SELECT &quot;company_company&quot;.&quot;schema&quot;, &quot;company_company&quot;.&quot;name&quot;, &quot;company_company&quot;.&quot;is_active&quot; FROM &quot;company_company&quot; INNER JOIN &quot;company_access&quot; ON ( &quot;company_company&quot;.&quot;schema&quot; = &quot;company_access&quot;.&quot;company_id&quot; ) WHERE (&quot;company_access&quot;.&quot;user_id&quot; = %s AND &quot;company_company&quot;.&quot;is_active&quot; = %s)" /><input name="params" type="hidden" value="[2117, true]" /><input name="alias" type="hidden" value="default" /><input name="duration" type="hidden" value="0.8783340454101562" /><input name="hash" type="hidden" value="1a5fa11b12ce83e0ddc6eed6eb7159dbf4208731" />
+
+								<button formaction="/__debug__/sql_select/" class="remoteCall">Sel</button>
+								<button formaction="/__debug__/sql_explain/" class="remoteCall">Expl</button>
+
+								
+							</form>
+						
+					
+					</td>
+				</tr>
+				<tr class="djUnselected djDebugHoverable djDebugEven djToggleDetails_8" id="sqlDetails_8">
+					<td colspan="2"></td>
+					<td colspan="4">
+						<div class="djSQLDetailsDiv">
+							<p><strong>Verbindung:</strong> default</p>
+							
+							
+							
+								<pre class="djdt-stack"><span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">&lt;module&gt;</span>(<span class="djdt-lineno">63</span>)
+  <span class="djdt-code">generate_pages()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">generate_pages</span>(<span class="djdt-lineno">48</span>)
+  <span class="djdt-code">editor = client.get(reverse(&#39;tasks&#39;, args=[data.project.id, data.job.id]))</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">500</span>)
+  <span class="djdt-code">**extra)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">303</span>)
+  <span class="djdt-code">return self.generic(&#39;GET&#39;, path, secure=secure, **r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">generic</span>(<span class="djdt-lineno">379</span>)
+  <span class="djdt-code">return self.request(**r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">request</span>(<span class="djdt-lineno">448</span>)
+  <span class="djdt-code">response = self.handler(environ)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">__call__</span>(<span class="djdt-lineno">122</span>)
+  <span class="djdt-code">response = self.get_response(request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/core/handlers/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">get_response</span>(<span class="djdt-lineno">164</span>)
+  <span class="djdt-code">response = response.render()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">response.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">158</span>)
+  <span class="djdt-code">self.content = self.rendered_content</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">response.py</span> in <span class="djdt-func">rendered_content</span>(<span class="djdt-lineno">135</span>)
+  <span class="djdt-code">content = template.render(context, self._request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/backends/</span><span class="djdt-file">django.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">74</span>)
+  <span class="djdt-code">return self.template.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">209</span>)
+  <span class="djdt-code">return self._render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">_render</span>(<span class="djdt-lineno">201</span>)
+  <span class="djdt-code">return self.nodelist.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">903</span>)
+  <span class="djdt-code">bit = self.render_node(node, context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">debug.py</span> in <span class="djdt-func">render_node</span>(<span class="djdt-lineno">79</span>)
+  <span class="djdt-code">return node.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">loader_tags.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">135</span>)
+  <span class="djdt-code">return compiled_parent._render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">_render</span>(<span class="djdt-lineno">201</span>)
+  <span class="djdt-code">return self.nodelist.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">903</span>)
+  <span class="djdt-code">bit = self.render_node(node, context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">debug.py</span> in <span class="djdt-func">render_node</span>(<span class="djdt-lineno">79</span>)
+  <span class="djdt-code">return node.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">loader_tags.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">135</span>)
+  <span class="djdt-code">return compiled_parent._render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">_render</span>(<span class="djdt-lineno">201</span>)
+  <span class="djdt-code">return self.nodelist.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">903</span>)
+  <span class="djdt-code">bit = self.render_node(node, context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">debug.py</span> in <span class="djdt-func">render_node</span>(<span class="djdt-lineno">79</span>)
+  <span class="djdt-code">return node.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">loader_tags.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">135</span>)
+  <span class="djdt-code">return compiled_parent._render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">_render</span>(<span class="djdt-lineno">201</span>)
+  <span class="djdt-code">return self.nodelist.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">903</span>)
+  <span class="djdt-code">bit = self.render_node(node, context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">debug.py</span> in <span class="djdt-func">render_node</span>(<span class="djdt-lineno">79</span>)
+  <span class="djdt-code">return node.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">loader_tags.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">65</span>)
+  <span class="djdt-code">result = block.nodelist.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">903</span>)
+  <span class="djdt-code">bit = self.render_node(node, context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">debug.py</span> in <span class="djdt-func">render_node</span>(<span class="djdt-lineno">79</span>)
+  <span class="djdt-code">return node.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">defaulttags.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">322</span>)
+  <span class="djdt-code">match = condition.eval(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">smartif.py</span> in <span class="djdt-func">eval</span>(<span class="djdt-lineno">62</span>)
+  <span class="djdt-code">return func(context, self.first, self.second)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">smartif.py</span> in <span class="djdt-func">&lt;lambda&gt;</span>(<span class="djdt-lineno">109</span>)
+  <span class="djdt-code">&#39;&gt;&#39;: infix(10, lambda context, x, y: x.eval(context) &gt; y.eval(context)),</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">defaulttags.py</span> in <span class="djdt-func">eval</span>(<span class="djdt-lineno">933</span>)
+  <span class="djdt-code">return self.value.resolve(context, ignore_failures=True)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">resolve</span>(<span class="djdt-lineno">674</span>)
+  <span class="djdt-code">new_obj = func(obj, *arg_vals)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">defaultfilters.py</span> in <span class="djdt-func">length</span>(<span class="djdt-lineno">582</span>)
+  <span class="djdt-code">return len(value)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">__len__</span>(<span class="djdt-lineno">144</span>)
+  <span class="djdt-code">self._fetch_all()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_fetch_all</span>(<span class="djdt-lineno">965</span>)
+  <span class="djdt-code">self._result_cache = list(self.iterator())</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">iterator</span>(<span class="djdt-lineno">238</span>)
+  <span class="djdt-code">results = compiler.execute_sql()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/sql/</span><span class="djdt-file">compiler.py</span> in <span class="djdt-func">execute_sql</span>(<span class="djdt-lineno">829</span>)
+  <span class="djdt-code">cursor.execute(sql, params)</span></pre>
+							
+							
+								<table>
+									
+									<tr>
+										<td>41</td>
+										<td><code >        &lt;div id=&quot;navbar&quot; class=&quot;navbar-collapse collapse&quot;&gt;
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>42</td>
+										<td><code >          &lt;ul class=&quot;nav navbar-nav&quot;&gt;
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>43</td>
+										<td><code >            &lt;li class=&quot;dropdown&quot;&gt;
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>44</td>
+										<td><code class="djdt-highlighted">              {% if available_companies|length &gt; 1 %}
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>45</td>
+										<td><code >                &lt;a href=&quot;#&quot; class=&quot;dropdown-toggle&quot; data-toggle=&quot;dropdown&quot; role=&quot;button&quot; aria-haspopup=&quot;true&quot; aria-expanded=&quot;false&quot;&gt;{{ selected_company.name }} &lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>46</td>
+										<td><code >                &lt;ul class=&quot;dropdown-menu&quot;&gt;
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>47</td>
+										<td><code >                  &lt;li class=&quot;dropdown-header&quot;&gt;{% trans &#39;available Companies&#39; %}&lt;/li&gt;
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>48</td>
+										<td><code >                  {% for available_company in available_companies %}
+</code></td>
+									</tr>
+									
+								</table>
+								<p><strong>/home/lex/projects/systori/systori/templates/base.html</strong></p>
+							
+						</div>
+					</td>
+				</tr>
+			
+				<tr class="djDebugHoverable djDebugOdd" id="sqlMain_9">
+					<td class="djdt-color"><span data-background-color="rgb(256.0, 0, 0)">&#160;</span></td>
+					<td class="djdt-toggle">
+						<a class="djToggleSwitch" data-toggle-name="sqlMain" data-toggle-id="9" data-toggle-open="+" data-toggle-close="-" href="">+</a>
+					</td>
+					<td class="query">
+						<div class="djDebugSqlWrap">
+							<div class="djDebugSql"><strong>SELECT</strong> <a class="djDebugUncollapsed djDebugToggle" href="#">&#8226;&#8226;&#8226;</a> <a class="djDebugCollapsed djDebugToggle" href="#">&quot;task_taskgroup&quot;.&quot;id&quot;, &quot;task_taskgroup&quot;.&quot;order&quot;, &quot;task_taskgroup&quot;.&quot;name&quot;, &quot;task_taskgroup&quot;.&quot;description&quot;, &quot;task_taskgroup&quot;.&quot;job_id&quot;</a> <strong>FROM</strong> &quot;task_taskgroup&quot; <strong>WHERE</strong> &quot;task_taskgroup&quot;.&quot;job_id&quot; = 1 <strong>ORDER</strong> <strong>BY</strong> &quot;task_taskgroup&quot;.&quot;order&quot; <strong>ASC</strong></div>
+						</div>
+						
+							<strong>Duplicated 2 times.
+							</strong>
+						
+					</td>
+					<td class="timeline">
+						<div class="djDebugTimeline"><div class="djDebugLineChart" data-left="87.042234470632%"><strong data-width="99.99999999999999%" data-background-color="#c00000">12.957765529368004%</strong></div></div>
+					</td>
+					<td class="djdt-time">
+						0.91
+					</td>
+					<td class="djdt-actions">
+
+					
+						
+							<form method="post">
+								<input name="sql" type="hidden" value="SELECT &quot;task_taskgroup&quot;.&quot;id&quot;, &quot;task_taskgroup&quot;.&quot;order&quot;, &quot;task_taskgroup&quot;.&quot;name&quot;, &quot;task_taskgroup&quot;.&quot;description&quot;, &quot;task_taskgroup&quot;.&quot;job_id&quot; FROM &quot;task_taskgroup&quot; WHERE &quot;task_taskgroup&quot;.&quot;job_id&quot; = 1 ORDER BY &quot;task_taskgroup&quot;.&quot;order&quot; ASC" /><input name="raw_sql" type="hidden" value="SELECT &quot;task_taskgroup&quot;.&quot;id&quot;, &quot;task_taskgroup&quot;.&quot;order&quot;, &quot;task_taskgroup&quot;.&quot;name&quot;, &quot;task_taskgroup&quot;.&quot;description&quot;, &quot;task_taskgroup&quot;.&quot;job_id&quot; FROM &quot;task_taskgroup&quot; WHERE &quot;task_taskgroup&quot;.&quot;job_id&quot; = %s ORDER BY &quot;task_taskgroup&quot;.&quot;order&quot; ASC" /><input name="params" type="hidden" value="[1]" /><input name="alias" type="hidden" value="default" /><input name="duration" type="hidden" value="0.9136199951171875" /><input name="hash" type="hidden" value="cc12329948a286fa464ee8ae99d445e75d9a8c63" />
+
+								<button formaction="/__debug__/sql_select/" class="remoteCall">Sel</button>
+								<button formaction="/__debug__/sql_explain/" class="remoteCall">Expl</button>
+
+								
+							</form>
+						
+					
+					</td>
+				</tr>
+				<tr class="djUnselected djDebugHoverable djDebugOdd djToggleDetails_9" id="sqlDetails_9">
+					<td colspan="2"></td>
+					<td colspan="4">
+						<div class="djSQLDetailsDiv">
+							<p><strong>Verbindung:</strong> default</p>
+							
+							
+							
+								<pre class="djdt-stack"><span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">&lt;module&gt;</span>(<span class="djdt-lineno">63</span>)
+  <span class="djdt-code">generate_pages()</span>
+<span class="djdt-path">/home/lex/projects/systori/systori/dart/tool/</span><span class="djdt-file">generate_test_harness.py</span> in <span class="djdt-func">generate_pages</span>(<span class="djdt-lineno">48</span>)
+  <span class="djdt-code">editor = client.get(reverse(&#39;tasks&#39;, args=[data.project.id, data.job.id]))</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">500</span>)
+  <span class="djdt-code">**extra)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">get</span>(<span class="djdt-lineno">303</span>)
+  <span class="djdt-code">return self.generic(&#39;GET&#39;, path, secure=secure, **r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">generic</span>(<span class="djdt-lineno">379</span>)
+  <span class="djdt-code">return self.request(**r)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">request</span>(<span class="djdt-lineno">448</span>)
+  <span class="djdt-code">response = self.handler(environ)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/test/</span><span class="djdt-file">client.py</span> in <span class="djdt-func">__call__</span>(<span class="djdt-lineno">122</span>)
+  <span class="djdt-code">response = self.get_response(request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/core/handlers/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">get_response</span>(<span class="djdt-lineno">164</span>)
+  <span class="djdt-code">response = response.render()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">response.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">158</span>)
+  <span class="djdt-code">self.content = self.rendered_content</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">response.py</span> in <span class="djdt-func">rendered_content</span>(<span class="djdt-lineno">135</span>)
+  <span class="djdt-code">content = template.render(context, self._request)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/backends/</span><span class="djdt-file">django.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">74</span>)
+  <span class="djdt-code">return self.template.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">209</span>)
+  <span class="djdt-code">return self._render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">_render</span>(<span class="djdt-lineno">201</span>)
+  <span class="djdt-code">return self.nodelist.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">903</span>)
+  <span class="djdt-code">bit = self.render_node(node, context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">debug.py</span> in <span class="djdt-func">render_node</span>(<span class="djdt-lineno">79</span>)
+  <span class="djdt-code">return node.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">loader_tags.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">135</span>)
+  <span class="djdt-code">return compiled_parent._render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">_render</span>(<span class="djdt-lineno">201</span>)
+  <span class="djdt-code">return self.nodelist.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">903</span>)
+  <span class="djdt-code">bit = self.render_node(node, context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">debug.py</span> in <span class="djdt-func">render_node</span>(<span class="djdt-lineno">79</span>)
+  <span class="djdt-code">return node.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">loader_tags.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">135</span>)
+  <span class="djdt-code">return compiled_parent._render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">_render</span>(<span class="djdt-lineno">201</span>)
+  <span class="djdt-code">return self.nodelist.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">903</span>)
+  <span class="djdt-code">bit = self.render_node(node, context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">debug.py</span> in <span class="djdt-func">render_node</span>(<span class="djdt-lineno">79</span>)
+  <span class="djdt-code">return node.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">loader_tags.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">135</span>)
+  <span class="djdt-code">return compiled_parent._render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">_render</span>(<span class="djdt-lineno">201</span>)
+  <span class="djdt-code">return self.nodelist.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">903</span>)
+  <span class="djdt-code">bit = self.render_node(node, context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">debug.py</span> in <span class="djdt-func">render_node</span>(<span class="djdt-lineno">79</span>)
+  <span class="djdt-code">return node.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">loader_tags.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">65</span>)
+  <span class="djdt-code">result = block.nodelist.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">903</span>)
+  <span class="djdt-code">bit = self.render_node(node, context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">debug.py</span> in <span class="djdt-func">render_node</span>(<span class="djdt-lineno">79</span>)
+  <span class="djdt-code">return node.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">loader_tags.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">65</span>)
+  <span class="djdt-code">result = block.nodelist.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">base.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">903</span>)
+  <span class="djdt-code">bit = self.render_node(node, context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">debug.py</span> in <span class="djdt-func">render_node</span>(<span class="djdt-lineno">79</span>)
+  <span class="djdt-code">return node.render(context)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/template/</span><span class="djdt-file">defaulttags.py</span> in <span class="djdt-func">render</span>(<span class="djdt-lineno">162</span>)
+  <span class="djdt-code">len_values = len(values)</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">__len__</span>(<span class="djdt-lineno">144</span>)
+  <span class="djdt-code">self._fetch_all()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">_fetch_all</span>(<span class="djdt-lineno">965</span>)
+  <span class="djdt-code">self._result_cache = list(self.iterator())</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/</span><span class="djdt-file">query.py</span> in <span class="djdt-func">iterator</span>(<span class="djdt-lineno">238</span>)
+  <span class="djdt-code">results = compiler.execute_sql()</span>
+<span class="djdt-path">/home/lex/.virtualenvs/systori/lib/python3.4/site-packages/django/db/models/sql/</span><span class="djdt-file">compiler.py</span> in <span class="djdt-func">execute_sql</span>(<span class="djdt-lineno">829</span>)
+  <span class="djdt-code">cursor.execute(sql, params)</span></pre>
+							
+							
+								<table>
+									
+									<tr>
+										<td>419</td>
+										<td><code >           data-taskgroup-zfill=&quot;{{ project.taskgroup_zfill }}&quot;
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>420</td>
+										<td><code >           data-task-zfill=&quot;{{ project.task_zfill }}&quot;&gt;
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>421</td>
+										<td><code >
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>422</td>
+										<td><code class="djdt-highlighted">    {% for group in object_list %}
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>423</td>
+										<td><code >      {% include &quot;task/taskgroup_loop.html&quot; with group=group %}
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>424</td>
+										<td><code >    {% empty %}
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>425</td>
+										<td><code >      {% include &quot;task/taskgroup_loop.html&quot; with group=blank_taskgroup %}
+</code></td>
+									</tr>
+									
+									<tr>
+										<td>426</td>
+										<td><code >    {% endfor %}
+</code></td>
+									</tr>
+									
+								</table>
+								<p><strong>/home/lex/projects/systori/systori/templates/task/editor.html</strong></p>
+							
+						</div>
+					</td>
+				</tr>
+			
+		</tbody>
+	</table>
+
+
+<script src="/static/debug_toolbar/js/toolbar.sql.js"></script>
+</div>
+					
+				</div>
+			</div>
+		
+	
+	<div id="djDebugWindow" class="djdt-panelContent"></div>
+</div>
+</body>
+</html>
+<link rel="x-dart-test" href="editor_test.dart">
+<script src="packages/test/dart.js"></script>
