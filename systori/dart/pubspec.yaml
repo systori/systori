@@ -7,6 +7,8 @@ dependencies:
   collection: any
   browser: any
   web_components: any
+dev_dependencies:
+  test: any
 transformers:
 - $dart2js:
     minify: true
