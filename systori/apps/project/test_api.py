@@ -8,7 +8,7 @@ class ResourceTestCaseBase(ResourceTestCaseMixin, TestCase):
     def setUp(self):
         super(ResourceTestCaseBase, self).setUp()
         create_task_data(self)
-        self.api_client.client.login(username='lex@damoti.com', password='pass')
+        self.api_client.client.login(username=self.user.email, password='open sesame')
 
 
 class ProjectResourceTest(ResourceTestCaseBase):
@@ -28,7 +28,7 @@ class ProjectResourceTest(ResourceTestCaseBase):
         self.assertEqual(sorted(expected_keys), sorted(keys))
 
     def test_update_project(self):
-        url = self.url + '{}/'.format(Project.objects.first().pk)
+        url = self.url + '{}/'.format(self.project.id)
         data = {"name": "updated proj", "description": "updated desc"}
         resp = self.api_client.put(url, data=data, format='json')
         self.assertHttpAccepted(resp)

@@ -8,7 +8,7 @@ class ResourceTestCaseBase(ResourceTestCaseMixin, TestCase):
     def setUp(self):
         super(ResourceTestCaseBase, self).setUp()
         create_task_data(self)
-        self.api_client.client.login(username='lex@damoti.com', password='pass')
+        self.api_client.client.login(username=self.user.email, password='open sesame')
 
 
 class JobOrderResourceTest(ResourceTestCaseBase):
@@ -45,7 +45,7 @@ class JobOrderResourceTest(ResourceTestCaseBase):
         }
         resp = self.api_client.post(self.url, data=data, format='json')
         self.assertHttpCreated(resp)
-        job = Job.objects.last()
+        job = Job.objects.order_by('id').last()
         self.assertEqual("new job", job.name)
         self.assertEqual("new desc", job.description)
 

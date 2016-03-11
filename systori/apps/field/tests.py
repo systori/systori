@@ -24,7 +24,7 @@ class TestFieldTaskView(TestCase):
         dailyplan = DailyPlan.objects.create(jobsite=jobsite)
         access, _ = Access.objects.get_or_create(user=self.user, company=self.company)
 
-        self.client.login(username='lex@damoti.com', password='pass')
+        self.client.login(username=self.user.email, password='open sesame')
 
         self.client.post(
             reverse('field.dailyplan.task', args=['1', dailyplan.url_id, self.task.pk]),

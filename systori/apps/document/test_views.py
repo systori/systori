@@ -50,7 +50,7 @@ class DocumentTestCase(TestCase):
             is_billable=True
         )
         self.client = Client()
-        self.client.login(username='lex@damoti.com', password='pass')
+        self.client.login(username=self.user.email, password='open sesame')
 
 
 class ProposalViewTests(DocumentTestCase):
