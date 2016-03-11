@@ -65,3 +65,21 @@ body {
 .main .page-header {
   margin-top: 0;
 }
+
+
+td[is=amount-input] {
+  width: 216px;
+}
+td[is=amount-input]>input {
+  padding-right: 5px;
+  text-align: right;
+}
+td[is=amount-input]>input.amount-gross {
+  width: 200px;
+}
+td[is=amount-input]>input.amount-net {
+  width: 110px;
+}
+td[is=amount-input]>input.amount-tax {
+  width: 90px;
+}

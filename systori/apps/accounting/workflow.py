@@ -1,5 +1,3 @@
-from datetime import date
-from systori.lib.accounting.tools import compute_gross_tax, extract_net_tax
 from .models import *
 from .constants import *
 

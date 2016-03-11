@@ -1,0 +1,11 @@
+{% load i18n customformatting %}
+<td is="amount-view{% if has_form %}-input{% endif %}" class="{{ css_class }}">
+  <span class="amount-gross">{{ amount.gross|ubrdecimal:2 }}</span><br />
+  <span class="amount-net">{{ amount.net|ubrdecimal:2 }}</span>
+  <span class="amount-tax">{{ amount.tax|ubrdecimal:2 }}</span>
+  {% if has_form %}
+    <input class="amount-gross" id="{{ gross.id_for_label }}" name="{{ gross.html_name }}" type="hidden" value="{{ amount.gross|ubrdecimal:2 }}">
+    <input class="amount-net" id="{{ net.id_for_label }}" name="{{ net.html_name }}" type="hidden" value="{{ amount.net|ubrdecimal:2 }}">
+    <input class="amount-tax" id="{{ tax.id_for_label }}" name="{{ tax.html_name }}" type="hidden" value="{{ amount.tax|ubrdecimal:2 }}">
+  {% endif %}
+</td>
