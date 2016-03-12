@@ -14,27 +14,34 @@ class PaymentSplitTable extends TableElement {
     TableCellElement credit_gross_total;
 
     double discount_percent;
+    double tax_rate;
 
-    PaymentSplitTable.created() : super.created() {
+    int get payment =>
+            (parse_currency(payment_input.value) * 100).round();
+
+    ElementList<PaymentSplit> get rows =>
+            this.querySelectorAll(":scope tr.payment-split-row");
+
+    PaymentSplitTable.created() : super.created(); attached() {
         TableRowElement totals = this.querySelector(":scope tr.split-table-totals");
-        this.payment_gross_total = totals.querySelector(":scope>.job-payment");
-        this.discount_gross_total = totals.querySelector(":scope>.job-discount");
-        this.credit_gross_total = totals.querySelector(":scope>.job-credit");
+        payment_gross_total = totals.querySelector(":scope>.job-payment");
+        discount_gross_total = totals.querySelector(":scope>.job-discount");
+        credit_gross_total = totals.querySelector(":scope>.job-credit");
         payment_input = document.querySelector('input[name="amount"]');
-        payment_input.onKeyUp.listen(update_table);
+        payment_input.onKeyUp.listen(auto_split);
         discount_select = this.querySelector('select[name="discount"]');
-        discount_select.onChange.listen(update_table);
+        discount_select.onChange.listen(auto_split);
         discount_percent = double.parse(discount_select.value);
+        tax_rate = double.parse(this.dataset['tax-rate']);
     }
 
-    update_table(Event e) {
+    auto_split([Event e]) {
         discount_percent = double.parse(discount_select.value);
-        int remaining = (parse_currency(payment_input.value) * 100).round();
-        var rows = this.querySelectorAll(":scope tr.payment-split-row");
+        var remaining = new Amount(0, 0, payment, tax_rate);
         for (PaymentSplit row in rows) {
             remaining = row.consume_payment(remaining);
         }
-        recalculate();
+        //recalculate();
     }
 
     recalculate() {
@@ -63,10 +70,10 @@ class PaymentSplit extends TableRowElement {
 
     AmountViewCell balance_cell;
     AmountInputCell payment_cell;
-    AmountViewInputCell discount_cell;
+    AmountStatefulCell discount_cell;
     AmountViewCell credit_cell;
 
-    PaymentSplit.created() : super.created() {
+    PaymentSplit.created() : super.created(); attached() {
         table = parent.parent;
         balance_cell = this.querySelector(":scope>.job-balance");
         payment_cell = this.querySelector(":scope>.job-payment");
@@ -91,58 +98,32 @@ class PaymentSplit extends TableRowElement {
         if (e != null) table.recalculate();
     }
 
-    int consume_payment(int payment) {
+    Amount consume_payment(Amount payment) {
 
-        int discount_gross = (balance_cell.gross * table.discount_percent).round();
-        int discount_net = (balance_cell.net * table.discount_percent).round();
-        int discount_tax = discount_gross - discount_net;
+        Amount discount = balance_cell.amount * table.discount_percent;
+        Amount apply = balance_cell.amount - discount;
 
-        int apply_gross = balance_cell.gross - discount_gross;
-        int apply_net = balance_cell.net - discount_net;
-        int apply_tax = apply_gross - apply_net;
-
-        if (payment <= 0 || apply_gross <= 0) {
+        if (payment.gross <= 0 || apply.gross <= 0) {
             payment_cell.zero();
             discount_cell.zero();
             credit_cell.zero();
             return payment;
         }
 
-        if (payment < apply_gross) {
-            // payment is less than amount due, we're going to use all of it up
-            // since payment < balance, we need to recalculate everything
-
-            // TODO: refactor this
-            int payment_tax = (payment / (1.0 + (1.0 / 0.19))).round();
-            int payment_net = payment - payment_tax;
-
-            discount_gross = (payment * table.discount_percent).round();
-            discount_net = (payment_net * table.discount_percent).round();
-            discount_tax = discount_gross - discount_net;
-
-            apply_gross = payment - discount_gross;
-            apply_net = payment_net - discount_net;
-            apply_tax = apply_gross - apply_net;
-
-            payment = 0;
+        if (payment.gross < apply.gross) {
+            discount = payment * table.discount_percent;
+            apply = payment - discount;
+            payment.zero();
 
         } else {
             // payment fully covers the balance
             // reduce payment by how much was applied here
-            payment -= apply_gross;
+            payment -= apply;
         }
 
-        payment_cell.gross = apply_gross;
-        payment_cell.net = apply_net;
-        payment_cell.tax = apply_tax;
-
-        discount_cell.gross = discount_gross;
-        discount_cell.net = discount_net;
-        discount_cell.tax = discount_tax;
-
-        credit_cell.gross = apply_gross + discount_gross;
-        credit_cell.net = apply_net + discount_net;
-        credit_cell.tax = apply_tax + discount_tax;
+        payment_cell.update(apply);
+        discount_cell.update(discount);
+        credit_cell.update(apply + discount);
 
         return payment;
     }
