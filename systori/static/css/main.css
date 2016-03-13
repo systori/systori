@@ -76,10 +76,41 @@ td[is=amount-input]>input {
 }
 td[is=amount-input]>input.amount-gross {
   width: 200px;
+  font-weight: bold;
 }
 td[is=amount-input]>input.amount-net {
   width: 110px;
 }
 td[is=amount-input]>input.amount-tax {
   width: 90px;
+}
+
+
+td[is=amount-view],
+td[is=amount-stateful] {
+  width: 216px;
+}
+td[is=amount-view]>div,
+td[is=amount-stateful]>div {
+  padding-right: 5px;
+  text-align: right;
+}
+td[is=amount-view]>div.amount-gross,
+td[is=amount-stateful]>div.amount-gross {
+  width: 200px;
+  border-bottom: 1px solid #808080;
+  font-weight: bold;
+}
+td[is=amount-view]>div.amount-net,
+td[is=amount-stateful]>div.amount-net {
+  color: #808080;
+  float: left;
+  width: 110px;
+}
+td[is=amount-view]>div.amount-tax,
+td[is=amount-stateful]>div.amount-tax {
+  color: #808080;
+  float: right;
+  width: 90px;
+  border-left: 1px solid #808080;
 }
