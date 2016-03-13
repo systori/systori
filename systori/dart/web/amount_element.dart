@@ -102,9 +102,9 @@ class AmountInputs {
     String _tax_rate;
 
     update_inputs(Amount amount) {
-        _net_input.text = amount.net_string;
-        _tax_input.text = amount.tax_string;
-        _gross_input.text = amount.gross_string;
+        _net_input.value = amount.net_string;
+        _tax_input.value = amount.tax_string;
+        _gross_input.value = amount.gross_string;
     }
 
     cache_inputs(Element scope) {
