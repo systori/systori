@@ -93,7 +93,6 @@ if __name__ == "__main__":
     atom = transaction.atomic()
     atom.__enter__()
 
-    create_data()
     generate_pages()
 
     # Rollback Transaction

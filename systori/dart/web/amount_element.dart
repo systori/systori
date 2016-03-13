@@ -17,66 +17,51 @@ class Amount {
 
     int net;
     int tax;
-    int gross;
+    int get gross => net + tax;
     double tax_rate;
 
     String get net_string => amount_int_to_string(net);
     String get tax_string => amount_int_to_string(tax);
     String get gross_string => amount_int_to_string(gross);
 
-    Amount(this.net, this.tax, this.gross, this.tax_rate);
+    void set gross(int _gross) {
+        net = (_gross / (1+tax_rate)).round();
+        tax = _gross - net;
+    }
 
-    Amount.from_strings(String net, String tax, String gross, String rate): this(
+    adjust_net(int _net) {
+        tax = gross - _net;
+        net = _net;
+    }
+
+    adjust_tax(int _tax) {
+        net = gross - _tax;
+        tax = _tax;
+    }
+
+    Amount(this.net, this.tax, this.tax_rate);
+
+    Amount.from_strings(String net, String tax, String rate): this(
         amount_string_to_int(net),
         amount_string_to_int(tax),
-        amount_string_to_int(gross),
         double.parse(rate)
     );
 
-    Amount operator * (num multiple) {
-        var result = new Amount(
-            (net*multiple).round(), 0,
-            (gross*multiple).round(), tax_rate
-        );
-        result.tax = result.gross - result.net;
-        return result;
-    }
-
-    Amount operator - (Amount other) {
-        return new Amount(
-            net - other.net,
-            tax - other.tax,
-            gross - other.gross,
-            tax_rate
-        );
-    }
-
-    Amount operator + (Amount other) {
-        return new Amount(
-            net + other.net,
-            tax + other.tax,
-            gross + other.gross,
-            tax_rate
-        );
-    }
-
-    update_gross(int _gross) {
+    Amount.from_gross(int _gross, double _tax_rate) {
+        tax_rate = _tax_rate;
         gross = _gross;
-        net = (gross / (1+tax_rate)).round();
-        tax = gross - net;
     }
 
-    update_net(int _net) {
-        net = _net;
-        tax = gross - net;
-    }
+    Amount operator * (num multiple) =>
+        new Amount((net * multiple).round(), (tax * multiple).round(), tax_rate);
 
-    update_tax(int _tax) {
-        tax = _tax;
-        net = gross - tax;
-    }
+    Amount operator - (Amount other) =>
+        new Amount(net - other.net, tax - other.tax, tax_rate);
 
-    zero() { net = tax = gross = 0; }
+    Amount operator + (Amount other) =>
+        new Amount(net + other.net, tax + other.tax, tax_rate);
+
+    zero() { net = tax = 0; }
 
 }
 
@@ -103,29 +88,8 @@ class AmountDivs {
     }
 
     Amount amount_from_divs() =>
-        new Amount.from_strings(
-                _net_div.text,
-                _tax_div.text,
-                _gross_div.text,
-                _tax_rate
-        );
+        new Amount.from_strings(_net_div.text, _tax_div.text, _tax_rate);
 
-}
-
-
-class AmountViewCell extends TableCellElement with AmountDivs {
-
-    Amount amount;
-
-    AmountViewCell.created() : super.created(); attached() {
-        cache_divs(this);
-        amount = amount_from_divs();
-    }
-
-    update(Amount _amount) {
-        amount = _amount;
-        update_divs(_amount);
-    }
 }
 
 
@@ -151,22 +115,44 @@ class AmountInputs {
     }
 
     Amount amount_from_inputs() =>
-        new Amount.from_strings(
-                _net_input.value,
-                _tax_input.value,
-                _gross_input.value,
-                _tax_rate
-        );
+        new Amount.from_strings(_net_input.value, _tax_input.value, _tax_rate);
 
 }
 
 
-class AmountInputCell extends TableCellElement with AmountInputs {
+abstract class AmountCell extends TableCellElement {
+
+    Amount amount;
+
+    AmountCell.created() : super.created();
+
+    update(Amount _amount);
+
+    zero() {
+        amount.zero();
+        update(amount);
+    }
+}
+
+
+class AmountViewCell extends AmountCell with AmountDivs {
+
+    AmountViewCell.created() : super.created(); attached() {
+        cache_divs(this);
+        amount = amount_from_divs();
+    }
+
+    update(Amount _amount) {
+        amount = _amount;
+        update_divs(_amount);
+    }
+}
+
+
+class AmountInputCell extends AmountCell with AmountInputs {
 
     StreamController<Event> controller = new StreamController<Event>();
     get onAmountChange => controller.stream;
-
-    Amount amount;
 
     AmountInputCell.created() : super.created(); attached() {
         cache_inputs(this);
@@ -183,31 +169,32 @@ class AmountInputCell extends TableCellElement with AmountInputs {
 
     gross_changed([Event e]) {
         int value = amount_string_to_int(_gross_input.value);
-        amount.update_gross(value);
-        update_inputs(amount);
+        amount.gross = value;
+        _net_input.text = amount.net_string;
+        _tax_input.text = amount.tax_string;
         controller.add(e);
     }
 
     net_changed([Event e]) {
         int value = amount_string_to_int(_net_input.value);
-        amount.update_net(value);
-        update_inputs(amount);
+        amount.adjust_net(value);
+        _tax_input.text = amount.tax_string;
+        _gross_input.text = amount.gross_string;
         controller.add(e);
     }
 
     tax_changed([Event e]) {
         int value = amount_string_to_int(_tax_input.value);
-        amount.update_tax(value);
-        update_inputs(amount);
+        amount.adjust_tax(value);
+        _net_input.text = amount.net_string;
+        _gross_input.text = amount.gross_string;
         controller.add(e);
     }
 
 }
 
 
-class AmountStatefulCell extends TableCellElement with AmountDivs, AmountInputs {
-
-    Amount amount;
+class AmountStatefulCell extends AmountCell with AmountDivs, AmountInputs {
 
     AmountStatefulCell.created() : super.created(); attached() {
         cache_divs(this);

@@ -64,10 +64,10 @@
       {% endfor %}
         <tr class="split-table-totals">
           <td class="job-name"></td>
-          <td class="job-balance">{{ form.balance_total.gross|ubrdecimal:2 }}</td>
-          <td class="job-payment">{{ form.payment_total.gross|ubrdecimal:2 }}</td>
-          <td class="job-discount">{{ form.discount_total.gross|ubrdecimal:2 }}</td>
-          <td class="job-credit">{{ form.credit_total.gross|ubrdecimal:2 }}</td>
+          {% amount_view "job-balance" form "balance_total" %}
+          {% amount_view "job-payment" form "payment_total" %}
+          {% amount_view "job-discount" form "discount_total" %}
+          {% amount_view "job-credit" form "credit_total" %}
         </tr>
       </tbody>
     </table>

@@ -4,18 +4,23 @@ register = template.Library()
 
 
 def _make_context(context, css, obj, field, has_form=False):
+
+    field_amount = field if field.endswith('_total') else field+'_amount'
+
     ctx = {
         'TAX_RATE': context['TAX_RATE'],
         'css_class': css,
-        'amount': getattr(obj, field+'_amount'),
+        'amount': getattr(obj, field_amount),
         'has_form': has_form
     }
+
     if has_form:
         ctx.update({
             'net': obj[field+'_net'],
             'tax': obj[field+'_tax'],
             'gross': obj[field+'_gross']
         })
+
     return ctx
 
 
