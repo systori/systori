@@ -149,9 +149,28 @@ class AmountViewCell extends AmountCell with AmountDivs {
 }
 
 
+enum AmountChangeType {
+    NET, TAX, GROSS
+}
+
+class AmountChangeEvent {
+
+    AmountChangeType type;
+    int old_value;
+    int new_value;
+
+    bool get is_net => type == AmountChangeType.NET;
+    bool get is_tax => type == AmountChangeType.TAX;
+    bool get is_gross => type == AmountChangeType.GROSS;
+
+    AmountChangeEvent(this.type, this.old_value, this.new_value);
+
+}
+
+
 class AmountInputCell extends AmountCell with AmountInputs {
 
-    StreamController<Event> controller = new StreamController<Event>();
+    StreamController<AmountChangeEvent> controller = new StreamController<AmountChangeEvent>();
     get onAmountChange => controller.stream;
 
     AmountInputCell.created() : super.created(); attached() {
@@ -167,28 +186,31 @@ class AmountInputCell extends AmountCell with AmountInputs {
         update_inputs(_amount);
     }
 
-    gross_changed([Event e]) {
+    gross_changed([Event _]) {
         int value = amount_string_to_int(_gross_input.value);
+        var event = new AmountChangeEvent(AmountChangeType.GROSS, amount.gross, value);
         amount.gross = value;
-        _net_input.text = amount.net_string;
-        _tax_input.text = amount.tax_string;
-        controller.add(e);
+        _net_input.value = amount.net_string;
+        _tax_input.value = amount.tax_string;
+        controller.add(event);
     }
 
-    net_changed([Event e]) {
+    net_changed([Event _]) {
         int value = amount_string_to_int(_net_input.value);
+        var event = new AmountChangeEvent(AmountChangeType.NET, amount.net, value);
         amount.adjust_net(value);
-        _tax_input.text = amount.tax_string;
-        _gross_input.text = amount.gross_string;
-        controller.add(e);
+        _tax_input.value = amount.tax_string;
+        _gross_input.value = amount.gross_string;
+        controller.add(event);
     }
 
-    tax_changed([Event e]) {
+    tax_changed([Event _]) {
         int value = amount_string_to_int(_tax_input.value);
+        var event = new AmountChangeEvent(AmountChangeType.TAX, amount.tax, value);
         amount.adjust_tax(value);
-        _net_input.text = amount.net_string;
-        _gross_input.text = amount.gross_string;
-        controller.add(e);
+        _net_input.value = amount.net_string;
+        _gross_input.value = amount.gross_string;
+        controller.add(event);
     }
 
 }

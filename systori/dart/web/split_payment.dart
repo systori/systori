@@ -76,25 +76,25 @@ class PaymentSplit extends TableRowElement {
         table = parent.parent;
         balance_cell = this.querySelector(":scope>.job-balance");
         payment_cell = this.querySelector(":scope>.job-payment");
-        payment_cell.onAmountChange.listen(input_changed);
+        payment_cell.onAmountChange.listen(amount_changed);
         discount_cell = this.querySelector(":scope>.job-discount");
         credit_cell = this.querySelector(":scope>.job-credit");
     }
 
-    input_changed([Event e]) {
-        int payment_gross = payment_cell.gross;
-        int full_amount = (payment_gross/(1-table.discount_percent)).round();
-        int discount_gross = full_amount - payment_gross;
-        int _tax = (discount_gross / payment_cell.inverse_tax_rate).round();
-        discount_cell.tax = _tax;
-        discount_cell.gross = discount_gross;
-        discount_input_net.value = ((discount_gross-_tax)/100).toStringAsFixed(2);
-        discount_span.text = AMOUNT.format(discount_gross/100);
+    amount_changed(AmountChangeEvent e) {
 
-        credit_gross = payment_gross + discount_gross;
-        credit_cell.text = AMOUNT.format(credit_gross/100);
+        if (e.is_gross) {
+            // gross changes affect the discount
+            var applied_payment = payment_cell.amount.gross;
+            var tax_rate = payment_cell.amount.tax_rate;
+            var total = (applied_payment / (1 - table.discount_percent)).round();
+            var discount = new Amount.from_gross(total - applied_payment, tax_rate);
+            discount_cell.update(discount);
+        }
 
-        if (e != null) table.recalculate();
+        credit_cell.update(payment_cell.amount + discount_cell.amount);
+
+        table.recalculate();
     }
 
     int consume_payment(int payment) {
