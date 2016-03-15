@@ -71,6 +71,7 @@ INSTALLED_APPS = (
     'systori.apps.accounting',
     'systori.apps.main',
     'systori.apps.company',
+    'systori.apps.timetracking',
 )
 
 MIDDLEWARE_CLASSES = (
