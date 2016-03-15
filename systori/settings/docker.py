@@ -25,3 +25,8 @@ if 'test' in sys.argv:
 INSTALLED_APPS += (
     'django_extensions',
 )
+
+STATICFILES_DIRS += (
+     ('dart', os.path.join(ROOT_DIR, 'systori/dart/web')),
+    #('dart', os.path.join(ROOT_DIR, 'systori/dart/build/web')),
+)
