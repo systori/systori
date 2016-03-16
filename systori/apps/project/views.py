@@ -16,7 +16,7 @@ from .forms import JobSiteForm, FilterForm
 from ..task.models import Job, TaskGroup
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
 from ..accounting.report import prepare_transaction_report
-from ..accounting.models import create_account_for_job
+from ..accounting.models import Transaction, create_account_for_job
 from ..accounting.constants import TAX_RATE
 from .gaeb_utils import gaeb_import
 
@@ -147,6 +147,7 @@ class ProjectView(DetailView):
         context['jobsites_count'] = len(context['jobsites'])
         context['project_has_billable_contact'] = self.object.has_billable_contact
         context['transaction_report'] = prepare_transaction_report(self.object.jobs.all())
+        context['adjustments'] = Transaction.objects.filter(transaction_type=Transaction.ADJUSTMENT)
         context['parent_invoices'] = self.object.invoices.filter(parent=None).prefetch_related('invoices').all()
         context['TAX_RATE_DISPLAY'] = '{}%'.format(ubrdecimal(TAX_RATE*100, 2))
         return context

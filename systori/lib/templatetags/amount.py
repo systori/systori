@@ -18,7 +18,6 @@ def _make_context(context, css, obj, field, has_form=False):
         ctx.update({
             'net': obj[field+'_net'],
             'tax': obj[field+'_tax'],
-            'gross': obj[field+'_gross']
         })
 
     return ctx

@@ -57,18 +57,14 @@ class SplitPaymentFormTests(TestCase):
             'transacted_on': '2015-01-01',
 
             'split-0-job': self.job.id,
-            'split-0-payment_gross': '1',
             'split-0-payment_net': '1',
             'split-0-payment_tax': '1',
-            'split-0-discount_gross': '0',
             'split-0-discount_net': '0',
             'split-0-discount_tax': '0',
 
             'split-1-job': self.job2.id,
-            'split-1-payment_gross': '1',
             'split-1-payment_net': '1',
             'split-1-payment_tax': '1',
-            'split-1-discount_gross': '0',
             'split-1-discount_net': '0',
             'split-1-discount_tax': '0',
 
@@ -85,18 +81,14 @@ class SplitPaymentFormTests(TestCase):
             'transacted_on': '2015-01-01',
 
             'split-0-job': self.job.id,
-            'split-0-payment_gross': '2',
             'split-0-payment_net': '2',
             'split-0-payment_tax': '2',
-            'split-0-discount_gross': '0',
             'split-0-discount_net': '0',
             'split-0-discount_tax': '0',
 
             'split-1-job': self.job2.id,
-            'split-1-payment_gross': '',
             'split-1-payment_net': '',
             'split-1-payment_tax': '',
-            'split-1-discount_gross': '0',
             'split-1-discount_net': '0',
             'split-1-discount_tax': '0',
 
@@ -113,12 +105,16 @@ class SplitPaymentFormTests(TestCase):
             'transacted_on': '2015-01-01',
 
             'split-0-job': self.job.id,
-            'split-0-payment': '',
-            'split-0-discount': '0',
+            'split-0-payment_net': '',
+            'split-0-payment_tax': '',
+            'split-0-discount_net': '',
+            'split-0-discount_tax': '',
 
             'split-1-job': self.job2.id,
-            'split-1-payment': '',
-            'split-1-discount': '0',
+            'split-1-payment_net': '',
+            'split-1-payment_tax': '',
+            'split-1-discount_net': '',
+            'split-1-discount_tax': '',
 
         })
         self.assertFalse(form.is_valid())

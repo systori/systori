@@ -62,11 +62,16 @@ class AdjustmentCreate(FormView):
             invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
             kwargs['initial'] = {
                 'invoice': invoice,
-                'amount': invoice.json['debit_gross'],
+                'amount': invoice.json['debit'],
             }
         if self.request.method == 'POST':
             kwargs['data'] = self.request.POST.copy()
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TAX_RATE'] = TAX_RATE
+        return context
 
     def form_valid(self, form):
         form.save()

@@ -76,6 +76,10 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
                 'payment': Amount.zero(),   # part of payment applied to this set of 'jobs'
                 'discount': Amount.zero(),  # discount applied to this set of 'jobs'
             })
+
+        elif txn.transaction_type == txn.ADJUSTMENT:
+            pass
+
         else:
             raise NotImplementedError('Unsupported transaction type: %s' % (txn.transaction_type,))
 

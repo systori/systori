@@ -9,7 +9,7 @@ from django.forms import Form, ModelForm, ValidationError, widgets
 from django.db.transaction import atomic
 from django import forms
 from systori.lib.fields import LocalizedDecimalField
-from systori.lib.accounting.tools import Amount, compute_gross_tax, extract_net_tax, round as _round
+from systori.lib.accounting.tools import Amount, round as _round
 from ..task.models import Job
 from .workflow import Account, credit_jobs, debit_jobs, adjust_jobs
 from .constants import TAX_RATE, BANK_CODE_RANGE
@@ -60,23 +60,20 @@ class SplitPaymentForm(Form):
 
     payment_net = LocalizedDecimalField(label=_("Amount Net"), max_digits=14, decimal_places=2, required=False)
     payment_tax = LocalizedDecimalField(label=_("Amount Tax"), max_digits=14, decimal_places=2, required=False)
-    payment_gross = LocalizedDecimalField(label=_("Amount Gross"), max_digits=14, decimal_places=2, required=False)
 
     discount_net = LocalizedDecimalField(label=_("Discount Net"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
     discount_tax = LocalizedDecimalField(label=_("Discount Tax"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
-    discount_gross = LocalizedDecimalField(label=_("Discount Gross"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.job = self.initial['job']
 
-        self.fields['job'].queryset = self.job.project.jobs.all()
+        self.fields['job'].queryset = Job.objects.filter(id=self.job.id)
 
         for column_name in ['payment', 'discount']:
             net = convert_field_to_value(self[column_name+'_net'])
             tax = convert_field_to_value(self[column_name+'_tax'])
-            gross = convert_field_to_value(self[column_name+'_gross'])
-            setattr(self, column_name+'_amount', Amount(net, tax, gross))
+            setattr(self, column_name+'_amount', Amount(net, tax))
 
         if 'invoiced' in self.initial:
             self.balance_amount = self.initial['invoiced']
@@ -277,71 +274,77 @@ class AdjustmentForm(Form):
 
 class AdjustJobForm(Form):
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.all(), widget=forms.HiddenInput())
-    approved = LocalizedDecimalField(label=_("Approved"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
-    adjustment = LocalizedDecimalField(label=_("Adjustment"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
-    adjustment_gross = forms.DecimalField(label=_("Adjustment Gross"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
-    refund = forms.DecimalField(label=_("Refund"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
-    refund_credit = forms.DecimalField(label=_("Apply"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+
+    approved_net = LocalizedDecimalField(label=_("Approved Net"), max_digits=14, decimal_places=2, required=False)
+    approved_tax = LocalizedDecimalField(label=_("Approved Tax"), max_digits=14, decimal_places=2, required=False)
+
+    adjustment_net = LocalizedDecimalField(label=_("Adjustment Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    adjustment_tax = LocalizedDecimalField(label=_("Adjustment Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+
+    refund_net = forms.DecimalField(label=_("Refund Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    refund_tax = forms.DecimalField(label=_("Refund Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+
+    refund_credit_net = forms.DecimalField(label=_("Apply Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    refund_credit_tax = forms.DecimalField(label=_("Apply Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.job = self.initial['job']
-        self.fields['job'].queryset = self.job.project.jobs.all()
+
+        self.fields['job'].queryset = Job.objects.filter(id=self.job.id)
 
         # Paid Column
-        self.received_amount = self.job.account.received_total
-        self.received_value = self.received_amount.net * -1
+        self.paid_amount = self.job.account.paid.negate
 
         # Invoiced Column
         if 'invoiced' in self.initial:
-            self.invoiced_amount = Amount.from_net(self.initial['invoiced'], TAX_RATE)
+            self.invoiced_amount = self.initial['invoiced']
         else:
-            self.invoiced_amount = self.job.account.invoiced_total
-        self.invoiced_value = self.invoiced_amount.net
-        self.invoiced_diff_value = self.invoiced_value - self.received_value
+            self.invoiced_amount = self.job.account.invoiced
+        self.invoiced_diff_amount = self.invoiced_amount - self.paid_amount
 
         # Billable Column
-        self.billable_value = self.job.billable_total
-        self.billable_amount = Amount.from_net(self.billable_value, TAX_RATE)
-        self.billable_diff_value = self.billable_value - self.invoiced_value
+        self.billable_amount = Amount.from_net(self.job.billable_total, TAX_RATE)
+        self.billable_diff_amount = self.billable_amount - self.invoiced_amount
 
-        self.initial['approved'] = self.invoiced_value
+        self.initial['approved_net'] = self.invoiced_amount.net
+        self.initial['approved_tax'] = self.invoiced_amount.tax
 
-        if self.billable_value < self.invoiced_value:
-            adjustment = self.invoiced_value - self.billable_value
-            self.initial['adjustment'] = adjustment
-            adjustment_gross = self.invoiced_amount.gross - self.billable_amount.gross
-            self.initial['adjustment_gross'] = adjustment_gross
+        if self.billable_amount.gross < self.invoiced_amount.gross:
+            adjustment = self.invoiced_amount - self.billable_amount
+            self.initial['adjustment_net'] = adjustment.net
+            self.initial['adjustment_tax'] = adjustment.tax
 
-        received_payments = self.received_amount.gross * -1
-        if self.billable_amount.gross < received_payments:
-            refund = received_payments - self.billable_amount.gross
-            self.initial['refund'] = refund
-            if refund > self.initial['adjustment_gross']:
-                self.initial['adjustment_gross'] = D('0.00')
+        if self.billable_amount.gross < self.paid_amount.gross:
+            refund = self.paid_amount - self.billable_amount
+            self.initial['refund_net'] = refund.net
+            self.initial['refund_tax'] = refund.tax
+            if refund.gross > (self.initial['adjustment_net']+self.initial['adjustment_net']):
+                self.initial['adjustment_net'] = D('0.00')
+                self.initial['adjustment_tax'] = D('0.00')
             else:
-                self.initial['adjustment_gross'] -= refund
+                self.initial['adjustment_net'] -= refund.net
+                self.initial['adjustment_tax'] -= refund.tax
 
-        self.approved_value = convert_field_to_value(self['approved'])
-        self.adjustment_value = convert_field_to_value(self['adjustment'])
-        self.adjustment_gross_value = convert_field_to_value(self['adjustment_gross'])
-        self.refund_value = convert_field_to_value(self['refund'])
-        self.refund_credit_value = convert_field_to_value(self['refund_credit'])
+        for column_name in ['approved', 'adjustment', 'refund', 'refund_credit']:
+            net = convert_field_to_value(self[column_name+'_net'])
+            tax = convert_field_to_value(self[column_name+'_tax'])
+            setattr(self, column_name+'_amount', Amount(net, tax))
 
     def consume_refund(self, refund):
-        received_payments = self.received_amount.gross * -1
-        if self.billable_amount.gross > received_payments:
-            consumable = self.billable_amount.gross - received_payments
-            if refund < consumable:
+        if self.billable_amount.gross > self.paid_amount.gross:
+            consumable = self.billable_amount - self.paid_amount
+            if refund.gross < consumable.gross:
                 consumable = refund
-            self.initial['refund_credit'] = consumable
-            self.refund_credit_value = convert_field_to_value(self['refund_credit'])
+            self.initial['refund_credit_net'] = consumable.net
+            self.initial['refund_credit_tax'] = consumable.tax
+            self.refund_credit_amount = consumable
             refund -= consumable
         return refund
 
     def clean(self):
-        if self.cleaned_data['adjustment'] > self.invoiced_value:
-            self.add_error('adjustment', ValidationError(_("Adjustment cannot be greater than invoiced amount.")))
+        if self.adjustment_amount.gross > self.invoiced_amount.gross:
+            self.add_error('adjustment_net', ValidationError(_("Adjustment cannot be greater than invoiced amount.")))
 
 
 class BaseAdjustJobFormSet(BaseFormSet):
@@ -352,28 +355,25 @@ class BaseAdjustJobFormSet(BaseFormSet):
         super().__init__(*args, initial=self.get_initial(kwargs.pop('jobs', [])), **kwargs)
         self.calculate_refund()
         self.adjustment_form = AdjustmentForm(*args, initial=initial, **kwargs)
-        self.received_total = D('0.00')
-        self.invoiced_total = D('0.00')
-        self.invoiced_diff_total = D('0.00')
-        self.billable_total = D('0.00')
-        self.billable_diff_total = D('0.00')
-        self.approved_total = D('0.00')
-        self.adjustment_total = D('0.00')
-        self.adjustment_gross_total = D('0.00')
-        self.refund_total = D('0.00')
-        self.refund_net_total = D('0.00')
-        self.refund_credit_total = D('0.00')
+        self.paid_total = Amount.zero()
+        self.invoiced_total = Amount.zero()
+        self.invoiced_diff_total = Amount.zero()
+        self.billable_total = Amount.zero()
+        self.billable_diff_total = Amount.zero()
+        self.approved_total = Amount.zero()
+        self.adjustment_total = Amount.zero()
+        self.refund_total = Amount.zero()
+        self.refund_credit_total = Amount.zero()
         for form in self.forms:
-            self.received_total += form.received_value
-            self.invoiced_total += form.invoiced_value
-            self.invoiced_diff_total += form.invoiced_diff_value
-            self.billable_total += form.billable_value
-            self.billable_diff_total += form.billable_diff_value
-            self.approved_total += form.approved_value
-            self.adjustment_total += form.adjustment_value
-            self.adjustment_gross_total += form.adjustment_gross_value
-            self.refund_total += form.refund_value
-            self.refund_credit_total += form.refund_credit_value
+            self.paid_total += form.paid_amount
+            self.invoiced_total += form.invoiced_amount
+            self.invoiced_diff_total += form.invoiced_diff_amount
+            self.billable_total += form.billable_amount
+            self.billable_diff_total += form.billable_diff_amount
+            self.approved_total += form.approved_amount
+            self.adjustment_total += form.adjustment_amount
+            self.refund_total += form.refund_amount
+            self.refund_credit_total += form.refund_credit_amount
 
     def get_initial(self, jobs):
         initial = []
@@ -382,16 +382,16 @@ class BaseAdjustJobFormSet(BaseFormSet):
             job_dict = {}
             for debit in previous_debits:
                 if debit['job.id'] == job.id:
-                    job_dict['invoiced'] = D(debit['debited_net'])
+                    job_dict['invoiced'] = debit['debited']
                     break
             job_dict['job'] = job
             initial.append(job_dict)
         return initial
 
     def calculate_refund(self):
-        refund_total = D('0.00')
+        refund_total = Amount.zero()
         for form in self.forms:
-            refund_total += form.refund_value
+            refund_total += form.refund_amount
         for form in self.forms:
             refund_total = form.consume_refund(refund_total)
 
@@ -399,14 +399,11 @@ class BaseAdjustJobFormSet(BaseFormSet):
         amounts = []
         for form in self.forms:
             job = form.cleaned_data['job']
-            adjustment = form.cleaned_data['adjustment_gross']
-            refund = form.cleaned_data['refund']
-            refund_credit = form.cleaned_data['refund_credit']
-            amounts.append((job, adjustment, refund, refund_credit))
+            amounts.append((job, form.adjustment_amount, form.refund_amount, form.refund_credit_amount))
         return amounts
 
     def save(self):
-        adjust_jobs(self.get_credit_tuples())
+        adjust_jobs(self.get_credit_tuples(), debug=True)
         #if self.invoice and not self.invoice.status == Invoice.PAID:
         #    self.invoice.pay()
         #    self.invoice.save()

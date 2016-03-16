@@ -279,7 +279,7 @@
     border-bottom: 2px solid #ddd;
   }
   </style>
-  <h2 class="sub-header">{% trans "Payments & Adjustments" %}</h2>
+  <h2 class="sub-header">{% trans "Payments" %}</h2>
   <div class="table-responsive">
     <table class="table" id="payments-table">
       <thead>
@@ -320,6 +320,42 @@
     </table>
   </div>
   <a  name="add_payment" href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
+
+
+
+  <style>
+    #adjustments-table .job-row {
+      font-size: 75%;
+      color: gray;
+      text-align: right;
+    }
+    #adjustments-table .job-row.last {
+      border-bottom: 2px solid #ddd;
+    }
+  </style>
+  <h2 class="sub-header">{% trans "Adjustments" %}</h2>
+  <div class="table-responsive">
+    <table class="table" id="adjustments-table">
+      <thead>
+      <tr>
+        <th>{% trans 'Date' %}</th>
+        <th class="text-right" colspan="3">{% trans 'Actions' %}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for transaction in adjustments %}
+        <tr>
+          <td>{{ transaction.recorded_on|localize }}</td>
+          <td class="text-right">
+            {% if not transaction.is_reconciled %}
+              <a href="{% url 'adjustment.delete' project.id transaction.id %}">{% trans "Delete" %}</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
   <a  name="add_adjustment" href="{% url 'adjustment.create' project.id %}">{% trans "Add Adjustment" %}</a>
 
 
