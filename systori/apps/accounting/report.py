@@ -18,7 +18,7 @@ def _transaction_sort_key(txn):
     return txn_date+type_weight+txn_id
 
 
-def prepare_transaction_report(jobs, transacted_on_or_before=None):
+def create_payments_report(jobs, transacted_on_or_before=None):
     """
     :param jobs: limit transaction details to specific set of jobs
     :param transacted_on_or_before: limit transactions up to and including a certain date
@@ -27,7 +27,6 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
 
     txns_query = Transaction.objects \
         .filter(entries__job__in=jobs) \
-        .prefetch_related('invoice') \
         .prefetch_related('entries__job__project') \
         .prefetch_related('entries__account') \
         .distinct()
@@ -40,11 +39,9 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
 
     report = {
         'invoiced': Amount.zero(),
-        'transactions': [],
+        'paid': Amount.zero(),
+        'payments': []
     }
-
-    # aggregates all payments per job, used by auto-pay algorithm later
-    payments = {job.id: Amount.zero() for job in jobs}
 
     for txn in transactions:
 
@@ -52,36 +49,11 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
             'id': txn.id,
             'type': txn.transaction_type,
             'date': txn.transacted_on,
-            'amount': Amount.zero(),
+            'payment': Amount.zero(),
+            'discount': Amount.zero(),
+            'total': Amount.zero(),
             'jobs': {}
         }
-
-        # TODO: needed for migration, replace with commented line after deployment
-        #if txn.transaction_type == txn.INVOICE:
-        if txn.transaction_type in (txn.INVOICE, 'final-invoice'):
-            txn_dict.update({
-                'paid': Amount.zero()
-            })
-            try:
-                txn_dict.update({
-                    'invoice_id': txn.invoice.id,
-                    'invoice_status': txn.invoice.status,
-                    'invoice_title': txn.invoice.json['title']
-                })
-            except ObjectDoesNotExist:
-                pass
-
-        elif txn.transaction_type == txn.PAYMENT:
-            txn_dict.update({
-                'payment': Amount.zero(),   # part of payment applied to this set of 'jobs'
-                'discount': Amount.zero(),  # discount applied to this set of 'jobs'
-            })
-
-        elif txn.transaction_type == txn.ADJUSTMENT:
-            pass
-
-        else:
-            raise NotImplementedError('Unsupported transaction type: %s' % (txn.transaction_type,))
 
         for entry in txn.entries.all():
 
@@ -89,29 +61,18 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
             if not entry.account.is_receivable:
                 continue
 
-            job = entry.job
-
-            if job not in jobs:
+            if entry.job not in jobs:
                 # skip jobs we're not interested in
                 continue
 
-            if job.id not in txn_dict['jobs']:
-                txn_dict['jobs'][job.id] = {
-                    'job.id': job.id,
-                    'code': job.code,
-                    'name': job.name,
-                    'amount': Amount.zero()
-                }
-                if txn.transaction_type in (txn.PAYMENT, txn.ADJUSTMENT):
-                    txn_dict['jobs'][job.id].update({
-                        'payment': Amount.zero(),  # actual amount received from customer
-                        'discount': Amount.zero()  # discount applied to this set of 'jobs'
-                    })
-
-            job_dict = txn_dict['jobs'][job.id]
-
-            txn_dict['amount'] += entry.amount
-            job_dict['amount'] += entry.amount
+            job_dict = txn_dict['jobs'].setdefault(entry.job.id, {
+                'job.id': entry.job.id,
+                'code': entry.job.code,
+                'name': entry.job.name,
+                'payment': Amount.zero(),
+                'discount': Amount.zero(),
+                'total': Amount.zero()
+            })
 
             if entry.entry_type == entry.PAYMENT:
                 txn_dict['payment'] += entry.amount
@@ -121,47 +82,70 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
                 txn_dict['discount'] += entry.amount
                 job_dict['discount'] += entry.amount
 
-            if entry.entry_type in entry.PAYMENT_TYPES+(entry.ADJUSTMENT,):
-                payments[job.id] += entry.amount
+            if entry.entry_type in (entry.PAYMENT, entry.DISCOUNT):
+                txn_dict['total'] += entry.amount
+                job_dict['total'] += entry.amount
 
             if entry.entry_type in entry.TYPES_FOR_INVOICED_SUM:
                 report['invoiced'] += entry.amount
 
-        report['transactions'].append(txn_dict)
+            if entry.entry_type in entry.PAYMENT_TYPES+(entry.ADJUSTMENT,):
+                report['paid'] += entry.amount
 
-    # Automated Payment Algorithm
-    # We start with a total of all payments the customer has made to a
-    # particular job. Then we loop over all of the invoices from first to last
-    # applying as much of the payment as we can to the invoices until there
-    # is no payment left.
-    for invoice in report['transactions']:
-
-        if invoice['type'] != txn.INVOICE:
-            continue
-
-        for job in invoice['jobs'].values():
-            payment = payments[job['job.id']]
-
-            if payment.gross == 0:
-                job['paid'] = Amount.zero()
-                continue  # payments used up
-
-            elif job['amount'].gross >= payment.negate.gross:
-                # payments left is less than the invoiced amount...
-                # pay invoice with all that's left
-                job['paid'] = payment.negate
-
-            else:
-                # still have enough payments left to cover the entire invoice...
-                # pay the invoice in full
-                job['paid'] = job['amount']
-
-            # reduce payment total by how much was applied to this invoice
-            payments[job['job.id']] += job['paid']
-
-            invoice['paid'] += job['paid']
+        if txn.transaction_type == txn.PAYMENT:
+            report['payments'].append(txn_dict)
 
     return report
+
+
+def create_adjustment_report(txn):
+
+    adjustment = {
+        'txn': txn
+    }
+
+    jobs = {}
+
+    for entry in txn.entries.all():
+
+        if not entry.account.is_receivable:
+            continue
+
+        job = jobs.setdefault(entry.job.id, {
+            'job.id': entry.job.id,
+            'code': entry.job.code,
+            'name': entry.job.name,
+            'amount': Amount.zero()
+        })
+
+        job['amount'] += entry.amount
+
+    return adjustment
+
+
+def create_refund_report(txn):
+
+    refund = {
+        'txn': txn
+    }
+
+    jobs = {}
+
+    for entry in txn.entries.all():
+
+        if not entry.account.is_receivable:
+            continue
+
+        job = jobs.setdefault(entry.job.id, {
+            'job.id': entry.job.id,
+            'code': entry.job.code,
+            'name': entry.job.name,
+            'amount': Amount.zero()
+        })
+
+        job['amount'] += entry.amount
+
+    return refund
 
 
 def generate_transaction_table(data, cols=('net', 'tax', 'gross')):

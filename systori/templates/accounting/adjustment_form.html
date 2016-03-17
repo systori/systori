@@ -41,8 +41,8 @@
       }
     </style>
 
-    <div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
-    {{ form.management_form }}
+    <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %}">
+    {{ form.formset.management_form }}
     <table is="adjustment-table" class="table table-striped">
       <thead>
       <tr>
@@ -52,12 +52,10 @@
         <th class="job-billable">{% trans 'Billable' %}</th>
         <th class="job-approved">{% trans 'Approved' %}</th>
         <th class="job-adjustment">{% trans 'Adjustment' %}</th>
-        <th class="job-refund">{% trans 'Refund' %}</th>
-        <th class="job-refund-credit">{% trans 'Applied Refund' %}</th>
       </tr>
       </thead>
       <tbody>
-      {% for adjustment in form.forms %}
+      {% for adjustment in form.formset %}
         <tr is="adjustment-row" class="adjustment-row">
           <td class="job-name">{{ adjustment.job }}{{ adjustment.initial.job.name }}</td>
           {% amount_view "job-paid" adjustment "paid" %}
@@ -65,23 +63,19 @@
           {% amount_view "job-billable" adjustment "billable" %}
           {% amount_input "job-approved" adjustment "approved" %}
           {% amount_input "job-adjustment" adjustment "adjustment" %}
-          {% amount_stateful "job-refund" adjustment "refund" %}
-          {% amount_stateful "job-refund-credit" adjustment "refund_credit" %}
         </tr>
       {% endfor %}
         <tr class="adjustment-table-totals">
           <td class="job-name"></td>
-          {% amount_view "job-paid" form "paid_total" %}
-          {% amount_view "job-invoiced" form "invoiced_total" %}
-          {% amount_view "job-billable" form "billable_total" %}
-          {% amount_view "job-approved" form "approved_total" %}
-          {% amount_view "job-adjustment" form "adjustment_total" %}
-          {% amount_view "job-refund" form "refund_total" %}
-          {% amount_view "job-refund-credit" form "refund_credit_total" %}
+          {% amount_view "job-paid" form.formset "paid_total" %}
+          {% amount_view "job-invoiced" form.formset "invoiced_total" %}
+          {% amount_view "job-billable" form.formset "billable_total" %}
+          {% amount_view "job-approved" form.formset "approved_total" %}
+          {% amount_view "job-adjustment" form.formset "adjustment_total" %}
         </tr>
       </tbody>
     </table>
-    {% for error in form.non_form_errors %}
+    {% for error in form.formset.non_form_errors %}
       <span class="help-block ">{{ error }}</span>
     {% endfor %}
     </div>

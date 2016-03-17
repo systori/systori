@@ -127,6 +127,21 @@ class Invoice(Document):
             return Decimal("0")
 
 
+class Adjustment(Document):
+    letterhead = models.ForeignKey('document.Letterhead', related_name="adjustment_documents")
+    project = models.ForeignKey("project.Project", related_name="adjustments")
+    invoice = models.OneToOneField('Invoice', related_name="adjustment", null=True, on_delete=models.SET_NULL)
+    transaction = models.OneToOneField('accounting.Transaction', related_name="adjustment", null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        verbose_name = _("Adjustment")
+        verbose_name_plural = _("Adjustment")
+        ordering = ['id']
+
+    def __str__(self):
+        return '{} {}'.format(self.__class__.__name__, self.created_on)
+
+
 class Refund(Document):
     letterhead = models.ForeignKey('document.Letterhead', related_name="refund_documents")
     project = models.ForeignKey("project.Project", related_name="refunds")
