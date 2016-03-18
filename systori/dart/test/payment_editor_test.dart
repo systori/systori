@@ -1,12 +1,12 @@
 import 'dart:html';
 import 'package:test/test.dart';
 import '../web/amount_element.dart' show Amount;
-import '../web/split_payment.dart';
-import '../web/split_payment.dart' as split_payment;
+import '../web/payment_editor.dart';
+import '../web/payment_editor.dart' as payment_editor;
 
-void main() { split_payment.main();
+void main() { payment_editor.main();
 
-    group("PaymentSplitTable", () {
+    group("PaymentTable", () {
 
         test("is registered", () {
             PaymentSplitTable table = querySelector("table");

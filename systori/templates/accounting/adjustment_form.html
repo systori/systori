@@ -6,7 +6,7 @@
 {% block content %}
   <form method="post" autocomplete="off">{% csrf_token %}
 
-    {% if form.invoice %}
+    {% if form.invoice.id %}
       <div class="form-group">
         <label class="control-label">{% trans "Invoice" %}</label>
         <div>{{ form.invoice.json.invoice_no }} {{ form.invoice.json.title }}</div>
@@ -43,7 +43,7 @@
 
     <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %}">
     {{ form.formset.management_form }}
-    <table is="adjustment-table" class="table table-striped">
+    <table is="adjustment-table" class="table table-striped" data-tax-rate="{{ TAX_RATE }}">
       <thead>
       <tr>
         <th class="job-name">{% trans 'Job' %}</th>

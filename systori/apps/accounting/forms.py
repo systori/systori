@@ -17,6 +17,7 @@ from .models import Entry
 from ..document.models import Invoice, Adjustment, Refund, DocumentTemplate, DocumentSettings
 from ..document.type import invoice as invoice_lib
 from ..document.type import refund as refund_lib
+from ..document.type import adjustment as adjustment_lib
 from .report import create_payments_report, create_adjustment_report, create_refund_report
 
 
@@ -151,7 +152,7 @@ class BaseInvoiceFormSet(BaseFormSet):
 
         # prepare_transaction_report expects the new transaction and invoice to already be in the database
 
-        invoice.json.update(prepare_transaction_report(jobs))
+        invoice.json.update(create_payments_report(jobs))
         invoice.save()
 
 
@@ -288,6 +289,27 @@ class AdjustmentForm(forms.ModelForm):
         super().__init__(*args, instance=instance, initial=initial, **kwargs)
         self.formset = AdjustmentFormSet(*args, jobs=jobs, adjustment=instance, **kwargs)
 
+    def is_valid(self):
+        adjustment_valid = super().is_valid()
+        formset_valid = self.formset.is_valid()
+        return adjustment_valid and formset_valid
+
+    @atomic
+    def save(self):
+
+        adjustment = self.instance
+
+        if adjustment.transaction:
+            adjustment.transaction.delete()
+
+        adjustment.transaction = adjust_jobs(self.formset.get_credit_tuples())
+
+        doc_settings = DocumentSettings.get_for_language(get_language())
+
+        adjustment.letterhead = doc_settings.invoice_letterhead
+        adjustment.json = adjustment_lib.serialize(adjustment, {})
+        adjustment.save()
+
 
 class BaseAdjustmentFormSet(BaseFormSet):
 
@@ -295,17 +317,17 @@ class BaseAdjustmentFormSet(BaseFormSet):
         super().__init__(*args, prefix='job', initial=self.get_initial(jobs, adjustment), **kwargs)
         self.paid_total = Amount.zero()
         self.invoiced_total = Amount.zero()
-        self.invoiced_diff_total = Amount.zero()
+        self.invoiced_total_diff = Amount.zero()
         self.billable_total = Amount.zero()
-        self.billable_diff_total = Amount.zero()
+        self.billable_total_diff = Amount.zero()
         self.approved_total = Amount.zero()
         self.adjustment_total = Amount.zero()
         for form in self.forms:
             self.paid_total += form.paid_amount
             self.invoiced_total += form.invoiced_amount
-            self.invoiced_diff_total += form.invoiced_diff_amount
+            self.invoiced_total_diff += form.invoiced_amount_diff
             self.billable_total += form.billable_amount
-            self.billable_diff_total += form.billable_diff_amount
+            self.billable_total_diff += form.billable_amount_diff
             self.approved_total += form.approved_amount
             self.adjustment_total += form.adjustment_amount
 
@@ -326,14 +348,8 @@ class BaseAdjustmentFormSet(BaseFormSet):
         amounts = []
         for form in self.forms:
             job = form.cleaned_data['job']
-            amounts.append((job, form.adjustment_amount))
+            amounts.append((job, form.adjustment_amount, Amount.zero(), Amount.zero()))
         return amounts
-
-    def save(self):
-        adjust_jobs(self.get_credit_tuples(), debug=True)
-        #if self.invoice and not self.invoice.status == Invoice.PAID:
-        #    self.invoice.pay()
-        #    self.invoice.save()
 
 
 class AdjustmentRowForm(Form):
@@ -360,24 +376,24 @@ class AdjustmentRowForm(Form):
             self.invoiced_amount = self.initial['invoiced']
         else:
             self.invoiced_amount = self.job.account.invoiced
-        self.invoiced_diff_amount = self.invoiced_amount - self.paid_amount
+        self.invoiced_amount_diff = self.invoiced_amount - self.paid_amount
 
         # Billable Column
         self.billable_amount = Amount.from_net(self.job.billable_total, TAX_RATE)
-        self.billable_diff_amount = self.billable_amount - self.invoiced_amount
+        self.billable_amount_diff = self.billable_amount - self.invoiced_amount
 
         self.initial['approved_net'] = self.invoiced_amount.net
         self.initial['approved_tax'] = self.invoiced_amount.tax
 
-        if self.billable_amount.gross < self.invoiced_amount.gross:
-            adjustment = self.invoiced_amount - self.billable_amount
-            self.initial['adjustment_net'] = adjustment.net
-            self.initial['adjustment_tax'] = adjustment.tax
+        self.approved_amount = Amount(
+            convert_field_to_value(self['approved_net']),
+            convert_field_to_value(self['approved_tax'])
+        )
 
-        for column_name in ['approved', 'adjustment']:
-            net = convert_field_to_value(self[column_name+'_net'])
-            tax = convert_field_to_value(self[column_name+'_tax'])
-            setattr(self, column_name+'_amount', Amount(net, tax))
+        self.adjustment_amount = Amount(
+            convert_field_to_value(self['adjustment_net']),
+            convert_field_to_value(self['adjustment_tax'])
+        )
 
     def clean(self):
         if self.adjustment_amount.gross > self.invoiced_amount.gross:

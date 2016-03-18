@@ -63,32 +63,62 @@ class Amount {
 
     zero() { net = tax = 0; }
 
+    zero_negatives() {
+        if (net < 0) net = 0;
+        if (tax < 0) tax = 0;
+    }
+
 }
 
 
 class AmountDivs {
 
-    DivElement _net_div;
-    DivElement _tax_div;
-    DivElement _gross_div;
+    SpanElement _net_span;
+    SpanElement _tax_span;
+    SpanElement _gross_span;
+
+    SpanElement _net_span_diff;
+    SpanElement _tax_span_diff;
+    SpanElement _gross_span_diff;
 
     String _tax_rate;
 
-    update_divs(Amount amount) {
-        _net_div.text = amount.net_string;
-        _tax_div.text = amount.tax_string;
-        _gross_div.text = amount.gross_string;
+    update_views(Amount amount) {
+        _net_span.text = amount.net_string;
+        _tax_span.text = amount.tax_string;
+        _gross_span.text = amount.gross_string;
     }
 
-    cache_divs(Element scope) {
-        _gross_div = scope.querySelector(":scope>div.amount-gross");
-        _net_div = scope.querySelector(":scope>div.amount-net");
-        _tax_div = scope.querySelector(":scope>div.amount-tax");
+    update_diff(Amount amount) {
+        _update_diff_value(_net_span, amount.net, amount.net_string);
+        _update_diff_value(_tax_span, amount.tax, amount.tax_string);
+        _update_diff_value(_gross_span, amount.gross, amount.gross_string);
+    }
+
+    _update_diff_value(SpanElement span, int value, String value_str) {
+        span.classes.removeAll(['red', 'green']);
+        if (value > 0) {
+            span.text = '+' + value_str;
+            span.classes.add('green');
+        } else if (value < 0) {
+            span.text = value_str;
+            span.classes.add('red');
+        }
+
+    }
+
+    cache_views(Element scope) {
+        _gross_span = scope.querySelector(":scope>.amount-gross>.amount-value");
+        _net_span = scope.querySelector(":scope>.amount-net>.amount-value");
+        _tax_span = scope.querySelector(":scope>.amount-tax>.amount-value");
+        _gross_span_diff = scope.querySelector(":scope>.amount-gross>.amount-diff");
+        _net_span_diff = scope.querySelector(":scope>.amount-net>.amount-diff");
+        _tax_span_diff = scope.querySelector(":scope>.amount-tax>.amount-diff");
         _tax_rate = scope.dataset['tax-rate'];
     }
 
-    Amount amount_from_divs() =>
-        new Amount.from_strings(_net_div.text, _tax_div.text, _tax_rate);
+    Amount amount_from_views() =>
+        new Amount.from_strings(_net_span.text, _tax_span.text, _tax_rate);
 
 }
 
@@ -138,13 +168,13 @@ abstract class AmountCell extends TableCellElement {
 class AmountViewCell extends AmountCell with AmountDivs {
 
     AmountViewCell.created() : super.created(); attached() {
-        cache_divs(this);
-        amount = amount_from_divs();
+        cache_views(this);
+        amount = amount_from_views();
     }
 
     update(Amount _amount) {
         amount = _amount;
-        update_divs(_amount);
+        update_views(_amount);
     }
 }
 
@@ -219,14 +249,14 @@ class AmountInputCell extends AmountCell with AmountInputs {
 class AmountStatefulCell extends AmountCell with AmountDivs, AmountInputs {
 
     AmountStatefulCell.created() : super.created(); attached() {
-        cache_divs(this);
+        cache_views(this);
         cache_inputs(this);
         amount = amount_from_inputs();
     }
 
     update(Amount _amount) {
         amount = _amount;
-        update_divs(_amount);
+        update_views(_amount);
         update_inputs(_amount);
     }
 }

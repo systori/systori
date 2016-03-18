@@ -341,12 +341,12 @@
       </tr>
       </thead>
       <tbody>
-      {% for transaction in adjustments %}
+      {% for doc in adjustments %}
         <tr>
-          <td>{{ transaction.recorded_on|localize }}</td>
+          <td>{{ doc.document_date|localize }}</td>
           <td class="text-right">
-            {% if not transaction.is_reconciled %}
-              <a href="{% url 'adjustment.delete' project.id transaction.id %}">{% trans "Delete" %}</a>
+            {% if not doc.transaction.is_reconciled %}
+              <a href="{% url 'adjustment.delete' project.id doc.id %}">{% trans "Delete" %}</a>
             {% endif %}
           </td>
         </tr>

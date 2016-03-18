@@ -52,7 +52,7 @@ void main() {
     group("AmountViewCell", () {
         test("is registered", () {
             AmountViewCell cell = querySelector(".test-amount-view");
-            expect(cell.amount_from_divs().gross, equals(48000));
+            expect(cell.amount_from_views().gross, equals(48000));
             expect(cell.amount.gross_string, equals("480,00"));
         });
     });

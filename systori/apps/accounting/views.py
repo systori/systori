@@ -137,14 +137,16 @@ class AdjustmentCreate(AdjustmentFormMixin, CreateView):
 
 
 class AdjustmentDelete(DeleteView):
-    model = Transaction
+    model = Adjustment
     template_name = 'accounting/adjustment_confirm_delete.html'
 
     def delete(self, request, *args, **kwargs):
-        object = self.get_object()
-        if not object.is_reconciled:
-            object.delete()
-        return HttpResponseRedirect(self.get_success_url())
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        if self.object.transaction:
+            self.object.transaction.delete()
+        self.object.delete()
+        return HttpResponseRedirect(success_url)
 
     def get_success_url(self):
         return self.request.project.get_absolute_url()

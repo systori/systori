@@ -106,11 +106,32 @@ td[is=amount-stateful]>div.amount-net {
   color: #808080;
   float: left;
   width: 110px;
+  border-right: 1px solid #808080;
+  right: -1px;
 }
 td[is=amount-view]>div.amount-tax,
 td[is=amount-stateful]>div.amount-tax {
   color: #808080;
   float: right;
   width: 90px;
-  border-left: 1px solid #808080;
+}
+
+td[is=amount-view]>div>.amount-diff,
+td[is=amount-stateful]>div>.amount-diff {
+  font-weight: normal;
+  font-size: x-small;
+}
+td[is=amount-view]>div>.amount-diff.red,
+td[is=amount-stateful]>div>.amount-diff.red {
+  color: red;
+}
+td[is=amount-view]>div>.amount-diff.green,
+td[is=amount-stateful]>div>.amount-diff.green {
+  color: green;
+}
+td[is=amount-view]>div.amount-net>.amount-diff,
+td[is=amount-stateful]>div.amount-net>.amount-diff,
+td[is=amount-view]>div.amount-tax>.amount-diff,
+td[is=amount-stateful]>div.amount-tax>.amount-diff {
+  display: block;
 }
