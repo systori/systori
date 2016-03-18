@@ -7,10 +7,10 @@
   <form role="form" method="post">{% csrf_token %}
 
       <h2 class="sub-header">{% trans "Invoice" %}</h2>
-      {{ form.invoice_form|bootstrap }}
+      {{ form|bootstrap }}
 
-      <div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
-      {{ form.management_form }}
+      <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %}">
+      {{ form.formset.management_form }}
 
       <style>
 
@@ -98,7 +98,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for debit_form in form.forms %}
+        {% for debit_form in form.formset %}
           <tr is="invoice-debit" class="job-row {% if debit_form.is_invoiced.value %}invoiced{% endif %} {% if debit_form.is_override.value == 'True' %}override{% elif debit_form.debit_amount.net > 0 and debit_form.debit_amount.net == debit_form.billable_amount.net %}itemized{% endif %}">
             <td class="job-invoiced">{{ debit_form.is_invoiced }}</td>
             <td class="job-name">{{ debit_form.job }}{{ debit_form.initial.job.name }}</td>
@@ -155,12 +155,12 @@
             <td class="job-debited"></td>
             <td class="job-flat"></td>
             <td class="job-itemized"></td>
-            <td class="job-amount-net">{{ form.debit_total.net|ubrdecimal:2 }}</td>
+            <td class="job-amount-net">{{ form.formset.debit_total.net|ubrdecimal:2 }}</td>
             <td class="job-comment"></td>
           </tr>
         </tbody>
       </table>
-      {% for error in form.non_form_errors %}
+      {% for error in form.formset.non_form_errors %}
         <span class="help-block ">{{ error }}</span>
       {% endfor %}
       </div>

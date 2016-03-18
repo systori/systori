@@ -209,12 +209,43 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None, debug=False):
     transaction.save(debug=debug)
 
 
-def adjust_jobs(jobs, transacted_on=None, bank=None, debug=False):
+def adjust_jobs(jobs, transacted_on=None, debug=False):
+
+    transacted_on = transacted_on or date.today()
+
+    transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.ADJUSTMENT)
+
+    for job, adjustment in jobs:
+
+        if adjustment.net != 0:
+
+            transaction.signed(job.account, adjustment.net, value_type=Entry.NET, entry_type=Entry.ADJUSTMENT, job=job)
+
+            if job.is_revenue_recognized:
+                transaction.signed(SKR03_INCOME_CODE, adjustment.net, value_type=Entry.NET, job=job)
+            else:
+                transaction.signed(SKR03_PROMISED_PAYMENTS_CODE, adjustment.net, value_type=Entry.NET, job=job)
+
+        if adjustment.tax != 0:
+
+            transaction.signed(job.account, adjustment.tax, value_type=Entry.TAX, entry_type=Entry.ADJUSTMENT, job=job)
+
+            if job.is_revenue_recognized:
+                transaction.signed(SKR03_TAX_PAYMENTS_CODE, adjustment.tax, value_type=Entry.TAX, job=job)
+            else:
+                transaction.signed(SKR03_PROMISED_PAYMENTS_CODE, adjustment.tax, value_type=Entry.TAX, job=job)
+
+    transaction.save(debug=debug)
+
+    return transaction
+
+
+def refund_jobs(jobs, transacted_on=None, bank=None, debug=False):
 
     bank = bank or Account.objects.get(code=SKR03_BANK_CODE)
     transacted_on = transacted_on or date.today()
 
-    transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.ADJUSTMENT)
+    transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.REFUND)
 
     bank_refund = Decimal('0.00')
 

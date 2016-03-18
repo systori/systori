@@ -240,7 +240,7 @@
             {% if project.has_billable_contact %}
               {% if 'id' in invoice.json %}
                 {% if invoice.status == invoice.SENT or invoice.status == invoice.PAID %}
-                  <a class="btn btn-default" href="{% url 'invoice.create' project.id %}?previous_invoice_id={{ invoice.id }}" style="width: 100%">
+                  <a class="btn btn-default" href="{% url 'invoice.create' project.id invoice.id %}" style="width: 100%">
                     {% trans 'Create next invoice in this sequence.' %}
                   </a>
                 {% else %}

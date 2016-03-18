@@ -5,8 +5,8 @@ import 'amount_element.dart';
 
 class AdjustmentTable extends TableElement {
 
-    AmountViewCell approved_total_cell;
     AmountViewCell adjustment_total_cell;
+    AmountViewCell corrected_total_cell;
 
     double tax_rate;
 
@@ -15,20 +15,20 @@ class AdjustmentTable extends TableElement {
 
     AdjustmentTable.created() : super.created(); attached() {
         TableRowElement totals = this.querySelector(":scope tr.adjustment-table-totals");
-        this.approved_total_cell = totals.querySelector(":scope>.job-approved");
         this.adjustment_total_cell = totals.querySelector(":scope>.job-adjustment");
+        this.corrected_total_cell = totals.querySelector(":scope>.job-corrected");
         tax_rate = double.parse(this.dataset['tax-rate']);
     }
 
     recalculate() {
-        Amount approved_total = new Amount(0, 0, tax_rate),
-               adjustment_total = new Amount(0, 0, tax_rate);
+        Amount adjustment_total = new Amount(0, 0, tax_rate),
+               corrected_total = new Amount(0, 0, tax_rate);
         for (AdjustmentRow row in rows) {
-            approved_total += row.approved_cell.amount;
             adjustment_total += row.adjustment_cell.amount;
+            corrected_total += row.corrected_cell.amount;
         }
-        approved_total_cell.update(approved_total);
         adjustment_total_cell.update(adjustment_total);
+        corrected_total_cell.update(corrected_total);
     }
 
 }
@@ -39,28 +39,25 @@ class AdjustmentRow extends TableRowElement {
     AdjustmentTable table;
 
     AmountViewCell invoiced_cell;
-    AmountInputCell approved_cell;
     AmountInputCell adjustment_cell;
+    AmountInputCell corrected_cell;
 
     AdjustmentRow.created() : super.created(); attached() {
         table = parent.parent;
         invoiced_cell = this.querySelector(":scope>.job-invoiced");
-        approved_cell = this.querySelector(":scope>.job-approved");
-        approved_cell.onAmountChange.listen(approved_changed);
         adjustment_cell = this.querySelector(":scope>.job-adjustment");
         adjustment_cell.onAmountChange.listen(adjustment_changed);
-    }
-
-    approved_changed(AmountChangeEvent e) {
-        var adjustment = invoiced_cell.amount - approved_cell.amount;
-        adjustment.zero_negatives();
-        adjustment_cell.update(adjustment);
-        table.recalculate();
+        corrected_cell = this.querySelector(":scope>.job-corrected");
+        corrected_cell.onAmountChange.listen(corrected_changed);
     }
 
     adjustment_changed(AmountChangeEvent e) {
-        var approved = invoiced_cell.amount - adjustment_cell.amount;
-        approved_cell.update(approved);
+        corrected_cell.update(invoiced_cell.amount + adjustment_cell.amount);
+        table.recalculate();
+    }
+
+    corrected_changed(AmountChangeEvent e) {
+        adjustment_cell.update(corrected_cell.amount - invoiced_cell.amount);
         table.recalculate();
     }
 

@@ -142,6 +142,20 @@ class Adjustment(Document):
         return '{} {}'.format(self.__class__.__name__, self.created_on)
 
 
+class Payment(Document):
+    letterhead = models.ForeignKey('document.Letterhead', related_name="payment_documents")
+    project = models.ForeignKey("project.Project", related_name="payments")
+    transaction = models.OneToOneField('accounting.Transaction', related_name="payment", null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        verbose_name = _("Payment")
+        verbose_name_plural = _("Payments")
+        ordering = ['id']
+
+    def __str__(self):
+        return '{} {}'.format(self.__class__.__name__, self.created_on)
+
+
 class Refund(Document):
     letterhead = models.ForeignKey('document.Letterhead', related_name="refund_documents")
     project = models.ForeignKey("project.Project", related_name="refunds")

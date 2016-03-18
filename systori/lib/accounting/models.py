@@ -170,11 +170,13 @@ class BaseTransaction(models.Model):
     INVOICE = "invoice"
     PAYMENT = "payment"
     ADJUSTMENT = "adjustment"
+    REFUND = "refund"
 
     TRANSACTION_TYPE = (
         (INVOICE, _("Invoice")),
         (PAYMENT, _("Payment")),
         (ADJUSTMENT, _("Adjustment")),
+        (REFUND, _("Refund")),
     )
     transaction_type = models.CharField(_('Transaction Type'), null=True, max_length=32, choices=TRANSACTION_TYPE)
 
@@ -201,6 +203,15 @@ class BaseTransaction(models.Model):
         credit_value = account.as_credit(round(value, 2))
         entry = self.entry_class(account=account, value=credit_value, **kwargs)
         self._entries.append(('credit', entry))
+        return entry
+
+    def signed(self, account, signed_value, **kwargs):
+        assert signed_value != 0
+        if type(account) is str:
+            account = self.account_class.objects.get(code=account)
+        entry = self.entry_class(account=account, value=round(signed_value, 2), **kwargs)
+        entry_type = 'credit' if account.is_credit_value(signed_value) else 'debit'
+        self._entries.append((entry_type, entry))
         return entry
 
     def _total(self, column):

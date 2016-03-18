@@ -58,7 +58,7 @@
           <ul class="nav navbar-nav">
             <li class="dropdown">
               
-                <a class="navbar-brand" href="#">nbfiivXSzlAfFUg</a>
+                <a class="navbar-brand" href="#">NKBtpKNEjUotAdx</a>
               
             </li>
             <li><a href="/projects/">Projekte</a></li>
@@ -69,7 +69,7 @@
 
           </ul>
 
-          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='4nBs8idd9UnRl9F7iEcS2V9h2mSsoVLP' />
+          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='dQ8B8UEBqY6Pz2NcwrasH4VKtWfrzZ7R' />
           <input type="hidden" name="language" value=""/>
         </form>
 
@@ -81,7 +81,7 @@
 
 
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">kjrTDmgMyErKjgE <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">jarfuhEfIUEtxku <b class="caret"></b></a>
             <ul class="dropdown-menu">
               <li><a href="/settings">Einstellungen</a></li>
               <li><a href="/logout">Abmelden</a></li>
@@ -136,7 +136,7 @@
       </div>
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         
-  <form method="post" autocomplete="off"><input type='hidden' name='csrfmiddlewaretoken' value='4nBs8idd9UnRl9F7iEcS2V9h2mSsoVLP' />
+  <form method="post" autocomplete="off"><input type='hidden' name='csrfmiddlewaretoken' value='dQ8B8UEBqY6Pz2NcwrasH4VKtWfrzZ7R' />
 
     
 
@@ -144,41 +144,29 @@
       .job-paid,
       .job-invoiced,
       .job-billable,
-      .job-approved,
       .job-adjustment,
-      .job-adjustment-gross,
-      .job-refund,
-      .job-refund-credit {
+      .job-corrected {
         text-align: right;
       }
-      .job-paid, .job-adjustment-gross {
+      .job-paid {
         border-left: 2px solid #ddd;
       }
-      .net-header {
-        border-left: 2px solid #ddd;
-        border-right: 2px solid #ddd;
-        text-align: center;
-      }
-      .gross-header {
-        text-align: center;
-      }
-      .adjustment-table-totals,
-      .job-adjustment-gross {
+      .adjustment-table-totals {
         font-weight: bold;
       }
     </style>
 
     <div class="form-group ">
     <input id="id_job-TOTAL_FORMS" name="job-TOTAL_FORMS" type="hidden" value="2" /><input id="id_job-INITIAL_FORMS" name="job-INITIAL_FORMS" type="hidden" value="2" /><input id="id_job-MIN_NUM_FORMS" name="job-MIN_NUM_FORMS" type="hidden" value="0" /><input id="id_job-MAX_NUM_FORMS" name="job-MAX_NUM_FORMS" type="hidden" value="1000" />
-    <table is="adjustment-table" class="table table-striped">
+    <table is="adjustment-table" class="table table-striped" data-tax-rate="0.19">
       <thead>
       <tr>
         <th class="job-name">Los</th>
         <th class="job-paid">bezahlt</th>
         <th class="job-invoiced">Rechnung</th>
         <th class="job-billable">Abrechenbar</th>
-        <th class="job-approved">beauftragt</th>
         <th class="job-adjustment">Korrektur</th>
+        <th class="job-corrected">Corrected</th>
       </tr>
       </thead>
       <tbody>
@@ -237,15 +225,15 @@
 </td>
 
           
-<td is="amount-input" class="job-approved" data-tax-rate="0.19">
-  <input class="amount-gross" type="text" value="480,00"><br/>
-  <input class="amount-net" placeholder="net" id="id_job-0-approved_net" name="job-0-approved_net" type="text" value="388,80"><input class="amount-tax" placeholder="MWSt" id="id_job-0-approved_tax" name="job-0-approved_tax" type="text" value="91,20">
-</td>
-
-          
 <td is="amount-input" class="job-adjustment" data-tax-rate="0.19">
   <input class="amount-gross" type="text" value="0,00"><br/>
   <input class="amount-net" placeholder="net" id="id_job-0-adjustment_net" name="job-0-adjustment_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_job-0-adjustment_tax" name="job-0-adjustment_tax" type="text" value="">
+</td>
+
+          
+<td is="amount-input" class="job-corrected" data-tax-rate="0.19">
+  <input class="amount-gross" type="text" value="480,00"><br/>
+  <input class="amount-net" placeholder="net" id="id_job-0-corrected_net" name="job-0-corrected_net" type="text" value="388,80"><input class="amount-tax" placeholder="MWSt" id="id_job-0-corrected_tax" name="job-0-corrected_tax" type="text" value="91,20">
 </td>
 
         </tr>
@@ -304,15 +292,15 @@
 </td>
 
           
-<td is="amount-input" class="job-approved" data-tax-rate="0.19">
-  <input class="amount-gross" type="text" value="119,00"><br/>
-  <input class="amount-net" placeholder="net" id="id_job-1-approved_net" name="job-1-approved_net" type="text" value="100,00"><input class="amount-tax" placeholder="MWSt" id="id_job-1-approved_tax" name="job-1-approved_tax" type="text" value="19,00">
-</td>
-
-          
 <td is="amount-input" class="job-adjustment" data-tax-rate="0.19">
   <input class="amount-gross" type="text" value="0,00"><br/>
   <input class="amount-net" placeholder="net" id="id_job-1-adjustment_net" name="job-1-adjustment_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_job-1-adjustment_tax" name="job-1-adjustment_tax" type="text" value="">
+</td>
+
+          
+<td is="amount-input" class="job-corrected" data-tax-rate="0.19">
+  <input class="amount-gross" type="text" value="119,00"><br/>
+  <input class="amount-net" placeholder="net" id="id_job-1-corrected_net" name="job-1-corrected_net" type="text" value="100,00"><input class="amount-tax" placeholder="MWSt" id="id_job-1-corrected_tax" name="job-1-corrected_tax" type="text" value="19,00">
 </td>
 
         </tr>
@@ -371,23 +359,6 @@
 </td>
 
           
-<td is="amount-view" class="job-approved" data-tax-rate="0.19">
-  <div class="amount-gross">
-    <span class="amount-diff "></span>
-    <span class="amount-value">599,00</span>
-  </div>
-  <div class="amount-net">
-    <span class="amount-diff "></span>
-    <span class="amount-value">488,80</span>
-  </div>
-  <div class="amount-tax">
-    <span class="amount-diff "></span>
-    <span class="amount-value">110,20</span>
-  </div>
-  
-</td>
-
-          
 <td is="amount-view" class="job-adjustment" data-tax-rate="0.19">
   <div class="amount-gross">
     <span class="amount-diff "></span>
@@ -400,6 +371,23 @@
   <div class="amount-tax">
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
+  </div>
+  
+</td>
+
+          
+<td is="amount-view" class="job-corrected" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">599,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">488,80</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">110,20</span>
   </div>
   
 </td>

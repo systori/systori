@@ -21,10 +21,6 @@ urlpatterns = [
     url(r'^project-(?P<project_pk>\d+)/jobsite-(?P<pk>\d+)/edit$', office_auth(JobSiteUpdate.as_view()), name='jobsite.edit'),
     url(r'^project-(?P<project_pk>\d+)/jobsite-(?P<pk>\d+)/delete$', office_auth(JobSiteDelete.as_view()), name='jobsite.delete'),
 
-    url(r'^project-(?P<project_pk>\d+)/create-payment$', office_auth(PaymentCreate.as_view()), name='payment.create'),
-    url(r'^project-(?P<project_pk>\d+)/create-payment-for-invoice/(?P<invoice_pk>\d+)$', office_auth(PaymentCreate.as_view()), name='payment.create'),
-    url(r'^project-(?P<project_pk>\d+)/payment-(?P<pk>\d+)/delete$', office_auth(PaymentDelete.as_view()), name='payment.delete'),
-
     url(r'^project-(?P<pk>\d+)/progress', office_auth(ProjectProgress.as_view()), name='project.progress'),
     url(r'^progress$', office_auth(AllProjectsProgress.as_view()), name='project.progress.all'),
 ]

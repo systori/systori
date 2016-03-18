@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^project-(?P<project_pk>\d+)/proposal-(?P<pk>\d+)/update$', office_auth(ProposalUpdate.as_view()), name='proposal.update'),
 
     url(r'^project-(?P<project_pk>\d+)/create-invoice$', office_auth(InvoiceCreate.as_view()), name='invoice.create'),
+    url(r'^project-(?P<project_pk>\d+)/create-next-invoice/(?P<previous_pk>\d+)$', office_auth(InvoiceCreate.as_view()), name='invoice.create'),
     url(r'^project-(?P<project_pk>\d+)/invoice-(?P<format>(email|print))-(?P<pk>\d+).pdf$', office_auth(InvoicePDF.as_view()), name='invoice.pdf'),
     url(r'^project-(?P<project_pk>\d+)/invoice-(?P<pk>\d+)/transition/(?P<transition>\w+)$', office_auth(InvoiceTransition.as_view()), name='invoice.transition'),
     url(r'^project-(?P<project_pk>\d+)/invoice-(?P<pk>\d+)/update$', office_auth(InvoiceUpdate.as_view()), name='invoice.update'),
@@ -20,6 +21,10 @@ urlpatterns = [
     url(r'^project-(?P<project_pk>\d+)/create-adjustment$', office_auth(AdjustmentCreate.as_view()), name='adjustment.create'),
     url(r'^project-(?P<project_pk>\d+)/create-adjustment-for-invoice/(?P<invoice_pk>\d+)$', office_auth(AdjustmentCreate.as_view()), name='adjustment.create'),
     url(r'^project-(?P<project_pk>\d+)/adjustment-(?P<pk>\d+)/delete$', office_auth(AdjustmentDelete.as_view()), name='adjustment.delete'),
+
+    url(r'^project-(?P<project_pk>\d+)/create-payment$', office_auth(PaymentCreate.as_view()), name='payment.create'),
+    url(r'^project-(?P<project_pk>\d+)/create-payment-for-invoice/(?P<invoice_pk>\d+)$', office_auth(PaymentCreate.as_view()), name='payment.create'),
+    url(r'^project-(?P<project_pk>\d+)/payment-(?P<pk>\d+)/delete$', office_auth(PaymentDelete.as_view()), name='payment.delete'),
 
     url(r'^project-(?P<project_pk>\d+)/create-refund$', office_auth(RefundCreate.as_view()), name='refund.create'),
     url(r'^project-(?P<project_pk>\d+)/refund-(?P<pk>\d+)/delete$', office_auth(RefundDelete.as_view()), name='refund.delete'),
