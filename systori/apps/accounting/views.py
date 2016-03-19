@@ -15,6 +15,7 @@ class InvoiceFormMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['TAX_RATE'] = TAX_RATE
         context['PERCENT_RANGE'] = [5, 20, 25, 30, 50, 75, 100]
         return context
 
@@ -43,12 +44,12 @@ class InvoiceCreate(InvoiceFormMixin, CreateView):
             for field in ['title', 'header', 'footer', 'add_terms']:
                 instance.json[field] = previous.json[field]
             # copy the list of jobs
-            instance.json['debits'] = [{
+            instance.json['jobs'] = [{
                 'job.id': debit['job.id'],
                 'is_invoiced': True
-            } for debit in previous.json['debits']]
+            } for debit in previous.json['jobs']]
         else:
-            instance.json['debits'] = []
+            instance.json['jobs'] = []
         return kwargs
 
 
@@ -107,7 +108,7 @@ class AdjustmentFormMixin:
         return context
 
     def get_form_kwargs(self):
-        jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems').all()
+        jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems')
         kwargs = {
             'jobs': jobs,
             'instance': self.model(project=self.request.project),
