@@ -258,4 +258,3 @@ class DocumentSettingsUpdate(UpdateView):
 class DocumentSettingsDelete(DeleteView):
     model = DocumentSettings
     success_url = reverse_lazy('templates')
-

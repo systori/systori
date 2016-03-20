@@ -12,12 +12,12 @@ from django.utils.translation import ugettext as _
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 
 from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable
-from .style import stylesheet, chunk_text, force_break, p, b
+from .style import chunk_text, force_break, p, b
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import calculate_table_width_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .utils import update_instance
-from . import font
+from .font import FontManager
 
 from ...accounting.constants import TAX_RATE
 
@@ -25,9 +25,9 @@ from ...accounting.constants import TAX_RATE
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-def collate_tasks(proposal, available_width):
+def collate_tasks(proposal, font, available_width):
 
-    t = TableFormatter([1, 0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
+    t = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
@@ -42,27 +42,29 @@ def collate_tasks(proposal, available_width):
     description_width = sum(t.get_widths()[1:6])
 
     for job in proposal['jobs']:
-        t.row(b(job['code']), b(job['name']))
+        t.row(b(job['code'], font), b(job['name'], font))
         t.row_style('SPAN', 1, -1)
 
         for taskgroup in job['taskgroups']:
-            t.row(b(taskgroup['code']), b(taskgroup['name']))
+            t.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
             t.row_style('SPAN', 1, -1)
+
             #t.keep_next_n_rows_together(2)
-            lines = simpleSplit(taskgroup['description'], font.font_name, t.font_size, description_width)
+            lines = simpleSplit(taskgroup['description'], font.normal.fontName, t.font_size, description_width)
+
             for line in lines:
-                t.row('', p(line))
+                t.row('', p(line, font))
                 t.row_style('SPAN', 1, -1)
                 t.row_style('TOPPADDING', 0, -1, 1)
             t.row_style('BOTTOMPADDING', 0, -1, 10)
 
             for task in taskgroup['tasks']:
-                t.row(p(task['code']), p(task['name']))
+                t.row(p(task['code'], font), p(task['name'], font))
                 t.row_style('SPAN', 1, -2)
 
-                lines = simpleSplit(task['description'], font.font_name, t.font_size, description_width)
+                lines = simpleSplit(task['description'], font.normal.fontName, t.font_size, description_width)
                 for line in lines:
-                    t.row('', p(line))
+                    t.row('', p(line, font))
                     t.row_style('SPAN', 1, -1)
                     t.row_style('TOPPADDING', 0, -1, 1)
 
@@ -72,13 +74,13 @@ def collate_tasks(proposal, available_width):
                 elif not task['selected']:
                     task_total_column = _('Alternative')
 
-                t.row('', '', ubrdecimal(task['qty']), p(task['unit']), money(task['price']), task_total_column)
+                t.row('', '', ubrdecimal(task['qty']), p(task['unit'], font), money(task['price']), task_total_column)
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
                 #t.keep_previous_n_rows_together(3)
 
                 t.row_style('BOTTOMPADDING', 0, -1, 10)
 
-            t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
+            t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
                   '', '', '', money(taskgroup['total']))
             t.row_style('FONTNAME', 0, -1, font.bold)
             t.row_style('ALIGNMENT', -1, -1, "RIGHT")
@@ -90,17 +92,17 @@ def collate_tasks(proposal, available_width):
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def collate_tasks_total(proposal, available_width):
+def collate_tasks_total(proposal, font, available_width):
 
-    t = TableFormatter([0, 1], available_width, debug=DEBUG_DOCUMENT)
+    t = TableFormatter([0, 1], available_width, font, debug=DEBUG_DOCUMENT)
     t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     t.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
-    t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold))
+    t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
 
     for job in proposal['jobs']:
         for taskgroup in job['taskgroups']:
-            t.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
+            t.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
                   money(taskgroup['total']))
     t.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
 
@@ -111,7 +113,7 @@ def collate_tasks_total(proposal, available_width):
     return t.get_table()
 
 
-def collate_lineitems(proposal, available_width):
+def collate_lineitems(proposal, available_width, font):
 
     pages = []
 
@@ -123,23 +125,23 @@ def collate_lineitems(proposal, available_width):
 
                 pages.append(PageBreak())
 
-                t = TableFormatter([1, 0], available_width, debug=DEBUG_DOCUMENT)
+                t = TableFormatter([1, 0], available_width, font, debug=DEBUG_DOCUMENT)
                 t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
                 t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
                 t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
 
-                t.row(b(job['code']), b(job['name']))
-                t.row(b(taskgroup['code']), b(taskgroup['name']))
-                t.row(p(task['code']), p(task['name']))
+                t.row(b(job['code'], font), b(job['name'], font))
+                t.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
+                t.row(p(task['code'], font), p(task['name'], font))
 
                 for chunk in chunk_text(task['description']):
-                    t.row('', p(chunk))
+                    t.row('', p(chunk, font))
 
                 # t.row_style('BOTTOMPADDING', 0, -1, 10)  seems to have no effect @elmcrest 09/2015
 
                 pages.append(t.get_table(ContinuationTable))
 
-                t = TableFormatter([0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
+                t = TableFormatter([0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
                 t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
                 t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
                 t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
@@ -147,16 +149,16 @@ def collate_lineitems(proposal, available_width):
                 t.style.append(('ALIGNMENT', (3, 0), (-1, -1), 'RIGHT'))
 
                 for lineitem in task['lineitems']:
-                    t.row(p(lineitem['name']),
+                    t.row(p(lineitem['name'], font),
                           ubrdecimal(lineitem['qty']),
-                          p(lineitem['unit']),
+                          p(lineitem['unit'], font),
                           money(lineitem['price']),
                           money(lineitem['price_per'])
-                    )
+                          )
 
                 t.row_style('LINEBELOW', 0, -1, 0.25, colors.black)
 
-                t.row('', ubrdecimal(task['qty']), b(task['unit']), '', money(task['total']))
+                t.row('', ubrdecimal(task['qty']), b(task['unit'], font), '', money(task['total']))
                 t.row_style('FONTNAME', 0, -1, font.bold)
 
                 pages.append(t.get_table(ContinuationTable))
@@ -168,6 +170,8 @@ def render(proposal, letterhead, with_line_items, format):
 
     with BytesIO() as buffer:
 
+        font = FontManager(letterhead.font)
+
         table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
 
         proposal_date = date_format(date(*map(int, proposal['date'].split('-'))), use_l10n=True)
@@ -176,27 +180,28 @@ def render(proposal, letterhead, with_line_items, format):
 
         flowables = [
 
-            get_address_label(proposal),
+            get_address_label(proposal, font),
 
             get_address_label_spacer(proposal),
 
-            heading_and_date(proposal.get('title') or _("Proposal"), proposal_date, table_width, debug=DEBUG_DOCUMENT),
+            heading_and_date(proposal.get('title') or _("Proposal"), proposal_date, font,
+                             table_width, debug=DEBUG_DOCUMENT),
 
             Spacer(0, 4*mm),
 
-            Paragraph(force_break(proposal['header']), stylesheet['Normal']),
+            Paragraph(force_break(proposal['header']), font.normal),
 
             Spacer(0, 4*mm),
 
-            collate_tasks(proposal, table_width),
+            collate_tasks(proposal, font, table_width),
 
-            collate_tasks_total(proposal, table_width),
+            collate_tasks_total(proposal, font, table_width),
 
             Spacer(0, 10*mm),
 
-            KeepTogether(Paragraph(force_break(proposal['footer']), stylesheet['Normal'])),
+            KeepTogether(Paragraph(force_break(proposal['footer']), font.normal)),
 
-            ] + (collate_lineitems(proposal, table_width) if with_line_items else [])
+            ] + (collate_lineitems(proposal, table_width, font) if with_line_items else [])
 
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)

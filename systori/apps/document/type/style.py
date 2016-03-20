@@ -1,131 +1,4 @@
-from decimal import Decimal
-from . import font
-
-from reportlab.lib.styles import StyleSheet1, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
-
-stylesheet = StyleSheet1()
-
-stylesheet.add(ParagraphStyle(name='Small',
-                              fontName=font.normal,
-                              fontSize=7,
-                              leading=8.4)
-               )
-
-stylesheet.add(ParagraphStyle(name='SmallRight',
-                              parent=stylesheet['Small'],
-                              alignment=TA_RIGHT)
-               )
-
-stylesheet.add(ParagraphStyle(name='Normal',
-                              fontName=font.normal,
-                              fontSize=10,
-                              leading=12)
-               )
-
-stylesheet.add(ParagraphStyle(name='NormalRight',
-                              parent=stylesheet['Normal'],
-                              alignment=TA_RIGHT)
-               )
-
-stylesheet.add(ParagraphStyle(name='Bold',
-                              fontName=font.bold,
-                              fontSize=10,
-                              leading=12)
-               )
-
-stylesheet.add(ParagraphStyle(name='BoldRight',
-                              parent=stylesheet['Bold'],
-                              alignment=TA_RIGHT)
-               )
-
-stylesheet.add(ParagraphStyle(name='BodyText',
-                              parent=stylesheet['Normal'],
-                              spaceBefore=6)
-               )
-
-stylesheet.add(ParagraphStyle(name='Italic',
-                              parent=stylesheet['BodyText'],
-                              fontName=font.italic)
-               )
-
-stylesheet.add(ParagraphStyle(name='Heading1',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=18,
-                              leading=22,
-                              spaceAfter=6),
-               alias='h1')
-
-stylesheet.add(ParagraphStyle(name='Title',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=18,
-                              leading=22,
-                              alignment=TA_CENTER,
-                              spaceAfter=6),
-               alias='title')
-
-stylesheet.add(ParagraphStyle(name='Heading2',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=14,
-                              leading=18,
-                              spaceBefore=12,
-                              spaceAfter=6),
-               alias='h2')
-
-stylesheet.add(ParagraphStyle(name='Heading3',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=12,
-                              leading=14,
-                              spaceBefore=12,
-                              spaceAfter=6),
-               alias='h3')
-
-stylesheet.add(ParagraphStyle(name='Heading4',
-                              parent=stylesheet['Normal'],
-                              fontName=font.boldItalic,
-                              fontSize=10,
-                              leading=12,
-                              spaceBefore=10,
-                              spaceAfter=4),
-               alias='h4')
-
-stylesheet.add(ParagraphStyle(name='Heading5',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=9,
-                              leading=10.8,
-                              spaceBefore=8,
-                              spaceAfter=4),
-               alias='h5')
-
-stylesheet.add(ParagraphStyle(name='Heading6',
-                              parent=stylesheet['Normal'],
-                              fontName=font.bold,
-                              fontSize=7,
-                              leading=8.4,
-                              spaceBefore=6,
-                              spaceAfter=2),
-               alias='h6')
-
-stylesheet.add(ParagraphStyle(name='Bullet',
-                              parent=stylesheet['Normal'],
-                              firstLineIndent=0,
-                              spaceBefore=3),
-               alias='bu')
-
-stylesheet.add(ParagraphStyle(name='Definition',
-                              parent=stylesheet['Normal'],
-                              firstLineIndent=0,
-                              leftIndent=36,
-                              bulletIndent=0,
-                              spaceBefore=6,
-                              bulletFontName=font.boldItalic),
-               alias='df')
-
+from .font import fonts
 
 import os.path
 from django.conf import settings
@@ -134,7 +7,7 @@ from django.utils.translation import ugettext as _
 from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
 
 from reportlab.pdfbase.pdfmetrics import stringWidth
-
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import BaseDocTemplate, PageTemplate
 from reportlab.platypus import Frame, Paragraph, Table, Spacer
 from reportlab.pdfgen import canvas
@@ -176,26 +49,29 @@ def force_break(txt):
     return txt.replace('\n', '<br />')
 
 
-def p(txt):
-    return Paragraph(txt, stylesheet['Normal'])
+def p(txt, font):
+    return Paragraph(txt, font.normal)
 
 
-def b(txt):
-    return Paragraph(txt, stylesheet['Bold'])
+def b(txt, font):
+    return Paragraph(txt, font.bold)
 
-def br(txt):
-    return Paragraph(str(txt), stylesheet['BoldRight'])
 
-def nr(txt):
-    return Paragraph(str(txt), stylesheet['NormalRight'])
+def br(txt, font):
+    return Paragraph(str(txt), font.bold_right)
 
-def heading_and_date(heading, date, available_width, debug=False):
 
-    t = TableFormatter([0, 1], available_width, debug=debug)
+def nr(txt, font):
+    return Paragraph(str(txt), font.normal_right)
+
+
+def heading_and_date(heading, date, font, available_width, debug=False):
+
+    t = TableFormatter([0, 1], available_width, font, debug=debug)
     t.style.append(('GRID', (0, 0), (-1, -1), 1, colors.transparent))
-    t.row(Paragraph(heading, stylesheet['h2']), Paragraph(date, stylesheet['NormalRight']))
+    t.row(Paragraph(heading, font.h2), Paragraph(date, font.normal_right))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
-    t.style.append(('RIGHTPADDING', (0,0), (-1,-1), 0))
+    t.style.append(('RIGHTPADDING', (0, 0), (-1, -1), 0))
 
     return t.get_table(Table)
 
@@ -221,12 +97,13 @@ class StationaryCanvas(canvas.Canvas):
 
 class NumberedCanvas(canvas.Canvas):
 
-    def __init__(self, *args, page_number_x, page_number_y, page_number_y_next, **kwargs):
+    def __init__(self, *args, page_number_x, page_number_y, page_number_y_next, font, **kwargs):
         super().__init__(*args, **kwargs)
         self._saved_page_states = []
         self.page_number_x = page_number_x
         self.page_number_y = page_number_y
         self.page_number_y_next = page_number_y_next
+        self.font = font
 
     def showPage(self):
         """ Instead of 'showing' the page we save the render state for later. """
@@ -243,7 +120,7 @@ class NumberedCanvas(canvas.Canvas):
         super().save()
 
     def draw_page_number(self, page_count):
-        self.setFont(font.normal, 10)
+        self.setFont('{}-Regular'.format(self.font), 10)
         if self._pageNumber == 1:
             self.drawRightString(self.page_number_x, self.page_number_y - 20,
                                  _("Page {} of {}").format(self._pageNumber, page_count))
@@ -282,7 +159,8 @@ class NumberedLetterheadCanvasWithoutFirstPage(StationaryCanvas, NumberedCanvas)
 
     @staticmethod
     def factory(letterhead):
-        return lambda *args, **kwargs: NumberedLetterheadCanvasWithoutFirstPage(letterhead.letterhead_pdf, *args, **kwargs)
+        return lambda *args, **kwargs: NumberedLetterheadCanvasWithoutFirstPage(letterhead.letterhead_pdf,
+                                                                                *args, **kwargs)
 
 
 class SystoriDocument(BaseDocTemplate):
@@ -329,7 +207,8 @@ class SystoriDocument(BaseDocTemplate):
         frame_later = Frame(frame_x, frame_y, frame_width, frame_height_later, **padding)
 
         self.addPageTemplates([
-            PageTemplate(id='First', frames=frame_first, onPage=self.onFirstPage, pagesize=self.pagesize, autoNextPageTemplate=True),
+            PageTemplate(id='First', frames=frame_first, onPage=self.onFirstPage, pagesize=self.pagesize,
+                         autoNextPageTemplate=True),
             PageTemplate(id='Later', frames=frame_later, onPage=self.onLaterPages, pagesize=self.pagesize)
         ])
 
@@ -391,6 +270,7 @@ class NumberedSystoriDocument(BaseDocTemplate):
             kwargs['page_number_x'] = frame_x + frame_width
             kwargs['page_number_y'] = frame_y
             kwargs['page_number_y_next'] = frame_y_next
+            kwargs['font'] = letterhead.font
             return canvasmaker(*args, **kwargs)
 
         super().build(flowables, canvasmaker=page_number_canvas_maker)
@@ -401,14 +281,15 @@ class ContinuationTable(Table):
     def draw(self):
 
         self.canv.saveState()
-        self.canv.setFont(font.italic, 10)
+        self.canv.setFont('{}-Italic'.format(self.canv.font), 10)
 
         if getattr(self, '_splitCount', 0) > 1:
-            #self.canv.drawString(0, self._height + 5*mm, '... '+_('Continuation'))
+            # if uncommented write ...Continuation line above next table segment
+            # self.canv.drawString(0, self._height + 5*mm, '... '+_('Continuation'))
             pass
 
         if getattr(self, '_splitCount', 0) >= 1 and not hasattr(self, '_lastTable'):
-            #self.canv.drawRightString(self._width, -7*mm, _('Continuation')+' ...')
+            # self.canv.drawRightString(self._width, -7*mm, _('Continuation')+' ...')
             self.canv.drawString(0, -20, _('Continuation')+' ...')
 
         self.canv.restoreState()
@@ -432,21 +313,20 @@ class ContinuationTable(Table):
 
 
 class TableFormatter:
-
-    font = font.normal
     font_size = 10
 
-    def __init__(self, columns, width, pad=5*mm, trim_ends=True, debug=False):
+    def __init__(self, columns, width, font, pad=5*mm, trim_ends=True, debug=False):
         assert columns.count(0) == 1, "Must have exactly one stretch column."
         self._maximums = columns.copy()
         self._available_width = width
+        self.font = font.normal
         self._pad = pad
         self._trim_ends = trim_ends
         self.columns = columns
         self.lines = []
         self.style = [
             ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('FONTNAME', (0, 0), (-1, -1), self.font),
+            ('FONTNAME', (0, 0), (-1, -1), self.font.fontName),
             ('FONTSIZE', (0, 0), (-1, -1), self.font_size)
         ]
         if debug:
@@ -466,9 +346,9 @@ class TableFormatter:
 
     def string_width(self, txt):
         if isinstance(txt, str):
-            return stringWidth(txt, self.font, self.font_size)
+            return stringWidth(txt, self.font.fontName, self.font_size)
         else:
-            return stringWidth(txt.text, self.font, self.font_size)
+            return stringWidth(txt.text, self.font.fontName, self.font_size)
 
     def get_widths(self):
 
@@ -492,6 +372,7 @@ class TableFormatter:
         return len(self.lines)-1
 
     def row_style(self, name, from_column, to_column, *args):
+        args = tuple(arg.fontName if isinstance(arg, ParagraphStyle) else arg for arg in args)
         self.style.append((name, (from_column, self._row_num), (to_column, self._row_num))+args)
 
     def keep_previous_n_rows_together(self, n):
@@ -501,20 +382,21 @@ class TableFormatter:
         self.style.append(('NOSPLIT', (0, self._row_num+n-1), (0, self._row_num)))
 
 
-def get_address_label(document):
+def get_address_label(document, font):
     if document.get('business') is '':
         return Paragraph(force_break(document.get('address_label', None) or """\
         {salutation} {first_name} {last_name}
         {address}
         {postal_code} {city}
-        """.format(**document)), stylesheet['Normal'])
+        """.format(**document)), font.normal)
     else:
         return Paragraph(force_break(document.get('address_label', None) or """\
         {business}
         {salutation} {first_name} {last_name}
         {address}
         {postal_code} {city}
-        """.format(**document)), stylesheet['Normal'])
+        """.format(**document)), font.normal)
+
 
 def get_address_label_spacer(document):
     if document.get('business') is '':
