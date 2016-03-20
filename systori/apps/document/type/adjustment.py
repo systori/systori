@@ -15,7 +15,7 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 from systori.apps.accounting.report import generate_transaction_table
 from systori.apps.accounting.constants import TAX_RATE
 
-from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, stylesheet, force_break, p, b
+from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, force_break, p, b
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import calculate_table_width_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
