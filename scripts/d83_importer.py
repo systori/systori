@@ -62,7 +62,7 @@ def parse(file_path):
                 data[task_group_code]['tasks'][-1][1] = clean(line)
 
             if line.startswith('26'):
-                data[task_group_code]['tasks'][-1][-1] += clean(line)+'<br>'
+                data[task_group_code]['tasks'][-1][-1] += clean(line)+'<br />'
 
     return data
 

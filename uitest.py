@@ -7,8 +7,9 @@ import django
 django.setup()
 
 import unittest
+from django.core.management import call_command
+from django.db import connections, DEFAULT_DB_ALIAS
 from django.test.testcases import LiveServerThread, _StaticFilesHandler
-from django.test.runner import setup_databases
 from selenium import webdriver
 from sauceclient import SauceClient
 from systori.apps.accounting.workflow import create_chart_of_accounts
@@ -82,6 +83,23 @@ def start_django():
     return server
 
 
+def setup_database(verbosity=3):
+    creation = connections[DEFAULT_DB_ALIAS].creation
+    test_database_name = creation._get_test_db_name()
+    settings.DATABASES[creation.connection.alias]["NAME"] = test_database_name
+    creation.connection.settings_dict["NAME"] = test_database_name
+    if True:
+        creation._create_test_db(verbosity=verbosity, autoclobber=False, keepdb=False)
+        creation.connection.close()
+        call_command(
+            'migrate',
+            verbosity=max(verbosity - 1, 0),
+            interactive=False,
+            database=creation.connection.alias,
+            test_flush=True,
+        )
+
+
 def setup_test_data():
     from systori.apps.company.models import Company, Access
     from systori.apps.user.models import User
@@ -105,7 +123,7 @@ def setup_test_data():
 
 def main(driver_names, keep_open, not_parallel):
 
-    setup_databases(verbosity=5, interactive=False, keepdb=False)
+    setup_database()
 
     setup_test_data()
 

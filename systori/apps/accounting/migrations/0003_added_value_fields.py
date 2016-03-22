@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.db import models, migrations
+from decimal import Decimal
 
 
 def split_gross_entries(apps, schema_editor):
@@ -60,7 +61,8 @@ def recalculate_invoices(apps, schema_editor):
     from systori.apps.company.models import Company
     from systori.apps.document.models import Invoice
     from systori.apps.task.models import Job
-    from systori.apps.accounting.report import prepare_transaction_report
+    from systori.apps.accounting.report import create_payments_report
+    from systori.lib.accounting.tools import Amount
 
     for company in Company.objects.all():
         company.activate()
@@ -69,14 +71,22 @@ def recalculate_invoices(apps, schema_editor):
             if 'debits' not in invoice.json:
                 print('skipping invoice #{}'.format(invoice.id))
                 continue
-            job_ids = [debit['job.id'] for debit in invoice.json['debits']]
+            invoice.json['jobs'] = invoice.json['debits']
+            del invoice.json['debits']
+            job_ids = []
+            for job in invoice.json['jobs']:
+                job_ids.append(job['job.id'])
+                job['debit'] = Amount(job['amount_net'], job['amount_tax'])
+                job['invoiced'] = Amount(job['debited_net'], job['debited_tax'])
+                job['balance'] = Amount(job['balance_net'], job['balance_tax'])
+                job['estimate'] = Amount(job['estimate_net'], Decimal('0.00'))
+                job['billable'] = Amount(job['itemized_net'], Decimal('0.00'))
             jobs = Job.objects.filter(id__in=job_ids)
-            new_json = prepare_transaction_report(jobs, invoice.document_date)
+            new_json = create_payments_report(jobs, invoice.document_date)
             print(invoice.id)
             if invoice.id == 85:
                 pass
             # TODO: Fix failing asserts.
-            print(len(new_json['transactions']), len(invoice.json['transactions']))
             #assert len(new_json['transactions']) == len(invoice.json['transactions'])
             print(new_json['invoiced'].gross, invoice.json['debited_gross'])
             #assert new_json['invoiced'].gross == invoice.json['debited_gross']
@@ -119,7 +129,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='transaction',
             name='transaction_type',
-            field=models.CharField(max_length=32, null=True, verbose_name='Transaction Type', choices=[('invoice', 'Invoice'), ('payment', 'Payment'), ('adjustment', 'Adjustment')]),
+            field=models.CharField(max_length=32, verbose_name='Transaction Type', null=True, choices=[('invoice', 'Invoice'), ('payment', 'Payment'), ('adjustment', 'Adjustment'), ('refund', 'Refund')]),
         ),
         migrations.RunPython(split_gross_entries),
         migrations.RunPython(recalculate_invoices)

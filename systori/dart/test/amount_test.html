@@ -2,25 +2,43 @@
     <table><tr>
     
 <td is="amount-view" class="test-amount-view" data-tax-rate="0.19">
-  <div class="amount-gross">480,00</div>
-  <div class="amount-net">388,80</div>
-  <div class="amount-tax">91,20</div>
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">480,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">388,80</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">91,20</span>
+  </div>
   
 </td>
 
     
 <td is="amount-input" class="test-amount-input" data-tax-rate="0.19">
-  <input class="amount-gross" id="id_payment_gross" name="payment_gross" type="text" value="5.712,00"><br/>
+  <input class="amount-gross" type="text" value="5.712,00"><br/>
   <input class="amount-net" placeholder="net" id="id_payment_net" name="payment_net" type="text" value="4.800,00"><input class="amount-tax" placeholder="MWSt" id="id_payment_tax" name="payment_tax" type="text" value="912,00">
 </td>
 
     
 <td is="amount-stateful" class="test-amount-stateful" data-tax-rate="0.19">
-  <div class="amount-gross">0,00</div>
-  <div class="amount-net">0,00</div>
-  <div class="amount-tax">0,00</div>
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
   
-    <input class="amount-gross" id="id_discount_gross" name="discount_gross" type="hidden" value="0,00">
+    <input class="amount-gross" type="hidden" value="0,00">
     <input class="amount-net" id="id_discount_net" name="discount_net" type="hidden" value="0,00">
     <input class="amount-tax" id="id_discount_tax" name="discount_tax" type="hidden" value="0,00">
   

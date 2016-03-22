@@ -15,32 +15,31 @@ User = get_user_model()
 
 def create_task_data(self, create_user=True, create_company=True):
     if create_company:
-        self.company = CompanyFactory.create()
+        self.company = CompanyFactory()
     if create_user:
-        self.user = UserFactory.create(company=self.company)
+        self.user = UserFactory(company=self.company, password='open sesame')
     letterhead_pdf = os.path.join(settings.BASE_DIR, 'apps/document/test_data/letterhead.pdf')
     self.letterhead = Letterhead.objects.create(name="Test Letterhead", letterhead_pdf=letterhead_pdf)
     DocumentSettings.objects.create(language='de',
                                     evidence_letterhead=self.letterhead,
                                     proposal_letterhead=self.letterhead,
                                     invoice_letterhead=self.letterhead)
-    self.template_project = ProjectFactory.create(name="Template Project", is_template=True)
-    self.project = ProjectFactory.create()
-    self.project2 = ProjectFactory.create()
-    self.job = JobFactory.create(project=self.project)
-    self.job2 = JobFactory.create(project=self.project)
-    self.group = TaskGroupFactory.create(name="my group", job=self.job)
-    self.group2 = TaskGroupFactory.create(name="my group 2", job=self.job)
-    self.task = TaskFactory.create(name="my task one", qty=10, taskgroup=self.group, status=Task.RUNNING)
-    TaskInstanceFactory.create(task=self.task, selected=True)
-    self.lineitem = LineItemFactory.create(unit_qty=8, price=12, taskinstance=self.task.instance)
-    self.task2 = TaskFactory.create(name="my task two", qty=0, taskgroup=self.group)
-    TaskInstanceFactory.create(task=self.task2, selected=True)
-    self.lineitem2 = LineItemFactory.create(unit_qty=0, price=0, taskinstance=self.task2.instance)
-    self.group3 = TaskGroupFactory.create(job=self.job2)
-    self.task3 = TaskFactory.create(name="my task one", qty=10, taskgroup=self.group3)
-    TaskInstanceFactory.create(task=self.task3, selected=True)
-    self.lineitem3 = LineItemFactory.create(unit_qty=8, price=12, taskinstance=self.task3.instance)
+    self.project = ProjectFactory()
+    self.project2 = ProjectFactory()
+    self.job = JobFactory(project=self.project)
+    self.job2 = JobFactory(project=self.project)
+    self.group = TaskGroupFactory(name="my group", job=self.job)
+    self.group2 = TaskGroupFactory(name="my group 2", job=self.job)
+    self.task = TaskFactory(name="my task one", qty=10, taskgroup=self.group, status=Task.RUNNING)
+    TaskInstanceFactory(task=self.task, selected=True)
+    self.lineitem = LineItemFactory(unit_qty=8, price=12, taskinstance=self.task.instance)
+    self.task2 = TaskFactory(name="my task two", qty=0, taskgroup=self.group)
+    TaskInstanceFactory(task=self.task2, selected=True)
+    self.lineitem2 = LineItemFactory(unit_qty=0, price=0, taskinstance=self.task2.instance)
+    self.group3 = TaskGroupFactory(job=self.job2)
+    self.task3 = TaskFactory(name="my task one", qty=10, taskgroup=self.group3)
+    TaskInstanceFactory(task=self.task3, selected=True)
+    self.lineitem3 = LineItemFactory(unit_qty=8, price=12, taskinstance=self.task3.instance)
 
 
 class TaskInstanceTotalTests(TestCase):
@@ -95,18 +94,18 @@ class TaskGroupOffsetTests(TestCase):
 
 class CodeTests(TestCase):
     def test_default_code(self):
-        CompanyFactory.create()
-        project = ProjectFactory.create()
-        job = JobFactory.create(job_code=1, project=project)
-        group = TaskGroupFactory.create(job=job)
-        task = TaskFactory.create(taskgroup=group)
+        CompanyFactory()
+        project = ProjectFactory()
+        job = JobFactory(job_code=1, project=project)
+        group = TaskGroupFactory(job=job)
+        task = TaskFactory(taskgroup=group)
         self.assertEqual('1', job.code)
         self.assertEqual('1.1', group.code)
         self.assertEqual('1.1.1', task.code)
 
-        TaskInstanceFactory.create(task=task, selected=True)
+        TaskInstanceFactory(task=task, selected=True)
         self.assertEqual('1.1.1', task.instance.code)
-        TaskInstanceFactory.create(task=task)
+        TaskInstanceFactory(task=task)
         self.assertEqual('1.1.1a', task.instance.code)
         self.assertEqual('1.1.1b', task.taskinstances.all()[1].code)
 

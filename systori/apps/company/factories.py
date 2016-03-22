@@ -2,7 +2,6 @@ import string
 
 import factory
 from factory import fuzzy
-from django.conf import settings
 
 from ..project.factories import ProjectFactory
 from .models import Company

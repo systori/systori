@@ -163,6 +163,10 @@ def make_dart():
         local('pub build --mode=debug')
 
 
+def test_dart():
+    with lcd('systori/dart'):
+        local('pub run test:test -r expanded -p content-shell test')
+
 def get_bitbucket_login():
     try:
         user, password = open('bitbucket.login').read().split(':')

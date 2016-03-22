@@ -10,10 +10,31 @@ from django.utils.translation import get_language
 
 from ..project.models import Project
 from ..task.models import Job
-from .models import Proposal, Invoice, Refund, DocumentTemplate, Letterhead, DocumentSettings
+from .models import Proposal, Invoice, Adjustment, Refund, DocumentTemplate, Letterhead, DocumentSettings
 from .forms import ProposalForm, ProposalUpdateForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
-from ..accounting.forms import InvoiceForm, RefundForm
-from .type import proposal, invoice, refund, evidence, letterhead, itemized_listing
+from .type import proposal, invoice, adjustment, refund, evidence, letterhead, itemized_listing
+
+
+class InvoiceList(ListView):
+    model = Invoice
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        years = OrderedDict()
+        for invoice in self.object_list.order_by('document_date').order_by('invoice_no'):
+            year, month = invoice.document_date.year, invoice.document_date.month
+            if year not in years:
+                years[year] = OrderedDict()
+            if month not in years[year]:
+                years[year][month] = {'invoices': [], 'total': Decimal('0.00')}
+            years[year][month]['invoices'].append(invoice)
+            if invoice.json.get('balance_gross'):
+                years[year][month]['total'] += Decimal(invoice.json['balance_gross'])
+
+        context['invoice_group'] = years
+
+        return context
 
 
 class DocumentRenderView(SingleObjectMixin, View):
@@ -24,11 +45,31 @@ class DocumentRenderView(SingleObjectMixin, View):
         raise NotImplementedError
 
 
-# Proposal
+class InvoicePDF(DocumentRenderView):
+    model = Invoice
+
+    def pdf(self):
+        json = self.get_object().json
+        letterhead = self.get_object().letterhead
+        return invoice.render(json, letterhead, self.request.GET.get('payment_details', False), self.kwargs['format'])
 
 
-class ProposalView(DetailView):
-    model = Proposal
+class AdjustmentPDF(DocumentRenderView):
+    model = Adjustment
+
+    def pdf(self):
+        json = self.get_object().json
+        letterhead = self.get_object().letterhead
+        return adjustment.render(json, letterhead, self.kwargs['format'])
+
+
+class RefundPDF(DocumentRenderView):
+    model = Refund
+
+    def pdf(self):
+        json = self.get_object().json
+        letterhead = self.get_object().letterhead
+        return refund.render(json, letterhead, self.kwargs['format'])
 
 
 class ProposalPDF(DocumentRenderView):
@@ -115,176 +156,6 @@ class ProposalTransition(SingleObjectMixin, View):
 
 class ProposalDelete(DeleteView):
     model = Proposal
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
-
-
-# Invoice
-
-
-class InvoiceView(DetailView):
-    model = Invoice
-
-
-class InvoiceList(ListView):
-    model = Invoice
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        years = OrderedDict()
-        for invoice in self.object_list.order_by('document_date').order_by('invoice_no'):
-            year, month = invoice.document_date.year, invoice.document_date.month
-            if year not in years:
-                years[year] = OrderedDict()
-            if month not in years[year]:
-                years[year][month] = {'invoices': [], 'total': Decimal('0.00')}
-            years[year][month]['invoices'].append(invoice)
-            if invoice.json.get('balance_gross'):
-                years[year][month]['total'] += Decimal(invoice.json['balance_gross'])
-
-        context['invoice_group'] = years
-
-        return context
-
-
-class InvoicePDF(DocumentRenderView):
-    model = Invoice
-
-    def pdf(self):
-        json = self.get_object().json
-        letterhead = self.get_object().letterhead
-        return invoice.render(json, letterhead, self.request.GET.get('payment_details', False), self.kwargs['format'])
-
-
-class InvoiceFormMixin:
-    model = Invoice
-    form_class = InvoiceForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['PERCENT_RANGE'] = [5, 20, 25, 30, 50, 75, 100]
-        return context
-
-    def get_form_kwargs(self):
-        jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems').all()
-        kwargs = {
-            'jobs': jobs,
-            'instance': self.model(project=self.request.project),
-        }
-        if self.request.method == 'POST':
-            kwargs['data'] = self.request.POST.copy()
-        return kwargs
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.request.project.id])
-
-
-class InvoiceCreate(InvoiceFormMixin, CreateView):
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        instance = kwargs['instance']
-        if 'previous_invoice_id' in self.request.GET:
-            previous_id = int(self.request.GET['previous_invoice_id'])
-            previous = Invoice.objects.get(id=previous_id)
-            instance.parent = previous.parent if previous.parent else previous
-            # copy all the basic stuff from previous invoice
-            for field in ['title', 'header', 'footer', 'add_terms']:
-                instance.json[field] = previous.json[field]
-            # copy the list of jobs
-            instance.json['debits'] = [
-                {'job.id': debit['job.id'], 'is_booked': False}
-                for debit in previous.json['debits']
-            ]
-        else:
-            instance.json['debits'] = []
-        return kwargs
-
-
-class InvoiceUpdate(InvoiceFormMixin, UpdateView):
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['instance'] = self.object
-        return kwargs
-
-
-class InvoiceTransition(SingleObjectMixin, View):
-    model = Invoice
-
-    def get(self, request, *args, **kwargs):
-        doc = self.get_object()
-
-        transition = None
-        for t in doc.get_available_status_transitions():
-            if t.name == kwargs['transition']:
-                transition = t
-                break
-
-        if transition.name == 'pay':
-            return HttpResponseRedirect(reverse('payment.create', args=[doc.project.id, doc.id]))
-
-        else:
-            getattr(doc, transition.name)()
-            doc.save()
-
-        return HttpResponseRedirect(reverse('project.view', args=[doc.project.id]))
-
-
-class InvoiceDelete(DeleteView):
-    model = Invoice
-
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        success_url = self.get_success_url()
-        if self.object.transaction:
-            self.object.transaction.delete()
-        self.object.delete()
-        return HttpResponseRedirect(success_url)
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
-
-
-# Refund
-
-
-class RefundPDF(DocumentRenderView):
-    model = Refund
-
-    def pdf(self):
-        json = self.get_object().json
-        letterhead = self.get_object().letterhead
-        return refund.render(json, letterhead, self.kwargs['format'])
-
-
-class RefundCreate(CreateView):
-    form_class = RefundForm
-    model = Refund
-
-    def get_form_kwargs(self):
-        kwargs = {
-            'jobs': self.request.project.jobs.all(),
-            'instance': self.model(project=self.request.project),
-        }
-        if self.request.method == 'POST':
-            kwargs['data'] = self.request.POST.copy()
-        return kwargs
-
-    def get_success_url(self):
-        return self.request.project.get_absolute_url()
-
-
-class RefundDelete(DeleteView):
-    model = Refund
-
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        success_url = self.get_success_url()
-        if self.object.transaction:
-            self.object.transaction.delete()
-        self.object.delete()
-        return HttpResponseRedirect(success_url)
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.project.id])
@@ -387,4 +258,3 @@ class DocumentSettingsUpdate(UpdateView):
 class DocumentSettingsDelete(DeleteView):
     model = DocumentSettings
     success_url = reverse_lazy('templates')
-

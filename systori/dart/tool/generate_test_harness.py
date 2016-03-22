@@ -14,7 +14,7 @@ from systori.apps.project.factories import ProjectFactory
 from systori.apps.task.factories import JobFactory
 from systori.apps.user.factories import UserFactory
 from systori.apps.accounting.models import Entry, create_account_for_job
-from systori.apps.accounting.forms import SplitPaymentForm
+from systori.apps.accounting.forms import PaymentRowForm
 from systori.apps.accounting.workflow import debit_jobs, create_chart_of_accounts
 from systori.lib.accounting.tools import Amount as A
 
@@ -32,16 +32,16 @@ def write_test_html(name, html):
 
 def create_data():
     data = types.SimpleNamespace()
-    data.company = CompanyFactory.create()
+    data.company = CompanyFactory()
     create_chart_of_accounts()
-    data.user = UserFactory.create(email='lex@damoti.com', company=data.company)
-    data.project = ProjectFactory.create(name="Test Project")
+    data.user = UserFactory(email='lex@damoti.com', password='open sesame', company=data.company)
+    data.project = ProjectFactory(name="Test Project")
 
-    data.job1 = JobFactory.create(name="Test Job", project=data.project)
+    data.job1 = JobFactory(name="Test Job", project=data.project)
     data.job1.account = create_account_for_job(data.job1)
     data.job1.save()
 
-    data.job2 = JobFactory.create(name="Test Job", project=data.project)
+    data.job2 = JobFactory(name="Test Job", project=data.project)
     data.job2.account = create_account_for_job(data.job2)
     data.job2.save()
 
@@ -61,11 +61,10 @@ def generate_amount_test_html(data):
     </tr></table>""")
     context = Context({
         'TAX_RATE': '0.19',
-        'form1': SplitPaymentForm(initial={
+        'form1': PaymentRowForm(initial={
             'job': data.job1,
             'payment_net': '4800',
             'payment_tax': '912',
-            'payment_gross': '5712',
         })
     })
     return template.render(context).encode()
@@ -77,10 +76,13 @@ def generate_pages():
     client.login(username=data.user.email, password='open sesame')
 
     editor = client.get(reverse('tasks', args=[data.project.id, data.job1.id]))
-    write_test_html('editor', editor.content)
+    write_test_html('proposal_editor', editor.content)
 
-    split_payment = client.get(reverse('payment.create', args=[data.project.id]))
-    write_test_html('split_payment', split_payment.content)
+    payment_create = client.get(reverse('payment.create', args=[data.project.id]))
+    write_test_html('payment_editor', payment_create.content)
+
+    adjustment_create = client.get(reverse('adjustment.create', args=[data.project.id]))
+    write_test_html('adjustment_editor', adjustment_create.content)
 
     write_test_html('amount', generate_amount_test_html(data))
 

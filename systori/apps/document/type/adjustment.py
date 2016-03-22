@@ -1,4 +1,5 @@
 from io import BytesIO
+from decimal import Decimal
 from datetime import date
 
 from reportlab.lib.units import mm
@@ -14,19 +15,19 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 from systori.apps.accounting.report import generate_transaction_table
 from systori.apps.accounting.constants import TAX_RATE
 
-from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, fonts, force_break, p, b
+from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, force_break, p, b
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import calculate_table_width_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
-from .font import FontManager
+from . import font
 
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-def collate_tasks(invoice, font, available_width):
+def collate_tasks(invoice, available_width):
 
-    t = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
+    t = TableFormatter([1, 0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
     t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
@@ -34,25 +35,26 @@ def collate_tasks(invoice, font, available_width):
 
     t.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
 
+    description_width = sum(t.get_widths()[1:6])
+
     for job in invoice['debits']:
-        t.row(b(job['code'], font), b(job['name'], font))
+        t.row(b(job['code']), b(job['name']))
         t.row_style('SPAN', 1, -1)
 
         for taskgroup in job['taskgroups']:
-            t.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
+            t.row(b(taskgroup['code']), b(taskgroup['name']))
             t.row_style('SPAN', 1, -1)
             t.keep_next_n_rows_together(2)
 
             for task in taskgroup['tasks']:
-                t.row(p(task['code'], font), p(task['name'], font))
+                t.row(p(task['code']), p(task['name']))
                 t.row_style('SPAN', 1, -2)
 
-                t.row('', '', ubrdecimal(task['complete']), p(task['unit'], font), money(task['price']),
-                      money(task['total']))
+                t.row('', '', ubrdecimal(task['complete']), p(task['unit']), money(task['price']), money(task['total']))
                 t.row_style('ALIGNMENT', 1, -1, "RIGHT")
                 t.keep_previous_n_rows_together(2)
 
-            t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
+            t.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
                   '', '', '', money(taskgroup['total']))
             t.row_style('FONTNAME', 0, -1, font.bold)
             t.row_style('ALIGNMENT', -1, -1, "RIGHT")
@@ -64,17 +66,17 @@ def collate_tasks(invoice, font, available_width):
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def collate_tasks_total(invoice, font, available_width):
+def collate_tasks_total(invoice, available_width):
 
-    t = TableFormatter([0, 1], available_width, font, debug=DEBUG_DOCUMENT)
+    t = TableFormatter([0, 1], available_width, debug=DEBUG_DOCUMENT)
     t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     t.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
-    t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
+    t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
 
     for job in invoice['debits']:
         for taskgroup in job['taskgroups']:
-            t.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
+            t.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name'])),
                   money(taskgroup['total']))
     t.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
 
@@ -83,9 +85,9 @@ def collate_tasks_total(invoice, font, available_width):
     return t.get_table()
 
 
-def collate_history(invoice, font, available_width):
+def collate_history(invoice, available_width):
 
-    t = TableFormatter([0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
+    t = TableFormatter([0, 1, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
     t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
     t.style.append(('VALIGN', (0, 0), (-2, -1), "TOP"))
@@ -152,9 +154,9 @@ def collate_history(invoice, font, available_width):
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def collate_payments(invoice, font, available_width, show_payment_details):
+def collate_payments(invoice, available_width, show_payment_details):
 
-    t = TableFormatter([0, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
+    t = TableFormatter([0, 1, 1, 1], available_width, debug=DEBUG_DOCUMENT)
     t.style.append(('ALIGNMENT', (0, 0), (0, -1), "LEFT"))
     t.style.append(('ALIGNMENT', (1, 0), (-1, -1), "RIGHT"))
     t.style.append(('VALIGN', (0, 0), (-1, -1), "BOTTOM"))
@@ -184,10 +186,10 @@ def collate_payments(invoice, font, available_width, show_payment_details):
             title = _("{invoice} from {date}").format(invoice=txn['invoice_title'], date=invoice_day)
 
         if idx == last_idx:
-            t.row(b(_('This Invoice'), font), money(-row[1]), money(-row[2]), money(-row[3]))
+            t.row(b(_('This Invoice')), money(-row[1]), money(-row[2]), money(-row[3]))
             t.row_style('LINEABOVE', 0, -1, 0.25, colors.black)
         else:
-            t.row(p(title, font), money(row[1]), money(row[2]), money(row[3]))
+            t.row(p(title), money(row[1]), money(row[2]), money(row[3]))
 
         def small_row(*args):
             t.row(*[Paragraph(c, stylesheet['SmallRight']) for c in args])
@@ -223,35 +225,35 @@ def render(invoice, letterhead, show_payment_details, format):
 
     with BytesIO() as buffer:
 
-        font = FontManager(letterhead.font)
         table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
+
         invoice_date = date_format(date(*map(int, invoice['date'].split('-'))), use_l10n=True)
+
         doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         flowables = [
 
-            get_address_label(invoice, font),
+            get_address_label(invoice),
 
             get_address_label_spacer(invoice),
 
-            heading_and_date(invoice.get('title') or _("Invoice"), invoice_date, font, table_width,
-                             debug=DEBUG_DOCUMENT),
+            heading_and_date(invoice.get('title') or _("Invoice"), invoice_date, table_width, debug=DEBUG_DOCUMENT),
 
             Spacer(0, 6*mm),
 
-            Paragraph(_("Invoice No.") + " " + invoice['invoice_no'], font.normal_right),
+            Paragraph(_("Invoice No.")+" "+invoice['invoice_no'], stylesheet['NormalRight']),
             Paragraph(_("Please indicate the correct invoice number on your payment."),
-                      ParagraphStyle('', parent=fonts['OpenSans']['Small'], alignment=TA_RIGHT)),
+                      ParagraphStyle('', parent=stylesheet['Small'], alignment=TA_RIGHT)),
 
-            Paragraph(force_break(invoice['header']), fonts['OpenSans']['Normal']),
-
-            Spacer(0, 4*mm),
-
-            collate_payments(invoice, font, table_width, show_payment_details),
+            Paragraph(force_break(invoice['header']), stylesheet['Normal']),
 
             Spacer(0, 4*mm),
 
-            KeepTogether(Paragraph(force_break(invoice['footer']), fonts['OpenSans']['Normal']))
+            collate_payments(invoice, table_width, show_payment_details),
+
+            Spacer(0, 4*mm),
+
+            KeepTogether(Paragraph(force_break(invoice['footer']), stylesheet['Normal']))
 
         ]
 
@@ -259,20 +261,19 @@ def render(invoice, letterhead, show_payment_details, format):
 
             flowables += [
 
-                PageBreak(),
+            PageBreak(),
 
-                Paragraph(invoice_date, fonts['OpenSans']['NormalRight']),
+            Paragraph(invoice_date, stylesheet['NormalRight']),
 
-                Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']),
-                          fonts['OpenSans']['h2']),
+            Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']), stylesheet['h2']),
 
-                Spacer(0, 4*mm),
+            Spacer(0, 4*mm),
 
-                collate_tasks(invoice, font, table_width),
+            collate_tasks(invoice, table_width),
 
-                Spacer(0, 4*mm),
+            Spacer(0, 4*mm),
 
-                collate_tasks_total(invoice, font, table_width),
+            collate_tasks_total(invoice, table_width),
 
             ]
 
@@ -284,110 +285,5 @@ def render(invoice, letterhead, show_payment_details, format):
         return buffer.getvalue()
 
 
-def serialize(invoice_obj, data):
-
-    contact = invoice_obj.project.billable_contact.contact
-
-    invoice = {
-
-        'id': invoice_obj.id,
-
-        'title': data['title'],
-        'date': data['document_date'],
-        'invoice_no': data['invoice_no'],
-
-        'header': data['header'],
-        'footer': data['footer'],
-
-        'is_final': data['is_final'],
-
-        'business': contact.business,
-        'salutation': contact.salutation,
-        'first_name': contact.first_name,
-        'last_name': contact.last_name,
-        'address': contact.address,
-        'postal_code': contact.postal_code,
-        'city': contact.city,
-        'address_label': contact.address_label,
-
-        # debits created solely as a result of this invoice
-        'debit_gross': data['debit_gross'],
-        'debit_net': data['debit_net'],
-        'debit_tax': data['debit_tax'],
-
-        # all debits for jobs on this invoice (including debit above)
-        # this is the top 'Project progress' row in history table
-        # set later by calling prepare_transaction_report
-        'debited_gross': data['debited_gross'],
-        'debited_net': data['debited_net'],
-        'debited_tax': data['debited_tax'],
-
-        # balance for all jobs on this invoice
-        'balance_gross': data['balance_gross'],
-        'balance_net': data['balance_net'],
-        'balance_tax': data['balance_tax'],
-
-        # payment history and prior invoices
-        'transactions': [],
-
-        # debits created with this invoice
-        # used when 'editing' the invoice and to show itemization table
-        'debits': []
-
-    }
-
-    if data.get('add_terms', False):
-        invoice['add_terms'] = True  # TODO: Calculate the terms.
-
-    for debit in data['debits']:
-
-        job = debit.pop('job')
-
-        debit.update({
-            'job.id': job.id,
-            'code': job.code,
-            'name': job.name,
-            'taskgroups': []
-        })
-        invoice['debits'].append(debit)
-
-        if debit['is_override']:
-            continue
-
-        for taskgroup in job.taskgroups.all():
-            taskgroup_dict = {
-                'id': taskgroup.id,
-                'code': taskgroup.code,
-                'name': taskgroup.name,
-                'description': taskgroup.description,
-                'total': taskgroup.billable_total,
-                'tasks': []
-            }
-            debit['taskgroups'].append(taskgroup_dict)
-
-            for task in taskgroup.tasks.all():
-                task_dict = {
-                    'id': task.id,
-                    'code': task.instance.code,
-                    'name': task.instance.full_name,
-                    'description': task.instance.full_description,
-                    'complete': task.complete,
-                    'unit': task.unit,
-                    'price': task.instance.unit_price,
-                    'total': task.fixed_price_billable,
-                    'lineitems': []
-                }
-                taskgroup_dict['tasks'].append(task_dict)
-
-                for lineitem in task.instance.lineitems.all():
-                    lineitem_dict = {
-                        'id': lineitem.id,
-                        'name': lineitem.name,
-                        'qty': lineitem.unit_qty,
-                        'unit': lineitem.unit,
-                        'price': lineitem.price,
-                        'price_per': lineitem.price_per_task_unit,
-                    }
-                    task_dict['lineitems'].append(lineitem_dict)
-
-    return invoice
+def serialize(adjustment_obj, data):
+    return {}

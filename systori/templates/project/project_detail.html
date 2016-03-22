@@ -240,7 +240,7 @@
             {% if project.has_billable_contact %}
               {% if 'id' in invoice.json %}
                 {% if invoice.status == invoice.SENT or invoice.status == invoice.PAID %}
-                  <a class="btn btn-default" href="{% url 'invoice.create' project.id %}?previous_invoice_id={{ invoice.id }}" style="width: 100%">
+                  <a class="btn btn-default" href="{% url 'invoice.create' project.id invoice.id %}" style="width: 100%">
                     {% trans 'Create next invoice in this sequence.' %}
                   </a>
                 {% else %}
@@ -279,7 +279,7 @@
     border-bottom: 2px solid #ddd;
   }
   </style>
-  <h2 class="sub-header">{% trans "Payments & Adjustments" %}</h2>
+  <h2 class="sub-header">{% trans "Payments" %}</h2>
   <div class="table-responsive">
     <table class="table" id="payments-table">
       <thead>
@@ -292,13 +292,12 @@
       </tr>
       </thead>
       <tbody>
-      {% for transaction in transaction_report.transactions %}
-        {% if transaction.type == 'payment' %}
+      {% for transaction in payments %}
         <tr>
           <td>{{ transaction.date|localize }}</td>
           <td class="text-right">{{ transaction.payment.negate.gross|money }}</td>
           <td class="text-right">{{ transaction.discount.negate.gross|money }}</td>
-          <td class="text-right">{{ transaction.amount.negate.gross|money }}</td>
+          <td class="text-right">{{ transaction.total.negate.gross|money }}</td>
           <td class="text-right">
             {% if not transaction.is_reconciled %}
               <a href="{% url 'payment.delete' project.id transaction.id %}">{% trans "Delete" %}</a>
@@ -310,16 +309,51 @@
             <td>{{ job.name }}</td>
             <td>{{ job.payment.negate.gross|money }}</td>
             <td>{{ job.discount.negate.gross|money }}</td>
-            <td>{{ job.amount.negate.gross|money }}</td>
+            <td>{{ job.total.negate.gross|money }}</td>
             <td></td>
           </tr>
         {% endfor %}
-        {% endif %}
       {% endfor %}
       </tbody>
     </table>
   </div>
   <a  name="add_payment" href="{% url 'payment.create' project.id %}">{% trans "Add Payment" %}</a>
+
+
+
+  <style>
+    #adjustments-table .job-row {
+      font-size: 75%;
+      color: gray;
+      text-align: right;
+    }
+    #adjustments-table .job-row.last {
+      border-bottom: 2px solid #ddd;
+    }
+  </style>
+  <h2 class="sub-header">{% trans "Adjustments" %}</h2>
+  <div class="table-responsive">
+    <table class="table" id="adjustments-table">
+      <thead>
+      <tr>
+        <th>{% trans 'Date' %}</th>
+        <th class="text-right" colspan="3">{% trans 'Actions' %}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for doc in adjustments %}
+        <tr>
+          <td>{{ doc.document_date|localize }}</td>
+          <td class="text-right">
+            {% if not doc.transaction.is_reconciled %}
+              <a href="{% url 'adjustment.delete' project.id doc.id %}">{% trans "Delete" %}</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
   <a  name="add_adjustment" href="{% url 'adjustment.create' project.id %}">{% trans "Add Adjustment" %}</a>
 
 
