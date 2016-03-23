@@ -149,7 +149,7 @@ class Report extends Resource {
 class ReportTableRow extends TableRowElement with MapMixin {
     Map<String, TableCellElement> mapping;
 
-    ReportTableRow.created() : super.created() {
+    ReportTableRow.created() : super.created(); attached() {
         mapping = new Map<String, TableCellElement>();
         this.children.forEach((TableCellElement cell) {
             var cell_name = cell.attributes['mapping'];
@@ -177,7 +177,7 @@ class ReportTable extends TableElement {
     TemplateElement template;
     TableElement body;
 
-    ReportTable.created() : super.created() {
+    ReportTable.created() : super.created(); attached() {
         body = this.querySelector('tbody');
         template = document.importNode(
             document.querySelector('template[for="timetracking-report-row"]').content, true);
@@ -189,7 +189,7 @@ class ReportTable extends TableElement {
             data = JSON.decode(response.responseText);
             refill(data);
         }).catchError((Error error) {
-            // output();
+            // don't know what to output yet
         });
     }
 
