@@ -61,7 +61,7 @@ def recalculate_invoices(apps, schema_editor):
     from systori.apps.company.models import Company
     from systori.apps.document.models import Invoice
     from systori.apps.task.models import Job
-    from systori.apps.accounting.report import create_payments_report
+    from systori.apps.accounting.report import create_invoice_report
     from systori.lib.accounting.tools import Amount
 
     for company in Company.objects.all():
@@ -83,7 +83,7 @@ def recalculate_invoices(apps, schema_editor):
                 job['estimate'] = Amount(job['estimate_net'], Decimal('0.00'))
                 job['billable'] = Amount(job['itemized_net'], Decimal('0.00'))
             jobs = Job.objects.filter(id__in=job_ids)
-            new_json = create_payments_report(jobs, invoice.document_date)
+            new_json = create_invoice_report(invoice.transaction, jobs, invoice.document_date)
             print(invoice.id)
             if invoice.id == 85:
                 pass

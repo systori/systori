@@ -13,7 +13,7 @@ from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
 from .forms import JobSiteForm, FilterForm
 from ..task.models import Job, TaskGroup
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
-from ..accounting.report import create_payments_report
+from ..accounting.report import create_invoice_report
 from ..accounting.models import create_account_for_job
 from ..accounting.constants import TAX_RATE
 from .gaeb_utils import gaeb_import
@@ -144,7 +144,7 @@ class ProjectView(DetailView):
         context['jobsites'] = self.object.jobsites.all()
         context['jobsites_count'] = len(context['jobsites'])
         context['project_has_billable_contact'] = self.object.has_billable_contact
-        context['payments'] = create_payments_report(self.object.jobs.all())['payments']
+        context['payments'] = self.object.payments.all()
         context['adjustments'] = self.object.adjustments.all()
         context['refunds'] = self.object.refunds.all()
         context['parent_invoices'] = self.object.invoices.filter(parent=None).prefetch_related('invoices').all()

@@ -11,7 +11,7 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
-from systori.apps.accounting.report import generate_transaction_table
+from systori.apps.accounting.report import create_invoice_table
 from systori.apps.accounting.constants import TAX_RATE
 
 from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, fonts, force_break, p, b
@@ -167,30 +167,32 @@ def collate_payments(invoice, font, available_width, show_payment_details):
     t.row('', _("consideration"), _("tax"), _("gross"))
     t.row_style('FONTNAME', 0, -1, font.bold)
 
-    table = generate_transaction_table(invoice)[1:]
+    table = create_invoice_table(invoice)[1:]
     last_idx = len(table) - 1
     for idx, row in enumerate(table):
         txn = row[4]
 
-        if txn is None:
+        if row[0] == 'progress':
             title = _('Project progress')
         elif row[0] == 'payment':
             pay_day = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
             title = _('Payment on {date}').format(date=pay_day)
         elif row[0] == 'discount':
             title = _('Discount applied')
-        elif row[0] == 'invoice':
-            invoice_day = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
-            title = _("{invoice} from {date}").format(invoice=txn['invoice_title'], date=invoice_day)
+        elif row[0] == 'unpaid':
+            title = _('Open claim from prior invoices')
+        elif row[0] == 'debit':
+            title = _('This invoice')
+        else:
+            raise NotImplementedError()
+
+        t.row(p(title, font), money(row[1]), money(row[2]), money(row[3]))
 
         if idx == last_idx:
-            t.row(b(_('This Invoice'), font), money(-row[1]), money(-row[2]), money(-row[3]))
             t.row_style('LINEABOVE', 0, -1, 0.25, colors.black)
-        else:
-            t.row(p(title, font), money(row[1]), money(row[2]), money(row[3]))
 
         def small_row(*args):
-            t.row(*[Paragraph(c, stylesheet['SmallRight']) for c in args])
+            t.row(*[Paragraph(c, font.small_right) for c in args])
 
         if show_payment_details and row[0] == 'payment':
             for job in txn['jobs'].values():
@@ -199,12 +201,6 @@ def collate_payments(invoice, font, available_width, show_payment_details):
         if show_payment_details and row[0] == 'discount':
             for job in txn['jobs'].values():
                 small_row(job['name'], money(job['discount_applied_net']), money(job['discount_applied_tax']), money(job['discount_applied_gross']))
-
-        if show_payment_details and row[0] == 'invoice':
-            for job in txn['jobs'].values():
-                unpaid_gross = job['gross'] - job['paid_gross']
-                if unpaid_gross > 0:
-                    small_row(job['name'], money(-(job['net']-job['paid_net'])), money(-(job['tax']-job['paid_tax'])), money(-unpaid_gross))
 
 
     t.row_style('RIGHTPADDING', -1, -1, 0)

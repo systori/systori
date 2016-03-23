@@ -12,7 +12,7 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
-from systori.apps.accounting.report import generate_transaction_table
+from systori.apps.accounting.report import create_adjustment_table
 from systori.apps.accounting.constants import TAX_RATE
 
 from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, force_break, p, b

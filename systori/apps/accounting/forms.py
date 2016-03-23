@@ -18,7 +18,7 @@ from ..document.models import Invoice, Adjustment, Payment, Refund, DocumentTemp
 from ..document.type import invoice as invoice_lib
 from ..document.type import refund as refund_lib
 from ..document.type import adjustment as adjustment_lib
-from .report import create_payments_report, create_adjustment_report, create_refund_report
+from .report import create_invoice_report, create_adjustment_report, create_refund_report
 
 
 def convert_field_to_value(field):

@@ -34,6 +34,10 @@ for font_name in font_families:
                                         fontSize=7,
                                         leading=8.4)
                          )
+    fonts[font_name].add(ParagraphStyle(name='SmallRight',
+                                        parent=fonts[font_name]['Small'],
+                                        alignment=TA_RIGHT)
+                         )
     fonts[font_name].add(ParagraphStyle(name='Normal',
                                         fontName='{}-Regular'.format(font_name),
                                         fontSize=10,
@@ -158,3 +162,7 @@ class FontManager:
     @property
     def small(self):
         return self.font.byName.get('Small')
+
+    @property
+    def small_right(self):
+        return self.font.byName.get('SmallRight')
