@@ -71,6 +71,7 @@ def recalculate_invoices(apps, schema_editor):
             if 'debits' not in invoice.json:
                 print('skipping invoice #{}'.format(invoice.id))
                 continue
+            invoice.json['debit'] = Amount(invoice.json['debit_net'], invoice.json['debit_tax'])
             invoice.json['jobs'] = invoice.json['debits']
             del invoice.json['debits']
             job_ids = []

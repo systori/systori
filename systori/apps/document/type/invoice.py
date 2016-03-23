@@ -34,7 +34,7 @@ def collate_tasks(invoice, font, available_width):
 
     t.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
 
-    for job in invoice['debits']:
+    for job in invoice['jobs']:
         t.row(b(job['code'], font), b(job['name'], font))
         t.row_style('SPAN', 1, -1)
 
@@ -72,7 +72,7 @@ def collate_tasks_total(invoice, font, available_width):
     t.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
 
-    for job in invoice['debits']:
+    for job in invoice['jobs']:
         for taskgroup in job['taskgroups']:
             t.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
                   money(taskgroup['total']))
@@ -255,7 +255,7 @@ def render(invoice, letterhead, show_payment_details, format):
 
         ]
 
-        if has_itemized_debit(invoice['debits']):
+        if has_itemized_debit(invoice['jobs']):
 
             flowables += [
 
@@ -311,35 +311,29 @@ def serialize(invoice_obj, data):
         'address_label': contact.address_label,
 
         # debits created solely as a result of this invoice
-        'debit_gross': data['debit_gross'],
-        'debit_net': data['debit_net'],
-        'debit_tax': data['debit_tax'],
+        'debit': data['debit'],
 
         # all debits for jobs on this invoice (including debit above)
         # this is the top 'Project progress' row in history table
         # set later by calling prepare_transaction_report
-        'debited_gross': data['debited_gross'],
-        'debited_net': data['debited_net'],
-        'debited_tax': data['debited_tax'],
+        'invoiced': data['invoiced'],
 
         # balance for all jobs on this invoice
-        'balance_gross': data['balance_gross'],
-        'balance_net': data['balance_net'],
-        'balance_tax': data['balance_tax'],
+        'balance': data['balance'],
 
         # payment history and prior invoices
         'transactions': [],
 
         # debits created with this invoice
         # used when 'editing' the invoice and to show itemization table
-        'debits': []
+        'jobs': []
 
     }
 
     if data.get('add_terms', False):
         invoice['add_terms'] = True  # TODO: Calculate the terms.
 
-    for debit in data['debits']:
+    for debit in data['jobs']:
 
         job = debit.pop('job')
 
@@ -349,7 +343,7 @@ def serialize(invoice_obj, data):
             'name': job.name,
             'taskgroups': []
         })
-        invoice['debits'].append(debit)
+        invoice['jobs'].append(debit)
 
         if debit['is_override']:
             continue
@@ -360,7 +354,7 @@ def serialize(invoice_obj, data):
                 'code': taskgroup.code,
                 'name': taskgroup.name,
                 'description': taskgroup.description,
-                'total': taskgroup.billable_total,
+                'total': taskgroup.progress_total,
                 'tasks': []
             }
             debit['taskgroups'].append(taskgroup_dict)
@@ -374,7 +368,7 @@ def serialize(invoice_obj, data):
                     'complete': task.complete,
                     'unit': task.unit,
                     'price': task.instance.unit_price,
-                    'total': task.fixed_price_billable,
+                    'total': task.fixed_price_progress,
                     'lineitems': []
                 }
                 taskgroup_dict['tasks'].append(task_dict)

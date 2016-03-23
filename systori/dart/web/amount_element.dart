@@ -52,6 +52,8 @@ class Amount {
         gross = _gross;
     }
 
+    Amount.zeroed() { zero(); }
+
     Amount operator * (num multiple) =>
         new Amount((net * multiple).round(), (tax * multiple).round(), tax_rate);
 

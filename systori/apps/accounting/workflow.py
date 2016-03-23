@@ -113,13 +113,17 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False, debug=False)
 
                 # debit the customer account (asset), this increases their balance
                 # (+) "good thing", customer owes us more money
-                transaction.debit(job.account, debit_amount.net, entry_type=entry_type, job=job, value_type=Entry.NET)
-                transaction.debit(job.account, debit_amount.tax, entry_type=entry_type, job=job, value_type=Entry.TAX)
+                if debit_amount.net > 0:
+                    transaction.debit(job.account, debit_amount.net, entry_type=entry_type, job=job, value_type=Entry.NET)
+                if debit_amount.tax > 0:
+                    transaction.debit(job.account, debit_amount.tax, entry_type=entry_type, job=job, value_type=Entry.TAX)
 
                 # credit the promised payments account (liability), increasing the liability
                 # (+) "bad thing", customer owing us money is a liability
-                transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, debit_amount.net, job=job, value_type=Entry.NET)
-                transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, debit_amount.tax, job=job, value_type=Entry.TAX)
+                if debit_amount.net > 0:
+                    transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, debit_amount.net, job=job, value_type=Entry.NET)
+                if debit_amount.tax > 0:
+                    transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, debit_amount.tax, job=job, value_type=Entry.TAX)
 
     transaction.save(debug=debug)
 

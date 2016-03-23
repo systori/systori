@@ -7,18 +7,22 @@ from .customformatting import ubrdecimal
 register = template.Library()
 
 
-def _make_context(context, css, obj, field, has_form=False):
+def _make_context(context, css, obj, field, bold="gross", has_form=False):
 
     field_amount = field if field.endswith('_total') else field+'_amount'
 
     diff_field_amount = field_amount+'_diff'
+
+    percent_field_value = field+'_percent'
 
     ctx = {
         'TAX_RATE': context['TAX_RATE'],
         'css_class': css,
         'amount': getattr(obj, field_amount),
         'diff': getattr(obj, diff_field_amount, None),
-        'has_form': has_form
+        'percent': getattr(obj, percent_field_value, None),
+        'has_form': has_form,
+        'bold': bold
     }
 
     if has_form:
@@ -66,3 +70,18 @@ def amount_value_part(amount, part):
     value = getattr(amount, part, Decimal(0))
     str_value = ubrdecimal(value, 2)
     return mark_safe('<span class="amount-value">%s</span>' % (str_value,))
+
+
+@register.simple_tag
+def amount_percent(percent):
+    color = ''
+    str_value = ''
+    if percent is not None:
+        str_value = str(percent)+'%'
+        if percent == 100:
+            color = 'green'
+        elif percent > 100:
+            color = 'red'
+        elif percent < 100:
+            color = 'blue'
+    return mark_safe('<div class="amount-percent %s">%s</div>' % (color, str_value))

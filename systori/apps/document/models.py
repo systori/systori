@@ -332,5 +332,7 @@ class DocumentSettings(models.Model):
         try:
             return DocumentSettings.objects.get(language=lang)
         except DocumentSettings.DoesNotExist:
-            return None
-
+            try:
+                return DocumentSettings.objects.first()
+            except DocumentSettings.DoesNotExist:
+                return None

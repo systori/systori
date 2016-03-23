@@ -14,50 +14,44 @@
 
       <style>
 
-        tr > .job-estimated,
-        tr > .job-billable,
-        tr > .job-itemized,
-        tr > .job-invoiced,
-        tr > .job-amount-net {
-          text-align: right;
-          min-width: 80px;
-        }
-
-        tr > th.job-flat {
-          text-align: center;
-          width: 300px;
-        }
-
-        tr > .job-invoiced {
-          border-right: 2px solid #ddd;
+        .invoice-row:not(.invoiced) {
+          color: lightgray;
         }
 
         tr > .job-name {
           min-width: 180px !important;
         }
 
-        tr > .job-amount-net > input.form-control {
-          display: inline-block;
-          margin-top: -6px;
-          width: 100px;
+        tr > .job-estimate,
+        tr > .job-progress,
+        tr > .job-invoiced,
+        tr > .job-itemized {
           text-align: right;
+          min-width: 80px;
         }
 
-        tr > td.job-itemized > a {
-          color: black;
-          background-color: transparent;
-          display: block;
-          text-align: right;
-          height: 100%;
+        tr > .job-invoiced{
+          border-right: 2px solid #ddd;
         }
-        tr > td.job-itemized > a:hover {
-          color: #fff;
+
+        tr > td.job-itemized:hover > div {
+          cursor: pointer;
           background-color: #e6e6e6;
         }
 
-        .job-row:not(.invoiced) {
-          color: lightgray;
+        tr > th.job-flat {
+          text-align: center;
+          width: 300px;
         }
+        tr > .job-flat {
+          border-right: 2px solid #ddd;
+        }
+
+        tr > .job-debit {
+          text-align: center;
+        }
+
+        /* Debit Comment */
 
         textarea.job-override-comment {
           opacity: 1;
@@ -67,63 +61,56 @@
           transition: all 0.5s ease 0.15s;
         }
 
-        .job-row:not(.invoiced) textarea.job-override-comment,
-        .job-row:not(.override) textarea.job-override-comment {
+        .invoice-row:not(.invoiced) textarea.job-override-comment,
+        .invoice-row:not(.override) textarea.job-override-comment {
           opacity: 0;
           height: 1px;
           margin-top: -10px;
         }
 
-        .job-row .itemized-icon {
+        /* Icon */
+
+        .invoice-row .itemized-icon {
           display: none;
         }
-        .job-row.override .itemized-icon.glyphicon-tag,
-        .job-row.itemized .itemized-icon.glyphicon-list {
+        .invoice-row.override .itemized-icon.glyphicon-tag,
+        .invoice-row.itemized .itemized-icon.glyphicon-list {
           display: inline-block;
         }
 
+
       </style>
       <h2 class="sub-header">{% trans "Debits" %}</h2>
-      <table is="invoice-table" class="table table-striped">
+      <table is="invoice-table" class="table table-striped" data-tax-rate="{{ TAX_RATE }}">
         <thead>
         <tr>
           <th class="job-is-invoiced"></th>
           <th class="job-name">{% trans 'Job' %}</th>
-          <th class="job-estimated">{% trans 'Estimate' %}</th>
-          <th class="job-billable">{% trans 'Progress' %}</th>
+          <th class="job-estimate">{% trans 'Estimate' %}</th>
+          <th class="job-progress">{% trans 'Progress' %}</th>
           <th class="job-invoiced">{% trans 'Invoiced' %}</th>
-          <th class="job-flat"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span> {% trans 'Flat' %}</th>
           <th class="job-itemized"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> {% trans 'Itemized' %}</th>
-          <th class="job-amount-net">{% trans 'This Invoice' %}</th>
+          <th class="job-flat"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span> {% trans 'Flat' %}</th>
+          <th class="job-debit">{% trans 'This Invoice' %}</th>
         </tr>
         </thead>
         <tbody>
         {% for debit_form in form.formset %}
-          <tr is="invoice-debit" class="job-row {% if debit_form.is_invoiced.value %}invoiced{% endif %} {% if debit_form.is_override.value == 'True' %}override{% elif debit_form.debit_amount.net > 0 and debit_form.debit_amount.net == debit_form.billable_amount.net %}itemized{% endif %}">
+          <tr is="invoice-row" class="invoice-row {% if debit_form.is_invoiced.value %}invoiced{% endif %} {% if debit_form.is_override.value == 'True' %}override{% elif debit_form.debit_amount.net > 0 and debit_form.debit_amount.net == debit_form.billable_amount.net %}itemized{% endif %}">
             <td class="job-is-invoiced">{{ debit_form.is_invoiced }}</td>
             <td class="job-name">{{ debit_form.job }}{{ debit_form.initial.job.name }}</td>
-            {% amount_view "job-estimate" debit_form "latest_estimate" %}
-            {% amount_view "job-billable" debit_form "latest_billable" %}
+            {% amount_view "job-estimate" debit_form "latest_estimate" "net" %}
+            {% amount_view "job-progress" debit_form "latest_progress" "net" %}
             {% amount_view "job-invoiced" debit_form "base_invoiced" %}
-            <td class="job-flat" data-amount="{{ debit_form.base_debited.net }}">
-                <input type="range" min="0" max="100" value="{{ debit_form.new_debited_percent }}" step="1" {% if not debit_form.is_invoiced.value %}disabled="disabled"{% endif %} />
+            {% amount_view "job-itemized" debit_form "itemized" %}
+            <td class="job-flat">
+                <input type="range" min="0" max="100" value="{{ debit_form.new_invoiced_percent }}" step="1" {% if not debit_form.is_invoiced.value %}disabled="disabled"{% endif %} />
                 <div class="btn-group btn-group-justified">
                 {% for percent in PERCENT_RANGE %}
                   <a class="btn btn-default btn-xs percent-button {% if not debit_form.is_invoiced.value %}disabled{% endif %}" data-percent="{{ percent }}">{{ percent }}%</a>
                 {% endfor %}
                 </div>
             </td>
-            {% amount_view "job-itemized" debit_form "itemized" %}
-            <!--
-            <td class="job-itemized">
-              <a name="btn_set_itemized" data-amount="{{ debit_form.itemized_amount.net }}"
-                 class="btn {% if not debit_form.is_invoiced.value %}disabled{% endif %}">
-              {% if debit_form.itemized_amount.net < 0 %}<span class="text-danger">{% endif %}
-              {{ debit_form.itemized_amount.net|ubrdecimal:2 }}
-              {% if debit_form.itemized_amount.net < 0 %}</span>{% endif %}
-              </a>
-            </td>
-            -->
             {% amount_input "job-debit" debit_form "debit" %}
             <!--
             <td class="job-amount-net {% if debit_form.amount_net.errors %}has-error bg-danger{% endif %}">
@@ -146,15 +133,15 @@
             </td>
           </tr>
         {% endfor %}
-          <tr class="job-table-totals">
-            <td class="job-invoiced"></td>
+          <tr class="invoice-table-totals">
+            <td class="job-is-invoiced"></td>
             <td class="job-name"></td>
-            <td class="job-estimated"></td>
-            <td class="job-completed"></td>
-            <td class="job-debited"></td>
+            {% amount_view "job-estimate" form "latest_estimate_total" "net" %}
+            {% amount_view "job-progress" form "latest_progress_total" "net" %}
+            {% amount_view "job-invoiced" form "base_invoiced_total" %}
+            {% amount_view "job-itemized" form "itemized_total" %}
             <td class="job-flat"></td>
-            <td class="job-itemized"></td>
-            <td class="job-amount-net">{{ form.formset.debit_total.net|ubrdecimal:2 }}</td>
+            {% amount_view "job-debit" form "debit_total" %}
             <td class="job-comment"></td>
           </tr>
         </tbody>
