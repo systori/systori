@@ -54,7 +54,7 @@ class DocumentForm(forms.ModelForm):
             setattr(self, total+'_total', Amount.zero())
 
         for form in self.formset:
-            if condition(form):#['is_invoiced'].value():
+            if condition(form):
                 for total in totals:
                     total_amount = getattr(self, total+'_total')
                     form_amount = getattr(form, total+'_amount')
@@ -186,7 +186,7 @@ class InvoiceForm(DocumentForm):
         data.update(self.get_data())
         invoice.letterhead = doc_settings.invoice_letterhead
         invoice.json = invoice_lib.serialize(invoice, data)
-        invoice.json.update(create_payments_report(self.formset.get_jobs()))
+        invoice.json.update(create_invoice_report(invoice.transaction, self.formset.get_jobs()))
         invoice.save(commit)
 
 
