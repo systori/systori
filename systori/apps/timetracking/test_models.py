@@ -38,9 +38,9 @@ class TimerTest(TestCase):
         timer.stop()
         self.assertTrue(timer.end)
 
-    def test_to_json(self):
+    def test_to_dict(self):
         timer = Timer.launch(self.user)
         self.assertEqual(
-            timer.to_json(),
-            json.dumps({'duration': timer.get_duration()})
+            timer.to_dict(),
+            {'duration': timer.get_duration()}
         )

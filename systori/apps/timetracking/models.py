@@ -18,7 +18,8 @@ class Timer(models.Model):
         (HOLIDAY, _('Holiday')),
         (ILLNESS, _('Illness'))
     )
-    DAILY_BREAK = 60 * 60  # minutes
+    DAILY_BREAK = 60 * 60  # seconds
+    WORK_HOURS = 60 * 60 * 8  # seconds
 
     duration_formulas = {
         WORK: lambda start, end: (end - start).total_seconds(),
@@ -26,7 +27,7 @@ class Timer(models.Model):
     }
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    start = models.DateTimeField(auto_now_add=True, db_index=True)
+    start = models.DateTimeField(db_index=True)
     end = models.DateTimeField(blank=True, null=True, db_index=True)
     duration = models.IntegerField(default=0, help_text=_('in seconds'))
     kind = models.PositiveIntegerField(default=WORK, choices=KIND_CHOICES, db_index=True)
@@ -52,8 +53,12 @@ class Timer(models.Model):
         return not self.end
 
     def save(self, *args, **kwargs):
+        if not self.start:
+            self.start = timezone.now()
         if not self.pk and type(self).objects.filter(user=self.user, end__isnull=True).exists():
             raise ValidationError(_('Timer already running'))
+        if self.end:
+            self.duration = self.get_duration_seconds(self.end)
         super().save(*args, **kwargs)
 
     def get_duration_seconds(self, now=None):
@@ -61,7 +66,7 @@ class Timer(models.Model):
             return self.duration
         if not now:
             now = timezone.now()
-        return self.duration_formulas[self.kind](self.start, now)
+        return int(self.duration_formulas[self.kind](self.start, now))
 
     def get_duration(self, now=None):
         seconds = self.get_duration_seconds(now)
@@ -70,8 +75,7 @@ class Timer(models.Model):
     def stop(self):
         assert self.pk
         self.end = timezone.now()
-        self.duration = self.get_duration_seconds(self.end)
         self.save()
 
-    def to_json(self):
-        return json.dumps({'duration': self.get_duration()})
+    def to_dict(self):
+        return {'duration': self.get_duration()}

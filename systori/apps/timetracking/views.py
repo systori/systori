@@ -6,6 +6,16 @@ from django.http import HttpResponse
 from django.core.exceptions import ValidationError
 
 from .models import Timer
+from .utils import get_report
+
+
+class JsonResponse(HttpResponse):
+
+    def __init__(self, content=b'', *args, **kwargs):
+        kwargs['content_type'] = 'text/json'
+        if content is not None and content != b'':
+            content = json.dumps(content)
+        super().__init__(content, *args, **kwargs)
 
 
 class TimerView(View):
@@ -17,11 +27,8 @@ class TimerView(View):
         try:
             Timer.launch(user=request.user)
         except ValidationError as exc:
-            return HttpResponse(
-                json.dumps({'errors': exc.messages}), 
-                status=400, content_type='text/json'
-            )
-        return HttpResponse('')
+            return JsonResponse({'errors': exc.messages}, status=400)
+        return JsonResponse()
 
     def put(self, request):
         """
@@ -29,11 +36,17 @@ class TimerView(View):
         """
         timer = get_object_or_404(Timer.objects.get_running(), user=request.user)
         timer.stop()
-        return HttpResponse('')
+        return JsonResponse()
 
     def get(self, request):
         timer = get_object_or_404(Timer.objects.get_running(), user=request.user)
-        return HttpResponse(timer.to_json(), content_type='text/json')
+        return JsonResponse(timer.to_dict())
+
+
+class ReportView(View):
+    
+    def get(self, request, year=None, month=None):
+        return JsonResponse(list(get_report(request.user, year, month)))
 
 
 class HomeView(View):

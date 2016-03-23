@@ -1,6 +1,14 @@
 {% extends "field/base.html" %}
 {% load i18n staticfiles %}
 
+{% block head %}
+{{ block.super }}
+<style type="text/css">
+  #timer-box { font-size: 300%; display: inline-block; }
+  #timer-toggle { position: relative; top: -10px; }
+</style>
+{% endblock %}
+
 {% block container %}
   <div class="container">
 
@@ -47,10 +55,36 @@
 
     <div>
       {% csrf_token %}
-      <div id="timer-box"></div>
-      <input type="button" class="btn btn-default" id="timer-toggle" value="Start">
-    </div>
+      <div id="timer-box">{{ timetracking_timer_duration }}</div>
 
+      <button type="button" class="btn btn-default" id="timer-toggle" value="Start">
+        <span class="glyphicon glyphicon-play"></span>
+      </button>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">{% now "F" %} {% trans "Report" %}</h3>
+        </div>
+        <div>
+          <table class="table" is="timetracking-report" id="timer-report">
+            <tr>
+              <th>{% trans "Date" %}</th>
+              <th>{% trans "Start" %}</th>
+              <th>{% trans "End" %}</th>
+              <th>{% trans "Hours" %}</th>
+              <th>{% trans "Overtime" %}</th>
+            </tr>
+            {% for row in timetracking_report %}
+              {% include "timetracking/report_row.html" %}
+            {% endfor %}
+          </table>
+          <template for="timetracking-report-row">
+            {% include "timetracking/report_row.html" %}
+          </template>
+        </div>
+      </div>
+
+    </div>
   </div>
 {% endblock %}
 
