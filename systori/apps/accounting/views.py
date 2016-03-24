@@ -127,12 +127,12 @@ class AdjustmentCreate(AdjustmentFormMixin, CreateView):
         if 'invoice_pk' in self.kwargs:
             invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
             kwargs['initial'] = {'invoice': invoice}
-            kwargs['instance'].json['credits'] = [
+            kwargs['instance'].json['jobs'] = [
                 {'job.id': debit['job.id'], 'approved': debit['amount']}
                 for debit in invoice.json['debits']
                 ]
         else:
-            kwargs['instance'].json['credits'] = []
+            kwargs['instance'].json['jobs'] = []
         return kwargs
 
 

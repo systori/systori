@@ -169,7 +169,8 @@ class InvoiceForm(DocumentForm):
         doc_settings = DocumentSettings.get_for_language(get_language())
         invoice.json = invoice_lib.serialize(invoice, data)
         invoice.letterhead = doc_settings.invoice_letterhead
-        invoice.save(commit)
+
+        super().save(commit)
 
 
 class InvoiceRowForm(DocumentRowForm):
@@ -320,17 +321,19 @@ class AdjustmentForm(DocumentForm):
     def save(self, commit=True):
 
         adjustment = self.instance
+        data = self.cleaned_data
+        data['jobs'] = self.formset.get_json_rows()
 
         if adjustment.transaction:
             adjustment.transaction.delete()
 
-        adjustment.transaction = adjust_jobs(self.formset.get_adjustments())
+        adjustment.transaction = adjust_jobs(self.formset.get_transaction_rows())
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-
+        adjustment.json = adjustment_lib.serialize(adjustment, data)
         adjustment.letterhead = doc_settings.invoice_letterhead
-        adjustment.json = adjustment_lib.serialize(adjustment, {})
-        adjustment.save(commit)
+
+        super().save(commit)
 
 
 class AdjustmentRowForm(DocumentRowForm):
@@ -376,6 +379,18 @@ class AdjustmentRowForm(DocumentRowForm):
         pass
         #if self.adjustment_amount.gross > self.invoiced_amount.gross:
         #    self.add_error('adjustment_net', ValidationError(_("Adjustment cannot be greater than invoiced amount.")))
+
+    @property
+    def json(self):
+        return {
+            'job': self.job,
+            'adjustment': self.adjustment_amount,
+            'correction': self.corrected_amount
+        }
+
+    @property
+    def transaction(self):
+        return self.job, self.adjustment_amount
 
 
 AdjustmentFormSet = formset_factory(AdjustmentRowForm, formset=BaseDocumentFormSet, extra=0)

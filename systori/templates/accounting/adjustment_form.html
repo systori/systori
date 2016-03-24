@@ -55,11 +55,11 @@
       {% endfor %}
         <tr class="adjustment-table-totals">
           <td class="job-name"></td>
-          {% amount_view "job-paid" form.formset "paid_total" %}
-          {% amount_view "job-invoiced" form.formset "invoiced_total" %}
-          {% amount_view "job-progress" form.formset "progress_total" %}
-          {% amount_view "job-adjustment" form.formset "adjustment_total" %}
-          {% amount_view "job-corrected" form.formset "corrected_total" %}
+          {% amount_view "job-paid" form "paid_total" %}
+          {% amount_view "job-invoiced" form "invoiced_total" %}
+          {% amount_view "job-progress" form "progress_total" %}
+          {% amount_view "job-adjustment" form "adjustment_total" %}
+          {% amount_view "job-corrected" form "corrected_total" %}
         </tr>
       </tbody>
     </table>
