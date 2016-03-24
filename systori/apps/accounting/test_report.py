@@ -88,7 +88,7 @@ class TestTransactionsTable(TestCase):
 
     def test_one_invoice_with_adjustment_and_unpaid_portion(self):
         debit_jobs([(self.job, A(1019), Entry.WORK_DEBIT)], transacted_on=days_ago(2))
-        credit_jobs([(self.job, A(0), A(0), A(900))], D(0), transacted_on=days_ago(1))
+        adjust_jobs([(self.job, A(-900))], transacted_on=days_ago(1))
         self.assertEqual(self.tbl(), [
             ('',             'net',    'tax',   'gross'),
             ('progress',  '100.00',  '19.00',  '119.00'),  # progress reduced by adjustment
@@ -160,8 +160,9 @@ class TestTransactionsTable(TestCase):
         self.assertEqual(self.tbl(), [
             ('',             'net',     'tax',    'gross'),
             ('progress', '2000.00',  '380.00',  '2380.00'),
-            ('invoice', '-1000.00', '-190.00', '-1190.00'),  # one of the invoices is hidden because it's fully paid
             ('payment', '-1000.00', '-190.00', '-1190.00'),
+            ('unpaid',  '-1000.00', '-190.00', '-1190.00'),
+            ('debit',       '0.00',    '0.00',     '0.00')
         ])
 
     def test_two_invoices_both_fully_paid(self):
@@ -171,5 +172,6 @@ class TestTransactionsTable(TestCase):
         self.assertEqual(self.tbl(), [
             ('',             'net',     'tax',    'gross'),
             ('progress', '2000.00',  '380.00',  '2380.00'),
-            ('payment', '-2000.00', '-380.00', '-2380.00'),  # both invoices are hidden because they're both fully paid
+            ('payment', '-2000.00', '-380.00', '-2380.00'),
+            ('debit',       '0.00',    '0.00',     '0.00')
         ])

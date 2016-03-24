@@ -18,7 +18,6 @@ from ..document.models import Invoice, Adjustment, Payment, Refund, DocumentTemp
 from ..document.type import invoice as invoice_lib
 from ..document.type import refund as refund_lib
 from ..document.type import adjustment as adjustment_lib
-from .report import create_invoice_report, create_adjustment_report, create_refund_report
 
 
 def convert_field_to_value(field):
@@ -87,9 +86,6 @@ class BaseDocumentFormSet(BaseFormSet):
     def get_transaction_rows(self):
         return [form.transaction for form in self if form.transaction]
 
-    def get_jobs(self):
-        return [form.get_job for form in self if form.get_job]
-
 
 class DocumentRowForm(Form):
     job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.none(), widget=forms.HiddenInput())
@@ -106,10 +102,6 @@ class DocumentRowForm(Form):
     @property
     def transaction(self):
         raise NotImplementedError()
-
-    @property
-    def get_job(self):
-        return self.job
 
 
 class InvoiceForm(DocumentForm):
@@ -162,18 +154,12 @@ class InvoiceForm(DocumentForm):
         if self.latest_progress_total.net > 0:
             self.base_invoiced_total_percent = round(self.base_invoiced_total.net / self.latest_progress_total.net * 100)
 
-    def get_data(self):
-        return {
-            'debit': self.debit_total,
-            'invoiced': self.new_invoiced_total,
-            'balance': self.new_balance_total
-        }
-
     @atomic
     def save(self, commit=True):
 
-        data = self.cleaned_data
         invoice = self.instance
+        data = self.cleaned_data
+        data['jobs'] = self.formset.get_json_rows()
 
         if invoice.transaction:
             invoice.transaction.delete()
@@ -181,12 +167,8 @@ class InvoiceForm(DocumentForm):
         invoice.transaction = debit_jobs(self.formset.get_transaction_rows(), recognize_revenue=data['is_final'])
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-
-        data['jobs'] = self.formset.get_json_rows()
-        data.update(self.get_data())
-        invoice.letterhead = doc_settings.invoice_letterhead
         invoice.json = invoice_lib.serialize(invoice, data)
-        invoice.json.update(create_invoice_report(invoice.transaction, self.formset.get_jobs()))
+        invoice.letterhead = doc_settings.invoice_letterhead
         invoice.save(commit)
 
 
@@ -292,7 +274,6 @@ class InvoiceRowForm(DocumentRowForm):
         if self.cleaned_data['is_invoiced']:
             return {
                 'job': self.job,
-                'job.id': self.job.id,
                 'is_invoiced': True,
                 'debit': self.debit_amount,
                 'is_override': self.cleaned_data['is_override'],
@@ -302,11 +283,6 @@ class InvoiceRowForm(DocumentRowForm):
                 'estimate': self.latest_estimate_amount,
                 'progress': self.latest_progress_amount,
             }
-
-    @property
-    def get_job(self):
-        if self.cleaned_data['is_invoiced']:
-            return self.job
 
     @property
     def transaction(self):

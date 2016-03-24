@@ -8,10 +8,10 @@
     </div>
   </div>
   <table class="table">
-  {% for debit in invoice.json.debits %}
+  {% for job in invoice.json.jobs %}
     <tr>
-      <td>{{ debit.name }}</td>
-      <td style="text-align: right; white-space: nowrap;">{{ debit.debit.net|money }}</td>
+      <td>{{ job.name }}</td>
+      <td style="text-align: right; white-space: nowrap;">{{ job.debit.net|money }}</td>
     </tr>
   {% endfor %}
     <tr style="text-align: right; white-space: nowrap;">

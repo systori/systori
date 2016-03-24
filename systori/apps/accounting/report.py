@@ -42,6 +42,7 @@ def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
         'invoiced': Amount.zero(),
         'paid': Amount.zero(),
         'payments': [],
+        'job_debits': {},
         'unpaid': Amount.zero(),
         'debit': Amount.zero()
     }
@@ -57,6 +58,8 @@ def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
             'total': Amount.zero(),
             'jobs': {}
         }
+
+        job_debits = {}
 
         for entry in txn.entries.all():
 
@@ -77,6 +80,13 @@ def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
                 'total': Amount.zero()
             })
 
+            job_debit = job_debits.setdefault(entry.job.id, {
+                'transaction_type': txn.transaction_type,
+                'entry_type': None,
+                'date': txn.transacted_on,
+                'amount': Amount.zero()
+            })
+
             if entry.entry_type == entry.PAYMENT:
                 txn_dict['payment'] += entry.amount
                 job_dict['payment'] += entry.amount
@@ -93,12 +103,20 @@ def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
                 report['invoiced'] += entry.amount
                 if txn.id == invoice_txn.id:
                     report['debit'] += entry.amount
+                assert job_debit['entry_type'] in (None, entry.entry_type)
+                job_debit['entry_type'] = entry.entry_type
+                job_debit['amount'] += entry.amount
 
             if entry.entry_type in entry.TYPES_FOR_PAID_SUM:
                 report['paid'] += entry.amount
 
         if txn.transaction_type == txn.PAYMENT:
             report['payments'].append(txn_dict)
+
+        for job_id, debit_dict in job_debits.items():
+            if debit_dict['amount'].gross != 0:
+                debits = report['job_debits'].setdefault(job_id, [])
+                debits.append(debit_dict)
 
     report['unpaid'] = (report['invoiced'] + report['paid'] - report['debit']).negate
 

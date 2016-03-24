@@ -62,6 +62,7 @@ def recalculate_invoices(apps, schema_editor):
     from systori.apps.document.models import Invoice
     from systori.apps.task.models import Job
     from systori.apps.accounting.report import create_invoice_report
+    from systori.apps.accounting.constants import TAX_RATE
     from systori.lib.accounting.tools import Amount
 
     for company in Company.objects.all():
@@ -71,17 +72,24 @@ def recalculate_invoices(apps, schema_editor):
             if 'debits' not in invoice.json:
                 print('skipping invoice #{}'.format(invoice.id))
                 continue
-            invoice.json['debit'] = Amount(invoice.json['debit_net'], invoice.json['debit_tax'])
             invoice.json['jobs'] = invoice.json['debits']
             del invoice.json['debits']
+
+            invoice.json['debit'] = Amount(invoice.json['debit_net'], invoice.json['debit_tax'])
+            del invoice.json['debit_net'], invoice.json['debit_tax']
             job_ids = []
             for job in invoice.json['jobs']:
                 job_ids.append(job['job.id'])
                 job['debit'] = Amount(job['amount_net'], job['amount_tax'])
+                del job['amount_net'], job['amount_tax']
                 job['invoiced'] = Amount(job['debited_net'], job['debited_tax'])
+                del job['debited_net'], job['debited_tax']
                 job['balance'] = Amount(job['balance_net'], job['balance_tax'])
-                job['estimate'] = Amount(job['estimate_net'], Decimal('0.00'))
-                job['billable'] = Amount(job['itemized_net'], Decimal('0.00'))
+                del job['balance_net'], job['balance_tax']
+                job['estimate'] = Amount.from_net(job['estimate_net'], TAX_RATE)
+                del job['estimate_net']
+                job['progress'] = Amount.from_net(job['itemized_net'], TAX_RATE)
+                del job['itemized_net']
             jobs = Job.objects.filter(id__in=job_ids)
             new_json = create_invoice_report(invoice.transaction, jobs, invoice.document_date)
             print(invoice.id)
