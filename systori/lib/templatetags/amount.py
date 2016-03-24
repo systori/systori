@@ -11,7 +11,7 @@ def _make_context(context, css, obj, field, bold="gross", has_form=False):
 
     field_amount = field if field.endswith('_total') else field+'_amount'
 
-    diff_field_amount = field_amount+'_diff'
+    diff_field_amount = field+'_diff_total' if field.endswith('_total') else field+'_diff_amount'
 
     percent_field_value = field+'_percent'
 
