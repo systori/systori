@@ -55,6 +55,11 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.AddField(
+            model_name='payment',
+            name='invoice',
+            field=models.OneToOneField(on_delete=django.db.models.deletion.SET_NULL, null=True, related_name='payment', to='document.Invoice'),
+        ),
+        migrations.AddField(
             model_name='letterhead',
             name='font',
             field=models.CharField(default='OpenSans', choices=[('OpenSans', 'Open Sans'), ('DroidSerif', 'Droid Serif'), ('Tinos', 'Tinos')], max_length=15, verbose_name='Font'),

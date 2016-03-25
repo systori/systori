@@ -182,7 +182,7 @@ class AmountViewCell extends AmountCell with AmountDivs {
 
 
 enum AmountChangeType {
-    NET, TAX, GROSS
+    NET, TAX, GROSS, ALL
 }
 
 class AmountChangeEvent {
@@ -213,9 +213,12 @@ class AmountInputCell extends AmountCell with AmountInputs {
         _tax_input.onKeyUp.listen(tax_changed);
     }
 
-    update(Amount _amount) {
+    update(Amount _amount, {bool triggerEvent: false}) {
         amount = _amount;
         update_inputs(_amount);
+        if (triggerEvent) {
+            controller.add(new AmountChangeEvent(AmountChangeType.ALL, null, null));
+        }
     }
 
     gross_changed([Event _]) {

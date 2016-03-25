@@ -76,8 +76,7 @@ class Invoice(Document):
     project = models.ForeignKey("project.Project", related_name="invoices")
     parent = models.ForeignKey("self", related_name="invoices", null=True)
 
-    transaction = models.OneToOneField('accounting.Transaction', related_name="invoice", null=True,
-                                       on_delete=models.SET_NULL)
+    transaction = models.OneToOneField('accounting.Transaction', related_name="invoice", null=True, on_delete=models.SET_NULL)
 
     DRAFT = "draft"
     SENT = "sent"
@@ -146,6 +145,7 @@ class Adjustment(Document):
 class Payment(Document):
     letterhead = models.ForeignKey('document.Letterhead', related_name="payment_documents")
     project = models.ForeignKey("project.Project", related_name="payments")
+    invoice = models.OneToOneField('Invoice', related_name="payment", null=True, on_delete=models.SET_NULL)
     transaction = models.OneToOneField('accounting.Transaction', related_name="payment", null=True, on_delete=models.SET_NULL)
 
     class Meta:

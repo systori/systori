@@ -156,3 +156,9 @@ td[is=amount-stateful]>div.amount-percent {
   width: 110px;
   font-weight: bold;
 }
+
+td[is=amount-view].clickable:hover>div,
+td[is=amount-stateful].clickable:hover {
+  cursor: pointer;
+  background-color: #e6e6e6;
+}

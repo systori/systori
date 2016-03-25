@@ -9,18 +9,12 @@ register = template.Library()
 
 def _make_context(context, css, obj, field, bold="gross", has_form=False):
 
-    field_amount = field if field.endswith('_total') else field+'_amount'
-
-    diff_field_amount = field+'_diff_total' if field.endswith('_total') else field+'_diff_amount'
-
-    percent_field_value = field+'_percent'
-
     ctx = {
         'TAX_RATE': context['TAX_RATE'],
         'css_class': css,
-        'amount': getattr(obj, field_amount),
-        'diff': getattr(obj, diff_field_amount, None),
-        'percent': getattr(obj, percent_field_value, None),
+        'amount': getattr(obj, field+'_amount'),
+        'diff': getattr(obj, field+'_diff_amount', None),
+        'percent': getattr(obj, field+'_percent', None),
         'has_form': has_form,
         'bold': bold
     }

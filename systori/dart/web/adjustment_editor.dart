@@ -38,13 +38,22 @@ class AdjustmentRow extends TableRowElement {
 
     AdjustmentTable table;
 
+    AmountViewCell paid_cell;
     AmountViewCell invoiced_cell;
+    AmountViewCell progress_cell;
     AmountInputCell adjustment_cell;
     AmountInputCell corrected_cell;
 
     AdjustmentRow.created() : super.created(); attached() {
         table = parent.parent;
+
+        paid_cell = this.querySelector(":scope>.job-paid");
+        paid_cell.onClick.listen(column_clicked);
         invoiced_cell = this.querySelector(":scope>.job-invoiced");
+        invoiced_cell.onClick.listen(column_clicked);
+        progress_cell = this.querySelector(":scope>.job-progress");
+        progress_cell.onClick.listen(column_clicked);
+
         adjustment_cell = this.querySelector(":scope>.job-adjustment");
         adjustment_cell.onAmountChange.listen(adjustment_changed);
         corrected_cell = this.querySelector(":scope>.job-corrected");
@@ -61,6 +70,10 @@ class AdjustmentRow extends TableRowElement {
         table.recalculate();
     }
 
+    column_clicked(MouseEvent e) {
+        Amount new_corrected_amount = (e.currentTarget as AmountViewCell).amount;
+        corrected_cell.update(new_corrected_amount, triggerEvent: true);
+    }
 }
 
 void main() {

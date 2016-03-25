@@ -152,9 +152,31 @@ class AdjustmentDelete(DeleteView):
         return self.request.project.get_absolute_url()
 
 
-class PaymentCreate(FormView):
-    form_class = PaymentFormSet
+class PaymentFormMixin:
+    model = Payment
+    form_class = PaymentForm
     template_name = 'accounting/payment_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TAX_RATE'] = TAX_RATE
+        return context
+
+    def get_form_kwargs(self):
+        jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems')
+        kwargs = {
+            'jobs': jobs,
+            'instance': self.model(project=self.request.project),
+        }
+        if self.request.method == 'POST':
+            kwargs['data'] = self.request.POST.copy()
+        return kwargs
+
+    def get_success_url(self):
+        return self.request.project.get_absolute_url()
+
+
+class PaymentCreate(AdjustmentFormMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = {'jobs': self.request.project.jobs.all()}

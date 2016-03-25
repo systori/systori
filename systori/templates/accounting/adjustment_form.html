@@ -46,9 +46,9 @@
       {% for adjustment in form.formset %}
         <tr is="adjustment-row" class="adjustment-row">
           <td class="job-name">{{ adjustment.job }}{{ adjustment.initial.job.name }}</td>
-          {% amount_view "job-paid" adjustment "paid" %}
-          {% amount_view "job-invoiced" adjustment "invoiced" %}
-          {% amount_view "job-progress" adjustment "progress" %}
+          {% amount_view "job-paid clickable" adjustment "paid" %}
+          {% amount_view "job-invoiced clickable" adjustment "invoiced" %}
+          {% amount_view "job-progress clickable" adjustment "progress" %}
           {% amount_input "job-adjustment" adjustment "adjustment" %}
           {% amount_input "job-corrected" adjustment "corrected" %}
         </tr>
