@@ -59,8 +59,9 @@ def split_gross_entries(apps, schema_editor):
 
 def recalculate_invoices(apps, schema_editor):
     from systori.apps.company.models import Company
-    from systori.apps.document.models import Invoice
+    from systori.apps.document.models import Invoice, Payment, DocumentSettings
     from systori.apps.task.models import Job
+    from systori.apps.accounting.models import Transaction
     from systori.apps.accounting.report import create_invoice_report
     from systori.apps.accounting.constants import TAX_RATE
     from systori.lib.accounting.tools import Amount
@@ -102,11 +103,81 @@ def recalculate_invoices(apps, schema_editor):
             invoice.json.update(new_json)
             invoice.save()
 
+        for t in Transaction.objects.filter(transaction_type=Transaction.PAYMENT):
+
+            job = None
+
+            jobs = {}
+            split_t = Amount.zero()
+            discount_t = Amount.zero()
+            adjustment_t = Amount.zero()
+            credit_t = Amount.zero()
+
+            bank_account = None
+            for entry in t.entries.all():
+
+                if entry.account.is_bank:
+                    bank_account = entry.account
+
+                job = entry.job
+                if job:
+                    job_dict = jobs.setdefault(job.id, {
+                        'job.id': job.id,
+                        'name': job.name,
+                        'split': Amount.zero(),
+                        'discount': Amount.zero(),
+                        'adjustment': Amount.zero(),
+                        'credit': Amount.zero()
+                    })
+
+                    if entry.entry_type == entry.PAYMENT:
+                        job_dict['split'] += entry.amount.negate
+                        split_t += entry.amount
+
+                    elif entry.entry_type == entry.DISCOUNT:
+                        job_dict['discount'] += entry.amount.negate
+                        discount_t += entry.amount
+
+                    elif entry.entry_type == entry.ADJUSTMENT:
+                        job_dict['adjustment'] += entry.amount.negate
+                        adjustment_t += entry.amount
+
+                    if entry.entry_type in (entry.PAYMENT, entry.DISCOUNT, entry.ADJUSTMENT):
+                        job_dict['credit'] += entry.amount.negate
+                        credit_t += entry.amount
+
+            if bank_account and job:
+                letterhead = DocumentSettings.get_for_language('de').invoice_letterhead
+                payment = Payment(
+                    project=job.project,
+                    document_date=t.transacted_on,
+                    transaction=t,
+                    letterhead=letterhead
+                )
+                payment.json.update({
+                    'bank.id': bank_account.id,
+                    'date': t.transacted_on,
+                    'payment': credit_t.negate.gross,
+                    'discount': Decimal('0.00'),
+                    'split_total': credit_t.negate,
+                    'discount_total': discount_t.negate,
+                    'adjustment_total': adjustment_t.negate,
+                    'credit_total': credit_t.negate,
+                    'jobs': jobs.values(),
+                })
+                payment.save()
+            else:
+                if job:
+                    print('No Bank Account: %s' % (job.project.name,))
+                else:
+                    print('No Job')
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ('accounting', '0002_auto_20160221_0254'),
+        ('document', '0003_new_models'),
     ]
 
     operations = [

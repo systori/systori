@@ -223,89 +223,26 @@ def render(invoice, letterhead, show_payment_details, format):
         return buffer.getvalue()
 
 
-def serialize(invoice_obj, data):
+def serialize(payment_obj, data):
 
-    contact = invoice_obj.project.billable_contact.contact
-
-    invoice = {
-
-        'id': invoice_obj.id,
-
-        'title': data['title'],
+    payment = {
+        'bank.id': data['bank_account'].id,
         'date': data['document_date'],
-        'invoice_no': data['invoice_no'],
-
-        'header': data['header'],
-        'footer': data['footer'],
-
-        'is_final': data['is_final'],
-
-        'business': contact.business,
-        'salutation': contact.salutation,
-        'first_name': contact.first_name,
-        'last_name': contact.last_name,
-        'address': contact.address,
-        'postal_code': contact.postal_code,
-        'city': contact.city,
-        'address_label': contact.address_label,
-
-        'jobs': []
-
+        'payment': data['payment'],
+        'discount': data['discount'],
+        'split_total': data['split_total'],
+        'discount_total': data['discount_total'],
+        'adjustment_total': data['adjustment_total'],
+        'credit_total': data['credit_total'],
+        'jobs': [],
     }
 
-    if data.get('add_terms', False):
-        invoice['add_terms'] = True  # TODO: Calculate the terms.
-
-    job_objs = []
     for job_data in data['jobs']:
-
         job_obj = job_data.pop('job')
-        job_objs.append(job_obj)
-
         job_data.update({
             'job.id': job_obj.id,
-            'code': job_obj.code,
-            'name': job_obj.name,
-            'taskgroups': []
+            'name': job_obj.name
         })
-        invoice['jobs'].append(job_data)
+        payment['jobs'].append(job_data)
 
-        for taskgroup in job_obj.taskgroups.all():
-            taskgroup_dict = {
-                'id': taskgroup.id,
-                'code': taskgroup.code,
-                'name': taskgroup.name,
-                'description': taskgroup.description,
-                'total': taskgroup.progress_total,
-                'tasks': []
-            }
-            job_data['taskgroups'].append(taskgroup_dict)
-
-            for task in taskgroup.tasks.all():
-                task_dict = {
-                    'id': task.id,
-                    'code': task.instance.code,
-                    'name': task.instance.full_name,
-                    'description': task.instance.full_description,
-                    'complete': task.complete,
-                    'unit': task.unit,
-                    'price': task.instance.unit_price,
-                    'total': task.fixed_price_progress,
-                    'lineitems': []
-                }
-                taskgroup_dict['tasks'].append(task_dict)
-
-                for lineitem in task.instance.lineitems.all():
-                    lineitem_dict = {
-                        'id': lineitem.id,
-                        'name': lineitem.name,
-                        'qty': lineitem.unit_qty,
-                        'unit': lineitem.unit,
-                        'price': lineitem.price,
-                        'price_per': lineitem.price_per_task_unit,
-                    }
-                    task_dict['lineitems'].append(lineitem_dict)
-
-    invoice.update(create_invoice_report(invoice_obj.transaction, job_objs))
-
-    return invoice
+    return payment

@@ -295,24 +295,24 @@
       </tr>
       </thead>
       <tbody>
-      {% for transaction in payments %}
+      {% for payment in payments %}
         <tr>
-          <td>{{ transaction.date|localize }}</td>
-          <td class="text-right">{{ transaction.payment.negate.gross|money }}</td>
-          <td class="text-right">{{ transaction.discount.negate.gross|money }}</td>
-          <td class="text-right">{{ transaction.total.negate.gross|money }}</td>
+          <td>{{ payment.document_date|localize }}</td>
+          <td class="text-right">{{ payment.json.split_total.gross|money }}</td>
+          <td class="text-right">{{ payment.json.discount_total.gross|money }}</td>
+          <td class="text-right">{{ payment.json.credit_total.gross|money }}</td>
           <td class="text-right">
-            {% if not transaction.is_reconciled %}
-              <a href="{% url 'payment.delete' project.id transaction.id %}">{% trans "Delete" %}</a>
+            {% if not payment.transaction.is_reconciled %}
+              <a href="{% url 'payment.delete' project.id payment.id %}">{% trans "Delete" %}</a>
             {% endif %}
           </td>
         </tr>
-        {% for job in transaction.jobs.values %}
+        {% for job in payment.json.jobs %}
           <tr class="job-row {% if forloop.last %}last{% endif %}">
             <td>{{ job.name }}</td>
-            <td>{{ job.payment.negate.gross|money }}</td>
-            <td>{{ job.discount.negate.gross|money }}</td>
-            <td>{{ job.total.negate.gross|money }}</td>
+            <td>{{ job.split.gross|money }}</td>
+            <td>{{ job.discount.gross|money }}</td>
+            <td>{{ job.credit.gross|money }}</td>
             <td></td>
           </tr>
         {% endfor %}

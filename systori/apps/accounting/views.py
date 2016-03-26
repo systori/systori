@@ -176,31 +176,25 @@ class PaymentFormMixin:
         return self.request.project.get_absolute_url()
 
 
-class PaymentCreate(AdjustmentFormMixin, CreateView):
-
+class PaymentCreate(PaymentFormMixin, CreateView):
     def get_form_kwargs(self):
-        kwargs = {'jobs': self.request.project.jobs.all()}
+        kwargs = super().get_form_kwargs()
+        instance = kwargs['instance']
         if 'invoice_pk' in self.kwargs:
             invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
             kwargs['initial'] = {
                 'invoice': invoice,
-                'amount': invoice.json['debit_gross'],
+                'amount': invoice.json['debit'].gross,
             }
-        if self.request.method == 'POST':
-            kwargs['data'] = self.request.POST.copy()
+            instance.json['jobs'] = [{
+                'job.id': job['job.id'],
+                'invoiced': job['invoiced'],
+                'payment_net': job['debit'].net,
+                'payment_tax': job['debit'].tax
+            } for job in invoice.json['jobs']]
+        else:
+            instance.json['jobs'] = []
         return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['TAX_RATE'] = TAX_RATE
-        return context
-
-    def form_valid(self, form):
-        form.save()
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return self.request.project.get_absolute_url()
 
 
 class PaymentDelete(DeleteView):

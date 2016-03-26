@@ -6,24 +6,24 @@
 {% block content %}
   <form method="post" autocomplete="off">{% csrf_token %}
 
-    {{ form.payment_form.bank_account|bootstrap }}
-    {{ form.payment_form.transacted_on|bootstrap }}
-    {% if form.invoice %}
+    {{ form.bank_account|bootstrap }}
+    {{ form.document_date|bootstrap }}
+    {% if form.invoice.value %}
       <div class="form-group">
         <label class="control-label">{% trans "Invoice" %}</label>
-        <div>{{ form.invoice.json.invoice_no }} {{ form.invoice.json.title }}</div>
+        <div>{{ form.invoice.value.json.invoice_no }} {{ form.invoice.value.json.title }}</div>
       </div>
     {% endif %}
     <div class="form-group">
-      <label class="control-label" for="{{ form.payment_form.amount.id_for_label }}">{{ form.payment_form.amount.label }}</label>
+      <label class="control-label" for="{{ form.payment.id_for_label }}">{{ form.payment.label }}</label>
       <div>
-        <input class="form-control" id="{{ form.payment_form.amount.id_for_label }}" name="{{ form.payment_form.amount.html_name }}" type="text" value="{{ form.payment_form.amount_value.gross|ubrdecimal:2 }}">
+        <input class="form-control" id="{{ form.payment.id_for_label }}" name="{{ form.payment.html_name }}" type="text" value="{{ form.payment_amount.gross|ubrdecimal:2 }}">
       </div>
     </div>
 
     <style>
       .job-balance,
-      .job-payment,
+      .job-split,
       .job-discount,
       .job-credit {
         text-align: right;
@@ -35,29 +35,29 @@
     </style>
 
     <div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
-    {{ form.management_form }}
+    {{ form.formset.management_form }}
     <table is="payment-split-table" class="table table-striped" data-tax-rate="{{ TAX_RATE }}">
       <thead>
       <tr>
         <th class="job-name">{% trans 'Job' %}</th>
         <th class="job-balance">
-          {% if form.invoice %}
+          {% if form.invoice.value %}
           {% trans 'Invoiced' %}
           {% else %}
           {% trans 'Balance' %}
           {% endif %}
         </th>
-        <th class="job-payment">{% trans 'Payment' %}</th>
-        <th class="job-discount">{% trans 'Discount' %} {{ form.payment_form.discount }}</th>
+        <th class="job-split">{% trans 'Payment' %}</th>
+        <th class="job-discount">{% trans 'Discount' %} {{ form.discount }}</th>
         <th class="job-credit">{% trans 'Credit' %}</th>
       </tr>
       </thead>
       <tbody>
-      {% for split in form.forms %}
+      {% for split in form.formset %}
         <tr is="payment-split" class="payment-split-row">
           <td class="job-name">{{ split.job }}{{ split.initial.job.name }}</td>
           {% amount_view "job-balance" split "balance" %}
-          {% amount_input "job-payment" split "payment" %}
+          {% amount_input "job-split" split "split" %}
           {% amount_stateful "job-discount" split "discount" %}
           {% amount_view "job-credit" split "credit" %}
         </tr>
@@ -65,7 +65,7 @@
         <tr class="split-table-totals">
           <td class="job-name"></td>
           {% amount_view "job-balance" form "balance_total" %}
-          {% amount_view "job-payment" form "payment_total" %}
+          {% amount_view "job-split" form "split_total" %}
           {% amount_view "job-discount" form "discount_total" %}
           {% amount_view "job-credit" form "credit_total" %}
         </tr>

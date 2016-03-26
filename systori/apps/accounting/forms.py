@@ -384,10 +384,10 @@ AdjustmentFormSet = formset_factory(AdjustmentRowForm, formset=BaseDocumentFormS
 
 
 class PaymentForm(DocumentForm):
-    transacted_on = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
+    document_date = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
     invoice = forms.ModelChoiceField(label=_("Invoice"), queryset=Invoice.objects.all(), widget=forms.HiddenInput(), required=False)
     bank_account = forms.ModelChoiceField(label=_("Bank Account"), queryset=Account.objects.banks())
-    amount = LocalizedDecimalField(label=_("Amount"), max_digits=14, decimal_places=4)
+    payment = LocalizedDecimalField(label=_("Payment"), max_digits=14, decimal_places=4)
     discount = forms.TypedChoiceField(
             label=_('Is discounted?'), coerce=D,
             choices=[
@@ -405,16 +405,16 @@ class PaymentForm(DocumentForm):
     class Meta(DocumentForm.Meta):
         model = Payment
         fields = [
-            'transacted_on', 'invoice',
-            'bank_account', 'amount', 'discount',
+            'document_date', 'invoice',
+            'bank_account', 'payment', 'discount',
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=PaymentFormSet, **kwargs)
-        self.amount_value = Amount.from_gross(convert_field_to_value(self['amount']), TAX_RATE)
+        self.payment_amount = Amount.from_gross(convert_field_to_value(self['payment']), TAX_RATE)
         self.calculate_totals([
             'balance',
-            'payment',
+            'split',
             'discount',
             'adjustment',
             'credit'
@@ -423,8 +423,8 @@ class PaymentForm(DocumentForm):
     def clean(self):
         splits = Amount.zero()
         for form in self.formset:
-            splits += form.payment_amount
-        if splits.gross != self.amount_value.gross:
+            splits += form.split_amount
+        if splits.gross != self.payment_amount.gross:
             raise forms.ValidationError(_("The sum of splits must equal the payment amount."))
 
     @atomic
@@ -432,15 +432,21 @@ class PaymentForm(DocumentForm):
 
         payment = self.instance
         data = self.cleaned_data
-        data['jobs'] = self.formset.get_json_rows()
+        data.update({
+            'jobs': self.formset.get_json_rows(),
+            'split_total': self.split_total_amount,
+            'discount_total': self.discount_total_amount,
+            'adjustment_total': self.adjustment_total_amount,
+            'credit_total': self.credit_total_amount
+        })
 
         if payment.transaction:
             payment.transaction.delete()
 
         payment.transaction = credit_jobs(
             self.formset.get_transaction_rows(),
-            data['amount'],
-            data['transacted_on'],
+            data['payment'],
+            data['document_date'],
             data['bank_account']
         )
 
@@ -458,8 +464,8 @@ class PaymentForm(DocumentForm):
 
 class PaymentRowForm(DocumentRowForm):
 
-    payment_net = LocalizedDecimalField(label=_("Amount Net"), max_digits=14, decimal_places=2, required=False)
-    payment_tax = LocalizedDecimalField(label=_("Amount Tax"), max_digits=14, decimal_places=2, required=False)
+    split_net = LocalizedDecimalField(label=_("Split Net"), max_digits=14, decimal_places=2, required=False)
+    split_tax = LocalizedDecimalField(label=_("Split Tax"), max_digits=14, decimal_places=2, required=False)
 
     discount_net = LocalizedDecimalField(label=_("Discount Net"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
     discount_tax = LocalizedDecimalField(label=_("Discount Tax"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
@@ -470,7 +476,7 @@ class PaymentRowForm(DocumentRowForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        for column_name in ['payment', 'discount', 'adjustment']:
+        for column_name in ['split', 'discount', 'adjustment']:
             net = convert_field_to_value(self[column_name+'_net'])
             tax = convert_field_to_value(self[column_name+'_tax'])
             setattr(self, column_name+'_amount', Amount(net, tax))
@@ -480,20 +486,24 @@ class PaymentRowForm(DocumentRowForm):
         else:
             self.balance_amount = self.job.account.balance
 
-        self.credit_amount = self.payment_amount + self.discount_amount
+        if self.balance_amount.gross < 0:
+            self.balance_amount = Amount.zero()
+
+        self.credit_amount = self.split_amount + self.discount_amount + self.adjustment_amount
 
     @property
     def json(self):
         return {
             'job': self.job,
-            'payment': self.payment_amount,
+            'split': self.split_amount,
             'discount': self.discount_amount,
-            'adjustment': self.adjustment_amount
+            'adjustment': self.adjustment_amount,
+            'credit': self.credit_amount
         }
 
     @property
     def transaction(self):
-        return self.job, self.payment_amount, self.discount_amount, self.adjustment_amount
+        return self.job, self.split_amount, self.discount_amount, self.adjustment_amount
 
 PaymentFormSet = formset_factory(PaymentRowForm, formset=BaseDocumentFormSet, extra=0)
 

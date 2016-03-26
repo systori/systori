@@ -11,7 +11,7 @@ from decimal import Decimal
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounting', '0003_added_value_fields'),
+        #('accounting', '0003_added_value_fields'),
         ('project', '0002_dailyplan_tasks'),
         ('document', '0002_auto_20160221_0254'),
     ]
