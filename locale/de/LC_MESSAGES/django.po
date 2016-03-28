@@ -61,13 +61,11 @@ msgid "Invoice"
 msgstr "Rechnung"
 
 #: systori/apps/accounting/forms.py:185
-#, fuzzy
 #| msgid "Debit"
 msgid "Debit Net"
 msgstr "Soll"
 
 #: systori/apps/accounting/forms.py:186
-#, fuzzy
 #| msgid "Debit"
 msgid "Debit Tax"
 msgstr "Soll"
@@ -77,25 +75,21 @@ msgid "A comment is required for flat invoice."
 msgstr "Eine Anmerkung wird bei einer Pauschalrechnung benötigt."
 
 #: systori/apps/accounting/forms.py:328 systori/apps/accounting/forms.py:473
-#, fuzzy
 #| msgid "Adjustment"
 msgid "Adjustment Net"
 msgstr "Korrektur"
 
 #: systori/apps/accounting/forms.py:329 systori/apps/accounting/forms.py:474
-#, fuzzy
 #| msgid "Adjustment"
 msgid "Adjustment Tax"
 msgstr "Korrektur"
 
 #: systori/apps/accounting/forms.py:331
-#, fuzzy
 #| msgid "Created On"
 msgid "Corrected Net"
 msgstr "Erstellt am"
 
 #: systori/apps/accounting/forms.py:332
-#, fuzzy
 #| msgid "Created On"
 msgid "Corrected Tax"
 msgstr "Erstellt am"
@@ -201,7 +195,6 @@ msgid "Owner"
 msgstr "Eigentümer"
 
 #: systori/apps/company/models.py:21
-#, fuzzy
 #| msgid "Laborer has limited access to the system."
 msgid "Owner has full and unlimited Access to Systori."
 msgstr "Mitarbeiter haben beschränkten Zugriff auf das System."
@@ -603,7 +596,6 @@ msgid "Top Margin Next"
 msgstr "Abstand Oben nächste Seite"
 
 #: systori/apps/document/models.py:264
-#, fuzzy
 #| msgid "Bottom Margin"
 msgid "Bottom Margin Next"
 msgstr "Abstand Unten"
@@ -856,22 +848,19 @@ msgid "Open claim from prior invoices"
 msgstr "Offene Forderungen aus vorherigen Rechnungen"
 
 #: systori/apps/document/type/invoice.py:147
-#: systori/apps/document/type/payment.py:147
-#, fuzzy, python-brace-format
+#: systori/apps/document/type/payment.py:147, python-brace-format
 #| msgid "Payment on {date}"
 msgid "Work completed on {date}"
 msgstr "Zahlung vom {date}"
 
 #: systori/apps/document/type/invoice.py:149
-#: systori/apps/document/type/payment.py:149
-#, fuzzy, python-brace-format
+#: systori/apps/document/type/payment.py:149, python-brace-format
 #| msgid "{invoice} from {date}"
 msgid "Flat invoice on {date}"
 msgstr "{invoice} vom {date}"
 
 #: systori/apps/document/type/invoice.py:151
-#: systori/apps/document/type/payment.py:151
-#, fuzzy, python-brace-format
+#: systori/apps/document/type/payment.py:151, python-brace-format
 #| msgid "Payment on {date}"
 msgid "Adjustment on {date}"
 msgstr "Zahlung vom {date}"
@@ -1304,7 +1293,6 @@ msgid "Value"
 msgstr "Betrag"
 
 #: systori/lib/accounting/models.py:318
-#, fuzzy
 #| msgid "Credit"
 msgid "Refund Credit"
 msgstr "Haben"
@@ -1327,7 +1315,6 @@ msgid "Net"
 msgstr "Netto"
 
 #: systori/lib/accounting/models.py:338
-#, fuzzy
 #| msgid "tax"
 msgid "Tax"
 msgstr "MWSt"
@@ -1338,7 +1325,6 @@ msgid "Gross"
 msgstr "Summe"
 
 #: systori/lib/accounting/models.py:341
-#, fuzzy
 #| msgid "Document Type"
 msgid "Value Type"
 msgstr "Dokumententyp"
@@ -1533,13 +1519,11 @@ msgid "Progress"
 msgstr "Fortschritt"
 
 #: systori/templates/accounting/adjustment_form.html:42
-#, fuzzy
 #| msgid "correction"
 msgid "Corrected"
 msgstr "Korrektur"
 
 #: systori/templates/accounting/amount_input_cell.html:4
-#, fuzzy
 #| msgid "next"
 msgid "net"
 msgstr "vor"
@@ -1547,7 +1531,6 @@ msgstr "vor"
 # msgid "Payment"
 # msgstr "Gesamtzahlung"
 #: systori/templates/accounting/refund_form.html:42
-#, fuzzy
 #| msgid "Applied"
 msgid "Apply Refund"
 msgstr "Anteil"
@@ -1631,7 +1614,6 @@ msgid "PDF"
 msgstr "PDF"
 
 #: systori/templates/document/invoice_card.html:49
-#, fuzzy
 #| msgid "Equipment Details"
 msgid "Email w/ Payment Details"
 msgstr "Rechnungsdetails"
@@ -1641,7 +1623,6 @@ msgid "Print"
 msgstr "Druck"
 
 #: systori/templates/document/invoice_card.html:51
-#, fuzzy
 #| msgid "Equipment Details"
 msgid "Print w/ Payment Details"
 msgstr "Rechnungsdetails"
@@ -1676,13 +1657,11 @@ msgid "Flat"
 msgstr "pauschal"
 
 #: systori/templates/document/invoice_form.html:90
-#, fuzzy
 #| msgid "Partial Invoice"
 msgid "Updated Invoice"
 msgstr "Abschlagsrechnung"
 
 #: systori/templates/document/invoice_form.html:91
-#, fuzzy
 #| msgid "Final Invoice"
 msgid "Original Invoice"
 msgstr "Schlussrechnung"
@@ -1784,7 +1763,6 @@ msgid "You have not been assigned to any job sites today."
 msgstr "Du bist noch keinem Einsatzort zugeteilt."
 
 #: systori/templates/field/job.html:16
-#, fuzzy
 #| msgid "Search"
 msgid "search"
 msgstr "Suche"
@@ -1916,7 +1894,6 @@ msgid "Reset estimate to original amount."
 msgstr "Angebot auf Ursprung setzen."
 
 #: systori/templates/project/project_detail.html:106
-#, fuzzy
 #| msgid "Create"
 msgid "Create Job"
 msgstr "Erstellen"
@@ -1946,7 +1923,6 @@ msgid "with Line Items Print"
 msgstr "Urkalk Druck"
 
 #: systori/templates/project/project_detail.html:166
-#, fuzzy
 #| msgid "Proposal"
 msgid "Create Proposal"
 msgstr "Angebot"
@@ -1989,16 +1965,12 @@ msgid "Add Payment"
 msgstr "Zahlung hinzufügen"
 
 #: systori/templates/project/project_detail.html:337
-#, fuzzy
-#| msgid "Adjustment"
 msgid "Adjustments"
 msgstr "Korrektur"
 
 #: systori/templates/project/project_detail.html:360
-#, fuzzy
-#| msgid "Adjustment"
 msgid "Add Adjustment"
-msgstr "Korrektur"
+msgstr "Korrektur hinzufügen"
 
 #: systori/templates/project/project_detail.html:397
 msgid "Add Refund"
@@ -2013,13 +1985,12 @@ msgid "Remove"
 msgstr "Entfernen"
 
 #: systori/templates/project/project_detail.html:435
-#, fuzzy
+    
 #| msgid "Contact"
 msgid "Add Contact"
 msgstr "Kontakt"
 
 #: systori/templates/project/project_detail.html:469
-#, fuzzy
 #| msgid "Job Sites"
 msgid "Create Job Site"
 msgstr "Einsatzorte"
@@ -2189,13 +2160,11 @@ msgid "Timestamp"
 msgstr "Zeitstempel"
 
 #: systori/templates/task/progressreport_list.html:12
-#, fuzzy
 #| msgid "Users"
 msgid "User"
 msgstr "Benutzer"
 
 #: systori/templates/task/progressreport_list.html:30
-#, fuzzy
 #| msgid "Comments"
 msgid "comment"
 msgstr "Kommentar"
