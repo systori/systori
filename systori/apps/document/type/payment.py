@@ -55,7 +55,7 @@ def collate_payments(invoice, font, available_width, show_payment_details):
         elif row[0] == 'unpaid':
             title = _('Open claim from prior invoices')
         elif row[0] == 'debit':
-            title = _('This invoice')
+            title = _('This Invoice')
         else:
             raise NotImplementedError()
 
