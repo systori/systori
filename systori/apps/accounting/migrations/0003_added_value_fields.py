@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from django.db import models, migrations
 from decimal import Decimal
+from datetime import date
 
 
 def split_gross_entries(apps, schema_editor):
@@ -70,14 +71,18 @@ def recalculate_invoices(apps, schema_editor):
         company.activate()
 
         for invoice in Invoice.objects.all():
+
+            invoice.json['debit'] = Amount(invoice.json['debit_net'], invoice.json['debit_tax'])
+            del invoice.json['debit_net'], invoice.json['debit_tax'], invoice.json['debit_gross']
+
             if 'debits' not in invoice.json:
-                print('skipping invoice #{}'.format(invoice.id))
+                invoice.json['jobs'] = []
+                invoice.save()
                 continue
+
             invoice.json['jobs'] = invoice.json['debits']
             del invoice.json['debits']
 
-            invoice.json['debit'] = Amount(invoice.json['debit_net'], invoice.json['debit_tax'])
-            del invoice.json['debit_net'], invoice.json['debit_tax']
             job_ids = []
             for job in invoice.json['jobs']:
                 job_ids.append(job['job.id'])
@@ -91,15 +96,16 @@ def recalculate_invoices(apps, schema_editor):
                 del job['estimate_net']
                 job['progress'] = Amount.from_net(job['itemized_net'], TAX_RATE)
                 del job['itemized_net']
+
             jobs = Job.objects.filter(id__in=job_ids)
-            new_json = create_invoice_report(invoice.transaction, jobs, invoice.document_date)
-            print(invoice.id)
-            if invoice.id == 85:
-                pass
-            # TODO: Fix failing asserts.
-            #assert len(new_json['transactions']) == len(invoice.json['transactions'])
-            print(new_json['invoiced'].gross, invoice.json['debited_gross'])
-            #assert new_json['invoiced'].gross == invoice.json['debited_gross']
+            tdate = date(*map(int, invoice.json['transactions'][-1]['date'].split('-')))
+            new_json = create_invoice_report(invoice.transaction, jobs, tdate)
+            if (company.schema == 'mehr_handwerk' and invoice.id not in [86, 111]) or \
+               (company.schema == 'montageservice_grad' and invoice.id not in [1]):
+                #print(company.schema, invoice.project_id, invoice.id, new_json['debit'].gross, invoice.json['debit'].gross)
+                #print(new_json['invoiced'].gross, invoice.json['debited_gross'])
+                assert new_json['debit'].gross == invoice.json['debit'].gross
+                assert new_json['invoiced'].gross == invoice.json['debited_gross']
             invoice.json.update(new_json)
             invoice.save()
 
@@ -113,10 +119,13 @@ def recalculate_invoices(apps, schema_editor):
             adjustment_t = Amount.zero()
             credit_t = Amount.zero()
 
+            if t.id == 154:
+                pass
+
             bank_account = None
             for entry in t.entries.all():
 
-                if entry.account.is_bank:
+                if entry.account.is_bank or entry.account.name == 'VR Bank Rhein-Neckar eG':
                     bank_account = entry.account
 
                 job = entry.job

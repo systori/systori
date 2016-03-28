@@ -11,7 +11,7 @@ from django import forms
 from systori.lib.fields import LocalizedDecimalField
 from systori.lib.accounting.tools import Amount, round as _round
 from ..task.models import Job
-from .workflow import Account, credit_jobs, debit_jobs, adjust_jobs
+from .workflow import Account, credit_jobs, debit_jobs, adjust_jobs, refund_jobs
 from .constants import TAX_RATE, BANK_CODE_RANGE
 from .models import Entry
 from ..document.models import Invoice, Adjustment, Payment, Refund, DocumentTemplate, DocumentSettings
@@ -493,126 +493,108 @@ class PaymentRowForm(DocumentRowForm):
 
     @property
     def json(self):
-        return {
-            'job': self.job,
-            'split': self.split_amount,
-            'discount': self.discount_amount,
-            'adjustment': self.adjustment_amount,
-            'credit': self.credit_amount
-        }
+        if any((self.split_amount.gross, self.discount_amount.gross, self.adjustment_amount.gross)):
+            return {
+                'job': self.job,
+                'split': self.split_amount,
+                'discount': self.discount_amount,
+                'adjustment': self.adjustment_amount,
+                'credit': self.credit_amount
+            }
 
     @property
     def transaction(self):
-        return self.job, self.split_amount, self.discount_amount, self.adjustment_amount
+        if any((self.split_amount.gross, self.discount_amount.gross, self.adjustment_amount.gross)):
+            return self.job, self.split_amount, self.discount_amount, self.adjustment_amount
 
 PaymentFormSet = formset_factory(PaymentRowForm, formset=BaseDocumentFormSet, extra=0)
 
 
 class RefundForm(DocumentForm):
-    title = forms.CharField(label=_('Title'), initial=_("Refund"))
-    header = forms.CharField(widget=forms.Textarea)
-    footer = forms.CharField(widget=forms.Textarea)
 
     class Meta(DocumentForm.Meta):
         model = Refund
-        fields = ['document_date', 'title', 'header', 'footer']
+        fields = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=RefundFormSet, **kwargs)
-        if len(jobs) <= 1:
-            not_overpaid_jobs = []  # if there is only one job, no sense to allow applying to the same job
-        else:
-            not_overpaid_jobs = [form.initial['job'] for form in self.refund_jobs_form.forms if form.overpaid_value <= 0]
-        self.apply_jobs_form = RefundFormSet(refund_total=self.refund_jobs_form.amount_total,
-                                                prefix='apply', initial=self.get_initial(not_overpaid_jobs),
-                                                **kwargs)
-        self.refund_amount = self.refund_jobs_form.amount_total - self.apply_jobs_form.amount_total
-
+        self.calculate_refund()
         self.calculate_totals([
-            'amount',
+            'paid',
             'invoiced',
-            'payments',
-            'overpaid',
-            'underpaid',
+            'invoiced_diff',
+            'progress',
+            'progress_diff',
+            'refund',
+            'refund_credit',
         ])
 
     def calculate_refund(self):
         refund_total = Amount.zero()
-        for form in self.forms:
+        for form in self.formset:
             refund_total += form.refund_amount
-        for form in self.forms:
+        for form in self.formset:
             refund_total = form.consume_refund(refund_total)
-
-    def get_amounts(self):
-        amounts = []
-        for form in self.forms:
-            if form.cleaned_data['amount']:
-                job = form.cleaned_data['job']
-                amount = form.cleaned_data['amount']
-                amounts.append((job, amount))
-        return amounts
-
-    def clean(self):
-        if self.prefix == 'apply':
-            applied = D(0.0)
-            for form in self.forms:
-                if form.cleaned_data['amount']:
-                    applied += form.cleaned_data['amount']
-            if applied > self.applicable_refund_total:
-                raise forms.ValidationError(_("Amount applied must be less than or equal to the refund amount."))
 
     @atomic
     def save(self, commit=True):
 
         refund = self.instance
+        data = self.cleaned_data
+        data['jobs'] = self.formset.get_json_rows()
 
-        refunded = self.refund_jobs_form.get_amounts()
-        applied = self.apply_jobs_form.get_amounts()
-        refund_total = self.refund_jobs_form.amount_total - self.apply_jobs_form.amount_total
+        if refund.transaction:
+            refund.transaction.delete()
 
-        data = self.cleaned_data.copy()
-        data.update({
-            'amount': refund_total
-        })
-
-        refund.transaction = refund_jobs(refunded, applied)
+        refund.transaction = refund_jobs(self.formset.get_transaction_rows())
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-
-        refund.letterhead = doc_settings.invoice_letterhead
         refund.json = refund_lib.serialize(refund, data)
-        refund.save()
+        refund.letterhead = doc_settings.invoice_letterhead
+
+        super().save(commit)
 
 
 class RefundRowForm(DocumentRowForm):
-    amount = LocalizedDecimalField(label=_("Amount"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    refund_net = LocalizedDecimalField(label=_("Refund Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    refund_tax = LocalizedDecimalField(label=_("Refund Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
 
-    refund_net = forms.DecimalField(label=_("Refund Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
-    refund_tax = forms.DecimalField(label=_("Refund Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
-
-    refund_credit_net = forms.DecimalField(label=_("Apply Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
-    refund_credit_tax = forms.DecimalField(label=_("Apply Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    refund_credit_net = LocalizedDecimalField(label=_("Apply Net"), max_digits=14, decimal_places=2, required=False)
+    refund_credit_tax = LocalizedDecimalField(label=_("Apply Tax"), max_digits=14, decimal_places=2, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.invoiced_value = self.initial['job'].account.invoiced_total.gross
-        self.payments_value = self.initial['job'].account.received_total.gross * -1
-        self.overpaid_value = max(D('0.00'), self.payments_value - self.invoiced_value)
-        self.underpaid_value = max(D('0.00'), self.invoiced_value - self.payments_value)
-        if 'refund' in self.prefix:
-            self.initial['amount'] = self.overpaid_value
-        self.amount_value = convert_field_to_value(self['amount'])
 
-        if self.progress_amount.gross < self.paid_amount.gross:
-            refund = self.paid_amount - self.progress_amount
+        # Paid Column
+        self.paid_amount = self.job.account.paid.negate
+
+        # Invoiced Column
+        if 'invoiced' in self.initial:
+            self.invoiced_amount = self.initial['invoiced']
+        else:
+            self.invoiced_amount = self.job.account.invoiced
+        self.invoiced_diff_amount = self.invoiced_amount - self.paid_amount
+
+        # Billable Column
+        self.progress_amount = Amount.from_net(self.job.progress_total, TAX_RATE)
+        self.progress_diff_amount = self.progress_amount - self.invoiced_amount
+
+        # Refund Column
+        if self.invoiced_amount.gross < self.paid_amount.gross:
+            refund = self.paid_amount - self.invoiced_amount
             self.initial['refund_net'] = refund.net
             self.initial['refund_tax'] = refund.tax
-            if refund.gross > (self.initial['adjustment_net']+self.initial['adjustment_net']):
-                self.initial['adjustment_net'] = D('0.00')
-                self.initial['adjustment_tax'] = D('0.00')
-            else:
-                self.initial['adjustment_net'] -= refund.net
-                self.initial['adjustment_tax'] -= refund.tax
+
+        self.refund_amount = Amount(
+            convert_field_to_value(self['refund_net']),
+            convert_field_to_value(self['refund_tax'])
+        )
+
+        # Apply Column
+        self.refund_credit_amount = Amount(
+            convert_field_to_value(self['refund_credit_net']),
+            convert_field_to_value(self['refund_credit_tax'])
+        )
 
     def consume_refund(self, refund):
         if self.progress_amount.gross > self.paid_amount.gross:
@@ -625,11 +607,17 @@ class RefundRowForm(DocumentRowForm):
             refund -= consumable
         return refund
 
-    def clean(self):
-        if 'refund' in self.prefix:
-            if self.cleaned_data['amount'] > self.payments_value:
-                self.add_error('amount', ValidationError(_("Cannot refund more than has been paid.")))
+    @property
+    def json(self):
+        return {
+            'job': self.job,
+            'refund': self.refund_amount,
+            'refund_credit': self.refund_credit_amount
+        }
 
+    @property
+    def transaction(self):
+        return self.job, self.refund_amount, self.refund_credit_amount
 
 RefundFormSet = formset_factory(RefundRowForm, formset=BaseDocumentFormSet, extra=0)
 

@@ -211,13 +211,20 @@ class PaymentDelete(DeleteView):
         return self.request.project.get_absolute_url()
 
 
-class RefundCreate(CreateView):
-    form_class = RefundForm
+class RefundFormMixin:
     model = Refund
+    form_class = RefundForm
+    template_name = 'accounting/refund_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TAX_RATE'] = TAX_RATE
+        return context
 
     def get_form_kwargs(self):
+        jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems')
         kwargs = {
-            'jobs': self.request.project.jobs.all(),
+            'jobs': jobs,
             'instance': self.model(project=self.request.project),
         }
         if self.request.method == 'POST':
@@ -226,6 +233,13 @@ class RefundCreate(CreateView):
 
     def get_success_url(self):
         return self.request.project.get_absolute_url()
+
+
+class RefundCreate(RefundFormMixin, CreateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'].json['jobs'] = []
+        return kwargs
 
 
 class RefundDelete(DeleteView):
@@ -240,7 +254,7 @@ class RefundDelete(DeleteView):
         return HttpResponseRedirect(success_url)
 
     def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+        return self.request.project.get_absolute_url()
 
 
 class AccountList(TemplateView):

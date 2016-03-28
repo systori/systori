@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Payment',
                 'verbose_name_plural': 'Payments',
-                'ordering': ['id'],
+                'ordering': ['document_date'],
             },
         ),
         migrations.AddField(

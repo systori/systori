@@ -360,37 +360,33 @@
   <a  name="add_adjustment" href="{% url 'adjustment.create' project.id %}">{% trans "Add Adjustment" %}</a>
 
 
-  <h2 class="sub-header">{% trans "Refunds" %}</h2>
-  <div class="table-responsive" style="padding-bottom:110px;">
+  <style>
+    #refunds-table .job-row {
+      font-size: 75%;
+      color: gray;
+      text-align: right;
+    }
+    #refunds-table .job-row.last {
+      border-bottom: 2px solid #ddd;
+    }
+  </style>
+  <h2 class="sub-header">{% trans "Refund" %}</h2>
+  <div class="table-responsive">
     <table class="table" id="refunds-table">
       <thead>
       <tr>
         <th>{% trans 'Date' %}</th>
-        <th class="text-right">{% trans 'Refund' %}</th>
-        <th>{% trans 'Download' %}</th>
-        <th>{% trans 'Actions' %}</th>
+        <th class="text-right" colspan="3">{% trans 'Actions' %}</th>
       </tr>
       </thead>
       <tbody>
-      {% for refund in project.refunds.all %}
+      {% for doc in refunds %}
         <tr>
-          <td>{{ refund.document_date|localize }}</td>
-          <td class="text-right">{{ refund.json.amount|money }}</td>
-          <td style="min-width: 100px;">
-            <div class="btn-group">
-              <button type="button" class="btn btn-default">{% trans 'PDF' %}</button>
-              <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                <span class="caret"></span>
-                <span class="sr-only">Toggle Dropdown</span>
-              </button>
-              <ul class="dropdown-menu" role="menu">
-                <li><a target="_blank" href="{% url 'refund.pdf' project.id 'email' refund.id %}">{% trans 'Email PDF' %}</a></li>
-                <li><a target="_blank" href="{% url 'refund.pdf' project.id 'print' refund.id %}">{% trans 'Print PDF' %}</a></li>
-              </ul>
-            </div>
-          </td>
+          <td>{{ doc.document_date|localize }}</td>
           <td class="text-right">
-            <a href="{% url 'refund.delete' project.id refund.id %}">{% trans "Delete" %}</a>
+            {% if not doc.transaction.is_reconciled %}
+              <a href="{% url 'refund.delete' project.id doc.id %}">{% trans "Delete" %}</a>
+            {% endif %}
           </td>
         </tr>
       {% endfor %}
