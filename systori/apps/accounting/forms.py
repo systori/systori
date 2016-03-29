@@ -526,7 +526,7 @@ class RefundForm(DocumentForm):
             'progress',
             'progress_diff',
             'refund',
-            'refund_credit',
+            'credit',
         ])
 
     def calculate_refund(self):
@@ -559,8 +559,8 @@ class RefundRowForm(DocumentRowForm):
     refund_net = LocalizedDecimalField(label=_("Refund Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
     refund_tax = LocalizedDecimalField(label=_("Refund Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
 
-    refund_credit_net = LocalizedDecimalField(label=_("Apply Net"), max_digits=14, decimal_places=2, required=False)
-    refund_credit_tax = LocalizedDecimalField(label=_("Apply Tax"), max_digits=14, decimal_places=2, required=False)
+    credit_net = LocalizedDecimalField(label=_("Apply Net"), max_digits=14, decimal_places=2, required=False)
+    credit_tax = LocalizedDecimalField(label=_("Apply Tax"), max_digits=14, decimal_places=2, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -591,9 +591,9 @@ class RefundRowForm(DocumentRowForm):
         )
 
         # Apply Column
-        self.refund_credit_amount = Amount(
-            convert_field_to_value(self['refund_credit_net']),
-            convert_field_to_value(self['refund_credit_tax'])
+        self.credit_amount = Amount(
+            convert_field_to_value(self['credit_net']),
+            convert_field_to_value(self['credit_tax'])
         )
 
     def consume_refund(self, refund):
@@ -601,9 +601,9 @@ class RefundRowForm(DocumentRowForm):
             consumable = self.progress_amount - self.paid_amount
             if refund.gross < consumable.gross:
                 consumable = refund
-            self.initial['refund_credit_net'] = consumable.net
-            self.initial['refund_credit_tax'] = consumable.tax
-            self.refund_credit_amount = consumable
+            self.initial['credit_net'] = consumable.net
+            self.initial['credit_tax'] = consumable.tax
+            self.credit_amount = consumable
             refund -= consumable
         return refund
 
@@ -612,12 +612,12 @@ class RefundRowForm(DocumentRowForm):
         return {
             'job': self.job,
             'refund': self.refund_amount,
-            'refund_credit': self.refund_credit_amount
+            'credit': self.credit_amount
         }
 
     @property
     def transaction(self):
-        return self.job, self.refund_amount, self.refund_credit_amount
+        return self.job, self.refund_amount, self.credit_amount
 
 RefundFormSet = formset_factory(RefundRowForm, formset=BaseDocumentFormSet, extra=0)
 
