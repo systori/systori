@@ -58,11 +58,10 @@ def split_gross_entries(apps, schema_editor):
                         entry.save()
 
 
-def recalculate_invoices(apps, schema_editor):
+def migrate_invoices(apps, schema_editor):
     from systori.apps.company.models import Company
-    from systori.apps.document.models import Invoice, Payment, DocumentSettings
+    from systori.apps.document.models import Invoice
     from systori.apps.task.models import Job
-    from systori.apps.accounting.models import Transaction
     from systori.apps.accounting.report import create_invoice_report
     from systori.apps.accounting.constants import TAX_RATE
     from systori.lib.accounting.tools import Amount
@@ -109,9 +108,22 @@ def recalculate_invoices(apps, schema_editor):
             invoice.json.update(new_json)
             invoice.save()
 
+def migrate_payments(apps, schema_editor):
+    from systori.apps.company.models import Company
+    from systori.apps.document.models import Payment, DocumentSettings
+    from systori.apps.task.models import Job
+    from systori.apps.accounting.models import Transaction
+    from systori.lib.accounting.tools import Amount
+
+    print('payment migration..')
+
+    for company in Company.objects.all():
+        company.activate()
+
         for t in Transaction.objects.filter(transaction_type=Transaction.PAYMENT):
 
             job = None
+            job_dict = None
 
             jobs = {}
             split_t = Amount.zero()
@@ -119,14 +131,17 @@ def recalculate_invoices(apps, schema_editor):
             adjustment_t = Amount.zero()
             credit_t = Amount.zero()
 
-            if t.id == 154:
-                pass
+            if t.id in [9, 154, 297, 307]:
+                entry = t.entries.first()
+                print('Company: ', company.schema, ', Transaction ID:', t.id, ', Date:', t.transacted_on, ', Bank:', entry.account.name, ', Amount:', entry.amount.gross, ', Entries: ', t.entries.count())
+                continue
 
             bank_account = None
             for entry in t.entries.all():
 
                 if entry.account.is_bank or entry.account.name == 'VR Bank Rhein-Neckar eG':
                     bank_account = entry.account
+                    continue
 
                 job = entry.job
                 if job:
@@ -155,31 +170,28 @@ def recalculate_invoices(apps, schema_editor):
                         job_dict['credit'] += entry.amount.negate
                         credit_t += entry.amount
 
-            if bank_account and job:
-                letterhead = DocumentSettings.get_for_language('de').invoice_letterhead
-                payment = Payment(
-                    project=job.project,
-                    document_date=t.transacted_on,
-                    transaction=t,
-                    letterhead=letterhead
-                )
-                payment.json.update({
-                    'bank.id': bank_account.id,
-                    'date': t.transacted_on,
-                    'payment': credit_t.negate.gross,
-                    'discount': Decimal('0.00'),
-                    'split_total': credit_t.negate,
-                    'discount_total': discount_t.negate,
-                    'adjustment_total': adjustment_t.negate,
-                    'credit_total': credit_t.negate,
-                    'jobs': jobs.values(),
-                })
-                payment.save()
-            else:
-                if job:
-                    print('No Bank Account: %s' % (job.project.name,))
-                else:
-                    print('No Job')
+            assert job
+            assert bank_account
+
+            letterhead = DocumentSettings.get_for_language('de').invoice_letterhead
+            payment = Payment(
+                project=job.project,
+                document_date=t.transacted_on,
+                transaction=t,
+                letterhead=letterhead
+            )
+            payment.json.update({
+                'bank.id': bank_account.id,
+                'date': t.transacted_on,
+                'payment': credit_t.negate.gross,
+                'discount': Decimal('0.00'),
+                'split_total': credit_t.negate,
+                'discount_total': discount_t.negate,
+                'adjustment_total': adjustment_t.negate,
+                'credit_total': credit_t.negate,
+                'jobs': jobs.values(),
+            })
+            payment.save()
 
 
 class Migration(migrations.Migration):
@@ -221,5 +233,6 @@ class Migration(migrations.Migration):
             field=models.CharField(max_length=32, verbose_name='Transaction Type', null=True, choices=[('invoice', 'Invoice'), ('payment', 'Payment'), ('adjustment', 'Adjustment'), ('refund', 'Refund')]),
         ),
         migrations.RunPython(split_gross_entries),
-        migrations.RunPython(recalculate_invoices)
+        migrations.RunPython(migrate_invoices),
+        migrations.RunPython(migrate_payments)
     ]
