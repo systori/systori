@@ -1,48 +1,86 @@
 from django import forms
 from django.conf import settings
-from django.forms import widgets
+from django.db.transaction import atomic
+from django.forms.formsets import formset_factory
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import get_language
+from systori.lib.accounting.tools import Amount
+from ..accounting.forms import DocumentForm, DocumentRowForm, BaseDocumentFormSet
+from ..accounting.constants import TAX_RATE
 from .models import Proposal, DocumentTemplate, Letterhead, DocumentSettings
 from .letterhead_utils import clean_letterhead_pdf
+from . import type as pdf_type
 
 
-class ProposalForm(forms.ModelForm):
+class ProposalForm(DocumentForm):
     doc_template = forms.ModelChoiceField(
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.PROPOSAL), required=False)
     add_terms = forms.BooleanField(label=_('Add Terms'),
                                    initial=True, required=False)
+    title = forms.CharField(label=_('Title'), initial=_("Proposal"))
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['jobs'].queryset = self.instance.project.jobs_for_proposal
+    class Meta(DocumentForm.Meta):
+        model = Proposal
+        fields = ['doc_template', 'document_date', 'title', 'header', 'footer', 'add_terms']
+
+    def __init__(self, *args, jobs, **kwargs):
+        super().__init__(*args, formset_class=ProposalFormSet, jobs=jobs, **kwargs)
         default_text = DocumentSettings.get_for_language(settings.LANGUAGE_CODE)
         if default_text and default_text.proposal_text:
             rendered = default_text.proposal_text.render(self.instance.project)
             self.initial['header'] = rendered['header']
             self.initial['footer'] = rendered['footer']
 
-    class Meta:
-        model = Proposal
-        fields = ['doc_template', 'document_date', 'header', 'footer',
-                  'jobs', 'add_terms', 'notes']
-        widgets = {
-            'document_date': widgets.DateInput(attrs={'type': 'date'}),
-        }
+        self.calculate_totals([
+            'estimate',
+        ], lambda form: str(form['is_attached'].value()) == 'True')
+
+    @atomic
+    def save(self, commit=True):
+
+        proposal = self.instance
+        data = self.cleaned_data.copy()
+        data.update({
+            'jobs': self.formset.get_json_rows(),
+            'estimate_total': self.estimate_total_amount
+        })
+
+        doc_settings = DocumentSettings.get_for_language(get_language())
+        proposal.json = pdf_type.proposal.serialize(proposal, data)
+        proposal.letterhead = doc_settings.proposal_letterhead
+
+        super().save(commit)
+
+        proposal.jobs = self.formset.get_transaction_rows()
 
 
-class ProposalUpdateForm(forms.ModelForm):
-    header = forms.CharField(widget=forms.Textarea)
-    footer = forms.CharField(widget=forms.Textarea)
+class ProposalRowForm(DocumentRowForm):
 
-    class Meta:
-        model = Proposal
-        fields = ['document_date', 'header', 'footer', 'notes']
-        widgets = {
-            'document_date': widgets.DateInput(attrs={'type': 'date'}),
-        }
+    is_attached = forms.BooleanField(initial=False, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.estimate_amount = Amount.from_net(self.job.estimate_total, TAX_RATE)
+
+    @property
+    def json(self):
+        if str(self['is_attached'].value()) == 'True':
+            return {
+                'job': self.job,
+                'is_attached': True,
+                'estimate': self.estimate_amount
+            }
+
+    @property
+    def transaction(self):
+        if str(self['is_attached'].value()) == 'True':
+            return self.job
+
+
+ProposalFormSet = formset_factory(ProposalRowForm, formset=BaseDocumentFormSet, extra=0)
 
 
 class LetterheadCreateForm(forms.ModelForm):

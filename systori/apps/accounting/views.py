@@ -9,7 +9,7 @@ from .models import *
 from .forms import *
 
 
-class InvoiceFormMixin:
+class InvoiceViewMixin:
     model = Invoice
     form_class = InvoiceForm
 
@@ -33,7 +33,7 @@ class InvoiceFormMixin:
         return self.request.project.get_absolute_url()
 
 
-class InvoiceCreate(InvoiceFormMixin, CreateView):
+class InvoiceCreate(InvoiceViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         instance = kwargs['instance']
@@ -53,7 +53,7 @@ class InvoiceCreate(InvoiceFormMixin, CreateView):
         return kwargs
 
 
-class InvoiceUpdate(InvoiceFormMixin, UpdateView):
+class InvoiceUpdate(InvoiceViewMixin, UpdateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.object
@@ -97,7 +97,7 @@ class InvoiceDelete(DeleteView):
         return reverse('project.view', args=[self.object.project.id])
 
 
-class AdjustmentFormMixin:
+class AdjustmentViewMixin:
     model = Adjustment
     form_class = AdjustmentForm
     template_name = 'accounting/adjustment_form.html'
@@ -121,7 +121,7 @@ class AdjustmentFormMixin:
         return self.request.project.get_absolute_url()
 
 
-class AdjustmentCreate(AdjustmentFormMixin, CreateView):
+class AdjustmentCreate(AdjustmentViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         if 'invoice_pk' in self.kwargs:
@@ -152,7 +152,7 @@ class AdjustmentDelete(DeleteView):
         return self.request.project.get_absolute_url()
 
 
-class PaymentFormMixin:
+class PaymentViewMixin:
     model = Payment
     form_class = PaymentForm
     template_name = 'accounting/payment_form.html'
@@ -176,7 +176,7 @@ class PaymentFormMixin:
         return self.request.project.get_absolute_url()
 
 
-class PaymentCreate(PaymentFormMixin, CreateView):
+class PaymentCreate(PaymentViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         instance = kwargs['instance']
@@ -211,7 +211,7 @@ class PaymentDelete(DeleteView):
         return self.request.project.get_absolute_url()
 
 
-class RefundFormMixin:
+class RefundViewMixin:
     model = Refund
     form_class = RefundForm
     template_name = 'accounting/refund_form.html'
@@ -235,7 +235,7 @@ class RefundFormMixin:
         return self.request.project.get_absolute_url()
 
 
-class RefundCreate(RefundFormMixin, CreateView):
+class RefundCreate(RefundViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['instance'].json['jobs'] = []

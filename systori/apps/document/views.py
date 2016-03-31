@@ -10,9 +10,10 @@ from django.utils.translation import get_language
 
 from ..project.models import Project
 from ..task.models import Job
+from ..accounting.constants import TAX_RATE
 from .models import Proposal, Invoice, Adjustment, Refund, DocumentTemplate, Letterhead, DocumentSettings
-from .forms import ProposalForm, ProposalUpdateForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
-from .type import proposal, invoice, adjustment, refund, evidence, letterhead, itemized_listing
+from .forms import ProposalForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
+from . import type as pdf_type
 
 
 class InvoiceList(ListView):
@@ -51,7 +52,8 @@ class InvoicePDF(DocumentRenderView):
     def pdf(self):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
-        return invoice.render(json, letterhead, self.request.GET.get('payment_details', False), self.kwargs['format'])
+        payment_details = self.request.GET.get('payment_details', False)
+        return pdf_type.invoice.render(json, letterhead, payment_details, self.kwargs['format'])
 
 
 class AdjustmentPDF(DocumentRenderView):
@@ -60,7 +62,7 @@ class AdjustmentPDF(DocumentRenderView):
     def pdf(self):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
-        return adjustment.render(json, letterhead, self.kwargs['format'])
+        return pdf_type.adjustment.render(json, letterhead, self.kwargs['format'])
 
 
 class RefundPDF(DocumentRenderView):
@@ -69,7 +71,7 @@ class RefundPDF(DocumentRenderView):
     def pdf(self):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
-        return refund.render(json, letterhead, self.kwargs['format'])
+        return pdf_type.refund.render(json, letterhead, self.kwargs['format'])
 
 
 class ProposalPDF(DocumentRenderView):
@@ -78,60 +80,45 @@ class ProposalPDF(DocumentRenderView):
     def pdf(self):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
-        return proposal.render(json, letterhead, self.request.GET.get('with_lineitems', False), self.kwargs['format'])
+        with_lineitems = self.request.GET.get('with_lineitems', False)
+        return pdf_type.proposal.render(json, letterhead, with_lineitems, self.kwargs['format'])
 
 
-class ProposalCreate(CreateView):
+class ProposalViewMixin:
+    model = Proposal
     form_class = ProposalForm
-    model = Proposal
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TAX_RATE'] = TAX_RATE
+        return context
 
     def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['instance'] = self.model(project=self.request.project)
+        jobs = self.request.project.jobs_for_proposal.prefetch_related('taskgroups__tasks__taskinstances__lineitems').all()
+        kwargs = {
+            'jobs': jobs,
+            'instance': self.model(project=self.request.project),
+        }
+        if self.request.method == 'POST':
+            kwargs['data'] = self.request.POST.copy()
         return kwargs
 
-    def form_valid(self, form):
-        form.cleaned_data['jobs'] = [
-            Job.prefetch(job.id) for job in form.cleaned_data['jobs']
-            ]
-
-        amount = Decimal(0.0)
-        for job in form.cleaned_data['jobs']:
-            amount += job.estimate_total
-
-        data = form.cleaned_data
-        data['amount'] = amount
-
-        doc_settings = DocumentSettings.get_for_language(get_language())
-
-        form.instance.letterhead = doc_settings.proposal_letterhead
-        form.instance.json = proposal.serialize(self.request.project, data)
-
-        return super().form_valid(form)
-
     def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+        return self.request.project.get_absolute_url()
 
 
-class ProposalUpdate(UpdateView):
-    form_class = ProposalUpdateForm
-    model = Proposal
-
+class ProposalCreate(ProposalViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['initial'] = self.object.json
+        kwargs['instance'].json['jobs'] = []
         return kwargs
 
-    def get_queryset(self):
-        return super().get_queryset().filter(project=self.request.project)
 
-    def form_valid(self, form):
-        proposal.update(self.object, form.cleaned_data)
-        self.object.save()
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+class ProposalUpdate(ProposalViewMixin, UpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.object
+        return kwargs
 
 
 class ProposalTransition(SingleObjectMixin, View):
@@ -171,7 +158,7 @@ class EvidencePDF(DocumentRenderView):
         project = Project.prefetch(self.kwargs['project_pk'])
         doc_settings = DocumentSettings.get_for_language(get_language())
         letterhead = doc_settings.evidence_letterhead
-        return evidence.render(project, letterhead)
+        return pdf_type.evidence.render(project, letterhead)
 
 
 # Itemized List
@@ -181,7 +168,7 @@ class ItemizedListingPDF(DocumentRenderView):
 
     def pdf(self):
         project = Project.prefetch(self.kwargs['project_pk'])
-        return itemized_listing.render(project, self.kwargs['format'])
+        return pdf_type.itemized_listing.render(project, self.kwargs['format'])
 
 # Document Template
 
@@ -237,7 +224,7 @@ class LetterheadDelete(DeleteView):
 
 class LetterheadPreview(DocumentRenderView):
     def pdf(self):
-        return letterhead.render(letterhead=Letterhead.objects.get(id=self.kwargs.get('pk')))
+        return pdf_type.letterhead.render(letterhead=Letterhead.objects.get(id=self.kwargs.get('pk')))
 
 
 # Document Settings

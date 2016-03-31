@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 from decimal import Decimal
 from datetime import date
+from django.utils.translation import ugettext as _
 
 
 def split_gross_entries(apps, schema_editor):
@@ -56,6 +57,61 @@ def split_gross_entries(apps, schema_editor):
                     else:
                         entry.value_type = value_type
                         entry.save()
+
+
+def migrate_proposals(apps, schema_editor):
+    from systori.apps.company.models import Company
+    from systori.apps.task.models import Job
+    from systori.apps.document.models import Proposal
+    from systori.apps.accounting.constants import TAX_RATE
+    from systori.lib.accounting.tools import Amount
+
+    for company in Company.objects.all():
+        company.activate()
+
+        for proposal in Proposal.objects.all():
+
+            try:
+                if 'total_base' not in proposal.json and 'jobs' not in proposal.json:
+                    proposal.json['date'] = proposal.document_date
+                    proposal.json['estimate_total'] = Amount(proposal.json['total_net'], proposal.json['total_gross']-proposal.json['total_net'])
+                    proposal.json['jobs'] = []
+
+                else:
+                    proposal.json['estimate_total'] = Amount(proposal.json['total_base'], proposal.json['total_tax'])
+                    del proposal.json['total_base'], proposal.json['total_tax'], proposal.json['total_gross']
+
+                proposal.json['id'] = proposal.id
+                proposal.json['title'] = _('Proposal')
+
+                for job in proposal.json['jobs']:
+
+                    if 'id' in job:
+                        job['job.id'] = job['id']
+                        del job['id']
+
+                    else:
+                        job_obj = Job.objects.filter(project=proposal.project, name=job['name']).get()
+                        job['job.id'] = job_obj.id
+
+                    job_estimate_net = Decimal('0.00')
+                    for group in job['taskgroups']:
+                        group['estimate_net'] = group['total']
+                        del group['total']
+                        job_estimate_net += Decimal(group['estimate_net'])
+                        for task in group['tasks']:
+                            task['estimate_net'] = task['total']
+                            del task['total']
+                    job['estimate'] = Amount.from_net(job_estimate_net, TAX_RATE)
+
+                proposal.save()
+
+            except:
+
+                if proposal.status == proposal.DECLINED:
+                    proposal.delete()
+                else:
+                    raise
 
 
 def migrate_invoices(apps, schema_editor):
@@ -233,6 +289,7 @@ class Migration(migrations.Migration):
             field=models.CharField(max_length=32, verbose_name='Transaction Type', null=True, choices=[('invoice', 'Invoice'), ('payment', 'Payment'), ('adjustment', 'Adjustment'), ('refund', 'Refund')]),
         ),
         migrations.RunPython(split_gross_entries),
+        migrations.RunPython(migrate_proposals),
         migrations.RunPython(migrate_invoices),
         migrations.RunPython(migrate_payments)
     ]

@@ -9,16 +9,13 @@ from django.forms import Form, ModelForm, ValidationError, widgets
 from django.db.transaction import atomic
 from django import forms
 from systori.lib.fields import LocalizedDecimalField
-from systori.lib.accounting.tools import Amount, round as _round
+from systori.lib.accounting.tools import Amount
 from ..task.models import Job
 from .workflow import Account, credit_jobs, debit_jobs, adjust_jobs, refund_jobs
 from .constants import TAX_RATE, BANK_CODE_RANGE
 from .models import Entry
 from ..document.models import Invoice, Adjustment, Payment, Refund, DocumentTemplate, DocumentSettings
-from ..document.type import invoice as invoice_lib
-from ..document.type import refund as refund_lib
-from ..document.type import adjustment as adjustment_lib
-from ..document.type import payment as payment_lib
+from ..document import type as pdf_type
 
 
 def convert_field_to_value(field):
@@ -98,7 +95,7 @@ class DocumentRowForm(Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.job = self.initial['job']
-        self.fields['job'].queryset = self.initial.pop('jobs')
+        self.fields['job'].queryset = self.initial['jobs']
 
     @property
     def json(self):
@@ -172,7 +169,7 @@ class InvoiceForm(DocumentForm):
         invoice.transaction = debit_jobs(self.formset.get_transaction_rows(), recognize_revenue=data['is_final'])
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        invoice.json = invoice_lib.serialize(invoice, data)
+        invoice.json = pdf_type.invoice.serialize(invoice, data)
         invoice.letterhead = doc_settings.invoice_letterhead
 
         super().save(commit)
@@ -317,7 +314,7 @@ class AdjustmentForm(DocumentForm):
         adjustment.transaction = adjust_jobs(self.formset.get_transaction_rows())
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        adjustment.json = adjustment_lib.serialize(adjustment, data)
+        adjustment.json = pdf_type.adjustment.serialize(adjustment, data)
         adjustment.letterhead = doc_settings.invoice_letterhead
 
         super().save(commit)
@@ -451,7 +448,7 @@ class PaymentForm(DocumentForm):
         )
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        payment.json = payment_lib.serialize(payment, data)
+        payment.json = pdf_type.payment.serialize(payment, data)
         payment.letterhead = doc_settings.invoice_letterhead
 
         invoice = self.instance.invoice
@@ -549,7 +546,7 @@ class RefundForm(DocumentForm):
         refund.transaction = refund_jobs(self.formset.get_transaction_rows())
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        refund.json = refund_lib.serialize(refund, data)
+        refund.json = pdf_type.refund.serialize(refund, data)
         refund.letterhead = doc_settings.invoice_letterhead
 
         super().save(commit)

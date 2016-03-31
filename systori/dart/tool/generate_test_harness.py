@@ -76,7 +76,7 @@ def generate_pages():
     client.login(username=data.user.email, password='open sesame')
 
     editor = client.get(reverse('tasks', args=[data.project.id, data.job1.id]))
-    write_test_html('proposal_editor', editor.content)
+    write_test_html('task_editor', editor.content)
 
     payment_create = client.get(reverse('payment.create', args=[data.project.id]))
     write_test_html('payment_editor', payment_create.content)
