@@ -9,16 +9,13 @@ from django.forms import Form, ModelForm, ValidationError, widgets
 from django.db.transaction import atomic
 from django import forms
 from systori.lib.fields import LocalizedDecimalField
-from systori.lib.accounting.tools import Amount, round as _round
+from systori.lib.accounting.tools import Amount
 from ..task.models import Job
 from .workflow import Account, credit_jobs, debit_jobs, adjust_jobs, refund_jobs
 from .constants import TAX_RATE, BANK_CODE_RANGE
 from .models import Entry
 from ..document.models import Invoice, Adjustment, Payment, Refund, DocumentTemplate, DocumentSettings
-from ..document.type import invoice as invoice_lib
-from ..document.type import refund as refund_lib
-from ..document.type import adjustment as adjustment_lib
-from ..document.type import payment as payment_lib
+from ..document import type as pdf_type
 
 
 def convert_field_to_value(field):
@@ -98,7 +95,7 @@ class DocumentRowForm(Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.job = self.initial['job']
-        self.fields['job'].queryset = self.initial.pop('jobs')
+        self.fields['job'].queryset = self.initial['jobs']
 
     @property
     def json(self):
@@ -130,7 +127,7 @@ class InvoiceForm(DocumentForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=InvoiceFormSet, **kwargs)
 
-        if hasattr(self.instance, 'parent'):
+        if self.instance.parent:
             self.fields['parent'].queryset = Invoice.objects.filter(id=self.instance.parent.id)
 
         if not self.initial.get('header', None) or not self.initial.get('footer', None):
@@ -172,7 +169,7 @@ class InvoiceForm(DocumentForm):
         invoice.transaction = debit_jobs(self.formset.get_transaction_rows(), recognize_revenue=data['is_final'])
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        invoice.json = invoice_lib.serialize(invoice, data)
+        invoice.json = pdf_type.invoice.serialize(invoice, data)
         invoice.letterhead = doc_settings.invoice_letterhead
 
         super().save(commit)
@@ -317,7 +314,7 @@ class AdjustmentForm(DocumentForm):
         adjustment.transaction = adjust_jobs(self.formset.get_transaction_rows())
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        adjustment.json = adjustment_lib.serialize(adjustment, data)
+        adjustment.json = pdf_type.adjustment.serialize(adjustment, data)
         adjustment.letterhead = doc_settings.invoice_letterhead
 
         super().save(commit)
@@ -451,7 +448,7 @@ class PaymentForm(DocumentForm):
         )
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        payment.json = payment_lib.serialize(payment, data)
+        payment.json = pdf_type.payment.serialize(payment, data)
         payment.letterhead = doc_settings.invoice_letterhead
 
         invoice = self.instance.invoice
@@ -512,13 +509,22 @@ PaymentFormSet = formset_factory(PaymentRowForm, formset=BaseDocumentFormSet, ex
 
 class RefundForm(DocumentForm):
 
+    doc_template = forms.ModelChoiceField(
+        queryset=DocumentTemplate.objects.filter(
+            document_type=DocumentTemplate.INVOICE), required=False)
+
+    title = forms.CharField(label=_('Title'), initial=_("Refund"), required=False)
+    header = forms.CharField(widget=forms.Textarea, initial='', required=False)
+    footer = forms.CharField(widget=forms.Textarea, initial='', required=False)
+
     class Meta(DocumentForm.Meta):
         model = Refund
         fields = []
+        fields = ['doc_template', 'document_date', 'title', 'header', 'footer', 'notes']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=RefundFormSet, **kwargs)
-        self.calculate_refund()
+        self.customer_refund_amount = self.calculate_refund()
         self.calculate_totals([
             'paid',
             'invoiced',
@@ -526,7 +532,7 @@ class RefundForm(DocumentForm):
             'progress',
             'progress_diff',
             'refund',
-            'refund_credit',
+            'credit',
         ])
 
     def calculate_refund(self):
@@ -535,6 +541,7 @@ class RefundForm(DocumentForm):
             refund_total += form.refund_amount
         for form in self.formset:
             refund_total = form.consume_refund(refund_total)
+        return refund_total
 
     @atomic
     def save(self, commit=True):
@@ -549,7 +556,7 @@ class RefundForm(DocumentForm):
         refund.transaction = refund_jobs(self.formset.get_transaction_rows())
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        refund.json = refund_lib.serialize(refund, data)
+        refund.json = pdf_type.refund.serialize(refund, data)
         refund.letterhead = doc_settings.invoice_letterhead
 
         super().save(commit)
@@ -559,8 +566,8 @@ class RefundRowForm(DocumentRowForm):
     refund_net = LocalizedDecimalField(label=_("Refund Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
     refund_tax = LocalizedDecimalField(label=_("Refund Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
 
-    refund_credit_net = LocalizedDecimalField(label=_("Apply Net"), max_digits=14, decimal_places=2, required=False)
-    refund_credit_tax = LocalizedDecimalField(label=_("Apply Tax"), max_digits=14, decimal_places=2, required=False)
+    credit_net = LocalizedDecimalField(label=_("Apply Net"), max_digits=14, decimal_places=2, required=False)
+    credit_tax = LocalizedDecimalField(label=_("Apply Tax"), max_digits=14, decimal_places=2, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -591,9 +598,9 @@ class RefundRowForm(DocumentRowForm):
         )
 
         # Apply Column
-        self.refund_credit_amount = Amount(
-            convert_field_to_value(self['refund_credit_net']),
-            convert_field_to_value(self['refund_credit_tax'])
+        self.credit_amount = Amount(
+            convert_field_to_value(self['credit_net']),
+            convert_field_to_value(self['credit_tax'])
         )
 
     def consume_refund(self, refund):
@@ -601,9 +608,9 @@ class RefundRowForm(DocumentRowForm):
             consumable = self.progress_amount - self.paid_amount
             if refund.gross < consumable.gross:
                 consumable = refund
-            self.initial['refund_credit_net'] = consumable.net
-            self.initial['refund_credit_tax'] = consumable.tax
-            self.refund_credit_amount = consumable
+            self.initial['credit_net'] = consumable.net
+            self.initial['credit_tax'] = consumable.tax
+            self.credit_amount = consumable
             refund -= consumable
         return refund
 
@@ -612,12 +619,12 @@ class RefundRowForm(DocumentRowForm):
         return {
             'job': self.job,
             'refund': self.refund_amount,
-            'refund_credit': self.refund_credit_amount
+            'credit': self.credit_amount
         }
 
     @property
     def transaction(self):
-        return self.job, self.refund_amount, self.refund_credit_amount
+        return self.job, self.refund_amount, self.credit_amount
 
 RefundFormSet = formset_factory(RefundRowForm, formset=BaseDocumentFormSet, extra=0)
 
