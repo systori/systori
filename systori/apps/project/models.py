@@ -213,7 +213,7 @@ class Project(models.Model):
 
     @property
     def jobs_for_proposal(self):
-        return self.jobs.filter(status=Job.DRAFT)
+        return self.jobs.filter(status__in=Job.STATUS_FOR_PROPOSAL)
 
     @property
     def has_jobs_for_proposal(self):

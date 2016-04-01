@@ -70,6 +70,8 @@ class Job(models.Model):
     )
     status = FSMField(default=DRAFT, choices=STATE_CHOICES)
 
+    STATUS_FOR_PROPOSAL = (DRAFT, PROPOSED)
+
     objects = JobManager()
 
     class Meta:
@@ -100,6 +102,10 @@ class Job(models.Model):
     @transition(field=status, source=STARTED, target=COMPLETED, custom={'label': _("Complete")})
     def complete(self):
         pass
+
+    @property
+    def can_propose(self):
+        return self.status in self.STATUS_FOR_PROPOSAL
 
     @property
     def billable_taskgroups(self):

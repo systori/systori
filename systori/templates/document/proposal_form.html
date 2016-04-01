@@ -24,25 +24,32 @@
 
       </style>
       <h2 class="sub-header">{% trans "Jobs" %}</h2>
-      <table is="proposal-table" class="table" data-tax-rate="{{ TAX_RATE }}">
+      <table is="proposal-table" class="table table-striped" data-tax-rate="{{ TAX_RATE }}">
         <thead>
         <tr>
           <th class="job-is-attached"></th>
+          <th class="job-status">{% trans 'Status' %}</th>
           <th class="job-name">{% trans 'Job' %}</th>
+          <th class="job-description">{% trans 'Description' %}</th>
           <th class="job-estimate">{% trans 'Estimate' %}</th>
         </tr>
         </thead>
         <tbody>
         {% for job_form in form.formset %}
           <tr is="proposal-row" class="proposal-row {% if job_form.is_attached.value %}is-attached{% endif %}">
-            <td class="job-is-attached">{{ job_form.is_attached }}</td>
-            <td class="job-name">{{ job_form.job }}{{ job_form.initial.job.name }}</td>
+            <td class="job-is-attached">
+              {% if job_form.initial.job.can_propose %}
+                {{ job_form.is_attached }}
+              {% endif %}
+            </td>
+            <td class="job-status">{{ job_form.initial.job.get_status_display }}</td>
+            <td class="job-name">{{ job_form.job }}{{ job_form.initial.job.code }} {{ job_form.initial.job.name }}</td>
+            <td class="job-description">{{ job_form.initial.job.description|truncatechars:200 }}</td>
             {% amount_view "job-estimate" job_form "estimate" "net" %}
           </tr>
         {% endfor %}
         <tr class="proposal-table-totals">
-          <td class="job-is-attached"></td>
-          <td class="job-name"></td>
+          <td colspan="4"></td>
           {% amount_view "job-estimate" form "estimate_total" "net" %}
         </tr>
         </tbody>

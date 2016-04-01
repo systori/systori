@@ -24,7 +24,7 @@ class ProposalForm(DocumentForm):
 
     class Meta(DocumentForm.Meta):
         model = Proposal
-        fields = ['doc_template', 'document_date', 'title', 'header', 'footer', 'add_terms']
+        fields = ['doc_template', 'document_date', 'title', 'header', 'footer', 'add_terms', 'notes']
 
     def __init__(self, *args, jobs, **kwargs):
         super().__init__(*args, formset_class=ProposalFormSet, jobs=jobs, **kwargs)
