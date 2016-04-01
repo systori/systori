@@ -36,7 +36,7 @@
         </thead>
         <tbody>
         {% for job_form in form.formset %}
-          <tr is="proposal-row" class="proposal-row {% if job_form.is_attached.value %}is-attached{% endif %}">
+          <tr {% if job_form.initial.job.can_propose %}is="proposal-row"{% endif %} class="proposal-row {% if job_form.is_attached.value %}is-attached{% endif %}">
             <td class="job-is-attached">
               {% if job_form.initial.job.can_propose %}
                 {{ job_form.is_attached }}
