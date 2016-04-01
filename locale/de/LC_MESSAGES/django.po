@@ -848,16 +848,14 @@ msgid "Open claim from prior invoices"
 msgstr "Offene Forderungen aus vorherigen Rechnungen"
 
 #: systori/apps/document/type/invoice.py:147
-#: systori/apps/document/type/payment.py:147, python-brace-format
-#| msgid "Payment on {date}"
+#: systori/apps/document/type/payment.py:147
 msgid "Work completed on {date}"
-msgstr "Zahlung vom {date}"
+msgstr "Erbrachte Leistung zum {date}"
 
 #: systori/apps/document/type/invoice.py:149
 #: systori/apps/document/type/payment.py:149, python-brace-format
-#| msgid "{invoice} from {date}"
 msgid "Flat invoice on {date}"
-msgstr "{invoice} vom {date}"
+msgstr "Pauschalrechnung vom {date}"
 
 #: systori/apps/document/type/invoice.py:151
 #: systori/apps/document/type/payment.py:151, python-brace-format
