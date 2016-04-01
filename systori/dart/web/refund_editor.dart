@@ -7,6 +7,7 @@ class RefundTable extends TableElement {
 
     AmountViewCell refund_total_cell;
     AmountViewCell credit_total_cell;
+    AmountViewCell issue_refund_cell;
 
     double tax_rate;
 
@@ -17,6 +18,7 @@ class RefundTable extends TableElement {
         TableRowElement totals = this.querySelector(":scope tr.refund-table-totals");
         this.refund_total_cell = totals.querySelector(":scope>.job-refund");
         this.credit_total_cell = totals.querySelector(":scope>.job-credit");
+        this.issue_refund_cell = querySelector(".issue-refund");
         tax_rate = double.parse(this.dataset['tax-rate']);
     }
 
@@ -34,6 +36,7 @@ class RefundTable extends TableElement {
             credit_total += row.credit_cell.amount;
         }
         credit_total_cell.update(credit_total);
+        issue_refund_cell.update(refund_total);
     }
 
 }

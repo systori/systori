@@ -9,8 +9,7 @@
     <h2 class="sub-header">{% trans "Proposal" %}</h2>
     {{ form|bootstrap }}
 
-    <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %}">
-      {{ form.formset.management_form }}
+    <div class="">
 
       <style>
 
@@ -23,14 +22,16 @@
         }
 
       </style>
+
       <h2 class="sub-header">{% trans "Jobs" %}</h2>
+      <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %} table-responsive">
+      {{ form.formset.management_form }}
       <table is="proposal-table" class="table table-striped" data-tax-rate="{{ TAX_RATE }}">
         <thead>
         <tr>
           <th class="job-is-attached"></th>
           <th class="job-status">{% trans 'Status' %}</th>
           <th class="job-name">{% trans 'Job' %}</th>
-          <th class="job-description">{% trans 'Description' %}</th>
           <th class="job-estimate">{% trans 'Estimate' %}</th>
         </tr>
         </thead>
@@ -44,16 +45,16 @@
             </td>
             <td class="job-status">{{ job_form.initial.job.get_status_display }}</td>
             <td class="job-name">{{ job_form.job }}{{ job_form.initial.job.code }} {{ job_form.initial.job.name }}</td>
-            <td class="job-description">{{ job_form.initial.job.description|truncatechars:200 }}</td>
             {% amount_view "job-estimate" job_form "estimate" "net" %}
           </tr>
         {% endfor %}
         <tr class="proposal-table-totals">
-          <td colspan="4"></td>
+          <td colspan="3"></td>
           {% amount_view "job-estimate" form "estimate_total" "net" %}
         </tr>
         </tbody>
       </table>
+      </div>
       {% for error in form.formset.non_form_errors %}
         <span class="help-block ">{{ error }}</span>
       {% endfor %}

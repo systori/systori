@@ -242,6 +242,13 @@ class RefundCreate(RefundViewMixin, CreateView):
         return kwargs
 
 
+class RefundUpdate(InvoiceViewMixin, UpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.object
+        return kwargs
+
+
 class RefundDelete(DeleteView):
     model = Refund
 

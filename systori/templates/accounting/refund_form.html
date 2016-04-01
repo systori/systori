@@ -29,7 +29,8 @@
       }
     </style>
 
-    <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %}">
+    <h2 class="sub-header">{% trans "Calculate & Apply Refund" %}</h2>
+    <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %} table-responsive">
     {{ form.formset.management_form }}
     <table is="refund-table" class="table table-striped" data-tax-rate="{{ TAX_RATE }}">
       <thead>
@@ -67,6 +68,20 @@
       <span class="help-block ">{{ error }}</span>
     {% endfor %}
     </div>
+
+    <style>
+    .table-nonfluid {
+      width: auto !important;
+    }
+    </style>
+    <h2 class="sub-header">{% trans "Issue Refund" %}</h2>
+    <div class="form-group">
+      <label class="control-label">{% trans 'Customer Refund' %}</label>
+      <table class="table table-nonfluid">
+        <tr>{% amount_view "issue-refund" form "customer_refund" %}</tr>
+      </table>
+    </div>
+    {{ form|bootstrap }}
 
     <div class="form-group">
       <button name="save" type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>

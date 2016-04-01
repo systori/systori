@@ -127,7 +127,7 @@ class InvoiceForm(DocumentForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=InvoiceFormSet, **kwargs)
 
-        if hasattr(self.instance, 'parent'):
+        if self.instance.parent:
             self.fields['parent'].queryset = Invoice.objects.filter(id=self.instance.parent.id)
 
         if not self.initial.get('header', None) or not self.initial.get('footer', None):
@@ -509,13 +509,22 @@ PaymentFormSet = formset_factory(PaymentRowForm, formset=BaseDocumentFormSet, ex
 
 class RefundForm(DocumentForm):
 
+    doc_template = forms.ModelChoiceField(
+        queryset=DocumentTemplate.objects.filter(
+            document_type=DocumentTemplate.INVOICE), required=False)
+
+    title = forms.CharField(label=_('Title'), initial=_("Refund"), required=False)
+    header = forms.CharField(widget=forms.Textarea, initial='', required=False)
+    footer = forms.CharField(widget=forms.Textarea, initial='', required=False)
+
     class Meta(DocumentForm.Meta):
         model = Refund
         fields = []
+        fields = ['doc_template', 'document_date', 'title', 'header', 'footer', 'notes']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=RefundFormSet, **kwargs)
-        self.calculate_refund()
+        self.customer_refund_amount = self.calculate_refund()
         self.calculate_totals([
             'paid',
             'invoiced',
@@ -532,6 +541,7 @@ class RefundForm(DocumentForm):
             refund_total += form.refund_amount
         for form in self.formset:
             refund_total = form.consume_refund(refund_total)
+        return refund_total
 
     @atomic
     def save(self, commit=True):
