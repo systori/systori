@@ -242,7 +242,7 @@ class RefundCreate(RefundViewMixin, CreateView):
         return kwargs
 
 
-class RefundUpdate(InvoiceViewMixin, UpdateView):
+class RefundUpdate(RefundViewMixin, UpdateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.object
@@ -251,6 +251,7 @@ class RefundUpdate(InvoiceViewMixin, UpdateView):
 
 class RefundDelete(DeleteView):
     model = Refund
+    template_name = 'accounting/refund_confirm_delete.html'
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()

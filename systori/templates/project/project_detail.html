@@ -376,19 +376,40 @@
       <thead>
       <tr>
         <th>{% trans 'Date' %}</th>
-        <th class="text-right" colspan="3">{% trans 'Actions' %}</th>
+        <td></td>
+        <th class="text-right">{% trans 'Refunded' %}</th>
+        <th class="text-right">{% trans 'Applied' %}</th>
+        <th class="text-right">{% trans 'Issued to Customer' %}</th>
+        <th class="text-right">{% trans 'Actions' %}</th>
       </tr>
       </thead>
       <tbody>
       {% for doc in refunds %}
         <tr>
           <td>{{ doc.document_date|localize }}</td>
+          <td></td>
+          <td class="text-right">{{ doc.json.refund_total.gross|money }}</td>
+          <td class="text-right">{{ doc.json.credit_total.gross|money }}</td>
+          <td class="text-right">{{ doc.json.customer_refund.gross|money }}</td>
           <td class="text-right">
             {% if not doc.transaction.is_reconciled %}
               <a href="{% url 'refund.delete' project.id doc.id %}">{% trans "Delete" %}</a>
+              <a href="{% url 'refund.update' project.id doc.id %}">{% trans "Edit" %}</a>
             {% endif %}
           </td>
         </tr>
+        {% for job in doc.json.jobs %}
+        {% if job.refund.gross > 0 or job.credit.gross > 0 %}
+        <tr class="job-row">
+          <td></td>
+          <td>{{ job.name }}</td>
+          <td>{% if job.refund.gross > 0 %}{{ job.refund.gross|money }}{% endif %}</td>
+          <td>{% if job.credit.gross > 0 %}{{ job.credit.gross|money }}{% endif %}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        {% endif %}
+        {% endfor %}
       {% endfor %}
       </tbody>
     </table>

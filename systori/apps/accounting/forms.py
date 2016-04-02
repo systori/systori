@@ -524,7 +524,10 @@ class RefundForm(DocumentForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=RefundFormSet, **kwargs)
-        self.customer_refund_amount = self.calculate_refund()
+
+        if not self.instance.id:
+            self.calculate_initial_refund()
+
         self.calculate_totals([
             'paid',
             'invoiced',
@@ -535,7 +538,11 @@ class RefundForm(DocumentForm):
             'credit',
         ])
 
-    def calculate_refund(self):
+        self.customer_refund_amount = Amount.zero()
+        if self.refund_total_amount.gross > self.credit_total_amount.gross:
+            self.customer_refund_amount = self.refund_total_amount - self.credit_total_amount
+
+    def calculate_initial_refund(self):
         refund_total = Amount.zero()
         for form in self.formset:
             refund_total += form.refund_amount
@@ -547,8 +554,13 @@ class RefundForm(DocumentForm):
     def save(self, commit=True):
 
         refund = self.instance
-        data = self.cleaned_data
-        data['jobs'] = self.formset.get_json_rows()
+        data = self.cleaned_data.copy()
+        data.update({
+            'jobs': self.formset.get_json_rows(),
+            'refund_total': self.refund_total_amount,
+            'credit_total': self.credit_total_amount,
+            'customer_refund': self.customer_refund_amount
+        })
 
         if refund.transaction:
             refund.transaction.delete()
@@ -587,10 +599,14 @@ class RefundRowForm(DocumentRowForm):
         self.progress_diff_amount = self.progress_amount - self.invoiced_amount
 
         # Refund Column
-        if self.invoiced_amount.gross < self.paid_amount.gross:
+        refund = Amount.zero()
+        if 'refund' in self.initial:
+            refund = self.initial['refund']
+        elif self.invoiced_amount.gross < self.paid_amount.gross:
             refund = self.paid_amount - self.invoiced_amount
-            self.initial['refund_net'] = refund.net
-            self.initial['refund_tax'] = refund.tax
+
+        self.initial['refund_net'] = refund.net
+        self.initial['refund_tax'] = refund.tax
 
         self.refund_amount = Amount(
             convert_field_to_value(self['refund_net']),
@@ -598,6 +614,10 @@ class RefundRowForm(DocumentRowForm):
         )
 
         # Apply Column
+        credit = self.initial.get('credit', Amount.zero())
+        self.initial['credit_net'] = credit.net
+        self.initial['credit_tax'] = credit.tax
+
         self.credit_amount = Amount(
             convert_field_to_value(self['credit_net']),
             convert_field_to_value(self['credit_tax'])
@@ -610,14 +630,19 @@ class RefundRowForm(DocumentRowForm):
                 consumable = refund
             self.initial['credit_net'] = consumable.net
             self.initial['credit_tax'] = consumable.tax
-            self.credit_amount = consumable
+            self.credit_amount = Amount(
+                convert_field_to_value(self['credit_net']),
+                convert_field_to_value(self['credit_tax'])
+            )
             refund -= consumable
         return refund
 
     @property
     def json(self):
         return {
-            'job': self.job,
+            'job.id': self.job.id,
+            'code': self.job.code,
+            'name': self.job.name,
             'refund': self.refund_amount,
             'credit': self.credit_amount
         }

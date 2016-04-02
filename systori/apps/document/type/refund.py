@@ -52,4 +52,34 @@ def render(refund, letterhead, format):
 
 
 def serialize(refund_obj, data):
-    return {}
+
+    contact = refund_obj.project.billable_contact.contact
+
+    refund = {
+
+        'id': refund_obj.id,
+
+        'title': data['title'],
+        'date': data['document_date'],
+
+        'header': data['header'],
+        'footer': data['footer'],
+
+        'business': contact.business,
+        'salutation': contact.salutation,
+        'first_name': contact.first_name,
+        'last_name': contact.last_name,
+        'address': contact.address,
+        'postal_code': contact.postal_code,
+        'city': contact.city,
+        'address_label': contact.address_label,
+
+        'jobs': data['jobs'],
+
+        'refund_total': data['refund_total'],
+        'credit_total': data['credit_total'],
+        'customer_refund': data['customer_refund']
+
+    }
+
+    return refund
