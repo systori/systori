@@ -15,6 +15,7 @@ urlpatterns = patterns('',
 
     url(r'^i18n/', include('django.conf.urls.i18n')),
 
+    url(r'', include('systori.apps.company.urls')),
     url(r'', include('systori.apps.project.urls')),
     url(r'', include('systori.apps.directory.urls')),
     url(r'', include('systori.apps.document.urls')),

@@ -45,9 +45,9 @@
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ selected_company.name }} <span class="caret"></span></a>
                 <ul class="dropdown-menu">
                   <li class="dropdown-header">{% trans 'available Companies' %}</li>
-                  {% for available_company in available_companies %}
-                    {% if available_company.schema != selected_company.schema %}
-                      <li><a href="/?__schema={{ available_company.schema }}">{{ available_company.name }}</a></li>
+                  {% for company in available_companies %}
+                    {% if not company.current %}
+                      <li><a href="{{ company.url }}">{{ company.name }}</a></li>
                     {% endif %}
                   {% endfor %}
                 </ul>

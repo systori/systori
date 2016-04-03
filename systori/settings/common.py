@@ -84,7 +84,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'tuath.middleware.SchemaMiddleware',
+    'systori.apps.company.middleware.CompanyMiddleware',
     'systori.apps.company.middleware.AccessMiddleware',
     'systori.apps.project.middleware.ProjectMiddleware',
     'systori.apps.field.middleware.FieldMiddleware'

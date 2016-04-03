@@ -1,5 +1,8 @@
 from .common import *
 
+SERVER_NAME = 'systori.localhost'
+SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
+
 DEBUG = True
 TEMPLATE_DEBUG = True
 

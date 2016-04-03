@@ -9,6 +9,11 @@ from tuath.models import AbstractSchema
 class Company(AbstractSchema):
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Access', blank=True, related_name='companies')
 
+    def url(self, request):
+        _, port = request.META['HTTP_HOST'].split(':')
+        port = '' if port == '80' else ':'+port
+        return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
+
 
 class Access(models.Model):
     company = models.ForeignKey('Company', related_name="users_access")
