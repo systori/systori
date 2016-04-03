@@ -136,6 +136,13 @@ class AdjustmentCreate(AdjustmentViewMixin, CreateView):
         return kwargs
 
 
+class AdjustmentUpdate(AdjustmentViewMixin, UpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.object
+        return kwargs
+
+
 class AdjustmentDelete(DeleteView):
     model = Adjustment
     template_name = 'accounting/adjustment_confirm_delete.html'
@@ -184,16 +191,26 @@ class PaymentCreate(PaymentViewMixin, CreateView):
             invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
             kwargs['initial'] = {
                 'invoice': invoice,
-                'amount': invoice.json['debit'].gross,
+                'payment': invoice.json['debit'].gross,
             }
             instance.json['jobs'] = [{
                 'job.id': job['job.id'],
                 'invoiced': job['invoiced'],
-                'payment_net': job['debit'].net,
-                'payment_tax': job['debit'].tax
+                'split': job['debit']
             } for job in invoice.json['jobs']]
         else:
             instance.json['jobs'] = []
+        return kwargs
+
+
+class PaymentUpdate(PaymentViewMixin, UpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.object
+        kwargs['initial'] = {
+            'bank_account': self.object.json['bank_account'],
+            'payment': self.object.json['payment']
+        }
         return kwargs
 
 

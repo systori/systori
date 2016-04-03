@@ -304,6 +304,7 @@
           <td class="text-right">
             {% if not payment.transaction.is_reconciled %}
               <a href="{% url 'payment.delete' project.id payment.id %}">{% trans "Delete" %}</a>
+              <a href="{% url 'payment.update' project.id payment.id %}">{% trans "Edit" %}</a>
             {% endif %}
           </td>
         </tr>
@@ -350,6 +351,7 @@
           <td class="text-right">
             {% if not doc.transaction.is_reconciled %}
               <a href="{% url 'adjustment.delete' project.id doc.id %}">{% trans "Delete" %}</a>
+              <a href="{% url 'adjustment.update' project.id doc.id %}">{% trans "Edit" %}</a>
             {% endif %}
           </td>
         </tr>
@@ -376,7 +378,7 @@
       <thead>
       <tr>
         <th>{% trans 'Date' %}</th>
-        <td></td>
+        <th></th>
         <th class="text-right">{% trans 'Refunded' %}</th>
         <th class="text-right">{% trans 'Applied' %}</th>
         <th class="text-right">{% trans 'Issued to Customer' %}</th>

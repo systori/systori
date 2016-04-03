@@ -17,7 +17,7 @@
     <div class="form-group">
       <label class="control-label" for="{{ form.payment.id_for_label }}">{{ form.payment.label }}</label>
       <div>
-        <input class="form-control" id="{{ form.payment.id_for_label }}" name="{{ form.payment.html_name }}" type="text" value="{{ form.payment_amount.gross|ubrdecimal:2 }}">
+        <input class="form-control" id="{{ form.payment.id_for_label }}" name="{{ form.payment.html_name }}" type="text" value="{{ form.payment_value|ubrdecimal:2 }}">
       </div>
     </div>
 

@@ -237,7 +237,7 @@ def migrate_payments(apps, schema_editor):
                 letterhead=letterhead
             )
             payment.json.update({
-                'bank.id': bank_account.id,
+                'bank_account': bank_account.id,
                 'date': t.transacted_on,
                 'payment': credit_t.negate.gross,
                 'discount': Decimal('0.00'),

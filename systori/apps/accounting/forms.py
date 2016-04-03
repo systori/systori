@@ -97,6 +97,16 @@ class DocumentRowForm(Form):
         self.job = self.initial['job']
         self.fields['job'].queryset = self.initial['jobs']
 
+    def init_amount(self, name):
+        initial_amount = self.initial.get(name, Amount.zero())
+        self.initial[name+'_net'] = initial_amount.net
+        self.initial[name+'_tax'] = initial_amount.tax
+        initial_or_updated_amount = Amount(
+            convert_field_to_value(self[name+'_net']),
+            convert_field_to_value(self[name+'_tax'])
+        )
+        setattr(self, name+'_amount', initial_or_updated_amount)
+
     @property
     def json(self):
         raise NotImplementedError()
@@ -227,13 +237,8 @@ class InvoiceRowForm(DocumentRowForm):
             if self.itemized_amount.net > 0:
                 debit = self.itemized_amount
 
-        self.initial['debit_net'] = debit.net
-        self.initial['debit_tax'] = debit.tax
-
-        self.debit_amount = Amount(
-            convert_field_to_value(self['debit_net']),
-            convert_field_to_value(self['debit_tax'])
-        )
+        self.initial['debit'] = debit
+        self.init_amount('debit')
 
         self.original_debit_diff_amount = self.original_debit_amount - self.debit_amount
 
@@ -335,10 +340,7 @@ class AdjustmentRowForm(DocumentRowForm):
         self.paid_amount = self.job.account.paid.negate
 
         # Invoiced Column
-        if 'invoiced' in self.initial:
-            self.invoiced_amount = self.initial['invoiced']
-        else:
-            self.invoiced_amount = self.job.account.invoiced
+        self.invoiced_amount = self.initial.get('invoiced', self.job.account.invoiced)
         self.invoiced_diff_amount = self.invoiced_amount - self.paid_amount
 
         # Billable Column
@@ -346,30 +348,17 @@ class AdjustmentRowForm(DocumentRowForm):
         self.progress_diff_amount = self.progress_amount - self.invoiced_amount
 
         # Adjustment Column
-        self.adjustment_amount = Amount(
-            convert_field_to_value(self['adjustment_net']),
-            convert_field_to_value(self['adjustment_tax'])
-        )
+        self.init_amount('adjustment')
 
         # Corrected Column
-        self.initial['corrected_net'] = self.invoiced_amount.net
-        self.initial['corrected_tax'] = self.invoiced_amount.tax
-        self.corrected_amount = Amount(
-            convert_field_to_value(self['corrected_net']),
-            convert_field_to_value(self['corrected_tax'])
-        )
-
-    def clean(self):
-        pass
-        #if self.adjustment_amount.gross > self.invoiced_amount.gross:
-        #    self.add_error('adjustment_net', ValidationError(_("Adjustment cannot be greater than invoiced amount.")))
+        self.init_amount('corrected')
 
     @property
     def json(self):
         return {
             'job': self.job,
             'adjustment': self.adjustment_amount,
-            'correction': self.corrected_amount
+            'corrected': self.corrected_amount
         }
 
     @property
@@ -408,7 +397,7 @@ class PaymentForm(DocumentForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=PaymentFormSet, **kwargs)
-        self.payment_amount = Amount.from_gross(convert_field_to_value(self['payment']), TAX_RATE)
+        self.payment_value = convert_field_to_value(self['payment'])
         self.calculate_totals([
             'balance',
             'split',
@@ -421,7 +410,7 @@ class PaymentForm(DocumentForm):
         splits = Amount.zero()
         for form in self.formset:
             splits += form.split_amount
-        if splits.gross != self.payment_amount.gross:
+        if splits.gross != self.payment_value:
             raise forms.ValidationError(_("The sum of splits must equal the payment amount."))
 
     @atomic
@@ -473,15 +462,11 @@ class PaymentRowForm(DocumentRowForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        for column_name in ['split', 'discount', 'adjustment']:
-            net = convert_field_to_value(self[column_name+'_net'])
-            tax = convert_field_to_value(self[column_name+'_tax'])
-            setattr(self, column_name+'_amount', Amount(net, tax))
+        self.init_amount('split')
+        self.init_amount('discount')
+        self.init_amount('adjustment')
 
-        if 'invoiced' in self.initial:
-            self.balance_amount = self.initial['invoiced']
-        else:
-            self.balance_amount = self.job.account.balance
+        self.balance_amount = self.initial.get('invoiced', self.job.account.balance)
 
         if self.balance_amount.gross < 0:
             self.balance_amount = Amount.zero()
@@ -588,10 +573,7 @@ class RefundRowForm(DocumentRowForm):
         self.paid_amount = self.job.account.paid.negate
 
         # Invoiced Column
-        if 'invoiced' in self.initial:
-            self.invoiced_amount = self.initial['invoiced']
-        else:
-            self.invoiced_amount = self.job.account.invoiced
+        self.invoiced_amount = self.initial.get('invoiced', self.job.account.invoiced)
         self.invoiced_diff_amount = self.invoiced_amount - self.paid_amount
 
         # Billable Column
@@ -599,41 +581,20 @@ class RefundRowForm(DocumentRowForm):
         self.progress_diff_amount = self.progress_amount - self.invoiced_amount
 
         # Refund Column
-        refund = Amount.zero()
-        if 'refund' in self.initial:
-            refund = self.initial['refund']
-        elif self.invoiced_amount.gross < self.paid_amount.gross:
-            refund = self.paid_amount - self.invoiced_amount
-
-        self.initial['refund_net'] = refund.net
-        self.initial['refund_tax'] = refund.tax
-
-        self.refund_amount = Amount(
-            convert_field_to_value(self['refund_net']),
-            convert_field_to_value(self['refund_tax'])
-        )
+        if 'refund' not in self.initial and self.invoiced_amount.gross < self.paid_amount.gross:
+            self.initial['refund'] = self.paid_amount - self.invoiced_amount
+        self.init_amount('refund')
 
         # Apply Column
-        credit = self.initial.get('credit', Amount.zero())
-        self.initial['credit_net'] = credit.net
-        self.initial['credit_tax'] = credit.tax
-
-        self.credit_amount = Amount(
-            convert_field_to_value(self['credit_net']),
-            convert_field_to_value(self['credit_tax'])
-        )
+        self.init_amount('credit')
 
     def consume_refund(self, refund):
         if self.progress_amount.gross > self.paid_amount.gross:
             consumable = self.progress_amount - self.paid_amount
             if refund.gross < consumable.gross:
                 consumable = refund
-            self.initial['credit_net'] = consumable.net
-            self.initial['credit_tax'] = consumable.tax
-            self.credit_amount = Amount(
-                convert_field_to_value(self['credit_net']),
-                convert_field_to_value(self['credit_tax'])
-            )
+            self.initial['credit'] = consumable
+            self.init_amount('credit')
             refund -= consumable
         return refund
 

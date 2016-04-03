@@ -1,6 +1,5 @@
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from .models import Access, Company
 import string
 
@@ -13,21 +12,7 @@ def get_subdomain(request):
     subdomain = host[:-len(settings.SERVER_NAME)]
     if subdomain and subdomain.endswith('.'):
         subdomain = subdomain[:-1]
-    if subdomain == 'www':
-        subdomain = ''
     return subdomain
-
-
-def subdomain_is_valid(test_str):
-    return set(test_str) <= SCHEMA_ALLOWED_CHARS
-
-
-def go_to(request, subdomain, path='/'):
-    port = ''
-    if ':' in request.META['HTTP_HOST']:
-        port = ':'+request.META['HTTP_HOST'].split(':')[1]
-    url = request.scheme+'://'+subdomain+'.'+settings.SERVER_NAME+port+path
-    return HttpResponseRedirect(url)
 
 
 class CompanyMiddleware:
@@ -38,22 +23,26 @@ class CompanyMiddleware:
 
         subdomain = get_subdomain(request)
 
-        if subdomain_is_valid(subdomain):
+        subdomain_is_safe = set(subdomain) <= SCHEMA_ALLOWED_CHARS
+
+        if subdomain_is_safe:
 
             try:
                 company = Company.objects.get(schema=subdomain)
+            except Company.DoesNotExist:
+                pass
+            else:
                 if company.is_active:
                     company.activate()
                     request.company = company
-            except Company.DoesNotExist:
-                pass
+                    return
 
         if request.user.is_authenticated():
 
             companies = request.user.visible_companies
             if len(companies) == 1:
-                schema = companies[0]
-                return go_to(request, schema)
+                company_url = companies[0].url(request)
+                return HttpResponseRedirect(company_url)
 
     def process_template_response(self, request, response):
         response.context_data['selected_company'] = request.company

@@ -226,7 +226,7 @@ def render(invoice, letterhead, show_payment_details, format):
 def serialize(payment_obj, data):
 
     payment = {
-        'bank.id': data['bank_account'].id,
+        'bank_account': data['bank_account'].id,
         'date': data['document_date'],
         'payment': data['payment'],
         'discount': data['discount'],
