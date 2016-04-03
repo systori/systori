@@ -8,7 +8,7 @@ SCHEMA_ALLOWED_CHARS = set(string.ascii_lowercase + string.digits + '-')
 
 
 def get_subdomain(request):
-    host, port = request.META['HTTP_HOST'].split(':')
+    host = request.META['HTTP_HOST'].split(':')[0]
     assert host.endswith(settings.SERVER_NAME)  # if this fails, SERVER_NAME needs to be configured in settings
     subdomain = host[:-len(settings.SERVER_NAME)]
     if subdomain and subdomain.endswith('.'):
