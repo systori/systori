@@ -23,8 +23,9 @@ def subdomain_is_valid(test_str):
 
 
 def go_to(request, subdomain, path='/'):
-    _, port = request.META['HTTP_HOST'].split(':')
-    port = '' if port == '80' else ':'+port
+    port = ''
+    if ':' in request.META['HTTP_HOST']:
+        port = ':'+request.META['HTTP_HOST'].split(':')[1]
     url = request.scheme+'://'+subdomain+'.'+settings.SERVER_NAME+port+path
     return HttpResponseRedirect(url)
 

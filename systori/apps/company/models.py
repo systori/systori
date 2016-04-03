@@ -10,8 +10,9 @@ class Company(AbstractSchema):
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Access', blank=True, related_name='companies')
 
     def url(self, request):
-        _, port = request.META['HTTP_HOST'].split(':')
-        port = '' if port == '80' else ':'+port
+        port = ''
+        if ':' in request.META['HTTP_HOST']:
+            port = ':'+request.META['HTTP_HOST'].split(':')[1]
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
 
 
