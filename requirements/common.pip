@@ -1,15 +1,15 @@
-psycopg2
+psycopg2==2.6.1
 
-django==1.8
-django-tastypie
-django-ordered-model
-django-fsm
-django_mobile
-django-bootstrap-form
+django==1.9.5
+django-tastypie==0.13.3
+django-ordered-model==1.1.0
+django-fsm==2.3.0
+django-mobile==0.7.0
+django-bootstrap-form==3.2
 
-geopy
-lxml
-jsonfield
+geopy==1.11.0
+lxml==3.6.0
+jsonfield==1.0.3
 
 -e hg+ssh://hg@bitbucket.org/rptlab/reportlab#egg=reportlab
 -e hg+ssh://hg@bitbucket.org/rptlab/preppy#egg=preppy

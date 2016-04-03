@@ -1,10 +1,10 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 #from apps.user.authorization import office_auth
 from django.views.static import serve
 from django.conf import settings
 
-urlpatterns = patterns('',
+urlpatterns = [
 
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT,}),
 
@@ -28,6 +28,6 @@ urlpatterns = patterns('',
     url(r'^templates/', include('systori.apps.task.urls')),
 
     url(r'^field/', include('systori.apps.field.urls')),
-)
+]
 
 urlpatterns += staticfiles_urlpatterns()

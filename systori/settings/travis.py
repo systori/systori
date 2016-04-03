@@ -6,7 +6,6 @@ SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
 GOOGLE_MAPS_API_KEY = "AIzaSyDvwtHHJ_FrNVkbKoHoWh2r2E5PtV5rmLY"
 
 DEBUG = True
-TEMPLATE_DEBUG = True
 
 DATABASES['default'].update({
     'NAME': 'systori_travis',

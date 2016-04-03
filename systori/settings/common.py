@@ -41,10 +41,7 @@ SECRET_KEY = '8)-+y0f@(mb=!o9ov_g!+35s4ritax6jzmc*c04jo=6*5t_74&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-TEMPLATE_DEBUG = True
-
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -90,24 +87,31 @@ MIDDLEWARE_CLASSES = (
     'systori.apps.field.middleware.FieldMiddleware'
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.template.context_processors.debug',
-    'django.template.context_processors.i18n',
-    'django.template.context_processors.media',
-    'django.template.context_processors.static',
-    'django.template.context_processors.tz',
-    'django.template.context_processors.request',
-    'django.contrib.messages.context_processors.messages',
-    'django_mobile.context_processors.flavour',
-)
+TEMPLATES = [
+    {
+        'BACKEND' : 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS' : {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.template.context_processors.request',
+                'django.contrib.messages.context_processors.messages',
+                'django_mobile.context_processors.flavour',
+            ],
+        },
+    },
+]
 
 ROOT_URLCONF = 'systori.urls'
 
 WSGI_APPLICATION = 'systori.wsgi.application'
-
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, 'templates'),
-)
 
 FIXTURE_DIRS = (
     os.path.join(ROOT_DIR, 'fixtures'),
