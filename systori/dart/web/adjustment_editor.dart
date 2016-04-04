@@ -39,7 +39,7 @@ class AdjustmentTable extends TableElement {
     match_overpaid(MouseEvent e) {
         for (AdjustmentRow row in rows) {
             if (row.paid_cell.amount.gross > row.invoiced_cell.amount.gross) {
-                row.corrected_cell.update(row.paid_cell.amount.copy());
+                row.corrected_cell.update(row.paid_cell.amount);
                 row.adjustment_cell.update(row.corrected_cell.amount - row.invoiced_cell.amount);
                 row.update_selected();
             }
@@ -50,7 +50,7 @@ class AdjustmentTable extends TableElement {
     match_underpaid(MouseEvent e) {
         for (AdjustmentRow row in rows) {
             if (row.paid_cell.amount.gross < row.invoiced_cell.amount.gross) {
-                row.corrected_cell.update(row.paid_cell.amount.copy());
+                row.corrected_cell.update(row.paid_cell.amount);
                 row.adjustment_cell.update(row.corrected_cell.amount - row.invoiced_cell.amount);
                 row.update_selected();
             }
@@ -61,7 +61,7 @@ class AdjustmentTable extends TableElement {
     match_overbilled(MouseEvent e) {
         for (AdjustmentRow row in rows) {
             if (row.invoiced_cell.amount.gross > row.progress_cell.amount.gross) {
-                row.corrected_cell.update(row.progress_cell.amount.copy());
+                row.corrected_cell.update(row.progress_cell.amount);
                 row.adjustment_cell.update(row.corrected_cell.amount - row.invoiced_cell.amount);
                 row.update_selected();
             }
@@ -72,7 +72,7 @@ class AdjustmentTable extends TableElement {
     reset_adjustments(MouseEvent e) {
         for (AdjustmentRow row in rows) {
             if (row.invoiced_cell.amount != row.corrected_cell.amount) {
-                row.corrected_cell.update(row.invoiced_cell.amount.copy());
+                row.corrected_cell.update(row.invoiced_cell.amount);
                 row.adjustment_cell.update(row.corrected_cell.amount - row.invoiced_cell.amount);
                 row.update_selected();
             }
@@ -123,7 +123,7 @@ class AdjustmentRow extends TableRowElement {
 
     column_clicked(MouseEvent e) {
         Amount new_corrected_amount = (e.currentTarget as AmountViewCell).amount;
-        corrected_cell.update(new_corrected_amount.copy(), triggerEvent: true);
+        corrected_cell.update(new_corrected_amount, triggerEvent: true);
     }
 
     update_selected() {

@@ -96,14 +96,14 @@ class InvoiceRow extends TableRowElement {
     flat_invoice_range_changed(Event e) {
         double percent = int.parse(flat_invoice_range_input.value)/100;
         Amount flat = estimate_cell.amount * percent - invoiced_cell.amount;
-        debit_cell.update(flat.gross < 0 ? new Amount.zeroed() : flat);
+        debit_cell.update(flat.gross < 0 ? flat.zero() : flat);
         debit_amount_updated();
     }
 
     flat_invoice_percent_clicked(Event e) {
         double percent = double.parse((e.target as AnchorElement).dataset['percent'])/100;
         Amount flat = estimate_cell.amount * percent - invoiced_cell.amount;
-        debit_cell.update(flat.gross < 0 ? new Amount.zeroed() : flat);
+        debit_cell.update(flat.gross < 0 ? flat.zero() : flat);
         update_range_slider();
         debit_amount_updated();
     }
