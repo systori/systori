@@ -6,6 +6,8 @@
 {% block content %}
   <form method="post" autocomplete="off">{% csrf_token %}
 
+    <h2 class="sub-header">{% trans "Calculate & Apply Refund" %}</h2>
+
     {% if form.invoice.id %}
       <div class="form-group">
         <label class="control-label">{% trans "Invoice" %}</label>
@@ -29,7 +31,6 @@
       }
     </style>
 
-    <h2 class="sub-header">{% trans "Calculate & Apply Refund" %}</h2>
     <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %} table-responsive">
     {{ form.formset.management_form }}
     <table is="refund-table" class="table table-striped" data-tax-rate="{{ TAX_RATE }}">

@@ -7,7 +7,7 @@ from .customformatting import ubrdecimal
 register = template.Library()
 
 
-def _make_context(context, css, obj, field, bold="gross", has_form=False):
+def _make_context(context, css, obj, field, bold="gross", has_form=False, select_if_equal=None):
 
     ctx = {
         'TAX_RATE': context['TAX_RATE'],
@@ -19,6 +19,9 @@ def _make_context(context, css, obj, field, bold="gross", has_form=False):
         'bold': bold
     }
 
+    if select_if_equal == ctx['amount']:
+        ctx['css_class'] += ' selected'
+
     if has_form:
         ctx.update({
             'net': obj[field+'_net'],
@@ -29,18 +32,18 @@ def _make_context(context, css, obj, field, bold="gross", has_form=False):
 
 
 @register.inclusion_tag('accounting/amount_view_cell.html', takes_context=True)
-def amount_view(context, *args):
-    return _make_context(context, *args)
+def amount_view(context, *args, **kwargs):
+    return _make_context(context, *args, **kwargs)
 
 
 @register.inclusion_tag('accounting/amount_view_cell.html', takes_context=True)
-def amount_stateful(context, *args):
-    return _make_context(context, *args, has_form=True)
+def amount_stateful(context, *args, **kwargs):
+    return _make_context(context, *args, has_form=True, **kwargs)
 
 
 @register.inclusion_tag('accounting/amount_input_cell.html', takes_context=True)
-def amount_input(context, *args):
-    return _make_context(context, *args, has_form=True)
+def amount_input(context, *args, **kwargs):
+    return _make_context(context, *args, has_form=True, **kwargs)
 
 
 @register.simple_tag

@@ -18,6 +18,11 @@ class AdjustmentTable extends TableElement {
         this.adjustment_total_cell = totals.querySelector(":scope>.job-adjustment");
         this.corrected_total_cell = totals.querySelector(":scope>.job-corrected");
         tax_rate = double.parse(this.dataset['tax-rate']);
+
+        querySelector('#match-overpaid').onClick.listen(match_overpaid);
+        querySelector('#match-underpaid').onClick.listen(match_underpaid);
+        querySelector('#match-overbilled').onClick.listen(match_overbilled);
+        querySelector('#reset-adjustments').onClick.listen(reset_adjustments);
     }
 
     recalculate() {
@@ -29,6 +34,50 @@ class AdjustmentTable extends TableElement {
         }
         adjustment_total_cell.update(adjustment_total);
         corrected_total_cell.update(corrected_total);
+    }
+
+    match_overpaid(MouseEvent e) {
+        for (AdjustmentRow row in rows) {
+            if (row.paid_cell.amount.gross > row.invoiced_cell.amount.gross) {
+                row.corrected_cell.update(row.paid_cell.amount.copy());
+                row.adjustment_cell.update(row.corrected_cell.amount - row.invoiced_cell.amount);
+                row.update_selected();
+            }
+        }
+        recalculate();
+    }
+
+    match_underpaid(MouseEvent e) {
+        for (AdjustmentRow row in rows) {
+            if (row.paid_cell.amount.gross < row.invoiced_cell.amount.gross) {
+                row.corrected_cell.update(row.paid_cell.amount.copy());
+                row.adjustment_cell.update(row.corrected_cell.amount - row.invoiced_cell.amount);
+                row.update_selected();
+            }
+        }
+        recalculate();
+    }
+
+    match_overbilled(MouseEvent e) {
+        for (AdjustmentRow row in rows) {
+            if (row.invoiced_cell.amount.gross > row.progress_cell.amount.gross) {
+                row.corrected_cell.update(row.progress_cell.amount.copy());
+                row.adjustment_cell.update(row.corrected_cell.amount - row.invoiced_cell.amount);
+                row.update_selected();
+            }
+        }
+        recalculate();
+    }
+
+    reset_adjustments(MouseEvent e) {
+        for (AdjustmentRow row in rows) {
+            if (row.invoiced_cell.amount != row.corrected_cell.amount) {
+                row.corrected_cell.update(row.invoiced_cell.amount.copy());
+                row.adjustment_cell.update(row.corrected_cell.amount - row.invoiced_cell.amount);
+                row.update_selected();
+            }
+        }
+        recalculate();
     }
 
 }
@@ -62,17 +111,28 @@ class AdjustmentRow extends TableRowElement {
 
     adjustment_changed(AmountChangeEvent e) {
         corrected_cell.update(invoiced_cell.amount + adjustment_cell.amount);
+        update_selected();
         table.recalculate();
     }
 
     corrected_changed(AmountChangeEvent e) {
         adjustment_cell.update(corrected_cell.amount - invoiced_cell.amount);
+        update_selected();
         table.recalculate();
     }
 
     column_clicked(MouseEvent e) {
         Amount new_corrected_amount = (e.currentTarget as AmountViewCell).amount;
-        corrected_cell.update(new_corrected_amount, triggerEvent: true);
+        corrected_cell.update(new_corrected_amount.copy(), triggerEvent: true);
+    }
+
+    update_selected() {
+        for (AmountCell cell in [paid_cell, invoiced_cell, progress_cell]) {
+            cell.classes.remove('selected');
+            if (cell.amount == corrected_cell.amount) {
+                cell.classes.add('selected');
+            }
+        }
     }
 }
 

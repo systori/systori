@@ -290,9 +290,13 @@ InvoiceFormSet = formset_factory(InvoiceRowForm, formset=BaseDocumentFormSet, ex
 class AdjustmentForm(DocumentForm):
     invoice = forms.ModelChoiceField(label=_("Invoice"), queryset=Invoice.objects.all(), widget=forms.HiddenInput(), required=False)
 
+    title = forms.CharField(label=_('Title'), initial=_("Adjustment"), required=False)
+    header = forms.CharField(widget=forms.Textarea, initial='', required=False)
+    footer = forms.CharField(widget=forms.Textarea, initial='', required=False)
+
     class Meta:
         model = Adjustment
-        fields = ['invoice']
+        fields = ['invoice', 'document_date', 'title', 'header', 'footer', 'notes']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=AdjustmentFormSet, **kwargs)
@@ -310,8 +314,15 @@ class AdjustmentForm(DocumentForm):
     def save(self, commit=True):
 
         adjustment = self.instance
-        data = self.cleaned_data
-        data['jobs'] = self.formset.get_json_rows()
+        data = self.cleaned_data.copy()
+        data.update({
+            'jobs': self.formset.get_json_rows(),
+            'paid_total': self.paid_total_amount,
+            'invoiced_total': self.invoiced_total_amount,
+            'progress_total': self.progress_total_amount,
+            'adjustment_total': self.adjustment_total_amount,
+            'corrected_total': self.corrected_total_amount
+        })
 
         if adjustment.transaction:
             adjustment.transaction.delete()
@@ -347,16 +358,26 @@ class AdjustmentRowForm(DocumentRowForm):
         self.progress_amount = Amount.from_net(self.job.progress_total, TAX_RATE)
         self.progress_diff_amount = self.progress_amount - self.invoiced_amount
 
+        # Corrected Column
+        if 'corrected' not in self.initial:
+            self.initial['corrected'] = self.invoiced_amount
+        self.init_amount('corrected')
+
         # Adjustment Column
+        if 'adjustment' not in self.initial:
+            self.initial['adjustment'] = self.corrected_amount - self.invoiced_amount
         self.init_amount('adjustment')
 
-        # Corrected Column
-        self.init_amount('corrected')
 
     @property
     def json(self):
         return {
-            'job': self.job,
+            'job.id': self.job.id,
+            'code': self.job.code,
+            'name': self.job.name,
+            'paid': self.paid_amount,
+            'invoiced': self.invoiced_amount,
+            'progress': self.progress_amount,
             'adjustment': self.adjustment_amount,
             'corrected': self.corrected_amount
         }
@@ -417,7 +438,7 @@ class PaymentForm(DocumentForm):
     def save(self, commit=True):
 
         payment = self.instance
-        data = self.cleaned_data
+        data = self.cleaned_data.copy()
         data.update({
             'jobs': self.formset.get_json_rows(),
             'split_total': self.split_total_amount,
@@ -477,7 +498,9 @@ class PaymentRowForm(DocumentRowForm):
     def json(self):
         if any((self.split_amount.gross, self.discount_amount.gross, self.adjustment_amount.gross)):
             return {
-                'job': self.job,
+                'job.id': self.job.id,
+                'code': self.job.code,
+                'name': self.job.name,
                 'split': self.split_amount,
                 'discount': self.discount_amount,
                 'adjustment': self.adjustment_amount,
@@ -494,18 +517,13 @@ PaymentFormSet = formset_factory(PaymentRowForm, formset=BaseDocumentFormSet, ex
 
 class RefundForm(DocumentForm):
 
-    doc_template = forms.ModelChoiceField(
-        queryset=DocumentTemplate.objects.filter(
-            document_type=DocumentTemplate.INVOICE), required=False)
-
     title = forms.CharField(label=_('Title'), initial=_("Refund"), required=False)
     header = forms.CharField(widget=forms.Textarea, initial='', required=False)
     footer = forms.CharField(widget=forms.Textarea, initial='', required=False)
 
     class Meta(DocumentForm.Meta):
         model = Refund
-        fields = []
-        fields = ['doc_template', 'document_date', 'title', 'header', 'footer', 'notes']
+        fields = ['document_date', 'title', 'header', 'footer', 'notes']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=RefundFormSet, **kwargs)
@@ -542,6 +560,9 @@ class RefundForm(DocumentForm):
         data = self.cleaned_data.copy()
         data.update({
             'jobs': self.formset.get_json_rows(),
+            'paid_total': self.paid_total_amount,
+            'invoiced_total': self.invoiced_total_amount,
+            'progress_total': self.progress_total_amount,
             'refund_total': self.refund_total_amount,
             'credit_total': self.credit_total_amount,
             'customer_refund': self.customer_refund_amount
@@ -604,6 +625,9 @@ class RefundRowForm(DocumentRowForm):
             'job.id': self.job.id,
             'code': self.job.code,
             'name': self.job.name,
+            'paid': self.paid_amount,
+            'invoiced': self.invoiced_amount,
+            'progress': self.progress_amount,
             'refund': self.refund_amount,
             'credit': self.credit_amount
         }

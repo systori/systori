@@ -286,4 +286,36 @@ def render(invoice, letterhead, show_payment_details, format):
 
 
 def serialize(adjustment_obj, data):
-    return {}
+
+    contact = adjustment_obj.project.billable_contact.contact
+
+    adjustment = {
+
+        'id': adjustment_obj.id,
+
+        'title': data['title'],
+        'date': data['document_date'],
+
+        'header': data['header'],
+        'footer': data['footer'],
+
+        'business': contact.business,
+        'salutation': contact.salutation,
+        'first_name': contact.first_name,
+        'last_name': contact.last_name,
+        'address': contact.address,
+        'postal_code': contact.postal_code,
+        'city': contact.city,
+        'address_label': contact.address_label,
+
+        'jobs': data['jobs'],
+
+        'paid_total': data['paid_total'],
+        'invoiced_total': data['invoiced_total'],
+        'progress_total': data['progress_total'],
+        'adjustment_total': data['adjustment_total'],
+        'corrected_total': data['corrected_total']
+
+    }
+
+    return adjustment

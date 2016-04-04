@@ -63,12 +63,19 @@ class Amount {
     Amount operator + (Amount other) =>
         new Amount(net + other.net, tax + other.tax, tax_rate);
 
+    bool operator == (Amount other) {
+        if (other == null) return false;
+        return net == other.net && tax == other.tax && gross == other.gross;
+    }
+
     zero() { net = tax = 0; }
 
     zero_negatives() {
         if (net < 0) net = 0;
         if (tax < 0) tax = 0;
     }
+
+    copy() => new Amount(net, tax, tax_rate);
 
 }
 

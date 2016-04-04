@@ -162,3 +162,8 @@ td[is=amount-stateful].clickable:hover {
   cursor: pointer;
   background-color: #e6e6e6;
 }
+
+td[is=amount-view].selected>div,
+td[is=amount-stateful].selected {
+  background-color: #e6e6e6;
+}
