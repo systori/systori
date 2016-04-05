@@ -5,6 +5,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 from tuath.models import AbstractSchema
 
+from systori.apps.project.models import Project
+from systori.apps.accounting.workflow import create_chart_of_accounts
+
 
 class Company(AbstractSchema):
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Access', blank=True, related_name='companies')
@@ -14,6 +17,20 @@ class Company(AbstractSchema):
         if ':' in request.META['HTTP_HOST']:
             port = ':'+request.META['HTTP_HOST'].split(':')[1]
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
+
+    @staticmethod
+    def setup(company, owner):
+        company.activate()
+        Access.objects.create(company=company, user=owner, is_owner=True)
+        Project.objects.create(name="Template Project", is_template=True)
+        create_chart_of_accounts()
+
+        return company
+
+
+    @property
+    def owner(self):
+        return self.users_access.filter(is_owner=True).first()
 
 
 class Access(models.Model):
@@ -52,6 +69,10 @@ class Access(models.Model):
     @property
     def has_owner(self):
         return self.is_owner or self.user.is_superuser
+
+    @property
+    def has_accountant(self):
+        return self.is_accountant or self.has_owner
 
     @property
     def has_staff(self):

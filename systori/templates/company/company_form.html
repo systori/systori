@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n bootstrap %}
+
+{% block container %}
+  <div class="container-fluid" style="padding-bottom:100px;">
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 class="sub-header">{% trans 'Companies' %}</h2>
+        <form role="form" method="post">
+            {% csrf_token %}
+            {{ form|bootstrap }}
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock container %}

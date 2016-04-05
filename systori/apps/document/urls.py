@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from ..user.authorization import office_auth, owner_auth
+from ..user.authorization import office_auth, accountant_auth
 from ..accounting.views import *
 from .views import *
 
@@ -37,7 +37,7 @@ urlpatterns = [
 
     url(r'^project-(?P<project_pk>\d+)/itemized_listing-(?P<format>(email|print)).pdf$', office_auth(ItemizedListingPDF.as_view()), name='itemized_listing.pdf'),
 
-    url(r'^invoices$', owner_auth(InvoiceList.as_view()), name='invoices'),
+    url(r'^invoices$', accountant_auth(InvoiceList.as_view()), name='invoices'),
 
     url(r'^templates/create-document-template$', office_auth(DocumentTemplateCreate.as_view()), name='document-template.create'),
     url(r'^templates/document-template-(?P<pk>\d+)$', office_auth(DocumentTemplateView.as_view()), name='document-template.view'),
