@@ -238,7 +238,7 @@
       {% for parent_invoice in parent_invoices %}
       <div class="invoice-sequence">
         {% for invoice in parent_invoice.get_invoices %}
-          {% include "document/invoice_card.html" with invoice=invoice %}
+          {% include "accounting/invoice_card.html" with invoice=invoice %}
           {% if forloop.last %}
             {% if project.has_billable_contact %}
               {% if 'id' in invoice.json %}

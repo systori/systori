@@ -27,11 +27,13 @@ class InvoiceTable extends TableElement {
     }
 
     recalculate() {
+
         var estimate_total = new Amount(0, 0, tax_rate),
             progress_total = new Amount(0, 0, tax_rate),
             invoiced_total = new Amount(0, 0, tax_rate),
             itemized_total = new Amount(0, 0, tax_rate),
             debit_total = new Amount(0, 0, tax_rate);
+
         for (var row in rows) {
             estimate_total += row.estimate_cell.amount;
             progress_total += row.progress_cell.amount;
