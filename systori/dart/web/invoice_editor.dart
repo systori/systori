@@ -5,24 +5,53 @@ import 'amount_element.dart';
 
 class InvoiceTable extends TableElement {
 
+    AmountViewCell estimate_total_cell;
+    AmountViewCell progress_total_cell;
+    AmountViewCell invoiced_total_cell;
+    AmountViewCell itemized_total_cell;
     AmountViewCell debit_total_cell;
 
     double tax_rate;
 
     ElementList<InvoiceRow> get rows =>
-            this.querySelectorAll(":scope tr.invoice-row.invoiced");
+            this.querySelectorAll(":scope tr[is=invoice-row].invoiced");
 
     InvoiceTable.created() : super.created(); attached() {
         TableRowElement totals = this.querySelector(":scope tr.invoice-table-totals");
+        this.estimate_total_cell = totals.querySelector(":scope>.job-estimate");
+        this.progress_total_cell = totals.querySelector(":scope>.job-progress");
+        this.invoiced_total_cell = totals.querySelector(":scope>.job-invoiced");
+        this.itemized_total_cell = totals.querySelector(":scope>.job-itemized");
         this.debit_total_cell = totals.querySelector(":scope>.job-debit");
         tax_rate = double.parse(this.dataset['tax-rate']);
     }
 
     recalculate() {
-        var debit_total = new Amount(0, 0, tax_rate);
+        var estimate_total = new Amount(0, 0, tax_rate),
+            progress_total = new Amount(0, 0, tax_rate),
+            invoiced_total = new Amount(0, 0, tax_rate),
+            itemized_total = new Amount(0, 0, tax_rate),
+            debit_total = new Amount(0, 0, tax_rate);
         for (var row in rows) {
+            estimate_total += row.estimate_cell.amount;
+            progress_total += row.progress_cell.amount;
+            invoiced_total += row.invoiced_cell.amount;
+            itemized_total += row.itemized_cell.amount;
             debit_total += row.debit_cell.amount;
         }
+
+        estimate_total_cell.update(estimate_total);
+
+        progress_total_cell.update(progress_total);
+        progress_total_cell.update_percent(
+                estimate_total.net > 0 ? progress_total.net/estimate_total.net * 100 : 0.0);
+
+        invoiced_total_cell.update(invoiced_total);
+        invoiced_total_cell.update_percent(
+                progress_total.net > 0 ? invoiced_total.net/progress_total.net * 100 : 0.0);
+
+        itemized_total_cell.update(itemized_total);
+
         debit_total_cell.update(debit_total);
     }
 }
@@ -33,7 +62,6 @@ class InvoiceRow extends TableRowElement {
     InvoiceTable table;
 
     CheckboxInputElement is_invoiced_input;
-    RangeInputElement flat_invoice_range_input;
     HiddenInputElement is_override_input;
     TextAreaElement override_comment_input;
 
@@ -62,76 +90,39 @@ class InvoiceRow extends TableRowElement {
         debit_cell = this.querySelector(":scope>.job-debit");
         debit_cell.onAmountChange.listen(debit_amount_updated);
 
-        this.flat_invoice_range_input = this.querySelector('[type="range"]');
-        this.flat_invoice_range_input.onInput.listen(flat_invoice_range_changed);
-        this.querySelectorAll('.percent-button').onClick.listen(flat_invoice_percent_clicked);
-
-        this.is_override_input = this.querySelector('[name^="job-"][name\$="-is_override"]');
-        this.override_comment_input = this.querySelector('[name^="job-"][name\$="-override_comment"]');
+        is_override_input = this.querySelector('[name^="job-"][name\$="-is_override"]');
+        override_comment_input = this.querySelector('[name^="job-"][name\$="-override_comment"]');
     }
 
     invoicing_toggled([Event e]) {
-        if (is_invoiced) {
-            classes.add('invoiced');
-            flat_invoice_range_input.disabled = false;
-            this.querySelectorAll('.percent-button').forEach((e) {
-                e.classes.remove('disabled');
-            });
-        } else {
-            classes.remove('invoiced');
-            flat_invoice_range_input.disabled = true;
-            this.querySelectorAll('.percent-button').forEach((e) {
-               e.classes.add('disabled');
-            });
-        }
+        is_invoiced ? classes.add('invoiced') : classes.remove('invoiced');
+        _clear_django_errors();
         table.recalculate();
     }
 
     itemized_amount_clicked(Event e) {
         debit_cell.update(itemized_cell.amount);
-        update_range_slider();
         debit_amount_updated();
-    }
-
-    flat_invoice_range_changed(Event e) {
-        double percent = int.parse(flat_invoice_range_input.value)/100;
-        Amount flat = estimate_cell.amount * percent - invoiced_cell.amount;
-        debit_cell.update(flat.gross < 0 ? flat.zero() : flat);
-        debit_amount_updated();
-    }
-
-    flat_invoice_percent_clicked(Event e) {
-        double percent = double.parse((e.target as AnchorElement).dataset['percent'])/100;
-        Amount flat = estimate_cell.amount * percent - invoiced_cell.amount;
-        debit_cell.update(flat.gross < 0 ? flat.zero() : flat);
-        update_range_slider();
-        debit_amount_updated();
-    }
-
-    update_range_slider() {
-        var invoiced_total = invoiced_cell.amount + debit_cell.amount;
-        if (invoiced_total.gross > estimate_cell.amount.gross) {
-            flat_invoice_range_input.value = '100';
-        } else {
-            flat_invoice_range_input.value = (invoiced_total.gross / estimate_cell.amount.gross * 100).round().toString();
-        }
     }
 
     debit_amount_updated([AmountChangeEvent e]) {
-        is_override_input.value = 'False';
-        classes.remove('override');
-        classes.remove('itemized');
-        var debit_gross = debit_cell.amount.gross;
-        if (debit_gross > 0) {
-            if (debit_gross == itemized_cell.amount.gross) {
-                is_override_input.value = 'False';
-                classes.add('itemized');
-            } else {
-                is_override_input.value = 'True';
-                classes.add('override');
-            }
+
+        if (debit_cell.amount == itemized_cell.amount) {
+            classes.add('itemized');
+            itemized_cell.classes.add('selected');
+            is_override_input.value = 'False';
+        } else {
+            classes.remove('itemized');
+            itemized_cell.classes.remove('selected');
+            is_override_input.value = 'True';
         }
+        _clear_django_errors();
         table.recalculate();
+    }
+
+    _clear_django_errors() {
+        debit_cell.classes.removeAll(['has-error', 'bg-danger']);
+        debit_cell.querySelector('p.comment-error')?.remove();
     }
 
 }

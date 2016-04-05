@@ -123,6 +123,7 @@ class InvoiceForm(DocumentForm):
     doc_template = forms.ModelChoiceField(
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.INVOICE), required=False)
+
     add_terms = forms.BooleanField(label=_('Add Terms'), initial=True, required=False)
     is_final = forms.BooleanField(label=_('Is Final Invoice?'), initial=False, required=False)
 
@@ -160,11 +161,11 @@ class InvoiceForm(DocumentForm):
 
         self.latest_progress_total_percent = 0
         if self.latest_estimate_total_amount.net > 0:
-            self.latest_progress_total_percent = round(self.latest_progress_total_amount.net / self.latest_estimate_total_amount.net * 100)
+            self.latest_progress_total_percent = self.latest_progress_total_amount.net / self.latest_estimate_total_amount.net * 100
 
         self.base_invoiced_total_percent = 0
         if self.latest_progress_total_amount.net > 0:
-            self.base_invoiced_total_percent = round(self.base_invoiced_total_amount.net / self.latest_progress_total_amount.net * 100)
+            self.base_invoiced_total_percent = self.base_invoiced_total_amount.net / self.latest_progress_total_amount.net * 100
 
     @atomic
     def save(self, commit=True):
@@ -197,10 +198,6 @@ class InvoiceRowForm(DocumentRowForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        comment_attrs = self.fields['override_comment'].widget.attrs
-        comment_attrs['class'] = 'job-override-comment form-control'
-        del comment_attrs['cols']
-        del comment_attrs['rows']
 
         self.latest_estimate_amount = Amount.from_net(self.job.estimate_total, TAX_RATE)
         self.latest_progress_amount = Amount.from_net(self.job.progress_total, TAX_RATE)
@@ -226,7 +223,7 @@ class InvoiceRowForm(DocumentRowForm):
 
         self.base_invoiced_percent = 0
         if self.latest_progress_amount.net > 0:
-            self.base_invoiced_percent = round(self.base_invoiced_amount.net / self.latest_progress_amount.net * 100)
+            self.base_invoiced_percent = self.base_invoiced_amount.net / self.latest_progress_amount.net * 100
 
         # subtract already invoiced from potentially billable to get amount not yet invoiced
         self.itemized_amount = self.latest_progress_amount - self.base_invoiced_amount
@@ -251,13 +248,11 @@ class InvoiceRowForm(DocumentRowForm):
             if self.new_invoiced_amount.net >= self.latest_estimate_amount.net:
                 self.new_invoiced_percent = 100
             else:
-                self.new_invoiced_percent = round((self.new_invoiced_amount.net / self.latest_estimate_amount.net) * 100, 2)
+                self.new_invoiced_percent = (self.new_invoiced_amount.net / self.latest_estimate_amount.net) * 100
 
     def clean(self):
-        if self.cleaned_data['is_override'] and \
-                        len(self.cleaned_data['override_comment']) < 1:
-            self.add_error('override_comment',
-                           ValidationError(_("A comment is required for flat invoice.")))
+        if self.cleaned_data['is_override'] and len(self.cleaned_data['override_comment']) == 0:
+            self.add_error('override_comment', _("An explanation is required for non-itemized invoice."))
 
     @property
     def json(self):

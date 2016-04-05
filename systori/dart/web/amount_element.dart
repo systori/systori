@@ -32,7 +32,8 @@ class Amount {
         double.parse(rate)
     );
 
-    factory Amount.from_gross(int gross, double tax_rate) {
+    factory
+    Amount.from_gross(int gross, double tax_rate) {
         var net = (gross / (1+tax_rate)).round();
         var tax = gross - net;
         return new Amount(net, tax, tax_rate);
@@ -48,7 +49,7 @@ class Amount {
         new Amount(gross - new_tax, new_tax, tax_rate);
 
     Amount adjust_gross(int new_gross) =>
-            new Amount.from_gross(new_gross, tax_rate);
+        new Amount.from_gross(new_gross, tax_rate);
 
     Amount zero_negatives() =>
         new Amount(net < 0 ? 0 : net, tax < 0 ? 0 : tax, tax_rate);
@@ -64,7 +65,7 @@ class Amount {
 
     bool operator == (Amount other) {
         if (other == null) return false;
-        return net == other.net && tax == other.tax && gross == other.gross;
+        return net == other.net && tax == other.tax;
     }
 
 }
@@ -79,6 +80,8 @@ class AmountDivs {
     SpanElement _net_span_diff;
     SpanElement _tax_span_diff;
     SpanElement _gross_span_diff;
+
+    DivElement _percent_div;
 
     String _tax_rate;
 
@@ -103,7 +106,22 @@ class AmountDivs {
             span.text = value_str;
             span.classes.add('red');
         }
+    }
 
+    update_percent(double percent) {
+        _percent_div.classes.removeAll(['red', 'green', 'blue']);
+        int rounded = 0;
+        if (percent < 100) {
+            _percent_div.classes.add('blue');
+            rounded = percent.floor();
+        } else if (percent == 100.0) {
+            _percent_div.classes.add('green');
+            rounded = 100;
+        } else if (percent > 100) {
+            _percent_div.classes.add('red');
+            rounded = percent.ceil();
+        }
+        _percent_div.text = "${rounded}%";
     }
 
     cache_views(Element scope) {
@@ -113,6 +131,7 @@ class AmountDivs {
         _gross_span_diff = scope.querySelector(":scope>.amount-gross>.amount-diff");
         _net_span_diff = scope.querySelector(":scope>.amount-net>.amount-diff");
         _tax_span_diff = scope.querySelector(":scope>.amount-tax>.amount-diff");
+        _percent_div = scope.querySelector(":scope>.amount-percent");
         _tax_rate = scope.dataset['tax-rate'];
     }
 
