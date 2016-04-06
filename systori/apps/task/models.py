@@ -1,3 +1,4 @@
+from math import floor, ceil
 from decimal import Decimal
 from datetime import datetime
 from string import ascii_lowercase
@@ -152,7 +153,13 @@ class Job(models.Model):
 
     @property
     def progress_percent(self):
-        return round(self.progress_total / self.estimate_total * 100) if self.estimate_total else 0
+        percent = self.progress_total / self.estimate_total * 100 if self.estimate_total else 0
+        if percent < 100:
+            return floor(percent)
+        elif percent > 100:
+            return ceil(percent)
+        else:
+            return 100
 
     @property
     def code(self):

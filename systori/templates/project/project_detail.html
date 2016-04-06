@@ -238,7 +238,7 @@
       {% for parent_invoice in parent_invoices %}
       <div class="invoice-sequence">
         {% for invoice in parent_invoice.get_invoices %}
-          {% include "document/invoice_card.html" with invoice=invoice %}
+          {% include "accounting/invoice_card.html" with invoice=invoice %}
           {% if forloop.last %}
             {% if project.has_billable_contact %}
               {% if 'id' in invoice.json %}
@@ -290,6 +290,7 @@
         <th>{% trans 'Date' %} / {% trans 'Job' %}</th>
         <th class="text-right">{% trans 'Payment' %}</th>
         <th class="text-right">{% trans 'Discount' %}</th>
+        <th class="text-right">{% trans 'Adjustment' %}</th>
         <th class="text-right">{% trans 'Applied' %}</th>
         <th class="text-right" colspan="3">{% trans 'Actions' %}</th>
       </tr>
@@ -300,6 +301,7 @@
           <td>{{ payment.document_date|localize }}</td>
           <td class="text-right">{{ payment.json.split_total.gross|money }}</td>
           <td class="text-right">{{ payment.json.discount_total.gross|money }}</td>
+          <td class="text-right">{{ payment.json.adjustment_total.gross|money }}</td>
           <td class="text-right">{{ payment.json.credit_total.gross|money }}</td>
           <td class="text-right">
             {% if not payment.transaction.is_reconciled %}
@@ -313,6 +315,7 @@
             <td>{{ job.name }}</td>
             <td>{{ job.split.gross|money }}</td>
             <td>{{ job.discount.gross|money }}</td>
+            <td>{{ job.adjustment.gross|money }}</td>
             <td>{{ job.credit.gross|money }}</td>
             <td></td>
           </tr>

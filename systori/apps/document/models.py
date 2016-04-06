@@ -78,7 +78,7 @@ class Invoice(Document):
 
     letterhead = models.ForeignKey('document.Letterhead', related_name="invoice_documents")
 
-    invoice_no = models.CharField(_("Invoice No."), max_length=30)
+    invoice_no = models.CharField(_("Invoice No."), max_length=30, unique=True)
     project = models.ForeignKey("project.Project", related_name="invoices")
     parent = models.ForeignKey("self", related_name="invoices", null=True)
 

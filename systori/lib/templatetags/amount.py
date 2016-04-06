@@ -1,3 +1,4 @@
+from math import floor, ceil
 from decimal import Decimal
 from django import template
 from django.utils.safestring import mark_safe
@@ -7,7 +8,7 @@ from .customformatting import ubrdecimal
 register = template.Library()
 
 
-def _make_context(context, css, obj, field, bold="gross", has_form=False):
+def _make_context(context, css, obj, field, bold="gross", has_form=False, comment=None, select_if_equal=None):
 
     ctx = {
         'TAX_RATE': context['TAX_RATE'],
@@ -19,28 +20,39 @@ def _make_context(context, css, obj, field, bold="gross", has_form=False):
         'bold': bold
     }
 
+    if select_if_equal == ctx['amount']:
+        ctx['css_class'] += ' selected'
+
     if has_form:
+
         ctx.update({
             'net': obj[field+'_net'],
             'tax': obj[field+'_tax'],
+            'comment': comment,
         })
+
+        for field_name in ['net', 'tax', 'comment']:
+            field_obj = ctx[field_name]
+            if field_obj is not None and field_obj.errors:
+                ctx['css_class'] += ' has-error bg-danger'
+                break
 
     return ctx
 
 
 @register.inclusion_tag('accounting/amount_view_cell.html', takes_context=True)
-def amount_view(context, *args):
-    return _make_context(context, *args)
+def amount_view(context, *args, **kwargs):
+    return _make_context(context, *args, **kwargs)
 
 
 @register.inclusion_tag('accounting/amount_view_cell.html', takes_context=True)
-def amount_stateful(context, *args):
-    return _make_context(context, *args, has_form=True)
+def amount_stateful(context, *args, **kwargs):
+    return _make_context(context, *args, has_form=True, **kwargs)
 
 
 @register.inclusion_tag('accounting/amount_input_cell.html', takes_context=True)
-def amount_input(context, *args):
-    return _make_context(context, *args, has_form=True)
+def amount_input(context, *args, **kwargs):
+    return _make_context(context, *args, has_form=True, **kwargs)
 
 
 @register.simple_tag
@@ -71,11 +83,13 @@ def amount_percent(percent):
     color = ''
     str_value = ''
     if percent is not None:
-        str_value = str(percent)+'%'
         if percent == 100:
             color = 'green'
         elif percent > 100:
             color = 'red'
+            percent = ceil(percent)
         elif percent < 100:
             color = 'blue'
+            percent = floor(percent)
+        str_value = str(percent)+'%'
     return mark_safe('<div class="amount-percent %s">%s</div>' % (color, str_value))

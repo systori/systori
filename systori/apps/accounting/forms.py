@@ -1,3 +1,4 @@
+import types
 from datetime import date
 from decimal import Decimal as D
 from django.conf import settings
@@ -6,7 +7,7 @@ from django.utils.translation import get_language
 from django.forms.formsets import formset_factory
 from django.forms.formsets import BaseFormSet
 from django.forms import Form, ModelForm, ValidationError, widgets
-from django.db.transaction import atomic
+from django.db import transaction
 from django import forms
 from systori.lib.fields import LocalizedDecimalField
 from systori.lib.accounting.tools import Amount
@@ -16,6 +17,7 @@ from .constants import TAX_RATE, BANK_CODE_RANGE
 from .models import Entry
 from ..document.models import Invoice, Adjustment, Payment, Refund, DocumentTemplate, DocumentSettings
 from ..document import type as pdf_type
+from .models import Transaction
 
 
 def convert_field_to_value(field):
@@ -39,6 +41,8 @@ class DocumentForm(forms.ModelForm):
     def __init__(self, *args, formset_class, instance, jobs, **kwargs):
         super().__init__(*args, instance=instance, initial=kwargs.pop('initial', {}), **kwargs)
         self.formset = formset_class(instance=instance, jobs=jobs, **kwargs)
+        self.calculate_accounting_states()
+        self.calculate_initial_values()
 
     def is_valid(self):
         form_valid = super().is_valid()
@@ -48,18 +52,54 @@ class DocumentForm(forms.ModelForm):
     def calculate_totals(self, totals, condition=lambda form: True):
 
         for total in totals:
-            if total.endswith('_diff'):
-                setattr(self, total[:-4]+'total_diff_amount', Amount.zero())
-            else:
-                setattr(self, total+'_total_amount', Amount.zero())
+            total_field = total[:-4]+'total_diff_amount' if total.endswith('_diff') else total+'_total_amount'
+            total_field = total_field.replace('.', '_')
+            setattr(self, total_field, Amount.zero())
 
         for form in self.formset:
             if condition(form):
                 for total in totals:
                     total_field = total[:-4]+'total_diff_amount' if total.endswith('_diff') else total+'_total_amount'
+                    if '.' in total:
+                        state_name, attr_name = total.split('.')
+                        state = getattr(form, state_name)
+                        form_amount = getattr(state, attr_name+'_amount')
+                    else:
+                        form_amount = getattr(form, total+'_amount')
+                    total_field = total_field.replace('.', '_')
                     total_amount = getattr(self, total_field)
-                    form_amount = getattr(form, total+'_amount')
                     setattr(self, total_field, total_amount+form_amount)
+
+    def calculate_accounting_states(self):
+
+        if self.instance.transaction:
+
+            # Start Transaction
+            atom = transaction.atomic()
+            atom.__enter__()
+
+            # Delete transaction so we can capture accounting state without it
+            Transaction.objects.filter(id=self.instance.transaction.id).delete()
+
+            # Capture state of accounting system before transaction
+            for form in self.formset:
+                form.pre_txn = types.SimpleNamespace()
+                form.calculate_accounting_state(form.pre_txn)
+
+            # Rollback Transaction
+            transaction.set_rollback(True)
+            atom.__exit__(None, None, None)
+
+        else:
+
+            # Capture state of accounting system before transaction
+            for form in self.formset:
+                form.pre_txn = types.SimpleNamespace()
+                form.calculate_accounting_state(form.pre_txn)
+
+    def calculate_initial_values(self):
+        for form in self.formset:
+            form.calculate_initial_values()
 
 
 class BaseDocumentFormSet(BaseFormSet):
@@ -107,6 +147,9 @@ class DocumentRowForm(Form):
         )
         setattr(self, name+'_amount', initial_or_updated_amount)
 
+    def calculate_accounting_state(self, state):
+        raise NotImplementedError()
+
     @property
     def json(self):
         raise NotImplementedError()
@@ -123,6 +166,7 @@ class InvoiceForm(DocumentForm):
     doc_template = forms.ModelChoiceField(
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.INVOICE), required=False)
+
     add_terms = forms.BooleanField(label=_('Add Terms'), initial=True, required=False)
     is_final = forms.BooleanField(label=_('Is Final Invoice?'), initial=False, required=False)
 
@@ -148,25 +192,23 @@ class InvoiceForm(DocumentForm):
                 self.initial['footer'] = rendered['footer']
 
         self.calculate_totals([
-            'latest_estimate',
-            'latest_progress',
-            'base_invoiced',
-            'base_balance',
-            'new_invoiced',
-            'new_balance',
-            'itemized',
+            'pre_txn.estimate',
+            'pre_txn.progress',
+            'pre_txn.invoiced',
+            'pre_txn.balance',
+            'pre_txn.itemized',
             'debit',
         ], lambda form: str(form['is_invoiced'].value()) == 'True')
 
-        self.latest_progress_total_percent = 0
-        if self.latest_estimate_total_amount.net > 0:
-            self.latest_progress_total_percent = round(self.latest_progress_total_amount.net / self.latest_estimate_total_amount.net * 100)
+        self.pre_txn_progress_total_percent = 0
+        if self.pre_txn_estimate_total_amount.net > 0:
+            self.pre_txn_progress_total_percent = self.pre_txn_progress_total_amount.net / self.pre_txn_estimate_total_amount.net * 100
 
-        self.base_invoiced_total_percent = 0
-        if self.latest_progress_total_amount.net > 0:
-            self.base_invoiced_total_percent = round(self.base_invoiced_total_amount.net / self.latest_progress_total_amount.net * 100)
+        self.pre_txn_invoiced_total_percent = 0
+        if self.pre_txn_progress_total_amount.net > 0:
+            self.pre_txn_invoiced_total_percent = self.pre_txn_invoiced_total_amount.net / self.pre_txn_progress_total_amount.net * 100
 
-    @atomic
+    @transaction.atomic
     def save(self, commit=True):
 
         invoice = self.instance
@@ -197,67 +239,48 @@ class InvoiceRowForm(DocumentRowForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        comment_attrs = self.fields['override_comment'].widget.attrs
-        comment_attrs['class'] = 'job-override-comment form-control'
-        del comment_attrs['cols']
-        del comment_attrs['rows']
 
-        self.latest_estimate_amount = Amount.from_net(self.job.estimate_total, TAX_RATE)
-        self.latest_progress_amount = Amount.from_net(self.job.progress_total, TAX_RATE)
-        self.latest_progress_percent = self.job.progress_percent
+    def calculate_accounting_state(self, state):
 
-        # previously saved debit or zero
-        debit = self.original_debit_amount = self.initial.get('debit', Amount.zero())
+        state.estimate_amount = Amount.from_net(self.job.estimate_total, TAX_RATE)
 
-        if 'is_booked' in self.initial:
-            # accounting system already has the 'new' amounts since this invoice was booked
-            self.new_invoiced_amount = self.job.account.invoiced
-            self.new_balance_amount = self.job.account.balance
+        state.progress_amount = Amount.from_net(self.job.progress_total, TAX_RATE)
+        state.progress_percent = self.job.progress_percent
 
-            # we need to undo the booking to get the 'base' amounts
-            self.base_invoiced_amount = self.new_invoiced_amount - self.original_debit_amount
-            self.base_balance_amount = self.new_balance_amount - self.original_debit_amount
+        state.invoiced_amount = self.job.account.invoiced
+        state.invoiced_percent = 0
+        if state.progress_amount.net > 0:
+            state.invoiced_percent = state.invoiced_amount.net / state.progress_amount.net * 100
 
-        else:
-            # no transactions exist yet so the account balance and debits don't include this new debit
-            # accounting system has the 'base' amounts
-            self.base_invoiced_amount = self.job.account.invoiced
-            self.base_balance_amount = self.job.account.balance
+        state.balance_amount = self.job.account.balance
 
-        self.base_invoiced_percent = 0
-        if self.latest_progress_amount.net > 0:
-            self.base_invoiced_percent = round(self.base_invoiced_amount.net / self.latest_progress_amount.net * 100)
+        state.itemized_amount = state.progress_amount - state.invoiced_amount
+        if state.itemized_amount.gross < 0:
+            state.itemized_amount = Amount.zero()
 
-        # subtract already invoiced from potentially billable to get amount not yet invoiced
-        self.itemized_amount = self.latest_progress_amount - self.base_invoiced_amount
-        if self.itemized_amount.gross < 0:
-            self.itemized_amount = Amount.zero()
+    def calculate_initial_values(self):
 
         if str(self['is_override'].value()) == 'False':
-            if self.itemized_amount.net > 0:
-                debit = self.itemized_amount
+            if self.pre_txn.itemized_amount.net > 0:
+                self.initial['debit'] = self.pre_txn.itemized_amount
 
-        self.initial['debit'] = debit
+        if 'debit' not in self.initial:
+            self.initial['debit'] = Amount.zero()
         self.init_amount('debit')
 
-        self.original_debit_diff_amount = self.original_debit_amount - self.debit_amount
+        self.post_txn = types.SimpleNamespace()
+        self.post_txn.invoiced_amount = self.pre_txn.invoiced_amount + self.debit_amount
+        self.post_txn.balance_amount = self.pre_txn.balance_amount + self.debit_amount
 
-        # now that we know the correct debit amount we can calculate what the new balance will be
-        self.new_invoiced_amount = self.base_invoiced_amount + self.debit_amount
-        self.new_balance_amount = self.base_balance_amount + self.debit_amount
-
-        self.new_invoiced_percent = 0
-        if self.latest_estimate_amount.net > 0:
-            if self.new_invoiced_amount.net >= self.latest_estimate_amount.net:
-                self.new_invoiced_percent = 100
-            else:
-                self.new_invoiced_percent = round((self.new_invoiced_amount.net / self.latest_estimate_amount.net) * 100, 2)
+        self.is_itemized = True
+        if self.post_txn.invoiced_amount != self.pre_txn.progress_amount:
+            self.is_itemized = False
 
     def clean(self):
         if self.cleaned_data['is_override'] and \
-                        len(self.cleaned_data['override_comment']) < 1:
-            self.add_error('override_comment',
-                           ValidationError(_("A comment is required for flat invoice.")))
+           self.debit_amount.gross > 0 and \
+           len(self.cleaned_data['override_comment']) == 0:
+            self.add_error('override_comment', _("An explanation is required for non-itemized invoice."))
 
     @property
     def json(self):
@@ -266,12 +289,13 @@ class InvoiceRowForm(DocumentRowForm):
                 'job': self.job,
                 'is_invoiced': True,
                 'debit': self.debit_amount,
+                'is_itemized': self.is_itemized,
                 'is_override': self.cleaned_data['is_override'],
                 'override_comment': self.cleaned_data['override_comment'],
-                'invoiced': self.new_invoiced_amount,
-                'balance': self.new_balance_amount,
-                'estimate': self.latest_estimate_amount,
-                'progress': self.latest_progress_amount,
+                'invoiced': self.post_txn.invoiced_amount,
+                'balance': self.post_txn.balance_amount,
+                'estimate': self.pre_txn.estimate_amount,
+                'progress': self.pre_txn.progress_amount,
             }
 
     @property
@@ -290,28 +314,39 @@ InvoiceFormSet = formset_factory(InvoiceRowForm, formset=BaseDocumentFormSet, ex
 class AdjustmentForm(DocumentForm):
     invoice = forms.ModelChoiceField(label=_("Invoice"), queryset=Invoice.objects.all(), widget=forms.HiddenInput(), required=False)
 
+    title = forms.CharField(label=_('Title'), initial=_("Adjustment"), required=False)
+    header = forms.CharField(widget=forms.Textarea, initial='', required=False)
+    footer = forms.CharField(widget=forms.Textarea, initial='', required=False)
+
     class Meta:
         model = Adjustment
-        fields = ['invoice']
+        fields = ['invoice', 'document_date', 'title', 'header', 'footer', 'notes']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=AdjustmentFormSet, **kwargs)
         self.calculate_totals([
-            'paid',
-            'invoiced',
-            'invoiced_diff',
-            'progress',
-            'progress_diff',
+            'pre_txn.paid',
+            'pre_txn.invoiced',
+            'pre_txn.invoiced_diff',
+            'pre_txn.progress',
+            'pre_txn.progress_diff',
             'adjustment',
             'corrected',
         ])
 
-    @atomic
+    @transaction.atomic
     def save(self, commit=True):
 
         adjustment = self.instance
-        data = self.cleaned_data
-        data['jobs'] = self.formset.get_json_rows()
+        data = self.cleaned_data.copy()
+        data.update({
+            'jobs': self.formset.get_json_rows(),
+            'paid_total': self.pre_txn_paid_total_amount,
+            'invoiced_total': self.pre_txn_invoiced_total_amount,
+            'progress_total': self.pre_txn_progress_total_amount,
+            'adjustment_total': self.adjustment_total_amount,
+            'corrected_total': self.corrected_total_amount
+        })
 
         if adjustment.transaction:
             adjustment.transaction.delete()
@@ -336,27 +371,35 @@ class AdjustmentRowForm(DocumentRowForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Paid Column
-        self.paid_amount = self.job.account.paid.negate
+    def calculate_accounting_state(self, state):
 
-        # Invoiced Column
-        self.invoiced_amount = self.initial.get('invoiced', self.job.account.invoiced)
-        self.invoiced_diff_amount = self.invoiced_amount - self.paid_amount
+        state.paid_amount = self.job.account.paid.negate
 
-        # Billable Column
-        self.progress_amount = Amount.from_net(self.job.progress_total, TAX_RATE)
-        self.progress_diff_amount = self.progress_amount - self.invoiced_amount
+        state.invoiced_amount = self.job.account.invoiced
+        state.invoiced_diff_amount = state.invoiced_amount - state.paid_amount
 
-        # Adjustment Column
-        self.init_amount('adjustment')
+        state.progress_amount = Amount.from_net(self.job.progress_total, TAX_RATE)
+        state.progress_diff_amount = state.progress_amount - state.invoiced_amount
 
-        # Corrected Column
+    def calculate_initial_values(self):
+
+        if 'corrected' not in self.initial:
+            self.initial['corrected'] = self.pre_txn.invoiced_amount
         self.init_amount('corrected')
+
+        if 'adjustment' not in self.initial:
+            self.initial['adjustment'] = self.corrected_amount - self.pre_txn.invoiced_amount
+        self.init_amount('adjustment')
 
     @property
     def json(self):
         return {
-            'job': self.job,
+            'job.id': self.job.id,
+            'code': self.job.code,
+            'name': self.job.name,
+            'progress': self.pre_txn.progress_amount,
+            'paid': self.pre_txn.paid_amount,
+            'invoiced': self.pre_txn.invoiced_amount,
             'adjustment': self.adjustment_amount,
             'corrected': self.corrected_amount
         }
@@ -413,11 +456,11 @@ class PaymentForm(DocumentForm):
         if splits.gross != self.payment_value:
             raise forms.ValidationError(_("The sum of splits must equal the payment amount."))
 
-    @atomic
+    @transaction.atomic
     def save(self, commit=True):
 
         payment = self.instance
-        data = self.cleaned_data
+        data = self.cleaned_data.copy()
         data.update({
             'jobs': self.formset.get_json_rows(),
             'split_total': self.split_total_amount,
@@ -462,11 +505,19 @@ class PaymentRowForm(DocumentRowForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def calculate_accounting_state(self, state):
+        state.balance_amount = self.job.account.balance
+
+    def calculate_initial_values(self):
+
+        self.balance_amount = self.pre_txn.balance_amount
+        if 'invoiced' in self.initial:
+            # when paying an invoice, the balance is taken from invoice instead of accouting system
+            self.balance_amount = self.initial['invoiced']
+
         self.init_amount('split')
         self.init_amount('discount')
         self.init_amount('adjustment')
-
-        self.balance_amount = self.initial.get('invoiced', self.job.account.balance)
 
         if self.balance_amount.gross < 0:
             self.balance_amount = Amount.zero()
@@ -476,13 +527,19 @@ class PaymentRowForm(DocumentRowForm):
     @property
     def json(self):
         if any((self.split_amount.gross, self.discount_amount.gross, self.adjustment_amount.gross)):
-            return {
-                'job': self.job,
+            json = {
+                'job.id': self.job.id,
+                'code': self.job.code,
+                'name': self.job.name,
+                'balance': self.balance_amount,
                 'split': self.split_amount,
                 'discount': self.discount_amount,
                 'adjustment': self.adjustment_amount,
                 'credit': self.credit_amount
             }
+            if 'invoiced' in self.initial:
+                json['invoiced'] = self.initial['invoiced']
+            return json
 
     @property
     def transaction(self):
@@ -494,18 +551,13 @@ PaymentFormSet = formset_factory(PaymentRowForm, formset=BaseDocumentFormSet, ex
 
 class RefundForm(DocumentForm):
 
-    doc_template = forms.ModelChoiceField(
-        queryset=DocumentTemplate.objects.filter(
-            document_type=DocumentTemplate.INVOICE), required=False)
-
     title = forms.CharField(label=_('Title'), initial=_("Refund"), required=False)
     header = forms.CharField(widget=forms.Textarea, initial='', required=False)
     footer = forms.CharField(widget=forms.Textarea, initial='', required=False)
 
     class Meta(DocumentForm.Meta):
         model = Refund
-        fields = []
-        fields = ['doc_template', 'document_date', 'title', 'header', 'footer', 'notes']
+        fields = ['document_date', 'title', 'header', 'footer', 'notes']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=RefundFormSet, **kwargs)
@@ -514,11 +566,11 @@ class RefundForm(DocumentForm):
             self.calculate_initial_refund()
 
         self.calculate_totals([
-            'paid',
-            'invoiced',
-            'invoiced_diff',
-            'progress',
-            'progress_diff',
+            'pre_txn.paid',
+            'pre_txn.invoiced',
+            'pre_txn.invoiced_diff',
+            'pre_txn.progress',
+            'pre_txn.progress_diff',
             'refund',
             'credit',
         ])
@@ -535,13 +587,16 @@ class RefundForm(DocumentForm):
             refund_total = form.consume_refund(refund_total)
         return refund_total
 
-    @atomic
+    @transaction.atomic
     def save(self, commit=True):
 
         refund = self.instance
         data = self.cleaned_data.copy()
         data.update({
             'jobs': self.formset.get_json_rows(),
+            'paid_total': self.pre_txn_paid_total_amount,
+            'invoiced_total': self.pre_txn_invoiced_total_amount,
+            'progress_total': self.pre_txn_progress_total_amount,
             'refund_total': self.refund_total_amount,
             'credit_total': self.credit_total_amount,
             'customer_refund': self.customer_refund_amount
@@ -569,28 +624,31 @@ class RefundRowForm(DocumentRowForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def calculate_accounting_state(self, state):
         # Paid Column
-        self.paid_amount = self.job.account.paid.negate
+        state.paid_amount = self.job.account.paid.negate
 
         # Invoiced Column
-        self.invoiced_amount = self.initial.get('invoiced', self.job.account.invoiced)
-        self.invoiced_diff_amount = self.invoiced_amount - self.paid_amount
+        state.invoiced_amount = self.job.account.invoiced
+        state.invoiced_diff_amount = state.invoiced_amount - state.paid_amount
 
         # Billable Column
-        self.progress_amount = Amount.from_net(self.job.progress_total, TAX_RATE)
-        self.progress_diff_amount = self.progress_amount - self.invoiced_amount
+        state.progress_amount = Amount.from_net(self.job.progress_total, TAX_RATE)
+        state.progress_diff_amount = state.progress_amount - state.invoiced_amount
+
+    def calculate_initial_values(self):
 
         # Refund Column
-        if 'refund' not in self.initial and self.invoiced_amount.gross < self.paid_amount.gross:
-            self.initial['refund'] = self.paid_amount - self.invoiced_amount
+        if 'refund' not in self.initial and self.pre_txn.invoiced_amount.gross < self.pre_txn.paid_amount.gross:
+            self.initial['refund'] = self.pre_txn.paid_amount - self.pre_txn.invoiced_amount
         self.init_amount('refund')
 
         # Apply Column
         self.init_amount('credit')
 
     def consume_refund(self, refund):
-        if self.progress_amount.gross > self.paid_amount.gross:
-            consumable = self.progress_amount - self.paid_amount
+        if self.pre_txn.progress_amount.gross > self.pre_txn.paid_amount.gross:
+            consumable = self.pre_txn.progress_amount - self.pre_txn.paid_amount
             if refund.gross < consumable.gross:
                 consumable = refund
             self.initial['credit'] = consumable
@@ -604,6 +662,9 @@ class RefundRowForm(DocumentRowForm):
             'job.id': self.job.id,
             'code': self.job.code,
             'name': self.job.name,
+            'paid': self.pre_txn.paid_amount,
+            'invoiced': self.pre_txn.invoiced_amount,
+            'progress': self.pre_txn.progress_amount,
             'refund': self.refund_amount,
             'credit': self.credit_amount
         }

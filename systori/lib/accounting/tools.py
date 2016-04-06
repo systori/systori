@@ -112,6 +112,11 @@ class Amount:
                 gross=self.gross+other.gross
         )
 
+    def __eq__(self, other):
+        if other is None:
+            return False
+        return self.net == other.net and self.tax == other.tax and self.gross == other.gross
+
     def __repr__(self):
         return "Amount(net=%s, tax=%s, gross=%s)" % (self.net, self.tax, self.gross)
 
