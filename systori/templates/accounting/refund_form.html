@@ -48,18 +48,18 @@
       {% for refund in form.formset %}
         <tr is="refund-row" class="refund-row">
           <td class="job-name">{{ refund.job }}{{ refund.initial.job.name }}</td>
-          {% amount_view "job-paid clickable" refund "paid" %}
-          {% amount_view "job-invoiced" refund "invoiced" %}
-          {% amount_view "job-progress" refund "progress" %}
+          {% amount_view "job-paid clickable" refund.pre_txn "paid" %}
+          {% amount_view "job-invoiced" refund.pre_txn "invoiced" %}
+          {% amount_view "job-progress" refund.pre_txn "progress" %}
           {% amount_input "job-refund" refund "refund" %}
           {% amount_input "job-credit" refund "credit" %}
         </tr>
       {% endfor %}
         <tr class="refund-table-totals">
           <td class="job-name"></td>
-          {% amount_view "job-paid" form "paid_total" %}
-          {% amount_view "job-invoiced" form "invoiced_total" %}
-          {% amount_view "job-progress" form "progress_total" %}
+          {% amount_view "job-paid" form "pre_txn_paid_total" %}
+          {% amount_view "job-invoiced" form "pre_txn_invoiced_total" %}
+          {% amount_view "job-progress" form "pre_txn_progress_total" %}
           {% amount_view "job-refund" form "refund_total" %}
           {% amount_view "job-credit" form "credit_total" %}
         </tr>

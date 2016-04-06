@@ -234,15 +234,7 @@ def serialize(payment_obj, data):
         'discount_total': data['discount_total'],
         'adjustment_total': data['adjustment_total'],
         'credit_total': data['credit_total'],
-        'jobs': [],
+        'jobs': data['jobs'],
     }
-
-    for job_data in data['jobs']:
-        job_obj = job_data.pop('job')
-        job_data.update({
-            'job.id': job_obj.id,
-            'name': job_obj.name
-        })
-        payment['jobs'].append(job_data)
 
     return payment

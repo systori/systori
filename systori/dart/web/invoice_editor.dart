@@ -109,16 +109,30 @@ class InvoiceRow extends TableRowElement {
 
     debit_amount_updated([AmountChangeEvent e]) {
 
-        if (debit_cell.amount == itemized_cell.amount) {
+        // invoice shows job as itemized only when invoiced == progress
+        if (invoiced_cell.amount + debit_cell.amount == progress_cell.amount) {
             classes.add('itemized');
-            itemized_cell.classes.add('selected');
-            is_override_input.value = 'False';
         } else {
             classes.remove('itemized');
-            itemized_cell.classes.remove('selected');
-            is_override_input.value = 'True';
         }
+
+        // itemized cell is highlighted if it matches the debit
+        if (itemized_cell.amount == debit_cell.amount) {
+            itemized_cell.classes.add('selected');
+        } else {
+            itemized_cell.classes.remove('selected');
+        }
+
+        if (itemized_cell.amount != debit_cell.amount && debit_cell.amount.gross > 0) {
+            is_override_input.value = 'True';
+            classes.add('override');
+        } else {
+            is_override_input.value = 'False';
+            classes.remove('override');
+        }
+
         _clear_django_errors();
+
         table.recalculate();
     }
 

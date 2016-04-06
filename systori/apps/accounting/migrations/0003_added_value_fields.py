@@ -128,7 +128,6 @@ def migrate_invoices(apps, schema_editor):
         for invoice in Invoice.objects.all():
 
             invoice.json['debit'] = Amount(invoice.json['debit_net'], invoice.json['debit_tax'])
-            del invoice.json['debit_net'], invoice.json['debit_tax'], invoice.json['debit_gross']
 
             if 'debits' not in invoice.json:
                 invoice.json['jobs'] = []
@@ -138,30 +137,34 @@ def migrate_invoices(apps, schema_editor):
             invoice.json['jobs'] = invoice.json['debits']
             del invoice.json['debits']
 
-            job_ids = []
-            for job in invoice.json['jobs']:
-                job_ids.append(job['job.id'])
-                job['debit'] = Amount(job['amount_net'], job['amount_tax'])
-                del job['amount_net'], job['amount_tax']
-                job['invoiced'] = Amount(job['debited_net'], job['debited_tax'])
-                del job['debited_net'], job['debited_tax']
-                job['balance'] = Amount(job['balance_net'], job['balance_tax'])
-                del job['balance_net'], job['balance_tax']
-                job['estimate'] = Amount.from_net(job['estimate_net'], TAX_RATE)
-                del job['estimate_net']
-                job['progress'] = Amount.from_net(job['itemized_net'], TAX_RATE)
-                del job['itemized_net']
-
-            jobs = Job.objects.filter(id__in=job_ids)
+            jobs = Job.objects.filter(id__in=[job['job.id'] for job in invoice.json['jobs']])
             tdate = date(*map(int, invoice.json['transactions'][-1]['date'].split('-')))
             new_json = create_invoice_report(invoice.transaction, jobs, tdate)
             if (company.schema == 'mehr_handwerk' and invoice.id not in [86, 111]) or \
                (company.schema == 'montageservice_grad' and invoice.id not in [1]):
-                #print(company.schema, invoice.project_id, invoice.id, new_json['debit'].gross, invoice.json['debit'].gross)
-                #print(new_json['invoiced'].gross, invoice.json['debited_gross'])
                 assert new_json['debit'].gross == invoice.json['debit'].gross
                 assert new_json['invoiced'].gross == invoice.json['debited_gross']
             invoice.json.update(new_json)
+
+            for job in invoice.json['jobs']:
+
+                taskgroup_total = Decimal('0.00')
+                for taskgroup in job['taskgroups']:
+                    taskgroup_total += taskgroup['total']
+                job['progress'] = Amount.from_net(taskgroup_total, TAX_RATE)
+
+                invoiced_total = Amount.zero()
+                for debit in invoice.json['job_debits'].get(job['job.id'], []):
+                    invoiced_total += debit['amount']
+                job['invoiced'] = invoiced_total
+
+                job['debit'] = Amount(job['amount_net'], job['amount_tax'])
+
+                job['balance'] = Amount(job['balance_net'], job['balance_tax'])
+                job['estimate'] = Amount.from_net(job['estimate_net'], TAX_RATE)
+
+                job['is_itemized'] = job['invoiced'].gross == job['progress'].gross
+
             invoice.save()
 
 def migrate_payments(apps, schema_editor):
@@ -241,7 +244,7 @@ def migrate_payments(apps, schema_editor):
                 'date': t.transacted_on,
                 'payment': credit_t.negate.gross,
                 'discount': Decimal('0.00'),
-                'split_total': credit_t.negate,
+                'split_total': split_t.negate,
                 'discount_total': discount_t.negate,
                 'adjustment_total': adjustment_t.negate,
                 'credit_total': credit_t.negate,

@@ -38,7 +38,7 @@
         /* Debit Comment */
 
         tr[is=invoice-row]:not(.invoiced) textarea.amount-comment,
-        tr[is=invoice-row].itemized textarea.amount-comment {
+        tr[is=invoice-row]:not(.override) textarea.amount-comment {
           opacity: 0;
           height: 1px;
           margin-top: -8px;
@@ -74,7 +74,7 @@
         </thead>
         <tbody>
         {% for debit in form.formset %}
-          <tr is="invoice-row" class="{% if debit.is_invoiced.value == True %}invoiced{% endif %} {% if debit.debit_amount == debit.itemized_amount %}itemized{% endif %}">
+          <tr is="invoice-row" class="{% if debit.is_invoiced.value == True %}invoiced{% endif %} {% if debit.is_itemized %}itemized{% endif %} {% if debit.is_override.value == True %}override{% endif %}">
             <td class="job-is-invoiced">{{ debit.is_invoiced }}</td>
             <td class="job-is-itemized">
               {{ debit.is_override }}
@@ -82,21 +82,21 @@
               <span class="glyphicon itemized-icon glyphicon-list" aria-hidden="true"></span>
             </td>
             <td class="job-name">{{ debit.job }}{{ debit.initial.job.name }}</td>
-            {% amount_view "job-estimate" debit "latest_estimate" "net" %}
-            {% amount_view "job-progress" debit "latest_progress" "net" %}
-            {% amount_view "job-invoiced" debit "base_invoiced" %}
-            {% amount_view "job-itemized clickable" debit "itemized" select_if_equal=debit.debit_amount %}
-            {% amount_input "job-debit" debit "debit" comment=debit.override_comment%}
+            {% amount_view "job-estimate" debit.pre_txn "estimate" "net" %}
+            {% amount_view "job-progress" debit.pre_txn "progress" "net" %}
+            {% amount_view "job-invoiced" debit.pre_txn "invoiced" %}
+            {% amount_view "job-itemized clickable" debit.pre_txn "itemized" select_if_equal=debit.debit_amount %}
+            {% amount_input "job-debit" debit "debit" comment=debit.override_comment %}
           </tr>
         {% endfor %}
           <tr class="invoice-table-totals">
             <td class="job-is-invoiced"></td>
             <td class="job-is-itemized"></td>
             <td class="job-name"></td>
-            {% amount_view "job-estimate" form "latest_estimate_total" "net" %}
-            {% amount_view "job-progress" form "latest_progress_total" "net" %}
-            {% amount_view "job-invoiced" form "base_invoiced_total" %}
-            {% amount_view "job-itemized" form "itemized_total" %}
+            {% amount_view "job-estimate" form "pre_txn_estimate_total" "net" %}
+            {% amount_view "job-progress" form "pre_txn_progress_total" "net" %}
+            {% amount_view "job-invoiced" form "pre_txn_invoiced_total" %}
+            {% amount_view "job-itemized" form "pre_txn_itemized_total" %}
             {% amount_view "job-debit" form "debit_total" %}
           </tr>
         </tbody>
