@@ -1,9 +1,185 @@
-from decimal import Decimal as D
 from django.test import TestCase
 from django.utils.translation import activate
 from .test_workflow import create_data, A
 from .forms import *
 from .models import Entry
+
+
+class TestForm(TestCase):
+    model = None
+    form = None
+    form_set = None
+
+    def setUp(self):
+        # creates task with 480 net and 571.20 gross ready to be billed
+        activate('en')
+        create_data(self)
+        self.task.complete = 5
+        self.task.save()
+
+    def make_form(self, data=None, initial={}, json=None, txn=None):
+
+        instance = self.model(project=self.project, json=json or {'jobs': []}, transaction=txn)
+        jobs = self.project.jobs.all()
+
+        if data:
+            _form_set = self.form_set(instance=instance, jobs=jobs)
+            for key, value in _form_set.management_form.initial.items():
+                data['job-'+key] = value
+
+        return self.form(instance=instance, jobs=jobs, initial=initial, data=data)
+
+    def assert_all_forms_valid(self, form):
+        self.assertIsNotNone(form.data)  # need data in order for is_valid() to even work
+        self.assertTrue(form.formset.management_form.is_valid(), form.formset.management_form.errors)
+        self.assertTrue(form.formset.is_valid(), form.formset.errors)
+        self.assertTrue(form.is_valid(), form.errors)
+
+
+class InvoiceFormTests(TestForm):
+    model = Invoice
+    form = InvoiceForm
+    form_set = InvoiceFormSet
+
+    def test_simple_invoice_form_is_valid(self):
+        form = self.make_form({
+
+            'title': 'Invoice #1',
+            'header': 'The Header',
+            'footer': 'The Footer',
+            'invoice_no': '2015/01/01',
+
+            'job-0-is_invoiced': 'True',
+            'job-0-job': self.job.id,
+            'job-0-debit_net': '1',
+            'job-0-debit_tax': '1',
+
+            'job-1-is_invoiced': 'True',
+            'job-1-job': self.job2.id,
+            'job-1-debit_net': '1',
+            'job-1-debit_tax': '1',
+
+        })
+        self.assert_all_forms_valid(form)
+        self.assertEqual(D('4'), form.debit_total_amount.gross)
+
+    def test_initial_form_has_debit(self):
+        form = self.make_form().formset[0]
+        self.assertTrue(form.is_itemized)
+        self.assertEqual(D('480.00'), form['debit_net'].value())
+        self.assertEqual(D('571.20'), form.debit_amount.gross)
+
+    def test_initial_form_no_debit(self):
+        debit_jobs([(self.job, A(571.20), Entry.WORK_DEBIT)])
+        # now there is nothing new to invoice, we invoiced the full amount already
+        form = self.make_form().formset[0]
+        self.assertTrue(form.is_itemized)
+        self.assertEqual(D('0.00'), form['debit_net'].value())
+        self.assertEqual(D('0.00'), form.debit_amount.gross)
+
+    def test_override_debit(self):
+        job_json = {'job.id': self.job.id, 'is_override': 'True', 'debit': A(119.00)}
+        form = self.make_form(json={'jobs': [job_json]}).formset[0]
+        self.assertFalse(form.is_itemized)
+        self.assertEqual(D('100.00'), form['debit_net'].value())
+        self.assertEqual(D('119.00'), form.debit_amount.gross)
+
+    def test_stale_debit_gets_updated(self):
+        # just like above test, but now is_override == False
+        job_json = {'job.id': self.job.id, 'debit': A(119.00)}
+        form = self.make_form(json={'jobs': [job_json]}).formset[0]
+        self.assertTrue(form.is_itemized)
+        self.assertEqual(D('480.00'), form['debit_net'].value())
+        self.assertEqual(D('571.20'), form.debit_amount.gross)
+
+    def test_transaction_gets_rolled_back_to_calculate_debit(self):
+        # just like test_initial_no_debit_no_txn, but with transaction present
+        txn = debit_jobs([(self.job, A(571.20), Entry.WORK_DEBIT)])
+        # debit will get deleted and rollback to get previous accounting state
+        form = self.make_form(txn=txn).formset[0]
+        self.assertTrue(form.is_itemized)
+        self.assertEqual(D('480.00'), form['debit_net'].value())
+        self.assertEqual(D('571.20'), form.debit_amount.gross)
+
+
+class PaymentFormTests(TestForm):
+    model = Payment
+    form = PaymentForm
+    form_set = PaymentFormSet
+
+    def test_simple_split_is_valid(self):
+        form = self.make_form({
+
+            'bank_account': Account.objects.banks().first().id,
+            'payment': '4',
+            'discount': '0.00',
+            'document_date': '2015-01-01',
+
+            'job-0-job': self.job.id,
+            'job-0-split_net': '1',
+            'job-0-split_tax': '1',
+            'job-0-discount_net': '0',
+            'job-0-discount_tax': '0',
+
+            'job-1-job': self.job2.id,
+            'job-1-split_net': '1',
+            'job-1-split_tax': '1',
+            'job-1-discount_net': '0',
+            'job-1-discount_tax': '0',
+
+        })
+        self.assert_all_forms_valid(form)
+        self.assertEqual(2, len(form.formset.get_json_rows()))
+
+    def test_handling_blank_splits(self):
+        form = self.make_form({
+
+            'bank_account': Account.objects.banks().first().id,
+            'payment': '2',
+            'discount': '0.00',
+            'document_date': '2015-01-01',
+
+            'job-0-job': self.job.id,
+            'job-0-split_net': '1',
+            'job-0-split_tax': '1',
+            'job-0-discount_net': '0',
+            'job-0-discount_tax': '0',
+
+            'job-1-job': self.job2.id,
+            'job-1-split_net': '',
+            'job-1-split_tax': '',
+            'job-1-discount_net': '0',
+            'job-1-discount_tax': '0',
+
+        })
+        self.assert_all_forms_valid(form)
+        self.assertEqual(1, len(form.formset.get_json_rows()))
+
+    def test_all_amounts_blank(self):
+        form = self.make_form({
+
+            'bank_account': Account.objects.banks().first().id,
+            'payment': '',
+            'discount': '0.00',
+            'document_date': '2015-01-01',
+
+            'job-0-job': self.job.id,
+            'job-0-split_net': '',
+            'job-0-split_tax': '',
+            'job-0-discount_net': '',
+            'job-0-discount_tax': '',
+
+            'job-1-job': self.job2.id,
+            'job-1-split_net': '',
+            'job-1-split_tax': '',
+            'job-1-discount_net': '',
+            'job-1-discount_tax': '',
+
+        })
+        self.assertTrue(form.formset.is_valid(), form.formset.errors)
+        self.assertFalse(form.is_valid(), form.errors)
+        self.assertEqual(['payment'], list(form.errors.keys()))
+        self.assertEqual(0, len(form.formset.get_json_rows()))
 
 
 class TestBankAccountForm(TestCase):
@@ -29,207 +205,4 @@ class TestBankAccountForm(TestCase):
 
         form = BankAccountForm({'code': '1a'})
         self.assertEquals('Account code must be a number between 1200 and 1288 inclusive.', form.errors['code'][0])
-
-
-class SplitPaymentFormTests(TestCase):
-
-    def setUp(self):
-        activate('en')
-        create_data(self)
-        self.task.complete = 5
-        self.task.save()
-
-        self.management_form = {}
-        _management_form = SplitPaymentFormSet(jobs=self.project.jobs.all()).management_form.initial
-        for key, value in _management_form.items():
-            self.management_form['split-'+key] = value
-
-    def make_split_payment_form(self, data):
-        data.update(self.management_form)
-        return SplitPaymentFormSet(data=data, jobs=self.project.jobs.all())
-
-    def test_simple_split_is_valid(self):
-        form = self.make_split_payment_form({
-
-            'bank_account': Account.objects.banks().first().id,
-            'amount': '2',
-            'discount': '0.00',
-            'transacted_on': '2015-01-01',
-
-            'split-0-job': self.job.id,
-            'split-0-payment_net': '1',
-            'split-0-payment_tax': '1',
-            'split-0-discount_net': '0',
-            'split-0-discount_tax': '0',
-
-            'split-1-job': self.job2.id,
-            'split-1-payment_net': '1',
-            'split-1-payment_tax': '1',
-            'split-1-discount_net': '0',
-            'split-1-discount_tax': '0',
-
-        })
-        self.assertTrue(form.is_valid())
-        self.assertEqual(2, len(form.get_splits()))
-
-    def test_handling_blank_splits(self):
-        form = self.make_split_payment_form({
-
-            'bank_account': Account.objects.banks().first().id,
-            'amount': '2',
-            'discount': '0.00',
-            'transacted_on': '2015-01-01',
-
-            'split-0-job': self.job.id,
-            'split-0-payment_net': '2',
-            'split-0-payment_tax': '2',
-            'split-0-discount_net': '0',
-            'split-0-discount_tax': '0',
-
-            'split-1-job': self.job2.id,
-            'split-1-payment_net': '',
-            'split-1-payment_tax': '',
-            'split-1-discount_net': '0',
-            'split-1-discount_tax': '0',
-
-        })
-        self.assertTrue(form.is_valid())
-        self.assertEqual(1, len(form.get_splits()))
-
-    def test_all_amounts_blank(self):
-        form = self.make_split_payment_form({
-
-            'bank_account': Account.objects.banks().first().id,
-            'amount': '',
-            'discount': '0.00',
-            'transacted_on': '2015-01-01',
-
-            'split-0-job': self.job.id,
-            'split-0-payment_net': '',
-            'split-0-payment_tax': '',
-            'split-0-discount_net': '',
-            'split-0-discount_tax': '',
-
-            'split-1-job': self.job2.id,
-            'split-1-payment_net': '',
-            'split-1-payment_tax': '',
-            'split-1-discount_net': '',
-            'split-1-discount_tax': '',
-
-        })
-        self.assertFalse(form.is_valid())
-        self.assertEqual(1, len(form.payment_form.errors))
-        self.assertEqual(0, len(form.non_form_errors()))
-        self.assertEqual(0, len(form.get_splits()))
-
-
-class InvoiceFormTests(TestCase):
-
-    def setUp(self):
-        create_data(self)
-        self.task.complete = 5
-        self.task.save()
-
-        self.management_form = {}
-        _management_form = InvoiceForm(instance=Invoice(project=self.project, json={'debits': []}),
-                                       jobs=self.project.jobs.all()).management_form.initial
-        for key, value in _management_form.items():
-            self.management_form['job-'+key] = value
-
-    def make_invoice_form(self, data):
-        data.update(self.management_form)
-        return InvoiceForm(data=data, instance=Invoice(project=self.project, json={'debits': []}),
-                           jobs=self.project.jobs.all())
-
-    def test_invoice_form_is_valid(self):
-        form = self.make_invoice_form({
-
-            'title': 'Invoice #1',
-            'header': 'The Header',
-            'footer': 'The Footer',
-            'invoice_no': '2015/01/01',
-
-            'job-0-is_invoiced': 'True',
-            'job-0-job': self.job.id,
-            'job-0-amount_net': '1',
-            'job-0-amount_gross': '1',
-
-            'job-1-is_invoiced': 'True',
-            'job-1-job': self.job2.id,
-            'job-1-amount_net': '1',
-            'job-1-amount_gross': '1',
-
-        })
-        self.assertTrue(form.is_valid())
-        self.assertEqual(D('2'), form.debit_total.net)
-
-
-class DebitFormTests(TestCase):
-
-    def setUp(self):
-        # creates task with 480 net and 571.20 gross ready to be billed
-        create_data(self)
-        self.task.complete = 5
-        self.task.save()
-
-    def test_initial_load_not_booked(self):
-        form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': False, 'is_override': False})
-        self.assertEqual(D('480.00'), form['amount_net'].value())
-        self.assertEqual(D('571.20'), form.debit_amount.gross)
-
-    def test_initial_load_nothing_to_bill(self):
-        debit_jobs([(self.job, A(571.20), Entry.WORK_DEBIT)])
-        # now there is nothing new to invoice, we invoiced the full amount already
-        # is_booked: False, means this form is not associated with the previous debit
-        form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': False, 'is_override': False})
-        self.assertEqual(D('0.00'), form['amount_net'].value())
-        self.assertEqual(D('0.00'), form.debit_amount.gross)
-
-    def test_reload_with_amount_changed_while_editing(self):
-        # this form starts off with initial amount_net of 100
-        form = DebitForm(
-            initial={'job': self.job, 'is_invoiced': True, 'is_booked': False, 'amount_net': '100.00', 'is_override': False}
-        )
-        # the actual itemized amount is actually 480, so the form auto-updates the amount_net to 480
-        self.assertEqual(D('480.00'), form['amount_net'].value())
-        self.assertEqual(D('380.00'), form.diff_debit_amount.net)
-
-    def test_initial_load_after_booking(self):
-        debit_jobs([(self.job, A(571.20), Entry.WORK_DEBIT)])
-        # is_booked: True, means this form is associated with the previous debit
-        form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': True, 'is_override': False,
-                                  'amount_net': '480.00',
-                                  'debited_gross': '571.20', 'balance_gross': '571.20',
-                                  'estimate_net': '480.00', 'itemized_net': '480.00'})
-        self.assertEqual(D('480.00'), form['amount_net'].value())
-        self.assertEqual(D('571.20'), form.debit_amount.gross)
-
-    def test_initial_load_after_booking_with_net_increase(self):
-        debit_jobs([(self.job, A(452.20), Entry.WORK_DEBIT)])
-        # is_booked: True, means this form is associated with the previous debit
-        form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': True, 'is_override': False,
-                                  'amount_net': '380.00',
-                                  'debited_gross': '452.20', 'balance_gross': '452.20',
-                                  'estimate_net': '960.00', 'itemized_net': '380.00'})
-        self.assertEqual(D('480.00'), form['amount_net'].value())
-        self.assertEqual(D('571.20'), form.debit_amount.gross)
-        self.assertEqual(D('100.00'), form.diff_debit_amount.net)
-        self.assertEqual(D('119.00'), form.diff_debited.gross)
-        self.assertEqual(D('0.00'), form.diff_estimate.net)
-        self.assertEqual(D('100.00'), form.diff_itemized.net)
-
-    def test_that_adjusted_payments_has_higher_amount_net(self):
-        debit_jobs([(self.job, A(452.20), Entry.WORK_DEBIT)])
-        credit_jobs([(self.job, A(119.00), A(0), A(119.00))], D(119.00))
-        # is_booked: True, means this form is associated with the previous debit
-        form = DebitForm(initial={'job': self.job, 'is_invoiced': True, 'is_booked': True, 'is_override': False,
-                                  'amount_net': '380.00',
-                                  'debited_gross': '452.20', 'balance_gross': '452.20',
-                                  'estimate_net': '960.00', 'itemized_net': '380.00'})
-        self.assertEqual(D('580.00'), form['amount_net'].value())
-        self.assertEqual(D('690.20'), form.debit_amount.gross)
-        self.assertEqual(D('200.00'), form.diff_debit_amount.net)
-        self.assertEqual(D('119.00'), form.diff_debited.gross)
-        self.assertEqual(D('0.00'), form.diff_estimate.net)
-        self.assertEqual(D('100.00'), form.diff_itemized.net)
 
