@@ -1,8 +1,8 @@
 from decimal import Decimal as D
 from django.test import TestCase
 from unittest import skip
-from systori.lib.accounting.tools import Amount, extract_net_tax
-from ..task.test_models import create_task_data
+from systori.lib.accounting.tools import Amount
+from ..task.test_models import create_task_data, JobFactory
 from .models import Account, Transaction, Entry, create_account_for_job
 from .workflow import create_chart_of_accounts
 from .workflow import debit_jobs, credit_jobs, adjust_jobs
@@ -42,6 +42,15 @@ def create_data(self):
     self.job.save()
     self.job2.account = create_account_for_job(self.job2)
     self.job2.save()
+    self.job3 = JobFactory(project=self.project)
+    self.job3.account = create_account_for_job(self.job3)
+    self.job3.save()
+    self.job4 = JobFactory(project=self.project)
+    self.job4.account = create_account_for_job(self.job4)
+    self.job4.save()
+    self.job5 = JobFactory(project=self.project)
+    self.job5.account = create_account_for_job(self.job5)
+    self.job5.save()
 
 
 class TestDeletingThings(AccountingTestCase):
