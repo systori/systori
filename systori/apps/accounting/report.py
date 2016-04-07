@@ -118,7 +118,14 @@ def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
                 debits = report['job_debits'].setdefault(job_id, [])
                 debits.append(debit_dict)
 
-    report['unpaid'] = (report['invoiced'] + report['paid'] - report['debit']).negate
+    total_unpaid_balance = report['invoiced'] + report['paid']  # report['paid'] is a negative number
+
+    report['unpaid'] = Amount.zero()
+    if total_unpaid_balance.gross > report['debit'].gross:
+        # There is more owned on the account than this invoice is trying to solicit.
+        # This means we need to show the difference between what is being sought and what is owed
+        # as unpaid amount above the debit line on invoice.
+        report['unpaid'] = report['debit'] - total_unpaid_balance  # big from small to get negative number
 
     return report
 
