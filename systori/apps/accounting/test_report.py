@@ -4,12 +4,21 @@ from systori.apps.field.utils import days_ago
 from .report import create_invoice_report, create_invoice_table
 from .models import Entry
 from .workflow import debit_jobs, credit_jobs, adjust_jobs
-from .test_workflow import create_data, A, Amount, TAX_RATE
+from .test_workflow import create_data, A, Amount, TAX_RATE, JobFactory, create_account_for_job
 
 
 class TestTransactionsTable(TestCase):
     def setUp(self):
         create_data(self)
+        self.job3 = JobFactory(project=self.project)
+        self.job3.account = create_account_for_job(self.job3)
+        self.job3.save()
+        self.job4 = JobFactory(project=self.project)
+        self.job4.account = create_account_for_job(self.job4)
+        self.job4.save()
+        self.job5 = JobFactory(project=self.project)
+        self.job5.account = create_account_for_job(self.job5)
+        self.job5.save()
 
     def tbl(self, invoice_txn=None, jobs=None):
         if not invoice_txn:

@@ -42,15 +42,6 @@ def create_data(self):
     self.job.save()
     self.job2.account = create_account_for_job(self.job2)
     self.job2.save()
-    self.job3 = JobFactory(project=self.project)
-    self.job3.account = create_account_for_job(self.job3)
-    self.job3.save()
-    self.job4 = JobFactory(project=self.project)
-    self.job4.account = create_account_for_job(self.job4)
-    self.job4.save()
-    self.job5 = JobFactory(project=self.project)
-    self.job5.account = create_account_for_job(self.job5)
-    self.job5.save()
 
 
 class TestDeletingThings(AccountingTestCase):
