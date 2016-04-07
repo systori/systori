@@ -49,9 +49,9 @@ class TaskInstanceTotalTests(TestCase):
     def test_zero_total(self):
         task = TaskInstance.objects.get(pk=self.task2.instance.pk)
         self.assertEqual(0, task.fixed_price_estimate)
-        self.assertEqual(0, task.fixed_price_billable)
+        self.assertEqual(0, task.fixed_price_progress)
         self.assertEqual(0, task.time_and_materials_estimate)
-        self.assertEqual(0, task.time_and_materials_billable)
+        self.assertEqual(0, task.time_and_materials_progress)
 
     def test_non_zero_total(self):
         lineitem1 = LineItem.objects.create(name="do stuff", price=10, unit_qty=8, unit="hour",
@@ -69,12 +69,12 @@ class JobQuerySetTests(TestCase):
     def test_zero_total(self):
         jobs = Job.objects.filter(pk=self.job2.id)
         self.assertEqual(0, jobs.estimate_total())
-        self.assertEqual(0, jobs.billable_total())
+        self.assertEqual(0, jobs.progress_total())
 
     def test_nonzero_total(self):
         jobs = Job.objects
         self.assertEqual(Decimal(1920), jobs.estimate_total())
-        self.assertEqual(Decimal(0), jobs.billable_total())
+        self.assertEqual(Decimal(0), jobs.progress_total())
 
 
 class TaskGroupOffsetTests(TestCase):
