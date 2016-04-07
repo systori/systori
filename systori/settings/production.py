@@ -6,7 +6,7 @@ SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
 DEBUG = False
 TEMPLATE_DEBUG = False
 
-ALLOWED_HOSTS = [SERVER_NAME]
+ALLOWED_HOSTS = ['.'+SERVER_NAME]
 
 STATICFILES_DIRS += (
     ('dart', 'systori/dart/build/web'),
