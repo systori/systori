@@ -2,13 +2,14 @@
 import os
 from systori import settings
 settings.INSTALLED_APPS = [a for a in settings.INSTALLED_APPS if a != 'debug_toolbar']
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings.travis")
 import django
 django.setup()
 
 import unittest
+from django.core.management import call_command
+from django.db import connections, DEFAULT_DB_ALIAS
 from django.test.testcases import LiveServerThread, _StaticFilesHandler
-from django.test.runner import setup_databases
 from selenium import webdriver
 from sauceclient import SauceClient
 from systori.apps.accounting.workflow import create_chart_of_accounts
@@ -19,11 +20,11 @@ TRAVIS_BUILD_NUMBER = os.environ.get('TRAVIS_BUILD_NUMBER', 1)
 CHROME_VERSION = "43.0"
 SAUCE_BROWSERS = [
 
-    #("OS X 10.10", "safari", "8.0"),
+    ("OS X 10.11", "safari", "9.0"),
     #("OS X 10.10", "chrome", CHROME_VERSION),
 
     #("Windows 7",  "internet explorer", "11.0"),
-    ("Windows 7",  "chrome", CHROME_VERSION),
+    #("Windows 7",  "chrome", CHROME_VERSION),
 
 ]
 
@@ -82,33 +83,57 @@ def start_django():
     return server
 
 
+def setup_database(verbosity=3):
+    creation = connections[DEFAULT_DB_ALIAS].creation
+    test_database_name = creation._get_test_db_name()
+    settings.DATABASES[creation.connection.alias]["NAME"] = test_database_name
+    creation.connection.settings_dict["NAME"] = test_database_name
+    if True:
+        creation._create_test_db(verbosity=verbosity, autoclobber=False, keepdb=False)
+        creation.connection.close()
+        call_command(
+            'migrate',
+            verbosity=max(verbosity - 1, 0),
+            interactive=False,
+            database=creation.connection.alias,
+            test_flush=True,
+        )
+
+
 def setup_test_data():
     from systori.apps.company.models import Company, Access
     from systori.apps.user.models import User
     from systori.apps.project.models import Project
+    from systori.apps.document.models import Letterhead, DocumentSettings
     company = Company.objects.create(schema="test", name="Test")
     company.activate()
-    user = User.objects.create_user('test@systori.com', 'pass', first_name="Standard", last_name="Worker")
+    user = User.objects.create_user('test@systori.com', 'pass', first_name="Standard", last_name="Worker", language="en")
     Access.objects.create(user=user, company=company, is_staff=True)
-    user = User.objects.create_user('test2@systori.com', 'pass', first_name="Standard2", last_name="Worker2")
+    user = User.objects.create_user('test2@systori.com', 'pass', first_name="Standard2", last_name="Worker2", language="en")
     Access.objects.create(user=user, company=company, is_staff=True)
     create_chart_of_accounts()
     Project.objects.create(name="Template Project", is_template=True)
+    letterhead_pdf = os.path.join(settings.BASE_DIR, 'apps/document/test_data/letterhead.pdf')
+    letterhead = Letterhead.objects.create(name="Test Letterhead", letterhead_pdf=letterhead_pdf)
+    DocumentSettings.objects.create(language='en',
+                                    evidence_letterhead=letterhead,
+                                    proposal_letterhead=letterhead,
+                                    invoice_letterhead=letterhead)
 
 
 def main(driver_names, keep_open, not_parallel):
 
-    setup_databases(verbosity=True, interactive=False, keepdb=False)
+    setup_database()
 
     setup_test_data()
 
-    server = start_django()
+    server = start_django()  # async
 
     # while django is starting we setup the webdrivers...
     suites = []
 
     if 'chrome' in driver_names:
-        chrome = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
+        chrome = webdriver.Chrome("chromedriver")
         chrome.implicitly_wait(SELENIUM_WAIT_TIME)
         suites.append((make_suite(chrome, server), None))
 

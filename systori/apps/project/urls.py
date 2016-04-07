@@ -1,7 +1,6 @@
 from django.conf.urls import url
 from ..user.authorization import office_auth
 from ..accounting.views import PaymentCreate, PaymentDelete
-from ..document.views import RefundCreate, RefundDelete, RefundPDF
 from .views import *
 from ..task.views import AllProjectsProgress
 
@@ -21,16 +20,6 @@ urlpatterns = [
     url(r'^project-(?P<project_pk>\d+)/create-jobsite$', office_auth(JobSiteCreate.as_view()), name='jobsite.create'),
     url(r'^project-(?P<project_pk>\d+)/jobsite-(?P<pk>\d+)/edit$', office_auth(JobSiteUpdate.as_view()), name='jobsite.edit'),
     url(r'^project-(?P<project_pk>\d+)/jobsite-(?P<pk>\d+)/delete$', office_auth(JobSiteDelete.as_view()), name='jobsite.delete'),
-
-    url(r'^project-(?P<project_pk>\d+)/create-payment$', office_auth(PaymentCreate.as_view()), name='payment.create'),
-    url(r'^project-(?P<project_pk>\d+)/create-payment-for-invoice/(?P<invoice_pk>\d+)$', office_auth(PaymentCreate.as_view()), name='payment.create'),
-    url(r'^project-(?P<project_pk>\d+)/payment-(?P<pk>\d+)/delete$', office_auth(PaymentDelete.as_view()), name='payment.delete'),
-
-    url(r'^project-(?P<project_pk>\d+)/create-refund$', office_auth(RefundCreate.as_view()), name='refund.create'),
-    url(r'^project-(?P<project_pk>\d+)/refund-(?P<pk>\d+)/delete$', office_auth(RefundDelete.as_view()), name='refund.delete'),
-    url(r'^project-(?P<project_pk>\d+)/refund-(?P<format>(email|print))-(?P<pk>\d+).pdf$', office_auth(RefundPDF.as_view()), name='refund.pdf'),
-
-    url(r'^project-(?P<project_pk>\d+)/transactions$', office_auth(TransactionEditor.as_view()), name='project.transactions'),
 
     url(r'^project-(?P<pk>\d+)/progress', office_auth(ProjectProgress.as_view()), name='project.progress'),
     url(r'^progress$', office_auth(AllProjectsProgress.as_view()), name='project.progress.all'),

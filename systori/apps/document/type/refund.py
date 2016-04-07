@@ -7,7 +7,7 @@ from reportlab.platypus import Paragraph, Spacer, KeepTogether
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
-from .style import NumberedSystoriDocument, stylesheet, force_break, p, b
+from .style import NumberedSystoriDocument, fonts, force_break, p, b
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import calculate_table_width_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
@@ -35,11 +35,11 @@ def render(refund, letterhead, format):
 
             Spacer(0, 6*mm),
 
-            Paragraph(force_break(refund['header']), stylesheet['Normal']),
+            Paragraph(force_break(refund['header']), fonts['OpenSans']['Normal']),
 
             Spacer(0, 4*mm),
 
-            KeepTogether(Paragraph(force_break(refund['footer']), stylesheet['Normal']))
+            KeepTogether(Paragraph(force_break(refund['footer']), fonts['OpenSans']['Normal']))
 
         ]
 
@@ -56,8 +56,6 @@ def serialize(refund_obj, data):
     contact = refund_obj.project.billable_contact.contact
 
     refund = {
-
-        'version': '1.0',
 
         'id': refund_obj.id,
 
@@ -76,7 +74,14 @@ def serialize(refund_obj, data):
         'city': contact.city,
         'address_label': contact.address_label,
 
-        'amount': data['amount']
+        'jobs': data['jobs'],
+
+        'paid_total': data['paid_total'],
+        'invoiced_total': data['invoiced_total'],
+        'progress_total': data['progress_total'],
+        'refund_total': data['refund_total'],
+        'credit_total': data['credit_total'],
+        'customer_refund': data['customer_refund']
 
     }
 

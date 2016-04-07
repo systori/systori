@@ -66,51 +66,114 @@ body {
   margin-top: 0;
 }
 
-/*
- * Day Based Overview
- */
 
-.overview-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  flex-direction: row;
-  width: 100vw;
+td[is=amount-input] {
+  width: 216px;
 }
-
-.overview-box {
-  margin: 0px 10px 0px 10px;
+td[is=amount-input]>input {
+  padding-right: 5px;
+  text-align: right;
 }
-
-.overview-innerContent {
-}
-
-.foreman_crown {
-  position: relative;
-  top: -2px;
-}
-
-.foreman_crown:after {
-  content: "♔";
-}
-
-.panel-custom {
-  padding: 2px 10px 2px 10px;
-}
-
-.notes-container {
-  display: flex;
-  width: 100vw;
-  position: fixed;
-  bottom: 0px;
-}
-
-.notes-box {
-  margin: 10px;
-  width: 100vw;
-}
-
-.notes-project {
-  color: rgb(250, 0, 0);
+td[is=amount-input]>input.amount-gross {
+  width: 200px;
   font-weight: bold;
+}
+td[is=amount-input]>input.amount-net {
+  width: 110px;
+}
+td[is=amount-input]>input.amount-tax {
+  width: 90px;
+}
+
+td[is=amount-input]>textarea.amount-comment {
+  opacity: 1;
+  height: 100px;
+  width: 100%;
+  background-color: inherit;
+  transition: all 0.5s ease 0.15s;
+  margin-top: 8px;
+}
+
+
+td[is=amount-view],
+td[is=amount-stateful] {
+  width: 216px;
+}
+td[is=amount-view]>div,
+td[is=amount-stateful]>div {
+  padding-right: 5px;
+  text-align: right;
+}
+td[is=amount-view]>div.amount-gross,
+td[is=amount-stateful]>div.amount-gross {
+  width: 200px;
+  border-bottom: 1px solid #808080;
+}
+td[is=amount-view]>div.amount-net,
+td[is=amount-stateful]>div.amount-net {
+  float: left;
+  width: 110px;
+  border-right: 1px solid #808080;
+  right: -1px;
+}
+td[is=amount-view]>div.amount-tax,
+td[is=amount-stateful]>div.amount-tax {
+  float: right;
+  width: 90px;
+}
+
+td[is=amount-view]>div>.amount-diff,
+td[is=amount-stateful]>div>.amount-diff {
+  font-weight: normal;
+  font-size: x-small;
+}
+td[is=amount-view]>div>.amount-diff.red,
+td[is=amount-stateful]>div>.amount-diff.red,
+td[is=amount-view]>div.amount-percent.red,
+td[is=amount-stateful]>div.amount-percent.red {
+  color: red;
+}
+td[is=amount-view]>div>.amount-diff.green,
+td[is=amount-stateful]>div>.amount-diff.green,
+td[is=amount-view]>div.amount-percent.green,
+td[is=amount-stateful]>div.amount-percent.green {
+  color: green;
+}
+td[is=amount-view]>div>.amount-diff.blue,
+td[is=amount-stateful]>div>.amount-diff.blue,
+td[is=amount-view]>div.amount-percent.blue,
+td[is=amount-stateful]>div.amount-percent.blue {
+  color: blue;
+}
+td[is=amount-view]>div.amount-net>.amount-diff,
+td[is=amount-stateful]>div.amount-net>.amount-diff,
+td[is=amount-view]>div.amount-tax>.amount-diff,
+td[is=amount-stateful]>div.amount-tax>.amount-diff {
+  display: block;
+}
+td[is=amount-view]>div.bold {
+  font-weight: bold;
+}
+td[is=amount-view]>div.amount-net:not(.bold),
+td[is=amount-view]>div.amount-tax:not(.bold),
+td[is=amount-view]>div.amount-gross:not(.bold) {
+  color: #808080;
+}
+td[is=amount-view]>div.amount-percent,
+td[is=amount-stateful]>div.amount-percent {
+  float: left;
+  width: 110px;
+  font-weight: bold;
+}
+
+td[is=amount-view].clickable:hover,
+td[is=amount-stateful].clickable:hover {
+  cursor: pointer;
+}
+
+td[is=amount-view].clickable:hover>div,
+td[is=amount-view].selected>div,
+td[is=amount-stateful].clickable:hover>div,
+td[is=amount-stateful].selected>div {
+  background-color: #e6e6e6;
 }

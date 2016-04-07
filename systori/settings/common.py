@@ -3,7 +3,7 @@
 # Pre-populates all addresses and used by geocoding
 # for address-> lat/long coordinates.
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
+import os, sys
 
 DEFAULT_COUNTRY = "Deutschland"
 
@@ -42,6 +42,8 @@ SECRET_KEY = '8)-+y0f@(mb=!o9ov_g!+35s4ritax6jzmc*c04jo=6*5t_74&'
 DEBUG = True
 
 TEMPLATE_DEBUG = True
+
+TESTING = 'test' in sys.argv
 
 ALLOWED_HOSTS = []
 
@@ -84,7 +86,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'tuath.middleware.SchemaMiddleware',
+    'systori.apps.company.middleware.CompanyMiddleware',
     'systori.apps.company.middleware.AccessMiddleware',
     'systori.apps.project.middleware.ProjectMiddleware',
     'systori.apps.field.middleware.FieldMiddleware'

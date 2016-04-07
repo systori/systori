@@ -1,8 +1,6 @@
-from decimal import Decimal as D
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Transaction
-from systori.lib.accounting.tools import extract_net_tax
-from .constants import *
+from systori.lib.accounting.tools import Amount
 
 
 def _transaction_sort_key(txn):
@@ -10,7 +8,7 @@ def _transaction_sort_key(txn):
     If there are payments and invoices created on the same day
     we want to make sure to process the payments first and then
     the invoices. Otherwise the transaction history on an
-    invoice will look like a drunk cow liked it, that's bad.
+    invoice will look like a drunk cow licked it, that's bad.
     :param txn:
     :return: sort key
     """
@@ -20,8 +18,9 @@ def _transaction_sort_key(txn):
     return txn_date+type_weight+txn_id
 
 
-def prepare_transaction_report(jobs, transacted_on_or_before=None):
+def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
     """
+    :param invoice_txn: transaction that should be excluded from 'open claims' (unpaid amount)
     :param jobs: limit transaction details to specific set of jobs
     :param transacted_on_or_before: limit transactions up to and including a certain date
     :return: serializable data structure
@@ -29,7 +28,6 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
 
     txns_query = Transaction.objects \
         .filter(entries__job__in=jobs) \
-        .prefetch_related('invoice') \
         .prefetch_related('entries__job__project') \
         .prefetch_related('entries__account') \
         .distinct()
@@ -41,21 +39,12 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
     transactions.sort(key=_transaction_sort_key)
 
     report = {
-        # progress
-        'debited_net': D('0.00'),
-        'debited_tax': D('0.00'),
-        'debited_gross': D('0.00'),
-        # payments and invoices
-        'transactions': [],
-    }
-
-    # aggregates all payments per job, used by auto-pay algorithm later
-    payments = {
-        job.id: {
-            'net': D('0.00'),
-            'tax': D('0.00'),
-            'gross': D('0.00')
-        } for job in jobs
+        'invoiced': Amount.zero(),
+        'paid': Amount.zero(),
+        'payments': [],
+        'job_debits': {},
+        'unpaid': Amount.zero(),
+        'debit': Amount.zero()
     }
 
     for txn in transactions:
@@ -64,208 +53,143 @@ def prepare_transaction_report(jobs, transacted_on_or_before=None):
             'id': txn.id,
             'type': txn.transaction_type,
             'date': txn.transacted_on,
-
-            'net': D('0.00'),
-            'tax': D('0.00'),
-            'gross': D('0.00'),
-
+            'payment': Amount.zero(),
+            'discount': Amount.zero(),
+            'total': Amount.zero(),
             'jobs': {}
         }
 
-        if txn.transaction_type == txn.INVOICE:
-            txn_dict.update({
-                'paid_net': D('0.00'),
-                'paid_tax': D('0.00'),
-                'paid_gross': D('0.00'),
-            })
-            try:
-                txn_dict.update({
-                    'invoice_id': txn.invoice.id,
-                    'invoice_status': txn.invoice.status,
-                    'invoice_title': txn.invoice.json['title']
-                })
-            except ObjectDoesNotExist:
-                pass
-
-        elif txn.transaction_type == txn.PAYMENT:
-            txn_dict.update({
-                'is_reconciled': False,
-
-                'payment_received': D('0.00'),  # actual amount received from customer
-
-                'payment_applied_net': D('0.00'),
-                'payment_applied_tax': D('0.00'),
-                'payment_applied_gross': D('0.00'),  # part of payment applied to this set of 'jobs'
-
-                'discount_applied_net': D('0.00'),
-                'discount_applied_tax': D('0.00'),
-                'discount_applied_gross': D('0.00'),  # discount applied to this set of 'jobs'
-
-                'adjustment_applied_net': D('0.00'),
-                'adjustment_applied_tax': D('0.00'),
-                'adjustment_applied_gross': D('0.00'),
-            })
+        job_debits = {}
 
         for entry in txn.entries.all():
-
-            # extract payment entry info
-            if txn.transaction_type == txn.PAYMENT and entry.account.is_bank:
-                txn_dict['is_reconciled'] = entry.is_reconciled
-                txn_dict['payment_received'] = entry.amount * -1
-                continue
 
             # we only work with receivable accounts from here on out
             if not entry.account.is_receivable:
                 continue
 
-            job = entry.job
-
-            if job not in jobs:
+            if entry.job not in jobs:
                 # skip jobs we're not interested in
                 continue
 
-            if job.id not in txn_dict['jobs']:
-                txn_dict['jobs'][job.id] = {
-                    'job.id': job.id,
-                    'code': job.code,
-                    'name': job.name,
-                    'net': D('0.00'),
-                    'tax': D('0.00'),
-                    'gross': D('0.00'),
-                }
-                if txn.transaction_type == txn.PAYMENT:
-                    txn_dict['jobs'][job.id].update({
-                        'payment_applied_net': D('0.00'),
-                        'payment_applied_tax': D('0.00'),
-                        'payment_applied_gross': D('0.00'),
+            job_dict = txn_dict['jobs'].setdefault(entry.job.id, {
+                'job.id': entry.job.id,
+                'code': entry.job.code,
+                'name': entry.job.name,
+                'payment': Amount.zero(),
+                'discount': Amount.zero(),
+                'total': Amount.zero()
+            })
 
-                        'discount_applied_net': D('0.00'),
-                        'discount_applied_tax': D('0.00'),
-                        'discount_applied_gross': D('0.00'),
+            job_debit = job_debits.setdefault(entry.job.id, {
+                'transaction_type': txn.transaction_type,
+                'entry_type': None,
+                'date': txn.transacted_on,
+                'amount': Amount.zero()
+            })
 
-                        'adjustment_applied_net': D('0.00'),
-                        'adjustment_applied_tax': D('0.00'),
-                        'adjustment_applied_gross': D('0.00'),
-                    })
-
-            entry_gross = entry.amount
-            entry_net, entry_tax = extract_net_tax(entry_gross, TAX_RATE)
-
-            job_dict = txn_dict['jobs'][job.id]
-
-            txn_dict['net'] += entry_net
-            txn_dict['tax'] += entry_tax
-            txn_dict['gross'] += entry_gross
-            job_dict['net'] += entry_net
-            job_dict['tax'] += entry_tax
-            job_dict['gross'] += entry_gross
-
-            if entry.entry_type == entry.ADJUSTMENT:
-                # adjustments reduce the total debited
-                report['debited_net'] += entry_net
-                report['debited_tax'] += entry_tax
-                report['debited_gross'] += entry_gross
-
-                txn_dict['adjustment_applied_net'] += entry_net
-                txn_dict['adjustment_applied_tax'] += entry_tax
-                txn_dict['adjustment_applied_gross'] += entry_gross
-                job_dict['adjustment_applied_net'] += entry_net
-                job_dict['adjustment_applied_tax'] += entry_tax
-                job_dict['adjustment_applied_gross'] += entry_gross
-
-            elif entry.entry_type == entry.PAYMENT:
-                txn_dict['payment_applied_net'] += entry_net
-                txn_dict['payment_applied_tax'] += entry_tax
-                txn_dict['payment_applied_gross'] += entry_gross
-                job_dict['payment_applied_net'] += entry_net
-                job_dict['payment_applied_tax'] += entry_tax
-                job_dict['payment_applied_gross'] += entry_gross
+            if entry.entry_type == entry.PAYMENT:
+                txn_dict['payment'] += entry.amount
+                job_dict['payment'] += entry.amount
 
             elif entry.entry_type == entry.DISCOUNT:
-                txn_dict['discount_applied_net'] += entry_net
-                txn_dict['discount_applied_tax'] += entry_tax
-                txn_dict['discount_applied_gross'] += entry_gross
-                job_dict['discount_applied_net'] += entry_net
-                job_dict['discount_applied_tax'] += entry_tax
-                job_dict['discount_applied_gross'] += entry_gross
+                txn_dict['discount'] += entry.amount
+                job_dict['discount'] += entry.amount
 
-        for job in txn_dict['jobs'].values():
-            if txn.transaction_type == txn.PAYMENT:
-                jid = job['job.id']
-                payments[jid]['net'] += job['net']
-                payments[jid]['tax'] += job['tax']
-                payments[jid]['gross'] += job['gross']
+            if entry.entry_type in (entry.PAYMENT, entry.DISCOUNT):
+                txn_dict['total'] += entry.amount
+                job_dict['total'] += entry.amount
 
-        report['transactions'].append(txn_dict)
-        if txn.transaction_type != txn.PAYMENT:
-            report['debited_net'] += txn_dict['net']
-            report['debited_tax'] += txn_dict['tax']
-            report['debited_gross'] += txn_dict['gross']
+            if entry.entry_type in entry.TYPES_FOR_INVOICED_SUM:
+                report['invoiced'] += entry.amount
+                if txn.id == invoice_txn.id:
+                    report['debit'] += entry.amount
+                assert job_debit['entry_type'] in (None, entry.entry_type)
+                job_debit['entry_type'] = entry.entry_type
+                job_debit['amount'] += entry.amount
 
-    # Automated Payment Algorithm
-    # We start with a total of all payments the customer has made to a
-    # particular job. Then we loop over all of the invoices from first to last
-    # applying as much of the payment as we can to the invoices until there
-    # is no payment left.
-    for invoice in report['transactions']:
+            if entry.entry_type in entry.TYPES_FOR_PAID_SUM:
+                report['paid'] += entry.amount
 
-        if invoice['type'] != txn.INVOICE:
-            continue
+        if txn.transaction_type == txn.PAYMENT:
+            report['payments'].append(txn_dict)
 
-        for job in invoice['jobs'].values():
-            payment = payments[job['job.id']]
+        for job_id, debit_dict in job_debits.items():
+            if debit_dict['amount'].gross != 0:
+                debits = report['job_debits'].setdefault(job_id, [])
+                debits.append(debit_dict)
 
-            if payment['gross'] == 0:
-                job['paid_net'] = D('0.00')
-                job['paid_tax'] = D('0.00')
-                job['paid_gross'] = D('0.00')
-                continue  # payments used up
-
-            elif job['gross'] >= -payment['gross']:
-                # payments left is less than the invoiced amount...
-                # pay invoice with all that's left
-                job['paid_gross'] = -payment['gross']
-                job['paid_net'] = -payment['net']
-                job['paid_tax'] = -payment['tax']
-
-            else:
-                # still have enough payments left to cover the entire invoice...
-                # pay the invoice in full
-                job['paid_gross'] = job['gross']
-                job['paid_net'] = job['net']
-                job['paid_tax'] = job['tax']
-
-            # reduce payment total by how much was applied to this invoice
-            payment['gross'] += job['paid_gross']
-            payment['net'] += job['paid_net']
-            payment['tax'] += job['paid_tax']
-
-            invoice['paid_net'] += job['paid_net']
-            invoice['paid_tax'] += job['paid_tax']
-            invoice['paid_gross'] += job['paid_gross']
+    report['unpaid'] = (report['invoiced'] + report['paid'] - report['debit']).negate
 
     return report
 
 
-def generate_transaction_table(data, cols=('net', 'tax', 'gross')):
+def create_invoice_table(report, cols=('net', 'tax', 'gross')):
     t = []
     t += [('',)+cols+(None,)]
-    t += [('progress',)+tuple(data['debited_'+col] for col in cols)+(None,)]
+    t += [('progress',)+tuple(getattr(report['invoiced'], col) for col in cols)+(None,)]
 
-    for txn in data['transactions']:
-        if txn['type'] == Transaction.INVOICE:
-            # only show invoice if it's not fully paid
-            if txn['paid_gross'] < txn['gross']:
-                vals = {
-                    'gross': txn['gross'] - txn['paid_gross'],
-                    'net': txn['net'] - txn['paid_net'],
-                    'tax': txn['tax'] - txn['paid_tax']
-                }
-                t += [(txn['type'],)+tuple(-vals[col] for col in cols)+(txn,)]
-        else:
-            t += [(txn['type'],)+tuple(txn['payment_applied_'+col] for col in cols)+(txn,)]
-            if txn['discount_applied_gross'] != 0:
-                t += [('discount',)+tuple(txn['discount_applied_'+col] for col in cols)+(txn,)]
+    for txn in report['payments']:
+        t += [(txn['type'],)+tuple(getattr(txn['payment'], col) for col in cols)+(txn,)]
+        if txn['discount'].gross != 0:
+            t += [('discount',)+tuple(getattr(txn['discount'], col) for col in cols)+(txn,)]
+
+    if report['unpaid'].gross != 0:
+        t += [('unpaid',)+tuple(getattr(report['unpaid'], col) for col in cols)+(None,)]
+
+    t += [('debit',)+tuple(getattr(report['debit'], col) for col in cols)+(None,)]
 
     return t
 
+
+def create_adjustment_report(txn):
+
+    adjustment = {
+        'txn': txn
+    }
+
+    jobs = {}
+
+    for entry in txn.entries.all():
+
+        if not entry.account.is_receivable:
+            continue
+
+        job = jobs.setdefault(entry.job.id, {
+            'job.id': entry.job.id,
+            'code': entry.job.code,
+            'name': entry.job.name,
+            'amount': Amount.zero()
+        })
+
+        job['amount'] += entry.amount
+
+    return adjustment
+
+
+def create_adjustment_table(report):
+    return []
+
+
+def create_refund_report(txn):
+
+    refund = {
+        'txn': txn
+    }
+
+    jobs = {}
+
+    for entry in txn.entries.all():
+
+        if not entry.account.is_receivable:
+            continue
+
+        job = jobs.setdefault(entry.job.id, {
+            'job.id': entry.job.id,
+            'code': entry.job.code,
+            'name': entry.job.name,
+            'amount': Amount.zero()
+        })
+
+        job['amount'] += entry.amount
+
+    return refund

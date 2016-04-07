@@ -17,6 +17,8 @@ systori/settings/__init__.py
 systori/dart/pubspec.lock
 systori/dart/packages/
 systori/dart/web/packages
+systori/dart/tool/packages
+systori/dart/test/packages
 systori/dart/build/
 systori/dart/.pub/
 systori/dart/.packages

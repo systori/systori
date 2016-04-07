@@ -1,21 +1,19 @@
 from io import BytesIO
 from datetime import date
 
-from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
-from reportlab.platypus import SimpleDocTemplate
 from reportlab.platypus import Table, TableStyle, PageBreak
-from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
 
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
-from systori.lib.templatetags.customformatting import ubrdecimal, money
+from systori.lib.templatetags.customformatting import ubrdecimal
 
 from .style import p, b, br, nr
 from .style import calculate_table_width_and_pagesize
 from .style import LetterheadCanvas, SystoriDocument
+from .font import FontManager
 
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
@@ -25,6 +23,8 @@ def render(project, letterhead):
 
     with BytesIO() as buffer:
 
+        font = FontManager(letterhead.font)
+
         table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
 
         proposal_date = date_format(date.today(), use_l10n=True)
@@ -32,7 +32,7 @@ def render(project, letterhead):
         doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         COLS = 55
-        ROWS = 25
+        ROWS = 23
 
         pages = []
 
@@ -40,10 +40,10 @@ def render(project, letterhead):
             for taskgroup in job.taskgroups.all():
                 for task in taskgroup.tasks.all():
 
-                    pages.append(Table([[b(_('Evidence Sheet')), nr(proposal_date)]]))
+                    pages.append(Table([[b(_('Evidence Sheet'), font), nr(proposal_date, font)]]))
 
                     pages.append(Table([
-                        [b(_('Project')), p('%s / %s / %s' % (job.project, job.name, taskgroup.name))]
+                        [b(_('Project'), font), p('%s / %s / %s' % (job.project, job.name, taskgroup.name), font)]
                     ],
                         colWidths=[30*mm, None],
                         style=[
@@ -52,9 +52,9 @@ def render(project, letterhead):
                     ))
 
                     pages.append(Table([
-                        [b(_('Code')), p(task.code.strip()),
-                         br(_('Task')), p(task.name[:60].strip())],
-                        [b(_('P-Amount')), '%s %s' % (ubrdecimal(task.qty).strip(), task.unit.strip())]
+                        [b(_('Code'), font), p(task.code.strip(), font),
+                         br(_('Task'), font), p(task.name[:60].strip(), font)],
+                        [b(_('P-Amount'), font), p('%s %s' % (ubrdecimal(task.qty).strip(), task.unit.strip()), font)]
                     ],
                         colWidths=[30*mm, 70*mm, 30*mm, None],
                         style=TableStyle([
@@ -71,7 +71,7 @@ def render(project, letterhead):
                     pages.append(PageBreak())
 
         if not pages:
-            pages.append(b(_('There are no billable Tasks available.')))
+            pages.append(b(_('There are no billable Tasks available.'), font))
 
         doc.build(pages, LetterheadCanvas.factory(letterhead), letterhead)
 

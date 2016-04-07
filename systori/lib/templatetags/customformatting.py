@@ -1,7 +1,6 @@
 import locale
 import calendar
 from decimal import Decimal
-from django.template.defaultfilters import stringfilter
 from django.utils.formats import get_format, get_language, number_format, to_locale
 from django import template
 
@@ -41,11 +40,6 @@ def money(decimal):
     if type(decimal) is str: decimal = Decimal(decimal)
     locale.setlocale(locale.LC_ALL, (to_locale(get_language()), 'utf-8'))
     return locale.currency(decimal, True, True)
-
-
-@register.filter
-def negate(value):
-    return -value
 
 
 @register.filter

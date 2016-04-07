@@ -1,82 +1,73 @@
 {% extends "project.html" %}
-{% load i18n staticfiles bootstrap customformatting ubrutils %}
+{% load i18n staticfiles bootstrap customformatting ubrutils amount %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
 {% block content %}
-  <form method="post">{% csrf_token %}
+  <form method="post" autocomplete="off">{% csrf_token %}
 
-    {{ form.payment_form.bank_account|bootstrap }}
-    {{ form.payment_form.transacted_on|bootstrap }}
-    {% if form.invoice %}
+    {{ form.bank_account|bootstrap }}
+    {{ form.document_date|bootstrap }}
+    {% if form.invoice.value %}
       <div class="form-group">
         <label class="control-label">{% trans "Invoice" %}</label>
-        <div>{{ form.invoice.json.invoice_no }} {{ form.invoice.json.title }}</div>
+        <div>{{ form.invoice.value.json.invoice_no }} {{ form.invoice.value.json.title }}</div>
       </div>
     {% endif %}
     <div class="form-group">
-      <label class="control-label" for="{{ form.payment_form.amount.id_for_label }}">{{ form.payment_form.amount.label }}</label>
+      <label class="control-label" for="{{ form.payment.id_for_label }}">{{ form.payment.label }}</label>
       <div>
-        <input class="form-control" id="{{ form.payment_form.amount.id_for_label }}" name="{{ form.payment_form.amount.html_name }}" type="text" value="{{ form.payment_form.amount_value.gross|ubrdecimal:2 }}">
+        <input class="form-control" id="{{ form.payment.id_for_label }}" name="{{ form.payment.html_name }}" type="text" value="{{ form.payment_value|ubrdecimal:2 }}">
       </div>
     </div>
 
     <style>
       .job-balance,
-      .job-payment,
-      .job-payment input,
+      .job-split,
       .job-discount,
-      .job-adjustment,
-      .job-adjustment input,
       .job-credit {
         text-align: right;
+      }
+      .job-balance,
+      .job-credit {
+        width: 120px;
       }
     </style>
 
     <div class="form-group {% if form.non_form_errors %}has-error{% endif %}">
-    {{ form.management_form }}
-    <table is="payment-split-table" class="table table-striped">
+    {{ form.formset.management_form }}
+    <table is="payment-split-table" class="table table-striped" data-tax-rate="{{ TAX_RATE }}">
       <thead>
       <tr>
         <th class="job-name">{% trans 'Job' %}</th>
         <th class="job-balance">
-          {% if form.invoice %}
+          {% if form.invoice.value %}
           {% trans 'Invoiced' %}
           {% else %}
           {% trans 'Balance' %}
           {% endif %}
         </th>
-        <th class="job-payment">{% trans 'Payment' %}</th>
-        <th class="job-discount">{% trans 'Discount' %} {{ form.payment_form.discount }}</th>
-        <th class="job-adjustment">{% trans 'Adjustment' %} {{ form.payment_form.is_adjusted }}</th>
+        <th class="job-split">{% trans 'Payment' %}</th>
+        <th class="job-discount">{% trans 'Discount' %} {{ form.discount }}</th>
         <th class="job-credit">{% trans 'Credit' %}</th>
       </tr>
       </thead>
       <tbody>
-      {% for split in form.forms %}
+      {% for split in form.formset %}
         <tr is="payment-split" class="payment-split-row">
           <td class="job-name">{{ split.job }}{{ split.initial.job.name }}</td>
-          <td class="job-balance" data-amount="{{ split.balance_amount.gross }}">{{ split.balance_amount.gross|ubrdecimal:2 }}</td>
-          <td class="job-payment" data-amount="{{ split.payment_amount.gross }}">
-            <input id="{{ split.payment.id_for_label }}" name="{{ split.payment.html_name }}" type="text" value="{{ split.payment_amount.gross|ubrdecimal:2 }}">
-          </td>
-          <td class="job-discount" data-amount="{{ split.discount_amount.gross }}">
-            <span class="text">{{ split.discount_amount.gross|ubrdecimal:2 }}</span>
-            {{ split.discount }}
-          </td>
-          <td class="job-adjustment" data-amount="{{ split.adjustment_amount.gross }}">
-            <input id="{{ split.adjustment.id_for_label }}" name="{{ split.adjustment.html_name }}" type="text" value="{{ split.adjustment_amount.gross|ubrdecimal:2 }}">
-          </td>
-          <td class="job-credit" data-amount="{{ split.credit_amount.gross }}">{{ split.credit_amount.gross|ubrdecimal:2 }}</td>
+          {% amount_view "job-balance" split "balance" %}
+          {% amount_input "job-split" split "split" %}
+          {% amount_stateful "job-discount" split "discount" %}
+          {% amount_view "job-credit" split "credit" %}
         </tr>
       {% endfor %}
         <tr class="split-table-totals">
           <td class="job-name"></td>
-          <td class="job-balance">{{ form.balance_total.gross|ubrdecimal:2 }}</td>
-          <td class="job-payment">{{ form.payment_total.gross|ubrdecimal:2 }}</td>
-          <td class="job-discount">{{ form.discount_total.gross|ubrdecimal:2 }}</td>
-          <td class="job-adjustment">{{ form.adjustment_total.gross|ubrdecimal:2 }}</td>
-          <td class="job-credit">{{ form.credit_total.gross|ubrdecimal:2 }}</td>
+          {% amount_view "job-balance" form "balance_total" %}
+          {% amount_view "job-split" form "split_total" %}
+          {% amount_view "job-discount" form "discount_total" %}
+          {% amount_view "job-credit" form "credit_total" %}
         </tr>
       </tbody>
     </table>
@@ -86,13 +77,13 @@
     </div>
 
     <div class="form-group">
-      <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+      <button name="save" type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
     </div>
   </form>
 {% endblock %}
 
 {% block extra_js %}
-  <script type="application/dart" src="{% static "dart/split_payment.dart" %}"></script>
+  <script type="application/dart" src="{% static "dart/payment_editor.dart" %}"></script>
   <script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
   <script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
   <script src="{% static "dart/packages/browser/dart.js" %}"></script>

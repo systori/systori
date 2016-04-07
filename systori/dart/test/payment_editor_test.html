@@ -1,0 +1,461 @@
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+<link rel="apple-touch-icon" sizes="57x57" href="/static/img/favicon/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/static/img/favicon/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/static/img/favicon/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/static/img/favicon/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/static/img/favicon/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/static/img/favicon/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/static/img/favicon/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/static/img/favicon/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/img/favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-194x194.png" sizes="194x194">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/static/img/favicon/android-chrome-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="/static/img/favicon/manifest.json">
+<link rel="mask-icon" href="/static/img/favicon/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="msapplication-TileImage" content="/static/img/favicon/mstile-144x144.png">
+<meta name="theme-color" content="#ffffff">
+
+    <title>Test Project</title>
+
+    
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+    <link href="/static/css/main.css" rel="stylesheet">
+  
+</head>
+
+
+<body>
+
+
+
+<!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/"><img alt="Systori" src="/static/img/systori_logo_nav.svg" style="margin-top:-10px;"></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              
+                <a class="navbar-brand" href="#">NKBtpKNEjUotAdx</a>
+              
+            </li>
+            <li><a href="/projects/">Projekte</a></li>
+            
+  <li class="active"><a href="/project-2">Test Project
+    <small>(angehend)</small>
+  </a></li>
+
+          </ul>
+
+          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='dQ8B8UEBqY6Pz2NcwrasH4VKtWfrzZ7R' />
+          <input type="hidden" name="language" value=""/>
+        </form>
+
+        <ul class="nav navbar-nav navbar-right">
+
+          
+  <li><a href="javascript:window.open('/field/project-2/', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">öffne Field App</a>
+  </li>
+
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">jarfuhEfIUEtxku <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="/settings">Einstellungen</a></li>
+              <li><a href="/logout">Abmelden</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">de<b class="caret"></b></a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
+              
+              
+                
+              
+                
+                  <li><a class="language-link" href="#"
+                         data-language="en">English</a></li>
+                
+              
+            </ul>
+          </li>
+
+        </ul>
+
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+
+
+  <div class="container-fluid" style="padding-bottom:100px;">
+    <div class="row">
+      <div class="col-sm-3 col-md-2 sidebar">
+        
+
+
+  <ul class="nav nav-sidebar">
+    <li ><a
+        href="/project-2">Projektkarte</a></li>
+    <li ><a
+        href="/project-2#jobs">Lose</a></li>
+    <li ><a
+        href="/project-2/plan">Plan</a></li>
+    <li ><a
+        href="/project-2#proposals">Angebote</a></li>
+    <li class="active"><a
+        href="/project-2#invoices">Rechnungen</a></li>
+    <li ><a
+        href="/project-2#contacts">Kontakte</a></li>
+  </ul>
+
+      </div>
+      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        
+  <form method="post" autocomplete="off"><input type='hidden' name='csrfmiddlewaretoken' value='dQ8B8UEBqY6Pz2NcwrasH4VKtWfrzZ7R' />
+
+    
+
+<div class="form-group">
+    
+        
+            <label class="control-label  " for="id_bank_account">Bankkonto</label>
+        
+
+        <div class=" ">
+            <select class=" form-control" id="id_bank_account" name="bank_account">
+<option value="" selected="selected">---------</option>
+<option value="6">1200 - Default Bank Account</option>
+</select>
+
+            
+
+            
+        </div>
+    
+</div>
+
+    
+
+<div class="form-group">
+    
+        
+            <label class="control-label  " for="id_transacted_on">Erhalten am</label>
+        
+
+        <div class=" ">
+            <input class=" form-control" id="id_transacted_on" name="transacted_on" type="text" value="2016-03-18" />
+
+            
+
+            
+        </div>
+    
+</div>
+
+    
+    <div class="form-group">
+      <label class="control-label" for="id_amount">Menge</label>
+      <div>
+        <input class="form-control" id="id_amount" name="amount" type="text" value="0,00">
+      </div>
+    </div>
+
+    <style>
+      .job-balance,
+      .job-payment,
+      .job-discount,
+      .job-credit {
+        text-align: right;
+      }
+      .job-balance,
+      .job-credit {
+        width: 120px;
+      }
+    </style>
+
+    <div class="form-group ">
+    <input id="id_split-TOTAL_FORMS" name="split-TOTAL_FORMS" type="hidden" value="2" /><input id="id_split-INITIAL_FORMS" name="split-INITIAL_FORMS" type="hidden" value="2" /><input id="id_split-MIN_NUM_FORMS" name="split-MIN_NUM_FORMS" type="hidden" value="0" /><input id="id_split-MAX_NUM_FORMS" name="split-MAX_NUM_FORMS" type="hidden" value="1000" />
+    <table is="payment-split-table" class="table table-striped" data-tax-rate="0.19">
+      <thead>
+      <tr>
+        <th class="job-name">Los</th>
+        <th class="job-balance">
+          
+          Saldo
+          
+        </th>
+        <th class="job-payment">Zahlung</th>
+        <th class="job-discount">Skonto <select id="id_discount" name="discount">
+<option value="0.00">0%</option>
+<option value="0.01">1%</option>
+<option value="0.02">2%</option>
+<option value="0.03">3%</option>
+<option value="0.04">4%</option>
+<option value="0.05">5%</option>
+<option value="0.06">6%</option>
+<option value="0.07">7%</option>
+</select></th>
+        <th class="job-credit">Haben</th>
+      </tr>
+      </thead>
+      <tbody>
+      
+        <tr is="payment-split" class="payment-split-row">
+          <td class="job-name"><input id="id_split-0-job" name="split-0-job" type="hidden" value="1" />Test Job</td>
+          
+<td is="amount-view" class="job-balance" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">480,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">388,80</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">91,20</span>
+  </div>
+  
+</td>
+
+          
+<td is="amount-input" class="job-payment" data-tax-rate="0.19">
+  <input class="amount-gross" type="text" value="0,00"><br/>
+  <input class="amount-net" placeholder="net" id="id_split-0-payment_net" name="split-0-payment_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_split-0-payment_tax" name="split-0-payment_tax" type="text" value="">
+</td>
+
+          
+<td is="amount-stateful" class="job-discount" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  
+    <input class="amount-gross" type="hidden" value="0,00">
+    <input class="amount-net" id="id_split-0-discount_net" name="split-0-discount_net" type="hidden" value="0,00">
+    <input class="amount-tax" id="id_split-0-discount_tax" name="split-0-discount_tax" type="hidden" value="0,00">
+  
+</td>
+
+          
+<td is="amount-view" class="job-credit" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  
+</td>
+
+        </tr>
+      
+        <tr is="payment-split" class="payment-split-row">
+          <td class="job-name"><input id="id_split-1-job" name="split-1-job" type="hidden" value="2" />Test Job</td>
+          
+<td is="amount-view" class="job-balance" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">119,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">100,00</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">19,00</span>
+  </div>
+  
+</td>
+
+          
+<td is="amount-input" class="job-payment" data-tax-rate="0.19">
+  <input class="amount-gross" type="text" value="0,00"><br/>
+  <input class="amount-net" placeholder="net" id="id_split-1-payment_net" name="split-1-payment_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_split-1-payment_tax" name="split-1-payment_tax" type="text" value="">
+</td>
+
+          
+<td is="amount-stateful" class="job-discount" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  
+    <input class="amount-gross" type="hidden" value="0,00">
+    <input class="amount-net" id="id_split-1-discount_net" name="split-1-discount_net" type="hidden" value="0,00">
+    <input class="amount-tax" id="id_split-1-discount_tax" name="split-1-discount_tax" type="hidden" value="0,00">
+  
+</td>
+
+          
+<td is="amount-view" class="job-credit" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  
+</td>
+
+        </tr>
+      
+        <tr class="split-table-totals">
+          <td class="job-name"></td>
+          
+<td is="amount-view" class="job-balance" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">599,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">488,80</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">110,20</span>
+  </div>
+  
+</td>
+
+          
+<td is="amount-view" class="job-payment" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  
+</td>
+
+          
+<td is="amount-view" class="job-discount" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  
+</td>
+
+          
+<td is="amount-view" class="job-credit" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-net">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  
+</td>
+
+        </tr>
+      </tbody>
+    </table>
+    
+    </div>
+
+    <div class="form-group">
+      <button name="save" type="submit" class="btn btn-primary" value="Speichern">Speichern</button>
+    </div>
+  </form>
+
+      </div>
+    </div>
+  </div>
+
+
+
+<script src="/static/js/jquery-1.11.2.min.js"></script>
+<script src="/static/js/jquery-ui.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+
+
+  <script src="/static/js/language_picker.js"></script>
+
+  <script type="application/dart" src="/static/dart/payment_editor.dart"></script>
+  <script src="/static/dart/packages/web_components/webcomponents.min.js"></script>
+  <script src="/static/dart/packages/web_components/dart_support.js"></script>
+  <script src="/static/dart/packages/browser/dart.js"></script>
+
+
+</body>
+</html>
+<link rel="x-dart-test" href="payment_editor_test.dart">
+<script src="packages/test/dart.js"></script>

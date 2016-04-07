@@ -2,48 +2,44 @@ import os
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.utils.translation import activate
-from django.conf import settings
-from ..company.models import *
-from ..project.models import *
 from ..document.models import *
 from .models import *
+
+from ..company.factories import *
+from ..project.factories import *
+from ..task.factories import *
+from ..user.factories import *
 
 User = get_user_model()
 
 
 def create_task_data(self, create_user=True, create_company=True):
     if create_company:
-        self.company = Company.objects.create(schema="test", name="Test")
-        self.company.activate()
+        self.company = CompanyFactory()
     if create_user:
-        self.user = User.objects.create_superuser('lex@damoti.com', 'pass')
-        Access.objects.create(user=self.user, company=self.company)
+        self.user = UserFactory(company=self.company, password='open sesame')
     letterhead_pdf = os.path.join(settings.BASE_DIR, 'apps/document/test_data/letterhead.pdf')
     self.letterhead = Letterhead.objects.create(name="Test Letterhead", letterhead_pdf=letterhead_pdf)
     DocumentSettings.objects.create(language='de',
                                     evidence_letterhead=self.letterhead,
                                     proposal_letterhead=self.letterhead,
                                     invoice_letterhead=self.letterhead)
-    self.template_project = Project.objects.create(name="Template Project", is_template=True)
-    self.project = Project.objects.create(name="my project")
-    self.project2 = Project.objects.create(name="my project 2")
-    self.job = Job.objects.create(job_code=1, name="Job A", project=self.project)
-    self.job2 = Job.objects.create(job_code=2, name="Job B", project=self.project)
-    self.group = TaskGroup.objects.create(name="my group", job=self.job)
-    self.group2 = TaskGroup.objects.create(name="my group 2", job=self.job)
-    self.task = Task.objects.create(name="my task one", qty=10, taskgroup=self.group, status=Task.RUNNING)
-    TaskInstance.objects.create(task=self.task, selected=True)
-    self.lineitem = LineItem.objects.create(name="my line item 1", unit_qty=8, price=12,
-                                            taskinstance=self.task.instance)
-    self.task2 = Task.objects.create(name="my task two", qty=0, taskgroup=self.group)
-    TaskInstance.objects.create(task=self.task2, selected=True)
-    self.lineitem2 = LineItem.objects.create(name="my line item 2", unit_qty=0, price=0,
-                                             taskinstance=self.task2.instance)
-    self.group3 = TaskGroup.objects.create(name="my group", job=self.job2)
-    self.task3 = Task.objects.create(name="my task one", qty=10, taskgroup=self.group3)
-    TaskInstance.objects.create(task=self.task3, selected=True)
-    self.lineitem3 = LineItem.objects.create(name="my line item 1", unit_qty=8, price=12,
-                                            taskinstance=self.task3.instance)
+    self.project = ProjectFactory()
+    self.project2 = ProjectFactory()
+    self.job = JobFactory(project=self.project)
+    self.job2 = JobFactory(project=self.project)
+    self.group = TaskGroupFactory(name="my group", job=self.job)
+    self.group2 = TaskGroupFactory(name="my group 2", job=self.job)
+    self.task = TaskFactory(name="my task one", qty=10, taskgroup=self.group, status=Task.RUNNING)
+    TaskInstanceFactory(task=self.task, selected=True)
+    self.lineitem = LineItemFactory(unit_qty=8, price=12, taskinstance=self.task.instance)
+    self.task2 = TaskFactory(name="my task two", qty=0, taskgroup=self.group)
+    TaskInstanceFactory(task=self.task2, selected=True)
+    self.lineitem2 = LineItemFactory(unit_qty=0, price=0, taskinstance=self.task2.instance)
+    self.group3 = TaskGroupFactory(job=self.job2)
+    self.task3 = TaskFactory(name="my task one", qty=10, taskgroup=self.group3)
+    TaskInstanceFactory(task=self.task3, selected=True)
+    self.lineitem3 = LineItemFactory(unit_qty=8, price=12, taskinstance=self.task3.instance)
 
 
 class TaskInstanceTotalTests(TestCase):
@@ -53,9 +49,9 @@ class TaskInstanceTotalTests(TestCase):
     def test_zero_total(self):
         task = TaskInstance.objects.get(pk=self.task2.instance.pk)
         self.assertEqual(0, task.fixed_price_estimate)
-        self.assertEqual(0, task.fixed_price_billable)
+        self.assertEqual(0, task.fixed_price_progress)
         self.assertEqual(0, task.time_and_materials_estimate)
-        self.assertEqual(0, task.time_and_materials_billable)
+        self.assertEqual(0, task.time_and_materials_progress)
 
     def test_non_zero_total(self):
         lineitem1 = LineItem.objects.create(name="do stuff", price=10, unit_qty=8, unit="hour",
@@ -73,17 +69,20 @@ class JobQuerySetTests(TestCase):
     def test_zero_total(self):
         jobs = Job.objects.filter(pk=self.job2.id)
         self.assertEqual(0, jobs.estimate_total())
-        self.assertEqual(0, jobs.billable_total())
+        self.assertEqual(0, jobs.progress_total())
 
     def test_nonzero_total(self):
         jobs = Job.objects
         self.assertEqual(Decimal(1920), jobs.estimate_total())
-        self.assertEqual(Decimal(0), jobs.billable_total())
+        self.assertEqual(Decimal(0), jobs.progress_total())
 
 
 class TaskGroupOffsetTests(TestCase):
     def setUp(self):
-        create_task_data(self)
+        CompanyFactory.create()
+        project = ProjectFactory.create()
+        self.job = JobFactory.create(job_code=1, project=project)
+        self.group = TaskGroupFactory.create(job=self.job)
 
     def test_no_offset(self):
         self.assertEqual('1.1', self.group.code)
@@ -94,16 +93,19 @@ class TaskGroupOffsetTests(TestCase):
 
 
 class CodeTests(TestCase):
-    def setUp(self):
-        create_task_data(self)
-
     def test_default_code(self):
-        self.assertEqual('1', self.job.code)
-        self.assertEqual('1.1', self.group.code)
-        self.assertEqual('1.1.1', self.task.code)
-        self.assertEqual('1.1.1', self.task.instance.code)
-        TaskInstance.objects.create(task=self.task)
-        task = Task.objects.get(id=self.task.id)
+        CompanyFactory()
+        project = ProjectFactory()
+        job = JobFactory(job_code=1, project=project)
+        group = TaskGroupFactory(job=job)
+        task = TaskFactory(taskgroup=group)
+        self.assertEqual('1', job.code)
+        self.assertEqual('1.1', group.code)
+        self.assertEqual('1.1.1', task.code)
+
+        TaskInstanceFactory(task=task, selected=True)
+        self.assertEqual('1.1.1', task.instance.code)
+        TaskInstanceFactory(task=task)
         self.assertEqual('1.1.1a', task.instance.code)
         self.assertEqual('1.1.1b', task.taskinstances.all()[1].code)
 

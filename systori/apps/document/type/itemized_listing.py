@@ -13,10 +13,10 @@ from django.utils.translation import ugettext as _
 from systori.apps.accounting.constants import TAX_RATE
 from systori.lib.templatetags.customformatting import money
 
-from .style import NumberedSystoriDocument, stylesheet, TableFormatter, ContinuationTable
+from .style import NumberedSystoriDocument, fonts, TableFormatter, ContinuationTable
 from .style import NumberedLetterheadCanvasWithoutFirstPage, NumberedCanvas
 from .style import calculate_table_width_and_pagesize
-from .invoice import collate_tasks, collate_tasks_total, serialize
+from .invoice import collate_itemized_listing, serialize
 
 from systori.apps.document.models import DocumentSettings
 
@@ -49,7 +49,7 @@ def collate_payments(invoice, available_width):
         row = ['', money(payment['amount']), money(payment['amount_base']), money(payment['amount_tax'])]
         if payment['type'] == 'payment':
             received_on = date_format(payment['transacted_on'], use_l10n=True)
-            row[0] = Paragraph(_('Your Payment on')+' '+received_on, stylesheet['Normal'])
+            row[0] = Paragraph(_('Your Payment on') +' ' + received_on, fonts['OpenSans']['Normal'])
         elif payment['type'] == 'discount':
             row[0] = _('Discount Applied')
         billable_amount += payment['amount']
@@ -77,10 +77,10 @@ def render(project, format):
 
         flowables = [
 
-            Paragraph(_("Itemized listing {}").format(date.today), stylesheet['h2']),
+            Paragraph(_("Itemized listing {}").format(date.today), fonts['OpenSans']['h2']),
 
-            Paragraph(_("Project") + ": {}".format(project.name), stylesheet['Normal']),
-            Paragraph(_("Date") + ": {}".format(today), stylesheet['Normal']),
+            Paragraph(_("Project") + ": {}".format(project.name), fonts['OpenSans']['Normal']),
+            Paragraph(_("Date") + ": {}".format(today), fonts['OpenSans']['Normal']),
 
             Spacer(0, 10*mm),
 
@@ -88,13 +88,7 @@ def render(project, format):
 
             Spacer(0, 10*mm),
 
-            collate_tasks(itemized_listing, table_width),
-
-            Spacer(0, 4*mm),
-
-            collate_tasks_total(itemized_listing, table_width),
-
-        ]
+        ] + collate_itemized_listing(itemized_listing, font, table_width)
 
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)

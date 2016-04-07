@@ -1,253 +1,276 @@
 import time
-from decimal import Decimal
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.ui import Select
 from uitests.base import BaseTestCase
 import datetime
 
 
+TODAY = datetime.date.today()
+
+
 def following_day(days):
-    return datetime.date.today() + datetime.timedelta(days)
-
-class LoginTests(BaseTestCase):
-
-    def test_login(self):
-        self.do_login()
-        body = self.driver.find_element_by_xpath('//body')
-        assert 'Pinnwand' in body.text
+    return TODAY + datetime.timedelta(days)
 
 
 class ProjectTests(BaseTestCase):
 
-    def setUp(self):
-        super(ProjectTests, self).setUp()
-        self.do_login()
+    def test_common_workflow(self):
 
-    def test_project_create_and_edit_job(self):
-        today = datetime.date.today()
-
-        self.driver.find_element_by_xpath('//li[2]').click()
-        self.driver.find_element_by_xpath('//p[1]/a').click()
-        #self.driver.get(self.live_server_url+'/create-project')
-        self.driver.find_element_by_name('name').send_keys("Test Project")
-        self.driver.find_element_by_name('address').send_keys("Pettenkoferstr. 10")
-        self.driver.find_element_by_name('city').send_keys("Mannheim")
-        self.driver.find_element_by_name('postal_code').send_keys("68169")
-        self.driver.find_element_by_name('save_goto_project').click()
+        self.find_link('Projects').click()
+        self.find_link('Create').click()
+        self.complete_project_form()
 
         # open first job
-        self.driver.find_element_by_xpath('//tbody[@id="job-table"]//a').click()
+        self.find_xpath('//*[@id="jobs-table"]//a').click()
 
         # click on task group name field
-        self.driver.find_element_by_xpath('//ubr-taskgroup[1]//div[@class="name"][1]').click()
+        self.find_xpath('//ubr-taskgroup[1]//div[@class="name"][1]').click()
 
         # edit task group
         self.send_keys("Task Group 1" + Keys.TAB)
         self.send_keys("Group one description." + Keys.SHIFT + Keys.ENTER)
 
-        time.sleep(1)  # give it a second to catchup
+        time.sleep(1)
 
-        # edit task
+        # create task
         self.send_keys("Task 1" + Keys.TAB)
-        self.send_keys("2,5" + Keys.TAB)
+        self.send_keys("2.5" + Keys.TAB)
         self.send_keys("stk" + Keys.TAB)
         self.send_keys("task description" + Keys.SHIFT + Keys.ENTER)
 
-        time.sleep(2)  # give it two seconds to catchup
+        time.sleep(2)
 
-        # edit line item
+        # create line item
         self.send_keys("Line Item 1" + Keys.TAB)
-        time.sleep(0.5)
-        self.send_keys("20,0" + Keys.TAB)
-        time.sleep(0.5)
+        self.send_keys("20.0" + Keys.TAB)
         self.send_keys("m" + Keys.TAB)
-        time.sleep(0.5)
         self.send_keys("5" + Keys.SHIFT + Keys.ENTER)
 
-        time.sleep(1.5)
+        time.sleep(1)
 
+        # create another line item
         self.send_keys("Line Item 2" + Keys.TAB)
-        time.sleep(0.5)
-        self.send_keys("10,0" + Keys.TAB)
-        time.sleep(0.5)
+        self.send_keys("10.0" + Keys.TAB)
         self.send_keys("kg" + Keys.TAB)
-        time.sleep(0.5)
         self.send_keys("10" + Keys.SHIFT + Keys.ENTER)
 
-        time.sleep(1)  # give it a second to catchup
+        time.sleep(1)
 
+        # go back out to start a new task group
         for i in range(3):
             self.send_keys(Keys.SHIFT + Keys.ENTER)
             time.sleep(0.5)
 
-        # get second taskgroup with autocompleter and set quantity
+        # autocomplete a new task group
         self.send_keys("Ta")
-        time.sleep(0.5)
-        self.send_keys(Keys.ARROW_DOWN + Keys.ENTER)
-        time.sleep(0.2)
-        self.driver.find_element_by_xpath('//*[@id="task-editor"]/ubr-taskgroup[2]/ubr-task/div/div[1]/div[3]').clear()
-        self.driver.find_element_by_xpath('//*[@id="task-editor"]/ubr-taskgroup[2]/ubr-task/div/div[1]/div[3]').send_keys('2,5')
-        self.send_keys(Keys.TAB)
-        self.send_keys(Keys.ARROW_UP) # set focus to Element above to trigger save
-
+        time.sleep(1)
+        # select the first option from the autocomplete
+        self.send_keys(Keys.ARROW_DOWN)
+        self.send_keys(Keys.ENTER)
         time.sleep(2)
+
+        # edit the qty for the first task
+        self.send_keys(Keys.ARROW_DOWN)
+        self.send_keys(Keys.TAB)
+        self.clear()
+        self.send_keys("3.0")
+        # leave input to trigger a save
+        self.send_keys(Keys.ARROW_UP)
+        time.sleep(1)
+
+        # make sure everything was saved
         self.driver.refresh()
 
         # check that the editor has calculated the total correctly
-        total = self.driver.find_element_by_xpath('//ubr-taskgroup[1]//div[@class="total"][1]').text
-        total_cleaned = total.replace(',', '_').replace('.', ',').replace('_', '.')
-        self.assertEqual(Decimal(500), Decimal(total_cleaned))
+        taskgroup_total = self.find_xpath('//ubr-taskgroup[2]//div[@class="total"][1]').text.strip()
+        self.assertEqual('600.00', taskgroup_total)
+
+        # check project details page for correct job total
+        self.find_link('Test Project').click()
+
+        job_total = self.find_xpath('//*[@id="jobs-table"]//td[3]').text.strip()
+        self.assertEqual('$1,100.00', job_total)
+
+        # Create Contact
+        self.find_link('Add Contact').click()
+        self.find_link('Create').click()
+        self.complete_contact_form()
 
         time.sleep(0.5)
-        # click on project link to get to detail page
-        self.driver.find_element_by_xpath('//li[4]').click()
-        time.sleep(0.5)
-        self.driver.find_element_by_xpath('//li[3]').click()
-        self.driver.refresh()
-        time.sleep(1)
+        row = self.find_xpath('//*[@id="contacts-table"]/tbody/tr')
+        self.assertEqual('Max Mustermann', row.find_element_by_xpath('./td[2]/a').text)
+        self.assertEqual('yes', row.find_element_by_xpath('./td[5]').text)
 
-        # editor total should be the same as the dashboard total (sans currency symbol)
-        job_total = self.driver.find_element_by_xpath('//tbody[@id="job-table"]//td[3]').text
-        self.assertEqual('1.000,00', job_total.strip()[:-2])
+        # Create Proposal
+        self.find_link('Create Proposal').click()
+        self.complete_proposal_form()
 
-        # create new ProjectContact which is billable
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/a[2]').click()
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/a').click()
-        self.driver.find_element_by_xpath('//*[@id="id_is_billable"]').click()
-        self.driver.find_element_by_xpath('//*[@id="id_business"]').send_keys("Company")
-        self.driver.find_element_by_xpath('//*[@id="id_salutation"]').send_keys("Mr.")
-        self.driver.find_element_by_xpath('//*[@id="id_first_name"]').send_keys("Max")
-        self.driver.find_element_by_xpath('//*[@id="id_last_name"]').send_keys("Mustermann")
-        self.driver.find_element_by_xpath('//*[@id="id_phone"]').send_keys("0123 456789")
-        self.driver.find_element_by_xpath('//*[@id="id_email"]').send_keys("max.mustermann@trash-mail.com")
-        self.driver.find_element_by_xpath('//*[@id="id_website"]').send_keys("http://www.mustermann.de")
-        self.driver.find_element_by_xpath('//*[@id="id_address"]').send_keys("Eintrachtstraße 24")
-        self.driver.find_element_by_xpath('//*[@id="id_postal_code"]').send_keys("68169")
-        self.driver.find_element_by_xpath('//*[@id="id_city"]').send_keys("Mannheim")
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[14]/div/textarea').send_keys("This is a Note on a Contact")
-
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[15]/button').click()
-
-        # make sure is_billable = True
-        time.sleep(0.5)
-        self.assertEqual('Max Mustermann',
-                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[4]/tbody/tr/td[2]/a').text)
-        self.assertEqual('Ja',
-                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[4]/tbody/tr/td[4]').text)
-
-        #create Proposal
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/a[2]').click()
+        row = self.find_xpath('//*[@id="proposals-table"]/tbody/tr')
+        self.assertEqual('New', row.find_element_by_xpath('./td[2]').text.strip())
+        self.assertEqual('$1,309.00', row.find_element_by_xpath('./td[4]').text.strip())
         time.sleep(0.5)
 
-        self.driver.find_element_by_xpath('//*[@id="id_document_date"]').send_keys(today.strftime('%m-%d-%Y'))
-        self.driver.find_element_by_xpath('//*[@id="id_header"]').send_keys('Dear Sir or Madam,\n this is a Test:')
-        self.driver.find_element_by_xpath('//*[@id="id_footer"]').send_keys('We hope you pay us for something.')
-        jobs = Select(self.driver.find_element_by_xpath('//*[@id="id_jobs"]'))
-        jobs.select_by_visible_text('Default')
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[8]/button').click()
-        time.sleep(1)
-
-        self.assertEqual('1.000,00 €',
-                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr/td[4]').text)
-        self.assertEqual('Neu',
-                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr/td[2]').text)
-        time.sleep(0.5)
-
-        # report some billable amounts
+        # report some billable amounts in field app
         self.driver.get(self.live_server_url+'/field/project-2/')
         self.driver.find_element_by_xpath('/html/body/div/div[3]/a[1]').click()
-        self.driver.find_element_by_css_selector('a[href="/field/project-2/{}?copy_source_date="]'.format(following_day(1).strftime('%Y-%m-%d'))).click()
-
+        self.driver.find_element_by_css_selector('a[href="/field/project-2/{}?copy_source_date="]'
+                                                 .format(following_day(1).strftime('%Y-%m-%d'))).click()
         self.driver.find_element_by_xpath('/html/body/div/div[3]/a[2]').click()
+
+
+        # go to date picker
+        # self.find_class('day-picker').click()
+        # next_day = following_day(1).strftime('%Y-%m-%d')
+        # pick a date
+        # self.find_xpath('//a[contains(@href, "{}")]'.format(next_day)).click()
+
+        # copy plan
+        # self.find_class('btn-copy-plan').click()
+
         self.driver.find_element_by_xpath('/html/body/form/div/div[2]/div[2]/label[1]/input').click()
         self.driver.find_element_by_xpath('/html/body/form/div/div[2]/div[3]/div/button').click()
-        self.driver.find_element_by_xpath('/html/body/div/div[2]/ul/a').click()
-        self.driver.find_element_by_xpath('/html/body/div/div[2]/div[3]/div/a').click()
-        self.driver.find_element_by_xpath('/html/body/div/div[2]/ul/a[2]').click()
-        self.driver.find_element_by_xpath('/html/body/div/div[2]/div[3]/div/a').click()
 
-        self.driver.find_element_by_xpath('/html/body/div/div[2]/ul/a').click()
-        self.driver.find_element_by_xpath('/html/body/div/form/div/div[2]/div[1]/input').send_keys("2.5")
-        self.driver.find_element_by_xpath('/html/body/div/form/div/div[2]/textarea').send_keys("Some Report billable_amount")
-        self.driver.find_element_by_xpath('/html/body/div/form/div/div[3]/div/input[2]').click()
+        # 50% of first task in first taskgroup
+        self.driver.find_element_by_id('task_0_0').click()
+        self.find_name('complete').clear()
+        self.find_name('complete').send_keys('1.25')
+        self.send_keys(Keys.ENTER)
+        # 50% of first task in second taskgroup
+        self.driver.find_element_by_id('task_1_0').click()
+        self.find_name('complete').clear()
+        self.find_name('complete').send_keys('1.50')
+        self.send_keys(Keys.ENTER)
 
-        self.driver.find_element_by_xpath('/html/body/div/div[1]/div[1]/a').click()
-        self.driver.find_element_by_xpath('/html/body/div/div[1]/div/div/div[1]/div[1]/a').click()
         self.driver.get(self.live_server_url+'/project-2')
         time.sleep(0.2)
-        self.assertEqual('500,00',
-                         self.driver.find_element_by_xpath('//*[@id="job-table"]/tr/td[5]').text[:-2])
 
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[2]/td[1]/a[1]').click()
-        self.driver.find_element_by_xpath('//*[@id="id_document_date"]').send_keys(following_day(2).strftime('%m-%d-%Y'))
+        # check for billable amount locale en-US
+        self.assertEqual('$550.00',
+                         self.driver.find_element_by_id('billable_amount_0').text)
+
+        # create first invoice
+        self.find_name('create_invoice').click()
+        self.driver.find_element_by_xpath('//*[@id="id_document_date"]')\
+            .send_keys(following_day(2).strftime('%Y-%m-%d'))
         self.driver.find_element_by_xpath('//*[@id="id_invoice_no"]').send_keys('1234/04|ä@1"2!')
         self.driver.find_element_by_xpath('//*[@id="id_header"]').send_keys('So much, very much Money.')
         self.driver.find_element_by_xpath('//*[@id="id_footer"]').send_keys('So much, very much Money.')
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[10]/button').click()
+        self.find_name('btn_set_itemized').click()
+        self.find_name('save').click()
 
-        self.assertEqual('595,00',
-                         self.driver.find_element_by_class_name('add-total-amount').text[:-2])
+        self.find_name('status_button').click()
+
+        self.assertEqual('$654.50',
+                         self.find_name('debit_gross').text)
         time.sleep(0.5)
 
         # receive first payment
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[4]/td[1]/a[2]').click()
-        account = Select(self.driver.find_element_by_xpath('//*[@id="id_bank_account"]'))
-        account.select_by_visible_text('1200 - ')
-        self.driver.find_element_by_xpath('//*[@id="id_amount"]').send_keys('595')
-        self.driver.find_element_by_xpath('//*[@id="id_received_on"]').clear()
-        self.driver.find_element_by_xpath('//*[@id="id_received_on"]').send_keys(following_day(3).strftime('%Y-%m-%d'))
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[5]/button').click()
-        time.sleep(0.5)
+        # add payment button
+        # self.find_name('add_payment').click()
+        # pay invoice button
+        self.find_name('status_button').click()
 
-        # second amount report
-        self.driver.get(self.live_server_url+'/field/project-2')
-        self.driver.find_element_by_xpath('/html/body/div/div[3]/a[1]').click()
-        self.driver.find_element_by_css_selector('a[href="/field/project-2/{}?copy_source_date="]'.format(following_day(2).strftime('%Y-%m-%d'))).click()
-        self.driver.find_element_by_xpath('/html/body/div/a[2]').click()
-        self.driver.find_element_by_xpath('/html/body/div/div[4]/div[2]/a[4]').click()
-        self.driver.find_element_by_xpath('/html/body/div/form/div/div[2]/div[1]/input').send_keys("2.5")
-        self.driver.find_element_by_xpath('/html/body/div/form/div/div[2]/textarea').send_keys("Some another Report billable_amount")
-        self.driver.find_element_by_xpath('/html/body/div/form/div/div[3]/div/input[2]').click()
-        self.driver.get(self.live_server_url+'/project-2')
-        time.sleep(0.5)
+        account = Select(self.driver.find_element_by_id('id_bank_account'))
+        account.select_by_index(1)
+        # enter partial payment with 3% discount and underpayment
+        payment_input = self.driver.find_element_by_id('id_amount')
+        payment_input.clear()
+        payment_input.send_keys('582')
+        discount = Select(self.driver.find_element_by_id('id_discount'))
+        discount.select_by_index(3)
+        self.assertEqual('582.00',
+                         self.driver.find_element_by_id('id_split-0-payment').get_attribute("value"))
+        self.assertEqual('18.00',
+                         self.driver.find_element_by_id('id_split-0-discount').get_attribute("value"))
+        self.assertEqual('54.50',
+                         self.driver.find_element_by_id('id_split-0-adjustment').get_attribute("value"))
+        self.find_name('save').click()
 
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[5]/td[1]/a[1]').click()
-        self.driver.find_element_by_xpath('//*[@id="id_is_final"]').click()
-        self.driver.find_element_by_xpath('//*[@id="id_document_date"]').send_keys(following_day(4).strftime('%m-%d-%Y'))
-        self.driver.find_element_by_xpath('//*[@id="id_invoice_no"]').send_keys('1235/07|ä@1"2!')
-        self.driver.find_element_by_xpath('//*[@id="id_title"]').clear()
-        self.driver.find_element_by_xpath('//*[@id="id_title"]').send_keys('Final Invoice')
-        self.driver.find_element_by_xpath('//*[@id="id_header"]').send_keys('So much, very much Money.')
-        self.driver.find_element_by_xpath('//*[@id="id_footer"]').send_keys('So much, very much Money.')
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[10]/button').click()
-        time.sleep(0.5)
 
-        # receive second payment
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[7]/td[1]/a[2]').click()
-        account2 = Select(self.driver.find_element_by_xpath('//*[@id="id_bank_account"]'))
-        account2.select_by_visible_text('1200 - ')
-        self.driver.find_element_by_xpath('//*[@id="id_amount"]').send_keys('577.15')
-        self.driver.find_element_by_xpath('//*[@id="id_received_on"]').clear()
-        self.driver.find_element_by_xpath('//*[@id="id_received_on"]').send_keys(following_day(5).strftime('%Y-%m-%d'))
-        discount = Select(self.driver.find_element_by_xpath('//*[@id="id_discount"]'))
-        discount.select_by_visible_text('3%')
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[5]/button').click()
-        time.sleep(0.5)
+        # self.driver.find_element_by_xpath('//*[@id="id_amount"]').send_keys('595')
+        # self.driver.find_element_by_xpath('//*[@id="id_received_on"]').clear()
+        # self.driver.find_element_by_xpath('//*[@id="id_received_on"]').send_keys(following_day(3).strftime('%Y-%m-%d'))
+        # self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[5]/button').click()
+        # time.sleep(0.5)
 
-        # test project filter
-        self.driver.get(self.live_server_url+'/projects')
-        self.driver.find_element_by_xpath('//*[@id="id_search_term"]').send_keys('project')
-        self.driver.find_element_by_xpath('/html/body/div/div/div[2]/div/div[1]/form/div[3]/button').click()
-        self.driver.find_element_by_xpath('//*[@id="table"]/tbody/tr[2]/td[2]/a').click()
+        # # second amount report
+        # self.driver.get(self.live_server_url+'/field/project-2')
+        # self.driver.find_element_by_xpath('/html/body/div/div[3]/a[1]').click()
+        # self.driver.find_element_by_css_selector('a[href="/field/project-2/{}?copy_source_date="]'.format(following_day(2).strftime('%Y-%m-%d'))).click()
+        # self.driver.find_element_by_xpath('/html/body/div/a[2]').click()
+        # self.driver.find_element_by_xpath('/html/body/div/div[4]/div[2]/a[4]').click()
+        # self.driver.find_element_by_xpath('/html/body/div/form/div/div[2]/div[1]/input').send_keys("2.5")
+        # self.driver.find_element_by_xpath('/html/body/div/form/div/div[2]/textarea').send_keys("Some another Report billable_amount")
+        # self.driver.find_element_by_xpath('/html/body/div/form/div/div[3]/div/input[2]').click()
+        # self.driver.get(self.live_server_url+'/project-2')
+        # time.sleep(0.5)
 
-        #check accounts
-        self.driver.get(self.live_server_url+'/accounts')
-        self.assertEqual('1.172,15 €',
-                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[1]/tbody/tr/td[3]').text)
-        self.assertEqual('187,15 €',
-                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr[3]/td[4]').text)
-        self.assertEqual('1.000,00 €',
-                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr[4]/td[4]').text)
-        self.assertEqual('-15,00 €',
-                         self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr[5]/td[4]').text)
+        # self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[5]/td[1]/a[1]').click()
+        # self.driver.find_element_by_xpath('//*[@id="id_is_final"]').click()
+        # self.driver.find_element_by_xpath('//*[@id="id_document_date"]').send_keys(following_day(4).strftime('%m-%d-%Y'))
+        # self.driver.find_element_by_xpath('//*[@id="id_invoice_no"]').send_keys('1235/07|ä@1"2!')
+        # self.driver.find_element_by_xpath('//*[@id="id_title"]').clear()
+        # self.driver.find_element_by_xpath('//*[@id="id_title"]').send_keys('Final Invoice')
+        # self.driver.find_element_by_xpath('//*[@id="id_header"]').send_keys('So much, very much Money.')
+        # self.driver.find_element_by_xpath('//*[@id="id_footer"]').send_keys('So much, very much Money.')
+        # self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[10]/button').click()
+        # time.sleep(0.5)
+
+        # # receive second payment
+        # self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[3]/tbody/tr[7]/td[1]/a[2]').click()
+        # account2 = Select(self.driver.find_element_by_xpath('//*[@id="id_bank_account"]'))
+        # account2.select_by_visible_text('1200 - ')
+        # self.driver.find_element_by_xpath('//*[@id="id_amount"]').send_keys('577.15')
+        # self.driver.find_element_by_xpath('//*[@id="id_received_on"]').clear()
+        # self.driver.find_element_by_xpath('//*[@id="id_received_on"]').send_keys(following_day(5).strftime('%Y-%m-%d'))
+        # discount = Select(self.driver.find_element_by_xpath('//*[@id="id_discount"]'))
+        # discount.select_by_visible_text('3%')
+        # self.driver.find_element_by_xpath('/html/body/div/div/div[2]/form/div[5]/button').click()
+        # time.sleep(0.5)
+
+        # # test project filter
+        # self.driver.get(self.live_server_url+'/projects')
+        # self.driver.find_element_by_xpath('//*[@id="id_search_term"]').send_keys('project')
+        # self.driver.find_element_by_xpath('/html/body/div/div/div[2]/div/div[1]/form/div[3]/button').click()
+        # self.driver.find_element_by_xpath('//*[@id="table"]/tbody/tr[2]/td[2]/a').click()
+
+        # #check accounts
+        # self.driver.get(self.live_server_url+'/accounts')
+        # self.assertEqual('1.172,15 €',
+        #                  self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[1]/tbody/tr/td[3]').text)
+        # self.assertEqual('187,15 €',
+        #                  self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr[3]/td[4]').text)
+        # self.assertEqual('1.000,00 €',
+        #                  self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr[4]/td[4]').text)
+        # self.assertEqual('-15,00 €',
+        #                  self.driver.find_element_by_xpath('/html/body/div/div/div[2]/table[2]/tbody/tr[5]/td[4]').text)
+
+    def complete_project_form(self):
+        self.find_name('name').send_keys("Test Project")
+        self.find_name('address').send_keys("Pettenkoferstr. 10")
+        self.find_name('city').send_keys("Mannheim")
+        self.find_name('postal_code').send_keys("68169")
+        self.find_name('save_goto_project').click()
+
+    def complete_contact_form(self):
+        self.find_name('is_billable').click()
+        self.find_name('business').send_keys("Company")
+        self.find_name('salutation').send_keys("Mr.")
+        self.find_name('first_name').send_keys("Max")
+        self.find_name('last_name').send_keys("Mustermann")
+        self.find_name('phone').send_keys("0123 456789")
+        self.find_name('email').send_keys("max.mustermann@trash-mail.com")
+        self.find_name('website').send_keys("http://www.mustermann.de")
+        self.find_name('address').send_keys("Eintrachtstraße 24")
+        self.find_name('postal_code').send_keys("68169")
+        self.find_name('city').send_keys("Mannheim")
+        self.find_name('notes').send_keys("This is a Note on a Contact")
+        self.find_button('Create').click()
+
+    def complete_proposal_form(self):
+        self.find_name('document_date').send_keys(TODAY.strftime('%Y-%m-%d'))
+        self.find_name('header').send_keys('Dear Sir or Madam,\n this is a Test:')
+        self.find_name('footer').send_keys('We hope you pay us for something.')
+        self.find_named_select('jobs').select_by_visible_text('Default')
+        self.find_button('Save').click()
 

@@ -640,7 +640,10 @@ abstract class EditableElement extends UbrElement {
         };
         repository.clone(object_name, selection['id'], data).then((resp) {
             var frag = stringToDocumentFragment(resp);
+            var idx = parent.children.indexOf(this);
+            var this_parent = this.parent;
             replaceWith(frag.children[0]);
+            (this_parent.children[idx] as EditableElement).start();
         });
     }
 
@@ -896,7 +899,7 @@ class TaskGroupElement extends EditableElement {
             .where((e) => e.truthy('is_optional') == false)
             .map((e) => e.total)
             .fold(0, (a, b) => a + b);
-        parent.update_totals();
+        (parent as EditableElement).update_totals();
     }
 
 }
@@ -975,7 +978,7 @@ class TaskElement extends EditableElement {
 
     void new_sibling() {
         super.new_sibling();
-    }    
+    }
 
     children_total_sum() {
         TaskInstanceElement first_child = this.querySelector(child_element);
@@ -1003,7 +1006,7 @@ class TaskInstanceElement extends EditableElement {
     }
 
     bool can_delete() {
-        return this.parent.querySelectorAll(this.parent.child_element).length > 1;
+        return this.parent.querySelectorAll((this.parent as EditableElement).child_element).length > 1;
     }
 }
 
@@ -1027,7 +1030,7 @@ class LineItemElement extends EditableElement {
         var qty = parse_decimal(qty_view.text);
         var price = parse_decimal(price_view.text);
         total = qty * price;
-        (parent as EditableElement).update_totals();
+        (this.parent as EditableElement).update_totals();
     }
 
     void new_parent_sibling() {

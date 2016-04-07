@@ -1,6 +1,4 @@
 from collections import OrderedDict
-from functools import reduce
-from operator import or_
 from django.http import HttpResponseRedirect
 from django.views.generic import View, TemplateView, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
@@ -11,12 +9,12 @@ from django.db.models import Q
 
 from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Project, JobSite
-from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm, EntryFormSet
+from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
 from .forms import JobSiteForm, FilterForm
 from ..task.models import Job, TaskGroup
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
-from ..accounting.report import prepare_transaction_report
-from ..accounting.models import Transaction, create_account_for_job
+from ..accounting.report import create_invoice_report
+from ..accounting.models import create_account_for_job
 from ..accounting.constants import TAX_RATE
 from .gaeb_utils import gaeb_import
 
@@ -146,7 +144,9 @@ class ProjectView(DetailView):
         context['jobsites'] = self.object.jobsites.all()
         context['jobsites_count'] = len(context['jobsites'])
         context['project_has_billable_contact'] = self.object.has_billable_contact
-        context['transaction_report'] = prepare_transaction_report(self.object.jobs.all())
+        context['payments'] = self.object.payments.all()
+        context['adjustments'] = self.object.adjustments.all()
+        context['refunds'] = self.object.refunds.all()
         context['parent_invoices'] = self.object.invoices.filter(parent=None).prefetch_related('invoices').all()
         context['TAX_RATE_DISPLAY'] = '{}%'.format(ubrdecimal(TAX_RATE*100, 2))
         return context
@@ -317,29 +317,3 @@ class JobSiteDelete(DeleteView):
     def get_success_url(self):
         return self.object.project.get_absolute_url()
 
-
-class TransactionEditor(TemplateView):
-    template_name = 'project/transaction_editor.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        transaction_ids = []
-        for job in self.request.project.jobs.all():
-            transaction_ids.extend(job.account.entries.all().values_list('transaction_id', flat=True))
-        transaction_ids = list(set(transaction_ids))
-
-        formsets = []
-        for transaction in Transaction.objects.filter(id__in=transaction_ids).order_by('id'):
-            formsets.append(EntryFormSet(instance=transaction))
-        for formset in formsets:
-            for form in formset:
-                print(form)
-        context['formsets'] = formsets
-
-        return context
-
-    def post(self, request, *args, **kwargs):
-        formset = EntryFormSet(request.POST, instance=Transaction.objects.get(id=request.POST['transaction_id']))
-        formset.save()
-        return super().get(request, *args, **kwargs)
