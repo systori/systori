@@ -41,8 +41,6 @@ class DocumentForm(forms.ModelForm):
     def __init__(self, *args, formset_class, instance, jobs, **kwargs):
         super().__init__(*args, instance=instance, initial=kwargs.pop('initial', {}), **kwargs)
         self.formset = formset_class(instance=instance, jobs=jobs, **kwargs)
-        self.calculate_accounting_states()
-        self.calculate_initial_values()
 
     def is_valid(self):
         form_valid = super().is_valid()
@@ -70,42 +68,15 @@ class DocumentForm(forms.ModelForm):
                     total_amount = getattr(self, total_field)
                     setattr(self, total_field, total_amount+form_amount)
 
-    def calculate_accounting_states(self):
-
-        if self.instance.transaction:
-
-            # Start Transaction
-            atom = transaction.atomic()
-            atom.__enter__()
-
-            # Delete transaction so we can capture accounting state without it
-            Transaction.objects.filter(id=self.instance.transaction.id).delete()
-
-            # Capture state of accounting system before transaction
-            for form in self.formset:
-                form.pre_txn = types.SimpleNamespace()
-                form.calculate_accounting_state(form.pre_txn)
-
-            # Rollback Transaction
-            transaction.set_rollback(True)
-            atom.__exit__(None, None, None)
-
-        else:
-
-            # Capture state of accounting system before transaction
-            for form in self.formset:
-                form.pre_txn = types.SimpleNamespace()
-                form.calculate_accounting_state(form.pre_txn)
-
-    def calculate_initial_values(self):
-        for form in self.formset:
-            form.calculate_initial_values()
-
 
 class BaseDocumentFormSet(BaseFormSet):
 
     def __init__(self, *args, instance, jobs, **kwargs):
         super().__init__(*args, prefix='job', initial=self.get_initial(instance, jobs), **kwargs)
+        self.instance = instance
+        if hasattr(self.instance, 'transaction'):
+            self.calculate_accounting_states()
+            self.calculate_initial_values()
 
     @staticmethod
     def get_initial(instance, jobs):
@@ -127,6 +98,37 @@ class BaseDocumentFormSet(BaseFormSet):
 
     def get_transaction_rows(self):
         return [form.transaction for form in self if form.transaction]
+
+    def calculate_accounting_states(self):
+
+        if self.instance.transaction:
+
+            # Start Transaction
+            atom = transaction.atomic()
+            atom.__enter__()
+
+            # Delete transaction so we can capture accounting state without it
+            Transaction.objects.filter(id=self.instance.transaction.id).delete()
+
+            # Capture state of accounting system before transaction
+            for form in self:
+                form.pre_txn = types.SimpleNamespace()
+                form.calculate_accounting_state(form.pre_txn)
+
+            # Rollback Transaction
+            transaction.set_rollback(True)
+            atom.__exit__(None, None, None)
+
+        else:
+
+            # Capture state of accounting system before transaction
+            for form in self:
+                form.pre_txn = types.SimpleNamespace()
+                form.calculate_accounting_state(form.pre_txn)
+
+    def calculate_initial_values(self):
+        for form in self:
+            form.calculate_initial_values()
 
 
 class DocumentRowForm(Form):

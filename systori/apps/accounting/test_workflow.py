@@ -1,8 +1,8 @@
 from decimal import Decimal as D
 from django.test import TestCase
 from unittest import skip
-from systori.lib.accounting.tools import Amount, extract_net_tax
-from ..task.test_models import create_task_data
+from systori.lib.accounting.tools import Amount
+from ..task.test_models import create_task_data, JobFactory
 from .models import Account, Transaction, Entry, create_account_for_job
 from .workflow import create_chart_of_accounts
 from .workflow import debit_jobs, credit_jobs, adjust_jobs

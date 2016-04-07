@@ -4,17 +4,28 @@ from systori.apps.field.utils import days_ago
 from .report import create_invoice_report, create_invoice_table
 from .models import Entry
 from .workflow import debit_jobs, credit_jobs, adjust_jobs
-from .test_workflow import create_data, A
+from .test_workflow import create_data, A, Amount, TAX_RATE, JobFactory, create_account_for_job
 
 
 class TestTransactionsTable(TestCase):
     def setUp(self):
         create_data(self)
+        self.job3 = JobFactory(project=self.project)
+        self.job3.account = create_account_for_job(self.job3)
+        self.job3.save()
+        self.job4 = JobFactory(project=self.project)
+        self.job4.account = create_account_for_job(self.job4)
+        self.job4.save()
+        self.job5 = JobFactory(project=self.project)
+        self.job5.account = create_account_for_job(self.job5)
+        self.job5.save()
 
-    def tbl(self, invoice_txn=None):
+    def tbl(self, invoice_txn=None, jobs=None):
         if not invoice_txn:
             invoice_txn = debit_jobs([(self.job, A(0), Entry.WORK_DEBIT)], transacted_on=days_ago(0))
-        report = create_invoice_report(invoice_txn, [self.job])
+        if not jobs:
+            jobs = [self.job]
+        report = create_invoice_report(invoice_txn, jobs)
         table = create_invoice_table(report)
         return [tuple(str(cell) for cell in row[:-1]) for row in table]
 
@@ -175,3 +186,109 @@ class TestTransactionsTable(TestCase):
             ('payment', '-2000.00', '-380.00', '-2380.00'),
             ('debit',       '0.00',    '0.00',     '0.00')
         ])
+
+    def test_project_143_having_open_claim_2016_04_06(self):
+
+        txn = debit_jobs([
+            (self.job, Amount.from_net(D('22721.38'), TAX_RATE), Entry.WORK_DEBIT),
+            (self.job2, Amount.from_net(D('3400.05'), TAX_RATE), Entry.WORK_DEBIT)
+        ], transacted_on=days_ago(8))
+        self.assertEqual(self.tbl(txn, [self.job, self.job2]), [
+            ('',              'net',      'tax',     'gross'),
+            ('progress', '26121.43',  '4963.07',  '31084.50'),
+            ('debit',    '26121.43',  '4963.07',  '31084.50'),
+        ])
+
+        credit_jobs([
+            (self.job, A('26227.29'), A('811.15'), A()),
+            (self.job2, A('1572.71'), A('48.64'), A('2424.71')),
+        ], D('27800.00'), transacted_on=days_ago(7))
+
+        txn = debit_jobs([
+            (self.job, Amount.from_net(D('8500'), TAX_RATE), Entry.WORK_DEBIT),
+            (self.job2, Amount.from_net(D('4000'), TAX_RATE), Entry.WORK_DEBIT),
+            (self.job3, Amount.from_net(D('1000'), TAX_RATE), Entry.WORK_DEBIT)
+        ], transacted_on=days_ago(6))
+        self.assertEqual(self.tbl(txn, [self.job, self.job2, self.job3]), [
+            ('',              'net',      'tax',     'gross'),
+            ('progress', '37583.86',  '7140.93',  '44724.79'),
+            ('payment', '-23361.35', '-4438.65', '-27800.00'),
+            ('discount',  '-722.51',  '-137.28',   '-859.79'),
+            ('debit',    '13500.00',  '2565.00',  '16065.00'),
+        ])
+
+        credit_jobs([
+            (self.job, A('9811.55'), A('303.45'), A()),
+            (self.job2, A('3188.45'), A('98.61'), A('1472.94')),
+        ], D('13000.00'), transacted_on=days_ago(5))
+
+        txn = debit_jobs([
+            (self.job2, Amount.from_net(D('11895.04'), TAX_RATE), Entry.WORK_DEBIT),
+            (self.job3, Amount.from_net(D('1628.86'), TAX_RATE), Entry.WORK_DEBIT),
+            (self.job4, Amount.from_net(D('358.31'), TAX_RATE), Entry.WORK_DEBIT)
+        ], transacted_on=days_ago(4))
+        self.assertEqual(self.tbl(txn, [self.job, self.job2, self.job3, self.job4]), [
+            ('',              'net',      'tax',     'gross'),
+            ('progress', '50228.31',  '9543.37',  '59771.68'),
+            ('payment', '-23361.35', '-4438.65', '-27800.00'),
+            ('discount',  '-722.51',  '-137.28',   '-859.79'),
+            ('payment', '-10924.37', '-2075.63', '-13000.00'),
+            ('discount',  '-337.87',   '-64.19',   '-402.06'),
+            ('unpaid',   '-1000.00',  '-190.00',  '-1190.00'),
+            ('debit',    '13882.21',  '2637.62',  '16519.83'),
+        ])
+
+        credit_jobs([
+            (self.job2, A('6585.27'), A('203.67'), A('7366.16')),
+            (self.job3, A('1938.34'), A('59.95'), A()),
+            (self.job4, A('426.39'), A('13.19'), A()),
+        ], D('8950.00'), transacted_on=days_ago(3))
+
+        # Initial Case: Due to an underpaid job, invoice shows 'open claim'
+
+        txn = debit_jobs([
+            (self.job2, Amount.from_net(D('17790.25'), TAX_RATE), Entry.WORK_DEBIT),
+            (self.job5, Amount.from_net(D('6377.68'), TAX_RATE), Entry.WORK_DEBIT),
+            (self.job3, Amount.from_net(D('2034.90'), TAX_RATE), Entry.WORK_DEBIT),
+            (self.job4, Amount.from_net(D('716.62'), TAX_RATE), Entry.WORK_DEBIT)
+        ], transacted_on=days_ago(1))
+        self.assertEqual(self.tbl(txn, [self.job, self.job2, self.job3, self.job4, self.job5]), [
+            ('',              'net',      'tax',     'gross'),
+            ('progress', '70957.71', '13481.96',  '84439.67'),
+            ('payment', '-23361.35', '-4438.65', '-27800.00'),
+            ('discount',  '-722.51',  '-137.28',   '-859.79'),
+            ('payment', '-10924.37', '-2075.63', '-13000.00'),
+            ('discount',  '-337.87',   '-64.19',   '-402.06'),
+            ('payment',  '-7521.01', '-1428.99',  '-8950.00'),
+            ('discount',  '-232.61',   '-44.20',   '-276.81'),
+            ('unpaid',    '-938.54',  '-178.32',  '-1116.86'),  # <-- open claim
+            ('debit',    '26919.45',  '5114.70',  '32034.15'),
+        ])
+        txn.delete()
+
+        # Adjusted Case: We adjust two jobs before creating the invoice.
+
+        adjust_jobs([
+            (self.job3, A(n='-949.62', t='-180.43')),
+            (self.job4, A(n='11.08', t='2.11'))
+        ], transacted_on=days_ago(1))
+
+        txn = debit_jobs([
+            (self.job2, Amount.from_net(D('17790.25'), TAX_RATE), Entry.WORK_DEBIT),
+            (self.job5, Amount.from_net(D('6377.68'), TAX_RATE), Entry.WORK_DEBIT),
+            (self.job3, Amount.from_net(D('2984.52'), TAX_RATE), Entry.WORK_DEBIT),
+            (self.job4, Amount.from_net(D('705.54'), TAX_RATE), Entry.WORK_DEBIT)
+        ], transacted_on=days_ago(3))
+        self.assertEqual(self.tbl(txn, [self.job, self.job2, self.job3, self.job4, self.job5]), [
+            ('',              'net',      'tax',     'gross'),
+            ('progress', '70957.71', '13481.96',  '84439.67'),
+            ('payment', '-23361.35', '-4438.65', '-27800.00'),
+            ('discount',  '-722.51',  '-137.28',   '-859.79'),
+            ('payment', '-10924.37', '-2075.63', '-13000.00'),
+            ('discount',  '-337.87',   '-64.19',   '-402.06'),
+            ('payment',  '-7521.01', '-1428.99',  '-8950.00'),
+            ('discount',  '-232.61',   '-44.20',   '-276.81'),
+            # ('unpaid',    '-938.54',  '-178.32',  '-1116.86'), <-- consumed into debit below
+            ('debit',    '27857.99',  '5293.02',  '33151.01'),
+        ])
+        txn.delete()

@@ -1,13 +1,22 @@
 from django.test import TestCase
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.utils.translation import check_for_language, to_locale, get_language, LANGUAGE_SESSION_KEY
+from django.test.client import MULTIPART_CONTENT
 
 from systori.apps.project.models import Project
 from .tests import CreateUserDataMixin
 
 
 class CreateProjectMixin(CreateUserDataMixin):
+
+    def client_get(self, path, data=None, follow=False, secure=False, **extra):
+        extra['HTTP_HOST'] = self.company.schema + '.' + settings.SERVER_NAME
+        return self.client.get(path, data, follow, secure, **extra)
+
+    def client_post(self, path, data=None, content_type=MULTIPART_CONTENT,
+                    follow=False, secure=False, **extra):
+        extra['HTTP_HOST'] = self.company.schema + '.' + settings.SERVER_NAME
+        return self.client.post(path, data, content_type, follow, secure, **extra)
 
     def setUp(self):
         super().setUp()
@@ -21,20 +30,20 @@ class SetLanguageViewTest(CreateProjectMixin, TestCase):
         self.client.login(username=self.username, password=self.password)
         set_language_url = reverse('set_language')
 
-        self.client.post(set_language_url, {'language': 'de'})
-        response = self.client.get('/')
+        self.client_post(set_language_url, {'language': 'de'})
+        response = self.client_get('/')
         self.assertEqual(response['Content-Language'], 'de')
         user = type(self.user).objects.get(pk=self.user.pk)
         self.assertEqual(user.language, 'de')
 
-        self.client.post(set_language_url, {'language': 'en'})
-        response = self.client.get('/')
+        self.client_post(set_language_url, {'language': 'en'})
+        response = self.client_get('/')
         self.assertEqual(response['Content-Language'], 'en')
         user = type(self.user).objects.get(pk=self.user.pk)
         self.assertEqual(user.language, 'en')
 
-        self.client.post(set_language_url, {'language': 'WRONG'})
-        response = self.client.get('/')
+        self.client_post(set_language_url, {'language': 'WRONG'})
+        response = self.client_get('/')
         self.assertEqual(response['Content-Language'], 'en')
         user = type(self.user).objects.get(pk=self.user.pk)
         self.assertEqual(user.language, 'en')
@@ -50,10 +59,10 @@ class SetLanguageMiddlewareTest(CreateProjectMixin, TestCase):
 
         self.user.language = 'en'
         self.user.save()
-        response = self.client.get('/')
+        response = self.client_get('/')
         self.assertEqual(response['Content-Language'], 'en')
 
         self.user.language = 'de'
         self.user.save()
-        response = self.client.get('/')
+        response = self.client_get('/')
         self.assertEqual(response['Content-Language'], 'de')
