@@ -21,6 +21,17 @@ def owner_auth(view):
     return user_passes_test(is_authorized)(view)
 
 
+def accountant_auth(view):
+    def is_authorized(request):
+        if not request.user.is_authenticated():
+            return False
+        if request.access.has_accountant:
+            return True
+        raise PermissionDenied
+
+    return user_passes_test(is_authorized)(view)
+
+
 def office_auth(view):
     def is_authorized(request):
         if not request.user.is_authenticated():

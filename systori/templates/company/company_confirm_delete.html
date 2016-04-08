@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n bootstrap %}
+
+{% block container %}
+  <div class="container-fluid" style="padding-bottom:100px;">
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 class="sub-header danger">{% trans 'delete' %}</h2>
+          <form method="post">{% csrf_token %}
+            <p>{% blocktrans with object=object %}Are you sure you want to delete "{{ object }}"?{% endblocktrans %}</p>
+            <input type="submit" value="{% trans 'Confirm' %}"/>
+          </form>
+      </div>
+    </div>
+  </div>
+{% endblock container %}}
