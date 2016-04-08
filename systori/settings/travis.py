@@ -1,6 +1,6 @@
 from .common import *
 
-SERVER_NAME = 'localhost'
+SERVER_NAME = 'systori.localhost'
 SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
 
 GOOGLE_MAPS_API_KEY = "AIzaSyDvwtHHJ_FrNVkbKoHoWh2r2E5PtV5rmLY"

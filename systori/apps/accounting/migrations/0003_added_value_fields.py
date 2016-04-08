@@ -291,8 +291,9 @@ class Migration(migrations.Migration):
             name='transaction_type',
             field=models.CharField(max_length=32, verbose_name='Transaction Type', null=True, choices=[('invoice', 'Invoice'), ('payment', 'Payment'), ('adjustment', 'Adjustment'), ('refund', 'Refund')]),
         ),
-        migrations.RunPython(split_gross_entries),
-        migrations.RunPython(migrate_proposals),
-        migrations.RunPython(migrate_invoices),
-        migrations.RunPython(migrate_payments)
+        # production has been migrated, we don't need this anymore
+        # migrations.RunPython(split_gross_entries),
+        # migrations.RunPython(migrate_proposals),
+        # migrations.RunPython(migrate_invoices),
+        # migrations.RunPython(migrate_payments)
     ]
