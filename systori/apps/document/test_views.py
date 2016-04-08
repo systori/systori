@@ -1,17 +1,11 @@
-from datetime import timedelta, date
-from decimal import Decimal
-from unittest import skip
+from datetime import date
 
-from django.test import TestCase, Client
-from django.test.client import MULTIPART_CONTENT
 from django.utils import timezone
 from django.core.urlresolvers import reverse
-from django.conf import settings
 
-from ..accounting.models import Entry
+from systori.lib.testing import SystoriTestCase
 from ..accounting.forms import InvoiceForm, InvoiceFormSet
 from ..accounting.test_workflow import create_data, A
-from ..accounting.workflow import credit_jobs, debit_jobs
 from ..directory.models import Contact, ProjectContact
 from .forms import ProposalForm, ProposalFormSet
 from .models import Proposal, Invoice, Letterhead
@@ -42,9 +36,10 @@ def template_debug_output():
             print(html.unescape(line[1])[:-1])
 
 
-class DocumentTestCase(TestCase):
+class DocumentTestCase(SystoriTestCase):
 
     def setUp(self):
+        super().setUp()
         create_data(self)
         ProjectContact.objects.create(
             project=self.project,
@@ -52,17 +47,7 @@ class DocumentTestCase(TestCase):
             association=ProjectContact.CUSTOMER,
             is_billable=True
         )
-        self.client = Client()
         self.client.login(username=self.user.email, password='open sesame')
-
-    def client_get(self, path, data=None, follow=False, secure=False, **extra):
-        extra['HTTP_HOST'] = self.company.schema + '.' + settings.SERVER_NAME
-        return self.client.get(path, data, follow, secure, **extra)
-
-    def client_post(self, path, data=None, content_type=MULTIPART_CONTENT,
-             follow=False, secure=False, **extra):
-        extra['HTTP_HOST'] = self.company.schema + '.' + settings.SERVER_NAME
-        return self.client.post(path, data, content_type, follow, secure, **extra)
 
     def make_management_form(self):
         data = {}
@@ -95,19 +80,19 @@ class ProposalViewTests(DocumentTestCase):
         }
         data.update(self.make_management_form())
 
-        response = self.client_post(reverse('proposal.create', args=[self.project.id]), data)
+        response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
         self.assertEqual(302, response.status_code)
 
         # render
 
-        response = self.client_get(reverse('proposal.pdf', args=[
+        response = self.client.get(reverse('proposal.pdf', args=[
             self.project.id,
             'print',
             Proposal.objects.first().id
         ]), {'with_lineitems': True})
         self.assertEqual(200, response.status_code)
 
-        response = self.client_get(reverse('proposal.pdf', args=[
+        response = self.client.get(reverse('proposal.pdf', args=[
             self.project.id,
             'email',
             Proposal.objects.first().id
@@ -136,7 +121,7 @@ class ProposalViewTests(DocumentTestCase):
             'job-1-is_attached': 'True',
         }
         data.update(self.make_management_form())
-        response = self.client_post(reverse('proposal.update', args=[self.project.id, proposal.id]), data)
+        response = self.client.post(reverse('proposal.update', args=[self.project.id, proposal.id]), data)
         self.assertEqual(302, response.status_code)
         #self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
 
@@ -179,12 +164,12 @@ class InvoiceViewTests(DocumentTestCase):
             'job-1-debit_tax': '1',
         }
         data.update(self.make_management_form())
-        response = self.client_post(reverse('invoice.create', args=[self.project.id]), data)
+        response = self.client.post(reverse('invoice.create', args=[self.project.id]), data)
         self.assertEqual(302, response.status_code)
 
         # render
 
-        response = self.client_get(reverse('invoice.pdf', args=[
+        response = self.client.get(reverse('invoice.pdf', args=[
             self.project.id,
             'print',
             Invoice.objects.first().id
@@ -211,7 +196,7 @@ class InvoiceViewTests(DocumentTestCase):
             'job-1-debit_tax': '1',
         }
         data.update(self.make_management_form())
-        self.client_post(reverse('invoice.create', args=[self.project.id]), data)
+        self.client.post(reverse('invoice.create', args=[self.project.id]), data)
 
 
         data = {
@@ -233,7 +218,7 @@ class InvoiceViewTests(DocumentTestCase):
         }
         data.update(self.make_management_form())
         invoice = Invoice.objects.order_by('id').first()
-        response = self.client_post(reverse('invoice.update', args=[self.project.id, invoice.id]), data)
+        response = self.client.post(reverse('invoice.update', args=[self.project.id, invoice.id]), data)
         self.assertEqual(302, response.status_code)
         #self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
 
@@ -246,7 +231,7 @@ class InvoiceViewTests(DocumentTestCase):
 class EvidenceViewTests(DocumentTestCase):
 
     def test_generate_evidence(self):
-        response = self.client_get(reverse('evidence.pdf', args=[
+        response = self.client.get(reverse('evidence.pdf', args=[
             self.project.id
         ]))
         self.assertEqual(200, response.status_code)
@@ -257,7 +242,7 @@ class LetterheadCreateTests(DocumentTestCase):
     def test_post(self):
         letterhead_count = Letterhead.objects.count()
         with open('systori/apps/document/test_data/letterhead.pdf', 'rb') as lettehead_pdf:
-            response = self.client_post(
+            response = self.client.post(
                 reverse('letterhead.create'),
                 {
                     'document_unit': Letterhead.mm,
