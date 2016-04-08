@@ -6,6 +6,7 @@ django-ordered-model
 django-fsm
 django_mobile
 django-bootstrap-form
+djangorestframework==3.3.2
 
 geopy
 lxml
