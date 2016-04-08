@@ -34,4 +34,4 @@ ADD ./ /systori/
 # RUN pip3 install --upgrade pip
 RUN pip3 install -r ./requirements/docker.pip
 RUN pip2 install Fabric
-RUN fab get_dart
+RUN fab getdart
