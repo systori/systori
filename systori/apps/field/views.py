@@ -73,11 +73,18 @@ class FieldDashboard(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(FieldDashboard, self).get_context_data(**kwargs)
-        context.update({
-            'todays_plans': self.request.access.todays_plans.all(),
-            'previous_plans': self.request.access.dailyplans \
+        access = self.request.access
+        if access.is_fake:
+            todays_plans = previous_plans = []
+        else:
+            todays_plans = self.request.access.todays_plans.all()
+            previous_plans = self.request.access.dailyplans \
                 .filter(day__gt=days_ago(5)) \
-                .exclude(day=date.today()).all(),
+                .exclude(day=date.today()).all()
+
+        context.update({
+            'todays_plans': todays_plans,
+            'previous_plans': previous_plans,
             'timetracking_report': timetracking_utils.get_report(self.request.user),
             'timetracking_timer_duration': timetracking_utils.get_timer_duration(self.request.user)
         })
