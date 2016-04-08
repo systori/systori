@@ -3,7 +3,7 @@
 # Pre-populates all addresses and used by geocoding
 # for address-> lat/long coordinates.
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
+import os, sys
 
 DEFAULT_COUNTRY = "Deutschland"
 
@@ -40,6 +40,8 @@ SECRET_KEY = '8)-+y0f@(mb=!o9ov_g!+35s4ritax6jzmc*c04jo=6*5t_74&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+TESTING = 'test' in sys.argv
 
 ALLOWED_HOSTS = []
 

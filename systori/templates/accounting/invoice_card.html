@@ -10,20 +10,27 @@
   <table class="table">
   {% for job in invoice.json.jobs %}
     <tr>
+      <td>
+        {% if job.is_itemized %}
+          <span class="glyphicon glyphicon-list"></span>
+        {% else %}
+          <span class="glyphicon glyphicon-tag"></span>
+        {% endif %}
+      </td>
       <td>{{ job.name }}</td>
       <td style="text-align: right; white-space: nowrap;">{{ job.debit.net|money }}</td>
     </tr>
   {% endfor %}
     <tr style="text-align: right; white-space: nowrap;">
-      <td>{% trans "Net" %}:</td>
+      <td colspan="2">{% trans "Net" %}:</td>
       <td style="text-align: right; white-space: nowrap;">{{ invoice.json.debit.net|money }}</td>
     </tr>
     <tr style="text-align: right; white-space: nowrap;">
-      <td>{% trans "VAT" %} {{ TAX_RATE_DISPLAY }}:</td>
+      <td colspan="2">{% trans "VAT" %} {{ TAX_RATE_DISPLAY }}:</td>
       <td style="text-align: right; white-space: nowrap;">{{ invoice.json.debit.tax|money }}</td>
     </tr>
     <tr style="text-align: right; white-space: nowrap;">
-      <td>{% trans "Gross" %}:</td>
+      <td colspan="2">{% trans "Gross" %}:</td>
       <td name="debit_gross" style="font-weight: bold; text-align: right; white-space: nowrap;">{{ invoice.json.debit.gross|money }}</td>
     </tr>
   </table>

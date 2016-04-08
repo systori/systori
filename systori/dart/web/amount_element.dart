@@ -15,29 +15,14 @@ String amount_int_to_string(int amount) =>
 
 class Amount {
 
-    int net;
-    int tax;
+    final int net;
+    final int tax;
     int get gross => net + tax;
-    double tax_rate;
+    final double tax_rate;
 
     String get net_string => amount_int_to_string(net);
     String get tax_string => amount_int_to_string(tax);
     String get gross_string => amount_int_to_string(gross);
-
-    void set gross(int _gross) {
-        net = (_gross / (1+tax_rate)).round();
-        tax = _gross - net;
-    }
-
-    adjust_net(int _net) {
-        tax = gross - _net;
-        net = _net;
-    }
-
-    adjust_tax(int _tax) {
-        net = gross - _tax;
-        tax = _tax;
-    }
 
     Amount(this.net, this.tax, this.tax_rate);
 
@@ -47,12 +32,27 @@ class Amount {
         double.parse(rate)
     );
 
-    Amount.from_gross(int _gross, double _tax_rate) {
-        tax_rate = _tax_rate;
-        gross = _gross;
+    factory
+    Amount.from_gross(int gross, double tax_rate) {
+        var net = (gross / (1+tax_rate)).round();
+        var tax = gross - net;
+        return new Amount(net, tax, tax_rate);
     }
 
-    Amount.zeroed() { zero(); }
+    Amount zero() =>
+        new Amount(0, 0, tax_rate);
+
+    Amount adjust_net(int new_net) =>
+        new Amount(new_net, gross - new_net, tax_rate);
+
+    Amount adjust_tax(int new_tax) =>
+        new Amount(gross - new_tax, new_tax, tax_rate);
+
+    Amount adjust_gross(int new_gross) =>
+        new Amount.from_gross(new_gross, tax_rate);
+
+    Amount zero_negatives() =>
+        new Amount(net < 0 ? 0 : net, tax < 0 ? 0 : tax, tax_rate);
 
     Amount operator * (num multiple) =>
         new Amount((net * multiple).round(), (tax * multiple).round(), tax_rate);
@@ -63,11 +63,9 @@ class Amount {
     Amount operator + (Amount other) =>
         new Amount(net + other.net, tax + other.tax, tax_rate);
 
-    zero() { net = tax = 0; }
-
-    zero_negatives() {
-        if (net < 0) net = 0;
-        if (tax < 0) tax = 0;
+    bool operator == (Amount other) {
+        if (other == null) return false;
+        return net == other.net && tax == other.tax;
     }
 
 }
@@ -82,6 +80,8 @@ class AmountDivs {
     SpanElement _net_span_diff;
     SpanElement _tax_span_diff;
     SpanElement _gross_span_diff;
+
+    DivElement _percent_div;
 
     String _tax_rate;
 
@@ -106,7 +106,22 @@ class AmountDivs {
             span.text = value_str;
             span.classes.add('red');
         }
+    }
 
+    update_percent(double percent) {
+        _percent_div.classes.removeAll(['red', 'green', 'blue']);
+        int rounded = 0;
+        if (percent < 100) {
+            _percent_div.classes.add('blue');
+            rounded = percent.floor();
+        } else if (percent == 100.0) {
+            _percent_div.classes.add('green');
+            rounded = 100;
+        } else if (percent > 100) {
+            _percent_div.classes.add('red');
+            rounded = percent.ceil();
+        }
+        _percent_div.text = "${rounded}%";
     }
 
     cache_views(Element scope) {
@@ -116,6 +131,7 @@ class AmountDivs {
         _gross_span_diff = scope.querySelector(":scope>.amount-gross>.amount-diff");
         _net_span_diff = scope.querySelector(":scope>.amount-net>.amount-diff");
         _tax_span_diff = scope.querySelector(":scope>.amount-tax>.amount-diff");
+        _percent_div = scope.querySelector(":scope>.amount-percent");
         _tax_rate = scope.dataset['tax-rate'];
     }
 
@@ -158,12 +174,10 @@ abstract class AmountCell extends TableCellElement {
 
     AmountCell.created() : super.created();
 
-    update(Amount _amount);
+    update(Amount amount);
 
-    zero() {
-        amount.zero();
-        update(amount);
-    }
+    zero() => update(amount.zero());
+
 }
 
 
@@ -224,7 +238,7 @@ class AmountInputCell extends AmountCell with AmountInputs {
     gross_changed([Event _]) {
         int value = amount_string_to_int(_gross_input.value);
         var event = new AmountChangeEvent(AmountChangeType.GROSS, amount.gross, value);
-        amount.gross = value;
+        amount = amount.adjust_gross(value);
         _net_input.value = amount.net_string;
         _tax_input.value = amount.tax_string;
         controller.add(event);
@@ -233,7 +247,7 @@ class AmountInputCell extends AmountCell with AmountInputs {
     net_changed([Event _]) {
         int value = amount_string_to_int(_net_input.value);
         var event = new AmountChangeEvent(AmountChangeType.NET, amount.net, value);
-        amount.adjust_net(value);
+        amount = amount.adjust_net(value);
         _tax_input.value = amount.tax_string;
         _gross_input.value = amount.gross_string;
         controller.add(event);
@@ -242,7 +256,7 @@ class AmountInputCell extends AmountCell with AmountInputs {
     tax_changed([Event _]) {
         int value = amount_string_to_int(_tax_input.value);
         var event = new AmountChangeEvent(AmountChangeType.TAX, amount.tax, value);
-        amount.adjust_tax(value);
+        amount = amount.adjust_tax(value);
         _net_input.value = amount.net_string;
         _gross_input.value = amount.gross_string;
         controller.add(event);

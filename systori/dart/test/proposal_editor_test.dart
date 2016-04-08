@@ -1,6 +1,6 @@
 import 'dart:html';
 import 'package:test/test.dart';
-import '../web/editor.dart';
+import '../web/proposal_editor.dart';
 
 void main() {
   

@@ -85,6 +85,15 @@ td[is=amount-input]>input.amount-tax {
   width: 90px;
 }
 
+td[is=amount-input]>textarea.amount-comment {
+  opacity: 1;
+  height: 100px;
+  width: 100%;
+  background-color: inherit;
+  transition: all 0.5s ease 0.15s;
+  margin-top: 8px;
+}
+
 
 td[is=amount-view],
 td[is=amount-stateful] {
@@ -157,8 +166,14 @@ td[is=amount-stateful]>div.amount-percent {
   font-weight: bold;
 }
 
-td[is=amount-view].clickable:hover>div,
+td[is=amount-view].clickable:hover,
 td[is=amount-stateful].clickable:hover {
   cursor: pointer;
+}
+
+td[is=amount-view].clickable:hover>div,
+td[is=amount-view].selected>div,
+td[is=amount-stateful].clickable:hover>div,
+td[is=amount-stateful].selected>div {
   background-color: #e6e6e6;
 }

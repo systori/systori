@@ -76,6 +76,9 @@ def serialize(refund_obj, data):
 
         'jobs': data['jobs'],
 
+        'paid_total': data['paid_total'],
+        'invoiced_total': data['invoiced_total'],
+        'progress_total': data['progress_total'],
         'refund_total': data['refund_total'],
         'credit_total': data['credit_total'],
         'customer_refund': data['customer_refund']

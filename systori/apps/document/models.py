@@ -78,7 +78,7 @@ class Invoice(Document):
 
     letterhead = models.ForeignKey('document.Letterhead', related_name="invoice_documents")
 
-    invoice_no = models.CharField(_("Invoice No."), max_length=30)
+    invoice_no = models.CharField(_("Invoice No."), max_length=30, unique=True)
     project = models.ForeignKey("project.Project", related_name="invoices")
     parent = models.ForeignKey("self", related_name="invoices", null=True)
 
@@ -127,6 +127,11 @@ class Invoice(Document):
         else:
             return Decimal("0")
 
+    def delete(self, **kwargs):
+        if self.transaction:
+            self.transaction.delete()
+        super().delete(**kwargs)
+
 
 class Adjustment(Document):
 
@@ -141,6 +146,11 @@ class Adjustment(Document):
 
     def __str__(self):
         return '{} {}'.format(self.__class__.__name__, self.created_on)
+
+    def delete(self, **kwargs):
+        if self.transaction:
+            self.transaction.delete()
+        super().delete(**kwargs)
 
 
 class Payment(Document):
@@ -158,6 +168,11 @@ class Payment(Document):
     def __str__(self):
         return '{} {}'.format(self.__class__.__name__, self.created_on)
 
+    def delete(self, **kwargs):
+        if self.transaction:
+            self.transaction.delete()
+        super().delete(**kwargs)
+
 
 class Refund(Document):
     letterhead = models.ForeignKey('document.Letterhead', related_name="refund_documents")
@@ -172,6 +187,11 @@ class Refund(Document):
 
     def __str__(self):
         return '{} {}'.format(self.__class__.__name__, self.created_on)
+
+    def delete(self, **kwargs):
+        if self.transaction:
+            self.transaction.delete()
+        super().delete(**kwargs)
 
 
 class SampleContact:
