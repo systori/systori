@@ -11,7 +11,7 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq fabric language-pack-de
   - sudo dpkg-reconfigure locales
-  - fab get_dart
+  - fab getdart
   - export DART_SDK="$HOME/bin/dart-sdk"
   - export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
 
@@ -20,7 +20,7 @@ install:
   - pip install --upgrade -r requirements/dev.pip
 
 before_script:
-  - fab init_settings:env_name=travis
+  - fab initsettings:envname=travis
   - cd systori/dart && pub get && pub build && cd ../..
 
 script:
@@ -36,7 +36,7 @@ branches:
     - dev
 
 notifications:
-  hipchat: c0d0f5b33bd732300040609176b55c@systori
+  slack: systori:Hj5NuE5GaaevsMu4sPygW4vE
   email: false
 
 addons:

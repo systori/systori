@@ -1,12 +1,12 @@
 import os
 import sys
-from distutils.version import LooseVersion as V
+from distutils.version import LooseVersion as _V
 from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
 
 from version import VERSION
 
 
-version = V(VERSION)
+version = _V(VERSION)
 
 
 env.hosts = ['systori.com']
@@ -22,16 +22,17 @@ PROD_MEDIA_PATH = '/srv/systori/production'
 PROD_MEDIA_FILE = 'systori.media.tgz'
 
 
-def deploy(env_name='dev'):
+def deploy(envname='dev'):
+    ":envname=dev -- deploy code to remote server"
     env.user = 'ubrblik'
 
-    for app in deploy_apps[env_name]:
+    for app in deploy_apps[envname]:
 
         sudo('service uwsgi stop systori_' + app)
 
         with cd('/srv/systori/' + app + '/systori'):
 
-            if env_name == 'dev':
+            if envname == 'dev':
                 # load production db
                 sudo('dropdb systori_dev', user='www-data')
                 sudo('createdb systori_dev', user='www-data')
@@ -46,41 +47,44 @@ def deploy(env_name='dev'):
                 run('/usr/lib/dart/bin/pub build')
 
             with prefix('source ../bin/activate'):
-                run('pip install -q -U -r requirements/%s.pip' % env_name)
+                run('pip install -q -U -r requirements/%s.pip' % envname)
                 sudo('./manage.py migrate --noinput', user='www-data')
-                #sudo('psql -f reset_migrations.sql systori_production', user='www-data')
-                #sudo('./manage.py migrate --noinput --fake', user='www-data')
                 run('./manage.py collectstatic --noinput --verbosity 0')
 
         sudo('service uwsgi start systori_' + app)
 
 
-def _reset_localdb():
-    local('dropdb systori_local')
-    local('createdb systori_local')
+def makemessages():
+    "django makemessages"
+    local('./manage.py makemessages -l de -e tex,html,py')
 
 
-def fetch_db(env_name='production'):
-    dbname = 'systori_'+env_name
-    dump_file = 'systori.'+env_name+'.dump'
+def test():
+    "django test"
+    local('./manage.py test --keepdb systori')
+
+
+def fetchdb(envname='production'):
+    ":envname=production -- fetch remote database, see getdb"
+    dbname = 'systori_'+envname
+    dump_file = 'systori.'+envname+'.dump'
     # -Fc : custom postgresql compressed format
     sudo('pg_dump -Fc -x -f /tmp/%s %s' % (dump_file, dbname), user='www-data')
     get('/tmp/' + dump_file, dump_file)
     sudo('rm /tmp/' + dump_file)
 
 
-def load_db(env_name):
-    _reset_localdb()
-    local('pg_restore -d systori_local -O systori.'+env_name+'.dump')
+def getdb(envname='production'):
+    ":envname=production -- fetch and load remote database"
+    fetchdb(envname)
+    local('dropdb systori_local')
+    local('createdb systori_local')
+    local('pg_restore -d systori_local -O systori.'+envname+'.dump')
+    local('rm systori.'+envname+'.dump')
 
 
-def get_db(env_name='production'):
-    fetch_db(env_name)
-    load_db(env_name)
-    local('rm systori.'+env_name+'.dump')
-
-
-def get_media():
+def getmedia():
+    "download production media files"
     with cd(PROD_MEDIA_PATH):
         run('tar -cz media -f /tmp/' + PROD_MEDIA_FILE)
     get('/tmp/' + PROD_MEDIA_FILE, PROD_MEDIA_FILE)
@@ -89,38 +93,37 @@ def get_media():
     run('rm /tmp/' + PROD_MEDIA_FILE)
 
 
-def docker_get_db(container_name='web', env_name='production'):
-    dump_file = 'systori.'+env_name+'.dump'
+def dockergetdb(container='web', envname='production'):
+    ":container=web,envname=production -- fetch and load remote database"
+    dump_file = 'systori.'+envname+'.dump'
     settings = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'HOST': 'db_1'
     }
-    fetch_db(env_name)
+    fetchdb(envname)
     local('docker-compose run {0} dropdb -h {HOST} -U {USER} {NAME}'.format(
-        container_name, **settings))
+        container, **settings))
     local('docker-compose run {0} createdb -h {HOST} -U {USER} {NAME}'.format(
-        container_name, **settings))
+        container, **settings))
     local('docker-compose run {0} pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(
-        container_name, dump_file, **settings))
+        container, dump_file, **settings))
     local('rm ' + dump_file)
 
 
-def init_settings(env_name='local'):
-    assert env_name in ['dev', 'production', 'local', 'travis']
+def initsettings(envname='local'):
+    ":envname=local -- creates __init__.py in settings folder"
+    assert envname in ['dev', 'production', 'local', 'travis']
     if os.path.exists('systori/settings/__init__.py'):
         print('Settings have already been initialized.')
     else:
         with open('systori/settings/__init__.py', 'w') as s:
-            print('Initializing settings for {}'.format(env_name))
-            s.write('from .{} import *\n'.format(env_name))
+            print('Initializing settings for {}'.format(envname))
+            s.write('from .{} import *\n'.format(envname))
 
 
-def make_messages():
-    local('./manage.py makemessages -l de -e tex,html,py')
-
-
-def get_dart():
+def getdart():
+    "download latest version of dart"
     is_64bits = sys.maxsize > 2**32
     BIN_DIR = os.path.expanduser('~/bin')
     if not os.path.exists(BIN_DIR):
@@ -145,7 +148,8 @@ export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
             file_handle.write(env_lines)
 
 
-def link_dart():
+def linkdart():
+    "create .packages file"
     with open('systori/dart/.packages', 'r') as packages:
         for package in packages:
             if package.startswith('#'):
@@ -158,120 +162,18 @@ def link_dart():
                 print exc
 
 
-def make_dart():
+def makedart():
+    "build dart packages in debug mode"
     with lcd('systori/dart'):
         local('pub build --mode=debug')
 
 
-def test_dart():
+def testdart():
+    "run dart tests"
     with lcd('systori/dart'):
-        local('pub run test:test -r expanded -p content-shell test')
-
-def get_bitbucket_login():
-    try:
-        user, password = open('bitbucket.login').read().split(':')
-        return user.strip(), password.strip()
-    except:
-        print
-        'Bitbucket API requires your user credentials'
-        user = raw_input('Username: ') or exit(1)
-        password = raw_input('Password: ') or exit(1)
-        saved = '{}:{}'.format(user, password)
-        open('bitbucket.login', 'w').write(saved)
-        return user, password
-
-
-REPO = 'https://api.bitbucket.org/1.0/repositories/damoti/systori/'
-
-
-def current_issues():
-    import requests
-    r = requests.get(REPO + 'issues?status=new', auth=get_bitbucket_login())
-    print
-    r.status_code
-    print
-    r.text
+        local('pub run test -r expanded -p content-shell test')
 
 
 def mail():
+    "start mail debugging server"
     local('python -m smtpd -n -c DebuggingServer localhost:1025')
-
-
-# Git Workflow
-# See: http://nvie.com/posts/a-successful-git-branching-model/
-
-
-def bump_version(ver):
-    with file('version.py', 'w') as f:
-        f.write('VERSION = \'%s\'' % ver)
-    print('Bumped version number to %s' % ver)
-
-
-def feature_start(name):
-    "fab feature_start:name=my_new_feature"
-    local('git checkout -b %s dev' % name)
-
-
-def feature_finish(name):
-    "fab feature_finish:name=my_new_feature"
-    local('git checkout dev')
-    local('git merge --no-ff %s' % name)
-    local('git branch -d %s' % name)
-    local('git push origin dev')
-
-
-def release_start(ver):
-    branch = 'release-%s' % ver
-    local('git checkout -b %s dev' % branch)
-    if VERSION != ver:
-        bump_version(ver)
-    with settings(warn_only=True):
-        local('git commit -a -m "bumped version number to %s"' % ver)
-    local('git push origin %s' % branch)
-
-
-def release_finish():
-    _merge_this()
-
-
-def hotfix_start(bump='yes'):
-    sub_number = version.version[1] + (bump == 'yes' and 1 or 0)
-    new_ver = '%s.%s' % (version.version[0], sub_number)
-    local('git checkout -b hotfix-%s master' % new_ver)
-    if bump == 'bump':
-        bump_version(new_ver)
-        local('git commit version.py -m "bumped version number to %s"' % new_ver)
-
-
-def hotfix_finish():
-    _merge_this()
-
-
-def _merge_this():
-    '''
-    Merge current branch into both master and dev branches, then delete it.
-    Meant to be called from commands
-    '''
-    # Parsing branch version: (release|hotfix)-<major>.<minor>
-    branch = local('git rev-parse --abbrev-ref HEAD', capture=True).rstrip()
-    if branch in ('master', 'dev'):
-        abort('''Your current branch is %s, which is one of the main branches. 
-            Try checking out your hotfix/release branch.''' % branch)
-    # Trying to figure out version from current branch name
-    ver = branch.split('-')
-    ver = len(ver) > 1 and ver[-1] or None
-    # Merging into prod branch
-    local('git checkout master')
-    local('git merge --no-ff %s' % branch)
-    if ver:
-        # Updating prod branch tag
-        local('git tag -a -f -m "{v}" {v}'.format(v=ver))
-    local('git push')
-    # Merging into dev
-    local('git checkout dev')
-    local('git merge --no-ff %s' % branch)
-    # Killing this branch
-    with settings(warn_only=True):
-        local('git push origin :%s' % branch)
-    local('git branch -d %s' % branch)
-    local('git push')
