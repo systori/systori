@@ -171,7 +171,7 @@ def makedart():
 def testdart():
     "run dart tests"
     with lcd('systori/dart'):
-        local('pub run test:test -r expanded -p content-shell test')
+        local('pub run test -r expanded -p content-shell test')
 
 
 def mail():

@@ -8,12 +8,7 @@ void main() { payment_editor.main();
 
     group("PaymentTable", () {
 
-        test("is registered", () {
-            PaymentSplitTable table = querySelector("table");
-            expect(table.rows.length, equals(2));
-        });
-
-        InputElement amount_input = querySelector('#id_amount');
+        InputElement amount_input = querySelector('#id_payment');
         SelectElement discount_input = querySelector('#id_discount');
         PaymentSplitTable table = querySelector("table");
 
@@ -23,28 +18,33 @@ void main() { payment_editor.main();
             table.auto_split();
         });
 
+        test("is registered", () {
+            PaymentSplitTable table = querySelector("table");
+            expect(table.rows.length, equals(2));
+        });
+
         test("auto_split()", () {
 
             amount_input.value = '500,00';
 
             PaymentSplit row = table.rows.first;
 
-            expect(row.payment_cell.amount.net_string, equals('0,00'));
-            expect(row.payment_cell.amount.tax_string, equals('0,00'));
-            expect(row.payment_cell.amount.gross_string, equals('0,00'));
+            expect(row.split_cell.amount.net_string, equals('0,00'));
+            expect(row.split_cell.amount.tax_string, equals('0,00'));
+            expect(row.split_cell.amount.gross_string, equals('0,00'));
 
             table.auto_split();
 
-            expect(row.payment_cell.amount.net_string, equals('388,80'));
-            expect(row.payment_cell.amount.tax_string, equals('91,20'));
-            expect(row.payment_cell.amount.gross_string, equals('480,00'));
+            expect(row.split_cell.amount.net_string, equals('388,80'));
+            expect(row.split_cell.amount.tax_string, equals('91,20'));
+            expect(row.split_cell.amount.gross_string, equals('480,00'));
             expect(row.discount_cell.amount.net_string, equals('0,00'));
             expect(row.discount_cell.amount.tax_string, equals('0,00'));
             expect(row.discount_cell.amount.gross_string, equals('0,00'));
             row = table.rows[1];
-            expect(row.payment_cell.amount.net_string, equals('16,81'));
-            expect(row.payment_cell.amount.tax_string, equals('3,19'));
-            expect(row.payment_cell.amount.gross_string, equals('20,00'));
+            expect(row.split_cell.amount.net_string, equals('16,81'));
+            expect(row.split_cell.amount.tax_string, equals('3,19'));
+            expect(row.split_cell.amount.gross_string, equals('20,00'));
             expect(row.discount_cell.amount.net_string, equals('0,00'));
             expect(row.discount_cell.amount.tax_string, equals('0,00'));
             expect(row.discount_cell.amount.gross_string, equals('0,00'));
@@ -58,22 +58,22 @@ void main() { payment_editor.main();
 
             PaymentSplit row = table.rows.first;
 
-            expect(row.payment_cell.amount.net_string, equals('0,00'));
-            expect(row.payment_cell.amount.tax_string, equals('0,00'));
-            expect(row.payment_cell.amount.gross_string, equals('0,00'));
+            expect(row.split_cell.amount.net_string, equals('0,00'));
+            expect(row.split_cell.amount.tax_string, equals('0,00'));
+            expect(row.split_cell.amount.gross_string, equals('0,00'));
 
             table.auto_split();
 
-            expect(row.payment_cell.amount.net_string, equals('384,91'));
-            expect(row.payment_cell.amount.tax_string, equals('90,29'));
-            expect(row.payment_cell.amount.gross_string, equals('475,20'));
+            expect(row.split_cell.amount.net_string, equals('384,91'));
+            expect(row.split_cell.amount.tax_string, equals('90,29'));
+            expect(row.split_cell.amount.gross_string, equals('475,20'));
             expect(row.discount_cell.amount.net_string, equals('3,89'));
             expect(row.discount_cell.amount.tax_string, equals('0,91'));
             expect(row.discount_cell.amount.gross_string, equals('4,80'));
             row = table.rows[1];
-            expect(row.payment_cell.amount.net_string, equals('20,84'));
-            expect(row.payment_cell.amount.tax_string, equals('3,96'));
-            expect(row.payment_cell.amount.gross_string, equals('24,80'));
+            expect(row.split_cell.amount.net_string, equals('20,84'));
+            expect(row.split_cell.amount.tax_string, equals('3,96'));
+            expect(row.split_cell.amount.gross_string, equals('24,80'));
             expect(row.discount_cell.amount.net_string, equals('0,21'));
             expect(row.discount_cell.amount.tax_string, equals('0,04'));
             expect(row.discount_cell.amount.gross_string, equals('0,25'));
@@ -86,7 +86,7 @@ void main() { payment_editor.main();
             discount_input.selectedIndex = 1;
             table.auto_split();
 
-            Amount payment_total = table.payment_gross_total.amount;
+            Amount payment_total = table.split_gross_total.amount;
             expect(payment_total.net_string, equals('405,75'));
             expect(payment_total.tax_string, equals('94,25'));
             expect(payment_total.gross_string, equals('500,00'));

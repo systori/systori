@@ -15,8 +15,7 @@ void main() {
             expect(a.gross_string, equals("1.190,00"));
         });
         test("update_gross()", () {
-            Amount a = new Amount(0, 0, 0.19);
-            a.gross = 23800;
+            var a = new Amount.from_gross(23800, 0.19);
             expect(a.net, equals(20000));
             expect(a.tax, equals(3800));
             expect(a.gross, equals(23800));

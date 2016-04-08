@@ -27,7 +27,7 @@
 <meta name="msapplication-TileImage" content="/static/img/favicon/mstile-144x144.png">
 <meta name="theme-color" content="#ffffff">
 
-    <title>Test Project > Test Job</title>
+    <title>Test Project</title>
 
     
     <link rel="stylesheet" href="/static/css/jquery-ui.css">
@@ -58,17 +58,20 @@
           <ul class="nav navbar-nav">
             <li class="dropdown">
               
-                <a class="navbar-brand" href="#">NKBtpKNEjUotAdx</a>
+                <a class="navbar-brand" href="#">OpmADOuwmcXuZje</a>
               
             </li>
+            
             <li><a href="/projects/">Projekte</a></li>
             
-  <li><a href="/project-2">Test Project</a></li>
-  <li class="active"><a href="/project-2/job-1/tasks">Test Job</a></li>
+            
+  <li class="active"><a href="/project-2">Test Project
+    <small>(angehend)</small>
+  </a></li>
 
           </ul>
 
-          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='dQ8B8UEBqY6Pz2NcwrasH4VKtWfrzZ7R' />
+          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='NrnY6PYOwv6wUJ5ITfTKv7FcG8eXSgj2' />
           <input type="hidden" name="language" value=""/>
         </form>
 
@@ -80,7 +83,7 @@
 
 
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">jarfuhEfIUEtxku <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">dMfZInNFbmwxJSw <b class="caret"></b></a>
             <ul class="dropdown-menu">
               <li><a href="/settings">Einstellungen</a></li>
               <li><a href="/logout">Abmelden</a></li>
@@ -115,28 +118,16 @@
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
         
-  <style>
-    @media (max-width: 1269px) {
-      .sidebar {
-        display: none;
-      }
-
-      .main {
-        margin-left: 0px;
-      }
-    }
-  </style>
-  
 
 
   <ul class="nav nav-sidebar">
     <li ><a
         href="/project-2">Projektkarte</a></li>
-    <li class="active"><a
+    <li ><a
         href="/project-2#jobs">Lose</a></li>
     <li ><a
         href="/project-2/plan">Plan</a></li>
-    <li ><a
+    <li class="active"><a
         href="/project-2#proposals">Angebote</a></li>
     <li ><a
         href="/project-2#invoices">Rechnungen</a></li>
@@ -144,521 +135,273 @@
         href="/project-2#contacts">Kontakte</a></li>
   </ul>
 
-
       </div>
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         
-  <style>
+  <form role="form" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='NrnY6PYOwv6wUJ5ITfTKv7FcG8eXSgj2' />
 
-    #task-editor {
-    }
-
-    .main {
-      margin-bottom:250px;
-    }
-
-    ubr-taskgroup,
-    ubr-task,
-    ubr-taskinstance,
-    ubr-lineitem {
-      display: block;
-      position: relative;
-    }
-
-    .editor {
-      position: relative;
-      padding-bottom: 10px;
-    }
-
-    .editor-row {
-      display: -webkit-flex;
-      display: flex;
-    }
-
-    /* task group & task */
-
-    .code {
-      width: 80px;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    .description {
-      margin-left: 80px;
-      padding-right: 10px;
-      width: 612px;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    .qty {
-      width: 90px;
-      text-align: right;
-      align-self: flex-end;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    .unit {
-      width: 90px;
-      padding-left: 4px;
-      align-self: flex-end;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    .price {
-      width: 90px;
-      text-align: right;
-      padding-right: 4px;
-      align-self: flex-end;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    .total {
-      width: 90px;
-      font-weight: bold;
-      text-align: right;
-      padding-right: 4px;
-      margin-left: 10px;
-      align-self: flex-end;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    .labels {
-      padding-left: 20px;
-      align-self: flex-end;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    .labels > .label:hover {
-      cursor: pointer;
-    }
-
-    .labels > .label.False {
-      display: none;
-      background-color: #F0F0F0;
-    }
-
-    .editor:hover > .editor-row > .labels > .label.False {
-      display: inline;
-    }
-
-    /* task group */
-
-    ubr-taskgroup > .editor .name {
-      font-weight: bold;
-      width: 700px;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    ubr-taskgroup > .editor .total {
-      width: 100px;
-      border: 1px solid black;
-      background-color: #fff;
-      z-index: 2;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    ubr-taskgroup:not(.empty) > .editor:after {
-      display: block;
-      position: absolute;
-      content: "";
-      border-left: 1px solid #e9e9e9;
-      top: 0px;
-      bottom: 0px;
-      left: 791px;
-      z-index: 1;
-    }
-
-    /* task */
-
-    ubr-task:not(:last-child):after {
-      display: block;
-      position: absolute;
-      content: "";
-      border-left: 1px solid #e9e9e9;
-      top: 0px;
-      bottom: 0px;
-      left: 791px;
-      z-index: 1;
-    }
-
-    ubr-task > .editor {
-      padding-bottom: 0px;
-    }
-
-    ubr-task > .editor .code {
-      padding-left: 10px;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    ubr-task > .editor .name {
-      width: 420px;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    ubr-task > .editor .price {
-      position: relative;
-      font-weight: bold;
-      border: 1px solid black;
-      margin-left: 10px;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    ubr-task > .editor .price:before {
-      display: block;
-      position: absolute;
-      content: "x";
-      width: 180px;
-      height: 1px;
-      padding-right: 2px;
-      border-top: 1px solid #e9e9e9;
-      top: -1px;
-      left: -181px;
-      color: #e9e9e9;
-      font-size: 8px;
-      text-align: right;
-    }
-
-    ubr-task > .editor .price:after {
-      display: block;
-      position: absolute;
-      content: "=";
-      width: 10px;
-      padding-left: 2px;
-      border-top: 1px solid #e9e9e9;
-      top: 1px;
-      right: -11px;
-      color: #e9e9e9;
-      font-size: 8px;
-      text-align: left;
-    }
-
-    ubr-task > .editor .total {
-      width: 100px;
-      border: 1px solid #e9e9e9;
-      background-color: #fff;
-      z-index: 2;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    ubr-task > .editor .total:before {
-      display: block;
-      position: absolute;
-      content: "+";
-      height: 10px;
-      top: -10px;
-      color: #e9e9e9;
-      font-size: 9px;
-      text-align: left;
-      padding-left: 2px;
-    }
-
-    ubr-task > .editor .description {
-      padding-bottom: 15px;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    ubr-task:not(.empty) > .editor .description {
-      padding-bottom: 20px;
-      border-right: 1px solid #e9e9e9;
-    }
-
-    /* task instance */
-
-    ubr-taskinstance > .editor .name {
-      width: 612px;
-      padding-right: 10px;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    ubr-taskinstance:nth-of-type(1) > .editor {
-      width: 692px;
-      border-right: 1px solid #e9e9e9;
-    }
-
-    ubr-taskinstance:nth-of-type(1) > ubr-lineitem > .editor .total {
-      border: 1px solid #e9e9e9;
-    }
-
-    ubr-taskinstance:nth-of-type(1) > ubr-lineitem > .editor .total:before {
-      display: block;
-      position: absolute;
-      content: "+";
-      height: 10px;
-      border-left: 1px solid #e9e9e9;
-      top: -10px;
-      color: #e9e9e9;
-      font-size: 9px;
-      text-align: left;
-      padding-left: 2px;
-    }
-
-    ubr-taskinstance:last-of-type {
-      padding-bottom: 40px;
-    }
-
-    ubr-taskinstance:only-of-type > .editor {
-      display: none;
-    }
-
-    /* line item */
-
-    ubr-lineitem .name {
-      width: 310px;
-      margin-left: 100px;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    ubr-lineitem .price {
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-    }
-
-    ubr-lineitem > a {
-      position: absolute;
-      top: -150px;
-    }
-
-    div[contenteditable][placeholder]:empty:before {
-      content: attr(placeholder);
-      font-style: italic;
-      color: #d9d9d9;
-    }
-
-    div[contenteditable][placeholder]:empty:focus:before {
-      content: "";
-    }
-
-    ubr-autocomplete {
-      z-index: 100;
-      display: none;
-      position: absolute;
-      background: white;
-      left: 80px;
-      width: 480px;
-      border: 1px solid lightgrey;
-      top: 20px;
-      -webkit-transition: top 0.1s;
-      -moz-transition: top 0.1s;
-      -ms-transition: top 0.1s;
-      -o-transition: top 0.1s;
-      transition: top 0.1s;
-    }
-
-    ubr-autocomplete > div {
-      border-bottom: 1px solid lightgrey;
-    }
-
-    /*
-    ubr-autocomplete > div:hover {
-      background: #FFE8D9;
-      cursor: pointer;
-    }
-    */
-
-    ubr-autocomplete > div.active {
-      background: orange;
-    }
-
-    #mode-selector {
-      position: fixed;
-      top: 60px;
-      right: 10px;
-    }
-
-    .editor-hint {
-      color: silver;
-      font-style: italic;
-      font-size: 85%;
-      display: none;
-      margin-top: 4px;
-      margin-left: 80px;
-      margin-bottom: 10px;
-    }
-
-    .editor-hint > .label-default {
-      background-color: silver;
-    }
-
-    .editor-hint .hidden {
-      display: none;
-    }
-
-    ubr-lineitem .editor-hint {
-      margin-left: 100px;
-    }
-
-    .job-total-row {
-      width: 900px;
-      margin-bottom: 10px;
-    }
+    <h2 class="sub-header">Angebot</h2>
     
-    .job-total-label {
-      width: 780px;
-      display: inline-block;
-      font-weight: bold;
-      text-align: right;
-    }
-
-    .job-total, .job-total-gross {
-      text-align: right;
-      display: inline-block;
-      border-top: 2px solid black;
-      font-weight: bold;
-      margin-left: 10px;
-      width: 100px;
-    }
 
 
-  </style>
 
-  <div id="mode-selector" class="btn-group-vertical" data-toggle="buttons">
-    <label id="input-task-mode" class="btn btn-default btn-sm"
-           title="Nur Positionen erstellen.">
-      <input type="radio" name="input-mode"><span class="glyphicon glyphicon-step-forward"></span>
-    </label>
-    <label id="input-lineitem-mode" class="btn btn-default btn-sm active"
-           title="Positionen mit Kalkulation erstellen.">
-      <input type="radio" name="input-mode"><span class="glyphicon glyphicon-fast-forward"></span>
-    </label>
+
+    
+
+<div class="form-group">
+    
+        
+            <label class="control-label  " for="id_doc_template">Doc template</label>
+        
+
+        <div class=" ">
+            <select class=" form-control" id="id_doc_template" name="doc_template">
+<option value="" selected="selected">---------</option>
+</select>
+
+            
+
+            
+        </div>
+    
+</div>
+
+
+    
+
+<div class="form-group">
+    
+        
+            <label class="control-label  " for="id_document_date">Datum</label>
+        
+
+        <div class=" ">
+            <input class=" form-control" id="id_document_date" name="document_date" type="date" value="2016-04-08" /><input id="initial-id_document_date" name="initial-document_date" type="hidden" value="2016-04-08" />
+
+            
+
+            
+        </div>
+    
+</div>
+
+
+    
+
+<div class="form-group">
+    
+        
+            <label class="control-label  " for="id_title">Titel</label>
+        
+
+        <div class=" ">
+            <input class=" form-control" id="id_title" name="title" type="text" value="Angebot" />
+
+            
+
+            
+        </div>
+    
+</div>
+
+
+    
+
+<div class="form-group">
+    
+        
+            <label class="control-label  " for="id_header">Header</label>
+        
+
+        <div class=" ">
+            <textarea class=" form-control" cols="40" id="id_header" name="header" rows="10">
+</textarea>
+
+            
+
+            
+        </div>
+    
+</div>
+
+
+    
+
+<div class="form-group">
+    
+        
+            <label class="control-label  " for="id_footer">Footer</label>
+        
+
+        <div class=" ">
+            <textarea class=" form-control" cols="40" id="id_footer" name="footer" rows="10">
+</textarea>
+
+            
+
+            
+        </div>
+    
+</div>
+
+
+    
+
+<div class="form-group">
+    
+        <div class="">
+            <div class="checkbox">
+                
+                    <label >
+                        <input checked="checked" id="id_add_terms" name="add_terms" type="checkbox" /> <span>AGBs hinzufügen</span>
+                    </label>
+                
+                
+
+                
+            </div>
+        </div>
+    
+</div>
+
+
+    
+
+<div class="form-group">
+    
+        
+            <label class="control-label  " for="id_notes">Notizen</label>
+        
+
+        <div class=" ">
+            <textarea class=" form-control" cols="40" id="id_notes" name="notes" rows="10">
+</textarea>
+
+            
+
+            
+        </div>
+    
+</div>
+
+
+
+
+    <div class="">
+
+      <style>
+
+        .proposal-row:not(.is-attached) {
+          color: lightgray;
+        }
+
+        tr > .job-name {
+          min-width: 180px !important;
+        }
+
+      </style>
+
+      <h2 class="sub-header">Lose</h2>
+      <div class="form-group  table-responsive">
+      <input id="id_job-TOTAL_FORMS" name="job-TOTAL_FORMS" type="hidden" value="2" /><input id="id_job-INITIAL_FORMS" name="job-INITIAL_FORMS" type="hidden" value="2" /><input id="id_job-MIN_NUM_FORMS" name="job-MIN_NUM_FORMS" type="hidden" value="0" /><input id="id_job-MAX_NUM_FORMS" name="job-MAX_NUM_FORMS" type="hidden" value="1000" />
+      <table is="proposal-table" class="table table-striped" data-tax-rate="0.19">
+        <thead>
+        <tr>
+          <th class="job-is-attached"></th>
+          <th class="job-status">Status</th>
+          <th class="job-name">Los</th>
+          <th class="job-estimate">angeboten</th>
+        </tr>
+        </thead>
+        <tbody>
+        
+          <tr is="proposal-row" class="proposal-row ">
+            <td class="job-is-attached">
+              
+                <input id="id_job-0-is_attached" name="job-0-is_attached" type="checkbox" />
+              
+            </td>
+            <td class="job-status">Entwurf</td>
+            <td class="job-name"><input id="id_job-0-job" name="job-0-job" type="hidden" value="1" />0 Test Job</td>
+            
+<td is="amount-view" class="job-estimate" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
   </div>
-
-  <ubr-job id="task-editor"
-           data-pk="1"
-           data-code="0"
-           data-taskgroup-offset="0"
-           data-taskgroup-zfill="1"
-           data-task-zfill="1">
-
-    
-      <ubr-taskgroup
-    
-    class="empty">
+  <div class="amount-net bold">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-percent "></div>
   
-<div class="editor">
-  <div class="editor-row">
-    <div class="code">0.1</div>
-    <div class="name" placeholder="Positionsgruppe" contenteditable></div>
-    <div class="total">0,00</div>
+</td>
+
+          </tr>
+        
+          <tr is="proposal-row" class="proposal-row ">
+            <td class="job-is-attached">
+              
+                <input id="id_job-1-is_attached" name="job-1-is_attached" type="checkbox" />
+              
+            </td>
+            <td class="job-status">Entwurf</td>
+            <td class="job-name"><input id="id_job-1-job" name="job-1-job" type="hidden" value="2" />1 Test Job</td>
+            
+<td is="amount-view" class="job-estimate" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
   </div>
-  <div class="description" placeholder="Beschreibung" contenteditable></div>
-  <div class="editor-hint">
-    <span class="label label-default">Shift </span> <span class="label label-default">Entf</span> dieses Element löschen
-    <br>
-    <span class="label label-default">Shift </span> <span class="label label-default">Enter</span> neue Position
+  <div class="amount-net bold">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
   </div>
-</div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-percent "></div>
   
-</ubr-taskgroup>
-    
+</td>
 
-    <div class="job-total-row">
-      <div class="job-total-label">Summe</div>
-      <div class="job-total">0,00</div>
+          </tr>
+        
+        <tr class="proposal-table-totals">
+          <td colspan="3"></td>
+          
+<td is="amount-view" class="job-estimate" data-tax-rate="0.19">
+  <div class="amount-gross">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-net bold">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-tax">
+    <span class="amount-diff "></span>
+    <span class="amount-value">0,00</span>
+  </div>
+  <div class="amount-percent "></div>
+  
+</td>
+
+        </tr>
+        </tbody>
+      </table>
+      </div>
+      
     </div>
 
-    <div class="job-total-row">
-      <div class="job-total-label">inkl. MWSt 19,00%</div>
-      <div class="job-total-gross" data-tax-rate="0.19">0,00</div>
+    <div class="form-group">
+      <button name="save" type="submit" class="btn btn-primary" value="Speichern">Speichern</button>
     </div>
-  </ubr-job>
-
-  <template id="taskgroup-template">
-    
-<div class="editor">
-  <div class="editor-row">
-    <div class="code">0.1</div>
-    <div class="name" placeholder="Positionsgruppe" contenteditable></div>
-    <div class="total">0,00</div>
-  </div>
-  <div class="description" placeholder="Beschreibung" contenteditable></div>
-  <div class="editor-hint">
-    <span class="label label-default">Shift </span> <span class="label label-default">Entf</span> dieses Element löschen
-    <br>
-    <span class="label label-default">Shift </span> <span class="label label-default">Enter</span> neue Position
-  </div>
-</div>
-  </template>
-
-  <template id="task-template">
-    
-<div class="editor">
-  <div class="editor-row">
-    <div class="code"></div>
-    <div class="name" placeholder="Position" contenteditable></div>
-    <div class="qty" placeholder="Menge" contenteditable>0,00</div>
-    <div class="unit" placeholder="Einheit" contenteditable></div>
-    <div class="price"></div>
-    <div class="total"></div>
-    <div class="labels">
-      <span class="is_optional False label label-primary">Bedarf</span>
-    </div>
-  </div>
-  <div class="editor-hint">
-    <span class="label label-default">Shift </span> <span class="label label-default">Entf</span> dieses Element löschen
-    <br>
-    <span class="label label-default">Shift </span> <span class="label label-default">Enter</span> neues Kalkulationselement
-    <br>
-    <span class="label label-default">Shift </span> <span class="label label-default">alt </span> <span class="label label-default">Enter</span> neue Alternativposition
-  </div>
-  <div class="description" placeholder="Beschreibung" contenteditable></div>
-</div>
-  </template>
-
-  <template id="taskinstance-template">
-    
-<div class="editor">
-  <div class="editor-row">
-    <div class="code"></div>
-    <div class="name" placeholder="Alternative" contenteditable></div>
-  </div>
-  <div class="description" placeholder="Beschreibung"
-       contenteditable></div>
-  <div class="editor-hint">
-    <span class="label label-default">Shift </span> <span class="label label-default">Entf</span> dieses Element löschen
-    <br>
-    <span class="label label-default">Shift </span> <span class="label label-default">Enter</span> neues Kalkulationselement
-  </div>
-</div>
-  </template>
-
-  <template id="lineitem-template">
-    
-<a name="lineitem-None"></a>
-<div class="editor">
-  <div class="editor-row">
-    <div class="name" placeholder="Kalkulationselement" contenteditable></div>
-    <div class="qty" placeholder="Menge" contenteditable>0,00</div>
-    <div class="unit" placeholder="Einheit" contenteditable></div>
-    <div class="price" placeholder="Preis" contenteditable>0,00</div>
-    <div class="total">0,00</div>
-    <div class="labels">
-      <span class="is_flagged False label label-danger">Markierung</span>
-    </div>
-  </div>
-  <div class="editor-hint">
-    <span class="label label-default">Shift </span> <span class="label label-default">Entf</span> dieses Element löschen
-    <br>
-    <span class="label label-default">Shift </span> <span class="label label-default">Enter</span> 
-    <span class="blank">neue Position erstellen</span><span class="non-blank">neues Kalkulationselement</span>
-  </div>
-</div>
-  </template>
-
+  </form>
 
       </div>
     </div>
@@ -673,6 +416,24 @@
 
   <script src="/static/js/language_picker.js"></script>
 
+  <script type="text/javascript">
+    $('[name="doc_template"]').on('change', function () {
+      var templateid = this.value;
+      if (templateid) {
+        $.ajax({
+          type: 'GET',
+          headers: {'X-CSRFToken': 'NrnY6PYOwv6wUJ5ITfTKv7FcG8eXSgj2'},
+          dataType: 'json',
+          data: {'templateid': templateid},
+          url: "/api/v1/project/2/document-template/",
+          async: false
+        }).done(function (template) {
+          $('[name="header"]').val(template['header']);
+          $('[name="footer"]').val(template['footer']);
+        });
+      }
+    });
+  </script>
   <script type="application/dart" src="/static/dart/proposal_editor.dart"></script>
   <script src="/static/dart/packages/web_components/webcomponents.min.js"></script>
   <script src="/static/dart/packages/web_components/dart_support.js"></script>
