@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.test.client import Client
 from django.conf import settings
 
-from ..company.factories import CompanyFactory
+from systori.apps.company.factories import CompanyFactory
 
 
 class SubdomainClient(Client):
