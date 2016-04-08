@@ -2,7 +2,6 @@ from io import BytesIO
 from datetime import date
 
 from reportlab.lib.units import mm
-from reportlab.lib.utils import simpleSplit
 from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
 from reportlab.lib import colors
 
@@ -12,7 +11,7 @@ from django.utils.translation import ugettext as _
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 
 from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable
-from .style import chunk_text, force_break, p, b
+from .style import better_simpleSplit, force_break, p, b
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import calculate_table_width_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
@@ -43,7 +42,7 @@ def collate_tasks(proposal, font, available_width):
     totals.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
     totals.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
 
-    description_width = sum(items.get_widths()[1:6])
+    description_width = sum(items.get_widths()[1:5])
 
     for job in proposal['jobs']:
 
@@ -56,19 +55,19 @@ def collate_tasks(proposal, font, available_width):
             items.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
             items.row_style('SPAN', 1, -1)
 
-            lines = simpleSplit(taskgroup['description'], font.normal.fontName, items.font_size, description_width)
+            lines = better_simpleSplit(taskgroup['description'], font.normal.fontName, items.font_size, description_width)
 
             for line in lines:
                 items.row('', p(line, font))
                 items.row_style('SPAN', 1, -1)
-                items.row_style('TOPPADDING', 0, -1, 1)
-            items.row_style('BOTTOMPADDING', 0, -1, 10)
+                items.row_style('TOPPADDING', 0, 0, 1)
+                items.row_style('BOTTOMPADDING', 0, 0, 1)
 
             for task in taskgroup['tasks']:
                 items.row(p(task['code'], font), p(task['name'], font))
                 items.row_style('SPAN', 1, -2)
 
-                lines = simpleSplit(task['description'], font.normal.fontName, items.font_size, description_width)
+                lines = better_simpleSplit(task['description'], font.normal.fontName, items.font_size, description_width)
                 for line in lines:
                     items.row('', p(line, font))
                     items.row_style('SPAN', 1, -1)
@@ -135,10 +134,11 @@ def collate_lineitems(proposal, available_width, font):
                 t.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
                 t.row(p(task['code'], font), p(task['name'], font))
 
-                for chunk in chunk_text(task['description']):
-                    t.row('', p(chunk, font))
+                description_width = sum(t.get_widths()[1:5])
 
-                # t.row_style('BOTTOMPADDING', 0, -1, 10)  seems to have no effect @elmcrest 09/2015
+                lines = better_simpleSplit(task['description'], font.normal.fontName, t.font_size, description_width)
+                for line in lines:
+                    t.row('', p(line, font))
 
                 pages.append(t.get_table(ContinuationTable))
 
