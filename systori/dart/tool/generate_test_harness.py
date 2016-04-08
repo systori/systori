@@ -8,6 +8,7 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.test.runner import setup_databases
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings.travis")
+django.setup()
 
 from django.conf import settings
 from systori.apps.company.factories import CompanyFactory
@@ -62,17 +63,13 @@ def generate_amount_test_html(data):
     form.pre_txn = types.SimpleNamespace()
     form.calculate_accounting_state(form.pre_txn)
     form.calculate_initial_values()
-    context = Context({
-        'TAX_RATE': '0.19',
-        'form1': form
-    })
     template = Template("""{% load amount %}
     <table><tr>
     {% amount_view "test-amount-view" form1 "balance" %}
     {% amount_input "test-amount-input" form1 "split" %}
     {% amount_stateful "test-amount-stateful" form1 "discount" %}
     </tr></table>""")
-    return template.render(context).encode()
+    return template.render({'TAX_RATE': '0.19', 'form1': form}).encode()
 
 
 def generate_pages():
@@ -100,7 +97,6 @@ def generate_pages():
 
 
 if __name__ == "__main__":
-    django.setup()
     setup_databases(verbosity=1, interactive=False, keepdb=True)
 
     # Start Transaction

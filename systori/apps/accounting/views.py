@@ -50,13 +50,14 @@ class InvoiceViewMixin(EditViewMixin):
 class InvoiceCreate(InvoiceViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        initial = kwargs['initial'] = {}
         instance = kwargs['instance']
         if 'previous_pk' in self.kwargs:
             previous = Invoice.objects.get(id=self.kwargs['previous_pk'])
             instance.parent = previous.parent if previous.parent else previous
             # copy all the basic stuff from previous invoice
             for field in ['title', 'header', 'footer', 'add_terms']:
-                instance.json[field] = previous.json[field]
+                initial[field] = previous.json[field]
             # copy the list of jobs
             instance.json['jobs'] = [{
                 'job.id': debit['job.id'],
