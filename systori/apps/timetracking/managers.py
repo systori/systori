@@ -1,12 +1,16 @@
 from django.db.models.query import QuerySet
 from django.db.models import F, Sum, Min, Max
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 
 
 class TimerQuerySet(QuerySet):
 
-    def get_running(self):
+    def filter_running(self):
         return self.filter(end__isnull=True)
+
+    def filter_today(self):
+        return self.filter(start__gte=timezone.now().date())
 
     def filter_period(self, year=None, month=None):
         date_filter = {}
@@ -21,16 +25,22 @@ class TimerQuerySet(QuerySet):
             date_filter['start__month'] = now.month
         return self.filter(**date_filter)
 
-    def generate_report_data(self, year=None, month=None):
-        report_data = self.filter_period(year, month).extra(
+    def group_for_report(self):
+        return self.extra(
             select={'date': 'date(start)'}
-        ).values('date').annotate(
+        ).values('date', 'user_id').order_by().annotate(
             total_duration=Sum('duration'),
             start=Min('start'),
             end=Max('end')
         ).order_by('-start')
 
+    def generate_report_data(self):
+        report_data = self.group_for_report()
+
         for day in report_data:
+            if not day['end'] and day['start']:
+                duration_calculator = self.model.duration_formulas[self.model.WORK]
+                day['total_duration'] += duration_calculator(day['start'], timezone.now())
             total = day['total_duration'] - self.model.DAILY_BREAK
             overtime = total - self.model.WORK_HOURS if total > self.model.WORK_HOURS else 0
             day.update({

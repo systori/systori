@@ -22,7 +22,7 @@ class TimerViewTest(TestCase):
         self.client.login(username=self.user.email, password=self.password)
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(Timer.objects.get_running().filter(user=self.user).exists())
+        self.assertTrue(Timer.objects.filter_running().filter(user=self.user).exists())
 
     def test_post_error(self):
         timer = Timer.launch(self.user)
@@ -85,6 +85,13 @@ class ReportViewTest(TestCase):
         response = self.client.get(self.url)
         json_response = json.loads(response.content.decode('utf-8'))
 
+        self.assertEqual(json_response[0]['date'], now.strftime('%d %b %Y'))
+        self.assertEqual(json_response[0]['start'], timer3.start.strftime('%H:%M'))
+        self.assertEqual(json_response[0]['end'], timer4.end.strftime('%H:%M'))
+        self.assertEqual(json_response[0]['total_duration'], '6:30')
+        self.assertEqual(json_response[0]['total'], '5:30')
+        self.assertEqual(json_response[0]['overtime'], '0:00')
+
         self.assertEqual(json_response[1]['date'], yesterday.strftime('%d %b %Y'))
         self.assertEqual(json_response[1]['start'], timer1.start.strftime('%H:%M'))
         self.assertEqual(json_response[1]['end'], timer2.end.strftime('%H:%M'))
@@ -92,12 +99,6 @@ class ReportViewTest(TestCase):
         self.assertEqual(json_response[1]['total'], '8:30')
         self.assertEqual(json_response[1]['overtime'], '0:30')
 
-        self.assertEqual(json_response[0]['date'], now.strftime('%d %b %Y'))
-        self.assertEqual(json_response[0]['start'], timer3.start.strftime('%H:%M'))
-        self.assertEqual(json_response[0]['end'], timer4.end.strftime('%H:%M'))
-        self.assertEqual(json_response[0]['total_duration'], '6:30')
-        self.assertEqual(json_response[0]['total'], '5:30')
-        self.assertEqual(json_response[0]['overtime'], '0:00')
 
     def test_get_empty(self, now=None):
         self.client.login(username=self.user.email, password=self.password)

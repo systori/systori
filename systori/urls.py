@@ -23,6 +23,7 @@ urlpatterns = patterns(
     url(r'', include('systori.apps.user.urls')),
     url(r'', include('systori.apps.equipment.urls')),
     url(r'', include('systori.apps.main.urls')),
+    url(r'', include('systori.apps.timetracking.urls')),
 
     url(r'^project-(?P<project_pk>\d+)/', include('systori.apps.task.urls')),
     url(r'^templates/', include('systori.apps.task.urls')),

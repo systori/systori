@@ -1,0 +1,38 @@
+{% extends "project.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='timetracking' %}{% endblock %}
+
+{% block content %}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">{% now "F" %} {% trans "Timetracking" %}</h3>
+  </div>
+  <div>
+    <table class="table">
+      <tr>
+        <th>{% trans "User" %}</th>
+        <th>{% trans "Start" %}</th>
+        <th>{% trans "End" %}</th>
+        <th>{% trans "Total Duration" %}</th>
+        <th>{% trans "Total" %}</th>
+        <th>{% trans "Overtime" %}</th>
+      </tr>
+      {% for user in report %}
+      <tr>
+        <td>{{ user.get_full_name }}</td>
+        {% with user.report as report %}
+        <td>{{ report.start }}</td>
+        <td>{{ report.end }}</td>
+        <td>{{ timer.total_duration }}</td>
+        <td>{{ timer.total }}</td>
+        <td>{{ timer.overtime }}</td>
+        {% endwith %}
+      </tr>
+      {% empty %}
+        No users
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -13,5 +13,6 @@ class AccessMiddleware:
                     request.access = Access.grant_superuser_access(request.user, request.company)
 
     def process_template_response(self, request, response):
-        response.context_data['access'] = request.access
+        if response.context_data is not None:
+            response.context_data['access'] = request.access
         return response

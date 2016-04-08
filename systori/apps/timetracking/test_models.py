@@ -44,3 +44,42 @@ class TimerTest(TestCase):
             timer.to_dict(),
             {'duration': timer.get_duration()}
         )
+
+
+class TimerQuerySetTest(TestCase):
+
+    def setUp(self):
+        self.company = CompanyFactory()
+        self.user = UserFactory(company=self.company)
+        self.user2 = UserFactory(company=self.company)
+
+    def test_filter_today(self):
+
+        now = timezone.now().replace(hour=9)
+        yesterday = now - timedelta(days=1)
+        Timer.objects.create(
+            user=self.user,
+            start=yesterday,
+            end=yesterday + timedelta(hours=8)
+        )
+
+        timer = Timer.launch(self.user)
+        self.assertEqual(
+            Timer.objects.filter_today().get(),
+            Timer.objects.get(pk=timer.pk)
+        )
+
+    def test_filter_running(self):
+        now = timezone.now().replace(hour=9)
+        yesterday = now - timedelta(days=1)
+        Timer.objects.create(
+            user=self.user,
+            start=yesterday,
+            end=yesterday + timedelta(hours=8)
+        )
+
+        timer = Timer.launch(self.user)
+        self.assertEqual(
+            Timer.objects.filter_running().get(),
+            Timer.objects.get(pk=timer.pk)
+        )

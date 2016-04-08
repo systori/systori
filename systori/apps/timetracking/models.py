@@ -31,6 +31,8 @@ class Timer(models.Model):
     end = models.DateTimeField(blank=True, null=True, db_index=True)
     duration = models.IntegerField(default=0, help_text=_('in seconds'))
     kind = models.PositiveIntegerField(default=WORK, choices=KIND_CHOICES, db_index=True)
+    altered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='timers_altered', blank=True, null=True)
 
     objects = TimerQuerySet.as_manager()
 
@@ -55,7 +57,7 @@ class Timer(models.Model):
     def save(self, *args, **kwargs):
         if not self.start:
             self.start = timezone.now()
-        if not self.pk and type(self).objects.filter(user=self.user, end__isnull=True).exists():
+        if not self.pk and Timer.objects.filter(user=self.user, end__isnull=True).exists():
             raise ValidationError(_('Timer already running'))
         if self.end:
             self.duration = self.get_duration_seconds(self.end)
@@ -71,6 +73,10 @@ class Timer(models.Model):
     def get_duration(self, now=None):
         seconds = self.get_duration_seconds(now)
         return [int(v) for v in (seconds // 3600, (seconds % 3600) // 60, seconds % 60)]
+
+    def get_duration_formatted(self):
+        from .utils import format_seconds
+        return format_seconds(self.get_duration_seconds())
 
     def stop(self):
         assert self.pk
