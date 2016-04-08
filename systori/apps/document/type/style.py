@@ -45,6 +45,41 @@ def chunk_text(txt, max_length=1500):
         yield from chunk_text(txt[1:])
 
 
+def _simpleSplit(txt, mW, SW):
+    L = []
+    ws = SW(' ')
+    O = []
+    w = -ws
+    for t in txt.split():
+        lt = SW(t)
+        if w+ws+lt <= mW or O == []:
+            O.append(t)
+            w = w + ws + lt
+        else:
+            L.append(' '.join(O))
+            O = [t]
+            w = lt
+    if O!=[]: L.append(' '.join(O))
+    # added conditional to support line breaks from "empty lines"
+    if L:
+        return L
+    else:
+        return ['']
+
+
+def better_simpleSplit(text,fontName,fontSize,maxWidth):
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    # enhanced line split based not only on '\n'
+    lines = text.replace('\n', '<br/>').replace('<br />', '<br/>').split('<br/>')
+    SW = lambda text, fN=fontName, fS=fontSize: stringWidth(text, fN, fS)
+    if maxWidth:
+        L = []
+        for l in lines:
+            L.extend(_simpleSplit(l, maxWidth, SW))
+        lines = L
+    return lines
+
+
 def force_break(txt):
     return txt.replace('\n', '<br />')
 
@@ -315,7 +350,7 @@ class ContinuationTable(Table):
 class TableFormatter:
     font_size = 10
 
-    def __init__(self, columns, width, font, pad=5*mm, trim_ends=True, debug=False):
+    def __init__(self, columns, width, font, pad=5*mm, trim_ends=False, debug=False):
         assert columns.count(0) == 1, "Must have exactly one stretch column."
         self._maximums = columns.copy()
         self._available_width = width
