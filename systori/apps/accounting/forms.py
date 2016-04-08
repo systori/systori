@@ -186,7 +186,7 @@ class InvoiceForm(DocumentForm):
         if self.instance.parent:
             self.fields['parent'].queryset = Invoice.objects.filter(id=self.instance.parent.id)
 
-        if not self.initial.get('header', None) or not self.initial.get('footer', None):
+        if 'header' not in self.initial or 'footer' not in self.initial:
             default_text = DocumentSettings.get_for_language(settings.LANGUAGE_CODE)
             if default_text and default_text.invoice_text:
                 rendered = default_text.invoice_text.render(self.instance.project)
