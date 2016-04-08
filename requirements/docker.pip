@@ -24,6 +24,6 @@ django-debug-toolbar
 coveralls
 selenium
 git+https://github.com/cgoldberg/sauceclient.git#egg=sauceclient
-django-extensions==1.5.5
+django-extensions
 
 factory-boy==2.6.1
