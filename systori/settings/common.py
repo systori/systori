@@ -57,6 +57,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'tastypie',
+    'rest_framework',
     'django_mobile',
     'ordered_model',
     'bootstrapform',
