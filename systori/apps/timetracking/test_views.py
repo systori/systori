@@ -5,12 +5,13 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
+from systori.lib.testing import SystoriTestCase
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 from .models import Timer
 
 
-class TimerViewTest(TestCase):
+class TimerViewTest(SystoriTestCase):
     password = 'TimerViewTest'
     url = reverse('timer')
 
@@ -50,7 +51,7 @@ class TimerViewTest(TestCase):
         self.assertFalse(timer.is_running)
 
 
-class ReportViewTest(TestCase):
+class ReportViewTest(SystoriTestCase):
     password = 'ReportViewTest'
     url = reverse('report')
 
