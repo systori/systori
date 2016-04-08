@@ -1,6 +1,7 @@
-from django.views import generic
+from django.views.generic import View, TemplateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.views.i18n import set_language
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.decorators import login_required
@@ -11,11 +12,11 @@ from .models import *
 from ..company.models import *
 
 
-class SettingsView(generic.TemplateView):
+class SettingsView(TemplateView):
     template_name = "user/settings.html"
 
 
-class UserList(generic.ListView):
+class UserList(ListView):
     model = Access
     template_name = 'user/user_list.html'
 
@@ -26,11 +27,15 @@ class UserList(generic.ListView):
             prefetch_related('user')
 
 
-class UserView(generic.DetailView):
+class UserView(DetailView):
     model = User
 
 
 class UserFormRenderer:
+
+    def get_form(self):
+        return None
+
     def render_forms(self, user_form, access_form):
         return self.render_to_response(self.get_context_data(
             user_form=user_form, access_form=access_form))
@@ -43,7 +48,7 @@ class UserFormRenderer:
         return user_form, access_form
 
 
-class UserAdd(generic.CreateView, UserFormRenderer):
+class UserAdd(UserFormRenderer, CreateView):
     model = User
     success_url = reverse_lazy('users')
 
@@ -87,7 +92,7 @@ class UserAdd(generic.CreateView, UserFormRenderer):
         return HttpResponseRedirect(self.success_url)
 
 
-class UserUpdate(generic.UpdateView, UserFormRenderer):
+class UserUpdate(UserFormRenderer, UpdateView):
     model = User
     success_url = reverse_lazy('users')
 
@@ -110,13 +115,13 @@ class UserUpdate(generic.UpdateView, UserFormRenderer):
             return self.render_forms(user_form, access_form)
 
 
-class AccessRemove(generic.DeleteView):
+class AccessRemove(DeleteView):
     model = Access
     template_name = "user/access_confirm_delete.html"
     success_url = reverse_lazy('users')
 
 
-class UserGeneratePassword(generic.DetailView):
+class UserGeneratePassword(DetailView):
     model = User
     template_name = "user/password_generator.html"
 
@@ -130,7 +135,7 @@ class UserGeneratePassword(generic.DetailView):
         return self.render_to_response(context)
 
 
-class SetLanguageView(generic.View):
+class SetLanguageView(View):
 
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
