@@ -1,19 +1,21 @@
 from decimal import Decimal as D
 from django.test import TestCase
 from django.db import connection
-from django.core.management.color import no_style
 from .models import *
 
 
 class Account(BaseAccount):
+    _is_shared_model = True
     pass
 
 
 class Entry(BaseEntry):
+    _is_shared_model = True
     pass
 
 
 class Transaction(BaseTransaction):
+    _is_shared_model = True
     entry_class = Entry
     account_class = Account
 
@@ -24,20 +26,10 @@ class AccountingTestCase(TestCase):
 
     def setUp(self):
         super().setUp()
-        pending_references = {}
-        tables = connection.introspection.table_names()
-        known_models = connection.introspection.installed_models(tables)
-        cursor = connection.cursor()
+        schema_editor = connection.schema_editor()
+        schema_editor.deferred_sql = []
         for model in self.CONCRETE_MODELS:
-            sql, references = connection.creation.sql_create_model(model, no_style(), known_models)
-            for refto, refs in references.items():
-                pending_references.setdefault(refto, []).extend(refs)
-                if refto in known_models:
-                    sql.extend(connection.creation.sql_for_pending_references(refto, no_style(), pending_references))
-            sql.extend(connection.creation.sql_for_pending_references(model, no_style(), pending_references))
-            for statement in sql:
-                cursor.execute(statement)
-            known_models.add(model)
+            schema_editor.create_model(model)
 
 
 class EntryTests(AccountingTestCase):
