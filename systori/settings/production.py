@@ -1,9 +1,11 @@
 from .common import *
 
-DEBUG = False
-TEMPLATE_DEBUG = False
+SERVER_NAME = 'systori.com'
+SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
 
-ALLOWED_HOSTS = ['systori.com']
+DEBUG = False
+
+ALLOWED_HOSTS = ['.'+SERVER_NAME]
 
 STATICFILES_DIRS += (
     ('dart', 'systori/dart/build/web'),

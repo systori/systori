@@ -7,6 +7,11 @@ from django import template
 register = template.Library()
 
 
+@register.simple_tag
+def company_url(company, request):
+    return company.url(request)
+
+
 @register.filter
 def ubrdecimal(decimal, decimal_pos=4):
     if decimal == '': return ''

@@ -1,22 +1,18 @@
-from django.views.generic import View, TemplateView, FormView
+from django.views.generic import View, TemplateView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.utils.translation import ugettext_lazy as _
 
-from .models import *
 from .forms import *
+from .models import *
 
 
-class InvoiceFormMixin:
-    model = Invoice
-    form_class = InvoiceForm
+class EditViewMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['TAX_RATE'] = TAX_RATE
-        context['PERCENT_RANGE'] = [5, 20, 25, 30, 50, 75, 100]
         return context
 
     def get_form_kwargs(self):
@@ -33,7 +29,25 @@ class InvoiceFormMixin:
         return self.request.project.get_absolute_url()
 
 
-class InvoiceCreate(InvoiceFormMixin, CreateView):
+class DeleteViewMixin(DeleteView):
+
+    def delete(self, request, *args, **kwargs):
+        doc = self.get_object()
+        if doc.transaction:
+            doc.transaction.delete()
+        return super().delete(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return self.request.project.get_absolute_url()
+
+
+class InvoiceViewMixin(EditViewMixin):
+    model = Invoice
+    form_class = InvoiceForm
+    template_name = 'accounting/invoice_form.html'
+
+
+class InvoiceCreate(InvoiceViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         instance = kwargs['instance']
@@ -53,7 +67,7 @@ class InvoiceCreate(InvoiceFormMixin, CreateView):
         return kwargs
 
 
-class InvoiceUpdate(InvoiceFormMixin, UpdateView):
+class InvoiceUpdate(InvoiceViewMixin, UpdateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.object
@@ -82,149 +96,109 @@ class InvoiceTransition(SingleObjectMixin, View):
         return HttpResponseRedirect(reverse('project.view', args=[doc.project.id]))
 
 
-class InvoiceDelete(DeleteView):
+class InvoiceDelete(DeleteViewMixin):
     model = Invoice
-
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        success_url = self.get_success_url()
-        if self.object.transaction:
-            self.object.transaction.delete()
-        self.object.delete()
-        return HttpResponseRedirect(success_url)
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+    template_name = 'accounting/invoice_confirm_delete.html'
 
 
-class AdjustmentFormMixin:
+class AdjustmentViewMixin(EditViewMixin):
     model = Adjustment
     form_class = AdjustmentForm
     template_name = 'accounting/adjustment_form.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['TAX_RATE'] = TAX_RATE
-        return context
 
-    def get_form_kwargs(self):
-        jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems')
-        kwargs = {
-            'jobs': jobs,
-            'instance': self.model(project=self.request.project),
-        }
-        if self.request.method == 'POST':
-            kwargs['data'] = self.request.POST.copy()
-        return kwargs
-
-    def get_success_url(self):
-        return self.request.project.get_absolute_url()
-
-
-class AdjustmentCreate(AdjustmentFormMixin, CreateView):
+class AdjustmentCreate(AdjustmentViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         if 'invoice_pk' in self.kwargs:
             invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
             kwargs['initial'] = {'invoice': invoice}
-            kwargs['instance'].json['credits'] = [
+            kwargs['instance'].json['jobs'] = [
                 {'job.id': debit['job.id'], 'approved': debit['amount']}
                 for debit in invoice.json['debits']
                 ]
         else:
-            kwargs['instance'].json['credits'] = []
+            kwargs['instance'].json['jobs'] = []
         return kwargs
 
 
-class AdjustmentDelete(DeleteView):
+class AdjustmentUpdate(AdjustmentViewMixin, UpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.object
+        return kwargs
+
+
+class AdjustmentDelete(DeleteViewMixin):
     model = Adjustment
     template_name = 'accounting/adjustment_confirm_delete.html'
 
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        success_url = self.get_success_url()
-        if self.object.transaction:
-            self.object.transaction.delete()
-        self.object.delete()
-        return HttpResponseRedirect(success_url)
 
-    def get_success_url(self):
-        return self.request.project.get_absolute_url()
-
-
-class PaymentCreate(FormView):
-    form_class = PaymentFormSet
+class PaymentViewMixin(EditViewMixin):
+    model = Payment
+    form_class = PaymentForm
     template_name = 'accounting/payment_form.html'
 
+
+class PaymentCreate(PaymentViewMixin, CreateView):
     def get_form_kwargs(self):
-        kwargs = {'jobs': self.request.project.jobs.all()}
+        kwargs = super().get_form_kwargs()
+        instance = kwargs['instance']
         if 'invoice_pk' in self.kwargs:
             invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
             kwargs['initial'] = {
                 'invoice': invoice,
-                'amount': invoice.json['debit_gross'],
+                'payment': invoice.json['debit'].gross,
             }
-        if self.request.method == 'POST':
-            kwargs['data'] = self.request.POST.copy()
+            instance.json['jobs'] = [{
+                'job.id': job['job.id'],
+                'invoiced': job['invoiced'],
+                'split': job['debit']
+            } for job in invoice.json['jobs']]
+        else:
+            instance.json['jobs'] = []
         return kwargs
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['TAX_RATE'] = TAX_RATE
-        return context
 
-    def form_valid(self, form):
-        form.save()
-        return super().form_valid(form)
+class PaymentUpdate(PaymentViewMixin, UpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.object
+        kwargs['initial'] = {
+            'bank_account': self.object.json['bank_account'],
+            'payment': self.object.json['payment']
+        }
+        return kwargs
 
-    def get_success_url(self):
-        return self.request.project.get_absolute_url()
 
-
-class PaymentDelete(DeleteView):
-    model = Transaction
+class PaymentDelete(DeleteViewMixin):
+    model = Payment
     template_name = 'accounting/payment_confirm_delete.html'
 
-    def delete(self, request, *args, **kwargs):
-        object = self.get_object()
-        if not object.is_reconciled:
-            object.delete()
-        return HttpResponseRedirect(self.get_success_url())
 
-    def get_success_url(self):
-        return self.request.project.get_absolute_url()
-
-
-class RefundCreate(CreateView):
-    form_class = RefundForm
+class RefundViewMixin(EditViewMixin):
     model = Refund
+    form_class = RefundForm
+    template_name = 'accounting/refund_form.html'
 
+
+class RefundCreate(RefundViewMixin, CreateView):
     def get_form_kwargs(self):
-        kwargs = {
-            'jobs': self.request.project.jobs.all(),
-            'instance': self.model(project=self.request.project),
-        }
-        if self.request.method == 'POST':
-            kwargs['data'] = self.request.POST.copy()
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'].json['jobs'] = []
         return kwargs
 
-    def get_success_url(self):
-        return self.request.project.get_absolute_url()
+
+class RefundUpdate(RefundViewMixin, UpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.object
+        return kwargs
 
 
-class RefundDelete(DeleteView):
+class RefundDelete(DeleteViewMixin):
     model = Refund
-
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        success_url = self.get_success_url()
-        if self.object.transaction:
-            self.object.transaction.delete()
-        self.object.delete()
-        return HttpResponseRedirect(success_url)
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.project.id])
+    template_name = 'accounting/refund_confirm_delete.html'
 
 
 class AccountList(TemplateView):

@@ -11,7 +11,7 @@ from decimal import Decimal
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounting', '0003_added_value_fields'),
+        #('accounting', '0003_added_value_fields'),
         ('project', '0002_dailyplan_tasks'),
         ('document', '0002_auto_20160221_0254'),
     ]
@@ -51,8 +51,13 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Payment',
                 'verbose_name_plural': 'Payments',
-                'ordering': ['id'],
+                'ordering': ['document_date'],
             },
+        ),
+        migrations.AddField(
+            model_name='payment',
+            name='invoice',
+            field=models.OneToOneField(on_delete=django.db.models.deletion.SET_NULL, null=True, related_name='payment', to='document.Invoice'),
         ),
         migrations.AddField(
             model_name='letterhead',

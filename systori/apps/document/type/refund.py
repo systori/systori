@@ -57,8 +57,6 @@ def serialize(refund_obj, data):
 
     refund = {
 
-        'version': '1.0',
-
         'id': refund_obj.id,
 
         'title': data['title'],
@@ -76,7 +74,14 @@ def serialize(refund_obj, data):
         'city': contact.city,
         'address_label': contact.address_label,
 
-        'amount': data['amount']
+        'jobs': data['jobs'],
+
+        'paid_total': data['paid_total'],
+        'invoiced_total': data['invoiced_total'],
+        'progress_total': data['progress_total'],
+        'refund_total': data['refund_total'],
+        'credit_total': data['credit_total'],
+        'customer_refund': data['customer_refund']
 
     }
 

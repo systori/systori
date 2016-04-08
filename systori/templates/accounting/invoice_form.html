@@ -1,0 +1,138 @@
+{% extends "project.html" %}
+{% load i18n bootstrap staticfiles customformatting amount %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
+
+{% block content %}
+  <form role="form" method="post">{% csrf_token %}
+
+      <h2 class="sub-header">{% trans "Invoice" %}</h2>
+      {{ form|bootstrap }}
+
+      <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %}">
+      {{ form.formset.management_form }}
+
+      <style>
+
+        tr[is=invoice-row]:not(.invoiced) > td,
+        tr[is=invoice-row]:not(.invoiced) > td > div {
+          color: lightgray !important;
+        }
+
+        tr > .job-name {
+          min-width: 180px !important;
+        }
+
+        tr > th.job-estimate,
+        tr > th.job-progress,
+        tr > th.job-invoiced,
+        tr > th.job-itemized,
+        tr > th.job-debit {
+          text-align: right;
+        }
+
+        tr > .job-invoiced {
+          border-right: 2px solid #ddd;
+        }
+
+        /* Debit Comment */
+
+        tr[is=invoice-row]:not(.invoiced) textarea.amount-comment,
+        tr[is=invoice-row]:not(.override) textarea.amount-comment {
+          opacity: 0;
+          height: 1px;
+          margin-top: -8px;
+        }
+
+        /* Icon */
+
+        tr[is=invoice-row] .itemized-icon {
+          display: none;
+        }
+        tr[is=invoice-row]:not(.itemized) .itemized-icon.glyphicon-tag,
+        tr[is=invoice-row].itemized .itemized-icon.glyphicon-list {
+          display: inline-block;
+        }
+        tr[is=invoice-row].invoiced:not(.itemized) .itemized-icon.glyphicon-tag {
+          color: red;
+        }
+
+      </style>
+      <h2 class="sub-header">{% trans "Debits" %}</h2>
+      <table is="invoice-table" class="table" data-tax-rate="{{ TAX_RATE }}">
+        <thead>
+        <tr>
+          <th class="job-is-invoiced"></th>
+          <th class="job-is-itemized"></th>
+          <th class="job-name">{% trans 'Job' %}</th>
+          <th class="job-estimate">{% trans 'Estimate' %}</th>
+          <th class="job-progress">{% trans 'Progress' %}</th>
+          <th class="job-invoiced">{% trans 'Invoiced' %}</th>
+          <th class="job-itemized"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> {% trans 'Itemized' %}</th>
+          <th class="job-debit">{% trans 'Invoice' %}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for debit in form.formset %}
+          <tr is="invoice-row" class="{% if debit.is_invoiced.value == True %}invoiced{% endif %} {% if debit.is_itemized %}itemized{% endif %} {% if debit.is_override.value == True %}override{% endif %}">
+            <td class="job-is-invoiced">{{ debit.is_invoiced }}</td>
+            <td class="job-is-itemized">
+              {{ debit.is_override }}
+              <span class="glyphicon itemized-icon glyphicon-tag" aria-hidden="true"></span>
+              <span class="glyphicon itemized-icon glyphicon-list" aria-hidden="true"></span>
+            </td>
+            <td class="job-name">{{ debit.job }}{{ debit.initial.job.name }}</td>
+            {% amount_view "job-estimate" debit.pre_txn "estimate" "net" %}
+            {% amount_view "job-progress" debit.pre_txn "progress" "net" %}
+            {% amount_view "job-invoiced" debit.pre_txn "invoiced" %}
+            {% amount_view "job-itemized clickable" debit.pre_txn "itemized" select_if_equal=debit.debit_amount %}
+            {% amount_input "job-debit" debit "debit" comment=debit.override_comment %}
+          </tr>
+        {% endfor %}
+          <tr class="invoice-table-totals">
+            <td class="job-is-invoiced"></td>
+            <td class="job-is-itemized"></td>
+            <td class="job-name"></td>
+            {% amount_view "job-estimate" form "pre_txn_estimate_total" "net" %}
+            {% amount_view "job-progress" form "pre_txn_progress_total" "net" %}
+            {% amount_view "job-invoiced" form "pre_txn_invoiced_total" %}
+            {% amount_view "job-itemized" form "pre_txn_itemized_total" %}
+            {% amount_view "job-debit" form "debit_total" %}
+          </tr>
+        </tbody>
+      </table>
+      {% for error in form.formset.non_form_errors %}
+        <span class="help-block ">{{ error }}</span>
+      {% endfor %}
+      </div>
+
+      <div class="form-group">
+        <button name="save" type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+      </div>
+  </form>
+{% endblock %}
+
+{% block extra_js %}
+  <script type="text/javascript">
+    $('[name="doc_template"]').on('change', function () {
+      var templateid = this.value;
+      if (templateid) {
+        $.ajax({
+          type: 'GET',
+          headers: {'X-CSRFToken': '{{ csrf_token }}'},
+          dataType: 'json',
+          data: {'templateid': templateid},
+          url: "{% url 'api_dispatch_document_template' 'v1' 'project' project.id %}",
+          async: false
+        }).done(function (template) {
+          $('[name="header"]').val(template['header']);
+          $('[name="footer"]').val(template['footer']);
+        });
+      }
+    });
+  </script>
+  <script type="application/dart" src="{% static "dart/invoice_editor.dart" %}"></script>
+  <script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
+  <script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
+  <script src="{% static "dart/packages/browser/dart.js" %}"></script>
+{% endblock extra_js %}

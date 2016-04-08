@@ -1,6 +1,6 @@
 psycopg2
 
-django==1.8
+django==1.9
 django-tastypie
 django-ordered-model
 django-fsm

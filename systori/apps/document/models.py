@@ -25,9 +25,15 @@ class Document(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['id']
 
 
 class Proposal(Document):
+
+    class Meta(Document.Meta):
+        verbose_name = _("Proposal")
+        verbose_name_plural = _("Proposals")
+
     letterhead = models.ForeignKey('document.Letterhead', related_name="proposal_documents")
 
     project = models.ForeignKey("project.Project", related_name="proposals")
@@ -63,21 +69,20 @@ class Proposal(Document):
     def decline(self):
         pass
 
-    class Meta:
-        verbose_name = _("Proposal")
-        verbose_name_plural = _("Proposals")
-        ordering = ['id']
-
 
 class Invoice(Document):
+
+    class Meta(Document.Meta):
+        verbose_name = _("Invoice")
+        verbose_name_plural = _("Invoices")
+
     letterhead = models.ForeignKey('document.Letterhead', related_name="invoice_documents")
 
-    invoice_no = models.CharField(_("Invoice No."), max_length=30)
+    invoice_no = models.CharField(_("Invoice No."), max_length=30, unique=True)
     project = models.ForeignKey("project.Project", related_name="invoices")
     parent = models.ForeignKey("self", related_name="invoices", null=True)
 
-    transaction = models.OneToOneField('accounting.Transaction', related_name="invoice", null=True,
-                                       on_delete=models.SET_NULL)
+    transaction = models.OneToOneField('accounting.Transaction', related_name="invoice", null=True, on_delete=models.SET_NULL)
 
     DRAFT = "draft"
     SENT = "sent"
@@ -103,11 +108,6 @@ class Invoice(Document):
         assert self.parent is None  # make sure this is a parent invoice
         return chain([self], self.invoices.all())
 
-    class Meta:
-        verbose_name = _("Invoice")
-        verbose_name_plural = _("Invoices")
-        ordering = ['id']
-
     @property
     def debited_gross(self):
         if self.json.get('debited_gross'):
@@ -127,34 +127,51 @@ class Invoice(Document):
         else:
             return Decimal("0")
 
+    def delete(self, **kwargs):
+        if self.transaction:
+            self.transaction.delete()
+        super().delete(**kwargs)
+
 
 class Adjustment(Document):
+
+    class Meta(Document.Meta):
+        verbose_name = _("Adjustment")
+        verbose_name_plural = _("Adjustment")
+
     letterhead = models.ForeignKey('document.Letterhead', related_name="adjustment_documents")
     project = models.ForeignKey("project.Project", related_name="adjustments")
     invoice = models.OneToOneField('Invoice', related_name="adjustment", null=True, on_delete=models.SET_NULL)
     transaction = models.OneToOneField('accounting.Transaction', related_name="adjustment", null=True, on_delete=models.SET_NULL)
 
-    class Meta:
-        verbose_name = _("Adjustment")
-        verbose_name_plural = _("Adjustment")
-        ordering = ['id']
-
     def __str__(self):
         return '{} {}'.format(self.__class__.__name__, self.created_on)
 
+    def delete(self, **kwargs):
+        if self.transaction:
+            self.transaction.delete()
+        super().delete(**kwargs)
+
 
 class Payment(Document):
-    letterhead = models.ForeignKey('document.Letterhead', related_name="payment_documents")
-    project = models.ForeignKey("project.Project", related_name="payments")
-    transaction = models.OneToOneField('accounting.Transaction', related_name="payment", null=True, on_delete=models.SET_NULL)
 
     class Meta:
         verbose_name = _("Payment")
         verbose_name_plural = _("Payments")
-        ordering = ['id']
+        ordering = ['document_date']
+
+    letterhead = models.ForeignKey('document.Letterhead', related_name="payment_documents")
+    project = models.ForeignKey("project.Project", related_name="payments")
+    invoice = models.OneToOneField('Invoice', related_name="payment", null=True, on_delete=models.SET_NULL)
+    transaction = models.OneToOneField('accounting.Transaction', related_name="payment", null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return '{} {}'.format(self.__class__.__name__, self.created_on)
+
+    def delete(self, **kwargs):
+        if self.transaction:
+            self.transaction.delete()
+        super().delete(**kwargs)
 
 
 class Refund(Document):
@@ -170,6 +187,11 @@ class Refund(Document):
 
     def __str__(self):
         return '{} {}'.format(self.__class__.__name__, self.created_on)
+
+    def delete(self, **kwargs):
+        if self.transaction:
+            self.transaction.delete()
+        super().delete(**kwargs)
 
 
 class SampleContact:
@@ -332,5 +354,7 @@ class DocumentSettings(models.Model):
         try:
             return DocumentSettings.objects.get(language=lang)
         except DocumentSettings.DoesNotExist:
-            return None
-
+            try:
+                return DocumentSettings.objects.first()
+            except DocumentSettings.DoesNotExist:
+                return None

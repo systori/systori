@@ -1,3 +1,4 @@
+from math import floor, ceil
 from decimal import Decimal
 from datetime import datetime
 from string import ascii_lowercase
@@ -25,8 +26,8 @@ class JobQuerySet(models.QuerySet):
     def estimate_total(self):
         return sum([job.estimate_total for job in self])
 
-    def billable_total(self):
-        return sum([job.billable_total for job in self])
+    def progress_total(self):
+        return sum([job.progress_total for job in self])
 
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
@@ -70,6 +71,8 @@ class Job(models.Model):
     )
     status = FSMField(default=DRAFT, choices=STATE_CHOICES)
 
+    STATUS_FOR_PROPOSAL = (DRAFT, PROPOSED)
+
     objects = JobManager()
 
     class Meta:
@@ -100,6 +103,10 @@ class Job(models.Model):
     @transition(field=status, source=STARTED, target=COMPLETED, custom={'label': _("Complete")})
     def complete(self):
         pass
+
+    @property
+    def can_propose(self):
+        return self.status in self.STATUS_FOR_PROPOSAL
 
     @property
     def billable_taskgroups(self):
@@ -141,12 +148,18 @@ class Job(models.Model):
         return self._total_calc('estimate')
 
     @property
-    def billable_total(self):
-        return self._total_calc('billable')
+    def progress_total(self):
+        return self._total_calc('progress')
 
     @property
-    def complete_percent(self):
-        return round((self.billable_total / self.estimate_total) * 100, 2) if self.estimate_total else 0
+    def progress_percent(self):
+        percent = self.progress_total / self.estimate_total * 100 if self.estimate_total else 0
+        if percent < 100:
+            return floor(percent)
+        elif percent > 100:
+            return ceil(percent)
+        else:
+            return 100
 
     @property
     def code(self):
@@ -196,24 +209,24 @@ class TaskGroup(BetterOrderedModel):
         return self._total_calc('fixed_price_estimate', include_optional=False)
 
     @property
-    def fixed_price_billable(self):
-        return self._total_calc('fixed_price_billable')
+    def fixed_price_progress(self):
+        return self._total_calc('fixed_price_progress')
 
     @property
     def time_and_materials_estimate(self):
         return self._total_calc('time_and_materials_estimate', include_optional=False)
 
     @property
-    def time_and_materials_billable(self):
-        return self._total_calc('time_and_materials_billable')
+    def time_and_materials_progress(self):
+        return self._total_calc('time_and_materials_progress')
 
     @property
     def estimate_total(self):
         return self.fixed_price_estimate
 
     @property
-    def billable_total(self):
-        return self.fixed_price_billable
+    def progress_total(self):
+        return self.fixed_price_progress
 
     @property
     def code(self):
@@ -305,16 +318,16 @@ class Task(BetterOrderedModel):
         return self.instance.fixed_price_estimate
 
     @property
-    def fixed_price_billable(self):
-        return self.instance.fixed_price_billable
+    def fixed_price_progress(self):
+        return self.instance.fixed_price_progress
 
     @property
     def time_and_materials_estimate(self):
         return self.instance.time_and_materials_estimate
 
     @property
-    def time_and_materials_billable(self):
-        return self.instance.time_and_materials_billable
+    def time_and_materials_progress(self):
+        return self.instance.time_and_materials_progress
 
     @property
     def code(self):
@@ -408,7 +421,7 @@ class TaskInstance(BetterOrderedModel):
     # For fixed price billing, returns the price based
     # on what has been completed.
     @property
-    def fixed_price_billable(self):
+    def fixed_price_progress(self):
         return round(self.unit_price * self.task.complete, 2)
 
     # For time and materials billing, returns
@@ -425,10 +438,10 @@ class TaskInstance(BetterOrderedModel):
     # the total amount that has been expended by
     # all line items contained by this task.
     @property
-    def time_and_materials_billable(self):
+    def time_and_materials_progress(self):
         t = Decimal(0.0)
         for lineitem in self.lineitems.all():
-            t += lineitem.time_and_materials_billable
+            t += lineitem.time_and_materials_progress
         return t
 
     @property
@@ -511,7 +524,7 @@ class LineItem(models.Model):
     # For time and materials billing, returns
     # the total amount that has been expended.
     @property
-    def time_and_materials_billable(self):
+    def time_and_materials_progress(self):
         return round(self.price * self.billable, 2)
 
     @property

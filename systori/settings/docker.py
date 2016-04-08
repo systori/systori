@@ -1,7 +1,9 @@
 import sys
 from .dev import *
 
-SESSION_COOKIE_DOMAIN = None
+SERVER_NAME = 'systori.dockerhost'
+SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
+
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 

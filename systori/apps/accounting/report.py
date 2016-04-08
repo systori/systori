@@ -8,7 +8,7 @@ def _transaction_sort_key(txn):
     If there are payments and invoices created on the same day
     we want to make sure to process the payments first and then
     the invoices. Otherwise the transaction history on an
-    invoice will look like a drunk cow liked it, that's bad.
+    invoice will look like a drunk cow licked it, that's bad.
     :param txn:
     :return: sort key
     """
@@ -18,8 +18,9 @@ def _transaction_sort_key(txn):
     return txn_date+type_weight+txn_id
 
 
-def create_payments_report(jobs, transacted_on_or_before=None):
+def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
     """
+    :param invoice_txn: transaction that should be excluded from 'open claims' (unpaid amount)
     :param jobs: limit transaction details to specific set of jobs
     :param transacted_on_or_before: limit transactions up to and including a certain date
     :return: serializable data structure
@@ -40,7 +41,10 @@ def create_payments_report(jobs, transacted_on_or_before=None):
     report = {
         'invoiced': Amount.zero(),
         'paid': Amount.zero(),
-        'payments': []
+        'payments': [],
+        'job_debits': {},
+        'unpaid': Amount.zero(),
+        'debit': Amount.zero()
     }
 
     for txn in transactions:
@@ -54,6 +58,8 @@ def create_payments_report(jobs, transacted_on_or_before=None):
             'total': Amount.zero(),
             'jobs': {}
         }
+
+        job_debits = {}
 
         for entry in txn.entries.all():
 
@@ -74,6 +80,13 @@ def create_payments_report(jobs, transacted_on_or_before=None):
                 'total': Amount.zero()
             })
 
+            job_debit = job_debits.setdefault(entry.job.id, {
+                'transaction_type': txn.transaction_type,
+                'entry_type': None,
+                'date': txn.transacted_on,
+                'amount': Amount.zero()
+            })
+
             if entry.entry_type == entry.PAYMENT:
                 txn_dict['payment'] += entry.amount
                 job_dict['payment'] += entry.amount
@@ -88,14 +101,51 @@ def create_payments_report(jobs, transacted_on_or_before=None):
 
             if entry.entry_type in entry.TYPES_FOR_INVOICED_SUM:
                 report['invoiced'] += entry.amount
+                if txn.id == invoice_txn.id:
+                    report['debit'] += entry.amount
+                assert job_debit['entry_type'] in (None, entry.entry_type)
+                job_debit['entry_type'] = entry.entry_type
+                job_debit['amount'] += entry.amount
 
-            if entry.entry_type in entry.PAYMENT_TYPES+(entry.ADJUSTMENT,):
+            if entry.entry_type in entry.TYPES_FOR_PAID_SUM:
                 report['paid'] += entry.amount
 
         if txn.transaction_type == txn.PAYMENT:
             report['payments'].append(txn_dict)
 
+        for job_id, debit_dict in job_debits.items():
+            if debit_dict['amount'].gross != 0:
+                debits = report['job_debits'].setdefault(job_id, [])
+                debits.append(debit_dict)
+
+    total_unpaid_balance = report['invoiced'] + report['paid']  # report['paid'] is a negative number
+
+    report['unpaid'] = Amount.zero()
+    if total_unpaid_balance.gross > report['debit'].gross:
+        # There is more owned on the account than this invoice is trying to solicit.
+        # This means we need to show the difference between what is being sought and what is owed
+        # as unpaid amount above the debit line on invoice.
+        report['unpaid'] = report['debit'] - total_unpaid_balance  # big from small to get negative number
+
     return report
+
+
+def create_invoice_table(report, cols=('net', 'tax', 'gross')):
+    t = []
+    t += [('',)+cols+(None,)]
+    t += [('progress',)+tuple(getattr(report['invoiced'], col) for col in cols)+(None,)]
+
+    for txn in report['payments']:
+        t += [(txn['type'],)+tuple(getattr(txn['payment'], col) for col in cols)+(txn,)]
+        if txn['discount'].gross != 0:
+            t += [('discount',)+tuple(getattr(txn['discount'], col) for col in cols)+(txn,)]
+
+    if report['unpaid'].gross != 0:
+        t += [('unpaid',)+tuple(getattr(report['unpaid'], col) for col in cols)+(None,)]
+
+    t += [('debit',)+tuple(getattr(report['debit'], col) for col in cols)+(None,)]
+
+    return t
 
 
 def create_adjustment_report(txn):
@@ -123,6 +173,10 @@ def create_adjustment_report(txn):
     return adjustment
 
 
+def create_adjustment_table(report):
+    return []
+
+
 def create_refund_report(txn):
 
     refund = {
@@ -146,24 +200,3 @@ def create_refund_report(txn):
         job['amount'] += entry.amount
 
     return refund
-
-
-def generate_transaction_table(data, cols=('net', 'tax', 'gross')):
-    t = []
-    t += [('',)+cols+(None,)]
-    t += [('progress',)+tuple(getattr(data['invoiced'], col) for col in cols)+(None,)]
-
-    for txn in data['transactions']:
-        if txn['type'] == Transaction.INVOICE:
-            # only show invoice if it's not fully paid
-            if txn['paid'].gross < txn['amount'].gross:
-                amount = (txn['amount'] - txn['paid']).negate
-                t += [(txn['type'],)+tuple(getattr(amount, col) for col in cols)+(txn,)]
-        elif txn['type'] == Transaction.PAYMENT and\
-                (txn['payment'].gross != 0 or txn['discount'].gross != 0):
-            t += [(txn['type'],)+tuple(getattr(txn['payment'], col) for col in cols)+(txn,)]
-            if txn['discount'].gross != 0:
-                t += [('discount',)+tuple(getattr(txn['discount'], col) for col in cols)+(txn,)]
-
-    return t
-

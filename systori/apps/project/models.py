@@ -200,36 +200,20 @@ class Project(models.Model):
                 .get()
 
     @property
-    def billable_jobs(self):
-        for job in self.jobs.all():
-            if job.is_billable:
-                yield job
-
-    @property
-    def is_billable(self):
-        for job in self.billable_jobs:
-            return True
-        return False
-
-    @property
     def estimate_total(self):
         return self.jobs.estimate_total()
 
     @property
-    def billable_total(self):
-        return self.jobs.billable_total()
+    def progress_total(self):
+        return self.jobs.progress_total()
 
     @property
-    def billable_tax_total(self):
-        return self.jobs.billable_tax_total()
-
-    @property
-    def billable_gross_total(self):
-        return self.jobs.billable_gross_total()
+    def progress_percent(self):
+        return round(self.progress_total / self.estimate_total * 100) if self.estimate_total else 0
 
     @property
     def jobs_for_proposal(self):
-        return self.jobs.filter(status=Job.DRAFT)
+        return self.jobs.filter(status__in=Job.STATUS_FOR_PROPOSAL)
 
     @property
     def has_jobs_for_proposal(self):
@@ -244,70 +228,7 @@ class Project(models.Model):
 
     @property
     def has_billable_contact(self):
-        return self.billable_contact != None
-
-    @property
-    def new_amount_to_debit(self):
-        """ This function returns the amount that can be debited to the customers
-            account based on work done since the last time the customer account was debited.
-        """
-        amount = Decimal(0.0)
-        for job in self.jobs.all():
-            amount += job.new_amount_to_debit
-        return amount
-
-    @property
-    def new_amount_with_balance(self):
-        amount = Decimal(0.0)
-        for job in self.jobs.all():
-            amount += job.new_amount_with_balance
-        return amount
-
-    @property
-    def debits(self):
-        amount = Decimal(0.0)
-        for job in self.jobs.all():
-            amount += job.account.debits().total
-        return amount
-
-    @property
-    def credits(self):
-        amount = Decimal(0.0)
-        for job in self.jobs.all():
-            amount += job.account.credits().total
-        return amount
-
-    @property
-    def balance(self):
-        amount = Decimal(0.0)
-        for job in self.jobs.all():
-            amount += job.account.balance
-        return amount
-
-    @property
-    def balance_base(self):
-        amount = Decimal(0.0)
-        for job in self.jobs.all():
-            amount += job.account.balance_base
-        return amount
-
-    @property
-    def balance_tax(self):
-        amount = Decimal(0.0)
-        for job in self.jobs.all():
-            amount += job.account.balance_tax
-        return amount
-
-    @property
-    def abs_payments(self):
-        amount = Decimal(0.0)
-        for job in self.jobs.all():
-            amount += job.account.payments().sum
-        return abs(amount)
-
-    @property
-    def complete_percent(self):
-        return round(self.billable_total / self.estimate_total * 100) if self.estimate_total else 0
+        return self.billable_contact is not None
 
 
 class JobSite(models.Model):

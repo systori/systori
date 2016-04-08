@@ -42,12 +42,15 @@
           <ul class="nav navbar-nav">
             <li class="dropdown">
               {% if available_companies|length > 1 %}
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ selected_company.name }} <span class="caret"></span></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  {% if selected_company %}{{ selected_company.name }}{% else %}{% trans "Select company..." %}{% endif %}
+                  <span class="caret"></span>
+                </a>
                 <ul class="dropdown-menu">
                   <li class="dropdown-header">{% trans 'available Companies' %}</li>
-                  {% for available_company in available_companies %}
-                    {% if available_company.schema != selected_company.schema %}
-                      <li><a href="/?__schema={{ available_company.schema }}">{{ available_company.name }}</a></li>
+                  {% for company in available_companies %}
+                    {% if not company.current %}
+                      <li><a href="{{ company.url }}">{{ company.name }}</a></li>
                     {% endif %}
                   {% endfor %}
                 </ul>
@@ -55,7 +58,9 @@
                 <a class="navbar-brand" href="#">{{ selected_company.name }}</a>
               {% endif %}
             </li>
+            {% if selected_company %}
             <li><a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
+            {% endif %}
             {% block head_navbar %}{% endblock %}
           </ul>
 
@@ -66,9 +71,11 @@
         <ul class="nav navbar-nav navbar-right">
 
           {% block open_field_app %}
+          {% if selected_company %}
           <li><a
               href="javascript:window.open('{% url 'field.dashboard' %}', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">{% trans 'open field app' %}</a>
           </li>
+          {% endif %}
           {% endblock %}
 
           <li class="dropdown">

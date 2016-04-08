@@ -45,10 +45,11 @@
       <tr>
         <th>{% trans "Name" %}</th>
         <th>{% trans "Status" %}</th>
-        <th style="text-align: right;">{% trans "Total" %}</th>
-        <th></th>
         <th>{% trans "Billing Method" %}</th>
-        <th style="text-align: right;">{% trans "Billable Amount" %}</th>
+        <th style="text-align: right;">{% trans "Estimate" %}</th>
+        <th></th>
+        <th style="text-align: right;">{% trans "Progress" %}</th>
+        <th></th>
         <th style="text-align: right;">{% trans "Actions" %}</th>
       </tr>
       </thead>
@@ -57,11 +58,12 @@
         <tr>
           <td><a href="{% url 'tasks' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
           <td>{{ job.get_status_display }}</td>
+          <td>{{ job.get_billing_method_display }}</td>
           <td style="text-align: right; white-space: nowrap;">
             {{ job.estimate_total|money }}
           </td>
           <td>
-            <div class="btn-group" style="width:70px;">
+            <div class="btn-group" style="width:80px;">
               <a class="btn btn-default btn-xs" href="{% url 'job.estimate' project.id job.id 'increase' %}"
                  title="{% blocktrans with percent=job.ESTIMATE_INCREMENT_DISPLAY %}Increase estimate by {{ percent }}.{% endblocktrans %}"><span
                   class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
@@ -73,8 +75,8 @@
                                                                                 aria-hidden="true"></span></a>
             </div>
           </td>
-          <td>{{ job.get_billing_method_display }}</td>
-          <td id="billable_amount_{{forloop.counter0}}" style="text-align: right; white-space: nowrap;">{{ job.billable_total|money }}</td>
+          <td style="text-align: right; white-space: nowrap;">{{ job.progress_total|money }}</td>
+          <td><small>{{ job.progress_percent }}%</small></td>
           <td style="text-align: right;">
             {% for state in job.get_available_status_transitions %}
               <a href="{% url 'job.transition' project.id job.id state.name %}">{{ state.custom.label }}</a>
@@ -90,10 +92,11 @@
         <tr>
           <td></td>
           <td></td>
+          <td></td>
           <td style="text-align: right;"><b>{{ project.estimate_total|money }}</b></td>
           <td></td>
-          <td></td>
-          <td style="text-align: right;"><b>{{ project.billable_total|money }}</b></td>
+          <td style="text-align: right;"><b>{{ project.progress_total|money }}</b></td>
+          <td><small>{{ project.progress_percent }}%</small></td>
           <td></td>
         </tr>
       {% endif %}
@@ -128,7 +131,7 @@
               {{ job.code }} {{ job }}<br/>
             {% endfor %}
           </td>
-          <td style="text-align: right; white-space: nowrap;">{{ doc.json.total_gross|money }}</td>
+          <td style="text-align: right; white-space: nowrap;">{{ doc.json.estimate_total.gross|money }}</td>
           <td>{{ doc.created_on|localize }}</td>
           <td>{{ doc.notes }}</td>
           <td style="min-width: 100px;">
@@ -235,7 +238,7 @@
       {% for parent_invoice in parent_invoices %}
       <div class="invoice-sequence">
         {% for invoice in parent_invoice.get_invoices %}
-          {% include "document/invoice_card.html" with invoice=invoice %}
+          {% include "accounting/invoice_card.html" with invoice=invoice %}
           {% if forloop.last %}
             {% if project.has_billable_contact %}
               {% if 'id' in invoice.json %}
@@ -287,29 +290,33 @@
         <th>{% trans 'Date' %} / {% trans 'Job' %}</th>
         <th class="text-right">{% trans 'Payment' %}</th>
         <th class="text-right">{% trans 'Discount' %}</th>
+        <th class="text-right">{% trans 'Adjustment' %}</th>
         <th class="text-right">{% trans 'Applied' %}</th>
         <th class="text-right" colspan="3">{% trans 'Actions' %}</th>
       </tr>
       </thead>
       <tbody>
-      {% for transaction in payments %}
+      {% for payment in payments %}
         <tr>
-          <td>{{ transaction.date|localize }}</td>
-          <td class="text-right">{{ transaction.payment.negate.gross|money }}</td>
-          <td class="text-right">{{ transaction.discount.negate.gross|money }}</td>
-          <td class="text-right">{{ transaction.total.negate.gross|money }}</td>
+          <td>{{ payment.document_date|localize }}</td>
+          <td class="text-right">{{ payment.json.split_total.gross|money }}</td>
+          <td class="text-right">{{ payment.json.discount_total.gross|money }}</td>
+          <td class="text-right">{{ payment.json.adjustment_total.gross|money }}</td>
+          <td class="text-right">{{ payment.json.credit_total.gross|money }}</td>
           <td class="text-right">
-            {% if not transaction.is_reconciled %}
-              <a href="{% url 'payment.delete' project.id transaction.id %}">{% trans "Delete" %}</a>
+            {% if not payment.transaction.is_reconciled %}
+              <a href="{% url 'payment.delete' project.id payment.id %}">{% trans "Delete" %}</a>
+              <a href="{% url 'payment.update' project.id payment.id %}">{% trans "Edit" %}</a>
             {% endif %}
           </td>
         </tr>
-        {% for job in transaction.jobs.values %}
+        {% for job in payment.json.jobs %}
           <tr class="job-row {% if forloop.last %}last{% endif %}">
             <td>{{ job.name }}</td>
-            <td>{{ job.payment.negate.gross|money }}</td>
-            <td>{{ job.discount.negate.gross|money }}</td>
-            <td>{{ job.total.negate.gross|money }}</td>
+            <td>{{ job.split.gross|money }}</td>
+            <td>{{ job.discount.gross|money }}</td>
+            <td>{{ job.adjustment.gross|money }}</td>
+            <td>{{ job.credit.gross|money }}</td>
             <td></td>
           </tr>
         {% endfor %}
@@ -347,6 +354,7 @@
           <td class="text-right">
             {% if not doc.transaction.is_reconciled %}
               <a href="{% url 'adjustment.delete' project.id doc.id %}">{% trans "Delete" %}</a>
+              <a href="{% url 'adjustment.update' project.id doc.id %}">{% trans "Edit" %}</a>
             {% endif %}
           </td>
         </tr>
@@ -357,39 +365,56 @@
   <a  name="add_adjustment" href="{% url 'adjustment.create' project.id %}">{% trans "Add Adjustment" %}</a>
 
 
-  <h2 class="sub-header">{% trans "Refunds" %}</h2>
-  <div class="table-responsive" style="padding-bottom:110px;">
+  <style>
+    #refunds-table .job-row {
+      font-size: 75%;
+      color: gray;
+      text-align: right;
+    }
+    #refunds-table .job-row.last {
+      border-bottom: 2px solid #ddd;
+    }
+  </style>
+  <h2 class="sub-header">{% trans "Refund" %}</h2>
+  <div class="table-responsive">
     <table class="table" id="refunds-table">
       <thead>
       <tr>
         <th>{% trans 'Date' %}</th>
-        <th class="text-right">{% trans 'Refund' %}</th>
-        <th>{% trans 'Download' %}</th>
-        <th>{% trans 'Actions' %}</th>
+        <th></th>
+        <th class="text-right">{% trans 'Refunded' %}</th>
+        <th class="text-right">{% trans 'Applied' %}</th>
+        <th class="text-right">{% trans 'Issued to Customer' %}</th>
+        <th class="text-right">{% trans 'Actions' %}</th>
       </tr>
       </thead>
       <tbody>
-      {% for refund in project.refunds.all %}
+      {% for doc in refunds %}
         <tr>
-          <td>{{ refund.document_date|localize }}</td>
-          <td class="text-right">{{ refund.json.amount|money }}</td>
-          <td style="min-width: 100px;">
-            <div class="btn-group">
-              <button type="button" class="btn btn-default">{% trans 'PDF' %}</button>
-              <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                <span class="caret"></span>
-                <span class="sr-only">Toggle Dropdown</span>
-              </button>
-              <ul class="dropdown-menu" role="menu">
-                <li><a target="_blank" href="{% url 'refund.pdf' project.id 'email' refund.id %}">{% trans 'Email PDF' %}</a></li>
-                <li><a target="_blank" href="{% url 'refund.pdf' project.id 'print' refund.id %}">{% trans 'Print PDF' %}</a></li>
-              </ul>
-            </div>
-          </td>
+          <td>{{ doc.document_date|localize }}</td>
+          <td></td>
+          <td class="text-right">{{ doc.json.refund_total.gross|money }}</td>
+          <td class="text-right">{{ doc.json.credit_total.gross|money }}</td>
+          <td class="text-right">{{ doc.json.customer_refund.gross|money }}</td>
           <td class="text-right">
-            <a href="{% url 'refund.delete' project.id refund.id %}">{% trans "Delete" %}</a>
+            {% if not doc.transaction.is_reconciled %}
+              <a href="{% url 'refund.delete' project.id doc.id %}">{% trans "Delete" %}</a>
+              <a href="{% url 'refund.update' project.id doc.id %}">{% trans "Edit" %}</a>
+            {% endif %}
           </td>
         </tr>
+        {% for job in doc.json.jobs %}
+        {% if job.refund.gross > 0 or job.credit.gross > 0 %}
+        <tr class="job-row">
+          <td></td>
+          <td>{{ job.name }}</td>
+          <td>{% if job.refund.gross > 0 %}{{ job.refund.gross|money }}{% endif %}</td>
+          <td>{% if job.credit.gross > 0 %}{{ job.credit.gross|money }}{% endif %}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        {% endif %}
+        {% endfor %}
       {% endfor %}
       </tbody>
     </table>

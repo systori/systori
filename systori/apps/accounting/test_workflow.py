@@ -1,10 +1,10 @@
 from decimal import Decimal as D
 from django.test import TestCase
-from systori.lib.accounting.tools import Amount, extract_net_tax
+from systori.lib.accounting.tools import Amount
 from ..task.test_models import create_task_data
 from .models import Account, Transaction, Entry, create_account_for_job
 from .workflow import create_chart_of_accounts
-from .workflow import debit_jobs, credit_jobs, adjust_jobs
+from .workflow import debit_jobs, credit_jobs, adjust_jobs, refund_jobs
 from .constants import *
 
 
@@ -214,17 +214,17 @@ class TestCompletedContractAccountingMethod(AccountingTestCase):
     def test_adjust_with_adjustment(self):
         """ Only adjustment requested. """
         debit_jobs([(self.job, A(600), Entry.WORK_DEBIT)])
-        adjust_jobs([(self.job, A(400), A(0), A(0))])
+        adjust_jobs([(self.job, A(-400))])
         self.assert_balances(bank=A(0), balance=A(200),          # debited (600) + credited (-400) = balance (200)
                              debited=A(600), invoiced=A(200),  # debited (600) + adjustment (-400) = invoiced (200)
                              paid=A(0), credited=A(-400),        # payment (0) + adjustment (-400) = credited (-400)
                              promised=A(200), partial=A(0), tax=A(0))
 
-    def test_adjust_with_bank_refund(self):
+    def test_refund_with_bank_refund(self):
         """ Customer overpaid an invoice, so we need to refund some cash. """
         debit_jobs([(self.job, A(600), Entry.WORK_DEBIT)])
         credit_jobs([(self.job, A(650), A(0), A(0))], D(650))
-        adjust_jobs([(self.job, A(0), A(50), A(0))])
+        refund_jobs([(self.job, A(50), A(0))])
         self.assert_balances(bank=A(600, 0, 0), balance=A(0), promised=A(0),
                              debited=A(650),    # invoice debit (600) + refund debit (50) = total debited (650)
                              invoiced=A(600),   # invoice debit (600) = total invoiced (600)
@@ -232,85 +232,104 @@ class TestCompletedContractAccountingMethod(AccountingTestCase):
                              credited=A(-650),  # payment credit (-650) + adjustment (0) = credited (-650)
                              partial=A(600).net_amount, tax=A(600).tax_amount)
 
-    def test_adjust_with_adjustment_and_bank_refund(self):
-        """ Customer overpaid an already inflated invoice, so we need to adjust invoice and refund some cash. """
-        # Invoice 680.00
-        debit_jobs([(self.job, A(680), Entry.WORK_DEBIT)])
-        # Customer pays 640.00
-        credit_jobs([(self.job, A(640), A(0), A(0))], D(640))
-        # Pretend now that progress changed and billable is now only 600.00
-        # We need to reduce invoiced by 80.00 of which 40.00 is a refund
-        # A(40) != A(80)-A(40)  # the net/tax is off by 0.01
-        a40 = A(80)-A(40)
-        a720 = A(680)+a40
-        adjust_jobs([(self.job, A(80), a40, A(0))])
-        self.assert_balances(bank=A(600, 0, 0), balance=A(0), promised=A(0),
-                             debited=a720,          # invoice debit (680) + refund debit (40) = total debited (720)
-                             invoiced=A(600),       # invoice debit (600) = total invoiced (600)
-                             paid=A(-600),          # payment credit (-650) + refund (50) = paid (-600)
-                             credited=a720.negate,  # payment credit (-640) + adjustment (-80) = total credited (-720)
-                             partial=A(600).net_amount, tax=A(600).tax_amount)
-
-    def test_adjust_with_adjustment_and_applied_refund(self):
-        """ Initially customer underpays an invoice with two jobs on it, then the first job billable is reduced.
-            So, we adjust the first job, issues a refund, then apply that refund to the second job.
+    def test_refund_with_applied_refund(self):
+        """ Customer pays the correct amount but it is incorrectly applied to jobs.
+            Issue a partial refund to first job and immediately apply that to the second job.
         """
         # Invoice 700.00
         debit_jobs([
             (self.job, A(680), Entry.WORK_DEBIT),
             (self.job2, A(20), Entry.WORK_DEBIT)
         ])
-        # Customer pays 500.00, applied to first job
-        credit_jobs([(self.job, A(500), A(0), A(0))], D(500))
-        # Progress changed and billable is now only 480.00 for first job
-        # We need to adjust first job by 200.00 of which 20.00 is a refund, then apply that to second job
-        adjust_jobs([
-            (self.job, A(200), A(20), A(0)),
-            (self.job2, A(0), A(0), A(20))
-        ])
 
-        self.assert_balances(bank=A(500, 0, 0), balance=A(0), promised=A(0),
-                             debited=A(700),    # invoice debit (680) + refund debit (20) = total debited (700)
-                             invoiced=A(480),   # invoice debit (680) + adjustment (-200) = total invoiced (480)
-                             paid=A(-480),      # payment credit (-500) + refund debit (20) = paid (-480)
-                             credited=A(-700),  # payment credit (-500) + adjustment (-200) = total credited (-700)
-                             partial=A(500).net_amount, tax=A(500).tax_amount)
+        # Payment of 700.00 is incorrectly applied to first job
+        credit_jobs([(self.job, A(700), A(0), A(0))], D(700))
 
-        self.assert_balances(bank=A(500, 0, 0), invoiced=A(20), paid=A(-20),
-                             partial=A(500).net_amount, tax=A(500).tax_amount,
+        self.assert_balances(bank=A(700, 0, 0), balance=A(-20), promised=A(0),
+                             debited=A(680),    # invoice debit (680) + refund debit (0) = total debited (680)
+                             invoiced=A(680),   # invoice debit (680) + adjustment (0) = total invoiced (680)
+                             paid=A(-700),      # payment credit (-700) + refund debit (0) = paid (-700)
+                             credited=A(-700),  # payment credit (-700) + adjustment (0) = total credited (-700)
+                             partial=A(700).net_amount, tax=A(700).tax_amount)
+
+        self.assert_balances(bank=A(700, 0, 0), balance=A(20), promised=A(0),
+                             debited=A(20),    # invoice debit (20) + refund debit (0) = total debited (20)
+                             invoiced=A(20),   # invoice debit (20) + adjustment (0) = total invoiced (20)
+                             paid=A(0),        # payment credit (0) + refund debit (0) = paid (0)
+                             credited=A(0),    # payment credit (0) + adjustment (0) = total credited (0)
+                             partial=A(700).net_amount, tax=A(700).tax_amount,
                              switch_to_job=self.job2)
 
-    def test_adjust_with_adjustment_bank_refund_and_applied_refund(self):
-        """ Initially customer underpays an invoice with two jobs on it, then the first job billable is reduced.
-            So, we adjust the first job and issues a refund, then apply that to the second job and cash refund the rest.
+        # Refund 20.00 from first job and apply to second job
+        refund_jobs([
+            (self.job, A(20), A(0)),
+            (self.job2, A(0), A(20))
+        ])
+
+        self.assert_balances(bank=A(700, 0, 0), balance=A(0), promised=A(0),
+                             debited=A(700),    # invoice debit (680) + refund debit (20) = total debited (700)
+                             invoiced=A(680),   # invoice debit (680) + adjustment (0) = total invoiced (680)
+                             paid=A(-680),      # payment credit (-700) + refund debit (20) = paid (-680)
+                             credited=A(-700),  # payment credit (-700) + adjustment (0) = total credited (-700)
+                             partial=A(700).net_amount, tax=A(700).tax_amount)
+
+        self.assert_balances(bank=A(700, 0, 0), balance=A(0), promised=A(0),
+                             debited=A(20),    # invoice debit (20) + refund debit (20) = total debited (70)
+                             invoiced=A(20),   # invoice debit (20) + adjustment (0) = total invoiced (20)
+                             paid=A(-20),      # payment credit (-20) + refund debit (0) = paid (-20)
+                             credited=A(-20),  # payment credit (-20) + adjustment (0) = total credited (-20)
+                             partial=A(700).net_amount, tax=A(700).tax_amount,
+                             switch_to_job=self.job2)
+
+    def test_refund_with_applied_refund_and_bank_refund(self):
+        """ Customer overpays invoice and the overpayment is further incorrectly applied.
+            Issue a partial refund to first job, apply that to the second job, refund to customer the rest.
         """
-        # Invoice 700.00
+        # Invoice 600.00
         debit_jobs([
-            (self.job, A(680), Entry.WORK_DEBIT),
+            (self.job, A(580), Entry.WORK_DEBIT),
             (self.job2, A(20), Entry.WORK_DEBIT)
         ])
-        # Customer pays 500.00, applied to first job
-        credit_jobs([(self.job, A(500), A(0), A(0))], D(500))
-        # Progress changed and billable is now only 400.00 for first job
-        # We need to adjust first job by 280.00 of which 100.00 is a refund
-        # We apply 20.00 of that refund to job 2 and issue cash refund for 80
-        adjust_jobs([
-            (self.job, A(280), A(100), A(0)),
-            (self.job2, A(0), A(0), A(20))
+
+        # Payment of 700.00 is incorrectly applied to first job
+        credit_jobs([(self.job, A(700), A(0), A(0))], D(700))
+
+        one = A(n='-0.01', t='0.01')
+
+        self.assert_balances(bank=A(700, 0, 0), balance=A('-120')+one, promised=A(-100)+one,
+                             debited=A(580),    # invoice debit (680) + refund debit (0) = total debited (680)
+                             invoiced=A(580),   # invoice debit (680) + adjustment (0) = total invoiced (680)
+                             paid=A(-700),      # payment credit (-700) + refund debit (0) = paid (-700)
+                             credited=A(-700),  # payment credit (-700) + adjustment (0) = total credited (-700)
+                             partial=A(700).net_amount, tax=A(700).tax_amount)
+
+        self.assert_balances(bank=A(700, 0, 0), balance=A(20), promised=A(-100)+one,
+                             debited=A(20),    # invoice debit (20) + refund debit (0) = total debited (20)
+                             invoiced=A(20),   # invoice debit (20) + adjustment (0) = total invoiced (20)
+                             paid=A(0),        # payment credit (0) + refund debit (0) = paid (0)
+                             credited=A(0),    # payment credit (0) + adjustment (0) = total credited (0)
+                             partial=A(700).net_amount, tax=A(700).tax_amount,
+                             switch_to_job=self.job2)
+
+        # Refund 20.00 from first job and apply to second job
+        refund_jobs([
+            (self.job, A(120)-one, A(0)),
+            (self.job2, A(0), A(20))
         ])
 
-        # A(400) != A(680)-A(280)  # the net/tax is off by 0.01
-        a400 = A(680)-A(280)
-        a420 = a400+A(20)
-        self.assert_balances(bank=A(420, 0, 0), balance=A(0), promised=A(0),
-                             debited=A(780),    # invoice debit (680) + refund debit (100) = total debited (780)
-                             invoiced=a400,     # invoice debit (680) + adjustment (-280) = total invoiced (400)
-                             paid=a400.negate,      # payment credit (-500) + refund debit (100) = paid (-400)
-                             credited=A(-780),  # payment credit (-500) + adjustment (-280) = total credited (-780)
-                             partial=a420.net_amount, tax=a420.tax_amount)
+        self.assert_balances(bank=A(600, 0, 0), balance=A(0), promised=A(0),
+                             debited=A(700),    # invoice debit (680) + refund debit (20) = total debited (700)
+                             invoiced=A(580),   # invoice debit (680) + adjustment (0) = total invoiced (680)
+                             paid=A(-580),      # payment credit (-700) + refund debit (20) = paid (-680)
+                             credited=A(-700),  # payment credit (-700) + adjustment (0) = total credited (-700)
+                             partial=A(600).net_amount, tax=A(600).tax_amount)
 
-        self.assert_balances(bank=A(420, 0, 0), invoiced=A(20), paid=A(-20),
-                             partial=a420.net_amount, tax=a420.tax_amount,
+        self.assert_balances(bank=A(600, 0, 0), balance=A(0), promised=A(0),
+                             debited=A(20),    # invoice debit (20) + refund debit (20) = total debited (70)
+                             invoiced=A(20),   # invoice debit (20) + adjustment (0) = total invoiced (20)
+                             paid=A(-20),      # payment credit (-20) + refund debit (0) = paid (-20)
+                             credited=A(-20),  # payment credit (-20) + adjustment (0) = total credited (-20)
+                             partial=A(600).net_amount, tax=A(600).tax_amount,
                              switch_to_job=self.job2)
 
     # After Revenue Recognition
@@ -420,83 +439,56 @@ class TestCompletedContractAccountingMethod(AccountingTestCase):
         total_income = income_account().balance + discount_account().balance
         self.assertEqual(total_income, A(900).net_amount)
 
-    def test_refund_to_other_job_and_customer_with_recognized_revenue(self):
-        """ Refund one job and apply part of the refund to second job and return the rest to customer. """
+    def test_refund_with_applied_refund_and_bank_refund_and_recognized_revenue(self):
+        """ Customer overpays final invoice and the overpayment is further incorrectly applied.
+            Issue a partial refund to first job, apply that to the second job, refund to customer the rest.
+        """
 
-        debit_jobs([(self.job, A(480), Entry.WORK_DEBIT),
-                    (self.job2, A(200), Entry.WORK_DEBIT)], recognize_revenue=True)
+        # Invoice 600.00
+        debit_jobs([
+            (self.job, A(580), Entry.WORK_DEBIT),
+            (self.job2, A(20), Entry.WORK_DEBIT)
+        ], recognize_revenue=True)
 
-        credit_jobs([(self.job, A(880), A(0), A(0))], D(880))
+        # Payment of 700.00 is incorrectly applied to first job
+        credit_jobs([(self.job, A(700), A(0), A(0))], D(700))
 
-        self.assert_balances(bank=A(880, 0, 0), balance=A(480)-A(880),
-                             invoiced=A(480), paid=A(-880),
-                             income=A(680).net_amount, tax=A(680).tax_amount)
+        one = A(n='-0.01', t='0.01')
 
-        self.assert_balances(bank=A(880, 0, 0), balance=A(200),
-                             invoiced=A(200),
-                             income=A(680).net_amount, tax=A(680).tax_amount,
+        self.assert_balances(bank=A(700, 0, 0), balance=A('-120')+one,
+                             debited=A(580),    # invoice debit (680) + refund debit (0) = total debited (680)
+                             invoiced=A(580),   # invoice debit (680) + adjustment (0) = total invoiced (680)
+                             paid=A(-700),      # payment credit (-700) + refund debit (0) = paid (-700)
+                             credited=A(-700),  # payment credit (-700) + adjustment (0) = total credited (-700)
+                             income=A(600).net_amount, tax=A(600).tax_amount)
+
+        self.assert_balances(bank=A(700, 0, 0), balance=A(20),
+                             debited=A(20),    # invoice debit (20) + refund debit (0) = total debited (20)
+                             invoiced=A(20),   # invoice debit (20) + adjustment (0) = total invoiced (20)
+                             paid=A(0),        # payment credit (0) + refund debit (0) = paid (0)
+                             credited=A(0),    # payment credit (0) + adjustment (0) = total credited (0)
+                             income=A(600).net_amount, tax=A(600).tax_amount,
                              switch_to_job=self.job2)
 
-        a400 = A(880)-A(480)
-        adjust_jobs([(self.job, A(0), a400, A(0)),
-                     (self.job2, A(0), A(0), a400-A(200))])
+        # Refund 20.00 from first job and apply to second job
+        refund_jobs([
+            (self.job, A(120)-one, A(0)),
+            (self.job2, A(0), A(20))
+        ])
 
-        self.assert_balances(bank=A(680, 0, 0), balance=A(0),
-                             invoiced=A(480), paid=A(-480),
-                             debited=A(880), credited=A(-880),
-                             income=A(680).net_amount, tax=A(680).tax_amount)
+        self.assert_balances(bank=A(600, 0, 0), balance=A(0),
+                             debited=A(700),    # invoice debit (680) + refund debit (20) = total debited (700)
+                             invoiced=A(580),   # invoice debit (680) + adjustment (0) = total invoiced (680)
+                             paid=A(-580),      # payment credit (-700) + refund debit (20) = paid (-680)
+                             credited=A(-700),  # payment credit (-700) + adjustment (0) = total credited (-700)
+                             income=A(600).net_amount, tax=A(600).tax_amount)
 
-        self.assert_balances(bank=A(680, 0, 0), balance=A(0),
-                             invoiced=A(200), paid=A(-200),
-                             income=A(680).net_amount, tax=A(680).tax_amount,
-                             switch_to_job=self.job2)
-
-    def test_refund_to_customer_on_final_invoice_after_complicated_transactions(self):
-        # we send a partial invoice for $410
-        debit_jobs([(self.job, A(210), Entry.WORK_DEBIT),
-                    (self.job2, A(200), Entry.WORK_DEBIT)])
-
-        # customer overpays by $100, we apply overpayment to first job
-        credit_jobs([(self.job, A(310), A(0), A(0)),
-                     (self.job2, A(200), A(0), A(0))], D(510))
-
-        # issue final invoice and add $100 extra debit to first job, consuming the overpayment
-        # job2 gets some new work charged as well
-        debit_jobs([(self.job, A(100), Entry.WORK_DEBIT),  # gets swallowed by overpayment
-                    (self.job2, A(100), Entry.WORK_DEBIT)],  # adds to amount due
-                   recognize_revenue=True)
-
-        a610 = A(510) + A(100)
-        self.assert_balances(bank=A(510, 0, 0),
-                             invoiced=A(310), paid=A(-310),
-                             income=a610.net_amount, tax=a610.tax_amount)
-        self.assert_balances(bank=A(510, 0, 0), balance=A(100),
-                             invoiced=A(300), paid=A(-200),
-                             income=a610.net_amount, tax=a610.tax_amount,
-                             switch_to_job=self.job2)
-
-        # customer overpays final invoice by $50
-        credit_jobs([(self.job2, A(150), A(0), A(0))], D(150))
-
-        # overpayment only affects the job balance, income/tax are unchanged
-        self.assert_balances(bank=A(660, 0, 0),
-                             invoiced=A(310), paid=A(-310),
-                             income=a610.net_amount, tax=a610.tax_amount)
-        self.assert_balances(bank=A(660, 0, 0), balance=A(-50.00),
-                             invoiced=A(300), paid=A(-350),
-                             income=a610.net_amount, tax=a610.tax_amount,
-                             switch_to_job=self.job2)
-
-        # refund customer the overpayment
-        adjust_jobs([(self.job2, A(0), A(50), A(0))])
-
-        self.assert_balances(bank=A(610, 0, 0),
-                             invoiced=A(310), paid=A(-310),
-                             income=a610.net_amount, tax=a610.tax_amount)
-        self.assert_balances(bank=A(610, 0, 0),
-                             invoiced=A(300), paid=A(-300),
-                             debited=A(350), credited=A(-350),
-                             income=a610.net_amount, tax=a610.tax_amount,
+        self.assert_balances(bank=A(600, 0, 0), balance=A(0),
+                             debited=A(20),    # invoice debit (20) + refund debit (20) = total debited (70)
+                             invoiced=A(20),   # invoice debit (20) + adjustment (0) = total invoiced (20)
+                             paid=A(-20),      # payment credit (-20) + refund debit (0) = paid (-20)
+                             credited=A(-20),  # payment credit (-20) + adjustment (0) = total credited (-20)
+                             income=A(600).net_amount, tax=A(600).tax_amount,
                              switch_to_job=self.job2)
 
 

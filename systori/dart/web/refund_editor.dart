@@ -1,106 +1,101 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
-import 'common.dart';
+import 'amount_element.dart';
 
 
-NumberFormat AMOUNT = new NumberFormat("#,###,###,##0.00");
+class RefundTable extends TableElement {
 
+    AmountViewCell refund_total_cell;
+    AmountViewCell credit_total_cell;
+    AmountViewCell issue_refund_cell;
 
-class JobsTable extends TableElement {
+    double tax_rate;
 
-    TableCellElement amount_total_cell;
+    ElementList<RefundRow> get rows =>
+            this.querySelectorAll(":scope tr.refund-row");
 
-    // 1.00 -> 100
-    int amount_total = 0;
-
-    JobsTable.created() : super.created() {
-        TableRowElement totals = this.querySelector(":scope tr.job-table-totals");
-        this.amount_total_cell = totals.querySelector(":scope>.job-amount");
-        this.amount_total = (parse_currency(amount_total_cell.text) * 100).round();
+    RefundTable.created() : super.created(); attached() {
+        TableRowElement totals = this.querySelector(":scope tr.refund-table-totals");
+        this.refund_total_cell = totals.querySelector(":scope>.job-refund");
+        this.credit_total_cell = totals.querySelector(":scope>.job-credit");
+        this.issue_refund_cell = querySelector(".issue-refund");
+        tax_rate = double.parse(this.dataset['tax-rate']);
     }
 
     recalculate() {
-        amount_total = 0;
-        var rows = this.querySelectorAll(":scope tr.job-row");
-        for (JobRow row in rows) {
-            amount_total += row.amount;
+
+        Amount refund_total = new Amount(0, 0, tax_rate);
+        for (RefundRow row in rows) {
+            refund_total += row.refund_cell.amount;
         }
-        amount_total_cell.text = AMOUNT.format(amount_total/100);
+        refund_total_cell.update(refund_total);
+
+        Amount credit_total = new Amount(0, 0, tax_rate);
+        for (RefundRow row in rows) {
+            refund_total = row.consume_refund(refund_total);
+            credit_total += row.credit_cell.amount;
+        }
+        credit_total_cell.update(credit_total);
+        issue_refund_cell.update(refund_total);
     }
 
 }
 
 
-class RefundTable extends JobsTable {
+class RefundRow extends TableRowElement {
 
-    DivElement refund_amount_div;
+    RefundTable table;
 
-    RefundTable.created() : super.created() {
-        refund_amount_div = document.querySelector('div.refund-amount');
+    AmountViewCell paid_cell;
+    AmountViewCell invoiced_cell;
+    AmountViewCell progress_cell;
+    AmountInputCell refund_cell;
+    AmountInputCell credit_cell;
+
+    RefundRow.created() : super.created(); attached() {
+        table = parent.parent;
+
+        paid_cell = this.querySelector(":scope>.job-paid");
+        paid_cell.onClick.listen(column_clicked);
+        invoiced_cell = this.querySelector(":scope>.job-invoiced");
+        progress_cell = this.querySelector(":scope>.job-progress");
+
+        refund_cell = this.querySelector(":scope>.job-refund");
+        refund_cell.onAmountChange.listen(amount_changed);
+        credit_cell = this.querySelector(":scope>.job-credit");
+        credit_cell.onAmountChange.listen(amount_changed);
     }
 
-    recalculate() {
-        super.recalculate();
-        update_refund_amount();
+    consume_refund(Amount refund) {
+        if (refund_cell.amount.gross > 0) {
+            // don't apply the refunds back on the row that's being refunded
+            credit_cell.zero();
+            return refund;
+        }
+        if (progress_cell.amount.gross > paid_cell.amount.gross) {
+            var consumable = progress_cell.amount - paid_cell.amount;
+            if (refund.gross < consumable.gross) {
+                consumable = refund;
+            }
+            credit_cell.update(consumable);
+            refund -= consumable;
+        }
+        return refund;
     }
 
-    update_refund_amount() {
-        ApplyTable apply_table = document.querySelector('table[is="apply-table"');
-        int refund = apply_table != null ? amount_total - apply_table.amount_total : amount_total;
-        refund_amount_div.text = AMOUNT.format(refund/100);
+    amount_changed(AmountChangeEvent e) {
+        table.recalculate();
     }
 
-}
-
-
-class ApplyTable extends JobsTable {
-
-    ApplyTable.created() : super.created();
-
-    recalculate() {
-        super.recalculate();
-        RefundTable refund_table = document.querySelector('table[is="refund-table"');
-        refund_table.update_refund_amount();
+    column_clicked(MouseEvent e) {
+        Amount new_refund_amount = (e.currentTarget as AmountViewCell).amount;
+        refund_cell.update(new_refund_amount, triggerEvent: true);
     }
-
-}
-
-
-class JobRow extends TableRowElement {
-
-    AnchorElement paid_anchor;
-    AnchorElement overpaid_anchor;
-    TextInputElement amount_input;
-
-    // 1.00 -> 100
-    int amount;
-
-    JobRow.created() : super.created() {
-        this.amount_input = this.querySelector('input[name\$="-amount"]');
-        this.amount_input.onKeyUp.listen(input_changed);
-        this.amount = (parse_currency(amount_input.value) * 100).round();
-
-        this.paid_anchor = this.querySelector(":scope>.job-paid>a");
-        if (this.paid_anchor != null) this.paid_anchor.onClick.listen(amount_clicked);
-        this.overpaid_anchor = this.querySelector(":scope>.job-overpaid>a");
-        if (this.overpaid_anchor != null) this.overpaid_anchor.onClick.listen(amount_clicked);
-    }
-
-    input_changed([Event e]) {
-        this.amount = (parse_currency(amount_input.value) * 100).round();
-        (parent.parent as JobsTable).recalculate();
-    }
-
-    amount_clicked(Event e) {
-        amount_input.value = (e.target as AnchorElement).text;
-        input_changed();
-    }
-
 }
 
 void main() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
+    registerAmountElements();
     document.registerElement('refund-table', RefundTable, extendsTag:'table');
-    document.registerElement('apply-table', ApplyTable, extendsTag:'table');
-    document.registerElement('job-row', JobRow, extendsTag:'tr');
+    document.registerElement('refund-row', RefundRow, extendsTag:'tr');
 }
