@@ -68,6 +68,11 @@ class Amount {
         return net == other.net && tax == other.tax;
     }
 
+    int get hashCode {
+        // TODO: re-implement this when dart sdk exposes _JenkinsSmiHash
+        //  SEE: https://github.com/dart-lang/sdk/issues/11617
+        return net.hashCode ^ tax.hashCode;
+    }
 }
 
 
