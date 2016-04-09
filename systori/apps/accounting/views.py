@@ -148,12 +148,12 @@ class PaymentCreate(PaymentViewMixin, CreateView):
             invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
             kwargs['initial'] = {
                 'invoice': invoice,
-                'payment': invoice.json['debit'].gross,
+                'payment': invoice.json.get('corrected', invoice.json['debit']).gross,
             }
             instance.json['jobs'] = [{
                 'job.id': job['job.id'],
-                'invoiced': job['debit'],
-                'split': job['debit']
+                'invoiced': job.get('corrected', job['debit']),
+                'split': job.get('corrected', job['debit'])
             } for job in invoice.json['jobs']]
         else:
             instance.json['jobs'] = []
