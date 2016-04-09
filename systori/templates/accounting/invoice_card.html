@@ -25,17 +25,17 @@
     <tr style="text-align: right; white-space: nowrap;">
       <td colspan="2">{% trans "Net" %}:</td>
       <td style="text-align: right; white-space: nowrap;">{{ invoice.json.debit.net|money }}</td>
-      <td></td>
+      <td style="text-align: right; white-space: nowrap;">{% if invoice.json.adjustment %}{% amount_diff_part invoice.json.adjustment 'net' %}{% endif %}</td>
     </tr>
     <tr style="text-align: right; white-space: nowrap;">
       <td colspan="2">{% trans "VAT" %} {{ TAX_RATE_DISPLAY }}:</td>
       <td style="text-align: right; white-space: nowrap;">{{ invoice.json.debit.tax|money }}</td>
-      <td></td>
+      <td style="text-align: right; white-space: nowrap;">{% if invoice.json.adjustment %}{% amount_diff_part invoice.json.adjustment 'tax' %}{% endif %}</td>
     </tr>
     <tr style="text-align: right; white-space: nowrap;">
       <td colspan="2">{% trans "Gross" %}:</td>
       <td name="debit_gross" style="font-weight: bold; text-align: right; white-space: nowrap;">{{ invoice.json.debit.gross|money }}</td>
-      <td></td>
+      <td style="text-align: right; white-space: nowrap;">{% if invoice.json.adjustment %}{% amount_diff_part invoice.json.adjustment 'gross' %}{% endif %}</td>
     </tr>
     {% if invoice.json.payment %}
     <tr style="text-align: right; white-space: nowrap;">
