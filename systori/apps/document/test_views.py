@@ -4,36 +4,10 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 
 from systori.lib.testing import SystoriTestCase
-from ..accounting.forms import InvoiceForm, InvoiceFormSet
-from ..accounting.test_workflow import create_data, A
+from ..accounting.test_workflow import create_data
 from ..directory.models import Contact, ProjectContact
 from .forms import ProposalForm, ProposalFormSet
-from .models import Proposal, Invoice, Letterhead
-
-
-def template_debug_output():
-    """ Usage:
-
-        try:
-            self.client.get(...)
-        except:
-            template_debug_output()
-    """
-    import sys
-    import html
-    from django.views.debug import ExceptionReporter
-    reporter = ExceptionReporter(None, *sys.exc_info())
-    reporter.get_template_exception_info()
-    info = reporter.template_info
-    print()
-    print('Exception Message: '+info['message'])
-    print('Template: '+info['name'])
-    print()
-    for line in info['source_lines']:
-        if line[0] == info['line']:
-            print('-->'+html.unescape(line[1])[3:-1])
-        else:
-            print(html.unescape(line[1])[:-1])
+from .models import Proposal, Letterhead
 
 
 class DocumentTestCase(SystoriTestCase):
@@ -130,102 +104,6 @@ class ProposalViewTests(DocumentTestCase):
         self.assertEqual(proposal.json['header'], 'new header')
         self.assertEqual(proposal.json['footer'], 'new footer')
         self.assertEqual(proposal.notes, 'new notes')
-
-
-class InvoiceViewTests(DocumentTestCase):
-    model = Invoice
-    form = InvoiceForm
-    form_set = InvoiceFormSet
-
-    def setUp(self):
-        super().setUp()
-        self.task.complete = 5
-        self.task.save()
-
-    def test_serialize_n_render_invoice(self):
-
-        # serialize
-
-        data = {
-            'title': 'Invoice #1',
-            'header': 'The Header',
-            'footer': 'The Footer',
-            'invoice_no': '2015/01/01',
-            'document_date': '2015-01-01',
-
-            'job-0-is_invoiced': 'True',
-            'job-0-job': self.job.id,
-            'job-0-debit_net': '1',
-            'job-0-debit_tax': '1',
-
-            'job-1-is_invoiced': 'True',
-            'job-1-job': self.job2.id,
-            'job-1-debit_net': '1',
-            'job-1-debit_tax': '1',
-        }
-        data.update(self.make_management_form())
-        response = self.client.post(reverse('invoice.create', args=[self.project.id]), data)
-        self.assertEqual(302, response.status_code)
-
-        # render
-
-        response = self.client.get(reverse('invoice.pdf', args=[
-            self.project.id,
-            'print',
-            Invoice.objects.first().id
-        ]))
-        self.assertEqual(200, response.status_code)
-
-    def test_update_invoice(self):
-
-        data = {
-            'title': 'Invoice #1',
-            'header': 'The Header',
-            'footer': 'The Footer',
-            'invoice_no': '2015/01/01',
-            'document_date': '2015-01-01',
-
-            'job-0-is_invoiced': 'True',
-            'job-0-job': self.job.id,
-            'job-0-debit_net': '1',
-            'job-0-debit_tax': '1',
-
-            'job-1-is_invoiced': 'True',
-            'job-1-job': self.job2.id,
-            'job-1-debit_net': '1',
-            'job-1-debit_tax': '1',
-        }
-        data.update(self.make_management_form())
-        self.client.post(reverse('invoice.create', args=[self.project.id]), data)
-
-
-        data = {
-            'title': 'Invoice #1',
-            'header': 'new header',
-            'footer': 'new footer',
-            'invoice_no': '2015/01/01',
-            'document_date': '2015-07-28',
-
-            'job-0-is_invoiced': 'True',
-            'job-0-job': self.job.id,
-            'job-0-debit_net': '5',
-            'job-0-debit_tax': '5',
-
-            'job-1-is_invoiced': 'True',
-            'job-1-job': self.job2.id,
-            'job-1-debit_net': '5',
-            'job-1-debit_tax': '5',
-        }
-        data.update(self.make_management_form())
-        invoice = Invoice.objects.order_by('id').first()
-        response = self.client.post(reverse('invoice.update', args=[self.project.id, invoice.id]), data)
-        self.assertEqual(302, response.status_code)
-        #self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
-
-        invoice.refresh_from_db()
-        self.assertEqual(invoice.document_date, date(2015, 7, 28))
-        self.assertEqual(invoice.json['header'], 'new header')
-        self.assertEqual(invoice.json['footer'], 'new footer')
 
 
 class EvidenceViewTests(DocumentTestCase):
