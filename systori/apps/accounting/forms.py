@@ -359,6 +359,24 @@ class AdjustmentForm(DocumentForm):
         adjustment.json = pdf_type.adjustment.serialize(adjustment, data)
         adjustment.letterhead = doc_settings.invoice_letterhead
 
+        if not adjustment.invoice:
+            adjustment.invoice = self.initial.get('invoice')
+
+        if adjustment.invoice:
+            for job in adjustment.invoice.json['jobs']:
+                adjust = None
+                for row in self.formset.get_json_rows():
+                    if job['job.id'] == row['job.id']:
+                        if row['adjustment'] != Amount.zero():
+                            adjust = row
+                        break
+                if adjust:
+                    job['adjustment'] = adjust['adjustment']
+                    job['corrected'] = adjust['corrected']
+            adjustment.invoice.json['adjustment'] = self.adjustment_total_amount
+            adjustment.invoice.json['corrected'] = self.corrected_total_amount
+            adjustment.invoice.save()
+
         super().save(commit)
 
 
@@ -384,6 +402,10 @@ class AdjustmentRowForm(DocumentRowForm):
         state.progress_diff_amount = state.progress_amount - state.invoiced_amount
 
     def calculate_initial_values(self):
+
+        if 'invoiced' in self.initial:
+            self.pre_txn.invoiced_amount = self.initial['invoiced']
+            self.pre_txn.invoiced_diff_amount = Amount.zero()
 
         if 'corrected' not in self.initial:
             self.initial['corrected'] = self.pre_txn.invoiced_amount
@@ -485,10 +507,26 @@ class PaymentForm(DocumentForm):
         payment.json = pdf_type.payment.serialize(payment, data)
         payment.letterhead = doc_settings.invoice_letterhead
 
-        invoice = self.instance.invoice
+        if not payment.invoice:
+            payment.invoice = self.initial.get('invoice')
+
+        invoice = payment.invoice
         if invoice and not invoice.status == Invoice.PAID:
             invoice.pay()
             invoice.save()
+
+        if payment.invoice:
+            for job in payment.invoice.json['jobs']:
+                pay = None
+                for row in self.formset.get_json_rows():
+                    if job['job.id'] == row['job.id']:
+                        if row['split'] != Amount.zero():
+                            pay = row
+                        break
+                if pay:
+                    job['payment'] = pay['credit']
+            payment.invoice.json['payment'] = self.credit_total_amount
+            payment.invoice.save()
 
         super().save(commit)
 

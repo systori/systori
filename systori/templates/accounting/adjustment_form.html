@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n staticfiles bootstrap customformatting ubrutils amount %}
+{% load i18n l10n staticfiles bootstrap customformatting ubrutils amount %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
@@ -9,19 +9,14 @@
     <h2 class="sub-header">
       {% trans "Adjustments & Corrections" %}
       <div class="btn-group" role="group">
+        {% if not form.initial.invoice %}
         <button type="button" class="btn btn-default" id="match-overpaid">{% trans "Match Overpaid" %}</button>
         <button type="button" class="btn btn-default" id="match-underpaid">{% trans "Match Underpaid" %}</button>
         <button type="button" class="btn btn-default" id="match-overbilled">{% trans "Match Overbilled" %}</button>
+        {% endif %}
         <button type="button" class="btn btn-default" id="reset-adjustments">{% trans "Reset" %}</button>
       </div>
     </h2>
-
-    {% if form.invoice.id %}
-      <div class="form-group">
-        <label class="control-label">{% trans "Invoice" %}</label>
-        <div>{{ form.invoice.json.invoice_no }} {{ form.invoice.json.title }}</div>
-      </div>
-    {% endif %}
 
     <style>
       .job-paid,
@@ -31,8 +26,8 @@
       .job-corrected {
         text-align: right;
       }
-      .job-paid {
-        border-left: 2px solid #ddd;
+      .job-name {
+        border-right: 2px solid #ddd;
       }
       .adjustment-table-totals {
         font-weight: bold;
@@ -45,9 +40,19 @@
       <thead>
       <tr>
         <th class="job-name">{% trans 'Job' %}</th>
+        {% if not form.initial.invoice %}
         <th class="job-paid">{% trans 'Paid' %}</th>
-        <th class="job-invoiced">{% trans 'Invoiced' %}</th>
+        {% endif %}
+        <th class="job-invoiced">
+          {% if form.initial.invoice %}
+            {% trans 'Invoice' %} {{ form.initial.invoice.invoice_no }}
+          {% else %}
+            {% trans 'Invoiced' %}
+          {% endif %}
+        </th>
+        {% if not form.initial.invoice %}
         <th class="job-progress">{% trans 'Progress' %}</th>
+        {% endif %}
         <th class="job-adjustment">{% trans 'Adjustment' %}</th>
         <th class="job-corrected">{% trans 'Corrected' %}</th>
       </tr>
@@ -56,18 +61,26 @@
       {% for adjustment in form.formset %}
         <tr is="adjustment-row" class="adjustment-row">
           <td class="job-name">{{ adjustment.job }}{{ adjustment.initial.job.name }}</td>
+          {% if not form.initial.invoice %}
           {% amount_view "job-paid clickable" adjustment.pre_txn "paid" select_if_equal=adjustment.corrected_amount %}
+          {% endif %}
           {% amount_view "job-invoiced clickable" adjustment.pre_txn "invoiced" select_if_equal=adjustment.corrected_amount %}
+          {% if not form.initial.invoice %}
           {% amount_view "job-progress clickable" adjustment.pre_txn "progress" select_if_equal=adjustment.corrected_amount %}
+          {% endif %}
           {% amount_input "job-adjustment" adjustment "adjustment" %}
           {% amount_input "job-corrected" adjustment "corrected" %}
         </tr>
       {% endfor %}
         <tr class="adjustment-table-totals">
           <td class="job-name"></td>
+          {% if not form.initial.invoice %}
           {% amount_view "job-paid" form "pre_txn_paid_total" %}
+          {% endif %}
           {% amount_view "job-invoiced" form "pre_txn_invoiced_total" %}
+          {% if not form.initial.invoice %}
           {% amount_view "job-progress" form "pre_txn_progress_total" %}
+          {% endif %}
           {% amount_view "job-adjustment" form "adjustment_total" %}
           {% amount_view "job-corrected" form "corrected_total" %}
         </tr>

@@ -87,10 +87,7 @@ class InvoiceTransition(SingleObjectMixin, View):
                 transition = t
                 break
 
-        if transition.name == 'pay':
-            return HttpResponseRedirect(reverse('payment.create', args=[doc.project.id, doc.id]))
-
-        else:
+        if transition:
             getattr(doc, transition.name)()
             doc.save()
 
@@ -114,10 +111,12 @@ class AdjustmentCreate(AdjustmentViewMixin, CreateView):
         if 'invoice_pk' in self.kwargs:
             invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
             kwargs['initial'] = {'invoice': invoice}
-            kwargs['instance'].json['jobs'] = [
-                {'job.id': debit['job.id'], 'approved': debit['amount']}
-                for debit in invoice.json['debits']
-                ]
+            kwargs['instance'].json['jobs'] = [{
+                   'job.id': job['job.id'],
+                   'invoiced': job['debit'],
+                   'corrected': job['debit']
+                } for job in invoice.json['jobs']
+            ]
         else:
             kwargs['instance'].json['jobs'] = []
         return kwargs
@@ -153,7 +152,7 @@ class PaymentCreate(PaymentViewMixin, CreateView):
             }
             instance.json['jobs'] = [{
                 'job.id': job['job.id'],
-                'invoiced': job['invoiced'],
+                'invoiced': job['debit'],
                 'split': job['debit']
             } for job in invoice.json['jobs']]
         else:
