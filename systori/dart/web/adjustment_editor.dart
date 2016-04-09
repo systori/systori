@@ -19,10 +19,10 @@ class AdjustmentTable extends TableElement {
         this.corrected_total_cell = totals.querySelector(":scope>.job-corrected");
         tax_rate = double.parse(this.dataset['tax-rate']);
 
-        querySelector('#match-overpaid').onClick.listen(match_overpaid);
-        querySelector('#match-underpaid').onClick.listen(match_underpaid);
-        querySelector('#match-overbilled').onClick.listen(match_overbilled);
-        querySelector('#reset-adjustments').onClick.listen(reset_adjustments);
+        querySelector('#match-overpaid')?.onClick?.listen(match_overpaid);
+        querySelector('#match-underpaid')?.onClick?.listen(match_underpaid);
+        querySelector('#match-overbilled')?.onClick?.listen(match_overbilled);
+        querySelector('#reset-adjustments')?.onClick?.listen(reset_adjustments);
     }
 
     recalculate() {
@@ -97,11 +97,11 @@ class AdjustmentRow extends TableRowElement {
         table = parent.parent;
 
         paid_cell = this.querySelector(":scope>.job-paid");
-        paid_cell.onClick.listen(column_clicked);
+        paid_cell?.onClick?.listen(column_clicked);
         invoiced_cell = this.querySelector(":scope>.job-invoiced");
         invoiced_cell.onClick.listen(column_clicked);
         progress_cell = this.querySelector(":scope>.job-progress");
-        progress_cell.onClick.listen(column_clicked);
+        progress_cell?.onClick?.listen(column_clicked);
 
         adjustment_cell = this.querySelector(":scope>.job-adjustment");
         adjustment_cell.onAmountChange.listen(adjustment_changed);
@@ -128,6 +128,7 @@ class AdjustmentRow extends TableRowElement {
 
     update_selected() {
         for (AmountCell cell in [paid_cell, invoiced_cell, progress_cell]) {
+            if (cell == null) continue;
             cell.classes.remove('selected');
             if (cell.amount == corrected_cell.amount) {
                 cell.classes.add('selected');

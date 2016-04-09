@@ -9,9 +9,9 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import get_language
 
 from ..project.models import Project
-from ..task.models import Job
 from ..accounting.constants import TAX_RATE
-from .models import Proposal, Invoice, Adjustment, Refund, DocumentTemplate, Letterhead, DocumentSettings
+from .models import Proposal, Invoice, Adjustment, Payment, Refund
+from .models import DocumentTemplate, Letterhead, DocumentSettings
 from .forms import ProposalForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
 from . import type as pdf_type
 
@@ -63,6 +63,15 @@ class AdjustmentPDF(DocumentRenderView):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
         return pdf_type.adjustment.render(json, letterhead, self.kwargs['format'])
+
+
+class PaymentPDF(DocumentRenderView):
+    model = Payment
+
+    def pdf(self):
+        json = self.get_object().json
+        letterhead = self.get_object().letterhead
+        return pdf_type.payment.render(json, letterhead, self.kwargs['format'])
 
 
 class RefundPDF(DocumentRenderView):

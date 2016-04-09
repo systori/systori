@@ -74,7 +74,7 @@ class ClonableModelResourceMixin:
 
         template, context = self.perform_cloning(obj, data['target'], data['pos'])
 
-        rendered = template.render(Context(context)).encode('utf-8')
+        rendered = template.render(context).encode('utf-8')
 
         return http.HttpCreated(rendered)
 
@@ -117,8 +117,7 @@ class AutoCompleteModelResourceMixin:
         query = self.add_prefetching(query)
 
         template = get_template('task/{}_autocomplete.html'.format(self._meta.resource_name))
-        context = Context({'objects': query[:15]})
-        rendered = template.render(context).encode('utf-8')
+        rendered = template.render({'objects': query[:15]}).encode('utf-8')
 
         return http.HttpResponse(rendered)
 

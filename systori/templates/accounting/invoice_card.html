@@ -1,4 +1,4 @@
-{% load i18n customformatting %}
+{% load i18n customformatting amount %}
 <div class="panel panel-{% if invoice.status == invoice.DRAFT %}primary{% elif invoice.status == invoice.SENT %}info{% else %}success{% endif %} invoice">
   <div class="panel-heading">
     <div class="row">
@@ -19,27 +19,56 @@
       </td>
       <td>{{ job.name }}</td>
       <td style="text-align: right; white-space: nowrap;">{{ job.debit.net|money }}</td>
+      <td style="text-align: right; white-space: nowrap;">{% if job.adjustment %}{% amount_diff_part job.adjustment 'net' %}{% endif %}</td>
     </tr>
   {% endfor %}
     <tr style="text-align: right; white-space: nowrap;">
       <td colspan="2">{% trans "Net" %}:</td>
       <td style="text-align: right; white-space: nowrap;">{{ invoice.json.debit.net|money }}</td>
+      <td></td>
     </tr>
     <tr style="text-align: right; white-space: nowrap;">
       <td colspan="2">{% trans "VAT" %} {{ TAX_RATE_DISPLAY }}:</td>
       <td style="text-align: right; white-space: nowrap;">{{ invoice.json.debit.tax|money }}</td>
+      <td></td>
     </tr>
     <tr style="text-align: right; white-space: nowrap;">
       <td colspan="2">{% trans "Gross" %}:</td>
       <td name="debit_gross" style="font-weight: bold; text-align: right; white-space: nowrap;">{{ invoice.json.debit.gross|money }}</td>
+      <td></td>
     </tr>
+    {% if invoice.json.payment %}
+    <tr style="text-align: right; white-space: nowrap;">
+      <td colspan="2" class="text-success">{% trans "Paid" %}:</td>
+      <td name="paid" class="text-success" style="font-weight: bold; text-align: right; white-space: nowrap;">{{ invoice.json.payment.gross|money }}</td>
+      <td></td>
+    </tr>
+    {% endif %}
   </table>
   <div class="panel-footer" style="text-align: right;">
     {% if invoice.status == invoice.DRAFT %}
     <a class="btn btn-sm btn-default pull-left" href="{% url 'invoice.delete' project.id invoice.id %}">{% trans "Delete" %}</a>
     {% endif %}
     {% for state in invoice.get_available_status_transitions %}
-      <a name="status_button" class="btn btn-sm btn-default" href="{% url 'invoice.transition' project.id invoice.id state.name %}">{{ state.custom.label }}</a>
+      {% if state.name == 'pay' %}
+
+        <a name="status_button" class="btn btn-sm btn-default"
+        {% if invoice.adjustment %}
+          href="{% url 'adjustment.update' project.id invoice.adjustment.id %}"{% else %}
+          href="{% url 'adjustment.create' project.id invoice.id %}"{% endif %}
+        >{% trans 'Adjust' %}</a>
+
+        <a name="status_button" class="btn btn-sm btn-default"
+        {% if invoice.payment %}
+          href="{% url 'payment.update' project.id invoice.payment.id %}"{% else %}
+          href="{% url 'payment.create' project.id invoice.id %}"{% endif %}
+        >{{ state.custom.label }}</a>
+
+      {% else %}
+
+        <a name="status_button" class="btn btn-sm btn-default" href="{% url 'invoice.transition' project.id invoice.id state.name %}">{{ state.custom.label }}</a>
+
+      {% endif %}
     {% endfor %}
     {% if 'id' in invoice.json %}
     {% if invoice.status == invoice.DRAFT %}

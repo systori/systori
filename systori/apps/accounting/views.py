@@ -50,13 +50,14 @@ class InvoiceViewMixin(EditViewMixin):
 class InvoiceCreate(InvoiceViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        initial = kwargs['initial'] = {}
         instance = kwargs['instance']
         if 'previous_pk' in self.kwargs:
             previous = Invoice.objects.get(id=self.kwargs['previous_pk'])
             instance.parent = previous.parent if previous.parent else previous
             # copy all the basic stuff from previous invoice
             for field in ['title', 'header', 'footer', 'add_terms']:
-                instance.json[field] = previous.json[field]
+                initial[field] = previous.json[field]
             # copy the list of jobs
             instance.json['jobs'] = [{
                 'job.id': debit['job.id'],
@@ -86,10 +87,7 @@ class InvoiceTransition(SingleObjectMixin, View):
                 transition = t
                 break
 
-        if transition.name == 'pay':
-            return HttpResponseRedirect(reverse('payment.create', args=[doc.project.id, doc.id]))
-
-        else:
+        if transition:
             getattr(doc, transition.name)()
             doc.save()
 
@@ -113,10 +111,12 @@ class AdjustmentCreate(AdjustmentViewMixin, CreateView):
         if 'invoice_pk' in self.kwargs:
             invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
             kwargs['initial'] = {'invoice': invoice}
-            kwargs['instance'].json['jobs'] = [
-                {'job.id': debit['job.id'], 'approved': debit['amount']}
-                for debit in invoice.json['debits']
-                ]
+            kwargs['instance'].json['jobs'] = [{
+                   'job.id': job['job.id'],
+                   'invoiced': job['debit'],
+                   'corrected': job['debit']
+                } for job in invoice.json['jobs']
+            ]
         else:
             kwargs['instance'].json['jobs'] = []
         return kwargs
@@ -152,7 +152,7 @@ class PaymentCreate(PaymentViewMixin, CreateView):
             }
             instance.json['jobs'] = [{
                 'job.id': job['job.id'],
-                'invoiced': job['invoiced'],
+                'invoiced': job['debit'],
                 'split': job['debit']
             } for job in invoice.json['jobs']]
         else:

@@ -58,10 +58,12 @@
           <ul class="nav navbar-nav">
             <li class="dropdown">
               
-                <a class="navbar-brand" href="#">NKBtpKNEjUotAdx</a>
+                <a class="navbar-brand" href="#">OMOStSCYOhVPgFH</a>
               
             </li>
+            
             <li><a href="/projects/">Projekte</a></li>
+            
             
   <li class="active"><a href="/project-2">Test Project
     <small>(angehend)</small>
@@ -69,7 +71,7 @@
 
           </ul>
 
-          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='dQ8B8UEBqY6Pz2NcwrasH4VKtWfrzZ7R' />
+          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='L1UNhbH01SPDdIxktqLQsxA6xj93zGX0' />
           <input type="hidden" name="language" value=""/>
         </form>
 
@@ -81,7 +83,7 @@
 
 
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">jarfuhEfIUEtxku <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">OfJeMSJpMBmtgft <b class="caret"></b></a>
             <ul class="dropdown-menu">
               <li><a href="/settings">Einstellungen</a></li>
               <li><a href="/logout">Abmelden</a></li>
@@ -136,7 +138,7 @@
       </div>
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         
-  <form method="post" autocomplete="off"><input type='hidden' name='csrfmiddlewaretoken' value='dQ8B8UEBqY6Pz2NcwrasH4VKtWfrzZ7R' />
+  <form method="post" autocomplete="off"><input type='hidden' name='csrfmiddlewaretoken' value='L1UNhbH01SPDdIxktqLQsxA6xj93zGX0' />
 
     
 
@@ -164,11 +166,11 @@
 <div class="form-group">
     
         
-            <label class="control-label  " for="id_transacted_on">Erhalten am</label>
+            <label class="control-label  " for="id_document_date">Erhalten am</label>
         
 
         <div class=" ">
-            <input class=" form-control" id="id_transacted_on" name="transacted_on" type="text" value="2016-03-18" />
+            <input class=" form-control" id="id_document_date" name="document_date" type="text" value="2016-04-08" />
 
             
 
@@ -179,15 +181,15 @@
 
     
     <div class="form-group">
-      <label class="control-label" for="id_amount">Menge</label>
+      <label class="control-label" for="id_payment">Zahlung</label>
       <div>
-        <input class="form-control" id="id_amount" name="amount" type="text" value="0,00">
+        <input class="form-control" id="id_payment" name="payment" type="text" value="0,00">
       </div>
     </div>
 
     <style>
       .job-balance,
-      .job-payment,
+      .job-split,
       .job-discount,
       .job-credit {
         text-align: right;
@@ -199,7 +201,7 @@
     </style>
 
     <div class="form-group ">
-    <input id="id_split-TOTAL_FORMS" name="split-TOTAL_FORMS" type="hidden" value="2" /><input id="id_split-INITIAL_FORMS" name="split-INITIAL_FORMS" type="hidden" value="2" /><input id="id_split-MIN_NUM_FORMS" name="split-MIN_NUM_FORMS" type="hidden" value="0" /><input id="id_split-MAX_NUM_FORMS" name="split-MAX_NUM_FORMS" type="hidden" value="1000" />
+    <input id="id_job-TOTAL_FORMS" name="job-TOTAL_FORMS" type="hidden" value="2" /><input id="id_job-INITIAL_FORMS" name="job-INITIAL_FORMS" type="hidden" value="2" /><input id="id_job-MIN_NUM_FORMS" name="job-MIN_NUM_FORMS" type="hidden" value="0" /><input id="id_job-MAX_NUM_FORMS" name="job-MAX_NUM_FORMS" type="hidden" value="1000" />
     <table is="payment-split-table" class="table table-striped" data-tax-rate="0.19">
       <thead>
       <tr>
@@ -209,7 +211,7 @@
           Saldo
           
         </th>
-        <th class="job-payment">Zahlung</th>
+        <th class="job-split">Zahlung</th>
         <th class="job-discount">Skonto <select id="id_discount" name="discount">
 <option value="0.00">0%</option>
 <option value="0.01">1%</option>
@@ -226,10 +228,10 @@
       <tbody>
       
         <tr is="payment-split" class="payment-split-row">
-          <td class="job-name"><input id="id_split-0-job" name="split-0-job" type="hidden" value="1" />Test Job</td>
+          <td class="job-name"><input id="id_job-0-job" name="job-0-job" type="hidden" value="1" />Test Job</td>
           
 <td is="amount-view" class="job-balance" data-tax-rate="0.19">
-  <div class="amount-gross">
+  <div class="amount-gross bold">
     <span class="amount-diff "></span>
     <span class="amount-value">480,00</span>
   </div>
@@ -241,18 +243,26 @@
     <span class="amount-diff "></span>
     <span class="amount-value">91,20</span>
   </div>
+  <div class="amount-percent "></div>
   
 </td>
 
           
-<td is="amount-input" class="job-payment" data-tax-rate="0.19">
+<td is="amount-input" class="job-split" data-tax-rate="0.19">
+
   <input class="amount-gross" type="text" value="0,00"><br/>
-  <input class="amount-net" placeholder="net" id="id_split-0-payment_net" name="split-0-payment_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_split-0-payment_tax" name="split-0-payment_tax" type="text" value="">
+  <input class="amount-net" placeholder="vor" id="id_job-0-split_net" name="job-0-split_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_job-0-split_tax" name="job-0-split_tax" type="text" value="">
+
+  
+  
+
+  
+
 </td>
 
           
 <td is="amount-stateful" class="job-discount" data-tax-rate="0.19">
-  <div class="amount-gross">
+  <div class="amount-gross bold">
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
@@ -264,16 +274,17 @@
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
+  <div class="amount-percent "></div>
   
     <input class="amount-gross" type="hidden" value="0,00">
-    <input class="amount-net" id="id_split-0-discount_net" name="split-0-discount_net" type="hidden" value="0,00">
-    <input class="amount-tax" id="id_split-0-discount_tax" name="split-0-discount_tax" type="hidden" value="0,00">
+    <input class="amount-net" id="id_job-0-discount_net" name="job-0-discount_net" type="hidden" value="0,00">
+    <input class="amount-tax" id="id_job-0-discount_tax" name="job-0-discount_tax" type="hidden" value="0,00">
   
 </td>
 
           
 <td is="amount-view" class="job-credit" data-tax-rate="0.19">
-  <div class="amount-gross">
+  <div class="amount-gross bold">
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
@@ -285,16 +296,17 @@
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
+  <div class="amount-percent "></div>
   
 </td>
 
         </tr>
       
         <tr is="payment-split" class="payment-split-row">
-          <td class="job-name"><input id="id_split-1-job" name="split-1-job" type="hidden" value="2" />Test Job</td>
+          <td class="job-name"><input id="id_job-1-job" name="job-1-job" type="hidden" value="2" />Test Job</td>
           
 <td is="amount-view" class="job-balance" data-tax-rate="0.19">
-  <div class="amount-gross">
+  <div class="amount-gross bold">
     <span class="amount-diff "></span>
     <span class="amount-value">119,00</span>
   </div>
@@ -306,18 +318,26 @@
     <span class="amount-diff "></span>
     <span class="amount-value">19,00</span>
   </div>
+  <div class="amount-percent "></div>
   
 </td>
 
           
-<td is="amount-input" class="job-payment" data-tax-rate="0.19">
+<td is="amount-input" class="job-split" data-tax-rate="0.19">
+
   <input class="amount-gross" type="text" value="0,00"><br/>
-  <input class="amount-net" placeholder="net" id="id_split-1-payment_net" name="split-1-payment_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_split-1-payment_tax" name="split-1-payment_tax" type="text" value="">
+  <input class="amount-net" placeholder="vor" id="id_job-1-split_net" name="job-1-split_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_job-1-split_tax" name="job-1-split_tax" type="text" value="">
+
+  
+  
+
+  
+
 </td>
 
           
 <td is="amount-stateful" class="job-discount" data-tax-rate="0.19">
-  <div class="amount-gross">
+  <div class="amount-gross bold">
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
@@ -329,16 +349,17 @@
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
+  <div class="amount-percent "></div>
   
     <input class="amount-gross" type="hidden" value="0,00">
-    <input class="amount-net" id="id_split-1-discount_net" name="split-1-discount_net" type="hidden" value="0,00">
-    <input class="amount-tax" id="id_split-1-discount_tax" name="split-1-discount_tax" type="hidden" value="0,00">
+    <input class="amount-net" id="id_job-1-discount_net" name="job-1-discount_net" type="hidden" value="0,00">
+    <input class="amount-tax" id="id_job-1-discount_tax" name="job-1-discount_tax" type="hidden" value="0,00">
   
 </td>
 
           
 <td is="amount-view" class="job-credit" data-tax-rate="0.19">
-  <div class="amount-gross">
+  <div class="amount-gross bold">
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
@@ -350,6 +371,7 @@
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
+  <div class="amount-percent "></div>
   
 </td>
 
@@ -359,7 +381,7 @@
           <td class="job-name"></td>
           
 <td is="amount-view" class="job-balance" data-tax-rate="0.19">
-  <div class="amount-gross">
+  <div class="amount-gross bold">
     <span class="amount-diff "></span>
     <span class="amount-value">599,00</span>
   </div>
@@ -371,12 +393,13 @@
     <span class="amount-diff "></span>
     <span class="amount-value">110,20</span>
   </div>
+  <div class="amount-percent "></div>
   
 </td>
 
           
-<td is="amount-view" class="job-payment" data-tax-rate="0.19">
-  <div class="amount-gross">
+<td is="amount-view" class="job-split" data-tax-rate="0.19">
+  <div class="amount-gross bold">
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
@@ -388,12 +411,13 @@
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
+  <div class="amount-percent "></div>
   
 </td>
 
           
 <td is="amount-view" class="job-discount" data-tax-rate="0.19">
-  <div class="amount-gross">
+  <div class="amount-gross bold">
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
@@ -405,12 +429,13 @@
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
+  <div class="amount-percent "></div>
   
 </td>
 
           
 <td is="amount-view" class="job-credit" data-tax-rate="0.19">
-  <div class="amount-gross">
+  <div class="amount-gross bold">
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
@@ -422,6 +447,7 @@
     <span class="amount-diff "></span>
     <span class="amount-value">0,00</span>
   </div>
+  <div class="amount-percent "></div>
   
 </td>
 

@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n staticfiles bootstrap customformatting ubrutils amount %}
+{% load i18n l10n staticfiles bootstrap customformatting ubrutils amount %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
@@ -8,10 +8,10 @@
 
     {{ form.bank_account|bootstrap }}
     {{ form.document_date|bootstrap }}
-    {% if form.invoice.value %}
+    {% if form.initial.invoice %}
       <div class="form-group">
         <label class="control-label">{% trans "Invoice" %}</label>
-        <div>{{ form.invoice.value.json.invoice_no }} {{ form.invoice.value.json.title }}</div>
+        <div>{{ form.initial.invoice.invoice_no }} {{ form.initial.invoice.title }} {% trans 'from' %} {{ form.initial.invoice.document_date|localize }}</div>
       </div>
     {% endif %}
     <div class="form-group">
