@@ -3,14 +3,43 @@ from decimal import Decimal
 
 from django.core.urlresolvers import reverse
 
+from systori.lib.testing import SystoriTestCase
 from systori.lib.accounting.tools import Amount
-from ..document.test_views import DocumentTestCase
 from .models import Account
+from ..accounting.test_workflow import create_data
+from ..directory.models import Contact, ProjectContact
 from ..document.models import Invoice, Payment, Adjustment, Refund
 from .forms import InvoiceForm, InvoiceFormSet
 from .forms import PaymentForm, PaymentFormSet
 from .forms import AdjustmentForm, AdjustmentFormSet
 from .forms import RefundForm, RefundFormSet
+
+
+class DocumentTestCase(SystoriTestCase):
+
+    def setUp(self):
+        super().setUp()
+        create_data(self)
+        ProjectContact.objects.create(
+            project=self.project,
+            contact=Contact.objects.create(first_name="Ludwig", last_name="von Mises"),
+            association=ProjectContact.CUSTOMER,
+            is_billable=True
+        )
+        self.client.login(username=self.user.email, password='open sesame')
+
+    def make_management_form(self):
+        data = {}
+        instance = self.model(project=self.project, json={'jobs': []})
+        jobs = self.project.jobs.all()
+        _form_set = self.form_set(instance=instance, jobs=jobs)
+        for key, value in _form_set.management_form.initial.items():
+            data['job-'+key] = value
+        return data
+
+    def form_data(self, data):
+        data.update(self.make_management_form())
+        return data
 
 
 class InvoiceViewTests(DocumentTestCase):

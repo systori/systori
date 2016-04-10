@@ -1,5 +1,7 @@
 from django.test import TestCase
 from django.utils.translation import activate
+
+from ..directory.models import Contact, ProjectContact
 from .test_workflow import create_data, A
 from .forms import *
 from .models import Entry
@@ -14,12 +16,21 @@ class TestForm(TestCase):
         # creates task with 480 net and 571.20 gross ready to be billed
         activate('en')
         create_data(self)
+        ProjectContact.objects.create(
+            project=self.project,
+            contact=Contact.objects.create(first_name="Ludwig", last_name="von Mises"),
+            association=ProjectContact.CUSTOMER,
+            is_billable=True
+        )
         self.task.complete = 5
         self.task.save()
 
     def make_form(self, data=None, initial={}, json=None, txn=None):
 
-        instance = self.model(project=self.project, json=json or {'jobs': []}, transaction=txn)
+        if txn:
+            instance = self.model(project=self.project, json=json or {'jobs': []}, transaction=txn)
+        else:
+            instance = self.model(project=self.project, json=json or {'jobs': []})
         jobs = self.project.jobs.all()
 
         if data:
