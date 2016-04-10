@@ -47,7 +47,7 @@
       <tbody>
       {% for refund in form.formset %}
         <tr is="refund-row" class="refund-row">
-          <td class="job-name">{{ refund.job }}{{ refund.initial.job.name }}</td>
+          <td class="job-name">{{ refund.job_id }}{{ refund.initial.job.name }}</td>
           {% amount_view "job-paid clickable" refund.pre_txn "paid" %}
           {% amount_view "job-invoiced" refund.pre_txn "invoiced" %}
           {% amount_view "job-progress" refund.pre_txn "progress" %}

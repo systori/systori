@@ -10,20 +10,44 @@ from .models import *
 
 class EditViewMixin:
 
+    def get_queryset(self):
+        return self.model.objects.prefetch_related('transaction').all()
+
+    def get_form(self):
+        # document forms are very expensive to create
+        if not hasattr(self, '_cached_form'):
+            self._cached_form = super().get_form()
+        return self._cached_form
+
+    def get_form_kwargs(self):
+
+        kwargs = {
+            'jobs': self.request.project.jobs.prefetch_related(
+                'taskgroups__tasks__taskinstances__lineitems',
+                'account'
+            )
+        }
+
+        if not self.object:
+            self.object = self.model(project=self.request.project)
+            self.object.json['jobs'] = []
+
+        kwargs['instance'] = self.object
+
+        kwargs['initial'] = {}
+        for field in self.form_class._meta.fields:
+            if field in self.object.json:
+                kwargs['initial'][field] = self.object.json[field]
+
+        if self.request.method == 'POST':
+            kwargs['data'] = self.request.POST.copy()
+
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['TAX_RATE'] = TAX_RATE
         return context
-
-    def get_form_kwargs(self):
-        jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems').all()
-        kwargs = {
-            'jobs': jobs,
-            'instance': self.model(project=self.request.project),
-        }
-        if self.request.method == 'POST':
-            kwargs['data'] = self.request.POST.copy()
-        return kwargs
 
     def get_success_url(self):
         return self.request.project.get_absolute_url()
@@ -50,29 +74,22 @@ class InvoiceViewMixin(EditViewMixin):
 class InvoiceCreate(InvoiceViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        initial = kwargs['initial'] = {}
-        instance = kwargs['instance']
         if 'previous_pk' in self.kwargs:
             previous = Invoice.objects.get(id=self.kwargs['previous_pk'])
-            instance.parent = previous.parent if previous.parent else previous
-            # copy all the basic stuff from previous invoice
+            self.object.parent = previous.parent if previous.parent else previous
+            # copy basic values from previous invoice
             for field in ['title', 'header', 'footer', 'add_terms']:
-                initial[field] = previous.json[field]
+                kwargs['initial'][field] = previous.json[field]
             # copy the list of jobs
-            instance.json['jobs'] = [{
+            self.object.json['jobs'] = [{
                 'job.id': debit['job.id'],
                 'is_invoiced': True
             } for debit in previous.json['jobs']]
-        else:
-            instance.json['jobs'] = []
         return kwargs
 
 
 class InvoiceUpdate(InvoiceViewMixin, UpdateView):
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['instance'] = self.object
-        return kwargs
+    pass
 
 
 class InvoiceTransition(SingleObjectMixin, View):
@@ -110,23 +127,18 @@ class AdjustmentCreate(AdjustmentViewMixin, CreateView):
         kwargs = super().get_form_kwargs()
         if 'invoice_pk' in self.kwargs:
             invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
-            kwargs['initial'] = {'invoice': invoice}
+            self.object.invoice = invoice
             kwargs['instance'].json['jobs'] = [{
                    'job.id': job['job.id'],
                    'invoiced': job['debit'],
                    'corrected': job['debit']
                 } for job in invoice.json['jobs']
             ]
-        else:
-            kwargs['instance'].json['jobs'] = []
         return kwargs
 
 
 class AdjustmentUpdate(AdjustmentViewMixin, UpdateView):
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['instance'] = self.object
-        return kwargs
+    pass
 
 
 class AdjustmentDelete(DeleteViewMixin):
@@ -143,32 +155,22 @@ class PaymentViewMixin(EditViewMixin):
 class PaymentCreate(PaymentViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        instance = kwargs['instance']
         if 'invoice_pk' in self.kwargs:
             invoice = Invoice.objects.get(id=self.kwargs['invoice_pk'])
-            kwargs['initial'] = {
-                'invoice': invoice,
+            self.object.invoice = invoice
+            kwargs['initial'].update({
                 'payment': invoice.json.get('corrected', invoice.json['debit']).gross,
-            }
-            instance.json['jobs'] = [{
+            })
+            kwargs['instance'].json['jobs'] = [{
                 'job.id': job['job.id'],
                 'invoiced': job.get('corrected', job['debit']),
                 'split': job.get('corrected', job['debit'])
             } for job in invoice.json['jobs']]
-        else:
-            instance.json['jobs'] = []
         return kwargs
 
 
 class PaymentUpdate(PaymentViewMixin, UpdateView):
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['instance'] = self.object
-        kwargs['initial'] = {
-            'bank_account': self.object.json['bank_account'],
-            'payment': self.object.json['payment']
-        }
-        return kwargs
+    pass
 
 
 class PaymentDelete(DeleteViewMixin):
@@ -183,17 +185,11 @@ class RefundViewMixin(EditViewMixin):
 
 
 class RefundCreate(RefundViewMixin, CreateView):
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['instance'].json['jobs'] = []
-        return kwargs
+    pass
 
 
 class RefundUpdate(RefundViewMixin, UpdateView):
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['instance'] = self.object
-        return kwargs
+    pass
 
 
 class RefundDelete(DeleteViewMixin):
@@ -213,10 +209,6 @@ class AccountList(TemplateView):
 
 class AccountView(DetailView):
     model = Account
-
-    def get_queryset(self):
-        queryset = super(AccountView, self).get_queryset()
-        return queryset
 
 
 class AccountUpdate(UpdateView):

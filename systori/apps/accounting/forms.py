@@ -8,6 +8,7 @@ from django.forms.formsets import formset_factory
 from django.forms.formsets import BaseFormSet
 from django.forms import Form, ModelForm, ValidationError, widgets
 from django.db import transaction
+from django.db.models import Model
 from django import forms
 from systori.lib.fields import LocalizedDecimalField
 from systori.lib.accounting.tools import Amount
@@ -68,6 +69,44 @@ class DocumentForm(forms.ModelForm):
                     total_amount = getattr(self, total_field)
                     setattr(self, total_field, total_amount+form_amount)
 
+    @property
+    def json(self):
+        json = {}
+
+        # Contact Details
+        contact = self.instance.project.billable_contact.contact
+        json.update({
+            'business': contact.business,
+            'salutation': contact.salutation,
+            'first_name': contact.first_name,
+            'last_name': contact.last_name,
+            'address': contact.address,
+            'postal_code': contact.postal_code,
+            'city': contact.city,
+            'address_label': contact.address_label
+        })
+
+        # Jobs
+        json['jobs'] = self.formset.get_json_rows()
+
+        # Totals
+        for attr in dir(self):
+            if attr.endswith('_total_amount'):
+                json_name = attr[:-len('_amount')]
+                if attr.startswith('pre_txn_'):
+                    json_name = json_name[len('pre_txn_'):]
+                json[json_name] = getattr(self, attr)
+
+        # Document Type Specific Fields
+        for field in self._meta.fields:
+            value = self.cleaned_data[field]
+            if isinstance(value, Model):
+                json[field] = value.id
+            else:
+                json[field] = value
+
+        return json
+
 
 class BaseDocumentFormSet(BaseFormSet):
 
@@ -78,10 +117,15 @@ class BaseDocumentFormSet(BaseFormSet):
             self.calculate_accounting_states()
             self.calculate_initial_values()
 
+    def clean(self):
+        for form in self:
+            if form.job.id != form.cleaned_data['job_id']:
+                raise ValidationError(_("Form has become invalid due to external changes to the jobs list."))
+
     @staticmethod
     def get_initial(instance, jobs):
         initial = []
-        for job in jobs.all():
+        for job in jobs:
             row = {
                 'job': job,
                 'jobs': jobs,
@@ -107,8 +151,8 @@ class BaseDocumentFormSet(BaseFormSet):
             atom = transaction.atomic()
             atom.__enter__()
 
-            # Delete transaction so we can capture accounting state without it
-            Transaction.objects.filter(id=self.instance.transaction.id).delete()
+            # Delete transaction entries so we can capture accounting state without it
+            self.instance.transaction.entries.all().delete()
 
             # Capture state of accounting system before transaction
             for form in self:
@@ -132,12 +176,12 @@ class BaseDocumentFormSet(BaseFormSet):
 
 
 class DocumentRowForm(Form):
-    job = forms.ModelChoiceField(label=_("Job"), queryset=Job.objects.none(), widget=forms.HiddenInput())
+    job_id = forms.IntegerField(widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.job = self.initial['job']
-        self.fields['job'].queryset = self.initial['jobs']
+        self.initial['job_id'] = self.job.id
 
     def init_amount(self, name):
         initial_amount = self.initial.get(name, Amount.zero())
@@ -163,8 +207,6 @@ class DocumentRowForm(Form):
 
 class InvoiceForm(DocumentForm):
 
-    parent = forms.ModelChoiceField(queryset=Invoice.objects.none(), required=False, widget=forms.HiddenInput())
-
     doc_template = forms.ModelChoiceField(
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.INVOICE), required=False)
@@ -178,13 +220,10 @@ class InvoiceForm(DocumentForm):
 
     class Meta(DocumentForm.Meta):
         model = Invoice
-        fields = ['parent', 'doc_template', 'is_final', 'document_date', 'invoice_no', 'title', 'header', 'footer', 'add_terms', 'notes']
+        fields = ['doc_template', 'document_date', 'invoice_no', 'is_final', 'title', 'header', 'footer', 'add_terms', 'notes']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=InvoiceFormSet, **kwargs)
-
-        if self.instance.parent:
-            self.fields['parent'].queryset = Invoice.objects.filter(id=self.instance.parent.id)
 
         if 'header' not in self.initial or 'footer' not in self.initial:
             default_text = DocumentSettings.get_for_language(settings.LANGUAGE_CODE)
@@ -214,17 +253,20 @@ class InvoiceForm(DocumentForm):
     def save(self, commit=True):
 
         invoice = self.instance
-        data = self.cleaned_data
-        data['jobs'] = self.formset.get_json_rows()
+        invoice.json = self.json
 
         if invoice.transaction:
             invoice.transaction.delete()
 
-        invoice.transaction = debit_jobs(self.formset.get_transaction_rows(), recognize_revenue=data['is_final'])
+        invoice.transaction = debit_jobs(
+            self.formset.get_transaction_rows(),
+            recognize_revenue=self.cleaned_data['is_final']
+        )
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        invoice.json = pdf_type.invoice.serialize(invoice, data)
         invoice.letterhead = doc_settings.invoice_letterhead
+
+        pdf_type.invoice.serialize(invoice)
 
         super().save(commit)
 
@@ -262,7 +304,14 @@ class InvoiceRowForm(DocumentRowForm):
 
     def calculate_initial_values(self):
 
-        if str(self['is_override'].value()) == 'False':
+        # on first load BooleanField.value() comes from self.initial and is an actual bool() type
+        # on subsequent submits, value() returns a string from self.data, this makes
+        # testing for truthyness difficult, so lets just always use the string version
+        # unless you have self.cleaned_data available which is best
+        self.is_invoiced_str = str(self['is_invoiced'].value())
+        self.is_override_str = str(self['is_override'].value())
+
+        if self.is_override_str == 'False':
             if self.pre_txn.itemized_amount.net > 0:
                 self.initial['debit'] = self.pre_txn.itemized_amount
 
@@ -281,7 +330,7 @@ class InvoiceRowForm(DocumentRowForm):
     def clean(self):
         if self.cleaned_data['is_override'] and \
            self.debit_amount.gross > 0 and \
-           len(self.cleaned_data['override_comment']) == 0:
+           len(self.cleaned_data['override_comment'].strip()) == 0:
             self.add_error('override_comment', _("An explanation is required for non-itemized invoice."))
 
     @property
@@ -289,6 +338,9 @@ class InvoiceRowForm(DocumentRowForm):
         if self.cleaned_data['is_invoiced']:
             return {
                 'job': self.job,
+                'job.id': self.job.id,
+                'code': self.job.code,
+                'name': self.job.name,
                 'is_invoiced': True,
                 'debit': self.debit_amount,
                 'is_itemized': self.is_itemized,
@@ -314,7 +366,6 @@ InvoiceFormSet = formset_factory(InvoiceRowForm, formset=BaseDocumentFormSet, ex
 
 
 class AdjustmentForm(DocumentForm):
-    invoice = forms.ModelChoiceField(label=_("Invoice"), queryset=Invoice.objects.all(), widget=forms.HiddenInput(), required=False)
 
     title = forms.CharField(label=_('Title'), initial=_("Adjustment"), required=False)
     header = forms.CharField(widget=forms.Textarea, initial='', required=False)
@@ -322,7 +373,7 @@ class AdjustmentForm(DocumentForm):
 
     class Meta:
         model = Adjustment
-        fields = ['invoice', 'document_date', 'title', 'header', 'footer', 'notes']
+        fields = ['document_date', 'title', 'header', 'footer', 'notes']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=AdjustmentFormSet, **kwargs)
@@ -340,15 +391,7 @@ class AdjustmentForm(DocumentForm):
     def save(self, commit=True):
 
         adjustment = self.instance
-        data = self.cleaned_data.copy()
-        data.update({
-            'jobs': self.formset.get_json_rows(),
-            'paid_total': self.pre_txn_paid_total_amount,
-            'invoiced_total': self.pre_txn_invoiced_total_amount,
-            'progress_total': self.pre_txn_progress_total_amount,
-            'adjustment_total': self.adjustment_total_amount,
-            'corrected_total': self.corrected_total_amount
-        })
+        adjustment.json = self.json
 
         if adjustment.transaction:
             adjustment.transaction.delete()
@@ -356,11 +399,9 @@ class AdjustmentForm(DocumentForm):
         adjustment.transaction = adjust_jobs(self.formset.get_transaction_rows())
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        adjustment.json = pdf_type.adjustment.serialize(adjustment, data)
         adjustment.letterhead = doc_settings.invoice_letterhead
 
-        if not adjustment.invoice:
-            adjustment.invoice = self.initial.get('invoice')
+        pdf_type.adjustment.serialize(adjustment)
 
         if adjustment.invoice:
             for job in adjustment.invoice.json['jobs']:
@@ -438,7 +479,6 @@ AdjustmentFormSet = formset_factory(AdjustmentRowForm, formset=BaseDocumentFormS
 
 class PaymentForm(DocumentForm):
     document_date = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
-    invoice = forms.ModelChoiceField(label=_("Invoice"), queryset=Invoice.objects.all(), widget=forms.HiddenInput(), required=False)
     bank_account = forms.ModelChoiceField(label=_("Bank Account"), queryset=Account.objects.banks())
     payment = LocalizedDecimalField(label=_("Payment"), max_digits=14, decimal_places=4)
     discount = forms.TypedChoiceField(
@@ -457,10 +497,7 @@ class PaymentForm(DocumentForm):
 
     class Meta(DocumentForm.Meta):
         model = Payment
-        fields = [
-            'document_date', 'invoice',
-            'bank_account', 'payment', 'discount',
-        ]
+        fields = ['document_date', 'bank_account', 'payment', 'discount']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=PaymentFormSet, **kwargs)
@@ -484,49 +521,45 @@ class PaymentForm(DocumentForm):
     def save(self, commit=True):
 
         payment = self.instance
-        data = self.cleaned_data.copy()
-        data.update({
-            'jobs': self.formset.get_json_rows(),
-            'split_total': self.split_total_amount,
-            'discount_total': self.discount_total_amount,
-            'adjustment_total': self.adjustment_total_amount,
-            'credit_total': self.credit_total_amount
-        })
+        payment.json = self.json
 
         if payment.transaction:
             payment.transaction.delete()
 
         payment.transaction = credit_jobs(
             self.formset.get_transaction_rows(),
-            data['payment'],
-            data['document_date'],
-            data['bank_account']
+            self.cleaned_data['payment'],
+            self.cleaned_data['document_date'],
+            self.cleaned_data['bank_account']
         )
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        payment.json = pdf_type.payment.serialize(payment, data)
         payment.letterhead = doc_settings.invoice_letterhead
 
-        if not payment.invoice:
-            payment.invoice = self.initial.get('invoice')
+        pdf_type.payment.serialize(payment)
 
+        save_invoice = False
         invoice = payment.invoice
+
         if invoice and not invoice.status == Invoice.PAID:
             invoice.pay()
-            invoice.save()
+            save_invoice = True
 
-        if payment.invoice:
-            for job in payment.invoice.json['jobs']:
+        if invoice:
+            for job in invoice.json['jobs']:
                 pay = None
                 for row in self.formset.get_json_rows():
                     if job['job.id'] == row['job.id']:
-                        if row['split'] != Amount.zero():
+                        if row['credit'] != Amount.zero():
                             pay = row
                         break
                 if pay:
                     job['payment'] = pay['credit']
-            payment.invoice.json['payment'] = self.credit_total_amount
-            payment.invoice.save()
+            invoice.json['payment'] = self.credit_total_amount
+            save_invoice = True
+
+        if save_invoice:
+            invoice.save()
 
         super().save(commit)
 
@@ -631,14 +664,8 @@ class RefundForm(DocumentForm):
     def save(self, commit=True):
 
         refund = self.instance
-        data = self.cleaned_data.copy()
-        data.update({
-            'jobs': self.formset.get_json_rows(),
-            'paid_total': self.pre_txn_paid_total_amount,
-            'invoiced_total': self.pre_txn_invoiced_total_amount,
-            'progress_total': self.pre_txn_progress_total_amount,
-            'refund_total': self.refund_total_amount,
-            'credit_total': self.credit_total_amount,
+        refund.json = self.json
+        refund.json.update({
             'customer_refund': self.customer_refund_amount
         })
 
@@ -648,8 +675,9 @@ class RefundForm(DocumentForm):
         refund.transaction = refund_jobs(self.formset.get_transaction_rows())
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        refund.json = pdf_type.refund.serialize(refund, data)
         refund.letterhead = doc_settings.invoice_letterhead
+
+        pdf_type.refund.serialize(refund)
 
         super().save(commit)
 

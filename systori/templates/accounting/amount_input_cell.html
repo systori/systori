@@ -12,7 +12,7 @@
   {% endfor %}
 
   {% if comment %}
-    <textarea class="amount-comment form-control" id="{{ comment.id_for_label }}" name="{{ comment.html_name }}"></textarea>
+    <textarea class="amount-comment form-control" id="{{ comment.id_for_label }}" name="{{ comment.html_name }}">{{ comment.value }}</textarea>
     {% for error in comment.errors %}
       <p class="help-block comment-error">{{ error }}</p>
     {% endfor %}

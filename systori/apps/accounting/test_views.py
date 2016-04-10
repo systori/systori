@@ -33,12 +33,12 @@ class InvoiceViewTests(DocumentTestCase):
             'document_date': '2015-01-01',
 
             'job-0-is_invoiced': 'True',
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-debit_net': '1',
             'job-0-debit_tax': '1',
 
             'job-1-is_invoiced': 'True',
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-debit_net': '1',
             'job-1-debit_tax': '1',
         }
@@ -61,12 +61,12 @@ class InvoiceViewTests(DocumentTestCase):
             'document_date': '2015-07-28',
 
             'job-0-is_invoiced': 'True',
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-debit_net': '5',
             'job-0-debit_tax': '5',
 
             'job-1-is_invoiced': 'True',
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-debit_net': '5',
             'job-1-debit_tax': '5',
         }
@@ -100,13 +100,13 @@ class PaymentViewTests(DocumentTestCase):
             'discount': '0.00',
             'document_date': '2015-01-01',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-split_net': '1',
             'job-0-split_tax': '1',
             'job-0-discount_net': '0',
             'job-0-discount_tax': '0',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-split_net': '1',
             'job-1-split_tax': '1',
             'job-1-discount_net': '0',
@@ -133,13 +133,13 @@ class PaymentViewTests(DocumentTestCase):
             'discount': '0.00',
             'document_date': '2015-07-28',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-split_net': '2',
             'job-0-split_tax': '1',
             'job-0-discount_net': '0',
             'job-0-discount_tax': '0',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-split_net': '2',
             'job-1-split_tax': '1',
             'job-1-discount_net': '0',
@@ -173,11 +173,11 @@ class AdjustmentViewTests(DocumentTestCase):
             'footer': 'The Footer',
             'document_date': '2015-01-01',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-adjustment_net': '1',
             'job-0-adjustment_tax': '1',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-adjustment_net': '1',
             'job-1-adjustment_tax': '1',
         }
@@ -198,11 +198,11 @@ class AdjustmentViewTests(DocumentTestCase):
             'footer': 'new footer',
             'document_date': '2015-07-28',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-adjustment_net': '5',
             'job-0-adjustment_tax': '5',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-adjustment_net': '5',
             'job-1-adjustment_tax': '5',
         }
@@ -236,13 +236,13 @@ class RefundViewTests(DocumentTestCase):
             'footer': 'new footer',
             'document_date': '2015-01-01',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-refund_net': '1',
             'job-0-refund_tax': '1',
             'job-0-credit_net': '0',
             'job-0-credit_tax': '0',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-refund_net': '0',
             'job-1-refund_tax': '0',
             'job-1-credit_net': '1',
@@ -270,13 +270,13 @@ class RefundViewTests(DocumentTestCase):
             'footer': 'updated footer',
             'document_date': '2015-07-28',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-refund_net': '2',
             'job-0-refund_tax': '2',
             'job-0-credit_net': '0',
             'job-0-credit_tax': '0',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-refund_net': '0',
             'job-1-refund_tax': '0',
             'job-1-credit_net': '2',
