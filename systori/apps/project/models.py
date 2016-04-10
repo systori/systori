@@ -248,13 +248,14 @@ class JobSite(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
-        g = geocoders.GoogleV3()
-        address = smart_str("{}, {}, {}, {}".format(self.address, self.city, self.postal_code, self.country))
+    def save(self, *args, skip_geocoding=False, **kwargs):
         try:
-            location = g.geocode(address)
-            self.latitude = location.latitude
-            self.longitude = location.longitude
+            if not skip_geocoding:
+                g = geocoders.GoogleV3()
+                address = smart_str("{}, {}, {}, {}".format(self.address, self.city, self.postal_code, self.country))
+                location = g.geocode(address)
+                self.latitude = location.latitude
+                self.longitude = location.longitude
         except:
             self.latitude = None
             self.longitude = None
