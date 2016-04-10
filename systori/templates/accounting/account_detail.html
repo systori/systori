@@ -10,11 +10,11 @@
     }
 
     .other-account {
-      color: lightgrey;
+      color: grey;
     }
 
     .other-account a {
-      color: lightgrey;
+      color: grey;
     }
   </style>
 
@@ -22,46 +22,75 @@
   <table class="table table-condensed">
     <thead>
     <tr>
-      <th>{% trans 'Transaction #' %}</th>
-      <th>{% trans 'Date' %}</th>
-      <th>{% trans 'Account' %}</th>
+      <th>{% trans 'Transaction #' %} - {% trans 'Transaction Type' %}</th>
+      <th>{% trans 'Date' %} / {% trans 'Account' %}</th>
       <th class="text-right">{% trans 'Debit' %}</th>
       <th class="text-right">{% trans 'Credit' %}</th>
     </tr>
     </thead>
     <tbody>
-    {% for account_entry in account.entries.all %}
+    {% for transaction in page_obj %}
       <tr class="active">
-        <td>{{ account_entry.transaction.id }}</td>
-        <td>{{ account_entry.transaction.recorded_on }}</td>
-        <td>&nbsp;</td>
+        <td>{{ transaction.id }} - {{ transaction.get_transaction_type_display }}</td>
+        <td>{{ transaction.recorded_on }}</td>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
       </tr>
-      {% for entry in account_entry.transaction.entries.all %}
+      {% for entry in transaction.entries.all %}
         <tr class="{% if entry.account.id == account.id %}active{% else %}other{% endif %}-account">
           <td>&nbsp;</td>
-          <td>&nbsp;</td>
           <td>
-            {% if entry.account.project %}
-              <a href="{% url 'project.view' entry.account.project.id %}">{{ entry.account.code }}
-                - {{ entry.account.project }}</a>
+            {% if entry.account.is_receivable %}
+              <a href="{% url 'project.view' entry.job.project.id %}">
+                {{ entry.job.project.name }} - {{ entry.job.name }}
+              </a>
             {% elif entry.account.id == account.id %}
               {{ entry.account }}
             {% else %}
               <a href="{% url 'account.view' entry.account.id %}">{{ entry.account }}</a>
             {% endif %}
+            {{ entry.get_entry_type_display }}
+            {{ entry.get_value_type_display }}
           </td>
           {% if entry.is_debit %}
-            <td align="right">{{ entry.absolute_amount|money }}</td>
+            <td align="right">{{ entry.value|money }}</td>
             <td align="right"></td>
           {% else %}
             <td align="right"></td>
-            <td align="right">{{ entry.absolute_amount|money }}</td>
+            <td align="right">{{ entry.value|money }}</td>
           {% endif %}
         </tr>
       {% endfor %}
     {% endfor %}
     </tbody>
   </table>
+
+<nav class="text-center">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+    <li>
+      <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>
+    {% else %}
+      <li class="disabled"><span><span aria-hidden="true">&laquo;</span></span></li>
+    {% endif %}
+    {% for page in page_obj.paginator.page_range %}
+    <li {% if page_obj.number == page %}class="active"{% endif %}>
+      <a href="?page={{ page }}">{{ page }}</a>
+    </li>
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <li>
+      <a href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>
+    {% else %}
+      <li class="disabled"><span><span aria-hidden="true">&raquo;</span></span></li>
+    {% endif %}
+  </ul>
+</nav>
+
 {% endblock %}

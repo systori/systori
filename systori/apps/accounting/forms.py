@@ -271,6 +271,14 @@ class InvoiceForm(DocumentForm):
         super().save(commit)
 
 
+class BaseInvoiceFormSet(BaseDocumentFormSet):
+
+    def clean(self):
+        super().clean()
+        if not self.get_transaction_rows():
+            raise ValidationError(_("At least one job must be selected."))
+
+
 class InvoiceRowForm(DocumentRowForm):
 
     is_invoiced = forms.BooleanField(initial=False, required=False)
@@ -362,7 +370,7 @@ class InvoiceRowForm(DocumentRowForm):
                 return self.job, self.debit_amount, debit_type
 
 
-InvoiceFormSet = formset_factory(InvoiceRowForm, formset=BaseDocumentFormSet, extra=0)
+InvoiceFormSet = formset_factory(InvoiceRowForm, formset=BaseInvoiceFormSet, extra=0)
 
 
 class AdjustmentForm(DocumentForm):

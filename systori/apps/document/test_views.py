@@ -47,9 +47,9 @@ class ProposalViewTests(DocumentTestCase):
             'header': 'hello',
             'footer': 'bye',
             'add_terms': True,
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-is_attached': 'True',
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-is_attached': 'True',
         }
         data.update(self.make_management_form())
@@ -89,9 +89,9 @@ class ProposalViewTests(DocumentTestCase):
             'footer': 'new footer',
             'notes': 'new notes',
             'add_terms': True,
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-is_attached': 'True',
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-is_attached': 'True',
         }
         data.update(self.make_management_form())

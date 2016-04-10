@@ -44,7 +44,7 @@
               {% endif %}
             </td>
             <td class="job-status">{{ job_form.initial.job.get_status_display }}</td>
-            <td class="job-name">{{ job_form.job }}{{ job_form.initial.job.code }} {{ job_form.initial.job.name }}</td>
+            <td class="job-name">{{ job_form.job_id }}{{ job_form.initial.job.code }} {{ job_form.initial.job.name }}</td>
             {% amount_view "job-estimate" job_form "estimate" "net" %}
           </tr>
         {% endfor %}

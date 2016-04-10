@@ -1,5 +1,5 @@
-from django.views.generic import View, TemplateView
-from django.views.generic.detail import DetailView, SingleObjectMixin
+from django.views.generic import View, TemplateView, ListView
+from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -207,8 +207,26 @@ class AccountList(TemplateView):
         return context
 
 
-class AccountView(DetailView):
-    model = Account
+class AccountView(SingleObjectMixin, ListView):
+    paginate_by = 10
+    template_name = 'accounting/account_detail.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object(queryset=Account.objects.all())
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['account'] = self.object
+        return context
+
+    def get_queryset(self):
+        return Transaction.objects \
+            .prefetch_related('entries__account') \
+            .prefetch_related('entries__job__project') \
+            .filter(entries__account=self.object) \
+            .order_by('-transacted_on') \
+            .distinct()
 
 
 class AccountUpdate(UpdateView):

@@ -291,3 +291,9 @@ class RefundViewTests(DocumentTestCase):
         self.assertEqual(refund.document_date, date(2015, 7, 28))
         self.assertEqual(refund.json['refund_total'], Amount(Decimal('2.0'), Decimal('2.0')))
         self.assertEqual(refund.json['credit_total'], Amount(Decimal('2.0'), Decimal('2.0')))
+
+
+class AccountingViewTests(DocumentTestCase):
+    def test_accounts_list(self):
+        response = self.client.get(reverse('accounts'))
+        self.assertEqual(200, response.status_code)
