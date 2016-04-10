@@ -15,6 +15,9 @@ class ProposalViewTests(DocumentTestCase):
 
     def test_serialize_n_render_proposal(self):
 
+        response = self.client.get(reverse('proposal.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
         data = self.form_data({
             'title': 'Proposal #1',
             'document_date': '2015-01-01',

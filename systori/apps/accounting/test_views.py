@@ -54,6 +54,9 @@ class InvoiceViewTests(DocumentTestCase):
 
     def test_happy_path_create_update_and_render(self):
 
+        response = self.client.get(reverse('invoice.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
         data = {
             'title': 'Invoice #1',
             'header': 'The Header',
@@ -122,6 +125,9 @@ class PaymentViewTests(DocumentTestCase):
         self.task.save()
 
     def test_happy_path_create_update_and_render(self):
+
+        response = self.client.get(reverse('payment.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
 
         data = {
             'bank_account': Account.objects.banks().first().id,
@@ -196,6 +202,9 @@ class AdjustmentViewTests(DocumentTestCase):
 
     def test_happy_path_create_update_and_render(self):
 
+        response = self.client.get(reverse('adjustment.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
         data = {
             'title': 'Adjustment #1',
             'header': 'The Header',
@@ -258,6 +267,9 @@ class RefundViewTests(DocumentTestCase):
         self.task.save()
 
     def test_happy_path_create_update_and_render(self):
+
+        response = self.client.get(reverse('refund.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
 
         data = {
             'title': 'Refund #1',
