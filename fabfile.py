@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import requests
 from distutils.version import LooseVersion as _V
 from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
@@ -57,7 +58,7 @@ def deploy(envname='dev'):
         sudo('service uwsgi start systori_' + app)
 
         url = 'https://mehr-handwerk'+('.dev' if envname else '')+'.systori.com'
-        requests.post(SLACK, data={'text': 'push to <'+url+'|'+envname+'> finished'})
+        requests.post(SLACK, json.dumps({'text': 'push to <'+url+'|'+envname+'> finished'}))
 
 
 def makemessages():
