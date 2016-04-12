@@ -1,5 +1,6 @@
 import os
 import sys
+import requests
 from distutils.version import LooseVersion as _V
 from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
 
@@ -16,6 +17,8 @@ deploy_apps = {
     'dev': ['dev'],
     'production': ['production']
 }
+
+SLACK = 'https://hooks.slack.com/services/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'
 
 
 PROD_MEDIA_PATH = '/srv/systori/production'
@@ -52,6 +55,9 @@ def deploy(envname='dev'):
                 run('./manage.py collectstatic --noinput --verbosity 0')
 
         sudo('service uwsgi start systori_' + app)
+
+        url = 'https://mehr-handwerk'+('.dev' if envname else '')+'.systori.com'
+        requests.post(SLACK, data={'text': 'push to <'+url+'|'+envname+'> finished'})
 
 
 def makemessages():
