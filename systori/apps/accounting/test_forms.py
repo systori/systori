@@ -1,5 +1,7 @@
 from django.test import TestCase
 from django.utils.translation import activate
+
+from ..directory.models import Contact, ProjectContact
 from .test_workflow import create_data, A
 from .forms import *
 from .models import Entry
@@ -14,12 +16,21 @@ class TestForm(TestCase):
         # creates task with 480 net and 571.20 gross ready to be billed
         activate('en')
         create_data(self)
+        ProjectContact.objects.create(
+            project=self.project,
+            contact=Contact.objects.create(first_name="Ludwig", last_name="von Mises"),
+            association=ProjectContact.CUSTOMER,
+            is_billable=True
+        )
         self.task.complete = 5
         self.task.save()
 
     def make_form(self, data=None, initial={}, json=None, txn=None):
 
-        instance = self.model(project=self.project, json=json or {'jobs': []}, transaction=txn)
+        if txn:
+            instance = self.model(project=self.project, json=json or {'jobs': []}, transaction=txn)
+        else:
+            instance = self.model(project=self.project, json=json or {'jobs': []})
         jobs = self.project.jobs.all()
 
         if data:
@@ -50,18 +61,42 @@ class InvoiceFormTests(TestForm):
             'invoice_no': '2015/01/01',
 
             'job-0-is_invoiced': 'True',
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-debit_net': '1',
             'job-0-debit_tax': '1',
 
             'job-1-is_invoiced': 'True',
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-debit_net': '1',
             'job-1-debit_tax': '1',
 
         })
         self.assert_all_forms_valid(form)
         self.assertEqual(D('4'), form.debit_total_amount.gross)
+
+    def test_corrupted_form_job_list(self):
+        # change order of the jobs
+        form = self.make_form({
+
+            'title': 'Invoice #1',
+            'header': 'The Header',
+            'footer': 'The Footer',
+            'invoice_no': '2015/01/01',
+
+            'job-0-is_invoiced': 'True',
+            'job-0-job_id': self.job2.id,
+            'job-0-debit_net': '1',
+            'job-0-debit_tax': '1',
+
+            'job-1-is_invoiced': 'True',
+            'job-1-job_id': self.job.id,
+            'job-1-debit_net': '1',
+            'job-1-debit_tax': '1',
+
+        })
+        self.assertFalse(form.formset.is_valid())
+        self.assertIn('Form has become invalid due to external changes to the jobs list.',
+                      form.formset.non_form_errors())
 
     def test_initial_form_has_debit(self):
         form = self.make_form().formset[0]
@@ -115,13 +150,13 @@ class PaymentFormTests(TestForm):
             'discount': '0.00',
             'document_date': '2015-01-01',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-split_net': '1',
             'job-0-split_tax': '1',
             'job-0-discount_net': '0',
             'job-0-discount_tax': '0',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-split_net': '1',
             'job-1-split_tax': '1',
             'job-1-discount_net': '0',
@@ -139,13 +174,13 @@ class PaymentFormTests(TestForm):
             'discount': '0.00',
             'document_date': '2015-01-01',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-split_net': '1',
             'job-0-split_tax': '1',
             'job-0-discount_net': '0',
             'job-0-discount_tax': '0',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-split_net': '',
             'job-1-split_tax': '',
             'job-1-discount_net': '0',
@@ -163,13 +198,13 @@ class PaymentFormTests(TestForm):
             'discount': '0.00',
             'document_date': '2015-01-01',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-split_net': '',
             'job-0-split_tax': '',
             'job-0-discount_net': '',
             'job-0-discount_tax': '',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-split_net': '',
             'job-1-split_tax': '',
             'job-1-discount_net': '',

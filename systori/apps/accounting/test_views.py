@@ -3,14 +3,43 @@ from decimal import Decimal
 
 from django.core.urlresolvers import reverse
 
+from systori.lib.testing import SystoriTestCase
 from systori.lib.accounting.tools import Amount
-from ..document.test_views import DocumentTestCase
 from .models import Account
+from ..accounting.test_workflow import create_data
+from ..directory.models import Contact, ProjectContact
 from ..document.models import Invoice, Payment, Adjustment, Refund
 from .forms import InvoiceForm, InvoiceFormSet
 from .forms import PaymentForm, PaymentFormSet
 from .forms import AdjustmentForm, AdjustmentFormSet
 from .forms import RefundForm, RefundFormSet
+
+
+class DocumentTestCase(SystoriTestCase):
+
+    def setUp(self):
+        super().setUp()
+        create_data(self)
+        ProjectContact.objects.create(
+            project=self.project,
+            contact=Contact.objects.create(first_name="Ludwig", last_name="von Mises"),
+            association=ProjectContact.CUSTOMER,
+            is_billable=True
+        )
+        self.client.login(username=self.user.email, password='open sesame')
+
+    def make_management_form(self):
+        data = {}
+        instance = self.model(project=self.project, json={'jobs': []})
+        jobs = self.project.jobs.all()
+        _form_set = self.form_set(instance=instance, jobs=jobs)
+        for key, value in _form_set.management_form.initial.items():
+            data['job-'+key] = value
+        return data
+
+    def form_data(self, data):
+        data.update(self.make_management_form())
+        return data
 
 
 class InvoiceViewTests(DocumentTestCase):
@@ -25,6 +54,9 @@ class InvoiceViewTests(DocumentTestCase):
 
     def test_happy_path_create_update_and_render(self):
 
+        response = self.client.get(reverse('invoice.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
         data = {
             'title': 'Invoice #1',
             'header': 'The Header',
@@ -33,12 +65,12 @@ class InvoiceViewTests(DocumentTestCase):
             'document_date': '2015-01-01',
 
             'job-0-is_invoiced': 'True',
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-debit_net': '1',
             'job-0-debit_tax': '1',
 
             'job-1-is_invoiced': 'True',
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-debit_net': '1',
             'job-1-debit_tax': '1',
         }
@@ -61,12 +93,12 @@ class InvoiceViewTests(DocumentTestCase):
             'document_date': '2015-07-28',
 
             'job-0-is_invoiced': 'True',
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-debit_net': '5',
             'job-0-debit_tax': '5',
 
             'job-1-is_invoiced': 'True',
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-debit_net': '5',
             'job-1-debit_tax': '5',
         }
@@ -94,19 +126,22 @@ class PaymentViewTests(DocumentTestCase):
 
     def test_happy_path_create_update_and_render(self):
 
+        response = self.client.get(reverse('payment.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
         data = {
             'bank_account': Account.objects.banks().first().id,
             'payment': '4',
             'discount': '0.00',
             'document_date': '2015-01-01',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-split_net': '1',
             'job-0-split_tax': '1',
             'job-0-discount_net': '0',
             'job-0-discount_tax': '0',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-split_net': '1',
             'job-1-split_tax': '1',
             'job-1-discount_net': '0',
@@ -133,13 +168,13 @@ class PaymentViewTests(DocumentTestCase):
             'discount': '0.00',
             'document_date': '2015-07-28',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-split_net': '2',
             'job-0-split_tax': '1',
             'job-0-discount_net': '0',
             'job-0-discount_tax': '0',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-split_net': '2',
             'job-1-split_tax': '1',
             'job-1-discount_net': '0',
@@ -167,17 +202,20 @@ class AdjustmentViewTests(DocumentTestCase):
 
     def test_happy_path_create_update_and_render(self):
 
+        response = self.client.get(reverse('adjustment.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
         data = {
             'title': 'Adjustment #1',
             'header': 'The Header',
             'footer': 'The Footer',
             'document_date': '2015-01-01',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-adjustment_net': '1',
             'job-0-adjustment_tax': '1',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-adjustment_net': '1',
             'job-1-adjustment_tax': '1',
         }
@@ -198,11 +236,11 @@ class AdjustmentViewTests(DocumentTestCase):
             'footer': 'new footer',
             'document_date': '2015-07-28',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-adjustment_net': '5',
             'job-0-adjustment_tax': '5',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-adjustment_net': '5',
             'job-1-adjustment_tax': '5',
         }
@@ -230,19 +268,22 @@ class RefundViewTests(DocumentTestCase):
 
     def test_happy_path_create_update_and_render(self):
 
+        response = self.client.get(reverse('refund.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
         data = {
             'title': 'Refund #1',
             'header': 'new header',
             'footer': 'new footer',
             'document_date': '2015-01-01',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-refund_net': '1',
             'job-0-refund_tax': '1',
             'job-0-credit_net': '0',
             'job-0-credit_tax': '0',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-refund_net': '0',
             'job-1-refund_tax': '0',
             'job-1-credit_net': '1',
@@ -270,13 +311,13 @@ class RefundViewTests(DocumentTestCase):
             'footer': 'updated footer',
             'document_date': '2015-07-28',
 
-            'job-0-job': self.job.id,
+            'job-0-job_id': self.job.id,
             'job-0-refund_net': '2',
             'job-0-refund_tax': '2',
             'job-0-credit_net': '0',
             'job-0-credit_tax': '0',
 
-            'job-1-job': self.job2.id,
+            'job-1-job_id': self.job2.id,
             'job-1-refund_net': '0',
             'job-1-refund_tax': '0',
             'job-1-credit_net': '2',
@@ -291,3 +332,9 @@ class RefundViewTests(DocumentTestCase):
         self.assertEqual(refund.document_date, date(2015, 7, 28))
         self.assertEqual(refund.json['refund_total'], Amount(Decimal('2.0'), Decimal('2.0')))
         self.assertEqual(refund.json['credit_total'], Amount(Decimal('2.0'), Decimal('2.0')))
+
+
+class AccountingViewTests(DocumentTestCase):
+    def test_accounts_list(self):
+        response = self.client.get(reverse('accounts'))
+        self.assertEqual(200, response.status_code)

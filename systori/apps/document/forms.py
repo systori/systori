@@ -1,6 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.db.transaction import atomic
+from django.forms import ValidationError
 from django.forms.formsets import formset_factory
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import get_language
@@ -13,11 +14,13 @@ from . import type as pdf_type
 
 
 class ProposalForm(DocumentForm):
+
     doc_template = forms.ModelChoiceField(
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.PROPOSAL), required=False)
-    add_terms = forms.BooleanField(label=_('Add Terms'),
-                                   initial=True, required=False)
+
+    add_terms = forms.BooleanField(label=_('Add Terms'), initial=True, required=False)
+
     title = forms.CharField(label=_('Title'), initial=_("Proposal"))
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
@@ -42,19 +45,24 @@ class ProposalForm(DocumentForm):
     def save(self, commit=True):
 
         proposal = self.instance
-        data = self.cleaned_data.copy()
-        data.update({
-            'jobs': self.formset.get_json_rows(),
-            'estimate_total': self.estimate_total_amount
-        })
+        proposal.json = self.json
 
         doc_settings = DocumentSettings.get_for_language(get_language())
-        proposal.json = pdf_type.proposal.serialize(proposal, data)
         proposal.letterhead = doc_settings.proposal_letterhead
+
+        pdf_type.proposal.serialize(proposal)
 
         super().save(commit)
 
         proposal.jobs = self.formset.get_transaction_rows()
+
+
+class BaseProposalFormSet(BaseDocumentFormSet):
+
+    def clean(self):
+        super().clean()
+        if not self.get_transaction_rows():
+            raise ValidationError(_("At least one job must be selected."))
 
 
 class ProposalRowForm(DocumentRowForm):
@@ -67,20 +75,23 @@ class ProposalRowForm(DocumentRowForm):
 
     @property
     def json(self):
-        if str(self['is_attached'].value()) == 'True':
+        if self.cleaned_data['is_attached']:
             return {
                 'job': self.job,
+                'job.id': self.job.id,
+                'code': self.job.code,
+                'name': self.job.name,
                 'is_attached': True,
                 'estimate': self.estimate_amount
             }
 
     @property
     def transaction(self):
-        if str(self['is_attached'].value()) == 'True':
+        if self.cleaned_data['is_attached']:
             return self.job
 
 
-ProposalFormSet = formset_factory(ProposalRowForm, formset=BaseDocumentFormSet, extra=0)
+ProposalFormSet = formset_factory(ProposalRowForm, formset=BaseProposalFormSet, extra=0)
 
 
 class LetterheadCreateForm(forms.ModelForm):

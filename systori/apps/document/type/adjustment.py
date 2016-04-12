@@ -20,7 +20,7 @@ def render(adjustment, letterhead, format):
 
         font = FontManager(letterhead.font)
         table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
-        document_date = date_format(date(*map(int, adjustment['date'].split('-'))), use_l10n=True)
+        document_date = date_format(date(*map(int, adjustment['document_date'].split('-'))), use_l10n=True)
         doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         flowables = [
@@ -41,37 +41,5 @@ def render(adjustment, letterhead, format):
         return buffer.getvalue()
 
 
-def serialize(adjustment_obj, data):
-
-    contact = adjustment_obj.project.billable_contact.contact
-
-    adjustment = {
-
-        'id': adjustment_obj.id,
-
-        'title': data['title'],
-        'date': data['document_date'],
-
-        'header': data['header'],
-        'footer': data['footer'],
-
-        'business': contact.business,
-        'salutation': contact.salutation,
-        'first_name': contact.first_name,
-        'last_name': contact.last_name,
-        'address': contact.address,
-        'postal_code': contact.postal_code,
-        'city': contact.city,
-        'address_label': contact.address_label,
-
-        'jobs': data['jobs'],
-
-        'paid_total': data['paid_total'],
-        'invoiced_total': data['invoiced_total'],
-        'progress_total': data['progress_total'],
-        'adjustment_total': data['adjustment_total'],
-        'corrected_total': data['corrected_total']
-
-    }
-
-    return adjustment
+def serialize(adjustment):
+    pass

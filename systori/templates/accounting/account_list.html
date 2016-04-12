@@ -19,7 +19,7 @@
       <tr>
         <td><a href="{% url 'account.view' account.id %}">{{ account.code }}</a></td>
         <td><a href="{% url 'account.view' account.id %}">{{ account.name }}</a></td>
-        <td align="right">{{ account.balance|money }}</td>
+        <td align="right">{{ account.balance.gross|money }}</td>
         <td>
           <a href="{% url 'bank.account.edit' account.id %}">{% trans "Edit" %}</a>
           {% if account.entries.count == 0 %}
@@ -49,7 +49,7 @@
         <td>{{ account.get_account_type_display }}</td>
         <td><a href="{% url 'account.view' account.id %}">{{ account.code }}</a></td>
         <td><a href="{% url 'account.view' account.id %}">{{ account.name }}</a></td>
-        <td align="right">{{ account.balance|money }}</td>
+        <td align="right">{{ account.balance.gross|money }}</td>
         <td>
           <a href="{% url 'account.edit' account.id %}">{% trans "Edit" %}</a>
         </td>

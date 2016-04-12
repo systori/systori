@@ -175,7 +175,7 @@ class ProjectCreate(CreateView):
         jobsite.address = form.cleaned_data['address']
         jobsite.city = form.cleaned_data['city']
         jobsite.postal_code = form.cleaned_data['postal_code']
-        jobsite.save()
+        jobsite.save(skip_geocoding=self.request.POST.get('skip_geocode', False))
 
         return response
 

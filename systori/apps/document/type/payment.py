@@ -20,7 +20,7 @@ def render(payment, letterhead, format):
 
         font = FontManager(letterhead.font)
         table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
-        document_date = date_format(date(*map(int, payment['date'].split('-'))), use_l10n=True)
+        document_date = date_format(date(*map(int, payment['document_date'].split('-'))), use_l10n=True)
         doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         flowables = [
@@ -37,18 +37,5 @@ def render(payment, letterhead, format):
         return buffer.getvalue()
 
 
-def serialize(payment_obj, data):
-
-    payment = {
-        'bank_account': data['bank_account'].id,
-        'date': data['document_date'],
-        'payment': data['payment'],
-        'discount': data['discount'],
-        'split_total': data['split_total'],
-        'discount_total': data['discount_total'],
-        'adjustment_total': data['adjustment_total'],
-        'credit_total': data['credit_total'],
-        'jobs': data['jobs'],
-    }
-
-    return payment
+def serialize(payment):
+    pass

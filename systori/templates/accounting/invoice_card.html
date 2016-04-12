@@ -70,7 +70,6 @@
 
       {% endif %}
     {% endfor %}
-    {% if 'id' in invoice.json %}
     {% if invoice.status == invoice.DRAFT %}
     <a class="btn btn-sm btn-default" href="{% url 'invoice.update' project.id invoice.id %}">{% trans "Edit" %}</a>
     {% endif %}
@@ -87,8 +86,5 @@
         <li><a target="_blank" href="{% url 'invoice.pdf' project.id 'print' invoice.id %}?payment_details=1">{% trans 'Print w/ Payment Details' %}</a></li>
       </ul>
     </div>
-    {% else %}
-    <a class="btn btn-sm btn-danger">NO JSON!</a>
-    {% endif %}
   </div>
 </div>

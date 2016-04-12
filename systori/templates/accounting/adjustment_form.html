@@ -9,7 +9,7 @@
     <h2 class="sub-header">
       {% trans "Adjustments & Corrections" %}
       <div class="btn-group" role="group">
-        {% if not form.initial.invoice %}
+        {% if not form.instance.invoice %}
         <button type="button" class="btn btn-default" id="match-overpaid">{% trans "Match Overpaid" %}</button>
         <button type="button" class="btn btn-default" id="match-underpaid">{% trans "Match Underpaid" %}</button>
         <button type="button" class="btn btn-default" id="match-overbilled">{% trans "Match Overbilled" %}</button>
@@ -40,17 +40,17 @@
       <thead>
       <tr>
         <th class="job-name">{% trans 'Job' %}</th>
-        {% if not form.initial.invoice %}
+        {% if not form.instance.invoice %}
         <th class="job-paid">{% trans 'Paid' %}</th>
         {% endif %}
         <th class="job-invoiced">
-          {% if form.initial.invoice %}
-            {% trans 'Invoice' %} {{ form.initial.invoice.invoice_no }}
+          {% if form.instance.invoice %}
+            {% trans 'Invoice' %} {{ form.instance.invoice.invoice_no }}
           {% else %}
             {% trans 'Invoiced' %}
           {% endif %}
         </th>
-        {% if not form.initial.invoice %}
+        {% if not form.instance.invoice %}
         <th class="job-progress">{% trans 'Progress' %}</th>
         {% endif %}
         <th class="job-adjustment">{% trans 'Adjustment' %}</th>
@@ -60,12 +60,12 @@
       <tbody>
       {% for adjustment in form.formset %}
         <tr is="adjustment-row" class="adjustment-row">
-          <td class="job-name">{{ adjustment.job }}{{ adjustment.initial.job.name }}</td>
-          {% if not form.initial.invoice %}
+          <td class="job-name">{{ adjustment.job_id }}{{ adjustment.initial.job.name }}</td>
+          {% if not form.instance.invoice %}
           {% amount_view "job-paid clickable" adjustment.pre_txn "paid" select_if_equal=adjustment.corrected_amount %}
           {% endif %}
           {% amount_view "job-invoiced clickable" adjustment.pre_txn "invoiced" select_if_equal=adjustment.corrected_amount %}
-          {% if not form.initial.invoice %}
+          {% if not form.instance.invoice %}
           {% amount_view "job-progress clickable" adjustment.pre_txn "progress" select_if_equal=adjustment.corrected_amount %}
           {% endif %}
           {% amount_input "job-adjustment" adjustment "adjustment" %}
@@ -74,11 +74,11 @@
       {% endfor %}
         <tr class="adjustment-table-totals">
           <td class="job-name"></td>
-          {% if not form.initial.invoice %}
+          {% if not form.instance.invoice %}
           {% amount_view "job-paid" form "pre_txn_paid_total" %}
           {% endif %}
           {% amount_view "job-invoiced" form "pre_txn_invoiced_total" %}
-          {% if not form.initial.invoice %}
+          {% if not form.instance.invoice %}
           {% amount_view "job-progress" form "pre_txn_progress_total" %}
           {% endif %}
           {% amount_view "job-adjustment" form "adjustment_total" %}
