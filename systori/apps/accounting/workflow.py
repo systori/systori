@@ -212,6 +212,8 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None, debug=False):
 
     transaction.save(debug=debug)
 
+    return transaction
+
 
 def adjust_jobs(jobs, transacted_on=None, debug=False):
 
