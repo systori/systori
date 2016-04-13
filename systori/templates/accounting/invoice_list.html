@@ -25,11 +25,11 @@
         <tr><td colspan="8" class="bg-primary">{{ month|date:"Y - F" }}</td></tr>
         {% for invoice in details.invoices %}
           <tr>
-            <td>{{ invoice.project }}</td>
+            <td><a href="{{ invoice.project.get_absolute_url }}">{{ invoice.project }}</a></td>
             <td style="text-align:right;">{{ invoice.json.invoiced.gross|money }}</td>
             <td style="text-align:right;">{{ invoice.json.paid.negate.gross|money }}</td>
             <td>{{ invoice.document_date }}</td>
-            <td>{{ invoice.invoice_no }}</td>
+            <td><a href="{% url "invoice.pdf" project.id "email" invoice.id %}">{{ invoice.invoice_no }}</a></td>
             <td>{{ invoice.get_status_display }}</td>
             <td style="text-align:right;"><b>{{ invoice.json.debit.gross|money }}</b></td>
             <td>{% if invoice.parent %}<span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{ invoice.parent.invoice_no }}{% else %}---{% endif %}</td>
