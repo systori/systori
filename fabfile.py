@@ -1,7 +1,6 @@
 import os
 import sys
 import json
-import requests
 from distutils.version import LooseVersion as _V
 from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
 
@@ -28,6 +27,7 @@ PROD_MEDIA_FILE = 'systori.media.tgz'
 
 def deploy(envname='dev'):
     ":envname=dev -- deploy code to remote server"
+    import requests
     env.user = 'ubrblik'
 
     for app in deploy_apps[envname]:
