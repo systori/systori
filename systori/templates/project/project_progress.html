@@ -12,11 +12,11 @@
     </tr>
     <tr>
       <td>{% trans 'billable' %}</td>
-      <td>{{ project.billable_total|money }}</td>
+      <td>{{ project.progress_total|money }}</td>
     </tr>
     <tr>
       <td>{% trans 'percent' %}</td>
-      <td>{{ project.complete_percent|ubrdecimal }} %</td>
+      <td>{{ project.progress_percent|ubrdecimal }} %</td>
     </tr>
     </table>
   </dl><br>
@@ -31,11 +31,11 @@
         </tr>
         <tr>
           <td>{% trans 'billable' %}</td>
-          <td>{{ job.billable_total|money }}</td>
+          <td>{{ job.progress_total|money }}</td>
         </tr>
         <tr>
           <td>{% trans 'percent' %}</td>
-          <td>{{ job.complete_percent|ubrdecimal }} %</td>
+          <td>{{ job.progress_percent|ubrdecimal }} %</td>
         </tr>
         </table>
   {% endfor %}
@@ -121,7 +121,7 @@
                     {{ task.unit_price|ubrdecimal:3 }}
                 </td>
                 <td>
-                    {{ task.fixed_price_billable|ubrdecimal:3 }}
+                    {{ task.fixed_price_progress|ubrdecimal:3 }}
                 </td>
                 <td>
                     {{ task.complete_percent }} %
@@ -129,9 +129,9 @@
             </tr>
             <tr><td colspan="8"></td></tr>
             {% endfor %}
-            <tr style="font-weight: bold;"><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ taskgroup.code }} - {% trans 'total' %}</td><td colspan="2">{{ taskgroup.billable_total|ubrdecimal }}</td></tr>
+            <tr style="font-weight: bold;"><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ taskgroup.code }} - {% trans 'total' %}</td><td colspan="2">{{ taskgroup.progress_total|money }}</td></tr>
         {% endfor %}
-        <tr style="font-weight: bold;"><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ job.code }} - {% trans 'total' %}</td><td colspan="2">{{ job.billable_total|ubrdecimal }}</td></tr>
+        <tr style="font-weight: bold;"><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ job.code }} - {% trans 'total' %}</td><td colspan="2">{{ job.progress_total|money }}</td></tr>
     {% endfor %}
     </tbody>
 </table>

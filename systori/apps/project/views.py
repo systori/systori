@@ -227,7 +227,7 @@ class ProjectProgress(DetailView):
     template_name = 'project/project_progress.html'
 
     def get_queryset(self):
-        queryset = super(ProjectProgress, self).get_queryset()
+        queryset = super().get_queryset()
         return queryset.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
 
 

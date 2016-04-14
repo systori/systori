@@ -19,6 +19,21 @@ class TestProjectListView(SystoriTestCase):
         self.assertEqual(200, response.status_code)
 
 
+class TestProgressViews(SystoriTestCase):
+
+    def setUp(self):
+        create_task_data(self)
+        self.client.login(username=self.user.email, password='open sesame')
+
+    def test_project_progress(self):
+        response = self.client.get(reverse('project.progress', args=[self.project.id]), {})
+        self.assertEqual(200, response.status_code)
+
+    def test_project_progress_all(self):
+        response = self.client.get(reverse('project.progress.all'), {})
+        self.assertEqual(200, response.status_code)
+
+
 class TestProjectFormViews(SystoriTestCase):
 
     def setUp(self):
