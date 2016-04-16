@@ -115,7 +115,7 @@ def dockergetdb(container='web', envname='production'):
 
 def initsettings(envname='local'):
     ":envname=local -- creates __init__.py in settings folder"
-    assert envname in ['dev', 'production', 'local', 'travis']
+    assert envname in ['dev', 'production', 'local', 'jenkins']
     if os.path.exists('systori/settings/__init__.py'):
         print('Settings have already been initialized.')
     else:

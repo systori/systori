@@ -8,7 +8,7 @@ GOOGLE_MAPS_API_KEY = "AIzaSyDvwtHHJ_FrNVkbKoHoWh2r2E5PtV5rmLY"
 DEBUG = True
 
 DATABASES['default'].update({
-    'NAME': 'systori_travis',
+    'NAME': 'systori_jenkins',
     'TEST': {
         'SERIALIZE': False
     }
