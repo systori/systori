@@ -18,16 +18,12 @@ deploy_apps = {
     'production': ['production']
 }
 
-SLACK = 'https://hooks.slack.com/services/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'
-
-
 PROD_MEDIA_PATH = '/srv/systori/production'
 PROD_MEDIA_FILE = 'systori.media.tgz'
 
 
 def deploy(envname='dev'):
     ":envname=dev -- deploy code to remote server"
-    import requests
     env.user = 'ubrblik'
 
     for app in deploy_apps[envname]:
@@ -57,9 +53,7 @@ def deploy(envname='dev'):
 
         sudo('service uwsgi start systori_' + app)
 
-        middomain = '' if envname=='production' else '.'+envname
-        url = 'https://mehr-handwerk'+middomain+'.systori.com'
-        requests.post(SLACK, json.dumps({'text': 'push to <'+url+'|'+envname+'> finished'}))
+    slack('push to <%(systori-url)s|%(envname)s> finished', envname)
 
 
 def makemessages():
@@ -182,6 +176,35 @@ def testdart():
         local('pub run test -r expanded -p content-shell test')
 
 
+SLACK = 'https://hooks.slack.com/services/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'
+
+
+def slack(msg, envname='dev'):
+    import requests
+    middomain = '' if envname=='production' else '.'+envname
+    systori_url = 'https://mehr-handwerk'+middomain+'.systori.com'
+    requests.post(SLACK, json.dumps({'text':
+        msg % {'systori-url': systori_url, 'envname': envname}
+    }))
+
+
 def mail():
     "start mail debugging server"
     local('python -m smtpd -n -c DebuggingServer localhost:1025')
+
+
+def jenkins():
+
+    local('pip install --upgrade -r requirements/dev.pip')
+
+    initsettings('jenkins')
+
+    with lcd('systori/dart'):
+        local('/usr/lib/dart/bin/pub get')
+        local('/usr/lib/dart/bin/pub build')
+
+    local('coverage run -p manage.py test systori')
+    local('coverage combine')
+    local('coverage html')
+
+    slack('build finished')
