@@ -11,8 +11,8 @@ geopy
 lxml
 jsonfield
 
--e hg+ssh://hg@bitbucket.org/rptlab/reportlab#egg=reportlab
--e hg+ssh://hg@bitbucket.org/rptlab/preppy#egg=preppy
+-e hg+https://eukreign@bitbucket.org/rptlab/reportlab#egg=reportlab
+-e hg+https://eukreign@bitbucket.org/rptlab/preppy#egg=preppy
 -e git+git@github.com:systori/rlextra.git#egg=rlextra
 #-e ../rlextra
 
