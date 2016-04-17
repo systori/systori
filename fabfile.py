@@ -200,8 +200,9 @@ def jenkins():
     initsettings('jenkins')
 
     with lcd('systori/dart'):
-        local('/usr/lib/dart/bin/pub get')
-        local('/usr/lib/dart/bin/pub build')
+        local('pub get')
+        local('pub build')
+        local('pub run test -r expanded -p content-shell test')
 
     local('coverage run -p manage.py test systori')
     local('coverage combine')
