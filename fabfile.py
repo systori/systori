@@ -202,7 +202,7 @@ def jenkins():
     with lcd('systori/dart'):
         local('pub get')
         local('pub build')
-        local('pub run test -r expanded -p content-shell test')
+        local("xvfb-run -s '-screen 0 1024x768x24' pub run test -r expanded -p content-shell test")
 
     local('coverage run -p manage.py test systori')
     local('coverage combine')
