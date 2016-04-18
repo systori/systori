@@ -137,8 +137,8 @@ Language : Tab size : Indent : Continuation indent
 
 |Color      | 100%    | 75%     | 50%     | 25%    |
 |-----------|---------|---------|---------|--------|
-|Braun      | #BBA892 | #CCBEAD | #DDD3C8 | #EEE9E3|
-|Rot        | #D41351 | #E05E76 | #EA99A2 | #F5CFD1|
+|Brown      | #BBA892 | #CCBEAD | #DDD3C8 | #EEE9E3|
+|Red        | #D41351 | #E05E76 | #EA99A2 | #F5CFD1|
 |Orange     | #EE725F | #F39985 | #F8BDAD | #FCE0D6|
 |Yellow     | #FAB94B | #FCCB7E | #FEDDAB | #FFEED6|
 |BlueGreen  | #006C7C | #478A98 | #8AACB8 | #C6D4DA|
