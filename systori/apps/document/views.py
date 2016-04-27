@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import Decimal
 from collections import OrderedDict
 
@@ -8,32 +9,39 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import get_language
 
+from systori.lib.accounting.tools import Amount
 from ..project.models import Project
-from ..task.models import Job
 from ..accounting.constants import TAX_RATE
-from .models import Proposal, Invoice, Adjustment, Refund, DocumentTemplate, Letterhead, DocumentSettings
+from .models import Proposal, Invoice, Adjustment, Payment, Refund
+from .models import DocumentTemplate, Letterhead, DocumentSettings
 from .forms import ProposalForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
 from . import type as pdf_type
 
 
 class InvoiceList(ListView):
     model = Invoice
+    template_name = 'accounting/invoice_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        years = OrderedDict()
-        for invoice in self.object_list.order_by('document_date').order_by('invoice_no'):
-            year, month = invoice.document_date.year, invoice.document_date.month
-            if year not in years:
-                years[year] = OrderedDict()
-            if month not in years[year]:
-                years[year][month] = {'invoices': [], 'total': Decimal('0.00')}
-            years[year][month]['invoices'].append(invoice)
-            if invoice.json.get('balance_gross'):
-                years[year][month]['total'] += Decimal(invoice.json['balance_gross'])
+        query = Invoice.objects.\
+            prefetch_related('project').\
+            prefetch_related('parent').\
+            filter(document_date__gte=date(2015, 9, 1)).\
+            order_by('-document_date', 'invoice_no')
 
-        context['invoice_group'] = years
+        months = OrderedDict()
+        for invoice in query:
+            doc_date = date(invoice.document_date.year, invoice.document_date.month, 1)
+            month = months.setdefault(doc_date, {
+                'invoices': [],
+                'debit': Amount.zero()
+            })
+            month['debit'] += invoice.json['debit']
+            month['invoices'].append(invoice)
+
+        context['invoice_groups'] = months
 
         return context
 
@@ -63,6 +71,15 @@ class AdjustmentPDF(DocumentRenderView):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
         return pdf_type.adjustment.render(json, letterhead, self.kwargs['format'])
+
+
+class PaymentPDF(DocumentRenderView):
+    model = Payment
+
+    def pdf(self):
+        json = self.get_object().json
+        letterhead = self.get_object().letterhead
+        return pdf_type.payment.render(json, letterhead, self.kwargs['format'])
 
 
 class RefundPDF(DocumentRenderView):

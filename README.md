@@ -132,3 +132,15 @@ Language : Tab size : Indent : Continuation indent
 
 * Repo owner or admin
 * Other community or team contact
+
+### Systori color palette ###
+
+|Color      | 100%    | 75%     | 50%     | 25%    |
+|-----------|---------|---------|---------|--------|
+|Brown      | #BBA892 | #CCBEAD | #DDD3C8 | #EEE9E3|
+|Red        | #D41351 | #E05E76 | #EA99A2 | #F5CFD1|
+|Orange     | #EE725F | #F39985 | #F8BDAD | #FCE0D6|
+|Yellow     | #FAB94B | #FCCB7E | #FEDDAB | #FFEED6|
+|BlueGreen  | #006C7C | #478A98 | #8AACB8 | #C6D4DA|
+|Green      | #00A19A | #6CB7B3 | #A6CFCC | #D5E7E6|
+|Mint       | #B7DBC1 | #CBE4D2 | #DDEDE1 | #EEF6F1|

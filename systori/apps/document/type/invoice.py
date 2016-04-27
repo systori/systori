@@ -174,7 +174,7 @@ def render(invoice, letterhead, show_payment_details, format):
 
         font = FontManager(letterhead.font)
         table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
-        invoice_date = date_format(date(*map(int, invoice['date'].split('-'))), use_l10n=True)
+        invoice_date = date_format(date(*map(int, invoice['document_date'].split('-'))), use_l10n=True)
         doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         flowables = [
@@ -223,52 +223,18 @@ def render(invoice, letterhead, show_payment_details, format):
         return buffer.getvalue()
 
 
-def serialize(invoice_obj, data):
+def serialize(invoice):
 
-    contact = invoice_obj.project.billable_contact.contact
-
-    invoice = {
-
-        'id': invoice_obj.id,
-
-        'title': data['title'],
-        'date': data['document_date'],
-        'invoice_no': data['invoice_no'],
-
-        'header': data['header'],
-        'footer': data['footer'],
-
-        'is_final': data['is_final'],
-
-        'business': contact.business,
-        'salutation': contact.salutation,
-        'first_name': contact.first_name,
-        'last_name': contact.last_name,
-        'address': contact.address,
-        'postal_code': contact.postal_code,
-        'city': contact.city,
-        'address_label': contact.address_label,
-
-        'jobs': []
-
-    }
-
-    if data.get('add_terms', False):
-        invoice['add_terms'] = True  # TODO: Calculate the terms.
+    if invoice.json['add_terms']:
+        pass  # TODO: Calculate the terms.
 
     job_objs = []
-    for job_data in data['jobs']:
+    for job_data in invoice.json['jobs']:
 
         job_obj = job_data.pop('job')
         job_objs.append(job_obj)
 
-        job_data.update({
-            'job.id': job_obj.id,
-            'code': job_obj.code,
-            'name': job_obj.name,
-            'taskgroups': []
-        })
-        invoice['jobs'].append(job_data)
+        job_data['taskgroups'] = []
 
         for taskgroup in job_obj.taskgroups.all():
             taskgroup_dict = {
@@ -306,6 +272,6 @@ def serialize(invoice_obj, data):
                     }
                     task_dict['lineitems'].append(lineitem_dict)
 
-    invoice.update(create_invoice_report(invoice_obj.transaction, job_objs))
+    invoice.json.update(create_invoice_report(invoice.transaction, job_objs))
 
     return invoice

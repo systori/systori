@@ -21,25 +21,23 @@
       </tr>
       </thead>
       <tbody>
-      {% for year, months in invoice_group.items %}
-        {% for month_number, month in months.items %}
-          <tr><td colspan="8" class="bg-primary">{{ year }} - {{ month_number|month_from_int }}</td></tr>
-          {% for invoice in month.invoices %}
-            <tr>
-              <td>{{ invoice.project }}</td>
-              <td style="text-align:right;">{{ invoice.debited_gross|money }}</td>
-              <td style="text-align:right;">{{ invoice.project.abs_payments|money }}</td>
-              <td>{{ invoice.document_date }}</td>
-              <td>{{ invoice.invoice_no }}</td>
-              <td>{{ invoice.get_status_display }}</td>
-              <td style="text-align:right;"><b>{{ invoice.balance_gross|money }}</b></td>
-              <td>{% if invoice.parent %}<span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{ invoice.parent.invoice_no }}{% else %}---{% endif %}</td>
-            </tr>
-          {% endfor %}
-            <tr>
-              <td colspan="6" style="text-align:right;">Summe {{ month_number|month_from_int }}:</td><td style="text-align:right;">{{ month.total|money }}</td><td></td>
-            </tr>
+      {% for month, details in invoice_groups.items %}
+        <tr><td colspan="8" class="bg-primary">{{ month|date:"Y - F" }}</td></tr>
+        {% for invoice in details.invoices %}
+          <tr>
+            <td><a href="{{ invoice.project.get_absolute_url }}">{{ invoice.project }}</a></td>
+            <td style="text-align:right;">{{ invoice.json.invoiced.gross|money }}</td>
+            <td style="text-align:right;">{{ invoice.json.paid.negate.gross|money }}</td>
+            <td>{{ invoice.document_date }}</td>
+            <td><a href="{% url "invoice.pdf" invoice.project.id "email" invoice.id %}">{{ invoice.invoice_no }}</a></td>
+            <td>{{ invoice.get_status_display }}</td>
+            <td style="text-align:right;"><b>{{ invoice.json.debit.gross|money }}</b></td>
+            <td>{% if invoice.parent %}<span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{ invoice.parent.invoice_no }}{% else %}---{% endif %}</td>
+          </tr>
         {% endfor %}
+          <tr>
+            <td colspan="6" style="text-align:right;">Summe {{ month|date:"F" }}:</td><td style="text-align:right;">{{ details.debit.gross|money }}</td><td></td>
+          </tr>
       {% endfor %}
       </tbody>
     </table>

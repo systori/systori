@@ -74,14 +74,14 @@
         </thead>
         <tbody>
         {% for debit in form.formset %}
-          <tr is="invoice-row" class="{% if debit.is_invoiced.value == True %}invoiced{% endif %} {% if debit.is_itemized %}itemized{% endif %} {% if debit.is_override.value == True %}override{% endif %}">
+          <tr is="invoice-row" class="{% if debit.is_invoiced_str == 'True' %}invoiced{% endif %} {% if debit.is_itemized %}itemized{% endif %} {% if debit.is_override_str == 'True' %}override{% endif %}">
             <td class="job-is-invoiced">{{ debit.is_invoiced }}</td>
             <td class="job-is-itemized">
               {{ debit.is_override }}
               <span class="glyphicon itemized-icon glyphicon-tag" aria-hidden="true"></span>
               <span class="glyphicon itemized-icon glyphicon-list" aria-hidden="true"></span>
             </td>
-            <td class="job-name">{{ debit.job }}{{ debit.initial.job.name }}</td>
+            <td class="job-name">{{ debit.job_id }}{{ debit.initial.job.name }}</td>
             {% amount_view "job-estimate" debit.pre_txn "estimate" "net" %}
             {% amount_view "job-progress" debit.pre_txn "progress" "net" %}
             {% amount_view "job-invoiced" debit.pre_txn "invoiced" %}

@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n staticfiles bootstrap customformatting ubrutils amount %}
+{% load i18n l10n staticfiles bootstrap customformatting ubrutils amount %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
@@ -8,10 +8,10 @@
 
     {{ form.bank_account|bootstrap }}
     {{ form.document_date|bootstrap }}
-    {% if form.invoice.value %}
+    {% if form.instance.invoice %}
       <div class="form-group">
         <label class="control-label">{% trans "Invoice" %}</label>
-        <div>{{ form.invoice.value.json.invoice_no }} {{ form.invoice.value.json.title }}</div>
+        <div>{{ form.instance.invoice.invoice_no }} {{ form.instance.invoice.title }} {% trans 'from' %} {{ form.instance.invoice.document_date|localize }}</div>
       </div>
     {% endif %}
     <div class="form-group">
@@ -55,7 +55,7 @@
       <tbody>
       {% for split in form.formset %}
         <tr is="payment-split" class="payment-split-row">
-          <td class="job-name">{{ split.job }}{{ split.initial.job.name }}</td>
+          <td class="job-name">{{ split.job_id }}{{ split.initial.job.name }}</td>
           {% amount_view "job-balance" split "balance" %}
           {% amount_input "job-split" split "split" %}
           {% amount_stateful "job-discount" split "discount" %}

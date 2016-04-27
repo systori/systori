@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 from distutils.version import LooseVersion as _V
 from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
 
@@ -16,7 +17,6 @@ deploy_apps = {
     'dev': ['dev'],
     'production': ['production']
 }
-
 
 PROD_MEDIA_PATH = '/srv/systori/production'
 PROD_MEDIA_FILE = 'systori.media.tgz'
@@ -52,6 +52,8 @@ def deploy(envname='dev'):
                 run('./manage.py collectstatic --noinput --verbosity 0')
 
         sudo('service uwsgi start systori_' + app)
+
+    slack('push to <%(systori-url)s|%(envname)s> finished', envname)
 
 
 def makemessages():
@@ -113,7 +115,7 @@ def dockergetdb(container='web', envname='production'):
 
 def initsettings(envname='local'):
     ":envname=local -- creates __init__.py in settings folder"
-    assert envname in ['dev', 'production', 'local', 'travis']
+    assert envname in ['dev', 'production', 'local', 'jenkins']
     if os.path.exists('systori/settings/__init__.py'):
         print('Settings have already been initialized.')
     else:
@@ -174,6 +176,36 @@ def testdart():
         local('pub run test -r expanded -p content-shell test')
 
 
+SLACK = 'https://hooks.slack.com/services/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'
+
+
+def slack(msg, envname='dev'):
+    import requests
+    middomain = '' if envname=='production' else '.'+envname
+    systori_url = 'https://mehr-handwerk'+middomain+'.systori.com'
+    requests.post(SLACK, json.dumps({'text':
+        msg % {'systori-url': systori_url, 'envname': envname}
+    }))
+
+
 def mail():
     "start mail debugging server"
     local('python -m smtpd -n -c DebuggingServer localhost:1025')
+
+
+def jenkins():
+
+    local('pip install --upgrade -r requirements/dev.pip')
+
+    initsettings('jenkins')
+
+    with lcd('systori/dart'):
+        local('pub get')
+        local('pub build')
+        local("xvfb-run -s '-screen 0 1024x768x24' pub run test -r expanded -p content-shell test")
+
+    local('coverage run -p manage.py test systori')
+    local('coverage combine')
+    local('coverage html')
+
+    slack('build finished')

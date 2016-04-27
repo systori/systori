@@ -175,7 +175,7 @@ class ProjectCreate(CreateView):
         jobsite.address = form.cleaned_data['address']
         jobsite.city = form.cleaned_data['city']
         jobsite.postal_code = form.cleaned_data['postal_code']
-        jobsite.save()
+        jobsite.save(skip_geocoding=self.request.POST.get('skip_geocode', False))
 
         return response
 
@@ -227,7 +227,7 @@ class ProjectProgress(DetailView):
     template_name = 'project/project_progress.html'
 
     def get_queryset(self):
-        queryset = super(ProjectProgress, self).get_queryset()
+        queryset = super().get_queryset()
         return queryset.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
 
 

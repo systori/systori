@@ -175,7 +175,7 @@ def render(proposal, letterhead, with_line_items, format):
 
         table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
 
-        proposal_date = date_format(date(*map(int, proposal['date'].split('-'))), use_l10n=True)
+        proposal_date = date_format(date(*map(int, proposal['document_date'].split('-'))), use_l10n=True)
 
         doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
@@ -210,48 +210,16 @@ def render(proposal, letterhead, with_line_items, format):
         return buffer.getvalue()
 
 
-def serialize(proposal_obj, data):
+def serialize(proposal):
 
-    contact = proposal_obj.project.billable_contact.contact
+    if proposal.json['add_terms']:
+        pass  # TODO: Calculate the terms.
 
-    proposal = {
+    for job_data in proposal.json['jobs']:
 
-        'id': proposal_obj.id,
+        job_obj = job_data.pop('job')
 
-        'date': data['document_date'],
-
-        'title': data['title'],
-        'header': data['header'],
-        'footer': data['footer'],
-
-        'business': contact.business,
-        'salutation': contact.salutation,
-        'first_name': contact.first_name,
-        'last_name': contact.last_name,
-        'address': contact.address,
-        'postal_code': contact.postal_code,
-        'city': contact.city,
-        'address_label': contact.address_label,
-
-        'jobs': [],
-
-        'estimate_total': data['estimate_total'],
-
-    }
-
-    if data['add_terms']:
-        proposal['add_terms'] = True  # TODO: Calculate the terms.
-
-    for job_dict in data['jobs']:
-
-        job_obj = job_dict.pop('job')
-        job_dict.update({
-            'job.id': job_obj.id,
-            'code': job_obj.code,
-            'name': job_obj.name,
-            'taskgroups': []
-        })
-        proposal['jobs'].append(job_dict)
+        job_data['taskgroups'] = []
 
         for taskgroup in job_obj.taskgroups.all():
             taskgroup_dict = {
@@ -262,7 +230,7 @@ def serialize(proposal_obj, data):
                 'estimate_net': taskgroup.estimate_total,
                 'tasks': []
             }
-            job_dict['taskgroups'].append(taskgroup_dict)
+            job_data['taskgroups'].append(taskgroup_dict)
 
             for task in taskgroup.tasks.all():
 
@@ -293,5 +261,3 @@ def serialize(proposal_obj, data):
                             'price_per': lineitem.price_per_task_unit,
                         }
                         task_dict['lineitems'].append(lineitem_dict)
-
-    return proposal
