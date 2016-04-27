@@ -13,10 +13,10 @@ jsonfield
 
 -e hg+https://eukreign@bitbucket.org/rptlab/reportlab#egg=reportlab
 -e hg+https://eukreign@bitbucket.org/rptlab/preppy#egg=preppy
--e git+git@github.com:systori/rlextra.git#egg=rlextra
+-e git+git@rlextra.github.com:systori/rlextra.git#egg=rlextra
 #-e ../rlextra
 
--e git+ssh://git@bitbucket.org/damoti/django-tuath.git#egg=django-tuath
+-e git+ssh://git@django-tuath.bitbucket.org/damoti/django-tuath.git#egg=django-tuath
 #-e ../django-tuath
 
 -e git+https://github.com/damoti/pyth.git@pyth-py3#egg=pyth
