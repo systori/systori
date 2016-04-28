@@ -12,7 +12,7 @@ DEBUG = True
 DATABASES['default'].update({
     'NAME': 'postgres',
     'USER': 'postgres',
-    'HOST': 'db_1',
+    'HOST': 'db',
     'PORT': 5432
 })
 

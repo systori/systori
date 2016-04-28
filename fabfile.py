@@ -56,6 +56,22 @@ def deploy(envname='dev'):
     slack('push to <%(systori-url)s|%(envname)s> finished', envname)
 
 
+def startdocker():
+    "install packages if they aren't installed and then runserver"
+    with open('/root/.ssh/config','w') as config:
+        config.write(
+            'Host *github.com\n'
+            '  HostName github.com\n'
+            'Host *bitbucket.org\n'
+            '  HostName bitbucket.org'
+        )
+    try:
+        import django
+    except:
+        local('pip3 install -r requirements/dev.pip')
+    local('python3 manage.py runserver 0.0.0.0:8000')
+
+
 def makemessages():
     "django makemessages"
     local('./manage.py makemessages -l de -e tex,html,py')
@@ -160,8 +176,8 @@ def linkdart():
             location = '/' + location.lstrip('file:///')
             try:
                 os.symlink(location, os.path.join('systori/dart/web/packages', package_name))
-            except OSError, exc:
-                print exc
+            except OSError as exc:
+                print(exc)
 
 
 def makedart():
@@ -201,7 +217,7 @@ def jenkins():
 
     with lcd('systori/dart'):
         local('pub get')
-        local('pub build')
+        #local('pub build') we'll need this later when doing selenium tests
         local("xvfb-run -s '-screen 0 1024x768x24' pub run test -r expanded -p content-shell test")
 
     local('coverage run -p manage.py test systori')
