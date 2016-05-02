@@ -1,16 +1,4 @@
-psycopg2
-fabric3
-
-django>=1.9,<1.10
-django-tastypie
-django-ordered-model
-django-fsm
-django-mobile
-django-bootstrap-form
-
-geopy
-lxml
-jsonfield
+-r base.pip
 
 -e hg+https://eukreign@bitbucket.org/rptlab/reportlab#egg=reportlab
 -e hg+https://eukreign@bitbucket.org/rptlab/preppy#egg=preppy

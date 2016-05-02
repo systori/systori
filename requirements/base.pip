@@ -1,0 +1,13 @@
+psycopg2
+fabric3
+
+django>=1.9,<1.10
+django-tastypie
+django-ordered-model
+django-fsm
+django-mobile
+django-bootstrap-form
+
+geopy
+lxml
+jsonfield

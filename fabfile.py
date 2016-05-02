@@ -209,6 +209,11 @@ def mail():
     local('python -m smtpd -n -c DebuggingServer localhost:1025')
 
 
+def dockercontextsize():
+    "shows size of 'context' uploaded to docker when building docker image"
+    local('du -X .dockerignore -h -d 2 | sort -h')
+
+
 def jenkins():
 
     local('pip install --upgrade -r requirements/dev.pip')

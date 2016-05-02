@@ -1,4 +1,4 @@
--r common.pip
+-r app.pip
 coverage
 selenium
 factory-boy

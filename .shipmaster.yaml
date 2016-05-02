@@ -1,0 +1,48 @@
+name: systori
+
+layers:
+  base:
+    from: damoti/base:latest
+    apt-get:
+      - language-pack-de
+      - libpq-dev
+      - libjpeg-dev
+      - libxml2-dev
+      - libxslt-dev
+      - libffi-dev
+    context:
+      - requirements/base.pip
+    script:
+      - pip3 install -r requirements/base.pip
+  app:
+    environment:
+      DJANGO_SETTINGS_MODULE: systori.settings.production
+    script:
+      - pip3 install -r requirements/app.pip
+  test:
+    environment:
+      DJANGO_SETTINGS_MODULE: systori.settings.test
+    script:
+      - pip3 install -r requirements/test.pip
+  dev:
+    environment:
+      DJANGO_SETTINGS_MODULE: systori.settings.docker
+    script:
+      - pip3 install -r requirements/dev.pip
+      - #fab dockergetdb
+      - #python3 manage.py migrate
+
+services:
+  app:
+    command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  db:
+    image: postgres
+
+ssh:
+  known_hosts:
+    - github.com
+    - bitbucket.org

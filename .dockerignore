@@ -1,0 +1,6 @@
+.git
+.idea
+src
+server
+systori/dart/build
+**/__pycache__
