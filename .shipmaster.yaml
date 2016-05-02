@@ -34,6 +34,7 @@ layers:
 
 services:
   app:
+    entrypoint: "/tmp/shipmaster/scripts/wait-for-it.sh db:5432 --"
     command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
     ports:
       - "8000:8000"
