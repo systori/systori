@@ -13,19 +13,20 @@ layers:
     context:
       - requirements/base.pip
     script:
+      - pip3 install --upgrade pip wheel
       - pip3 install -r requirements/base.pip
   app:
     environment:
       DJANGO_SETTINGS_MODULE: systori.settings.production
     script:
-      - pip3 install -r requirements/app.pip
+      - pip3 install --src=/src -r requirements/app.pip
     command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
   test:
     environment:
       DJANGO_SETTINGS_MODULE: systori.settings.test
     script:
       - pip3 install -r requirements/test.pip
-    command: ["python3", "manage.py", "test", "systori"]
+    command: ["python3", "manage.py", "test", "systori.apps"]
   dev:
     environment:
       DJANGO_SETTINGS_MODULE: systori.settings.docker
