@@ -19,11 +19,13 @@ layers:
       DJANGO_SETTINGS_MODULE: systori.settings.production
     script:
       - pip3 install -r requirements/app.pip
+    command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
   test:
     environment:
       DJANGO_SETTINGS_MODULE: systori.settings.test
     script:
       - pip3 install -r requirements/test.pip
+    command: ["python3", "manage.py", "test", "systori"]
   dev:
     environment:
       DJANGO_SETTINGS_MODULE: systori.settings.docker
@@ -31,11 +33,11 @@ layers:
       - pip3 install -r requirements/dev.pip
       - #fab dockergetdb
       - #python3 manage.py migrate
+    command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
 
 services:
   app:
     entrypoint: "/tmp/shipmaster/scripts/wait-for-it.sh db:5432 --"
-    command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
     ports:
       - "8000:8000"
     depends_on:
