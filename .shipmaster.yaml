@@ -18,6 +18,8 @@ layers:
   app:
     environment:
       DJANGO_SETTINGS_MODULE: systori.settings.production
+    context:
+      - .
     script:
       - pip3 install --src=/src -r requirements/app.pip
     command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
@@ -32,8 +34,6 @@ layers:
       DJANGO_SETTINGS_MODULE: systori.settings.docker
     script:
       - pip3 install -r requirements/dev.pip
-      - #fab dockergetdb
-      - #python3 manage.py migrate
     command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
 
 services:
