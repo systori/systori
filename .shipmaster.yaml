@@ -34,15 +34,18 @@ layers:
       DJANGO_SETTINGS_MODULE: systori.settings.docker
     script:
       - pip3 install -r requirements/dev.pip
-    command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
 
 services:
   app:
-    entrypoint: "/tmp/shipmaster/scripts/wait-for-it.sh db:5432 --"
     ports:
       - "8000:8000"
     depends_on:
       - db
+    deploy:
+      - fab copyproductiontodev
+      - python3 manage.py migrate
+    entrypoint: /shipmaster/scripts/wait-for-it/wait-for-it.sh db:5432 --
+    command: python3 manage.py runserver 0.0.0.0:8000
   db:
     image: postgres
 

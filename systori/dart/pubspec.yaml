@@ -9,10 +9,3 @@ dependencies:
   web_components: any
 dev_dependencies:
   test: any
-transformers:
-- $dart2js:
-    minify: true
-    commandLineOptions: [
-        --trust-type-annotations
-        --trust-primitives
-    ]

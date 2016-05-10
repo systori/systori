@@ -128,6 +128,15 @@ def dockergetdb(container='web', envname='production'):
         container, dump_file, **settings))
     local('rm ' + dump_file)
 
+def copyproductiontodev():
+    from systori.settings.dev import DATABASES as DEVDB
+    from systori.settings.production import DATABASES as PRODDB
+    devdb = DEVDB['default']
+    proddb = PRODDB['default']
+    local('dropdb -h {HOST} -U {USER} {NAME}'.format(**devdb))
+    local('createdb -h {HOST} -U {USER} {NAME}'.format(**devdb))
+    local('pg_dump -h {HOST} -U {USER} -f prod.sql {NAME}'.format(**proddb))
+    local('psql -h {HOST} -U {USER} -f prod.sql {NAME}'.format(**devdb))
 
 def initsettings(envname='local'):
     ":envname=local -- creates __init__.py in settings folder"
