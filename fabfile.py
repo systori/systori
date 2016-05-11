@@ -160,8 +160,8 @@ def linkdart():
             location = '/' + location.lstrip('file:///')
             try:
                 os.symlink(location, os.path.join('systori/dart/web/packages', package_name))
-            except OSError, exc:
-                print exc
+            except OSError as exc:
+                print(exc)
 
 
 def makedart():
