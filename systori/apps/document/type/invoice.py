@@ -108,7 +108,7 @@ def collate_itemized_listing(invoice, font, available_width):
 
         taskgroup_subtotals_added = False
 
-        if job['invoiced'].gross == job['progress'].gross:
+        if job['invoiced'].net == job['progress'].net:
 
             for taskgroup in job['taskgroups']:
                 items.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
