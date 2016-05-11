@@ -24,7 +24,7 @@ def format_seconds(seconds, strftime_format='%-H:%M'):
 def format_report_data(report):
     for row in report:
         row['date'] = row['date'].strftime('%d %b %Y')
-        row['start'] = row['start'].strftime('%H:%M')
+        row['start'] = row['day_start'].strftime('%H:%M')
         row['end'] = row['end'].strftime('%H:%M') if row['end'] else ''
         row['total_duration'] = format_seconds(row['total_duration'])
         row['total'] = format_seconds(row['total'])
@@ -46,17 +46,15 @@ def regroup(items, getter):
     return result
 
 
-def get_today_report(users):
+def get_today_report(users, now=None):
     from .models import Timer
 
     report = format_report_data(
-        Timer.objects.filter(user__in=users).filter_today().generate_report_data()
+        Timer.objects.filter(user__in=users).filter_today().generate_report_data(now)
     )
     report_by_user = regroup(report, itemgetter('user_id'))
     for user in users:
-        user.report = report_by_user.get(user.pk)
-
-    return users
+        yield {'user': user, 'report': report_by_user.get(user.pk)}
 
 
 def get_timer_duration(user):

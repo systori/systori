@@ -1,5 +1,57 @@
 {% extends "project.html" %}
-{% load i18n %}
+{% load i18n static bootstrap %}
+
+{% block head %}
+{{ block.super }}
+<style type="text/css">
+  tr.timetracking-enter-form.hidden-box td {
+    opacity: 0;
+    height: 1px;
+    margin-top: -8px;
+    padding: 0;
+  }
+  tr.timetracking-enter-form.hidden-box div {
+    display: none;
+  }
+  tr.timetracking-enter-form:not(.hidden-box) td {
+    opacity: 1;
+    height: 30px;
+    background-color: inherit;
+    transition: all 0.3s ease 0.1s;
+    margin-top: 8px;
+    padding: 8px;
+  }
+  tr.timetracking-enter-form.hidden-box:not(.hidden-box) div {
+    display: default;
+  }
+  #timetracking-report td.user {
+    width: 40%;
+  }
+  #id_user {
+    width: 200px;
+  }
+  #id_duration {
+    width: 80px !important;
+  }
+/*  input.timetracking-form-start {
+    width: 200px !important;
+  }*/
+
+</style>
+{{ form.media.css }}
+
+{# This is here because of the datepicker init calls in the body #}
+<script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
+<script src="{% static "js/jquery-ui.min.js" %}"></script>
+<script src="{% static "js/bootstrap.min.js" %}"></script>
+
+{# <script type="application/dart" src="{% static "dart/timetracking.dart" %}"></script> #}
+<script type="application/dart" src="{% static "dart/timetracking_report.dart" %}"></script>
+<script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
+<script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
+<script src="{% static "dart/packages/browser/dart.js" %}"></script>
+{{ form.media.js }}
+{% endblock head %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='timetracking' %}{% endblock %}
 
@@ -8,25 +60,43 @@
   <div class="panel-heading">
     <h3 class="panel-title">{% now "F" %} {% trans "Timetracking" %}</h3>
   </div>
-  <div>
-    <table class="table">
+  <!-- <div class="panel panel-default"> -->
+    <div class="panel-body">
+      <form class="form-inline" method="POST">
+      {% csrf_token %}
+      {{ form|bootstrap_inline }}
+        <div class="form-group">
+          <div class="col-sm-10 col-sm-offset-2">
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  <!-- </div> -->
+    <table id="timetracking-report" class="table table-striped table-bordered">
       <tr>
         <th>{% trans "User" %}</th>
+        <th></th>
         <th>{% trans "Start" %}</th>
         <th>{% trans "End" %}</th>
         <th>{% trans "Total Duration" %}</th>
         <th>{% trans "Total" %}</th>
         <th>{% trans "Overtime" %}</th>
       </tr>
-      {% for user in report %}
+      {% for row in report %}
       <tr>
-        <td>{{ user.get_full_name }}</td>
-        {% with user.report as report %}
-        <td>{{ report.start }}</td>
-        <td>{{ report.end }}</td>
-        <td>{{ timer.total_duration }}</td>
-        <td>{{ timer.total }}</td>
-        <td>{{ timer.overtime }}</td>
+        <td class="user">{{ row.user.get_full_name }}</td>
+        <td>
+          <a class="timetracking-enter-toggle" title="{% trans 'enter time manually' %}" data-user-rel="{{ row.user.id }}">
+            <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+          </a>
+        </td>
+        {% with row.report as row_report %}
+        <td>{{ row_report.start }}</td>
+        <td>{{ row_report.end }}</td>
+        <td>{{ row_report.total_duration }}</td>
+        <td>{{ row_report.total }}</td>
+        <td>{{ row_report.overtime }}</td>
         {% endwith %}
       </tr>
       {% empty %}
@@ -36,3 +106,5 @@
   </div>
 </div>
 {% endblock %}
+
+{% block base_js %}{% endblock %}

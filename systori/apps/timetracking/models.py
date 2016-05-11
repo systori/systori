@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta
 
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -23,6 +24,7 @@ class Timer(models.Model):
 
     duration_formulas = {
         WORK: lambda start, end: (end - start).total_seconds(),
+        ILLNESS: lambda start, end: -(end - start).total_seconds(),
         HOLIDAY: lambda start, end: -(end - start).total_seconds()
     }
 
@@ -59,8 +61,11 @@ class Timer(models.Model):
             self.start = timezone.now()
         if not self.pk and Timer.objects.filter(user=self.user, end__isnull=True).exists():
             raise ValidationError(_('Timer already running'))
+
         if self.end:
             self.duration = self.get_duration_seconds(self.end)
+        elif self.duration:
+            self.end = self.start + timedelta(seconds=self.duration)
         super().save(*args, **kwargs)
 
     def get_duration_seconds(self, now=None):

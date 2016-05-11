@@ -22,3 +22,5 @@ jsonfield
 
 -e git+https://github.com/damoti/pyth.git@pyth-py3#egg=pyth
 #-e ../pyth
+
+django-datetime-widget==0.9.3

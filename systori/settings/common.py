@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'django_mobile',
     'ordered_model',
     'bootstrapform',
+    'datetimewidget',
     'systori.lib',
     'systori.apps.user',
     'systori.apps.project',

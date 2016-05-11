@@ -28,20 +28,31 @@ class TimerQuerySet(QuerySet):
     def group_for_report(self):
         return self.extra(
             select={'date': 'date(start)'}
-        ).values('date', 'user_id').order_by().annotate(
+        ).values('kind', 'date', 'user_id').order_by().annotate(
             total_duration=Sum('duration'),
-            start=Min('start'),
+            day_start=Min('start'),
+            latest_start=Max('start'),
             end=Max('end')
-        ).order_by('-start')
+        ).order_by('-day_start')
 
-    def generate_report_data(self):
+    def generate_report_data(self, now=None):
         report_data = self.group_for_report()
 
+        if not now:
+            now = timezone.now()
         for day in report_data:
-            if not day['end'] and day['start']:
-                duration_calculator = self.model.duration_formulas[self.model.WORK]
-                day['total_duration'] += duration_calculator(day['start'], timezone.now())
-            total = day['total_duration'] - self.model.DAILY_BREAK
+            duration_calculator = self.model.duration_formulas[day['kind']]
+
+            # if not day['end'] and day['day_start']:
+            #     day['total_duration'] += duration_calculator(day['day_start'], timezone.now())
+            if not day['end'] or day['latest_start'] > day['end']:
+                # We have a running timer (possibly with existing stopped timers)
+                day['total_duration'] += duration_calculator(day['latest_start'], now)
+
+            if day['total_duration'] >= self.model.DAILY_BREAK:
+                total = day['total_duration'] - self.model.DAILY_BREAK
+            else:
+                total = day['total_duration']
             overtime = total - self.model.WORK_HOURS if total > self.model.WORK_HOURS else 0
             day.update({
                 'total': total,
