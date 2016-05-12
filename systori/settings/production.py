@@ -12,6 +12,7 @@ STATICFILES_DIRS += (
 )
 
 DATABASES['default'].update({
+    'HOST': 'db',
     'NAME': 'systori_production',
-    'USER': 'www-data'
+    'USER': 'postgres'
 })

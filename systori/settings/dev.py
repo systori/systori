@@ -10,8 +10,9 @@ STATICFILES_DIRS += (
 )
 
 DATABASES['default'].update({
+    'HOST': 'db',
     'NAME': 'systori_dev',
-    'USER': 'www-data'
+    'USER': 'postgres'
 })
 
 # Settings for making Systori all https                                         
