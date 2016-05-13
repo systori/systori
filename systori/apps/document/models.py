@@ -130,15 +130,33 @@ class Invoice(Document):
             job['corrected'] = corrected
             self.json['corrected'] += corrected
 
-        self.save()
-
     def clear_adjustments(self):
         self.json.pop('adjustment', 0)
         self.json.pop('corrected', 0)
         for job in self.json['jobs']:
             job.pop('adjustment', 0)
             job.pop('corrected', 0)
-        self.save()
+
+    def set_payment(self, splits):
+
+        self.json['payment'] = Amount.zero()
+
+        for job in self.json['jobs']:
+
+            credit = Amount.zero()
+
+            for row in splits:
+                if job['job.id'] == row['job.id']:
+                    credit = row['credit']
+                    break
+
+            job['payment'] = credit
+            self.json['payment'] += credit
+
+    def clear_payment(self):
+        self.json.pop('payment', 0)
+        for job in self.json['jobs']:
+            job.pop('payment', 0)
 
     def delete(self, **kwargs):
         if self.transaction:
@@ -163,6 +181,7 @@ class Adjustment(Document):
     def delete(self, **kwargs):
         if self.invoice:
             self.invoice.clear_adjustments()
+            self.invoice.save()
         if self.transaction:
             self.transaction.delete()
         super().delete(**kwargs)
@@ -184,6 +203,9 @@ class Payment(Document):
         return '{} {}'.format(self.__class__.__name__, self.created_on)
 
     def delete(self, **kwargs):
+        if self.invoice:
+            self.invoice.clear_payment()
+            self.invoice.save()
         if self.transaction:
             self.transaction.delete()
         super().delete(**kwargs)

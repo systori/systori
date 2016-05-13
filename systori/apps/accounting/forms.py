@@ -411,8 +411,10 @@ class AdjustmentForm(DocumentForm):
 
         pdf_type.adjustment.serialize(adjustment)
 
-        if adjustment.invoice:
-            adjustment.invoice.set_adjustments(self.formset.get_json_rows())
+        invoice = adjustment.invoice
+        if invoice:
+            invoice.set_adjustments(self.formset.get_json_rows())
+            invoice.save()
 
         super().save(commit)
 
@@ -534,27 +536,12 @@ class PaymentForm(DocumentForm):
 
         pdf_type.payment.serialize(payment)
 
-        save_invoice = False
         invoice = payment.invoice
 
-        if invoice and not invoice.status == Invoice.PAID:
-            invoice.pay()
-            save_invoice = True
-
         if invoice:
-            for job in invoice.json['jobs']:
-                pay = None
-                for row in self.formset.get_json_rows():
-                    if job['job.id'] == row['job.id']:
-                        if row['credit'] != Amount.zero():
-                            pay = row
-                        break
-                if pay:
-                    job['payment'] = pay['credit']
-            invoice.json['payment'] = self.credit_total_amount
-            save_invoice = True
-
-        if save_invoice:
+            if not invoice.status == Invoice.PAID:
+                invoice.pay()
+            invoice.set_payment(self.formset.get_json_rows())
             invoice.save()
 
         super().save(commit)
