@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
 from django.conf.urls import url
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.template.loader import get_template
 from django.template import Context
 from tastypie import fields
@@ -114,12 +114,20 @@ class AutoCompleteModelResourceMixin:
         query = self._meta.queryset. \
             filter(autocomplete_filter).order_by('name','description').distinct('name','description')
 
+        query = self.add_custom(query)
+
         query = self.add_prefetching(query)
 
         template = get_template('task/{}_autocomplete.html'.format(self._meta.resource_name))
         rendered = template.render({'objects': query[:15]}).encode('utf-8')
 
         return http.HttpResponse(rendered)
+
+    def add_prefetching(self, query):
+        return query
+
+    def add_custom(self, query):
+        return query
 
 
 class JobResource(OrderedModelResourceMixin, ModelResource):
@@ -173,6 +181,12 @@ class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCo
     def add_prefetching(self, query):
         return query.prefetch_related('taskgroup__job__project') \
             .prefetch_related('taskinstances__lineitems')
+
+    def add_custom(self, query):
+        return Task.objects. \
+            filter(id__in=query). \
+            annotate(lineitems_count=Count('taskinstances__lineitems')). \
+            order_by('-lineitems_count')
 
 
 class TaskInstanceResource(OrderedModelResourceMixin, ModelResource):

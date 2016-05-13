@@ -46,7 +46,7 @@ class TaskEditor(SingleObjectMixin, ListView):
     template_name = "task/editor.html"
 
     def get_context_data(self, **kwargs):
-        context = super(TaskEditor, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['job'] = self.object
         context['blank_taskgroup'] = TaskGroup(job=self.object, order=0)
         context['blank_task'] = Task()
@@ -59,13 +59,12 @@ class TaskEditor(SingleObjectMixin, ListView):
         return context
 
     def get_object(self):
-        queryset = Job.objects.prefetch_related('project').all()
-        return super(TaskEditor, self).get_object(queryset)
+        queryset = Job.objects.prefetch_related('taskgroups__tasks__taskinstances__lineitems')
+        return super().get_object(queryset)
 
     def get_queryset(self):
         self.object = self.get_object()
-        queryset = self.object.taskgroups.prefetch_related('tasks__taskinstances__lineitems')
-        return queryset.all()
+        return self.object.taskgroups.all()
 
 
 class JobView(DetailView):
