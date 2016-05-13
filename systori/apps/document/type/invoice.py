@@ -37,7 +37,7 @@ def collate_payments(invoice, font, available_width, show_payment_details):
     t.style.append(('LINEBELOW', (0, 0), (-1, 0), 0.25, colors.black))
     t.style.append(('LINEAFTER', (0, 1), (-2, -2), 0.25, colors.black))
 
-    t.row('', _("consideration"), _("tax"), _("gross"))
+    t.row('', _("consideration"), "19% "+_("tax"), _("gross"))
     t.row_style('FONTNAME', 0, -1, font.bold)
 
     table = create_invoice_table(invoice)[1:]
