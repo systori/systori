@@ -55,12 +55,6 @@ class EditViewMixin:
 
 class DeleteViewMixin(DeleteView):
 
-    def delete(self, request, *args, **kwargs):
-        doc = self.get_object()
-        if doc.transaction:
-            doc.transaction.delete()
-        return super().delete(request, *args, **kwargs)
-
     def get_success_url(self):
         return self.request.project.get_absolute_url()
 

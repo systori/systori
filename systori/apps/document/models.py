@@ -108,24 +108,37 @@ class Invoice(Document):
         assert self.parent is None  # make sure this is a parent invoice
         return chain([self], self.invoices.all())
 
-    @property
-    def debited_gross(self):
-        if self.json.get('debited_gross'):
-            return Decimal(self.json['debited_gross'])
-        elif self.json.get('debit_gross'):
-            return Decimal(self.json['debit_gross'])
-        else:
-            return Decimal("0")
+    def set_adjustments(self, adjustments):
 
-    @property
-    def balance_gross(self):
-        if self.json.get('balance_gross'):
-            return Decimal(self.json['balance_gross'])
-        # elif debit_gross for backwards compatibility
-        elif self.json.get('debit_gross'):
-            return Decimal(self.json['debit_gross'])
-        else:
-            return Decimal("0")
+        self.json['adjustment'] = Amount.zero()
+        self.json['corrected'] = Amount.zero()
+
+        for job in self.json['jobs']:
+
+            adjustment = Amount.zero()
+            corrected = Amount.zero()
+
+            for row in adjustments:
+                if job['job.id'] == row['job.id']:
+                    adjustment = row['adjustment']
+                    corrected = row['corrected']
+                    break
+
+            job['adjustment'] = adjustment
+            self.json['adjustment'] += adjustment
+
+            job['corrected'] = corrected
+            self.json['corrected'] += corrected
+
+        self.save()
+
+    def clear_adjustments(self):
+        self.json.pop('adjustment', 0)
+        self.json.pop('corrected', 0)
+        for job in self.json['jobs']:
+            job.pop('adjustment', 0)
+            job.pop('corrected', 0)
+        self.save()
 
     def delete(self, **kwargs):
         if self.transaction:
@@ -148,6 +161,8 @@ class Adjustment(Document):
         return '{} {}'.format(self.__class__.__name__, self.created_on)
 
     def delete(self, **kwargs):
+        if self.invoice:
+            self.invoice.clear_adjustments()
         if self.transaction:
             self.transaction.delete()
         super().delete(**kwargs)

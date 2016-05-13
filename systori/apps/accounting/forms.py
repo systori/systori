@@ -412,19 +412,7 @@ class AdjustmentForm(DocumentForm):
         pdf_type.adjustment.serialize(adjustment)
 
         if adjustment.invoice:
-            for job in adjustment.invoice.json['jobs']:
-                adjust = None
-                for row in self.formset.get_json_rows():
-                    if job['job.id'] == row['job.id']:
-                        if row['adjustment'] != Amount.zero():
-                            adjust = row
-                        break
-                if adjust:
-                    job['adjustment'] = adjust['adjustment']
-                    job['corrected'] = adjust['corrected']
-            adjustment.invoice.json['adjustment'] = self.adjustment_total_amount
-            adjustment.invoice.json['corrected'] = self.corrected_total_amount
-            adjustment.invoice.save()
+            adjustment.invoice.set_adjustments(self.formset.get_json_rows())
 
         super().save(commit)
 
