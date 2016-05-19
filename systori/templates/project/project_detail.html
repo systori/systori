@@ -435,6 +435,7 @@
         <th>{% trans 'Name' %}</th>
         <th>{% trans 'Address Label' %}</th>
         <th>{% trans 'Association' %}</th>
+        <th>{% trans 'Phone' %}</th>
         <th>{% trans 'Billable' %}</th>
         <th>{% trans 'Actions' %}</th>
       </tr>
@@ -446,6 +447,7 @@
           <td><a href="{% url 'contact.view' contact.contact.id %}">{{ contact.contact }}</a></td>
           <td><pre>{{ contact.contact.address_label }}</pre></td>
           <td>{{ contact.get_association_display }}</td>
+          <td>{{ contact.contact.phone }}</td>
           <td>{{ contact.is_billable|yesno }}</td>
           <td>
             {% if not contact.is_billable %}
