@@ -1,4 +1,5 @@
 import 'dart:html';
+import 'package:intl/intl.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:collection';
@@ -152,7 +153,7 @@ class ReportTableRow extends TableRowElement with MapMixin {
     ReportTableRow.created() : super.created(); attached() {
         mapping = new Map<String, TableCellElement>();
         this.children.forEach((TableCellElement cell) {
-            var cell_name = cell.attributes['mapping'];
+            var cell_name = cell.dataset['mapping'];
             mapping[cell_name] = cell;
             cell.classes.add('cell-${cell_name}');
         });
@@ -204,9 +205,7 @@ class ReportTable extends TableElement {
     void allocateRows(int number) {
         var row_count = this.body.children.length - 1;
         new Iterable.generate(row_count - number).forEach((_) {
-            print('deleting row');
             this.deleteReportRow();
-            print('deleted');
         });
         new Iterable.generate(number - row_count).forEach((_) {
             this.insertReportRow();

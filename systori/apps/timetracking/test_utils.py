@@ -64,29 +64,35 @@ class ReportsTest(TestCase):
         report = list(utils.get_today_report(User.objects.order_by('pk')))
 
         self.assertEqual(report[0]['user'], self.user1)
-        self.assertEqual(report[0]['report']['start'], user1_timer1.start.strftime('%H:%M'))
-        self.assertEqual(report[0]['report']['end'], user1_timer2.end.strftime('%H:%M'))
-        self.assertEqual(report[0]['report']['total_duration'], '8:00')
-        self.assertEqual(report[0]['report']['total'], '7:00')
-        self.assertEqual(report[0]['report']['overtime'], '0:00')
+        self.assertEqual(report[0]['report']['day_start'], user1_timer1.start)
+        self.assertEqual(report[0]['report']['day_end'], user1_timer2.end)
+        self.assertEqual(
+            report[0]['report']['total_duration'],
+            user1_timer1.duration + user1_timer2.duration)
+        self.assertEqual(
+            report[0]['report']['total'], 
+            user1_timer1.duration + user1_timer2.duration - Timer.DAILY_BREAK)
+        self.assertEqual(report[0]['report']['overtime'], 0)
 
         self.assertEqual(report[1]['user'], self.user2)
-        self.assertEqual(report[1]['report']['start'], user2_timer1.start.strftime('%H:%M'))
-        self.assertEqual(report[1]['report']['end'], user2_timer2.end.strftime('%H:%M'))
-        self.assertEqual(report[1]['report']['total_duration'], '9:00')
-        self.assertEqual(report[1]['report']['total'], '8:00')
-        self.assertEqual(report[1]['report']['overtime'], '0:00')
+        self.assertEqual(report[1]['report']['day_start'], user2_timer1.start)
+        self.assertEqual(report[1]['report']['day_end'], user2_timer2.end)
+        self.assertEqual(
+            report[1]['report']['total_duration'],
+            user2_timer1.duration + user2_timer2.duration)
+        self.assertEqual(
+            report[1]['report']['total'],
+            user2_timer1.duration + user2_timer2.duration - Timer.DAILY_BREAK)
+        self.assertEqual(report[1]['report']['overtime'], 0)
 
         self.assertEqual(report[2]['user'], self.user3)
-        self.assertEqual(report[2]['report']['start'], user3_timer1.start.strftime('%H:%M'))
-        self.assertEqual(report[2]['report']['end'], '')
-        self.assertEqual(report[2]['report']['total_duration'], user3_timer1.get_duration_formatted())
+        self.assertEqual(report[2]['report']['day_start'], user3_timer1.start)
+        self.assertEqual(report[2]['report']['day_end'], None)
+        self.assertEqual(report[2]['report']['total_duration'], user3_timer1.get_duration_seconds())
         self.assertEqual(
             report[2]['report']['total'], 
-            utils.format_seconds(user3_timer1.get_duration_seconds() - Timer.DAILY_BREAK)
+            user3_timer1.get_duration_seconds() - Timer.DAILY_BREAK
         )
-        self.assertEqual(report[2]['report']['overtime'], '0:00')
+        self.assertEqual(report[2]['report']['overtime'], 0)
 
-        self.assertEqual(
-            report[3]['report'], None
-        )
+        self.assertIsNone(report[3]['report'])

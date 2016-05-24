@@ -90,17 +90,18 @@ class TimerQuerySet(QuerySet):
 
     def generate_report_data(self):
         report_data = self.group_for_report()
+        now = timezone.now()
 
         for day in report_data:
-            real_day_end = day['date'] + timedelta(days=1)
+            # real_day_end = timezone.make_aware(
+            #     datetime.combine(day['date'], datetime.max.time()),
+            #     timezone.get_current_timezone()
+            # )
             duration_calculator = self.model.duration_formulas[day['kind']]
-
-            # if not day['day_end'] and day['day_start']:
-            #     day['total_duration'] += duration_calculator(day['day_start'], timezone.now())
 
             # We have a running timer (possibly with existing stopped timers)
             if not day['day_end'] or day['latest_start'] > day['day_end']:
-                day['total_duration'] += duration_calculator(day['latest_start'], real_day_end)
+                day['total_duration'] += duration_calculator(day['latest_start'], now)
 
             if day['total_duration'] >= self.model.DAILY_BREAK:
                 total = day['total_duration'] - self.model.DAILY_BREAK

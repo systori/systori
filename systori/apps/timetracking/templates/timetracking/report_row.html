@@ -1,7 +1,8 @@
+{% load timetracking %}
 <tr is="timetracking-report-row">
-    <td mapping="date">{{ row.date }}</td>
-    <td mapping="start">{{ row.start }}</td>
-    <td mapping="end">{{ row.end }}</td>
-    <td mapping="total">{{ row.total }}</td>
-    <td mapping="overtime">{{ row.overtime }}</td>
+    <td data-mapping="date">{{ row.date }}</td>
+    <td data-mapping="day_start">{{ row.day_start }}</td>
+    <td data-mapping="day_end">{{ row.day_end }}</td>
+    <td data-mapping="total_duration">{{ row.total_duration }}</td>
+    <td data-mapping="overtime">{{ row.overtime }}</td>
 </tr>

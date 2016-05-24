@@ -31,17 +31,6 @@ def format_days(seconds):
     return '{:.1f}'.format(seconds / WORK_DAY)
 
 
-def format_report_data(report):
-    for row in report:
-        row['date'] = row['date'].strftime('%d %b %Y')
-        row['start'] = row['day_start'].strftime('%H:%M')
-        row['day_end'] = row['day_end'].strftime('%H:%M') if row['end'] else ''
-        row['total_duration'] = format_seconds(row['total_duration'])
-        row['total'] = format_seconds(row['total'])
-        row['overtime'] = format_seconds(row['overtime'])
-        yield row
-
-
 def get_this_month_full_report(user):
     from .models import Timer
     now = timezone.now()
@@ -57,11 +46,23 @@ def get_this_month_full_report(user):
     }
 
 
-def get_report(user, year=None, month=None):
+def format_report_data(report):
+    for row in report:
+        row['date'] = row['date'].strftime('%d %b %Y')
+        row['day_start'] = row['day_start'].strftime('%H:%M')
+        row['day_end'] = row['day_end'].strftime('%H:%M') if row['day_end'] else ''
+        row['total_duration'] = format_seconds(row['total_duration'])
+        row['total'] = format_seconds(row['total'])
+        row['overtime'] = format_seconds(row['overtime'])
+        yield row
+
+
+def get_report(user):
     from .models import Timer
-    return format_report_data(
-        Timer.objects.filter(user=user, kind=Timer.WORK).filter_period(year, month).generate_report_data()
+    report = format_report_data(
+        Timer.objects.filter(user=user, kind=Timer.WORK).filter_today().generate_report_data()
     )
+    return report
 
 
 def get_holidays_duration(user, year, month):

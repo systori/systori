@@ -44,7 +44,7 @@ class TimerView(views.APIView):
 class ReportView(views.APIView):
     
     def get(self, request, year=None, month=None):
-        return Response(list(get_report(request.user, year, month)))
+        return Response(list(get_report(request.user)))
 
 
 class TimerAdminView(views.APIView):
@@ -74,10 +74,3 @@ class TimerAdminView(views.APIView):
     def get(self, request, user_id):
         timer = get_object_or_404(Timer.objects.filter_running(), user__pk=user_id)
         return Response(timer.to_dict())
-
-
-# class ReportAdminView(View):
-#     permissions = (HasStaffAccess,)
-    
-#     def get(self, request, year=None, month=None):
-#         return Response(list(get_report(request.user, year, month)))
