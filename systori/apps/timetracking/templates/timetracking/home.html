@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n static bootstrap %}
+{% load i18n static bootstrap timetracking %}
 
 {% block head %}
 {{ block.super }}
@@ -33,10 +33,6 @@
   #id_duration {
     width: 80px !important;
   }
-/*  input.timetracking-form-start {
-    width: 200px !important;
-  }*/
-
 </style>
 {{ form.media.css }}
 
@@ -58,9 +54,8 @@
 {% block content %}
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">{% now "F" %} {% trans "Timetracking" %}</h3>
+    <h3 class="panel-title">{% trans "Worklog for" %} {% now "j F Y" %}</h3>
   </div>
-  <!-- <div class="panel panel-default"> -->
     <div class="panel-body">
       <form class="form-inline" method="POST">
       {% csrf_token %}
@@ -72,11 +67,9 @@
         </div>
       </form>
     </div>
-  <!-- </div> -->
     <table id="timetracking-report" class="table table-striped table-bordered">
       <tr>
         <th>{% trans "User" %}</th>
-        <th></th>
         <th>{% trans "Start" %}</th>
         <th>{% trans "End" %}</th>
         <th>{% trans "Total Duration" %}</th>
@@ -85,18 +78,15 @@
       </tr>
       {% for row in report %}
       <tr>
-        <td class="user">{{ row.user.get_full_name }}</td>
-        <td>
-          <a class="timetracking-enter-toggle" title="{% trans 'enter time manually' %}" data-user-rel="{{ row.user.id }}">
-            <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
-          </a>
+        <td class="user">
+          <a href="{% url 'timetracking_user' row.user.pk %}">{{ row.user.get_full_name }}</a>
         </td>
         {% with row.report as row_report %}
-        <td>{{ row_report.start }}</td>
-        <td>{{ row_report.end }}</td>
-        <td>{{ row_report.total_duration }}</td>
-        <td>{{ row_report.total }}</td>
-        <td>{{ row_report.overtime }}</td>
+        <td>{{ row_report.day_start|date:"H:i" }}</td>
+        <td>{{ row_report.day_end|date:"H:i" }}</td>
+        <td>{{ row_report.total_duration|seconds_to_hours }}</td>
+        <td>{{ row_report.total|seconds_to_hours }}</td>
+        <td>{{ row_report.overtime|seconds_to_hours }}</td>
         {% endwith %}
       </tr>
       {% empty %}

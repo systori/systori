@@ -59,7 +59,6 @@ class AccessMiddleware:
 
     def process_view(self, request, view, args, kwargs):
         request.access = None
-        print(request.company.pk)
         if request.user.is_authenticated() and request.company:
             try:
                 request.access = Access.objects.select_related("user").get(user=request.user, company=request.company)

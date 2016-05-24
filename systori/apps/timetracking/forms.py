@@ -37,7 +37,7 @@ class UserChoiceField(forms.ModelChoiceField):
 DURATION_RE = re.compile(r'((?P<hours>\d+?)h)?\s?((?P<minutes>\d+?)m)?')
 
 
-class SuperuserTimerForm(ModelForm):
+class ManualTimerForm(ModelForm):
 
     class Meta:
         model = Timer
@@ -65,3 +65,11 @@ class SuperuserTimerForm(ModelForm):
         raw_value = self.cleaned_data['duration']
         parsed_values = {k: int(v) for k, v in DURATION_RE.match(raw_value).groupdict().items() if v}
         return int(timedelta(**parsed_values).total_seconds())
+
+
+class UserManualTimerForm(ManualTimerForm):
+
+    class Meta(ManualTimerForm.Meta):
+        widgets = {
+            'user': forms.HiddenInput()
+        }

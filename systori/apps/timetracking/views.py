@@ -1,49 +1,55 @@
 import json
 
 from django.shortcuts import redirect, get_object_or_404
-from django.views.generic import TemplateView
+from django.views.generic.edit import FormView
 from django.http import HttpResponse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
 from . import utils
-from .forms import SuperuserTimerForm
+from .forms import ManualTimerForm, UserManualTimerForm
 
 
 User = get_user_model()
 
 
-class HomeView(TemplateView):
-    template_name = 'timetracking/timetracking.html'
+class HomeView(FormView):
+    template_name = 'timetracking/home.html'
+    form_class = ManualTimerForm
 
-    # def get_context_data(self, **kwargs):
-    #     report = list(utils.get_today_report(User.objects.all()))
-    #     context = {
-    #         'report': report
-    #     }
-    #     context.update(kwargs)
-    #     if 'formset' not in context:
-    #         context['formset'] = embed_forms(self.request, report)
-    #     return context
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            report=utils.get_today_report(self.request.company.users.all()),
+            **kwargs
+        )
 
-    def get(self, request, *args, **kwargs):
-        report = list(utils.get_today_report(User.objects.all()))
-        form = SuperuserTimerForm()
-        context = {
-            'report': report,
-            'form': form
-        }
-        return self.render_to_response(context)
+    def form_valid(self, form):
+        form.save()
+        return redirect('timetracking')
 
-    def post(self, request, *args, **kwargs):
-        report = list(utils.get_today_report(User.objects.all()))
-        form = SuperuserTimerForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('timetracking')
-        else:
-            return self.render_to_response({
-                'report': report,
-                'form': form
-            })
+
+class UserReportView(FormView):
+    template_name = 'timetracking/user_report.html'
+    form_class = UserManualTimerForm
+
+    @cached_property
+    def user(self):
+        return get_object_or_404(User, pk=self.kwargs['user_id'])
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['user'] = self.user
+        return initial
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            user=self.user,
+            report=utils.get_this_month_full_report(self.user),
+            **kwargs
+        )
+
+    def form_valid(self, form):
+        form.save()
+        return redirect('timetracking_user', self.user.pk)
