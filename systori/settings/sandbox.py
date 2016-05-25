@@ -3,7 +3,7 @@ from .common import *
 SESSION_COOKIE_SECURE = True                                                    
 CSRF_COOKIE_SECURE = True
 
-SERVER_NAME = 'systori.com'
+SERVER_NAME = 'sandbox.systori.com'
 SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
 ALLOWED_HOSTS = ['.'+SERVER_NAME]
 
@@ -13,6 +13,6 @@ STATICFILES_DIRS += (
 
 DATABASES['default'].update({
     'HOST': 'db',
-    'NAME': 'systori_production',
+    'NAME': 'systori_sandbox',
     'USER': 'postgres'
 })
