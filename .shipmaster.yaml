@@ -14,6 +14,7 @@ layers:
       - requirements/base.pip
     script:
       - pip3 install --upgrade pip wheel
+      - pip3 install uwsgi
       - pip3 install -r requirements/base.pip
   app:
     environment:
