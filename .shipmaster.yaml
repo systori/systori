@@ -23,7 +23,7 @@ layers:
     context:
       - .
     script:
-      - cd systori/dart && pub get && pub build
+      - cd systori/dart && pub get && pub build && cd -
       - pip3 install --src=/src -r requirements/app.pip
       - python3 manage.py collectstatic
     command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
