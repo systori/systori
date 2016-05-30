@@ -55,9 +55,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'tastypie',
+    'rest_framework',
     'django_mobile',
     'ordered_model',
     'bootstrapform',
+    'datetimewidget',
     'systori.lib',
     'systori.apps.user',
     'systori.apps.project',
@@ -69,6 +71,7 @@ INSTALLED_APPS = (
     'systori.apps.accounting',
     'systori.apps.main',
     'systori.apps.company',
+    'systori.apps.timetracking',
 )
 
 MIDDLEWARE_CLASSES = (

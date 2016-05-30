@@ -55,12 +55,6 @@ class EditViewMixin:
 
 class DeleteViewMixin(DeleteView):
 
-    def delete(self, request, *args, **kwargs):
-        doc = self.get_object()
-        if doc.transaction:
-            doc.transaction.delete()
-        return super().delete(request, *args, **kwargs)
-
     def get_success_url(self):
         return self.request.project.get_absolute_url()
 
@@ -130,7 +124,7 @@ class AdjustmentCreate(AdjustmentViewMixin, CreateView):
             self.object.invoice = invoice
             kwargs['instance'].json['jobs'] = [{
                    'job.id': job['job.id'],
-                   'invoiced': job['debit'],
+                   'invoiced': job['invoiced'],
                    'corrected': job['debit']
                 } for job in invoice.json['jobs']
             ]

@@ -9,10 +9,10 @@ class Contact(models.Model):
     business = models.CharField(_("Business"), max_length=512, blank=True)
 
     salutation = models.CharField(_("Salutation"), max_length=512, blank=True)
-    first_name = models.CharField(_("First Name"), max_length=512)
-    last_name = models.CharField(_("Last Name"), max_length=512)
+    first_name = models.CharField(_("First Name"), max_length=512, blank=True)
+    last_name = models.CharField(_("Last Name"), max_length=512, blank=True)
 
-    phone = models.CharField(_("Phone"), max_length=512)
+    phone = models.CharField(_("Phone"), max_length=512, blank=True)
     email = models.EmailField(_("Email"), blank=True)
     website = models.URLField(_("Website"), blank=True)
 

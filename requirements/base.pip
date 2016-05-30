@@ -7,6 +7,8 @@ django-ordered-model
 django-fsm
 django-mobile
 django-bootstrap-form
+django-datetime-widget==0.9.3
+djangorestframework==3.3.2
 
 geopy
 lxml

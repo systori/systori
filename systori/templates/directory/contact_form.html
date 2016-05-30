@@ -6,7 +6,7 @@
 {% block content %}
   <form role="form" method="post">
       {% csrf_token %}
-      {{ form|bootstrap }}
+      {{ form|bootstrap_horizontal }}
       <div class="form-group">
         <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
       </div>

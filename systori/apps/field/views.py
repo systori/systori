@@ -1,6 +1,7 @@
 from datetime import timedelta, date
 from calendar import LocaleHTMLCalendar, month_name
 from itertools import groupby
+
 from django.http import HttpResponseRedirect
 from django.db.models import Q, Count, Prefetch
 from django.utils.http import urlquote
@@ -8,10 +9,12 @@ from django.utils.formats import to_locale, get_language
 from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
+
 from ..company.models import Access
 from ..project.models import Project, DailyPlan, JobSite, TeamMember
 from ..task.models import Job, Task, ProgressReport
 from ..equipment.models import Equipment
+from ..timetracking import utils as timetracking_utils
 from .forms import CompletionForm, DailyPlanNoteForm
 from .utils import find_next_workday, days_ago
 
@@ -70,12 +73,21 @@ class FieldDashboard(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(FieldDashboard, self).get_context_data(**kwargs)
+        access = self.request.access
+        if access.is_fake:
+            todays_plans = previous_plans = []
+        else:
+            todays_plans = self.request.access.todays_plans.all()
+            previous_plans = self.request.access.dailyplans \
+                .filter(day__gt=days_ago(5)) \
+                .exclude(day=date.today()).all()
 
-        context['todays_plans'] = self.request.access.todays_plans.all()
-
-        context['previous_plans'] = self.request.access.dailyplans \
-            .filter(day__gt=days_ago(5)) \
-            .exclude(day=date.today()).all()
+        context.update({
+            'todays_plans': todays_plans,
+            'previous_plans': previous_plans,
+            'timetracking_report': timetracking_utils.get_report(self.request.user),
+            'timetracking_timer_duration': timetracking_utils.get_timer_duration(self.request.user)
+        })
 
         return context
 

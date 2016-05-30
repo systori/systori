@@ -1,3 +1,4 @@
 coverage
 selenium
-factory-boy
+factory-boy==2.6.1
+freezegun==0.3.7

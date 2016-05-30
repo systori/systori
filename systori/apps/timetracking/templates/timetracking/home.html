@@ -1,0 +1,100 @@
+{% extends "project.html" %}
+{% load i18n static bootstrap timetracking %}
+
+{% block head %}
+{{ block.super }}
+<style type="text/css">
+  tr.timetracking-enter-form.hidden-box td {
+    opacity: 0;
+    height: 1px;
+    margin-top: -8px;
+    padding: 0;
+  }
+  tr.timetracking-enter-form.hidden-box div {
+    display: none;
+  }
+  tr.timetracking-enter-form:not(.hidden-box) td {
+    opacity: 1;
+    height: 30px;
+    background-color: inherit;
+    transition: all 0.3s ease 0.1s;
+    margin-top: 8px;
+    padding: 8px;
+  }
+  tr.timetracking-enter-form.hidden-box:not(.hidden-box) div {
+    display: default;
+  }
+  #timetracking-report td.user {
+    width: 40%;
+  }
+  #id_user {
+    width: 200px;
+  }
+  #id_duration {
+    width: 80px !important;
+  }
+</style>
+{{ form.media.css }}
+
+{# This is here because of the datepicker init calls in the body #}
+<script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
+<script src="{% static "js/jquery-ui.min.js" %}"></script>
+<script src="{% static "js/bootstrap.min.js" %}"></script>
+
+{# <script type="application/dart" src="{% static "dart/timetracking.dart" %}"></script> #}
+<script type="application/dart" src="{% static "dart/timetracking_report.dart" %}"></script>
+<script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
+<script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
+<script src="{% static "dart/packages/browser/dart.js" %}"></script>
+{{ form.media.js }}
+{% endblock head %}
+
+{% block sidebar %}{% include "project/sidebar.html" with section='timetracking' %}{% endblock %}
+
+{% block content %}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">{% trans "Worklog for" %} {% now "j F Y" %}</h3>
+  </div>
+    <div class="panel-body">
+      <form class="form-inline" method="POST">
+      {% csrf_token %}
+      {{ form|bootstrap_inline }}
+        <div class="form-group">
+          <div class="col-sm-10 col-sm-offset-2">
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <table id="timetracking-report" class="table table-striped table-bordered">
+      <tr>
+        <th>{% trans "User" %}</th>
+        <th>{% trans "Start" %}</th>
+        <th>{% trans "End" %}</th>
+        <th>{% trans "Total Duration" %}</th>
+        <th>{% trans "Total" %}</th>
+        <th>{% trans "Overtime" %}</th>
+      </tr>
+      {% for row in report %}
+      <tr>
+        <td class="user">
+          <a href="{% url 'timetracking_user' row.user.pk %}">{{ row.user.get_full_name }}</a>
+        </td>
+        {% with row.report as row_report %}
+        <td>{{ row_report.day_start|date:"H:i" }}</td>
+        <td>{{ row_report.day_end|date:"H:i" }}</td>
+        <td>{{ row_report.total_duration|seconds_to_hours }}</td>
+        <td>{{ row_report.total|seconds_to_hours }}</td>
+        <td>{{ row_report.overtime|seconds_to_hours }}</td>
+        {% endwith %}
+      </tr>
+      {% empty %}
+        No users
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block base_js %}{% endblock %}

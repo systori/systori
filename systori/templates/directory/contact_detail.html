@@ -1,15 +1,19 @@
 {% extends "frame.html" %}
-{% load i18n %}
+{% load i18n bootstrap %}
 
 {% block sidebar %}{% include "main/sidebar.html" with section='directory' %}{% endblock %}
 
 {% block content %}
   <h2>{% trans 'Contact Details' %} - <a href="{% url 'contact.edit' object.id %}">{% trans 'edit' %}</a></h2>
-  {% for field in form %}
-    <div>
-      {{ field.label }}: {{ field.value }}
-    </div>
-  {% endfor %}
+
+
+    <table class="table table-bordered">
+      <tbody>
+        {% for field in form %}
+        <tr><td>{{ field.label }}</td><td>{{ field.value }}</td>
+        {% endfor %}
+        </tbody>
+    </table>
 
   <h2>{% trans 'Associated Projects' %}</h2>
   <table class="table table-striped">
