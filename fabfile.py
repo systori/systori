@@ -9,77 +9,40 @@ from version import VERSION
 
 version = _V(VERSION)
 
-
 env.hosts = ['systori.com']
-
-
-deploy_apps = {
-    'dev': ['dev'],
-    'production': ['production']
-}
 
 PROD_MEDIA_PATH = '/srv/systori/production'
 PROD_MEDIA_FILE = 'systori.media.tgz'
 
 
-def deploy(envname='dev'):
-    ":envname=dev -- deploy code to remote server"
-    env.user = 'ubrblik'
+def prepare(service, branch):
+    "copy database and migrate"
 
-    for app in deploy_apps[envname]:
+    if service != 'production':
+        settings = {
+            'HOST': 'db',
+            'NAME': 'systori_{}'.format(service),
+            'USER': 'postgres'
+        }
+        local('dropdb -h {HOST} -U {USER} {NAME}'.format(**settings))
+        local('createdb -T systori_production -h {HOST} -U {USER} {NAME}'.format(**settings))
 
-        sudo('service uwsgi stop systori_' + app)
-
-        with cd('/srv/systori/' + app + '/systori'):
-
-            if envname == 'dev':
-                # load production db
-                sudo('dropdb systori_dev', user='www-data')
-                sudo('createdb systori_dev', user='www-data')
-                sudo('pg_dump -f prod.sql systori_production', user='www-data')
-                sudo('psql -f prod.sql systori_dev >/dev/null', user='www-data')
-                sudo('rm prod.sql')
-
-            run('git pull')
-
-            with cd('systori/dart'):
-                run('/usr/lib/dart/bin/pub get')
-                run('/usr/lib/dart/bin/pub build')
-
-            with prefix('source ../bin/activate'):
-                run('pip install -q -U -r requirements/%s.pip' % envname)
-                sudo('./manage.py migrate --noinput', user='www-data')
-                run('./manage.py collectstatic --noinput --verbosity 0')
-
-        sudo('service uwsgi start systori_' + app)
-
-    slack('push to <%(systori-url)s|%(envname)s> finished', envname)
+    local('./manage.py migrate --noinput')
 
 
-def startdocker():
-    "install packages if they aren't installed and then runserver"
-    with open('/root/.ssh/config','w') as config:
-        config.write(
-            'Host *github.com\n'
-            '  HostName github.com\n'
-            'Host *bitbucket.org\n'
-            '  HostName bitbucket.org'
-        )
-    try:
-        import django
-    except:
-        local('pip3 install -r requirements/dev.pip')
+def start():
+    "runserver"
     local('python3 manage.py runserver 0.0.0.0:8000')
+
+
+def test():
+    "django test"
+    local('./manage.py test systori')
 
 
 def makemessages():
     "django makemessages"
     local('./manage.py makemessages -l de -e tex,html,py')
-
-
-def test():
-    "django test"
-    local('./manage.py test --keepdb systori')
 
 
 def fetchdb(envname='production'):
