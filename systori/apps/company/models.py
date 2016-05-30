@@ -50,6 +50,13 @@ class Access(models.Model):
         return cls(user=user, company=company, is_staff=True, is_active=True)
 
     @property
+    def is_fake(self):
+        """
+        Check if this is a pseudo access object created by `grant_superuser_access`
+        """
+        return not self.pk
+
+    @property
     def has_owner(self):
         return self.is_owner or self.user.is_superuser
 

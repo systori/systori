@@ -4,14 +4,15 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.static import serve
 from django.conf import settings
 
-urlpatterns = [
 
+urlpatterns = [
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT,}),
 
     url(r'^api/', include('systori.apps.project.api')),
     url(r'^api/', include('systori.apps.task.api')),
     url(r'^api/', include('systori.apps.document.api')),
     url(r'^api/', include('systori.apps.directory.api')),
+    url(r'^api/v1/timetracking/', include('systori.apps.timetracking.api_urls')),
 
     url(r'^i18n/', include('django.conf.urls.i18n')),
 
@@ -23,6 +24,7 @@ urlpatterns = [
     url(r'', include('systori.apps.user.urls')),
     url(r'', include('systori.apps.equipment.urls')),
     url(r'', include('systori.apps.main.urls')),
+    url(r'', include('systori.apps.timetracking.urls')),
 
     url(r'^project-(?P<project_pk>\d+)/', include('systori.apps.task.urls')),
     url(r'^templates/', include('systori.apps.task.urls')),

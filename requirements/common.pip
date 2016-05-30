@@ -6,6 +6,7 @@ django-ordered-model
 django-fsm
 django-mobile
 django-bootstrap-form
+djangorestframework==3.3.2
 
 geopy
 lxml
@@ -21,3 +22,5 @@ jsonfield
 
 -e git+https://github.com/damoti/pyth.git@pyth-py3#egg=pyth
 #-e ../pyth
+
+django-datetime-widget==0.9.3

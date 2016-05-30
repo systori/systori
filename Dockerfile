@@ -3,7 +3,7 @@ MAINTAINER Andrey Beletsky "andrey@vr2.net"
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE systori.settings.docker
 
-RUN apt-get update
+RUN apt-get update --fix-missing
 RUN apt-get install -y libcurl4-openssl-dev git python3-pip python-pip python-dev locales mercurial
 RUN apt-get install -y postgresql-contrib postgresql-server-dev-all
 RUN apt-get install -y python3-lxml python3-dev libyaml-dev libjpeg-dev
@@ -34,4 +34,4 @@ ADD ./ /systori/
 # RUN pip3 install --upgrade pip
 RUN pip3 install -r ./requirements/docker.pip
 RUN pip2 install Fabric
-RUN fab get_dart
+RUN fab getdart

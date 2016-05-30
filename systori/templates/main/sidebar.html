@@ -26,4 +26,7 @@
       href="{% url 'users' %}">{% trans 'Users' %}</a></li>
   <li {% if section == 'accounts' %}class="active"{% endif %}><a
       href="{% url 'accounts' %}">{% trans 'Accounts' %}</a></li>
+
+  {% if access.is_staff %}<li {% if section == 'timetracking' %}class="active"{% endif %}><a
+      href="{% url 'timetracking' %}">{% trans 'Timetracking' %}</a></li>{% endif %}
 </ul>
