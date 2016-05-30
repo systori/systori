@@ -56,6 +56,22 @@ def deploy(envname='dev'):
     slack('push to <%(systori-url)s|%(envname)s> finished', envname)
 
 
+def startdocker():
+    "install packages if they aren't installed and then runserver"
+    with open('/root/.ssh/config','w') as config:
+        config.write(
+            'Host *github.com\n'
+            '  HostName github.com\n'
+            'Host *bitbucket.org\n'
+            '  HostName bitbucket.org'
+        )
+    try:
+        import django
+    except:
+        local('pip3 install -r requirements/dev.pip')
+    local('python3 manage.py runserver 0.0.0.0:8000')
+
+
 def makemessages():
     "django makemessages"
     local('./manage.py makemessages -l de -e tex,html,py')
@@ -112,6 +128,15 @@ def dockergetdb(container='web', envname='production'):
         container, dump_file, **settings))
     local('rm ' + dump_file)
 
+def copyproductiontodev():
+    from systori.settings.dev import DATABASES as DEVDB
+    from systori.settings.production import DATABASES as PRODDB
+    devdb = DEVDB['default']
+    proddb = PRODDB['default']
+    local('dropdb -h {HOST} -U {USER} {NAME}'.format(**devdb))
+    local('createdb -h {HOST} -U {USER} {NAME}'.format(**devdb))
+    local('pg_dump -h {HOST} -U {USER} -f prod.sql {NAME}'.format(**proddb))
+    local('psql -h {HOST} -U {USER} -f prod.sql {NAME}'.format(**devdb))
 
 def initsettings(envname='local'):
     ":envname=local -- creates __init__.py in settings folder"
@@ -193,6 +218,11 @@ def mail():
     local('python -m smtpd -n -c DebuggingServer localhost:1025')
 
 
+def dockercontextsize():
+    "shows size of 'context' uploaded to docker when building docker image"
+    local('du -X .dockerignore -h -d 2 | sort -h')
+
+
 def jenkins():
 
     local('pip install --upgrade -r requirements/dev.pip')
@@ -201,7 +231,7 @@ def jenkins():
 
     with lcd('systori/dart'):
         local('pub get')
-        local('pub build')
+        #local('pub build') we'll need this later when doing selenium tests
         local("xvfb-run -s '-screen 0 1024x768x24' pub run test -r expanded -p content-shell test")
 
     local('coverage run -p manage.py test systori')

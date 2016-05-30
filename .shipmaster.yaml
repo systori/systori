@@ -1,0 +1,56 @@
+name: systori
+
+layers:
+  base:
+    from: damoti/base:latest
+    apt-get:
+      - language-pack-de
+      - libpq-dev
+      - libjpeg-dev
+      - libxml2-dev
+      - libxslt-dev
+      - libffi-dev
+    context:
+      - requirements/base.pip
+    script:
+      - pip3 install -r requirements/base.pip
+  app:
+    environment:
+      DJANGO_SETTINGS_MODULE: systori.settings.production
+    context:
+      - .
+    script:
+      - cd systori/dart && pub get && pub build && cd -
+      - pip3 install --src=/src -r requirements/app.pip
+      - python3 manage.py collectstatic --noinput
+    command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+  test:
+    environment:
+      DJANGO_SETTINGS_MODULE: systori.settings.test
+    script:
+      - pip3 install -r requirements/test.pip
+    command: ["python3", "manage.py", "test", "systori.apps"]
+  dev:
+    environment:
+      DJANGO_SETTINGS_MODULE: systori.settings.docker
+    script:
+      - pip3 install -r requirements/dev.pip
+
+services:
+  app:
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    deploy:
+      - fab copyproductiontodev
+      - python3 manage.py migrate
+    entrypoint: /shipmaster/scripts/wait-for-it/wait-for-it.sh db:5432 --
+    command: python3 manage.py runserver 0.0.0.0:8000
+  db:
+    image: postgres
+
+ssh:
+  known_hosts:
+    - github.com
+    - bitbucket.org

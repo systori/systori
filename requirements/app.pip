@@ -1,16 +1,4 @@
-psycopg2
-
-django>=1.9,<1.10
-django-tastypie
-django-ordered-model
-django-fsm
-django-mobile
-django-bootstrap-form
-djangorestframework==3.3.2
-
-geopy
-lxml
-jsonfield
+-r base.pip
 
 -e hg+https://eukreign@bitbucket.org/rptlab/reportlab#egg=reportlab
 -e hg+https://eukreign@bitbucket.org/rptlab/preppy#egg=preppy
@@ -22,5 +10,3 @@ jsonfield
 
 -e git+https://github.com/damoti/pyth.git@pyth-py3#egg=pyth
 #-e ../pyth
-
-django-datetime-widget==0.9.3

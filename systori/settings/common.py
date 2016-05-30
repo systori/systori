@@ -38,8 +38,7 @@ PROJECTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, '../'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '8)-+y0f@(mb=!o9ov_g!+35s4ritax6jzmc*c04jo=6*5t_74&'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 TESTING = 'test' in sys.argv
 

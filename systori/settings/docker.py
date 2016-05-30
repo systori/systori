@@ -1,7 +1,7 @@
 import sys
 from .dev import *
 
-SERVER_NAME = 'systori.dockerhost'
+SERVER_NAME = 'systori.localhost'
 SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
 
 SESSION_COOKIE_SECURE = False
@@ -12,7 +12,7 @@ DEBUG = True
 DATABASES['default'].update({
     'NAME': 'postgres',
     'USER': 'postgres',
-    'HOST': 'db_1',
+    'HOST': 'db',
     'PORT': 5432
 })
 
