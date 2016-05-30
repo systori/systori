@@ -4,7 +4,6 @@ layers:
   base:
     from: damoti/base:latest
     apt-get:
-      - language-pack-en
       - language-pack-de
       - libpq-dev
       - libjpeg-dev
@@ -14,8 +13,6 @@ layers:
     context:
       - requirements/base.pip
     script:
-      - pip3 install --upgrade pip wheel
-      - pip3 install uwsgi
       - pip3 install -r requirements/base.pip
   app:
     environment:
