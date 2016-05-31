@@ -44,7 +44,7 @@ $ git clone git@github.com:systori/systori.git
 $ cd systori/
 $ mkvirtualenv -a `pwd` -p /usr/bin/python3 systori
 $ pip install -r requirements/dev.pip
-$ fab init_settings
+$ fab initsettings
 ```
 
 Now run some tests to make sure everything is working:
