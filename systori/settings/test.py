@@ -11,7 +11,7 @@ CSRF_COOKIE_SECURE = False
 DEBUG = True
 
 DATABASES['default'].update({
-    'NAME': 'postgres',
+    'NAME': 'systori_test',
     'USER': 'postgres',
     'HOST': 'db',
     'PORT': 5432,
