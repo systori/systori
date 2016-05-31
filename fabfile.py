@@ -30,9 +30,14 @@ def prepare(service, branch):
     local('./manage.py migrate --noinput')
 
 
-def start():
-    "runserver"
-    local('python3 manage.py runserver 0.0.0.0:8000')
+def uwsgi():
+    "start uwsgi service"
+    local("uwsgi"
+          " --module=systori.wsgi"
+          " --socket=0.0.0.0:8000"
+          " --static-map /static=/static"
+          " --env DJANGO_SETTINGS_MODULE={}".format(
+              os.environ['DJANGO_SETTINGS_MODULE']))
 
 
 def test():

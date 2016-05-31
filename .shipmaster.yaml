@@ -24,7 +24,8 @@ layers:
       - export DJANGO_SETTINGS_MODULE=systori.settings.common
       - python3 manage.py collectstatic --noinput
     prepare: fab prepare:service={service},branch={git-branch}
-    start: fab start
+    start: fab uwsgi
+    wait-for: db:5432
   test:
     build:
       - pip3 install -r requirements/test.pip
