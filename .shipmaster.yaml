@@ -12,21 +12,22 @@ layers:
       - libffi-dev
     context:
       - requirements/base.pip
-    script:
+    build:
       - pip3 install -r requirements/base.pip
   app:
     context:
       - .
-    script:
+    build:
       - cd systori/dart && pub get && pub build && cd -
       - pip3 install --src=/src -r requirements/app.pip
+      - export DJANGO_SETTINGS_MODULE=systori.settings.common
       - python3 manage.py collectstatic --noinput
     prepare: fab prepare:service={service},branch={git-branch}
-    command: fab start
+    start: fab start
   test:
-    script:
+    build:
       - pip3 install -r requirements/test.pip
-    command: fab test
+    start: fab test
 
 ssh:
   known_hosts:
