@@ -6,6 +6,7 @@ layers:
     apt-get:
       - language-pack-de
       - libpq-dev
+      - postgresql-client
       - libjpeg-dev
       - libxml2-dev
       - libxslt-dev
