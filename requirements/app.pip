@@ -2,7 +2,7 @@
 
 -e hg+https://eukreign@bitbucket.org/rptlab/reportlab#egg=reportlab
 -e hg+https://eukreign@bitbucket.org/rptlab/preppy#egg=preppy
--e git+git@rlextra.github.com:systori/rlextra.git#egg=rlextra
+-e git+git@github.com:systori/rlextra.git#egg=rlextra
 #-e ../rlextra
 
 -e git+ssh://git@django-tuath.bitbucket.org/damoti/django-tuath.git#egg=django-tuath
