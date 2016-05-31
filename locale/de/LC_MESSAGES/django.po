@@ -1,26 +1,15 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-05-31 22:05+0200\n"
-"PO-Revision-Date: 2015-07-11 15:41+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.1\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: systori\n"
+"Language: de\n"
 
 #: systori/apps/accounting/forms.py:123
 msgid "Form has become invalid due to external changes to the jobs list."
-msgstr ""
+msgstr "Die Daten wurden ungültig auf Grund von externen Änderungen."
 
 #: systori/apps/accounting/forms.py:214 systori/apps/document/forms.py:22
 msgid "Add Terms"
@@ -52,7 +41,7 @@ msgstr "Rechnung"
 
 #: systori/apps/accounting/forms.py:279 systori/apps/document/forms.py:65
 msgid "At least one job must be selected."
-msgstr ""
+msgstr "Es muss mindestens ein Los ausgewählt sein."
 
 #: systori/apps/accounting/forms.py:286
 msgid "Debit Net"
@@ -64,7 +53,6 @@ msgstr "Soll"
 
 #: systori/apps/accounting/forms.py:342
 #, fuzzy
-#| msgid "A comment is required for flat invoice."
 msgid "An explanation is required for non-itemized invoice."
 msgstr "Eine Anmerkung wird bei einer Pauschalrechnung benötigt."
 
@@ -79,19 +67,19 @@ msgstr "Korrektur"
 
 #: systori/apps/accounting/forms.py:424 systori/apps/accounting/forms.py:558
 msgid "Adjustment Net"
-msgstr "Korrektur"
+msgstr "Korrektur netto"
 
 #: systori/apps/accounting/forms.py:425 systori/apps/accounting/forms.py:559
 msgid "Adjustment Tax"
-msgstr "Korrektur"
+msgstr "Korrektur Steuer"
 
 #: systori/apps/accounting/forms.py:427
 msgid "Corrected Net"
-msgstr "Erstellt am"
+msgstr "korrigiert netto"
 
 #: systori/apps/accounting/forms.py:428
 msgid "Corrected Tax"
-msgstr "Erstellt am"
+msgstr "korrigiert Steuer"
 
 #: systori/apps/accounting/forms.py:479
 msgid "Received Date"
@@ -115,35 +103,35 @@ msgstr "Wurde Skonto gezogen?"
 
 #: systori/apps/accounting/forms.py:485
 msgid "0%"
-msgstr ""
+msgstr "0%"
 
 #: systori/apps/accounting/forms.py:486
 msgid "1%"
-msgstr ""
+msgstr "1%"
 
 #: systori/apps/accounting/forms.py:487
 msgid "2%"
-msgstr ""
+msgstr "2%"
 
 #: systori/apps/accounting/forms.py:488
 msgid "3%"
-msgstr ""
+msgstr "3%"
 
 #: systori/apps/accounting/forms.py:489
 msgid "4%"
-msgstr ""
+msgstr "4%"
 
 #: systori/apps/accounting/forms.py:490
 msgid "5%"
-msgstr ""
+msgstr "5%"
 
 #: systori/apps/accounting/forms.py:491
 msgid "6%"
-msgstr ""
+msgstr "6%"
 
 #: systori/apps/accounting/forms.py:492
 msgid "7%"
-msgstr ""
+msgstr "7%"
 
 #: systori/apps/accounting/forms.py:516
 msgid "The sum of splits must equal the payment amount."
@@ -181,8 +169,8 @@ msgstr "Gutschrift netto"
 msgid "Refund Tax"
 msgstr "Gutschrift Steuer"
 
-# msgid "Payment"
-# msgstr "Gesamtzahlung"
+#. msgid "Payment"
+#. msgstr "Gesamtzahlung"
 #: systori/apps/accounting/forms.py:672
 msgid "Apply Net"
 msgstr "Netto anwenden"
@@ -192,7 +180,6 @@ msgid "Apply Tax"
 msgstr "Steuer anwenden"
 
 #: systori/apps/accounting/forms.py:765
-#, python-format
 msgid "Account code must be a number between %(min)s and %(max)s inclusive."
 msgstr "Die Kontonummer muss zwischen %(min)s und %(max)s liegen. "
 
@@ -250,17 +237,12 @@ msgid "active"
 msgstr "aktiv"
 
 #: systori/apps/company/models.py:42
-msgid ""
-"Designates whether this user should be treated as active. Unselect this "
-"instead of deleting accounts. This will remove user from any present and "
-"future daily plans."
-msgstr ""
-"Markiert diesen Benutzer als im System aktiv. Abwählen und deaktivieren ist "
-"im Normalfall die bessere Option als den Benutzer zu löschen."
+msgid "Designates whether this user should be treated as active. Unselect this instead of deleting accounts. This will remove user from any present and future daily plans."
+msgstr "Markiert diesen Benutzer als im System aktiv. Abwählen und deaktivieren ist im Normalfall die bessere Option als den Benutzer zu löschen."
 
 #: systori/apps/directory/forms.py:18
 msgid "You must provide either a company or last name."
-msgstr ""
+msgstr "Pflicht ist (mind.) entweder ein Firmen- oder Nachname."
 
 #: systori/apps/directory/models.py:9
 #: systori/templates/directory/contact_list.html:17
@@ -606,35 +588,35 @@ msgstr "Abstand Unten"
 
 #: systori/apps/document/models.py:333
 msgid "A5"
-msgstr ""
+msgstr "A5"
 
 #: systori/apps/document/models.py:334
 msgid "A4"
-msgstr ""
+msgstr "A4"
 
 #: systori/apps/document/models.py:335
 msgid "A3"
-msgstr ""
+msgstr "A3"
 
 #: systori/apps/document/models.py:336
 msgid "LETTER"
-msgstr ""
+msgstr "LETTER"
 
 #: systori/apps/document/models.py:337
 msgid "LEGAL"
-msgstr ""
+msgstr "LEGAL"
 
 #: systori/apps/document/models.py:338
 msgid "ELEVENSEVENTEEN"
-msgstr ""
+msgstr "ELENVENSEVENTEEN"
 
 #: systori/apps/document/models.py:339
 msgid "B5"
-msgstr ""
+msgstr "B5"
 
 #: systori/apps/document/models.py:340
 msgid "B4"
-msgstr ""
+msgstr "B4"
 
 #: systori/apps/document/models.py:342
 msgid "Pagesize"
@@ -719,7 +701,6 @@ msgid "Project progress"
 msgstr "Leistungsstand"
 
 #: systori/apps/document/type/invoice.py:52
-#, python-brace-format
 msgid "Payment on {date}"
 msgstr "Zahlung vom {date}"
 
@@ -772,17 +753,14 @@ msgid "Total"
 msgstr "Summe"
 
 #: systori/apps/document/type/invoice.py:147
-#, python-brace-format
 msgid "Work completed on {date}"
 msgstr "Erbrachte Leistung zum {date}"
 
 #: systori/apps/document/type/invoice.py:149
-#, python-brace-format
 msgid "Flat invoice on {date}"
 msgstr "Pauschalrechnung vom {date}"
 
 #: systori/apps/document/type/invoice.py:151
-#, python-brace-format
 msgid "Adjustment on {date}"
 msgstr "Zahlung vom {date}"
 
@@ -883,14 +861,12 @@ msgid "Search"
 msgstr "Suche"
 
 #: systori/apps/project/gaeb_utils.py:35
-#, python-format
 msgid "File %s can't be imported. Please Contact Support."
-msgstr ""
-"Datei %s kann nicht importiert werden. Bitte kontaktieren Sie den Support."
+msgstr "Datei %s kann nicht importiert werden. Bitte kontaktieren Sie den Support."
 
 #: systori/apps/project/gaeb_utils.py:82
 msgid " Info: Picture was in Imported File."
-msgstr " Info: Bild in importierter Datei vorhanden."
+msgstr "Info: Bild in importierter Datei vorhanden."
 
 #: systori/apps/project/models.py:23
 msgid "Project Name"
@@ -1093,14 +1069,13 @@ msgstr "fertig"
 
 #: systori/apps/task/models.py:377
 msgid "Task Instance"
-msgstr "Positionsinstanz"
+msgstr "Positionsvariante"
 
 #: systori/apps/task/models.py:378
 msgid "Task Instances"
-msgstr "Positionsinstanzen"
+msgstr "Positionsvarianten"
 
 #: systori/apps/task/models.py:385
-#, python-format
 msgid "Price correction from %(user)s on %(date)s"
 msgstr "Zu-/Abschlag von %(user)s am %(date)s"
 
@@ -1141,59 +1116,57 @@ msgstr "Anhänge"
 #: systori/apps/timetracking/forms.py:25
 #: systori/apps/timetracking/models.py:63
 msgid "Timer already running"
-msgstr ""
+msgstr "Stoppuhr läuft bereits"
 
 #: systori/apps/timetracking/models.py:18
 #, fuzzy
-#| msgid "Workers"
 msgid "Work"
 msgstr "Arbeiter"
 
 #: systori/apps/timetracking/models.py:19
 msgid "Holiday"
-msgstr ""
+msgstr "Urlaub"
 
 #: systori/apps/timetracking/models.py:20
 msgid "Illness"
-msgstr ""
+msgstr "Krankheit"
 
 #: systori/apps/timetracking/models.py:34
 msgid "in seconds"
-msgstr ""
+msgstr "in Sekunden"
 
 #: systori/apps/timetracking/models.py:42
 msgid "timer"
-msgstr ""
+msgstr "Stoppuhr"
 
 #: systori/apps/timetracking/models.py:43
 msgid "timers"
-msgstr ""
+msgstr "Stoppuhren"
 
 #: systori/apps/timetracking/templates/timetracking/dashboard_part.html:11
 msgid "Report"
-msgstr ""
+msgstr "Report"
 
 #: systori/apps/timetracking/templates/timetracking/dashboard_part.html:18
 #: systori/apps/timetracking/templates/timetracking/home.html:74
 #: systori/apps/timetracking/templates/timetracking/user_report.html:53
 msgid "End"
-msgstr ""
+msgstr "Ende"
 
 #: systori/apps/timetracking/templates/timetracking/dashboard_part.html:19
 #, fuzzy
-#| msgid "Timestamp"
 msgid "Time"
-msgstr "Zeitstempel"
+msgstr "Zeit"
 
 #: systori/apps/timetracking/templates/timetracking/dashboard_part.html:20
 #: systori/apps/timetracking/templates/timetracking/home.html:77
 #: systori/apps/timetracking/templates/timetracking/user_report.html:55
 msgid "Overtime"
-msgstr ""
+msgstr "Überstunden"
 
 #: systori/apps/timetracking/templates/timetracking/home.html:57
 msgid "Worklog for"
-msgstr ""
+msgstr "Arbeitsbuch für"
 
 #: systori/apps/timetracking/templates/timetracking/home.html:72
 #: systori/templates/task/progressreport_list.html:12
@@ -1202,33 +1175,30 @@ msgstr "Benutzer"
 
 #: systori/apps/timetracking/templates/timetracking/home.html:75
 #, fuzzy
-#| msgid "Salutation"
 msgid "Total Duration"
-msgstr "Anrede"
+msgstr "Summe Dauer"
 
 #: systori/apps/timetracking/templates/timetracking/user_report.html:34
 msgid "Time Report for"
-msgstr ""
+msgstr "Stundenübersicht für"
 
 #: systori/apps/timetracking/templates/timetracking/user_report.html:51
 #, fuzzy
-#| msgid "Active"
 msgid "Activity"
-msgstr "aktiv"
+msgstr "Aktivität"
 
 #: systori/apps/timetracking/templates/timetracking/user_report.html:54
 msgid "Hours"
-msgstr ""
+msgstr "Stunden"
 
 #: systori/apps/timetracking/templates/timetracking/user_report.html:56
 #, fuzzy
-#| msgid "Total"
 msgid "Total Hours"
-msgstr "Summe"
+msgstr "Summe Stunden"
 
 #: systori/apps/timetracking/templates/timetracking/user_report.html:82
 msgid "No entries"
-msgstr ""
+msgstr "keine Einträge"
 
 #: systori/apps/user/forms.py:11
 msgid "The two password fields didn't match."
@@ -1260,7 +1230,7 @@ msgstr "Nachname"
 
 #: systori/apps/user/models.py:33
 msgid "email address"
-msgstr "Adresse"
+msgstr "eMail"
 
 #: systori/apps/user/models.py:34
 msgid "date joined"
@@ -1300,7 +1270,7 @@ msgstr "Dokumententyp"
 
 #: systori/lib/accounting/models.py:54
 msgid "Bank"
-msgstr ""
+msgstr "Bank"
 
 #: systori/lib/accounting/models.py:55
 msgid "Accounts Receivable"
@@ -1329,7 +1299,7 @@ msgstr "Belegdatum"
 #: systori/lib/accounting/models.py:181
 #: systori/templates/accounting/account_detail.html:25
 msgid "Transaction Type"
-msgstr "Buchungssatz #"
+msgstr "Buchungssatz"
 
 #: systori/lib/accounting/models.py:291
 msgid "Value"
@@ -1355,7 +1325,7 @@ msgstr "Pauschal Soll"
 
 #: systori/lib/accounting/models.py:328
 msgid "Entry Type"
-msgstr "Dokumententyp"
+msgstr "Buchungstyp"
 
 #: systori/lib/accounting/models.py:337
 #: systori/templates/accounting/invoice_card.html:26
@@ -1406,7 +1376,6 @@ msgstr "Englisch"
 #: systori/templates/project/project_confirm_delete.html:8
 #: systori/templates/task/job_confirm_delete.html:8
 #: systori/templates/user/access_confirm_delete.html:8
-#, python-format
 msgid "Are you sure you want to delete \"%(object)s\"?"
 msgstr "Sind Sie sicher dass Sie das Objekt \"%(object)s\" löschen möchten?"
 
@@ -1554,32 +1523,31 @@ msgstr "Typ"
 
 #: systori/templates/accounting/adjustment_form.html:10
 #, fuzzy
-#| msgid "Adjustment Net"
 msgid "Adjustments & Corrections"
 msgstr "Korrektur"
 
 #: systori/templates/accounting/adjustment_form.html:13
 msgid "Match Overpaid"
-msgstr ""
+msgstr "Überzahlung ausgleichen"
 
 #: systori/templates/accounting/adjustment_form.html:14
 msgid "Match Underpaid"
-msgstr ""
+msgstr "Auf freigegeben reduzieren"
 
 #: systori/templates/accounting/adjustment_form.html:15
 msgid "Match Overbilled"
-msgstr ""
+msgstr "An berechnet angleichen"
 
 #: systori/templates/accounting/adjustment_form.html:17
 msgid "Reset"
-msgstr ""
+msgstr "Reset"
 
 #: systori/templates/accounting/adjustment_form.html:50
 #: systori/templates/accounting/invoice_form.html:70
 #: systori/templates/accounting/payment_form.html:45
 #: systori/templates/accounting/refund_form.html:41
 msgid "Invoiced"
-msgstr "Rechnung"
+msgstr "berechnet"
 
 #: systori/templates/accounting/adjustment_form.html:54
 #: systori/templates/accounting/invoice_form.html:69
@@ -1592,23 +1560,21 @@ msgstr "Fortschritt"
 
 #: systori/templates/accounting/adjustment_form.html:57
 msgid "Corrected"
-msgstr "Korrektur"
+msgstr "korrigiert"
 
 #: systori/templates/accounting/adjustment_form.html:94
 #, fuzzy
-#| msgid "Adjustment Net"
 msgid "Adjustment Document"
-msgstr "Korrektur"
+msgstr "Korrekturdokument"
 
 #: systori/templates/accounting/amount_input_cell.html:5
 msgid "net"
-msgstr "vor"
+msgstr "netto"
 
 #: systori/templates/accounting/invoice_card.html:59
 #, fuzzy
-#| msgid "Adjustment"
 msgid "Adjust"
-msgstr "Korrektur"
+msgstr "anpassen"
 
 #: systori/templates/accounting/invoice_card.html:77
 #: systori/templates/project/project_detail.html:139
@@ -1617,7 +1583,7 @@ msgstr "PDF"
 
 #: systori/templates/accounting/invoice_card.html:84
 msgid "Email w/ Payment Details"
-msgstr "Rechnungsdetails"
+msgstr "eMail - Zahlungsdetails"
 
 #: systori/templates/accounting/invoice_card.html:85
 msgid "Print"
@@ -1625,7 +1591,7 @@ msgstr "Druck"
 
 #: systori/templates/accounting/invoice_card.html:86
 msgid "Print w/ Payment Details"
-msgstr "Rechnungsdetails"
+msgstr "Druck - Zahlungsdetails"
 
 #: systori/templates/accounting/invoice_detail.html:8
 msgid "Invoice Details"
@@ -1644,7 +1610,7 @@ msgstr "Status"
 #: systori/templates/document/evidence_detail.html:9
 #: systori/templates/document/proposal_detail.html:10
 msgid "Created"
-msgstr "Erstellen"
+msgstr "Erstellet"
 
 #: systori/templates/accounting/invoice_form.html:61
 msgid "Debits"
@@ -1654,11 +1620,11 @@ msgstr "Debitoren"
 #: systori/templates/document/proposal_form.html:35
 #: systori/templates/project/project_detail.html:49
 msgid "Estimate"
-msgstr "angeboten"
+msgstr "Angebot"
 
 #: systori/templates/accounting/invoice_form.html:71
 msgid "Itemized"
-msgstr "Aufmaß"
+msgstr "Aufstellung"
 
 #: systori/templates/accounting/invoice_list.html:20
 msgid "Parent"
@@ -1666,44 +1632,39 @@ msgstr "Vorgänger"
 
 #: systori/templates/accounting/payment_form.html:14
 #, fuzzy
-#| msgctxt "jquery.timeago"
-#| msgid "from now"
 msgid "from"
-msgstr "seit gerade eben"
+msgstr "vom"
 
-# msgid "Payment"
-# msgstr "Gesamtzahlung"
+#. msgid "Payment"
+#. msgstr "Gesamtzahlung"
 #: systori/templates/accounting/refund_form.html:9
 #, fuzzy
-#| msgid "Apply Refund"
 msgid "Calculate & Apply Refund"
-msgstr "Anteil"
+msgstr "Berechne und wende Gutschrift an"
 
-# msgid "Payment"
-# msgstr "Gesamtzahlung"
+#. msgid "Payment"
+#. msgstr "Gesamtzahlung"
 #: systori/templates/accounting/refund_form.html:44
 msgid "Apply Refund"
-msgstr "Anteil"
+msgstr "Wende Gutschrift an"
 
 #: systori/templates/accounting/refund_form.html:78
 #, fuzzy
-#| msgid "Refund"
 msgid "Issue Refund"
 msgstr "Gutschrift"
 
 #: systori/templates/accounting/refund_form.html:80
 #, fuzzy
-#| msgid "Customer"
 msgid "Customer Refund"
-msgstr "Kunde"
+msgstr "Kundengutschrift"
 
 #: systori/templates/base.html:47
 msgid "Select company..."
-msgstr ""
+msgstr "Firma auswählen..."
 
 #: systori/templates/base.html:51
 msgid "available Companies"
-msgstr "verfügbare Mandanten"
+msgstr "verfügbare Firmen"
 
 #: systori/templates/base.html:77 systori/templates/project.html:5
 msgid "open field app"
@@ -1719,9 +1680,8 @@ msgstr "Abmelden"
 
 #: systori/templates/company/company_list.html:8
 #, fuzzy
-#| msgid "available Companies"
 msgid "Companies"
-msgstr "verfügbare Mandanten"
+msgstr "Firmen"
 
 #: systori/templates/company/company_list.html:38
 #: systori/templates/directory/contact_list.html:38
@@ -1757,23 +1717,20 @@ msgid "Directory"
 msgstr "Adressbuch"
 
 #: systori/templates/directory/projectcontact_confirm_delete.html:8
-#, python-format
 msgid "Are you sure you want to remove \"%(object)s\" from this project?"
 msgstr "Sicher das Objekt \"%(object)s\" löschen?"
 
 #: systori/templates/directory/projectcontact_form_add.html:11
-#, python-format
 msgid "Add Contact to %(project_name)s"
 msgstr "Kontakt zu %(project_name)s hinzufügen"
 
 #: systori/templates/directory/projectcontact_form_create.html:8
-#, python-format
 msgid "Create and then add contact to %(project_name)s"
 msgstr "Kontakt erstellen und zu Projekt %(project_name)s hinzufügen."
 
 #: systori/templates/document/evidence_detail.html:8
 msgid "Evidence Details"
-msgstr "Rechnungsdetails"
+msgstr "Aufmaßdetails"
 
 #: systori/templates/document/letterhead_form.html:31
 msgid "No Letterhead available."
@@ -1785,7 +1742,7 @@ msgstr "Angebotsdetails"
 
 #: systori/templates/equipment/equipment_detail.html:7
 msgid "Equipment Details"
-msgstr "Rechnungsdetails"
+msgstr "Ausrüstungsdetails"
 
 #: systori/templates/equipment/equipment_list.html:7
 #: systori/templates/field/assign_equipment.html:27
@@ -1882,7 +1839,6 @@ msgstr "Einsatzorte"
 
 #: systori/templates/field/planning.html:72
 #: systori/templates/field/project.html:92
-#, python-format
 msgid "Copy from %(otherday)s."
 msgstr "Von %(otherday)s kopieren."
 
@@ -1891,7 +1847,6 @@ msgid "Cannot change the past."
 msgstr "Nicht die Vergangenheit ändern du kannst."
 
 #: systori/templates/field/project.html:96
-#, python-format
 msgid "No daily plans exist for %(day)s."
 msgstr "Für %(day)s existieren keine Tagespläne"
 
@@ -1900,12 +1855,10 @@ msgid "Back"
 msgstr "Zurück"
 
 #: systori/templates/field/task.html:31
-#, python-format
 msgid "Remove task from %(jobsite)s."
 msgstr "Entferne Pos. von %(jobsite)s."
 
 #: systori/templates/field/task.html:34
-#, python-format
 msgid "Add task to %(jobsite)s."
 msgstr "Position zu %(jobsite)s hinzufügen"
 
@@ -1952,7 +1905,7 @@ msgstr "Konten"
 
 #: systori/templates/main/sidebar.html:31
 msgid "Timetracking"
-msgstr ""
+msgstr "Zeiterfassung"
 
 #: systori/templates/main/templates.html:7
 msgid "Job Templates"
@@ -1960,11 +1913,11 @@ msgstr "Los-Vorlagen"
 
 #: systori/templates/main/templates.html:54
 msgid "Document Settings"
-msgstr "Los-Vorlagen"
+msgstr "Dokumenten-Einstellungen"
 
 #: systori/templates/main/templates.html:59
 msgid "Text"
-msgstr ""
+msgstr "Text"
 
 #: systori/templates/main/templates.html:60
 #: systori/templates/main/templates.html:91
@@ -1988,12 +1941,10 @@ msgid "Evidence preprinted form"
 msgstr "Aufmaß Vordruck"
 
 #: systori/templates/project/project_detail.html:68
-#, python-format
 msgid "Increase estimate by %(percent)s."
 msgstr "Angebot um %(percent)s erhöhen."
 
 #: systori/templates/project/project_detail.html:71
-#, python-format
 msgid "Decrease estimate by %(percent)s."
 msgstr "Angebot um %(percent)s verringern."
 
@@ -2003,7 +1954,7 @@ msgstr "Angebot auf Ursprung setzen."
 
 #: systori/templates/project/project_detail.html:106
 msgid "Create Job"
-msgstr "Erstellen"
+msgstr "Los Erstellen"
 
 #: systori/templates/project/project_detail.html:118
 msgid "Created On"
@@ -2023,7 +1974,7 @@ msgstr "Druck"
 
 #: systori/templates/project/project_detail.html:147
 msgid "with Line Items Email"
-msgstr "Urkalk Email"
+msgstr "Urkalk eMail"
 
 #: systori/templates/project/project_detail.html:148
 msgid "with Line Items Print"
@@ -2031,7 +1982,7 @@ msgstr "Urkalk Druck"
 
 #: systori/templates/project/project_detail.html:166
 msgid "Create Proposal"
-msgstr "Angebot"
+msgstr "Angebot erstellen"
 
 #: systori/templates/project/project_detail.html:168
 msgid "No jobs available for new proposal."
@@ -2049,23 +2000,19 @@ msgid "Create next invoice in this sequence."
 msgstr "Neue Rechnung in dieser Folge erstellen."
 
 #: systori/templates/project/project_detail.html:251
-msgid ""
-"Last invoice in sequence must be marked as sent before a new one can be "
-"created."
-msgstr ""
-"Bevor eine neue Rechnung erstellt werden kann, muss die vorherige als "
-"versendet markiert werden."
+msgid "Last invoice in sequence must be marked as sent before a new one can be created."
+msgstr "Bevor eine neue Rechnung erstellt werden kann, muss die vorherige als versendet markiert werden."
 
 #: systori/templates/project/project_detail.html:264
 msgid "Start new invoice sequence."
 msgstr "Starte eine neue Rechnungsfolge."
 
-# msgid "Payment"
-# msgstr "Gesamtzahlung"
+#. msgid "Payment"
+#. msgstr "Gesamtzahlung"
 #: systori/templates/project/project_detail.html:294
 #: systori/templates/project/project_detail.html:386
 msgid "Applied"
-msgstr "Anteil"
+msgstr "anteilig"
 
 #: systori/templates/project/project_detail.html:327
 msgid "Add Payment"
@@ -2073,7 +2020,7 @@ msgstr "Zahlung hinzufügen"
 
 #: systori/templates/project/project_detail.html:341
 msgid "Adjustments"
-msgstr "Korrektur"
+msgstr "Korrekturen"
 
 #: systori/templates/project/project_detail.html:365
 msgid "Add Adjustment"
@@ -2081,13 +2028,11 @@ msgstr "Korrektur hinzufügen"
 
 #: systori/templates/project/project_detail.html:385
 #, fuzzy
-#| msgid "Refund"
 msgid "Refunded"
 msgstr "Gutschrift"
 
 #: systori/templates/project/project_detail.html:387
 #, fuzzy
-#| msgid "Customer"
 msgid "Issued to Customer"
 msgstr "Kunde"
 
@@ -2121,7 +2066,7 @@ msgstr "Speichern &uarr; Liste"
 
 #: systori/templates/project/project_list.html:10
 msgid "Project Filter"
-msgstr "Projektbezeichnung"
+msgstr "Projektfilter"
 
 #: systori/templates/project/project_list.html:26
 msgid "New Project"
@@ -2140,7 +2085,6 @@ msgid "Finished"
 msgstr "beendet"
 
 #: systori/templates/project/project_list.html:147
-#, python-format
 msgid "Show %(phase)s Projects"
 msgstr "Zeige %(phase)s Projekte"
 
@@ -2157,7 +2101,7 @@ msgstr "angeboten"
 #: systori/templates/project/project_progress.html:14
 #: systori/templates/project/project_progress.html:33
 msgid "billable"
-msgstr "Abrechenbar"
+msgstr "abrechenbar"
 
 #: systori/templates/project/project_progress.html:18
 #: systori/templates/project/project_progress.html:37
@@ -2289,7 +2233,7 @@ msgstr "neues Kalkulationselement"
 
 #: systori/templates/task/task_editor.html:19
 msgid "alt"
-msgstr ""
+msgstr "alt"
 
 #: systori/templates/task/task_editor.html:19
 msgid "new Alternative Task"
@@ -2319,7 +2263,7 @@ msgstr "neues Kalkulationselement"
 
 #: systori/templates/user/login.html:62
 msgid "Your username and password didn't match. Please try again."
-msgstr "Die eingegebenen Daten sind nicht richtig."
+msgstr "Die eingegebenen Daten funktionieren nicht, bitte versuchen Sie es noch einmal."
 
 #: systori/templates/user/login.html:70
 msgid "Sign in"
@@ -2353,118 +2297,3 @@ msgstr "Administration"
 msgid "Generate Password"
 msgstr "Passwort generieren"
 
-#~ msgid "balance"
-#~ msgstr "Saldo"
-
-#~ msgid "Partial Invoice"
-#~ msgstr "Abschlagsrechnung"
-
-#~ msgid "Final Invoice"
-#~ msgstr "Schlussrechnung"
-
-#~ msgid "Please Pay"
-#~ msgstr "Zahlbetrag"
-
-#~ msgid "{invoice} from {date}"
-#~ msgstr "{invoice} vom {date}"
-
-#~ msgid "Flat"
-#~ msgstr "pauschal"
-
-#~| msgid "Partial Invoice"
-#~ msgid "Updated Invoice"
-#~ msgstr "Abschlagsrechnung"
-
-#~| msgid "Final Invoice"
-#~ msgid "Original Invoice"
-#~ msgstr "Schlussrechnung"
-
-#~ msgid "Apply Adjustment?"
-#~ msgstr "Kürzung anwenden?"
-
-#~ msgid "Tax Rate"
-#~ msgstr "Steuersatz"
-
-#~ msgid "Document"
-#~ msgstr "Dokument"
-
-#~ msgid "Updated"
-#~ msgstr "Aktualisiert"
-
-#~ msgid "less than a minute ago"
-#~ msgstr "vor weniger als einer Minute"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "prefix-ago"
-#~ msgstr "vor"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "prefix-from-now"
-#~ msgstr "in"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "ago"
-#~ msgstr "null"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "any moment now"
-#~ msgstr "gerade jetzt"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "less than a minute"
-#~ msgstr "weniger als einer Minute"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "about a minute"
-#~ msgstr "ungefähr eine Minute"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "{} minutes"
-#~ msgstr "{} Minuten"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "about an hour"
-#~ msgstr "ungefähr eine Stunde"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "about {} hours"
-#~ msgstr "ungefähr {} Stunden"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "a day"
-#~ msgstr "ein Tag"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "{} days"
-#~ msgstr "{} Tage"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "about a month"
-#~ msgstr "ungefähr ein Monat"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "{} months"
-#~ msgstr "{} Monate"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "about a year"
-#~ msgstr "ungefähr ein Jahr"
-
-#~ msgctxt "jquery.timeago"
-#~ msgid "{} years"
-#~ msgstr "{} Jahre"
-
-#~ msgid "Billable Amount"
-#~ msgstr "Abrechenbare Menge"
-
-#~ msgid "Total Credit"
-#~ msgstr "Summe"
-
-#~ msgid "Is Payment?"
-#~ msgstr "Ist Zahlung?"
-
-#~ msgid "Is Discount?"
-#~ msgstr "Wurde Skonto gezogen?"
-
-#~ msgid "UP"
-#~ msgstr "EP"
