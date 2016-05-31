@@ -1,4 +1,4 @@
-{% extends "project.html" %}
+{% extends "frame.html" %}
 {% load i18n static bootstrap timetracking %}
 
 {% block head %}
@@ -49,7 +49,7 @@
 {{ form.media.js }}
 {% endblock head %}
 
-{% block sidebar %}{% include "project/sidebar.html" with section='timetracking' %}{% endblock %}
+{% block sidebar %}{% include "main/sidebar.html" with section='timetracking' %}{% endblock %}
 
 {% block content %}
 <div class="panel panel-default">
