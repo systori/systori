@@ -43,8 +43,18 @@ Now change into the directory where you'd like to install systori and run the fo
 $ git clone git@github.com:systori/systori.git
 $ cd systori/
 $ mkvirtualenv -a `pwd` -p /usr/bin/python3 systori
+```
+Set ssh to point to github with every subdomain
+```
+vi /etc/ssh/ssh_config
+-> add the following:
+Host *github.com
+ HostName github.com
+```
+Install requirements and init settings
+```
 $ pip install -r requirements/dev.pip
-$ fab init_settings
+$ fab initsettings
 ```
 
 Now run some tests to make sure everything is working:
