@@ -52,12 +52,16 @@ def makemessages():
 
 def fetchdb(envname='production'):
     ":envname=production -- fetch remote database, see getdb"
+    container = 'systori_db_1'
     dbname = 'systori_'+envname
     dump_file = 'systori.'+envname+'.dump'
+    dump_folder = '/var/lib/postgresql/dumps'
+    dump_path = os.path.join(dump_folder, dump_file)
     # -Fc : custom postgresql compressed format
-    sudo('pg_dump -Fc -x -f /tmp/%s %s' % (dump_file, dbname), user='www-data')
-    get('/tmp/' + dump_file, dump_file)
-    sudo('rm /tmp/' + dump_file)
+    run('docker exec {container} pg_dump -U postgres -Fc -x -f {dump_path} {dbname}'
+        .format(**locals()))
+    get(dump_path, dump_file)
+    sudo('rm {}'.format(dump_path))
 
 
 def getdb(envname='production'):
