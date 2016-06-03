@@ -83,8 +83,10 @@
 {% endblock %}
 
 {% block extra_js %}
-  <script type="application/dart" src="{% static "dart/payment_editor.dart" %}"></script>
-  <script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
-  <script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
-  <script src="{% static "dart/packages/browser/dart.js" %}"></script>
+  {% if request.is_dartium %}
+    <script type="application/dart" src="{% static "dart/payment_editor.dart" %}"></script>
+  {% else %}
+    <script src="{% static "build/payment_editor.dart.js" %}"></script>
+  {% endif %}
+  <script src="{% static "dart/packages/web_components/webcomponents-lite.min.js" %}"></script>
 {% endblock extra_js %}

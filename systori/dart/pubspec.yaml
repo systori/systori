@@ -5,7 +5,6 @@ description: >
 dependencies:
   intl: any
   collection: any
-  browser: any
   web_components: any
 dev_dependencies:
   test: any

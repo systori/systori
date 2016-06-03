@@ -60,8 +60,10 @@
 {% endblock %}
 
 {% block extra_js %}
-  <script type="application/dart" src="{% static "dart/timetracking.dart" %}"></script>
-  <script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
-  <script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
-  <script src="{% static "dart/packages/browser/dart.js" %}"></script>
+  {% if request.is_dartium %}
+    <script type="application/dart" src="{% static "dart/timetracking.dart" %}"></script>
+  {% else %}
+    <script src="{% static "build/timetracking.dart.js" %}"></script>
+  {% endif %}
+  <script src="{% static "dart/packages/web_components/webcomponents-lite.min.js" %}"></script>
 {% endblock extra_js %}

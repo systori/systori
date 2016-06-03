@@ -79,6 +79,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'systori.middleware.mobile.UbrMobileDetectionMiddleware',
+    'systori.middleware.dartium.DartiumCheckMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'systori.apps.user.middleware.SetLanguageMiddleware',
     'django_mobile.middleware.SetFlavourMiddleware',
@@ -177,6 +178,7 @@ STATICFILES_DIRS = (
     ('css', 'systori/static/css'),
     ('img', 'systori/static/img'),
     ('fonts', 'systori/static/fonts'),
+    ('build', 'systori/dart/build/web'),
 )
 
 STATICFILES_FINDERS = (
