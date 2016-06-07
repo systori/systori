@@ -1,3 +1,4 @@
+-r app.pip
 coverage
 selenium
 factory-boy==2.6.1
