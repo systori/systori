@@ -43,7 +43,7 @@ def collate_tasks(proposal, font, available_width):
     totals.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
     totals.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
 
-    description_width = sum(items.get_widths()[1:6])
+    description_width = 314.0
 
     for job in proposal['jobs']:
 
