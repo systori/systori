@@ -64,23 +64,28 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False, debug=False)
                 # we'll add them into the income account a little bit later
                 account_balance = job.account.balance
 
-                # TODO: Need to look at net and tax separately instead of just the gross, it's possible
-                #       for net and tax to be above or below 0 independently from each other
-                if account_balance.gross > 0:
+                if account_balance.net > 0:
                     # reset balance, by paying it in full
                     transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, account_balance.net, job=job, value_type=Entry.NET)
-                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, account_balance.tax, job=job, value_type=Entry.TAX)
                     transaction.credit(job.account, account_balance.net, entry_type=Entry.ADJUSTMENT, job=job, value_type=Entry.NET)
-                    transaction.credit(job.account, account_balance.tax, entry_type=Entry.ADJUSTMENT, job=job, value_type=Entry.TAX)
-
-                elif account_balance.gross < 0:
+                elif account_balance.net < 0:
                     # we can work with a negative balance but only if there is a current debit pending
                     # that will get the account back to zero or positive (since we can't have a negative invoice)
-                    assert debit_amount.gross + account_balance.gross >= 0
+                    assert debit_amount.net + account_balance.net >= 0
                     # reset balance, by refunding it in full
                     transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, account_balance.negate.net, job=job, value_type=Entry.NET)
-                    transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, account_balance.negate.tax, job=job, value_type=Entry.TAX)
                     transaction.debit(job.account, account_balance.negate.net, entry_type=Entry.ADJUSTMENT, job=job, value_type=Entry.NET)
+
+                if account_balance.tax > 0:
+                    # reset balance, by paying it in full
+                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, account_balance.tax, job=job, value_type=Entry.TAX)
+                    transaction.credit(job.account, account_balance.tax, entry_type=Entry.ADJUSTMENT, job=job, value_type=Entry.TAX)
+                elif account_balance.tax < 0:
+                    # we can work with a negative balance but only if there is a current debit pending
+                    # that will get the account back to zero or positive (since we can't have a negative invoice)
+                    assert debit_amount.tax + account_balance.tax >= 0
+                    # reset balance, by refunding it in full
+                    transaction.credit(SKR03_PROMISED_PAYMENTS_CODE, account_balance.negate.tax, job=job, value_type=Entry.TAX)
                     transaction.debit(job.account, account_balance.negate.tax, entry_type=Entry.ADJUSTMENT, job=job, value_type=Entry.TAX)
 
                 # update the new debit increasing or decreasing it depending on the balance
@@ -90,21 +95,22 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False, debug=False)
                 job.is_revenue_recognized = True
                 job.save()
 
-            if debit_amount.gross > 0:
-
-                # debit the customer account (asset), this increases their balance
-                # (+) "good thing", customer owes us more money
+            # debit the customer account (asset), this increases their balance
+            # (+) "good thing", customer owes us more money
+            if debit_amount.net > 0:
                 transaction.debit(job.account, debit_amount.net, entry_type=entry_type, job=job, value_type=Entry.NET)
+            if debit_amount.tax > 0:
                 transaction.debit(job.account, debit_amount.tax, entry_type=entry_type, job=job, value_type=Entry.TAX)
 
-                # credit the tax payments account (liability), increasing the liability
-                # (+) "bad thing", will have to be paid in taxes eventually
-                if debit_amount.tax > 0:  # when the refund is very small (like 0.01) there is no tax
-                    transaction.credit(SKR03_TAX_PAYMENTS_CODE, debit_amount.tax, job=job, value_type=Entry.TAX)
-
-                # credit the income account (income), this increases the balance
-                # (+) "good thing", income is good
+            # credit the income account (income), this increases the balance
+            # (+) "good thing", income is good
+            if debit_amount.net > 0:
                 transaction.credit(SKR03_INCOME_CODE, debit_amount.net, job=job, value_type=Entry.NET)
+
+            # credit the tax payments account (liability), increasing the liability
+            # (+) "bad thing", will have to be paid in taxes eventually
+            if debit_amount.tax > 0:  # when the refund is very small (like 0.01) there is no tax
+                transaction.credit(SKR03_TAX_PAYMENTS_CODE, debit_amount.tax, job=job, value_type=Entry.TAX)
 
         else:
             # Still not recognizing revenue, tracking debits in a promised payments account instead..
@@ -152,7 +158,8 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None, debug=False):
 
             # credit the customer account (asset), decreasing their balance
             # (-) "bad thing", customer owes us less money
-            transaction.credit(job.account, amount.net, entry_type=Entry.PAYMENT, job=job, value_type=Entry.NET)
+            if amount.net > 0:
+                transaction.credit(job.account, amount.net, entry_type=Entry.PAYMENT, job=job, value_type=Entry.NET)
             if amount.tax > 0:
                 transaction.credit(job.account, amount.tax, entry_type=Entry.PAYMENT, job=job, value_type=Entry.TAX)
 
@@ -160,13 +167,15 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None, debug=False):
 
                 # debit the promised payments account (liability), decreasing the liability
                 # (-) "good thing", customer paying debt reduces liability
-                transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, amount.net, job=job, value_type=Entry.NET)
+                if amount.net > 0:
+                    transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, amount.net, job=job, value_type=Entry.NET)
                 if amount.tax > 0:
                     transaction.debit(SKR03_PROMISED_PAYMENTS_CODE, amount.tax, job=job, value_type=Entry.TAX)
 
                 # credit the partial payments account (liability), increasing the liability
                 # (+) "bad thing", we are on the hook to finish and deliver the service or product
-                transaction.credit(SKR03_PARTIAL_PAYMENTS_CODE, amount.net, job=job, value_type=Entry.NET)
+                if amount.net > 0:
+                    transaction.credit(SKR03_PARTIAL_PAYMENTS_CODE, amount.net, job=job, value_type=Entry.NET)
 
                 # credit the tax payments account (liability), increasing the liability
                 # (+) "bad thing", tax have to be paid eventually

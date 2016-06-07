@@ -22,18 +22,6 @@ def A(g=None, n=None, t=None):
     return Amount.zero()
 
 
-class AccountingTestCase(TestCase):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.addTypeEqualityFunc(Amount, 'assertAmountEqual')
-
-    def assertAmountEqual(self, expected, actual, msg):
-        self.assertEqual(expected.gross, actual.gross, 'gross')
-        self.assertEqual(expected.net, actual.net, 'net')
-        self.assertEqual(expected.tax, actual.tax, 'tax')
-
-
 def create_data(self):
     create_task_data(self)
     create_chart_of_accounts(self)
@@ -43,25 +31,16 @@ def create_data(self):
     self.job2.save()
 
 
-class TestDeletingThings(AccountingTestCase):
-    def setUp(self):
-        create_data(self)
-        credit_jobs([(self.job, A(100), A(), A())], D(100))
+class AccountingTestCase(TestCase):
 
-    def test_that_all_entries_are_also_deleted(self):
-        self.assertEquals(A(100).negate, self.job.account.balance)
-        Transaction.objects.first().delete()
-        self.assertEquals(A(), self.job.account.balance)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.addTypeEqualityFunc(Amount, 'assertAmountEqual')
 
-    def test_delete_account_when_job_is_deleted(self):
-        account_id = self.job.account.id
-        self.assertTrue(Account.objects.filter(id=account_id).exists())
-        self.job.delete()
-        self.assertFalse(Account.objects.filter(id=account_id).exists())
-
-
-class TestCompletedContractAccountingMethod(AccountingTestCase):
-    """ http://accountingexplained.com/financial/revenue/completed-contract-method """
+    def assertAmountEqual(self, expected, actual, msg):
+        self.assertEqual(expected.net, actual.net, 'net')
+        self.assertEqual(expected.tax, actual.tax, 'tax')
+        self.assertEqual(expected.gross, actual.gross, 'gross')
 
     def setUp(self):
         create_data(self)
@@ -108,6 +87,27 @@ class TestCompletedContractAccountingMethod(AccountingTestCase):
 
         if switch_to_job:
             self.job = original_job
+
+
+class TestDeletingThings(AccountingTestCase):
+    def setUp(self):
+        super().setUp()
+        credit_jobs([(self.job, A(100), A(), A())], D(100))
+
+    def test_that_all_entries_are_also_deleted(self):
+        self.assertEquals(A(100).negate, self.job.account.balance)
+        Transaction.objects.first().delete()
+        self.assertEquals(A(), self.job.account.balance)
+
+    def test_delete_account_when_job_is_deleted(self):
+        account_id = self.job.account.id
+        self.assertTrue(Account.objects.filter(id=account_id).exists())
+        self.job.delete()
+        self.assertFalse(Account.objects.filter(id=account_id).exists())
+
+
+class TestCompletedContractAccountingMethod(AccountingTestCase):
+    """ http://accountingexplained.com/financial/revenue/completed-contract-method """
 
     # Before Revenue Recognition
 
@@ -490,6 +490,62 @@ class TestCompletedContractAccountingMethod(AccountingTestCase):
                              credited=A(-20),  # payment credit (-20) + adjustment (0) = total credited (-20)
                              income=A(600).net_amount, tax=A(600).tax_amount,
                              switch_to_job=self.job2)
+
+
+class TestRevenueRecognitionEdgeCases(AccountingTestCase):
+    """ The revenue recognition algorithm needs to handle situations
+        where the net/tax on the balance are actually different signs or zero/non-zero,
+        we test four cases:
+         Case 1. net:  0.00, tax:  0.01
+         Case 2. net:  0.01, tax:  0.00
+         Case 3. net: -0.01, tax:  0.01 (requires additional debit: net: 0.01, tax: 0.00)
+         Case 4. net:  0.01, tax: -0.01 (requires additional debit: net: 0.00, tax: 0.01)
+    """
+
+    def test_case1(self):
+        self.caseA_test(A(n='0.00', t='0.01'))
+
+    def test_case2(self):
+        self.caseA_test(A(n='0.01', t='0.00'))
+
+    def caseA_test(self, case):
+        """ Covers the case where either net or tax are zero but the other part is greater than zero.
+        """
+        debit_jobs([(self.job, case, Entry.FLAT_DEBIT)])
+        self.assert_balances(balance=case, invoiced=case, promised=case)
+        debit_jobs([(self.job, A(0), Entry.FLAT_DEBIT)], recognize_revenue=True)
+        self.assert_balances(balance=case, invoiced=case,
+                             credited=case.negate,  # the recognized revenue debit first clears the oustanding balance
+                             debited=case+case,  # the recognized revenue debit then re-debits the outstanding balance
+                             paid=A(0),  # there is income due to revenue recognition, but nothing actually paid yet
+                             income=case.net_amount,
+                             tax=case.tax_amount)
+
+    def test_case3(self):
+        self.caseB_test(A(n='0.01'), A(t='0.01'))
+
+    def test_case4(self):
+        self.caseB_test(A(t='0.01'), A(n='0.01'))
+
+    def caseB_test(self, payment, debit):
+        """ Covers the case where one part is negative and the other is positive.
+            Because it's not actually possible to end up with a negative net or tax on
+            on the invoice (don't want negative invoice) we have to zero-out the negative
+            part in the final debit.
+        """
+        credit_jobs([(self.job, payment, A(0), A(0))], payment.gross)  # this creates the 'negative' part of balance
+        debit_jobs([(self.job, debit, Entry.FLAT_DEBIT)])  # this creates the 'positive' part of balance
+        case = payment.negate+debit  # this is either net:-0.01,tax:0.01 or net:0.01,tax:-0.01
+        self.assert_balances(bank=A(payment.gross, 0, 0), balance=case, invoiced=debit, promised=case,
+                             partial=payment.net_amount, tax=payment.tax_amount, paid=payment.negate)
+        zero_out_payment = A(n=payment.net, t=payment.tax)  # we can't create final invoice with negative net/tax
+        debit_jobs([(self.job, zero_out_payment, Entry.FLAT_DEBIT)], recognize_revenue=True)
+        self.assert_balances(bank=A(payment.gross, 0, 0), balance=debit, invoiced=payment+debit,
+                             credited=A(n='0.01', t='0.01').negate,  # the recognized revenue debit first clears the oustanding balance
+                             debited=debit+debit+zero_out_payment,  # the recognized revenue debit then re-debits the outstanding balance
+                             paid=payment.negate,
+                             income=A(n='0.01'),
+                             tax=A(t='0.01'))
 
 
 def promised_payments():
