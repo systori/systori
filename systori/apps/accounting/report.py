@@ -103,7 +103,7 @@ def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
                 report['invoiced'] += entry.amount
                 if txn.id == invoice_txn.id:
                     report['debit'] += entry.amount
-                assert job_debit['entry_type'] in (None, entry.entry_type)
+                assert job_debit['entry_type'] in (None, entry.entry_type, entry.ADJUSTMENT)
                 job_debit['entry_type'] = entry.entry_type
                 job_debit['amount'] += entry.amount
 
