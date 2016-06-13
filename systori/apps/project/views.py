@@ -78,13 +78,14 @@ class ProjectList(FormMixin, ListView):
                                   Q(contacts__address__icontains=term) | \
                                   Q(contacts__notes__icontains=term) | \
                                   Q(project_contacts__association__icontains=term)
-                                  #Q(project_contacts__notes__icontains=term)
+                documents_query = Q(invoices__invoice_no__icontains=term)
                 searchable_paths[term] = Q()
 
                 if not search_option:
                     searchable_paths[term] |= project_query
                     searchable_paths[term] |= jobs_query
                     searchable_paths[term] |= contacts_query
+                    searchable_paths[term] |= documents_query
 
                 if 'contacts' in search_option:
                     searchable_paths[term] |= contacts_query
