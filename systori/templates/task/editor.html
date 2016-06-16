@@ -455,10 +455,11 @@
 {% endblock content %}
 
 {% block extra_js %}
-{% if request.is_dartium %}
-  <script type="application/dart" src="{% static "dart/task_editor.dart" %}"></script>
-{% else %}
-  <script src="{% static "build/task_editor.dart.js" %}"></script>
-{% endif %}
-  <script src="{% static "dart/packages/web_components/webcomponents-lite.min.js" %}"></script>
+  {% if request.is_dartium %}
+    <script type="application/dart" src="{% static "dart/task_editor.dart" %}"></script>
+    <script src="{% static "dart/packages/web_components/webcomponents-lite.min.js" %}"></script>
+  {% else %}
+    <script src="{% static "build/task_editor.dart.js" %}"></script>
+    <script src="{% static "build/packages/web_components/webcomponents-lite.min.js" %}"></script>
+  {% endif %}
 {% endblock extra_js %}
