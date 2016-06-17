@@ -2,7 +2,7 @@ import 'dart:html';
 import 'dart:async';
 import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'package:collection/equality.dart';
+import 'package:collection/collection.dart';
 import 'common.dart';
 
 
