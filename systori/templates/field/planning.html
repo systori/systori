@@ -2,10 +2,14 @@
 {% load i18n staticfiles field_app %}
 
 {% block container %}
+
   <style>
     .date-header {
       text-align: center;
       margin-top: -3px;
+    }
+    daily-plan {
+      display: block;
     }
     .panel-heading {
       position: relative;
@@ -27,7 +31,9 @@
       border-top: 2px black solid;
     }
   </style>
+
   <div class="container">
+
     <div class="row">
       <div class="col-xs-12">
         <div class="field-nav">
@@ -85,6 +91,7 @@
 
       {% endfor %}
     </div>
+
   </div>
 
   <field-clipboard style="display: none">
@@ -97,6 +104,7 @@
 {% endblock %}
 
 {% block extra_js %}
+  {% csrf_token %}
   {% if request.is_dartium %}
     <script type="application/dart" src="{% static "dart/field_planning.dart" %}"></script>
   {% else %}

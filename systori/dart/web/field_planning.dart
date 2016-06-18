@@ -64,8 +64,13 @@ class FieldClipboard extends HtmlElement {
     }
 
     pasteTo(DailyPlan dp) {
+        var dailyplans = [dp];
+        [workers, equipment].forEach((list) => list.forEach((FieldItem i) {
+            !dailyplans.contains(i.plan) && dailyplans.add(i.plan);
+        }));
         workers.forEach((w) => dp.addWorker(w));
         equipment.forEach((e) => dp.addEquipment(e));
+        dailyplans.forEach((DailyPlan dp) => dp.updateEmptyMessage());
         cancel();
     }
 
@@ -76,23 +81,42 @@ class DailyPlan extends HtmlElement {
 
     ButtonElement paste_button;
     SpanElement workers_header;
+    DivElement workers_empty;
     SpanElement equipment_header;
+    DivElement equipment_empty;
 
     DailyPlan.created() : super.created(); attached() {
-        paste_button = this.querySelector(":scope .paste-button");
+        paste_button = this.querySelector(".paste-button");
         paste_button.onClick.listen(doPaste);
-        workers_header = this.querySelector(":scope .workers-header");
-        equipment_header = this.querySelector(":scope .equipment-header");
+        workers_header = this.querySelector(".workers-header");
+        workers_empty = this.querySelector(".workers-empty");
+        equipment_header = this.querySelector(".equipment-header");
+        equipment_empty = this.querySelector(".equipment-empty");
     }
 
     doPaste(_) =>
         clipboard.pasteTo(this);
 
-    addWorker(FieldWorker fw) =>
+    addWorker(FieldWorker fw) {
         workers_header.insertAdjacentElement('afterend', fw);
+    }
 
-    addEquipment(FieldEquipment fe) =>
+    addEquipment(FieldEquipment fe) {
         equipment_header.insertAdjacentElement('afterend', fe);
+    }
+
+    updateEmptyMessage() {
+        if (this.querySelector('field-worker') == null) {
+            workers_empty.style.display = 'block';
+        } else {
+            workers_empty.style.display = 'none';
+        }
+        if (this.querySelector('field-equipment') == null) {
+            equipment_empty.style.display = 'block';
+        } else {
+            equipment_empty.style.display = 'none';
+        }
+    }
 
 }
 
@@ -103,9 +127,11 @@ class FieldItem extends HtmlElement {
     StreamSubscription<Event> copy_event;
 
     String name;
+    DailyPlan plan;
 
     FieldItem.created() : super.created(); attached() {
         name = this.querySelector('.name').text;
+        plan = this.parent.parent;
         copy_button = this.querySelector(":scope .copy-button");
         copy_event = copy_button.onClick.listen(toggleCopy);
     }

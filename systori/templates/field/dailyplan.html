@@ -98,7 +98,7 @@
 
     {% endfor %}
 
-    <div {% if dailyplan.workers.all %}style="display: none;"{% endif %} class="list-group-item workers-header-empty">
+    <div {% if dailyplan.workers.all %}style="display: none;"{% endif %} class="list-group-item workers-empty">
       {% trans "No workers have been assigned." %}
     </div>
 
@@ -146,18 +146,18 @@
 
   {% endfor %}
 
-  <div {% if dailyplan.equipment.all %}style="display: none;"{% endif %} class="list-group-item equipment-header-empty">
-    {% trans "No equipment have been assigned." %}
+  <div {% if dailyplan.equipment.all %}style="display: none;"{% endif %} class="list-group-item equipment-empty">
+    {% trans "No equipment has been assigned." %}
   </div>
 
   {% if 'planning' not in request.path or request.session.is_planning_tasks %}
 
-    {% if access.has_laborer %}
-      <a class="list-group-item sub-header clearfix"
-         href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
-    {% else %}
-      <div class="list-group-item sub-header">
-    {% endif %}
+  {% if access.has_laborer %}
+    <a class="list-group-item sub-header clearfix"
+       href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+  {% else %}
+    <div class="list-group-item sub-header">
+  {% endif %}
 
   {% trans "Tasks" %}
 
@@ -189,9 +189,7 @@
 
   {% endif %}
 
-  </daily-plan>
-
-
+  </div>
 
   {% if 'planning' not in request.path or request.session.is_planning_notes %}
     {% if access.has_laborer or dailyplan.notes %}
@@ -241,6 +239,7 @@
 
   {% endif %}
 
-  </div>
+  </daily-plan>
+
 
 {% endwith %}
