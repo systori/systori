@@ -2,22 +2,40 @@
 
 {% with jobsite=dailyplan.jobsite %}
 
-  <div class="panel panel-primary">
+  <daily-plan class="panel panel-primary">
 
-    <div class="panel-heading">
+    <div class="panel-heading dailyplan-heading">
       <a name="plan-{{  dailyplan.id }}"></a>
-      <div class="pull-right dailyplan-number"># {{ dailyplan.id }}</div>
+      {% if access.has_staff %}
+      <div class="pull-right">
+        <a class="btn btn-default btn-sm" style="margin-right: 20px;"
+          href="{% url 'field.dailyplan.assign-labor' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+          <span class="glyphicon glyphicon-user"></span>
+        </a>
+        <a class="btn btn-default btn-sm" style="margin-right: 20px;"
+          href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+          <span class="glyphicon glyphicon-road"></span>
+        </a>
+        <button class="btn btn-default btn-sm paste-button">
+          <span class="glyphicon glyphicon-paste"></span>
+        </button>
+      </div>
+      {% endif %}
       {{ jobsite.name }}<br/>
       {{ jobsite.address }} {{ jobsite.city }}
     </div>
 
     <div class="list-group">
 
+      {% comment %}placeholder so Dart knows where to add workers{% endcomment %}
+      <span class="workers-header"></span>
+
+    {% comment %}
       {% if access.has_staff %}
-        <a class="list-group-item sub-header clearfix"
+        <a class="list-group-item sub-header clearfix workers-header"
            href="{% url 'field.dailyplan.assign-labor' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
       {% else %}
-        <div class="list-group-item sub-header">
+        <div class="list-group-item sub-header workers-header">
       {% endif %}
 
       {% trans "Workers" %}
@@ -27,12 +45,28 @@
       {% else %}
         </div>
       {% endif %}
+    {% endcomment %}
 
     {% for worker in dailyplan.workers.all %}
 
-      <div class="list-group-item nav nav-pills">
-        {{ worker.access.user.get_full_name }}
+      <field-worker class="list-group-item nav nav-pills" data-member-id="{{ worker.id }}">
 
+        <span class="name">{{ worker.access.user.get_full_name }}</span>
+
+        {% if access.has_staff %}
+        <span class="pull-right">
+          {% comment %}
+          <button class="btn btn-default btn-sm remove-button" style="margin-right: 20px;">
+            <span class="glyphicon glyphicon-remove" style="color:#B4004F;"></span>
+          </button>
+          {% endcomment %}
+          <button class="btn btn-default btn-sm copy-button">
+            <span class="glyphicon glyphicon-copy"></span>
+          </button>
+        </span>
+        {% endif %}
+
+      {% comment %}
         {% if access.has_staff %}
           <span class="pull-right">
           <div class="btn-group" role="group">
@@ -58,24 +92,26 @@
         {% else %}
           </span>
         {% endif %}
+      {% endcomment %}
 
-      </div>
-
-    {% empty %}
-
-      <div class="list-group-item">
-        {% trans "No workers have been assigned." %}
-      </div>
+      </field-worker>
 
     {% endfor %}
 
+    <div {% if dailyplan.workers.all %}style="display: none;"{% endif %} class="list-group-item workers-empty">
+      {% trans "No workers have been assigned." %}
+    </div>
 
 
+    {% comment %}placeholder so Dart knows where to add equipment{% endcomment %}
+    <span class="equipment-header"></span>
+
+    {% comment %}
     {% if access.has_laborer %}
-      <a class="list-group-item sub-header clearfix"
+      <a class="list-group-item sub-header clearfix equipment-header"
          href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
     {% else %}
-      <div class="list-group-item sub-header">
+      <div class="list-group-item sub-header equipment-header">
     {% endif %}
 
     {% trans "Equipment" %}
@@ -85,29 +121,43 @@
     {% else %}
       </div>
     {% endif %}
+    {% endcomment %}
 
   {% for equipment in dailyplan.equipment.all %}
 
-    <div class="list-group-item nav nav-pills">
-      {{ equipment }}
-    </div>
+    <field-equipment class="list-group-item nav nav-pills" data-equipment-id="{{ equipment.id }}">
 
-  {% empty %}
+      <span class="name">{{ equipment }}</span>
 
-    <div class="list-group-item">
-      {% trans "No equipment has been assigned." %}
-    </div>
+      {% if access.has_staff %}
+        <span class="pull-right">
+          {% comment %}
+          <span class="btn btn-default btn-sm remove-button" style="margin-right: 20px;">
+            <span class="glyphicon glyphicon-remove" style="color:#B4004F;"></span>
+          </span>
+          {% endcomment %}
+          <span class="btn btn-default btn-sm copy-button">
+            <span class="glyphicon glyphicon-copy"></span>
+          </span>
+        </span>
+      {% endif %}
+
+    </field-equipment>
 
   {% endfor %}
 
+  <div {% if dailyplan.equipment.all %}style="display: none;"{% endif %} class="list-group-item equipment-empty">
+    {% trans "No equipment has been assigned." %}
+  </div>
+
   {% if 'planning' not in request.path or request.session.is_planning_tasks %}
 
-    {% if access.has_laborer %}
-      <a class="list-group-item sub-header clearfix"
-         href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
-    {% else %}
-      <div class="list-group-item sub-header">
-    {% endif %}
+  {% if access.has_laborer %}
+    <a class="list-group-item sub-header clearfix"
+       href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+  {% else %}
+    <div class="list-group-item sub-header">
+  {% endif %}
 
   {% trans "Tasks" %}
 
@@ -140,8 +190,6 @@
   {% endif %}
 
   </div>
-
-
 
   {% if 'planning' not in request.path or request.session.is_planning_notes %}
     {% if access.has_laborer or dailyplan.notes %}
@@ -191,6 +239,7 @@
 
   {% endif %}
 
-  </div>
+  </daily-plan>
+
 
 {% endwith %}

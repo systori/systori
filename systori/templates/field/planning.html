@@ -2,10 +2,14 @@
 {% load i18n staticfiles field_app %}
 
 {% block container %}
+
   <style>
     .date-header {
       text-align: center;
       margin-top: -3px;
+    }
+    daily-plan {
+      display: block;
     }
     .panel-heading {
       position: relative;
@@ -14,8 +18,22 @@
       position: absolute;
       top: -138px;
     }
+    .copied .worker-copy {
+      visibility: hidden;
+    }
+    field-clipboard {
+      background: beige;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 5px 5px;
+      border-top: 2px black solid;
+    }
   </style>
+
   <div class="container">
+
     <div class="row">
       <div class="col-xs-12">
         <div class="field-nav">
@@ -66,7 +84,6 @@
 
       {% empty %}
 
-
         {% if access.has_staff and selected_day >= today and latest_daily_plan.day < selected_day %}
           <a href="{% url 'field.planning.generate' selected_day %}" class="btn btn-primary">
             {% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
@@ -74,5 +91,23 @@
 
       {% endfor %}
     </div>
+
   </div>
+
+  <field-clipboard style="display: none">
+    <button class="btn btn-default btn-sm pull-right" id="cancel-clipboard">
+      <span class="glyphicon glyphicon-remove"></span>
+    </button>
+    <div id="clipboard"></div>
+  </field-clipboard>
+
 {% endblock %}
+
+{% block extra_js %}
+  {% csrf_token %}
+  {% if request.is_dartium %}
+    <script type="application/dart" src="{% static "dart/field_planning.dart" %}"></script>
+  {% else %}
+    <script src="{% static "build/field_planning.dart.js" %}"></script>
+  {% endif %}
+{% endblock extra_js %}
