@@ -17,8 +17,8 @@
 
       <ul class="list-group">
         {% for project in project_list %}
-          <a href="{% url 'field.project' project.id %}" class="list-group-item clearfix">{{ project.name }} <span
-              class="pull-right">&raquo;</span></a>
+          <a href="{% url 'field.project' project.id %}" class="list-group-item clearfix">
+            <div class="col-xs-2 col-sm-1">{{ project.id }}</div><div class="col-xs-10 col-sm-11">{{ project.name }}</div></a>
         {% endfor %}
       </ul>
 

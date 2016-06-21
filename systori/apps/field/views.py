@@ -131,7 +131,8 @@ class FieldProjectList(ListView):
     def get_queryset(self):
         return Project.objects \
             .without_template() \
-            .filter(phase__in=[Project.PLANNING, Project.EXECUTING])
+            .filter(phase__in=[Project.PLANNING, Project.EXECUTING]) \
+            .order_by('id')
 
 
 class FieldProjectView(DetailView):
