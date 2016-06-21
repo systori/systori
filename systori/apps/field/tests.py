@@ -8,6 +8,7 @@ from ..project.models import TeamMember, DailyPlan, JobSite, EquipmentAssignment
 from ..company.models import Access
 from ..equipment.models import Equipment
 from ..task.test_models import create_task_data
+from ..user.factories import *
 from .utils import find_next_workday
 
 
@@ -97,3 +98,70 @@ class TestCutPaste(SystoriTestCase):
         )
         self.assertEqual(0, dailyplan.assigned_equipment.count())
         self.assertEqual(1, dailyplan2.assigned_equipment.count())
+
+
+class TestAssignEquipment(SystoriTestCase):
+
+    def setUp(self):
+        create_task_data(self)
+        self.client.login(username=self.user.email, password='open sesame')
+        self.jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
+        self.dailyplan = DailyPlan.objects.create(jobsite=self.jobsite)
+        self.equipment = Equipment.objects.create(name='truck')
+        self.equipment2 = Equipment.objects.create(name='bulldozer')
+        self.url = reverse('field.dailyplan.assign-equipment', args=[self.jobsite.id, self.dailyplan.url_id])
+
+    def test_get_form(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('truck', response.content.decode('utf-8'))
+
+    def test_no_assignments_deletes_dailyplan(self):
+        self.assertTrue(DailyPlan.objects.filter(id=self.dailyplan.id).exists())
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)  # redirect
+        self.assertFalse(DailyPlan.objects.filter(id=self.dailyplan.id).exists())
+
+    def test_equipment_assignment(self):
+        self.assertEqual(0, self.dailyplan.assigned_equipment.count())
+        response = self.client.post(self.url, {'equipment_list': [self.equipment.id]})
+        self.assertEqual(response.status_code, 302)  # redirect
+        self.assertEqual(1, self.dailyplan.assigned_equipment.count())
+
+    def test_equipment_unassignment(self):
+        self.client.post(self.url, {'equipment_list': [self.equipment.id, self.equipment2.id]})
+        self.assertEqual(2, self.dailyplan.assigned_equipment.count())
+        response = self.client.post(self.url, {'equipment_list': [self.equipment.id]})
+        self.assertEqual(response.status_code, 302)  # redirect
+        self.assertEqual(1, self.dailyplan.assigned_equipment.count())
+
+
+class TestAssignWorkers(SystoriTestCase):
+
+    def setUp(self):
+        create_task_data(self)
+        self.client.login(username=self.user.email, password='open sesame')
+        self.jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
+        self.dailyplan = DailyPlan.objects.create(jobsite=self.jobsite)
+        self.access, _ = Access.objects.get_or_create(user=self.user, company=self.company)
+        self.user2 = UserFactory(company=self.company, password='open sesame')
+        self.access2, _ = Access.objects.get_or_create(user=self.user2, company=self.company)
+        self.url = reverse('field.dailyplan.assign-labor', args=[self.jobsite.id, self.dailyplan.url_id])
+
+    def test_get_form(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.user.get_full_name(), response.content.decode('utf-8'))
+
+    def test_labor_assignment(self):
+        self.assertEqual(0, self.dailyplan.workers.count())
+        response = self.client.post(self.url, {'workers': [self.access.id]})
+        self.assertEqual(response.status_code, 302)  # redirect
+        self.assertEqual(1, self.dailyplan.workers.count())
+
+    def test_labor_unassignment(self):
+        self.client.post(self.url, {'workers': [self.access.id, self.access2.id]})
+        self.assertEqual(2, self.dailyplan.workers.count())
+        response = self.client.post(self.url, {'workers': [self.access.id]})
+        self.assertEqual(response.status_code, 302)  # redirect
+        self.assertEqual(1, self.dailyplan.workers.count())

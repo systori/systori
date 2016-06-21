@@ -583,12 +583,18 @@ class FieldAssignEquipment(TemplateView):
         # Add new assignments
         for equipment in new_assignments:
             if equipment not in previous_assignments:
-                dailyplan.equipment.add(equipment)
+                EquipmentAssignment.objects.create(
+                    dailyplan=dailyplan,
+                    equipment_id=equipment
+                )
 
         # Remove unchecked assignments
         for equipment in previous_assignments:
             if equipment not in new_assignments:
-                dailyplan.equipment.remove(equipment)
+                EquipmentAssignment.objects.filter(
+                    dailyplan=dailyplan,
+                    equipment_id=equipment
+                ).delete()
 
         delete_when_empty(dailyplan)
 
