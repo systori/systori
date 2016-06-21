@@ -1,8 +1,9 @@
+import json
 from datetime import timedelta, date
 from calendar import LocaleHTMLCalendar, month_name
 from itertools import groupby
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q, Count, Prefetch
 from django.utils.http import urlquote
 from django.utils.formats import to_locale, get_language
@@ -11,7 +12,7 @@ from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
 
 from ..company.models import Access
-from ..project.models import Project, DailyPlan, JobSite, TeamMember
+from ..project.models import Project, DailyPlan, EquipmentAssignment, TeamMember
 from ..task.models import Job, Task, ProgressReport
 from ..equipment.models import Equipment
 from ..timetracking import utils as timetracking_utils
@@ -591,3 +592,16 @@ class FieldAssignEquipment(TemplateView):
         delete_when_empty(dailyplan)
 
         return HttpResponseRedirect(redirect)
+
+
+class FieldPaste(View):
+    def post(self, request, *args, **kwargs):
+        dailyplan = self.request.dailyplan
+        clipboard = json.loads(request.body.decode('utf-8'))
+        member_ids = clipboard.get('workers', [])
+        members = TeamMember.objects.filter(id__in=member_ids)
+        members.update(dailyplan=dailyplan)
+        equipment_ids = clipboard.get('equipment', [])
+        equipment = EquipmentAssignment.objects.filter(id__in=equipment_ids)
+        equipment.update(dailyplan=dailyplan)
+        return HttpResponse("OK")

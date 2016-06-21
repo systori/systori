@@ -283,7 +283,7 @@ class DailyPlan(models.Model):
     day = models.DateField(_("Day"), default=date.today)
     accesses = models.ManyToManyField('company.Access', through='TeamMember', related_name="dailyplans")
     tasks = models.ManyToManyField('task.Task', related_name="dailyplans")
-    equipment = models.ManyToManyField('equipment.Equipment', related_name="dailyplans")
+    equipment = models.ManyToManyField('equipment.Equipment', through='EquipmentAssignment', related_name="dailyplans")
 
     notes = models.TextField(blank=True)
 
@@ -314,3 +314,8 @@ class TeamMember(models.Model):
 
     class Meta:
         ordering = ['-is_foreman', 'access__user__first_name']
+
+
+class EquipmentAssignment(models.Model):
+    dailyplan = models.ForeignKey(DailyPlan, related_name="assigned_equipment")
+    equipment = models.ForeignKey('equipment.Equipment', related_name="assignments")

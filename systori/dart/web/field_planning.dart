@@ -1,5 +1,47 @@
 import 'dart:html';
 import 'dart:async';
+import 'dart:convert';
+
+
+final Repository repository = new Repository();
+
+
+class Repository {
+
+    Map<String, String> headers;
+
+    Repository() {
+        var csrftoken = (querySelector('input[name=csrfmiddlewaretoken]') as InputElement).value;
+        headers = {
+            "X-CSRFToken": csrftoken,
+            "Content-Type": "application/json"
+        };
+    }
+
+    Future<bool> paste(String url, List<int> workers, List<int> equipment) {
+        var wait_for_response = HttpRequest.request(
+                url,
+                method: "POST",
+                requestHeaders: headers,
+                sendData: JSON.encode({
+                    'workers': workers,
+                    'equipment': equipment
+                })
+        );
+
+        var result = new Completer<int>();
+        wait_for_response.then((response) {
+            if (response.status == 200) {
+                result.complete(true);
+            } else {
+                result.completeError("Wrong status returned from server.");
+            }
+        }, onError: result.completeError);
+        return result.future;
+    }
+
+}
+
 
 FieldClipboard clipboard;
 
@@ -64,6 +106,11 @@ class FieldClipboard extends HtmlElement {
     }
 
     pasteTo(DailyPlan dp) {
+        repository.paste(
+            dp.paste_url,
+            workers.map((w) => w.item_id).toList(),
+            equipment.map((e) => e.item_id).toList()
+        );
         var dailyplans = [dp];
         [workers, equipment].forEach((list) => list.forEach((FieldItem i) {
             !dailyplans.contains(i.plan) && dailyplans.add(i.plan);
@@ -85,7 +132,10 @@ class DailyPlan extends HtmlElement {
     SpanElement equipment_header;
     DivElement equipment_empty;
 
+    String paste_url;
+
     DailyPlan.created() : super.created(); attached() {
+        paste_url = this.dataset['paste-url'];
         paste_button = this.querySelector(".paste-button");
         paste_button.onClick.listen(doPaste);
         workers_header = this.querySelector(".workers-header");
@@ -122,6 +172,8 @@ class DailyPlan extends HtmlElement {
 
 
 class FieldItem extends HtmlElement {
+
+    int get item_id => int.parse(this.dataset['id']);
 
     ButtonElement copy_button;
     StreamSubscription<Event> copy_event;

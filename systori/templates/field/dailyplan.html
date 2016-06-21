@@ -2,7 +2,7 @@
 
 {% with jobsite=dailyplan.jobsite %}
 
-  <daily-plan class="panel panel-primary">
+  <daily-plan class="panel panel-primary" data-paste-url="{% url 'field.dailyplan.paste' jobsite.id dailyplan.url_id %}">
 
     <div class="panel-heading dailyplan-heading">
       <a name="plan-{{  dailyplan.id }}"></a>
@@ -49,7 +49,7 @@
 
     {% for worker in dailyplan.workers.all %}
 
-      <field-worker class="list-group-item nav nav-pills" data-member-id="{{ worker.id }}">
+      <field-worker class="list-group-item nav nav-pills" data-id="{{ worker.id }}">
 
         <span class="name">{{ worker.access.user.get_full_name }}</span>
 
@@ -123,11 +123,11 @@
     {% endif %}
     {% endcomment %}
 
-  {% for equipment in dailyplan.equipment.all %}
+  {% for assigned in dailyplan.assigned_equipment.all %}
 
-    <field-equipment class="list-group-item nav nav-pills" data-equipment-id="{{ equipment.id }}">
+    <field-equipment class="list-group-item nav nav-pills" data-id="{{ assigned.id }}">
 
-      <span class="name">{{ equipment }}</span>
+      <span class="name">{{ assigned.equipment }}</span>
 
       {% if access.has_staff %}
         <span class="pull-right">

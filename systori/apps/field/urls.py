@@ -4,6 +4,8 @@ from .views import *
 
 dailyplan_urls = [
 
+    url(r'^paste$', field_auth(FieldPaste.as_view()), name='field.dailyplan.paste'),
+
     # assign-labor
     url(r'^labor$', field_auth(FieldAssignLabor.as_view()), name='field.dailyplan.assign-labor'),
 
