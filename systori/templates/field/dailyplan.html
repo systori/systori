@@ -2,147 +2,67 @@
 
 {% with jobsite=dailyplan.jobsite %}
 
-  <daily-plan class="panel panel-primary" data-paste-url="{% url 'field.dailyplan.paste' jobsite.id dailyplan.url_id %}">
+<daily-plan class="panel panel-primary" data-paste-url="{% url 'field.dailyplan.paste' jobsite.id dailyplan.url_id %}">
 
-    <div class="panel-heading dailyplan-heading">
-      <a name="plan-{{  dailyplan.id }}"></a>
-      {% if access.has_staff %}
-      <div class="pull-right">
-        <a class="btn btn-default btn-sm" style="margin-right: 20px;"
-          href="{% url 'field.dailyplan.assign-labor' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
-          <span class="glyphicon glyphicon-user"></span>
-        </a>
-        <a class="btn btn-default btn-sm" style="margin-right: 20px;"
-          href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
-          <span class="glyphicon glyphicon-road"></span>
-        </a>
-        <button class="btn btn-default btn-sm paste-button">
-          <span class="glyphicon glyphicon-paste"></span>
-        </button>
-      </div>
-      {% endif %}
-      {{ jobsite.name }}<br/>
-      {{ jobsite.address }} {{ jobsite.city }}
+  <div class="panel-heading dailyplan-heading">
+    <a name="plan-{{  dailyplan.id }}"></a>
+    {% if access.has_foreman %}
+    <div class="pull-right">
+      <button class="btn btn-default btn-sm paste-button" style="display: none;">
+        <span class="glyphicon glyphicon-paste"></span>
+      </button>
     </div>
+    {% endif %}
+    {{ jobsite.name }}<br/>
+    {{ jobsite.address }} {{ jobsite.city }}
+  </div>
 
-    <div class="list-group">
+  <div class="list-group">
 
-      {% comment %}placeholder so Dart knows where to add workers{% endcomment %}
-      <span class="workers-header"></span>
+  {% if access.has_foreman %}
+    <a class="list-group-item sub-header clearfix workers-header"
+       href="{% url 'field.dailyplan.assign-labor' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+      {% trans "Workers" %}<span class="pull-right">{% trans 'edit' %} &raquo;</span>
+    </a>
+  {% else %}
+    <div class="list-group-item sub-header workers-header">{% trans "Workers" %}</div>
+  {% endif %}
 
-    {% comment %}
-      {% if access.has_staff %}
-        <a class="list-group-item sub-header clearfix workers-header"
-           href="{% url 'field.dailyplan.assign-labor' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
-      {% else %}
-        <div class="list-group-item sub-header workers-header">
-      {% endif %}
+  {% for worker in dailyplan.workers.all %}
 
-      {% trans "Workers" %}
-
-      {% if access.has_staff %}
-        <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
-      {% else %}
-        </div>
-      {% endif %}
-    {% endcomment %}
-
-    {% for worker in dailyplan.workers.all %}
-
-      <field-worker class="list-group-item nav nav-pills" data-id="{{ worker.id }}">
-
-        <span class="name">{{ worker.access.user.get_full_name }}</span>
-
-        {% if access.has_staff %}
-        <span class="pull-right">
-          {% comment %}
-          <button class="btn btn-default btn-sm remove-button" style="margin-right: 20px;">
-            <span class="glyphicon glyphicon-remove" style="color:#B4004F;"></span>
-          </button>
-          {% endcomment %}
-          <button class="btn btn-default btn-sm copy-button">
-            <span class="glyphicon glyphicon-copy"></span>
-          </button>
-        </span>
-        {% endif %}
-
-      {% comment %}
-        {% if access.has_staff %}
-          <span class="pull-right">
-          <div class="btn-group" role="group">
-          <a href="{% url 'field.dailyplan.toggle-role' jobsite.id dailyplan.url_id worker.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
-             class="btn btn-default btn-sm">
-        {% else %}
-          <span class="pull-right">
-        {% endif %}
-
-        {% if worker.is_foreman %}
-          {% trans 'Foreman' %}
-        {% else %}
-          {% trans 'Laborer' %}
-        {% endif %}
-
-        {% if access.has_staff %}
-          </a>
-          <a href="{% url 'field.dailyplan.member-remove' jobsite.id dailyplan.url_id worker.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
-             class="btn btn-default btn-sm">
-            <span class="glyphicon glyphicon-remove" style="color:#B4004F;"></span>
-          </a>
-          </div></span>
-        {% else %}
-          </span>
-        {% endif %}
-      {% endcomment %}
-
-      </field-worker>
-
-    {% endfor %}
-
-    <div {% if dailyplan.workers.all %}style="display: none;"{% endif %} class="list-group-item workers-empty">
-      {% trans "No workers have been assigned." %}
-    </div>
-
-
-    {% comment %}placeholder so Dart knows where to add equipment{% endcomment %}
-    <span class="equipment-header"></span>
-
-    {% comment %}
-    {% if access.has_laborer %}
-      <a class="list-group-item sub-header clearfix equipment-header"
-         href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+    {% if access.has_foreman %}
+    <field-worker
+        class="list-group-item"
+        data-id="{{ worker.id }}">{{ worker.access.user.get_full_name }}</field-worker>
     {% else %}
-      <div class="list-group-item sub-header equipment-header">
+    <div class="list-group-item">{{ worker.access.user.get_full_name }}</div>
     {% endif %}
 
-    {% trans "Equipment" %}
+  {% endfor %}
 
-    {% if access.has_laborer %}
-      <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
-    {% else %}
-      </div>
-    {% endif %}
-    {% endcomment %}
+  <div {% if dailyplan.workers.all %}style="display: none;"{% endif %} class="list-group-item workers-empty">
+    {% trans "No workers have been assigned." %}
+  </div>
+
+
+  {% if access.has_foreman %}
+    <a class="list-group-item sub-header clearfix equipment-header"
+       href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+      {% trans "Equipment" %}<span class="pull-right">{% trans 'edit' %} &raquo;</span>
+    </a>
+  {% else %}
+    <div class="list-group-item sub-header equipment-header">{% trans "Equipment" %}</div>
+  {% endif %}
 
   {% for assigned in dailyplan.assigned_equipment.all %}
 
-    <field-equipment class="list-group-item nav nav-pills" data-id="{{ assigned.id }}">
-
-      <span class="name">{{ assigned.equipment }}</span>
-
-      {% if access.has_staff %}
-        <span class="pull-right">
-          {% comment %}
-          <span class="btn btn-default btn-sm remove-button" style="margin-right: 20px;">
-            <span class="glyphicon glyphicon-remove" style="color:#B4004F;"></span>
-          </span>
-          {% endcomment %}
-          <span class="btn btn-default btn-sm copy-button">
-            <span class="glyphicon glyphicon-copy"></span>
-          </span>
-        </span>
-      {% endif %}
-
-    </field-equipment>
+    {% if access.has_foreman %}
+    <field-equipment
+        class="list-group-item"
+        data-id="{{ assigned.id }}">{{ assigned.equipment }}</field-equipment>
+    {% else %}
+    <div class="list-group-item">{{ assigned.equipment }}</div>
+    {% endif %}
 
   {% endfor %}
 
@@ -152,94 +72,58 @@
 
   {% if 'planning' not in request.path or request.session.is_planning_tasks %}
 
-  {% if access.has_laborer %}
+  {% if access.has_foreman %}
     <a class="list-group-item sub-header clearfix"
        href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+      {% trans "Tasks" %}<span class="pull-right">{% trans 'edit' %} &raquo;</span>
+    </a>
   {% else %}
-    <div class="list-group-item sub-header">
+    <div class="list-group-item sub-header">{% trans "Tasks" %}</div>
   {% endif %}
 
-  {% trans "Tasks" %}
+  {% for task in dailyplan.tasks.all %}
 
-  {% if access.has_laborer %}
-    <span class="pull-right">{% trans 'edit' %} &raquo;</span></a>
-  {% else %}
+    <a href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
+       class="list-group-item clearfix">
+      {{ task.name }}
+      {% if task.complete_percent > 0 %}
+        <span class="badge">{{ task.complete_percent }}%</span>
+      {% else %}
+        <span class="pull-right">&raquo;</span>
+      {% endif %}
+    </a>
+
+  {% empty %}
+
+    <div class="list-group-item tasks-empty">{% trans "No tasks have been assigned." %}</div>
+
+  {% endfor %}
+
+  {% endif %}
+
+
+  {% if 'planning' not in request.path or request.session.is_planning_notes %}
+  {% if access.has_laborer or dailyplan.notes %}
+
+    <div class="list-group-item sub-header">{% trans "Notes" %}</div>
+
+    <div class="panel-body">
+      {% if access.has_laborer %}
+        <form action="{% url 'field.dailyplan.save.notes' dailyplan.id %}" method="post">{% csrf_token %}
+          <input type="hidden" name="origin" value="{{ request.path }}#plan-{{ dailyplan.id }}"/>
+          <textarea rows="4" style="width: 100%;" name="notes">{{ dailyplan.notes }}</textarea>
+          <input type="submit" class="btn btn-default" value="{% trans 'Save' %}"/>
+        </form>
+      {% else %}
+        {{ dailyplan.notes }}
+      {% endif %}
     </div>
+
   {% endif %}
-
-    {% for task in dailyplan.tasks.all %}
-
-      <a href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
-         class="list-group-item clearfix">
-        {{ task.name }}
-        {% if task.complete_percent > 0 %}
-          <span class="badge">{{ task.complete_percent }}%</span>
-        {% else %}
-          <span class="pull-right">&raquo;</span>
-        {% endif %}
-      </a>
-
-    {% empty %}
-
-      <div class="list-group-item">
-        {% trans "No tasks have been assigned." %}
-      </div>
-
-    {% endfor %}
-
   {% endif %}
 
   </div>
 
-  {% if 'planning' not in request.path or request.session.is_planning_notes %}
-    {% if access.has_laborer or dailyplan.notes %}
-
-      <div class="list-group-item sub-header">{% trans "Notes" %}</div>
-
-      <div class="panel-body">
-        {% if access.has_laborer %}
-          <form action="{% url 'field.dailyplan.save.notes' dailyplan.id %}" method="post">{% csrf_token %}
-            <input type="hidden" name="origin" value="{{ request.path }}#plan-{{ dailyplan.id }}"/>
-            <textarea rows="4" style="width: 100%;" name="notes">{{ dailyplan.notes }}</textarea>
-            <input type="submit" class="btn btn-default" value="{% trans 'Save' %}"/>
-          </form>
-        {% else %}
-          {{ dailyplan.notes }}
-        {% endif %}
-
-      </div>
-
-    {% endif %}
-  {% endif %}
-
-
-  {% if not access.has_staff %}
-
-    <div class="panel-footer clearfix">
-
-      {% if access in dailyplan.accesses.all %}
-
-        {% for worker in dailyplan.workers.all %}
-          {% if worker.access == access%}
-            <a href="{% url 'field.dailyplan.self.remove' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
-               class="btn btn-default">{% trans 'Remove yourself from this assignment.' %}</a>
-          {% endif %}
-        {% endfor %}
-
-      {% else %}
-
-        <a href="{% url 'field.dailyplan.self.add' jobsite.id dailyplan.url_id 'foreman' %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
-           class="btn btn-default">{% blocktrans %}Add yourself as <b>foreman</b>.{% endblocktrans %}</a>
-        <a href="{% url 'field.dailyplan.self.add' jobsite.id dailyplan.url_id 'laborer' %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}"
-           class="btn btn-default">{% blocktrans %}Add yourself as <b>laborer</b>.{% endblocktrans %}</a>
-
-      {% endif %}
-
-    </div>
-
-  {% endif %}
-
-  </daily-plan>
-
+</daily-plan>
 
 {% endwith %}

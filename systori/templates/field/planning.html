@@ -8,9 +8,6 @@
       text-align: center;
       margin-top: -3px;
     }
-    daily-plan {
-      display: block;
-    }
     .panel-heading {
       position: relative;
     }
@@ -18,8 +15,12 @@
       position: absolute;
       top: -138px;
     }
-    .copied .worker-copy {
-      visibility: hidden;
+    daily-plan {
+      display: block;
+    }
+    field-worker,
+    field-equipment {
+      cursor: pointer;
     }
     field-clipboard {
       background: beige;
@@ -72,7 +73,7 @@
 
           <div class="day-separator">
             {{ plan.jobsite.project.id }} - {{ plan.jobsite.project.name }}
-            {% if access.has_staff and plan.day >= today %}
+            {% if access.has_foreman and plan.day >= today %}
               <a href="{% add_daily_plan_url plan.jobsite.project plan.day %}?origin={{ request.path }}%23project-{{ plan.jobsite.project.id }}"
                  class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
             {% endif %}
@@ -84,7 +85,7 @@
 
       {% empty %}
 
-        {% if access.has_staff and selected_day >= today and latest_daily_plan.day < selected_day %}
+        {% if access.has_foreman and selected_day >= today and latest_daily_plan.day < selected_day %}
           <a href="{% url 'field.planning.generate' selected_day %}" class="btn btn-primary">
             {% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
         {% endif %}
@@ -94,9 +95,9 @@
 
   </div>
 
-  <field-clipboard style="display: none">
-    <button class="btn btn-default btn-sm pull-right" id="cancel-clipboard">
-      <span class="glyphicon glyphicon-remove"></span>
+  <field-clipboard style="display: none" class="bg-warning text-warning">
+    <button type="button" class="close pull-right" aria-label="Close" id="cancel-clipboard">
+      <span aria-hidden="true">&times;</span>
     </button>
     <div id="clipboard"></div>
   </field-clipboard>

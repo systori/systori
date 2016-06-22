@@ -57,13 +57,9 @@ class FieldClipboard extends HtmlElement {
         this.querySelector('#cancel-clipboard').onClick.listen(cancel);
     }
 
-    bool addWorker(FieldWorker w) {
-        if (!workers.contains(w)) {
-            workers.add(w);
-            update();
-            return true;
-        }
-        return false;
+    addWorker(FieldWorker w) {
+        workers.add(w);
+        update();
     }
 
     removeWorker(FieldWorker w) {
@@ -71,13 +67,9 @@ class FieldClipboard extends HtmlElement {
         update();
     }
 
-    bool addEquipment(FieldEquipment e) {
-        if (!equipment.contains(e)) {
-            equipment.add(e);
-            update();
-            return true;
-        }
-        return false;
+    addEquipment(FieldEquipment e) {
+        equipment.add(e);
+        update();
     }
 
     removeEquipment(FieldEquipment e) {
@@ -91,8 +83,10 @@ class FieldClipboard extends HtmlElement {
             equipment.join(', ')
         );
         if (equipment.isEmpty && workers.isEmpty) {
+            querySelectorAll('daily-plan').forEach((DailyPlan dp) => dp.hidePasteButton());
             style.display = 'none';
         } else {
+            querySelectorAll('daily-plan').forEach((DailyPlan dp) => dp.showPasteButton());
             style.display = 'block';
         }
     }
@@ -127,9 +121,9 @@ class FieldClipboard extends HtmlElement {
 class DailyPlan extends HtmlElement {
 
     ButtonElement paste_button;
-    SpanElement workers_header;
+    HtmlElement workers_header;
     DivElement workers_empty;
-    SpanElement equipment_header;
+    HtmlElement equipment_header;
     DivElement equipment_empty;
 
     String paste_url;
@@ -168,58 +162,74 @@ class DailyPlan extends HtmlElement {
         }
     }
 
+    hidePasteButton() {
+        paste_button.style.display = 'none';
+    }
+
+    showPasteButton() {
+        var items = this.querySelectorAll('field-worker,field-equipment');
+        var has_selected = items.any((FieldItem fi) => fi.selected);
+        if (has_selected) {
+            hidePasteButton();
+        } else {
+            paste_button.style.display = 'block';
+        }
+    }
+
 }
 
 
 class FieldItem extends HtmlElement {
 
-    int get item_id => int.parse(this.dataset['id']);
+    static String SELECTED = 'list-group-item-warning';
 
-    ButtonElement copy_button;
     StreamSubscription<Event> copy_event;
 
-    String name;
-    DailyPlan plan;
+    int get item_id => int.parse(this.dataset['id']);
+    String get name => this.text;
+    DailyPlan get plan => this.parent.parent;
+    bool get selected => this.classes.contains(SELECTED);
 
     FieldItem.created() : super.created(); attached() {
-        name = this.querySelector('.name').text;
-        plan = this.parent.parent;
-        copy_button = this.querySelector(":scope .copy-button");
-        copy_event = copy_button.onClick.listen(toggleCopy);
+        copy_event = this.onClick.listen(toggleCopy);
     }
 
     detached() {
         copy_event.cancel();
     }
 
-    String toString() => name;
+    String toString() => '<span class="badge">' + name + '</span>';
 
     toggleCopy([_]) {
-        copy_button.classes.remove('active');
-        if (addSelf()) {
-            copy_button.classes.add('active');
+        this.classes.remove(SELECTED);
+        if (!containsSelf()) {
+            this.classes.add(SELECTED);
+            addSelf();
         } else {
             removeSelf();
         }
     }
 
-    cancelCopy() => copy_button.classes.remove('active');
+    cancelCopy() => this.classes.remove(SELECTED);
 
-    bool addSelf();
+    bool containsSelf();
+    addSelf();
     removeSelf();
 }
 
 
 class FieldWorker extends FieldItem {
     FieldWorker.created() : super.created();
-    bool addSelf() => clipboard.addWorker(this);
+    bool containsSelf() => clipboard.workers.contains(this);
+    addSelf() => clipboard.addWorker(this);
     removeSelf() => clipboard.removeWorker(this);
 }
 
 
 class FieldEquipment extends FieldItem {
     FieldEquipment.created() : super.created();
-    bool addSelf() => clipboard.addEquipment(this);
+    bool containsSelf() => clipboard.equipment.contains(this);
+    addSelf() => clipboard.addEquipment(this);
     removeSelf() => clipboard.removeEquipment(this);
 }
 
