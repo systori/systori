@@ -124,7 +124,7 @@ class AdjustmentCreate(AdjustmentViewMixin, CreateView):
             self.object.invoice = invoice
             kwargs['instance'].json['jobs'] = [{
                    'job.id': job['job.id'],
-                   'invoiced': job['invoiced'],
+                   'invoiced': job['debit'],
                    'corrected': job['debit']
                 } for job in invoice.json['jobs']
             ]
