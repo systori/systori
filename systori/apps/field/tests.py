@@ -9,7 +9,7 @@ from ..company.models import Access
 from ..equipment.models import Equipment
 from ..task.test_models import create_task_data
 from ..user.factories import *
-from .utils import find_next_workday
+from .utils import find_next_workday, days_ago, date
 
 
 class TestDateCalculations(TestCase):
@@ -165,3 +165,23 @@ class TestAssignWorkers(SystoriTestCase):
         response = self.client.post(self.url, {'workers': [self.access.id]})
         self.assertEqual(response.status_code, 302)  # redirect
         self.assertEqual(1, self.dailyplan.workers.count())
+
+
+class TestCopyDailyPlans(SystoriTestCase):
+
+    def setUp(self):
+        create_task_data(self)
+        self.client.login(username=self.user.email, password='open sesame')
+
+    def test_generate(self):
+        jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
+        dailyplan = DailyPlan.objects.create(jobsite=jobsite, day=days_ago(1))
+        access, _ = Access.objects.get_or_create(user=self.user, company=self.company)
+        TeamMember.objects.create(dailyplan=dailyplan, access=access)
+        equipment = Equipment.objects.create(name='truck')
+        EquipmentAssignment.objects.create(dailyplan=dailyplan, equipment=equipment)
+        self.assertEqual(1, DailyPlan.objects.count())
+        self.assertEqual(0, DailyPlan.objects.filter(day=date.today()).count())
+        self.client.get(reverse('field.planning.generate', args=[date.today()]))
+        self.assertEqual(2, DailyPlan.objects.count())
+        self.assertEqual(1, DailyPlan.objects.filter(day=date.today()).count())

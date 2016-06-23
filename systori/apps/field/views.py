@@ -278,8 +278,11 @@ class FieldGenerateAllDailyPlans(View):
                     is_foreman=oldmember.is_foreman
                 )
 
-            for oldequipment in oldplan.equipment.all():
-                newplan.equipment.add(oldequipment)
+            for oldequipment in oldplan.assigned_equipment.all():
+                EquipmentAssignment.objects.create(
+                    dailyplan=newplan,
+                    equipment_id=oldequipment.equipment_id
+                )
 
         return HttpResponseRedirect(reverse('field.planning', args=[selected_day.isoformat()]))
 
