@@ -15,6 +15,9 @@ class Company(AbstractSchema):
             port = ':'+request.META['HTTP_HOST'].split(':')[1]
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
 
+    def active_users(self):
+        return self.users.filter(companies_access__is_active=True)
+
 
 class Access(models.Model):
     company = models.ForeignKey('Company', related_name="users_access")
