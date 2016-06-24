@@ -2,3 +2,4 @@
 django-debug-toolbar
 django-extensions
 fabric3
+ipython
