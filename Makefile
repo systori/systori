@@ -1,5 +1,5 @@
 test: 
-	python3 manage.py test systori
+	./manage.py test systori.apps systori.lib
 
 uitest:
-	python3 uitest.py saucelabs
+	./uitest.py saucelabs

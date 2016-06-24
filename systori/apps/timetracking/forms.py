@@ -30,6 +30,7 @@ class UserForm(ModelForm):
 
 
 class UserChoiceField(forms.ModelChoiceField):
+
     def label_from_instance(self, obj):
         return obj.get_full_name()
 
@@ -49,17 +50,17 @@ class ManualTimerForm(ModelForm):
     duration = forms.RegexField(regex=DURATION_RE, required=True, widget=forms.TextInput(
         attrs={'placeholder': '1h 30m', 'class': 'timetracking-form-duration'}))
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, company, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.fields['user'].widget = forms.HiddenInput()
-
-        # self.fields['start'].widget = forms.DateTimeInput(
-        #     format='%Y-%m-%dT%H:%M',
-        #     attrs={'type': 'datetime-local', 'class': 'timetracking-form-start'})
         from datetimewidget.widgets import DateTimeWidget
 
-        self.fields['start'].widget = DateTimeWidget(attrs={
-            'id':'timetracking-form-start'}, usel10n=True, bootstrap_version=3)
+        self.fields['start'].widget = DateTimeWidget(
+            options={'format': 'dd.mm.yyyy HH:ii'},
+            attrs={'id':'timetracking-form-start'},
+            bootstrap_version=3,
+            # usel10n=True
+        )
+        self.fields['user'].queryset = company.active_users()
 
     def clean_duration(self):
         raw_value = self.cleaned_data['duration']
