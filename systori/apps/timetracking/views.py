@@ -19,9 +19,14 @@ class HomeView(FormView):
     template_name = 'timetracking/home.html'
     form_class = ManualTimerForm
 
+    def get_form_kwargs(self):
+        default_kwargs = super().get_form_kwargs()
+        default_kwargs['company'] = self.request.company
+        return default_kwargs
+
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            report=utils.get_today_report(self.request.company.users.all()),
+            report=utils.get_today_report(self.request.company.active_users()),
             **kwargs
         )
 
