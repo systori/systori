@@ -83,15 +83,16 @@ def getmedia():
     run('rm /tmp/' + PROD_MEDIA_FILE)
 
 
-def dockergetdb(container='web', envname='production'):
-    ":container=web,envname=production -- fetch and load remote database"
+def dockergetdb(container='app', envname='production'):
+    ":container=app,envname=production -- fetch and load remote database"
     dump_file = 'systori.'+envname+'.dump'
     settings = {
         'NAME': 'postgres',
         'USER': 'postgres',
-        'HOST': 'db_1'
+        'HOST': 'db'
     }
     fetchdb(envname)
+    local('docker-compose stop app')
     local('docker-compose run {0} dropdb -h {HOST} -U {USER} {NAME}'.format(
         container, **settings))
     local('docker-compose run {0} createdb -h {HOST} -U {USER} {NAME}'.format(
