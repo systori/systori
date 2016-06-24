@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libxml2-dev \
     libxslt-dev \
-    unzip
+    unzip \
+    postgresql-client
 
 RUN pip3 install fabric3 psycopg2 lxml
 
