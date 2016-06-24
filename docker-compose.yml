@@ -4,16 +4,16 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: systori.settings.docker
       SSH_AUTH_SOCK: /tmp/agent.sock
+      PYTHONPATH: /python
     build: .
     tty: true
-    entrypoint: fab
-    command: startdocker
+    command: python3 manage.py runserver 0.0.0.0:8100
     image: systori/local
     volumes:
       - $SSH_AUTH_SOCK:/tmp/agent.sock
       - .:/systori
     ports:
-      - "8000:8000"
+      - "8100:8100"
     depends_on:
       - db
   db:

@@ -1,5 +1,5 @@
 import sys
-from .dev import *
+from .common import *
 
 SERVER_NAME = 'systori.localhost'
 SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
