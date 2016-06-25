@@ -120,6 +120,7 @@ class FieldPlanning(TemplateView):
         context['is_selected_future'] = selected_day > date.today()
 
         context['latest_daily_plan'] = DailyPlan.objects.first()
+        context['latest_days_with_plans'] = DailyPlan.objects.values('day').distinct()[:5]
 
         return context
 
@@ -260,12 +261,11 @@ class FieldCopyPasteDailyPlans(View):
 
 class FieldGenerateAllDailyPlans(View):
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, source_day, *args, **kwargs):
 
         selected_day = request.selected_day
-        other_day = DailyPlan.objects.first().day
 
-        for oldplan in DailyPlan.objects.filter(day=other_day):
+        for oldplan in DailyPlan.objects.filter(day=source_day):
 
             newplan = DailyPlan.objects.create(jobsite=oldplan.jobsite,
                                                day=selected_day,
