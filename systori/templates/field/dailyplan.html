@@ -2,7 +2,7 @@
 
 {% with jobsite=dailyplan.jobsite %}
 
-<daily-plan class="panel panel-primary" data-paste-url="{% url 'field.dailyplan.paste' jobsite.id dailyplan.url_id %}">
+<daily-plan class="panel panel-primary" data-id="{{ dailyplan.id }}" data-paste-url="{% url 'field.dailyplan.paste' jobsite.id dailyplan.url_id %}">
 
   <div class="panel-heading dailyplan-heading">
     <a name="plan-{{  dailyplan.id }}"></a>
@@ -66,7 +66,7 @@
 
   {% endfor %}
 
-  <div {% if dailyplan.equipment.all %}style="display: none;"{% endif %} class="list-group-item equipment-empty">
+  <div {% if dailyplan.assigned_equipment.all %}style="display: none;"{% endif %} class="list-group-item equipment-empty">
     {% trans "No equipment has been assigned." %}
   </div>
 
