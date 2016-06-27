@@ -18,14 +18,15 @@ class Repository {
         };
     }
 
-    Future<bool> paste(String url, List<int> workers, List<int> equipment) {
+    Future<bool> paste(String url, List<int> workers, List<int> equipment, List<int> empty_plans) {
         var wait_for_response = HttpRequest.request(
                 url,
                 method: "POST",
                 requestHeaders: headers,
                 sendData: JSON.encode({
                     'workers': workers,
-                    'equipment': equipment
+                    'equipment': equipment,
+                    'empty-plans': empty_plans
                 })
         );
 
@@ -100,11 +101,6 @@ class FieldClipboard extends HtmlElement {
     }
 
     pasteTo(DailyPlan dp) {
-        repository.paste(
-            dp.paste_url,
-            workers.map((w) => w.item_id).toList(),
-            equipment.map((e) => e.item_id).toList()
-        );
         var dailyplans = [dp];
         [workers, equipment].forEach((list) => list.forEach((FieldItem i) {
             !dailyplans.contains(i.plan) && dailyplans.add(i.plan);
@@ -112,6 +108,14 @@ class FieldClipboard extends HtmlElement {
         workers.forEach((w) => dp.addWorker(w));
         equipment.forEach((e) => dp.addEquipment(e));
         dailyplans.forEach((DailyPlan dp) => dp.updateEmptyMessage());
+        var empty_plans = dailyplans.where((dp) => !dp.hasItems);
+        repository.paste(
+            dp.paste_url,
+            workers.map((w) => w.item_id).toList(),
+            equipment.map((e) => e.item_id).toList(),
+            empty_plans.map((dp) => dp.planId).toList()
+        );
+        empty_plans.forEach((DailyPlan dp) => dp.remove());
         cancel();
     }
 
@@ -126,10 +130,11 @@ class DailyPlan extends HtmlElement {
     HtmlElement equipment_header;
     DivElement equipment_empty;
 
-    String paste_url;
+    int get planId => int.parse(this.dataset['id']);
+    String get paste_url => this.dataset['paste-url'];
+    bool get hasItems => this.querySelectorAll('field-worker,field-equipment').isNotEmpty;
 
     DailyPlan.created() : super.created(); attached() {
-        paste_url = this.dataset['paste-url'];
         paste_button = this.querySelector(".paste-button");
         paste_button.onClick.listen(doPaste);
         workers_header = this.querySelector(".workers-header");

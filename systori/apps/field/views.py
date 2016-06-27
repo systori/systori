@@ -63,9 +63,9 @@ def delete_when_empty(dailyplan):
 
 def daily_plan_objects():
     return DailyPlan.objects \
-        .select_related("jobsite__project") \
+        .prefetch_related("jobsite__project__jobsites") \
         .prefetch_related(Prefetch("workers", queryset=TeamMember.objects.select_related("access__user"))) \
-        .prefetch_related("equipment") \
+        .prefetch_related(Prefetch("assigned_equipment", queryset=EquipmentAssignment.objects.select_related("equipment"))) \
         .prefetch_related("tasks")
 
 
@@ -614,4 +614,7 @@ class FieldPaste(View):
         equipment_ids = clipboard.get('equipment', [])
         equipment = EquipmentAssignment.objects.filter(id__in=equipment_ids)
         equipment.update(dailyplan=dailyplan)
+        plans = clipboard.get('empty-plans', [])
+        for plan in daily_plan_objects().filter(id__in=plans):
+            delete_when_empty(plan)
         return HttpResponse("OK")
