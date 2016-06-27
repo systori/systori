@@ -83,14 +83,20 @@
 
         {% include "field/dailyplan.html" with dailyplan=plan %}
 
-      {% empty %}
-
-        {% if access.has_foreman and selected_day >= today and latest_daily_plan.day < selected_day %}
-          <a href="{% url 'field.planning.generate' selected_day %}" class="btn btn-primary">
-            {% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>
-        {% endif %}
-
       {% endfor %}
+      {% if access.has_foreman and selected_day >= today %}
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="list-group">
+            {% for day in latest_days_with_plans %}
+              <a href="{% url 'field.planning.generate' selected_day day.day|date:'Y-m-d' %}"
+                 class="list-group-item btn list-group-item-warning">
+                {% blocktrans with otherday=day.day|date:'l d. F' %}Copy from {{ otherday }}.{% endblocktrans %}</a>
+            {% endfor %}
+            </div>
+          </div>
+        </div>
+       {% endif %}
     </div>
 
   </div>

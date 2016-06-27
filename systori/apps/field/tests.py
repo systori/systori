@@ -1,5 +1,5 @@
 import json
-from datetime import date
+from datetime import date, timedelta
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
@@ -174,14 +174,16 @@ class TestCopyDailyPlans(SystoriTestCase):
         self.client.login(username=self.user.email, password='open sesame')
 
     def test_generate(self):
+        today = date.today()
+        yesterday = today - timedelta(days=1)
         jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
-        dailyplan = DailyPlan.objects.create(jobsite=jobsite, day=days_ago(1))
+        dailyplan = DailyPlan.objects.create(jobsite=jobsite, day=yesterday)
         access, _ = Access.objects.get_or_create(user=self.user, company=self.company)
         TeamMember.objects.create(dailyplan=dailyplan, access=access)
         equipment = Equipment.objects.create(name='truck')
         EquipmentAssignment.objects.create(dailyplan=dailyplan, equipment=equipment)
         self.assertEqual(1, DailyPlan.objects.count())
-        self.assertEqual(0, DailyPlan.objects.filter(day=date.today()).count())
-        self.client.get(reverse('field.planning.generate', args=[date.today()]))
+        self.assertEqual(0, DailyPlan.objects.filter(day=today).count())
+        self.client.get(reverse('field.planning.generate', kwargs={'selected_day':today,'source_day':yesterday}))
         self.assertEqual(2, DailyPlan.objects.count())
-        self.assertEqual(1, DailyPlan.objects.filter(day=date.today()).count())
+        self.assertEqual(1, DailyPlan.objects.filter(day=today).count())
