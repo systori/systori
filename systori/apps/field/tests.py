@@ -187,3 +187,27 @@ class TestCopyDailyPlans(SystoriTestCase):
         self.client.get(reverse('field.planning.generate', kwargs={'selected_day':today,'source_day':yesterday}))
         self.assertEqual(2, DailyPlan.objects.count())
         self.assertEqual(1, DailyPlan.objects.filter(day=today).count())
+
+
+class TestDeleteDailyPlan(SystoriTestCase):
+
+    def setUp(self):
+        create_task_data(self)
+        self.client.login(username=self.user.email, password='open sesame')
+
+    def test_delete_dailyplan(self):
+        today = date.today()
+        jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
+        dailyplan = DailyPlan.objects.create(jobsite=jobsite, day=today)
+        access, _ = Access.objects.get_or_create(user=self.user, company=self.company)
+        TeamMember.objects.create(dailyplan=dailyplan, access=access)
+        equipment = Equipment.objects.create(name='chainsaw')
+        EquipmentAssignment.objects.create(dailyplan=dailyplan, equipment=equipment)
+        self.assertEqual(1, DailyPlan.objects.count())
+        # first step the get request to trigger the confirmation page
+        self.client.get(reverse('field.dailyplan.delete', kwargs={'jobsite_pk':jobsite.id,
+                                                                  'dailyplan_url_id':dailyplan.url_id}), follow=True)
+        # second step the post request to actually delete the object
+        self.client.post(reverse('field.dailyplan.delete', kwargs={'jobsite_pk':jobsite.id,
+                                                                  'dailyplan_url_id':dailyplan.url_id}), follow=True)
+        self.assertEqual(0, DailyPlan.objects.count())
