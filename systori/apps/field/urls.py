@@ -42,6 +42,6 @@ urlpatterns = [
     url(r'^jobsite-(?P<jobsite_pk>\d+)/(?P<dailyplan_url_id>\d{4}-\d{2}-\d{2}-\d+)/', include(dailyplan_urls)),
     url(r'^dailyplan-(?P<pk>\d+)/notes$', field_auth(FieldDailyPlanNotes.as_view()), name='field.dailyplan.save.notes'),
     url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})?$', field_auth(FieldPlanning.as_view()), name='field.planning'),
-    url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})/generate$', field_auth(FieldGenerateAllDailyPlans.as_view()), name='field.planning.generate'),
+    url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})/generate/(?P<source_day>\d{4}-\d{2}-\d{2})$', field_auth(FieldGenerateAllDailyPlans.as_view()), name='field.planning.generate'),
     url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})/toggle/(?P<toggle>(tasks|notes))$', field_auth(FieldPlanningToggle.as_view()), name='field.planning.toggle'),
 ]
