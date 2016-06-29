@@ -6,6 +6,7 @@ from django import forms
 from django.forms import ModelForm, modelformset_factory, BaseModelFormSet
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from datetimewidget.widgets import DateTimeWidget
 
 from .models import Timer
 
@@ -52,10 +53,9 @@ class ManualTimerForm(ModelForm):
 
     def __init__(self, company, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from datetimewidget.widgets import DateTimeWidget
 
         self.fields['start'].widget = DateTimeWidget(
-            options={'format': 'dd.mm.yyyy HH:ii'},
+            options={'format': 'dd.mm.yyyy HH:ii', 'pickerPosition': 'bottom-left'},
             attrs={'id':'timetracking-form-start'},
             bootstrap_version=3,
             # usel10n=True
@@ -74,3 +74,18 @@ class UserManualTimerForm(ManualTimerForm):
         widgets = {
             'user': forms.HiddenInput()
         }
+
+
+class MonthPickerForm(forms.Form):
+
+    period = forms.DateField(widget=DateTimeWidget(
+        options={
+            'format': 'mm.yyyy',
+            'startView': 3,
+            'pickerPosition': 'bottom-left',
+            'minView': 3,
+            'clearBtn': False
+        },
+        attrs={'id':'timetracking-report-period'},
+        bootstrap_version=3
+    ), input_formats=['%m.%Y'])

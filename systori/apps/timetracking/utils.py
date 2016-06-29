@@ -60,12 +60,12 @@ def get_user_dashboard_report(user):
     return report
 
 
-def get_user_monthly_report(user):
+def get_user_monthly_report(user, period):
     from .models import Timer
-    now = timezone.now()
+    period = period or timezone.now()
 
-    holidays_used = get_holidays_duration(user, now.year, now.month)
-    report = Timer.objects.filter(user=user).generate_user_report_data()
+    holidays_used = get_holidays_duration(user, period.year, period.month)
+    report = Timer.objects.filter(user=user).generate_user_report_data(period)
     overtime = sum(r.get('overtime', 0) for day in report.values() for r in day)
     return {
         'holidays_used': format_days(holidays_used),

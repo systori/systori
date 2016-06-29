@@ -51,12 +51,12 @@ class TimerQuerySet(QuerySet):
                 day[field] = day[field].astimezone(current_timezone)
             yield day
 
-    def generate_user_report_data(self):
+    def generate_user_report_data(self, period):
         from calendar import monthrange
         from .utils import format_seconds
 
-        now = timezone.now()
-        queryset = self.filter_period(now.year, now.month).group_for_report(order_by='day_start')
+        period = period or timezone.now()
+        queryset = self.filter_period(period.year, period.month).group_for_report(order_by='day_start')
         report = OrderedDict()
         for row in queryset:
             report_row = report.setdefault(row['date'], [])
