@@ -9,7 +9,7 @@ from rest_framework import status, views
 from rest_framework.response import Response
 
 from .models import Timer
-from .utils import get_report
+from .utils import get_user_dashboard_report
 from .permissions import HasStaffAccess
 
 
@@ -44,7 +44,7 @@ class TimerView(views.APIView):
 class ReportView(views.APIView):
     
     def get(self, request, year=None, month=None):
-        return Response(list(get_report(request.user)))
+        return Response(list(get_user_dashboard_report(request.user)))
 
 
 class TimerAdminView(views.APIView):

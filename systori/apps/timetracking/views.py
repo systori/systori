@@ -26,7 +26,7 @@ class HomeView(FormView):
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            report=utils.get_today_report(self.request.company.active_users()),
+            report=utils.get_daily_users_report(self.request.company.active_users()),
             **kwargs
         )
 
@@ -56,7 +56,7 @@ class UserReportView(FormView):
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             user=self.user,
-            report=utils.get_this_month_full_report(self.user),
+            report=utils.get_user_monthly_report(self.user),
             **kwargs
         )
 
