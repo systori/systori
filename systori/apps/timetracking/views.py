@@ -43,6 +43,11 @@ class UserReportView(FormView):
     def user(self):
         return get_object_or_404(User, pk=self.kwargs['user_id'])
 
+    def get_form_kwargs(self):
+        default_kwargs = super().get_form_kwargs()
+        default_kwargs['company'] = self.request.company
+        return default_kwargs
+
     def get_initial(self):
         initial = super().get_initial()
         initial['user'] = self.user
