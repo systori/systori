@@ -11,14 +11,20 @@ from .managers import TimerQuerySet
 
 
 class Timer(models.Model):
+    CORRECTION = 5
     WORK = 10
+    EDUCATION = 15
     HOLIDAY = 20
     ILLNESS = 30
+
     KIND_CHOICES = (
         (WORK, _('Work')),
         (HOLIDAY, _('Holiday')),
-        (ILLNESS, _('Illness'))
+        (ILLNESS, _('Illness')),
+        (CORRECTION, _('Correction')),
+        (EDUCATION, _('Education')),
     )
+
     DAILY_BREAK = 60 * 60  # seconds
     WORK_HOURS = 60 * 60 * 8  # seconds
 
@@ -29,7 +35,8 @@ class Timer(models.Model):
     }
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    start = models.DateTimeField(db_index=True)
+    date = models.DateField(db_index=True)
+    start = models.DateTimeField(blank=True, null=True, db_index=True)
     end = models.DateTimeField(blank=True, null=True, db_index=True)
     duration = models.IntegerField(default=0, help_text=_('in seconds'))
     kind = models.PositiveIntegerField(default=WORK, choices=KIND_CHOICES, db_index=True)
@@ -56,16 +63,30 @@ class Timer(models.Model):
     def is_running(self):
         return not self.end
 
-    def save(self, *args, **kwargs):
+    def _pre_save_generic(self):
         if not self.start:
             self.start = timezone.now()
-        if not self.pk and Timer.objects.filter(user=self.user, end__isnull=True).exists():
+
+        if not self.pk and not (self.end or self.duration) and Timer.objects.filter(
+                user=self.user).filter_running().exists():
             raise ValidationError(_('Timer already running'))
 
         if self.end:
             self.duration = self.get_duration_seconds(self.end)
         elif self.duration:
             self.end = self.start + timedelta(seconds=self.duration)
+
+    def _pre_save_correction(self):
+        pass
+
+    def save(self, *args, **kwargs):
+        if self.kind == self.CORRECTION:
+            self._pre_save_correction()
+        else:
+            self._pre_save_generic()
+
+        if not self.date:
+            self.date = timezone.now().date()
         super().save(*args, **kwargs)
 
     def get_duration_seconds(self, now=None):

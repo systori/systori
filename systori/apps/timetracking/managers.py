@@ -13,7 +13,7 @@ class TimerQuerySet(QuerySet):
         return self.aggregate(total_duration=Sum('duration'))['total_duration'] or 0
 
     def filter_running(self):
-        return self.filter(end__isnull=True)
+        return self.filter(end__isnull=True).exclude(kind=self.model.CORRECTION)
 
     def filter_today(self):
         return self.filter(start__gte=timezone.now().date())
@@ -22,13 +22,13 @@ class TimerQuerySet(QuerySet):
         date_filter = {}
         assert not (month and not year), 'Cannot generate report by month without a year specified'
         if year:
-            date_filter['start__year'] = year
+            date_filter['date__year'] = year
             if month:
-                date_filter['start__month'] = month
+                date_filter['date__month'] = month
         else:
             now = timezone.now()
-            date_filter['start__year'] = now.year
-            date_filter['start__month'] = now.month
+            date_filter['date__year'] = now.year
+            date_filter['date__month'] = now.month
         return self.filter(**date_filter)
 
     def group_for_report(self, order_by='-day_start'):
