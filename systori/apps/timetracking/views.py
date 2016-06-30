@@ -70,6 +70,7 @@ class UserReportView(FormView):
         if period_form.is_valid():
             report_period = period_form.cleaned_data['period']
         else:
+            period_form = forms.MonthPickerForm(initial={'period': timezone.now()})
             report_period = timezone.now()
         return self.render_to_response(self.get_context_data(
             form=form, report_period=report_period,
