@@ -42,6 +42,7 @@ class Timer(models.Model):
     kind = models.PositiveIntegerField(default=WORK, choices=KIND_CHOICES, db_index=True)
     altered_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name='timers_altered', blank=True, null=True)
+    comment = models.CharField(max_length=1000, blank=True)
 
     objects = TimerQuerySet.as_manager()
 

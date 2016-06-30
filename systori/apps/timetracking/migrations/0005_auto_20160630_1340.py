@@ -18,9 +18,9 @@ def set_date(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('timetracking', '0004_auto_20160630_0837'),
+        ('timetracking', '0004_auto_20160630_1339'),
     ]
 
     operations = [
-        migrations.RunPython(set_date),
+        migrations.RunPython(set_date, reverse_code=migrations.RunPython.noop),
     ]
