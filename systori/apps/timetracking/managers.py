@@ -33,12 +33,8 @@ class TimerQuerySet(QuerySet):
 
     def group_for_report(self, order_by='-day_start'):
         current_timezone = timezone.get_current_timezone()
-        current_offset = current_timezone.utcoffset(datetime.now()).seconds
-        queryset = self.extra(
-            select={
-                'date': 'date(start + interval \'{} seconds\')'.format(current_offset)
-            }
-        ).values('kind', 'date', 'user_id').order_by().annotate(
+        # current_offset = current_timezone.utcoffset(datetime.now()).seconds
+        queryset = self.values('kind', 'date', 'user_id').order_by().annotate(
             total_duration=Sum('duration'),
             day_start=Min('start'),
             latest_start=Max('start'),

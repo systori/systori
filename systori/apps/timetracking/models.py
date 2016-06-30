@@ -50,6 +50,11 @@ class Timer(models.Model):
         verbose_name_plural = _('timers')
         ordering = ('start',)
 
+    def __str__(self):
+        return 'Timer for {}: start={}, end={}, duration={}, date={}'.format(
+            self.user, self.start, self.end, self.duration, self.date
+        )
+
     @classmethod
     def launch(cls, user):
         """
@@ -86,7 +91,7 @@ class Timer(models.Model):
             self._pre_save_generic()
 
         if not self.date:
-            self.date = timezone.now().date()
+            self.date = self.start.date() if self.start else timezone.now().date()
         super().save(*args, **kwargs)
 
     def get_duration_seconds(self, now=None):
