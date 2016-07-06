@@ -62,8 +62,7 @@ class ManualTimerForm(ModelForm):
         model = Timer
         fields = ['user', 'start', 'duration', 'kind']
         field_classes = {
-            'user': UserChoiceField,
-            # 'duration': DurationField
+            'user': UserChoiceField
         }
 
     duration = DurationField(required=True, widget=forms.TextInput(
@@ -80,11 +79,6 @@ class ManualTimerForm(ModelForm):
         )
         if company:
             self.fields['user'].queryset = company.active_users()
-
-    # def clean_duration(self):
-    #     raw_value = self.cleaned_data['duration']
-    #     parsed_values = {k: int(v) for k, v in DURATION_RE.match(raw_value).groupdict().items() if v}
-    #     return int(timedelta(**parsed_values).total_seconds())
 
 
 class UserManualTimerForm(ManualTimerForm):

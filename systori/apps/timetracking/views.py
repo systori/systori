@@ -54,10 +54,12 @@ class UserReportView(FormView):
         return initial
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
+        context_data = super().get_context_data(
             user=self.user,
             **kwargs
         )
+        context_data.setdefault('period_form', forms.MonthPickerForm(initial={'period': timezone.now()}))
+        return context_data
 
     def form_valid(self, form):
         form.save()
