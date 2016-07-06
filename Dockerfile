@@ -17,6 +17,7 @@ RUN mkdir -p /root/.ssh && \
     ssh-keyscan bitbucket.org >> /root/.ssh/known_hosts
 
 COPY ./docker_dev/ssh /root/.ssh
+RUN chmod -R 0600 /root/.ssh/*
 
 COPY ./requirements/ /tmp/requirements
 RUN pip3 install -r /tmp/requirements/dev.pip
