@@ -27,6 +27,7 @@ class Timer(models.Model):
 
     DAILY_BREAK = 60 * 60  # seconds
     WORK_HOURS = 60 * 60 * 8  # seconds
+    SHORT_DURATION_THRESHOLD = 59
 
     duration_formulas = {
         WORK: lambda start, end: (end - start).total_seconds(),
@@ -110,10 +111,13 @@ class Timer(models.Model):
         from .utils import format_seconds
         return format_seconds(self.get_duration_seconds())
 
-    def stop(self):
+    def stop(self, ignore_short_duration=True):
         assert self.pk
         self.end = timezone.now()
-        self.save()
+        if not ignore_short_duration or self.get_duration_seconds() > self.SHORT_DURATION_THRESHOLD:
+            self.save()
+        else:
+            self.delete()
 
     def to_dict(self):
         return {'duration': self.get_duration()}

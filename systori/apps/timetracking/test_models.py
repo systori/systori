@@ -40,8 +40,13 @@ class TimerTest(TestCase):
 
     def test_stop(self):
         timer = Timer.launch(self.user)
-        timer.stop()
+        timer.stop(ignore_short_duration=False)
         self.assertTrue(timer.end)
+
+    def test_stop_zero_timer_ignores_it(self):
+        timer = Timer.launch(self.user)
+        timer.stop()
+        self.assertFalse(Timer.objects.filter(pk=timer.pk).exists())
 
     def test_to_dict(self):
         timer = Timer.launch(self.user)
