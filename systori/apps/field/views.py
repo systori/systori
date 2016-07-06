@@ -86,8 +86,8 @@ class FieldDashboard(TemplateView):
         context.update({
             'todays_plans': todays_plans,
             'previous_plans': previous_plans,
-            'timetracking_report': timetracking_utils.get_report(self.request.user),
-            'timetracking_timer_duration': timetracking_utils.get_timer_duration(self.request.user)
+            'timetracking_report': timetracking_utils.get_user_dashboard_report(self.request.user),
+            'timetracking_timer_duration': timetracking_utils.get_running_timer_duration(self.request.user)
         })
 
         return context

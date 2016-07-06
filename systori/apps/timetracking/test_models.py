@@ -4,13 +4,18 @@ from datetime import timedelta
 from django.test import TestCase
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from freezegun import freeze_time
 
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 from .models import Timer
 
 
+NOW = timezone.now().replace(hour=12)
+
+
 class TimerTest(TestCase):
+
     def setUp(self):
         self.company = CompanyFactory()
         self.user = UserFactory(company=self.company)
@@ -35,8 +40,13 @@ class TimerTest(TestCase):
 
     def test_stop(self):
         timer = Timer.launch(self.user)
-        timer.stop()
+        timer.stop(ignore_short_duration=False)
         self.assertTrue(timer.end)
+
+    def test_stop_zero_timer_ignores_it(self):
+        timer = Timer.launch(self.user)
+        timer.stop()
+        self.assertFalse(Timer.objects.filter(pk=timer.pk).exists())
 
     def test_to_dict(self):
         timer = Timer.launch(self.user)
@@ -44,6 +54,39 @@ class TimerTest(TestCase):
             timer.to_dict(),
             {'duration': timer.get_duration()}
         )
+
+    @freeze_time(NOW)
+    def test_save(self):
+        # Regular timer
+        timer = Timer(user=self.user)
+        timer.save()
+        self.assertEqual(timer.start, NOW)
+        self.assertEqual(timer.date, NOW.date())
+        self.assertIsNone(timer.end)
+
+        with self.assertRaises(ValidationError):
+            timer = Timer(user=self.user)
+            timer.save()
+
+        # Timers with some attributes set
+        timer = Timer(user=self.user, end=NOW + timedelta(hours=2))
+        timer.save()
+        self.assertEqual(timer.start, NOW)
+        self.assertEqual(timer.date, NOW.date())
+        self.assertEqual(timer.duration, 60 * 60 * 2)
+
+        timer = Timer(user=self.user, duration=60 * 60 * 2)
+        timer.save()
+        self.assertEqual(timer.start, NOW)
+        self.assertEqual(timer.date, NOW.date())
+        self.assertEqual(timer.end, NOW + timedelta(hours=2))
+
+        # Correction timer
+        timer = Timer(user=self.user, duration=60 * 60 * 2, kind=Timer.CORRECTION)
+        timer.save()
+        self.assertIsNone(timer.start)
+        self.assertIsNone(timer.end)
+        self.assertEqual(timer.date, NOW.date())
 
 
 class TimerQuerySetTest(TestCase):
@@ -77,6 +120,11 @@ class TimerQuerySetTest(TestCase):
             start=yesterday,
             end=yesterday + timedelta(hours=8)
         )
+        Timer.objects.create(
+            user=self.user,
+            kind=Timer.CORRECTION
+        )
+        self.assertFalse(Timer.objects.filter_running().exists())
 
         timer = Timer.launch(self.user)
         self.assertEqual(

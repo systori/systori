@@ -12,6 +12,13 @@ WORK_DAY = timedelta(hours=8).total_seconds()
 HOLIDAYS_PER_MONTH = WORK_DAY * 1.5
 
 
+def regroup(items, getter):
+    result = {}
+    for item in items:
+        result[getter(item)] = item
+    return result
+
+
 def seconds_to_time(seconds):
     seconds = int(seconds)
     minutes, seconds = divmod(seconds, 60)
@@ -31,22 +38,7 @@ def format_days(seconds):
     return '{:.1f}'.format(seconds / WORK_DAY)
 
 
-def get_this_month_full_report(user):
-    from .models import Timer
-    now = timezone.now()
-
-    holidays_used = get_holidays_duration(user, now.year, now.month)
-    report = Timer.objects.filter(user=user).generate_user_report_data()
-    overtime = sum(r.get('overtime', 0) for day in report.values() for r in day)
-    return {
-        'holidays_used': format_days(holidays_used),
-        'holidays_available': format_days(HOLIDAYS_PER_MONTH - holidays_used),
-        'rows': report,
-        'overtime': overtime,
-    }
-
-
-def format_report_data(report):
+def format_dashboard_report_data(report):
     for row in report:
         row['date'] = row['date'].strftime('%d %b %Y')
         row['day_start'] = row['day_start'].strftime('%H:%M')
@@ -57,12 +49,30 @@ def format_report_data(report):
         yield row
 
 
-def get_report(user):
+### Reports
+
+
+def get_user_dashboard_report(user):
     from .models import Timer
-    report = format_report_data(
+    report = format_dashboard_report_data(
         Timer.objects.filter(user=user, kind=Timer.WORK).filter_today().generate_report_data()
     )
     return report
+
+
+def get_user_monthly_report(user, period):
+    from .models import Timer
+    period = period or timezone.now()
+
+    holidays_used = get_holidays_duration(user, period.year, period.month)
+    report = Timer.objects.filter(user=user).generate_user_report_data(period)
+    overtime = sum(r.get('overtime', 0) for day in report.values() for r in day)
+    return {
+        'holidays_used': format_days(holidays_used),
+        'holidays_available': format_days(HOLIDAYS_PER_MONTH - holidays_used),
+        'rows': report,
+        'overtime': overtime,
+    }
 
 
 def get_holidays_duration(user, year, month):
@@ -70,14 +80,7 @@ def get_holidays_duration(user, year, month):
     return Timer.objects.filter(user=user, kind=Timer.HOLIDAY).filter_period(year, month).get_duration()
 
 
-def regroup(items, getter):
-    result = {}
-    for item in items:
-        result[getter(item)] = item
-    return result
-
-
-def get_today_report(users, now=None):
+def get_daily_users_report(users, now=None):
     from .models import Timer
 
     report = Timer.objects.filter(user__in=users).filter_today().generate_report_data()
@@ -86,7 +89,7 @@ def get_today_report(users, now=None):
         yield {'user': user, 'report': report_by_user.get(user.pk)}
 
 
-def get_timer_duration(user):
+def get_running_timer_duration(user):
     from .models import Timer
     timer = Timer.objects.filter_running().filter(user=user).first()
     duration = timer.get_duration_seconds() if timer else 0

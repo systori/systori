@@ -3,9 +3,12 @@ import re
 from datetime import timedelta
 
 from django import forms
-from django.forms import ModelForm, modelformset_factory, BaseModelFormSet
+from django.forms import ModelForm, modelformset_factory, BaseModelFormSet, ValidationError
+from django.core import validators
+
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from datetimewidget.widgets import DateTimeWidget
 
 from .models import Timer
 
@@ -35,7 +38,22 @@ class UserChoiceField(forms.ModelChoiceField):
         return obj.get_full_name()
 
 
-DURATION_RE = re.compile(r'((?P<hours>\d+?)h)?\s?((?P<minutes>\d+?)m)?')
+class DurationField(forms.Field):
+    duration_re = re.compile(r'^(?P<sign>\-)?((?P<hours>\d+?)h)?\s?((?P<minutes>\d+?)m)?$')
+    default_error_messages = {
+        'invalid': _('Enter valid duration (example: 1h 10m)')
+    }
+
+    def to_python(self, value):
+        if value in self.empty_values:
+            return None
+        match = self.duration_re.match(value)
+        if not match:
+            raise ValidationError(self.error_messages['invalid'], code='invalid')
+        bits = match.groupdict()
+        sign = bits.pop('sign') or ''
+        parsed_values = {k: int(sign + v) for k, v in bits.items() if v}
+        return int(timedelta(**parsed_values).total_seconds())
 
 
 class ManualTimerForm(ModelForm):
@@ -47,25 +65,20 @@ class ManualTimerForm(ModelForm):
             'user': UserChoiceField
         }
 
-    duration = forms.RegexField(regex=DURATION_RE, required=True, widget=forms.TextInput(
+    duration = DurationField(required=True, widget=forms.TextInput(
         attrs={'placeholder': '1h 30m', 'class': 'timetracking-form-duration'}))
 
-    def __init__(self, company, *args, **kwargs):
+    def __init__(self, company=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from datetimewidget.widgets import DateTimeWidget
 
         self.fields['start'].widget = DateTimeWidget(
-            options={'format': 'dd.mm.yyyy HH:ii'},
+            options={'format': 'dd.mm.yyyy HH:ii', 'pickerPosition': 'bottom-left'},
             attrs={'id':'timetracking-form-start'},
             bootstrap_version=3,
             # usel10n=True
         )
-        self.fields['user'].queryset = company.active_users()
-
-    def clean_duration(self):
-        raw_value = self.cleaned_data['duration']
-        parsed_values = {k: int(v) for k, v in DURATION_RE.match(raw_value).groupdict().items() if v}
-        return int(timedelta(**parsed_values).total_seconds())
+        if company:
+            self.fields['user'].queryset = company.active_users()
 
 
 class UserManualTimerForm(ManualTimerForm):
@@ -74,3 +87,18 @@ class UserManualTimerForm(ManualTimerForm):
         widgets = {
             'user': forms.HiddenInput()
         }
+
+
+class MonthPickerForm(forms.Form):
+
+    period = forms.DateField(widget=DateTimeWidget(
+        options={
+            'format': 'mm.yyyy',
+            'startView': 3,
+            'pickerPosition': 'bottom-left',
+            'minView': 3,
+            'clearBtn': False
+        },
+        attrs={'id':'timetracking-report-period'},
+        bootstrap_version=3
+    ), input_formats=['%m.%Y'])

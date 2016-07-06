@@ -2,6 +2,7 @@ import json
 from datetime import timedelta
 
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
@@ -51,6 +52,7 @@ class TimerViewTest(SystoriTestCase):
         self.assertFalse(timer.is_running)
 
 
+@override_settings(TIME_ZONE='Etc/UTC')
 class ReportViewTest(SystoriTestCase):
     password = 'ReportViewTest'
     url = reverse('report')

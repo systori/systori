@@ -28,7 +28,7 @@ class ReportsTest(TestCase):
         self.user4 = UserFactory(company=self.company)
 
     @freeze_time(NOW)
-    def test_get_today_report(self):
+    def test_get_daily_users_report(self):
         today = NOW.replace(hour=9)
         yesterday = today - timedelta(days=1)
         Timer.objects.create(
@@ -61,7 +61,7 @@ class ReportsTest(TestCase):
             user=self.user3, start=today
         )
 
-        report = list(utils.get_today_report(User.objects.order_by('pk')))
+        report = list(utils.get_daily_users_report(User.objects.order_by('pk')))
 
         self.assertEqual(report[0]['user'], self.user1)
         self.assertEqual(report[0]['report']['day_start'], user1_timer1.start)

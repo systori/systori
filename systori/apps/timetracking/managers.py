@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, date
 from collections import OrderedDict
 
 from django.db.models.query import QuerySet
-from django.db.models import F, Sum, Min, Max
+from django.db.models import F, Sum, Min, Max, Func
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
@@ -13,7 +13,7 @@ class TimerQuerySet(QuerySet):
         return self.aggregate(total_duration=Sum('duration'))['total_duration'] or 0
 
     def filter_running(self):
-        return self.filter(end__isnull=True)
+        return self.filter(end__isnull=True).exclude(kind=self.model.CORRECTION)
 
     def filter_today(self):
         return self.filter(start__gte=timezone.now().date())
@@ -22,39 +22,47 @@ class TimerQuerySet(QuerySet):
         date_filter = {}
         assert not (month and not year), 'Cannot generate report by month without a year specified'
         if year:
-            date_filter['start__year'] = year
+            date_filter['date__year'] = year
             if month:
-                date_filter['start__month'] = month
+                date_filter['date__month'] = month
         else:
             now = timezone.now()
-            date_filter['start__year'] = now.year
-            date_filter['start__month'] = now.month
+            date_filter['date__year'] = now.year
+            date_filter['date__month'] = now.month
         return self.filter(**date_filter)
 
-    def group_for_report(self):
-        offset_seconds = timezone.get_current_timezone().utcoffset(datetime.now()).seconds
-        return self.extra(
-            select={'date': 'date(start + interval \'{} seconds\')'.format(offset_seconds)}
-        ).values('kind', 'date', 'user_id').order_by().annotate(
+    def group_for_report(self, order_by='-day_start'):
+        current_timezone = timezone.get_current_timezone()
+        # current_offset = current_timezone.utcoffset(datetime.now()).seconds
+        queryset = self.values('kind', 'date', 'user_id').order_by().annotate(
             total_duration=Sum('duration'),
             day_start=Min('start'),
             latest_start=Max('start'),
             day_end=Max('end')
-        ).order_by('-day_start')
+        ).order_by(order_by)
+        for day in queryset:
+            for field in ('day_start', 'day_end', 'latest_start'):
+                if not day[field]:
+                    continue
+                day[field] = day[field].astimezone(current_timezone)
+            yield day
 
-    def generate_user_report_data(self):
+    def generate_user_report_data(self, period):
         from calendar import monthrange
         from .utils import format_seconds
 
-        now = timezone.now()
-        queryset = self.filter_period(now.year, now.month).group_for_report().order_by('day_start')
+        period = period or timezone.now()
+        queryset = self.filter_period(period.year, period.month).group_for_report(order_by='day_start')
         report = OrderedDict()
         for row in queryset:
             report_row = report.setdefault(row['date'], [])
             print(row)
             if row['kind'] == self.model.WORK:
                 duration_calculator = self.model.duration_formulas[self.model.WORK]
-                next_day = row['date'] + timedelta(days=1)
+                next_day = timezone.make_aware(
+                    datetime.combine(row['date'] + timedelta(days=1), datetime.min.time()),
+                    timezone.get_current_timezone()
+                )
                 total_duration = row['total_duration']
                 # We have a running timer (possibly with existing stopped timers)
                 if not row['day_end'] or row['latest_start'] > row['day_end']:
