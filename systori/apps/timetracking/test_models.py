@@ -26,6 +26,14 @@ class TimerTest(TestCase):
         self.assertEqual(timer.user, self.user)
         self.assertTrue(timer.is_running)
 
+    def test_launch_with_kwargs(self):
+        timer = Timer.launch(self.user, latitude=52.5076, longitude=13.3904)
+        self.assertTrue(timer.pk)
+        self.assertEqual(timer.user, self.user)
+        self.assertEqual(timer.latitude, 52.5076)
+        self.assertEqual(timer.longitude, 13.3904)
+        self.assertTrue(timer.is_running)
+
     def test_no_two_timers(self):
         Timer.launch(self.user)
         with self.assertRaises(ValidationError):
@@ -96,8 +104,7 @@ class TimerQuerySetTest(TestCase):
         self.user = UserFactory(company=self.company)
         self.user2 = UserFactory(company=self.company)
 
-    def test_filter_today(self):
-
+    def test_filter_date(self):
         now = timezone.now().replace(hour=9)
         yesterday = now - timedelta(days=1)
         Timer.objects.create(
@@ -106,9 +113,10 @@ class TimerQuerySetTest(TestCase):
             end=yesterday + timedelta(hours=8)
         )
 
-        timer = Timer.launch(self.user)
+        timer = Timer(user=self.user, duration=60 * 60 * 2)
+        timer.save()
         self.assertEqual(
-            Timer.objects.filter_today().get(),
+            Timer.objects.filter_date().get(),
             Timer.objects.get(pk=timer.pk)
         )
 
