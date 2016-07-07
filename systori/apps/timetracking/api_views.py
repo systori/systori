@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Timer
 from .utils import get_user_dashboard_report
 from .permissions import HasStaffAccess
-from .serializers import TimerStartSerializer
+from .serializers import TimerStartSerializer, TimerSerializer
 
 
 User = get_user_model()
@@ -46,7 +46,7 @@ class TimerView(views.APIView):
 class ReportView(views.APIView):
     
     def get(self, request, year=None, month=None):
-        return Response(list(get_user_dashboard_report(request.user)))
+        return Response(TimerSerializer(get_user_dashboard_report(request.user), many=True).data)
 
 
 class TimerAdminView(views.APIView):

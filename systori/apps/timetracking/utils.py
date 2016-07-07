@@ -38,15 +38,8 @@ def format_days(seconds):
     return '{:.1f}'.format(seconds / WORK_DAY)
 
 
-def format_dashboard_report_data(report):
-    for row in report:
-        row['date'] = row['date'].strftime('%d %b %Y')
-        row['day_start'] = row['day_start'].strftime('%H:%M')
-        row['day_end'] = row['day_end'].strftime('%H:%M') if row['day_end'] else ''
-        row['total_duration'] = format_seconds(row['total_duration'])
-        row['total'] = format_seconds(row['total'])
-        row['overtime'] = format_seconds(row['overtime'])
-        yield row
+def to_current_timezone(date_time):
+    return date_time.astimezone(timezone.get_current_timezone())
 
 
 ### Reports
@@ -54,10 +47,8 @@ def format_dashboard_report_data(report):
 
 def get_user_dashboard_report(user):
     from .models import Timer
-    report = format_dashboard_report_data(
-        Timer.objects.filter(user=user, kind=Timer.WORK).filter_date().generate_daily_users_report()
-    )
-    return report
+    timers = Timer.objects.filter(user=user, kind=Timer.WORK).order_by('start')
+    return timers
 
 
 def get_user_monthly_report(user, period):
@@ -65,7 +56,7 @@ def get_user_monthly_report(user, period):
     period = period or timezone.now()
 
     holidays_used = get_holidays_duration(user, period.year, period.month)
-    report = Timer.objects.filter(user=user).generate_user_report_data(period)
+    report = Timer.objects.filter(user=user).generate_user_report(period)
     overtime = sum(r.get('overtime', 0) for day in report.values() for r in day)
     return {
         'holidays_used': format_days(holidays_used),

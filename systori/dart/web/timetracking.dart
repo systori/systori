@@ -256,6 +256,7 @@ class ReportTable extends TableElement {
         this.allocateRows(data.length);
         var data_pivot = data.iterator;
         data_pivot.moveNext();
+        // Skipping table head
         this.body.children.skip(1).forEach((row) {
             row.fill(data_pivot.current);
             data_pivot.moveNext();

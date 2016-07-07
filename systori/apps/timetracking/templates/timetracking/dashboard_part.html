@@ -11,24 +11,18 @@
 </button>
 
 <div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title">{% now "F" %} {% trans "Report" %}</h3>
-  </div>
-  <div>
-    <table class="table" is="timetracking-report" id="timer-report">
-      <tr>
-        <th>{% trans "Date" %}</th>
-        <th>{% trans "Start" %}</th>
-        <th>{% trans "End" %}</th>
-        <th>{% trans "Time" %}</th>
-        <th>{% trans "Overtime" %}</th>
-      </tr>
-      {% for row in timetracking_report %}
-        {% include "timetracking/report_row.html" %}
-      {% endfor %}
-    </table>
-    <template for="timetracking-report-row">
+  <table class="table" is="timetracking-report" id="timer-report">
+    <tr>
+      <th></th>
+      <th>{% trans "Start" %}</th>
+      <th>{% trans "End" %}</th>
+      <th>{% trans "Duration" %}</th>
+    </tr>
+    {% for row in timetracking_report %}
       {% include "timetracking/report_row.html" %}
-    </template>
-  </div>
+    {% endfor %}
+  </table>
+  <template for="timetracking-report-row">
+    {% include "timetracking/report_row.html" %}
+  </template>
 </div>

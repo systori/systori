@@ -54,7 +54,7 @@ class TimerQuerySet(QuerySet):
                 day[field] = day[field].astimezone(current_timezone)
             yield day
 
-    def generate_user_report_data(self, period):
+    def generate_user_report(self, period=None):
         # TODO: Refactor/remove in favor of using non-aggregated Timer queryset (a la generate_daily_users_report)
         from .utils import format_seconds
 
