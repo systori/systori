@@ -88,18 +88,16 @@
         <th>{% trans "Total" %}</th>
         <th>{% trans "Overtime" %}</th>
       </tr>
-      {% for row in report %}
+      {% for user, row in report.items %}
       <tr>
         <td class="user">
-          <a href="{% url 'timetracking_user' row.user.pk %}">{{ row.user.get_full_name }}</a>
+          <a href="{% url 'timetracking_user' user.pk %}">{{ user.get_full_name }}</a>
         </td>
-        {% with row.report as row_report %}
-        <td>{{ row_report.day_start|date:"H:i" }}</td>
-        <td>{{ row_report.day_end|date:"H:i" }}</td>
-        <td>{{ row_report.total_duration|seconds_to_hours }}</td>
-        <td>{{ row_report.total|seconds_to_hours }}</td>
-        <td>{{ row_report.overtime|seconds_to_hours }}</td>
-        {% endwith %}
+        <td>{{ row.day_start|date:"H:i" }}</td>
+        <td>{{ row.day_end|date:"H:i" }}</td>
+        <td>{{ row.total_duration|seconds_to_hours }}</td>
+        <td>{{ row.total|seconds_to_hours }}</td>
+        <td>{{ row.overtime|seconds_to_hours }}</td>
       </tr>
       {% empty %}
         {% trans "No users" %}

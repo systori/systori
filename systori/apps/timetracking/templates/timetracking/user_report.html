@@ -86,6 +86,10 @@
       <td>{% trans "Illness" %}</td>
       <td>{{ row.day_start|date:"H:i" }}</td>
       <td colspan="4">{{ row.total_duration|seconds_to_hours }}</td>
+      {% elif row.kind == 'correction' %}
+      <td>{% trans "Correction" %}</td>
+      <td>{{ row.total_duration|seconds_to_hours }}</td>
+      <td colspan="5">{{ row.comment }}</td>
       {% else %}
       <td colspan="6">—</td>
       {% endif %}

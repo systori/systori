@@ -55,7 +55,7 @@ def format_dashboard_report_data(report):
 def get_user_dashboard_report(user):
     from .models import Timer
     report = format_dashboard_report_data(
-        Timer.objects.filter(user=user, kind=Timer.WORK).filter_date().generate_report_data()
+        Timer.objects.filter(user=user, kind=Timer.WORK).filter_date().generate_daily_users_report()
     )
     return report
 
@@ -83,10 +83,10 @@ def get_holidays_duration(user, year, month):
 def get_daily_users_report(users, date=None):
     from .models import Timer
 
-    report = Timer.objects.filter(user__in=users).filter_date(date).generate_report_data()
-    report_by_user = regroup(report, itemgetter('user_id'))
-    for user in users:
-        yield {'user': user, 'report': report_by_user.get(user.pk)}
+    return Timer.objects.generate_daily_users_report(date=date, users=users)
+    # report_by_user = regroup(report, itemgetter('user_id'))
+    # for user in users:
+    #     yield {'user': user, 'report': report_by_user.get(user.pk)}
 
 
 def get_running_timer_duration(user):

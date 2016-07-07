@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, date
 from collections import OrderedDict
 
 from django.db.models.query import QuerySet
-from django.db.models import F, Sum, Min, Max, Func
+from django.db.models import F, Q, Sum, Min, Max, Func
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
@@ -19,7 +19,7 @@ class TimerQuerySet(QuerySet):
         date = date or timezone.now().date()
         start = datetime.combine(date, datetime.min.time())
         end = start + timedelta(days=1)
-        return self.filter(start__gte=start, end__lt=end)
+        return self.filter(Q(end__lt=end) | Q(end__isnull=True), start__gte=start)
 
     def filter_month(self, year=None, month=None):
         date_filter = {}
@@ -34,10 +34,14 @@ class TimerQuerySet(QuerySet):
             date_filter['date__month'] = now.month
         return self.filter(**date_filter)
 
-    def group_for_report(self, order_by='-day_start'):
+    def group_for_report(self, order_by='-day_start', separate_by_kind=False):
+        # TODO: Refactor/remove in favor of using non-aggregated Timer queryset (a la generate_daily_users_report)
         current_timezone = timezone.get_current_timezone()
-        # current_offset = current_timezone.utcoffset(datetime.now()).seconds
-        queryset = self.values('kind', 'date', 'user_id').order_by().annotate(
+        grouping_values = ['date', 'user_id', 'comment']
+        if separate_by_kind:
+            grouping_values.insert(0, 'kind')
+
+        queryset = self.values(*grouping_values).order_by().annotate(
             total_duration=Sum('duration'),
             day_start=Min('start'),
             latest_start=Max('start'),
@@ -51,15 +55,15 @@ class TimerQuerySet(QuerySet):
             yield day
 
     def generate_user_report_data(self, period):
-        from calendar import monthrange
+        # TODO: Refactor/remove in favor of using non-aggregated Timer queryset (a la generate_daily_users_report)
         from .utils import format_seconds
 
         period = period or timezone.now()
-        queryset = self.filter_month(period.year, period.month).group_for_report(order_by='day_start')
+        queryset = self.filter_month(period.year, period.month).group_for_report(
+            order_by='day_start', separate_by_kind=True)
         report = OrderedDict()
         for row in queryset:
             report_row = report.setdefault(row['date'], [])
-            print(row)
             if row['kind'] == self.model.WORK:
                 duration_calculator = self.model.duration_formulas[self.model.WORK]
                 next_day = timezone.make_aware(
@@ -77,14 +81,15 @@ class TimerQuerySet(QuerySet):
                     total = total_duration
 
                 overtime = total - self.model.WORK_HOURS if total > self.model.WORK_HOURS else 0
-                report_row.append({
+                work_row = {
                     'kind': 'work',
                     'total_duration': total_duration,
                     'total': total,
                     'overtime': overtime,
                     'day_start': row['day_start'],
                     'day_end': row['day_end']
-                })
+                }
+                report_row.append(work_row)
             elif row['kind'] == self.model.HOLIDAY:
                 report_row.append({
                     'kind': 'holiday',
@@ -97,30 +102,45 @@ class TimerQuerySet(QuerySet):
                     'day_start': row['day_start'],
                     'total_duration': row['total_duration']
                 })
+            elif row['kind'] == self.model.CORRECTION:
+                report_row.append({
+                    'kind': 'correction',
+                    'day_start': row['day_start'],
+                    'total_duration': row['total_duration'],
+                    'comment': row['comment']
+                })
         return report
 
-    def generate_report_data(self):
-        report_data = self.group_for_report()
-        now = timezone.now()
+    def generate_daily_users_report(self, date, users):
+        from .utils import format_seconds
 
-        for day in report_data:
-            # real_day_end = timezone.make_aware(
-            #     datetime.combine(day['date'], datetime.max.time()),
-            #     timezone.get_current_timezone()
-            # )
-            duration_calculator = self.model.duration_formulas[day['kind']]
+        day_start = timezone.make_aware(
+            datetime.combine(date, datetime.min.time()),
+            timezone.get_current_timezone()
+        )
+        queryset = self.filter(user__in=users).filter_date(date).select_related('user')
+        reports = OrderedDict((user, {
+            'day_start': day_start,
+            'day_end': day_start,
+            'total_duration': 0,
+            'total': 0,
+            'overtime': 0
+        }) for user in users)
+        for timer in queryset:
+            user_report = reports[timer.user]
+            if user_report['day_start'] > timer.start:
+                user_report['day_start'] = timer.start
+            if timer.end and timer.end > user_report['day_end']:
+                user_report['day_end'] = timer.end
+            user_report['total_duration'] += timer.get_duration_seconds()
 
-            # We have a running timer (possibly with existing stopped timers)
-            if not day['day_end'] or day['latest_start'] > day['day_end']:
-                day['total_duration'] += duration_calculator(day['latest_start'], now)
-
-            if day['total_duration'] >= self.model.DAILY_BREAK:
-                total = day['total_duration'] - self.model.DAILY_BREAK
+        for _, report_data in reports.items():
+            if report_data['total_duration'] >= self.model.DAILY_BREAK:
+                report_data['total'] = report_data['total_duration'] - self.model.DAILY_BREAK
             else:
-                total = day['total_duration']
-            overtime = total - self.model.WORK_HOURS if total > self.model.WORK_HOURS else 0
-            day.update({
-                'total': total,
-                'overtime': overtime
-            })
-            yield day
+                report_data['total'] = report_data['total_duration']
+            if report_data['total'] > self.model.WORK_HOURS:
+                report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
+            else:
+                report_data['overtime'] = 0
+        return reports
