@@ -72,7 +72,7 @@ class ManualTimerForm(ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields['start'].widget = DateTimeWidget(
-            options={'format': 'dd.mm.yyyy HH:ii', 'pickerPosition': 'bottom-left'},
+            options={'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'},
             attrs={'id':'timetracking-form-start'},
             bootstrap_version=3,
             # usel10n=True
