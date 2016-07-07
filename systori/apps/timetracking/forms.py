@@ -60,7 +60,7 @@ class ManualTimerForm(ModelForm):
 
     class Meta:
         model = Timer
-        fields = ['user', 'start', 'duration', 'kind']
+        fields = ['user', 'start', 'duration', 'kind', 'comment']
         field_classes = {
             'user': UserChoiceField
         }
