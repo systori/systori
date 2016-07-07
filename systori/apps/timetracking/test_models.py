@@ -26,6 +26,14 @@ class TimerTest(TestCase):
         self.assertEqual(timer.user, self.user)
         self.assertTrue(timer.is_running)
 
+    def test_launch_with_kwargs(self):
+        timer = Timer.launch(self.user, latitude=52.5076, longitude=13.3904)
+        self.assertTrue(timer.pk)
+        self.assertEqual(timer.user, self.user)
+        self.assertEqual(timer.latitude, 52.5076)
+        self.assertEqual(timer.longitude, 13.3904)
+        self.assertTrue(timer.is_running)
+
     def test_no_two_timers(self):
         Timer.launch(self.user)
         with self.assertRaises(ValidationError):

@@ -4,6 +4,10 @@
 
 <button type="button" class="btn btn-default" id="timer-toggle" value="Start">
   <span class="glyphicon glyphicon-play"></span>
+  <span class="btn-label"
+    data-label-stopped="{% trans 'Paused' %}"
+    data-label-geolocating="{% trans 'Geolocating...' %}"
+    data-label-running="{% trans 'Running' %}">{% trans 'Paused' %}</span>
 </button>
 
 <div class="panel panel-default">

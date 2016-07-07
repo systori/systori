@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext as __
 
+from ..project.models import JobSite
 from .managers import TimerQuerySet
 
 
@@ -44,6 +45,9 @@ class Timer(models.Model):
     altered_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name='timers_altered', blank=True, null=True)
     comment = models.CharField(max_length=1000, blank=True)
+    latitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
+    job_site = models.ForeignKey(JobSite, blank=True, null=True)
 
     objects = TimerQuerySet.as_manager()
 
@@ -58,11 +62,11 @@ class Timer(models.Model):
         )
 
     @classmethod
-    def launch(cls, user):
+    def launch(cls, user, **kwargs):
         """
         Convenience method for consistency (so the class has not just stop but launch method as well)
         """
-        timer = cls(user=user)
+        timer = cls(user=user, **kwargs)
         timer.save()
         return timer
 

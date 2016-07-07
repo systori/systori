@@ -64,6 +64,9 @@ class TimetrackingTimer extends Resource {
     String url = "/api/v1/timetracking/timer/";
     InputElement box = querySelector('#timer-box');
     HtmlElement button;
+    String _current_button_icon = 'play';
+    HtmlElement _button_icon;
+    HtmlElement _button_label;
     ReportTable report_table;
     int hours = 0;
     int minutes = 0;
@@ -72,28 +75,55 @@ class TimetrackingTimer extends Resource {
 
     void initialize() {
         report_table = document.querySelector('#timer-report');
+
         button = querySelector('#timer-toggle');
+        _button_icon = button.querySelector('.glyphicon');
+        _button_label = button.querySelector('.btn-label');
+
         button.onClick.listen((_) {
             this.toggle();
         });
 
         get().then((response) {
-            Map data = JSON.decode(response.responseText);
-            hours = data['duration'][0];
-            minutes = data['duration'][1];
-            seconds = data['duration'][2];
+            Map remote_data = JSON.decode(response.responseText);
+            hours = remote_data['duration'][0];
+            minutes = remote_data['duration'][1];
+            seconds = remote_data['duration'][2];
             run();
         }).catchError((Error error) {
             output();
         });
     }
 
-    void start() {
-        create().then((response) {
-            if (response.status == 200) {
-                run();
-                report_table.refresh();
+    Future<Map> _pre_create_data() async {
+        var data = new Map();
+        try {
+            set_button_icon('map-marker');
+            set_button_label('geolocating');
+            Geoposition position = await window.navigator.geolocation.getCurrentPosition();
+            data['latitude'] = position.coords.latitude;
+            data['longitude'] = position.coords.longitude;
+        } catch(PositionError, error) {
+            if (window.navigator.userAgent.contains(new RegExp(r"(Chromium)|(Dart)"))) {
+                // Dummy data for Chromium that doesn't support geolocation
+                data['latitude'] = 52.5076;
+                data['longitude'] = 13.3904;
             }
+            else {
+                window.alert("Geolocation error: ${error.message} (${error.code})");
+            }
+        }
+        return data;
+    }
+
+    void start() {
+        _pre_create_data().then((data) {
+            create(data).then((response) {
+                if (response.status == 200) {
+                    run();
+                    report_table.refresh();
+                }
+            });
         });
     }
 
@@ -103,8 +133,8 @@ class TimetrackingTimer extends Resource {
 
     void run() {
         timer = new Timer.periodic(new Duration(milliseconds: 1000), increment);
-        button.children.first.classes.toggle('glyphicon-play');
-        button.children.first.classes.toggle('glyphicon-pause');
+        set_button_icon('pause');
+        set_button_label('running');
     }
 
     void increment(Timer timer) {
@@ -132,12 +162,22 @@ class TimetrackingTimer extends Resource {
         timer.cancel();
         hours = minutes = seconds = 0;
         output();
-        button.children.first.classes.toggle('glyphicon-play');
-        button.children.first.classes.toggle('glyphicon-pause');
+        set_button_icon('play');
+        set_button_label('stopped');
     }
 
     bool isRunning() {
         return timer == null ? false : timer.isActive;
+    }
+
+    void set_button_icon(String name) {
+        _button_icon.classes.remove('glyphicon-${_current_button_icon}');
+        _current_button_icon = name;
+        _button_icon.classes.add('glyphicon-${_current_button_icon}');
+    }
+
+    void set_button_label(String string_constant) {
+        _button_label.text = _button_label.dataset["label-${string_constant}"];
     }
 }
 
