@@ -15,10 +15,13 @@ class TimerQuerySet(QuerySet):
     def filter_running(self):
         return self.filter(end__isnull=True).exclude(kind=self.model.CORRECTION)
 
-    def filter_today(self):
-        return self.filter(start__gte=timezone.now().date())
+    def filter_date(self, date=None):
+        date = date or timezone.now().date()
+        start = datetime.combine(date, datetime.min.time())
+        end = start + timedelta(days=1)
+        return self.filter(start__gte=start, end__lt=end)
 
-    def filter_period(self, year=None, month=None):
+    def filter_month(self, year=None, month=None):
         date_filter = {}
         assert not (month and not year), 'Cannot generate report by month without a year specified'
         if year:
@@ -52,7 +55,7 @@ class TimerQuerySet(QuerySet):
         from .utils import format_seconds
 
         period = period or timezone.now()
-        queryset = self.filter_period(period.year, period.month).group_for_report(order_by='day_start')
+        queryset = self.filter_month(period.year, period.month).group_for_report(order_by='day_start')
         report = OrderedDict()
         for row in queryset:
             report_row = report.setdefault(row['date'], [])

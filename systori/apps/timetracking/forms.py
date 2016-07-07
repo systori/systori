@@ -102,3 +102,18 @@ class MonthPickerForm(forms.Form):
         attrs={'id':'timetracking-report-period'},
         bootstrap_version=3
     ), input_formats=['%m.%Y'])
+
+
+class DayPickerForm(forms.Form):
+
+    period = forms.DateField(widget=DateTimeWidget(
+        options={
+            'format': 'dd.mm.yyyy',
+            'startView': 2,
+            'pickerPosition': 'bottom-left',
+            'minView': 2,
+            'clearBtn': False
+        },
+        attrs={'id':'timetracking-report-period'},
+        bootstrap_version=3
+    ), input_formats=['%d.%m.%Y'])
