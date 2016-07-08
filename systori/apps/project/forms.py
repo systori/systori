@@ -31,7 +31,7 @@ class ProjectUpdateForm(ModelForm):
 class JobSiteForm(ModelForm):
     class Meta:
         model = JobSite
-        fields = ['name', 'address', 'postal_code', 'city']
+        fields = ['name', 'address', 'postal_code', 'city', 'travel_time']
 
 
 class FilterForm(Form):
