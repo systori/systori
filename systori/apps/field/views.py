@@ -63,9 +63,9 @@ def delete_when_empty(dailyplan):
 
 def daily_plan_objects():
     return DailyPlan.objects \
-        .select_related("jobsite__project") \
+        .prefetch_related("jobsite__project__jobsites") \
         .prefetch_related(Prefetch("workers", queryset=TeamMember.objects.select_related("access__user"))) \
-        .prefetch_related("equipment") \
+        .prefetch_related(Prefetch("assigned_equipment", queryset=EquipmentAssignment.objects.select_related("equipment"))) \
         .prefetch_related("tasks")
 
 
@@ -120,6 +120,7 @@ class FieldPlanning(TemplateView):
         context['is_selected_future'] = selected_day > date.today()
 
         context['latest_daily_plan'] = DailyPlan.objects.first()
+        context['latest_days_with_plans'] = DailyPlan.objects.values('day').distinct()[:5]
 
         return context
 
@@ -260,12 +261,11 @@ class FieldCopyPasteDailyPlans(View):
 
 class FieldGenerateAllDailyPlans(View):
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, source_day, *args, **kwargs):
 
         selected_day = request.selected_day
-        other_day = DailyPlan.objects.first().day
 
-        for oldplan in DailyPlan.objects.filter(day=other_day):
+        for oldplan in DailyPlan.objects.filter(day=source_day):
 
             newplan = DailyPlan.objects.create(jobsite=oldplan.jobsite,
                                                day=selected_day,
@@ -278,8 +278,11 @@ class FieldGenerateAllDailyPlans(View):
                     is_foreman=oldmember.is_foreman
                 )
 
-            for oldequipment in oldplan.equipment.all():
-                newplan.equipment.add(oldequipment)
+            for oldequipment in oldplan.assigned_equipment.all():
+                EquipmentAssignment.objects.create(
+                    dailyplan=newplan,
+                    equipment_id=oldequipment.equipment_id
+                )
 
         return HttpResponseRedirect(reverse('field.planning', args=[selected_day.isoformat()]))
 
@@ -611,4 +614,7 @@ class FieldPaste(View):
         equipment_ids = clipboard.get('equipment', [])
         equipment = EquipmentAssignment.objects.filter(id__in=equipment_ids)
         equipment.update(dailyplan=dailyplan)
+        plans = clipboard.get('empty-plans', [])
+        for plan in daily_plan_objects().filter(id__in=plans):
+            delete_when_empty(plan)
         return HttpResponse("OK")
