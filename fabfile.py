@@ -148,6 +148,27 @@ export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
             file_handle.write(env_lines)
 
 
+def getcontentshell():
+    "download content shell for linux, on mac use homebrew"
+    BIN_DIR = os.path.expanduser('~/bin')
+    if not os.path.exists(BIN_DIR):
+        os.mkdir(BIN_DIR)
+    url = ('https://storage.googleapis.com/dart-archive/channels/stable'
+           '/release/1.17.1/dartium/content_shell-linux-x64-release.zip')
+    with lcd(BIN_DIR):
+        local("curl %s > content_shell.zip" % url)
+        local("unzip -qo content_shell.zip")
+        local("mv drt-lucid64-full-stable-1.17.1.0 content-shell")
+    env_lines = 'export PATH="%s:$PATH"' % os.path.join(BIN_DIR, 'content-shell')
+    bash_rc_file = os.path.expanduser('~/.bashrc')
+    if not os.path.exists(bash_rc_file):
+        print("Add to your environment:")
+        print(env_lines)
+    elif not 'content-shell' in open(bash_rc_file, 'r').read():
+        with open(bash_rc_file, 'a') as file_handle:
+            file_handle.write(env_lines)
+
+
 def linkdart():
     "create .packages file"
     with open('systori/dart/.packages', 'r') as packages:
