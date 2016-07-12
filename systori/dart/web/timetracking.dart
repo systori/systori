@@ -22,39 +22,44 @@ class Resource {
         };
     }
 
-    String build_request_url() =>
-        id ? "${url}${id}" : url;
+    String build_request_url() {
+        if (id != null) {
+          return "${url}${id}";
+        } else {
+          return url;
+        }
+    }
 
-    Future<int> create([Map data]) {
+    Future<HttpRequest> create([Map data]) {
         return HttpRequest.request(
-                url,
-                method: "POST",
-                requestHeaders: headers,
-                sendData: JSON.encode(data)
+            url,
+            method: "POST",
+            requestHeaders: headers,
+            sendData: JSON.encode(data)
         );
     }
 
-    Future<int> destroy() {
+    Future<HttpRequest> destroy() {
         return HttpRequest.request(
-                build_request_url(),
-                method: "DELETE",
-                requestHeaders: headers
+            build_request_url(),
+            method: "DELETE",
+            requestHeaders: headers
         );
     }
 
-    Future<int> get() {
+    Future<HttpRequest> get() {
         return HttpRequest.request(
-                build_request_url(),
-                method: "GET"
+            build_request_url(),
+            method: "GET"
         );
     }
 
-    Future<int> update([Map data]) {
+    Future<HttpRequest> update([Map data]) {
         return HttpRequest.request(
-                build_request_url(),
-                method: "PUT",
-                requestHeaders: headers,
-                sendData: JSON.encode(data)
+            build_request_url(),
+            method: "PUT",
+            requestHeaders: headers,
+            sendData: JSON.encode(data)
         );
     }
 }
@@ -103,7 +108,7 @@ class TimetrackingTimer extends Resource {
             Geoposition position = await window.navigator.geolocation.getCurrentPosition();
             data['latitude'] = position.coords.latitude;
             data['longitude'] = position.coords.longitude;
-        } catch(PositionError, error) {
+        } on PositionError catch (error) {
             if (window.navigator.userAgent.contains(new RegExp(r"(Chromium)|(Dart)"))) {
                 // Dummy data for Chromium that doesn't support geolocation
                 data['latitude'] = 52.5076;
@@ -199,8 +204,9 @@ class ReportTableRow extends TableRowElement with MapMixin {
         });
     }
 
-    V operator[](Object key) => mapping[key].text;
-    void operator []=(K key, V value) {
+    operator[](Object key) => mapping[key].text;
+
+    void operator []=(Object key, String value) {
         mapping[key].text = value;
     }
 
@@ -209,6 +215,8 @@ class ReportTableRow extends TableRowElement with MapMixin {
             this[key] = data.containsKey(key) ? data[key] : '(None)';
         });
     }
+
+    void clear() {}
 }
 
 
