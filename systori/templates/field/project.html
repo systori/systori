@@ -47,7 +47,7 @@
           {{ day|date:"D" }}, {{ day|date:"DATE_FORMAT" }}
         {% endif %}
 
-        {% if access.has_staff %}
+        {% if access.has_laborer %}
 
           {% if day.isoformat != request.GET.copy_source_date %}
 

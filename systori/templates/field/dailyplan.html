@@ -6,7 +6,7 @@
 
   <div class="panel-heading dailyplan-heading">
     <a name="plan-{{  dailyplan.id }}"></a>
-    {% if access.has_foreman %}
+    {% if access.has_laborer %}
     <div class="pull-right">
       <button class="btn btn-default btn-sm paste-button" style="display: none;">
         <span class="glyphicon glyphicon-paste"></span>
@@ -19,7 +19,7 @@
 
   <div class="list-group">
 
-  {% if access.has_foreman %}
+  {% if access.has_laborer %}
     <a class="list-group-item sub-header clearfix workers-header"
        href="{% url 'field.dailyplan.assign-labor' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
       {% trans "Workers" %}<span class="pull-right">{% trans 'edit' %} &raquo;</span>
@@ -30,7 +30,7 @@
 
   {% for worker in dailyplan.workers.all %}
 
-    {% if access.has_foreman %}
+    {% if access.has_laborer %}
     <field-worker
         class="list-group-item"
         data-id="{{ worker.id }}">{{ worker.access.user.get_full_name }}</field-worker>
@@ -45,7 +45,7 @@
   </div>
 
 
-  {% if access.has_foreman %}
+  {% if access.has_laborer %}
     <a class="list-group-item sub-header clearfix equipment-header"
        href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
       {% trans "Equipment" %}<span class="pull-right">{% trans 'edit' %} &raquo;</span>
@@ -56,7 +56,7 @@
 
   {% for assigned in dailyplan.assigned_equipment.all %}
 
-    {% if access.has_foreman %}
+    {% if access.has_laborer %}
     <field-equipment
         class="list-group-item"
         data-id="{{ assigned.id }}">{{ assigned.equipment }}</field-equipment>
@@ -72,7 +72,7 @@
 
   {% if 'planning' not in request.path or request.session.is_planning_tasks %}
 
-  {% if access.has_foreman %}
+  {% if access.has_laborer %}
     <a class="list-group-item sub-header clearfix"
        href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
       {% trans "Tasks" %}<span class="pull-right">{% trans 'edit' %} &raquo;</span>
