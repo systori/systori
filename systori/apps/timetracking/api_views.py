@@ -44,7 +44,7 @@ class TimerView(views.APIView):
 
 
 class ReportView(views.APIView):
-    
+
     def get(self, request, year=None, month=None):
         return Response(TimerSerializer(get_user_dashboard_report(request.user), many=True).data)
 
@@ -72,7 +72,3 @@ class TimerAdminView(views.APIView):
         timer = get_object_or_404(Timer.objects.filter_running(), user__pk=user_id)
         timer.stop()
         return Response()
-
-    def get(self, request, user_id):
-        timer = get_object_or_404(Timer.objects.filter_running(), user__pk=user_id)
-        return Response(timer.to_dict())
