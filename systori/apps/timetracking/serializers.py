@@ -18,12 +18,16 @@ class TimerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Timer
-        fields = ('kind', 'start', 'end', 'duration')
+        fields = ('kind', 'date', 'start', 'end', 'duration')
 
     kind = serializers.CharField(source='get_kind_display')
+    date = serializers.SerializerMethodField()
     start = serializers.SerializerMethodField()
     end = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
+
+    def get_date(self, obj):
+        return utils.to_current_timezone(obj.start).strftime('%d.%m.%Y')
 
     def get_start(self, obj):
         return utils.to_current_timezone(obj.start).strftime('%H:%M')

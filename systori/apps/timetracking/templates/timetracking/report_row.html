@@ -1,6 +1,6 @@
 {% load timetracking %}
 <tr is="timetracking-report-row">
-    <td data-mapping="kind">{{ row.get_kind_display }}</td>
+    <td data-mapping="date">{{ row.start|date:"d.m.Y" }}</td>
     <td data-mapping="start">{{ row.start|date:"H:i" }}</td>
     <td data-mapping="end">{{ row.end|date:"H:i" }}</td>
     <td data-mapping="duration">{{ row.duration|seconds_to_hours }}</td>

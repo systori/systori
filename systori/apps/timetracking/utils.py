@@ -47,7 +47,9 @@ def to_current_timezone(date_time):
 
 def get_user_dashboard_report(user):
     from .models import Timer
-    timers = Timer.objects.filter(user=user, kind=Timer.WORK).order_by('start')
+    now = timezone.now()
+    timers = Timer.objects.filter_month(now.year, now.month).filter(
+        user=user, kind=Timer.WORK).order_by('start')
     return timers
 
 
