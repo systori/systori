@@ -479,12 +479,6 @@ class FieldAssignLabor(TemplateView):
             if new_assignments:
                 dailyplan.save()
 
-            origin = urlquote(_origin_success_url(request, ''))
-
-            redirect = reverse('field.dailyplan.assign-tasks',
-                               args=[dailyplan.jobsite.id, dailyplan.url_id]) + \
-                               '?origin=' + origin
-
             if not new_assignments:
                 return HttpResponseRedirect(redirect)
 
