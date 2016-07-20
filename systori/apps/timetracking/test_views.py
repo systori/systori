@@ -48,6 +48,14 @@ class TimerViewTest(SystoriTestCase):
         self.client.login(username=self.user.email, password=self.password)
         response = self.client.put(self.url)
         self.assertEqual(response.status_code, 200)
+        with self.assertRaises(Timer.DoesNotExist):
+            timer.refresh_from_db()
+
+    def test_put(self):
+        timer = Timer.objects.create(user=self.user, start=timezone.now() - timedelta(hours=1))
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code, 200)
         timer.refresh_from_db()
         self.assertFalse(timer.is_running)
 
@@ -67,7 +75,7 @@ class ReportViewTest(SystoriTestCase):
         timer1 = Timer.objects.create(
             user=self.user, 
             start=yesterday - timedelta(hours=10),
-            end=yesterday - timedelta(hours=2)
+            end=yesterday - timedelta(hours=3)
         )
         timer2 = Timer.objects.create(
             user=self.user,
@@ -84,16 +92,35 @@ class ReportViewTest(SystoriTestCase):
             start=now - timedelta(hours=1),
             end=now - timedelta(minutes=30)
         )
+        Timer.objects.create(
+            user=UserFactory(company=self.company),
+            start=now - timedelta(hours=1),
+            end=now - timedelta(minutes=30)
+        )
+
         self.client.login(username=self.user.email, password=self.password)
         response = self.client.get(self.url)
         json_response = json.loads(response.content.decode('utf-8'))
 
-        self.assertEqual(json_response[0]['date'], now.strftime('%d %b %Y'))
-        self.assertEqual(json_response[0]['day_start'], timer3.start.strftime('%H:%M'))
-        self.assertEqual(json_response[0]['day_end'], timer4.end.strftime('%H:%M'))
-        self.assertEqual(json_response[0]['total_duration'], '6:30')
-        self.assertEqual(json_response[0]['total'], '5:30')
-        self.assertEqual(json_response[0]['overtime'], '0:00')
+        self.assertEqual(json_response[0]['date'], yesterday.strftime('%d.%m.%Y'))
+        self.assertEqual(json_response[0]['start'], timer1.start.strftime('%H:%M'))
+        self.assertEqual(json_response[0]['end'], timer1.end.strftime('%H:%M'))
+        self.assertEqual(json_response[0]['duration'], '7:00')
+
+        self.assertEqual(json_response[1]['date'], yesterday.strftime('%d.%m.%Y'))
+        self.assertEqual(json_response[1]['start'], timer2.start.strftime('%H:%M'))
+        self.assertEqual(json_response[1]['end'], timer2.end.strftime('%H:%M'))
+        self.assertEqual(json_response[1]['duration'], '1:30')
+
+        self.assertEqual(json_response[2]['date'], now.strftime('%d.%m.%Y'))
+        self.assertEqual(json_response[2]['start'], timer3.start.strftime('%H:%M'))
+        self.assertEqual(json_response[2]['end'], timer3.end.strftime('%H:%M'))
+        self.assertEqual(json_response[2]['duration'], '6:00')
+
+        self.assertEqual(json_response[3]['date'], now.strftime('%d.%m.%Y'))
+        self.assertEqual(json_response[3]['start'], timer4.start.strftime('%H:%M'))
+        self.assertEqual(json_response[3]['end'], timer4.end.strftime('%H:%M'))
+        self.assertEqual(json_response[3]['duration'], '0:30')
 
     def test_get_empty(self, now=None):
         self.client.login(username=self.user.email, password=self.password)

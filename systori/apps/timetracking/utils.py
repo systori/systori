@@ -1,5 +1,6 @@
 from datetime import time, timedelta
 from operator import itemgetter
+from collections import UserDict
 
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -10,6 +11,12 @@ User = get_user_model()
 
 WORK_DAY = timedelta(hours=8).total_seconds()
 HOLIDAYS_PER_MONTH = WORK_DAY * 1.5
+
+
+class AccumulatorDict(UserDict):
+
+    def __setitem__(self, key, value):
+        self.data.setdefault(key, []).append(value)
 
 
 def regroup(items, getter):
@@ -87,3 +94,12 @@ def get_running_timer_duration(user):
     timer = Timer.objects.filter_running().filter(user=user).first()
     duration = timer.get_duration_seconds() if timer else 0
     return format_seconds(duration, '%H:%M:%S')
+
+
+def get_users_statuses(users):
+    from .models import Timer
+    timers = Timer.objects.filter(user__in=users).filter_now()
+    user_timers = AccumulatorDict()
+    for timer in timers:
+        user_timers[timer.user.pk] = timer
+    return user_timers

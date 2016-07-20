@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from django.test import TestCase
 from django.utils import timezone
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from freezegun import freeze_time
 
 from ..company.factories import CompanyFactory
@@ -64,7 +64,7 @@ class TimerTest(TestCase):
         )
 
     @freeze_time(NOW)
-    def test_save(self):
+    def test_save_regular_timer(self):
         # Regular timer
         timer = Timer(user=self.user)
         timer.save()
@@ -76,25 +76,42 @@ class TimerTest(TestCase):
             timer = Timer(user=self.user)
             timer.save()
 
-        # Timers with some attributes set
+    @freeze_time(NOW)
+    def test_save_with_end(self):
         timer = Timer(user=self.user, end=NOW + timedelta(hours=2))
         timer.save()
         self.assertEqual(timer.start, NOW)
         self.assertEqual(timer.date, NOW.date())
         self.assertEqual(timer.duration, 60 * 60 * 2)
 
+    @freeze_time(NOW)
+    def test_save_with_duration(self):
         timer = Timer(user=self.user, duration=60 * 60 * 2)
         timer.save()
         self.assertEqual(timer.start, NOW)
         self.assertEqual(timer.date, NOW.date())
         self.assertEqual(timer.end, NOW + timedelta(hours=2))
 
-        # Correction timer
+    @freeze_time(NOW)
+    def test_save_correction_timer(self):
         timer = Timer(user=self.user, duration=60 * 60 * 2, kind=Timer.CORRECTION)
         timer.save()
         self.assertIsNone(timer.start)
         self.assertIsNone(timer.end)
         self.assertEqual(timer.date, NOW.date())
+
+    @freeze_time(NOW)
+    def test_save_overlapping_timer(self):
+        Timer.objects.create(
+            user=self.user,
+            start=NOW - timedelta(hours=2), end=NOW + timedelta(hours=2),
+            kind=Timer.HOLIDAY)
+        timer = Timer(
+            user=self.user,
+            start=NOW - timedelta(hours=1), end=NOW + timedelta(hours=5),
+            kind=Timer.HOLIDAY)
+        with self.assertRaises(ValidationError):
+            timer.save()
 
 
 class TimerQuerySetTest(TestCase):
@@ -130,6 +147,7 @@ class TimerQuerySetTest(TestCase):
         )
         Timer.objects.create(
             user=self.user,
+            duration=3600,
             kind=Timer.CORRECTION
         )
         self.assertFalse(Timer.objects.filter_running().exists())

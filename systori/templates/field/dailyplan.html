@@ -1,7 +1,7 @@
-{% load i18n staticfiles field_app %}
+{% load i18n staticfiles field_app timetracking %}
 
 {% with jobsite=dailyplan.jobsite %}
-
+{% load_user_statuses %}
 <daily-plan class="panel panel-primary" data-id="{{ dailyplan.id }}" data-paste-url="{% url 'field.dailyplan.paste' jobsite.id dailyplan.url_id %}">
 
   <div class="panel-heading dailyplan-heading">
@@ -33,14 +33,14 @@
     {% if access.has_foreman %}
     <field-worker
         class="list-group-item"
-        data-id="{{ worker.id }}">{{ worker.access.user.get_full_name }}</field-worker>
+        data-id="{{ worker.id }}">{% show_user_status worker.access.user %}{{ worker.access.user.get_full_name }}</field-worker>
     {% else %}
-    <div class="list-group-item">{{ worker.access.user.get_full_name }}</div>
+    <div class="list-group-item">{% show_user_status worker.access.user %}{{ worker.access.user.get_full_name }}</div>
     {% endif %}
 
   {% endfor %}
 
-  <div {% if dailyplan.workers.all %}style="display: none;"{% endif %} class="list-group-item workers-empty">
+  <div {% if dailyplan.workers.exists %}style="display: none;"{% endif %} class="list-group-item workers-empty">
     {% trans "No workers have been assigned." %}
   </div>
 

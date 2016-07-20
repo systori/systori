@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n l10n customformatting %}
+{% load static i18n l10n customformatting timetracking %}
 
 {% debug %}
 
@@ -45,7 +45,7 @@
 
 
 {% block container %}
-
+{% load_user_statuses %}
 <div class="container-fluid">
   <div class="row equal-height-panels">
     {% for plan in selected_plans %}
@@ -61,7 +61,7 @@
             <hr>
 
           {% for worker in plan.workers.all %}
-            <h5 class="fit-text text-info">{{ worker.access.user.get_full_name }}</h5>
+            <h5 class="fit-text text-info">{% show_user_status worker.access.user %}{{ worker.access.user.get_full_name }}</h5>
           {% endfor %}
             
           {% if plan.equipment.count > 0 %}

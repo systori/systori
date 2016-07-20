@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from collections import OrderedDict
 
 from django.db.models.query import QuerySet
@@ -20,6 +20,10 @@ class TimerQuerySet(QuerySet):
         start = datetime.combine(date, datetime.min.time())
         end = start + timedelta(days=1)
         return self.filter(Q(end__lt=end) | Q(end__isnull=True), start__gte=start)
+
+    def filter_now(self, now=None):
+        now = now or timezone.now()
+        return self.filter(Q(end__gte=now) | Q(end__isnull=True), start__lte=now)
 
     def filter_month(self, year=None, month=None):
         date_filter = {}
@@ -113,24 +117,25 @@ class TimerQuerySet(QuerySet):
 
     def generate_daily_users_report(self, date, users):
         from .utils import format_seconds
-
+        date = date or timezone.now().date()
         day_start = timezone.make_aware(
             datetime.combine(date, datetime.min.time()),
             timezone.get_current_timezone()
         )
         queryset = self.filter(user__in=users).filter_date(date).select_related('user')
         reports = OrderedDict((user, {
-            'day_start': day_start,
-            'day_end': day_start,
+            'day_start': None,
+            'day_end': None,
             'total_duration': 0,
             'total': 0,
             'overtime': 0
         }) for user in users)
         for timer in queryset:
             user_report = reports[timer.user]
-            if user_report['day_start'] > timer.start:
+            if not user_report['day_start'] or user_report['day_start'] > timer.start:
                 user_report['day_start'] = timer.start
-            if timer.end and timer.end > user_report['day_end']:
+
+            if not user_report['day_end'] or timer.end and timer.end > user_report['day_end']:
                 user_report['day_end'] = timer.end
             user_report['total_duration'] += timer.get_duration_seconds()
 
