@@ -2,10 +2,11 @@ import json
 from datetime import timedelta
 
 from django.db import models
-from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.utils import timezone
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext as __
+from rest_framework.exceptions import ValidationError
 
 from ..project.models import JobSite
 from .managers import TimerQuerySet
@@ -75,27 +76,53 @@ class Timer(models.Model):
     def is_running(self):
         return not self.end
 
-    def _pre_save_generic(self):
+    @property
+    def is_working(self):
+        return self.kind == self.WORK
+
+    @property
+    def is_busy(self):
+        return self.kind in (self.EDUCATION, self.HOLIDAY, self.ILLNESS)
+
+    def _pre_save_for_generic(self):
         if not self.start:
             self.start = timezone.now()
-
-        if not self.pk and not (self.end or self.duration) and Timer.objects.filter(
-                user=self.user).filter_running().exists():
-            raise ValidationError(_('Timer already running'))
-
         if self.end:
             self.duration = self.get_duration_seconds(self.end)
         elif self.duration:
             self.end = self.start + timedelta(seconds=self.duration)
 
-    def _pre_save_correction(self):
-        pass
+    def _pre_save_for_correction(self):
+        if self.start:
+            self.end = self.start + timedelta(seconds=self.duration)
+
+    def _validate(self):
+        if self.pk:
+            return
+        user_timers = Timer.objects.filter(user=self.user)
+        if not (self.end or self.duration) and user_timers.filter_running().exists():
+            raise ValidationError(_('Timer already running'))
+        if self.start:
+            overlapping_timer = user_timers.filter(start__lte=self.start).filter(
+                Q(end__gte=self.start) | Q(end__isnull=True)
+            ).first()
+            if overlapping_timer:
+                if overlapping_timer.end:
+                    message = _(
+                        'Overlapping timer ({:%d.%m.%Y %H:%M}—{:%d.%m.%Y %H:%M}) already exists'
+                    ).format(overlapping_timer.start, overlapping_timer.end)
+                else:
+                    message = _(
+                        'A potentially overlapping timer (started on {:%d.%m.%Y %H:%M}) is already running'
+                    ).format(overlapping_timer.start)
+                raise ValidationError(message)
 
     def save(self, *args, **kwargs):
         if self.kind == self.CORRECTION:
-            self._pre_save_correction()
+            self._pre_save_for_correction()
         else:
-            self._pre_save_generic()
+            self._pre_save_for_generic()
+        self._validate()
 
         if not self.date:
             self.date = self.start.date() if self.start else timezone.now().date()

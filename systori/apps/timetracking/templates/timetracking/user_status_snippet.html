@@ -1,0 +1,8 @@
+{% load i18n %}
+{% if status.is_working %}
+<span class="user-status glyphicon glyphicon-record" style="font-size:70%;color:#04B486" title="{{ status.get_kind_display }}"></span>
+{% elif status.is_busy %}
+<span class="user-status glyphicon glyphicon-ban-circle" style="font-size:70%;color:#B43104" title="{{ status.get_kind_display }}"></span>
+{% else %}
+<span class="user-status glyphicon glyphicon-pause" style="font-size:70%;color:#FFBF00" title="{% trans 'Idle' %}"></span>
+{% endif %}
