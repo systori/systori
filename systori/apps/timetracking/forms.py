@@ -60,13 +60,13 @@ class ManualTimerForm(ModelForm):
 
     class Meta:
         model = Timer
-        fields = ['user', 'start', 'duration', 'kind', 'comment']
+        fields = ['user', 'start', 'end', 'kind', 'comment']
         field_classes = {
             'user': UserChoiceField
         }
 
-    duration = DurationField(required=True, widget=forms.TextInput(
-        attrs={'placeholder': '1h 30m', 'class': 'timetracking-form-duration'}))
+    # duration = DurationField(required=True, widget=forms.TextInput(
+    #     attrs={'placeholder': '1h 30m', 'class': 'timetracking-form-duration'}))
 
     def __init__(self, company=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -74,8 +74,12 @@ class ManualTimerForm(ModelForm):
         self.fields['start'].widget = DateTimeWidget(
             options={'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'},
             attrs={'id':'timetracking-form-start'},
-            bootstrap_version=3,
-            # usel10n=True
+            bootstrap_version=3
+        )
+        self.fields['end'].widget = DateTimeWidget(
+            options={'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'},
+            attrs={'id':'timetracking-form-end'},
+            bootstrap_version=3
         )
         if company:
             self.fields['user'].queryset = company.active_users()
