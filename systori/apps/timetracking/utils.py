@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 WORK_DAY = timedelta(hours=8).total_seconds()
-HOLIDAYS_PER_MONTH = WORK_DAY * 1.5
+HOLIDAYS_PER_MONTH = WORK_DAY * 2.5
 
 
 class AccumulatorDict(UserDict):

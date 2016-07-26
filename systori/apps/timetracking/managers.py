@@ -84,7 +84,7 @@ class TimerQuerySet(QuerySet):
                 else:
                     total = total_duration
 
-                overtime = total - self.model.WORK_HOURS if total > self.model.WORK_HOURS else 0
+                overtime = total - self.model.WORK_HOURS
                 work_row = {
                     'kind': 'work',
                     'total_duration': total_duration,
@@ -144,8 +144,5 @@ class TimerQuerySet(QuerySet):
                 report_data['total'] = report_data['total_duration'] - self.model.DAILY_BREAK
             else:
                 report_data['total'] = report_data['total_duration']
-            if report_data['total'] > self.model.WORK_HOURS:
-                report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
-            else:
-                report_data['overtime'] = 0
+            report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
         return reports
