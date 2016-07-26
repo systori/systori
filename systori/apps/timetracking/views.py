@@ -8,6 +8,8 @@ from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
+from systori.apps.document.views import DocumentRenderView
+
 from . import utils
 from . import forms
 
@@ -87,3 +89,16 @@ class UserReportView(PeriodFilterMixin, FormView):
         form.save()
         # return redirect('timetracking_user', self.user.pk)
         return redirect(self.request.META['HTTP_REFERER'])
+
+
+class UserReportPDFView(DocumentRenderView):
+
+    @cached_property
+    def user(self):
+        return get_object_or_404(User, pk=self.kwargs['user_id'])
+
+    def pdf(self):
+        month = self.kwargs['month']
+        year = self.kwargs['year']
+        letterhead = self.get_object().letterhead
+        return (letterhead, self.kwargs['format'])
