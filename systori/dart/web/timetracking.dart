@@ -106,8 +106,8 @@ class TimetrackingTimer extends Resource {
             set_button_icon('map-marker');
             set_button_label('geolocating');
             Geoposition position = await window.navigator.geolocation.getCurrentPosition();
-            data['latitude'] = position.coords.latitude;
-            data['longitude'] = position.coords.longitude;
+            data['latitude'] = position.coords.latitude.toStringAsFixed(8);
+            data['longitude'] = position.coords.longitude.toStringAsFixed(8);
         } on PositionError catch (error) {
             if (window.navigator.userAgent.contains(new RegExp(r"(Chromium)|(Dart)"))) {
                 // Dummy data for Chromium that doesn't support geolocation
