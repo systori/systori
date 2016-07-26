@@ -81,7 +81,7 @@ class ReportsTest(TestCase):
         self.assertEqual(
             report[self.user2]['total'],
             user2_timer1.duration + user2_timer2.duration - Timer.DAILY_BREAK)
-        self.assertEqual(report[self.user2]['overtime'], 0)
+        self.assertEqual(report[self.user2]['overtime'], -10800)
 
         self.assertEqual(report[self.user3]['day_start'], user3_timer1.start)
         self.assertEqual(report[self.user3]['day_end'], None)
@@ -90,7 +90,7 @@ class ReportsTest(TestCase):
             report[self.user3]['total'], 
             user3_timer1.get_duration_seconds() - Timer.DAILY_BREAK
         )
-        self.assertEqual(report[self.user3]['overtime'], 0)
+        self.assertEqual(report[self.user3]['overtime'], -7200)
 
         self.assertFalse(report[self.user4]['total'])
 

@@ -144,8 +144,5 @@ class TimerQuerySet(QuerySet):
                 report_data['total'] = report_data['total_duration'] - self.model.DAILY_BREAK
             else:
                 report_data['total'] = report_data['total_duration']
-            # if report_data['total'] > self.model.WORK_HOURS:
             report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
-            # else:
-            #     report_data['overtime'] = self.model.WORK_HOURS - report_data['total']
         return reports
