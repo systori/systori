@@ -81,8 +81,18 @@ class ManualTimerForm(ModelForm):
             attrs={'id':'timetracking-form-end'},
             bootstrap_version=3
         )
+        self.fields['start'].required = True
+        self.fields['end'].required = True
         if company:
             self.fields['user'].queryset = company.active_users()
+
+    def save(self, commit=True):
+        data = self.cleaned_data
+        span_days = (data['end'] - data['start']).days
+        if commit and span_days > 1 and data['kind'] in self._meta.model.FULL_DAY_KINDS:
+            return self._meta.model.objects.create_batch(days=span_days, **data)
+        else:
+            return super().save(commit)
 
 
 class UserManualTimerForm(ManualTimerForm):

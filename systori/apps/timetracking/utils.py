@@ -80,6 +80,11 @@ def get_holidays_duration(user, year, month):
     return Timer.objects.filter(user=user, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
 
 
+def get_overtime_duration(user, year, month):
+    from .models import Timer
+    return Timer.objects.filter(user=user, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
+
+
 def get_daily_users_report(users, date=None):
     from .models import Timer
 
