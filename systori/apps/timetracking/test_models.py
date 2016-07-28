@@ -1,5 +1,5 @@
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from django.test import TestCase
 from django.utils import timezone
@@ -157,3 +157,20 @@ class TimerQuerySetTest(TestCase):
             Timer.objects.filter_running().get(),
             Timer.objects.get(pk=timer.pk)
         )
+
+    def test_create_batch(self):
+        now = timezone.now()
+        start = now.replace(hour=8, minute=0, microsecond=0)
+        result = Timer.objects.create_batch(
+            user=self.user, days=3, start=now,
+            kind=Timer.HOLIDAY, comment='Test comment'
+        )
+        self.assertEqual(len(result), 3)
+        self.assertEqual(result[0].start, start)
+        self.assertEqual(result[0].end, start + timedelta(seconds=Timer.WORK_HOURS))
+        self.assertEqual(result[0].kind, Timer.HOLIDAY)
+        self.assertEqual(result[0].comment, 'Test comment')
+        self.assertEqual(result[1].start, start + timedelta(days=1))
+        self.assertEqual(result[1].end, start + timedelta(days=1) + timedelta(seconds=Timer.WORK_HOURS))
+        self.assertEqual(result[2].start, start + timedelta(days=2))
+        self.assertEqual(result[2].end, start + timedelta(days=2) + timedelta(seconds=Timer.WORK_HOURS))
