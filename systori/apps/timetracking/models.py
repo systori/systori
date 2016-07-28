@@ -26,6 +26,7 @@ class Timer(models.Model):
         (CORRECTION, _('Correction')),
         (EDUCATION, _('Education')),
     )
+    FULL_DAY_KINDS = (HOLIDAY, ILLNESS)
 
     DAILY_BREAK = 60 * 60  # seconds
     WORK_HOURS = 60 * 60 * 8  # seconds
@@ -33,8 +34,8 @@ class Timer(models.Model):
 
     duration_formulas = {
         WORK: lambda start, end: (end - start).total_seconds(),
-        ILLNESS: lambda start, end: -(end - start).total_seconds(),
-        HOLIDAY: lambda start, end: -(end - start).total_seconds(),
+        ILLNESS: lambda start, end: (end - start).total_seconds(),
+        HOLIDAY: lambda start, end: (end - start).total_seconds(),
         CORRECTION: lambda start, end: (end - start).total_seconds()
     }
 
@@ -59,8 +60,8 @@ class Timer(models.Model):
         ordering = ('start',)
 
     def __str__(self):
-        return 'Timer for {}: start={}, end={}, duration={}, date={}'.format(
-            self.user, self.start, self.end, self.duration, self.date
+        return 'Timer for user#{}: start={}, end={}, duration={}, date={}'.format(
+            self.user_id, self.start, self.end, self.duration, self.date
         )
 
     @classmethod

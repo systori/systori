@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 WORK_DAY = timedelta(hours=8).total_seconds()
-HOLIDAYS_PER_MONTH = WORK_DAY * 1.5
+HOLIDAYS_PER_MONTH = WORK_DAY * 2.5
 
 
 class AccumulatorDict(UserDict):
@@ -76,6 +76,11 @@ def get_user_monthly_report(user, period):
 
 
 def get_holidays_duration(user, year, month):
+    from .models import Timer
+    return Timer.objects.filter(user=user, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
+
+
+def get_overtime_duration(user, year, month):
     from .models import Timer
     return Timer.objects.filter(user=user, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
 
