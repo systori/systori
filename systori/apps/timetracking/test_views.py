@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+from rest_framework import status
 
 from systori.lib.testing import SystoriTestCase
 from ..company.factories import CompanyFactory
@@ -126,3 +127,24 @@ class ReportViewTest(SystoriTestCase):
         self.client.login(username=self.user.email, password=self.password)
         response = self.client.get(self.url)
         self.assertEqual(json.loads(response.content.decode('utf-8')), [])
+
+
+@override_settings(TIME_ZONE='Etc/UTC')
+class UserReportViewTest(SystoriTestCase):
+    password = 'UserReportViewTest'
+
+    def setUp(self):
+        self.another_company = CompanyFactory(schema='another_testcompany')
+        self.another_user = UserFactory(company=self.another_company, password=self.password)
+        self.company = CompanyFactory()
+        self.user = UserFactory(company=self.company, password=self.password)
+
+    def test_user_from_another_company_cannot_be_viewed(self):
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.get(reverse('timetracking_user', args=[self.another_user.pk]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_user_from_current_company_can_be_viewed(self):
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.get(reverse('timetracking_user', args=[self.user.pk]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

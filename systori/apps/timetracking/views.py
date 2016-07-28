@@ -6,13 +6,9 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model
 
 from . import utils
 from . import forms
-
-
-User = get_user_model()
 
 
 class PeriodFilterMixin:
@@ -65,7 +61,7 @@ class UserReportView(PeriodFilterMixin, FormView):
 
     @cached_property
     def user(self):
-        return get_object_or_404(User, pk=self.kwargs['user_id'])
+        return get_object_or_404(self.request.company.active_users(), pk=self.kwargs['user_id'])
 
     def get_form_kwargs(self):
         default_kwargs = super().get_form_kwargs()
