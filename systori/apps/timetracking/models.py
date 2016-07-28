@@ -26,10 +26,11 @@ class Timer(models.Model):
         (CORRECTION, _('Correction')),
         (EDUCATION, _('Education')),
     )
-    FULL_DAY_KINDS = (HOLIDAY, ILLNESS)
+    FULL_DAY_KINDS = (WORK, HOLIDAY, ILLNESS)
 
     DAILY_BREAK = 60 * 60  # seconds
     WORK_HOURS = 60 * 60 * 8  # seconds
+    WORK_DAY_START = (7, 00)
     SHORT_DURATION_THRESHOLD = 59
 
     duration_formulas = {

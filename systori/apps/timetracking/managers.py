@@ -150,7 +150,8 @@ class TimerQuerySet(QuerySet):
     def create_batch(self, days, user, start, **kwargs):
         kwargs.pop('end', None)
         assert kwargs.get('kind') in self.model.FULL_DAY_KINDS
-        start = start.replace(hour=8, minute=0, second=0, microsecond=0)
+        day_start_hour, day_start_minute = self.model.WORK_DAY_START
+        start = start.replace(hour=day_start_hour, minute=day_start_minute, second=0, microsecond=0)
         duration = self.model.WORK_HOURS
         timers = [
             self.model(user=user, start=start + timedelta(days=d), duration=duration, **kwargs)
