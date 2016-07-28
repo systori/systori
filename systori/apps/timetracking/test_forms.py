@@ -2,6 +2,7 @@ import json
 from datetime import timedelta
 
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.forms import ValidationError
 from django.utils import timezone
 
@@ -25,6 +26,7 @@ class DurationFieldTest(TestCase):
         self.assertEqual(60 * 60 * -1, field.clean('-1h'))
 
 
+@override_settings(TIME_ZONE='Etc/UTC')
 class ManualTimerFormTest(TestCase):
 
     def setUp(self):
@@ -45,8 +47,7 @@ class ManualTimerFormTest(TestCase):
 
     def test_save_days_span(self):
         now = timezone.now()
-        # A hack to work around the fact that now is in UTC
-        start = now.replace(hour=8 - 2, minute=0, second=0, microsecond=0)
+        start = now.replace(hour=8, minute=0, second=0, microsecond=0)
         form = forms.ManualTimerForm(data={
             'user': self.user.pk,
             'start': now.strftime('%d.%m.%Y %H:%M'),
