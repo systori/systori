@@ -57,8 +57,10 @@ class Timer(models.Model):
     altered_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name='timers_altered', blank=True, null=True)
     comment = models.CharField(max_length=1000, blank=True)
-    latitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
-    longitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
+    start_latitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
+    start_longitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
+    end_latitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
+    end_longitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
     job_site = models.ForeignKey(JobSite, blank=True, null=True)
 
     objects = TimerQuerySet.as_manager()

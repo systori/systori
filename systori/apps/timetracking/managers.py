@@ -59,66 +59,6 @@ class TimerQuerySet(QuerySet):
                 day[field] = day[field].astimezone(current_timezone)
             yield day
 
-    # def generate_monthly_user_report(self, period=None):
-    #     # TODO: Refactor/remove in favor of using non-aggregated Timer queryset (a la generate_daily_users_report)
-    #     from .utils import format_seconds
-
-    #     period = period or timezone.now()
-    #     queryset = self.filter_month(period.year, period.month).group_for_report(
-    #         order_by='day_start', separate_by_kind=True)
-    #     report = OrderedDict()
-    #     for row in queryset:
-    #         report_row = report.setdefault(row['date'], [])
-    #         if row['kind'] == self.model.WORK:
-    #             duration_calculator = self.model.duration_formulas[self.model.WORK]
-    #             next_day = timezone.make_aware(
-    #                 datetime.combine(row['date'] + timedelta(days=1), datetime.min.time()),
-    #                 timezone.get_current_timezone()
-    #             )
-    #             total_duration = row['total_duration']
-    #             # We have a running timer (possibly with existing stopped timers)
-    #             if not row['day_end'] or row['latest_start'] > row['day_end']:
-    #                 total_duration += duration_calculator(row['latest_start'], next_day)
-
-    #             if row['total_duration'] >= self.model.DAILY_BREAK:
-    #                 total = total_duration - self.model.DAILY_BREAK
-    #             else:
-    #                 total = total_duration
-
-    #             overtime = total - self.model.WORK_HOURS
-    #             work_row = {
-    #                 'kind': 'work',
-    #                 'total_duration': total_duration,
-    #                 'total': total,
-    #                 'overtime': overtime,
-    #                 'day_start': row['day_start'],
-    #                 'day_end': row['day_end']
-    #             }
-    #             report_row.append(work_row)
-    #         elif row['kind'] == self.model.HOLIDAY:
-    #             report_row.append({
-    #                 'kind': 'holiday',
-    #                 'day_start': row['day_start'],
-    #                 'day_end': row['day_end'],
-    #                 'total_duration': row['total_duration']
-    #             })
-    #         elif row['kind'] == self.model.ILLNESS:
-    #             report_row.append({
-    #                 'kind': 'illness',
-    #                 'day_start': row['day_start'],
-    #                 'day_end': row['day_end'],
-    #                 'total_duration': row['total_duration']
-    #             })
-    #         elif row['kind'] == self.model.CORRECTION:
-    #             report_row.append({
-    #                 'kind': 'correction',
-    #                 'day_start': row['day_start'],
-    #                 'day_end': row['day_end'],
-    #                 'total_duration': row['total_duration'],
-    #                 'comment': row['comment']
-    #             })
-    #     return report
-
     def generate_monthly_user_report(self, period=None):
         from .utils import format_seconds
 
@@ -134,7 +74,8 @@ class TimerQuerySet(QuerySet):
                     'end': None,
                     'duration': 0,
                     'overtime': 0,
-                    'total': 0                    
+                    'total': 0,
+                    'locations': []
                 },
                 'holiday': {
                     'start': None,
@@ -180,6 +121,9 @@ class TimerQuerySet(QuerySet):
                 if report_row['duration'] > self.model.WORK_HOURS:
                     report_row['overtime'] = report_row['duration'] - self.model.WORK_DAY
                     report_row['total'] = report_row['overtime']
+                report_row['locations'].append(
+                    ((timer.start_latitude, timer.start_longitude), (timer.end_latitude, timer.end_longitude))
+                )
         return report
 
     def generate_daily_users_report(self, date, users):

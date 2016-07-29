@@ -73,7 +73,23 @@
     <tr>
       <td>{{ date }}</td>
           {% if kind == 'work' %}
-      <td>{% trans "Work" %}</td>
+      <td>
+        {% trans "Work" %}
+        {% for start_location, end_location in row.locations %}
+        <br>
+          {% if start_location.0 %}
+        <a href="https://www.google.com/maps/place/{{ start_location.0 }},{{ start_location.1 }}" class="btn-xs btn-info" role="button" title="{% trans "start" %}">
+          <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+        </a>&nbsp;
+          {% endif %}
+          {% if end_location.0 %}
+        <a href="https://www.google.com/maps/place/{{ end_location.0 }},{{ end_location.1 }}" class="btn-xs btn-info" role="button" title="{% trans "end" %}">
+          <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+        </a>
+          {% endif %}
+        {% endfor %}
+    </td>
+      </td>
       <td>{{ row.start|date:"H:i" }}</td>
       <td>{{ row.end|date:"H:i"}}</td>
       <td>{{ row.duration|seconds_to_hours }}</td>

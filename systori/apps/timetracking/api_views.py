@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Timer
 from .utils import get_user_dashboard_report
 from .permissions import HasStaffAccess
-from .serializers import TimerStartSerializer, TimerSerializer
+from .serializers import TimerStartSerializer, TimerStopSerializer, TimerSerializer
 
 
 User = get_user_model()
@@ -35,8 +35,13 @@ class TimerView(views.APIView):
         Stop a timer
         """
         timer = get_object_or_404(Timer.objects.filter_running(), user=request.user)
+        serializer = TimerStopSerializer(data=request.data, context={'user': request.user})
+        serializer.is_valid(raise_exception=True)
+        timer.end_longitude = serializer.validated_data['end_longitude']
+        timer.end_latitude = serializer.validated_data['end_latitude']
         timer.stop()
         return Response()
+
 
     def get(self, request):
         timer = get_object_or_404(Timer.objects.filter_running(), user=request.user)

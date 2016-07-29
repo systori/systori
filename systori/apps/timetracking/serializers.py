@@ -8,10 +8,17 @@ class TimerStartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Timer
-        fields = ('latitude', 'longitude')
+        fields = ('start_latitude', 'start_longitude')
 
     def create(self, validated_data):
         return Timer.launch(user=self.context['user'], **validated_data)
+
+
+class TimerStopSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Timer
+        fields = ('end_latitude', 'end_longitude')
 
 
 class TimerSerializer(serializers.ModelSerializer):
