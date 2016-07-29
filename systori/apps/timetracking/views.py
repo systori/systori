@@ -9,10 +9,12 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
 from systori.apps.document.views import DocumentRenderView
+from systori.apps.document.type import timetracking
+from systori.apps.document.models import DocumentSettings
 
 from . import utils
 from . import forms
-
+from .models import Timer
 
 User = get_user_model()
 
@@ -92,13 +94,16 @@ class UserReportView(PeriodFilterMixin, FormView):
 
 
 class UserReportPDFView(DocumentRenderView):
+    data = {}
 
     @cached_property
     def user(self):
         return get_object_or_404(User, pk=self.kwargs['user_id'])
 
+    def get_queryset(self):
+        self.data['timers'] = Timer.objects.filter(user=self.user).filter_month(year=int(self.kwargs['year']),
+                                                                                month=int(self.kwargs['month']))
+
     def pdf(self):
-        month = self.kwargs['month']
-        year = self.kwargs['year']
-        letterhead = self.get_object().letterhead
-        return (letterhead, self.kwargs['format'])
+        letterhead = DocumentSettings.objects.first().timetracking_letterhead
+        return timetracking.render(self.data, letterhead)
