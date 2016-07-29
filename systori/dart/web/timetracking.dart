@@ -100,7 +100,7 @@ class TimetrackingTimer extends Resource {
         });
     }
 
-    Future<Map> _pre_create_data() async {
+    Future<Map> _get_location() async {
         var data = new Map();
         try {
             set_button_icon('map-marker');
@@ -122,8 +122,9 @@ class TimetrackingTimer extends Resource {
     }
 
     void start() {
-        _pre_create_data().then((data) {
-            create(data).then((response) {
+        _get_location().then((data) {
+            var remote_data = {'start_latitude': data['latitude'], 'start_longitude': data['longitude']};
+            create(remote_data).then((response) {
                 if (response.status == 200) {
                     run();
                     report_table.refresh();
@@ -163,7 +164,14 @@ class TimetrackingTimer extends Resource {
     }
 
     void stop() {
-        update().then((_) => report_table.refresh());
+        _get_location().then((data) {
+            var remote_data = {'end_latitude': data['latitude'], 'end_longitude': data['longitude']};
+            update(remote_data).then((response) {
+                if (response.status == 200) {
+                    report_table.refresh();
+                }
+            });
+        });
         timer.cancel();
         hours = minutes = seconds = 0;
         output();

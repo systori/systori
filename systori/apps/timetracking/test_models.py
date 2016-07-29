@@ -160,7 +160,7 @@ class TimerQuerySetTest(TestCase):
 
     def test_create_batch(self):
         now = timezone.now()
-        start = now.replace(hour=8, minute=0, microsecond=0)
+        start = now.replace(hour=7, minute=0, second=0, microsecond=0)
         result = Timer.objects.create_batch(
             user=self.user, days=3, start=now,
             kind=Timer.HOLIDAY, comment='Test comment'
