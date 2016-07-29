@@ -94,16 +94,15 @@ class UserReportView(PeriodFilterMixin, FormView):
 
 
 class UserReportPDFView(DocumentRenderView):
-    data = {}
+    model = Timer
 
     @cached_property
     def user(self):
         return get_object_or_404(User, pk=self.kwargs['user_id'])
 
-    def get_queryset(self):
-        self.data['timers'] = Timer.objects.filter(user=self.user).filter_month(year=int(self.kwargs['year']),
-                                                                                month=int(self.kwargs['month']))
-
     def pdf(self):
+        month = int(self.kwargs['month'])
+        year = int(self.kwargs['year'])
+        data = Timer.objects.filter(user=self.user).filter_month(year=year, month=month)
         letterhead = DocumentSettings.objects.first().timetracking_letterhead
-        return timetracking.render(self.data, letterhead)
+        return timetracking.render(data, letterhead, month=month, year=year)
