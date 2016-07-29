@@ -11,7 +11,7 @@ version = _V(VERSION)
 
 env.hosts = ['systori.com']
 
-PROD_MEDIA_PATH = '/srv/systori/production'
+PROD_MEDIA_PATH = '/var/lib/systori/production'
 PROD_MEDIA_FILE = 'systori.media.tgz'
 
 
