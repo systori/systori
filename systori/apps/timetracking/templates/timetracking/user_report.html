@@ -68,30 +68,40 @@
       <th>{% trans "Total Hours" %}</th>
     </tr>
     {% for date, date_entries in report.rows.items %}
-      {% for row in date_entries %}
+      {% for kind, row in date_entries.items %}
+        {% if row.start %}
     <tr>
       <td>{{ date }}</td>
-      {% if row.kind == 'work' %}
+          {% if kind == 'work' %}
       <td>{% trans "Work" %}</td>
-      <td>{{ row.day_start|date:"H:i" }}</td>
-      <td>{{ row.day_end|date:"H:i"}}</td>
-      <td>{{ row.total|seconds_to_hours }}</td>
+      <td>{{ row.start|date:"H:i" }}</td>
+      <td>{{ row.end|date:"H:i"}}</td>
+      <td>{{ row.duration|seconds_to_hours }}</td>
       <td>{{ row.overtime|seconds_to_hours}}</td>
-      <td>{{ row.total_duration|seconds_to_hours }}</td>
-      {% elif row.kind == 'holiday' %}
+      <td>{{ row.total|seconds_to_hours }}</td>
+          {% elif kind == 'holiday' %}
       <td>{% trans "Holiday" %}</td>
-      <td colspan="5">{{ row.total_duration|seconds_to_hours }}</td>
-      {% elif row.kind == 'illness' %}
+      <td colspan="5">{{ row.duration|seconds_to_hours }}</td>
+          {% elif kind == 'illness' %}
       <td>{% trans "Illness" %}</td>
-      <td>{{ row.day_start|date:"H:i" }}</td>
-      <td colspan="4">{{ row.total_duration|seconds_to_hours }}</td>
-      {% elif row.kind == 'correction' %}
+      <td>{{ row.start|date:"H:i" }}</td>
+      <td>{{ row.end|date:"H:i" }}</td>
+      <td>{{ row.duration|seconds_to_hours }}</td>
+      <td colspan="3"></td>
+          {% elif kind == 'correction' %}
       <td>{% trans "Correction" %}</td>
-      <td>{{ row.total_duration|seconds_to_hours }}</td>
-      <td colspan="5">{{ row.comment }}</td>
-      {% else %}
-      <td colspan="6">—</td>
-      {% endif %}
+      <td>{{ row.start|date:"H:i" }}</td>
+      <td>{{ row.end|date:"H:i" }}</td>
+      <td>{{ row.duration|seconds_to_hours }}</td>
+      <td colspan="3">{{ row.comment }}</td>
+          {% elif kind == 'education' and row.start %}
+      <td>{% trans "Education" %}</td>
+      <td>{{ row.start|date:"H:i" }}</td>
+      <td>{{ row.end|date:"H:i" }}</td>
+      <td>{{ row.duration|seconds_to_hours }}</td>
+      <td colspan="3"></td>
+          {% endif %}
+        {% endif %}
     </tr>
       {% endfor %}
     {% empty %}

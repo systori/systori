@@ -28,6 +28,14 @@ class Timer(models.Model):
     )
     FULL_DAY_KINDS = (WORK, HOLIDAY, ILLNESS)
 
+    KIND_TO_STRING = {
+        CORRECTION: 'correction',
+        WORK: 'work',
+        EDUCATION: 'education',
+        HOLIDAY: 'holiday',
+        ILLNESS: 'illness'
+    }
+
     DAILY_BREAK = 60 * 60  # seconds
     WORK_HOURS = 60 * 60 * 8  # seconds
     WORK_DAY_START = (7, 00)
@@ -94,10 +102,6 @@ class Timer(models.Model):
         elif self.duration:
             self.end = self.start + timedelta(seconds=self.duration)
 
-    def _pre_save_for_correction(self):
-        if self.start:
-            self.end = self.start + timedelta(seconds=self.duration)
-
     def _validate(self):
         if self.pk:
             return
@@ -120,10 +124,7 @@ class Timer(models.Model):
                 raise ValidationError(message)
 
     def save(self, *args, **kwargs):
-        if self.kind == self.CORRECTION:
-            self._pre_save_for_correction()
-        else:
-            self._pre_save_for_generic()
+        self._pre_save_for_generic()
         self._validate()
 
         if not self.date:
