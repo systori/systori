@@ -76,17 +76,26 @@
       <td>
         {% trans "Work" %}
         {% for start_location, end_location in row.locations %}
-        <br>
-          {% if start_location.0 %}
-        <a href="https://www.google.com/maps/place/{{ start_location.0 }},{{ start_location.1 }}" class="btn-xs btn-info" role="button" title="{% trans "start" %}">
-          <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
-        </a>&nbsp;
-          {% endif %}
-          {% if end_location.0 %}
-        <a href="https://www.google.com/maps/place/{{ end_location.0 }},{{ end_location.1 }}" class="btn-xs btn-info" role="button" title="{% trans "end" %}">
-          <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
-        </a>
-          {% endif %}
+          <div class="btn-group">
+            {% if start_location.0 %}
+              <a href="https://www.google.com/maps/place/{{ start_location.0 }},{{ start_location.1 }}"
+                 class="btn btn-xs btn-info"
+                 role="button"
+                 title="{% trans "start" %}"
+                 target="_blank">
+                <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+              </a>&nbsp;
+            {% endif %}
+            {% if end_location.0 %}
+              <a href="https://www.google.com/maps/place/{{ end_location.0 }},{{ end_location.1 }}"
+                 class="btn btn-xs btn-success"
+                 role="button"
+                 title="{% trans "end" %}"
+                 target="_blank">
+                <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+              </a>
+            {% endif %}
+          </div>
         {% endfor %}
     </td>
       </td>

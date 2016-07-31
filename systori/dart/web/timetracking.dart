@@ -103,8 +103,6 @@ class TimetrackingTimer extends Resource {
     Future<Map> _get_location() async {
         var data = new Map();
         try {
-            set_button_icon('map-marker');
-            set_button_label('geolocating');
             Geoposition position = await window.navigator.geolocation.getCurrentPosition();
             data['latitude'] = position.coords.latitude.toStringAsFixed(8);
             data['longitude'] = position.coords.longitude.toStringAsFixed(8);
@@ -122,6 +120,8 @@ class TimetrackingTimer extends Resource {
     }
 
     void start() {
+        set_button_icon('map-marker');
+        set_button_label('geolocating');        
         _get_location().then((data) {
             var remote_data = {'start_latitude': data['latitude'], 'start_longitude': data['longitude']};
             create(remote_data).then((response) {
@@ -164,19 +164,21 @@ class TimetrackingTimer extends Resource {
     }
 
     void stop() {
+        set_button_icon('map-marker');
+        set_button_label('geolocating');
         _get_location().then((data) {
             var remote_data = {'end_latitude': data['latitude'], 'end_longitude': data['longitude']};
             update(remote_data).then((response) {
                 if (response.status == 200) {
                     report_table.refresh();
+                    set_button_icon('play');
+                    set_button_label('stopped');
                 }
             });
         });
         timer.cancel();
         hours = minutes = seconds = 0;
         output();
-        set_button_icon('play');
-        set_button_label('stopped');
     }
 
     bool isRunning() {
