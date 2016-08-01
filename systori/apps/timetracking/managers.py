@@ -119,7 +119,7 @@ class TimerQuerySet(QuerySet):
                 if second_break_start >= timer_start_time and timer_end_time >= second_break_end:
                     report_row['total'] -= self.model.DAILY_BREAK * 0.5
                 if report_row['duration'] > self.model.WORK_HOURS:
-                    report_row['overtime'] = report_row['duration'] - self.model.WORK_DAY
+                    report_row['overtime'] = report_row['duration'] - self.model.WORK_HOURS
                     report_row['total'] = report_row['overtime']
                 report_row['locations'].append(
                     ((timer.start_latitude, timer.start_longitude), (timer.end_latitude, timer.end_longitude))
