@@ -123,13 +123,19 @@ class TimetrackingTimer extends Resource {
         set_button_icon('map-marker');
         set_button_label('geolocating');        
         _get_location().then((data) {
-            var remote_data = {'start_latitude': data['latitude'], 'start_longitude': data['longitude']};
-            create(remote_data).then((response) {
-                if (response.status == 200) {
-                    run();
-                    report_table.refresh();
-                }
-            });
+            if (data['latitude'] && data['longitude']) {
+                var remote_data = {'start_latitude': data['latitude'], 'start_longitude': data['longitude']};
+                create(remote_data).then((response) {
+                    if (response.status == 200) {
+                        run();
+                        report_table.refresh();
+                    }
+                });
+            }
+            else {
+                set_button_icon('play');
+                set_button_label('stopped');
+            }
         });
     }
 
