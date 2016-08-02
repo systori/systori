@@ -20,6 +20,12 @@ location1 = [49.516043, 8.454014]
 location_oleg = [49.507978, 8.529639]
 
 user_timers = [
+    ["bernd", 25, 2016, 8, 2, 6, 40, 0, 0, location1],
+    ["harry", 61, 2016, 8, 2, 6, 40, 0, 0, location1],
+    ["leon", 44, 2016, 8, 2, 6, 41, 0, 0, location1],
+    ["rene", 7, 2016, 8, 2, 6, 42, 0, 0, location1],
+    ["enzo", 19, 2016, 8, 2, 6, 42, 0, 0, location1],
+    ["oskar", 22, 2016, 8, 2, 6, 46, 0, 0, location1],
     ["Sven", 30, 2016, 8, 2, 6, 47, 0, 0, location1],
     ["dam", 63, 2016, 8, 2, 6, 49, 0, 0, location1],
     ["kevin", 10, 2016, 8, 2, 6, 50, 0, 0, location1],
