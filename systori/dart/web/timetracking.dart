@@ -121,9 +121,9 @@ class TimetrackingTimer extends Resource {
 
     void start() {
         set_button_icon('map-marker');
-        set_button_label('geolocating');        
+        set_button_label('geolocating');
         _get_location().then((data) {
-            if (data['latitude'] && data['longitude']) {
+            if (data.isNotEmpty) {
                 var remote_data = {'start_latitude': data['latitude'], 'start_longitude': data['longitude']};
                 create(remote_data).then((response) {
                     if (response.status == 200) {
@@ -131,8 +131,7 @@ class TimetrackingTimer extends Resource {
                         report_table.refresh();
                     }
                 });
-            }
-            else {
+            } else {
                 set_button_icon('play');
                 set_button_label('stopped');
             }
