@@ -110,7 +110,7 @@ class TimetrackingTimer extends Resource {
             if (window.navigator.userAgent.contains(new RegExp(r"(Chromium)|(Dart)"))) {
                 // Dummy data for Chromium that doesn't support geolocation
                 data['latitude'] = 52.5076;
-                data['longitude'] = 13.3904;
+                data['longitude'] = 131.39043904;
             }
             else {
                 window.alert("Geolocation error: ${error.message} (${error.code})");
