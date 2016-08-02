@@ -20,12 +20,6 @@ location1 = [49.516043, 8.454014]
 location_oleg = [49.507978, 8.529639]
 
 user_timers = [
-    ["bernd", 25, 2016, 8, 2, 6, 40, 0, 0, location1],
-    ["harry", 61, 2016, 8, 2, 6, 40, 0, 0, location1],
-    ["leon", 44, 2016, 8, 2, 6, 41, 0, 0, location1],
-    ["rene", 7, 2016, 8, 2, 6, 42, 0, 0, location1],
-    ["enzo", 19, 2016, 8, 2, 6, 42, 0, 0, location1],
-    ["oskar", 22, 2016, 8, 2, 6, 46, 0, 0, location1],
     ["Sven", 30, 2016, 8, 2, 6, 47, 0, 0, location1],
     ["dam", 63, 2016, 8, 2, 6, 49, 0, 0, location1],
     ["kevin", 10, 2016, 8, 2, 6, 50, 0, 0, location1],
@@ -44,8 +38,7 @@ user_timers = [
 
 for data in user_timers:
     user = User.objects.get(id=data[1])
-    print("creating for {} with dataset {}".format(user, data[0]))
     Timer.objects.create(user=user, date=today,
-                         start=datetime.datetime(data[2], data[3], data[4], data[5], data[6], data[7], data[8], tzinfo=tz),
+                         start=datetime.datetime(data[2], data[3], data[4], data[5], data[6], data[7], data[8],tzinfo=tz),
                          start_latitude=data[9][0],
                          start_longitude=data[9][1])
