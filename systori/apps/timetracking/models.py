@@ -109,21 +109,25 @@ class Timer(models.Model):
             return
         user_timers = Timer.objects.filter(user=self.user)
         if not (self.end or self.duration) and user_timers.filter_running().exists():
-            raise ValidationError(_('Timer already running'))
+            raise ValidationError(__('Timer already running'))
         if self.start:
             overlapping_timer = user_timers.filter(start__lte=self.start).filter(
                 Q(end__gte=self.start) | Q(end__isnull=True)
             ).first()
             if overlapping_timer:
                 if overlapping_timer.end:
-                    message = _(
+                    message = __(
                         'Overlapping timer ({:%d.%m.%Y %H:%M}—{:%d.%m.%Y %H:%M}) already exists'
                     ).format(overlapping_timer.start, overlapping_timer.end)
                 else:
-                    message = _(
+                    message = __(
                         'A potentially overlapping timer (started on {:%d.%m.%Y %H:%M}) is already running'
                     ).format(overlapping_timer.start)
                 raise ValidationError(message)
+        if self.duration > 60 * 60 * 24:
+            raise ValidationError(__('Timer cannot be longer than 24 hours'))
+        if self.start and self.end and self.start > self.end:
+            raise ValidationError(__('Timer cannot be negative'))
 
     def save(self, *args, **kwargs):
         self._pre_save_for_generic()
