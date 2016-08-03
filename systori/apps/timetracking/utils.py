@@ -30,7 +30,10 @@ def seconds_to_time(seconds):
     seconds = int(seconds)
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
-    return time(hours, minutes, seconds)
+    try:
+        return time(hours, minutes, seconds)
+    except ValueError:
+        return time(0, 0, 0)
 
 
 def format_seconds(seconds, strftime_format='%-H:%M'):

@@ -4,6 +4,7 @@ from datetime import timedelta
 
 from django import forms
 from django.forms import ModelForm, modelformset_factory, BaseModelFormSet, ValidationError
+from django.utils.translation import ugettext as __
 from django.core import validators
 
 from django.utils import timezone
@@ -85,6 +86,12 @@ class ManualTimerForm(ModelForm):
         self.fields['end'].required = True
         if company:
             self.fields['user'].queryset = company.active_users()
+
+    def clean(self):
+        data = self.cleaned_data
+        if data['start'] and data['end'] and data['start'] > data['end']:
+            raise ValidationError({'start': __('Timer cannot be negative')})
+        return data
 
     def save(self, commit=True):
         data = self.cleaned_data

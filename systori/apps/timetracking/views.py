@@ -53,6 +53,10 @@ class HomeView(PeriodFilterMixin, FormView):
         # return redirect('timetracking')
         return redirect(self.request.META['HTTP_REFERER'])
 
+    def form_invalid(self, form):
+        period_form = self.period_form_class(initial={'period': timezone.now()})
+        return self.render_to_response(self.get_context_data(form=form, period_form=period_form))
+
 
 class UserReportView(PeriodFilterMixin, FormView):
     template_name = 'timetracking/user_report.html'
