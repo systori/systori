@@ -30,7 +30,10 @@ def seconds_to_time(seconds):
     seconds = int(seconds)
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
-    return time(hours, minutes, seconds)
+    try:
+        return time(hours, minutes, seconds)
+    except ValueError:
+        return time(0, 0, 0)
 
 
 def format_seconds(seconds, strftime_format='%-H:%M'):
@@ -65,8 +68,8 @@ def get_user_monthly_report(user, period):
     period = period or timezone.now()
 
     holidays_used = get_holidays_duration(user, period.year, period.month)
-    report = Timer.objects.filter(user=user).generate_user_report(period)
-    overtime = sum(r.get('overtime', 0) for day in report.values() for r in day)
+    report = Timer.objects.filter(user=user).generate_monthly_user_report(period)
+    overtime = sum(day['work']['overtime'] for day in report.values())
     return {
         'holidays_used': format_days(holidays_used),
         'holidays_available': format_days(HOLIDAYS_PER_MONTH - holidays_used),

@@ -26,10 +26,19 @@ class Timer(models.Model):
         (CORRECTION, _('Correction')),
         (EDUCATION, _('Education')),
     )
-    FULL_DAY_KINDS = (HOLIDAY, ILLNESS)
+    FULL_DAY_KINDS = (WORK, HOLIDAY, ILLNESS)
+
+    KIND_TO_STRING = {
+        CORRECTION: 'correction',
+        WORK: 'work',
+        EDUCATION: 'education',
+        HOLIDAY: 'holiday',
+        ILLNESS: 'illness'
+    }
 
     DAILY_BREAK = 60 * 60  # seconds
     WORK_HOURS = 60 * 60 * 8  # seconds
+    WORK_DAY_START = (7, 00)
     SHORT_DURATION_THRESHOLD = 59
 
     duration_formulas = {
@@ -48,8 +57,10 @@ class Timer(models.Model):
     altered_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name='timers_altered', blank=True, null=True)
     comment = models.CharField(max_length=1000, blank=True)
-    latitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
-    longitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
+    start_latitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
+    start_longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
+    end_latitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
+    end_longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     job_site = models.ForeignKey(JobSite, blank=True, null=True)
 
     objects = TimerQuerySet.as_manager()
@@ -93,36 +104,33 @@ class Timer(models.Model):
         elif self.duration:
             self.end = self.start + timedelta(seconds=self.duration)
 
-    def _pre_save_for_correction(self):
-        if self.start:
-            self.end = self.start + timedelta(seconds=self.duration)
-
     def _validate(self):
         if self.pk:
             return
         user_timers = Timer.objects.filter(user=self.user)
         if not (self.end or self.duration) and user_timers.filter_running().exists():
-            raise ValidationError(_('Timer already running'))
+            raise ValidationError(__('Timer already running'))
         if self.start:
             overlapping_timer = user_timers.filter(start__lte=self.start).filter(
                 Q(end__gte=self.start) | Q(end__isnull=True)
             ).first()
             if overlapping_timer:
                 if overlapping_timer.end:
-                    message = _(
+                    message = __(
                         'Overlapping timer ({:%d.%m.%Y %H:%M}—{:%d.%m.%Y %H:%M}) already exists'
                     ).format(overlapping_timer.start, overlapping_timer.end)
                 else:
-                    message = _(
+                    message = __(
                         'A potentially overlapping timer (started on {:%d.%m.%Y %H:%M}) is already running'
                     ).format(overlapping_timer.start)
                 raise ValidationError(message)
+        if self.duration > 60 * 60 * 24:
+            raise ValidationError(__('Timer cannot be longer than 24 hours'))
+        if self.start and self.end and self.start > self.end:
+            raise ValidationError(__('Timer cannot be negative'))
 
     def save(self, *args, **kwargs):
-        if self.kind == self.CORRECTION:
-            self._pre_save_for_correction()
-        else:
-            self._pre_save_for_generic()
+        self._pre_save_for_generic()
         self._validate()
 
         if not self.date:

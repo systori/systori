@@ -100,11 +100,9 @@ class TimetrackingTimer extends Resource {
         });
     }
 
-    Future<Map> _pre_create_data() async {
+    Future<Map> _get_location() async {
         var data = new Map();
         try {
-            set_button_icon('map-marker');
-            set_button_label('geolocating');
             Geoposition position = await window.navigator.geolocation.getCurrentPosition();
             data['latitude'] = position.coords.latitude.toStringAsFixed(8);
             data['longitude'] = position.coords.longitude.toStringAsFixed(8);
@@ -112,7 +110,7 @@ class TimetrackingTimer extends Resource {
             if (window.navigator.userAgent.contains(new RegExp(r"(Chromium)|(Dart)"))) {
                 // Dummy data for Chromium that doesn't support geolocation
                 data['latitude'] = 52.5076;
-                data['longitude'] = 13.3904;
+                data['longitude'] = 131.39043904;
             }
             else {
                 window.alert("Geolocation error: ${error.message} (${error.code})");
@@ -122,13 +120,21 @@ class TimetrackingTimer extends Resource {
     }
 
     void start() {
-        _pre_create_data().then((data) {
-            create(data).then((response) {
-                if (response.status == 200) {
-                    run();
-                    report_table.refresh();
-                }
-            });
+        set_button_icon('map-marker');
+        set_button_label('geolocating');
+        _get_location().then((data) {
+            if (data.isNotEmpty) {
+                var remote_data = {'start_latitude': data['latitude'], 'start_longitude': data['longitude']};
+                create(remote_data).then((response) {
+                    if (response.status == 200) {
+                        run();
+                        report_table.refresh();
+                    }
+                });
+            } else {
+                set_button_icon('play');
+                set_button_label('stopped');
+            }
         });
     }
 
@@ -163,12 +169,21 @@ class TimetrackingTimer extends Resource {
     }
 
     void stop() {
-        update().then((_) => report_table.refresh());
+        set_button_icon('map-marker');
+        set_button_label('geolocating');
+        _get_location().then((data) {
+            var remote_data = {'end_latitude': data['latitude'], 'end_longitude': data['longitude']};
+            update(remote_data).then((response) {
+                if (response.status == 200) {
+                    report_table.refresh();
+                    set_button_icon('play');
+                    set_button_label('stopped');
+                }
+            });
+        });
         timer.cancel();
         hours = minutes = seconds = 0;
         output();
-        set_button_icon('play');
-        set_button_label('stopped');
     }
 
     bool isRunning() {

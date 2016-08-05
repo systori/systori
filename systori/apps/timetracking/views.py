@@ -6,7 +6,6 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model
 
 from systori.apps.document.views import DocumentRenderView
 from systori.apps.document.type import timetracking
@@ -15,9 +14,6 @@ from systori.apps.document.models import DocumentSettings
 from . import utils
 from . import forms
 from .models import Timer
-
-User = get_user_model()
-
 
 class PeriodFilterMixin:
     report_period = None
@@ -61,6 +57,10 @@ class HomeView(PeriodFilterMixin, FormView):
         # return redirect('timetracking')
         return redirect(self.request.META['HTTP_REFERER'])
 
+    def form_invalid(self, form):
+        period_form = self.period_form_class(initial={'period': timezone.now()})
+        return self.render_to_response(self.get_context_data(form=form, period_form=period_form))
+
 
 class UserReportView(PeriodFilterMixin, FormView):
     template_name = 'timetracking/user_report.html'
@@ -69,7 +69,7 @@ class UserReportView(PeriodFilterMixin, FormView):
 
     @cached_property
     def user(self):
-        return get_object_or_404(User, pk=self.kwargs['user_id'])
+        return get_object_or_404(self.request.company.active_users(), pk=self.kwargs['user_id'])
 
     def get_form_kwargs(self):
         default_kwargs = super().get_form_kwargs()

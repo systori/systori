@@ -5,13 +5,22 @@ from . import utils
 
 
 class TimerStartSerializer(serializers.ModelSerializer):
+    start_latitude = serializers.DecimalField(max_digits=11, decimal_places=8, required=True)
+    start_longitude = serializers.DecimalField(max_digits=11, decimal_places=8, required=True)
 
     class Meta:
         model = Timer
-        fields = ('latitude', 'longitude')
+        fields = ('start_latitude', 'start_longitude')
 
     def create(self, validated_data):
         return Timer.launch(user=self.context['user'], **validated_data)
+
+
+class TimerStopSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Timer
+        fields = ('end_latitude', 'end_longitude')
 
 
 class TimerSerializer(serializers.ModelSerializer):

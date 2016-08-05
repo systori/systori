@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from collections import OrderedDict
 
+from pytz import timezone as pytz_timezone
 from django.db.models.query import QuerySet
 from django.db.models import F, Q, Sum, Min, Max, Func
 from django.utils import timezone
@@ -58,61 +59,71 @@ class TimerQuerySet(QuerySet):
                 day[field] = day[field].astimezone(current_timezone)
             yield day
 
-    def generate_user_report(self, period=None):
-        # TODO: Refactor/remove in favor of using non-aggregated Timer queryset (a la generate_daily_users_report)
+    def generate_monthly_user_report(self, period=None):
         from .utils import format_seconds
 
+        naive_now = datetime.now()
         period = period or timezone.now()
-        queryset = self.filter_month(period.year, period.month).group_for_report(
-            order_by='day_start', separate_by_kind=True)
+        queryset = self.filter_month(period.year, period.month)
+
         report = OrderedDict()
-        for row in queryset:
-            report_row = report.setdefault(row['date'], [])
-            if row['kind'] == self.model.WORK:
-                duration_calculator = self.model.duration_formulas[self.model.WORK]
-                next_day = timezone.make_aware(
-                    datetime.combine(row['date'] + timedelta(days=1), datetime.min.time()),
-                    timezone.get_current_timezone()
-                )
-                total_duration = row['total_duration']
-                # We have a running timer (possibly with existing stopped timers)
-                if not row['day_end'] or row['latest_start'] > row['day_end']:
-                    total_duration += duration_calculator(row['latest_start'], next_day)
-
-                if row['total_duration'] >= self.model.DAILY_BREAK:
-                    total = total_duration - self.model.DAILY_BREAK
-                else:
-                    total = total_duration
-
-                overtime = total - self.model.WORK_HOURS
-                work_row = {
-                    'kind': 'work',
-                    'total_duration': total_duration,
-                    'total': total,
-                    'overtime': overtime,
-                    'day_start': row['day_start'],
-                    'day_end': row['day_end']
+        for timer in queryset:
+            report.setdefault(timer.date, OrderedDict({
+                'work': {
+                    'start': None,
+                    'end': None,
+                    'duration': 0,
+                    'overtime': 0,
+                    'total': 0,
+                    'locations': []
+                },
+                'holiday': {
+                    'start': None,
+                    'end': None,
+                    'duration': 0,
+                },
+                'illness': {
+                    'start': None,
+                    'end': None,
+                    'duration': 0,
+                },
+                'correction': {
+                    'start': None,
+                    'end': None,
+                    'duration': 0,
+                },
+                'education': {
+                    'start': None,
+                    'end': None,
+                    'duration': 0,
                 }
-                report_row.append(work_row)
-            elif row['kind'] == self.model.HOLIDAY:
-                report_row.append({
-                    'kind': 'holiday',
-                    'day_start': row['day_start'],
-                    'total_duration': row['total_duration']
-                })
-            elif row['kind'] == self.model.ILLNESS:
-                report_row.append({
-                    'kind': 'illness',
-                    'day_start': row['day_start'],
-                    'total_duration': row['total_duration']
-                })
-            elif row['kind'] == self.model.CORRECTION:
-                report_row.append({
-                    'kind': 'correction',
-                    'day_start': row['day_start'],
-                    'total_duration': row['total_duration'],
-                    'comment': row['comment']
-                })
+            }))
+            report_row = report[timer.start.date()][self.model.KIND_TO_STRING[timer.kind]]
+            if not report_row['start'] or report_row['start'] > timer.start:
+                report_row['start'] = timer.start
+            if not report_row['end'] or timer.end > report_row['end']:
+                report_row['end'] = timer.end
+            report_row['duration'] += timer.duration
+            if timer.kind == self.model.WORK:
+                report_row['total'] += timer.duration
+                timer_start_time = (timer.start.hour, timer.start.minute)
+                timer_end_time = (timer.end.hour, timer.end.minute)
+                # TODO: This is a hack for dealing with the timezone insanity, should fix it later
+                offset = pytz_timezone('CET').utcoffset(naive_now).total_seconds() / 60 / 60
+                first_break_start = (9 - offset, 00)
+                first_break_end = (9 - offset, 30)
+                second_break_start = (12 - offset, 30)
+                second_break_end = (13 - offset, 00)
+                if first_break_start >= timer_start_time and timer_end_time >= first_break_end:
+                    report_row['total'] -= self.model.DAILY_BREAK * 0.5
+                if second_break_start >= timer_start_time and timer_end_time >= second_break_end:
+                    report_row['total'] -= self.model.DAILY_BREAK * 0.5
+                if report_row['duration'] > self.model.WORK_HOURS:
+                    report_row['overtime'] = report_row['duration'] - self.model.WORK_HOURS
+                    report_row['total'] = report_row['overtime']
+                report_row['locations'].append(
+                    ((timer.start_latitude, timer.start_longitude), (timer.end_latitude, timer.end_longitude))
+                )
         return report
 
     def generate_daily_users_report(self, date, users):
@@ -150,7 +161,8 @@ class TimerQuerySet(QuerySet):
     def create_batch(self, days, user, start, **kwargs):
         kwargs.pop('end', None)
         assert kwargs.get('kind') in self.model.FULL_DAY_KINDS
-        start = start.replace(hour=8, minute=0, second=0, microsecond=0)
+        day_start_hour, day_start_minute = self.model.WORK_DAY_START
+        start = start.replace(hour=day_start_hour, minute=day_start_minute, second=0, microsecond=0)
         duration = self.model.WORK_HOURS
         timers = [
             self.model(user=user, start=start + timedelta(days=d), duration=duration, **kwargs)

@@ -27,11 +27,11 @@ class TimerTest(TestCase):
         self.assertTrue(timer.is_running)
 
     def test_launch_with_kwargs(self):
-        timer = Timer.launch(self.user, latitude=52.5076, longitude=13.3904)
+        timer = Timer.launch(self.user, start_latitude=52.5076, start_longitude=13.3904)
         self.assertTrue(timer.pk)
         self.assertEqual(timer.user, self.user)
-        self.assertEqual(timer.latitude, 52.5076)
-        self.assertEqual(timer.longitude, 13.3904)
+        self.assertEqual(timer.start_latitude, 52.5076)
+        self.assertEqual(timer.start_longitude, 13.3904)
         self.assertTrue(timer.is_running)
 
     def test_no_two_timers(self):
@@ -96,8 +96,8 @@ class TimerTest(TestCase):
     def test_save_correction_timer(self):
         timer = Timer(user=self.user, duration=60 * 60 * 2, kind=Timer.CORRECTION)
         timer.save()
-        self.assertIsNone(timer.start)
-        self.assertIsNone(timer.end)
+        self.assertEqual(timer.start, NOW)
+        self.assertEqual(timer.end, NOW + timedelta(hours=2))
         self.assertEqual(timer.date, NOW.date())
 
     @freeze_time(NOW)
@@ -112,6 +112,14 @@ class TimerTest(TestCase):
             kind=Timer.HOLIDAY)
         with self.assertRaises(ValidationError):
             timer.save()
+
+    def test_save_long_timer_fails(self):
+        with self.assertRaises(ValidationError):
+            Timer.objects.create(user=self.user, start=NOW, end=NOW + timedelta(days=2))
+
+    def test_create_negative_timer_fails(self):
+        with self.assertRaises(ValidationError):
+            Timer.objects.create(user=self.user, start=NOW, end=NOW - timedelta(days=2))
 
 
 class TimerQuerySetTest(TestCase):
@@ -160,7 +168,7 @@ class TimerQuerySetTest(TestCase):
 
     def test_create_batch(self):
         now = timezone.now()
-        start = now.replace(hour=8, minute=0, microsecond=0)
+        start = now.replace(hour=7, minute=0, second=0, microsecond=0)
         result = Timer.objects.create_batch(
             user=self.user, days=3, start=now,
             kind=Timer.HOLIDAY, comment='Test comment'
