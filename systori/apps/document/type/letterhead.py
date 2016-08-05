@@ -10,7 +10,7 @@ from django.utils.translation import ugettext as _
 
 from .style import NumberedLetterheadCanvas, NumberedSystoriDocument
 from .style import force_break, heading_and_date
-from .style import calculate_table_width_and_pagesize
+from .style import get_available_width_height_and_pagesize
 
 from .font import FontManager
 
@@ -18,7 +18,7 @@ from .font import FontManager
 def render(letterhead):
 
     font = FontManager(letterhead.font)
-    table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
+    available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
 
     invoice_date = date_format(date(*map(int, '2016-01-31'.split('-'))), use_l10n=True)
 
@@ -36,7 +36,7 @@ def render(letterhead):
             """), font.normal),
             Spacer(0, 25*mm),
 
-            heading_and_date(_("Invoice"), invoice_date, font, table_width, debug=letterhead.debug),
+            heading_and_date(_("Invoice"), invoice_date, font, available_width, debug=letterhead.debug),
             Spacer(0, 4*mm),
 
             Paragraph(_("Invoice No.") + " 00000815", font.normal_right),

@@ -6,7 +6,7 @@ from django.utils.translation import ugettext as _
 
 from .style import NumberedSystoriDocument
 from .style import NumberedLetterheadCanvas, NumberedCanvas
-from .style import calculate_table_width_and_pagesize
+from .style import get_available_width_height_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .font import FontManager
 
@@ -19,7 +19,7 @@ def render(refund, letterhead, format):
     with BytesIO() as buffer:
 
         font = FontManager(letterhead.font)
-        table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
+        available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
         document_date = date_format(date(*map(int, refund['document_date'].split('-'))), use_l10n=True)
         doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
@@ -29,7 +29,7 @@ def render(refund, letterhead, format):
 
             get_address_label_spacer(refund),
 
-            heading_and_date(refund.get('title') or _("Refund"), document_date, font, table_width,
+            heading_and_date(refund.get('title') or _("Refund"), document_date, font, available_width,
                              debug=DEBUG_DOCUMENT),
 
         ]

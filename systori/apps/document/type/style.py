@@ -15,13 +15,16 @@ from reportlab.lib.units import mm
 from reportlab.lib import colors, pagesizes, units
 
 
-def calculate_table_width_and_pagesize(letterhead):
+def get_available_width_height_and_pagesize(letterhead):
     document_unit = getattr(units, letterhead.document_unit)
     pagesize = getattr(pagesizes, letterhead.document_format)
     if letterhead.orientation == 'landscape':
         pagesize = pagesizes.landscape(pagesize)
-    margin = letterhead.left_margin + letterhead.right_margin
-    return pagesize[0] - float(margin) * document_unit, pagesize
+    width_margin = letterhead.left_margin + letterhead.right_margin
+    height_margin = letterhead.top_margin + letterhead.bottom_margin
+    return pagesize[0] - float(width_margin) * document_unit,\
+           pagesize[1] - float(height_margin) * document_unit,\
+           pagesize
 
 
 def chunk_text(txt, max_length=1500):

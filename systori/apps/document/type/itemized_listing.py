@@ -15,7 +15,7 @@ from systori.lib.templatetags.customformatting import money
 
 from .style import NumberedSystoriDocument, fonts, TableFormatter, ContinuationTable
 from .style import NumberedLetterheadCanvasWithoutFirstPage, NumberedCanvas
-from .style import calculate_table_width_and_pagesize
+from .style import get_available_width_height_and_pagesize
 from .invoice import collate_itemized_listing, serialize
 
 from systori.apps.document.models import DocumentSettings
@@ -67,7 +67,7 @@ def render(project, format):
     letterhead = DocumentSettings.objects.first().itemized_letterhead
 
     with BytesIO() as buffer:
-        table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
+        available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
 
         today = date_format(date.today(), use_l10n=True)
 
@@ -84,11 +84,11 @@ def render(project, format):
 
             Spacer(0, 10*mm),
 
-            collate_payments(itemized_listing, table_width),
+            collate_payments(itemized_listing, available_width),
 
             Spacer(0, 10*mm),
 
-        ] + collate_itemized_listing(itemized_listing, font, table_width)
+        ] + collate_itemized_listing(itemized_listing, font, available_width)
 
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)

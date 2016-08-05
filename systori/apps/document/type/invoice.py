@@ -17,7 +17,7 @@ from systori.apps.accounting.constants import TAX_RATE
 
 from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, fonts, force_break, p, b
 from .style import NumberedLetterheadCanvas, NumberedCanvas
-from .style import calculate_table_width_and_pagesize
+from .style import get_available_width_height_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .font import FontManager
 
@@ -173,7 +173,7 @@ def render(invoice, letterhead, show_payment_details, format):
     with BytesIO() as buffer:
 
         font = FontManager(letterhead.font)
-        table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
+        available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
         invoice_date = date_format(date(*map(int, invoice['document_date'].split('-'))), use_l10n=True)
         doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
@@ -183,7 +183,7 @@ def render(invoice, letterhead, show_payment_details, format):
 
             get_address_label_spacer(invoice),
 
-            heading_and_date(invoice.get('title') or _("Invoice"), invoice_date, font, table_width,
+            heading_and_date(invoice.get('title') or _("Invoice"), invoice_date, font, available_width,
                              debug=DEBUG_DOCUMENT),
 
             Spacer(0, 6*mm),
@@ -196,7 +196,7 @@ def render(invoice, letterhead, show_payment_details, format):
 
             Spacer(0, 4*mm),
 
-            collate_payments(invoice, font, table_width, show_payment_details),
+            collate_payments(invoice, font, available_width, show_payment_details),
 
             Spacer(0, 4*mm),
 
@@ -213,7 +213,7 @@ def render(invoice, letterhead, show_payment_details, format):
 
             Spacer(0, 4*mm),
 
-        ] + collate_itemized_listing(invoice, font, table_width)
+        ] + collate_itemized_listing(invoice, font, available_width)
 
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)
