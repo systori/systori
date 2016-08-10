@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import date as _date
+from datetime import datetime
 
 GASOLINE = 'gasoline'
 DIESEL = 'diesel'
@@ -24,10 +25,9 @@ class Equipment(models.Model):
     license_plate = models.CharField(_('license plate'), max_length=10, blank=True)
     number_of_seats = models.IntegerField(_('number of seats'), default=2)
     icon = models.ImageField(_('Icon'), blank=True)
-    fuel = models.CharField(_('fuel'), max_length=100, choices=FUEL_CHOICES, default=DIESEL)
-    last_refueling_stop = models.DateField(_('last refueling stop'), blank=True, editable=False)
+    fuel = models.CharField(_('fuel'), max_length=255, choices=FUEL_CHOICES, default=DIESEL)
+    last_refueling_stop = models.DateTimeField(_('last refueling stop'), blank=True, null=True)
 
-    @property
     def mileage(self):
         refuelingstop = self.refuelingstop_set.aggregate(
             m=models.Max('mileage')
@@ -42,7 +42,6 @@ class Equipment(models.Model):
 
     mileage.short_description = _('mileage')
 
-    @property
     def average_consumption(self):
         consumption = self.refuelingstop_set.aggregate(
             average_consumption=models.Avg('average_consumption')
@@ -64,35 +63,34 @@ class RefuelingStop(models.Model):
         verbose_name = _('refueling stop')
         verbose_name_plural = _('refueling stops')
 
-    vehicle = models.ForeignKey(Equipment, verbose_name=_('vehicle'))
-    datetime = models.DateTimeField(blank=True, null=True, db_index=True)
+    equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
+    datetime = models.DateTimeField(default=datetime.now(), db_index=True)
     mileage = models.IntegerField(_('mileage'))
-    liters = models.DecimalField(_('refueled liters'), max_digits=4, decimal_places=2, default=0.0)
+    liters = models.DecimalField(_('refueled liters'), max_digits=5, decimal_places=2, default=0.0)
     price_per_liter = models.FloatField(_('price per liter'))
     average_consumption = models.FloatField(_('average consumption'), null=True, blank=True, editable=False)
 
     def __str__(self):
-        return u"%s %s %s" % (_date(self.date), self.liters, _('liters'))
+        return u"%s %s %s" % (_date(self.datetime), self.liters, _('liters'))
 
     def save(self, *args, **kwargs):
-        # Update last_refueling_stop in vehicle object/table
-        if self.vehicle and (self.vehicle.last_refueling_stop is None \
-        or self.vehicle.last_refueling_stop < self.date):
-            self.vehicle.last_refueling_stop = self.date
-            self.vehicle.save()
+        # Update last_refueling_stop in equipment object/table
+        if self.equipment and (self.equipment.last_refueling_stop is None \
+        or self.equipment.last_refueling_stop < self.datetime):
+            self.equipment.last_refueling_stop = self.datetime
+            self.equipment.save()
         # Save average consumption
-        if self.vehicle:
+        if self.equipment:
             self.average_consumption = self.calc_average_consumption()
         super(RefuelingStop, self).save(*args, **kwargs)
 
-    @property
-    def average_consumption(self):
-        if not (self.vehicle and self.date and self.mileage and self.liters):
+    def calc_average_consumption(self):
+        if not (self.equipment and self.datetime and self.mileage and self.liters):
             return "unknow"
         older_refueling_stops = RefuelingStop.objects.filter(
-            vehicle_id=self.vehicle.id,
-            date__lt=self.date
-        ).order_by('-date')
+            equipment_id=self.equipment.id,
+            datetime__lt=self.datetime
+        ).order_by('-datetime')
         if older_refueling_stops.count() == 0:
             return None
         else:
@@ -107,7 +105,7 @@ class Defect(models.Model):
         verbose_name = _('defect')
         verbose_name_plural = _('defects')
 
-    vehicle = models.ForeignKey(Equipment, verbose_name=_('vehicle'))
+    equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
     date = models.DateField(_('date'))
     mileage = models.IntegerField(_('mileage'))
     description = models.TextField(_('description'))
