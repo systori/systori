@@ -8,4 +8,7 @@ urlpatterns = [
     url(r'^equipment-create$', office_auth(EquipmentCreate.as_view()), name='equipment.create'),
     url(r'^equipment-(?P<pk>\d+)/edit$', office_auth(EquipmentUpdate.as_view()), name='equipment.edit'),
     url(r'^equipment-(?P<pk>\d+)/delete$', office_auth(EquipmentDelete.as_view()), name='equipment.delete'),
+
+    url(r'^equipment-(?P<pk>\d+)/add-refueling-stop$',
+        office_auth(RefuelingStopCreate.as_view()), name='refueling_stop.create'),
 ]

@@ -612,3 +612,8 @@ class FieldPaste(View):
         for plan in daily_plan_objects().filter(id__in=plans):
             delete_when_empty(plan)
         return HttpResponse("OK")
+
+
+class FieldEquipmentList(ListView):
+    model = Equipment
+    template_name = "field/equipment_list.html"

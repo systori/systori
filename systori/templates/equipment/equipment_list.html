@@ -17,7 +17,9 @@
     {% for equipment in equipment_list %}
       <tr>
         <td>{{ equipment.id }}</td>
-        <td>{{ equipment.name }}</td>
+        <td>
+            <a href="{% url 'equipment.view' equipment.id %}">{{ equipment.name }}</a>
+        </td>
         <td>
           <a href="{% url 'equipment.edit' equipment.id %}">{% trans "Edit" %}</a>
           <a href="{% url 'equipment.delete' equipment.id %}">{% trans "Delete" %}</a>

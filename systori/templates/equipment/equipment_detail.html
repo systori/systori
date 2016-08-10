@@ -11,4 +11,32 @@
     </div>
   {% endfor %}
 
+    <a href="{% url 'refueling_stop.create' equipment.id %}">{% trans "Add refuel stop" %}</a>
+
+    <h2 class="sub-header">{% trans "Refueling Stops" %}</h2>
+    <div class="table-responsive">
+    <table class="table table-striped" id="jobs-table">
+        <thead>
+            <tr>
+                <th>{% trans "Average Consumption" %}</th>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "Mileage" %}</th>
+                <th>{% trans "Liters" %}</th>
+                <th>{% trans "Price" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for refuel_stop in refueling_stops %}
+            <tr>
+                <td>{{ refuel_stop.average_consumption }}</td>
+                <td>{{ refuel_stop.datetime }}</td>
+                <td>{{ refuel_stop.mileage }}</td>
+                <td>{{ refuel_stop.liters }}</td>
+                <td>{{ refuel_stop.price_per_liter }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
 {% endblock %}
