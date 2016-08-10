@@ -21,12 +21,13 @@ class Equipment(models.Model):
     purchase_price = models.DecimalField(_("Purchase Price"), max_digits=14, decimal_places=2, default=0.0)
 
     # Vehicle specific fields
-    license_plate = models.CharField(_('license plate'), max_length=10, null=True, blank=True)
+    license_plate = models.CharField(_('license plate'), max_length=10, blank=True)
     number_of_seats = models.IntegerField(_('number of seats'), default=2)
-    icon = models.ImageField(_('Icon'), null=True, blank=True)
+    icon = models.ImageField(_('Icon'), blank=True)
     fuel = models.CharField(_('fuel'), max_length=100, choices=FUEL_CHOICES, default=DIESEL)
-    last_refueling_stop = models.DateField(_('last refueling stop'), null=True, blank=True, editable=False)
+    last_refueling_stop = models.DateField(_('last refueling stop'), blank=True, editable=False)
 
+    @property
     def mileage(self):
         refuelingstop = self.refuelingstop_set.aggregate(
             m=models.Max('mileage')
@@ -41,6 +42,7 @@ class Equipment(models.Model):
 
     mileage.short_description = _('mileage')
 
+    @property
     def average_consumption(self):
         consumption = self.refuelingstop_set.aggregate(
             average_consumption=models.Avg('average_consumption')
@@ -83,7 +85,8 @@ class RefuelingStop(models.Model):
             self.average_consumption = self.calc_average_consumption()
         super(RefuelingStop, self).save(*args, **kwargs)
 
-    def calc_average_consumption(self):
+    @property
+    def average_consumption(self):
         if not (self.vehicle and self.date and self.mileage and self.liters):
             return "unknow"
         older_refueling_stops = RefuelingStop.objects.filter(
