@@ -3,6 +3,7 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
+from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import date as _date
 
 
@@ -82,14 +83,14 @@ class RefuelingStop(models.Model):
         return RefuelingStop.objects.filter(
             equipment_id=self.equipment.id,
             mileage__lt=self.mileage
-        ).exclude(id=self.id).order_by('-mileage').get()
+        ).exclude(id=self.id).order_by('-mileage').first()
 
     @cached_property
     def younger_refueling_stop(self):
         return RefuelingStop.objects.filter(
             equipment_id=self.equipment.id,
             mileage__gt=self.mileage
-        ).exclude(id=self.id).order_by('-mileage').get()
+        ).exclude(id=self.id).order_by('-mileage').first()
 
     def save(self, *args, **kwargs):
         # Update last_refueling_stop in equipment object/table
@@ -97,10 +98,8 @@ class RefuelingStop(models.Model):
             self.equipment.last_refueling_stop = self.datetime
             self.equipment.save()
         # Save average consumption
-        if self.equipment and not self.younger_refueling_stop:
+        if self.equipment:
             self.calc_average_consumption()
-        elif self.equipment:
-            self.calc_average_consumption_cascade()
         super(RefuelingStop, self).save(*args, **kwargs)
 
     def calc_average_consumption(self):
@@ -110,11 +109,15 @@ class RefuelingStop(models.Model):
             last_mileage = self.older_refueling_stop.mileage
         distance = self.mileage - last_mileage
         self.average_consumption = round(self.liters/distance*100, 2)
-        self.save()
+        if self.younger_refueling_stop:
+            calc_average_consumption_cascade(self)
 
-    def calc_average_consumption_cascade(self):
-        self.calc_average_consumption()
-        self.younger_refueling_stop.calc_average_consumption()
+
+def calc_average_consumption_cascade(refueling_stop):
+    RefuelingStop.objects.filter(
+        equipment_id=refueling_stop.equipment.id,
+        mileage__gt=refueling_stop.mileage
+    ).exclude(id=refueling_stop.id).order_by('-mileage').first().calc_average_consumption()
 
 
 class Defect(models.Model):
