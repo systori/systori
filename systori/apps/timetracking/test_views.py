@@ -1,6 +1,8 @@
 import json
 from datetime import timedelta
 
+from urllib.parse import urlencode
+
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
@@ -23,12 +25,17 @@ class TimerViewTest(SystoriTestCase):
 
     def test_post(self):
         self.client.login(username=self.user.email, password=self.password)
-        response = self.client.post(self.url)
+        response = self.client.post(self.url, {'start_latitude': '52.5076', 'start_longitude': '131.39043904'})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Timer.objects.filter_running().filter(user=self.user).exists())
 
-    def test_post_error(self):
+    def test_post_with_already_running_timer(self):
         timer = Timer.launch(self.user)
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 400)
+
+    def test_post_without_coordinates(self):
         self.client.login(username=self.user.email, password=self.password)
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 400)
@@ -39,15 +46,19 @@ class TimerViewTest(SystoriTestCase):
         response = self.client.get(self.url)
         self.assertIn('duration', json.loads(response.content.decode('utf-8')))
 
-    def test_get_no_timer(self, now=None):
+    def test_get_no_timer(self):
         self.client.login(username=self.user.email, password=self.password)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 404)
 
-    def test_put(self):
+    def test_put_with_short_timer(self):
         timer = Timer.launch(self.user)
         self.client.login(username=self.user.email, password=self.password)
-        response = self.client.put(self.url)
+        response = self.client.put(
+            self.url,
+            urlencode({'end_latitude': '52.5076', 'end_longitude': '131.39043904'}),
+            content_type='application/x-www-form-urlencoded'
+        )
         self.assertEqual(response.status_code, 200)
         with self.assertRaises(Timer.DoesNotExist):
             timer.refresh_from_db()
@@ -55,8 +66,12 @@ class TimerViewTest(SystoriTestCase):
     def test_put(self):
         timer = Timer.objects.create(user=self.user, start=timezone.now() - timedelta(hours=1))
         self.client.login(username=self.user.email, password=self.password)
-        response = self.client.put(self.url)
-        self.assertEqual(response.status_code, 200)
+        response = self.client.put(
+            self.url,
+            urlencode({'end_latitude': '52.5076', 'end_longitude': '131.39043904'}),
+            content_type='application/x-www-form-urlencoded'
+        )
+        self.assertEqual(response.status_code, 200, response.data)
         timer.refresh_from_db()
         self.assertFalse(timer.is_running)
 

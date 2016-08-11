@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 
 from django.test import TestCase
 from django.utils import timezone
-from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
 from ..company.factories import CompanyFactory
@@ -74,7 +74,7 @@ class TimerTest(TestCase):
 
         with self.assertRaises(ValidationError):
             timer = Timer(user=self.user)
-            timer.save()
+            timer.clean()
 
     @freeze_time(NOW)
     def test_save_with_end(self):
@@ -111,15 +111,12 @@ class TimerTest(TestCase):
             start=NOW - timedelta(hours=1), end=NOW + timedelta(hours=5),
             kind=Timer.HOLIDAY)
         with self.assertRaises(ValidationError):
-            timer.save()
-
-    def test_save_long_timer_fails(self):
-        with self.assertRaises(ValidationError):
-            Timer.objects.create(user=self.user, start=NOW, end=NOW + timedelta(days=2))
+            timer.clean()
 
     def test_create_negative_timer_fails(self):
         with self.assertRaises(ValidationError):
-            Timer.objects.create(user=self.user, start=NOW, end=NOW - timedelta(days=2))
+            timer = Timer(user=self.user, start=NOW, end=NOW - timedelta(days=2))
+            timer.clean()
 
 
 class TimerQuerySetTest(TestCase):

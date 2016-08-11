@@ -47,7 +47,7 @@ class ManualTimerFormTest(TestCase):
 
     def test_save_days_span(self):
         now = timezone.now()
-        start = now.replace(hour=8, minute=0, second=0, microsecond=0)
+        start = now.replace(hour=7, minute=0, second=0, microsecond=0)
         form = forms.ManualTimerForm(data={
             'user': self.user.pk,
             'start': now.strftime('%d.%m.%Y %H:%M'),

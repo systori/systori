@@ -17,6 +17,8 @@ class TimerStartSerializer(serializers.ModelSerializer):
 
 
 class TimerStopSerializer(serializers.ModelSerializer):
+    end_latitude = serializers.DecimalField(max_digits=11, decimal_places=8, required=True)
+    end_longitude = serializers.DecimalField(max_digits=11, decimal_places=8, required=True)
 
     class Meta:
         model = Timer
