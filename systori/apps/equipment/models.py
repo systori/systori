@@ -1,7 +1,10 @@
+from decimal import Decimal
 from django.db import models
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
+from django.utils.timezone import now
 from django.template.defaultfilters import date as _date
-from datetime import datetime
+
 
 GASOLINE = 'gasoline'
 DIESEL = 'diesel'
@@ -64,39 +67,54 @@ class RefuelingStop(models.Model):
         verbose_name_plural = _('refueling stops')
 
     equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
-    datetime = models.DateTimeField(default=datetime.now(), db_index=True)
-    mileage = models.IntegerField(_('mileage'))
+    datetime = models.DateTimeField(default=now(), db_index=True)
+    mileage = models.DecimalField(_('mileage'), max_digits=6, decimal_places=0)
     liters = models.DecimalField(_('refueled liters'), max_digits=5, decimal_places=2, default=0.0)
     price_per_liter = models.FloatField(_('price per liter'))
-    average_consumption = models.FloatField(_('average consumption'), null=True, blank=True, editable=False)
+    average_consumption = models.DecimalField(_('average consumption'), max_digits=5, decimal_places=2,
+                                              null=True, blank=True)
 
     def __str__(self):
         return u"%s %s %s" % (_date(self.datetime), self.liters, _('liters'))
 
+    @cached_property
+    def older_refueling_stop(self):
+        return RefuelingStop.objects.filter(
+            equipment_id=self.equipment.id,
+            mileage__lt=self.mileage
+        ).exclude(id=self.id).order_by('-mileage').get()
+
+    @cached_property
+    def younger_refueling_stop(self):
+        return RefuelingStop.objects.filter(
+            equipment_id=self.equipment.id,
+            mileage__gt=self.mileage
+        ).exclude(id=self.id).order_by('-mileage').get()
+
     def save(self, *args, **kwargs):
         # Update last_refueling_stop in equipment object/table
-        if self.equipment and (self.equipment.last_refueling_stop is None \
-        or self.equipment.last_refueling_stop < self.datetime):
+        if self.equipment and (not self.equipment.last_refueling_stop or not self.younger_refueling_stop):
             self.equipment.last_refueling_stop = self.datetime
             self.equipment.save()
         # Save average consumption
-        if self.equipment:
-            self.average_consumption = self.calc_average_consumption()
+        if self.equipment and not self.younger_refueling_stop:
+            self.calc_average_consumption()
+        elif self.equipment:
+            self.calc_average_consumption_cascade()
         super(RefuelingStop, self).save(*args, **kwargs)
 
     def calc_average_consumption(self):
-        if not (self.equipment and self.datetime and self.mileage and self.liters):
-            return "unknow"
-        older_refueling_stops = RefuelingStop.objects.filter(
-            equipment_id=self.equipment.id,
-            datetime__lt=self.datetime
-        ).order_by('-datetime')
-        if older_refueling_stops.count() == 0:
-            return None
+        if not self.older_refueling_stop:
+            last_mileage = Decimal(0)
         else:
-            last_mileage = older_refueling_stops[0].mileage
+            last_mileage = self.older_refueling_stop.mileage
         distance = self.mileage - last_mileage
-        return round((self.liters * 100) / distance, 2)
+        self.average_consumption = round(self.liters/distance*100, 2)
+        self.save()
+
+    def calc_average_consumption_cascade(self):
+        self.calc_average_consumption()
+        self.younger_refueling_stop.calc_average_consumption()
 
 
 class Defect(models.Model):
