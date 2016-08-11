@@ -63,6 +63,7 @@ class TimerQuerySet(QuerySet):
         from .utils import format_seconds
 
         naive_now = datetime.now()
+        now = timezone.now()
         period = period or timezone.now()
         queryset = self.filter_month(period.year, period.month)
 
@@ -103,11 +104,12 @@ class TimerQuerySet(QuerySet):
                 report_row['start'] = timer.start
             if not report_row['end'] or timer.end > report_row['end']:
                 report_row['end'] = timer.end
-            report_row['duration'] += timer.duration
+            report_row['duration'] += timer.get_duration_seconds(now)
             if timer.kind == self.model.WORK:
-                report_row['total'] += timer.duration
+                report_row['total'] += timer.get_duration_seconds(now)
                 timer_start_time = (timer.start.hour, timer.start.minute)
-                timer_end_time = (timer.end.hour, timer.end.minute)
+                timer_end = timer.end or now
+                timer_end_time = (timer_end.hour, timer_end.minute)
                 # TODO: This is a hack for dealing with the timezone insanity, should fix it later
                 offset = pytz_timezone('CET').utcoffset(naive_now).total_seconds() / 60 / 60
                 first_break_start = (9 - offset, 00)
