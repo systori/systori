@@ -1,42 +1,109 @@
 {% extends "frame.html" %}
-{% load i18n %}
+{% load i18n l10n customformatting %}
 
 {% block sidebar %}{% include "main/sidebar.html" with section='equipment' %}{% endblock %}
 
 {% block content %}
-  <h2>{% trans 'Equipment Details' %}</h2>
-  {% for field in form %}
-    <div>
-      {{ field.label }}: {{ field.value }}
+    <div class="row">
+        <div class="col-xs-12">
+            <h2 class="sub-header">{% trans 'Equipment Details' %}</h2>
+            <a href="{% url 'equipment.edit' equipment.id %}">{% trans "Edit" %}</a>
+            <div class="table-responsive">
+            <table class="table table-striped" id="jobs-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Name" %}</th>
+                        <th>{% trans "Manufacturer" %}</th>
+                        <th>{% trans "purchase date" %}</th>
+                        <th>{% trans "purchase price" %}</th>
+                        <th>{% trans "license plate" %}</th>
+                        <th>{% trans "number of seats" %}</th>
+                        <th>{% trans "icon" %}</th>
+                        <th>{% trans "fuel" %}</th>
+                        <th>{% trans "last refueling stop" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ equipment.name }}</td>
+                        <td>{{ equipment.manufacturer }}</td>
+                        <td>{{ equipment.purchase_date|localize }}</td>
+                        <td>{{ equipment.purchase_price|money }}</td>
+                        <td>{{ equipment.license_plate }}</td>
+                        <td>{{ equipment.number_of_seats }}</td>
+                        <td>{{ equipment.icon }}</td>
+                        <td>{{ equipment.fuel }}</td>
+                        <td>{{ equipment.last_refueling_stop|localize }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
     </div>
-  {% endfor %}
 
-    <a href="{% url 'refueling_stop.create' equipment.id %}">{% trans "Add refuel stop" %}</a>
+    <div class="row">
+        <div class="col-xs-12 col-md-6">
+            <a href="{% url 'refueling_stop.create' equipment.id %}">{% trans "Add refuel stop" %}</a>
 
-    <h2 class="sub-header">{% trans "Refueling Stops" %}</h2>
-    <div class="table-responsive">
-    <table class="table table-striped" id="jobs-table">
-        <thead>
-            <tr>
-                <th>{% trans "Average Consumption" %}</th>
-                <th>{% trans "Date" %}</th>
-                <th>{% trans "Mileage" %}</th>
-                <th>{% trans "Liters" %}</th>
-                <th>{% trans "Price" %}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for refuel_stop in refueling_stops %}
-            <tr>
-                <td>{{ refuel_stop.average_consumption }}</td>
-                <td>{{ refuel_stop.datetime }}</td>
-                <td>{{ refuel_stop.mileage }}</td>
-                <td>{{ refuel_stop.liters }}</td>
-                <td>{{ refuel_stop.price_per_liter }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <h3 class="sub-header">{% trans "Refueling Stops" %}</h3>
+            <div class="table-responsive">
+            <table class="table table-striped" id="jobs-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Average Consumption" %}</th>
+                        <th>{% trans "Date" %}</th>
+                        <th>{% trans "Mileage" %}</th>
+                        <th>{% trans "Liters" %}</th>
+                        <th>{% trans "Price" %}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for refuel_stop in refueling_stops %}
+                    <tr>
+                        <td>{{ refuel_stop.average_consumption }}</td>
+                        <td>{{ refuel_stop.datetime|localize }}</td>
+                        <td>{{ refuel_stop.mileage }} km</td>
+                        <td>{{ refuel_stop.liters }}</td>
+                        <td>{{ refuel_stop.price_per_liter|money }}</td>
+                        <td><a href="{% url 'refueling_stop.update' equipment.id refuel_stop.id %}">{% trans "edit" %}</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6">
+            <a href="{% url 'defect.create' equipment.id %}">{% trans "Add defect" %}</a>
+
+            <h3 class="sub-header">{% trans "Defects" %}</h3>
+            <div class="table-responsive">
+            <table class="table table-striped" id="jobs-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "date" %}</th>
+                        <th>{% trans "mileage" %}</th>
+                        <th>{% trans "description" %}</th>
+                        <th>{% trans "repaired" %}</th>
+                        <th>{% trans "contractor" %}</th>
+                        <th>{% trans "cost" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for defect in defects %}
+                    <tr>
+                        <td>{{ defect.date|localize }}</td>
+                        <td>{{ defect.mileage }} km</td>
+                        <td>{{ defect.description }}</td>
+                        <td>{{ defect.repaired }}</td>
+                        <td>{{ defect.contractor }}</td>
+                        <td>{{ defect.cost|money }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
     </div>
 
 {% endblock %}
