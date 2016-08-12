@@ -53,6 +53,7 @@
                         <th>{% trans "Average Consumption" %}</th>
                         <th>{% trans "Date" %}</th>
                         <th>{% trans "Mileage" %}</th>
+                        <th>{% trans "Distance" %}</th>
                         <th>{% trans "Liters" %}</th>
                         <th>{% trans "Price" %}</th>
                         <th></th>
@@ -64,6 +65,7 @@
                         <td>{{ refuel_stop.average_consumption }}</td>
                         <td>{{ refuel_stop.datetime|localize }}</td>
                         <td>{{ refuel_stop.mileage }} km</td>
+                        <td>{{ refuel_stop.distance }}</td>
                         <td>{{ refuel_stop.liters }}</td>
                         <td>{{ refuel_stop.price_per_liter|money }}</td>
                         <td><a href="{% url 'refueling_stop.update' equipment.id refuel_stop.id %}">{% trans "edit" %}</a></td>

@@ -1,5 +1,5 @@
 from decimal import Decimal
-from django.db import models
+from django.db import models, transaction
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
@@ -75,11 +75,13 @@ class RefuelingStop(models.Model):
     price_per_liter = models.DecimalField(_('price per liter'), max_digits=5, decimal_places=2)
     average_consumption = models.DecimalField(_('average consumption'), max_digits=5, decimal_places=2,
                                               null=True, blank=True)
+    cascade = False
+    step = False
 
     def __str__(self):
-        return '{} {} {} {} {}'.format(_date(self.datetime), self.liters, _('liters'), self.mileage, _('miles'))
+        return '{}: {} {} {} {} {}'.format(self.id, _date(self.datetime), self.liters, _('l'), self.mileage, _('km'))
 
-    @property
+    @cached_property
     def older_refueling_stop(self):
         older_refueling_stop = RefuelingStop.objects.filter(
             equipment_id=self.equipment.id,
@@ -87,12 +89,12 @@ class RefuelingStop(models.Model):
         ).exclude(id=self.id).order_by('-mileage').first()
         return older_refueling_stop
 
-    @property
+    @cached_property
     def younger_refueling_stop(self):
         younger_refueling_stop = RefuelingStop.objects.filter(
             equipment_id=self.equipment.id,
             mileage__gt=self.mileage
-        ).exclude(id=self.id).order_by('-mileage').first()
+        ).exclude(id=self.id).order_by('mileage').first()
         return younger_refueling_stop
 
     def save(self, *args, **kwargs):
@@ -110,18 +112,13 @@ class RefuelingStop(models.Model):
             last_mileage = Decimal(0)
         else:
             last_mileage = self.older_refueling_stop.mileage
-        self.distance = self.mileage - last_mileage
+        new_distance = self.mileage - last_mileage
+        if self.distance is not new_distance:
+            self.step = True
+            self.distance = new_distance
         self.average_consumption = round(self.liters/self.distance*100, 2)
-        if self.younger_refueling_stop is not None:
-            refueling_stop = self
-            calc_average_consumption_cascade(refueling_stop)
-
-
-def calc_average_consumption_cascade(refueling_stop):
-    RefuelingStop.objects.filter(
-        equipment_id=refueling_stop.equipment.id,
-        mileage__gt=refueling_stop.mileage
-    ).exclude(id=refueling_stop.id).order_by('-mileage').first().calc_average_consumption()
+        if self.younger_refueling_stop is not None and self.step:
+            self.cascade = True
 
 
 class Defect(models.Model):

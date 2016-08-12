@@ -21,15 +21,6 @@ class RefuelingStopForm(forms.ModelForm):
         model = RefuelingStop
         exclude = []
 
-    #def clean(self):
-    #    cleaned_data = super(RefuelingStopForm, self).clean()
-    #    mileage = cleaned_data.get('mileage')
-    #    if self.instance.pk:
-    #        if mileage <= self.instance.older_refueling_stop.mileage:
-    #            self.add_error('mileage', _('you must enter a higher mileage than the older refueling stop.'))
-    #        elif mileage >= self.instance.younger_refueling_stop.mileage:
-    #            self.add_error('mileage', _('you must enter a smaller mileage than the younger refueling stop.'))
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Remove broken MaxValueValidator that django imposes
@@ -39,12 +30,18 @@ class RefuelingStopForm(forms.ModelForm):
 
     def clean_mileage(self):
         mileage = self.cleaned_data.get('mileage')
+        older_refueling_stop = RefuelingStop.objects.filter(equipment=self.cleaned_data.get('equipment').id,
+                                                            mileage__gt=mileage).order_by('mileage').first()
+        # todo: check if self.instance.older_refueling_stop could be replaced with local older_refueling_stop
         if self.instance.pk:
             if self.instance.older_refueling_stop is not None and mileage <= self.instance.older_refueling_stop.mileage:
                     raise ValidationError(_('you must enter a higher mileage than the older refueling stop.'))
             elif self.instance.younger_refueling_stop and mileage >= self.instance.younger_refueling_stop.mileage:
                 raise ValidationError(_('you must enter a smaller mileage than the younger refueling stop.'))
             return mileage
+        elif older_refueling_stop and mileage <= older_refueling_stop.mileage:
+            raise ValidationError(_('you must enter a higher mileage than the older refueling stop.'))
+
         return mileage
 
 
