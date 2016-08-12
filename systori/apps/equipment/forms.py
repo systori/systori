@@ -6,7 +6,7 @@ from .models import Equipment, RefuelingStop, Defect
 
 
 class EquipmentForm(forms.ModelForm):
-    last_refueling_stop = forms.DateField(_('last_refueling_stop'), disabled=True)
+    last_refueling_stop = forms.DateField(_('last_refueling_stop'), disabled=True, required=False)
 
     class Meta:
         model = Equipment
@@ -14,6 +14,9 @@ class EquipmentForm(forms.ModelForm):
 
 
 class RefuelingStopForm(forms.ModelForm):
+    distance = forms.DecimalField(_('distance'), disabled=True, required=False)
+    average_consumption = forms.DecimalField(_('average_consumption'), disabled=True, required=False)
+
     class Meta:
         model = RefuelingStop
         exclude = []
@@ -30,8 +33,8 @@ class RefuelingStopForm(forms.ModelForm):
     def clean_mileage(self):
         mileage = self.cleaned_data.get('mileage')
         if self.instance.pk:
-            if self.instance.older_refueling_stop and mileage <= self.instance.older_refueling_stop.mileage:
-                raise ValidationError(_('you must enter a higher mileage than the older refueling stop.'))
+            if self.instance.older_refueling_stop is not None and mileage <= self.instance.older_refueling_stop.mileage:
+                    raise ValidationError(_('you must enter a higher mileage than the older refueling stop.'))
             elif self.instance.younger_refueling_stop and mileage >= self.instance.younger_refueling_stop.mileage:
                 raise ValidationError(_('you must enter a smaller mileage than the younger refueling stop.'))
             return mileage
