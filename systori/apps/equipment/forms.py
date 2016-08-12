@@ -30,6 +30,13 @@ class RefuelingStopForm(forms.ModelForm):
     #        elif mileage >= self.instance.younger_refueling_stop.mileage:
     #            self.add_error('mileage', _('you must enter a smaller mileage than the younger refueling stop.'))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove broken MaxValueValidator that django imposes
+        # on DecimalField with disabled=True for some reason
+        self.fields['distance'].validators.pop(0)
+        self.fields['average_consumption'].validators.pop(0)
+
     def clean_mileage(self):
         mileage = self.cleaned_data.get('mileage')
         if self.instance.pk:
