@@ -71,8 +71,6 @@ class RefuelingStopUpdate(UpdateView):
         return kwargs
 
     def get_success_url(self):
-        if self.object.cascade:
-            self.object.younger_refueling_stop.save()
         return reverse('equipment.view', args=(self.object.equipment.id,))
 
 
