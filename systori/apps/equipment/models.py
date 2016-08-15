@@ -25,7 +25,7 @@ class Equipment(models.Model):
     manufacturer = models.CharField(_("Manufacturer"), max_length=255)
 
     purchase_date = models.DateField(_("Purchase Date"), blank=True, null=True)
-    purchase_price = models.DecimalField(_("Purchase Price"), max_digits=14, decimal_places=2, default=0.0)
+    purchase_price = models.DecimalField(_("Purchase Price"), max_digits=14, decimal_places=2, default=Decimal(0))
 
     # Vehicle specific fields
     license_plate = models.CharField(_('license plate'), max_length=10, blank=True)
@@ -71,7 +71,7 @@ class RefuelingStop(models.Model):
     datetime = models.DateTimeField(default=timezone.now, db_index=True)
     mileage = models.DecimalField(_('mileage'), max_digits=8, decimal_places=2)
     distance = models.DecimalField(_('distance'), max_digits=6, decimal_places=2, blank=True, null=True)
-    liters = models.DecimalField(_('refueled liters'), max_digits=5, decimal_places=2, default=0.0)
+    liters = models.DecimalField(_('refueled liters'), max_digits=5, decimal_places=2, default=Decimal(0))
     price_per_liter = models.DecimalField(_('price per liter'), max_digits=6, decimal_places=3)
     average_consumption = models.DecimalField(_('average consumption'), max_digits=5, decimal_places=2,
                                               null=True, blank=True)
@@ -141,7 +141,7 @@ class Defect(models.Model):
     description = models.TextField(_('description'))
     repaired = models.BooleanField(_('repaired'))
     contractor = models.CharField(_('contractor'), max_length=100, blank=True)
-    cost = models.DecimalField(_("cost"), max_digits=14, decimal_places=4, default=0.0)
+    cost = models.DecimalField(_("cost"), max_digits=14, decimal_places=4, default=Decimal(0))
 
     def __str__(self):
         if self.repaired:
