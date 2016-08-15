@@ -34,7 +34,7 @@ mapping = {
     8: 1
 }
 
-data_left = []
+berlin = pytz.timezone("Europe/Berlin")
 
 for entry in data:
     if 'vehicle.vehicle' in entry['model']:
@@ -48,25 +48,35 @@ for entry in data:
             equipment.name += " {}".format(entry['fields']['model'])
             equipment.save()
         else:
-            data_left.append(entry)
-    elif 'vehicle.refuelingstop' in entry['model']:
-        try:
-            equipment = Equipment.objects.get(id=mapping[entry['pk']])
-        except KeyError:
-            equipment = None
-        if equipment is not None:
-            unaware = datetime.strptime("{} {}".format(entry['fields']['date'], entry['fields']['time']), "%Y-%m-%d %X")
-            aware = unaware.replace(tzinfo=pytz.timezone("CET"))
-            print(entry['pk'])
-            RefuelingStop.objects.create(
-                equipment=equipment,
-                datetime=aware,
-                mileage=Decimal("{:06.2f}".format(entry['fields']['mileage'])),
-                liters=Decimal("{:03.2f}".format(entry['fields']['liters'])),
-                price_per_liter=Decimal("{:03.3f}".format(entry['fields']['price_per_liter']))
+            equipment = Equipment.objects.create(
+                name=entry['fields']['model'],
+                manufacturer=entry['fields']['brand'],
+                license_plate=entry['fields']['license_plate']
             )
-        else:
-            data_left.append(entry)
-
-for entry in data_left:
-    print(entry)
+            mapping[entry['pk']] = equipment.id
+    elif 'vehicle.refuelingstop' in entry['model']:
+        equipment = Equipment.objects.get(id=mapping[entry['fields']['vehicle']])
+        unaware = datetime.strptime("{} {}".format(entry['fields']['date'], entry['fields']['time']), "%Y-%m-%d %X")
+        aware = berlin.localize(unaware)
+        RefuelingStop.objects.create(
+            equipment=equipment,
+            datetime=aware,
+            mileage=Decimal(entry['fields']['mileage']),
+            liters=Decimal(entry['fields']['liters']),
+            price_per_liter=Decimal(entry['fields']['price_per_liter'])
+        )
+    elif 'vehicle.defect' in entry['model']:
+        equipment = Equipment.objects.get(id=mapping[entry['fields']['vehicle']])
+        date = datetime.strptime(entry['fields']['date'], "%Y-%m-%d").date()
+        contractor = [entry['fields']['contractor'] if entry['fields']['contractor'] is not None else '']
+        Defect.objects.create(
+            equipment=equipment,
+            date=date,
+            repaired=entry['fields']['repaired'],
+            contractor=contractor,
+            description=entry['fields']['description'],
+            mileage=Decimal(entry['fields']['mileage']),
+            cost=Decimal(entry['fields']['cost'])
+        )
+    else:
+        print("something wrong in the neighbourhood.")
