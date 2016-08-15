@@ -69,11 +69,11 @@ class RefuelingStop(models.Model):
 
     equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
     datetime = models.DateTimeField(default=timezone.now, db_index=True)
-    mileage = models.DecimalField(_('mileage'), max_digits=8, decimal_places=2)
-    distance = models.DecimalField(_('distance'), max_digits=6, decimal_places=2, blank=True, null=True)
+    mileage = models.DecimalField(_('mileage'), max_digits=9, decimal_places=2)
+    distance = models.DecimalField(_('distance'), max_digits=9, decimal_places=2, blank=True, null=True)
     liters = models.DecimalField(_('refueled liters'), max_digits=5, decimal_places=2, default=Decimal(0))
     price_per_liter = models.DecimalField(_('price per liter'), max_digits=6, decimal_places=3)
-    average_consumption = models.DecimalField(_('average consumption'), max_digits=5, decimal_places=2,
+    average_consumption = models.DecimalField(_('average consumption'), max_digits=6, decimal_places=2,
                                               null=True, blank=True)
     cascade = False
     update_younger = False
@@ -137,7 +137,7 @@ class Defect(models.Model):
 
     equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
     date = models.DateField(_('date'), default=timezone.now)
-    mileage = models.IntegerField(_('mileage'))
+    mileage = models.DecimalField(_('mileage'), max_digits=9, decimal_places=2)
     description = models.TextField(_('description'))
     repaired = models.BooleanField(_('repaired'))
     contractor = models.CharField(_('contractor'), max_length=100, blank=True)
