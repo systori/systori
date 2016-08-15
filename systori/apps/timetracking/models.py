@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext as __
-from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError
 
 from ..project.models import JobSite
 from .managers import TimerQuerySet
@@ -45,7 +45,8 @@ class Timer(models.Model):
         WORK: lambda start, end: (end - start).total_seconds(),
         ILLNESS: lambda start, end: (end - start).total_seconds(),
         HOLIDAY: lambda start, end: (end - start).total_seconds(),
-        CORRECTION: lambda start, end: (end - start).total_seconds()
+        CORRECTION: lambda start, end: (end - start).total_seconds(),
+        EDUCATION: lambda start, end: (end - start).total_seconds()
     }
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
@@ -81,6 +82,7 @@ class Timer(models.Model):
         Convenience method for consistency (so the class has not just stop but launch method as well)
         """
         timer = cls(user=user, **kwargs)
+        timer.clean()
         timer.save()
         return timer
 
@@ -104,7 +106,7 @@ class Timer(models.Model):
         elif self.duration:
             self.end = self.start + timedelta(seconds=self.duration)
 
-    def _validate(self):
+    def clean(self):
         if self.pk:
             return
         user_timers = Timer.objects.filter(user=self.user)
@@ -131,7 +133,6 @@ class Timer(models.Model):
 
     def save(self, *args, **kwargs):
         self._pre_save_for_generic()
-        self._validate()
 
         if not self.date:
             self.date = self.start.date() if self.start else timezone.now().date()
