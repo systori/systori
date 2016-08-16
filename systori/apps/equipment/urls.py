@@ -13,7 +13,13 @@ urlpatterns = [
         office_auth(RefuelingStopCreate.as_view()), name='refueling_stop.create'),
     url(r'^equipment-(?P<equipment_pk>\d+)/refueling-stop-(?P<pk>\d+)/update$',
         office_auth(RefuelingStopUpdate.as_view()), name='refueling_stop.update'),
+    url(r'^equipment-(?P<equipment_pk>\d+)/refueling-stop-(?P<pk>\d+)/delete',
+        office_auth(RefuelingStopDelete.as_view()), name='refueling_stop.delete'),
 
     url(r'^equipment-(?P<pk>\d+)/add-defect$',
         office_auth(DefectCreate.as_view()), name='defect.create'),
+    url(r'^equipment-(?P<equipment_pk>\d+)/defect-(?P<pk>\d+)/update$',
+        office_auth(DefectUpdate.as_view()), name='defect.update'),
+    url(r'^equipment-(?P<equipment_pk>\d+)/defect-(?P<pk>\d+)/delete',
+        office_auth(DefectDelete.as_view()), name='defect.delete'),
 ]

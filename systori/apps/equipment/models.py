@@ -24,9 +24,6 @@ class Equipment(models.Model):
     name = models.CharField(_("Name"), max_length=255)
     manufacturer = models.CharField(_("Manufacturer"), max_length=255)
 
-    purchase_date = models.DateField(_("Purchase Date"), blank=True, null=True)
-    purchase_price = models.DecimalField(_("Purchase Price"), max_digits=14, decimal_places=2, default=Decimal(0))
-
     # Vehicle specific fields
     license_plate = models.CharField(_('license plate'), max_length=10, blank=True)
     number_of_seats = models.IntegerField(_('number of seats'), default=2)
@@ -58,7 +55,7 @@ class Equipment(models.Model):
             return _("unknown")
 
     def __str__(self):
-        return self.name
+        return "{} : {}".format(self.name, self.license_plate)
 
 
 class RefuelingStop(models.Model):
@@ -75,8 +72,6 @@ class RefuelingStop(models.Model):
     price_per_liter = models.DecimalField(_('price per liter'), max_digits=6, decimal_places=3)
     average_consumption = models.DecimalField(_('average consumption'), max_digits=6, decimal_places=2,
                                               null=True, blank=True)
-    cascade = False
-    update_younger = False
 
     def __str__(self):
         return '{}: {} {} {} {} {}'.format(self.id, _date(self.datetime), self.liters, _('l'), self.mileage, _('km'))
@@ -112,21 +107,20 @@ class RefuelingStop(models.Model):
             last_mileage = Decimal(0)
         else:
             last_mileage = self.older_refueling_stop.mileage
-        new_distance = self.mileage - last_mileage
-        if self.distance is not new_distance:
-            self.update_younger = True
-            self.distance = new_distance
+        self.distance = self.mileage - last_mileage
         self.average_consumption = round(self.liters/self.distance*100, 2)
-        if self.younger_refueling_stop is not None and self.update_younger:
-            self.cascade = True
 
-# todo: change flags to UI provided flag in case it's needed
 
+# The cascade_true Flag is set in the UpdateView and it's only set once to prevent unlimited recursive calls
+# therefor a try except block is needed to catch the expected AttributeError
 @receiver(post_save, sender=RefuelingStop)
 def calc_average_consumption_cascade(sender, **kwargs):
     refueling_stop = kwargs.get('instance')
-    if refueling_stop.cascade:
-        refueling_stop.younger_refueling_stop.save()
+    try:
+        if refueling_stop.cascade_save and refueling_stop.younger_refueling_stop is not None:
+            refueling_stop.younger_refueling_stop.save()
+    except AttributeError:
+        pass
 
 
 class Defect(models.Model):
@@ -139,13 +133,8 @@ class Defect(models.Model):
     date = models.DateField(_('date'), default=timezone.now)
     mileage = models.DecimalField(_('mileage'), max_digits=9, decimal_places=2)
     description = models.TextField(_('description'))
-    repaired = models.BooleanField(_('repaired'))
     contractor = models.CharField(_('contractor'), max_length=100, blank=True)
     cost = models.DecimalField(_("cost"), max_digits=14, decimal_places=4, default=Decimal(0))
 
     def __str__(self):
-        if self.repaired:
-            _repaired = _('repaired')
-        else:
-            _repaired = _('not repaired')
-        return u"%s %s" % (_date(self.date), _repaired)
+        return "{}: {}".format(_date(self.date), self.cost)

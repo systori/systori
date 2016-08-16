@@ -34,6 +34,11 @@ mapping = {
     8: 1
 }
 
+contractors = {
+    67: "Günster & Leibfahrt",
+    66: "Auto Ihm GmbH & Co.KG"
+}
+
 berlin = pytz.timezone("Europe/Berlin")
 
 for entry in data:
@@ -68,11 +73,10 @@ for entry in data:
     elif 'vehicle.defect' in entry['model']:
         equipment = Equipment.objects.get(id=mapping[entry['fields']['vehicle']])
         date = datetime.strptime(entry['fields']['date'], "%Y-%m-%d").date()
-        contractor = [entry['fields']['contractor'] if entry['fields']['contractor'] is not None else '']
+        contractor = [contractors[entry['fields']['contractor']] if entry['fields']['contractor'] is not None else ''][0]
         Defect.objects.create(
             equipment=equipment,
             date=date,
-            repaired=entry['fields']['repaired'],
             contractor=contractor,
             description=entry['fields']['description'],
             mileage=Decimal(entry['fields']['mileage']),
