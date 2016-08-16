@@ -2,8 +2,8 @@ from django.views.generic import \
     ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
 
-from .models import Equipment, RefuelingStop, Defect
-from .forms import EquipmentForm, RefuelingStopForm, DefectForm
+from .models import Equipment, RefuelingStop, Maintenance
+from .forms import EquipmentForm, RefuelingStopForm, MaintenanceForm
 
 
 class EquipmentListView(ListView):
@@ -18,7 +18,7 @@ class EquipmentView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(EquipmentView, self).get_context_data(**kwargs)
         context['refueling_stops'] = RefuelingStop.objects.filter(equipment=self.object.id).order_by('-mileage')
-        context['defects'] = Defect.objects.filter(equipment=self.object.id).order_by('-mileage')
+        context['maintenances'] = Maintenance.objects.filter(equipment=self.object.id).order_by('-mileage')
         return context
 
 
@@ -89,13 +89,13 @@ class RefuelingStopDelete(DeleteView):
         return reverse('equipment.view', args=(self.object.equipment.id,))
 
 
-class DefectCreate(CreateView):
-    model = Defect
-    form_class = DefectForm
+class MaintenanceCreate(CreateView):
+    model = Maintenance
+    form_class = MaintenanceForm
     template_name = 'equipment/equipment_form.html'
 
     def get_form_kwargs(self):
-        kwargs = super(DefectCreate, self).get_form_kwargs()
+        kwargs = super(MaintenanceCreate, self).get_form_kwargs()
 
         equipment = Equipment(id=int(self.kwargs['pk']))
         kwargs['initial'].update({
@@ -107,13 +107,13 @@ class DefectCreate(CreateView):
         return reverse('equipment.view', args=(self.object.equipment.id,))
 
 
-class DefectUpdate(UpdateView):
-    model = Defect
-    form_class = DefectForm
+class MaintenanceUpdate(UpdateView):
+    model = Maintenance
+    form_class = MaintenanceForm
     template_name = 'equipment/equipment_form.html'
 
     def get_form_kwargs(self):
-        kwargs = super(DefectUpdate, self).get_form_kwargs()
+        kwargs = super(MaintenanceUpdate, self).get_form_kwargs()
 
         equipment = Equipment(id=int(self.kwargs['equipment_pk']))
         kwargs['initial'].update({
@@ -125,8 +125,8 @@ class DefectUpdate(UpdateView):
         return reverse('equipment.view', args=(self.object.equipment.id,))
 
 
-class DefectDelete(DeleteView):
-    model = Defect
+class MaintenanceDelete(DeleteView):
+    model = Maintenance
     template_name = 'equipment/equipment_confirm_delete.html'
 
     def get_success_url(self):

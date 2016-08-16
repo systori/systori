@@ -9,12 +9,16 @@ from django.template.defaultfilters import date as _date
 
 
 GASOLINE = 'gasoline'
+PREMIUM_GASOLINE = 'premium_gasoline'
 DIESEL = 'diesel'
+PREMIUM_DIESEL = 'premium_diesel'
 ELECTRIC = 'electric'
 
 FUEL_CHOICES = (
     (GASOLINE, _('gasoline')),
+    (PREMIUM_GASOLINE, _('premium gasoline')),
     (DIESEL, _('diesel')),
+    (PREMIUM_DIESEL, _('premium diesel')),
     (ELECTRIC, _('electric'))
 )
 
@@ -36,13 +40,13 @@ class Equipment(models.Model):
         refuelingstop = self.refuelingstop_set.aggregate(
             m=models.Max('mileage')
         ).get('m', Decimal(0))
-        defect = self.defect_set.aggregate(
+        maintenance = self.maintenance_set.aggregate(
             m=models.Max('mileage')
         ).get('m', Decimal(0))
-        if not defect or refuelingstop > defect:
+        if not maintenance or refuelingstop > maintenance:
             return refuelingstop
         else:
-            return defect
+            return maintenance
 
     @cached_property
     def average_consumption(self):
@@ -123,11 +127,11 @@ def calc_average_consumption_cascade(sender, **kwargs):
         pass
 
 
-class Defect(models.Model):
+class Maintenance(models.Model):
 
     class Meta:
-        verbose_name = _('defect')
-        verbose_name_plural = _('defects')
+        verbose_name = _('maintenance')
+        verbose_name_plural = _('maintenances')
 
     equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
     date = models.DateField(_('date'), default=timezone.now)
