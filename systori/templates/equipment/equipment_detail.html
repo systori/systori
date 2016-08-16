@@ -12,12 +12,10 @@
             <table class="table table-striped" id="jobs-table">
                 <thead>
                     <tr>
-                        <th>{% trans "Name" %}</th>
-                        <th>{% trans "Manufacturer" %}</th>
-                        <th>{% trans "Mileage" %}</th>
-                        <th>{% trans "avg consumption" %}</th>
-                        <th>{% trans "purchase date" %}</th>
-                        <th>{% trans "purchase price" %}</th>
+                        <th>{% trans "name" %}</th>
+                        <th>{% trans "manufacturer" %}</th>
+                        <th>{% trans "mileage" %}</th>
+                        <th>{% trans "AFC" %}</th>
                         <th>{% trans "license plate" %}</th>
                         <th>{% trans "number of seats" %}</th>
                         <th>{% trans "icon" %}</th>
@@ -31,8 +29,6 @@
                         <td>{{ equipment.manufacturer }}</td>
                         <td>{{ equipment.mileage }}</td>
                         <td>{{ equipment.average_consumption }}</td>
-                        <td>{{ equipment.purchase_date|localize }}</td>
-                        <td>{{ equipment.purchase_price|money }}</td>
                         <td>{{ equipment.license_plate }}</td>
                         <td>{{ equipment.number_of_seats }}</td>
                         <td>{{ equipment.icon }}</td>
@@ -54,12 +50,12 @@
             <table class="table table-striped" id="jobs-table">
                 <thead>
                     <tr>
-                        <th>{% trans "Average Consumption" %}</th>
-                        <th>{% trans "Date" %}</th>
-                        <th>{% trans "Mileage" %}</th>
-                        <th>{% trans "Distance" %}</th>
-                        <th>{% trans "Liters" %}</th>
-                        <th>{% trans "Price" %}</th>
+                        <th>{% trans "AFC" %}</th>
+                        <th>{% trans "date" %}</th>
+                        <th>{% trans "mileage" %}</th>
+                        <th>{% trans "distance" %}</th>
+                        <th>{% trans "liters" %}</th>
+                        <th>{% trans "price" %}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -68,11 +64,18 @@
                     <tr>
                         <td>{{ refuel_stop.average_consumption }}</td>
                         <td>{{ refuel_stop.datetime|localize }}</td>
-                        <td>{{ refuel_stop.mileage }} km</td>
-                        <td>{{ refuel_stop.distance }}</td>
-                        <td>{{ refuel_stop.liters }}</td>
+                        <td>{{ refuel_stop.mileage|localize }} km</td>
+                        <td>{{ refuel_stop.distance|localize }}</td>
+                        <td>{{ refuel_stop.liters|localize }}</td>
                         <td>{{ refuel_stop.price_per_liter|money }}</td>
-                        <td><a href="{% url 'refueling_stop.update' equipment.id refuel_stop.id %}">{% trans "edit" %}</a></td>
+                        <td>
+                            <a href="{% url 'refueling_stop.update' equipment.id refuel_stop.id %}">
+                                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                            </a>
+                            <a href="{% url 'refueling_stop.delete' equipment.id refuel_stop.id %}">
+                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                            </a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -90,20 +93,27 @@
                         <th>{% trans "date" %}</th>
                         <th>{% trans "mileage" %}</th>
                         <th>{% trans "description" %}</th>
-                        <th>{% trans "repaired" %}</th>
                         <th>{% trans "contractor" %}</th>
                         <th>{% trans "cost" %}</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for defect in defects %}
                     <tr>
                         <td>{{ defect.date|localize }}</td>
-                        <td>{{ defect.mileage }} km</td>
+                        <td>{{ defect.mileage|localize }} km</td>
                         <td>{{ defect.description }}</td>
-                        <td>{{ defect.repaired }}</td>
                         <td>{{ defect.contractor }}</td>
                         <td>{{ defect.cost|money }}</td>
+                        <td>
+                            <a href="{% url 'defect.update' equipment.id defect.id %}">
+                                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                            </a>
+                            <a href="{% url 'defect.delete' equipment.id defect.id %}">
+                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                            </a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

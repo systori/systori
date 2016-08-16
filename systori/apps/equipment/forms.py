@@ -17,9 +17,11 @@ class RefuelingStopForm(forms.ModelForm):
     distance = forms.DecimalField(_('distance'), disabled=True, required=False)
     average_consumption = forms.DecimalField(_('average_consumption'), disabled=True, required=False)
 
+    # explicite order of fields to have them called accordingly in clean()
     class Meta:
         model = RefuelingStop
         exclude = []
+        fields = ['equipment', 'datetime', 'mileage', 'distance', 'liters', 'price_per_liter', 'average_consumption']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,8 +33,7 @@ class RefuelingStopForm(forms.ModelForm):
     def clean_mileage(self):
         mileage = self.cleaned_data.get('mileage')
         older_refueling_stop = RefuelingStop.objects.filter(equipment=self.cleaned_data.get('equipment').id,
-                                                            mileage__gt=mileage).order_by('mileage').first()
-        # todo: check if self.instance.older_refueling_stop could be replaced with local older_refueling_stop
+                                                            mileage__gt=mileage).order_by('-mileage').first()
         if self.instance.pk:
             if self.instance.older_refueling_stop is not None and mileage <= self.instance.older_refueling_stop.mileage:
                     raise ValidationError(_('you must enter a higher mileage than the older refueling stop.'))
