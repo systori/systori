@@ -2,7 +2,8 @@ import json
 from decimal import Decimal
 from django.utils import timezone
 
-from django.test import TestCase
+from systori.lib.testing import SystoriTestCase
+from django.core.urlresolvers import reverse
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from freezegun import freeze_time
@@ -10,19 +11,25 @@ from freezegun import freeze_time
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 
-from .models import Equipment, RefuelingStop, Defect
+from .models import Equipment, RefuelingStop, Maintenance
 from .forms import EquipmentForm, RefuelingStopForm
 
+from ..accounting.test_workflow import create_data
 
-class EquipmentTest(TestCase):
+
+class EquipmentTestCase(SystoriTestCase):
 
     def setUp(self):
-        self.company = CompanyFactory()
-        self.user = UserFactory(company=self.company)
-        Equipment.objects.create(
+        super().setUp()
+        create_data(self)
+        self.equipment = Equipment.objects.create(
             name="Test-Equiment",
             manufacturer="Mercetest",
         )
+        self.client.login(username=self.user.email, password='open sesame')
+
+
+class EquipmentTest(EquipmentTestCase):
 
     def test_equipment_create(self):
         equipment = Equipment.objects.first()
@@ -39,15 +46,7 @@ class EquipmentTest(TestCase):
         self.assertEqual(refueling_stop.average_consumption, Decimal(10))
 
 
-class EquipmentFormTest(TestCase):
-
-    def setUp(self):
-        self.company = CompanyFactory()
-        self.user = UserFactory(company=self.company)
-        self.equipment = Equipment.objects.create(
-            name="Test-Equiment",
-            manufacturer="Mercetest",
-        )
+class EquipmentFormTest(EquipmentTestCase):
 
     def test_EquipmentForm_create(self):
         form = EquipmentForm(data={
@@ -88,3 +87,53 @@ class EquipmentFormTest(TestCase):
             price_per_liter=1.02
         )
         self.assertEqual(stop2.average_consumption, stop1.average_consumption)
+
+
+class EquipmentCBVTest(EquipmentTestCase):
+
+    def test_equipment_create_view(self):
+        response = self.client.get(reverse('equipment.create'))
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'name': "CBV create Test Equipment",
+            'manufacturer': 'Bee Ehmm Double U',
+            'fuel': 'diesel',
+            'number_of_seats': 5
+        }
+
+        response = self.client.post(reverse('equipment.create'), data)
+        self.assertEqual(302, response.status_code)
+
+    def test_refueling_stop_create_view(self):
+        response = self.client.get(reverse('refueling_stop.create', args=[self.equipment.id]))
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'datetime': timezone.now(),
+            'equipment': self.equipment,
+            'mileage': 500,
+            'liters': 50,
+            'price_per_liter': 1.01
+        }
+        data2 = {
+            'datetime': timezone.now(),
+            'equipment': self.equipment,
+            'mileage': 1000,
+            'liters': 50,
+            'price_per_liter': 1.02
+        }
+
+        response = self.client.post(reverse('refueling_stop.create', args=[self.equipment.id]), data)
+        self.assertEqual(302, response.status_code)
+        response = self.client.post(reverse('refueling_stop.create', args=[self.equipment.id]), data2)
+        self.assertEqual(302, response.status_code)
+
+        refueling_stop = RefuelingStop.objects.first()
+        response = self.client.get(reverse('refueling_stop.update', args=[refueling_stop.id]))
+        self.assertEqual(200, response.status_code)
+
+    # def test_refueling_stop_update_view(self):
+    #     refueling_stop = RefuelingStop.objects.first()
+    #     response = self.client.get(reverse('refueling_stop.update', args=[refueling_stop.id]))
+    #     self.assertEqual(302, response.status_code)

@@ -11,7 +11,7 @@ import pytz
 django.setup()
 
 from systori.apps.company.models import Company
-from systori.apps.equipment.models import Equipment, RefuelingStop, Defect
+from systori.apps.equipment.models import Equipment, RefuelingStop, Maintenance
 
 c = Company.objects.get(schema="mehr-handwerk").activate()
 
@@ -74,7 +74,7 @@ for entry in data:
         equipment = Equipment.objects.get(id=mapping[entry['fields']['vehicle']])
         date = datetime.strptime(entry['fields']['date'], "%Y-%m-%d").date()
         contractor = [contractors[entry['fields']['contractor']] if entry['fields']['contractor'] is not None else ''][0]
-        Defect.objects.create(
+        Maintenance.objects.create(
             equipment=equipment,
             date=date,
             contractor=contractor,

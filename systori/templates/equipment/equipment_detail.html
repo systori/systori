@@ -83,9 +83,9 @@
             </div>
         </div>
         <div class="col-xs-12 col-md-6">
-            <a href="{% url 'defect.create' equipment.id %}">{% trans "Add defect" %}</a>
+            <a href="{% url 'maintenance.create' equipment.id %}">{% trans "Add maintenance" %}</a>
 
-            <h3 class="sub-header">{% trans "Defects" %}</h3>
+            <h3 class="sub-header">{% trans "Maintenance" %}</h3>
             <div class="table-responsive">
             <table class="table table-striped" id="jobs-table">
                 <thead>
@@ -99,18 +99,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for defect in defects %}
+                    {% for maintenance in maintenances %}
                     <tr>
-                        <td>{{ defect.date|localize }}</td>
-                        <td>{{ defect.mileage|localize }} km</td>
-                        <td>{{ defect.description }}</td>
-                        <td>{{ defect.contractor }}</td>
-                        <td>{{ defect.cost|money }}</td>
+                        <td>{{ maintenance.date|localize }}</td>
+                        <td>{{ maintenance.mileage|localize }} km</td>
+                        <td>{{ maintenance.description }}</td>
+                        <td>{{ maintenance.contractor }}</td>
+                        <td>{{ maintenance.cost|money }}</td>
                         <td>
-                            <a href="{% url 'defect.update' equipment.id defect.id %}">
+                            <a href="{% url 'maintenance.update' equipment.id maintenance.id %}">
                                 <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                             </a>
-                            <a href="{% url 'defect.delete' equipment.id defect.id %}">
+                            <a href="{% url 'maintenance.delete' equipment.id maintenance.id %}">
                                 <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                             </a>
                         </td>

@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-from .models import Equipment, RefuelingStop, Defect
+from .models import Equipment, RefuelingStop, Maintenance
 
 
 class EquipmentForm(forms.ModelForm):
@@ -46,7 +46,7 @@ class RefuelingStopForm(forms.ModelForm):
         return mileage
 
 
-class DefectForm(forms.ModelForm):
+class MaintenanceForm(forms.ModelForm):
     class Meta:
-        model = Defect
+        model = Maintenance
         exclude = []
