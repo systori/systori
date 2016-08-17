@@ -9,22 +9,21 @@ from django.utils import timezone
 from django.template.defaultfilters import date as _date
 
 
-GASOLINE = 'gasoline'
-PREMIUM_GASOLINE = 'premium_gasoline'
-DIESEL = 'diesel'
-PREMIUM_DIESEL = 'premium_diesel'
-ELECTRIC = 'electric'
-
-FUEL_CHOICES = (
-    (GASOLINE, _('gasoline')),
-    (PREMIUM_GASOLINE, _('premium gasoline')),
-    (DIESEL, _('diesel')),
-    (PREMIUM_DIESEL, _('premium diesel')),
-    (ELECTRIC, _('electric'))
-)
-
-
 class Equipment(models.Model):
+    GASOLINE = 'gasoline'
+    PREMIUM_GASOLINE = 'premium_gasoline'
+    DIESEL = 'diesel'
+    PREMIUM_DIESEL = 'premium_diesel'
+    ELECTRIC = 'electric'
+
+    FUEL_CHOICES = (
+        (GASOLINE, _('gasoline')),
+        (PREMIUM_GASOLINE, _('premium gasoline')),
+        (DIESEL, _('diesel')),
+        (PREMIUM_DIESEL, _('premium diesel')),
+        (ELECTRIC, _('electric'))
+    )
+
     active = models.BooleanField(_('active'), default=True)
     name = models.CharField(_("Name"), max_length=255)
     manufacturer = models.CharField(_("Manufacturer"), max_length=255)

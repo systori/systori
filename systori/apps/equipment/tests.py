@@ -33,23 +33,6 @@ class EquipmentTestCase(SystoriTestCase):
         self.client.login(username=self.user.email, password='open sesame')
 
 
-class EquipmentTest(EquipmentTestCase):
-
-    def test_equipment_create(self):
-        equipment = Equipment.objects.first()
-        self.assertTrue(equipment.pk)
-
-    def test_refueling_stop_create(self):
-        equipment = Equipment.objects.first()
-        refueling_stop = RefuelingStop.objects.create(
-            equipment=equipment,
-            mileage=Decimal(100),
-            liters=Decimal(10),
-            price_per_liter=Decimal(1)
-        )
-        self.assertEqual(refueling_stop.average_consumption, Decimal(10))
-
-
 class EquipmentFormTest(EquipmentTestCase):
 
     def test_EquipmentForm_create(self):

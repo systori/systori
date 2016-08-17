@@ -187,14 +187,16 @@ $(function() {
     window.location.hash = $(this).data('hash');
   });
 
-    
-    $('#goto-project-id-button').click(function(e) {
+    function goto_project() {
         var project_id = $("#goto-project-id").val();
-        window.location.replace(window.location.origin+"/project-"+project_id);
+        window.location.href = window.location.origin+"/project-"+project_id;
+    }
+    $('#goto-project-id-button').click(function(e) {
+        goto_project();
     });
-    $('.large').keypress(function (e) {
+    $('#goto-project-id').keypress(function (e) {
        if(e.which ==13)
-        console.log($(this).attr('id'));
+        goto_project();
     });
 });
 
