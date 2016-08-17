@@ -23,8 +23,12 @@ class EquipmentTestCase(SystoriTestCase):
         super().setUp()
         create_data(self)
         self.equipment = Equipment.objects.create(
-            name="Test-Equiment",
+            active=True,
+            name="Test Equipment0",
             manufacturer="Mercetest",
+            license_plate="MA-ST 0",
+            number_of_seats=2,
+            fuel="diesel"
         )
         self.client.login(username=self.user.email, password='open sesame')
 
@@ -51,15 +55,15 @@ class EquipmentFormTest(EquipmentTestCase):
     def test_EquipmentForm_create(self):
         form = EquipmentForm(data={
             'active': True,
-            'name': "Test Equipment",
-            'manufacturer': "Test Manufacturer",
+            'name': "Test Equipment1",
+            'manufacturer': "Mercetest",
             'license_plate': "MA-ST 1",
             'number_of_seats': 5,
             'fuel': 'diesel'
         })
         self.assertTrue(form.is_valid(), form.errors)
         equipment = form.save()
-        self.assertEqual(equipment.name, "Test Equipment")
+        self.assertEqual(equipment.name, "Test Equipment1")
 
     def test_RefuelingStopForm_create(self):
         form = RefuelingStopForm(data={
@@ -71,7 +75,7 @@ class EquipmentFormTest(EquipmentTestCase):
         })
         self.assertTrue(form.is_valid(), form.errors)
 
-    def test_refuelung_stop_multiple(self):
+    def test_refueling_stop_AFC(self):
         stop1 = RefuelingStop.objects.create(
             datetime=timezone.now(),
             equipment=self.equipment,
@@ -83,10 +87,11 @@ class EquipmentFormTest(EquipmentTestCase):
             datetime=timezone.now(),
             equipment=self.equipment,
             mileage=1000,
-            liters=50,
+            liters=25,
             price_per_liter=1.02
         )
-        self.assertEqual(stop2.average_consumption, stop1.average_consumption)
+        self.assertEqual(stop1.average_consumption, 10)
+        self.assertEqual(stop2.average_consumption, 5)
 
 
 class EquipmentCBVTest(EquipmentTestCase):
@@ -110,15 +115,15 @@ class EquipmentCBVTest(EquipmentTestCase):
         self.assertEqual(200, response.status_code)
 
         data = {
-            'datetime': timezone.now(),
-            'equipment': self.equipment,
+            'datetime': '2016-08-11 07:00:00',
+            'equipment': self.equipment.id,
             'mileage': 500,
             'liters': 50,
             'price_per_liter': 1.01
         }
         data2 = {
-            'datetime': timezone.now(),
-            'equipment': self.equipment,
+            'datetime': '2016-08-12 07:00:00',
+            'equipment': self.equipment.id,
             'mileage': 1000,
             'liters': 50,
             'price_per_liter': 1.02
@@ -130,10 +135,48 @@ class EquipmentCBVTest(EquipmentTestCase):
         self.assertEqual(302, response.status_code)
 
         refueling_stop = RefuelingStop.objects.first()
-        response = self.client.get(reverse('refueling_stop.update', args=[refueling_stop.id]))
-        self.assertEqual(200, response.status_code)
+        data = {
+            'datetime': '2016-08-11 07:00:00',
+            'equipment': self.equipment.id,
+            'mileage': 520,
+            'liters': 50,
+            'price_per_liter': 1.01
+        }
 
-    # def test_refueling_stop_update_view(self):
-    #     refueling_stop = RefuelingStop.objects.first()
-    #     response = self.client.get(reverse('refueling_stop.update', args=[refueling_stop.id]))
-    #     self.assertEqual(302, response.status_code)
+        response = self.client.post(reverse('refueling_stop.update', args=[self.equipment.id, refueling_stop.id]),
+                                    data)
+        self.assertEqual(302, response.status_code)
+
+        refueling_stop = RefuelingStop.objects.last()
+        self.assertEqual(480.00, refueling_stop.distance)
+
+        data = {
+            'datetime': '2016-08-12 07:00:00',
+            'equipment': self.equipment.id,
+            'mileage': 519,
+            'liters': 50,
+            'price_per_liter': 1.02
+        }
+        response = self.client.post(reverse('refueling_stop.update', args=[self.equipment.id, refueling_stop.id]),
+                                    data)
+        form = response.context_data.get('form')
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['mileage'],
+                         ['you must enter a higher mileage than the older refueling stop.'])
+
+        refueling_stop = RefuelingStop.objects.first()
+
+        data = {
+            'datetime': '2016-08-11 07:00:00',
+            'equipment': self.equipment.id,
+            'mileage': 1001,
+            'liters': 50,
+            'price_per_liter': 1.01
+        }
+
+        response = self.client.post(reverse('refueling_stop.update', args=[self.equipment.id, refueling_stop.id]),
+                                    data)
+        form = response.context_data.get('form')
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['mileage'],
+                         ['you must enter a smaller mileage than the younger refueling stop.'])
