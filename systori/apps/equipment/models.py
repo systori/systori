@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -70,10 +71,14 @@ class RefuelingStop(models.Model):
 
     equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
     datetime = models.DateTimeField(default=timezone.now, db_index=True)
-    mileage = models.DecimalField(_('mileage'), max_digits=9, decimal_places=2)
-    distance = models.DecimalField(_('distance'), max_digits=9, decimal_places=2, blank=True, null=True)
-    liters = models.DecimalField(_('refueled liters'), max_digits=5, decimal_places=2, default=Decimal(0))
-    price_per_liter = models.DecimalField(_('price per liter'), max_digits=6, decimal_places=3)
+    mileage = models.DecimalField(_('mileage'), max_digits=9, decimal_places=2,
+                                  validators=[MinValueValidator(Decimal('0.01'))])
+    distance = models.DecimalField(_('distance'), max_digits=9, decimal_places=2, blank=True, null=True,
+                                   validators = [MinValueValidator(Decimal('0.01'))])
+    liters = models.DecimalField(_('refueled liters'), max_digits=5, decimal_places=2, default=Decimal(0),
+                                 validators=[MinValueValidator(Decimal('0.01'))])
+    price_per_liter = models.DecimalField(_('price per liter'), max_digits=6, decimal_places=3,
+                                          validators=[MinValueValidator(Decimal('0.001'))])
     average_consumption = models.DecimalField(_('average consumption'), max_digits=6, decimal_places=2,
                                               null=True, blank=True)
 
@@ -135,10 +140,12 @@ class Maintenance(models.Model):
 
     equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
     date = models.DateField(_('date'), default=timezone.now)
-    mileage = models.DecimalField(_('mileage'), max_digits=9, decimal_places=2)
+    mileage = models.DecimalField(_('mileage'), max_digits=9, decimal_places=2,
+                                  validators=[MinValueValidator(Decimal('0.01'))])
     description = models.TextField(_('description'))
     contractor = models.CharField(_('contractor'), max_length=100, blank=True)
-    cost = models.DecimalField(_("cost"), max_digits=14, decimal_places=4, default=Decimal(0))
+    cost = models.DecimalField(_("cost"), max_digits=14, decimal_places=4, default=Decimal(0),
+                               validators=[MinValueValidator(Decimal('0.01'))])
 
     def __str__(self):
         return "{}: {}".format(_date(self.date), self.cost)

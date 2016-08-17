@@ -28,6 +28,10 @@
         <a href="{% url 'project.create' %}">{% trans "Create" %}</a> {% trans "or" %}
         <a href="{% url 'project.import' %}">{% trans "GAEB-Import (experimental)" %}</a>
       </p>
+      <legend>{% trans 'Go To Project' %}</legend>
+      <p>
+        <input id="goto-project-id"><button type="button" id="goto-project-id-button" class="btn btn-xs btn-default">{% trans "Go" %}</button>
+      </p>
     </div>
   </div>
 
@@ -183,6 +187,15 @@ $(function() {
     window.location.hash = $(this).data('hash');
   });
 
+    
+    $('#goto-project-id-button').click(function(e) {
+        var project_id = $("#goto-project-id").val();
+        window.location.replace(window.location.origin+"/project-"+project_id);
+    });
+    $('.large').keypress(function (e) {
+       if(e.which ==13)
+        console.log($(this).attr('id'));
+    });
 });
 
 </script>
