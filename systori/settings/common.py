@@ -19,6 +19,8 @@ SHARED_MODELS = [
     'tastypie.apikey'
 ]
 
+BROKER_URL = 'amqp://guest:guest@192.168.0.99:5672//'
+
 # Django Settings
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
