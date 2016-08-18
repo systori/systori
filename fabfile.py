@@ -36,7 +36,7 @@ def uwsgi():
           " --module=systori.wsgi"
           " --socket=0.0.0.0:8000"
           " --static-map /static=/static"
-          #" --attach-daemon=celery -A systori worker"
+          " --attach-daemon=\"celery -A systori worker\""
           " --env DJANGO_SETTINGS_MODULE={}".format(
               os.environ['DJANGO_SETTINGS_MODULE']))
 
