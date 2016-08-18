@@ -443,7 +443,7 @@
       <tbody>
       {% for contact in project_contacts %}
         <tr>
-          <td>{{ contact.id }}</td>
+          <td>{{ contact.contact.id }}</td>
           <td><a href="{% url 'contact.view' contact.contact.id %}">{{ contact.contact }}</a></td>
           <td><pre>{{ contact.contact.address_label }}</pre></td>
           <td>{{ contact.get_association_display }}</td>
