@@ -76,6 +76,33 @@ class EquipmentFormTest(EquipmentTestCase):
         self.assertEqual(stop1.average_consumption, 10)
         self.assertEqual(stop2.average_consumption, 5)
 
+        average_consumption = Equipment.objects.first().average_consumption
+        self.assertEqual(average_consumption, 7.5)
+
+        mileage = Equipment.objects.first().mileage
+        self.assertEqual(1000, mileage)
+
+        maintenance1 = Maintenance.objects.create(
+            equipment=self.equipment,
+            date=timezone.now().date(),
+            mileage=1500,
+            description="Test Maintenance, very Expensive",
+            contractor="Steve Jobs",
+            cost=134598.23
+        )
+        mileage = Equipment.objects.first().mileage
+        self.assertEqual(mileage, 1500)
+
+        equipment2 = Equipment.objects.create(
+            active=True,
+            name="Test Equipment0",
+            manufacturer="Mercetest",
+            license_plate="MA-ST 0",
+            number_of_seats=2,
+            fuel="diesel"
+        )
+        self.assertEqual(equipment2.average_consumption, "unknown")
+
 
 class EquipmentCBVTest(EquipmentTestCase):
 

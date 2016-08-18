@@ -67,7 +67,7 @@
           {% if plan.equipment.count > 0 %}
           <hr>
             {% for equipment in plan.equipment.all %}
-              <h5 class="fit-text text-warning">{{ equipment }}</h5>
+              <h5 class="fit-text text-warning">{{ equipment|safe }}</h5>
             {% endfor %}
           {% endif %}
 

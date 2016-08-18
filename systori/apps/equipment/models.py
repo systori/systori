@@ -59,7 +59,9 @@ class Equipment(models.Model):
             return _("unknown")
 
     def __str__(self):
-        return "{} : {}".format(self.name, self.license_plate)
+        if self.license_plate:
+            return '{} - {} <span class="glyphicon glyphicon-user" aria-hidden="true"></span>'.format(self.license_plate, self.number_of_seats)
+        return "{}".format(self.name)
 
 
 class RefuelingStop(models.Model):
