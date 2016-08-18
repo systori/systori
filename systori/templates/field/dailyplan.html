@@ -59,9 +59,9 @@
     {% if access.has_laborer %}
     <field-equipment
         class="list-group-item"
-        data-id="{{ assigned.id }}">{{ assigned.equipment }}</field-equipment>
+        data-id="{{ assigned.id }}">{{ assigned.equipment|safe }}</field-equipment>
     {% else %}
-    <div class="list-group-item">{{ assigned.equipment }}</div>
+        <div class="list-group-item">{{ assigned.equipment|safe }}</div>
     {% endif %}
 
   {% endfor %}
