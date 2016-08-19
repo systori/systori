@@ -1,10 +1,4 @@
-.idea/workspace.xml
-.idea/dataSources.ids
-.idea/dataSources.local.xml
-.idea/dataSources.xml
-.idea/systori.iml
-.idea/dictionaries/
-.idea/libraries/
+.idea
 *.pyc
 .settings/
 src/

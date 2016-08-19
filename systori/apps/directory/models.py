@@ -16,9 +16,9 @@ class Contact(models.Model):
     email = models.EmailField(_("Email"), blank=True)
     website = models.URLField(_("Website"), blank=True)
 
-    address = models.CharField(_("Address"), max_length=512)
-    postal_code = models.CharField(_("Postal Code"), max_length=512)
-    city = models.CharField(_("City"), max_length=512)
+    address = models.CharField(_("Address"), max_length=512, blank=True)
+    postal_code = models.CharField(_("Postal Code"), max_length=512, blank=True)
+    city = models.CharField(_("City"), max_length=512, blank=True)
     country = models.CharField(_("Country"), max_length=512, default=settings.DEFAULT_COUNTRY)
 
     is_address_label_generated = models.BooleanField(_("auto-generate address label"), default=True)

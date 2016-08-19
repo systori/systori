@@ -479,12 +479,6 @@ class FieldAssignLabor(TemplateView):
             if new_assignments:
                 dailyplan.save()
 
-            origin = urlquote(_origin_success_url(request, ''))
-
-            redirect = reverse('field.dailyplan.assign-tasks',
-                               args=[dailyplan.jobsite.id, dailyplan.url_id]) + \
-                               '?origin=' + origin
-
             if not new_assignments:
                 return HttpResponseRedirect(redirect)
 
@@ -618,3 +612,8 @@ class FieldPaste(View):
         for plan in daily_plan_objects().filter(id__in=plans):
             delete_when_empty(plan)
         return HttpResponse("OK")
+
+
+class FieldEquipmentList(ListView):
+    model = Equipment
+    template_name = "field/equipment_list.html"

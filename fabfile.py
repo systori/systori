@@ -11,7 +11,7 @@ version = _V(VERSION)
 
 env.hosts = ['systori.com']
 
-PROD_MEDIA_PATH = '/srv/systori/production'
+PROD_MEDIA_PATH = '/var/lib/systori/production'
 PROD_MEDIA_FILE = 'systori.media.tgz'
 
 
@@ -36,6 +36,7 @@ def uwsgi():
           " --module=systori.wsgi"
           " --socket=0.0.0.0:8000"
           " --static-map /static=/static"
+          " --attach-daemon=\"celery -A systori worker -B\""
           " --env DJANGO_SETTINGS_MODULE={}".format(
               os.environ['DJANGO_SETTINGS_MODULE']))
 

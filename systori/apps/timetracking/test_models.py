@@ -124,6 +124,14 @@ class TimerTest(TestCase):
             timer = Timer(user=self.user, start=NOW, end=NOW - timedelta(days=2))
             timer.clean()
 
+    def test_save_long_timer_fails(self):
+        with self.assertRaises(ValidationError):
+            Timer.objects.create(user=self.user, start=NOW, end=NOW + timedelta(days=2))
+
+    def test_create_negative_timer_fails(self):
+        with self.assertRaises(ValidationError):
+            Timer.objects.create(user=self.user, start=NOW, end=NOW - timedelta(days=2))
+
 
 class TimerQuerySetTest(TestCase):
 

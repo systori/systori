@@ -19,6 +19,11 @@ SHARED_MODELS = [
     'tastypie.apikey'
 ]
 
+BROKER_URL = 'amqp://guest:guest@192.168.0.99:5672//'
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]
+
 # Django Settings
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
