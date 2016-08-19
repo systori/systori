@@ -153,9 +153,9 @@ class Timer(models.Model):
         from .utils import format_seconds
         return format_seconds(self.get_duration_seconds())
 
-    def stop(self, ignore_short_duration=True):
+    def stop(self, end=None, ignore_short_duration=True):
         assert self.pk
-        self.end = timezone.now()
+        self.end = end or timezone.now()
         if not ignore_short_duration or self.get_duration_seconds() > self.SHORT_DURATION_THRESHOLD:
             self.save()
         else:

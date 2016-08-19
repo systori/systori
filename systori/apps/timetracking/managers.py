@@ -4,8 +4,12 @@ from collections import OrderedDict
 from pytz import timezone as pytz_timezone
 from django.db.models.query import QuerySet
 from django.db.models import F, Q, Sum, Min, Max, Func
+from django.db.transaction import atomic
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+
+
+ABANDONED_CUTOFF = (16, 00)
 
 
 class TimerQuerySet(QuerySet):
@@ -15,6 +19,15 @@ class TimerQuerySet(QuerySet):
 
     def filter_running(self):
         return self.filter(end__isnull=True).exclude(kind=self.model.CORRECTION)
+
+    @atomic
+    def stop_abandoned(self):
+        cutoff_params = dict(hour=ABANDONED_CUTOFF[0], minute=ABANDONED_CUTOFF[1], second=0, microsecond=0)
+        for timer in self.filter_running():
+            if (timer.start.hour, timer.start.minute) >= ABANDONED_CUTOFF:
+                timer.stop(end=timer.start + timedelta(minutes=5))
+            else:
+                timer.stop(end=timer.start.replace(**cutoff_params))
 
     def filter_date(self, date=None):
         date = date or timezone.now().date()
