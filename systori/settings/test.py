@@ -20,10 +20,6 @@ DATABASES['default'].update({
     }
 })
 
-STATICFILES_DIRS += (
-    ('dart', os.path.join(ROOT_DIR, 'systori/dart/build/web')),
-)
-
 PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
 )
