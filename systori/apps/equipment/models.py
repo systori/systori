@@ -60,7 +60,7 @@ class Equipment(models.Model):
 
     def __str__(self):
         if self.license_plate:
-            return '{} - {}P'.format(self.license_plate, self.number_of_seats)
+            return '{} - {}P - {}'.format(self.license_plate, self.number_of_seats, self.name)
         return "{}".format(self.name)
 
 
