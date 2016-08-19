@@ -1,13 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: systori\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-19 08:30-0400\n"
-"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
+"Project-Id-Version: systori\n"
+"Language: de\n"
 
 #: systori/apps/accounting/forms.py:123
 msgid "Form has become invalid due to external changes to the jobs list."
@@ -171,6 +169,8 @@ msgstr "Gutschrift netto"
 msgid "Refund Tax"
 msgstr "Gutschrift Steuer"
 
+#. msgid "Payment"
+#. msgstr "Gesamtzahlung"
 #: systori/apps/accounting/forms.py:672
 msgid "Apply Net"
 msgstr "Netto anwenden"
@@ -180,7 +180,6 @@ msgid "Apply Tax"
 msgstr "Steuer anwenden"
 
 #: systori/apps/accounting/forms.py:765
-#, python-format
 msgid "Account code must be a number between %(min)s and %(max)s inclusive."
 msgstr "Die Kontonummer muss zwischen %(min)s und %(max)s liegen. "
 
@@ -236,13 +235,8 @@ msgid "active"
 msgstr "aktiv"
 
 #: systori/apps/company/models.py:45
-msgid ""
-"Designates whether this user should be treated as active. Unselect this "
-"instead of deleting accounts. This will remove user from any present and "
-"future daily plans."
-msgstr ""
-"Markiert diesen Benutzer als im System aktiv. Abwählen und deaktivieren ist "
-"im Normalfall die bessere Option als den Benutzer zu löschen."
+msgid "Designates whether this user should be treated as active. Unselect this instead of deleting accounts. This will remove user from any present and future daily plans."
+msgstr "Markiert diesen Benutzer als im System aktiv. Abwählen und deaktivieren ist im Normalfall die bessere Option als den Benutzer zu löschen."
 
 #: systori/apps/directory/forms.py:18
 msgid "You must provide either a company or last name."
@@ -704,7 +698,6 @@ msgid "Project progress"
 msgstr "Leistungsstand"
 
 #: systori/apps/document/type/invoice.py:52
-#, python-brace-format
 msgid "Payment on {date}"
 msgstr "Zahlung vom {date}"
 
@@ -757,17 +750,14 @@ msgid "Total"
 msgstr "Summe"
 
 #: systori/apps/document/type/invoice.py:147
-#, python-brace-format
 msgid "Work completed on {date}"
 msgstr "Erbrachte Leistung zum {date}"
 
 #: systori/apps/document/type/invoice.py:149
-#, python-brace-format
 msgid "Flat invoice on {date}"
 msgstr "Pauschalrechnung vom {date}"
 
 #: systori/apps/document/type/invoice.py:151
-#, python-brace-format
 msgid "Adjustment on {date}"
 msgstr "Zahlung vom {date}"
 
@@ -838,140 +828,9 @@ msgstr "Seite {} von {}"
 msgid "Continuation"
 msgstr "Fortsetzung"
 
-#: systori/apps/equipment/forms.py:9
-msgid "last_refueling_stop"
-msgstr ""
-
-#: systori/apps/equipment/forms.py:17 systori/apps/equipment/models.py:73
-#: systori/templates/equipment/equipment_detail.html:56
-msgid "distance"
-msgstr ""
-
-#: systori/apps/equipment/forms.py:18
-msgid "average_consumption"
-msgstr ""
-
-#: systori/apps/equipment/forms.py:38 systori/apps/equipment/forms.py:43
-msgid "you must enter a higher mileage than the older refueling stop."
-msgstr ""
-
-#: systori/apps/equipment/forms.py:40
-msgid "you must enter a smaller mileage than the younger refueling stop."
-msgstr ""
-
-#: systori/apps/equipment/models.py:20
-msgid "gasoline"
-msgstr ""
-
-#: systori/apps/equipment/models.py:21
-msgid "premium gasoline"
-msgstr ""
-
-#: systori/apps/equipment/models.py:22
-msgid "diesel"
-msgstr ""
-
-#: systori/apps/equipment/models.py:23
-msgid "premium diesel"
-msgstr ""
-
-#: systori/apps/equipment/models.py:24
-msgid "electric"
-msgstr ""
-
 #: systori/apps/equipment/models.py:29
 msgid "Manufacturer"
 msgstr "Hersteller"
-
-#: systori/apps/equipment/models.py:32
-#: systori/templates/equipment/equipment_detail.html:19
-#: systori/templates/equipment/equipment_list.html:11
-#, fuzzy
-#| msgid "Document Template"
-msgid "license plate"
-msgstr "Dokumentenvorlage"
-
-#: systori/apps/equipment/models.py:33
-#: systori/templates/equipment/equipment_detail.html:20
-msgid "number of seats"
-msgstr ""
-
-#: systori/apps/equipment/models.py:34
-msgid "Icon"
-msgstr ""
-
-#: systori/apps/equipment/models.py:35
-#: systori/templates/equipment/equipment_detail.html:22
-msgid "fuel"
-msgstr ""
-
-#: systori/apps/equipment/models.py:36
-#: systori/templates/equipment/equipment_detail.html:23
-msgid "last refueling stop"
-msgstr ""
-
-#: systori/apps/equipment/models.py:59
-msgid "unknown"
-msgstr ""
-
-#: systori/apps/equipment/models.py:69 systori/apps/equipment/models.py:133
-#, fuzzy
-#| msgid "Equipment"
-msgid "equipment"
-msgstr "Ausrüstung"
-
-#: systori/apps/equipment/models.py:71 systori/apps/equipment/models.py:135
-#: systori/templates/equipment/equipment_detail.html:17
-#: systori/templates/equipment/equipment_detail.html:55
-#: systori/templates/equipment/equipment_detail.html:94
-msgid "mileage"
-msgstr ""
-
-#: systori/apps/equipment/models.py:75
-msgid "refueled liters"
-msgstr ""
-
-#: systori/apps/equipment/models.py:77
-msgid "price per liter"
-msgstr ""
-
-#: systori/apps/equipment/models.py:79
-msgid "average consumption"
-msgstr ""
-
-#: systori/apps/equipment/models.py:83
-msgid "l"
-msgstr ""
-
-#: systori/apps/equipment/models.py:83
-msgid "km"
-msgstr ""
-
-#: systori/apps/equipment/models.py:134
-#: systori/templates/equipment/equipment_detail.html:54
-#: systori/templates/equipment/equipment_detail.html:93
-msgid "date"
-msgstr ""
-
-#: systori/apps/equipment/models.py:137
-#: systori/templates/equipment/equipment_detail.html:95
-#: systori/templates/task/task_editor.html:21
-#: systori/templates/task/taskgroup_editor.html:8
-#: systori/templates/task/taskinstance_editor.html:7
-msgid "description"
-msgstr "Beschreibung"
-
-#: systori/apps/equipment/models.py:138
-#: systori/templates/equipment/equipment_detail.html:96
-#, fuzzy
-#| msgid "Contractor"
-msgid "contractor"
-msgstr "Vertragspartner"
-
-#: systori/apps/equipment/models.py:139
-#: systori/templates/equipment/equipment_detail.html:97
-msgid "cost"
-msgstr ""
 
 #: systori/apps/project/forms.py:39
 msgid "Limit search to Contacts."
@@ -991,10 +850,8 @@ msgid "Search"
 msgstr "Suche"
 
 #: systori/apps/project/gaeb_utils.py:35
-#, python-format
 msgid "File %s can't be imported. Please Contact Support."
-msgstr ""
-"Datei %s kann nicht importiert werden. Bitte kontaktieren Sie den Support."
+msgstr "Datei %s kann nicht importiert werden. Bitte kontaktieren Sie den Support."
 
 #: systori/apps/project/gaeb_utils.py:82
 msgid " Info: Picture was in Imported File."
@@ -1097,16 +954,6 @@ msgstr "Breitengrad"
 #: systori/templates/project/project_detail.html:474
 msgid "Longitude"
 msgstr "Längengrad"
-
-#: systori/apps/project/models.py:254
-#, fuzzy
-#| msgid "Overtime"
-msgid "Travel time"
-msgstr "Überstunden"
-
-#: systori/apps/project/models.py:254
-msgid "in minutes"
-msgstr ""
 
 #: systori/apps/project/models.py:285
 msgid "Day"
@@ -1221,7 +1068,6 @@ msgid "Task Instances"
 msgstr "Positionsvarianten"
 
 #: systori/apps/task/models.py:385
-#, python-format
 msgid "Price correction from %(user)s on %(date)s"
 msgstr "Zu-/Abschlag von %(user)s am %(date)s"
 
@@ -1263,10 +1109,6 @@ msgstr "Anhänge"
 msgid "Timer already running"
 msgstr "Stoppuhr läuft bereits"
 
-#: systori/apps/timetracking/forms.py:45
-msgid "Enter valid duration (example: 1h 10m)"
-msgstr ""
-
 #: systori/apps/timetracking/models.py:23
 #: systori/apps/timetracking/templates/timetracking/user_report.html:77
 #, fuzzy
@@ -1283,20 +1125,6 @@ msgstr "Urlaub"
 msgid "Illness"
 msgstr "Krankheit"
 
-#: systori/apps/timetracking/models.py:26
-#: systori/apps/timetracking/templates/timetracking/user_report.html:117
-#, fuzzy
-#| msgid "correction"
-msgid "Correction"
-msgstr "Korrektur"
-
-#: systori/apps/timetracking/models.py:27
-#: systori/apps/timetracking/templates/timetracking/user_report.html:123
-#, fuzzy
-#| msgid "Salutation"
-msgid "Education"
-msgstr "Anrede"
-
 #: systori/apps/timetracking/models.py:56
 msgid "in seconds"
 msgstr "in Sekunden"
@@ -1309,52 +1137,17 @@ msgstr "Stoppuhr"
 msgid "timers"
 msgstr "Stoppuhren"
 
-#: systori/apps/timetracking/templates/timetracking/dashboard_part.html:9
-msgid "Geolocating..."
-msgstr ""
-
 #: systori/apps/timetracking/templates/timetracking/dashboard_part.html:18
 #: systori/apps/timetracking/templates/timetracking/home.html:85
 #: systori/apps/timetracking/templates/timetracking/user_report.html:65
 msgid "End"
 msgstr "Ende"
 
-#: systori/apps/timetracking/templates/timetracking/dashboard_part.html:19
-#, fuzzy
-msgid "Duration"
-msgstr "Summe Dauer"
-
-#: systori/apps/timetracking/templates/timetracking/home.html:56
-#: systori/apps/timetracking/templates/timetracking/user_report.html:34
-msgid "Time Report for"
-msgstr "Stundenübersicht für"
-
-#: systori/apps/timetracking/templates/timetracking/home.html:63
-#: systori/apps/timetracking/templates/timetracking/user_report.html:41
-msgid "Show"
-msgstr ""
-
-#: systori/apps/timetracking/templates/timetracking/home.html:76
-#: systori/apps/timetracking/templates/timetracking/user_report.html:54
-#: systori/templates/accounting/account_form.html:14
-#: systori/templates/accounting/adjustment_form.html:102
-#: systori/templates/accounting/invoice_form.html:110
-#: systori/templates/accounting/payment_form.html:80
-#: systori/templates/accounting/refund_form.html:88
-#: systori/templates/directory/contact_form.html:11
-#: systori/templates/document/documentsettings_form.html:11
-#: systori/templates/document/documenttemplate_form.html:14
-#: systori/templates/document/evidence_form.html:11
-#: systori/templates/document/letterhead_form.html:15
-#: systori/templates/document/proposal_form.html:64
-#: systori/templates/equipment/equipment_form.html:11
-#: systori/templates/field/dailyplan.html:115
-#: systori/templates/project/jobsite_form.html:11
-#: systori/templates/project/project_form_upload.html:9
-#: systori/templates/task/job_form.html:11
-#: systori/templates/user/user_form.html:23
-msgid "Save"
-msgstr "Speichern"
+#: systori/apps/timetracking/templates/timetracking/home.html:88
+#: systori/apps/timetracking/templates/timetracking/user_report.html:67
+#: systori/apps/timetracking/templates/timetracking/user_report.html:147
+msgid "Overtime"
+msgstr "Überstunden"
 
 #: systori/apps/timetracking/templates/timetracking/home.html:83
 #: systori/templates/task/progressreport_list.html:12
@@ -1366,16 +1159,10 @@ msgstr "Benutzer"
 msgid "Total Duration"
 msgstr "Summe Dauer"
 
-#: systori/apps/timetracking/templates/timetracking/home.html:88
-#: systori/apps/timetracking/templates/timetracking/user_report.html:67
-#: systori/apps/timetracking/templates/timetracking/user_report.html:147
-msgid "Overtime"
-msgstr "Überstunden"
-
-#: systori/apps/timetracking/templates/timetracking/home.html:102
-#, fuzzy
-msgid "No users"
-msgstr "Benutzer"
+#: systori/apps/timetracking/templates/timetracking/home.html:56
+#: systori/apps/timetracking/templates/timetracking/user_report.html:34
+msgid "Time Report for"
+msgstr "Stundenübersicht für"
 
 #: systori/apps/timetracking/templates/timetracking/user_report.html:63
 #, fuzzy
@@ -1391,34 +1178,9 @@ msgstr "Stunden"
 msgid "Total Hours"
 msgstr "Summe Stunden"
 
-#: systori/apps/timetracking/templates/timetracking/user_report.html:84
-#, fuzzy
-#| msgid "Start"
-msgid "start"
-msgstr "Start"
-
-#: systori/apps/timetracking/templates/timetracking/user_report.html:93
-#, fuzzy
-#| msgid "Send"
-msgid "end"
-msgstr "als gesendet markieren"
-
 #: systori/apps/timetracking/templates/timetracking/user_report.html:133
 msgid "No entries"
 msgstr "keine Einträge"
-
-#: systori/apps/timetracking/templates/timetracking/user_report.html:141
-#, fuzzy
-msgid "Holidays used"
-msgstr "verbrauchte Urlaubstage"
-
-#: systori/apps/timetracking/templates/timetracking/user_report.html:144
-msgid "Holidays available"
-msgstr "verfügbare Urlaubstage"
-
-#: systori/apps/timetracking/templates/timetracking/user_status_snippet.html:7
-msgid "Idle"
-msgstr ""
 
 #: systori/apps/user/forms.py:11
 msgid "The two password fields didn't match."
@@ -1596,7 +1358,6 @@ msgstr "Englisch"
 #: systori/templates/project/project_confirm_delete.html:8
 #: systori/templates/task/job_confirm_delete.html:8
 #: systori/templates/user/access_confirm_delete.html:8
-#, python-format
 msgid "Are you sure you want to delete \"%(object)s\"?"
 msgstr "Sind Sie sicher dass Sie das Objekt \"%(object)s\" löschen möchten?"
 
@@ -1635,6 +1396,28 @@ msgstr "Soll"
 #: systori/templates/accounting/payment_form.html:52
 msgid "Credit"
 msgstr "Haben"
+
+#: systori/apps/timetracking/templates/timetracking/home.html:76
+#: systori/apps/timetracking/templates/timetracking/user_report.html:54
+#: systori/templates/accounting/account_form.html:14
+#: systori/templates/accounting/adjustment_form.html:102
+#: systori/templates/accounting/invoice_form.html:110
+#: systori/templates/accounting/payment_form.html:80
+#: systori/templates/accounting/refund_form.html:88
+#: systori/templates/directory/contact_form.html:11
+#: systori/templates/document/documentsettings_form.html:11
+#: systori/templates/document/documenttemplate_form.html:14
+#: systori/templates/document/evidence_form.html:11
+#: systori/templates/document/letterhead_form.html:15
+#: systori/templates/document/proposal_form.html:64
+#: systori/templates/equipment/equipment_form.html:11
+#: systori/templates/field/dailyplan.html:115
+#: systori/templates/project/jobsite_form.html:11
+#: systori/templates/project/project_form_upload.html:9
+#: systori/templates/task/job_form.html:11
+#: systori/templates/user/user_form.html:23
+msgid "Save"
+msgstr "Speichern"
 
 #: systori/templates/accounting/account_list.html:7
 msgid "Bank Accounts"
@@ -1837,11 +1620,15 @@ msgstr "Vorgänger"
 msgid "from"
 msgstr "vom"
 
+#. msgid "Payment"
+#. msgstr "Gesamtzahlung"
 #: systori/templates/accounting/refund_form.html:9
 #, fuzzy
 msgid "Calculate & Apply Refund"
 msgstr "Berechne und wende Gutschrift an"
 
+#. msgid "Payment"
+#. msgstr "Gesamtzahlung"
 #: systori/templates/accounting/refund_form.html:44
 msgid "Apply Refund"
 msgstr "Wende Gutschrift an"
@@ -1915,17 +1702,14 @@ msgid "Directory"
 msgstr "Adressbuch"
 
 #: systori/templates/directory/projectcontact_confirm_delete.html:8
-#, python-format
 msgid "Are you sure you want to remove \"%(object)s\" from this project?"
 msgstr "Sicher das Objekt \"%(object)s\" löschen?"
 
 #: systori/templates/directory/projectcontact_form_add.html:11
-#, python-format
 msgid "Add Contact to %(project_name)s"
 msgstr "Kontakt zu %(project_name)s hinzufügen"
 
 #: systori/templates/directory/projectcontact_form_create.html:8
-#, python-format
 msgid "Create and then add contact to %(project_name)s"
 msgstr "Kontakt erstellen und zu Projekt %(project_name)s hinzufügen."
 
@@ -1944,50 +1728,6 @@ msgstr "Angebotsdetails"
 #: systori/templates/equipment/equipment_detail.html:9
 msgid "Equipment Details"
 msgstr "Ausrüstungsdetails"
-
-#: systori/templates/equipment/equipment_detail.html:16
-#, fuzzy
-#| msgid "Manufacturer"
-msgid "manufacturer"
-msgstr "Hersteller"
-
-#: systori/templates/equipment/equipment_detail.html:18
-#: systori/templates/equipment/equipment_detail.html:53
-msgid "AFC"
-msgstr ""
-
-#: systori/templates/equipment/equipment_detail.html:21
-msgid "icon"
-msgstr ""
-
-#: systori/templates/equipment/equipment_detail.html:46
-msgid "Add refuel stop"
-msgstr ""
-
-#: systori/templates/equipment/equipment_detail.html:48
-msgid "Refueling Stops"
-msgstr ""
-
-#: systori/templates/equipment/equipment_detail.html:57
-msgid "liters"
-msgstr ""
-
-#: systori/templates/equipment/equipment_detail.html:58
-#: systori/templates/task/lineitem_editor.html:8
-msgid "price"
-msgstr "Preis"
-
-#: systori/templates/equipment/equipment_detail.html:86
-#, fuzzy
-#| msgid "Add Contact"
-msgid "Add maintenance"
-msgstr "Kontakt"
-
-#: systori/templates/equipment/equipment_detail.html:88
-#, fuzzy
-#| msgid "Main Site"
-msgid "Maintenance"
-msgstr "Baustelle"
 
 #: systori/templates/equipment/equipment_list.html:7
 #: systori/templates/field/assign_equipment.html:27
@@ -2074,7 +1814,6 @@ msgstr "Einsatzorte"
 
 #: systori/templates/field/planning.html:94
 #: systori/templates/field/project.html:95
-#, python-format
 msgid "Copy from %(otherday)s."
 msgstr "Von %(otherday)s kopieren."
 
@@ -2083,7 +1822,6 @@ msgid "Cannot change the past."
 msgstr "Nicht die Vergangenheit ändern du kannst."
 
 #: systori/templates/field/project.html:99
-#, python-format
 msgid "No daily plans exist for %(day)s."
 msgstr "Für %(day)s existieren keine Tagespläne"
 
@@ -2092,12 +1830,10 @@ msgid "Back"
 msgstr "Zurück"
 
 #: systori/templates/field/task.html:31
-#, python-format
 msgid "Remove task from %(jobsite)s."
 msgstr "Entferne Pos. von %(jobsite)s."
 
 #: systori/templates/field/task.html:34
-#, python-format
 msgid "Add task to %(jobsite)s."
 msgstr "Position zu %(jobsite)s hinzufügen"
 
@@ -2180,12 +1916,10 @@ msgid "Evidence preprinted form"
 msgstr "Aufmaß Vordruck"
 
 #: systori/templates/project/project_detail.html:68
-#, python-format
 msgid "Increase estimate by %(percent)s."
 msgstr "Angebot um %(percent)s erhöhen."
 
 #: systori/templates/project/project_detail.html:71
-#, python-format
 msgid "Decrease estimate by %(percent)s."
 msgstr "Angebot um %(percent)s verringern."
 
@@ -2241,17 +1975,15 @@ msgid "Create next invoice in this sequence."
 msgstr "Neue Rechnung in dieser Folge erstellen."
 
 #: systori/templates/project/project_detail.html:251
-msgid ""
-"Last invoice in sequence must be marked as sent before a new one can be "
-"created."
-msgstr ""
-"Bevor eine neue Rechnung erstellt werden kann, muss die vorherige als "
-"versendet markiert werden."
+msgid "Last invoice in sequence must be marked as sent before a new one can be created."
+msgstr "Bevor eine neue Rechnung erstellt werden kann, muss die vorherige als versendet markiert werden."
 
 #: systori/templates/project/project_detail.html:264
 msgid "Start new invoice sequence."
 msgstr "Starte eine neue Rechnungsfolge."
 
+#. msgid "Payment"
+#. msgstr "Gesamtzahlung"
 #: systori/templates/project/project_detail.html:294
 #: systori/templates/project/project_detail.html:386
 msgid "Applied"
@@ -2323,22 +2055,11 @@ msgstr "oder"
 msgid "GAEB-Import (experimental)"
 msgstr "GAEB-Import (experimentell)"
 
-#: systori/templates/project/project_list.html:31
-#, fuzzy
-#| msgid "Project"
-msgid "Go To Project"
-msgstr "Projekt"
-
-#: systori/templates/project/project_list.html:33
-msgid "Go"
-msgstr ""
-
 #: systori/templates/project/project_list.html:150
 msgid "Finished"
 msgstr "beendet"
 
 #: systori/templates/project/project_list.html:151
-#, python-format
 msgid "Show %(phase)s Projects"
 msgstr "Zeige %(phase)s Projekte"
 
@@ -2419,6 +2140,11 @@ msgstr "Kalkulationselement"
 msgid "qty"
 msgstr "Menge"
 
+#: systori/templates/equipment/equipment_detail.html:58
+#: systori/templates/task/lineitem_editor.html:8
+msgid "price"
+msgstr "Preis"
+
 #: systori/templates/task/lineitem_editor.html:11
 msgid "Flag"
 msgstr "Markierung"
@@ -2489,6 +2215,14 @@ msgstr "alt"
 msgid "new Alternative Task"
 msgstr "neue Alternativposition"
 
+#: systori/apps/equipment/models.py:137
+#: systori/templates/equipment/equipment_detail.html:95
+#: systori/templates/task/task_editor.html:21
+#: systori/templates/task/taskgroup_editor.html:8
+#: systori/templates/task/taskinstance_editor.html:7
+msgid "description"
+msgstr "Beschreibung"
+
 #: systori/templates/task/taskgroup_editor.html:5
 msgid "task group"
 msgstr "Positionsgruppe"
@@ -2507,9 +2241,7 @@ msgstr "neues Kalkulationselement"
 
 #: systori/templates/user/login.html:62
 msgid "Your username and password didn't match. Please try again."
-msgstr ""
-"Die eingegebenen Daten funktionieren nicht, bitte versuchen Sie es noch "
-"einmal."
+msgstr "Die eingegebenen Daten funktionieren nicht, bitte versuchen Sie es noch einmal."
 
 #: systori/templates/user/login.html:70
 msgid "Sign in"
@@ -2543,27 +2275,222 @@ msgstr "Administration"
 msgid "Generate Password"
 msgstr "Passwort generieren"
 
-#~ msgid "Purchase Date"
-#~ msgstr "Kaufdatum"
-
-#~ msgid "Purchase Price"
-#~ msgstr "Kaufpreis"
-
-#~ msgid "Report"
-#~ msgstr "Report"
-
+#: systori/apps/timetracking/templates/timetracking/home.html:102
 #, fuzzy
-#~ msgid "Time"
-#~ msgstr "Zeit"
+msgid "No users"
+msgstr "Benutzer"
 
-#~ msgid "Worklog for"
-#~ msgstr "Arbeitsbuch für"
+#: systori/apps/timetracking/templates/timetracking/user_report.html:141
+#, fuzzy
+msgid "Holidays used"
+msgstr "verbrauchte Urlaubstage"
 
-#~ msgid "Remove yourself from this assignment."
-#~ msgstr "Mich von der Baustelle abmelden."
+#: systori/apps/timetracking/templates/timetracking/user_report.html:144
+msgid "Holidays available"
+msgstr "verfügbare Urlaubstage"
 
-#~ msgid "Add yourself as <b>foreman</b>."
-#~ msgstr "Selbst als <b>Vorarbeiter</b> verknüpfen."
+#: systori/apps/equipment/forms.py:9
+msgid "last_refueling_stop"
+msgstr "letzter Tankstop"
 
-#~ msgid "Add yourself as <b>laborer</b>."
-#~ msgstr "Selbst als <b>Mitarbeiter</b> verknüpfen."
+#: systori/apps/equipment/forms.py:17 systori/apps/equipment/models.py:73
+#: systori/templates/equipment/equipment_detail.html:56
+msgid "distance"
+msgstr "Strecke"
+
+#: systori/apps/equipment/forms.py:18
+msgid "average_consumption"
+msgstr "Durchschnittsverbrauch"
+
+#: systori/apps/equipment/forms.py:38 systori/apps/equipment/forms.py:43
+msgid "you must enter a higher mileage than the older refueling stop."
+msgstr "es muss ein höherer Kilometerstand als die älteren Tankstops eingegeben werden."
+
+#: systori/apps/equipment/forms.py:40
+msgid "you must enter a smaller mileage than the younger refueling stop."
+msgstr "es muss ein niedrigerer Kilometerstand als die jüngeren Tankstops eingegeben werden."
+
+#: systori/apps/equipment/models.py:20
+msgid "gasoline"
+msgstr "Super"
+
+#: systori/apps/equipment/models.py:21
+msgid "premium gasoline"
+msgstr "Super+"
+
+#: systori/apps/equipment/models.py:22
+msgid "diesel"
+msgstr "Diesel"
+
+#: systori/apps/equipment/models.py:23
+msgid "premium diesel"
+msgstr "Diesel+"
+
+#: systori/apps/equipment/models.py:24
+msgid "electric"
+msgstr "elektrisch"
+
+#: systori/apps/equipment/models.py:32
+#: systori/templates/equipment/equipment_detail.html:19
+#: systori/templates/equipment/equipment_list.html:11
+msgid "license plate"
+msgstr "Nummernschild"
+
+#: systori/apps/equipment/models.py:33
+#: systori/templates/equipment/equipment_detail.html:20
+msgid "number of seats"
+msgstr "Anzahl Sitzplätze"
+
+#: systori/apps/equipment/models.py:34
+msgid "Icon"
+msgstr "Icon"
+
+#: systori/apps/equipment/models.py:35
+#: systori/templates/equipment/equipment_detail.html:22
+msgid "fuel"
+msgstr "Kraftstoff"
+
+#: systori/apps/equipment/models.py:36
+#: systori/templates/equipment/equipment_detail.html:23
+msgid "last refueling stop"
+msgstr "letzter Tankstop"
+
+#: systori/apps/equipment/models.py:59
+msgid "unknown"
+msgstr "unbekannt"
+
+#: systori/apps/equipment/models.py:69 systori/apps/equipment/models.py:133
+msgid "equipment"
+msgstr "Ausrüstung"
+
+#: systori/apps/equipment/models.py:71 systori/apps/equipment/models.py:135
+#: systori/templates/equipment/equipment_detail.html:17
+#: systori/templates/equipment/equipment_detail.html:55
+#: systori/templates/equipment/equipment_detail.html:94
+msgid "mileage"
+msgstr "Kilometerstand"
+
+#: systori/apps/equipment/models.py:75
+msgid "refueled liters"
+msgstr "getankte Liter"
+
+#: systori/apps/equipment/models.py:77
+msgid "price per liter"
+msgstr "Preis pro Liter"
+
+#: systori/apps/equipment/models.py:79
+msgid "average consumption"
+msgstr "Durchschnittsverbrauch"
+
+#: systori/apps/equipment/models.py:83
+msgid "l"
+msgstr "l"
+
+#: systori/apps/equipment/models.py:83
+msgid "km"
+msgstr "km"
+
+#: systori/apps/equipment/models.py:134
+#: systori/templates/equipment/equipment_detail.html:54
+#: systori/templates/equipment/equipment_detail.html:93
+msgid "date"
+msgstr "Datum"
+
+#: systori/apps/equipment/models.py:138
+#: systori/templates/equipment/equipment_detail.html:96
+msgid "contractor"
+msgstr "Werkstatt"
+
+#: systori/apps/equipment/models.py:139
+#: systori/templates/equipment/equipment_detail.html:97
+msgid "cost"
+msgstr "Kosten"
+
+#: systori/apps/project/models.py:254
+msgid "Travel time"
+msgstr "Fahrtzeit"
+
+#: systori/apps/project/models.py:254
+msgid "in minutes"
+msgstr "in Minuten"
+
+#: systori/apps/timetracking/forms.py:45
+msgid "Enter valid duration (example: 1h 10m)"
+msgstr "gültige Zeitspanne eingeben (Beispiel: 1h 10m)"
+
+#: systori/apps/timetracking/models.py:26
+#: systori/apps/timetracking/templates/timetracking/user_report.html:117
+msgid "Correction"
+msgstr "Korrektur"
+
+#: systori/apps/timetracking/models.py:27
+#: systori/apps/timetracking/templates/timetracking/user_report.html:123
+msgid "Education"
+msgstr "Fortbildung"
+
+#: systori/apps/timetracking/templates/timetracking/dashboard_part.html:9
+msgid "Geolocating..."
+msgstr "finde Position..."
+
+#: systori/apps/timetracking/templates/timetracking/dashboard_part.html:19
+msgid "Duration"
+msgstr "Dauer"
+
+#: systori/apps/timetracking/templates/timetracking/home.html:63
+#: systori/apps/timetracking/templates/timetracking/user_report.html:41
+msgid "Show"
+msgstr "Zeige"
+
+#: systori/apps/timetracking/templates/timetracking/user_report.html:84
+msgid "start"
+msgstr "Start"
+
+#: systori/apps/timetracking/templates/timetracking/user_report.html:93
+msgid "end"
+msgstr "Ende"
+
+#: systori/apps/timetracking/templates/timetracking/user_status_snippet.html:7
+msgid "Idle"
+msgstr "pausiert"
+
+#: systori/templates/equipment/equipment_detail.html:16
+msgid "manufacturer"
+msgstr "Hersteller"
+
+#: systori/templates/equipment/equipment_detail.html:18
+#: systori/templates/equipment/equipment_detail.html:53
+msgid "AFC"
+msgstr "∅"
+
+#: systori/templates/equipment/equipment_detail.html:21
+msgid "icon"
+msgstr "Icon"
+
+#: systori/templates/equipment/equipment_detail.html:46
+msgid "Add refuel stop"
+msgstr "Tankstop hinzufügen"
+
+#: systori/templates/equipment/equipment_detail.html:48
+msgid "Refueling Stops"
+msgstr "Tankstop"
+
+#: systori/templates/equipment/equipment_detail.html:57
+msgid "liters"
+msgstr "Liter"
+
+#: systori/templates/equipment/equipment_detail.html:86
+msgid "Add maintenance"
+msgstr "Wartung hinzufügen"
+
+#: systori/templates/equipment/equipment_detail.html:88
+msgid "Maintenance"
+msgstr "Wartung"
+
+#: systori/templates/project/project_list.html:31
+msgid "Go To Project"
+msgstr "Gehe zu Projekt#"
+
+#: systori/templates/project/project_list.html:33
+msgid "Go"
+msgstr "Go"
+
