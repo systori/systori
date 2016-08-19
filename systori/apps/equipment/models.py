@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
-from django.template.defaultfilters import date as _date
+from django.template.defaultfilters import date as date_filter
 
 
 class Equipment(models.Model):
@@ -38,11 +38,11 @@ class Equipment(models.Model):
     @cached_property
     def mileage(self):
         refuelingstop = self.refuelingstop_set.aggregate(
-            m=models.Max('mileage')
-        ).get('m', Decimal(0))
+            max_mileage=models.Max('mileage')
+        ).get('max_mileage', Decimal(0))
         maintenance = self.maintenance_set.aggregate(
-            m=models.Max('mileage')
-        ).get('m', Decimal(0))
+            max_mileage=models.Max('mileage')
+        ).get('max_mileage', Decimal(0))
         if not maintenance or refuelingstop > maintenance:
             return refuelingstop
         else:
@@ -60,15 +60,11 @@ class Equipment(models.Model):
 
     def __str__(self):
         if self.license_plate:
-            return '{} - {} <span class="glyphicon glyphicon-user" aria-hidden="true"></span>'.format(self.license_plate, self.number_of_seats)
+            return '{} - {}P'.format(self.license_plate, self.number_of_seats)
         return "{}".format(self.name)
 
 
 class RefuelingStop(models.Model):
-
-    class Meta:
-        verbose_name = _('refueling stop')
-        verbose_name_plural = _('refueling stops')
 
     equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
     datetime = models.DateTimeField(default=timezone.now, db_index=True)
@@ -84,7 +80,7 @@ class RefuelingStop(models.Model):
                                               null=True, blank=True)
 
     def __str__(self):
-        return '{}: {} {} {} {} {}'.format(self.id, _date(self.datetime), self.liters, _('l'), self.mileage, _('km'))
+        return '{}: {} {} {} {} {}'.format(self.id, date_filter(self.datetime), self.liters, _('l'), self.mileage, _('km'))
 
     @cached_property
     def older_refueling_stop(self):
@@ -103,13 +99,13 @@ class RefuelingStop(models.Model):
         return younger_refueling_stop
 
     def save(self, *args, **kwargs):
-        # Update last_refueling_stop in equipment object/table
-        if self.equipment and (not self.equipment.last_refueling_stop or not self.younger_refueling_stop):
-            self.equipment.last_refueling_stop = self.datetime
-            self.equipment.save()
         # Save average consumption
         if self.equipment:
             self.calc_average_consumption()
+        # Update last_refueling_stop in equipment object/table
+        if not self.equipment.last_refueling_stop or not self.younger_refueling_stop:
+            self.equipment.last_refueling_stop = self.datetime
+            self.equipment.save()
         super(RefuelingStop, self).save(*args, **kwargs)
 
     def calc_average_consumption(self):
@@ -117,27 +113,22 @@ class RefuelingStop(models.Model):
             last_mileage = Decimal(0)
         else:
             last_mileage = self.older_refueling_stop.mileage
-        self.distance = self.mileage - last_mileage
+        self.distance = self.mileage-last_mileage
         self.average_consumption = round(self.liters/self.distance*100, 2)
 
 
 # The cascade_true Flag is set in the UpdateView and it's only set once to prevent unlimited recursive calls
 # therefor a try except block is needed to catch the expected AttributeError
 @receiver(post_save, sender=RefuelingStop)
-def calc_average_consumption_cascade(sender, **kwargs):
-    refueling_stop = kwargs.get('instance')
+def calc_average_consumption_cascade(sender, instance, **kwargs):
     try:
-        if refueling_stop.cascade_save and refueling_stop.younger_refueling_stop is not None:
-            refueling_stop.younger_refueling_stop.save()
+        if instance.cascade_save and instance.younger_refueling_stop is not None:
+            instance.younger_refueling_stop.save()
     except AttributeError:
         pass
 
 
 class Maintenance(models.Model):
-
-    class Meta:
-        verbose_name = _('maintenance')
-        verbose_name_plural = _('maintenances')
 
     equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
     date = models.DateField(_('date'), default=timezone.now)
@@ -149,4 +140,4 @@ class Maintenance(models.Model):
                                validators=[MinValueValidator(Decimal('0.01'))])
 
     def __str__(self):
-        return "{}: {}".format(_date(self.date), self.cost)
+        return "{}: {}".format(date_filter(self.date), self.cost)

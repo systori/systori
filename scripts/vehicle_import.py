@@ -18,6 +18,9 @@ c = Company.objects.get(schema="mehr-handwerk").activate()
 file = open("vehicle_data.json")
 data = json.loads(file.read())
 
+# mapping of old vehicle to current equipment model
+# for old vehicle in the imported data that aren't available in the current model
+# mapping dict gets extended in for loop
 mapping = {
     16: 4,
     10: 5,
@@ -34,6 +37,7 @@ mapping = {
     8: 1
 }
 
+# contractors had been in a FK relation, now mapped to just a string
 contractors = {
     67: "Günster & Leibfahrt",
     66: "Auto Ihm GmbH & Co.KG"
@@ -83,4 +87,4 @@ for entry in data:
             cost=Decimal(entry['fields']['cost'])
         )
     else:
-        print("something wrong in the neighbourhood.")
+        print("ATTENTION! check imported data file - wrong data format.")

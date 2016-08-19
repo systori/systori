@@ -20,7 +20,6 @@ class RefuelingStopForm(forms.ModelForm):
     # explicite order of fields to have them called accordingly in clean()
     class Meta:
         model = RefuelingStop
-        exclude = []
         fields = ['equipment', 'datetime', 'mileage', 'distance', 'liters', 'price_per_liter', 'average_consumption']
 
     def __init__(self, *args, **kwargs):
@@ -35,7 +34,7 @@ class RefuelingStopForm(forms.ModelForm):
         older_refueling_stop = RefuelingStop.objects.filter(equipment=self.cleaned_data.get('equipment').id,
                                                             mileage__gt=mileage).order_by('-mileage').first()
         if self.instance.pk:
-            if self.instance.older_refueling_stop is not None and mileage <= self.instance.older_refueling_stop.mileage:
+            if self.instance.older_refueling_stop and mileage <= self.instance.older_refueling_stop.mileage:
                     raise ValidationError(_('you must enter a higher mileage than the older refueling stop.'))
             elif self.instance.younger_refueling_stop and mileage >= self.instance.younger_refueling_stop.mileage:
                 raise ValidationError(_('you must enter a smaller mileage than the younger refueling stop.'))
