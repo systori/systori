@@ -17,8 +17,8 @@ class EquipmentView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(EquipmentView, self).get_context_data(**kwargs)
-        context['refueling_stops'] = RefuelingStop.objects.filter(equipment=self.object.id).order_by('-mileage')
-        context['maintenances'] = Maintenance.objects.filter(equipment=self.object.id).order_by('-mileage')
+        context['refueling_stops'] = self.object.refuelingstop_set.order_by('-mileage')
+        context['maintenances'] = self.object.maintenance_set.order_by('-mileage')
         return context
 
 
@@ -44,14 +44,8 @@ class RefuelingStopCreate(CreateView):
     form_class = RefuelingStopForm
     template_name = 'equipment/equipment_form.html'
 
-    def get_form_kwargs(self):
-        kwargs = super(RefuelingStopCreate, self).get_form_kwargs()
-
-        equipment = Equipment(id=int(self.kwargs['pk']))
-        kwargs['initial'].update({
-            'equipment': equipment,
-        })
-        return kwargs
+    def get_initial(self):
+        return {'equipment': self.kwargs['pk']}
 
     def get_success_url(self):
         return reverse('equipment.view', args=(self.object.equipment.id,))
@@ -62,14 +56,8 @@ class RefuelingStopUpdate(UpdateView):
     form_class = RefuelingStopForm
     template_name = 'equipment/equipment_form.html'
 
-    def get_form_kwargs(self):
-        kwargs = super(RefuelingStopUpdate, self).get_form_kwargs()
-
-        equipment = Equipment(id=int(self.kwargs['equipment_pk']))
-        kwargs['initial'].update({
-            'equipment': equipment,
-        })
-        return kwargs
+    def get_initial(self):
+        return {'equipment': self.kwargs['equipment_pk']}
 
     # an updated Refueling Stop might change something in a younger Refueling Stop
     # this flag is to cascade the save method once to a younger object if present
@@ -94,14 +82,8 @@ class MaintenanceCreate(CreateView):
     form_class = MaintenanceForm
     template_name = 'equipment/equipment_form.html'
 
-    def get_form_kwargs(self):
-        kwargs = super(MaintenanceCreate, self).get_form_kwargs()
-
-        equipment = Equipment(id=int(self.kwargs['pk']))
-        kwargs['initial'].update({
-            'equipment': equipment,
-        })
-        return kwargs
+    def get_initial(self):
+        return {'equipment': self.kwargs['pk']}
 
     def get_success_url(self):
         return reverse('equipment.view', args=(self.object.equipment.id,))
@@ -112,14 +94,8 @@ class MaintenanceUpdate(UpdateView):
     form_class = MaintenanceForm
     template_name = 'equipment/equipment_form.html'
 
-    def get_form_kwargs(self):
-        kwargs = super(MaintenanceUpdate, self).get_form_kwargs()
-
-        equipment = Equipment(id=int(self.kwargs['equipment_pk']))
-        kwargs['initial'].update({
-            'equipment': equipment,
-        })
-        return kwargs
+    def get_initial(self):
+        return {'equipment': self.kwargs['equipment_pk']}
 
     def get_success_url(self):
         return reverse('equipment.view', args=(self.object.equipment.id,))
