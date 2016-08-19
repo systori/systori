@@ -17,7 +17,6 @@ class TasksTest(TestCase):
         user1 = UserFactory(company=company1)
         Timer.objects.create(user=user1, start=timezone.now() - timedelta(hours=7))
 
-        company1.deactivate()
         company2 = CompanyFactory()
         user2 = UserFactory(company=company2)
         Timer.objects.create(user=user2, start=timezone.now() - timedelta(hours=5))

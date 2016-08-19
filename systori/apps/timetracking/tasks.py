@@ -10,4 +10,3 @@ def stop_abandoned_timers():
     for company in Company.objects.all():
         company.activate()
         Timer.objects.stop_abandoned()
-        company.deactivate()
