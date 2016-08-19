@@ -102,10 +102,10 @@ class RefuelingStop(models.Model):
         # Save average consumption
         if self.equipment:
             self.calc_average_consumption()
-        # Update last_refueling_stop in equipment object/table
-        if not self.equipment.last_refueling_stop or not self.younger_refueling_stop:
-            self.equipment.last_refueling_stop = self.datetime
-            self.equipment.save()
+            # Update last_refueling_stop in equipment object/table
+            if not self.equipment.last_refueling_stop or not self.younger_refueling_stop:
+                self.equipment.last_refueling_stop = self.datetime
+                self.equipment.save()
         super(RefuelingStop, self).save(*args, **kwargs)
 
     def calc_average_consumption(self):
@@ -113,7 +113,7 @@ class RefuelingStop(models.Model):
             last_mileage = Decimal(0)
         else:
             last_mileage = self.older_refueling_stop.mileage
-        self.distance = self.mileage-last_mileage
+        self.distance = self.mileage - last_mileage
         self.average_consumption = round(self.liters/self.distance*100, 2)
 
 
