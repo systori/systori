@@ -32,3 +32,5 @@ STATICFILES_DIRS += (
     ('dart', os.path.join(ROOT_DIR, 'systori/dart/web')),
     # ('dart', os.path.join(ROOT_DIR, 'systori/dart/build/web')),
 )
+
+BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'

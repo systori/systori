@@ -18,3 +18,5 @@ services:
       - db
   db:
     image: postgres
+  rabbitmq:
+    image: rabbitmq
