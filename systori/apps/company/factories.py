@@ -9,7 +9,7 @@ from .models import Company
 
 class CompanyFactory(factory.django.DjangoModelFactory):
     name = fuzzy.FuzzyText(length=15)
-    schema = 'testcompany'
+    schema = factory.Sequence(lambda n: 'test_company{}'.format(n))
 
     class Meta:
         model = Company

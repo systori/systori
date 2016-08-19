@@ -51,6 +51,12 @@ class TimerTest(TestCase):
         timer.stop(ignore_short_duration=False)
         self.assertTrue(timer.end)
 
+    @freeze_time('2016-08-16 18:30')
+    def test_stop_with_supplied_timestamp(self):
+        timer = Timer.launch(self.user)
+        timer.stop(end=timezone.now() + timedelta(hours=2))
+        self.assertEqual(timer.end.strftime('%H:%M'), '20:30')
+
     def test_stop_zero_timer_ignores_it(self):
         timer = Timer.launch(self.user)
         timer.stop()
@@ -187,3 +193,18 @@ class TimerQuerySetTest(TestCase):
         self.assertEqual(result[1].end, start + timedelta(days=1) + timedelta(seconds=Timer.WORK_HOURS))
         self.assertEqual(result[2].start, start + timedelta(days=2))
         self.assertEqual(result[2].end, start + timedelta(days=2) + timedelta(seconds=Timer.WORK_HOURS))
+
+    @freeze_time('2016-08-16 18:30')
+    def test_stop_abandoned(self):
+        now = timezone.now()
+        user2 = UserFactory(company=self.company)
+        timer_before_cutoff = Timer.objects.create(
+            user=self.user, start=now - timedelta(hours=5))
+        timer_after_cutoff = Timer.objects.create(
+            user=user2, start=now - timedelta(hours=1))
+        Timer.objects.stop_abandoned()
+        timer_before_cutoff.refresh_from_db()
+        timer_after_cutoff.refresh_from_db()
+        self.assertEqual(timer_before_cutoff.end, now.replace(hour=16, minute=0, second=0, microsecond=0))
+        self.assertEqual(timer_after_cutoff.end, timer_after_cutoff.start + timedelta(minutes=5))
+        self.assertEqual(timer_after_cutoff.duration, 60 * 5)
