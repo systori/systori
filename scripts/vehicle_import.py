@@ -87,4 +87,4 @@ for entry in data:
             cost=Decimal(entry['fields']['cost'])
         )
     else:
-        print("ATTENTION! check imported data file - wrong data format.")
+        print("ATTENTION! unknown entry model.")
