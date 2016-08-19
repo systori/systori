@@ -2,7 +2,6 @@ from math import floor, ceil
 from datetime import date
 from django.db import models
 from django.conf import settings
-from ordered_model.models import OrderedModel
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
@@ -24,8 +23,34 @@ class Project(models.Model):
     description = models.TextField(_('Project Description'), blank=True, null=True)
     is_template = models.BooleanField(default=False)
 
-    job_zfill = models.PositiveSmallIntegerField(_("Job Code Zero Fill"), default=1)
-    taskgroup_zfill = models.PositiveSmallIntegerField(_("Task Group Code Zero Fill"), default=1)
+    # level 1 is Job/Lot which is not optional and cannot be named something other than "Lot" (per GAEB spec)
+    level_1_zfill = models.PositiveSmallIntegerField(_("Level %(num)s Zero Fill") % {'num': 1}, default=1)
+
+    # eg. Main Section
+    has_level_2 = models.BooleanField(default=True)
+    level_2_zfill = models.PositiveSmallIntegerField(_("Level %(num)s Zero Fill") % {'num': 2}, default=1)
+    level_2_name = models.CharField(_('Level %(num)s Name') % {'num': 2}, max_length=512,
+                                    default=pgettext_lazy('level', "Main Section"))
+
+    # eg. Section
+    has_level_3 = models.BooleanField(default=False)
+    level_3_zfill = models.PositiveSmallIntegerField(_("Level %(num)s Zero Fill") % {'num': 3}, default=1)
+    level_3_name = models.CharField(_('Level %(num)s Name') % {'num': 3}, max_length=512,
+                                    default=pgettext_lazy('level', "Section"))
+
+    # eg. Sub Section
+    has_level_4 = models.BooleanField(default=False)
+    level_4_zfill = models.PositiveSmallIntegerField(_("Level %(num)s Zero Fill") % {'num': 4}, default=1)
+    level_4_name = models.CharField(_('Level %(num)s Name') % {'num': 4}, max_length=512,
+                                    default=pgettext_lazy('level', "Sub-Section"))
+
+    # eg. Title
+    has_level_5 = models.BooleanField(default=False)
+    level_5_zfill = models.PositiveSmallIntegerField(_("Level %(num)s Zero Fill") % {'num': 5}, default=1)
+    level_5_name = models.CharField(_('Level %(num)s Name') % {'num': 5}, max_length=512,
+                                    default=pgettext_lazy('level', "Title"))
+
+    # Work Item
     task_zfill = models.PositiveSmallIntegerField(_("Task Code Zero Fill"), default=1)
 
     account = models.OneToOneField('accounting.Account', related_name="project", null=True)

@@ -46,7 +46,7 @@ class OrderedModelResourceMixin:
         except:
             raise ValidationError("'position' must be an integer")
 
-        obj.to(position)
+        obj.move_to(position)
 
         return http.HttpAccepted()
 

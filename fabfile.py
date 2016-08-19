@@ -168,10 +168,14 @@ def makedart():
         local('pub build --mode=debug')
 
 
-def testdart():
+def testdart(test_file=None):
     "run dart tests"
     with lcd('systori/dart'):
-        local('pub run test -r expanded -p content-shell test')
+        docker = "docker run --rm -v `pwd`:`pwd` --workdir=`pwd` damoti/content-shell"
+        if test_file:
+            local(docker + " '-r expanded {}'".format(test_file))
+        else:
+            local(docker)
 
 
 SLACK = 'https://hooks.slack.com/services/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'

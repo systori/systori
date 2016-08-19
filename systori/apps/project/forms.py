@@ -14,8 +14,29 @@ class ProjectCreateForm(ModelForm):
 
     class Meta:
         model = Project
-        fields = ['name', 'description', 'job_zfill', 'taskgroup_zfill', 'task_zfill',
-                  'address', 'postal_code', 'city']
+        fields = ['name', 'description', 'address', 'postal_code', 'city',
+
+                  'level_1_zfill',
+
+                  'has_level_2',
+                  'level_2_zfill',
+                  'level_2_name',
+
+                  'has_level_3',
+                  'level_3_zfill',
+                  'level_3_name',
+
+                  'has_level_4',
+                  'level_4_zfill',
+                  'level_4_name',
+
+                  'has_level_5',
+                  'level_5_zfill',
+                  'level_5_name',
+
+                  'task_zfill',
+
+                  ]
 
 
 class ProjectImportForm(forms.Form):
@@ -25,7 +46,29 @@ class ProjectImportForm(forms.Form):
 class ProjectUpdateForm(ModelForm):
     class Meta:
         model = Project
-        fields = ['name', 'description', 'job_zfill', 'taskgroup_zfill', 'task_zfill']
+        fields = ['name', 'description',
+
+                  'level_1_zfill',
+
+                  'has_level_2',
+                  'level_2_zfill',
+                  'level_2_name',
+
+                  'has_level_3',
+                  'level_3_zfill',
+                  'level_3_name',
+
+                  'has_level_4',
+                  'level_4_zfill',
+                  'level_4_name',
+
+                  'has_level_5',
+                  'level_5_zfill',
+                  'level_5_name',
+
+                  'task_zfill',
+
+                  ]
 
 
 class JobSiteForm(ModelForm):

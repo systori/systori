@@ -63,7 +63,8 @@ class TaskGroupResourceTest(ResourceTestCaseBase):
     def test_create_task_group(self):
         data = {
             "job": "/api/v1/job/{}/".format(self.job.id),
-            "name": "created group"
+            "name": "created group",
+            "level": 2
         }
         resp = self.api_client.post(self.url, data=data, format='json')
         self.assertHttpCreated(resp)
@@ -196,7 +197,7 @@ class LineItemResourceTest(ResourceTestCaseBase):
         lineitem = LineItem.objects.last()
         self.assertEqual("created line item", lineitem.name)
         self.assertEqual(self.task.instance.id, lineitem.taskinstance.id)
-        self.assertEqual(160, lineitem.price_per_task_unit)
+        self.assertEqual(160, lineitem.price*lineitem.unit_qty)
 
     def test_delete_lineitem(self):
         start_count = LineItem.objects.count()

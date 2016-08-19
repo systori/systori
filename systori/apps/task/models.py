@@ -4,22 +4,10 @@ from datetime import datetime
 from string import ascii_lowercase
 from django.db import models
 from django.db.models.manager import BaseManager
-from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
 from django.utils.formats import date_format
 from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
-
-
-class BetterOrderedModel(OrderedModel):
-    class Meta:
-        abstract = True
-
-    def save(self, *args, **kwargs):
-        if not self.pk and self.order is not None:
-            qs = self.get_ordering_queryset()
-            qs.filter(order__gte=self.order).update(order=models.F('order') + 1)
-        super(BetterOrderedModel, self).save(*args, **kwargs)
 
 
 class JobQuerySet(models.QuerySet):
@@ -104,6 +92,37 @@ class Job(models.Model):
     def complete(self):
         pass
 
+    @staticmethod
+    def prefetch(job_id):
+        return \
+            Job.objects.filter(id=job_id) \
+                .prefetch_related('taskgroups__tasks__taskinstances__lineitems') \
+                .get()
+
+    def has_level(self, level):
+        if level > 5:
+            return False
+        return getattr(self.project, 'has_level_'+str(level))
+
+    @cached_property
+    def taskgroups(self):
+        level = 3
+        prefetch = []
+        while self.has_level(level):
+            prefetch.append('children')
+            level += 1
+        prefetch += ['tasks', 'taskinstances', 'lineitems']
+        return list(
+            self._taskgroups
+                .filter(level=2)
+                .prefetch_related('__'.join(prefetch))
+                .all()
+        )
+
+    @property
+    def code(self):
+        return str(self.job_code).zfill(self.project.level_1_zfill)
+
     @property
     def can_propose(self):
         return self.status in self.STATUS_FOR_PROPOSAL
@@ -120,28 +139,20 @@ class Job(models.Model):
             return True
         return False
 
-    @staticmethod
-    def prefetch(job_id):
-        return \
-            Job.objects.filter(id=job_id) \
-                .prefetch_related('taskgroups__tasks__taskinstances__lineitems') \
-                .get()
-
     def clone_to(self, other_job):
-        taskgroups = self.taskgroups.all()
-        for taskgroup in taskgroups:
+        for taskgroup in self.taskgroups:
             taskgroup.clone_to(other_job, taskgroup.order)
 
     def _total_calc(self, calc_type):
         field = "{}_{}".format(self.billing_method, calc_type)
         total = Decimal(0.0)
-        for taskgroup in self.taskgroups.all():
-            total += getattr(taskgroup, field)
+        for task in self.tasks.all():
+            total += getattr(task, field)
         return total
 
     def estimate_total_modify(self, user, action):
-        for taskgroup in self.taskgroups.all():
-            taskgroup.estimate_total_modify(user, action, self.ESTIMATE_INCREMENT)
+        for task in self.tasks.all():
+            task.estimate_total_modify(user, action, self.ESTIMATE_INCREMENT)
 
     @property
     def estimate_total(self):
@@ -161,25 +172,84 @@ class Job(models.Model):
         else:
             return 100
 
-    @property
-    def code(self):
-        return str(self.job_code).zfill(self.project.job_zfill)
-
     def __str__(self):
         return self.name
 
 
-class TaskGroup(BetterOrderedModel):
-    name = models.CharField(_("Name"), max_length=512)
-    description = models.TextField(blank=True)
+class OrderedModel(models.Model):
 
-    job = models.ForeignKey(Job, related_name="taskgroups")
-    order_with_respect_to = 'job'
+    order = models.PositiveIntegerField(_('Order'), editable=False, db_index=True)
+    order_with_respect_to = None
+
+    class Meta:
+        abstract = True
+
+    def get_ordering_queryset(self):
+        assert self.order_with_respect_to is not None, "Subclasses of OrderbleModel must set order_with_respect_to."
+        return self.__class__.objects.filter((self.order_with_respect_to, getattr(self, self.order_with_respect_to)))
+
+    def save(self, *args, **kwargs):
+        if not self.pk and self.order is not None:
+            qs = self.get_ordering_queryset()
+            qs.filter(order__gte=self.order).update(order=models.F('order') + 1)
+        if self.order is None:
+            c = self.get_ordering_queryset().aggregate(models.Max('order')).get('order__max')
+            self.order = 0 if c is None else c + 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        qs = self.get_ordering_queryset()
+        qs.filter(order__gt=self.order).update(order=models.F('order')-1)
+        super().delete(*args, **kwargs)
+
+    def move_to(self, order):
+        if order is None or self.order == order:
+            # object is already at desired position
+            return
+        qs = self.get_ordering_queryset()
+        if self.order > order:
+            qs.filter(order__lt=self.order, order__gte=order).update(order=models.F('order')+1)
+        else:
+            qs.filter(order__gt=self.order, order__lte=order).update(order=models.F('order')-1)
+        self.order = order
+        self.save()
+
+
+class TaskGroup(OrderedModel):
+
+    name = models.CharField(_("Name"), max_length=512)
+    description = models.TextField(_("Description"), blank=True)
+    parent = models.ForeignKey('self', related_name='children', null=True, on_delete=models.CASCADE)
+    level = models.PositiveIntegerField(_('Level'), editable=False)
+
+    job = models.ForeignKey(Job, related_name="_taskgroups")
+
+    order_with_respect_to = 'parent'
 
     class Meta:
         verbose_name = _("Task Group")
         verbose_name_plural = _("Task Groups")
-        ordering = ['order']
+        ordering = ('order',)
+
+    def generate_children(self):
+        if self.job.has_level(self.level+1):
+            child = TaskGroup.objects.create(
+                name="",
+                description="",
+                parent=self,
+                job=self.job,
+                level=self.level+1
+            )
+            child.generate_children()
+
+    def clone_to(self, new_job, new_order):
+        tasks = self.tasks.all()
+        self.pk = None
+        self.job = new_job
+        self.order = new_order
+        self.save()
+        for task in tasks:
+            task.clone_to(self, task.order)
 
     @property
     def billable_tasks(self):
@@ -199,10 +269,6 @@ class TaskGroup(BetterOrderedModel):
             if include_optional or not task.is_optional:
                 total += getattr(task, field)
         return total
-
-    def estimate_total_modify(self, user, action, rate):
-        for task in self.tasks.all():
-            task.estimate_total_modify(user, action, rate)
 
     @property
     def fixed_price_estimate(self):
@@ -232,23 +298,14 @@ class TaskGroup(BetterOrderedModel):
     def code(self):
         parent_code = self.job.code
         offset = self.job.taskgroup_offset
-        self_code = str(self.order + 1 + offset).zfill(self.job.project.taskgroup_zfill)
+        self_code = str(self.order + 1 + offset).zfill(self.job.project.level_2_zfill)
         return '{}.{}'.format(parent_code, self_code)
 
     def __str__(self):
         return '{} {}'.format(self.code, self.name)
 
-    def clone_to(self, new_job, new_order):
-        tasks = self.tasks.all()
-        self.pk = None
-        self.job = new_job
-        self.order = new_order
-        self.save()
-        for task in tasks:
-            task.clone_to(self, task.order)
 
-
-class Task(BetterOrderedModel):
+class Task(OrderedModel):
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField()
 
@@ -268,6 +325,7 @@ class Task(BetterOrderedModel):
     started_on = models.DateField(blank=True, null=True)
     completed_on = models.DateField(blank=True, null=True)
 
+    job = models.ForeignKey(Job, related_name="tasks", null=True)
     taskgroup = models.ForeignKey(TaskGroup, related_name="tasks")
     order_with_respect_to = 'taskgroup'
 
@@ -288,7 +346,7 @@ class Task(BetterOrderedModel):
     class Meta:
         verbose_name = _("Task")
         verbose_name_plural = _("Task")
-        ordering = ['order']
+        ordering = ('order',)
 
     @property
     def is_billable(self):
@@ -315,19 +373,11 @@ class Task(BetterOrderedModel):
 
     @property
     def fixed_price_estimate(self):
-        return self.instance.fixed_price_estimate
+        return round(self.unit_price * self.qty, 2)
 
     @property
     def fixed_price_progress(self):
-        return self.instance.fixed_price_progress
-
-    @property
-    def time_and_materials_estimate(self):
-        return self.instance.time_and_materials_estimate
-
-    @property
-    def time_and_materials_progress(self):
-        return self.instance.time_and_materials_progress
+        return round(self.unit_price * self.complete, 2)
 
     @property
     def code(self):
@@ -353,7 +403,7 @@ class Task(BetterOrderedModel):
             taskinstance.clone_to(self, taskinstance.order)
 
 
-class TaskInstance(BetterOrderedModel):
+class TaskInstance(OrderedModel):
     """
     A TaskInstance is a concrete version of a task that can actually be executed.
     For example, a Task could be to "Install a window."
@@ -365,6 +415,7 @@ class TaskInstance(BetterOrderedModel):
 
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField()
+    unit_price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=0.0)
 
     # By default the first TaskInstance created for a task
     # will be the selected one.
@@ -403,47 +454,6 @@ class TaskInstance(BetterOrderedModel):
     def full_description(self):
         return self.task.description + " " + self.description
 
-    # For fixed price billing, returns the price
-    # per unit of this task
-    @property
-    def unit_price(self):
-        t = Decimal(0.0)
-        for lineitem in self.lineitems.all():
-            t += lineitem.price_per_task_unit
-        return t
-
-    # For fixed price billing, returns the estimated price
-    # to complete this task.
-    @property
-    def fixed_price_estimate(self):
-        return round(self.unit_price * self.task.qty, 2)
-
-    # For fixed price billing, returns the price based
-    # on what has been completed.
-    @property
-    def fixed_price_progress(self):
-        return round(self.unit_price * self.task.complete, 2)
-
-    # For time and materials billing, returns
-    # the estimated amount that will been expended by
-    # all line items contained by this task.
-    @property
-    def time_and_materials_estimate(self):
-        t = Decimal(0.0)
-        for lineitem in self.lineitems.all():
-            t += lineitem.time_and_materials_estimate
-        return t
-
-    # For time and materials billing, returns
-    # the total amount that has been expended by
-    # all line items contained by this task.
-    @property
-    def time_and_materials_progress(self):
-        t = Decimal(0.0)
-        for lineitem in self.lineitems.all():
-            t += lineitem.time_and_materials_progress
-        return t
-
     @property
     def code(self):
         parent_code = self.task.code
@@ -468,7 +478,8 @@ class TaskInstance(BetterOrderedModel):
             lineitem.save()
 
 
-class LineItem(models.Model):
+class LineItem(OrderedModel):
+
     name = models.CharField(_("Name"), max_length=512)
 
     # fixed billing, amount of hours or materials to complete just one unit of the task
@@ -503,33 +514,16 @@ class LineItem(models.Model):
     is_correction = models.BooleanField(default=False)
 
     taskinstance = models.ForeignKey(TaskInstance, related_name="lineitems")
+    order_with_respect_to = 'taskinstance'
 
     class Meta:
         verbose_name = _("Line Item")
         verbose_name_plural = _("Line Items")
-        ordering = ['id']
-
-    # For fixed price billing, returns the price
-    # of this line item per 1 unit of the parent task.
-    @property
-    def price_per_task_unit(self):
-        return round(self.price * self.unit_qty, 2)
-
-    # For time and materials billing, returns the estimated price
-    # of this line item to complete the entire task.
-    @property
-    def time_and_materials_estimate(self):
-        return round(self.price * self.task_qty, 2)
-
-    # For time and materials billing, returns
-    # the total amount that has been expended.
-    @property
-    def time_and_materials_progress(self):
-        return round(self.price * self.billable, 2)
+        ordering = ('order',)
 
     @property
     def job(self):
-        return self.taskinstance.task.taskgroup.job
+        return self.taskinstance.task.job
 
     @property
     def project(self):
