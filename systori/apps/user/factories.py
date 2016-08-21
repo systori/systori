@@ -1,6 +1,5 @@
 import factory
 from factory import fuzzy
-
 from ..company.models import Access
 from .models import User
 

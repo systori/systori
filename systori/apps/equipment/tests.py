@@ -1,9 +1,9 @@
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 from systori.lib.testing import SystoriTestCase
-from .models import Equipment, RefuelingStop, Maintenance
-from .forms import EquipmentForm, RefuelingStopForm
 from ..accounting.test_workflow import create_data
+from .models import Equipment, RefuelingStop, Maintenance
 
 
 class EquipmentTestCase(SystoriTestCase):
@@ -12,11 +12,11 @@ class EquipmentTestCase(SystoriTestCase):
         create_data(self)
         self.equipment = Equipment.objects.create(
             active=True,
-            name="Test Equipment0",
-            manufacturer="Mercetest",
-            license_plate="MA-ST 0",
+            name='Test Equipment0',
+            manufacturer='Mercetest',
+            license_plate='MA-ST 0',
             number_of_seats=2,
-            fuel="diesel"
+            fuel='diesel'
         )
         self.client.login(username=self.user.email, password='open sesame')
 
@@ -51,8 +51,8 @@ class RefuelingStopTest(EquipmentTestCase):
             equipment=self.equipment,
             date=timezone.now().date(),
             mileage=1500,
-            description="Test Maintenance, very Expensive",
-            contractor="Steve Jobs",
+            description='Test Maintenance, very Expensive',
+            contractor='Steve Jobs',
             cost=134598.23
         )
         mileage = Equipment.objects.first().mileage
@@ -60,13 +60,13 @@ class RefuelingStopTest(EquipmentTestCase):
 
         equipment2 = Equipment.objects.create(
             active=True,
-            name="Test Equipment0",
-            manufacturer="Mercetest",
-            license_plate="MA-ST 0",
+            name='Test Equipment0',
+            manufacturer='Mercetest',
+            license_plate='MA-ST 0',
             number_of_seats=2,
-            fuel="diesel"
+            fuel='diesel'
         )
-        self.assertEqual(equipment2.average_consumption, "unknown")
+        self.assertEqual(equipment2.average_consumption, _('unknown'))
 
     def test_validation_and_cascade_save(self):
         # this method tests the custom validation and the cascade_save flag
@@ -121,7 +121,7 @@ class RefuelingStopTest(EquipmentTestCase):
         form = response.context_data.get('form')
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['mileage'],
-                         ['you must enter a higher mileage than the older refueling stop.'])
+                         [_('you must enter a higher mileage than the older refueling stop.')])
 
         refueling_stop = RefuelingStop.objects.first()
 
@@ -138,4 +138,4 @@ class RefuelingStopTest(EquipmentTestCase):
         form = response.context_data.get('form')
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['mileage'],
-                         ['you must enter a smaller mileage than the younger refueling stop.'])
+                         [_('you must enter a smaller mileage than the younger refueling stop.')])
