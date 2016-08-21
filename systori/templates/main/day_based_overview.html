@@ -32,7 +32,7 @@
 
         <ul class="nav navbar-nav">
           <li><a href="{{ previous_day_url }}">{% trans 'back' %}</a></li>
-          <li><a>{{ request.selected_day|date:"l" }} {{ request.selected_day|localize }}</a></li>
+          <li><a>{{ selected_day|date:"l" }} {{ selected_day|localize }}</a></li>
           <li><a href="{{ next_day_url }}">{% trans 'next' %}</a></li>
         </ul>
         <div class="nav navbar-text progress pull-right" style="width: 300px;">
