@@ -3,7 +3,9 @@ from ..user.authorization import office_auth
 from .views import *
 
 urlpatterns = [
-    url(r'^equipment$', office_auth(EquipmentListView.as_view()), name='equipment.list'),
+    # two url rules to make the active_filter keyword optional
+    url(r'^equipment/$', office_auth(EquipmentListView.as_view()), name='equipment.list'),
+    url(r'^equipment/(?P<active_filter>[\w-]+)$', office_auth(EquipmentListView.as_view()), name='equipment.list'),
     url(r'^equipment-(?P<pk>\d+)$', office_auth(EquipmentView.as_view()), name='equipment.view'),
     url(r'^create-equipment$', office_auth(EquipmentCreate.as_view()), name='equipment.create'),
     url(r'^equipment-(?P<pk>\d+)/edit$', office_auth(EquipmentUpdate.as_view()), name='equipment.edit'),

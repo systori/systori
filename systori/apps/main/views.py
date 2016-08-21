@@ -48,9 +48,7 @@ class DayBasedOverviewView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DayBasedOverviewView, self).get_context_data(**kwargs)
 
-        if not hasattr(self.request, 'selected_day'):
-            self.request.selected_day = date.today()
-        selected_day = self.request.selected_day
+        selected_day = date(*map(int, kwargs['selected_day'].split('-'))) if kwargs['selected_day'] else date.today()
 
         context['today'] = date.today()
         context['previous_day'] = selected_day - timedelta(days=1)

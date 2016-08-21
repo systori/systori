@@ -139,3 +139,29 @@ class RefuelingStopTest(EquipmentTestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['mileage'],
                          [_('you must enter a smaller mileage than the younger refueling stop.')])
+
+
+class EquipmentListViewTest(EquipmentTestCase):
+
+    def test_kwarg_queryset_filter(self):
+        response = self.client.get(reverse('equipment.list'))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('equipment.list', kwargs={'active_filter': 'active'}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('equipment.list', kwargs={'active_filter': 'passive'}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('equipment.list', kwargs={'active_filter': 'all'}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('equipment.list', kwargs={'active_filter': 'foo'}))
+        self.assertEqual(response.status_code, 404)
+
+
+class EquipmentViewTest(EquipmentTestCase):
+
+    def test_render(self):
+        response = self.client.get(reverse('equipment.view', args=[self.equipment.id]))
+        self.assertEqual(response.status_code, 200)

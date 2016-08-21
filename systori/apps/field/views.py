@@ -547,6 +547,7 @@ class FieldAssignEquipment(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(FieldAssignEquipment, self).get_context_data(**kwargs)
         context['equipment_list'] = Equipment.objects \
+            .filter(active=True) \
             .annotate(plan_count=Count('dailyplans')) \
             .order_by('plan_count', 'name')
         context['assigned'] = []
@@ -617,3 +618,4 @@ class FieldPaste(View):
 class FieldEquipmentList(ListView):
     model = Equipment
     template_name = "field/equipment_list.html"
+    queryset = Equipment.objects.filter(active=True)

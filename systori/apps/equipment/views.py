@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.views.generic import \
     ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
@@ -10,6 +11,17 @@ class EquipmentListView(ListView):
     model = Equipment
     template_name = "equipment/equipment_list.html"
     ordering = "name"
+
+    def get_queryset(self, model=model):
+        active_filter = self.kwargs['active_filter'] if 'active_filter' in self.kwargs else 'active'
+        if 'active' in active_filter:
+            return model.objects.filter(active=True)
+        elif 'passive' in active_filter:
+            return model.objects.filter(active=False)
+        elif 'all' in active_filter:
+            return model.objects.all()
+        else:
+            raise Http404
 
 
 class EquipmentView(DetailView):
