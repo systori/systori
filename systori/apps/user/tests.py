@@ -1,20 +1,21 @@
 from django.test import TestCase
 from django.utils.translation import activate
-
-from .models import User
+from django.utils import timezone
 from .forms import UserForm
-from ..company.models import Company, Access
-
+from ..company.factories import CompanyFactory
+from ..user.factories import UserFactory
 
 class CreateUserDataMixin:
 
     def setUp(self):
-        self.company = Company.objects.create(schema="test", name="Test")
-        self.company.activate()
-        self.password = 'pass'
-        self.username = 'test@damoti.com'
-        self.user = User.objects.create_superuser(self.username, self.password)
-        Access.objects.create(user=self.user, company=self.company)
+        self.company = CompanyFactory()
+        self.user = UserFactory(company=self.company)
+        self.data = {
+            'first_name': 'foo',
+            'last_name': 'foo',
+            'email': 'foo@bar.com',
+            'date_joined': timezone.now().strftime('%Y-%m-%d %T')
+        }
 
 
 class TestUserForm(CreateUserDataMixin, TestCase):
@@ -24,11 +25,16 @@ class TestUserForm(CreateUserDataMixin, TestCase):
         self.assertFalse(UserForm({}).is_valid())
         self.assertEquals('A name or email is required.',
                           UserForm({}).errors['__all__'][0])
-        self.assertTrue(UserForm({'first_name': 'foo'}).is_valid())
-        self.assertTrue(UserForm({'last_name': 'foo'}).is_valid())
-        self.assertTrue(UserForm({'email': 'foo@bar.com'}).is_valid())
+        self.assertTrue(UserForm(data=self.data).is_valid())
 
     def test_clean_password(self):
+        self.data.update({
+            'password1': 'foo',
+            'password2': 'not-foo'
+        })
         self.assertEquals("The two password fields didn't match.",
-                          UserForm({'first_name': 'foo', 'password1': 'foo'}).errors['password2'][0])
-        self.assertTrue(UserForm({'first_name': 'foo', 'password1': 'foo', 'password2': 'foo'}).is_valid())
+                          UserForm(data=self.data).errors['password2'][0])
+        self.data.update({
+            'password2': 'foo'
+        })
+        self.assertTrue(UserForm(data=self.data).is_valid())
