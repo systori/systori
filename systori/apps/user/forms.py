@@ -16,6 +16,11 @@ class UserForm(ModelForm):
     password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput, required=False,
                                 help_text=_("Enter the same password as above, for verification."))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            del self.fields['date_joined']
+
     def clean_email(self):
         if not self.cleaned_data['email']:
             return None
