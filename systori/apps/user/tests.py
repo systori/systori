@@ -31,4 +31,5 @@ class TestUserForm(CreateUserDataMixin, TestCase):
     def test_clean_password(self):
         self.assertEquals("The two password fields didn't match.",
                           UserForm({'first_name': 'foo', 'password1': 'foo'}).errors['password2'][0])
-        self.assertTrue(UserForm({'first_name': 'foo', 'password1': 'foo', 'password2': 'foo'}).is_valid())
+        form = UserForm({'first_name': 'foo', 'password1': 'foo', 'password2': 'foo'})
+        self.assertTrue(form.is_valid(), form.errors)
