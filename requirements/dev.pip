@@ -1,4 +1,4 @@
 -r test.pip
-django-debug-toolbar
-django-extensions
-ipython
+django-debug-toolbar==1.5
+django-extensions==1.7.2
+ipython==5.1.0

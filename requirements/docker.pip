@@ -1,16 +1,16 @@
-psycopg2
+psycopg2==2.6.1
 
 django==1.9
-django-tastypie
-django-ordered-model
-django-fsm
-django_mobile
-django-bootstrap-form
+django-tastypie==0.13.3
+django-ordered-model==1.2.1
+django-fsm==2.4.0
+django-mobile==0.7.0
+django-bootstrap-form==3.2.1
 djangorestframework==3.3.2
 
-geopy
-lxml
-jsonfield
+geopy==1.11.0
+lxml==3.6.0
+jsonfield==1.0.3
 
 hg+https://bitbucket.org/rptlab/reportlab
 hg+https://bitbucket.org/rptlab/preppy
@@ -20,11 +20,11 @@ git+ssh://git@bitbucket.org/damoti/rlextra.git
 git+ssh://git@bitbucket.org/damoti/django-tuath.git
 
 git+https://github.com/damoti/pyth.git@pyth-py3
-django-debug-toolbar
+django-debug-toolbar==1.5
 coveralls
-selenium
+selenium==2.53.6
 git+https://github.com/cgoldberg/sauceclient.git#egg=sauceclient
-django-extensions
+django-extensions==1.7.2
 
 factory-boy==2.6.1
 freezegun==0.3.7
