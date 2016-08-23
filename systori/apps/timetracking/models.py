@@ -13,28 +13,20 @@ from .managers import TimerQuerySet
 
 
 class Timer(models.Model):
-    CORRECTION = 5
-    WORK = 10
-    EDUCATION = 15
-    HOLIDAY = 20
-    ILLNESS = 30
+    CORRECTION = 'correction'
+    WORK = 'work'
+    TRAINING = 'training'
+    HOLIDAY = 'holiday'
+    ILLNESS = 'illness'
 
     KIND_CHOICES = (
         (WORK, _('Work')),
         (HOLIDAY, _('Holiday')),
         (ILLNESS, _('Illness')),
         (CORRECTION, _('Correction')),
-        (EDUCATION, _('Education')),
+        (TRAINING, _('Training')),
     )
     FULL_DAY_KINDS = (WORK, HOLIDAY, ILLNESS)
-
-    KIND_TO_STRING = {
-        CORRECTION: 'correction',
-        WORK: 'work',
-        EDUCATION: 'education',
-        HOLIDAY: 'holiday',
-        ILLNESS: 'illness'
-    }
 
     DAILY_BREAK = 60 * 60  # seconds
     WORK_HOURS = 60 * 60 * 8  # seconds
@@ -54,7 +46,7 @@ class Timer(models.Model):
     start = models.DateTimeField(blank=True, null=True, db_index=True)
     end = models.DateTimeField(blank=True, null=True, db_index=True)
     duration = models.IntegerField(default=0, help_text=_('in seconds'))
-    kind = models.PositiveIntegerField(default=WORK, choices=KIND_CHOICES, db_index=True)
+    kind = models.CharField(default=WORK, choices=KIND_CHOICES, db_index=True, max_length=32)
     altered_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name='timers_altered', blank=True, null=True)
     comment = models.CharField(max_length=1000, blank=True)
@@ -96,7 +88,7 @@ class Timer(models.Model):
 
     @property
     def is_busy(self):
-        return self.kind in (self.EDUCATION, self.HOLIDAY, self.ILLNESS)
+        return self.kind in (self.TRAINING, self.HOLIDAY, self.ILLNESS)
 
     def _pre_save_for_generic(self):
         if not self.start:
