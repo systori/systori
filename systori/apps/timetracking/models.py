@@ -38,7 +38,7 @@ class Timer(models.Model):
         ILLNESS: lambda start, end: (end - start).total_seconds(),
         HOLIDAY: lambda start, end: (end - start).total_seconds(),
         CORRECTION: lambda start, end: (end - start).total_seconds(),
-        EDUCATION: lambda start, end: (end - start).total_seconds()
+        TRAINING: lambda start, end: (end - start).total_seconds()
     }
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
