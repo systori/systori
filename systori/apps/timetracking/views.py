@@ -103,7 +103,6 @@ class UserReportPDFView(DocumentRenderView):
         month = int(self.kwargs['month'])
         year = int(self.kwargs['year'])
         period = datetime.date(year, month, 1)
-        #data = Timer.objects.filter(user=user).filter_month(year=year, month=month)
         data = Timer.objects.filter(user=user).generate_monthly_user_report(period=period)
         letterhead = DocumentSettings.objects.first().timetracking_letterhead
         return timetracking.render(data, letterhead, month=month, year=year)

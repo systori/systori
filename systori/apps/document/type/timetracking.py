@@ -1,5 +1,6 @@
 from io import BytesIO
 from datetime import date
+from collections import OrderedDict
 
 from reportlab.lib.units import mm, cm
 from reportlab.lib.utils import simpleSplit
@@ -10,6 +11,8 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
+from systori.apps.timetracking.models import Timer
+from systori.apps.timetracking.utils import format_seconds
 
 import calendar
 
@@ -21,49 +24,90 @@ from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .font import FontManager
 
 
-DEBUG_DOCUMENT = True  # Shows boxes in rendered output
+DEBUG_DOCUMENT = False  # Shows boxes in rendered output
+
+
+class TimeSheet:
+
+    WEEKDAYS = [_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun')]
+
+    def __init__(self, year, month):
+        self.names = []
+        self.numbers = []
+        start, self.days = calendar.monthrange(year, month)
+        for day in range(31):
+            if day < self.days:
+                self.names.append(self.WEEKDAYS[(day+start) % 7])
+                self.numbers.append(str(day+1))
+            else:
+                self.names.append("")
+                self.numbers.append("")
+        self.names.append(_("Total"))
+        self.names.append(_("Project"))
+        self.projects = OrderedDict()
+        self.special = OrderedDict([
+            (p, [0]*self.days) for p in ['holiday', 'illness', 'correction', 'education']
+        ])
+
+    def add(self, date, project, seconds):
+        slot = None
+        if project in self.special:
+            slot = self.special[project]
+        elif project in self.projects:
+            slot = self.projects[project]
+        else:
+            slot = self.projects[project] = [0]*self.days
+
+        slot[date.day-1] += seconds
+
+
+    @property
+    def data(self):
+        yield self.numbers
+        yield self.names
+
+        def secs_to_hrs(secs):
+            return str(round(secs / 60.0 / 60.0, 1) or "")
+
+        def render_row(secs, project):
+            total = sum(secs)
+            columns = [""]*31 + [secs_to_hrs(total), project]
+            for i, sec in enumerate(secs):
+                columns[i] = secs_to_hrs(sec)
+            return columns
+
+        project_rows = 10
+        for project, secs in self.projects.items():
+            yield render_row(secs, project)
+            project_rows -= 1
+
+        while project_rows > 0:
+            yield [""]
+            project_rows -= 1
+
+        yield render_row(self.special['holiday'], _("Holiday"))
+        yield render_row(self.special['illness'], _("Illness"))
+        yield render_row(self.special['correction'], _("Correction"))
+        yield render_row(self.special['education'], _("Education"))
 
 
 def collate_elements(data, month, year, available_width, available_height, font):
 
-    cal = [[_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun')]]
-    cal.extend(calendar.monthcalendar(year, month))
+    ts = TimeSheet(year, month)
+    for date, projects in data.items():
+        for name, stats in projects.items():
+            if stats['duration'] > 0:
+                ts.add(date, name, stats['duration'])
 
-    pages = []
-
-    table = Table(cal, available_width/7, available_height/6 - 4*mm)
+    table = Table(list(ts.data), colWidths=[(available_width-135)/31]*31+[35, 100], rowHeights=18)
     table.setStyle(TableStyle([
         ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-        ('BOX', (0, 0), (-1, -1), 0.25, colors.green)
+        ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+        ('FONTSIZE', (0, 0), (-3, 1), 9),
+        ('LEFTPADDING', (0, 0), (-3, -1), 2),
     ]))
-    pages.append(table)
-    # for timer in data.all():
-    #
-    #     pages.append(Table([[b(_('Evidence Sheet'), font), "assad"]]))
-    #
-    #     pages.append(Table([
-    #         [b(_('Project'), font), "asdasda"]
-    #     ],
-    #         colWidths=[30 * mm, None],
-    #         style=[
-    #             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-    #         ]
-    #     ))
-    #
-    #     pages.append(Table([
-    #         [b(_('Code'), font), "asdasd",
-    #          br(_('Task'), font), "asdasdasd"],
-    #         [b(_('P-Amount'), font), "asdasedsa"]
-    #     ],
-    #         colWidths=[30 * mm, 70 * mm, 30 * mm, None],
-    #         style=TableStyle([
-    #             ('SPAN', (3, 0), (-1, 0)),
-    #         ])
-    #     ))
-    #
-    #     pages.append(PageBreak())
 
-    return pages
+    return [table]
 
 
 def render(data, letterhead, month, year):
