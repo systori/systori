@@ -13,19 +13,20 @@ class EquipmentListView(ListView):
     ordering = "name"
 
     def get(self, request, *args, **kwargs):
-        self.kwargs.setdefault('active_filter', 'active')
+        self.active_filter = kwargs.get('active_filter', 'active')
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self, model=model):
-        if 'active' == self.kwargs['active_filter']:
+        if self.active_filter == 'active':
             return model.objects.filter(active=True)
-        elif 'passive' == self.kwargs['active_filter']:
+        elif self.active_filter == 'passive':
             return model.objects.filter(active=False)
         else:
             return model.objects.all()
 
-    def get_context_data(self):
-        context = super().get_context_data(**self.kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_filter'] = self.active_filter
         return context
 
 

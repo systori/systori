@@ -23,21 +23,22 @@ class InvoiceList(ListView):
     template_name = 'accounting/invoice_list.html'
 
     def get(self, request, *args, **kwargs):
-        self.kwargs.setdefault('status_filter', 'all')
+        self.status_filter = self.kwargs.get('status_filter', 'all')
         return super().get(self, request, *args, **kwargs)
 
     def get_queryset(self, model=model):
-        if 'draft' == self.kwargs['status_filter']:
+        if self.status_filter == 'draft':
             return model.objects.filter(status='draft')
-        elif 'sent' == self.kwargs['status_filter']:
+        elif self.status_filter == 'sent':
             return model.objects.filter(status='sent')
-        elif 'paid' == self.kwargs['status_filter']:
+        elif self.status_filter == 'paid':
             return model.objects.filter(status='paid')
         else:
             return model.objects
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**self.kwargs)
+        context = super().get_context_data(**kwargs)
+        context['status_filter'] = self.status_filter
 
         query = self.get_queryset()
         query = query.\
