@@ -39,7 +39,9 @@ urlpatterns = [
 
     url(r'^project-(?P<project_pk>\d+)/itemized_listing-(?P<format>(email|print)).pdf$', office_auth(ItemizedListingPDF.as_view()), name='itemized_listing.pdf'),
 
-    url(r'^invoices$', owner_auth(InvoiceList.as_view()), name='invoices'),
+    # two matching patterns for InvoiceList to get optional filter kwarg
+    url(r'^invoices/$', owner_auth(InvoiceList.as_view()), name='invoice.list'),
+    url(r'^invoices/(?P<status_filter>[\w-]+)$', owner_auth(InvoiceList.as_view()), name='invoice.list'),
 
     url(r'^templates/create-document-template$', office_auth(DocumentTemplateCreate.as_view()), name='document-template.create'),
     url(r'^templates/document-template-(?P<pk>\d+)$', office_auth(DocumentTemplateView.as_view()), name='document-template.view'),
