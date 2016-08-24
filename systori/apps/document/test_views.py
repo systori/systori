@@ -118,7 +118,6 @@ class InvoiceListViewTest(SystoriTestCase):
 
     def setUp(self):
         create_data(self)
-        self.company.users_access.first().is_owner = True
         access = Access.objects.get(user=self.user)
         access.is_owner = True
         access.save()
