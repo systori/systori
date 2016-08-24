@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 from collections import OrderedDict
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.views.generic import View, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -22,10 +22,25 @@ class InvoiceList(ListView):
     model = Invoice
     template_name = 'accounting/invoice_list.html'
 
+    def get_queryset(self, model=model):
+        status_filter = self.kwargs['status_filter'] if 'status_filter' in self.kwargs else 'all'
+        if 'draft' in status_filter:
+            return model.objects.filter(status='draft')
+        elif 'sent' in status_filter:
+            return model.objects.filter(status='sent')
+        elif 'paid' in status_filter:
+            return model.objects.filter(status='paid')
+        elif 'all' in status_filter:
+            return model.objects
+        else:
+            raise Http404
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['status_filter'] = self.kwargs['status_filter'] if 'status_filter' in self.kwargs else 'all'
 
-        query = Invoice.objects.\
+        query = self.get_queryset()
+        query = query.\
             prefetch_related('project').\
             prefetch_related('parent').\
             filter(document_date__gte=date(2015, 9, 1)).\

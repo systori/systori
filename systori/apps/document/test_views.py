@@ -3,7 +3,10 @@ from datetime import date
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
+from systori.lib.testing import SystoriTestCase
+from ..accounting.test_workflow import create_data
 from ..accounting.test_views import DocumentTestCase
+from ..company.models import Access
 from .forms import ProposalForm, ProposalFormSet
 from .models import Proposal, Letterhead
 
@@ -109,3 +112,33 @@ class LetterheadCreateTests(DocumentTestCase):
             )
         self.assertEqual(Letterhead.objects.count(), letterhead_count + 1)
         self.assertRedirects(response, reverse('letterhead.update', args=[Letterhead.objects.latest('pk').pk]))
+
+
+class InvoiceListViewTest(SystoriTestCase):
+
+    def setUp(self):
+        create_data(self)
+        self.company.users_access.first().is_owner = True
+        access = Access.objects.get(user=self.user)
+        access.is_owner = True
+        access.save()
+        self.client.login(username=self.user.email, password='open sesame')
+
+    def test_kwarg_queryset_filter(self):
+        response = self.client.get(reverse('invoice.list'))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('invoice.list', kwargs={'status_filter': 'all'}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('invoice.list', kwargs={'status_filter': 'sent'}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('invoice.list', kwargs={'status_filter': 'paid'}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('invoice.list', kwargs={'status_filter': 'draft'}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('invoice.list', kwargs={'status_filter': 'foo'}))
+        self.assertEqual(response.status_code, 404)
