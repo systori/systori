@@ -127,9 +127,6 @@ class InvoiceListViewTest(SystoriTestCase):
         response = self.client.get(reverse('invoice.list'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(reverse('invoice.list', kwargs={'status_filter': 'all'}))
-        self.assertEqual(response.status_code, 200)
-
         response = self.client.get(reverse('invoice.list', kwargs={'status_filter': 'sent'}))
         self.assertEqual(response.status_code, 200)
 
@@ -138,6 +135,3 @@ class InvoiceListViewTest(SystoriTestCase):
 
         response = self.client.get(reverse('invoice.list', kwargs={'status_filter': 'draft'}))
         self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(reverse('invoice.list', kwargs={'status_filter': 'foo'}))
-        self.assertEqual(response.status_code, 404)
