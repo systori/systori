@@ -9,5 +9,5 @@ urlpatterns = [
     url(r'^timetracking/users/(?P<user_id>\d+)$',
         office_auth(views.UserReportView.as_view()), name='timetracking_user'),
     url(r'^timetracking/users/(?P<user_id>\d+)/pdf/(?P<year>\d+)/(?P<month>\d+)$',
-        office_auth(views.UserReportPDFView.as_view()), name='timetracking_pdf'),
+        office_auth(views.TimeSheetPDFView.as_view()), name='timetracking_pdf'),
 ]

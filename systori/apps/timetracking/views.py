@@ -95,14 +95,14 @@ class UserReportView(PeriodFilterMixin, FormView):
         return redirect(self.request.META['HTTP_REFERER'])
 
 
-class UserReportPDFView(DocumentRenderView):
+class TimeSheetPDFView(DocumentRenderView):
     model = Timer
 
     def pdf(self):
-        user = User.objects.get(id=self.kwargs['user_id'])
         month = int(self.kwargs['month'])
         year = int(self.kwargs['year'])
-        period = datetime.date(year, month, 1)
-        data = Timer.objects.filter(user=user).generate_monthly_user_report(period=period)
+        qs = Timer.objects.filter_month(year, month).prefetch_related('user')
+        if 'user_id' in self.kwargs:
+            qs = qs.filter(user_id=self.kwargs['user_id'])
         letterhead = DocumentSettings.objects.first().timetracking_letterhead
-        return timetracking.render(data, letterhead, month=month, year=year)
+        return timetracking.render(qs, letterhead, datetime.date(year, month, 1))
