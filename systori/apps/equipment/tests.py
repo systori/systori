@@ -153,12 +153,6 @@ class EquipmentListViewTest(EquipmentTestCase):
         response = self.client.get(reverse('equipment.list', kwargs={'active_filter': 'passive'}))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(reverse('equipment.list', kwargs={'active_filter': 'all'}))
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(reverse('equipment.list', kwargs={'active_filter': 'foo'}))
-        self.assertEqual(response.status_code, 404)
-
 
 class EquipmentViewTest(EquipmentTestCase):
 

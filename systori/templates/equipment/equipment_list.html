@@ -4,6 +4,26 @@
 {% block sidebar %}{% include "main/sidebar.html" with section='equipment' %}{% endblock %}
 
 {% block content %}
+    <div class="btn-toolbar">
+        <div class="btn-group">
+            <span class="btn">{% trans "Filter Equipment" %}</span>
+        </div>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Invoice filter">
+            <a href="{% url "equipment.list" "all" %}" type="button"
+               class="btn btn-sm btn-default {% if "all" in active_filter %}active{% endif %}">
+                {% trans "all" %}
+            </a>
+            <a href="{% url "equipment.list" "active" %}"
+               type="button" class="btn btn-sm btn-default {% if "active" in active_filter %}active{% endif %}">
+                {% trans "active" %}
+            </a>
+            <a href="{% url "equipment.list" "passive" %}" type="button"
+               class="btn btn-sm btn-default {% if "passive" in active_filter %}active{% endif %}">
+                {% trans "passive" %}
+            </a>
+        </div>
+    </div>
+
   <h2 class="sub-header">{% trans 'Equipment' %}</h2>
   <table class="table table-striped">
     <thead>

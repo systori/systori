@@ -17,7 +17,7 @@
       href="{% url 'project.progress.all' %}">{% trans 'Progress Reports' %}</a></li>
 
   {% if access.has_owner %}<li {% if section == 'invoices' %}class="active"{% endif %}><a
-      href="{% url 'invoices' %}">{% trans 'Invoices' %}</a></li>{% endif %}
+      href="{% url 'invoice.list' %}">{% trans 'Invoices' %}</a></li>{% endif %}
 
   <li {% if section == 'templates' %}class="active"{% endif %}><a
       href="{% url 'templates' %}">{% trans 'Templates' %}</a></li>
