@@ -50,3 +50,5 @@ DATABASES['default'].update({
         'SERIALIZE': False
     }
 })
+
+MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, 'media'))

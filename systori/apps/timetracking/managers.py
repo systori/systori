@@ -112,7 +112,7 @@ class TimerQuerySet(QuerySet):
                     'duration': 0,
                 }
             }))
-            report_row = report[timer.start.date()][self.model.KIND_TO_STRING[timer.kind]]
+            report_row = report[timer.start.date()][timer.kind]
             if not report_row['start'] or report_row['start'] > timer.start:
                 report_row['start'] = timer.start
             if not report_row['end'] or timer.end > report_row['end']:

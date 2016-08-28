@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic.edit import FormView
@@ -7,9 +8,14 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
+from systori.apps.user.models import User
+from systori.apps.document.views import DocumentRenderView
+from systori.apps.document.type import timetracking
+from systori.apps.document.models import DocumentSettings
+
 from . import utils
 from . import forms
-
+from .models import Timer
 
 class PeriodFilterMixin:
     report_period = None
@@ -87,3 +93,16 @@ class UserReportView(PeriodFilterMixin, FormView):
         form.save()
         # return redirect('timetracking_user', self.user.pk)
         return redirect(self.request.META['HTTP_REFERER'])
+
+
+class TimeSheetPDFView(DocumentRenderView):
+    model = Timer
+
+    def pdf(self):
+        month = int(self.kwargs['month'])
+        year = int(self.kwargs['year'])
+        qs = Timer.objects.filter_month(year, month).prefetch_related('user')
+        if 'user_id' in self.kwargs:
+            qs = qs.filter(user_id=self.kwargs['user_id'])
+        letterhead = DocumentSettings.objects.first().timetracking_letterhead
+        return timetracking.render(qs, letterhead, datetime.date(year, month, 1))

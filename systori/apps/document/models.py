@@ -385,6 +385,8 @@ class DocumentSettings(models.Model):
                                             related_name="+")
     itemized_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL,
                                             related_name="+")
+    timetracking_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL,
+                                                related_name="+")
 
     @staticmethod
     def get_for_language(lang):
