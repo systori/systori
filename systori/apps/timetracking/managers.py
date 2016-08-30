@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from collections import OrderedDict
 
 from pytz import timezone as pytz_timezone
@@ -7,23 +7,9 @@ from django.db.models import F, Q, Sum, Min, Max, Func
 from django.db.transaction import atomic
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-
+from .utils import get_timer_spans, days_range
 
 ABANDONED_CUTOFF = (16, 00)
-
-
-def days_range(start, end, delta, weekends=False):
-    curr = start
-    while curr < end:
-        if weekends:
-            yield curr
-            curr += delta
-        else:
-            if curr.weekday() not in (5, 6):
-                yield curr
-                curr += delta
-            else:
-                curr += delta
 
 
 class TimerQuerySet(QuerySet):
@@ -187,31 +173,14 @@ class TimerQuerySet(QuerySet):
             report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
         return reports
 
-    def create_batch(self, days, user, start, end, **kwargs):
-        assert kwargs.get('kind') in self.model.FULL_DAY_KINDS
+    def create_batch(self, user, start, end, kind, **kwargs):
+        # TODO: customer specific code for softronic
+        assert kind in self.model.FULL_DAY_KINDS
 
         days = days_range(start, end, delta=timedelta(days=1), weekends=False)
-        #self.model(user=user, start=start + timedelta(days=d), duration=duration, **kwargs)
-
         timers = []
-        for day in days:
-            start = day.replace(hour=start.hour)
-            end = day.replace(hour=9)
-            timer = self.model(user=user, date=day, start=start, end=end)
+        for day_start, day_end in get_timer_spans(start.time(), end.time(), days):
+            timer = self.model.objects.create(user=user, date=day_start.date(), start=day_start, end=day_end, kind=kind)
             timers.append(timer)
 
-            # Break 1: 9:00 - 9:30
-            start = day.replace(hour=9, minute=30, second=0)
-            end = day.replace(hour=12, minute=30, second=0)
-            timer = self.model(user=user, date=day, start=start, end=end)
-            timers.append(timer)
-
-            # Break 2: 12:30 - 13:00
-            start = day.replace(hour=13, minute=0, second=0)
-            end = day.replace(hour=end.hour)
-            timer = self.model(user=user, date=day, start=start, end=end)
-            timers.append(timer)
-
-        for timer in timers:
-            timer.save()
         return timers

@@ -113,3 +113,40 @@ def get_users_statuses(users):
     for timer in timers:
         user_timers[timer.user.pk] = timer
     return user_timers
+
+
+def get_timer_spans(day_start, day_end, days):
+    breaks = [
+        (time(9), time(9, 30)),
+        (time(12, 30), time(13)),
+    ]
+    for day in days:
+        next_start = day_start
+        # Apply Breaks
+        for span in breaks:
+            if next_start <= span[0]:
+                start = day.replace(hour=next_start.hour, minute=next_start.minute)
+                end_time = min(span[0], day_end)
+                end = day.replace(hour=end_time.hour, minute=end_time.minute)
+                if start < end:
+                    yield start, end
+                next_start = span[1]
+        # Apply Remainder
+        if next_start < day_end:
+            start = day.replace(hour=next_start.hour, minute=next_start.minute)
+            end = day.replace(hour=day_end.hour, minute=day_end.minute)
+            yield start, end
+
+
+def days_range(start, end, delta, weekends=False):
+    curr = start
+    while curr < end:
+        if weekends:
+            yield curr
+            curr += delta
+        else:
+            if curr.weekday() not in (5, 6):
+                yield curr
+                curr += delta
+            else:
+                curr += delta

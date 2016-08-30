@@ -1,5 +1,5 @@
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime, time
 
 from freezegun import freeze_time
 from django.test import TestCase
@@ -137,3 +137,51 @@ class UserStatusesTest(TestCase):
                 self.user3.pk: [user3_timer],
             }
         )
+
+
+class TimeSpanTest(TestCase):
+
+    def setUp(self):
+        self.days = [datetime(2016, 8, 30)]
+
+    def t(self, hour=0, minute=0, second=0):
+        return self.days[0].replace(hour=hour, minute=minute, second=second)
+
+    def assertSpan(self, expected, start, end):
+        self.assertEquals([
+            (self.t(*span[0]), self.t(*span[1]))
+            for span in expected
+        ], list(utils.get_timer_spans(start, end, self.days)))
+
+    def test_simple(self):
+        self.assertSpan([
+            ((8, 00),  (9, 00)),
+            ((9, 30), (12, 30)),
+            ((13, 00), (16, 00))
+         ], time(8), time(16))
+
+    def test_start_at_break(self):
+        self.assertSpan([
+            ((9, 30), (12, 30)),
+            ((13, 00), (16, 00))
+        ], time(9), time(16))
+
+    def test_start_and_end_at_break(self):
+        self.assertSpan([], time(9), time(9, 30))
+
+    def test_late_start(self):
+        self.assertSpan([
+            ((14, 00), (16, 00))
+        ], time(14), time(16))
+
+    def test_early_finish(self):
+        self.assertSpan([
+            ((8, 00), (9, 00)),
+            ((9, 30), (10, 00)),
+        ], time(8), time(10))
+
+    def test_early_break_only(self):
+        self.assertSpan([], time(9), time(9, 30))
+
+    def test_late_break_only(self):
+        self.assertSpan([], time(12, 30), time(13))
