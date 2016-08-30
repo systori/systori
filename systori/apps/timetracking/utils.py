@@ -1,12 +1,7 @@
 from datetime import time, timedelta
-from operator import itemgetter
 from collections import UserDict
 
-from django.contrib.auth import get_user_model
 from django.utils import timezone
-
-
-User = get_user_model()
 
 
 WORK_DAY = timedelta(hours=8).total_seconds()
@@ -51,6 +46,13 @@ def format_days(seconds):
 def to_current_timezone(date_time):
     return date_time.astimezone(timezone.get_current_timezone())
 
+
+def round_to_nearest_multiple(seconds, multiplier=36):
+    remainder = seconds % multiplier
+    if remainder >= (multiplier/2):
+        return seconds + (multiplier-remainder)
+    else:
+        return seconds - remainder
 
 ### Reports
 

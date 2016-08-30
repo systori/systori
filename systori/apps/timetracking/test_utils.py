@@ -18,6 +18,17 @@ User = get_user_model()
 NOW = timezone.now().replace(hour=16)
 
 
+class RoundToNearestMultipleTest(TestCase):
+
+    def test_round_seconds(self):
+        self.assertEquals(0, utils.round_to_nearest_multiple(1))
+        self.assertEquals(0, utils.round_to_nearest_multiple(17))
+        self.assertEquals(36, utils.round_to_nearest_multiple(18))
+        self.assertEquals(36, utils.round_to_nearest_multiple(35))
+        self.assertEquals(252, utils.round_to_nearest_multiple(250))
+        self.assertEquals(216, utils.round_to_nearest_multiple(230))
+
+
 class ReportsTest(TestCase):
 
     def setUp(self):

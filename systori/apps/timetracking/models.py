@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 
 from ..project.models import JobSite
 from .managers import TimerQuerySet
+from .utils import round_to_nearest_multiple
 
 
 class Timer(models.Model):
@@ -94,7 +95,7 @@ class Timer(models.Model):
         if not self.start:
             self.start = timezone.now()
         if self.end:
-            self.duration = self.get_duration_seconds(self.end)
+            self.duration = round_to_nearest_multiple(self.get_duration_seconds(self.end))
         elif self.duration:
             self.end = self.start + timedelta(seconds=self.duration)
 

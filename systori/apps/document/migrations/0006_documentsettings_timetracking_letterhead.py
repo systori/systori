@@ -6,6 +6,17 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def set_timetracking_letterhead(apps, schema_editor):
+    from systori.apps.company.models import Company
+    DocumentSettings = apps.get_model("document", "DocumentSettings")
+    Letterhead = apps.get_model("document", "Letterhead")
+    company = Company.objects.get(schema="mehr-handwerk")
+    company.activate()
+    settings = DocumentSettings.objects.first()
+    settings.timetracking_letterhead = Letterhead.objects.get(id=2)
+    settings.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -18,4 +29,5 @@ class Migration(migrations.Migration):
             name='timetracking_letterhead',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='document.Letterhead'),
         ),
+        migrations.RunPython(set_timetracking_letterhead),
     ]

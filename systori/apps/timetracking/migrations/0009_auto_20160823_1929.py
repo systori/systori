@@ -21,6 +21,30 @@ def convert_kind(apps, schema_editor):
             timer.save()
 
 
+def split_timers(apps, schema_editor):
+    from systori.apps.company.models import Company
+    from systori.apps.timetracking.models import Timer
+    for company in Company.objects.all():
+        company.activate()
+        for timer in Timer.objects.all():
+            if timer.duration >= 60 * 60 * 9:
+                assert timer.start.hour < 9
+                old_end = timer.end
+                timer.end = timer.end.replace(
+                    hour=12, minute=0, second=0
+                )
+                timer.duration = None
+                timer.save()
+
+                timer.id = None
+                timer.start = timer.start.replace(
+                    hour=13, minute=0, second=0
+                )
+                timer.end = old_end
+                timer.duration = None
+                timer.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -34,4 +58,5 @@ class Migration(migrations.Migration):
             field=models.CharField(choices=[('work', 'Work'), ('holiday', 'Holiday'), ('illness', 'Illness'), ('correction', 'Correction'), ('training', 'Training')], db_index=True, default='work', max_length=32),
         ),
         migrations.RunPython(convert_kind),
+        migrations.RunPython(split_timers),
     ]

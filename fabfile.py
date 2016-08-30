@@ -234,3 +234,8 @@ def jenkins():
     local('coverage html')
 
     slack('build finished')
+
+def git():
+    "git usage help and cheatsheet"
+    print("Start a new branch (based on dev)...")
+    print("git checkout -b <new_branch> dev")
