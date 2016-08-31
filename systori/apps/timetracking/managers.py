@@ -7,7 +7,7 @@ from django.db.models import F, Q, Sum, Min, Max, Func
 from django.db.transaction import atomic
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-from .utils import get_timer_spans, days_range
+from .utils import GET_TIMERS_SPLIT_BY_BREAKS, get_dates_in_range
 
 ABANDONED_CUTOFF = (16, 00)
 
@@ -173,13 +173,13 @@ class TimerQuerySet(QuerySet):
             report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
         return reports
 
-    def create_batch(self, user, start, end, kind, **kwargs):
+    def create_batch(self, user, start, end, kind):
         # TODO: customer specific code for softronic
         assert kind in self.model.FULL_DAY_KINDS
 
-        days = days_range(start, end, delta=timedelta(days=1), weekends=False)
+        days = get_dates_in_range(start, end, delta=timedelta(days=1))
         timers = []
-        for day_start, day_end in get_timer_spans(start.time(), end.time(), days):
+        for day_start, day_end in GET_TIMERS_SPLIT_BY_BREAKS(start.time(), end.time(), days):
             timer = self.model.objects.create(user=user, date=day_start.date(), start=day_start, end=day_end, kind=kind)
             timers.append(timer)
 

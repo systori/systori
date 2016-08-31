@@ -155,19 +155,23 @@ class TimeSpanTest(TestCase):
 
     def test_simple(self):
         self.assertSpan([
-            ((8, 00),  (9, 00)),
+            ((7, 00),  (9, 00)),
             ((9, 30), (12, 30)),
             ((13, 00), (16, 00))
-         ], time(8), time(16))
+         ], time(7), time(16))
+
+    def test_simple_overtime(self):
+        self.assertSpan([
+            ((7, 00),  (9, 00)),
+            ((9, 30), (12, 30)),
+            ((13, 00), (18, 00))
+         ], time(7), time(18))
 
     def test_start_at_break(self):
         self.assertSpan([
             ((9, 30), (12, 30)),
             ((13, 00), (16, 00))
         ], time(9), time(16))
-
-    def test_start_and_end_at_break(self):
-        self.assertSpan([], time(9), time(9, 30))
 
     def test_late_start(self):
         self.assertSpan([
@@ -185,3 +189,9 @@ class TimeSpanTest(TestCase):
 
     def test_late_break_only(self):
         self.assertSpan([], time(12, 30), time(13))
+
+    def test_early_start_early_break(self):
+        self.assertSpan([
+            ((5, 00), (9, 00)),
+            ((9, 30), (11, 30))
+        ], time(5), time(11))
