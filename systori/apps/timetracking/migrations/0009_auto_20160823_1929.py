@@ -32,7 +32,8 @@ def split_timers(apps, schema_editor):
                 timer.start = timer.start.replace(
                     hour=7, minute=0, second=0
                 )
-                timer.duration = None
+                if timer.end:
+                    timer.duration = None
                 timer.save()
 
             if timer.duration >= 60 * 60 * 9:
@@ -79,6 +80,16 @@ class Migration(migrations.Migration):
             model_name='timer',
             name='kind',
             field=models.CharField(choices=[('work', 'Work'), ('holiday', 'Holiday'), ('illness', 'Illness'), ('correction', 'Correction'), ('training', 'Training')], db_index=True, default='work', max_length=32),
+        ),
+        migrations.AddField(
+            model_name='timer',
+            name='is_auto_started',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='timer',
+            name='is_auto_stopped',
+            field=models.BooleanField(default=False),
         ),
         migrations.RunPython(convert_kind),
         migrations.RunPython(split_timers),
