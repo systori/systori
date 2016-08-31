@@ -31,7 +31,8 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
-    {{ user.get_full_name }} {% trans "Time Report for" %} {{ report_period|date:"F Y" }}</h3>
+    {% trans "Time Report for" %} {{ user.get_full_name }} - {{ report_period|date:"F Y" }}
+    </h3>
   </div>
   <div class="panel-body">
     <form class="form-inline" method="GET">
@@ -46,6 +47,9 @@
 </div>
 <div class="panel panel-default">
   <div class="panel-body">
+    <div class="alert alert-warning">
+      {% trans "Fixed breaks from 9:00-9:30 and 12:30-13:00 are always subtracted for all kinds." %}
+    </div>
     <form class="form-inline" method="POST">
     {% csrf_token %}
     {{ form|bootstrap_inline }}
