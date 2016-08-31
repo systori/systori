@@ -128,7 +128,7 @@ def get_dates_in_range(start_date, end_date, delta, include_weekends=False):
         current_date += delta
 
 
-def get_timers_split_by_breaks(day_start, day_end, datetime_list):
+def get_timespans_split_by_breaks(day_start, day_end, datetime_list):
     for day in datetime_list:
         next_start = day_start
         # Apply Breaks
