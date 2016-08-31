@@ -7,10 +7,9 @@ from django.utils import timezone
 WORK_DAY = timedelta(hours=8).total_seconds()
 HOLIDAYS_PER_MONTH = WORK_DAY * 2.5
 BREAKS = [
-    (time(9), time(9, 30)),
-    (time(12, 30), time(13)),
+    (time(9, 00), time(9, 30)),
+    (time(12, 30), time(13, 00)),
 ]
-
 
 
 class AccumulatorDict(UserDict):
@@ -145,3 +144,17 @@ def get_timespans_split_by_breaks(day_start, day_end, datetime_list):
             start = day.replace(hour=next_start.hour, minute=next_start.minute)
             end = day.replace(hour=day_end.hour, minute=day_end.minute)
             yield start, end
+
+
+def perform_autopilot_duties():
+    """
+    Issue timers stop or launch commands at certain times of day
+    """
+    from .models import Timer
+
+    now = timezone.now().replace(second=0, microsecond=0)
+    time_now = now.time()
+    if time_now in [b[0] for b in BREAKS]:
+        Timer.objects.stop_for_break(now)
+    elif time_now in [b[1] for b in BREAKS]:
+        Timer.objects.launch_after_break(now)
