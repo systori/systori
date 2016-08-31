@@ -152,8 +152,9 @@ def perform_autopilot_duties():
     """
     from .models import Timer
 
-    now = timezone.now().time().replace(second=0, microsecond=0)
-    if now in [b[0] for b in BREAKS]:
-        Timer.objects.stop_for_break()
-    elif now in [b[1] for b in BREAKS]:
-        Timer.objects.launch_after_break()
+    now = timezone.now().replace(second=0, microsecond=0)
+    time_now = now.time()
+    if time_now in [b[0] for b in BREAKS]:
+        Timer.objects.stop_for_break(now)
+    elif time_now in [b[1] for b in BREAKS]:
+        Timer.objects.launch_after_break(now)

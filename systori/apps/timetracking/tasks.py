@@ -12,8 +12,10 @@ def stop_abandoned_timers():
         company.activate()
         Timer.objects.stop_abandoned()
 
-@task.periodic_task(run_every=crontab(minute='*'))
-def launch_autopilot():
+# TODO: Might cause problems in the future if autopilot cannot launch or complete
+# within one minute, consider creating periodic tasks dynamically (after Celery 4.0 launch)
+@task.periodic_task(run_every=crontab(minute='*'), bind=True)
+def launch_autopilot(self):
     for company in Company.objects.all():
         company.activate()
         perform_autopilot_duties()

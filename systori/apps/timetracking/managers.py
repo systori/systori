@@ -32,23 +32,23 @@ class TimerQuerySet(QuerySet):
             else:
                 timer.stop(end=timer.start.replace(**cutoff_params))
 
-    def stop_for_break(self):
+    def stop_for_break(self, end=None):
         """
         Stop currently running timers automatically.
         Doesn't validate if it's time for break now or not.
         """
-        end = timezone.now()
+        end = end or timezone.now()
         counter = 0
         for timer in self.filter_running().filter(kind=self.model.WORK):
             timer.stop(end=end, is_auto_stopped=True)
             counter += 1
         return counter
 
-    def launch_after_break(self):
+    def launch_after_break(self, start=None):
         """
         Launch timers for users that had timers automatically stopped.
         """
-        start = timezone.now()
+        start = start or timezone.now()
         seen_users = set()
         auto_stopped_timers = self.filter_today().filter(
             kind=self.model.WORK, is_auto_stopped=True).select_related('user')
