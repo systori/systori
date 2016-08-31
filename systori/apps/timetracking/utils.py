@@ -7,10 +7,9 @@ from django.utils import timezone
 WORK_DAY = timedelta(hours=8).total_seconds()
 HOLIDAYS_PER_MONTH = WORK_DAY * 2.5
 BREAKS = [
-    (time(9), time(9, 30)),
-    (time(12, 30), time(13)),
+    (time(9, 00), time(9, 30)),
+    (time(12, 30), time(13, 00)),
 ]
-
 
 
 class AccumulatorDict(UserDict):
