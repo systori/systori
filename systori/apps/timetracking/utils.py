@@ -144,3 +144,16 @@ def get_timespans_split_by_breaks(day_start, day_end, datetime_list):
             start = day.replace(hour=next_start.hour, minute=next_start.minute)
             end = day.replace(hour=day_end.hour, minute=day_end.minute)
             yield start, end
+
+
+def perform_autopilot_duties():
+    """
+    Issue timers stop or launch commands at certain times of day
+    """
+    from .models import Timer
+
+    now = timezone.now().time().replace(second=0, microsecond=0)
+    if now in [b[0] for b in BREAKS]:
+        Timer.objects.stop_for_break()
+    elif now in [b[1] for b in BREAKS]:
+        Timer.objects.launch_after_break()

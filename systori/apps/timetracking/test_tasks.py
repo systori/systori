@@ -11,6 +11,7 @@ from . import tasks
 
 
 class TasksTest(TestCase):
+
     @freeze_time('2016-08-16 18:30')
     def test_stop_abandoned_timers(self):
         company1 = CompanyFactory()

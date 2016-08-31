@@ -1,4 +1,5 @@
 import json
+from unittest.mock import patch
 from datetime import timedelta, datetime, time
 
 from freezegun import freeze_time
@@ -195,3 +196,32 @@ class TimeSpanTest(TestCase):
             ((5, 00), (9, 00)),
             ((9, 30), (11, 30))
         ], time(5), time(11, 30))
+
+
+class AutoPilotTest(TestCase):
+
+    @patch.object(Timer, 'objects')
+    def test_perform_autopilot_duties(self, manager_mock):
+        with freeze_time('2016-08-16 08:55'):
+            utils.perform_autopilot_duties()
+            self.assertFalse(manager_mock.stop_for_break.mock_calls)
+            self.assertFalse(manager_mock.launch_after_break.mock_calls)
+        manager_mock.stop_for_break.reset_mock()
+
+        with freeze_time('2016-08-16 09:00'):
+            utils.perform_autopilot_duties()
+            manager_mock.stop_for_break.assert_called_once_with()
+            self.assertFalse(manager_mock.launch_after_break.mock_calls)
+        manager_mock.stop_for_break.reset_mock()
+
+        with freeze_time('2016-08-16 09:15'):
+            utils.perform_autopilot_duties()
+            self.assertFalse(manager_mock.stop_for_break.mock_calls)
+            self.assertFalse(manager_mock.launch_after_break.mock_calls)
+        manager_mock.stop_for_break.reset_mock()
+
+        with freeze_time('2016-08-16 09:30'):
+            utils.perform_autopilot_duties()
+            self.assertFalse(manager_mock.stop_for_break.mock_calls)
+            manager_mock.launch_after_break.assert_called_once_with()
+        manager_mock.stop_for_break.reset_mock()
