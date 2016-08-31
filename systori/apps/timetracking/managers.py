@@ -22,12 +22,45 @@ class TimerQuerySet(QuerySet):
 
     @atomic
     def stop_abandoned(self):
+        """
+        Stop timers still running at the end of the day
+        """
         cutoff_params = dict(hour=ABANDONED_CUTOFF[0], minute=ABANDONED_CUTOFF[1], second=0, microsecond=0)
         for timer in self.filter_running():
             if (timer.start.hour, timer.start.minute) >= ABANDONED_CUTOFF:
                 timer.stop(end=timer.start + timedelta(minutes=5))
             else:
                 timer.stop(end=timer.start.replace(**cutoff_params))
+
+    def stop_for_break(self):
+        """
+        Stop currently running timers automatically.
+        Doesn't validate if it's time for break now or not.
+        """
+        end = timezone.now()
+        counter = 0
+        for timer in self.filter_running().filter(kind=self.model.WORK):
+            timer.stop(end=end, is_auto_stopped=True)
+            counter += 1
+        return counter
+
+    def launch_after_break(self):
+        """
+        Launch timers for users that had timers automatically stopped.
+        """
+        start = timezone.now()
+        seen_users = set()
+        auto_stopped_timers = self.filter_today().filter(
+            kind=self.model.WORK, is_auto_stopped=True).select_related('user')
+        running_users = self.filter_running().values_list('user')
+        for timer in auto_stopped_timers.exclude(user__in=running_users):
+            if not timer.user in seen_users:
+                self.model.launch(timer.user, start=start, is_auto_started=True)
+                seen_users.add(timer.user)
+        return len(seen_users)
+
+    def filter_today(self):
+        return self.filter_date(date=None)
 
     def filter_date(self, date=None):
         date = date or timezone.now().date()

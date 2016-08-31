@@ -56,6 +56,8 @@ class Timer(models.Model):
     end_latitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     end_longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     job_site = models.ForeignKey(JobSite, blank=True, null=True)
+    is_auto_started = models.BooleanField(default=False)
+    is_auto_stopped = models.BooleanField(default=False)
 
     objects = TimerQuerySet.as_manager()
 
@@ -146,9 +148,11 @@ class Timer(models.Model):
         from .utils import format_seconds
         return format_seconds(self.get_duration_seconds())
 
-    def stop(self, end=None, ignore_short_duration=True):
+    def stop(self, end=None, ignore_short_duration=True, **kwargs):
         assert self.pk
         self.end = end or timezone.now()
+        for field, value in kwargs.items():
+            setattr(self, field, value)
         if not ignore_short_duration or self.get_duration_seconds() > self.SHORT_DURATION_THRESHOLD:
             self.save()
         else:
