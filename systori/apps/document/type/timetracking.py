@@ -29,7 +29,7 @@ DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
 def seconds_to_hours(seconds):
-    return Decimal(round(seconds / 60.0 / 60.0, 1))
+    return Decimal(seconds / 60.0 / 60.0)
 
 
 class TimeSheet:

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from collections import OrderedDict
 
 from pytz import timezone as pytz_timezone
@@ -7,7 +7,7 @@ from django.db.models import F, Q, Sum, Min, Max, Func
 from django.db.transaction import atomic
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-
+from .utils import get_timespans_split_by_breaks, get_dates_in_range
 
 ABANDONED_CUTOFF = (16, 00)
 
@@ -173,16 +173,15 @@ class TimerQuerySet(QuerySet):
             report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
         return reports
 
-    def create_batch(self, days, user, start, **kwargs):
-        kwargs.pop('end', None)
-        assert kwargs.get('kind') in self.model.FULL_DAY_KINDS
-        day_start_hour, day_start_minute = self.model.WORK_DAY_START
-        start = start.replace(hour=day_start_hour, minute=day_start_minute, second=0, microsecond=0)
-        duration = self.model.WORK_HOURS
-        timers = [
-            self.model(user=user, start=start + timedelta(days=d), duration=duration, **kwargs)
-            for d in range(days)
-        ]
-        for timer in timers:
-            timer.save()
+    def create_batch(self, user, start, end, kind, comment, **kwargs):
+        # TODO: customer specific code for softronic
+        assert kind in self.model.FULL_DAY_KINDS
+
+        days = get_dates_in_range(start, end, delta=timedelta(days=1))
+        timers = []
+        for day_start, day_end in get_timespans_split_by_breaks(start.time(), end.time(), days):
+            timer = self.model.objects.create(
+                      user=user, date=day_start.date(), start=day_start, end=day_end, kind=kind, **kwargs)
+            timers.append(timer)
+
         return timers
