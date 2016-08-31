@@ -10,11 +10,15 @@ def set_timetracking_letterhead(apps, schema_editor):
     from systori.apps.company.models import Company
     DocumentSettings = apps.get_model("document", "DocumentSettings")
     Letterhead = apps.get_model("document", "Letterhead")
-    company = Company.objects.get(schema="mehr-handwerk")
-    company.activate()
-    settings = DocumentSettings.objects.first()
-    settings.timetracking_letterhead = Letterhead.objects.get(id=2)
-    settings.save()
+    try:
+        company = Company.objects.get(schema="mehr-handwerk")
+    except Company.DoesNotExist:
+        pass
+    else:
+        company.activate()
+        settings = DocumentSettings.objects.first()
+        settings.timetracking_letterhead = Letterhead.objects.get(id=2)
+        settings.save()
 
 
 class Migration(migrations.Migration):
