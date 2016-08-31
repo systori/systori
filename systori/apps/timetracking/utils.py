@@ -6,6 +6,11 @@ from django.utils import timezone
 
 WORK_DAY = timedelta(hours=8).total_seconds()
 HOLIDAYS_PER_MONTH = WORK_DAY * 2.5
+BREAKS = [
+    (time(9), time(9, 30)),
+    (time(12, 30), time(13)),
+]
+
 
 
 class AccumulatorDict(UserDict):
@@ -113,3 +118,30 @@ def get_users_statuses(users):
     for timer in timers:
         user_timers[timer.user.pk] = timer
     return user_timers
+
+
+def get_dates_in_range(start_date, end_date, delta, include_weekends=False):
+    current_date = start_date
+    while end_date > current_date:
+        if include_weekends or current_date.weekday() not in (5, 6):
+            yield current_date
+        current_date += delta
+
+
+def get_timespans_split_by_breaks(day_start, day_end, datetime_list):
+    for day in datetime_list:
+        next_start = day_start
+        # Apply Breaks
+        for span in BREAKS:
+            if next_start <= span[0]:
+                start = day.replace(hour=next_start.hour, minute=next_start.minute)
+                end_time = min(span[0], day_end)
+                end = day.replace(hour=end_time.hour, minute=end_time.minute)
+                if start < end:
+                    yield start, end
+                next_start = span[1]
+        # Apply Remainder
+        if next_start < day_end:
+            start = day.replace(hour=next_start.hour, minute=next_start.minute)
+            end = day.replace(hour=day_end.hour, minute=day_end.minute)
+            yield start, end
