@@ -57,6 +57,14 @@ class TimerTest(TestCase):
         timer.stop(end=timezone.now() + timedelta(hours=2))
         self.assertEqual(timer.end.strftime('%H:%M'), '20:30')
 
+    def test_stop_with_extra_params(self):
+        with freeze_time(timezone.now() - timedelta(hours=3)):
+            timer = Timer.launch(self.user)
+        timer.stop(is_auto_stopped=True, comment='test comment')
+        timer.refresh_from_db()
+        self.assertTrue(timer.is_auto_stopped)
+        self.assertEqual(timer.comment, 'test comment')
+
     def test_stop_zero_timer_ignores_it(self):
         timer = Timer.launch(self.user)
         timer.stop()
@@ -191,17 +199,61 @@ class TimerQuerySetTest(TestCase):
         self.assertEqual(result[2].start, start + timedelta(days=2))
         self.assertEqual(result[2].end, start + timedelta(days=2) + timedelta(seconds=Timer.WORK_HOURS))
 
-    @freeze_time('2016-08-16 18:30')
-    def test_stop_abandoned(self):
-        now = timezone.now()
+    def test_stop_for_break(self):
         user2 = UserFactory(company=self.company)
-        timer_before_cutoff = Timer.objects.create(
-            user=self.user, start=now - timedelta(hours=5))
-        timer_after_cutoff = Timer.objects.create(
-            user=user2, start=now - timedelta(hours=1))
-        Timer.objects.stop_abandoned()
-        timer_before_cutoff.refresh_from_db()
-        timer_after_cutoff.refresh_from_db()
-        self.assertEqual(timer_before_cutoff.end, now.replace(hour=16, minute=0, second=0, microsecond=0))
-        self.assertEqual(timer_after_cutoff.end, timer_after_cutoff.start + timedelta(minutes=5))
-        self.assertEqual(timer_after_cutoff.duration, 60 * 5)
+        with freeze_time('2016-08-16 07:00'):
+            timer1 = Timer.launch(user=self.user)
+            timer2 = Timer.launch(user=user2)
+            outside_timer = Timer.objects.create(
+                user=self.user,
+                duration=3600,
+                kind=Timer.CORRECTION,
+                start=timezone.now() - timedelta(days=1)
+            )
+
+        with freeze_time('2016-08-16 09:00'):
+            now = timezone.now()
+            stopped_count = Timer.objects.stop_for_break()
+            timer1.refresh_from_db()
+            timer2.refresh_from_db()
+            outside_timer.refresh_from_db()
+            self.assertEqual(stopped_count, 2)
+            self.assertEqual(timer1.end, now)
+            self.assertEqual(timer2.end, now)
+            self.assertTrue(timer1.is_auto_stopped)
+            self.assertTrue(timer2.is_auto_stopped)
+            self.assertEqual(outside_timer.end, outside_timer.start + timedelta(seconds=3600))
+
+    def test_launch_after_break(self):
+        user2 = UserFactory(company=self.company)
+        running_user = UserFactory(company=self.company)
+        manually_stopped_user = UserFactory(company=self.company)
+        with freeze_time('2016-08-16 07:00'):
+            Timer.launch(user=self.user)
+            Timer.launch(user=user2)
+            manually_stopped_timer = Timer.launch(user=manually_stopped_user)
+
+        with freeze_time('2016-08-16 09:00'):
+            manually_stopped_timer.stop()
+            Timer.objects.stop_for_break()
+
+        with freeze_time('2016-08-16 09:15'):
+            running_timer_started = timezone.now()
+            Timer.launch(user=running_user)
+
+        with freeze_time('2016-08-16 09:30'):
+            Timer.objects.launch_after_break()
+            now = timezone.now()
+            timer1 = self.user.timer_set.latest('start')
+            timer2 = user2.timer_set.latest('start')
+            running_timer = running_user.timer_set.latest('start')
+            stopped_timer = manually_stopped_user.timer_set.latest('start')
+            self.assertEqual(timer1.start, now)
+            self.assertEqual(timer2.start, now)
+            self.assertTrue(timer1.is_auto_started)
+            self.assertTrue(timer2.is_auto_started)
+            self.assertEqual(running_timer.start, running_timer_started)
+            self.assertTrue(running_timer.is_running)
+            self.assertFalse(stopped_timer.is_running)
+
+    # def test_stop_after_day

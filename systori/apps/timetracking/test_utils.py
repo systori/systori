@@ -1,5 +1,6 @@
 import json
-from datetime import timedelta
+from unittest.mock import patch
+from datetime import timedelta, datetime, time
 
 from freezegun import freeze_time
 from django.test import TestCase
@@ -137,3 +138,92 @@ class UserStatusesTest(TestCase):
                 self.user3.pk: [user3_timer],
             }
         )
+
+
+class TimeSpanTest(TestCase):
+
+    def setUp(self):
+        self.days = [datetime(2016, 8, 30)]
+
+    def t(self, hour=0, minute=0, second=0):
+        return self.days[0].replace(hour=hour, minute=minute, second=second)
+
+    def assertSpan(self, expected, start, end):
+        self.assertEquals([
+            (self.t(*span[0]), self.t(*span[1]))
+            for span in expected
+        ], list(utils.get_timespans_split_by_breaks(start, end, self.days)))
+
+    def test_simple(self):
+        self.assertSpan([
+            ((7, 00),  (9, 00)),
+            ((9, 30), (12, 30)),
+            ((13, 00), (16, 00))
+         ], time(7), time(16))
+
+    def test_simple_overtime(self):
+        self.assertSpan([
+            ((7, 00),  (9, 00)),
+            ((9, 30), (12, 30)),
+            ((13, 00), (18, 00))
+         ], time(7), time(18))
+
+    def test_start_at_break(self):
+        self.assertSpan([
+            ((9, 30), (12, 30)),
+            ((13, 00), (16, 00))
+        ], time(9), time(16))
+
+    def test_late_start(self):
+        self.assertSpan([
+            ((14, 00), (16, 00))
+        ], time(14), time(16))
+
+    def test_early_finish(self):
+        self.assertSpan([
+            ((8, 00), (9, 00)),
+            ((9, 30), (10, 00)),
+        ], time(8), time(10))
+
+    def test_early_break_only(self):
+        self.assertSpan([], time(9), time(9, 30))
+
+    def test_late_break_only(self):
+        self.assertSpan([], time(12, 30), time(13))
+
+    def test_early_start_early_break(self):
+        self.assertSpan([
+            ((5, 00), (9, 00)),
+            ((9, 30), (11, 30))
+        ], time(5), time(11, 30))
+
+
+class AutoPilotTest(TestCase):
+
+    @patch.object(Timer, 'objects')
+    def test_perform_autopilot_duties(self, manager_mock):
+        round_now = lambda: timezone.now().replace(second=0, microsecond=0)
+
+        with freeze_time('2016-08-16 08:55:59'):
+            utils.perform_autopilot_duties()
+            self.assertFalse(manager_mock.stop_for_break.mock_calls)
+            self.assertFalse(manager_mock.launch_after_break.mock_calls)
+        manager_mock.stop_for_break.reset_mock()
+
+        with freeze_time('2016-08-16 09:00:45'):
+            utils.perform_autopilot_duties()
+            manager_mock.stop_for_break.assert_called_once_with(round_now())
+            self.assertFalse(manager_mock.launch_after_break.mock_calls)
+        manager_mock.stop_for_break.reset_mock()
+
+        with freeze_time('2016-08-16 09:15:15'):
+            utils.perform_autopilot_duties()
+            self.assertFalse(manager_mock.stop_for_break.mock_calls)
+            self.assertFalse(manager_mock.launch_after_break.mock_calls)
+        manager_mock.stop_for_break.reset_mock()
+
+        with freeze_time('2016-08-16 09:30:01'):
+            utils.perform_autopilot_duties()
+            self.assertFalse(manager_mock.stop_for_break.mock_calls)
+            manager_mock.launch_after_break.assert_called_once_with(round_now())
+        manager_mock.stop_for_break.reset_mock()

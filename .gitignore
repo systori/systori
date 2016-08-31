@@ -21,3 +21,4 @@ media/
 systori/dart/pub-cache
 systori.sublime-project
 systori.sublime-workspace
+celerybeat-schedule.db

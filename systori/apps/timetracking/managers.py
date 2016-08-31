@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from collections import OrderedDict
 
 from pytz import timezone as pytz_timezone
@@ -7,7 +7,7 @@ from django.db.models import F, Q, Sum, Min, Max, Func
 from django.db.transaction import atomic
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-
+from .utils import get_timespans_split_by_breaks, get_dates_in_range
 
 ABANDONED_CUTOFF = (16, 00)
 
@@ -22,12 +22,45 @@ class TimerQuerySet(QuerySet):
 
     @atomic
     def stop_abandoned(self):
+        """
+        Stop timers still running at the end of the day
+        """
         cutoff_params = dict(hour=ABANDONED_CUTOFF[0], minute=ABANDONED_CUTOFF[1], second=0, microsecond=0)
         for timer in self.filter_running():
             if (timer.start.hour, timer.start.minute) >= ABANDONED_CUTOFF:
                 timer.stop(end=timer.start + timedelta(minutes=5))
             else:
                 timer.stop(end=timer.start.replace(**cutoff_params))
+
+    def stop_for_break(self, end=None):
+        """
+        Stop currently running timers automatically.
+        Doesn't validate if it's time for break now or not.
+        """
+        end = end or timezone.now()
+        counter = 0
+        for timer in self.filter_running().filter(kind=self.model.WORK):
+            timer.stop(end=end, is_auto_stopped=True)
+            counter += 1
+        return counter
+
+    def launch_after_break(self, start=None):
+        """
+        Launch timers for users that had timers automatically stopped.
+        """
+        start = start or timezone.now()
+        seen_users = set()
+        auto_stopped_timers = self.filter_today().filter(
+            kind=self.model.WORK, is_auto_stopped=True).select_related('user')
+        running_users = self.filter_running().values_list('user')
+        for timer in auto_stopped_timers.exclude(user__in=running_users):
+            if not timer.user in seen_users:
+                self.model.launch(timer.user, start=start, is_auto_started=True)
+                seen_users.add(timer.user)
+        return len(seen_users)
+
+    def filter_today(self):
+        return self.filter_date(date=None)
 
     def filter_date(self, date=None):
         date = date or timezone.now().date()
@@ -173,16 +206,15 @@ class TimerQuerySet(QuerySet):
             report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
         return reports
 
-    def create_batch(self, days, user, start, **kwargs):
-        kwargs.pop('end', None)
-        assert kwargs.get('kind') in self.model.FULL_DAY_KINDS
-        day_start_hour, day_start_minute = self.model.WORK_DAY_START
-        start = start.replace(hour=day_start_hour, minute=day_start_minute, second=0, microsecond=0)
-        duration = self.model.WORK_HOURS
-        timers = [
-            self.model(user=user, start=start + timedelta(days=d), duration=duration, **kwargs)
-            for d in range(days)
-        ]
-        for timer in timers:
-            timer.save()
+    def create_batch(self, user, start, end, kind, comment, **kwargs):
+        # TODO: customer specific code for softronic
+        assert kind in self.model.FULL_DAY_KINDS
+
+        days = get_dates_in_range(start, end, delta=timedelta(days=1))
+        timers = []
+        for day_start, day_end in get_timespans_split_by_breaks(start.time(), end.time(), days):
+            timer = self.model.objects.create(
+                      user=user, date=day_start.date(), start=day_start, end=day_end, kind=kind, **kwargs)
+            timers.append(timer)
+
         return timers
