@@ -7,7 +7,7 @@ from django.db.models import F, Q, Sum, Min, Max, Func
 from django.db.transaction import atomic
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-from .utils import GET_TIMERS_SPLIT_BY_BREAKS, get_dates_in_range
+from .utils import get_timers_split_by_breaks, get_dates_in_range
 
 ABANDONED_CUTOFF = (16, 00)
 
@@ -179,7 +179,7 @@ class TimerQuerySet(QuerySet):
 
         days = get_dates_in_range(start, end, delta=timedelta(days=1))
         timers = []
-        for day_start, day_end in GET_TIMERS_SPLIT_BY_BREAKS(start.time(), end.time(), days):
+        for day_start, day_end in get_timers_split_by_breaks(start.time(), end.time(), days):
             timer = self.model.objects.create(user=user, date=day_start.date(), start=day_start, end=day_end, kind=kind)
             timers.append(timer)
 
