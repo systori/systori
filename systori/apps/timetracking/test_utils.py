@@ -151,7 +151,7 @@ class TimeSpanTest(TestCase):
         self.assertEquals([
             (self.t(*span[0]), self.t(*span[1]))
             for span in expected
-        ], list(utils.get_timer_spans(start, end, self.days)))
+        ], list(utils.get_timespans_split_by_breaks(start, end, self.days)))
 
     def test_simple(self):
         self.assertSpan([
@@ -194,4 +194,4 @@ class TimeSpanTest(TestCase):
         self.assertSpan([
             ((5, 00), (9, 00)),
             ((9, 30), (11, 30))
-        ], time(5), time(11))
+        ], time(5), time(11, 30))

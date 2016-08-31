@@ -95,8 +95,7 @@ class ManualTimerForm(ModelForm):
 
     def save(self, commit=True):
         data = self.cleaned_data
-        span_days = (data['end'] - data['start']).days
-        if commit and span_days >= 1 and data['kind'] in self._meta.model.FULL_DAY_KINDS:
+        if commit and data['kind'] in self._meta.model.FULL_DAY_KINDS:
             return self._meta.model.objects.create_batch(**data)
         else:
             return super().save(commit)

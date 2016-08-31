@@ -173,14 +173,15 @@ class TimerQuerySet(QuerySet):
             report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
         return reports
 
-    def create_batch(self, user, start, end, kind):
+    def create_batch(self, user, start, end, kind, comment, **kwargs):
         # TODO: customer specific code for softronic
         assert kind in self.model.FULL_DAY_KINDS
 
         days = get_dates_in_range(start, end, delta=timedelta(days=1))
         timers = []
         for day_start, day_end in get_timespans_split_by_breaks(start.time(), end.time(), days):
-            timer = self.model.objects.create(user=user, date=day_start.date(), start=day_start, end=day_end, kind=kind)
+            timer = self.model.objects.create(user=user, date=day_start.date(), start=day_start, end=day_end, kind=kind,
+                                              **kwargs)
             timers.append(timer)
 
         return timers
