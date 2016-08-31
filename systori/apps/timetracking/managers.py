@@ -180,8 +180,8 @@ class TimerQuerySet(QuerySet):
         days = get_dates_in_range(start, end, delta=timedelta(days=1))
         timers = []
         for day_start, day_end in get_timespans_split_by_breaks(start.time(), end.time(), days):
-            timer = self.model.objects.create(user=user, date=day_start.date(), start=day_start, end=day_end, kind=kind,
-                                              **kwargs)
+            timer = self.model.objects.create(
+                      user=user, date=day_start.date(), start=day_start, end=day_end, kind=kind, **kwargs)
             timers.append(timer)
 
         return timers
