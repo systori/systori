@@ -102,7 +102,7 @@ class TimeSheetPDFView(DocumentRenderView):
         month = int(self.kwargs['month'])
         year = int(self.kwargs['year'])
         qs = Timer.objects.filter_month(year, month).prefetch_related('user')
-        if 'user_id' in self.kwargs:
+        if self.kwargs['user_id'] is not None:
             qs = qs.filter(user_id=self.kwargs['user_id'])
         letterhead = DocumentSettings.objects.first().timetracking_letterhead
         return timetracking.render(qs, letterhead, datetime.date(year, month, 1))
