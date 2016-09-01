@@ -202,46 +202,28 @@ class AutoPilotTest(TestCase):
 
     @patch.object(Timer, 'objects')
     def test_perform_autopilot_duties(self, manager_mock):
-<<<<<<< HEAD
         round_now = lambda: datetime.now(timezone.get_current_timezone()).replace(second=0, microsecond=0)
         offset = -timezone.get_current_timezone().utcoffset(datetime.now()).total_seconds() / 60 / 60
 
         with freeze_time('2016-08-16 08:55:59', tz_offset=offset):
-=======
-        round_now = lambda: timezone.now().replace(second=0, microsecond=0)
-
-        with freeze_time('2016-08-16 08:55:59'):
->>>>>>> dev
             utils.perform_autopilot_duties()
             self.assertFalse(manager_mock.stop_for_break.mock_calls)
             self.assertFalse(manager_mock.launch_after_break.mock_calls)
         manager_mock.stop_for_break.reset_mock()
 
-<<<<<<< HEAD
         with freeze_time('2016-08-16 09:00:45', tz_offset=offset):
-=======
-        with freeze_time('2016-08-16 09:00:45'):
->>>>>>> dev
             utils.perform_autopilot_duties()
             manager_mock.stop_for_break.assert_called_once_with(round_now())
             self.assertFalse(manager_mock.launch_after_break.mock_calls)
         manager_mock.stop_for_break.reset_mock()
 
-<<<<<<< HEAD
         with freeze_time('2016-08-16 09:15:15', tz_offset=offset):
-=======
-        with freeze_time('2016-08-16 09:15:15'):
->>>>>>> dev
             utils.perform_autopilot_duties()
             self.assertFalse(manager_mock.stop_for_break.mock_calls)
             self.assertFalse(manager_mock.launch_after_break.mock_calls)
         manager_mock.stop_for_break.reset_mock()
 
-<<<<<<< HEAD
         with freeze_time('2016-08-16 09:30:01', tz_offset=offset):
-=======
-        with freeze_time('2016-08-16 09:30:01'):
->>>>>>> dev
             utils.perform_autopilot_duties()
             self.assertFalse(manager_mock.stop_for_break.mock_calls)
             manager_mock.launch_after_break.assert_called_once_with(round_now())
