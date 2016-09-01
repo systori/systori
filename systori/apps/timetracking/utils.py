@@ -1,4 +1,4 @@
-from datetime import time, timedelta
+from datetime import time, timedelta, datetime
 from collections import UserDict
 
 from django.utils import timezone
@@ -152,7 +152,7 @@ def perform_autopilot_duties():
     """
     from .models import Timer
 
-    now = timezone.now().replace(second=0, microsecond=0)
+    now = datetime.now(timezone.get_current_timezone()).replace(second=0, microsecond=0)
     time_now = now.time()
     if time_now in [b[0] for b in BREAKS]:
         Timer.objects.stop_for_break(now)
