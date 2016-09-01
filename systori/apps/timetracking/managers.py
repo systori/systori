@@ -148,27 +148,18 @@ class TimerQuerySet(QuerySet):
             report_row = report[timer.start.date()][timer.kind]
             if not report_row['start'] or report_row['start'] > timer.start:
                 report_row['start'] = timer.start
-            if not report_row['end'] or timer.end > report_row['end']:
+            if report_row['end'] and timer.end and timer.end > report_row['end']:
                 report_row['end'] = timer.end
+            else:
+                if timer.end:
+                    report_row['end'] = timer.end
+                else:
+                    report_row['end'] = now
             report_row['duration'] += timer.get_duration_seconds(now)
             if timer.kind == self.model.WORK:
                 report_row['total'] += timer.get_duration_seconds(now)
-                timer_start_time = (timer.start.hour, timer.start.minute)
-                timer_end = timer.end or now
-                timer_end_time = (timer_end.hour, timer_end.minute)
-                # TODO: This is a hack for dealing with the timezone insanity, should fix it later
-                offset = pytz_timezone('CET').utcoffset(naive_now).total_seconds() / 60 / 60
-                first_break_start = (9 - offset, 00)
-                first_break_end = (9 - offset, 30)
-                second_break_start = (12 - offset, 30)
-                second_break_end = (13 - offset, 00)
-                if first_break_start >= timer_start_time and timer_end_time >= first_break_end:
-                    report_row['total'] -= self.model.DAILY_BREAK * 0.5
-                if second_break_start >= timer_start_time and timer_end_time >= second_break_end:
-                    report_row['total'] -= self.model.DAILY_BREAK * 0.5
-                if report_row['duration'] > self.model.WORK_HOURS:
-                    report_row['overtime'] = report_row['duration'] - self.model.WORK_HOURS
-                    report_row['total'] += report_row['overtime']
+                report_row['overtime'] = report_row['duration'] - self.model.WORK_HOURS
+                report_row['total'] += report_row['overtime']
                 report_row['locations'].append(
                     ((timer.start_latitude, timer.start_longitude), (timer.end_latitude, timer.end_longitude))
                 )
