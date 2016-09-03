@@ -1,10 +1,8 @@
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from urllib.parse import urlencode
 
-from django.test import TestCase
-from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from rest_framework import status
@@ -13,6 +11,7 @@ from systori.lib.testing import SystoriTestCase
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 from .models import Timer
+from .utils import to_current_timezone as totz
 
 
 class TimerViewTest(SystoriTestCase):
@@ -21,39 +20,35 @@ class TimerViewTest(SystoriTestCase):
 
     def setUp(self):
         self.company = CompanyFactory()
-        self.user = UserFactory(company=self.company, password=self.password)
+        self.actual_user = UserFactory(company=self.company, password=self.password)
+        self.user = self.actual_user.access.first()
+        self.client.login(username=self.actual_user.email, password=self.password)
 
     def test_post(self):
-        self.client.login(username=self.user.email, password=self.password)
         response = self.client.post(self.url, {'start_latitude': '52.5076', 'start_longitude': '131.39043904'})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Timer.objects.filter_running().filter(user=self.user).exists())
 
     def test_post_with_already_running_timer(self):
         timer = Timer.launch(self.user)
-        self.client.login(username=self.user.email, password=self.password)
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 400)
 
     def test_post_without_coordinates(self):
-        self.client.login(username=self.user.email, password=self.password)
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 400)
 
     def test_get(self):
         Timer.launch(self.user)
-        self.client.login(username=self.user.email, password=self.password)
         response = self.client.get(self.url)
         self.assertIn('duration', json.loads(response.content.decode('utf-8')))
 
     def test_get_no_timer(self):
-        self.client.login(username=self.user.email, password=self.password)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 404)
 
     def test_put_with_short_timer(self):
         timer = Timer.launch(self.user)
-        self.client.login(username=self.user.email, password=self.password)
         response = self.client.put(
             self.url,
             urlencode({'end_latitude': '52.5076', 'end_longitude': '131.39043904'}),
@@ -65,7 +60,6 @@ class TimerViewTest(SystoriTestCase):
 
     def test_put(self):
         timer = Timer.objects.create(user=self.user, start=timezone.now() - timedelta(hours=1))
-        self.client.login(username=self.user.email, password=self.password)
         response = self.client.put(
             self.url,
             urlencode({'end_latitude': '52.5076', 'end_longitude': '131.39043904'}),
@@ -76,17 +70,16 @@ class TimerViewTest(SystoriTestCase):
         self.assertFalse(timer.is_running)
 
 
-@override_settings(TIME_ZONE='Etc/UTC')
 class ReportViewTest(SystoriTestCase):
     password = 'ReportViewTest'
     url = reverse('report')
 
     def setUp(self):
         self.company = CompanyFactory()
-        self.user = UserFactory(company=self.company, password=self.password)
+        self.user = UserFactory(company=self.company, password=self.password).access.first()
 
     def test_get(self):
-        now = timezone.now().replace(hour=18)
+        now = timezone.now().replace(hour=18, minute=0, second=0, microsecond=0)
         yesterday = now - timedelta(days=1)
         timer1 = Timer.objects.create(
             user=self.user, 
@@ -109,42 +102,41 @@ class ReportViewTest(SystoriTestCase):
             end=now - timedelta(minutes=30)
         )
         Timer.objects.create(
-            user=UserFactory(company=self.company),
+            user=UserFactory(company=self.company).access.first(),
             start=now - timedelta(hours=1),
             end=now - timedelta(minutes=30)
         )
 
-        self.client.login(username=self.user.email, password=self.password)
+        self.client.login(username=self.user.user.email, password=self.password)
         response = self.client.get(self.url)
         json_response = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(json_response[0]['date'], yesterday.strftime('%d.%m.%Y'))
-        self.assertEqual(json_response[0]['start'], timer1.start.strftime('%H:%M'))
-        self.assertEqual(json_response[0]['end'], timer1.end.strftime('%H:%M'))
+        self.assertEqual(json_response[0]['start'], totz(timer1.start).strftime('%H:%M'))
+        self.assertEqual(json_response[0]['end'], totz(timer1.end).strftime('%H:%M'))
         self.assertEqual(json_response[0]['duration'], '7:00')
 
         self.assertEqual(json_response[1]['date'], yesterday.strftime('%d.%m.%Y'))
-        self.assertEqual(json_response[1]['start'], timer2.start.strftime('%H:%M'))
-        self.assertEqual(json_response[1]['end'], timer2.end.strftime('%H:%M'))
+        self.assertEqual(json_response[1]['start'], totz(timer2.start).strftime('%H:%M'))
+        self.assertEqual(json_response[1]['end'], totz(timer2.end).strftime('%H:%M'))
         self.assertEqual(json_response[1]['duration'], '1:30')
 
         self.assertEqual(json_response[2]['date'], now.strftime('%d.%m.%Y'))
-        self.assertEqual(json_response[2]['start'], timer3.start.strftime('%H:%M'))
-        self.assertEqual(json_response[2]['end'], timer3.end.strftime('%H:%M'))
+        self.assertEqual(json_response[2]['start'], totz(timer3.start).strftime('%H:%M'))
+        self.assertEqual(json_response[2]['end'], totz(timer3.end).strftime('%H:%M'))
         self.assertEqual(json_response[2]['duration'], '6:00')
 
         self.assertEqual(json_response[3]['date'], now.strftime('%d.%m.%Y'))
-        self.assertEqual(json_response[3]['start'], timer4.start.strftime('%H:%M'))
-        self.assertEqual(json_response[3]['end'], timer4.end.strftime('%H:%M'))
+        self.assertEqual(json_response[3]['start'], totz(timer4.start).strftime('%H:%M'))
+        self.assertEqual(json_response[3]['end'], totz(timer4.end).strftime('%H:%M'))
         self.assertEqual(json_response[3]['duration'], '0:30')
 
-    def test_get_empty(self, now=None):
-        self.client.login(username=self.user.email, password=self.password)
+    def test_get_empty(self):
+        self.client.login(username=self.user.user.email, password=self.password)
         response = self.client.get(self.url)
         self.assertEqual(json.loads(response.content.decode('utf-8')), [])
 
 
-@override_settings(TIME_ZONE='Etc/UTC')
 class UserReportViewTest(SystoriTestCase):
     password = 'UserReportViewTest'
 

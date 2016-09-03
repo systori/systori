@@ -4,7 +4,6 @@ from datetime import timedelta, datetime, time
 
 from freezegun import freeze_time
 from django.test import TestCase
-from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -34,10 +33,10 @@ class ReportsTest(TestCase):
 
     def setUp(self):
         self.company = CompanyFactory()
-        self.user1 = UserFactory(company=self.company)
-        self.user2 = UserFactory(company=self.company)
-        self.user3 = UserFactory(company=self.company)
-        self.user4 = UserFactory(company=self.company)
+        self.user1 = UserFactory(company=self.company).access.first()
+        self.user2 = UserFactory(company=self.company).access.first()
+        self.user3 = UserFactory(company=self.company).access.first()
+        self.user4 = UserFactory(company=self.company).access.first()
 
     @freeze_time(NOW)
     def test_get_daily_users_report(self):
@@ -73,7 +72,7 @@ class ReportsTest(TestCase):
             user=self.user3, start=today
         )
 
-        report = utils.get_daily_users_report(User.objects.order_by('pk'))
+        report = utils.get_daily_users_report(self.company.access.order_by('pk'))
 
         self.assertEqual(report[self.user1]['day_start'], user1_timer1.start)
         self.assertEqual(report[self.user1]['day_end'], user1_timer2.end)
@@ -111,9 +110,9 @@ class UserStatusesTest(TestCase):
 
     def setUp(self):
         self.company = CompanyFactory()
-        self.user1 = UserFactory(company=self.company)
-        self.user2 = UserFactory(company=self.company)
-        self.user3 = UserFactory(company=self.company)
+        self.user1 = UserFactory(company=self.company).access.first()
+        self.user2 = UserFactory(company=self.company).access.first()
+        self.user3 = UserFactory(company=self.company).access.first()
 
     @freeze_time(NOW)
     def test_get_user_statuses(self):
@@ -131,7 +130,7 @@ class UserStatusesTest(TestCase):
         user3_timer = Timer.objects.create(
             user=self.user3, start=yesterday, end=tomorrow, kind=Timer.HOLIDAY)
         self.assertEqual(
-            utils.get_users_statuses(User.objects.all()),
+            utils.get_users_statuses(self.company.access.all()),
             {
                 self.user1.pk: [user1_timer],
                 self.user2.pk: [user2_timer],
@@ -143,16 +142,16 @@ class UserStatusesTest(TestCase):
 class TimeSpanTest(TestCase):
 
     def setUp(self):
-        self.days = [datetime(2016, 8, 30)]
-
-    def t(self, hour=0, minute=0, second=0):
-        return self.days[0].replace(hour=hour, minute=minute, second=second)
+        self.breaks = [
+            utils.BreakSpan(time(9, 00), time(9, 30)),
+            utils.BreakSpan(time(12, 30), time(13, 00)),
+        ]
 
     def assertSpan(self, expected, start, end):
         self.assertEquals([
-            (self.t(*span[0]), self.t(*span[1]))
+            (time(*span[0]), time(*span[1]))
             for span in expected
-        ], list(utils.get_timespans_split_by_breaks(start, end, self.days)))
+        ], list(utils.get_timespans_split_by_breaks(start, end, self.breaks)))
 
     def test_simple(self):
         self.assertSpan([
@@ -202,29 +201,31 @@ class AutoPilotTest(TestCase):
 
     @patch.object(Timer, 'objects')
     def test_perform_autopilot_duties(self, manager_mock):
-        round_now = lambda: datetime.now(timezone.get_current_timezone()).replace(second=0, microsecond=0)
-        offset = -timezone.get_current_timezone().utcoffset(datetime.now()).total_seconds() / 60 / 60
+        company = CompanyFactory()
+        breaks, tz = company.breaks, company.timezone
+        round_now = lambda: datetime.now(tz).replace(second=0, microsecond=0)
+        offset = -tz.utcoffset(datetime.now()).total_seconds() / 60 / 60
 
         with freeze_time('2016-08-16 08:55:59', tz_offset=offset):
-            utils.perform_autopilot_duties()
+            utils.perform_autopilot_duties(breaks, tz)
             self.assertFalse(manager_mock.stop_for_break.mock_calls)
             self.assertFalse(manager_mock.launch_after_break.mock_calls)
         manager_mock.stop_for_break.reset_mock()
 
         with freeze_time('2016-08-16 09:00:45', tz_offset=offset):
-            utils.perform_autopilot_duties()
+            utils.perform_autopilot_duties(breaks, tz)
             manager_mock.stop_for_break.assert_called_once_with(round_now())
             self.assertFalse(manager_mock.launch_after_break.mock_calls)
         manager_mock.stop_for_break.reset_mock()
 
         with freeze_time('2016-08-16 09:15:15', tz_offset=offset):
-            utils.perform_autopilot_duties()
+            utils.perform_autopilot_duties(breaks, tz)
             self.assertFalse(manager_mock.stop_for_break.mock_calls)
             self.assertFalse(manager_mock.launch_after_break.mock_calls)
         manager_mock.stop_for_break.reset_mock()
 
         with freeze_time('2016-08-16 09:30:01', tz_offset=offset):
-            utils.perform_autopilot_duties()
+            utils.perform_autopilot_duties(breaks, tz)
             self.assertFalse(manager_mock.stop_for_break.mock_calls)
             manager_mock.launch_after_break.assert_called_once_with(round_now())
         manager_mock.stop_for_break.reset_mock()

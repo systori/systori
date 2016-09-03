@@ -25,7 +25,7 @@ class TimerView(views.APIView):
         """
         Start a timer
         """
-        serializer = TimerStartSerializer(data=request.data, context={'user': request.user})
+        serializer = TimerStartSerializer(data=request.data, context={'user': request.access})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response()
@@ -34,8 +34,8 @@ class TimerView(views.APIView):
         """
         Stop a timer
         """
-        timer = get_object_or_404(Timer.objects.filter_running(), user=request.user)
-        serializer = TimerStopSerializer(data=request.data, context={'user': request.user})
+        timer = get_object_or_404(Timer.objects.filter_running(), user=request.access)
+        serializer = TimerStopSerializer(data=request.data, context={'user': request.access})
         serializer.is_valid(raise_exception=True)
         timer.end_longitude = serializer.validated_data['end_longitude']
         timer.end_latitude = serializer.validated_data['end_latitude']
@@ -44,14 +44,14 @@ class TimerView(views.APIView):
 
 
     def get(self, request):
-        timer = get_object_or_404(Timer.objects.filter_running(), user=request.user)
+        timer = get_object_or_404(Timer.objects.filter_running(), user=request.access)
         return Response(timer.to_dict())
 
 
 class ReportView(views.APIView):
 
     def get(self, request, year=None, month=None):
-        return Response(TimerSerializer(get_user_dashboard_report(request.user), many=True).data)
+        return Response(TimerSerializer(get_user_dashboard_report(request.access), many=True).data)
 
 
 class TimerAdminView(views.APIView):
@@ -62,6 +62,7 @@ class TimerAdminView(views.APIView):
         Start user's timer
         """
         try:
+            # TODO: Need to use Access object here instead of User.
             user = User.objects.get(pk=user_id)
             Timer.launch(user=user)
         except ValidationError as exc:
@@ -74,6 +75,7 @@ class TimerAdminView(views.APIView):
         """
         Stop user's timer
         """
+        # TODO: Need to use Access object id here instead of User id.
         timer = get_object_or_404(Timer.objects.filter_running(), user__pk=user_id)
         timer.stop()
         return Response()

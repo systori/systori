@@ -1,4 +1,5 @@
 import json
+import pytz
 from datetime import timedelta, datetime
 
 from django.test import TestCase
@@ -6,6 +7,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
+from ..company.models import Company
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 from .models import Timer
@@ -18,7 +20,7 @@ class TimerTest(TestCase):
 
     def setUp(self):
         self.company = CompanyFactory()
-        self.user = UserFactory(company=self.company)
+        self.user = UserFactory(company=self.company).access.first()
 
     def test_launch(self):
         timer = Timer.launch(self.user)
@@ -141,9 +143,9 @@ class TimerTest(TestCase):
 class TimerQuerySetTest(TestCase):
 
     def setUp(self):
-        self.company = CompanyFactory()
-        self.user = UserFactory(company=self.company)
-        self.user2 = UserFactory(company=self.company)
+        self.company = CompanyFactory()  # type: Company
+        self.user = UserFactory(company=self.company).access.first()
+        self.user2 = UserFactory(company=self.company).access.first()
 
     def test_filter_date(self):
         now = timezone.now().replace(hour=9)
@@ -153,13 +155,11 @@ class TimerQuerySetTest(TestCase):
             start=yesterday,
             end=yesterday + timedelta(hours=8)
         )
-
-        timer = Timer(user=self.user, duration=60 * 60 * 2)
-        timer.save()
-        self.assertEqual(
-            Timer.objects.filter_date().get(),
-            Timer.objects.get(pk=timer.pk)
+        timer = Timer.objects.create(
+            user=self.user,
+            duration=60 * 60 * 2
         )
+        self.assertEqual(Timer.objects.filter_date().get(), timer)
 
     def test_filter_running(self):
         now = timezone.now().replace(hour=9)
@@ -183,24 +183,34 @@ class TimerQuerySetTest(TestCase):
         )
 
     def test_create_batch(self):
-        now = timezone.now()
-        start = now.replace(hour=7, minute=0, second=0, microsecond=0)
-        result = Timer.objects.create_batch(
-            user=self.user, days=3, start=now,
-            kind=Timer.HOLIDAY, comment='Test comment'
+        """
+            October 30, 2016 is the transition from CEST to CET timezone.
+            October 27, 2016 is a Thursday.
+            October 31, 2016 is a Monday.
+            This test will generate timers between Oct 27 and Oct 31. Which
+            will verify the following features:
+             - Skipping weekends.
+             - Generating days across a timezone switch.
+        """
+        tz = self.company.timezone
+        start = tz.localize(datetime(2016, 10, 27, 7))
+        end = tz.localize(datetime(2016, 10, 31, 16))
+        Timer.objects.create_batch(
+            user=self.user, start=start, end=end,
+            kind=Timer.WORK, comment='Test comment'
         )
-        self.assertEqual(len(result), 3)
-        self.assertEqual(result[0].start, start)
-        self.assertEqual(result[0].end, start + timedelta(seconds=Timer.WORK_HOURS))
-        self.assertEqual(result[0].kind, Timer.HOLIDAY)
+        result = Timer.objects.order_by('id').all()
+        self.assertEqual(len(result), 9)  # 3 per day, two days skipped
+        self.assertEqual(result[0].kind, Timer.WORK)
         self.assertEqual(result[0].comment, 'Test comment')
-        self.assertEqual(result[1].start, start + timedelta(days=1))
-        self.assertEqual(result[1].end, start + timedelta(days=1) + timedelta(seconds=Timer.WORK_HOURS))
-        self.assertEqual(result[2].start, start + timedelta(days=2))
-        self.assertEqual(result[2].end, start + timedelta(days=2) + timedelta(seconds=Timer.WORK_HOURS))
+        self.assertEqual(result[0].start, start)  # left is UTC, right is CEST, automatically normalized for '=='
+        self.assertEqual(result[0].start.hour, 5)  # different UTC from a CEST datetime
+        self.assertEqual(result[6].start.hour, 6)  # different UTC from a CET datetime
+        self.assertEqual(result[0].start.astimezone(tz).hour, 7)  # same local time
+        self.assertEqual(result[6].start.astimezone(tz).hour, 7)  # same local time
 
     def test_stop_for_break(self):
-        user2 = UserFactory(company=self.company)
+        user2 = UserFactory(company=self.company).access.first()
         with freeze_time('2016-08-16 07:00'):
             timer1 = Timer.launch(user=self.user)
             timer2 = Timer.launch(user=user2)
@@ -225,9 +235,9 @@ class TimerQuerySetTest(TestCase):
             self.assertEqual(outside_timer.end, outside_timer.start + timedelta(seconds=3600))
 
     def test_launch_after_break(self):
-        user2 = UserFactory(company=self.company)
-        running_user = UserFactory(company=self.company)
-        manually_stopped_user = UserFactory(company=self.company)
+        user2 = UserFactory(company=self.company).access.first()
+        running_user = UserFactory(company=self.company).access.first()
+        manually_stopped_user = UserFactory(company=self.company).access.first()
         with freeze_time('2016-08-16 07:00'):
             Timer.launch(user=self.user)
             Timer.launch(user=user2)
@@ -244,10 +254,10 @@ class TimerQuerySetTest(TestCase):
         with freeze_time('2016-08-16 09:30'):
             Timer.objects.launch_after_break()
             now = timezone.now()
-            timer1 = self.user.timer_set.latest('start')
-            timer2 = user2.timer_set.latest('start')
-            running_timer = running_user.timer_set.latest('start')
-            stopped_timer = manually_stopped_user.timer_set.latest('start')
+            timer1 = self.user.timers.latest('start')
+            timer2 = user2.timers.latest('start')
+            running_timer = running_user.timers.latest('start')
+            stopped_timer = manually_stopped_user.timers.latest('start')
             self.assertEqual(timer1.start, now)
             self.assertEqual(timer2.start, now)
             self.assertTrue(timer1.is_auto_started)

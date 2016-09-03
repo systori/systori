@@ -1,9 +1,12 @@
-from datetime import date
+import pytz
+from datetime import date, time
+from typing import List
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 from tuath.models import AbstractSchema
+from ..timetracking.utils import BreakSpan
 
 
 class Company(AbstractSchema):
@@ -16,12 +19,26 @@ class Company(AbstractSchema):
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
 
     def active_users(self):
-        return self.users.filter(companies_access__is_active=True)
+        return self.access.filter(is_active=True)
+
+    @property
+    def breaks(self) -> List[BreakSpan]:
+        """ TODO: store in database for each company. """
+        return [
+            BreakSpan(time(9, 00), time(9, 30)),
+            BreakSpan(time(12, 30), time(13, 00)),
+        ]
+
+    @property
+    def timezone(self) -> pytz.tzinfo.StaticTzInfo:
+        """ TODO: store in database for each company. """
+        # return pytz.timezone(self.timezone_name)
+        return pytz.timezone(settings.TIME_ZONE)
 
 
 class Access(models.Model):
-    company = models.ForeignKey('Company', related_name="users_access")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="companies_access")
+    company = models.ForeignKey('Company', related_name="access")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="access")
 
     class Meta:
         unique_together = ("company", "user")

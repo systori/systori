@@ -1,4 +1,3 @@
-import json
 from datetime import timedelta
 
 from django.db import models
@@ -9,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext as __
 from django.core.exceptions import ValidationError
 
 from ..project.models import JobSite
+from ..company.models import Access
 from .managers import TimerQuerySet
 from .utils import round_to_nearest_multiple
 
@@ -42,14 +42,13 @@ class Timer(models.Model):
         TRAINING: lambda start, end: (end - start).total_seconds()
     }
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    user = models.ForeignKey('company.Access', related_name='timers')
     date = models.DateField(db_index=True)
     start = models.DateTimeField(blank=True, null=True, db_index=True)
     end = models.DateTimeField(blank=True, null=True, db_index=True)
     duration = models.IntegerField(default=0, help_text=_('in seconds'))
     kind = models.CharField(default=WORK, choices=KIND_CHOICES, db_index=True, max_length=32)
-    altered_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name='timers_altered', blank=True, null=True)
+    altered_by = models.ForeignKey('company.Access', related_name='timers_altered', blank=True, null=True)
     comment = models.CharField(max_length=1000, blank=True)
     start_latitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     start_longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)

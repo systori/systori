@@ -197,15 +197,21 @@ class TimerQuerySet(QuerySet):
             report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
         return reports
 
-    def create_batch(self, user, start, end, kind, comment, **kwargs):
-        # TODO: customer specific code for softronic
-        assert kind in self.model.FULL_DAY_KINDS
+    def create_batch(self, user, start: datetime, end: datetime, commit=True, include_weekends=False, **kwargs):
+        tz = user.company.timezone
 
-        days = get_dates_in_range(start, end, delta=timedelta(days=1))
+        # Requested start/end times must be of the same timezone as the company breaks.
+        assert all(dt.tzinfo.zone == tz.zone for dt in (start, end))
+        time_spans = list(get_timespans_split_by_breaks(start.time(), end.time(), user.company.breaks))
+
         timers = []
-        for day_start, day_end in get_timespans_split_by_breaks(start.time(), end.time(), days):
-            timer = self.model.objects.create(
-                      user=user, date=day_start.date(), start=day_start, end=day_end, kind=kind, **kwargs)
-            timers.append(timer)
+        for day in get_dates_in_range(start.date(), end.date(), include_weekends):
+            for start_time, end_time in time_spans:
+                timer = self.model(user=user, **kwargs)
+                timer.date = day
+                timer.start = tz.localize(datetime.combine(day, start_time))
+                timer.end = tz.localize(datetime.combine(day, end_time))
+                timers.append(timer)
+                if commit: timer.save()
 
         return timers
