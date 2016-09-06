@@ -6,24 +6,22 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def convert_user_to_access(apps, schema_editor):
+def convert_user_to_worker(apps, schema_editor):
     from systori.apps.company.models import Company as Company
     Timer = apps.get_model("timetracking", "Timer")
-    Access = apps.get_model("company", "Access")
+    Worker = apps.get_model("company", "Worker")
     for company in Company.objects.all():
         company.activate()
-        AcessQuery = Access.objects.filter(company_id=company.schema)
+        WorkerQuery = Worker.objects.filter(company_id=company.schema)
         for timer in Timer.objects.all():
-            timer.user_access = AcessQuery.get(user_id=timer.user_id)
-            if timer.altered_by_id:
-                timer.altered_by_access = AcessQuery.get(user_id=timer.altered_by_id)
+            timer.worker = WorkerQuery.get(user_id=timer.user_id)
             timer.save()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('company', '0003_auto_20160403_0209'),
+        ('company', '0004_worker'),
         ('timetracking', '0009_auto_20160823_1929'),
     ]
 
@@ -33,32 +31,25 @@ class Migration(migrations.Migration):
 
         migrations.AddField(
             model_name='timer',
-            name='user_access',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='timers', to='company.Access'),
-        ),
-        migrations.AddField(
-            model_name='timer',
-            name='altered_by_access',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='timers_altered', to='company.Access'),
+            name='worker',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='timers', to='company.Worker'),
         ),
 
         # Lookup and set the 'access' fields.
 
-        migrations.RunPython(convert_user_to_access),
+        migrations.RunPython(convert_user_to_worker),
 
         # Make 'user_access' not null now that it's been set.
 
         migrations.AlterField(
             model_name='timer',
-            name='user_access',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='timers', to='company.Access'),
+            name='worker',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='timers', to='company.Worker'),
         ),
 
         # Remove the 'user' based fields.
 
         migrations.RemoveField('timer', 'user'),
         migrations.RemoveField('timer', 'altered_by'),
-
-        # For some reason renaming 'user_access' to 'user', etc, has to be done in a new migration...
 
     ]

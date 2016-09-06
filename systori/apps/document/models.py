@@ -46,7 +46,7 @@ class Timesheet(Document):
         verbose_name_plural = _("Timesheets")
 
     letterhead = models.ForeignKey('document.Letterhead', related_name="timesheet_documents")
-    user = models.ForeignKey('company.Access', related_name='timesheets')
+    worker = models.ForeignKey('company.Worker', related_name='timesheets')
 
     objects = TimesheetQuerySet.as_manager()
 

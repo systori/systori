@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import get_language
 
 from systori.lib.accounting.tools import Amount
-from ..company.models import Access
+from ..company.models import Worker
 from ..project.models import Project
 from ..timetracking.models import Timer
 from ..accounting.constants import TAX_RATE
@@ -63,19 +63,15 @@ class TimesheetsGenerateView(View):
         # clear existing timesheets for this period
         Timesheet.objects.period(year, month).delete()
 
-        # get users that have timers for which timesheets can be generated
-        access_ids = Timer.objects \
-            .order_by() \
-            .filter_month(year, month) \
-            .values_list('user', flat=True) \
-            .distinct('user')
+        # get workers that have timers for which timesheets can be generated
+        worker_ids = Timer.objects.filter_month(year, month).distinct_workers_list()
 
         # start generating
-        for access_id in access_ids:
-            access = Access.objects.get(id=access_id)
-            ts = Timesheet(letterhead=letterhead, user=access, document_date=date(year, month, 1))
+        for worker_id in worker_ids:
+            worker = Worker.objects.get(id=worker_id)
+            ts = Timesheet(letterhead=letterhead, worker=worker, document_date=date(year, month, 1))
             ts.json = pdf_type.timesheet.serialize(
-                Timer.objects.filter_month(year, month).filter(user=access).all(),
+                Timer.objects.filter_month(year, month).filter(worker=worker).all(),
                 year, month
             )
             ts.save()

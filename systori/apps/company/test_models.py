@@ -1,20 +1,15 @@
-import json
-from datetime import timedelta
-
 from django.test import TestCase
-from django.utils import timezone
-from django.core.exceptions import ValidationError
-
 from .factories import CompanyFactory
 from ..user.factories import UserFactory
-from .models import Company, Access
+from .models import Company, Worker
 
 
 class CompanyTest(TestCase):
 
-    def test_active_users(self):
+    def test_active_workers(self):
         company = CompanyFactory()
         user = UserFactory(company=company)
-        self.assertIn(user, company.active_users())
-        Access.objects.filter(user=user, company=company).update(is_active=False)
-        self.assertNotIn(user, company.active_users())
+        worker = user.access.first()
+        self.assertIn(worker, company.active_workers())
+        Worker.objects.filter(user=user, company=company).update(is_active=False)
+        self.assertNotIn(worker, company.active_workers())

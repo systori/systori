@@ -58,20 +58,20 @@ def round_to_nearest_multiple(seconds, multiplier=36):
 ### Reports
 
 
-def get_user_dashboard_report(user):
+def get_worker_dashboard_report(worker):
     from .models import Timer
     now = timezone.now()
     timers = Timer.objects.filter_month(now.year, now.month).filter(
-        user=user, kind=Timer.WORK).order_by('start')
+        worker=worker, kind=Timer.WORK).order_by('start')
     return timers
 
 
-def get_user_monthly_report(user, period):
+def get_worker_monthly_report(worker, period):
     from .models import Timer
     period = period or timezone.now()
 
-    holidays_used = get_holidays_duration(user, period.year, period.month)
-    report = Timer.objects.filter(user=user).generate_monthly_user_report(period)
+    holidays_used = get_holidays_duration(worker, period.year, period.month)
+    report = Timer.objects.filter(worker=worker).generate_monthly_worker_report(period)
     overtime = sum(day['work']['overtime'] for day in report.values())
     return {
         'holidays_used': format_days(holidays_used),
@@ -81,39 +81,39 @@ def get_user_monthly_report(user, period):
     }
 
 
-def get_holidays_duration(user, year, month):
+def get_holidays_duration(worker, year, month):
     from .models import Timer
-    return Timer.objects.filter(user=user, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
+    return Timer.objects.filter(worker=worker, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
 
 
-def get_overtime_duration(user, year, month):
+def get_overtime_duration(worker, year, month):
     from .models import Timer
-    return Timer.objects.filter(user=user, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
+    return Timer.objects.filter(worker=worker, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
 
 
-def get_daily_users_report(users, date=None):
+def get_daily_workers_report(workers, date=None):
     from .models import Timer
 
-    return Timer.objects.generate_daily_users_report(date=date, users=users)
+    return Timer.objects.generate_daily_workers_report(date=date, workers=workers)
     # report_by_user = regroup(report, itemgetter('user_id'))
     # for user in users:
     #     yield {'user': user, 'report': report_by_user.get(user.pk)}
 
 
-def get_running_timer_duration(user):
+def get_running_timer_duration(worker):
     from .models import Timer
-    timer = Timer.objects.filter_running().filter(user=user).first()
+    timer = Timer.objects.filter_running().filter(worker=worker).first()
     duration = timer.get_duration_seconds() if timer else 0
     return format_seconds(duration, '%H:%M:%S')
 
 
-def get_users_statuses(users):
+def get_workers_statuses(workers):
     from .models import Timer
-    timers = Timer.objects.filter(user__in=users).filter_now()
-    user_timers = AccumulatorDict()
+    timers = Timer.objects.filter(worker__in=workers).filter_now()
+    worker_timers = AccumulatorDict()
     for timer in timers:
-        user_timers[timer.user.pk] = timer
-    return user_timers
+        worker_timers[timer.worker_id] = timer
+    return worker_timers
 
 
 def get_dates_in_range(start: date, end: date, include_weekends=False) -> Iterator[date]:

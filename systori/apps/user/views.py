@@ -9,19 +9,19 @@ from django.utils.decorators import method_decorator
 
 from .forms import *
 from .models import *
-from ..company.models import *
+from ..company.models import Worker
 
 
 class SettingsView(TemplateView):
     template_name = "user/settings.html"
 
 
-class UserList(ListView):
-    model = Access
+class WorkerList(ListView):
+    model = Worker
     template_name = 'user/user_list.html'
 
     def get_queryset(self):
-        return Access.objects.\
+        return Worker.objects.\
             filter(company=self.request.company).\
             order_by('user__first_name').\
             prefetch_related('user')
@@ -36,16 +36,16 @@ class UserFormRenderer:
     def get_form(self):
         return None
 
-    def render_forms(self, user_form, access_form):
+    def render_forms(self, user_form, worker_form):
         return self.render_to_response(self.get_context_data(
-            user_form=user_form, access_form=access_form))
+            user_form=user_form, worker_form=worker_form))
 
-    def get_cleaned_forms(self, user=None, access=None):
+    def get_cleaned_forms(self, user=None, worker=None):
         user_form = UserForm(self.request.POST, instance=user)
         user_form.full_clean()
-        access_form = AccessForm(self.request.POST, instance=access)
-        access_form.full_clean()
-        return user_form, access_form
+        worker_form = WorkerForm(self.request.POST, instance=worker)
+        worker_form.full_clean()
+        return user_form, worker_form
 
 
 class UserAdd(UserFormRenderer, CreateView):
@@ -54,16 +54,16 @@ class UserAdd(UserFormRenderer, CreateView):
 
     def get(self, request, *args, **kwargs):
         self.object = None
-        return self.render_forms(UserForm(), AccessForm())
+        return self.render_forms(UserForm(), WorkerForm())
 
     def post(self, request, *args, **kwargs):
         self.object = None
 
-        user_form, access_form = self.get_cleaned_forms()
+        user_form, worker_form = self.get_cleaned_forms()
 
         # Before we do anything else make sure the forms are actually valid.
-        if not user_form.is_valid() or not access_form.is_valid():
-            return self.render_forms(user_form, access_form)
+        if not user_form.is_valid() or not worker_form.is_valid():
+            return self.render_forms(user_form, worker_form)
 
         email = user_form.cleaned_data['email']
 
@@ -79,15 +79,15 @@ class UserAdd(UserFormRenderer, CreateView):
             # User doesn't already exist, lets create them.
             user = user_form.save()
 
-        elif Access.objects.filter(user=user, company=request.company).exists():
-            # User exists and already has an access object for this company.
+        elif Worker.objects.filter(user=user, company=request.company).exists():
+            # User exists and already has an worker object for this company.
             user_form.add_error('email', _('This user is already a member of this company.'))
-            return self.render_forms(user_form, access_form)
+            return self.render_forms(user_form, worker_form)
 
-        # Finally create the access object for this user and company combination.
-        access_form.instance.company = request.company
-        access_form.instance.user = user
-        access_form.save()
+        # Finally create the worker object for this user and company combination.
+        worker_form.instance.company = request.company
+        worker_form.instance.user = user
+        worker_form.save()
 
         return HttpResponseRedirect(self.success_url)
 
@@ -98,25 +98,25 @@ class UserUpdate(UserFormRenderer, UpdateView):
 
     def get(self, request, *args, **kwargs):
         user = self.object = self.get_object()
-        access = Access.objects.get(user=user, company=request.company)
-        return self.render_forms(UserForm(instance=user), AccessForm(instance=access))
+        worker = Worker.objects.get(user=user, company=request.company)
+        return self.render_forms(UserForm(instance=user), WorkerForm(instance=worker))
 
     def post(self, request, *args, **kwargs):
         user = self.object = self.get_object()
-        access = Access.objects.get(user=user, company=request.company)
+        worker = Worker.objects.get(user=user, company=request.company)
 
-        user_form, access_form = self.get_cleaned_forms(user, access)
+        user_form, worker_form = self.get_cleaned_forms(user, worker)
 
-        if user_form.is_valid() and access_form.is_valid():
+        if user_form.is_valid() and worker_form.is_valid():
             user_form.save()
-            access_form.save()
+            worker_form.save()
             return HttpResponseRedirect(self.success_url)
         else:
-            return self.render_forms(user_form, access_form)
+            return self.render_forms(user_form, worker_form)
 
 
-class AccessRemove(DeleteView):
-    model = Access
+class WorkerRemove(DeleteView):
+    model = Worker
     template_name = "user/access_confirm_delete.html"
     success_url = reverse_lazy('users')
 

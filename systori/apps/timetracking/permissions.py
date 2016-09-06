@@ -8,4 +8,4 @@ class HasStaffAccess(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
-        return is_authenticated and request.access.is_staff
+        return is_authenticated and request.worker.is_staff

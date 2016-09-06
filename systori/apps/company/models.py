@@ -10,7 +10,7 @@ from ..timetracking.utils import BreakSpan
 
 
 class Company(AbstractSchema):
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Access', blank=True, related_name='companies')
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Worker', blank=True, related_name='companies')
 
     def url(self, request):
         port = ''
@@ -18,8 +18,8 @@ class Company(AbstractSchema):
             port = ':'+request.META['HTTP_HOST'].split(':')[1]
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
 
-    def active_users(self):
-        return self.access.filter(is_active=True)
+    def active_workers(self):
+        return self.workers.filter(is_active=True)
 
     @property
     def breaks(self) -> List[BreakSpan]:
@@ -36,15 +36,9 @@ class Company(AbstractSchema):
         return pytz.timezone(settings.TIME_ZONE)
 
 
-class Access(models.Model):
+class Worker(models.Model):
 
-    # TODO: Rename to something other than Access, possible candidates:
-    # - ProxyUser
-    # - CompanyUser
-    # - Employee
-    # - Worker
-
-    company = models.ForeignKey('Company', related_name="access")
+    company = models.ForeignKey('Company', related_name="workers")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="access")
 
     class Meta:

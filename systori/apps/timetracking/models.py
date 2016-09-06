@@ -8,7 +8,6 @@ from django.utils.translation import ugettext_lazy as _, ugettext as __
 from django.core.exceptions import ValidationError
 
 from ..project.models import JobSite
-from ..company.models import Access
 from .managers import TimerQuerySet
 from .utils import round_to_nearest_multiple
 
@@ -42,13 +41,12 @@ class Timer(models.Model):
         TRAINING: lambda start, end: (end - start).total_seconds()
     }
 
-    user = models.ForeignKey('company.Access', related_name='timers')
+    worker = models.ForeignKey('company.Worker', related_name='timers')
     date = models.DateField(db_index=True)
     start = models.DateTimeField(blank=True, null=True, db_index=True)
     end = models.DateTimeField(blank=True, null=True, db_index=True)
     duration = models.IntegerField(default=0, help_text=_('in seconds'))
     kind = models.CharField(default=WORK, choices=KIND_CHOICES, db_index=True, max_length=32)
-    altered_by = models.ForeignKey('company.Access', related_name='timers_altered', blank=True, null=True)
     comment = models.CharField(max_length=1000, blank=True)
     start_latitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     start_longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
@@ -66,16 +64,16 @@ class Timer(models.Model):
         ordering = ('start',)
 
     def __str__(self):
-        return 'Timer for user#{}: start={}, end={}, duration={}, date={}'.format(
-            self.user_id, self.start, self.end, self.duration, self.date
+        return 'Timer for worker#{}: start={}, end={}, duration={}, date={}'.format(
+            self.worker_id, self.start, self.end, self.duration, self.date
         )
 
     @classmethod
-    def launch(cls, user, **kwargs):
+    def launch(cls, worker, **kwargs):
         """
         Convenience method for consistency (so the class has not just stop but launch method as well)
         """
-        timer = cls(user=user, **kwargs)
+        timer = cls(worker=worker, **kwargs)
         timer.clean()
         timer.save()
         return timer
@@ -103,11 +101,11 @@ class Timer(models.Model):
     def clean(self):
         if self.pk:
             return
-        user_timers = Timer.objects.filter(user=self.user)
-        if not (self.end or self.duration) and user_timers.filter_running().exists():
+        worker_timers = Timer.objects.filter(worker=self.worker)
+        if not (self.end or self.duration) and worker_timers.filter_running().exists():
             raise ValidationError(__('Timer already running'))
         if self.start:
-            overlapping_timer = user_timers.filter(start__lte=self.start).filter(
+            overlapping_timer = worker_timers.filter(start__lte=self.start).filter(
                 Q(end__gte=self.start) | Q(end__isnull=True)
             ).first()
             if overlapping_timer:

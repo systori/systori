@@ -1,6 +1,6 @@
 import factory
 from factory import fuzzy
-from ..company.models import Access
+from ..company.models import Worker
 from .models import User
 
 
@@ -22,4 +22,4 @@ class UserFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def company(self, create, extracted, **kwargs):
         if extracted is not None:
-            Access.objects.create(company=extracted, user=self, is_staff=True)
+            Worker.objects.create(company=extracted, user=self, is_staff=True)

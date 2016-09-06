@@ -10,5 +10,5 @@ urlpatterns = [
         r'^report/(?:(?P<year>\d{4})/(?:(?P<month>[10]\d)/)?)?$', 
         login_required(api_views.ReportView.as_view()), name='report'),
 
-    url(r'^users/(?P<user_id>\d+)/timers/$', api_views.TimerAdminView.as_view(), name='timer_admin'),
+    url(r'^users/(?P<worker_id>\d+)/timers/$', api_views.TimerAdminView.as_view(), name='timer_admin'),
 ]

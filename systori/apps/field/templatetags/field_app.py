@@ -24,8 +24,8 @@ def add_daily_plan_url(project, date, jobsite=None):
         return reverse('field.dailyplan.pick-jobsite', args=[project.id, date.isoformat()])
 
 @register.simple_tag
-def is_assigned(plan, access):
-    return DailyPlan.is_worker_assigned(plan, access)
+def is_assigned(plan, worker):
+    return DailyPlan.is_worker_assigned(plan, worker)
 
 @register.filter
 #

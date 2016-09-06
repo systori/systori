@@ -2,11 +2,10 @@ import json
 from datetime import timedelta, datetime
 
 from django.test import TestCase
-from django.test.utils import override_settings
 from django.forms import ValidationError
 from django.utils import timezone
 
-from ..company.models import Company, Access
+from ..company.models import Company, Worker
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 from . import forms
@@ -31,15 +30,14 @@ class ManualTimerFormTest(TestCase):
 
     def setUp(self):
         self.company = CompanyFactory()  # type: Company
-        self.actual_user = UserFactory(company=self.company)
-        self.user = Access.objects.get(company=self.company, user=self.actual_user)
+        self.worker = UserFactory(company=self.company).access.first()
 
     def test_save(self):
         tz = timezone.get_current_timezone()
         start = tz.localize(datetime(2016, 9, 1, 7))
         end = start + timedelta(hours=9)
         form = forms.ManualTimerForm(data={
-            'user': self.user.pk,
+            'worker': self.worker.pk,
             'start': start.strftime('%d.%m.%Y %H:%M'),
             'end': end.strftime('%d.%m.%Y %H:%M'),
             'kind': Timer.HOLIDAY
@@ -56,7 +54,7 @@ class ManualTimerFormTest(TestCase):
         start = tz.localize(datetime(2016, 9, 1, 7))
         end = start + timedelta(days=3, hours=9)
         form = forms.ManualTimerForm(data={
-            'user': self.user.pk,
+            'worker': self.worker.pk,
             'start': start.strftime('%d.%m.%Y %H:%M'),
             'end': end.strftime('%d.%m.%Y %H:%M'),
             'kind': Timer.WORK

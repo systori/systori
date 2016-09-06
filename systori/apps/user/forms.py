@@ -3,7 +3,7 @@ from django.forms import ModelForm
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm as BaseAuthenticationForm
 from .models import *
-from ..company.models import Access
+from ..company.models import Worker
 
 
 class UserForm(ModelForm):
@@ -60,10 +60,10 @@ class AuthenticationForm(BaseAuthenticationForm):
     username = forms.CharField(max_length=254, initial='')
 
 
-class AccessForm(ModelForm):
+class WorkerForm(ModelForm):
 
     class Meta:
-        model = Access
+        model = Worker
         fields = ['is_active', 'is_owner', 'is_staff', 'is_foreman', 'is_laborer']
 
 

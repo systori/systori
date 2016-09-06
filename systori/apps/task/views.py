@@ -127,6 +127,6 @@ class JobDelete(DeleteView):
 
 class AllProjectsProgress(ListView):
     model = ProgressReport
-    queryset = model.objects.prefetch_related('task__taskgroup__job__project').prefetch_related('access__user')
+    queryset = model.objects.prefetch_related('task__taskgroup__job__project').prefetch_related('worker__user')
     context_object_name = 'progressreport_list'
     paginate_by = 30
