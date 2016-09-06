@@ -8,6 +8,8 @@ from django.db.transaction import atomic
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from .utils import get_timespans_split_by_breaks, get_dates_in_range
+from systori.lib import date_utils
+
 
 ABANDONED_CUTOFF = (16, 00)
 
@@ -73,17 +75,12 @@ class TimerQuerySet(QuerySet):
         return self.filter(Q(end__gte=now) | Q(end__isnull=True), start__lte=now)
 
     def filter_month(self, year=None, month=None):
-        date_filter = {}
-        assert not (month and not year), 'Cannot generate report by month without a year specified'
-        if year:
-            date_filter['date__year'] = year
-            if month:
-                date_filter['date__month'] = month
+        if year is not None:
+            assert month is not None
         else:
             now = timezone.now()
-            date_filter['date__year'] = now.year
-            date_filter['date__month'] = now.month
-        return self.filter(**date_filter)
+            year, month = now.year, now.month
+        return self.filter(date__range=date_utils.month_range(year, month))
 
     def group_for_report(self, order_by='-day_start', separate_by_kind=False):
         # TODO: Refactor/remove in favor of using non-aggregated Timer queryset (a la generate_daily_users_report)

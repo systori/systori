@@ -144,7 +144,7 @@ class TestAssignWorkers(SystoriTestCase):
         self.jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
         self.dailyplan = DailyPlan.objects.create(jobsite=self.jobsite)
         self.access, _ = Access.objects.get_or_create(user=self.user, company=self.company)
-        self.user2 = UserFactory(company=self.company, password='open sesame')
+        self.user2 = UserFactory(company=self.company)
         self.access2, _ = Access.objects.get_or_create(user=self.user2, company=self.company)
         self.url = reverse('field.dailyplan.assign-labor', args=[self.jobsite.id, self.dailyplan.url_id])
 

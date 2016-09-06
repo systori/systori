@@ -8,9 +8,8 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
-from systori.apps.user.models import User
 from systori.apps.document.views import DocumentRenderView
-from systori.apps.document.type import timetracking
+from systori.apps.document.type import timesheet
 from systori.apps.document.models import DocumentSettings
 
 from . import utils
@@ -105,4 +104,4 @@ class TimeSheetPDFView(DocumentRenderView):
         if self.kwargs['user_id'] is not None:
             qs = qs.filter(user_id=self.kwargs['user_id'])
         letterhead = DocumentSettings.objects.first().timetracking_letterhead
-        return timetracking.render(qs, letterhead, datetime.date(year, month, 1))
+        return timesheet.render(qs, letterhead, datetime.date(year, month, 1))

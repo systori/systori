@@ -36,7 +36,7 @@ class UserForm(ModelForm):
 class UserChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
-        return obj.get_full_name()
+        return obj.user.get_full_name()
 
 
 class DurationField(forms.Field):

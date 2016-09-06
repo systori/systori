@@ -19,7 +19,7 @@
           <tr>
             <td>{{ report.timestamp|localize }}</td>
             <td><a href="{% url 'project.view' report.task.taskgroup.job.project.id %}">{{ report.task.taskgroup.job.project }}</a></td>
-            <td>{{ report.access.user.get_full_name }}</td>
+            <td>{{ report.access.get_full_name }}</td>
             <td>
               <a target="_blank" href="{% url 'tasks' report.task.taskgroup.job.project.id report.task.taskgroup.job.id %}">{{ report.task|truncatechars:60 }}</a>
             </td>

@@ -134,11 +134,6 @@ class TimerTest(TestCase):
             timer = Timer(user=self.user, start=NOW, end=NOW - timedelta(days=2))
             timer.clean()
 
-    def test_clean_for_long_timer_fails(self):
-        with self.assertRaises(ValidationError):
-            timer = Timer(user=self.user, start=NOW, end=NOW + timedelta(days=2))
-            timer.clean()
-
 
 class TimerQuerySetTest(TestCase):
 
@@ -148,12 +143,11 @@ class TimerQuerySetTest(TestCase):
         self.user2 = UserFactory(company=self.company).access.first()
 
     def test_filter_date(self):
-        now = timezone.now().replace(hour=9)
-        yesterday = now - timedelta(days=1)
+        yesterday = timezone.now() - timedelta(days=1)
         Timer.objects.create(
             user=self.user,
-            start=yesterday,
-            end=yesterday + timedelta(hours=8)
+            start=yesterday.replace(hour=9),
+            end=yesterday.replace(hour=17)
         )
         timer = Timer.objects.create(
             user=self.user,

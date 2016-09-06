@@ -36,7 +36,7 @@ def create_data():
     data = types.SimpleNamespace()
     data.company = CompanyFactory()
     create_chart_of_accounts()
-    data.user = UserFactory(email='test@systori.com', password='open sesame', company=data.company)
+    data.user = UserFactory(email='test@systori.com', company=data.company)
     data.project = ProjectFactory(name="Test Project")
 
     data.job1 = JobFactory(name="Test Job", project=data.project)

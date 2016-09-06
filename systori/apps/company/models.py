@@ -37,6 +37,13 @@ class Company(AbstractSchema):
 
 
 class Access(models.Model):
+
+    # TODO: Rename to something other than Access, possible candidates:
+    # - ProxyUser
+    # - CompanyUser
+    # - Employee
+    # - Worker
+
     company = models.ForeignKey('Company', related_name="access")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="access")
 
@@ -96,3 +103,18 @@ class Access(models.Model):
     def todays_plans(self):
         return self.dailyplans.filter(day=date.today())
 
+    @property
+    def get_full_name(self):
+        return self.user.get_full_name()
+
+    @property
+    def first_name(self):
+        return self.user.first_name
+
+    @property
+    def last_name(self):
+        return self.user.last_name
+
+    @property
+    def email(self):
+        return self.user.email

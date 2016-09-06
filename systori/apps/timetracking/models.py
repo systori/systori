@@ -120,8 +120,6 @@ class Timer(models.Model):
                         'A potentially overlapping timer (started on {:%d.%m.%Y %H:%M}) is already running'
                     ).format(overlapping_timer.start)
                 raise ValidationError(message)
-        if self.duration > 60 * 60 * 24:
-            raise ValidationError(__('Timer cannot be longer than 24 hours'))
         if self.start and self.end and self.start > self.end:
             raise ValidationError(__('Timer cannot be negative'))
 

@@ -1,14 +1,17 @@
 from collections import OrderedDict
 from itertools import chain
-from datetime import date
+from calendar import monthrange
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.db import models
+from django.db.models.query import QuerySet
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from jsonfield import JSONField
 
+from systori.lib import date_utils
 from systori.lib.accounting.tools import Amount, JSONEncoder
 
 
@@ -26,6 +29,26 @@ class Document(models.Model):
     class Meta:
         abstract = True
         ordering = ['id']
+
+
+class TimesheetQuerySet(QuerySet):
+
+    def period(self, year, month):
+        return self.filter(
+            document_date__range=date_utils.month_range(year, month)
+        )
+
+
+class Timesheet(Document):
+
+    class Meta(Document.Meta):
+        verbose_name = _("Timesheet")
+        verbose_name_plural = _("Timesheets")
+
+    letterhead = models.ForeignKey('document.Letterhead', related_name="timesheet_documents")
+    user = models.ForeignKey('company.Access', related_name='timesheets')
+
+    objects = TimesheetQuerySet.as_manager()
 
 
 class Proposal(Document):
@@ -385,7 +408,7 @@ class DocumentSettings(models.Model):
                                             related_name="+")
     itemized_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL,
                                             related_name="+")
-    timetracking_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL,
+    timesheet_letterhead = models.ForeignKey("Letterhead", null=True, blank=True, on_delete=models.SET_NULL,
                                                 related_name="+")
 
     @staticmethod

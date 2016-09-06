@@ -33,9 +33,9 @@
     {% if access.has_laborer %}
     <field-worker
         class="list-group-item"
-        data-id="{{ worker.id }}">{% show_user_status worker.access.user %}{{ worker.access.user.get_full_name }}</field-worker>
+        data-id="{{ worker.id }}">{% show_user_status worker.access.user %}{{ worker.access.get_full_name }}</field-worker>
     {% else %}
-    <div class="list-group-item">{% show_user_status worker.access.user %}{{ worker.access.user.get_full_name }}</div>
+    <div class="list-group-item">{% show_user_status worker.access.user %}{{ worker.access.get_full_name }}</div>
     {% endif %}
 
   {% endfor %}

@@ -107,7 +107,7 @@ class ReportViewTest(SystoriTestCase):
             end=now - timedelta(minutes=30)
         )
 
-        self.client.login(username=self.user.user.email, password=self.password)
+        self.client.login(username=self.user.email, password=self.password)
         response = self.client.get(self.url)
         json_response = json.loads(response.content.decode('utf-8'))
 
@@ -132,7 +132,7 @@ class ReportViewTest(SystoriTestCase):
         self.assertEqual(json_response[3]['duration'], '0:30')
 
     def test_get_empty(self):
-        self.client.login(username=self.user.user.email, password=self.password)
+        self.client.login(username=self.user.email, password=self.password)
         response = self.client.get(self.url)
         self.assertEqual(json.loads(response.content.decode('utf-8')), [])
 
