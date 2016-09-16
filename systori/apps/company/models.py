@@ -112,3 +112,6 @@ class Worker(models.Model):
     @property
     def email(self):
         return self.user.email
+
+    def __str__(self):
+        return self.user.get_full_name()

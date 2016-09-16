@@ -3,7 +3,8 @@ celery==3.1.23
 fabric3==1.12.post1
 
 Django==1.10
-django-tastypie==0.13.3
+#django-tastypie==0.13.3
+git+https://github.com/django-tastypie/django-tastypie.git@604e4ac#egg=django-tastypie
 django-ordered-model==1.2.1
 django-fsm==2.4.0
 django-bootstrap-form==3.2.1

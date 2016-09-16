@@ -64,7 +64,6 @@ def delete_when_empty(dailyplan):
 def daily_plan_objects():
     return DailyPlan.objects \
         .prefetch_related("jobsite__project__jobsites") \
-        .prefetch_related(Prefetch("workers", queryset=TeamMember.objects.select_related("worker__user"))) \
         .prefetch_related(Prefetch("assigned_equipment", queryset=EquipmentAssignment.objects.select_related("equipment"))) \
         .prefetch_related("tasks")
 
@@ -86,8 +85,8 @@ class FieldDashboard(TemplateView):
         context.update({
             'todays_plans': todays_plans,
             'previous_plans': previous_plans,
-            'timetracking_report': timetracking_utils.get_user_dashboard_report(self.request.user),
-            'timetracking_timer_duration': timetracking_utils.get_running_timer_duration(self.request.user)
+            'timetracking_report': timetracking_utils.get_worker_dashboard_report(self.request.worker),
+            'timetracking_timer_duration': timetracking_utils.get_running_timer_duration(self.request.worker)
         })
 
         return context

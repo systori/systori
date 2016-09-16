@@ -62,3 +62,9 @@ class ManualTimerFormTest(TestCase):
         self.assertTrue(form.is_valid())
         timers = form.save()
         self.assertEqual(len(timers), 6)  # 3 breaks per day, for 2 days
+
+    def test_worker_dropdown_label(self):
+        f = forms.ManualTimerForm(company=self.company)
+        self.assertEqual(
+            self.worker.user.get_full_name(),
+            list(f.fields['worker'].choices)[1][1])

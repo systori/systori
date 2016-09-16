@@ -33,12 +33,6 @@ class WorkerForm(ModelForm):
         instance.worker = self.worker
 
 
-class WorkerChoiceField(forms.ModelChoiceField):
-
-    def label_from_instance(self, obj):
-        return obj.get_full_name()
-
-
 class DurationField(forms.Field):
     duration_re = re.compile(r'^(?P<sign>\-)?((?P<hours>\d+?)h)?\s?((?P<minutes>\d+?)m)?$')
     default_error_messages = {
@@ -62,12 +56,6 @@ class ManualTimerForm(ModelForm):
     class Meta:
         model = Timer
         fields = ['worker', 'start', 'end', 'kind', 'comment']
-        field_classes = {
-            'worker': WorkerChoiceField
-        }
-
-    # duration = DurationField(required=True, widget=forms.TextInput(
-    #     attrs={'placeholder': '1h 30m', 'class': 'timetracking-form-duration'}))
 
     def __init__(self, company=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
