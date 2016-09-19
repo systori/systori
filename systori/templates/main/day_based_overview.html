@@ -60,8 +60,8 @@
             <h4>{{ plan.jobsite.city }}</h4>
             <hr>
 
-          {% for worker in plan.workers.all %}
-            <h5 class="fit-text text-info">{% show_user_status worker.access.user %}{{ worker.access.get_full_name }}</h5>
+          {% for plan_worker in plan.workers.all %}
+            <h5 class="fit-text text-info">{% show_user_status plan_worker.user %}{{ plan_worker.get_full_name }}</h5>
           {% endfor %}
             
           {% if plan.equipment.count > 0 %}

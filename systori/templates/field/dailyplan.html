@@ -6,7 +6,7 @@
 
   <div class="panel-heading dailyplan-heading">
     <a name="plan-{{  dailyplan.id }}"></a>
-    {% if access.has_laborer %}
+    {% if worker.has_laborer %}
     <div class="pull-right">
       <button class="btn btn-default btn-sm paste-button" style="display: none;">
         <span class="glyphicon glyphicon-paste"></span>
@@ -19,7 +19,7 @@
 
   <div class="list-group">
 
-  {% if access.has_laborer %}
+  {% if worker.has_laborer %}
     <a class="list-group-item sub-header clearfix workers-header"
        href="{% url 'field.dailyplan.assign-labor' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
       {% trans "Workers" %}<span class="pull-right">{% trans 'edit' %} &raquo;</span>
@@ -28,14 +28,14 @@
     <div class="list-group-item sub-header workers-header">{% trans "Workers" %}</div>
   {% endif %}
 
-  {% for worker in dailyplan.workers.all %}
+  {% for daily_worker in dailyplan.workers.all %}
 
-    {% if access.has_laborer %}
+    {% if worker.has_laborer %}
     <field-worker
         class="list-group-item"
-        data-id="{{ worker.id }}">{% show_user_status worker.access.user %}{{ worker.access.get_full_name }}</field-worker>
+        data-id="{{ daily_worker.id }}">{% show_user_status daily_worker.user %}{{ daily_worker.get_full_name }}</field-worker>
     {% else %}
-    <div class="list-group-item">{% show_user_status worker.access.user %}{{ worker.access.get_full_name }}</div>
+    <div class="list-group-item">{% show_user_status daily_worker.user %}{{ daily_worker.get_full_name }}</div>
     {% endif %}
 
   {% endfor %}
@@ -45,7 +45,7 @@
   </div>
 
 
-  {% if access.has_laborer %}
+  {% if worker.has_laborer %}
     <a class="list-group-item sub-header clearfix equipment-header"
        href="{% url 'field.dailyplan.assign-equipment' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
       {% trans "Equipment" %}<span class="pull-right">{% trans 'edit' %} &raquo;</span>
@@ -56,7 +56,7 @@
 
   {% for assigned in dailyplan.assigned_equipment.all %}
 
-    {% if access.has_laborer %}
+    {% if worker.has_laborer %}
     <field-equipment
         class="list-group-item"
         data-id="{{ assigned.id }}">{{ assigned.equipment|safe }}</field-equipment>
@@ -72,7 +72,7 @@
 
   {% if 'planning' not in request.path or request.session.is_planning_tasks %}
 
-  {% if access.has_laborer %}
+  {% if worker.has_laborer %}
     <a class="list-group-item sub-header clearfix"
        href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
       {% trans "Tasks" %}<span class="pull-right">{% trans 'edit' %} &raquo;</span>
@@ -103,12 +103,12 @@
 
 
   {% if 'planning' not in request.path or request.session.is_planning_notes %}
-  {% if access.has_laborer or dailyplan.notes %}
+  {% if worker.has_laborer or dailyplan.notes %}
 
     <div class="list-group-item sub-header">{% trans "Notes" %}</div>
 
     <div class="panel-body">
-      {% if access.has_laborer %}
+      {% if worker.has_laborer %}
         <form action="{% url 'field.dailyplan.save.notes' dailyplan.id %}" method="post">{% csrf_token %}
           <input type="hidden" name="origin" value="{{ request.path }}#plan-{{ dailyplan.id }}"/>
           <textarea rows="4" style="width: 100%;" name="notes">{{ dailyplan.notes }}</textarea>
