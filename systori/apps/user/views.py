@@ -19,6 +19,7 @@ class SettingsView(TemplateView):
 class WorkerList(ListView):
     model = Worker
     template_name = 'user/user_list.html'
+    context_object_name = 'access_list'
 
     def get_queryset(self):
         return Worker.objects.\

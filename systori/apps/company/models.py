@@ -19,7 +19,7 @@ class Company(AbstractSchema):
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
 
     def active_workers(self):
-        return self.workers.filter(is_active=True)
+        return self.workers.filter(is_active=True).select_related('user')
 
     @property
     def breaks(self) -> List[BreakSpan]:

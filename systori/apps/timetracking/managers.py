@@ -156,7 +156,7 @@ class TimerQuerySet(QuerySet):
 
     def generate_daily_workers_report(self, date, workers):
         date = date or timezone.now().date()
-        queryset = self.filter(worker__in=workers).filter(date=date).select_related('worker')
+        queryset = self.filter(worker__in=workers).filter(date=date).select_related('worker__user')
         reports = OrderedDict((worker, {
             'day_start': None,
             'day_end': None,

@@ -1,6 +1,6 @@
 from django import template
-from django.contrib.auth import get_user_model
 
+from systori.apps.company.models import Worker
 from .. import utils
 
 
@@ -16,7 +16,7 @@ class StatusLoader(template.Node):
     var_name = 'user_statuses'
 
     def render(self, context):
-        context[self.var_name] = utils.get_users_statuses(get_user_model().objects.all())
+        context[self.var_name] = utils.get_workers_statuses(Worker.objects.all())
         return ''
 
 
