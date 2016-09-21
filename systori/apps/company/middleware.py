@@ -1,6 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from .models import Access, Company
+from .models import Company, Worker
 import string
 
 SCHEMA_ALLOWED_CHARS = set(string.ascii_lowercase + string.digits + '-')
@@ -17,7 +17,8 @@ def get_subdomain(request):
 
 class CompanyMiddleware:
 
-    def process_request(self, request):
+    @staticmethod
+    def process_request(request):
 
         request.company = None
 
@@ -44,7 +45,8 @@ class CompanyMiddleware:
                 company_url = companies[0].url(request)
                 return HttpResponseRedirect(company_url)
 
-    def process_template_response(self, request, response):
+    @staticmethod
+    def process_template_response(request, response):
         if response.context_data is not None:
             response.context_data['selected_company'] = request.company
             current = request.company.schema if request.company else ''
@@ -55,18 +57,20 @@ class CompanyMiddleware:
         return response
 
 
-class AccessMiddleware:
+class WorkerMiddleware:
 
-    def process_view(self, request, view, args, kwargs):
-        request.access = None
+    @staticmethod
+    def process_view(request, view, args, kwargs):
+        request.worker = None
         if request.user.is_authenticated() and request.company:
             try:
-                request.access = Access.objects.select_related("user").get(user=request.user, company=request.company)
-            except Access.DoesNotExist:
+                request.worker = Worker.objects.select_related("user").get(user=request.user, company=request.company)
+            except Worker.DoesNotExist:
                 if request.user.is_superuser:
-                    request.access = Access.grant_superuser_access(request.user, request.company)
+                    request.worker = Worker.grant_superuser_access(request.user, request.company)
 
-    def process_template_response(self, request, response):
+    @staticmethod
+    def process_template_response(request, response):
         if response.context_data is not None:
-            response.context_data['access'] = request.access
+            response.context_data['worker'] = request.worker
         return response

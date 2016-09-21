@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 
 from systori.lib.testing import SystoriTestCase
 from ..project.models import TeamMember, DailyPlan, JobSite, EquipmentAssignment
-from ..company.models import Access
+from ..company.models import Worker
 from ..equipment.models import Equipment
 from ..task.test_models import create_task_data
 from ..user.factories import *
@@ -30,7 +30,7 @@ class TestFieldTaskView(SystoriTestCase):
     def test_complete_assigns_task_to_user_dailyplan(self):
         jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
         dailyplan = DailyPlan.objects.create(jobsite=jobsite)
-        access, _ = Access.objects.get_or_create(user=self.user, company=self.company)
+        access, _ = Worker.objects.get_or_create(user=self.user, company=self.company)
 
         self.client.post(
             reverse('field.dailyplan.task', args=['1', dailyplan.url_id, self.task.pk]),
@@ -46,7 +46,7 @@ class TestFieldTaskView(SystoriTestCase):
         self.task.refresh_from_db()
         self.assertFalse(self.task.dailyplans.filter(id=dailyplan.id).exists())
 
-        TeamMember.objects.create(dailyplan=dailyplan, access=access)
+        TeamMember.objects.create(dailyplan=dailyplan, worker=access)
         self.client.post(
             reverse('field.dailyplan.task', args=['1', dailyplan.url_id, self.task.pk]),
             {'complete': 2}
@@ -64,8 +64,8 @@ class TestCutPaste(SystoriTestCase):
     def test_move_worker(self):
         jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
         dailyplan = DailyPlan.objects.create(jobsite=jobsite)
-        access, _ = Access.objects.get_or_create(user=self.user, company=self.company)
-        member = TeamMember.objects.create(dailyplan=dailyplan, access=access)
+        access, _ = Worker.objects.get_or_create(user=self.user, company=self.company)
+        member = TeamMember.objects.create(dailyplan=dailyplan, worker=access)
 
         jobsite2 = JobSite.objects.create(project=self.project, name='b', address='b', city='b', postal_code='b')
         dailyplan2 = DailyPlan.objects.create(jobsite=jobsite2)
@@ -143,9 +143,9 @@ class TestAssignWorkers(SystoriTestCase):
         self.client.login(username=self.user.email, password='open sesame')
         self.jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
         self.dailyplan = DailyPlan.objects.create(jobsite=self.jobsite)
-        self.access, _ = Access.objects.get_or_create(user=self.user, company=self.company)
-        self.user2 = UserFactory(company=self.company, password='open sesame')
-        self.access2, _ = Access.objects.get_or_create(user=self.user2, company=self.company)
+        self.access, _ = Worker.objects.get_or_create(user=self.user, company=self.company)
+        self.user2 = UserFactory(company=self.company)
+        self.access2, _ = Worker.objects.get_or_create(user=self.user2, company=self.company)
         self.url = reverse('field.dailyplan.assign-labor', args=[self.jobsite.id, self.dailyplan.url_id])
 
     def test_get_form(self):
@@ -178,8 +178,8 @@ class TestCopyDailyPlans(SystoriTestCase):
         yesterday = today - timedelta(days=1)
         jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
         dailyplan = DailyPlan.objects.create(jobsite=jobsite, day=yesterday)
-        access, _ = Access.objects.get_or_create(user=self.user, company=self.company)
-        TeamMember.objects.create(dailyplan=dailyplan, access=access)
+        access, _ = Worker.objects.get_or_create(user=self.user, company=self.company)
+        TeamMember.objects.create(dailyplan=dailyplan, worker=access)
         equipment = Equipment.objects.create(name='truck')
         EquipmentAssignment.objects.create(dailyplan=dailyplan, equipment=equipment)
         self.assertEqual(1, DailyPlan.objects.count())

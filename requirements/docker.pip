@@ -29,3 +29,5 @@ django-extensions==1.7.2
 factory-boy==2.6.1
 freezegun==0.3.7
 django-datetime-widget==0.9.3
+
+ipython==5.1.0

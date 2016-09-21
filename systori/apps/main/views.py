@@ -1,9 +1,9 @@
 from datetime import date, timedelta
 from django.views.generic import View, TemplateView
-from django_mobile import get_flavour
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from systori.middleware.mobile import get_flavour
 from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
@@ -33,7 +33,7 @@ class IndexView(View):
         if request.user.is_authenticated():
             if not request.company:
                 return HttpResponseRedirect(reverse('companies'))
-            if get_flavour() == 'full' and request.access.has_staff:
+            if get_flavour() == 'full' and request.worker.has_staff:
                 view = OfficeDashboard.as_view()
             else:
                 view = FieldDashboard.as_view()

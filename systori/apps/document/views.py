@@ -1,21 +1,82 @@
+import calendar
 from datetime import date
 from decimal import Decimal
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.views.generic import View, ListView
+from django.views.generic import View, ListView, TemplateView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import get_language
 
 from systori.lib.accounting.tools import Amount
+from ..company.models import Worker
 from ..project.models import Project
+from ..timetracking.models import Timer
 from ..accounting.constants import TAX_RATE
-from .models import Proposal, Invoice, Adjustment, Payment, Refund
+from .models import Proposal, Invoice, Adjustment, Payment, Refund, Timesheet
 from .models import DocumentTemplate, Letterhead, DocumentSettings
 from .forms import ProposalForm, LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
 from . import type as pdf_type
+
+
+TimesheetMonth = namedtuple(
+    'TimesheetMonth', (
+        'date',
+        'can_generate',
+        'count'
+    )
+)
+
+
+class TimesheetsList(TemplateView):
+    template_name = 'document/timesheets_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        today = date.today()
+        year, month = today.year, today.month
+        months = []
+        while month > 0:
+            months.append(
+                TimesheetMonth(
+                    date(year, month, 1),
+                    can_generate=(
+                        (month == today.month or month == today.month-1) and
+                        Timer.objects.filter_month(year, month).exists()
+                    ),
+                    count=Timesheet.objects.period(year, month).count()
+                )
+            )
+            month -= 1
+        context['months'] = months
+        return context
+
+
+class TimesheetsGenerateView(View):
+
+    def get(self, request, *args, **kwargs):
+        year, month = int(self.kwargs['year']), int(self.kwargs['month'])
+        letterhead = DocumentSettings.objects.first().timesheet_letterhead
+
+        # clear existing timesheets for this period
+        Timesheet.objects.period(year, month).delete()
+
+        # get workers that have timers for which timesheets can be generated
+        worker_ids = Timer.objects.filter_month(year, month).distinct_workers_list()
+
+        # start generating
+        for worker_id in worker_ids:
+            worker = Worker.objects.get(id=worker_id)
+            ts = Timesheet(letterhead=letterhead, worker=worker, document_date=date(year, month, 1))
+            ts.json = pdf_type.timesheet.serialize(
+                Timer.objects.filter_month(year, month).filter(worker=worker).all(),
+                year, month
+            )
+            ts.save()
+
+        return HttpResponseRedirect(reverse('timesheets'))
 
 
 class InvoiceList(ListView):
@@ -68,6 +129,14 @@ class DocumentRenderView(SingleObjectMixin, View):
 
     def pdf(self):
         raise NotImplementedError
+
+
+class TimesheetsPDF(DocumentRenderView):
+    def pdf(self):
+        year, month = int(self.kwargs['year']), int(self.kwargs['month'])
+        queryset = Timesheet.objects.period(year, month)
+        letterhead = DocumentSettings.objects.first().timesheet_letterhead
+        return pdf_type.timesheet.render(queryset, letterhead)
 
 
 class InvoicePDF(DocumentRenderView):

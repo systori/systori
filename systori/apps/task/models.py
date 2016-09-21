@@ -139,9 +139,9 @@ class Job(models.Model):
             total += getattr(taskgroup, field)
         return total
 
-    def estimate_total_modify(self, user, action):
+    def estimate_total_modify(self, worker, action):
         for taskgroup in self.taskgroups.all():
-            taskgroup.estimate_total_modify(user, action, self.ESTIMATE_INCREMENT)
+            taskgroup.estimate_total_modify(worker, action, self.ESTIMATE_INCREMENT)
 
     @property
     def estimate_total(self):
@@ -200,9 +200,9 @@ class TaskGroup(BetterOrderedModel):
                 total += getattr(task, field)
         return total
 
-    def estimate_total_modify(self, user, action, rate):
+    def estimate_total_modify(self, worker, action, rate):
         for task in self.tasks.all():
-            task.estimate_total_modify(user, action, rate)
+            task.estimate_total_modify(worker, action, rate)
 
     @property
     def fixed_price_estimate(self):
@@ -294,9 +294,9 @@ class Task(BetterOrderedModel):
     def is_billable(self):
         return self.complete > 0
 
-    def estimate_total_modify(self, user, action, rate):
+    def estimate_total_modify(self, worker, action, rate):
         for instance in self.taskinstances.all():
-            instance.estimate_total_modify(user, action, rate)
+            instance.estimate_total_modify(worker, action, rate)
 
     @cached_property
     def instance(self):
@@ -378,12 +378,12 @@ class TaskInstance(BetterOrderedModel):
         verbose_name_plural = _("Task Instances")
         ordering = ['order']
 
-    def estimate_total_modify(self, user, action, rate):
+    def estimate_total_modify(self, worker, action, rate):
         correction = self.lineitems.filter(is_correction=True).first()
         if action in ['increase', 'decrease']:
             correction = correction or LineItem(taskinstance=self, is_correction=True, price=0)
-            correction.name = _("Price correction from %(user)s on %(date)s") % \
-                              {'user': user.get_full_name(), 'date': date_format(datetime.now())}
+            correction.name = _("Price correction from %(worker)s on %(date)s") % \
+                              {'worker': worker.get_full_name(), 'date': date_format(datetime.now())}
             correction.unit_qty = 1.0
             correction.unit = _("correction")
             direction = {'increase': 1, 'decrease': -1}[action]
@@ -496,7 +496,7 @@ class LineItem(models.Model):
 
     # flagged items will appear in the project dashboard as needing attention
     # could be set automatically by the system from temporal triggers (materials should have been delivered by now)
-    # or it could be set manual by a users
+    # or it could be set manual by a user
     is_flagged = models.BooleanField(default=False)
 
     # this line item is a price correction
@@ -549,7 +549,7 @@ class ProgressReport(models.Model):
 
     task = models.ForeignKey(Task, related_name="progressreports")
 
-    access = models.ForeignKey('company.Access', related_name="filedreports")
+    worker = models.ForeignKey('company.Worker', related_name="filedreports")
 
     @property
     def complete_percent(self):

@@ -8,9 +8,8 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
-from systori.apps.user.models import User
 from systori.apps.document.views import DocumentRenderView
-from systori.apps.document.type import timetracking
+from systori.apps.document.type import timesheet
 from systori.apps.document.models import DocumentSettings
 
 from . import utils
@@ -49,8 +48,8 @@ class HomeView(PeriodFilterMixin, FormView):
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            report=utils.get_daily_users_report(
-                self.request.company.active_users(), self.report_period),
+            report=utils.get_daily_workers_report(
+                self.request.company.active_workers(), self.report_period),
             **kwargs
         )
 
@@ -64,14 +63,14 @@ class HomeView(PeriodFilterMixin, FormView):
         return self.render_to_response(self.get_context_data(form=form, period_form=period_form))
 
 
-class UserReportView(PeriodFilterMixin, FormView):
+class WorkerReportView(PeriodFilterMixin, FormView):
     template_name = 'timetracking/user_report.html'
-    form_class = forms.UserManualTimerForm
+    form_class = forms.WorkerManualTimerForm
     period_form_class = forms.MonthPickerForm
 
     @cached_property
-    def user(self):
-        return get_object_or_404(self.request.company.active_users(), pk=self.kwargs['user_id'])
+    def worker(self):
+        return get_object_or_404(self.request.company.active_workers(), pk=self.kwargs['worker_id'])
 
     def get_form_kwargs(self):
         default_kwargs = super().get_form_kwargs()
@@ -80,18 +79,17 @@ class UserReportView(PeriodFilterMixin, FormView):
 
     def get_initial(self):
         initial = super().get_initial()
-        initial['user'] = self.user
+        initial['worker'] = self.worker
         return initial
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            user=self.user, report=utils.get_user_monthly_report(
-                self.user, self.report_period),
+            worker=self.worker, report=utils.get_worker_monthly_report(
+                self.worker, self.report_period),
             **kwargs)
 
     def form_valid(self, form):
         form.save()
-        # return redirect('timetracking_user', self.user.pk)
         return redirect(self.request.META['HTTP_REFERER'])
 
 
@@ -101,8 +99,8 @@ class TimeSheetPDFView(DocumentRenderView):
     def pdf(self):
         month = int(self.kwargs['month'])
         year = int(self.kwargs['year'])
-        qs = Timer.objects.filter_month(year, month).prefetch_related('user')
-        if self.kwargs['user_id'] is not None:
-            qs = qs.filter(user_id=self.kwargs['user_id'])
+        qs = Timer.objects.filter_month(year, month).prefetch_related('worker')
+        if self.kwargs['worker_id'] is not None:
+            qs = qs.filter(worker_id=self.kwargs['worker_id'])
         letterhead = DocumentSettings.objects.first().timetracking_letterhead
-        return timetracking.render(qs, letterhead, datetime.date(year, month, 1))
+        return timesheet.render(qs, letterhead, datetime.date(year, month, 1))

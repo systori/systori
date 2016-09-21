@@ -1,0 +1,33 @@
+{% extends "frame.html" %}
+{% load i18n %}
+
+{% block sidebar %}{% include "main/sidebar.html" with section='timesheets' %}{% endblock %}
+
+{% block content %}
+  <h2 class="sub-header">{% trans 'Timesheets' %}</h2>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>{% trans 'Month' %}</th>
+      <th>{% trans 'Timesheets' %}</th>
+      <th>{% trans 'Actions' %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for month in months %}
+      <tr>
+        <td>{{ month.date|date:"Y F" }}</td>
+        <td>{{ month.count }}</td>
+        <td>
+          {% if month.can_generate %}
+          <a href="{% url 'timesheets.generate' month.date.year month.date.month %}">{% trans "Generate" %}</a>
+          {% endif %}
+          {% if month.count > 0 %}
+          <a href="{% url 'timesheets.pdf' month.date.year month.date.month %}">{% trans "Download" %}</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock content %}

@@ -3,7 +3,7 @@ from django.utils.translation import activate
 
 from .models import User
 from .forms import UserForm
-from ..company.models import Company, Access
+from ..company.models import Company, Worker
 
 
 class CreateUserDataMixin:
@@ -14,7 +14,7 @@ class CreateUserDataMixin:
         self.password = 'pass'
         self.username = 'test@damoti.com'
         self.user = User.objects.create_superuser(self.username, self.password)
-        Access.objects.create(user=self.user, company=self.company)
+        Worker.objects.create(user=self.user, company=self.company)
 
 
 class TestUserForm(CreateUserDataMixin, TestCase):

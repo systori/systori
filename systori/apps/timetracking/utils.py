@@ -1,15 +1,12 @@
-from datetime import time, timedelta, datetime
-from collections import UserDict
+from datetime import time, timedelta, date, datetime
+from collections import UserDict, namedtuple
+from typing import Iterator, Tuple
 
 from django.utils import timezone
 
 
 WORK_DAY = timedelta(hours=8).total_seconds()
 HOLIDAYS_PER_MONTH = WORK_DAY * 2.5
-BREAKS = [
-    (time(9, 00), time(9, 30)),
-    (time(12, 30), time(13, 00)),
-]
 
 
 class AccumulatorDict(UserDict):
@@ -61,20 +58,20 @@ def round_to_nearest_multiple(seconds, multiplier=36):
 ### Reports
 
 
-def get_user_dashboard_report(user):
+def get_worker_dashboard_report(worker):
     from .models import Timer
     now = timezone.now()
     timers = Timer.objects.filter_month(now.year, now.month).filter(
-        user=user, kind=Timer.WORK).order_by('start')
+        worker=worker, kind=Timer.WORK).order_by('start')
     return timers
 
 
-def get_user_monthly_report(user, period):
+def get_worker_monthly_report(worker, period):
     from .models import Timer
     period = period or timezone.now()
 
-    holidays_used = get_holidays_duration(user, period.year, period.month)
-    report = Timer.objects.filter(user=user).generate_monthly_user_report(period)
+    holidays_used = get_holidays_duration(worker, period.year, period.month)
+    report = Timer.objects.filter(worker=worker).generate_monthly_worker_report(period)
     overtime = sum(day['work']['overtime'] for day in report.values())
     return {
         'holidays_used': format_days(holidays_used),
@@ -84,77 +81,78 @@ def get_user_monthly_report(user, period):
     }
 
 
-def get_holidays_duration(user, year, month):
+def get_holidays_duration(worker, year, month):
     from .models import Timer
-    return Timer.objects.filter(user=user, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
+    return Timer.objects.filter(worker=worker, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
 
 
-def get_overtime_duration(user, year, month):
+def get_overtime_duration(worker, year, month):
     from .models import Timer
-    return Timer.objects.filter(user=user, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
+    return Timer.objects.filter(worker=worker, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
 
 
-def get_daily_users_report(users, date=None):
+def get_daily_workers_report(workers, date=None):
     from .models import Timer
 
-    return Timer.objects.generate_daily_users_report(date=date, users=users)
+    return Timer.objects.generate_daily_workers_report(date=date, workers=workers)
     # report_by_user = regroup(report, itemgetter('user_id'))
     # for user in users:
     #     yield {'user': user, 'report': report_by_user.get(user.pk)}
 
 
-def get_running_timer_duration(user):
+def get_running_timer_duration(worker):
     from .models import Timer
-    timer = Timer.objects.filter_running().filter(user=user).first()
+    timer = Timer.objects.filter_running().filter(worker=worker).first()
     duration = timer.get_duration_seconds() if timer else 0
     return format_seconds(duration, '%H:%M:%S')
 
 
-def get_users_statuses(users):
+def get_workers_statuses(workers):
     from .models import Timer
-    timers = Timer.objects.filter(user__in=users).filter_now()
-    user_timers = AccumulatorDict()
+    timers = Timer.objects.filter(worker__in=workers).filter_now()
+    worker_timers = AccumulatorDict()
     for timer in timers:
-        user_timers[timer.user.pk] = timer
-    return user_timers
+        worker_timers[timer.worker_id] = timer
+    return worker_timers
 
 
-def get_dates_in_range(start_date, end_date, delta, include_weekends=False):
-    current_date = start_date
-    while end_date > current_date:
-        if include_weekends or current_date.weekday() not in (5, 6):
-            yield current_date
-        current_date += delta
+def get_dates_in_range(start: date, end: date, include_weekends=False) -> Iterator[date]:
+    current = start
+    while end >= current:
+        if include_weekends or current.weekday() not in (5, 6):
+            yield current
+        current += timedelta(days=1)
 
 
-def get_timespans_split_by_breaks(day_start, day_end, datetime_list):
-    for day in datetime_list:
-        next_start = day_start
-        # Apply Breaks
-        for span in BREAKS:
-            if next_start <= span[0]:
-                start = day.replace(hour=next_start.hour, minute=next_start.minute)
-                end_time = min(span[0], day_end)
-                end = day.replace(hour=end_time.hour, minute=end_time.minute)
-                if start < end:
-                    yield start, end
-                next_start = span[1]
-        # Apply Remainder
-        if next_start < day_end:
-            start = day.replace(hour=next_start.hour, minute=next_start.minute)
-            end = day.replace(hour=day_end.hour, minute=day_end.minute)
-            yield start, end
+BreakSpan = namedtuple('BreakSpan', ('start', 'end'))
 
 
-def perform_autopilot_duties():
+def get_timespans_split_by_breaks(start_time: time, end_time: time, breaks) -> Iterator[Tuple[time, time]]:
+    """ This function is timezone unaware. Time range and breaks must
+        be in the same local timezone. Breaks must be in chronological order.
+    """
+    next_start = start_time
+    # Apply Breaks
+    for break_span in breaks:
+        if next_start <= break_span.start:
+            end = min(break_span.start, end_time)
+            if next_start < end:
+                yield next_start, end
+            next_start = break_span.end
+    # Apply Remainder
+    if next_start < end_time:
+        yield next_start, end_time
+
+
+def perform_autopilot_duties(breaks, tz):
     """
     Issue timers stop or launch commands at certain times of day
     """
     from .models import Timer
 
-    now = datetime.now(timezone.get_current_timezone()).replace(second=0, microsecond=0)
+    now = datetime.now(tz).replace(second=0, microsecond=0)
     time_now = now.time()
-    if time_now in [b[0] for b in BREAKS]:
+    if time_now in [b.start for b in breaks]:
         Timer.objects.stop_for_break(now)
-    elif time_now in [b[1] for b in BREAKS]:
+    elif time_now in [b.end for b in breaks]:
         Timer.objects.launch_after_break(now)

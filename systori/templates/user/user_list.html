@@ -18,8 +18,8 @@
     <tbody>
     {% for access in access_list %}
       <tr>
-        <td>{{ access.user.get_full_name }}</td>
-        <td>{% if access.user.email %}{{ access.user.email }}{% else %}-{% endif %}</td>
+        <td>{{ access.get_full_name }}</td>
+        <td>{% if access.email %}{{ access.email }}{% else %}-{% endif %}</td>
         <td>
           {% if access.has_staff %}
             {% trans 'Staff' %}

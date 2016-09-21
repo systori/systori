@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from systori.lib.testing import SystoriTestCase
 from ..accounting.test_workflow import create_data
 from ..accounting.test_views import DocumentTestCase
-from ..company.models import Access
+from ..company.models import Worker
 from .forms import ProposalForm, ProposalFormSet
 from .models import Proposal, Letterhead
 
@@ -118,7 +118,7 @@ class InvoiceListViewTest(SystoriTestCase):
 
     def setUp(self):
         create_data(self)
-        access = Access.objects.get(user=self.user)
+        access = self.user.access.first()
         access.is_owner = True
         access.save()
         self.client.login(username=self.user.email, password='open sesame')

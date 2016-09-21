@@ -1,20 +1,18 @@
 from functools import wraps
 
+from urllib.parse import urlparse
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import resolve_url
 from django.utils.decorators import available_attrs
 from django.conf import settings
-from django.utils.six.moves.urllib.parse import urlparse
 from django.contrib.auth import REDIRECT_FIELD_NAME
-
-from ..company.models import Access
 
 
 def owner_auth(view):
     def is_authorized(request):
         if not request.user.is_authenticated():
             return False
-        if request.access.has_owner:
+        if request.worker.has_owner:
             return True
         raise PermissionDenied
 
@@ -25,7 +23,7 @@ def office_auth(view):
     def is_authorized(request):
         if not request.user.is_authenticated():
             return False  # redirect to login
-        if request.access.has_staff:
+        if request.worker.has_staff:
             return True  # all good
         raise PermissionDenied  # logged in but not allowed
 
@@ -36,7 +34,7 @@ def field_auth(view):
     def is_authorized(request):
         if not request.user.is_authenticated():
             return False  # redirect to login
-        if request.access.has_laborer:
+        if request.worker.has_laborer:
             return True  # all good
         raise PermissionDenied  # logged in but not allowed
 

@@ -93,7 +93,7 @@
       {% for user, row in report.items %}
       <tr>
         <td class="user">
-          <a href="{% url 'timetracking_user' user.pk %}">{{ user.get_full_name }}</a>
+          <a href="{% url 'timetracking_worker' user.pk %}">{{ user.get_full_name }}</a>
         </td>
         <td>{{ row.day_start|date:"H:i" }}</td>
         <td>{{ row.day_end|date:"H:i" }}</td>

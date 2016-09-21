@@ -10,7 +10,7 @@ class LanguageTestCase(SystoriTestCase):
 
     def setUp(self):
         super().setUp()
-        self.user = UserFactory(company=CompanyFactory(), password='open sesame')
+        self.user = UserFactory(company=CompanyFactory())
         self.client.login(username=self.user.email, password='open sesame')
 
 
