@@ -143,7 +143,8 @@ class ProjectQuantityList(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['object_list'] = self.get_queryset().without_template().filter(phase__in=self.phases)
+        context['object_list'] = self.get_queryset().prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')\
+            .without_template().filter(phase__in=self.phases)
 
         return context
 

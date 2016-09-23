@@ -1,5 +1,5 @@
 {% extends "frame_no_sidebar.html" %}
-{% load i18n bootstrap %}
+{% load i18n bootstrap customformatting %}
 
 {% block sidebar %}{% include "main/sidebar.html" with section='projects' %}{% endblock %}
 
@@ -19,7 +19,7 @@
               <tr>
                 <td width="3%" class="hidden-xs">{{ project.id }}</td>
                 <td width="35%"><a href="{% url 'project.view' project.id %}">{{ project }}</a></td>
-                <td width="47%">
+                <td width="47%">{{ project.approved_total|money }}
                 </td>
                 <td width="15%">
                 </td>

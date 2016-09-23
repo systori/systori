@@ -52,3 +52,10 @@ DATABASES['default'].update({
 })
 
 MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, 'media'))
+
+
+def show_toolbar(request):
+    return True
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK" : show_toolbar,
+}
