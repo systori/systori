@@ -8,6 +8,7 @@ from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
 from django_fsm import FSMField, transition
 from ..task.models import Job
+from systori.lib.accounting.tools import Amount
 from geopy import geocoders
 
 
@@ -206,6 +207,10 @@ class Project(models.Model):
     @property
     def progress_total(self):
         return self.jobs.progress_total()
+
+    @property
+    def approved_total(self):
+        return self.jobs.approved_total()
 
     @property
     def progress_percent(self):

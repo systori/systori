@@ -29,6 +29,9 @@ class JobQuerySet(models.QuerySet):
     def progress_total(self):
         return sum([job.progress_total for job in self])
 
+    def approved_total(self):
+        return sum([job.approved_total for job in self])
+
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
     use_for_related_fields = True
@@ -72,6 +75,7 @@ class Job(models.Model):
     status = FSMField(default=DRAFT, choices=STATE_CHOICES)
 
     STATUS_FOR_PROPOSAL = (DRAFT, PROPOSED)
+    STATUS_FOR_APPROVED = (APPROVED, STARTED, COMPLETED)
 
     objects = JobManager()
 
@@ -150,6 +154,13 @@ class Job(models.Model):
     @property
     def progress_total(self):
         return self._total_calc('progress')
+
+    @property
+    def approved_total(self):
+        if self.status in self.STATUS_FOR_APPROVED:
+            return self.estimate_total
+        else:
+            return Decimal(0.0)
 
     @property
     def progress_percent(self):

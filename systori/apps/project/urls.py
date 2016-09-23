@@ -1,12 +1,12 @@
 from django.conf.urls import url
 from ..user.authorization import office_auth
-from ..accounting.views import PaymentCreate, PaymentDelete
 from .views import *
 from ..task.views import AllProjectsProgress
 
 urlpatterns = [
 
     url(r'^projects/(?P<phase_filter>\w+)?$', office_auth(ProjectList.as_view()), name='projects'),
+    url(r'^projects-quantity/', office_auth(ProjectQuantityList.as_view()), name='projects-quantity'),
     url(r'^create-project$', office_auth(ProjectCreate.as_view()), name='project.create'),
     url(r'^import-project$', office_auth(ProjectImport.as_view()), name='project.import'),
     url(r'^project-(?P<pk>\d+)$', office_auth(ProjectView.as_view()), name='project.view'),

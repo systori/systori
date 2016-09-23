@@ -13,7 +13,6 @@ from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
 from .forms import JobSiteForm, FilterForm
 from ..task.models import Job, TaskGroup
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
-from ..accounting.report import create_invoice_report
 from ..accounting.models import create_account_for_job
 from ..accounting.constants import TAX_RATE
 from .gaeb_utils import gaeb_import
@@ -133,6 +132,20 @@ class ProjectList(FormMixin, ListView):
         context['project_groups'] = project_groups
 
         return self.render_to_response(context)
+
+
+class ProjectQuantityList(ListView):
+    model = Project
+    template_name = "project/project_quantity_list.html"
+
+    phases = ("executing", "planning")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['object_list'] = self.get_queryset().without_template().filter(phase__in=self.phases)
+
+        return context
 
 
 class ProjectView(DetailView):

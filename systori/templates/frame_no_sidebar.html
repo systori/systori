@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block container %}
+  <div class="container-fluid" style="padding-bottom:100px;">
+    <div class="row">
+      <div class="col-sm-12 main">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
