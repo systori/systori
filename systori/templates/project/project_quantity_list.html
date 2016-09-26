@@ -1,37 +1,37 @@
-{% extends "frame_no_sidebar.html" %}
-{% load i18n bootstrap customformatting %}
+{% extends "base.html" %}
+{% load i18n bootstrap customformatting static %}
 
-{% block sidebar %}{% include "main/sidebar.html" with section='projects' %}{% endblock %}
+{% block container %}
+  <div class="container-fluid" style="padding-bottom:100px;">
+    <div class="row">
+      <div class="col-sm-12 main">
 
-{% block content %}
+          <table class="table table-striped" id="table">
+            <thead>
+            <tr>
+              <th class="hidden-xs">#</th>
+              <th>{% trans 'Name' %}</th>
+            </tr>
+            </thead>
+            <tbody>
+                    {% for project in object_list %}
+                      <tr class="project_row" data-project-id="{{ project.id }}">
+                        <td class="hidden-xs">{{ project.id }}</td>
+                        <td>{{ project }}</td>
+                      </tr>
+                    {% endfor %}
+            </tbody>
+          </table>
 
-  <table class="table table-striped" id="table">
-    <thead>
-    <tr>
-      <th class="hidden-xs">#</th>
-      <th>{% trans 'Name' %}</th>
-      <th>{% trans 'Contact' %}</th>
-      <th>{% trans 'Actions' %}</th>
-    </tr>
-    </thead>
-    <tbody>
-            {% for project in object_list %}
-              <tr>
-                <td width="3%" class="hidden-xs">{{ project.id }}</td>
-                <td width="35%"><a href="{% url 'project.view' project.id %}">{{ project }}</a></td>
-                <td width="47%">{{ project.approved_total|money }}
-                </td>
-                <td width="15%">
-                </td>
-              </tr>
-            {% endfor %}
-    </tbody>
-  </table>
-
-{% endblock content %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
 
 {% block extra_js %}
-<script type="text/javascript">
-
-</script>
+  {% if request.is_dartium %}
+    <script type="application/dart" src="{% static "dart/project_list.dart" %}"></script>
+  {% else %}
+    <script src="{% static "build/project_list.dart.js" %}"></script>
+  {% endif %}
 {% endblock %}

@@ -138,15 +138,10 @@ class ProjectQuantityList(ListView):
     model = Project
     template_name = "project/project_quantity_list.html"
 
-    phases = ("executing", "planning")
+    phases = ["executing", "planning"]
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['object_list'] = self.get_queryset().prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')\
-            .without_template().filter(phase__in=self.phases)
-
-        return context
+    def get_queryset(self):
+        return self.model.objects.filter(phase__in=self.phases)
 
 
 class ProjectView(DetailView):
