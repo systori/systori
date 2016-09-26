@@ -325,14 +325,14 @@ class FieldTaskView(UpdateView):
             .prefetch_related('progressreports__worker__user')
 
     def get_context_data(self, **kwargs):
-        context = super(FieldTaskView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         task = self.object
         dailyplan = self.request.dailyplan
         context['in_current_dailyplan'] = dailyplan.id and dailyplan in task.dailyplans.all()
         return context
 
     def form_valid(self, form):
-        redirect = super(FieldTaskView, self).form_valid(form)
+        redirect = super().form_valid(form)
 
         complete_filled = 'complete' in form.changed_data
 
