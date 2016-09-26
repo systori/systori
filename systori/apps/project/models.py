@@ -5,6 +5,7 @@ from django.conf import settings
 from ordered_model.models import OrderedModel
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django.utils.encoding import smart_str
+from django.utils.functional import cached_property
 from django.core.urlresolvers import reverse
 from django_fsm import FSMField, transition
 from ..task.models import Job
@@ -200,17 +201,21 @@ class Project(models.Model):
                 .prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems') \
                 .get()
 
-    @property
+    @cached_property
     def estimate_total(self):
         return self.jobs.estimate_total()
 
-    @property
+    @cached_property
     def progress_total(self):
         return self.jobs.progress_total()
 
-    @property
+    @cached_property
     def approved_total(self):
         return self.jobs.approved_total()
+
+    @cached_property
+    def invoiced_total(self):
+        return self.jobs.invoiced_total()
 
     @property
     def progress_percent(self):

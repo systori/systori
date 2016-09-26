@@ -140,8 +140,16 @@ class ProjectQuantityList(ListView):
 
     phases = ["executing", "planning"]
 
-    def get_queryset(self):
-        return self.model.objects.filter(phase__in=self.phases)
+    # def get_queryset(self):
+    #     return self.model.objects.filter(phase__in=self.phases).\
+    #         prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems').order_by('approved_total')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_list'] = sorted(self.model.objects.filter(phase__in=self.phases).\
+            prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')[:5], key=lambda t: t.approved_total
+                                        , reverse=True)
+        return context
 
 
 class ProjectView(DetailView):

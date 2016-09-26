@@ -32,6 +32,9 @@ class JobQuerySet(models.QuerySet):
     def approved_total(self):
         return sum([job.approved_total for job in self])
 
+    def invoiced_total(self):
+        return sum([job.invoiced for job in self])
+
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
     use_for_related_fields = True
@@ -161,6 +164,15 @@ class Job(models.Model):
             return self.estimate_total
         else:
             return Decimal(0.0)
+
+    @property
+    def invoiced(self):
+        try:
+            invoiced = self.account.invoiced.gross
+        except AttributeError:
+            return Decimal(0.0)
+        else:
+            return invoiced
 
     @property
     def progress_percent(self):
