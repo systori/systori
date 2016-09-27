@@ -42,14 +42,13 @@ def uwsgi():
 
 
 def test():
-    "django test"
+    "django continuous integration test"
     settings = {
         'HOST': 'db',
+        'USER': 'postgres',
         'NAME': 'systori_test',
-        'USER': 'postgres'
     }
-    #local('dropdb -h {HOST} -U {USER} {NAME}'.format(**settings))
-    #local('createdb -h {HOST} -U {USER} {NAME}'.format(**settings))
+    local('createdb -h {HOST} -U {USER} {NAME}'.format(**settings))
     local('DJANGO_SETTINGS_MODULE=systori.settings.test ./manage.py migrate --noinput')
     local('DJANGO_SETTINGS_MODULE=systori.settings.test ./manage.py test systori')
 
