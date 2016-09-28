@@ -292,6 +292,7 @@ class Task(BetterOrderedModel):
     completed_on = models.DateField(blank=True, null=True)
 
     taskgroup = models.ForeignKey(TaskGroup, related_name="tasks")
+    job = models.ForeignKey(Job, related_name="tasks")
     order_with_respect_to = 'taskgroup'
 
     APPROVED = "approved"

@@ -149,6 +149,11 @@ class ProjectQuantityList(ListView):
         context['object_list'] = sorted(self.model.objects.filter(phase__in=self.phases).\
             prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')[:5], key=lambda t: t.approved_total
                                         , reverse=True)
+        test = self.model.objects.raw("select project_project.id from task_task join task_job "
+                                      "on (task_task.job_id=task_job.id) join project_project "
+                                      "on (task_job.project_id=project_project.id) "
+                                      "where project_project.phase = 'executing' or project_project.phase = 'settlement' "
+                                      "group by project_project.id;")
         return context
 
 
