@@ -49,6 +49,33 @@ WHERE
   job.status IN ('approved', 'started')
 GROUP BY project.id, project.phase;"""
 
+SELECT_APPROVED_TOTAL_ALL_PROJECTS = """
+SELECT
+  project_id,
+  SUM(
+    (SELECT
+      SUM(
+        task.qty
+        *
+        (SELECT
+           SUM(li.unit_qty * li.price)
+         FROM task_lineitem AS li
+           JOIN task_taskinstance AS instance ON (li.taskinstance_id=instance.id)
+         WHERE
+           instance.selected = true AND
+           instance.task_id = task.id
+        )
+      )
+    FROM task_task AS task
+    WHERE
+      task.is_optional = false AND
+      task.job_id = job.id
+    )
+  )
+FROM task_job AS job
+WHERE status IN ('approved', 'started')
+GROUP BY project_id;"""
+
 
 class ProjectList(FormMixin, ListView):
     form_class = FilterForm
