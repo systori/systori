@@ -18,6 +18,38 @@ from ..accounting.constants import TAX_RATE
 from .gaeb_utils import gaeb_import
 
 
+SELECT_APPROVED_TOTAL = """
+SELECT
+  project.id,
+  project.phase,
+  SUM(
+    (SELECT
+      SUM(
+        task.qty
+        *
+        (SELECT
+           SUM(li.unit_qty * li.price)
+         FROM task_lineitem AS li
+           JOIN task_taskinstance AS instance ON (li.taskinstance_id=instance.id)
+         WHERE
+           instance.selected = true AND
+           instance.task_id = task.id
+        )
+      )
+    FROM task_task AS task
+    WHERE
+      task.is_optional = false AND
+      task.job_id = job.id
+    )
+  )
+FROM project_project AS project
+  JOIN task_job AS job ON (job.project_id=project.id)
+WHERE
+  project.phase IN ('executing', 'planning') AND
+  job.status IN ('approved', 'started')
+GROUP BY project.id, project.phase;"""
+
+
 class ProjectList(FormMixin, ListView):
     form_class = FilterForm
     queryset = Project._default_manager.all()
@@ -149,11 +181,7 @@ class ProjectQuantityList(ListView):
         context['object_list'] = sorted(self.model.objects.filter(phase__in=self.phases).\
             prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')[:5], key=lambda t: t.approved_total
                                         , reverse=True)
-        test = self.model.objects.raw("select project_project.id from task_task join task_job "
-                                      "on (task_task.job_id=task_job.id) join project_project "
-                                      "on (task_job.project_id=project_project.id) "
-                                      "where project_project.phase = 'executing' or project_project.phase = 'settlement' "
-                                      "group by project_project.id;")
+        test = self.model.objects.raw(SELECT_APPROVED_TOTAL)
         return context
 
 
