@@ -49,11 +49,9 @@ def test():
         'USER': 'postgres',
         'NAME': 'systori_test',
     }
-    local('createdb -h {HOST} -U {USER} {NAME}'.format(**settings))
+    #local('createdb -h {HOST} -U {USER} {NAME}'.format(**settings))
     with shell_env(DJANGO_SETTINGS_MODULE='systori.settings.test'):
-        local('./manage.py migrate --noinput')
-        local('coverage run -p manage.py test systori.apps')
-        local('coverage run -p manage.py test systori.lib')
+        local('coverage run -p manage.py test -v 2 systori.apps systori.lib')
         local('coverage combine')
         local('coverage html -d reports')
 
