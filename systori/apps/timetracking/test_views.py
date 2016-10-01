@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, timedelta
+from unittest import skip
 
 from urllib.parse import urlencode
 
@@ -77,6 +78,7 @@ class ReportViewTest(SystoriTestCase):
         self.company = CompanyFactory()
         self.worker = UserFactory(company=self.company, password=self.password).access.first()
 
+    @skip
     def test_get(self):
         now = timezone.now().replace(hour=18, minute=0, second=0, microsecond=0)
         yesterday = now - timedelta(days=1)
