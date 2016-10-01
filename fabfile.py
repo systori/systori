@@ -3,6 +3,7 @@ import sys
 import json
 from distutils.version import LooseVersion as _V
 from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
+from fabric.context_managers import shell_env
 
 from version import VERSION
 
@@ -49,8 +50,12 @@ def test():
         'NAME': 'systori_test',
     }
     local('createdb -h {HOST} -U {USER} {NAME}'.format(**settings))
-    local('DJANGO_SETTINGS_MODULE=systori.settings.test ./manage.py migrate --noinput')
-    local('DJANGO_SETTINGS_MODULE=systori.settings.test ./manage.py test systori')
+    with shell_env(DJANGO_SETTINGS_MODULE='systori.settings.test'):
+        local('./manage.py migrate --noinput')
+        local('coverage run -p manage.py test systori.apps')
+        local('coverage run -p manage.py test systori.lib')
+        local('coverage combine')
+        local('coverage html -d reports')
 
 
 def makemessages():
