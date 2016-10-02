@@ -36,3 +36,6 @@ ssh:
   known_hosts:
     - github.com
     - bitbucket.org
+
+slack:
+  api: https://hooks.slack.com/services/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
