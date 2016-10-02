@@ -16,6 +16,11 @@ services:
       - "8100:8100"
     depends_on:
       - db
+  test:
+    build: .
+    depends_on:
+      - db
+      - rabbitmq
   db:
     image: postgres
   rabbitmq:

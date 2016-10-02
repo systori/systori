@@ -30,8 +30,21 @@ layers:
     build:
       - pip3 install -r requirements/test.pip
     start: fab test
+    wait-for: db:5432
 
 ssh:
   known_hosts:
     - github.com
     - bitbucket.org
+
+slack:
+  events:
+    - build.failure
+    - test.success
+    - test.failure
+    - deployment.*
+  api: https://hooks.slack.com/services/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
+
+build:
+  branches:
+    - dev

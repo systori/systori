@@ -61,6 +61,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django_dartium',
     'tastypie',
     'rest_framework',
     'ordered_model',
@@ -85,7 +86,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'systori.middleware.mobile.MobileDetectionMiddleware',
-    'systori.middleware.dartium.DartiumCheckMiddleware',
+    'django_dartium.middleware.DartiumDetectionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'systori.apps.user.middleware.SetLanguageMiddleware',
     'systori.middleware.mobile.SetFlavourMiddleware',
@@ -183,7 +184,7 @@ STATICFILES_DIRS = (
     ('css', 'systori/static/css'),
     ('img', 'systori/static/img'),
     ('fonts', 'systori/static/fonts'),
-    ('build', 'systori/dart/build/web'),
+    ('dart/build', 'systori/dart/build/web'),
 )
 
 STATICFILES_FINDERS = (

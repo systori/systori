@@ -41,7 +41,7 @@ if True:
     }
 
 STATICFILES_DIRS += (
-    ('dart', 'systori/dart/web'),
+    ('dart/src', 'systori/dart/web'),
 )
 
 DATABASES['default'].update({

@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n bootstrap staticfiles amount %}
+{% load i18n bootstrap static dartium amount %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='proposals' %}{% endblock %}
 
@@ -85,9 +85,5 @@
       }
     });
   </script>
-  {% if request.is_dartium %}
-    <script type="application/dart" src="{% static "dart/proposal_editor.dart" %}"></script>
-  {% else %}
-    <script src="{% static "build/proposal_editor.dart.js" %}"></script>
-  {% endif %}
+  {% dart "proposal_editor.dart" %}
 {% endblock extra_js %}

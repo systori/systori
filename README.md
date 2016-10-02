@@ -1,6 +1,5 @@
 [![Build Status](https://magnum.travis-ci.com/systori/systori.svg?token=euxuNjuxx7RiAnuoQpWu&branch=dev)](https://magnum.travis-ci.com/systori/systori)
 [![Coverage Status](https://coveralls.io/repos/systori/systori/badge.svg?branch=dev&service=github&t=VAhuEl)](https://coveralls.io/github/systori/systori?branch=dev)  
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/systori_ci.svg?auth=9be86bfddf1c8eaf29b1332187627db9)](https://saucelabs.com/u/systori_ci)
 
 
 ## About Systori
