@@ -44,3 +44,7 @@ slack:
     - test.failure
     - deployment.*
   api: https://hooks.slack.com/services/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
+
+build:
+  branches:
+    - dev
