@@ -343,7 +343,7 @@ abstract class EditableElement extends UbrElement {
         input_views.forEach((Element e) {
 
             // we listen for paste events and try to clean up the pasted data
-            e.onPaste.listen((Event event) {
+            e.onPaste.listen((ClipboardEvent event) {
 
                 event.preventDefault();
 
