@@ -3,7 +3,7 @@ from django.utils.translation import activate
 
 from .models import User
 from .forms import UserForm
-from ..company.models import Company, Access
+from ..company.models import Company, Worker
 
 
 class CreateUserDataMixin:
@@ -14,7 +14,7 @@ class CreateUserDataMixin:
         self.password = 'pass'
         self.username = 'test@damoti.com'
         self.user = User.objects.create_superuser(self.username, self.password)
-        Access.objects.create(user=self.user, company=self.company)
+        Worker.objects.create(user=self.user, company=self.company)
 
 
 class TestUserForm(CreateUserDataMixin, TestCase):
@@ -31,4 +31,5 @@ class TestUserForm(CreateUserDataMixin, TestCase):
     def test_clean_password(self):
         self.assertEquals("The two password fields didn't match.",
                           UserForm({'first_name': 'foo', 'password1': 'foo'}).errors['password2'][0])
-        self.assertTrue(UserForm({'first_name': 'foo', 'password1': 'foo', 'password2': 'foo'}).is_valid())
+        form = UserForm({'first_name': 'foo', 'password1': 'foo', 'password2': 'foo'})
+        self.assertTrue(form.is_valid(), form.errors)

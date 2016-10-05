@@ -13,10 +13,12 @@ class TimerStartSerializer(serializers.ModelSerializer):
         fields = ('start_latitude', 'start_longitude')
 
     def create(self, validated_data):
-        return Timer.launch(user=self.context['user'], **validated_data)
+        return Timer.launch(worker=self.context['worker'], **validated_data)
 
 
 class TimerStopSerializer(serializers.ModelSerializer):
+    end_latitude = serializers.DecimalField(max_digits=11, decimal_places=8, required=True)
+    end_longitude = serializers.DecimalField(max_digits=11, decimal_places=8, required=True)
 
     class Meta:
         model = Timer

@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n staticfiles %}
+{% load i18n static dartium %}
 
 {% block head %}
 {{ block.super }}
@@ -12,7 +12,7 @@
 {% block container %}
   <div class="container">
 
-    {% if access.has_staff %}
+    {% if worker.has_staff %}
 
       <div class="panel panel-primary">
 
@@ -25,6 +25,8 @@
               class="pull-right">&raquo;</span></a>
           <a href="{% url 'field.planning' %}" class="list-group-item">{% trans 'Planning' %} <span
               class="pull-right">&raquo;</span></a>
+          <a href="{% url 'field.equipment' %}" class="list-group-item">{% trans 'Equipment' %} <span
+              class="pull-right">&raquo;</span></a>
         </div>
 
       </div>
@@ -33,7 +35,7 @@
 
     <div class="day-separator">
       {% now "l" %}, {% now "DATE_FORMAT" %}
-      {% if access.is_laborer or access.is_foreman %}
+      {% if worker.is_laborer or worker.is_foreman %}
         <a href="{% url 'field.projects' %}"
            class="btn btn-default btn-contextual btn-add-plan">{% trans "Projects" %} &raquo;</a>
       {% endif %}
@@ -60,9 +62,5 @@
 {% endblock %}
 
 {% block extra_js %}
-  {% if request.is_dartium %}
-    <script type="application/dart" src="{% static "dart/timetracking.dart" %}"></script>
-  {% else %}
-    <script src="{% static "build/timetracking.dart.js" %}"></script>
-  {% endif %}
+  {% dart "timetracking.dart" %}
 {% endblock extra_js %}

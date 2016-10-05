@@ -1,5 +1,4 @@
+-r app.pip
 -r test.pip
-django-debug-toolbar
-django-extensions
-fabric3
-ipython
+django-debug-toolbar==1.5
+django-extensions==1.7.2

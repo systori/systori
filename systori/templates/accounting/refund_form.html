@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n staticfiles bootstrap customformatting ubrutils amount %}
+{% load i18n static dartium bootstrap customformatting ubrutils amount %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
@@ -91,9 +91,5 @@
 {% endblock %}
 
 {% block extra_js %}
-  {% if request.is_dartium %}
-    <script type="application/dart" src="{% static "dart/refund_editor.dart" %}"></script>
-  {% else %}
-    <script src="{% static "build/refund_editor.dart.js" %}"></script>
-  {% endif %}
+  {% dart "refund_editor.dart" %}
 {% endblock extra_js %}

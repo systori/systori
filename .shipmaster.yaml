@@ -30,6 +30,7 @@ layers:
     build:
       - pip3 install -r requirements/test.pip
     start: fab test
+    wait-for: db:5432
 
 ssh:
   known_hosts:

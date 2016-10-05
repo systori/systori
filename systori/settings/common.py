@@ -3,7 +3,8 @@
 # Pre-populates all addresses and used by geocoding
 # for address-> lat/long coordinates.
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os, sys
+import os
+import sys
 
 DEFAULT_COUNTRY = "Deutschland"
 
@@ -14,10 +15,16 @@ SCHEMA_USER_RELATED_NAME = 'companies'
 
 SHARED_MODELS = [
     'company.access',
+    'company.worker',
     'user.user',
     'tastypie.apiaccess',
     'tastypie.apikey'
 ]
+
+BROKER_URL = 'amqp://guest:guest@192.168.0.99:5672//'
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]
 
 # Django Settings
 
@@ -47,16 +54,16 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
+#    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django_dartium',
     'tastypie',
     'rest_framework',
-    'django_mobile',
     'ordered_model',
     'bootstrapform',
     'datetimewidget',
@@ -78,28 +85,28 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'systori.middleware.mobile.UbrMobileDetectionMiddleware',
-    'systori.middleware.dartium.DartiumCheckMiddleware',
+    'systori.middleware.mobile.MobileDetectionMiddleware',
+    'django_dartium.middleware.DartiumDetectionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'systori.apps.user.middleware.SetLanguageMiddleware',
-    'django_mobile.middleware.SetFlavourMiddleware',
+    'systori.middleware.mobile.SetFlavourMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'systori.apps.company.middleware.CompanyMiddleware',
-    'systori.apps.company.middleware.AccessMiddleware',
+    'systori.apps.company.middleware.WorkerMiddleware',
     'systori.apps.project.middleware.ProjectMiddleware',
     'systori.apps.field.middleware.FieldMiddleware'
 )
 
 TEMPLATES = [
     {
-        'BACKEND' : 'django.template.backends.django.DjangoTemplates',
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
         ],
         'APP_DIRS': True,
-        'OPTIONS' : {
+        'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.i18n',
@@ -108,7 +115,6 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
-                'django_mobile.context_processors.flavour',
             ],
         },
     },
@@ -178,7 +184,7 @@ STATICFILES_DIRS = (
     ('css', 'systori/static/css'),
     ('img', 'systori/static/img'),
     ('fonts', 'systori/static/fonts'),
-    ('build', 'systori/dart/build/web'),
+    ('dart/build', 'systori/dart/build/web'),
 )
 
 STATICFILES_FINDERS = (

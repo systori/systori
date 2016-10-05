@@ -1,4 +1,4 @@
-{% load i18n staticfiles %}
+{% load i18n static dartium %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 
@@ -109,11 +109,7 @@
 <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
 <script src="{% static "js/jquery-ui.min.js" %}"></script>
 <script src="{% static "js/bootstrap.min.js" %}"></script>
-{% if request.is_dartium %}
-  <script src="{% static "dart/packages/web_components/webcomponents-lite.min.js" %}"></script>
-{% else %}
-  <script src="{% static "build/packages/web_components/webcomponents-lite.min.js" %}"></script>
-{% endif %}
+{% webcomponents 'lite' %}
 {% endblock base_js %}
 
 {% block lang_js %}<script src="{% static "js/language_picker.js" %}"></script>{% endblock lang_js %}

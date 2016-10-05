@@ -15,13 +15,16 @@ from reportlab.lib.units import mm
 from reportlab.lib import colors, pagesizes, units
 
 
-def calculate_table_width_and_pagesize(letterhead):
+def get_available_width_height_and_pagesize(letterhead):
     document_unit = getattr(units, letterhead.document_unit)
     pagesize = getattr(pagesizes, letterhead.document_format)
     if letterhead.orientation == 'landscape':
         pagesize = pagesizes.landscape(pagesize)
-    margin = letterhead.left_margin + letterhead.right_margin
-    return pagesize[0] - float(margin) * document_unit, pagesize
+    width_margin = letterhead.left_margin + letterhead.right_margin
+    height_margin = letterhead.top_margin + letterhead.bottom_margin
+    return pagesize[0] - float(width_margin) * document_unit,\
+           pagesize[1] - float(height_margin) * document_unit,\
+           pagesize
 
 
 def chunk_text(txt, max_length=1500):
@@ -312,28 +315,56 @@ class ContinuationTable(Table):
             table._lastTable = True
 
 
-class TableFormatter:
+class TableStyler:
     font_size = 10
 
-    def __init__(self, columns, width, font, pad=5*mm, trim_ends=True, debug=False):
-        assert columns.count(0) == 1, "Must have exactly one stretch column."
-        self._maximums = columns.copy()
-        self._available_width = width
+    def __init__(self, font, base_style=True, debug=False):
         self.font = font.normal
-        self._pad = pad
-        self._trim_ends = trim_ends
-        self.columns = columns
         self.lines = []
-        self.style = [
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('FONTNAME', (0, 0), (-1, -1), self.font.fontName),
-            ('FONTSIZE', (0, 0), (-1, -1), self.font_size)
-        ]
+        self.style = []
+        if base_style:
+            self.style += [
+                ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                ('FONTNAME', (0, 0), (-1, -1), self.font.fontName),
+                ('FONTSIZE', (0, 0), (-1, -1), self.font_size)
+            ]
         if debug:
             self.style += [
                 ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
                 ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
             ]
+
+    def get_table(self, table_class=Table, **kwargs):
+        return table_class(self.lines, style=self.style, **kwargs)
+
+    def row(self, *line):
+        self.lines.append(line)
+
+    @property
+    def _row_num(self):
+        return len(self.lines)-1
+
+    def row_style(self, name, from_column, to_column, *args):
+        args = tuple(arg.fontName if isinstance(arg, ParagraphStyle) else arg for arg in args)
+        self.style.append((name, (from_column, self._row_num), (to_column, self._row_num))+args)
+
+    def keep_previous_n_rows_together(self, n):
+        self.style.append(('NOSPLIT', (0, self._row_num-n+1), (0, self._row_num)))
+
+    def keep_next_n_rows_together(self, n):
+        self.style.append(('NOSPLIT', (0, self._row_num+n-1), (0, self._row_num)))
+
+
+class TableFormatter(TableStyler):
+
+    def __init__(self, columns, width, font, pad=5*mm, trim_ends=True, debug=False):
+        super().__init__(font, debug)
+        assert columns.count(0) == 1, "Must have exactly one stretch column."
+        self._maximums = columns.copy()
+        self._available_width = width
+        self._pad = pad
+        self._trim_ends = trim_ends
+        self.columns = columns
 
     def get_table(self, table_class=Table, **kwargs):
         return table_class(self.lines, colWidths=self.get_widths(), style=self.style, **kwargs)
@@ -366,20 +397,6 @@ class TableFormatter:
         widths[widths.index(0)] = self._available_width - sum(widths)
 
         return widths
-
-    @property
-    def _row_num(self):
-        return len(self.lines)-1
-
-    def row_style(self, name, from_column, to_column, *args):
-        args = tuple(arg.fontName if isinstance(arg, ParagraphStyle) else arg for arg in args)
-        self.style.append((name, (from_column, self._row_num), (to_column, self._row_num))+args)
-
-    def keep_previous_n_rows_together(self, n):
-        self.style.append(('NOSPLIT', (0, self._row_num-n+1), (0, self._row_num)))
-
-    def keep_next_n_rows_together(self, n):
-        self.style.append(('NOSPLIT', (0, self._row_num+n-1), (0, self._row_num)))
 
 
 def get_address_label(document, font):

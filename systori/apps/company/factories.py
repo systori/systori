@@ -9,6 +9,7 @@ from .models import Company
 
 class CompanyFactory(factory.django.DjangoModelFactory):
     name = fuzzy.FuzzyText(length=15)
+    # This should be left static to avoid conflicts
     schema = 'testcompany'
 
     class Meta:

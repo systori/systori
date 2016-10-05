@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n staticfiles field_app %}
+{% load i18n static dartium field_app %}
 
 {% block container %}
 
@@ -73,7 +73,7 @@
 
           <div class="day-separator">
             {{ plan.jobsite.project.id }} - {{ plan.jobsite.project.name }}
-            {% if access.has_foreman and plan.day >= today %}
+            {% if worker.has_foreman and plan.day >= today %}
               <a href="{% add_daily_plan_url plan.jobsite.project plan.day %}?origin={{ request.path }}%23project-{{ plan.jobsite.project.id }}"
                  class="btn btn-primary btn-contextual btn-add-plan">{% trans 'Add' %}</a>
             {% endif %}
@@ -84,7 +84,7 @@
         {% include "field/dailyplan.html" with dailyplan=plan %}
 
       {% endfor %}
-      {% if access.has_foreman and selected_day >= today %}
+      {% if worker.has_foreman and selected_day >= today %}
         <div class="row">
           <div class="col-xs-12">
             <div class="list-group">
@@ -112,9 +112,5 @@
 
 {% block extra_js %}
   {% csrf_token %}
-  {% if request.is_dartium %}
-    <script type="application/dart" src="{% static "dart/field_planning.dart" %}"></script>
-  {% else %}
-    <script src="{% static "build/field_planning.dart.js" %}"></script>
-  {% endif %}
+  {% dart "field_planning.dart" %}
 {% endblock extra_js %}

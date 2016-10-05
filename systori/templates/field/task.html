@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n l10n staticfiles customformatting field_app %}
+{% load i18n l10n static dartium customformatting field_app %}
 
 {% block container %}
   <div class="container">
@@ -105,7 +105,7 @@
       <ul class="list-group">
         {% for report in task.progressreports.all %}
           <li class="list-group-item clearfix"><span
-              class="badge">{{ report.complete|stringformat:'d' }} {{ task.unit }} / {{ report.complete_percent }}%</span>{{ report.timestamp }}<br/>{{ report.access.user.get_full_name }}
+              class="badge">{{ report.complete|stringformat:'d' }} {{ task.unit }} / {{ report.complete_percent }}%</span>{{ report.timestamp }}<br/>{{ report.worker.get_full_name }}
               {% if report.comment %}<br/>{{ report.comment }}{% endif %}</li>
         {% endfor %}
       </ul>
@@ -117,9 +117,5 @@
 
 
 {% block extra_js %}
-  {% if request.is_dartium %}
-    <script type="application/dart" src="{% static "dart/field.dart" %}"></script>
-  {% else %}
-    <script src="{% static "build/field.dart.js" %}"></script>
-  {% endif %}
+  {% dart "field.dart" %}
 {% endblock extra_js %}

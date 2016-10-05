@@ -47,7 +47,7 @@
           {{ day|date:"D" }}, {{ day|date:"DATE_FORMAT" }}
         {% endif %}
 
-        {% if access.has_laborer %}
+        {% if worker.has_laborer %}
 
           {% if day.isoformat != request.GET.copy_source_date %}
 
@@ -84,11 +84,11 @@
 
         {% comment %}Only selected_day could be empty.{% endcomment %}
 
-        {% if access.has_staff and day < today %}
+        {% if worker.has_staff and day < today %}
 
           <div>{% trans 'Cannot change the past.' %}</div>
 
-        {% elif access.has_staff and day >= today and latest_daily_plan %}
+        {% elif worker.has_staff and day >= today and latest_daily_plan %}
 
           <a href="{% url 'field.dailyplan.copy-paste' project.id day.isoformat latest_daily_plan.day.isoformat %}"
              class="btn btn-success">{% blocktrans with otherday=latest_daily_plan.day %}Copy from {{ otherday }}.{% endblocktrans %}</a>

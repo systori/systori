@@ -1,9 +1,9 @@
 from datetime import date, timedelta
 from django.views.generic import View, TemplateView
-from django_mobile import get_flavour
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from systori.middleware.mobile import get_flavour
 from ..project.models import Project, JobSite, DailyPlan
 from ..task.models import LineItem
 from ..field.views import FieldDashboard
@@ -33,7 +33,7 @@ class IndexView(View):
         if request.user.is_authenticated():
             if not request.company:
                 return HttpResponseRedirect(reverse('companies'))
-            if get_flavour() == 'full' and request.access.has_staff:
+            if get_flavour() == 'full' and request.worker.has_staff:
                 view = OfficeDashboard.as_view()
             else:
                 view = FieldDashboard.as_view()
@@ -48,9 +48,7 @@ class DayBasedOverviewView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DayBasedOverviewView, self).get_context_data(**kwargs)
 
-        if not hasattr(self.request, 'selected_day'):
-            self.request.selected_day = date.today()
-        selected_day = self.request.selected_day
+        selected_day = date(*map(int, kwargs['selected_day'].split('-'))) if kwargs['selected_day'] else date.today()
 
         context['today'] = date.today()
         context['previous_day'] = selected_day - timedelta(days=1)

@@ -36,7 +36,10 @@ project_urls = [
 
 urlpatterns = [
     url(r'^$', field_auth(FieldDashboard.as_view()), name='field.dashboard'),
+    # equipment
+    url(r'^equipment$', field_auth(FieldEquipmentList.as_view()), name='field.equipment'),
     url(r'^projects$', field_auth(FieldProjectList.as_view()), name='field.projects'),
+
     url(r'^project-(?P<project_pk>\d+)/', include(project_urls)),
     url(r'^jobsite-(?P<jobsite_pk>\d+)/(?P<dailyplan_url_id>\d{4}-\d{2}-\d{2}-\d+)/', include(dailyplan_urls)),
     url(r'^dailyplan-(?P<pk>\d+)/notes$', field_auth(FieldDailyPlanNotes.as_view()), name='field.dailyplan.save.notes'),

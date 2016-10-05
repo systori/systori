@@ -18,7 +18,7 @@ def create_task_data(self, create_user=True, create_company=True):
     if create_company:
         self.company = CompanyFactory()
     if create_user:
-        self.user = UserFactory(company=self.company, password='open sesame')
+        self.user = UserFactory(company=self.company)
     letterhead_pdf = os.path.join(settings.BASE_DIR, 'apps/document/test_data/letterhead.pdf')
     self.letterhead = Letterhead.objects.create(name="Test Letterhead", letterhead_pdf=letterhead_pdf)
     DocumentSettings.objects.create(language='de',

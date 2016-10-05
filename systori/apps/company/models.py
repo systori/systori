@@ -1,13 +1,16 @@
-from datetime import date
+import pytz
+from datetime import date, time
+from typing import List
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 from tuath.models import AbstractSchema
+from ..timetracking.utils import BreakSpan
 
 
 class Company(AbstractSchema):
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Access', blank=True, related_name='companies')
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Worker', blank=True, related_name='companies')
 
     def url(self, request):
         port = ''
@@ -15,13 +18,28 @@ class Company(AbstractSchema):
             port = ':'+request.META['HTTP_HOST'].split(':')[1]
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
 
-    def active_users(self):
-        return self.users.filter(companies_access__is_active=True)
+    def active_workers(self):
+        return self.workers.filter(is_active=True).select_related('user')
+
+    @property
+    def breaks(self) -> List[BreakSpan]:
+        """ TODO: store in database for each company. """
+        return [
+            BreakSpan(time(9, 00), time(9, 30)),
+            BreakSpan(time(12, 30), time(13, 00)),
+        ]
+
+    @property
+    def timezone(self) -> pytz.tzinfo.StaticTzInfo:
+        """ TODO: store in database for each company. """
+        # return pytz.timezone(self.timezone_name)
+        return pytz.timezone(settings.TIME_ZONE)
 
 
-class Access(models.Model):
-    company = models.ForeignKey('Company', related_name="users_access")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="companies_access")
+class Worker(models.Model):
+
+    company = models.ForeignKey('Company', related_name="workers")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="access")
 
     class Meta:
         unique_together = ("company", "user")
@@ -79,3 +97,21 @@ class Access(models.Model):
     def todays_plans(self):
         return self.dailyplans.filter(day=date.today())
 
+    @property
+    def get_full_name(self):
+        return self.user.get_full_name()
+
+    @property
+    def first_name(self):
+        return self.user.first_name
+
+    @property
+    def last_name(self):
+        return self.user.last_name
+
+    @property
+    def email(self):
+        return self.user.email
+
+    def __str__(self):
+        return self.user.get_full_name()

@@ -14,7 +14,7 @@ from systori.lib.templatetags.customformatting import ubrdecimal, money
 from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable
 from .style import chunk_text, force_break, p, b
 from .style import NumberedLetterheadCanvas, NumberedCanvas
-from .style import calculate_table_width_and_pagesize
+from .style import get_available_width_height_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .font import FontManager
 
@@ -173,7 +173,7 @@ def render(proposal, letterhead, with_line_items, format):
 
         font = FontManager(letterhead.font)
 
-        table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
+        available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
 
         proposal_date = date_format(date(*map(int, proposal['document_date'].split('-'))), use_l10n=True)
 
@@ -186,7 +186,7 @@ def render(proposal, letterhead, with_line_items, format):
             get_address_label_spacer(proposal),
 
             heading_and_date(proposal['title'], proposal_date, font,
-                             table_width, debug=DEBUG_DOCUMENT),
+                             available_width, debug=DEBUG_DOCUMENT),
 
             Spacer(0, 4*mm),
 
@@ -194,13 +194,13 @@ def render(proposal, letterhead, with_line_items, format):
 
             Spacer(0, 4*mm)
 
-        ] + collate_tasks(proposal, font, table_width) + [
+        ] + collate_tasks(proposal, font, available_width) + [
 
             Spacer(0, 10*mm),
 
             KeepTogether(Paragraph(force_break(proposal['footer']), font.normal)),
 
-        ] + (collate_lineitems(proposal, table_width, font) if with_line_items else [])
+        ] + (collate_lineitems(proposal, available_width, font) if with_line_items else [])
 
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)

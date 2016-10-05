@@ -32,7 +32,7 @@
 
         <ul class="nav navbar-nav">
           <li><a href="{{ previous_day_url }}">{% trans 'back' %}</a></li>
-          <li><a>{{ request.selected_day|date:"l" }} {{ request.selected_day|localize }}</a></li>
+          <li><a>{{ selected_day|date:"l" }} {{ selected_day|localize }}</a></li>
           <li><a href="{{ next_day_url }}">{% trans 'next' %}</a></li>
         </ul>
         <div class="nav navbar-text progress pull-right" style="width: 300px;">
@@ -60,14 +60,14 @@
             <h4>{{ plan.jobsite.city }}</h4>
             <hr>
 
-          {% for worker in plan.workers.all %}
-            <h5 class="fit-text text-info">{% show_user_status worker.access.user %}{{ worker.access.user.get_full_name }}</h5>
+          {% for plan_worker in plan.workers.all %}
+            <h5 class="fit-text text-info">{% show_user_status plan_worker.user %}{{ plan_worker.get_full_name }}</h5>
           {% endfor %}
             
           {% if plan.equipment.count > 0 %}
           <hr>
             {% for equipment in plan.equipment.all %}
-              <h5 class="fit-text text-warning">{{ equipment }}</h5>
+              <h5 class="fit-text text-warning">{{ equipment|safe }}</h5>
             {% endfor %}
           {% endif %}
 

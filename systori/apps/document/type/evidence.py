@@ -11,7 +11,7 @@ from django.utils.translation import ugettext as _
 from systori.lib.templatetags.customformatting import ubrdecimal
 
 from .style import p, b, br, nr
-from .style import calculate_table_width_and_pagesize
+from .style import get_available_width_height_and_pagesize
 from .style import LetterheadCanvas, SystoriDocument
 from .font import FontManager
 
@@ -25,7 +25,7 @@ def render(project, letterhead):
 
         font = FontManager(letterhead.font)
 
-        table_width, pagesize = calculate_table_width_and_pagesize(letterhead)
+        available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
 
         proposal_date = date_format(date.today(), use_l10n=True)
 

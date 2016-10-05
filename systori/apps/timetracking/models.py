@@ -1,4 +1,3 @@
-import json
 from datetime import timedelta
 
 from django.db import models
@@ -6,35 +5,28 @@ from django.db.models import Q
 from django.utils import timezone
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext as __
-from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError
 
 from ..project.models import JobSite
 from .managers import TimerQuerySet
+from .utils import round_to_nearest_multiple
 
 
 class Timer(models.Model):
-    CORRECTION = 5
-    WORK = 10
-    EDUCATION = 15
-    HOLIDAY = 20
-    ILLNESS = 30
+    CORRECTION = 'correction'
+    WORK = 'work'
+    TRAINING = 'training'
+    HOLIDAY = 'holiday'
+    ILLNESS = 'illness'
 
     KIND_CHOICES = (
         (WORK, _('Work')),
         (HOLIDAY, _('Holiday')),
         (ILLNESS, _('Illness')),
         (CORRECTION, _('Correction')),
-        (EDUCATION, _('Education')),
+        (TRAINING, _('Training')),
     )
     FULL_DAY_KINDS = (WORK, HOLIDAY, ILLNESS)
-
-    KIND_TO_STRING = {
-        CORRECTION: 'correction',
-        WORK: 'work',
-        EDUCATION: 'education',
-        HOLIDAY: 'holiday',
-        ILLNESS: 'illness'
-    }
 
     DAILY_BREAK = 60 * 60  # seconds
     WORK_HOURS = 60 * 60 * 8  # seconds
@@ -45,23 +37,24 @@ class Timer(models.Model):
         WORK: lambda start, end: (end - start).total_seconds(),
         ILLNESS: lambda start, end: (end - start).total_seconds(),
         HOLIDAY: lambda start, end: (end - start).total_seconds(),
-        CORRECTION: lambda start, end: (end - start).total_seconds()
+        CORRECTION: lambda start, end: (end - start).total_seconds(),
+        TRAINING: lambda start, end: (end - start).total_seconds()
     }
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    worker = models.ForeignKey('company.Worker', related_name='timers')
     date = models.DateField(db_index=True)
     start = models.DateTimeField(blank=True, null=True, db_index=True)
     end = models.DateTimeField(blank=True, null=True, db_index=True)
     duration = models.IntegerField(default=0, help_text=_('in seconds'))
-    kind = models.PositiveIntegerField(default=WORK, choices=KIND_CHOICES, db_index=True)
-    altered_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name='timers_altered', blank=True, null=True)
+    kind = models.CharField(default=WORK, choices=KIND_CHOICES, db_index=True, max_length=32)
     comment = models.CharField(max_length=1000, blank=True)
     start_latitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     start_longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     end_latitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     end_longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     job_site = models.ForeignKey(JobSite, blank=True, null=True)
+    is_auto_started = models.BooleanField(default=False)
+    is_auto_stopped = models.BooleanField(default=False)
 
     objects = TimerQuerySet.as_manager()
 
@@ -71,16 +64,17 @@ class Timer(models.Model):
         ordering = ('start',)
 
     def __str__(self):
-        return 'Timer for user#{}: start={}, end={}, duration={}, date={}'.format(
-            self.user_id, self.start, self.end, self.duration, self.date
+        return 'Timer for worker#{}: start={}, end={}, duration={}, date={}'.format(
+            self.worker_id, self.start, self.end, self.duration, self.date
         )
 
     @classmethod
-    def launch(cls, user, **kwargs):
+    def launch(cls, worker, **kwargs):
         """
         Convenience method for consistency (so the class has not just stop but launch method as well)
         """
-        timer = cls(user=user, **kwargs)
+        timer = cls(worker=worker, **kwargs)
+        timer.clean()
         timer.save()
         return timer
 
@@ -94,40 +88,41 @@ class Timer(models.Model):
 
     @property
     def is_busy(self):
-        return self.kind in (self.EDUCATION, self.HOLIDAY, self.ILLNESS)
+        return self.kind in (self.TRAINING, self.HOLIDAY, self.ILLNESS)
 
     def _pre_save_for_generic(self):
         if not self.start:
             self.start = timezone.now()
         if self.end:
-            self.duration = self.get_duration_seconds(self.end)
+            self.duration = round_to_nearest_multiple(self.get_duration_seconds(self.end))
         elif self.duration:
             self.end = self.start + timedelta(seconds=self.duration)
 
-    def _validate(self):
+    def clean(self):
         if self.pk:
             return
-        user_timers = Timer.objects.filter(user=self.user)
-        if not (self.end or self.duration) and user_timers.filter_running().exists():
-            raise ValidationError(_('Timer already running'))
+        worker_timers = Timer.objects.filter(worker=self.worker)
+        if not (self.end or self.duration) and worker_timers.filter_running().exists():
+            raise ValidationError(__('Timer already running'))
         if self.start:
-            overlapping_timer = user_timers.filter(start__lte=self.start).filter(
+            overlapping_timer = worker_timers.filter(start__lte=self.start).filter(
                 Q(end__gte=self.start) | Q(end__isnull=True)
             ).first()
             if overlapping_timer:
                 if overlapping_timer.end:
-                    message = _(
+                    message = __(
                         'Overlapping timer ({:%d.%m.%Y %H:%M}—{:%d.%m.%Y %H:%M}) already exists'
                     ).format(overlapping_timer.start, overlapping_timer.end)
                 else:
-                    message = _(
+                    message = __(
                         'A potentially overlapping timer (started on {:%d.%m.%Y %H:%M}) is already running'
                     ).format(overlapping_timer.start)
                 raise ValidationError(message)
+        if self.start and self.end and self.start > self.end:
+            raise ValidationError(__('Timer cannot be negative'))
 
     def save(self, *args, **kwargs):
         self._pre_save_for_generic()
-        self._validate()
 
         if not self.date:
             self.date = self.start.date() if self.start else timezone.now().date()
@@ -148,9 +143,11 @@ class Timer(models.Model):
         from .utils import format_seconds
         return format_seconds(self.get_duration_seconds())
 
-    def stop(self, ignore_short_duration=True):
+    def stop(self, end=None, ignore_short_duration=True, **kwargs):
         assert self.pk
-        self.end = timezone.now()
+        self.end = end or timezone.now()
+        for field, value in kwargs.items():
+            setattr(self, field, value)
         if not ignore_short_duration or self.get_duration_seconds() > self.SHORT_DURATION_THRESHOLD:
             self.save()
         else:

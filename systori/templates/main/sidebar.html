@@ -16,8 +16,8 @@
   <li {% if section == 'progressreports' %}class="active"{% endif %}><a
       href="{% url 'project.progress.all' %}">{% trans 'Progress Reports' %}</a></li>
 
-  {% if access.has_owner %}<li {% if section == 'invoices' %}class="active"{% endif %}><a
-      href="{% url 'invoices' %}">{% trans 'Invoices' %}</a></li>{% endif %}
+  {% if worker.has_owner %}<li {% if section == 'invoices' %}class="active"{% endif %}><a
+      href="{% url 'invoice.list' %}">{% trans 'Invoices' %}</a></li>{% endif %}
 
   <li {% if section == 'templates' %}class="active"{% endif %}><a
       href="{% url 'templates' %}">{% trans 'Templates' %}</a></li>
@@ -27,6 +27,11 @@
   <li {% if section == 'accounts' %}class="active"{% endif %}><a
       href="{% url 'accounts' %}">{% trans 'Accounts' %}</a></li>
 
-  {% if access.has_staff %}<li {% if section == 'timetracking' %}class="active"{% endif %}><a
-      href="{% url 'timetracking' %}">{% trans 'Timetracking' %}</a></li>{% endif %}
+{% if worker.has_staff %}
+  <li {% if section == 'timetracking' %}class="active"{% endif %}><a
+      href="{% url 'timetracking' %}">{% trans 'Timetracking' %}</a></li>
+  <li {% if section == 'timesheets' %}class="active"{% endif %}><a
+      href="{% url 'timesheets' %}">{% trans 'Timesheets' %}</a></li>
+{% endif %}
+
 </ul>

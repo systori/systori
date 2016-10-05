@@ -3,6 +3,7 @@ import sys
 import json
 from distutils.version import LooseVersion as _V
 from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
+from fabric.context_managers import shell_env
 
 from version import VERSION
 
@@ -36,6 +37,7 @@ def uwsgi():
           " --module=systori.wsgi"
           " --socket=0.0.0.0:8000"
           " --static-map /static=/static"
+          " --attach-daemon=\"celery -A systori worker -B\""
           " --env DJANGO_SETTINGS_MODULE={}".format(
               os.environ['DJANGO_SETTINGS_MODULE']))
 
@@ -241,3 +243,8 @@ def jenkins():
     local('coverage html')
 
     slack('build finished')
+
+def git():
+    "git usage help and cheatsheet"
+    print("Start a new branch (based on dev)...")
+    print("git checkout -b <new_branch> dev")

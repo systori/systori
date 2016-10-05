@@ -3,7 +3,7 @@ from django.forms import ModelForm
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm as BaseAuthenticationForm
 from .models import *
-from ..company.models import Access
+from ..company.models import Worker
 
 
 class UserForm(ModelForm):
@@ -15,6 +15,11 @@ class UserForm(ModelForm):
     password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput, required=False)
     password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput, required=False,
                                 help_text=_("Enter the same password as above, for verification."))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            del self.fields['date_joined']
 
     def clean_email(self):
         if not self.cleaned_data['email']:
@@ -48,17 +53,17 @@ class UserForm(ModelForm):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'password1', 'password2']
+        fields = ['first_name', 'last_name', 'email', 'password1', 'password2', 'date_joined']
 
 
 class AuthenticationForm(BaseAuthenticationForm):
     username = forms.CharField(max_length=254, initial='')
 
 
-class AccessForm(ModelForm):
+class WorkerForm(ModelForm):
 
     class Meta:
-        model = Access
+        model = Worker
         fields = ['is_active', 'is_owner', 'is_staff', 'is_foreman', 'is_laborer']
 
 

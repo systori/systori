@@ -10,3 +10,5 @@ git+ssh://git@django-tuath.bitbucket.org/damoti/django-tuath.git
 
 git+https://github.com/damoti/pyth.git@pyth-py3
 #-e ../pyth
+
+-e .

@@ -139,9 +139,9 @@ class Project(models.Model):
     def is_finished(self):
         return self.phase == Project.FINISHED
 
-    def phases(self, access):
+    def phases(self, worker):
         phases = []
-        available = list(self.get_available_user_phase_transitions(access.user))
+        available = list(self.get_available_user_phase_transitions(worker.user))
         is_past = True
         for name, label in self.PHASE_CHOICES:
 
@@ -188,9 +188,9 @@ class Project(models.Model):
     def stop(self):
         pass
 
-    def states(self, access):
+    def states(self, worker):
         states = []
-        available = list(self.get_available_user_state_transitions(access.user))
+        available = list(self.get_available_user_state_transitions(worker.user))
         for name, label in self.STATE_CHOICES:
 
             transition_name = None
@@ -308,7 +308,7 @@ class DailyPlan(models.Model):
     """
     jobsite = models.ForeignKey(JobSite, related_name="dailyplans")
     day = models.DateField(_("Day"), default=date.today)
-    accesses = models.ManyToManyField('company.Access', through='TeamMember', related_name="dailyplans")
+    workers = models.ManyToManyField('company.Worker', through='TeamMember', related_name="dailyplans")
     tasks = models.ManyToManyField('task.Task', related_name="dailyplans")
     equipment = models.ManyToManyField('equipment.Equipment', through='EquipmentAssignment', related_name="dailyplans")
 
@@ -325,7 +325,7 @@ class DailyPlan(models.Model):
         return '{}-{}'.format(self.day.isoformat(), self.id or 0)
 
     def is_worker_assigned(self, worker):
-        return self.workers.filter(access=worker).exists()
+        return self.members.filter(worker=worker).exists()
 
     class Meta:
         ordering = ['-day']
@@ -335,12 +335,12 @@ class TeamMember(models.Model):
     """ When a worker is assigned to a DailyPlan we need to record
         if they are a foreman or a regular worker.
     """
-    dailyplan = models.ForeignKey(DailyPlan, related_name="workers")
-    access = models.ForeignKey('company.Access', related_name="assignments")
+    dailyplan = models.ForeignKey(DailyPlan, related_name="members")
+    worker = models.ForeignKey('company.Worker', related_name="assignments")
     is_foreman = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ['-is_foreman', 'access__user__first_name']
+        ordering = ['-is_foreman', 'worker__user__first_name']
 
 
 class EquipmentAssignment(models.Model):
