@@ -35,3 +35,16 @@ ssh:
   known_hosts:
     - github.com
     - bitbucket.org
+
+slack:
+  events:
+    - build.failure
+    - test.success
+    - test.failure
+    - deployment.success
+    - deployment.failure
+  api: https://hooks.slack.com/services/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
+
+build:
+  branches:
+    - dev

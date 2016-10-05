@@ -41,8 +41,11 @@ def uwsgi():
 
 
 def test():
-    "django test"
-    local('./manage.py test systori')
+    "django continuous integration test"
+    with shell_env(DJANGO_SETTINGS_MODULE='systori.settings.test'):
+        local('coverage run -p manage.py test -v 2 systori.apps systori.lib')
+        local('coverage combine')
+        local('coverage html -d reports')
 
 
 def makemessages():
@@ -144,6 +147,28 @@ export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
         print("Add to your environment:")
         print(env_lines)
     elif not 'DART_SDK' in open(bash_rc_file, 'r').read():
+        with open(bash_rc_file, 'a') as file_handle:
+            file_handle.write(env_lines)
+
+
+def getcontentshell():
+    "download content shell for linux, on mac use homebrew"
+    VERSION = '1.20.0-dev.10.0'
+    BIN_DIR = os.path.expanduser('~/bin')
+    if not os.path.exists(BIN_DIR):
+        os.mkdir(BIN_DIR)
+    url = ('https://storage.googleapis.com/dart-archive/channels/dev'
+           '/release/{}/dartium/content_shell-linux-x64-release.zip'.format(VERSION))
+    with lcd(BIN_DIR):
+        local("curl %s > content_shell.zip" % url)
+        local("unzip -qo content_shell.zip")
+        local("mv drt-linux-x64-dev-{}.0 content-shell".format(VERSION))
+    env_lines = 'export PATH="%s:$PATH"' % os.path.join(BIN_DIR, 'content-shell')
+    bash_rc_file = os.path.expanduser('~/.bashrc')
+    if not os.path.exists(bash_rc_file):
+        print("Add to your environment:")
+        print(env_lines)
+    elif not 'content-shell' in open(bash_rc_file, 'r').read():
         with open(bash_rc_file, 'a') as file_handle:
             file_handle.write(env_lines)
 
