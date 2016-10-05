@@ -231,7 +231,10 @@ class ReportTableRow extends TableRowElement with MapMixin {
         });
     }
 
-    void clear() {}
+    Iterable<String> get keys => mapping.keys;
+    void clear() => mapping.clear();
+    void remove([Object key]) => super.remove(key);
+
 }
 
 
@@ -243,8 +246,8 @@ class ReportTable extends TableElement {
 
     ReportTable.created() : super.created(); attached() {
         body = this.querySelector('tbody');
-        template = document.importNode(
-            document.querySelector('template[for="timetracking-report-row"]').content, true);
+        TemplateElement template = document.querySelector('template[for="timetracking-report-row"]');
+        template = document.importNode(template.content, true);
         resource = new Report();
     }
 

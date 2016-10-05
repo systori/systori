@@ -44,12 +44,6 @@ def uwsgi():
 
 def test():
     "django continuous integration test"
-    settings = {
-        'HOST': 'db',
-        'USER': 'postgres',
-        'NAME': 'systori_test',
-    }
-    #local('createdb -h {HOST} -U {USER} {NAME}'.format(**settings))
     with shell_env(DJANGO_SETTINGS_MODULE='systori.settings.test'):
         local('coverage run -p manage.py test -v 2 systori.apps systori.lib')
         local('coverage combine')
@@ -161,15 +155,16 @@ export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
 
 def getcontentshell():
     "download content shell for linux, on mac use homebrew"
+    VERSION = '1.20.0-dev.10.0'
     BIN_DIR = os.path.expanduser('~/bin')
     if not os.path.exists(BIN_DIR):
         os.mkdir(BIN_DIR)
-    url = ('https://storage.googleapis.com/dart-archive/channels/stable'
-           '/release/1.17.1/dartium/content_shell-linux-x64-release.zip')
+    url = ('https://storage.googleapis.com/dart-archive/channels/dev'
+           '/release/{}/dartium/content_shell-linux-x64-release.zip'.format(VERSION))
     with lcd(BIN_DIR):
         local("curl %s > content_shell.zip" % url)
         local("unzip -qo content_shell.zip")
-        local("mv drt-lucid64-full-stable-1.17.1.0 content-shell")
+        local("mv drt-linux-x64-dev-{}.0 content-shell".format(VERSION))
     env_lines = 'export PATH="%s:$PATH"' % os.path.join(BIN_DIR, 'content-shell')
     bash_rc_file = os.path.expanduser('~/.bashrc')
     if not os.path.exists(bash_rc_file):
