@@ -23,4 +23,9 @@ class Migration(migrations.Migration):
             name='parent',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='children', to='task.TaskGroup'),
         ),
+        migrations.RenameField(
+            model_name='progressreport',
+            old_name='access',
+            new_name='worker',
+        ),
     ]

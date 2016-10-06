@@ -325,7 +325,7 @@ class Task(OrderedModel):
     started_on = models.DateField(blank=True, null=True)
     completed_on = models.DateField(blank=True, null=True)
 
-    job = models.ForeignKey(Job, related_name="tasks", null=True)
+    job = models.ForeignKey(Job, related_name="tasks")
     taskgroup = models.ForeignKey(TaskGroup, related_name="tasks")
     order_with_respect_to = 'taskgroup'
 
