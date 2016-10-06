@@ -1,15 +1,13 @@
 import os
 import types
-import django
+import django; django.setup()
 from decimal import Decimal as D
 from django.db import transaction
 from django.template import Context, Template
 from django.test.client import Client
-from django.core.urlresolvers import reverse
 from django.test.runner import setup_databases
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings.travis")
-django.setup()
-
+from django.core.urlresolvers import reverse
+from django.utils.translation import activate
 from django.conf import settings
 from systori.apps.company.factories import CompanyFactory
 from systori.apps.project.factories import ProjectFactory
@@ -69,7 +67,7 @@ def generate_amount_test_html(data):
     {% amount_input "test-amount-input" form1 "split" %}
     {% amount_stateful "test-amount-stateful" form1 "discount" %}
     </tr></table>""")
-    return template.render({'TAX_RATE': '0.19', 'form1': form}).encode()
+    return template.render(Context({'TAX_RATE': '0.19', 'form1': form})).encode()
 
 
 def generate_pages():
@@ -93,6 +91,7 @@ def generate_pages():
     refund_create = client.get(reverse('refund.create', args=[data.project.id]), HTTP_HOST=host)
     write_test_html('refund_editor', refund_create.content)
 
+    activate('de')
     write_test_html('amount', generate_amount_test_html(data))
 
 

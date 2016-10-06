@@ -27,9 +27,8 @@
 <meta name="msapplication-TileImage" content="/static/img/favicon/mstile-144x144.png">
 <meta name="theme-color" content="#ffffff">
 
-    <title>Test Project</title>
+    <title>#2 Test Project</title>
 
-    
     <link rel="stylesheet" href="/static/css/jquery-ui.css">
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
@@ -58,7 +57,7 @@
           <ul class="nav navbar-nav">
             <li class="dropdown">
               
-                <a class="navbar-brand" href="#">OMOStSCYOhVPgFH</a>
+                <a class="navbar-brand" href="#">AirdvvynoSLRBgi</a>
               
             </li>
             
@@ -71,7 +70,7 @@
 
           </ul>
 
-          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='L1UNhbH01SPDdIxktqLQsxA6xj93zGX0' />
+          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='pP0hKNVfWrsayrvMPy7v20Bxqqu154hup10z5QZXc01tp4hEpQTyphZb7dhf9F0E' />
           <input type="hidden" name="language" value=""/>
         </form>
 
@@ -83,7 +82,7 @@
 
 
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">OfJeMSJpMBmtgft <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">OsanlBAxmUDyfyj <b class="caret"></b></a>
             <ul class="dropdown-menu">
               <li><a href="/settings">Einstellungen</a></li>
               <li><a href="/logout">Abmelden</a></li>
@@ -138,7 +137,7 @@
       </div>
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         
-  <form method="post" autocomplete="off"><input type='hidden' name='csrfmiddlewaretoken' value='L1UNhbH01SPDdIxktqLQsxA6xj93zGX0' />
+  <form method="post" autocomplete="off"><input type='hidden' name='csrfmiddlewaretoken' value='pP0hKNVfWrsayrvMPy7v20Bxqqu154hup10z5QZXc01tp4hEpQTyphZb7dhf9F0E' />
 
     
 
@@ -149,7 +148,7 @@
         
 
         <div class=" ">
-            <select class=" form-control" id="id_bank_account" name="bank_account">
+            <select class=" form-control" id="id_bank_account" name="bank_account" required>
 <option value="" selected="selected">---------</option>
 <option value="6">1200 - Default Bank Account</option>
 </select>
@@ -170,7 +169,7 @@
         
 
         <div class=" ">
-            <input class=" form-control" id="id_document_date" name="document_date" type="text" value="2016-04-08" />
+            <input class=" form-control" id="id_document_date" name="document_date" type="text" value="2016-10-06" required />
 
             
 
@@ -212,7 +211,7 @@
           
         </th>
         <th class="job-split">Zahlung</th>
-        <th class="job-discount">Skonto <select id="id_discount" name="discount">
+        <th class="job-discount">Skonto <select id="id_discount" name="discount" required>
 <option value="0.00">0%</option>
 <option value="0.01">1%</option>
 <option value="0.02">2%</option>
@@ -228,7 +227,7 @@
       <tbody>
       
         <tr is="payment-split" class="payment-split-row">
-          <td class="job-name"><input id="id_job-0-job" name="job-0-job" type="hidden" value="1" />Test Job</td>
+          <td class="job-name"><input id="id_job-0-job_id" name="job-0-job_id" type="hidden" value="1" />Test Job</td>
           
 <td is="amount-view" class="job-balance" data-tax-rate="0.19">
   <div class="amount-gross bold">
@@ -251,7 +250,7 @@
 <td is="amount-input" class="job-split" data-tax-rate="0.19">
 
   <input class="amount-gross" type="text" value="0,00"><br/>
-  <input class="amount-net" placeholder="vor" id="id_job-0-split_net" name="job-0-split_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_job-0-split_tax" name="job-0-split_tax" type="text" value="">
+  <input class="amount-net" placeholder="netto" id="id_job-0-split_net" name="job-0-split_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_job-0-split_tax" name="job-0-split_tax" type="text" value="">
 
   
   
@@ -303,7 +302,7 @@
         </tr>
       
         <tr is="payment-split" class="payment-split-row">
-          <td class="job-name"><input id="id_job-1-job" name="job-1-job" type="hidden" value="2" />Test Job</td>
+          <td class="job-name"><input id="id_job-1-job_id" name="job-1-job_id" type="hidden" value="2" />Test Job</td>
           
 <td is="amount-view" class="job-balance" data-tax-rate="0.19">
   <div class="amount-gross bold">
@@ -326,7 +325,7 @@
 <td is="amount-input" class="job-split" data-tax-rate="0.19">
 
   <input class="amount-gross" type="text" value="0,00"><br/>
-  <input class="amount-net" placeholder="vor" id="id_job-1-split_net" name="job-1-split_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_job-1-split_tax" name="job-1-split_tax" type="text" value="">
+  <input class="amount-net" placeholder="netto" id="id_job-1-split_net" name="job-1-split_net" type="text" value=""><input class="amount-tax" placeholder="MWSt" id="id_job-1-split_tax" name="job-1-split_tax" type="text" value="">
 
   
   
@@ -471,14 +470,13 @@
 <script src="/static/js/jquery-1.11.2.min.js"></script>
 <script src="/static/js/jquery-ui.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/dart/build/packages/web_components/webcomponents-lite.min.js"></script>
 
 
-  <script src="/static/js/language_picker.js"></script>
+<script src="/static/js/language_picker.js"></script>
 
-  <script type="application/dart" src="/static/dart/payment_editor.dart"></script>
-  <script src="/static/dart/packages/web_components/webcomponents.min.js"></script>
-  <script src="/static/dart/packages/web_components/dart_support.js"></script>
-  <script src="/static/dart/packages/browser/dart.js"></script>
+
+  <script src="/static/dart/build/payment_editor.dart.js"></script>
 
 
 </body>

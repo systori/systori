@@ -27,9 +27,8 @@
 <meta name="msapplication-TileImage" content="/static/img/favicon/mstile-144x144.png">
 <meta name="theme-color" content="#ffffff">
 
-    <title>Test Project</title>
+    <title>#2 Test Project</title>
 
-    
     <link rel="stylesheet" href="/static/css/jquery-ui.css">
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
@@ -58,7 +57,7 @@
           <ul class="nav navbar-nav">
             <li class="dropdown">
               
-                <a class="navbar-brand" href="#">OMOStSCYOhVPgFH</a>
+                <a class="navbar-brand" href="#">AirdvvynoSLRBgi</a>
               
             </li>
             
@@ -71,7 +70,7 @@
 
           </ul>
 
-          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='L1UNhbH01SPDdIxktqLQsxA6xj93zGX0' />
+          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='4AhXGd6aB89TzmOwsnXtbXUaZUEoyf614Mhf1gaSRHIcqZAo2FJwyeiOGHrCCQPb' />
           <input type="hidden" name="language" value=""/>
         </form>
 
@@ -83,7 +82,7 @@
 
 
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">OfJeMSJpMBmtgft <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">OsanlBAxmUDyfyj <b class="caret"></b></a>
             <ul class="dropdown-menu">
               <li><a href="/settings">Einstellungen</a></li>
               <li><a href="/logout">Abmelden</a></li>
@@ -138,7 +137,7 @@
       </div>
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         
-  <form role="form" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='L1UNhbH01SPDdIxktqLQsxA6xj93zGX0' />
+  <form role="form" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='4AhXGd6aB89TzmOwsnXtbXUaZUEoyf614Mhf1gaSRHIcqZAo2FJwyeiOGHrCCQPb' />
 
     <h2 class="sub-header">Angebot</h2>
     
@@ -176,7 +175,7 @@
         
 
         <div class=" ">
-            <input class=" form-control" id="id_document_date" name="document_date" type="date" value="2016-04-08" /><input id="initial-id_document_date" name="initial-document_date" type="hidden" value="2016-04-08" />
+            <input class=" form-control" id="id_document_date" name="document_date" type="date" value="2016-10-06" /><input id="initial-id_document_date" name="initial-document_date" type="hidden" value="2016-10-06" />
 
             
 
@@ -195,7 +194,7 @@
         
 
         <div class=" ">
-            <input class=" form-control" id="id_title" name="title" type="text" value="Angebot" />
+            <input class=" form-control" id="id_title" name="title" type="text" value="Angebot" required />
 
             
 
@@ -214,7 +213,7 @@
         
 
         <div class=" ">
-            <textarea class=" form-control" cols="40" id="id_header" name="header" rows="10">
+            <textarea class=" form-control" cols="40" id="id_header" name="header" rows="10" required>
 </textarea>
 
             
@@ -234,7 +233,7 @@
         
 
         <div class=" ">
-            <textarea class=" form-control" cols="40" id="id_footer" name="footer" rows="10">
+            <textarea class=" form-control" cols="40" id="id_footer" name="footer" rows="10" required>
 </textarea>
 
             
@@ -310,7 +309,7 @@
           <th class="job-is-attached"></th>
           <th class="job-status">Status</th>
           <th class="job-name">Los</th>
-          <th class="job-estimate">angeboten</th>
+          <th class="job-estimate">Angebot</th>
         </tr>
         </thead>
         <tbody>
@@ -322,7 +321,7 @@
               
             </td>
             <td class="job-status">Entwurf</td>
-            <td class="job-name"><input id="id_job-0-job" name="job-0-job" type="hidden" value="1" />0 Test Job</td>
+            <td class="job-name"><input id="id_job-0-job_id" name="job-0-job_id" type="hidden" value="1" />0 Test Job</td>
             
 <td is="amount-view" class="job-estimate" data-tax-rate="0.19">
   <div class="amount-gross">
@@ -350,7 +349,7 @@
               
             </td>
             <td class="job-status">Entwurf</td>
-            <td class="job-name"><input id="id_job-1-job" name="job-1-job" type="hidden" value="2" />1 Test Job</td>
+            <td class="job-name"><input id="id_job-1-job_id" name="job-1-job_id" type="hidden" value="2" />1 Test Job</td>
             
 <td is="amount-view" class="job-estimate" data-tax-rate="0.19">
   <div class="amount-gross">
@@ -412,9 +411,11 @@
 <script src="/static/js/jquery-1.11.2.min.js"></script>
 <script src="/static/js/jquery-ui.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/dart/build/packages/web_components/webcomponents-lite.min.js"></script>
 
 
-  <script src="/static/js/language_picker.js"></script>
+<script src="/static/js/language_picker.js"></script>
+
 
   <script type="text/javascript">
     $('[name="doc_template"]').on('change', function () {
@@ -422,7 +423,7 @@
       if (templateid) {
         $.ajax({
           type: 'GET',
-          headers: {'X-CSRFToken': 'L1UNhbH01SPDdIxktqLQsxA6xj93zGX0'},
+          headers: {'X-CSRFToken': '4AhXGd6aB89TzmOwsnXtbXUaZUEoyf614Mhf1gaSRHIcqZAo2FJwyeiOGHrCCQPb'},
           dataType: 'json',
           data: {'templateid': templateid},
           url: "/api/v1/project/2/document-template/",
@@ -434,10 +435,7 @@
       }
     });
   </script>
-  <script type="application/dart" src="/static/dart/proposal_editor.dart"></script>
-  <script src="/static/dart/packages/web_components/webcomponents.min.js"></script>
-  <script src="/static/dart/packages/web_components/dart_support.js"></script>
-  <script src="/static/dart/packages/browser/dart.js"></script>
+  <script src="/static/dart/build/proposal_editor.dart.js"></script>
 
 
 </body>
