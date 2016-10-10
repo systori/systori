@@ -12,7 +12,7 @@ from tastypie.authorization import Authorization
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.utils import trailing_slash
 from ..project.api import ProjectResource
-from .models import Job, TaskGroup, Task, TaskInstance, LineItem
+from .models import Job, Group, Task, LineItem
 
 
 class BaseMeta:
@@ -146,7 +146,7 @@ class TaskGroupResource(OrderedModelResourceMixin, ClonableModelResourceMixin, A
     job = fields.ForeignKey(JobResource, 'job')
 
     class Meta(BaseMeta):
-        queryset = TaskGroup.objects.all()
+        queryset = Group.objects.all()
         resource_name = "taskgroup"
         filtering = {
             "job": "exact"
@@ -189,19 +189,8 @@ class TaskResource(OrderedModelResourceMixin, ClonableModelResourceMixin, AutoCo
             order_by('-lineitems_count')
 
 
-class TaskInstanceResource(OrderedModelResourceMixin, ModelResource):
-    task = fields.ForeignKey(TaskResource, 'task')
-
-    class Meta(BaseMeta):
-        queryset = TaskInstance.objects.all()
-        resource_name = "taskinstance"
-        filtering = {
-            "task": "exact"
-        }
-
-
 class LineItemResource(ModelResource):
-    taskinstance = fields.ForeignKey(TaskInstanceResource, 'taskinstance')
+    task = fields.ForeignKey(TaskResource, 'taskinstance')
 
     class Meta(BaseMeta):
         queryset = LineItem.objects.all()
@@ -217,6 +206,5 @@ api = Api()
 api.register(JobResource())
 api.register(TaskGroupResource())
 api.register(TaskResource())
-api.register(TaskInstanceResource())
 api.register(LineItemResource())
 urlpatterns = api.urls

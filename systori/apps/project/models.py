@@ -3,6 +3,7 @@ from datetime import date
 from django.db import models
 from django.conf import settings
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
+from django.utils.functional import cached_property
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
 from django_fsm import FSMField, transition
@@ -18,44 +19,44 @@ class ProjectQuerySet(models.QuerySet):
         return self.exclude(is_template=True)
 
 
+class GAEBHierarchyStructure:
+    """ See: docs/GAEB_DA_XML_3.0_en.pdf """
+
+    MAXLEVELS = 6  # 1 Lot/Job + 4 Categories + 1 Task
+
+    def __init__(self, format):
+        self.format = format
+        self.zfill = [len(p) for p in format.split('.')]
+        assert 2 <= len(self.zfill) < self.MAXLEVELS,\
+            "GAEB hiearchy is outside the allowed hierarchy depth."
+
+    @staticmethod
+    def _format(code, zfill):
+        return str(code).zfill(zfill)
+
+    def format_task(self, code):
+        return self._format(code, self.zfill[-1])
+
+    def format_group(self, code, level):
+        assert self.has_level(level), "Group level is outside the allowed hierarchy depth."
+        return self._format(code, self.zfill[level])
+
+    def has_level(self, level):
+        return 0 <= level < (len(self.zfill)-1)
+
+
 class Project(models.Model):
     name = models.CharField(_('Project Name'), max_length=512)
     description = models.TextField(_('Project Description'), blank=True, null=True)
     is_template = models.BooleanField(default=False)
-
-    # level 1 is Job/Lot which is not optional and cannot be named something other than "Lot" (per GAEB spec)
-    level_1_zfill = models.PositiveSmallIntegerField(_("Level %(num)s Zero Fill") % {'num': 1}, default=1)
-
-    # eg. Main Section
-    has_level_2 = models.BooleanField(default=True)
-    level_2_zfill = models.PositiveSmallIntegerField(_("Level %(num)s Zero Fill") % {'num': 2}, default=1)
-    level_2_name = models.CharField(_('Level %(num)s Name') % {'num': 2}, max_length=512,
-                                    default=pgettext_lazy('level', "Main Section"))
-
-    # eg. Section
-    has_level_3 = models.BooleanField(default=False)
-    level_3_zfill = models.PositiveSmallIntegerField(_("Level %(num)s Zero Fill") % {'num': 3}, default=1)
-    level_3_name = models.CharField(_('Level %(num)s Name') % {'num': 3}, max_length=512,
-                                    default=pgettext_lazy('level', "Section"))
-
-    # eg. Sub Section
-    has_level_4 = models.BooleanField(default=False)
-    level_4_zfill = models.PositiveSmallIntegerField(_("Level %(num)s Zero Fill") % {'num': 4}, default=1)
-    level_4_name = models.CharField(_('Level %(num)s Name') % {'num': 4}, max_length=512,
-                                    default=pgettext_lazy('level', "Sub-Section"))
-
-    # eg. Title
-    has_level_5 = models.BooleanField(default=False)
-    level_5_zfill = models.PositiveSmallIntegerField(_("Level %(num)s Zero Fill") % {'num': 5}, default=1)
-    level_5_name = models.CharField(_('Level %(num)s Name') % {'num': 5}, max_length=512,
-                                    default=pgettext_lazy('level', "Title"))
-
-    # Work Item
-    task_zfill = models.PositiveSmallIntegerField(_("Task Code Zero Fill"), default=1)
-
+    structure_format = models.CharField(_('Numbering Structure'), max_length=124, default="01.01.0001")
     account = models.OneToOneField('accounting.Account', related_name="project", null=True)
 
     objects = ProjectQuerySet.as_manager()
+
+    @cached_property
+    def structure(self):
+        return GAEBHierarchyStructure(self.structure_format)
 
     PROSPECTIVE = "prospective"
     TENDERING = "tendering"

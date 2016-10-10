@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                 ('attachment', models.FileField(upload_to='')),
             ],
             options={
-                'ordering': ['id'],
+                'ordering': ('id',),
                 'verbose_name': 'Attachment',
                 'verbose_name_plural': 'Attachments',
             },
@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
                 ('access', models.ForeignKey(to='company.Access', related_name='filedreports')),
             ],
             options={
-                'ordering': ['-timestamp'],
+                'ordering': ('-timestamp',),
                 'verbose_name': 'Progress Report',
                 'verbose_name_plural': 'Progress Reports',
             },
@@ -99,7 +99,7 @@ class Migration(migrations.Migration):
                 ('status', django_fsm.FSMField(max_length=50, choices=[('approved', 'Approved'), ('ready', 'Ready'), ('running', 'Running'), ('done', 'Done')], blank=True)),
             ],
             options={
-                'ordering': ['order'],
+                'ordering': ('order',),
                 'verbose_name': 'Task',
                 'verbose_name_plural': 'Task',
             },

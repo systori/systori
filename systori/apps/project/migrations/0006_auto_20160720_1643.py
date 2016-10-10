@@ -10,8 +10,12 @@ def zfill_field_renamed(apps, schema_editor):
     for company in Company.objects.all():
         company.activate()
         for project in Project.objects.all():
-            project.level_1_zfill = project.job_zfill
-            project.level_2_zfill = project.taskgroup_zfill
+            project.structure_format = "{}.{}.{}".format(
+                '1'.zfill(project.job_zfill),
+                '1'.zfill(project.taskgroup_zfill),
+                '1'.zfill(project.task_zfill)
+            )
+            project.save()
 
 
 class Migration(migrations.Migration):
@@ -23,68 +27,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='project',
-            name='has_level_2',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='has_level_3',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='has_level_4',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='has_level_5',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='level_1_zfill',
-            field=models.PositiveSmallIntegerField(default=1, verbose_name='Level 1 Zero Fill'),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='level_2_name',
-            field=models.CharField(default='Main Section', max_length=512, verbose_name='Level 2 Name'),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='level_2_zfill',
-            field=models.PositiveSmallIntegerField(default=1, verbose_name='Level 2 Zero Fill'),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='level_3_name',
-            field=models.CharField(default='Section', max_length=512, verbose_name='Level 3 Name'),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='level_3_zfill',
-            field=models.PositiveSmallIntegerField(default=1, verbose_name='Level 3 Zero Fill'),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='level_4_name',
-            field=models.CharField(default='Sub-Section', max_length=512, verbose_name='Level 4 Name'),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='level_4_zfill',
-            field=models.PositiveSmallIntegerField(default=1, verbose_name='Level 4 Zero Fill'),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='level_5_name',
-            field=models.CharField(default='Title', max_length=512, verbose_name='Level 5 Name'),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='level_5_zfill',
-            field=models.PositiveSmallIntegerField(default=1, verbose_name='Level 5 Zero Fill'),
+            name='structure_format',
+            field=models.CharField(default="01.01.0001", max_length=124, verbose_name='Numbering Structure'),
         ),
         migrations.RunPython(zfill_field_renamed),
         migrations.RemoveField(
@@ -94,6 +38,10 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='project',
             name='taskgroup_zfill',
+        ),
+        migrations.RemoveField(
+            model_name='project',
+            name='task_zfill',
         ),
         migrations.AlterModelOptions(
             name='teammember',

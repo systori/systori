@@ -3,8 +3,8 @@
 
 {% block title %}{{ project.name }} > {{ job.name }}{% endblock %}
 {% block head_navbar %}
-  <li><a href="{% url 'project.view' project.id %}">{{ project.name }}</a></li>
-  <li class="active"><a href="{% url 'tasks' project.id job.id %}">{{ job.name }}</a></li>
+  <li><a href="{% url 'project.view' project.pk %}">{{ project.name }}</a></li>
+  <li class="active"><a href="{% url 'tasks' project.pk job.pk %}">{{ job.name }}</a></li>
 {% endblock %}
 
 {% block sidebar %}
@@ -412,48 +412,30 @@
     </label>
   </div>
 
-  <ubr-job id="task-editor"
-           data-pk="{{ job.pk }}"
-           data-code="{{ job.code }}"
-           data-taskgroup-offset="{{ job.taskgroup_offset }}"
-           data-taskgroup-zfill="{{ project.taskgroup_zfill }}"
-           data-task-zfill="{{ project.task_zfill }}">
-
-    {% for group in object_list %}
-      {% include "task/taskgroup_loop.html" with group=group %}
-    {% empty %}
-      {% include "task/taskgroup_loop.html" with group=blank_taskgroup %}
+  <sys-job id="task-editor" data-pk="{{ job.pk }}" data-code="{{ job.code }}"
+           data-structure-format="{{ job.project.structure_format }}">
+    {% for group in job.groups.all %}
+      {% include "task/editor/group_loop.html" with group=group %}
     {% endfor %}
+    {% for task in job.tasks.all %}
+      {% include "task/editor/task_loop.html" with task=task %}
+    {% endfor %}
+  </sys-job>
 
-    <div class="job-total-row">
-      <div class="job-total-label">{% trans 'Total' %}</div>
-      <div class="job-total">{{ job_total_net|ubrdecimal }}</div>
-    </div>
-
-    <div class="job-total-row">
-      <div class="job-total-label">{% trans 'incl. tax' %} {{ tax_rate_percent|localize }}%</div>
-      <div class="job-total-gross" data-tax-rate="{{ tax_rate }}">{{ job_total_gross|ubrdecimal }}</div>
-    </div>
-  </ubr-job>
-
-  <template id="taskgroup-template">
-    {% include "task/taskgroup_editor.html" with group=blank_taskgroup %}
+  <template id="group-template">
+    {% include "task/editor/group_editor.html" with group=blank_group %}
   </template>
 
   <template id="task-template">
-    {% include "task/task_editor.html" with task=blank_task %}
-  </template>
-
-  <template id="taskinstance-template">
-    {% include "task/taskinstance_editor.html" with task=blank_taskinstance %}
+    {% include "task/editor/task_editor.html" with task=blank_task %}
   </template>
 
   <template id="lineitem-template">
-    {% include "task/lineitem_editor.html" with lineitem=blank_lineitem %}
+    {% include "task/editor/lineitem_editor.html" with lineitem=blank_lineitem %}
   </template>
 
 {% endblock content %}
 
 {% block extra_js %}
-  {% dart "task_editor.dart" %}
+  {% dart "job_editor.dart" %}
 {% endblock extra_js %}

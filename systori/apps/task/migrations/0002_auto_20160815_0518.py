@@ -13,16 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='taskgroup',
-            name='level',
-            field=models.PositiveSmallIntegerField(default=2, verbose_name='Level'),
-        ),
-        migrations.AddField(
-            model_name='taskgroup',
-            name='parent',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='children', to='task.TaskGroup'),
-        ),
         migrations.RenameField(
             model_name='progressreport',
             old_name='access',

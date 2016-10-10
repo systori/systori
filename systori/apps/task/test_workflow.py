@@ -29,8 +29,8 @@ def create_task_data(self, create_user=True, create_company=True):
     self.project2 = ProjectFactory(has_level_3=True)
     self.job = JobFactory(project=self.project)
     self.job2 = JobFactory(project=self.project)
-    self.group = TaskGroupFactory(name="my group", job=self.job, level=2)
-    self.group2 = TaskGroupFactory(name="my group 2", job=self.job, level=2)
+    self.group = GroupFactory(name="my group", job=self.job, level=2)
+    self.group2 = GroupFactory(name="my group 2", job=self.job, level=2)
     self.group2.generate_children()
     self.task = TaskFactory(name="my task one", qty=10, taskgroup=self.group, job=self.job, status=Task.RUNNING)
     TaskInstanceFactory(task=self.task, selected=True, unit_price=96)
@@ -38,25 +38,78 @@ def create_task_data(self, create_user=True, create_company=True):
     self.task2 = TaskFactory(name="my task two", qty=0, taskgroup=self.group, job=self.job)
     TaskInstanceFactory(task=self.task2, selected=True, unit_price=0)
     self.lineitem2 = LineItemFactory(unit_qty=0, price=0, taskinstance=self.task2.instance)
-    self.group3 = TaskGroupFactory(job=self.job2, level=2)
+    self.group3 = GroupFactory(job=self.job2, level=2)
     self.task3 = TaskFactory(name="my task one", qty=10, taskgroup=self.group3, job=self.job2)
     TaskInstanceFactory(task=self.task3, selected=True, unit_price=96)
     self.lineitem3 = LineItemFactory(unit_qty=8, price=12, taskinstance=self.task3.instance)
 
 
-class TaskTotalTests(TestCase):
+class TaskCalculationTests(TestCase):
 
     def setUp(self):
-        create_task_data(self)
+        CompanyFactory()
+        self.job = JobFactory(project=ProjectFactory())
 
-    def test_zero_total(self):
-        task = Task.objects.get(pk=self.task2.pk)
-        self.assertEqual(0, task.fixed_price_estimate)
-        self.assertEqual(0, task.fixed_price_progress)
+    def test_task_zero_total(self):
+        task = TaskFactory(group=self.job)
+        self.assertEqual(0, task.estimate)
+        self.assertEqual(0, task.progress)
 
-    def test_non_zero_total(self):
-        self.task.instance.unit_price = 80
-        self.assertEqual(800, self.task.fixed_price_estimate)
+    def test_task_estimate(self):
+        task = TaskFactory(group=self.job, qty=2, unit_price=7)
+        self.assertEqual(14, task.estimate)
+
+    def test_provisional_task_estimate(self):
+        """ Provisional tasks are not included in the estimate total. """
+        task = TaskFactory(group=self.job, qty=2, unit_price=7)
+        self.assertEqual(14, task.estimate)
+        task.is_provisional = True
+        self.assertEqual(0, task.estimate)
+
+    def test_variant_task_estimate(self):
+        """ Only the variant with serial 0 (default variant) is included in estimates. """
+        task = TaskFactory(group=self.job, qty=2, unit_price=7, variant_group=1)
+        self.assertEqual(14, task.estimate)
+        task.variant_serial = 1
+        self.assertEqual(0, task.estimate)
+
+    def test_task_progress_with_value(self):
+        """ Progress from completion is always counted regardless of is_provisional or variant serial."""
+        task = TaskFactory(group=self.job, complete=2, unit_price=7)
+        self.assertEqual(14, task.progress)
+        task.is_provisional = True
+        self.assertEqual(14, task.progress)
+        task.variant_group = 1
+        task.variant_serial = 1
+        self.assertEqual(14, task.progress)
+
+
+class GroupCalculationTests(TestCase):
+
+    def setUp(self):
+        CompanyFactory()
+        self.job = JobFactory(project=ProjectFactory())
+
+    def test_empty_group_is_zero(self):
+        group = GroupFactory(parent=self.job)
+        self.assertEqual(0, group.estimate)
+
+    def test_group_with_tasks(self):
+        group = GroupFactory(parent=self.job)
+        TaskFactory(group=group, qty=2, unit_price=7)
+        TaskFactory(group=group, qty=2, unit_price=8)
+        self.assertEqual(30, group.estimate)
+
+    def test_multiple_subgroups(self):
+        group = GroupFactory(parent=self.job)
+        subgroup1 = GroupFactory(parent=group)
+        TaskFactory(group=subgroup1, qty=2, unit_price=7)
+        subgroup2 = GroupFactory(parent=group)
+        TaskFactory(group=subgroup2, qty=2, unit_price=8)
+        self.assertEqual(14, subgroup1.estimate)
+        self.assertEqual(16, subgroup2.estimate)
+        self.assertEqual(30, group.estimate)
+        self.assertEqual(30, self.job.estimate)
 
 
 class JobQuerySetTests(TestCase):
@@ -74,39 +127,6 @@ class JobQuerySetTests(TestCase):
         jobs = Job.objects
         self.assertEqual(Decimal(1920), jobs.estimate_total())
         self.assertEqual(Decimal(0), jobs.progress_total())
-
-
-class TaskGroupOffsetTests(TestCase):
-    def setUp(self):
-        CompanyFactory.create()
-        project = ProjectFactory.create()
-        self.job = JobFactory.create(job_code=1, project=project)
-        self.group = TaskGroupFactory.create(job=self.job, level=2)
-
-    def test_no_offset(self):
-        self.assertEqual('1.1', self.group.code)
-
-    def test_offset_4(self):
-        self.job.taskgroup_offset = 3
-        self.assertEqual('1.4', self.group.code)
-
-
-class CodeTests(TestCase):
-    def test_default_code(self):
-        CompanyFactory()
-        project = ProjectFactory()
-        job = JobFactory(job_code=1, project=project)
-        group = TaskGroupFactory(job=job, level=2)
-        task = TaskFactory(taskgroup=group)
-        self.assertEqual('1', job.code)
-        self.assertEqual('1.1', group.code)
-        self.assertEqual('1.1.1', task.code)
-
-        TaskInstanceFactory(task=task, selected=True)
-        self.assertEqual('1.1.1', task.instance.code)
-        TaskInstanceFactory(task=task)
-        self.assertEqual('1.1.1a', task.instance.code)
-        self.assertEqual('1.1.1b', task.taskinstances.all()[1].code)
 
 
 class JobEstimateModificationTests(TestCase):
@@ -158,23 +178,6 @@ class JobEstimateModificationTests(TestCase):
         self.assertEqual(Decimal(960), self.job.estimate_total)
 
 
-class TaskCloneTests(TestCase):
-    def setUp(self):
-        create_task_data(self)
-
-    def test_clone(self):
-        new_job = Job.objects.create(job_code=5, name="New", project=self.project)
-        self.assertEqual(len(new_job.taskgroups), 0)
-        self.job.clone_to(new_job)
-
-        job = Job.objects.get(pk=new_job.pk)
-        self.assertEqual(len(job.taskgroups), 2)
-        group = job._taskgroups.get(name="my group")
-        self.assertNotEqual(group.id, self.group.id)
-        self.assertEqual(group.tasks.count(), 2)
-        self.assertFalse(max(group.tasks.values_list('status', flat=True)))
-
-
 class TestJobTransitions(TestCase):
     def setUp(self):
         activate('en')
@@ -224,57 +227,3 @@ class TaskTest(TestCase):
         self.assertEqual(task.complete_percent, 0)
         task.qty = 10
         self.assertEqual(task.complete_percent, 100)
-
-
-class TaskGroupTest(TestCase):
-
-    def setUp(self):
-        self.company = CompanyFactory()
-        self.user = UserFactory(company=self.company, password='open sesame')
-        self.project = ProjectFactory(has_level_3=True, has_level_4=True)
-        self.job = JobFactory(project=self.project)
-        self.group = TaskGroupFactory(name="my group", job=self.job, level=2)
-
-    def test_generate_children(self):
-
-        self.assertEquals(0, self.group.children.count())
-
-        self.group.generate_children()
-
-        self.assertEquals(1, len(self.job.taskgroups))  # Level 2
-        self.assertEquals(1, self.group.children.count())  # Level 3
-        self.assertEquals(1, self.group.children.first().children.count())  # Level 4
-        self.assertEquals(0, self.group.children.first().children.first().children.count())  # Level 5
-
-    def test_prefetching(self):
-
-        def add_lineitems_n_stuff(group):
-            task = TaskFactory(taskgroup=group)
-            inst = TaskInstanceFactory(task=task, selected=True)
-            li = LineItemFactory(taskinstance=inst)
-
-        self.group.generate_children()
-        add_lineitems_n_stuff(self.group.children.first().children.first())
-
-        self.group2 = TaskGroupFactory(name='second', parent=self.group, job=self.job, level=3)
-        self.group2.generate_children()
-        add_lineitems_n_stuff(self.group2.children.first())
-
-        self.group3 = TaskGroupFactory(name='second', parent=self.group2, job=self.job, level=4)
-        self.group3.generate_children()  # nothing should happen, we're at level 4
-        add_lineitems_n_stuff(self.group3)
-
-        self.assertEquals(1, self.job._taskgroups.filter(level=2).count())
-
-        def traverse_children(groups):
-            groups[0].children.all()[0].children.all()[0].tasks.first().instance.lineitems.first()
-            groups[0].children.all()[1].children.all()[0].tasks.first().instance.lineitems.first()
-            groups[0].children.all()[1].children.all()[1].tasks.first().instance.lineitems.first()
-
-        # no prefetch
-        with self.assertNumQueries(18):
-            traverse_children(self.job._taskgroups.filter(level=2).all())
-
-        # with prefetch
-        with self.assertNumQueries(6):
-            traverse_children(self.job.taskgroups)
