@@ -1,16 +1,6 @@
 import 'dart:html';
 import 'dart:async';
-import 'package:intl/intl.dart';
 import 'common.dart';
-
-
-NumberFormat AMOUNT = new NumberFormat("#,###,###,##0.00");
-
-int amount_string_to_int(String amount) =>
-    (parse_currency(amount) * 100).round();
-
-String amount_int_to_string(int amount) =>
-    AMOUNT.format(amount / 100);
 
 
 class Amount {
