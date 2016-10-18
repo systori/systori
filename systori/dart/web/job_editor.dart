@@ -23,13 +23,6 @@ abstract class ModelElement extends HtmlElement {
         return div;
     }
 
-    triggerCalculationOnChangeFor(List<DivElement> inputs) =>
-        inputs.forEach((var view) =>
-            view.onKeyUp.listen((_) =>
-                this.dispatchEvent(new CustomEvent('calculate', detail: this))
-            )
-        );
-
 }
 
 
@@ -99,12 +92,43 @@ class LineItemElement extends ModelElement with Orderable, SummingRow {
         name_input = getInput("name");
         qty_input = getInput("qty");
         unit_input = getInput("unit");
+        unit_input.onFocus.listen(askParentToRecalculate);
+        unit_input.onBlur.listen(clearHighlighting);
         price_input = getInput("price");
-        triggerCalculationOnChangeFor([
-            qty_input, unit_input, price_input
-        ]);
+        [qty_input, unit_input, price_input].forEach((var view) =>
+            view.onKeyUp.listen((_) =>
+                this.dispatchEvent(new CustomEvent('calculate', detail: this))
+            )
+        );
         total_view = getView("total");
     }
+
+    askParentToRecalculate([_]) {
+        (parent as LineItemContainerElement).calculate();
+    }
+
+    clearHighlighting([_]) {
+        LineItemElement previous = previousElementSibling;
+        while (previous != null) {
+            previous.total_view.style.backgroundColor = 'white';
+            previous = previous.previousElementSibling;
+        }
+        this.price_input.style.backgroundColor = 'white';
+    }
+
+    onCalculationFinished() {
+        if (document.activeElement != this.unit_input || !equation.isSum) return;
+        clearHighlighting();
+        int i = equation.sumX;
+        LineItemElement previous = previousElementSibling;
+        while (i > 0 && previous != null) {
+            previous.total_view.style.backgroundColor = '#FBCEB1';
+            previous = previous.previousElementSibling;
+            i--;
+        }
+        this.price_input.style.backgroundColor = '#F88379';
+    }
+
 }
 
 

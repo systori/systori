@@ -90,6 +90,9 @@ abstract class SummingRow {
         }
 
         total = amount_int_to_string(_total);
+        onCalculationFinished();
         return _total;
     }
+
+    onCalculationFinished() {}
 }
