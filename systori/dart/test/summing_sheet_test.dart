@@ -9,7 +9,7 @@ class Sheet extends SummingSheet {
 }
 
 class Row extends SummingRow {
-    var isPriceCalculated;
+    var total, isPriceCalculated;
     var qty, unit, price;
     Row(this.qty, this.unit, this.price);
 }

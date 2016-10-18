@@ -7,7 +7,8 @@ from django.utils.functional import cached_property
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
 from django_fsm import FSMField, transition
-from ..task.models import Job
+from systori.lib.utils import nice_percent
+from systori.apps.task.models import Job
 from geopy import geocoders
 
 
@@ -27,7 +28,7 @@ class GAEBHierarchyStructure:
     def __init__(self, format):
         self.format = format
         self.zfill = [len(p) for p in format.split('.')]
-        assert 2 <= len(self.zfill) < self.MAXLEVELS,\
+        assert 2 <= len(self.zfill) <= self.MAXLEVELS,\
             "GAEB hiearchy is outside the allowed hierarchy depth."
 
     @staticmethod
@@ -49,7 +50,7 @@ class Project(models.Model):
     name = models.CharField(_('Project Name'), max_length=512)
     description = models.TextField(_('Project Description'), blank=True, null=True)
     is_template = models.BooleanField(default=False)
-    structure_format = models.CharField(_('Numbering Structure'), max_length=124, default="01.01.0001")
+    structure_format = models.CharField(_('Numbering Structure'), max_length=124, default="01.01.001")
     account = models.OneToOneField('accounting.Account', related_name="project", null=True)
 
     objects = ProjectQuerySet.as_manager()
@@ -226,22 +227,16 @@ class Project(models.Model):
                 .get()
 
     @property
-    def estimate_total(self):
-        return self.jobs.estimate_total()
+    def estimate(self):
+        return self.jobs.estimate()
 
     @property
-    def progress_total(self):
-        return self.jobs.progress_total()
+    def progress(self):
+        return self.jobs.progress()
 
     @property
     def progress_percent(self):
-        percent = self.progress_total / self.estimate_total * 100 if self.estimate_total else 0
-        if percent < 100:
-            return floor(percent)
-        elif percent > 100:
-            return ceil(percent)
-        else:
-            return 100
+        return nice_percent(self.progress, self.estimate)
 
     @property
     def jobs_for_proposal(self):

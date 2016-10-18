@@ -1,4 +1,3 @@
-from math import floor, ceil
 from decimal import Decimal
 from datetime import datetime
 from string import ascii_lowercase
@@ -8,16 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.formats import date_format
 from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
-
-
-def nice_percent(progress, total):
-    percent = progress / total * 100 if total else 0
-    if percent < 100:
-        return floor(percent)
-    elif percent > 100:
-        return ceil(percent)
-    else:
-        return 100
+from systori.lib.utils import nice_percent
 
 
 class OrderedModel(models.Model):
@@ -119,7 +109,8 @@ class Group(OrderedModel):
         for group in self.groups.all():
             total += getattr(group, field)
         for task in self.tasks.all():
-            total += getattr(task, field)
+            if field != 'estimate' or task.include_estimate:
+                total += getattr(task, field)
         return total
 
     @property
@@ -130,17 +121,21 @@ class Group(OrderedModel):
     def progress(self):
         return self._calc('progress')
 
+    @property
+    def progress_percent(self):
+        return nice_percent(self.progress, self.estimate)
+
     def __str__(self):
         return self.name
 
 
 class JobQuerySet(models.QuerySet):
 
-    def estimate_total(self):
-        return sum([job.estimate_total for job in self])
+    def estimate(self):
+        return sum([job.estimate for job in self])
 
-    def progress_total(self):
-        return sum([job.progress_total for job in self])
+    def progress(self):
+        return sum([job.progress for job in self])
 
     def prefetch_groups(self, project):
         level = 3
@@ -241,10 +236,6 @@ class Job(Group):
                 return True
         return False
 
-    @property
-    def progress_percent(self):
-        return nice_percent(self.progress_total, self.estimate_total)
-
     def __str__(self):
         return self.name
 
@@ -279,10 +270,6 @@ class Task(OrderedModel):
     variant_group = models.PositiveIntegerField(null=True)
     variant_serial = models.PositiveIntegerField(default=0)
 
-    @property
-    def is_variant(self):
-        return self.variant_group is not None
-
     APPROVED = "approved"
     READY = "ready"
     RUNNING = "running"
@@ -312,24 +299,36 @@ class Task(OrderedModel):
         return self.complete > 0
 
     @property
-    def complete_percent(self):
-        return nice_percent(self.complete, self.qty)
+    def is_variant(self):
+        return self.variant_group is not None
 
     @property
-    def _estimate(self):
-        return round(self.unit_price * self.qty, 2)
+    def include_estimate(self):
+        if self.is_provisional:
+            return False
+        if self.is_variant and self.variant_serial != 0:
+            return False
+        return True
+
+    @property
+    def calculated_unit_price(self):
+        unit_price = Decimal('0.00')
+        for li in self.lineitems.all():
+            unit_price += li.total
+        return unit_price
 
     @property
     def estimate(self):
-        if self.is_provisional:
-            return 0
-        if self.is_variant and self.variant_serial != 0:
-            return 0
-        return self._estimate
+        return round(self.calculated_unit_price * self.qty, 2)
+        #return round(self.unit_price * self.qty, 2)
 
     @property
     def progress(self):
         return round(self.unit_price * self.complete, 2)
+
+    @property
+    def complete_percent(self):
+        return nice_percent(self.complete, self.qty)
 
     @property
     def code(self):
@@ -408,6 +407,10 @@ class LineItem(OrderedModel):
     @property
     def project(self):
         return self.job.project
+
+    @property
+    def total(self):
+        return self.unit_qty * self.price
 
 
 class ProgressReport(models.Model):

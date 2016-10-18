@@ -1,8 +1,10 @@
-<sys-task data-pk="{{ task.pk }}"{% if not task.taskinstances.all %} class="empty"{% endif %}>
+<sys-task data-pk="{{ task.pk }}">
   {% include "task/editor/task_editor.html" with task=task %}
+  <sys-lineitem-container>
   {% for lineitem in task.lineitems.all %}
     <sys-lineitem data-pk="{{ lineitem.pk }}">
       {% include "task/editor/lineitem_editor.html" with lineitem=lineitem %}
     </sys-lineitem>
   {% endfor %}
+  </sys-lineitem-container>
 </sys-task>

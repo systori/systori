@@ -52,36 +52,37 @@ class TaskCalculationTests(TestCase):
 
     def test_task_zero_total(self):
         task = TaskFactory(group=self.job)
-        self.assertEqual(0, task.estimate)
-        self.assertEqual(0, task.progress)
+        self.assertEqual(task.estimate, 0)
+        self.assertEqual(task.progress, 0)
 
     def test_task_estimate(self):
         task = TaskFactory(group=self.job, qty=2, unit_price=7)
-        self.assertEqual(14, task.estimate)
+        self.assertEqual(task.estimate, 14)
 
-    def test_provisional_task_estimate(self):
-        """ Provisional tasks are not included in the estimate total. """
-        task = TaskFactory(group=self.job, qty=2, unit_price=7)
-        self.assertEqual(14, task.estimate)
-        task.is_provisional = True
-        self.assertEqual(0, task.estimate)
-
-    def test_variant_task_estimate(self):
-        """ Only the variant with serial 0 (default variant) is included in estimates. """
-        task = TaskFactory(group=self.job, qty=2, unit_price=7, variant_group=1)
-        self.assertEqual(14, task.estimate)
-        task.variant_serial = 1
-        self.assertEqual(0, task.estimate)
-
-    def test_task_progress_with_value(self):
+    def test_task_progress(self):
         """ Progress from completion is always counted regardless of is_provisional or variant serial."""
-        task = TaskFactory(group=self.job, complete=2, unit_price=7)
-        self.assertEqual(14, task.progress)
-        task.is_provisional = True
-        self.assertEqual(14, task.progress)
-        task.variant_group = 1
-        task.variant_serial = 1
-        self.assertEqual(14, task.progress)
+        task = TaskFactory(group=self.job, complete=2, unit_price=8)
+        self.assertEqual(task.progress, 16)
+
+    def test_task_estimate_determination(self):
+        """ Determines if a task should be included in totals. """
+        self.assertEqual(TaskFactory(group=self.job).include_estimate, True)
+
+        # provisional tasks
+        self.assertEqual(TaskFactory(group=self.job, is_provisional=True).include_estimate, False)
+
+        # variant tasks
+        self.assertEqual(TaskFactory(group=self.job, variant_group=1).include_estimate, True)
+        self.assertEqual(TaskFactory(group=self.job, variant_group=1, variant_serial=1).include_estimate, False)
+
+    def test_complete_percent(self):
+        # Division by zero
+        self.assertEqual(TaskFactory(group=self.job, complete=10, qty=0).complete_percent, 0)
+        # Complete greater than qty
+        self.assertEqual(TaskFactory(group=self.job, complete=10, qty=5).complete_percent, 200)
+        # 100% rounding
+        self.assertEqual(TaskFactory(group=self.job, complete=99.99, qty=100).complete_percent, 100)
+        self.assertEqual(TaskFactory(group=self.job, complete=100.01, qty=100).complete_percent, 100)
 
 
 class GroupCalculationTests(TestCase):
@@ -110,6 +111,34 @@ class GroupCalculationTests(TestCase):
         self.assertEqual(16, subgroup2.estimate)
         self.assertEqual(30, group.estimate)
         self.assertEqual(30, self.job.estimate)
+
+    def test_provisional_task_estimate(self):
+        """ Provisional tasks are not included in the estimate total. """
+        task = TaskFactory(group=self.job, qty=2, unit_price=7)
+        self.assertEqual(14, self.job.estimate)
+        task.is_provisional = True
+        task.save()
+        self.assertEqual(0, self.job.estimate)
+
+    def test_variant_task_estimate(self):
+        """ Only the variant with serial 0 (default variant) is included in estimates. """
+        task = TaskFactory(group=self.job, qty=2, unit_price=7, variant_group=1)
+        self.assertEqual(14, self.job.estimate)
+        task.variant_serial = 1
+        task.save()
+        self.assertEqual(0, self.job.estimate)
+
+    def test_task_progress_with_value(self):
+        """ Progress from completion is always counted regardless of is_provisional or variant serial."""
+        task = TaskFactory(group=self.job, complete=2, unit_price=10)
+        self.assertEqual(20, self.job.progress)
+        task.is_provisional = True
+        task.save()
+        self.assertEqual(20, self.job.progress)
+        task.variant_group = 1
+        task.variant_serial = 1
+        task.save()
+        self.assertEqual(20, self.job.progress)
 
 
 class JobQuerySetTests(TestCase):
@@ -220,10 +249,3 @@ class TestJobTransitions(TestCase):
         self.assertEquals('Draft', self.job.get_status_display())
 
 
-class TaskTest(TestCase):
-
-    def test_complete_percent(self):
-        task = Task(complete=10, qty=0)
-        self.assertEqual(task.complete_percent, 0)
-        task.qty = 10
-        self.assertEqual(task.complete_percent, 100)

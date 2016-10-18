@@ -2,8 +2,8 @@ import 'dart:html';
 import 'package:test/test.dart';
 import 'package:systori/orderable_container.dart';
 
-class AOrderable extends HtmlElement with Orderable {
-    AOrderable.created(): super.created();
+class OrderableElement extends HtmlElement with Orderable {
+    OrderableElement.created(): super.created();
 }
 
 mouseUp() => document.dispatchEvent(new MouseEvent('mouseup'));
@@ -25,8 +25,8 @@ mouseMoveTo(int x, int y) {
 }
 
 void main() {
-    registerOrderableContainer();
-    document.registerElement('orderable-item', AOrderable);
+    registerOrderableContainerElement();
+    document.registerElement('orderable-item', OrderableElement);
 
     group("Orderable", () {
 

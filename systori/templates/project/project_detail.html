@@ -60,7 +60,7 @@
           <td>{{ job.get_status_display }}</td>
           <td>{{ job.get_billing_method_display }}</td>
           <td style="text-align: right; white-space: nowrap;">
-            {{ job.estimate_total|money }}
+            {{ job.estimate|money }}
           </td>
           <td>
             <div class="btn-group" style="width:80px;">
@@ -75,7 +75,7 @@
                                                                                 aria-hidden="true"></span></a>
             </div>
           </td>
-          <td style="text-align: right; white-space: nowrap;">{{ job.progress_total|money }}</td>
+          <td style="text-align: right; white-space: nowrap;">{{ job.progress|money }}</td>
           <td><small>{{ job.progress_percent }}%</small></td>
           <td style="text-align: right;">
             {% for state in job.get_available_status_transitions %}
@@ -93,9 +93,9 @@
           <td></td>
           <td></td>
           <td></td>
-          <td style="text-align: right;"><b>{{ project.estimate_total|money }}</b></td>
+          <td style="text-align: right;"><b>{{ project.estimate|money }}</b></td>
           <td></td>
-          <td style="text-align: right;"><b>{{ project.progress_total|money }}</b></td>
+          <td style="text-align: right;"><b>{{ project.progress|money }}</b></td>
           <td><small>{{ project.progress_percent }}%</small></td>
           <td></td>
         </tr>

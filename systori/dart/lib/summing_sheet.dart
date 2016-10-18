@@ -59,11 +59,13 @@ abstract class SummingRow {
 
     Equation equation;
 
-    String qty;
-    String unit;
-    String price;
-    String total;
-    String isPriceCalculated;
+    String get qty;
+    String get unit;
+    String get price;
+    set price(String _price);
+    set isPriceCalculated(bool _calculated);
+    String get total;
+    set total(String _total);
 
     int calculate(List<int> previous) {
         equation = new Equation(unit);
@@ -73,10 +75,10 @@ abstract class SummingRow {
         if (_calc != null) {
             _price = _calc;
             price = amount_int_to_string(_calc);
-            isPriceCalculated = 'true';
+            isPriceCalculated = true;
         } else {
             _price = string_to_int(price);
-            isPriceCalculated = 'false';
+            isPriceCalculated = false;
         }
 
         var _total = 0;

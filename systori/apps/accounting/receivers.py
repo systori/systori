@@ -6,4 +6,5 @@ from .models import Account
 
 @receiver(post_delete, sender=Job)
 def job_delete_handler(sender, instance, **kwargs):
-    Account.objects.get(id=instance.account_id).delete()
+    if instance.account_id is not None:
+        Account.objects.get(id=instance.account_id).delete()

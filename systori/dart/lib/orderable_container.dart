@@ -8,16 +8,14 @@ abstract class Orderable implements Element {
         this.offset.top < y && y < this.offset.bottom;
 
     isHandle(Element handle) =>
-        handle.classes.contains('orderable-handle');
+        handle.classes.contains('${tagName.toLowerCase()}-handle');
 
 }
 
 
-class OrderableContainer extends HtmlElement {
+abstract class OrderableContainer implements Element {
 
     StreamSubscription<MouseEvent> mouseDownSubscription;
-
-    OrderableContainer.created(): super.created();
 
     attached() => mouseDownSubscription = onMouseDown.listen(maybeStartDragging);
 
@@ -48,7 +46,7 @@ class OrderableContainer extends HtmlElement {
 
         // add placeholder
         DivElement placeholder = document.createElement('div');
-        placeholder.classes.add('orderable-placeholder');
+        placeholder.classes.add('${orderable.tagName.toLowerCase()}-placeholder');
         placeholder.style.height = "${orderable.offsetHeight}px";
         placeholder.style.width = "${orderable.offsetWidth}px";
         insertBefore(placeholder, orderable.nextElementSibling);
@@ -94,11 +92,19 @@ class OrderableContainer extends HtmlElement {
             orderable.style.width = null;
             orderable.style.position = null;
             orderable.style.zIndex = null;
+            onOrderingFinished(orderable);
         });
     }
+
+    onOrderingFinished(Orderable orderable) {}
 }
 
 
-void registerOrderableContainer() {
-    document.registerElement('orderable-container', OrderableContainer);
+class OrderableContainerElement extends HtmlElement with OrderableContainer {
+    OrderableContainerElement.created(): super.created();
+}
+
+
+void registerOrderableContainerElement() {
+    document.registerElement('orderable-container', OrderableContainerElement);
 }
