@@ -116,16 +116,22 @@ class LineItemElement extends ModelElement with Orderable, SummingRow {
         this.price_input.style.backgroundColor = 'white';
     }
 
+    static final List<String> COLORS = [
+        '#DDD3C8', '#F8BDAD', '#FEDDAB', '#8AACB8', '#A6CFCC', '#DDEDE1'
+    ];
+
     onCalculationFinished() {
-        if (document.activeElement != this.unit_input || !equation.isSum) return;
-        clearHighlighting();
-        int i = equation.sumX;
-        LineItemElement previous = previousElementSibling;
-        while (i > 0 && previous != null) {
-            previous.total_view.style.backgroundColor = '#FBCEB1';
-            previous = previous.previousElementSibling;
-            i--;
-        }
+        if (document.activeElement != this.unit_input || !equation.isEquation) return;
+        equation.rowColors.asMap().forEach((idx, group) {
+            LineItemElement li = parent.children[idx];
+            if (group == 0) {
+                li.total_view.style.backgroundColor = 'white';
+            } else if (group == -1) {
+                li.total_view.style.backgroundColor = '#D41351';
+            } else {
+                li.total_view.style.backgroundColor = COLORS[idx%COLORS.length];
+            }
+        });
         this.price_input.style.backgroundColor = '#F88379';
     }
 

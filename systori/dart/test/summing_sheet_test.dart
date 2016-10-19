@@ -41,7 +41,7 @@ main() async {
         });
     });
 
-    group("range sum", () {
+    group("Range.sum()", () {
 
         int calc(String eq, List<int> ints, [hasEquation=-1]) {
             var equation = new Equation(eq);
@@ -114,7 +114,50 @@ main() async {
 
     });
 
-    group("equations without ranges", () {
+    group("Range.startIdx/endIdx", () {
+
+        List<int> calc(String eq, List<int> ints, [hasEquation = -1]) {
+            var equation = new Equation(eq);
+            List<Equation> previous = [];
+            ints.asMap().forEach((i, total) =>
+                previous.add(
+                    new Equation(hasEquation == i ? '!' : '')..total = total)
+            );
+            var range = equation.ranges.first;
+            range.sum(previous);
+            return [range.startIdx, range.endIdx];
+        }
+
+        test("top-down, no range", () {
+            expect(calc('@', [1, 2, 4]), [0, 0]);
+            expect(calc('@1', [1, 2, 4]), [0, 0]);
+            expect(calc('@3', [1, 2, 4]), [2, 2]);
+        });
+
+        test("top-down, with range", () {
+            expect(calc('@:3', [1, 2, 4]), [0, 2]);
+            expect(calc('@:1', [1, 2, 4]), [0, 0]);
+            expect(calc('@1:', [1, 2, 4]), [0, 2]);
+            expect(calc('@3:', [1, 2, 4]), [2, 2]);
+            expect(calc('@2:', [1, 2, 4]), [1, 2]);
+        });
+
+        test("bottom-up, no range", () {
+            expect(calc('!', [1, 2, 4]), [2, 2]);
+            expect(calc('!1', [1, 2, 4]), [2, 2]);
+            expect(calc('!3', [1, 2, 4]), [0, 0]);
+        });
+
+        test("bottom-up, with range", () {
+            expect(calc('!:3', [1, 2, 4]), [0, 2]);
+            expect(calc('!:1', [1, 2, 4]), [2, 2]);
+            expect(calc('!1:', [1, 2, 4]), [0, 2]);
+            expect(calc('!3:', [1, 2, 4]), [0, 0]);
+            expect(calc('!2:', [1, 2, 4]), [0, 1]);
+        });
+    });
+
+    group("Equation.calculate() without ranges", () {
 
         Equation calc(int qty, String eq, int price) =>
             new Equation(eq)..calculate(qty, price, []);
@@ -131,7 +174,7 @@ main() async {
 
     });
 
-    group("equations with ranges", () {
+    group("Equation.calculate() with ranges", () {
 
         int calc(int qty, String eq, List<int> ints, [hasEquation=-1]) {
             var equation = new Equation(eq);
@@ -169,7 +212,32 @@ main() async {
 
     });
 
-    group("summing row", () {
+    group("Equation.rowColors", () {
+        List<int> calc(String eq, List<int> ints) {
+            var equation = new Equation(eq);
+            List<Equation> previous = [];
+            ints.asMap().forEach((i, total) =>
+                previous.add(new Equation('')..total = total * 100)
+            );
+            equation.calculate(0, null, previous);
+            return equation.rowColors;
+        }
+
+        test("single number non-ranges", () {
+            expect(calc('!', [1,2,3]), [0,0,1]);
+            expect(calc('!@', [1,2,3]), [2,0,1]);
+            expect(calc('!!@', [1,2,3]), [3,0,-1]);
+        });
+
+        test("multiple ranges", () {
+            expect(calc('!:', [1,2,3]), [1,1,1]);
+            expect(calc('!:@', [1,2,3]), [-1,1,1]);
+            expect(calc('!!@:', [1,2,3]), [3,3,-1]);
+        });
+
+    });
+
+    group("Row.calculate()", () {
 
         test("basic calculations", () {
             calc(q,u,p) => new Row(q,u,p).calculate([]).total;

@@ -50,10 +50,14 @@ class Range {
             new Range(m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6))
         ).toList();
 
-    int total = 0;
+    int total;
+    int startIdx;
+    int endIdx;
 
     int sum(List<Equation> previous) {
         total = 0;
+        startIdx = null;
+        endIdx = null;
 
         Iterator<Equation> rows = previous.iterator;
         if (direction == '!') {
@@ -75,6 +79,13 @@ class Range {
             if (!inside)
                 continue; // keep searching for the start of range
 
+            if (startIdx == null && endIdx == null) {
+                if (direction == '!')
+                    endIdx = lastIdx-i;
+                else
+                    startIdx = i-1;
+            }
+
             if ((!isEndEquation && end == i) || (isEndEquation && rows.current.isEquation) || lastIdx == i)
                 // last row means we're not inside anymore
                 inside = false;
@@ -85,6 +96,11 @@ class Range {
 
             total += rows.current.total;
 
+            if (direction == '!')
+                startIdx = lastIdx-i;
+            else
+                endIdx = i-1;
+
             if (!inside || !range)
                 break;
 
@@ -92,6 +108,8 @@ class Range {
 
         return total;
     }
+
+    bool isHit(int idx) => startIdx <= idx && idx <= endIdx;
 
 }
 
@@ -104,10 +122,12 @@ class Equation {
     Equation(eq): ranges = Range.extractRanges(eq), eq=eq;
 
     int total = 0;
+    int price = 0;
     List<int> rowColors; // -1: overlap, 0: no color, 1..: color group
-    int calculate(int qty, int price, List<Equation> previous) {
+    int calculate(int qty, int _price, List<Equation> previous) {
 
         total = 0;
+        price = _price;
         rowColors = new List.filled(previous.length, 0);
 
         if (isEquation) {
@@ -115,12 +135,26 @@ class Equation {
             for (var range in ranges) {
                 price += range.sum(previous);
             }
+            ranges.asMap().forEach((group, range) {
+                for (int idx = 0; idx < rowColors.length; idx++) {
+                    if (range.isHit(idx)) {
+                        if (rowColors[idx] != 0) {
+                            rowColors[idx] = -1;
+                        } else {
+                            rowColors[idx] = group+1;
+                        }
+                    }
+                }
+            });
+
         }
 
         if (price != null) {
             if (qty == null) qty = 100;
             if (eq.contains('%')) qty = (qty/100).round();
             total = ((qty * price)/100).round();
+        } else {
+            price = 0;
         }
 
         return total;
@@ -149,6 +183,7 @@ abstract class SummingRow {
         var _price = string_to_int(price);
         equation.calculate(_qty, _price, previous);
         isPriceCalculated = equation.isEquation;
+        price = amount_int_to_string(equation.price);
         total = amount_int_to_string(equation.total);
         onCalculationFinished();
         return equation;
