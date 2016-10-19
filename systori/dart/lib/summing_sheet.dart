@@ -6,51 +6,125 @@ int sum(Iterable<int> ints) => ints.reduce((i, j) => i + j);
 abstract class SummingSheet {
     List<SummingRow> get rows;
     int calculate() {
-        List<int> subtotals = [];
+        int total = 0;
+        List<Equation> previous = [];
         for (var row in rows) {
-            subtotals.add(row.calculate(subtotals));
+            var eq = row.calculate(previous);
+            previous.add(eq);
+            total += eq.total;
         }
-        return subtotals.length >0 ? sum(subtotals) : 0;
+        return total;
     }
+}
+
+
+class Range {
+
+    static final RegExp RANGE = new RegExp(r'([!@])(&|\d*)(\[?)(:?)(\]?)(&|\d*)');
+
+    final String direction;
+    final bool range;
+
+    final int start;
+    final bool isStartEquation;
+    final bool isStartExclusive;
+    bool get isStartOpen => start == null && !isStartEquation;
+
+    final int end;
+    final bool isEndExclusive;
+    final bool isEndEquation;
+    bool get isEndOpen => end == null && !isEndEquation;
+
+    Range(this.direction, start, exclusiveStart, range, exclusiveEnd, end):
+        start = int.parse(start, onError: (source) => 1),
+        isStartEquation = start=='&',
+        isStartExclusive = exclusiveStart=='[',
+        end = int.parse(end, onError: (source) => null),
+        isEndExclusive = exclusiveEnd==']',
+        isEndEquation = end=='&',
+        range = exclusiveStart=='[' || exclusiveEnd==']' || range==':'
+    ;
+
+    static List<Range> extractRanges(String eq) =>
+        RANGE.allMatches(eq).map((m) =>
+            new Range(m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6))
+        ).toList();
+
+    int total = 0;
+
+    int sum(List<Equation> previous) {
+        total = 0;
+
+        Iterator<Equation> rows = previous.iterator;
+        if (direction == '!') {
+            rows = previous.reversed.iterator;
+        }
+
+        int i = 0;
+        bool inside = false;
+        int lastIdx = previous.length;
+        while (rows.moveNext()) { i++;
+
+            if ((!isStartEquation && start == i) || (isStartEquation && rows.current.isEquation)) {
+                inside = true;
+                if (isStartExclusive)
+                    // if we're at the start and [ then don't add this row
+                    continue;
+            }
+
+            if (!inside)
+                continue; // keep searching for the start of range
+
+            if ((!isEndEquation && end == i) || (isEndEquation && rows.current.isEquation) || lastIdx == i)
+                // last row means we're not inside anymore
+                inside = false;
+
+            if (isEndExclusive && !inside)
+                // if we're at the end and ] then don't add this row
+                break;
+
+            total += rows.current.total;
+
+            if (!inside || !range)
+                break;
+
+        }
+
+        return total;
+    }
+
 }
 
 
 class Equation {
 
-    static final RegExp SUMX = new RegExp(r'[%!](\d+)');
+    final String eq;
+    final List<Range> ranges;
+    bool get isEquation => ranges.length > 0;
+    Equation(eq): ranges = Range.extractRanges(eq), eq=eq;
 
-    int sumX = 1;
-    bool isSum;
-    bool isSumAll;
-    bool isPercent;
+    int total = 0;
+    List<int> rowColors; // -1: overlap, 0: no color, 1..: color group
+    int calculate(int qty, int price, List<Equation> previous) {
 
-    Equation(String eq) {
-        isPercent = eq.contains('%');
-        isSum = eq.contains('!') || isPercent;
-        isSumAll = eq.contains('!!');
-        if (!isSumAll) {
-            var match = SUMX.firstMatch(eq);
-            if (match != null) {
-                sumX = int.parse(match.group(1));
+        total = 0;
+        rowColors = new List.filled(previous.length, 0);
+
+        if (isEquation) {
+            price = 0;
+            for (var range in ranges) {
+                price += range.sum(previous);
             }
         }
-    }
 
-    int calculate(List<int> previous) {
-        if (!isSum) return null;
-
-        if (previous.length == 0) {
-            sumX = 0;
-            return 0;
+        if (price != null) {
+            if (qty == null) qty = 100;
+            if (eq.contains('%')) qty = (qty/100).round();
+            total = ((qty * price)/100).round();
         }
 
-        if (isSumAll || previous.length < sumX) {
-            sumX = previous.length;
-            return sum(previous);
-        } else {
-            var toSumRow = previous.length - sumX;
-            return sum(previous.skip(toSumRow));
-        }
+        return total;
+
     }
 }
 
@@ -67,31 +141,17 @@ abstract class SummingRow {
     String get total;
     set total(String _total);
 
-    int calculate(List<int> previous) {
-        equation = new Equation(unit);
+    Equation calculate(List<Equation> previous) {
+        if (equation == null || equation.eq != unit) {
+            equation = new Equation(unit);
+        }
         var _qty = string_to_int(qty);
-        var _calc = equation.calculate(previous);
-        var _price;
-        if (_calc != null) {
-            _price = _calc;
-            price = amount_int_to_string(_calc);
-            isPriceCalculated = true;
-        } else {
-            _price = string_to_int(price);
-            isPriceCalculated = false;
-        }
-
-        var _total = 0;
-
-        if (_price != null) {
-            if (_qty == null) _qty = 100;
-            if (equation.isPercent) _qty /= 100;
-            _total = ((_qty * _price)/100).round();
-        }
-
-        total = amount_int_to_string(_total);
+        var _price = string_to_int(price);
+        equation.calculate(_qty, _price, previous);
+        isPriceCalculated = equation.isEquation;
+        total = amount_int_to_string(equation.total);
         onCalculationFinished();
-        return _total;
+        return equation;
     }
 
     onCalculationFinished() {}
