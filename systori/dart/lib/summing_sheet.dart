@@ -86,9 +86,20 @@ class Range {
                     startIdx = i-1;
             }
 
-            if ((!isEndEquation && end == i) || (isEndEquation && rows.current.isEquation) || lastIdx == i)
+            if ((!isEndEquation && end == i) ||
+                (isEndEquation && rows.current.isEquation) ||
+                lastIdx == i) {
                 // last row means we're not inside anymore
                 inside = false;
+                if (lastIdx == i && isEndEquation && !rows.current.isEquation) {
+                    // we've made it to the end without finding any equations
+                    // this whole range is a dud, clear everything and exit
+                    total = 0;
+                    startIdx = null;
+                    endIdx = null;
+                    break;
+                }
+            }
 
             if (isEndExclusive && !inside)
                 // if we're at the end and ] then don't add this row

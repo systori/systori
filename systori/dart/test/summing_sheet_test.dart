@@ -105,6 +105,8 @@ main() async {
 
         test("bottom-up summing, equation stops, range", () {
             expect(calc('!&:', [1, 2, 4, 5]), 0);
+            expect(calc('!:&', [1, 2, 4, 5]), 0);
+            expect(calc('!&:&', [1, 2, 4, 5]), 0);
             expect(calc('!&:', [1, 2, 4, 5], 3), 12);
             expect(calc('!&:', [1, 2, 4, 5], 2), 7);
             expect(calc('!:&', [1, 2, 4, 5], 2), 9);
@@ -116,12 +118,11 @@ main() async {
 
     group("Range.startIdx/endIdx", () {
 
-        List<int> calc(String eq, List<int> ints, [hasEquation = -1]) {
+        List<int> calc(String eq, List<int> ints) {
             var equation = new Equation(eq);
             List<Equation> previous = [];
             ints.asMap().forEach((i, total) =>
-                previous.add(
-                    new Equation(hasEquation == i ? '!' : '')..total = total)
+                previous.add(new Equation('')..total = total)
             );
             var range = equation.ranges.first;
             range.sum(previous);
@@ -155,6 +156,44 @@ main() async {
             expect(calc('!3:', [1, 2, 4]), [0, 0]);
             expect(calc('!2:', [1, 2, 4]), [0, 1]);
         });
+    });
+
+    group("Range.startIdx/endIdx for '&'", () {
+
+        List<int> calc(String eq, List<int> ints, [eq1=-1, eq2=-1]) {
+            var equation = new Equation(eq);
+            List<Equation> previous = [];
+            ints.asMap().forEach((i, total) =>
+                previous.add(
+                    new Equation(eq1==i||eq2==i ? '!' : '')..total = total)
+            );
+            var range = equation.ranges.first;
+            range.sum(previous);
+            return [range.startIdx, range.endIdx];
+        }
+
+        test("equation stops, no matches", () {
+            expect(calc('!&:',  [1, 2, 4, 5]), [null, null]);
+            expect(calc('!:&',  [1, 2, 4, 5]), [null, null]);
+            expect(calc('!&:&', [1, 2, 4, 5]), [null, null]);
+            expect(calc('!3:&',   [1, 2, 4, 5], 2, 3), [null, null]);
+            expect(calc('@&:',  [1, 2, 4, 5]), [null, null]);
+            expect(calc('@:&',  [1, 2, 4, 5]), [null, null]);
+            expect(calc('@&:&', [1, 2, 4, 5]), [null, null]);
+            expect(calc('@3:&',   [1, 2, 4, 5], 0, 1), [null, null]);
+        });
+
+        test("equation stops, with matches", () {
+            expect(calc('!&',   [1, 2, 4, 5], 1, 3), [3, 3]);
+            expect(calc('!&:&', [1, 2, 4, 5], 1, 3), [3, 3]);
+            expect(calc('!2:&', [1, 2, 4, 5], 0), [0, 2]);
+            expect(calc('!&:3', [1, 2, 4, 5], 3), [1, 3]);
+            expect(calc('@&',   [1, 2, 4, 5], 1, 3), [1, 1]);
+            expect(calc('@&:&', [1, 2, 4, 5], 1, 3), [1, 1]);
+            expect(calc('@2:&', [1, 2, 4, 5], 2), [1, 2]);
+            expect(calc('@&:3', [1, 2, 4, 5], 1), [1, 2]);
+        });
+
     });
 
     group("Equation.calculate() without ranges", () {
