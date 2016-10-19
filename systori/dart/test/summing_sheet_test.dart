@@ -173,14 +173,14 @@ main() async {
         }
 
         test("equation stops, no matches", () {
-            expect(calc('!&:',  [1, 2, 4, 5]), [null, null]);
-            expect(calc('!:&',  [1, 2, 4, 5]), [null, null]);
-            expect(calc('!&:&', [1, 2, 4, 5]), [null, null]);
-            expect(calc('!3:&',   [1, 2, 4, 5], 2, 3), [null, null]);
-            expect(calc('@&:',  [1, 2, 4, 5]), [null, null]);
-            expect(calc('@:&',  [1, 2, 4, 5]), [null, null]);
-            expect(calc('@&:&', [1, 2, 4, 5]), [null, null]);
-            expect(calc('@3:&',   [1, 2, 4, 5], 0, 1), [null, null]);
+            expect(calc('!&:',  [1, 2, 4, 5]), [-1, -1]);
+            expect(calc('!:&',  [1, 2, 4, 5]), [-1, -1]);
+            expect(calc('!&:&', [1, 2, 4, 5]), [-1, -1]);
+            expect(calc('!3:&',   [1, 2, 4, 5], 2, 3), [-1, -1]);
+            expect(calc('@&:',  [1, 2, 4, 5]), [-1, -1]);
+            expect(calc('@:&',  [1, 2, 4, 5]), [-1, -1]);
+            expect(calc('@&:&', [1, 2, 4, 5]), [-1, -1]);
+            expect(calc('@3:&',   [1, 2, 4, 5], 0, 1), [-1, -1]);
         });
 
         test("equation stops, with matches", () {
@@ -271,6 +271,7 @@ main() async {
         test("multiple ranges", () {
             expect(calc('!:', [1,2,3]), [1,1,1]);
             expect(calc('!:@', [1,2,3]), [-1,1,1]);
+            expect(calc('!!@:', [1,2,3]), [3,3,-1]);
             expect(calc('!!@:', [1,2,3]), [3,3,-1]);
         });
 

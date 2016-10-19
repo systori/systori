@@ -51,13 +51,13 @@ class Range {
         ).toList();
 
     int total;
-    int startIdx;
-    int endIdx;
+    int startIdx = -1;
+    int endIdx = -1;
 
     int sum(List<Equation> previous) {
         total = 0;
-        startIdx = null;
-        endIdx = null;
+        startIdx = -1;
+        endIdx = -1;
 
         Iterator<Equation> rows = previous.iterator;
         if (direction == '!') {
@@ -79,7 +79,7 @@ class Range {
             if (!inside)
                 continue; // keep searching for the start of range
 
-            if (startIdx == null && endIdx == null) {
+            if (startIdx == -1 && endIdx == -1) {
                 if (direction == '!')
                     endIdx = lastIdx-i;
                 else
@@ -95,8 +95,8 @@ class Range {
                     // we've made it to the end without finding any equations
                     // this whole range is a dud, clear everything and exit
                     total = 0;
-                    startIdx = null;
-                    endIdx = null;
+                    startIdx = -1;
+                    endIdx = -1;
                     break;
                 }
             }
@@ -194,7 +194,8 @@ abstract class SummingRow {
         var _price = string_to_int(price);
         equation.calculate(_qty, _price, previous);
         isPriceCalculated = equation.isEquation;
-        price = amount_int_to_string(equation.price);
+        if (equation.isEquation)
+            price = amount_int_to_string(equation.price);
         total = amount_int_to_string(equation.total);
         onCalculationFinished();
         return equation;
