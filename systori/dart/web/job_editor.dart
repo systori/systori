@@ -129,7 +129,7 @@ class LineItemElement extends ModelElement with Orderable, SummingRow {
             } else if (group == -1) {
                 li.total_view.style.backgroundColor = '#D41351';
             } else {
-                li.total_view.style.backgroundColor = COLORS[idx%COLORS.length];
+                li.total_view.style.backgroundColor = COLORS[group%COLORS.length];
             }
         });
         this.price_input.style.backgroundColor = '#F88379';
