@@ -35,7 +35,11 @@ class Range {
     final bool isEndEquation;
     bool get isEndOpen => end == null && !isEndEquation;
 
-    Range(this.direction, start, exclusiveStart, range, exclusiveEnd, end):
+    final int id;
+    final int srcStart;
+    final int srcEnd;
+
+    Range(this.id, this.direction, start, exclusiveStart, range, exclusiveEnd, end, this.srcStart, this.srcEnd):
         start = int.parse(start, onError: (source) => 1),
         isStartEquation = start=='&',
         isStartExclusive = exclusiveStart=='[',
@@ -45,10 +49,18 @@ class Range {
         range = exclusiveStart=='[' || exclusiveEnd==']' || range==':'
     ;
 
-    static List<Range> extractRanges(String eq) =>
-        RANGE.allMatches(eq).map((m) =>
-            new Range(m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6))
-        ).toList();
+    static List<Range> extractRanges(String eq) {
+        int i = 1;
+        List<Range> ranges = [];
+        for (var m in RANGE.allMatches(eq)) {
+            ranges.add(new Range(i,
+                m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6),
+                m.start, m.end
+            ));
+            i++;
+        }
+        return ranges;
+    }
 
     int total;
     int startIdx = -1;
@@ -134,30 +146,19 @@ class Equation {
 
     int total = 0;
     int price = 0;
-    List<int> rowColors; // -1: overlap, 0: no color, 1..: color group
+    List<int> rowToRange; // -1: overlap, 0: no range, 1..: range id
     int calculate(int qty, int _price, List<Equation> previous) {
 
         total = 0;
         price = _price;
-        rowColors = new List.filled(previous.length, 0);
+        rowToRange = new List.filled(previous.length, 0);
 
         if (isEquation) {
             price = 0;
             for (var range in ranges) {
                 price += range.sum(previous);
             }
-            ranges.asMap().forEach((group, range) {
-                for (int idx = 0; idx < rowColors.length; idx++) {
-                    if (range.isHit(idx)) {
-                        if (rowColors[idx] != 0) {
-                            rowColors[idx] = -1;
-                        } else {
-                            rowColors[idx] = group+1;
-                        }
-                    }
-                }
-            });
-
+            updateRowToRangeMapping();
         }
 
         if (price != null) {
@@ -170,6 +171,20 @@ class Equation {
 
         return total;
 
+    }
+
+    updateRowToRangeMapping() {
+        for (var range in ranges) {
+            for (int idx = 0; idx < rowToRange.length; idx++) {
+                if (range.isHit(idx)) {
+                    if (rowToRange[idx] != 0) {
+                        rowToRange[idx] = -1;
+                    } else {
+                        rowToRange[idx] = range.id;
+                    }
+                }
+            }
+        }
     }
 }
 

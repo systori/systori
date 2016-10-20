@@ -251,7 +251,7 @@ main() async {
 
     });
 
-    group("Equation.rowColors", () {
+    group("Equation.rowToRange", () {
         List<int> calc(String eq, List<int> ints) {
             var equation = new Equation(eq);
             List<Equation> previous = [];
@@ -259,7 +259,7 @@ main() async {
                 previous.add(new Equation('')..total = total * 100)
             );
             equation.calculate(0, null, previous);
-            return equation.rowColors;
+            return equation.rowToRange;
         }
 
         test("single number non-ranges", () {

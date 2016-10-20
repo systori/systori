@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:systori/summing_sheet.dart';
 import 'package:systori/orderable_container.dart';
 import 'package:systori/common.dart';
+import 'package:systori/richinput_element.dart';
 
 
 abstract class ModelElement extends HtmlElement {
@@ -14,10 +15,10 @@ abstract class ModelElement extends HtmlElement {
 
     ModelElement.created() : super.created();
 
-    DivElement getView(String field) =>
+    HtmlElement getView(String field) =>
         this.querySelector(":scope>.editor .${field}");
 
-    DivElement getInput(String field) {
+    HtmlElement getInput(String field) {
         var div = getView(field);
         inputs.add(div);
         return div;
@@ -70,7 +71,7 @@ class LineItemElement extends ModelElement with Orderable, SummingRow {
     DivElement qty_input;
     String get qty => qty_input.text;
 
-    DivElement unit_input;
+    RichInput unit_input;
     String get unit => unit_input.text;
 
     DivElement price_input;
@@ -95,11 +96,14 @@ class LineItemElement extends ModelElement with Orderable, SummingRow {
         unit_input.onFocus.listen(askParentToRecalculate);
         unit_input.onBlur.listen(clearHighlighting);
         price_input = getInput("price");
-        [qty_input, unit_input, price_input].forEach((var view) =>
+        [qty_input, unit_input, price_input].forEach((Element view) {
             view.onKeyUp.listen((_) =>
                 this.dispatchEvent(new CustomEvent('calculate', detail: this))
-            )
-        );
+            );
+            view.onPaste.listen((_) =>
+                this.dispatchEvent(new CustomEvent('calculate', detail: this))
+            );
+        });
         total_view = getView("total");
     }
 
@@ -114,6 +118,7 @@ class LineItemElement extends ModelElement with Orderable, SummingRow {
             previous = previous.previousElementSibling;
         }
         this.price_input.style.backgroundColor = 'white';
+        this.unit_input.text = this.unit_input.text;
     }
 
     static final List<String> COLORS = [
@@ -121,18 +126,27 @@ class LineItemElement extends ModelElement with Orderable, SummingRow {
     ];
 
     onCalculationFinished() {
+
         if (document.activeElement != this.unit_input || !equation.isEquation) return;
-        equation.rowColors.asMap().forEach((idx, group) {
+
+        unit_input.highlight(
+            equation.ranges.map((r) =>
+            new Highlight(r.srcStart, r.srcEnd, COLORS[r.id%COLORS.length]))
+        );
+
+        equation.rowToRange.asMap().forEach((idx, rangeId) {
             LineItemElement li = parent.children[idx];
-            if (group == 0) {
+            if (rangeId == 0) {
                 li.total_view.style.backgroundColor = 'white';
-            } else if (group == -1) {
+            } else if (rangeId == -1) {
                 li.total_view.style.backgroundColor = '#D41351';
             } else {
-                li.total_view.style.backgroundColor = COLORS[group%COLORS.length];
+                li.total_view.style.backgroundColor = COLORS[rangeId%COLORS.length];
             }
         });
+
         this.price_input.style.backgroundColor = '#F88379';
+
     }
 
 }
@@ -150,6 +164,7 @@ class LineItemContainerElement extends HtmlElement with OrderableContainer, Summ
 
 void main() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
+    document.registerElement('rich-input', RichInput);
     document.registerElement('sys-job', JobElement);
     document.registerElement('sys-group', GroupElement);
     document.registerElement('sys-task', TaskElement);

@@ -5,7 +5,7 @@
     <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
     <div class="name" placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name|safe }}</div>
     <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ lineitem.unit_qty|ubrdecimal }}</div>
-    <div class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ lineitem.unit }}</div>
+    <rich-input class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ lineitem.unit }}</rich-input>
     <div class="price" placeholder="{% trans 'price' %}" contenteditable>{{ lineitem.price|ubrdecimal }}</div>
     <div class="total">{{ lineitem.total|ubrdecimal:3 }}</div>
     <div class="labels">
