@@ -99,6 +99,11 @@ class Migration(migrations.Migration):
             name='variant_serial',
             field=models.PositiveIntegerField(default=0),
         ),
+        migrations.AddField(
+            model_name='lineitem',
+            name='is_hidden',
+            field=models.BooleanField(default=False),
+        ),
 
 
         migrations.AddField(

@@ -23,6 +23,8 @@ class RichInput extends HtmlElement {
         contentEditable = 'true';
     }
 
+    clear() => text = text;
+
     highlight(List<Highlight> highlights) {
 
         var buffer = new StringBuffer();
@@ -30,7 +32,7 @@ class RichInput extends HtmlElement {
         int lastEnd = 0;
         for (var highlight in highlights) {
             buffer.write(text.substring(lastEnd, highlight.start));
-            buffer.write('<span style="background-color: ${highlight.color};">');
+            buffer.write('<span style="background: rgba(${highlight.color},0.2);">');
             buffer.write(text.substring(highlight.start, highlight.end));
             buffer.write('</span>');
             lastEnd = highlight.end;

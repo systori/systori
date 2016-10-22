@@ -6,5 +6,8 @@ dependencies:
   intl: any
   collection: any
   web_components: any
+  parsers: any
+  quiver: any
 dev_dependencies:
   test: any
+  mockito: any

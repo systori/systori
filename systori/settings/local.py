@@ -5,7 +5,7 @@ SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
 
 DEBUG = True
 
-if True:
+if False:
     INSTALLED_APPS += (
         'debug_toolbar',
     )

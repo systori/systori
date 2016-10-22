@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='structure_format',
-            field=models.CharField(default="01.01.0001", max_length=124, verbose_name='Numbering Structure'),
+            field=models.CharField(default="01.01.001", max_length=124, verbose_name='Numbering Structure'),
         ),
         migrations.RunPython(zfill_field_renamed),
         migrations.RemoveField(

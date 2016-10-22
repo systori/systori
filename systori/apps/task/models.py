@@ -389,6 +389,9 @@ class LineItem(OrderedModel):
     # or it could be set manual by a user
     is_flagged = models.BooleanField(default=False)
 
+    # hidden lineitems are not included in the total
+    is_hidden = models.BooleanField(default=False)
+
     # this line item is a price correction
     is_correction = models.BooleanField(default=False)
 

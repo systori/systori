@@ -97,10 +97,7 @@ class LineItemElement extends ModelElement with Orderable, SummingRow {
         unit_input.onBlur.listen(clearHighlighting);
         price_input = getInput("price");
         [qty_input, unit_input, price_input].forEach((Element view) {
-            view.onKeyUp.listen((_) =>
-                this.dispatchEvent(new CustomEvent('calculate', detail: this))
-            );
-            view.onPaste.listen((_) =>
+            view.onInput.listen((_) =>
                 this.dispatchEvent(new CustomEvent('calculate', detail: this))
             );
         });
@@ -118,11 +115,12 @@ class LineItemElement extends ModelElement with Orderable, SummingRow {
             previous = previous.previousElementSibling;
         }
         this.price_input.style.backgroundColor = 'white';
-        this.unit_input.text = this.unit_input.text;
+        this.unit_input.clear();
     }
 
     static final List<String> COLORS = [
-        '#DDD3C8', '#F8BDAD', '#FEDDAB', '#8AACB8', '#A6CFCC', '#DDEDE1'
+        //'#DDD3C8', '#F8BDAD', '#FEDDAB', '#8AACB8', '#A6CFCC', '#DDEDE1'
+        '187,168,146', '238,114,95', '250,185,75', '0,108,124', '0,161,154', '183,219,193'
     ];
 
     onCalculationFinished() {
@@ -141,7 +139,7 @@ class LineItemElement extends ModelElement with Orderable, SummingRow {
             } else if (rangeId == -1) {
                 li.total_view.style.backgroundColor = '#D41351';
             } else {
-                li.total_view.style.backgroundColor = COLORS[rangeId%COLORS.length];
+                li.total_view.style.background = 'rgba(${COLORS[rangeId%COLORS.length]},0.2)';
             }
         });
 

@@ -2,11 +2,11 @@
 <div class="editor">
   <div class="editor-row">
     <div class="code">{{ task.code }}</div>
-    <div class="name" placeholder="{% trans 'task' %}" contenteditable>{{ task.name|safe }}</div>
-    <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ task.qty|ubrdecimal }}</div>
-    <div class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ task.unit }}</div>
-    <div class="price">{{ task.calculated_unit_price|ubrdecimal:3 }}</div>
-    <div class="total">{{ task.estimate|ubrdecimal:3 }}</div>
+    <name-view class="name" placeholder="{% trans 'task' %}" editable="true">{{ task.name|safe }}</name-view>
+    <decimal-view class="qty" placeholder="{% trans 'qty' %}" editable="true">{{ task.qty|ubrdecimal }}</decimal-view>
+    <unit-view class="unit" placeholder="{% trans 'unit' %}" editable="true">{{ task.unit }}</unit-view>
+    <decimal-view class="price">{{ task.calculated_unit_price|ubrdecimal:3 }}</decimal-view>
+    <decimal-view class="total">{{ task.estimate|ubrdecimal:3 }}</decimal-view>
     {% comment %}
     <div class="labels">
       <span class="is_optional {{ task.is_provisional }} label label-primary">{% trans 'Optional' %}</span>

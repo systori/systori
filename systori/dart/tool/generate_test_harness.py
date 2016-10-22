@@ -11,7 +11,7 @@ from django.utils.translation import activate
 from django.conf import settings
 from systori.apps.company.factories import CompanyFactory
 from systori.apps.project.factories import ProjectFactory
-from systori.apps.task.factories import JobFactory
+from systori.apps.task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from systori.apps.user.factories import UserFactory
 from systori.apps.accounting.models import Entry, create_account_for_job
 from systori.apps.accounting.forms import PaymentRowForm
@@ -35,13 +35,20 @@ def create_data():
     data.company = CompanyFactory()
     create_chart_of_accounts()
     data.user = UserFactory(email='test@systori.com', company=data.company)
-    data.project = ProjectFactory(name="Test Project")
+    data.project = ProjectFactory(name="Test Project", structure_format="0.00.00.000")
 
     data.job1 = JobFactory(name="Test Job", project=data.project)
+    data.job1.generate_groups()
     data.job1.account = create_account_for_job(data.job1)
     data.job1.save()
+    group = data.job1.groups.first().groups.first()
+    task = TaskFactory(name="Sample Task", group=group, job=data.job1)
+    LineItemFactory(task=task)
+    LineItemFactory(task=task)
+    LineItemFactory(task=task)
 
     data.job2 = JobFactory(name="Test Job", project=data.project)
+    data.job2.generate_groups()
     data.job2.account = create_account_for_job(data.job2)
     data.job2.save()
 
@@ -76,8 +83,8 @@ def generate_pages():
     client = Client()
     client.login(username=data.user.email, password='open sesame')
 
-    editor = client.get(reverse('tasks', args=[data.project.id, data.job1.id]), HTTP_HOST=host)
-    write_test_html('task_editor', editor.content)
+    job_editor = client.get(reverse('tasks', args=[data.project.id, data.job1.id]), HTTP_HOST=host)
+    write_test_html('job_editor', job_editor.content)
 
     proposal_create = client.get(reverse('proposal.create', args=[data.project.id]), HTTP_HOST=host)
     write_test_html('proposal_editor', proposal_create.content)

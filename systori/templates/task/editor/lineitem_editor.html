@@ -3,13 +3,14 @@
 <div class="editor">
   <div class="editor-row">
     <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
-    <div class="name" placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name|safe }}</div>
-    <div class="qty" placeholder="{% trans 'qty' %}" contenteditable>{{ lineitem.unit_qty|ubrdecimal }}</div>
-    <rich-input class="unit" placeholder="{% trans 'unit' %}" contenteditable>{{ lineitem.unit }}</rich-input>
-    <div class="price" placeholder="{% trans 'price' %}" contenteditable>{{ lineitem.price|ubrdecimal }}</div>
-    <div class="total">{{ lineitem.total|ubrdecimal:3 }}</div>
-    <div class="labels">
-      <span class="is_flagged {{ lineitem.is_flagged }} label label-danger">{% trans 'Flag' %}</span>
+    <name-view class="name" placeholder="{% trans 'line item' %}" editable="true">{{ lineitem.name|safe }}</name-view>
+    <decimal-view class="qty" placeholder="{% trans 'qty' %}" editable="true">{{ lineitem.unit_qty|ubrdecimal }}</decimal-view>
+    <rich-input class="unit" placeholder="{% trans 'unit' %}" editable="true">{{ lineitem.unit }}</rich-input>
+    <decimal-view class="price" placeholder="{% trans 'price' %}" {% if not lineitem.is_equation %}editable="true"{% endif %}>{{ lineitem.price|ubrdecimal }}</decimal-view>
+    <decimal-view class="total">{{ lineitem.total|ubrdecimal:3 }}</decimal-view>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close {{ lineitem.is_hidden }}"></span>
+      <span class="is_flagged glyphicon glyphicon-flag {{ lineitem.is_flagged }}"></span>
     </div>
   </div>
 </div>
