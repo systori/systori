@@ -2,17 +2,17 @@ import 'package:test/test.dart';
 import 'package:quiver/iterables.dart';
 import 'package:systori/decimal.dart';
 import 'package:systori/spreadsheet.dart' as sheet;
-import 'package:systori/spreadsheet.dart' show Range;
+import 'package:systori/spreadsheet.dart' show Range, RangeList, RangeCache;
 
 
 class Cell extends sheet.Cell {
-    int column = 0;
-    Decimal value;
-    String rawEquation, resolvedEquation;
-    Cell(this.value, [this.rawEquation=""]);
+    String equation, resolved;
+    Cell(_value, [this.equation="", _col=0, _row=0])
+        {value=_value; this.column=_col; row=_row;}
 }
 
-List<Range> ranges(String eq) => Range.extractRanges(eq);
+
+RangeList ranges(String eq) => new RangeList(eq, new RangeCache());
 
 Range extract(String eq) => ranges(eq).first;
 
@@ -30,13 +30,13 @@ double total(String eq, List<int> ints, [eq1=-1, eq2=-1]) =>
 
 List index(String eq, List<int> ints, [eq1=-1, eq2=-1]) {
     var _range = range(eq, ints, eq1, eq2);
-    return [_range.startIdx, _range.endIdx];
+    return [_range.result.start, _range.result.end];
 }
 
 
 main() async {
 
-    group("Range.extractRanges()", () {
+    group("RangeList()", () {
 
         test("ranges", () {
             expect(ranges('1+1').length, 0);
@@ -171,7 +171,7 @@ main() async {
 
     });
 
-    group("Range.startIdx/endIdx", () {
+    group("RangeResult.start/end", () {
 
         test("top-down, no range", () {
             expect(index('@', [1, 2, 4]), [0, 0]);
@@ -202,7 +202,7 @@ main() async {
         });
     });
 
-    group("Range.startIdx/endIdx for '&'", () {
+    group("RangeResult.start/end for '&'", () {
 
         test("equation stops, no matches", () {
             expect(index('!&:',  [1, 2, 4, 5]), [-1, -1]);

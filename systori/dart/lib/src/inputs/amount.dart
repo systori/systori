@@ -1,51 +1,53 @@
 import 'dart:html';
 import 'dart:async';
-import 'common.dart';
+import 'package:systori/decimal.dart';
 
 
 class Amount {
 
-    final int net;
-    final int tax;
-    int get gross => net + tax;
-    final double tax_rate;
-
-    String get net_string => amount_int_to_string(net);
-    String get tax_string => amount_int_to_string(tax);
-    String get gross_string => amount_int_to_string(gross);
+    final Decimal net;
+    final Decimal tax;
+    Decimal get gross => net + tax;
+    final Decimal tax_rate;
 
     Amount(this.net, this.tax, this.tax_rate);
 
-    Amount.from_strings(String net, String tax, String rate): this(
-        amount_string_to_int(net),
-        amount_string_to_int(tax),
-        double.parse(rate)
+    Amount.fromStrings(String net, String tax, String rate): this(
+        new Decimal.parse(net),
+        new Decimal.parse(tax),
+        new Decimal.parse(rate)
+    );
+
+    Amount.from(num net, num tax, num rate): this(
+        new Decimal(net),
+        new Decimal(tax),
+        new Decimal(rate)
     );
 
     factory
-    Amount.from_gross(int gross, double tax_rate) {
-        var net = (gross / (1+tax_rate)).round();
+    Amount.fromGross(Decimal gross, Decimal tax_rate) {
+        var net = gross / (new Decimal(1) + tax_rate);
         var tax = gross - net;
         return new Amount(net, tax, tax_rate);
     }
 
     Amount zero() =>
-        new Amount(0, 0, tax_rate);
+        new Amount(new Decimal(), new Decimal(), tax_rate);
 
-    Amount adjust_net(int new_net) =>
+    Amount adjustNet(Decimal new_net) =>
         new Amount(new_net, gross - new_net, tax_rate);
 
-    Amount adjust_tax(int new_tax) =>
+    Amount adjustTax(Decimal new_tax) =>
         new Amount(gross - new_tax, new_tax, tax_rate);
 
-    Amount adjust_gross(int new_gross) =>
-        new Amount.from_gross(new_gross, tax_rate);
+    Amount adjustGross(Decimal new_gross) =>
+        new Amount.fromGross(new_gross, tax_rate);
 
-    Amount zero_negatives() =>
-        new Amount(net < 0 ? 0 : net, tax < 0 ? 0 : tax, tax_rate);
+    Amount zeroNegatives() =>
+        new Amount(net.decimal < 0 ? new Decimal() : net, tax.decimal < 0 ? new Decimal() : tax, tax_rate);
 
-    Amount operator * (num multiple) =>
-        new Amount((net * multiple).round(), (tax * multiple).round(), tax_rate);
+    Amount operator * (Decimal multiple) =>
+        new Amount(net * multiple, tax * multiple, tax_rate);
 
     Amount operator - (Amount other) =>
         new Amount(net - other.net, tax - other.tax, tax_rate);
@@ -80,30 +82,30 @@ class AmountDivs {
 
     String _tax_rate;
 
-    update_views(Amount amount) {
-        _net_span.text = amount.net_string;
-        _tax_span.text = amount.tax_string;
-        _gross_span.text = amount.gross_string;
+    updateViews(Amount amount) {
+        _net_span.text = amount.net.money;
+        _tax_span.text = amount.tax.money;
+        _gross_span.text = amount.gross.money;
     }
 
-    update_diff(Amount amount) {
-        _update_diff_value(_net_span, amount.net, amount.net_string);
-        _update_diff_value(_tax_span, amount.tax, amount.tax_string);
-        _update_diff_value(_gross_span, amount.gross, amount.gross_string);
+    updateDiff(Amount amount) {
+        _update_diff_value(_net_span, amount.net);
+        _update_diff_value(_tax_span, amount.tax);
+        _update_diff_value(_gross_span, amount.gross);
     }
 
-    _update_diff_value(SpanElement span, int value, String value_str) {
+    _update_diff_value(SpanElement span, Decimal value) {
         span.classes.removeAll(['red', 'green']);
-        if (value > 0) {
-            span.text = '+' + value_str;
+        if (value > new Decimal()) {
+            span.text = '+' + value.money;
             span.classes.add('green');
-        } else if (value < 0) {
-            span.text = value_str;
+        } else if (value < new Decimal()) {
+            span.text = value.money;
             span.classes.add('red');
         }
     }
 
-    update_percent(double percent) {
+    updatePercent(double percent) {
         _percent_div.classes.removeAll(['red', 'green', 'blue']);
         int rounded = 0;
         if (percent < 100) {
@@ -119,7 +121,7 @@ class AmountDivs {
         _percent_div.text = "${rounded}%";
     }
 
-    cache_views(Element scope) {
+    cacheViews(Element scope) {
         _gross_span = scope.querySelector(":scope>.amount-gross>.amount-value");
         _net_span = scope.querySelector(":scope>.amount-net>.amount-value");
         _tax_span = scope.querySelector(":scope>.amount-tax>.amount-value");
@@ -130,8 +132,8 @@ class AmountDivs {
         _tax_rate = scope.dataset['tax-rate'];
     }
 
-    Amount amount_from_views() =>
-        new Amount.from_strings(_net_span.text, _tax_span.text, _tax_rate);
+    Amount amountFromViews() =>
+        new Amount.fromStrings(_net_span.text, _tax_span.text, _tax_rate);
 
 }
 
@@ -144,21 +146,21 @@ class AmountInputs {
 
     String _tax_rate;
 
-    update_inputs(Amount amount) {
-        _net_input.value = amount.net_string;
-        _tax_input.value = amount.tax_string;
-        _gross_input.value = amount.gross_string;
+    updateInputs(Amount amount) {
+        _net_input.value = amount.net.money;
+        _tax_input.value = amount.tax.money;
+        _gross_input.value = amount.gross.money;
     }
 
-    cache_inputs(Element scope) {
+    cacheInputs(Element scope) {
         _gross_input = scope.querySelector(":scope>input.amount-gross");
         _net_input = scope.querySelector(":scope>input.amount-net");
         _tax_input = scope.querySelector(":scope>input.amount-tax");
         _tax_rate = scope.dataset['tax-rate'];
     }
 
-    Amount amount_from_inputs() =>
-        new Amount.from_strings(_net_input.value, _tax_input.value, _tax_rate);
+    Amount amountFromInputs() =>
+        new Amount.fromStrings(_net_input.value, _tax_input.value, _tax_rate);
 
 }
 
@@ -179,13 +181,13 @@ abstract class AmountCell extends TableCellElement {
 class AmountViewCell extends AmountCell with AmountDivs {
 
     AmountViewCell.created() : super.created(); attached() {
-        cache_views(this);
-        amount = amount_from_views();
+        cacheViews(this);
+        amount = amountFromViews();
     }
 
     update(Amount _amount) {
         amount = _amount;
-        update_views(_amount);
+        updateViews(_amount);
     }
 }
 
@@ -197,12 +199,12 @@ enum AmountChangeType {
 class AmountChangeEvent {
 
     AmountChangeType type;
-    int old_value;
-    int new_value;
+    Decimal old_value;
+    Decimal new_value;
 
-    bool get is_net => type == AmountChangeType.NET;
-    bool get is_tax => type == AmountChangeType.TAX;
-    bool get is_gross => type == AmountChangeType.GROSS;
+    bool get isNet => type == AmountChangeType.NET;
+    bool get isTax => type == AmountChangeType.TAX;
+    bool get isGross => type == AmountChangeType.GROSS;
 
     AmountChangeEvent(this.type, this.old_value, this.new_value);
 
@@ -215,45 +217,45 @@ class AmountInputCell extends AmountCell with AmountInputs {
     get onAmountChange => controller.stream;
 
     AmountInputCell.created() : super.created(); attached() {
-        cache_inputs(this);
-        amount = amount_from_inputs();
-        _gross_input.onKeyUp.listen(gross_changed);
-        _net_input.onKeyUp.listen(net_changed);
-        _tax_input.onKeyUp.listen(tax_changed);
+        cacheInputs(this);
+        amount = amountFromInputs();
+        _gross_input.onKeyUp.listen(grossChanged);
+        _net_input.onKeyUp.listen(netChanged);
+        _tax_input.onKeyUp.listen(taxChanged);
     }
 
     update(Amount _amount, {bool triggerEvent: false}) {
         amount = _amount;
-        update_inputs(_amount);
+        updateInputs(_amount);
         if (triggerEvent) {
             controller.add(new AmountChangeEvent(AmountChangeType.ALL, null, null));
         }
     }
 
-    gross_changed([Event _]) {
-        int value = amount_string_to_int(_gross_input.value);
+    grossChanged([Event _]) {
+        Decimal value = new Decimal.parse(_gross_input.value);
         var event = new AmountChangeEvent(AmountChangeType.GROSS, amount.gross, value);
-        amount = amount.adjust_gross(value);
-        _net_input.value = amount.net_string;
-        _tax_input.value = amount.tax_string;
+        amount = amount.adjustGross(value);
+        _net_input.value = amount.net.money;
+        _tax_input.value = amount.tax.money;
         controller.add(event);
     }
 
-    net_changed([Event _]) {
-        int value = amount_string_to_int(_net_input.value);
+    netChanged([Event _]) {
+        Decimal value = new Decimal.parse(_net_input.value);
         var event = new AmountChangeEvent(AmountChangeType.NET, amount.net, value);
-        amount = amount.adjust_net(value);
-        _tax_input.value = amount.tax_string;
-        _gross_input.value = amount.gross_string;
+        amount = amount.adjustNet(value);
+        _tax_input.value = amount.tax.money;
+        _gross_input.value = amount.gross.money;
         controller.add(event);
     }
 
-    tax_changed([Event _]) {
-        int value = amount_string_to_int(_tax_input.value);
+    taxChanged([Event _]) {
+        Decimal value = new Decimal.parse(_tax_input.value);
         var event = new AmountChangeEvent(AmountChangeType.TAX, amount.tax, value);
-        amount = amount.adjust_tax(value);
-        _net_input.value = amount.net_string;
-        _gross_input.value = amount.gross_string;
+        amount = amount.adjustTax(value);
+        _net_input.value = amount.net.money;
+        _gross_input.value = amount.gross.money;
         controller.add(event);
     }
 
@@ -263,15 +265,15 @@ class AmountInputCell extends AmountCell with AmountInputs {
 class AmountStatefulCell extends AmountCell with AmountDivs, AmountInputs {
 
     AmountStatefulCell.created() : super.created(); attached() {
-        cache_views(this);
-        cache_inputs(this);
-        amount = amount_from_inputs();
+        cacheViews(this);
+        cacheInputs(this);
+        amount = amountFromInputs();
     }
 
     update(Amount _amount) {
         amount = _amount;
-        update_views(_amount);
-        update_inputs(_amount);
+        updateViews(_amount);
+        updateInputs(_amount);
     }
 }
 

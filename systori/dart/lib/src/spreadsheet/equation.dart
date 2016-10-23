@@ -2,7 +2,7 @@ import 'package:parsers/parsers.dart';
 import 'package:systori/decimal.dart';
 
 
-Decimal solve(String equation) => Equation.parser.parse(equation);
+Decimal solve(String equation) => Equation.parser.parse(equation.trim());
 
 
 class Equation {

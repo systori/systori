@@ -4,7 +4,7 @@ import 'package:systori/decimal.dart';
 
 main() async {
 
-    group("currency parsing", () {
+    group("Decimal.parse()", () {
 
         double to_double(String number) => new Decimal.parse(number).decimal;
 
@@ -32,4 +32,28 @@ main() async {
 
     });
 
+    group("Decimal.isNullBlankOrNumber", () {
+
+        bool isNBON(String txt) => Decimal.isNullBlankOrNumber(txt);
+
+        test("true", () {
+            expect(isNBON(''), true);
+            expect(isNBON('0'), true);
+            expect(isNBON('1'), true);
+            expect(isNBON('  '), true);
+            expect(isNBON(null), true);
+            expect(isNBON('1,00 '), true);
+            expect(isNBON(' 1.000,00'), true);
+            expect(isNBON(' -1.000,00'), true);
+        });
+
+        test("false", () {
+            expect(isNBON('A'), false);
+            expect(isNBON('1 2'), false);
+            expect(isNBON('1%'), false);
+            expect(isNBON('1-2'), false);
+            expect(isNBON('(1.000,00)'), false);
+        });
+
+    });
 }

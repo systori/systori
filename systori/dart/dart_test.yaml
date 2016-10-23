@@ -1,1 +1,3 @@
-#platforms: [content-shell]
+platforms:
+  - vm
+  - content-shell

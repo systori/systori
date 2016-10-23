@@ -6,10 +6,9 @@ import 'package:systori/spreadsheet.dart' as sheet;
 
 
 class Cell extends sheet.Cell {
-    int column;
-    Decimal value;
-    String rawEquation, resolvedEquation;
-    Cell(this.value, this.rawEquation, this.column);
+    String equation, resolved;
+    Cell(_value, [this.equation="", _col=0, _row=0])
+        {value=_value; column=_col; this.row=_row;}
 }
 
 
@@ -43,8 +42,11 @@ sheet.Spreadsheet mockSheet(List<int> ints, int eq1, int eq2) {
 }
 
 
-Row row(String qty, String price, String total, [List<int> ints, eq1=-1, eq2=-1]) =>
-    new Row(qty, price, total)..calculate(mockSheet(ints, eq1, eq2));
+Row row(String qty, String price, String total, [List<int> ints, eq1=-1, eq2=-1]) {
+    var r = new Row(qty, price, total);
+    r.calculate(mockSheet(ints, eq1, eq2), ints!=null?ints.length:0, r.columns[0]);
+    return r;
+}
 
 double total(String qty, String price, String total, [List<int> ints, eq1=-1, eq2=-1]) =>
     row(qty, price, total, ints, eq1, eq1).total.value.decimal;
@@ -59,7 +61,7 @@ main() async {
         double percent(String qty, String price) {
             var r = new Row(qty, price, '');
             r.hasPercent = true;
-            r.calculate(mockSheet([], null, null));
+            r.calculate(mockSheet([], null, null), 0, r.columns[0]);
             return r.total.value.decimal;
         }
 

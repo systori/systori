@@ -4,7 +4,7 @@ import 'dart:async';
 
 abstract class Orderable implements Element {
 
-    isHit(int y) =>
+    isHit(num y) =>
         this.offset.top < y && y < this.offset.bottom;
 
     isHandle(Element handle) =>
@@ -79,24 +79,24 @@ abstract class OrderableContainer implements Element {
                 } else {
                     insertBefore(placeholder, over);
                 }
+                insertBefore(orderable, placeholder);
             }
 
             previousMousePosition = e.page.y;
+            onOrderingChanged(orderable);
         });
 
         document.onMouseUp.first.then((MouseEvent e) {
             movement.cancel();
-            insertBefore(orderable, placeholder);
             placeholder.remove();
             orderable.style.top = null;
             orderable.style.width = null;
             orderable.style.position = null;
             orderable.style.zIndex = null;
-            onOrderingFinished(orderable);
         });
     }
 
-    onOrderingFinished(Orderable orderable) {}
+    onOrderingChanged(Orderable orderable) {}
 }
 
 

@@ -1,9 +1,96 @@
+import 'package:quiver/collection.dart';
 import 'package:systori/decimal.dart';
 import 'cell.dart';
 
+
+class RangeResult {
+
+    int group;
+    int start;
+    int end;
+    Decimal value;
+
+    bool isHit(int idx) => start <= idx && idx <= end;
+    bool get isEmpty => start == -1;
+
+    RangeResult() {
+        reset();
+    }
+
+    reset() {
+        start = -1;
+        end = -1;
+        value = new Decimal();
+    }
+}
+
+
+class RangeCache extends DelegatingMap<String,RangeResult> {
+    final Map<String,RangeResult> _cache = {};
+    Map<String,RangeResult> get delegate => _cache;
+
+    reset() {
+        // there could be ranges still holding references to results
+        // so we want to reset those first
+        _cache.values.forEach((r)=>r.reset());
+        // now clear out the cache
+        _cache.clear();
+    }
+
+}
+
+
+class RangeList extends DelegatingList<Range> {
+
+    final List<Range> _ranges = [];
+    List<Range> get delegate => _ranges;
+
+    RangeList(String eq, RangeCache cache) {
+        cache.values.forEach((r)=>r.group=null);
+        int nextGroup = 1;
+        for (var m in Range.PATTERN.allMatches(eq.toUpperCase())) {
+            var src = m.group(0);
+            var result = cache.putIfAbsent(src, ()=>new RangeResult());
+            if (result.group == null)
+                result.group = nextGroup++;
+            _ranges.add(new Range(result,
+                    m.group(1), m.group(2),
+                    m.group(3), m.group(4), // startEquation, start
+                    m.group(5), m.group(6), m.group(7), // exclusive range
+                    m.group(8), m.group(9), // endEquation, end
+                    m.start, m.end, src
+            ));
+        }
+    }
+
+    calculate(List<Cell> getColumn(int columnIdx), RangeCache cache, int thisColumn) {
+        for (var range in _ranges) {
+            var columnIdx = range.column != null ? range.column : thisColumn;
+            cache.putIfAbsent(range.src, ()=>range.result);
+            if (range.result.isEmpty)
+                range.calculate(getColumn(columnIdx));
+        }
+    }
+
+    String resolve(String equation) {
+        var buffer = new StringBuffer();
+        int lastEnd = 0;
+        for (var range in _ranges) {
+            buffer.write(equation.substring(lastEnd, range.srcStart));
+            buffer.write(range.result.value.number);
+            lastEnd = range.srcEnd;
+        }
+        buffer.write(equation.substring(lastEnd));
+        return buffer.toString();
+    }
+
+
+}
+
+
 class Range {
 
-    static final RegExp RANGE = new RegExp(r'([ABC]?)([!@])(&?)(\d*)(\[?)(:?)(\]?)(&?)(\d*)');
+    static final RegExp PATTERN = new RegExp(r'([ABC]?)([!@])(&?)(\d*)(\[?)(:?)(\]?)(&?)(\d*)');
 
     final int column;
     final String direction;
@@ -18,12 +105,12 @@ class Range {
     final bool isEndEquation;
     bool get isEndOpen => end == null && !isEndEquation;
 
-    final int group;
+    final RangeResult result;
     final int srcStart;
     final int srcEnd;
     final String src;
 
-    Range(this.group, String column, this.direction,
+    Range(this.result, String column, this.direction,
         startEquation, start,
         exclusiveStart, range, exclusiveEnd,
         endEquation, end,
@@ -38,61 +125,23 @@ class Range {
             end = int.parse(end, onError: (source) => endEquation=='&' ? 1 : null)
     ;
 
-    static List<Range> extractRanges(String eq) {
-        int i = 1;
-        List<Range> ranges = [];
-        Map<String,int> rangeGroups = {};
-        for (var m in RANGE.allMatches(eq.toUpperCase())) {
-            var key = m.group(0);
-            if (!rangeGroups.containsKey(key)) {
-                rangeGroups[key] = i++;
-            }
-            ranges.add(new Range(rangeGroups[key], m.group(1), m.group(2),
-                m.group(3), m.group(4), // startEquation, start
-                m.group(5), m.group(6), m.group(7), // exclusive range
-                m.group(8), m.group(9), // endEquation, end
-                m.start, m.end, key
-            ));
-        }
-        return ranges;
-    }
+    Decimal calculate(List<Cell> _cells) {
 
-    static String resolveRanges(String equation, List<Range> ranges, Map<String,Decimal> cache) {
-        var buffer = new StringBuffer();
-        int lastEnd = 0;
-        for (var range in ranges) {
-            buffer.write(equation.substring(lastEnd, range.srcStart));
-            buffer.write(cache[range.src].number);
-            lastEnd = range.srcEnd;
-        }
-        buffer.write(equation.substring(lastEnd));
-        return buffer.toString();
-    }
-
-    int startIdx = -1;
-    int endIdx = -1;
-
-    Decimal calculate(List<Cell> column) {
-        // Due to caching only the first encountered unique range gets calculate()'ed
-        // This means that only one of them will have the startIdx/endIdx set.
-        startIdx = -1;
-        endIdx = -1;
-
-        var total = new Decimal();
+        result.reset();
 
         if ((end != null && !isEndEquation && start > end) ||
             (isStartEquation && start > 1 && isEndEquation && isEndOpen)) // prevent: !&2:&
-            return total; // stupid users! :-D
+            return result.value;
 
-        Iterator<Cell> cells = column.iterator;
+        Iterator<Cell> cells = _cells.iterator;
         if (direction == '!') {
-            cells = column.reversed.iterator;
+            cells = _cells.reversed.iterator;
         }
 
         int i = 0;
         bool inside = false;
         int equationIdx = 0;
-        int lastIdx = column.length;
+        int lastIdx = _cells.length;
         while (cells.moveNext()) { i++;
 
         if (cells.current.hasEquation) equationIdx++;
@@ -108,11 +157,11 @@ class Range {
         if (!inside)
             continue; // keep searching for the start of range
 
-        if (startIdx == -1 && endIdx == -1) {
+        if (result.start == -1 && result.end == -1) {
             if (direction == '!')
-                endIdx = lastIdx-i;
+                result.end = lastIdx-i;
             else
-                startIdx = i-1;
+                result.start = i-1;
         }
 
         if ((!isEndEquation && end == i) ||
@@ -126,29 +175,25 @@ class Range {
             if (lastIdx == i && isEndEquation && (!cells.current.hasEquation || end != equationIdx)) {
                 // we've made it to the end without finding any equations
                 // this whole range is a dud, clear everything and exit
-                total = new Decimal();
-                startIdx = -1;
-                endIdx = -1;
+                result.reset();
                 break;
             }
         }
 
-        total += cells.current.value;
+        result.value += cells.current.value;
 
         if (direction == '!')
-            startIdx = lastIdx-i;
+            result.start = lastIdx-i;
         else
-            endIdx = i-1;
+            result.end = i-1;
 
         if (!inside || !range)
             break;
 
         }
 
-        return total;
+        return result.value;
     }
-
-    bool isHit(int idx) => startIdx <= idx && idx <= endIdx;
 
 }
 

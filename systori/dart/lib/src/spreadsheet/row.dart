@@ -1,3 +1,4 @@
+import 'package:quiver/iterables.dart';
 import 'package:systori/decimal.dart';
 import 'spreadsheet.dart';
 import 'cell.dart';
@@ -10,19 +11,16 @@ abstract class Row {
     Cell get total;
     bool get hasPercent;
 
-    Cell getCell(int cell) {
-        switch (cell) {
-            case 0: return qty;
-            case 1: return price;
-            case 2: return total;
-        }
-        return null;
-    }
+    List<Cell> get columns => [qty, price, total];
+    Cell getCell(int cell) => columns[cell];
 
-    calculate(Spreadsheet sheet) {
-        qty.dependenciesChanged(sheet);
-        price.dependenciesChanged(sheet);
-        total.dependenciesChanged(sheet);
+    calculate(Spreadsheet sheet, int row, bool dependencyChanged) {
+
+        enumerate(columns).forEach((IndexedValue<Cell> iterator) {
+            iterator.value.row = row;
+            iterator.value.column = iterator.index;
+            iterator.value.update(sheet.getColumn, dependencyChanged);
+        });
 
         var _qty = qty.value;
         if (hasPercent && _qty.isNotNull)
@@ -35,9 +33,10 @@ abstract class Row {
         } else if (price.value.isNotNull && total.value.isNotNull) {
             qty.value = total.value / price.value;
         }
-        onCalculationFinished();
-    }
 
-    onCalculationFinished() {}
+        // give the UI a chance to do something in response
+        columns.forEach((cell) => cell.onCalculationFinished());
+
+    }
 
 }

@@ -1,19 +1,21 @@
 import 'dart:html';
+import 'dart:async';
 import 'package:intl/intl.dart';
-import 'package:systori/summing_sheet.dart';
-import 'package:systori/orderable_container.dart';
-import 'package:systori/common.dart';
-import 'package:systori/richinput_element.dart';
+import 'package:quiver/iterables.dart';
+import 'package:systori/decimal.dart';
+import 'package:systori/spreadsheet.dart';
+import 'package:systori/orderable.dart';
+import 'package:systori/inputs.dart';
 
 
-abstract class ModelElement extends HtmlElement {
+abstract class Model extends HtmlElement {
 
     int get pk => int.parse(dataset['pk']);
     int get code => int.parse(dataset['code']);
 
     List<DivElement> inputs = [];
 
-    ModelElement.created() : super.created();
+    Model.created() : super.created();
 
     HtmlElement getView(String field) =>
         this.querySelector(":scope>.editor .${field}");
@@ -27,19 +29,19 @@ abstract class ModelElement extends HtmlElement {
 }
 
 
-class JobElement extends ModelElement {
+class Job extends Model {
     String get zfill => dataset['zfill'];
     int get levels => int.parse(dataset['levels']);
-    JobElement.created(): super.created();
+    Job.created(): super.created();
 }
 
 
-class GroupElement extends ModelElement {
-    GroupElement.created(): super.created();
+class Group extends Model {
+    Group.created(): super.created();
 }
 
 
-class TaskElement extends ModelElement {
+class Task extends Model {
 
     DivElement price_view;
     String get price => price_view.text;
@@ -49,123 +51,196 @@ class TaskElement extends ModelElement {
     String get total => total_view.text;
     set total(String _total) => total_view.text = _total;
 
-    TaskElement.created(): super.created() {
+    Task.created(): super.created() {
         price_view = getView("price");
         total_view = getView("total");
         this.on['calculate'].listen((_) => calculate());
     }
+
     calculate() {
-        price = amount_int_to_string(children_total());
+        price = sumChildren().money;
     }
-    children_total() {
-        var items = this.querySelectorAll('sys-lineitem').map((e) => amount_string_to_int(e.total));
-        return items.fold(0, (a, b) => a + b);
+
+    Decimal sumChildren() {
+        var items = this.querySelectorAll('sys-lineitem').map((e) => e.total.value);
+        return items.fold(new Decimal(), (a, b) => a + b);
     }
+
 }
 
 
-class LineItemElement extends ModelElement with Orderable, SummingRow {
+class LineItemCell extends HighlightableInput with Cell {
 
-    DivElement name_input;
+    String get equation => dataset['equation'].isEmpty?null:dataset['equation'];
+    set equation(String equation) => dataset['equation'] = equation;
 
-    DivElement qty_input;
-    String get qty => qty_input.text;
+    String get resolved => dataset['resolved'];
+    set resolved(String equation) => dataset['resolved'] = equation;
 
-    RichInput unit_input;
-    String get unit => unit_input.text;
+    StreamSubscription<Event> inputSubscription;
+    StreamSubscription<Event> focusSubscription;
 
-    DivElement price_input;
-    String get price => price_input.text;
-    set price(String _price) => price_input.text = _price;
-    set isPriceCalculated(bool _calculated) {
-        if (_calculated) {
-            price_input.contentEditable = 'false';
-        } else {
-            price_input.contentEditable = 'true';
-        }
+    LineItemCell.created(): super.created() {
+        value = new Decimal.parse(text);
+        focusSubscription = onFocus.listen(handleFocus);
+        inputSubscription = onInput.listen(handleInput);
+        onBlur.listen(handleBlur);
     }
 
-    DivElement total_view;
-    String get total => total_view.text;
-    set total(String _total) => total_view.text = _total;
-
-    LineItemElement.created(): super.created() {
-        name_input = getInput("name");
-        qty_input = getInput("qty");
-        unit_input = getInput("unit");
-        unit_input.onFocus.listen(askParentToRecalculate);
-        unit_input.onBlur.listen(clearHighlighting);
-        price_input = getInput("price");
-        [qty_input, unit_input, price_input].forEach((Element view) {
-            view.onInput.listen((_) =>
-                this.dispatchEvent(new CustomEvent('calculate', detail: this))
-            );
-        });
-        total_view = getView("total");
+    setText(String txt) {
+        inputSubscription.pause();
+        focusSubscription.pause();
+        text = txt;
+        inputSubscription.resume();
+        focusSubscription.resume();
     }
 
-    askParentToRecalculate([_]) {
-        (parent as LineItemContainerElement).calculate();
+    handleFocus(FocusEvent event) {
+        print('focus triggered');
+        /* This timer solves an annoying situation when user clicks
+         * on an input field and two events are fired:
+         *   1) onFocus is fired first and the text is selected. So far good.
+         *   2) Immediately after onFocus, the onClick event is fired. But the onClick event
+         *      default behavior is to place a carret somewhere in the text. This causes the
+         *      selection we made in onFocus to be un-selected. :-(
+         * The solution is to set a timer that will delay selecting text
+         * until after onClick is called. It's a hack but it works.
+         */
+        //new Timer(new Duration(milliseconds: 1), () {
+            if (equation != null)
+                setText(equation);
+       //     window.getSelection().selectAllChildren(event.target);
+            dispatchCalculate();
+        //});
     }
 
-    clearHighlighting([_]) {
-        LineItemElement previous = previousElementSibling;
-        while (previous != null) {
-            previous.total_view.style.backgroundColor = 'white';
-            previous = previous.previousElementSibling;
-        }
-        this.price_input.style.backgroundColor = 'white';
-        this.unit_input.clear();
+    handleInput([_]) {
+        equation = text;
+        dispatchCalculate();
     }
+
+    handleBlur([_]) {
+        setText(value.money);
+    }
+
+    dispatchCalculate([_]) =>
+        dispatchEvent(new CustomEvent('calculate', detail: this));
 
     static final List<String> COLORS = [
-        //'#DDD3C8', '#F8BDAD', '#FEDDAB', '#8AACB8', '#A6CFCC', '#DDEDE1'
         '187,168,146', '238,114,95', '250,185,75', '0,108,124', '0,161,154', '183,219,193'
     ];
 
     onCalculationFinished() {
 
-        if (document.activeElement != this.unit_input || !equation.isEquation) return;
+        if (document.activeElement != this) {
+            setText(value.money);
+            return;
+        }
 
-        unit_input.highlight(
-            equation.ranges.map((r) =>
-            new Highlight(r.srcStart, r.srcEnd, COLORS[r.id%COLORS.length]))
-        );
+        if (!hasEquation)
+            return;
 
-        equation.rowToRange.asMap().forEach((idx, rangeId) {
-            LineItemElement li = parent.children[idx];
-            if (rangeId == 0) {
-                li.total_view.style.backgroundColor = 'white';
-            } else if (rangeId == -1) {
-                li.total_view.style.backgroundColor = '#D41351';
-            } else {
-                li.total_view.style.background = 'rgba(${COLORS[rangeId%COLORS.length]},0.2)';
-            }
-        });
-
-        this.price_input.style.backgroundColor = '#F88379';
+        inputSubscription.pause();
+        focusSubscription.pause();
+        //highlight(ranges.map((r) =>
+        //    new Highlight(r.srcStart, r.srcEnd, COLORS[r.result.id%COLORS.length]))
+        //);
+        inputSubscription.resume();
+        focusSubscription.resume();
 
     }
 
 }
 
 
-class LineItemContainerElement extends HtmlElement with OrderableContainer, SummingSheet {
-    get rows => this.querySelectorAll(':scope>sys-lineitem');
-    LineItemContainerElement.created(): super.created() {
-        this.on['calculate'].listen((_) => calculate());
+class LineItem extends Model with Orderable, Row {
+
+    DivElement name;
+    DivElement unit;
+    bool get hasPercent => unit.text.contains('%');
+
+    LineItemCell qty;
+    LineItemCell price;
+    LineItemCell total;
+
+    LineItem.created(): super.created() {
+        name = getInput("name");
+        qty = getInput("qty");
+        unit = getInput("unit");
+        price = getInput("price");
+        total = getInput("total");
     }
-    onOrderingFinished(Orderable order) =>
-        this.dispatchEvent(new CustomEvent('calculate', detail: this));
+
+}
+
+
+class LineItemContainer extends HtmlElement with OrderableContainer, Spreadsheet {
+
+    List get rows => this.querySelectorAll(':scope>sys-lineitem');
+
+    LineItemContainer.created(): super.created() {
+        on['calculate'].listen((CustomEvent e) => calculate(e.detail as Cell));
+        addEventListener('blur', clearHighlighting, true);
+    }
+
+    onOrderingChanged(LineItem orderable) =>
+        dispatchEvent(new CustomEvent('calculate', detail: orderable.getCell(0)));
+
+    onCalculationFinished(Cell changedCell) {
+
+        if (changedCell.ranges == null) return;
+
+        var matrix = new List.generate(rows.length, (i)=>[0,0,0]);
+
+        for (var range in changedCell.ranges) {
+            for (int rowIdx = 0; rowIdx < matrix.length; rowIdx++) {
+                if (range.result.isHit(rowIdx)) {
+                    var colIdx = range.column != null
+                            ? range.column
+                            : changedCell.column;
+                    if (matrix[rowIdx][colIdx] != 0) {
+                        matrix[rowIdx][colIdx] = -1;
+                    } else {
+                        matrix[rowIdx][colIdx] = range.result.group;
+                    }
+                }
+            }
+        }
+
+        print(matrix);
+
+        for (int rowIdx = 0; rowIdx < matrix.length; rowIdx++) {
+            var row = rows[rowIdx];
+            for (int colIdx = 0; colIdx < 3; colIdx++) {
+                var col = row.getCell(colIdx) as LineItemCell;
+                var group = matrix[rowIdx][colIdx];
+                switch(group) {
+                    case -1: col.style.background = '#D41351'; break;
+                    case 0: col.style.background = null; break;
+                    default:
+                        col.style.background = 'rgba(${LineItemCell.COLORS[group%LineItemCell.COLORS.length]},0.2)';
+                }
+            }
+        }
+    }
+
+    clearHighlighting([_]) {
+        for (LineItem row in rows) {
+            row.qty.style.background = null;
+            row.price.style.background = null;
+            row.total.style.background = null;
+        }
+    }
+
 }
 
 
 void main() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
-    document.registerElement('rich-input', RichInput);
-    document.registerElement('sys-job', JobElement);
-    document.registerElement('sys-group', GroupElement);
-    document.registerElement('sys-task', TaskElement);
-    document.registerElement('sys-lineitem', LineItemElement);
-    document.registerElement('sys-lineitem-container', LineItemContainerElement);
+    document.registerElement('sys-job', Job);
+    document.registerElement('sys-group', Group);
+    document.registerElement('sys-task', Task);
+    document.registerElement('sys-lineitem-container', LineItemContainer);
+    document.registerElement('sys-lineitem-cell', LineItemCell);
+    document.registerElement('sys-lineitem', LineItem);
 }

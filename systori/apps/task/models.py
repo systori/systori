@@ -361,28 +361,17 @@ class LineItem(OrderedModel):
 
     name = models.CharField(_("Name"), max_length=512)
 
-    # fixed billing, amount of hours or materials to complete just one unit of the task
-    unit_qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
+    qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
+    qty_equation = models.CharField(max_length=512)
+    complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=0.0)
 
-    # time and materials billing, amount of hours or materials to complete the entire task
-    task_qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
+    unit = models.CharField(_("Unit"), max_length=512)
 
-    # time and materials billing, how many units of this have been delivered/expended and can thus be billed
-    billable = models.DecimalField(_("Billable"), max_digits=14, decimal_places=4, default=0.0)
-
-    # unit for the quantity
-    unit = models.CharField(_("Unit"), max_length=64)
-
-    # price per unit
     price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=0.0)
+    price_equation = models.CharField(max_length=512)
 
-    # when labor is true, this will cause this line item to show up in time sheet and other
-    # labor related parts of the system
-    is_labor = models.BooleanField(default=False)
-
-    # when material is true, this will cause this line item to show up in materials tracking
-    # and other inventory parts of the system
-    is_material = models.BooleanField(default=False)
+    total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=0.0)
+    total_equation = models.CharField(max_length=512)
 
     # flagged items will appear in the project dashboard as needing attention
     # could be set automatically by the system from temporal triggers (materials should have been delivered by now)
@@ -410,10 +399,6 @@ class LineItem(OrderedModel):
     @property
     def project(self):
         return self.job.project
-
-    @property
-    def total(self):
-        return self.unit_qty * self.price
 
 
 class ProgressReport(models.Model):

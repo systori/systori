@@ -17,6 +17,16 @@ class Decimal {
         NUMBER = makeNumberFormat();
     }
 
+    static final RegExp NUMBER_STUFF = new RegExp(r'^-?[0-9.,]+$');
+    static bool isNullBlankOrNumber(String text) {
+        if (text == null || text == "")
+            return true;
+        var trimmed = text.trim();
+        if (trimmed == "" || NUMBER_STUFF.hasMatch(trimmed))
+            return true;
+        return false;
+    }
+
     final int _decimal;
     final int _precision;
 
@@ -47,4 +57,15 @@ class Decimal {
     Decimal operator + (Decimal other) =>
         new Decimal._(_decimal + other._decimal, _precision);
 
+    bool operator < (Decimal other) =>
+        _decimal < other._decimal;
+
+    bool operator <= (Decimal other) =>
+        _decimal <= other._decimal;
+
+    bool operator > (Decimal other) =>
+        _decimal > other._decimal;
+
+    bool operator >= (Decimal other) =>
+        _decimal >= other._decimal;
 }

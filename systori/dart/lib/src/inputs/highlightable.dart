@@ -17,13 +17,11 @@ class Highlight {
 }
 
 
-class RichInput extends HtmlElement {
+class HighlightableInput extends HtmlElement {
 
-    RichInput.created(): super.created() {
+    HighlightableInput.created(): super.created() {
         contentEditable = 'true';
     }
-
-    clear() => text = text;
 
     highlight(List<Highlight> highlights) {
 
@@ -32,7 +30,10 @@ class RichInput extends HtmlElement {
         int lastEnd = 0;
         for (var highlight in highlights) {
             buffer.write(text.substring(lastEnd, highlight.start));
-            buffer.write('<span style="background: rgba(${highlight.color},0.2);">');
+            buffer.write('<span');
+            if (highlight.color!=null)
+                buffer.write(' style="background: rgba(${highlight.color},0.2);"');
+            buffer.write('>');
             buffer.write(text.substring(highlight.start, highlight.end));
             buffer.write('</span>');
             lastEnd = highlight.end;
@@ -42,8 +43,9 @@ class RichInput extends HtmlElement {
         var caretOffset = getCaretOffset();
         setInnerHtml(
             buffer.toString(),
-            validator: new NodeValidatorBuilder.common()
-                ..allowElement('span', attributes: ['style'])
+            treeSanitizer: NodeTreeSanitizer.trusted
+            //validator: new NodeValidatorBuilder.common()
+            //    ..allowElement('span', attributes: ['style'])
         );
         setCaret(caretOffset);
     }
