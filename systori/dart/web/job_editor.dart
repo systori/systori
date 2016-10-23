@@ -137,8 +137,12 @@ class LineItemCell extends HighlightableInput with Cell {
             return;
         }
 
-        if (!hasEquation)
-            return;
+        if (hasEquation) {
+            if (resolved != value.number)
+                dataset['preview'] = "${resolved} = ${value.money}";
+            else
+                dataset['preview'] = value.money;
+        } else return;
 
         inputSubscription.pause();
         focusSubscription.pause();
