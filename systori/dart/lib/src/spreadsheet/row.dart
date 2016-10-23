@@ -26,11 +26,11 @@ abstract class Row {
         if (hasPercent && _qty.isNotNull)
             _qty = qty.value / new Decimal(100);
 
-        if (_qty.isNotNull && price.value.isNotNull) {
+        if (qty.isNotBlank && price.isNotBlank) {
             total.value = _qty * price.value;
-        } else if (_qty.isNotNull && total.value.isNotNull) {
+        } else if (qty.isNotBlank && total.isNotBlank) {
             price.value = total.value / _qty;
-        } else if (price.value.isNotNull && total.value.isNotNull) {
+        } else if (price.isNotBlank && total.isNotBlank) {
             qty.value = total.value / price.value;
         }
 

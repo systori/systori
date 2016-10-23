@@ -58,7 +58,6 @@
 
     .total {
       flex: 0 1 auto;
-      font-weight: bold;
       text-align: right;
       padding: 0 4px 0 4px;
       margin-right: -5px;
@@ -279,6 +278,10 @@
 
     sys-lineitem-cell {
       position: relative;
+    }
+
+    sys-lineitem-cell[data-equation=""] {
+      font-weight: bold;
     }
 
     sys-lineitem-cell:focus {

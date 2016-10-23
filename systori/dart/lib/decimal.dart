@@ -33,6 +33,7 @@ class Decimal {
     bool get isNull => _decimal == null;
     bool get isNotNull => _decimal != null;
     bool get isZero => _decimal == 0;
+    bool get isNonzero => isNotNull && !isZero;
     double get decimal => isNull ? _decimal : _decimal / _precision;
     String get money => MONEY.format(decimal);
     String get number => NUMBER.format(decimal);

@@ -44,6 +44,5 @@ class LineItemFactory(django.DjangoModelFactory):
             if kwargs.get('unit') == '%':
                 _qty /= 100.00
             kwargs['total'] = _qty * kwargs.get('price', 0)
-            kwargs['total_equation'] = str(kwargs['total'])
         obj = super()._create(*args, **kwargs)
         return obj

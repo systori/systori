@@ -19,6 +19,7 @@ abstract class Cell {
     String _previous_equation;
 
     bool get hasEquation => !Decimal.isNullBlankOrNumber(equation);
+    bool get isNotBlank => equation != null && equation.trim().isNotEmpty;
 
     update(List<Cell> getColumn(int columnIdx), bool dependencyChanged) {
 
