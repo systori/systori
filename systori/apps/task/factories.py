@@ -39,6 +39,10 @@ class LineItemFactory(django.DjangoModelFactory):
             kwargs['price_equation'] = str(kwargs['price'])
         if 'total' in kwargs and 'total_equation' not in kwargs:
             kwargs['total_equation'] = str(kwargs['total'])
+        if 'price' in kwargs and 'total' in kwargs and 'qty' not in kwargs:
+            kwargs['qty'] = kwargs['total'] / kwargs['price']
+        if 'qty' in kwargs and 'total' in kwargs and 'price' not in kwargs:
+            kwargs['price'] = kwargs['total'] / kwargs['qty']
         if 'total' not in kwargs and 'total_equation' not in kwargs:
             _qty = kwargs.get('qty', 0)
             if kwargs.get('unit') == '%':

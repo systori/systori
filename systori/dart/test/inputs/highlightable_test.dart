@@ -1,7 +1,15 @@
 @TestOn("browser")
 import 'dart:html';
 import 'package:test/test.dart';
-import 'package:systori/inputs.dart';
+import 'package:systori/inputs.dart' as inputs;
+import 'package:systori/inputs.dart' show Highlight;
+
+
+class HighlightableInput extends inputs.HighlightableInput {
+    HighlightableInput.created(): super.created() {
+        contentEditable = "true";
+    }
+}
 
 
 String setCaretAt(Node node) {

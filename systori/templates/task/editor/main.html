@@ -129,13 +129,13 @@
 
     .qty {
       flex: 0 0 auto;
-      width: 60px;
+      width: 80px;
       text-align: right;
     }
 
     .unit {
       flex: 0 0 auto;
-      width: 80px;
+      width: 40px;
       padding-left: 4px;
     }
 
@@ -267,7 +267,7 @@
       top: -150px;
     }
 
-    sys-lineitem .price[contenteditable="false"] {
+    sys-lineitem-cell[contenteditable="false"] {
       font-weight: bold;
     }
 
@@ -278,10 +278,6 @@
 
     sys-lineitem-cell {
       position: relative;
-    }
-
-    sys-lineitem-cell[data-equation=""] {
-      font-weight: bold;
     }
 
     sys-lineitem-cell:focus {

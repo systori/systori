@@ -1,4 +1,5 @@
 from decimal import Decimal
+from functools import partialmethod
 from datetime import datetime
 from string import ascii_lowercase
 from django.db import models
@@ -399,6 +400,23 @@ class LineItem(OrderedModel):
     @property
     def project(self):
         return self.job.project
+
+    @cached_property
+    def _readonly_columns(self):
+        cols = {
+            'qty': self.qty_equation,
+            'price': self.price_equation,
+            'total': self.total_equation
+        }
+        blank = [col[0] for col in cols.items() if col[1].strip() == ""]
+        return blank if len(blank) == 1 else cols.keys()
+
+    def _check_editability(self, col):
+        return 'true' if col not in self._readonly_columns else 'false'
+
+    is_qty_editable = partialmethod(_check_editability, 'qty')
+    is_price_editable = partialmethod(_check_editability, 'price')
+    is_total_editable = partialmethod(_check_editability, 'total')
 
 
 class ProgressReport(models.Model):

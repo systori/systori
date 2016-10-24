@@ -23,20 +23,24 @@ abstract class Row {
         });
 
         var _qty = qty.value;
-        if (hasPercent && _qty.isNotNull)
+        if (hasPercent && qty.isNotBlank)
             _qty = qty.value / new Decimal(100);
 
-        if (qty.isNotBlank && price.isNotBlank) {
-            total.value = _qty * price.value;
-        } else if (qty.isNotBlank && total.isNotBlank) {
-            price.value = total.value / _qty;
-        } else if (price.isNotBlank && total.isNotBlank) {
-            qty.value = total.value / price.value;
+        if (qty.isNotBlank && price.isNotBlank && total.isBlank)
+            total.value = _qty * price.value; else
+        if (qty.isNotBlank && price.isBlank    && total.isNotBlank)
+            price.value = total.value / _qty; else
+        if (qty.isBlank    && price.isNotBlank && total.isNotBlank)
+            qty.value = total.value / price.value; else
+        if (qty.isBlank    && price.isBlank    && total.isNotBlank) {
+            qty.value = new Decimal(1);
+            price.value = total.value;
         }
 
         // give the UI a chance to do something in response
         columns.forEach((cell) => cell.onCalculationFinished());
-
+        onCalculationFinished();
     }
 
+    onCalculationFinished() {}
 }

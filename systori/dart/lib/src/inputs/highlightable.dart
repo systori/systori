@@ -19,9 +19,7 @@ class Highlight {
 
 class HighlightableInput extends HtmlElement {
 
-    HighlightableInput.created(): super.created() {
-        contentEditable = 'true';
-    }
+    HighlightableInput.created(): super.created();
 
     highlight(List<Highlight> highlights) {
 

@@ -77,7 +77,9 @@ class RangeList extends DelegatingList<Range> {
         int lastEnd = 0;
         for (var range in _ranges) {
             buffer.write(equation.substring(lastEnd, range.srcStart));
+            buffer.write(' ');
             buffer.write(range.result.value.number);
+            buffer.write(' ');
             lastEnd = range.srcEnd;
         }
         buffer.write(equation.substring(lastEnd));
@@ -144,10 +146,10 @@ class Range {
         int lastIdx = _cells.length;
         while (cells.moveNext()) { i++;
 
-        if (cells.current.hasEquation) equationIdx++;
+        if (cells.current.isEquation) equationIdx++;
 
         if ((!isStartEquation && start == i) ||
-            (isStartEquation && cells.current.hasEquation && start == equationIdx)) {
+            (isStartEquation && cells.current.isEquation && start == equationIdx)) {
             inside = true;
             if (isStartExclusive)
                 // if we're at the start and [ then don't add this row
@@ -165,14 +167,14 @@ class Range {
         }
 
         if ((!isEndEquation && end == i) ||
-            (isEndEquation && cells.current.hasEquation && end == equationIdx) ||
+            (isEndEquation && cells.current.isEquation && end == equationIdx) ||
             lastIdx == i) {
             // last row means we're not inside anymore
             inside = false;
             if (isEndExclusive)
                 // if we're at the end and ] then don't add this row, break immediately
                 break;
-            if (lastIdx == i && isEndEquation && (!cells.current.hasEquation || end != equationIdx)) {
+            if (lastIdx == i && isEndEquation && (!cells.current.isEquation || end != equationIdx)) {
                 // we've made it to the end without finding any equations
                 // this whole range is a dud, clear everything and exit
                 result.reset();

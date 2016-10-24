@@ -71,56 +71,48 @@ class Task extends Model {
 
 class LineItemCell extends HighlightableInput with Cell {
 
-    String get equation => dataset['equation'].isEmpty?null:dataset['equation'];
+    String get equation => dataset['equation'];
     set equation(String equation) => dataset['equation'] = equation;
 
     String get resolved => dataset['resolved'];
     set resolved(String equation) => dataset['resolved'] = equation;
 
-    StreamSubscription<Event> inputSubscription;
-    StreamSubscription<Event> focusSubscription;
+    List<StreamSubscription<Event>> subscriptions = [];
 
     LineItemCell.created(): super.created() {
         value = new Decimal.parse(text);
-        focusSubscription = onFocus.listen(handleFocus);
-        inputSubscription = onInput.listen(handleInput);
-        onBlur.listen(handleBlur);
+        if (isContentEditable) enableEditing();
     }
 
-    setText(String txt) {
-        inputSubscription.pause();
-        focusSubscription.pause();
-        text = txt;
-        inputSubscription.resume();
-        focusSubscription.resume();
+    enableEditing() {
+        contentEditable = "true";
+        subscriptions = [
+            onBlur.listen(handleBlur),
+            onFocus.listen(handleFocus),
+            onInput.listen(handleInput),
+        ];
+    }
+
+    disableEditing() {
+        contentEditable = "false";
+        subscriptions.forEach((s)=>s.cancel());
+        subscriptions = [];
     }
 
     handleFocus(FocusEvent event) {
-        print('focus triggered');
-        /* This timer solves an annoying situation when user clicks
-         * on an input field and two events are fired:
-         *   1) onFocus is fired first and the text is selected. So far good.
-         *   2) Immediately after onFocus, the onClick event is fired. But the onClick event
-         *      default behavior is to place a carret somewhere in the text. This causes the
-         *      selection we made in onFocus to be un-selected. :-(
-         * The solution is to set a timer that will delay selecting text
-         * until after onClick is called. It's a hack but it works.
-         */
-        //new Timer(new Duration(milliseconds: 1), () {
-            if (equation != null)
-                setText(equation);
-       //     window.getSelection().selectAllChildren(event.target);
-            dispatchCalculate();
-        //});
+        if (equation != null)
+            text = equation;
+        window.getSelection().selectAllChildren(event.target);
+        dispatchCalculate();
     }
 
     handleInput([_]) {
-        equation = text;
+        equation = text.trim();
         dispatchCalculate();
     }
 
     handleBlur([_]) {
-        setText(value.money);
+        text = value.money;
     }
 
     dispatchCalculate([_]) =>
@@ -133,25 +125,21 @@ class LineItemCell extends HighlightableInput with Cell {
     onCalculationFinished() {
 
         if (document.activeElement != this) {
-            setText(value.money);
+            text = value.money;
             return;
         }
 
-        if (hasEquation) {
-            if (resolved != value.number)
+        if (isEquation) {
+            if (resolved != null && resolved.trim() != value.number)
                 dataset['preview'] = "${resolved} = ${value.money}";
             else
                 dataset['preview'] = value.money;
         } else return;
 
-        inputSubscription.pause();
-        focusSubscription.pause();
-        //highlight(ranges.map((r) =>
-        //    new Highlight(r.srcStart, r.srcEnd, COLORS[r.result.id%COLORS.length]))
-        //);
-        inputSubscription.resume();
-        focusSubscription.resume();
-
+        if (ranges == null) return;
+        highlight(ranges.map((r) =>
+            new Highlight(r.srcStart, r.srcEnd, COLORS[r.result.group%COLORS.length]))
+        );
     }
 
 }
@@ -173,6 +161,20 @@ class LineItem extends Model with Orderable, Row {
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
+    }
+
+    onCalculationFinished() {
+        List<LineItemCell> cols = columns, blank = [], other = [];
+        cols.forEach((c)=> c.isBlank ? blank.add(c) : other.add(c));
+        if (blank.length == 1) {
+            if (blank[0].isContentEditable)  blank[0].disableEditing();
+            if (!other[0].isContentEditable) other[0].enableEditing();
+            if (!other[1].isContentEditable) other[1].enableEditing();
+        } else {
+            if (!cols[0].isContentEditable) cols[0].enableEditing();
+            if (!cols[1].isContentEditable) cols[1].enableEditing();
+            if (!cols[2].isContentEditable) cols[2].enableEditing();
+        }
     }
 
 }
@@ -244,7 +246,7 @@ void main() {
     document.registerElement('sys-job', Job);
     document.registerElement('sys-group', Group);
     document.registerElement('sys-task', Task);
-    document.registerElement('sys-lineitem-container', LineItemContainer);
     document.registerElement('sys-lineitem-cell', LineItemCell);
+    document.registerElement('sys-lineitem-container', LineItemContainer);
     document.registerElement('sys-lineitem', LineItem);
 }
