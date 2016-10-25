@@ -41,31 +41,130 @@ class Group extends Model {
 }
 
 
-class Task extends Model {
+class TaskCell extends HtmlElement with Cell {
 
-    DivElement price_view;
-    String get price => price_view.text;
-    set price(String _price) => price_view.text = _price;
+    String get equation => dataset['equation'];
+    set equation(String equation) => dataset['equation'] = equation;
 
-    DivElement total_view;
-    String get total => total_view.text;
-    set total(String _total) => total_view.text = _total;
+    String get resolved => dataset['resolved'];
+    set resolved(String equation) => dataset['resolved'] = equation;
+
+    List<StreamSubscription<Event>> subscriptions = [];
+
+    TaskCell.created(): super.created() {
+        value = new Decimal.parse(text);
+        if (isContentEditable) enableEditing();
+    }
+
+    enableEditing() {
+        contentEditable = "true";
+        subscriptions = [
+            onBlur.listen(handleBlur),
+            onFocus.listen(handleFocus),
+            onInput.listen(handleInput),
+        ];
+    }
+
+    disableEditing() {
+        contentEditable = "false";
+        subscriptions.forEach((s)=>s.cancel());
+        subscriptions = [];
+    }
+
+    handleFocus(FocusEvent event) {
+        if (equation != null)
+            text = equation;
+        window.getSelection().selectAllChildren(event.target);
+        dispatchCalculate();
+    }
+
+    handleInput([_]) {
+        equation = text.trim();
+        dispatchCalculate();
+    }
+
+    handleBlur([_]) {
+        text = value.money;
+    }
+
+    dispatchCalculate([_]) =>
+        dispatchEvent(new CustomEvent('calculate', detail: this));
+
+    onCalculationFinished() {
+        super.onCalculationFinished();
+
+        if (document.activeElement != this) {
+            text = value.money;
+            return;
+        }
+
+        if (isEquation) {
+            if (resolved != null && resolved.trim() != value.number)
+                dataset['preview'] = "${resolved} = ${value.money}";
+            else
+                dataset['preview'] = value.money;
+        }
+
+    }
+
+}
+
+
+
+class Task extends Model with Row {
+
+    DivElement name;
+    DivElement unit;
+    TaskCell qty;
+    TaskCell price;
+    TaskCell total;
+    DivElement diffRow;
+    DivElement diffCell;
+
+    LineItemSheet sheet;
 
     Task.created(): super.created() {
-        price_view = getView("price");
-        total_view = getView("total");
-        this.on['calculate'].listen((_) => calculate());
+        name = getInput("name");
+        qty = getInput("qty");
+        unit = getInput("unit");
+        price = getInput("price");
+        total = getInput("total");
+        diffRow = this.querySelector(":scope> div.price-difference");
+        diffCell = diffRow.querySelector(":scope> .total");
+        sheet = this.querySelector(":scope > sys-lineitem-sheet");
+        this.on['calculate'].listen((_) {
+            if (sheet.hasNeverBeenCalculated)
+                sheet.calculate(qty);
+            calculate(sheet, 0, true);
+        });
     }
 
-    calculate() {
-        price = sumChildren().money;
+    solve() {
+
+        if (qty.isNotBlank && total.isBlank) {
+            setDiffCell(new Decimal(0));
+            total.value = qty.value * price.value;
+        } else
+        if (qty.isNotBlank && total.isNotBlank) {
+            var task_price = total.value / qty.value;
+            setDiffCell(task_price  - price.value);
+            price.value = total.value / qty.value;
+        } else
+        if (qty.isBlank && total.isNotBlank) {
+            setDiffCell(new Decimal(0));
+            qty.value = total.value / price.value;
+        }
     }
 
-    Decimal sumChildren() {
-        var items = this.querySelectorAll('sys-lineitem').map((e) => e.total.value);
-        return items.fold(new Decimal(), (a, b) => a + b);
+    setDiffCell(Decimal diff) {
+        if (diff.isZero) {
+            diffRow.style.visibility = 'hidden';
+            diffCell.text = '0';
+        } else {
+            diffRow.style.visibility = 'visible';
+            diffCell.text = diff.money;
+        }
     }
-
 }
 
 
@@ -123,6 +222,7 @@ class LineItemCell extends HighlightableInput with Cell {
     ];
 
     onCalculationFinished() {
+        super.onCalculationFinished();
 
         if (document.activeElement != this) {
             text = value.money;
@@ -164,6 +264,7 @@ class LineItem extends Model with Orderable, Row {
     }
 
     onCalculationFinished() {
+        super.onCalculationFinished();
         List<LineItemCell> cols = columns, blank = [], other = [];
         cols.forEach((c)=> c.isBlank ? blank.add(c) : other.add(c));
         if (blank.length == 1) {
@@ -180,11 +281,11 @@ class LineItem extends Model with Orderable, Row {
 }
 
 
-class LineItemContainer extends HtmlElement with OrderableContainer, Spreadsheet {
+class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
 
     List get rows => this.querySelectorAll(':scope>sys-lineitem');
 
-    LineItemContainer.created(): super.created() {
+    LineItemSheet.created(): super.created() {
         on['calculate'].listen((CustomEvent e) => calculate(e.detail as Cell));
         addEventListener('blur', clearHighlighting, true);
     }
@@ -193,6 +294,7 @@ class LineItemContainer extends HtmlElement with OrderableContainer, Spreadsheet
         dispatchEvent(new CustomEvent('calculate', detail: orderable.getCell(0)));
 
     onCalculationFinished(Cell changedCell) {
+        super.onCalculationFinished(changedCell);
 
         if (changedCell.ranges == null) return;
 
@@ -212,8 +314,6 @@ class LineItemContainer extends HtmlElement with OrderableContainer, Spreadsheet
                 }
             }
         }
-
-        print(matrix);
 
         for (int rowIdx = 0; rowIdx < matrix.length; rowIdx++) {
             var row = rows[rowIdx];
@@ -243,10 +343,11 @@ class LineItemContainer extends HtmlElement with OrderableContainer, Spreadsheet
 
 void main() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
+    document.registerElement('sys-lineitem-cell', LineItemCell);
+    document.registerElement('sys-lineitem', LineItem);
+    document.registerElement('sys-lineitem-sheet', LineItemSheet);
+    document.registerElement('sys-task-cell', TaskCell);
+    document.registerElement('sys-task', Task);
     document.registerElement('sys-job', Job);
     document.registerElement('sys-group', Group);
-    document.registerElement('sys-task', Task);
-    document.registerElement('sys-lineitem-cell', LineItemCell);
-    document.registerElement('sys-lineitem-container', LineItemContainer);
-    document.registerElement('sys-lineitem', LineItem);
 }

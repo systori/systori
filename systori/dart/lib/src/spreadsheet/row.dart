@@ -14,13 +14,15 @@ abstract class Row {
     List<Cell> get columns => [qty, price, total];
     Cell getCell(int cell) => columns[cell];
 
-    calculate(Spreadsheet sheet, int row, bool dependencyChanged) {
-
+    update(Spreadsheet sheet, int row, bool dependencyChanged) {
         enumerate(columns).forEach((IndexedValue<Cell> iterator) {
             iterator.value.row = row;
             iterator.value.column = iterator.index;
             iterator.value.update(sheet.getColumn, dependencyChanged);
         });
+    }
+
+    solve() {
 
         var _qty = qty.value;
         if (hasPercent && qty.isNotBlank)
@@ -37,10 +39,15 @@ abstract class Row {
             price.value = total.value;
         }
 
-        // give the UI a chance to do something in response
-        columns.forEach((cell) => cell.onCalculationFinished());
-        onCalculationFinished();
     }
 
-    onCalculationFinished() {}
+    onCalculationFinished() {
+        columns.forEach((cell) => cell.onCalculationFinished());
+    }
+
+    calculate(Spreadsheet sheet, int row, bool dependencyChanged) {
+        update(sheet, row, dependencyChanged);
+        solve();
+        onCalculationFinished();
+    }
 }

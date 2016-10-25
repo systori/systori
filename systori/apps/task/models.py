@@ -110,13 +110,13 @@ class Group(OrderedModel):
         for group in self.groups.all():
             total += getattr(group, field)
         for task in self.tasks.all():
-            if field != 'estimate' or task.include_estimate:
+            if field != 'total' or task.include_estimate:
                 total += getattr(task, field)
         return total
 
     @property
-    def estimate(self):
-        return self._calc('estimate')
+    def total(self):
+        return self._calc('total')
 
     @property
     def progress(self):
@@ -124,7 +124,7 @@ class Group(OrderedModel):
 
     @property
     def progress_percent(self):
-        return nice_percent(self.progress, self.estimate)
+        return nice_percent(self.progress, self.total)
 
     def __str__(self):
         return self.name
@@ -132,8 +132,8 @@ class Group(OrderedModel):
 
 class JobQuerySet(models.QuerySet):
 
-    def estimate(self):
-        return sum([job.estimate for job in self])
+    def total(self):
+        return sum([job.total for job in self])
 
     def progress(self):
         return sum([job.progress for job in self])
@@ -245,17 +245,12 @@ class Task(OrderedModel):
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField()
 
-    # How many units of this task will be needed?
     qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
-
-    # Unit of measurement for this task.
-    unit = models.CharField(_("Unit"), max_length=64)
-
-    # What is the price of each unit of this task?
-    unit_price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=0.0)
-
-    # How many units of this task are complete? Could be greater than the estimated 'qty'.
-    complete = models.DecimalField(_("Complete"), max_digits=14, decimal_places=4, default=0.0)
+    qty_equation = models.CharField(max_length=512)
+    complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=0.0)
+    unit = models.CharField(_("Unit"), max_length=512)
+    total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=0.0)
+    total_equation = models.CharField(max_length=512)
 
     started_on = models.DateField(blank=True, null=True)
     completed_on = models.DateField(blank=True, null=True)
@@ -264,12 +259,12 @@ class Task(OrderedModel):
     group = models.ForeignKey(Group, related_name="tasks")
     order_with_respect_to = 'group'
 
-    # GAEB Spec 2.7.5.3
-    is_provisional = models.BooleanField(default=False)
-
     # GAEB Spec 2.7.5.2
     variant_group = models.PositiveIntegerField(null=True)
     variant_serial = models.PositiveIntegerField(default=0)
+
+    # GAEB Spec 2.7.5.3
+    is_provisional = models.BooleanField(default=False)
 
     APPROVED = "approved"
     READY = "ready"
@@ -312,20 +307,34 @@ class Task(OrderedModel):
         return True
 
     @property
-    def calculated_unit_price(self):
-        unit_price = Decimal('0.00')
-        for li in self.lineitems.all():
-            unit_price += li.total
-        return unit_price
+    def task_price(self):
+        """ The task price consistent internally to the task.
+            For most cases, use this instead of lineitem_price.
+        """
+        return round(self.total / self.qty if self.qty != 0 else 0, 2)
 
     @property
-    def estimate(self):
-        return round(self.calculated_unit_price * self.qty, 2)
-        #return round(self.unit_price * self.qty, 2)
+    def lineitem_price(self):
+        """ The task price as defined by lineitems.
+            For most cases, use the other task_price instead of this.
+        """
+        price = Decimal('0.00')
+        for li in self.lineitems.all():
+            price += li.total
+        return price
+
+    @property
+    def price_difference(self):
+        """ Normally the task_price == lineitem_price and thus diff is 0.
+            In cases where the user has defined the total manually and then the
+            lineitem_price (sum of lineitem totals) != task_price (task.total/task.qty)
+            this will return the amount of the discrepancy.
+        """
+        return self.task_price - self.lineitem_price
 
     @property
     def progress(self):
-        return round(self.unit_price * self.complete, 2)
+        return round(self.task_price * self.complete, 2)
 
     @property
     def complete_percent(self):
@@ -345,7 +354,6 @@ class Task(OrderedModel):
         self.group = new_group
         self.job = new_group._job
         self.order = new_order
-        self.qty = 0.0
         self.complete = 0.0
         self.started_on = None
         self.completed_on = None
@@ -353,6 +361,7 @@ class Task(OrderedModel):
         self.save()
         for lineitem in lineitems:
             lineitem.pk = None
+            lineitem.complete = 0.0
             lineitem.is_flagged = False
             lineitem.task = self
             lineitem.save()

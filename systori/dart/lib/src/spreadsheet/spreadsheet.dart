@@ -8,6 +8,7 @@ abstract class Spreadsheet {
 
     List<Row> get rows;
     List<Row> iterated;
+    bool get hasNeverBeenCalculated => iterated == null;
 
     Decimal calculate(Cell changedCell) {
         iterated = [];

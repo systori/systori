@@ -228,7 +228,7 @@ class Project(models.Model):
 
     @property
     def estimate(self):
-        return self.jobs.estimate()
+        return self.jobs.total()
 
     @property
     def progress(self):

@@ -2,11 +2,11 @@
 <div class="editor">
   <div class="editor-row">
     <div class="code">{{ task.code }}</div>
-    <name-view class="name" placeholder="{% trans 'task' %}" editable="true">{{ task.name|safe }}</name-view>
-    <decimal-view class="qty" placeholder="{% trans 'qty' %}" editable="true">{{ task.qty|ubrdecimal }}</decimal-view>
-    <unit-view class="unit" placeholder="{% trans 'unit' %}" editable="true">{{ task.unit }}</unit-view>
-    <decimal-view class="price">{{ task.calculated_unit_price|ubrdecimal:3 }}</decimal-view>
-    <decimal-view class="total">{{ task.estimate|ubrdecimal:3 }}</decimal-view>
+    <div           class="name"  placeholder="{% trans 'task' %}"                                            contenteditable="true">{{ task.name|safe }}</div>
+    <sys-task-cell class="qty"   placeholder="{% trans 'qty' %}"   data-equation="{{ task.qty_equation }}"   contenteditable="true">{{ task.qty|ubrdecimal }}</sys-task-cell>
+    <div           class="unit"  placeholder="{% trans 'unit' %}"                                            contenteditable="true">{{ task.unit }}</div>
+    <sys-task-cell class="price"                                   data-equation="C!:"                                             >{{ task.task_price|ubrdecimal }}</sys-task-cell>
+    <sys-task-cell class="total" placeholder="{% trans 'total' %}" data-equation="{{ task.total_equation }}" contenteditable="true">{{ task.total|ubrdecimal:3 }}</sys-task-cell>
     {% comment %}
     <div class="labels">
       <span class="is_optional {{ task.is_provisional }} label label-primary">{% trans 'Optional' %}</span>

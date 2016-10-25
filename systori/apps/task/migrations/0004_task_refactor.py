@@ -50,15 +50,16 @@ def upgrade_taskinstance_to_task(apps, schema_editor):
                     elif is_variant_mode:
                         print("    Primary: {}.{}".format(task.variant_group, task.variant_serial))
 
-                    unit_price = Decimal('0.00')
+                    task_price = Decimal('0.00')
                     if is_variant_mode: print("    Line items ", end='')
                     for lineitem in taskinstance.lineitems.all():
-                        unit_price += lineitem.unit_qty * lineitem.price
+                        lineitem.total = lineitem.qty * lineitem.price
+                        task_price += lineitem.total
                         lineitem.task = task
                         lineitem.save()
                         if is_variant_mode: print(".", end='')
                     if is_variant_mode: print("")
-                    task.unit_price = unit_price
+                    task.total = task.qty * task_price
                     task.save()
 
 
@@ -78,11 +79,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-
         migrations.AddField(
             model_name='task',
-            name='unit_price',
-            field=models.DecimalField(decimal_places=4, default=0.0, max_digits=14, verbose_name='Price'),
+            name='total',
+            field=models.DecimalField(decimal_places=4, default=0.0, max_digits=14, verbose_name='Total'),
         ),
         migrations.RenameField(
             model_name='task',
@@ -105,7 +105,15 @@ class Migration(migrations.Migration):
             field=models.BooleanField(default=False),
         ),
 
-
+        migrations.RenameField(
+            model_name='lineitem',
+            old_name='unit_qty',
+            new_name='qty',
+        ),
+        migrations.RemoveField(
+            model_name='lineitem',
+            name='task_qty',
+        ),
         migrations.AddField(
             model_name='lineitem',
             name='order',

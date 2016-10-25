@@ -31,7 +31,8 @@ String getAtCaret() {
 }
 
 
-void main() {
+main() {
+
     document.registerElement('highlight-input', HighlightableInput);
 
     group("HighlightableInput", () {

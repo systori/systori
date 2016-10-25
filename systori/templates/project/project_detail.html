@@ -60,7 +60,7 @@
           <td>{{ job.get_status_display }}</td>
           <td>{{ job.get_billing_method_display }}</td>
           <td style="text-align: right; white-space: nowrap;">
-            {{ job.estimate|money }}
+            {{ job.total|money }}
           </td>
           <td>
             <div class="btn-group" style="width:80px;">

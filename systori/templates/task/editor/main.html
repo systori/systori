@@ -22,7 +22,8 @@
     sys-job,
     sys-group,
     sys-task,
-    sys-lineitem {
+    sys-lineitem,
+    sys-task > div.price-difference {
       display: block;
       position: relative;
       margin-right: 15px;
@@ -193,6 +194,23 @@
       margin-left: 10px;
     }
 
+    sys-task > div.price-difference {
+      display: flex;
+      margin-bottom: 10px;
+      margin-left: 100px;
+    }
+
+    sys-task > div.price-difference > .glyphicon {
+      color: red;
+    }
+
+    sys-task > div.price-difference > .total {
+      color: red;
+      font-weight: bold;
+      border-color: red;
+      min-width: 80px;
+    }
+
     sys-task > .editor:not(:only-child):after {
       display: block;
       position: absolute;
@@ -267,13 +285,13 @@
       top: -150px;
     }
 
-    sys-lineitem-cell[contenteditable="false"] {
-      font-weight: bold;
-    }
-
     sys-lineitem,
     .sys-lineitem-placeholder {
       margin-bottom: 10px;
+    }
+
+    sys-lineitem-cell[contenteditable="false"] {
+      font-weight: bold;
     }
 
     sys-lineitem-cell {
@@ -300,7 +318,7 @@
       cursor: pointer;
     }
 
-    sys-lineitem-container {
+    sys-lineitem-sheet {
       -webkit-user-select: none;
       user-select: none;
       margin-left: 100px;
@@ -308,7 +326,7 @@
       position: relative;
     }
 
-    sys-lineitem-container:after {
+    sys-lineitem-sheet:after {
       display: block;
       position: absolute;
       content: "";
