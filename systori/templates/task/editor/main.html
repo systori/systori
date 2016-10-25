@@ -290,8 +290,12 @@
       margin-bottom: 10px;
     }
 
-    sys-lineitem-cell[contenteditable="false"] {
+    sys-lineitem-cell[data-equation=""] {
       font-weight: bold;
+    }
+
+    sys-lineitem-cell[data-resolved] {
+      font-style: italic;
     }
 
     sys-lineitem-cell {

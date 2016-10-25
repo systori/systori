@@ -234,7 +234,11 @@ class LineItemCell extends HighlightableInput with Cell {
                 dataset['preview'] = "${resolved} = ${value.money}";
             else
                 dataset['preview'] = value.money;
-        } else return;
+        } else if (isBlank && value.isNonzero) {
+            dataset['preview'] = value.money;
+        } else {
+            dataset['preview'] = "";
+        }
 
         if (ranges == null) return;
         highlight(ranges.map((r) =>
@@ -265,19 +269,12 @@ class LineItem extends Model with Orderable, Row {
 
     onCalculationFinished() {
         super.onCalculationFinished();
-        List<LineItemCell> cols = columns, blank = [], other = [];
-        cols.forEach((c)=> c.isBlank ? blank.add(c) : other.add(c));
-        if (blank.length == 1) {
-            if (blank[0].isContentEditable)  blank[0].disableEditing();
-            if (!other[0].isContentEditable) other[0].enableEditing();
-            if (!other[1].isContentEditable) other[1].enableEditing();
+        if (qty.isNotBlank && price.isNotBlank && total.isNotBlank) {
+            [qty,price,total].forEach((Element e)=>e.style.color = 'red');
         } else {
-            if (!cols[0].isContentEditable) cols[0].enableEditing();
-            if (!cols[1].isContentEditable) cols[1].enableEditing();
-            if (!cols[2].isContentEditable) cols[2].enableEditing();
+            [qty,price,total].forEach((Element e)=>e.style.color = null);
         }
     }
-
 }
 
 
