@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from decimal import Decimal
 from django.db import migrations, models
 import django.db.models.deletion
+from systori.lib.templatetags.customformatting import money, ubrdecimal
 
 
 def upgrade_taskinstance_to_task(apps, schema_editor):
@@ -50,16 +51,16 @@ def upgrade_taskinstance_to_task(apps, schema_editor):
                     elif is_variant_mode:
                         print("    Primary: {}.{}".format(task.variant_group, task.variant_serial))
 
-                    task_price = Decimal('0.00')
+                    task.price = Decimal('0.00')
                     if is_variant_mode: print("    Line items ", end='')
                     for lineitem in taskinstance.lineitems.all():
                         lineitem.total = lineitem.qty * lineitem.price
-                        task_price += lineitem.total
+                        task.price += lineitem.total
                         lineitem.task = task
                         lineitem.save()
                         if is_variant_mode: print(".", end='')
                     if is_variant_mode: print("")
-                    task.total = task.qty * task_price
+                    task.total = task.qty * task.price
                     task.save()
 
 
@@ -79,6 +80,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='task',
+            name='price',
+            field=models.DecimalField(decimal_places=4, default=0.0, max_digits=14, verbose_name='Price'),
+        ),
         migrations.AddField(
             model_name='task',
             name='total',
@@ -109,6 +115,11 @@ class Migration(migrations.Migration):
             model_name='lineitem',
             old_name='unit_qty',
             new_name='qty',
+        ),
+        migrations.AddField(
+            model_name='lineitem',
+            name='total',
+            field=models.DecimalField(decimal_places=4, default=0.0, max_digits=14, verbose_name='Total'),
         ),
         migrations.RemoveField(
             model_name='lineitem',

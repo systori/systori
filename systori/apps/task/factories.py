@@ -1,7 +1,7 @@
-import factory
 from factory import django
 from factory import fuzzy
 from .models import Job, Group, Task, LineItem
+from systori.lib.templatetags.customformatting import ubrdecimal
 
 
 class JobFactory(django.DjangoModelFactory):
@@ -34,11 +34,11 @@ class LineItemFactory(django.DjangoModelFactory):
     @classmethod
     def _create(cls, *args, **kwargs):
         if 'qty' in kwargs and 'qty_equation' not in kwargs:
-            kwargs['qty_equation'] = str(kwargs['qty'])
+            kwargs['qty_equation'] = ubrdecimal(kwargs['qty'])
         if 'price' in kwargs and 'price_equation' not in kwargs:
-            kwargs['price_equation'] = str(kwargs['price'])
+            kwargs['price_equation'] = ubrdecimal(kwargs['price'])
         if 'total' in kwargs and 'total_equation' not in kwargs:
-            kwargs['total_equation'] = str(kwargs['total'])
+            kwargs['total_equation'] = ubrdecimal(kwargs['total'])
         if 'price' in kwargs and 'total' in kwargs and 'qty' not in kwargs:
             kwargs['qty'] = kwargs['total'] / kwargs['price']
         if 'qty' in kwargs and 'total' in kwargs and 'price' not in kwargs:

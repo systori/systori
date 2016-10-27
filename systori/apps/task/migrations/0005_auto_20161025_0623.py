@@ -43,11 +43,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='lineitem',
-            name='total',
-            field=models.DecimalField(decimal_places=4, default=0.0, max_digits=14, verbose_name='Total'),
-        ),
-        migrations.AddField(
-            model_name='lineitem',
             name='total_equation',
             field=models.CharField(default='', max_length=512),
             preserve_default=False,
@@ -78,5 +73,11 @@ class Migration(migrations.Migration):
             model_name='task',
             name='unit',
             field=models.CharField(max_length=512, verbose_name='Unit'),
+        ),
+        migrations.AddField(
+            model_name='task',
+            name='price_equation',
+            field=models.CharField(default='', max_length=512),
+            preserve_default=False,
         ),
     ]

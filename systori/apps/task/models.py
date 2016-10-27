@@ -1,3 +1,4 @@
+import re
 from decimal import Decimal
 from functools import partialmethod
 from datetime import datetime
@@ -249,6 +250,8 @@ class Task(OrderedModel):
     qty_equation = models.CharField(max_length=512)
     complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=0.0)
     unit = models.CharField(_("Unit"), max_length=512)
+    price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=0.0)
+    price_equation = models.CharField(max_length=512)
     total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=0.0)
     total_equation = models.CharField(max_length=512)
 
@@ -307,16 +310,9 @@ class Task(OrderedModel):
         return True
 
     @property
-    def task_price(self):
-        """ The task price consistent internally to the task.
-            For most cases, use this instead of lineitem_price.
-        """
-        return round(self.total / self.qty if self.qty != 0 else 0, 2)
-
-    @property
     def lineitem_price(self):
         """ The task price as defined by lineitems.
-            For most cases, use the other task_price instead of this.
+            For most cases, use the Task.price instead of this.
         """
         price = Decimal('0.00')
         for li in self.lineitems.all():
@@ -325,16 +321,16 @@ class Task(OrderedModel):
 
     @property
     def price_difference(self):
-        """ Normally the task_price == lineitem_price and thus diff is 0.
+        """ Normally the Task.price == lineitem_price and thus diff is 0.
             In cases where the user has defined the total manually and then the
-            lineitem_price (sum of lineitem totals) != task_price (task.total/task.qty)
+            lineitem_price (sum of lineitem totals) != Task.price
             this will return the amount of the discrepancy.
         """
-        return self.task_price - self.lineitem_price
+        return self.price - self.lineitem_price
 
     @property
     def progress(self):
-        return round(self.task_price * self.complete, 2)
+        return round(self.price * self.complete, 2)
 
     @property
     def complete_percent(self):
@@ -409,6 +405,20 @@ class LineItem(OrderedModel):
     @property
     def project(self):
         return self.job.project
+
+    # regex should math the one in dart app spreadsheet/cell.dart
+    NUMBER = re.compile(r"^-?[0-9.,]+$")
+
+    def _is_equation(self, column):
+        val = getattr(self, column+'_equation')
+        if not val:
+            return False
+        if self.NUMBER.search(val):
+            return False
+        return True
+    is_qty_equation = property(lambda self: self._is_equation('qty'))
+    is_price_equation = property(lambda self: self._is_equation('price'))
+    is_total_equation = property(lambda self: self._is_equation('total'))
 
 
 class ProgressReport(models.Model):

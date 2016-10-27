@@ -4,10 +4,10 @@
   <div class="editor-row">
     <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
     <div               class="name"  placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name|safe }}</div>
-    <sys-lineitem-cell class="qty"   placeholder="{% trans 'qty' %}" data-equation="{{ lineitem.qty_equation }}" contenteditable>{{ lineitem.qty|ubrdecimal }}</sys-lineitem-cell>
+    <sys-lineitem-cell class="qty"   placeholder="{% trans 'qty' %}" {% if lineitem.is_qty_equation %}data-resolved=""{% endif %} data-equation="{{ lineitem.qty_equation }}" contenteditable>{{ lineitem.qty|ubrdecimal }}</sys-lineitem-cell>
     <div               class="unit"  placeholder="{% trans 'unit' %}" contenteditable>{{ lineitem.unit }}</div>
-    <sys-lineitem-cell class="price" placeholder="{% trans 'price' %}" data-equation="{{ lineitem.price_equation }}" contenteditable>{{ lineitem.price|ubrdecimal }}</sys-lineitem-cell>
-    <sys-lineitem-cell class="total" placeholder="{% trans 'total' %}" data-equation="{{ lineitem.total_equation }}" contenteditable>{{ lineitem.total|ubrdecimal:3 }}</sys-lineitem-cell>
+    <sys-lineitem-cell class="price" placeholder="{% trans 'price' %}" {% if lineitem.is_price_equation %}data-resolved=""{% endif %} data-equation="{{ lineitem.price_equation }}" contenteditable>{{ lineitem.price|ubrdecimal }}</sys-lineitem-cell>
+    <sys-lineitem-cell class="total" placeholder="{% trans 'total' %}" {% if lineitem.is_total_equation %}data-resolved=""{% endif %} data-equation="{{ lineitem.total_equation }}" contenteditable>{{ lineitem.total|ubrdecimal:3 }}</sys-lineitem-cell>
     <div class="actions">
       <span class="is_hidden glyphicon glyphicon-eye-close {{ lineitem.is_hidden }}"></span>
       <span class="is_flagged glyphicon glyphicon-flag {{ lineitem.is_flagged }}"></span>

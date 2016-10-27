@@ -12,6 +12,7 @@ class Decimal implements Comparable<Decimal> {
 
     static NumberFormat MONEY = makeMoneyFormat();
     static NumberFormat NUMBER = makeNumberFormat();
+    static NumberFormat CANONICAL = new NumberFormat("0.####", "en");
     static updateFormats() {
         MONEY = makeMoneyFormat();
         NUMBER = makeNumberFormat();
@@ -28,6 +29,7 @@ class Decimal implements Comparable<Decimal> {
     double get decimal => isNull ? _decimal : _decimal / _precision;
     String get money => isNull ? "" : MONEY.format(decimal);
     String get number => isNull ? "" : NUMBER.format(decimal);
+    String get canonical => isNull ? "" : CANONICAL.format(decimal);
 
     Decimal([num number=0, precision=1000]):
             this._(number != null ? (number * precision).round() : number, precision);
