@@ -1,6 +1,8 @@
-import 'package:quiver/collection.dart';
 import 'package:systori/decimal.dart';
 import 'cell.dart';
+
+
+typedef List<Cell> ColumnGetter(int columnIdx);
 
 
 class RangeResult {
@@ -25,74 +27,7 @@ class RangeResult {
 }
 
 
-class RangeCache extends DelegatingMap<String,RangeResult> {
-    final Map<String,RangeResult> _cache = {};
-    Map<String,RangeResult> get delegate => _cache;
-
-    reset() {
-        // there could be ranges still holding references to results
-        // so we want to reset those first
-        _cache.values.forEach((r)=>r.reset());
-        // now clear out the cache
-        _cache.clear();
-    }
-
-}
-
-
-class RangeList extends DelegatingList<Range> {
-
-    final List<Range> _ranges = [];
-    List<Range> get delegate => _ranges;
-
-    RangeList(String eq, RangeCache cache) {
-        cache.values.forEach((r)=>r.group=null);
-        int nextGroup = 1;
-        for (var m in Range.PATTERN.allMatches(eq.toUpperCase())) {
-            var src = m.group(0);
-            var result = cache.putIfAbsent(src, ()=>new RangeResult());
-            if (result.group == null)
-                result.group = nextGroup++;
-            _ranges.add(new Range(result,
-                    m.group(1), m.group(2),
-                    m.group(3), m.group(4), // startEquation, start
-                    m.group(5), m.group(6), m.group(7), // exclusive range
-                    m.group(8), m.group(9), // endEquation, end
-                    m.start, m.end, src
-            ));
-        }
-    }
-
-    calculate(List<Cell> getColumn(int columnIdx), RangeCache cache, int thisColumn) {
-        for (var range in _ranges) {
-            var columnIdx = range.column != null ? range.column : thisColumn;
-            cache.putIfAbsent(range.src, ()=>range.result);
-            if (range.result.isEmpty)
-                range.calculate(getColumn(columnIdx));
-        }
-    }
-
-    String resolve(String equation) {
-        var buffer = new StringBuffer();
-        int lastEnd = 0;
-        for (var range in _ranges) {
-            buffer.write(equation.substring(lastEnd, range.srcStart));
-            buffer.write(' ');
-            buffer.write(range.result.value.number);
-            buffer.write(' ');
-            lastEnd = range.srcEnd;
-        }
-        buffer.write(equation.substring(lastEnd));
-        return buffer.toString();
-    }
-
-
-}
-
-
 class Range {
-
-    static final RegExp PATTERN = new RegExp(r'([ABC]?)([!@])(&?)(\d*)(\[?)(:?)(\]?)(&?)(\d*)');
 
     final int column;
     final String direction;
