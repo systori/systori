@@ -32,7 +32,7 @@ class TestCell extends Cell {
 List<Range> ranges(String eq) {
     var te = new TestEquation(eq);
     te.resolver = new RangeResolver();
-    te.focus();
+    te.focused();
     te.calculate((i)=>[new TestCell(new Decimal(99))], true);
     return te.resolver.ranges;
 }
@@ -131,7 +131,7 @@ main() async {
             expect(e.resolved, isNull);
             expect(e.value.decimal, 98);
 
-            e.focus();
+            e.focused();
             expect(e.local, "-1,000 + !:");
             expect(e.resolved, isNull);
             expect(e.value.decimal, 98);

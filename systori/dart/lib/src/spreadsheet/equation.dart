@@ -1,4 +1,4 @@
-import 'package:parsers/parsers.dart';
+import 'package:parsers/parsers.dart' as _p;
 import 'package:systori/decimal.dart';
 import 'package:systori/spreadsheet.dart';
 
@@ -266,7 +266,7 @@ abstract class Equation {
 
 abstract class ParseEquation<R> {
 
-    Parser parser;
+    _p.Parser<R> parser;
     RangeResolver resolver;
     ParseEquation(this.resolver) {
         parser = buildParser();
@@ -274,12 +274,12 @@ abstract class ParseEquation<R> {
 
     R call(String eq);
     R parseDecimal(sign, digits);
-    R parseRange(PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, PointedValue<String> end);
+    R parseRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, _p.PointedValue<String> end);
 
-    String rangeToString(PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, PointedValue<String> end) =>
+    String rangeToString(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, _p.PointedValue<String> end) =>
         "${column.value}$direction$startEquation$start$startExclusive$colon$endExclusive$endEquation${end.value}";
 
-    Decimal evalRange(PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, PointedValue<String> end) {
+    Decimal evalRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, _p.PointedValue<String> end) {
         var src = rangeToString(column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end);
         return resolver.resolve(
             column.value, direction,
@@ -290,42 +290,43 @@ abstract class ParseEquation<R> {
         );
     }
 
-    Parser<R> buildParser() => expr() < eof;
+    _p.Parser<R> buildParser() => expr() < (_p.eof as _p.Parser<R>);
 
-    lexeme(parser) => parser < spaces;
-    token(str)     => lexeme(string(str));
-    parens(parser) => parser.between(token('('), token(')'));
+    _p.Parser<R> lexeme(_p.Parser<R> parser) => parser < (_p.spaces as _p.Parser<R>);
+    _p.Parser<R> token(str)               => lexeme(_p.string(str) as _p.Parser<R>);
+    _p.Parser<R> parens(parser)           => parser.between(token('('), token(')')) as _p.Parser<R>;
 
     get times  => token('*');
     get div    => token('/');
     get plus   => token('+');
     get minus  => token('-');
 
-    get sign => (char('-') | char('+')).orElse('');
-    get digits => oneOf("1234567890.") % 'digit';
-    get decimal => (lexeme(sign) + digits.many1 ^ parseDecimal) % 'decimal';
+    _p.Parser<R> get sign => (_p.char('-') | _p.char('+')).orElse('') as _p.Parser<R>;
+    _p.Parser<R> get digits => _p.oneOf("1234567890.") % 'digit' as _p.Parser<R>;
+    _p.Parser<R> get decimal => (lexeme(sign) + digits.many1 ^ parseDecimal) % 'decimal' as _p.Parser<R>;
 
-    get range =>
-            oneOf('ABC').orElse('').withPosition % 'column' +
-            oneOf('@!') % 'direction' +
-            char('&').orElse('') % 'equation symbol' +
-            (digit.many1 ^ (s)=>s.join()).orElse('') % 'row' +
-            char('[').orElse('') % 'exclusive range' +
-            char(':').orElse('') % 'colon' +
-            char(']').orElse('') % 'exclusive range' +
-            char('&').orElse('') % 'equation symbol' +
-            (digit.many1 ^ (s)=>s.join()).orElse('').withPosition % 'row'
-            ^ parseRange;
+    _p.Parser<R> get range =>
+            _p.oneOf('ABC').orElse('').withPosition % 'column' +
+            _p.oneOf('@!') % 'direction' +
+            _p.char('&').orElse('') % 'equation symbol' +
+            (_p.digit.many1 ^ (s)=>s.join()).orElse('') % 'row' +
+            _p.char('[').orElse('') % 'exclusive range' +
+            _p.char(':').orElse('') % 'colon' +
+            _p.char(']').orElse('') % 'exclusive range' +
+            _p.char('&').orElse('') % 'equation symbol' +
+            (_p.digit.many1 ^ (s)=>s.join()).orElse('').withPosition % 'row'
+            ^ parseRange as _p.Parser<R>;
 
-    expr() => rec(term).chainl1(addop);
-    term() => rec(atom).chainl1(mulop);
-    atom() => lexeme(range) | lexeme(decimal) | parens(rec(expr));
+    rec(_p.Parser<R> f()) => _p.rec(f) as _p.Parser<R>;
+    _p.Parser<R> expr() => rec(term).chainl1(addop) as _p.Parser<R>;
+    _p.Parser<R> term() => rec(atom).chainl1(mulop) as _p.Parser<R>;
+    _p.Parser<R> atom() => lexeme(range) | lexeme(decimal) | parens(rec(expr)) as _p.Parser<R>;
 
-    get addop => (plus  > success((x, y) => x + y))
-               | (minus > success((x, y) => x - y));
+    get addop => (plus  > _p.success((x, y) => x + y))
+               | (minus > _p.success((x, y) => x - y));
 
-    get mulop => (times > success((x, y) => x * y))
-               | (div   > success((x, y) => x / y));
+    get mulop => (times > _p.success((x, y) => x * y))
+               | (div   > _p.success((x, y) => x / y));
 }
 
 
@@ -337,14 +338,14 @@ class EvaluateEquation extends ParseEquation<Decimal> {
 
     Decimal parseDecimal(sign, digits) => new Decimal.parse(sign+digits.join());
 
-    Decimal parseRange(PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, PointedValue<String> end) =>
+    Decimal parseRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, _p.PointedValue<String> end) =>
         evalRange(column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end);
 
-    get addop => (plus  > success((x, y) => x + y))
-               | (minus > success((x, y) => x - y));
+    get addop => (plus  > _p.success((x, y) => x + y))
+               | (minus > _p.success((x, y) => x - y));
 
-    get mulop => (times > success((x, y) => x * y))
-               | (div   > success((x, y) => x / y));
+    get mulop => (times > _p.success((x, y) => x * y))
+               | (div   > _p.success((x, y) => x / y));
 }
 
 
@@ -371,17 +372,17 @@ class ConvertEquation extends ParseEquation<String> {
     String parseDecimal(sign, digits) =>
         converter(sign+digits.join());
 
-    String parseRange(PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, PointedValue<String> end) =>
+    String parseRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, _p.PointedValue<String> end) =>
         resolver != null ?
             evalRange(column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end).number :
             rangeToString(column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end);
 
     // supports localized format parsing
-    get digits => oneOf("1234567890., ") % 'digit';
+    get digits => _p.oneOf("1234567890., ") % 'digit';
 
-    get addop => (plus  > success((x, y) => "($x + $y)"))
-               | (minus > success((x, y) => "($x - $y)"));
+    get addop => (plus  > _p.success((x, y) => "($x + $y)"))
+               | (minus > _p.success((x, y) => "($x - $y)"));
 
-    get mulop => (times > success((x, y) => "($x * $y)"))
-               | (div   > success((x, y) => "($x / $y)"));
+    get mulop => (times > _p.success((x, y) => "($x * $y)"))
+               | (div   > _p.success((x, y) => "($x / $y)"));
 }
