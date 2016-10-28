@@ -15,7 +15,7 @@ abstract class Row {
     Cell getCell(int cell) => columns[cell];
 
     update(Spreadsheet sheet, int row, bool dependencyChanged) {
-        enumerate(columns).forEach((IndexedValue<Cell> iterator) {
+        enumerate/*<Cell>*/(columns).forEach((IndexedValue<Cell> iterator) {
             iterator.value.row = row;
             iterator.value.column = iterator.index;
             iterator.value.update(sheet.getColumn, dependencyChanged);

@@ -1,7 +1,6 @@
 import 'dart:html';
 import 'dart:async';
 import 'package:intl/intl.dart';
-import 'package:quiver/iterables.dart';
 import 'package:systori/decimal.dart';
 import 'package:systori/spreadsheet.dart';
 import 'package:systori/orderable.dart';
@@ -43,11 +42,14 @@ class Group extends Model {
 
 class TaskCell extends HtmlElement with Cell {
 
-    String get equation => dataset['equation'];
-    set equation(String equation) => dataset['equation'] = equation;
+    String get canonical => dataset['canonical'];
+    set canonical(String canonical) => dataset['canonical'] = canonical;
+
+    String get local => dataset['local'];
+    set local(String local) => dataset['local'] = local;
 
     String get resolved => dataset['resolved'];
-    set resolved(String equation) => dataset['resolved'] = equation;
+    set resolved(String resolved) => dataset['resolved'] = resolved;
 
     List<StreamSubscription<Event>> subscriptions = [];
 
@@ -71,19 +73,22 @@ class TaskCell extends HtmlElement with Cell {
         subscriptions = [];
     }
 
-    handleFocus(FocusEvent event) {
-        if (equation != null)
-            text = equation;
+    handleFocus(Event event) {
+        if (isEquation) {
+            focused();
+            text = local;
+        }
         window.getSelection().selectAllChildren(event.target);
         dispatchCalculate();
     }
 
-    handleInput([_]) {
-        equation = text.trim();
+    handleInput([Event _]) {
+        local = text.trim();
+        changed();
         dispatchCalculate();
     }
 
-    handleBlur([_]) {
+    handleBlur([Event _]) {
         text = value.money;
     }
 
@@ -170,11 +175,14 @@ class Task extends Model with Row {
 
 class LineItemCell extends HighlightableInput with Cell {
 
-    String get equation => dataset['equation'];
-    set equation(String equation) => dataset['equation'] = equation;
+    String get canonical => dataset['canonical'];
+    set canonical(String canonical) => dataset['canonical'] = canonical;
+
+    String get local => dataset['local'];
+    set local(String local) => dataset['local'] = local;
 
     String get resolved => dataset['resolved'];
-    set resolved(String equation) => dataset['resolved'] = equation;
+    set resolved(String resolved) => dataset['resolved'] = resolved;
 
     List<StreamSubscription<Event>> subscriptions = [];
 
@@ -198,19 +206,22 @@ class LineItemCell extends HighlightableInput with Cell {
         subscriptions = [];
     }
 
-    handleFocus(FocusEvent event) {
-        if (equation != null)
-            text = equation;
-        window.getSelection().selectAllChildren(event.target);
+    handleFocus(Event event) {
+        if (isEquation) {
+            focused();
+            text = local;
+        }
+        //window.getSelection().selectAllChildren(event.target);
         dispatchCalculate();
     }
 
-    handleInput([_]) {
-        equation = text.trim();
+    handleInput([Event _]) {
+        local = text.trim();
+        changed();
         dispatchCalculate();
     }
 
-    handleBlur([_]) {
+    handleBlur([Event _]) {
         text = value.money;
     }
 
@@ -240,8 +251,8 @@ class LineItemCell extends HighlightableInput with Cell {
             dataset['preview'] = "";
         }
 
-        if (ranges == null) return;
-        highlight(ranges.map((r) =>
+        if (resolver.ranges.isEmpty) return;
+        highlight(resolver.ranges.map((r) =>
             new Highlight(r.srcStart, r.srcEnd, COLORS[r.result.group%COLORS.length]))
         );
     }
@@ -280,24 +291,24 @@ class LineItem extends Model with Orderable, Row {
 
 class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
 
-    List get rows => this.querySelectorAll(':scope>sys-lineitem');
+    List<LineItem> get rows => this.querySelectorAll(':scope>sys-lineitem');
 
     LineItemSheet.created(): super.created() {
         on['calculate'].listen((CustomEvent e) => calculate(e.detail as Cell));
         addEventListener('blur', clearHighlighting, true);
     }
 
-    onOrderingChanged(LineItem orderable) =>
-        dispatchEvent(new CustomEvent('calculate', detail: orderable.getCell(0)));
+    onOrderingChanged(Orderable orderable) =>
+        dispatchEvent(new CustomEvent('calculate', detail: (orderable as LineItem).getCell(0)));
 
     onCalculationFinished(Cell changedCell) {
         super.onCalculationFinished(changedCell);
 
-        if (changedCell.ranges == null) return;
+        if (changedCell.resolver.ranges == null) return;
 
         var matrix = new List.generate(rows.length, (i)=>[0,0,0]);
 
-        for (var range in changedCell.ranges) {
+        for (var range in changedCell.resolver.ranges) {
             for (int rowIdx = 0; rowIdx < matrix.length; rowIdx++) {
                 if (range.result.isHit(rowIdx)) {
                     var colIdx = range.column != null
@@ -327,7 +338,7 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
         }
     }
 
-    clearHighlighting([_]) {
+    clearHighlighting([Event _]) {
         for (LineItem row in rows) {
             row.qty.style.background = null;
             row.price.style.background = null;

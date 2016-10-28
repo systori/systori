@@ -2,11 +2,11 @@
 <div class="editor">
   <div class="editor-row">
     <div class="code">{{ task.code }}</div>
-    <div           class="name"  placeholder="{% trans 'task' %}"                                            contenteditable>{{ task.name|safe }}</div>
-    <sys-task-cell class="qty"   placeholder="{% trans 'qty' %}"   data-equation="{{ task.qty_equation }}"   contenteditable>{{ task.qty|ubrdecimal }}</sys-task-cell>
-    <div           class="unit"  placeholder="{% trans 'unit' %}"                                            contenteditable>{{ task.unit }}</div>
-    <sys-task-cell class="price"                                   data-equation="C!:"                                             >{{ task.task_price|ubrdecimal }}</sys-task-cell>
-    <sys-task-cell class="total" placeholder="{% trans 'total' %}" data-equation="{{ task.total_equation }}" contenteditable>{{ task.total|ubrdecimal:3 }}</sys-task-cell>
+    <div           class="name"  placeholder="{% trans 'task' %}"                                             contenteditable>{{ task.name|safe }}</div>
+    <sys-task-cell class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ task.qty_equation }}"   contenteditable>{{ task.qty|ubrdecimal }}</sys-task-cell>
+    <div           class="unit"  placeholder="{% trans 'unit' %}"                                             contenteditable>{{ task.unit }}</div>
+    <sys-task-cell class="price"                                   data-canonical="C!:"                                      >{{ task.task_price|ubrdecimal }}</sys-task-cell>
+    <sys-task-cell class="total" placeholder="{% trans 'total' %}" data-canonical="{{ task.total_equation }}" contenteditable>{{ task.total|ubrdecimal:3 }}</sys-task-cell>
     {% comment %}
     <div class="labels">
       <span class="is_optional {{ task.is_provisional }} label label-primary">{% trans 'Optional' %}</span>

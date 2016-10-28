@@ -29,7 +29,7 @@ LineItemFactory(name="risk", unit="%", qty=10, price_equation="C!:", price=2660,
 LineItemFactory(name="Screed", unit="hr", qty=2, total=20, task=concrete_task)
 LineItemFactory(name="Remove Forms", unit="hr", qty=4, total=40, task=concrete_task)
 LineItemFactory(name="risk", qty=10, unit="%", price_equation="C!]&", price=120, task=concrete_task)
-LineItemFactory(name="discount", qty=-10, unit="%", price_equation="C!:", price=3058, task=concrete_task)
+LineItemFactory(name="discount", qty=-10, unit="%", price_equation="1000.001*C!:", price=3058, task=concrete_task)
 booth_task = TaskFactory(name="Install Booth", group=booth_group, qty=1, total=1, description=desc)
 LineItemFactory(name="Manufacturer suggested installation cost", unit="", qty=1, price=5000, task=booth_task, is_hidden=True)
 LineItemFactory(name="Place ontop concrete pad", unit="hr", qty=2, price=50, task=booth_task)

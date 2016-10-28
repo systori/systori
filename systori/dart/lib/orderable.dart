@@ -17,9 +17,9 @@ abstract class OrderableContainer implements Element {
 
     StreamSubscription<MouseEvent> mouseDownSubscription;
 
-    attached() => mouseDownSubscription = onMouseDown.listen(maybeStartDragging);
+    attached() { mouseDownSubscription = onMouseDown.listen(maybeStartDragging); }
 
-    detached() => mouseDownSubscription.cancel();
+    detached() { mouseDownSubscription.cancel(); }
 
     Orderable findOrderable(Element child) {
         while (child != null) {

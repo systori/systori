@@ -15,7 +15,7 @@ abstract class Spreadsheet {
         Decimal total = new Decimal();
         changedCell.row = -1;
         changedCell.column = -1;
-        enumerate(rows).forEach((IndexedValue<Row> iterator) {
+        enumerate/*<Row>*/(rows).forEach((IndexedValue<Row> iterator) {
             iterator.value.calculate(this, iterator.index, changedCell.row!=-1);
             total += iterator.value.total.value;
             iterated.add(iterator.value);

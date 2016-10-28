@@ -55,10 +55,8 @@ class Amount {
     Amount operator + (Amount other) =>
         new Amount(net + other.net, tax + other.tax, tax_rate);
 
-    bool operator == (Amount other) {
-        if (other == null) return false;
-        return net == other.net && tax == other.tax;
-    }
+    bool operator == (dynamic other) =>
+        other is Amount && net == other.net && tax == other.tax;
 
     int get hashCode {
         // TODO: re-implement this when dart sdk exposes _JenkinsSmiHash

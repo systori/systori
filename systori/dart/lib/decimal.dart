@@ -55,8 +55,8 @@ class Decimal implements Comparable<Decimal> {
     Decimal operator + (Decimal other) =>
         new Decimal._(_decimal + other._decimal, _precision);
 
-    bool operator == (Decimal other) =>
-        _decimal == other._decimal;
+    bool operator == (dynamic other) =>
+        other is Decimal && _decimal == other._decimal;
 
     bool operator < (Decimal other) =>
         _decimal < other._decimal;

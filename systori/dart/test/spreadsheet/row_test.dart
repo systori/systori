@@ -1,36 +1,37 @@
+@TestOn("vm")
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/iterables.dart';
 import 'package:systori/decimal.dart';
-import 'package:systori/spreadsheet.dart' as sheet;
+import 'package:systori/spreadsheet.dart';
 
 
-class Cell extends sheet.Cell {
-    String equation, resolved;
-    Cell(_value, [this.equation="", _col=0, _row=0])
-        {value=_value; column=_col; this.row=_row;}
+class TestCell extends Cell {
+    String canonical, local, resolved;
+    TestCell(_value, [canonical="", _col=0, _row=0])
+    {value=_value; this.canonical=canonical; this.column=_col; this.row=_row;}
 }
 
 
-class Row extends sheet.Row {
+class TestRow extends Row {
     Cell qty, price, total;
     bool hasPercent=false;
-    Row(qty, price, total):
-        qty = new Cell(new Decimal(null), qty, 0),
-        price = new Cell(new Decimal(null), price, 1),
-        total = new Cell(new Decimal(null), total, 2);
+    TestRow(qty, price, total):
+        qty = new TestCell(new Decimal(null), qty, 0),
+        price = new TestCell(new Decimal(null), price, 1),
+        total = new TestCell(new Decimal(null), total, 2);
 }
 
 
-class MockSpreadsheet extends Mock implements sheet.Spreadsheet {}
-sheet.Spreadsheet mockSheet(List<int> ints, int eq1, int eq2) {
+class MockSpreadsheet extends Mock implements Spreadsheet {}
+Spreadsheet mockSheet(List<int> ints, int eq1, int eq2) {
     ints = ints != null ? ints : [];
     var sheet = new MockSpreadsheet();
     for (var col in range(3)) {
         when(sheet.getColumn(col)).thenReturn(
             enumerate(ints).
             map((total) =>
-            new Cell(
+            new TestCell(
                 new Decimal(total.value),
                 eq1==total.index||eq2==total.index ? '!' : '',
                 col
@@ -43,8 +44,8 @@ sheet.Spreadsheet mockSheet(List<int> ints, int eq1, int eq2) {
 
 
 Row row(String qty, String price, String total, [List<int> ints, eq1=-1, eq2=-1]) {
-    var r = new Row(qty, price, total);
-    r.calculate(mockSheet(ints, eq1, eq2), ints!=null?ints.length:0, r.columns[0]);
+    var r = new TestRow(qty, price, total);
+    r.calculate(mockSheet(ints, eq1, eq2), ints!=null?ints.length:0, true);
     return r;
 }
 
@@ -59,9 +60,9 @@ main() async {
     group("Row.calculate() without ranges", () {
 
         double percent(String qty, String price) {
-            var r = new Row(qty, price, '');
+            var r = new TestRow(qty, price, '');
             r.hasPercent = true;
-            r.calculate(mockSheet([], null, null), 0, r.columns[0]);
+            r.calculate(mockSheet([], null, null), 0, true);
             return r.total.value.decimal;
         }
 
