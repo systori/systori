@@ -1,27 +1,28 @@
+@TestOn('vm')
 import 'package:test/test.dart';
 import 'package:quiver/iterables.dart';
 import 'package:systori/decimal.dart';
-import 'package:systori/spreadsheet.dart' as sheet;
+import 'package:systori/spreadsheet.dart';
 
 
-class Cell extends sheet.Cell {
-    String equation, resolved;
-    Cell(_value, [this.equation="", _col=0, _row=0])
-        {value=_value; column=_col; row=_row;}
+class TestCell extends Cell {
+    String canonical, local, resolved;
+    TestCell(_value, [canonical="", _col=0, _row=0])
+    {value=_value; this.canonical=canonical; this.column=_col; row=_row;}
 }
 
 
-Cell cell(String txt, [num value=0]) => new Cell(new Decimal(value), txt);
+Cell cell(String txt, [num value=0]) => new TestCell(new Decimal(value), txt);
 
-Function columnGetterFor(List<int> ints, [eq1=-1, eq2=-1]) =>
+ColumnGetter columnGetterFor(List<int> ints, [eq1=-1, eq2=-1]) =>
     (col) => enumerate(ints).map((total) =>
-        new Cell(
+        new TestCell(
             new Decimal(total.value),
             eq1==total.index||eq2==total.index ? '!' : '',
             col, total.index)).toList();
 
 Cell eval(String eq, List<int> ints, [eq1=-1, eq2=-1]) {
-    var c = new Cell(new Decimal(), eq, 0, ints.length);
+    var c = new TestCell(new Decimal(), eq, 0, ints.length);
     c.update(columnGetterFor(ints, eq1, eq2), true);
     return c;
 }
@@ -63,16 +64,17 @@ main() async {
 
         test("isEquationChanged", () {
             var c = cell('');
+            expect(c.isEquationChanged, isFalse);
 
-            // always marked as changed on initial load
+            c.local = '@';
             expect(c.isEquationChanged, isTrue);
 
             c.update((i)=>[],false);
-            // change saved
             expect(c.isEquationChanged, isFalse);
 
-            c.equation = '1';
-            // changed
+            c.local = '@';
+            expect(c.isEquationChanged, isFalse);
+            c.local = '!';
             expect(c.isEquationChanged, isTrue);
 
         });
@@ -93,22 +95,24 @@ main() async {
 
         });
 
-        test("cache.reset()", () {
+        test("RangeResolver.reset()", () {
             Cell c = eval('!+!+!', [1,2]);
-            expect(c.cache, contains('!'));
-            expect(c.ranges[0].result.start, 1);
-            expect(c.ranges[1].result.start, 1);
+            RangeResolver rr = c.resolver;
+            expect(rr.results, contains('!'));
+            expect(rr.ranges[0].result.start, 1);
+            expect(rr.ranges[1].result.start, 1);
 
-            c.cache.reset();
-            expect(c.cache, isEmpty);
-            expect(c.ranges[0].result.group, 1);
-            expect(c.ranges[0].result.start, -1);
-            expect(c.ranges[1].result.start, -1);
+            rr.reset();
+            expect(rr.results, isEmpty);
+            expect(rr.ranges[0].result.group, 1);
+            expect(rr.ranges[0].result.start, -1);
+            expect(rr.ranges[1].result.start, -1);
 
-            c.update(columnGetterFor([1,2]),false);
-            expect(c.ranges[0].result.group, 1);
-            expect(c.ranges[0].result.start, 1);
-            expect(c.ranges[1].result.start, 1);
+            c.resolver.collectRanges = true;
+            c.calculate(columnGetterFor([1,2]), false);
+            expect(rr.ranges[0].result.group, 1);
+            expect(rr.ranges[0].result.start, 1);
+            expect(rr.ranges[1].result.start, 1);
         });
 
     });
@@ -122,7 +126,7 @@ main() async {
             c.update((i)=>[],false);
             expect(c.value, new Decimal());
 
-            c.equation = '   ';
+            c.local = '   ';
             c.update((i)=>[],false);
             expect(c.value, new Decimal());
         });
@@ -134,7 +138,8 @@ main() async {
             c.update((i)=>[],false);
             expect(c.value, new Decimal(7));
 
-            c.equation = '-9,000.00';
+            c.local = '-9,000.00';
+            c.changed();
             c.update((i)=>[],false);
             expect(c.value, new Decimal(-9000));
         });

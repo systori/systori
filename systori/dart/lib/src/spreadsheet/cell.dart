@@ -1,5 +1,4 @@
 import 'package:systori/decimal.dart';
-import 'range.dart';
 import 'equation.dart';
 
 
@@ -9,7 +8,7 @@ abstract class Cell extends Equation {
     int column;
 
     int _previous_row_position;
-    String _previous_equation;
+    String _previous_local;
 
     static final RegExp ZERO = new RegExp(r"^-?[0.,]*$");
     static final RegExp NUMBER = new RegExp(r"^-?[0-9.,]+$");
@@ -25,10 +24,13 @@ abstract class Cell extends Equation {
     bool get isEquation => !isBlank && !isNumber;
     bool get isNotBlank => !isBlank;
 
-    bool get isEquationChanged => _previous_equation != canonical;
+    bool get isEquationChanged => _previous_local != local;
     bool get isPositionChanged => _previous_row_position != row;
 
-    update(List<Cell> getColumn(int columnIdx), bool dependencyChanged) {
+    update(ColumnGetter getColumn, bool dependencyChanged) {
+
+        if (_previous_local == null)
+            _previous_local = local;
 
         if (!isEquation) {
 
@@ -36,31 +38,13 @@ abstract class Cell extends Equation {
 
         } else {
 
-            value = new Decimal();
+            if (isEquationChanged) changed();
 
-            if (dependencyChanged || isPositionChanged)
-                // something changed above us or we moved rows
-                // invalidate the cache
-                cache.reset();
+            calculate(getColumn, dependencyChanged || isPositionChanged);
 
-            if (isEquationChanged || ranges == null)
-                // equation changed or was never primed, parse the ranges
-                ranges = new RangeList(equation, cache);
-
-            // there are three cases where this will do something:
-            // 1) cache was empty to begin with
-            // 2) cache was invalidated above
-            // 3) user added a new range to equation
-            ranges.calculate(getColumn, cache, column);
-
-            // replace all ranges with actual values
-            resolved = ranges.resolve(equation);
-
-            // math
-            value = solve(resolved);
         }
 
-        _previous_equation = equation;
+        _previous_local = local;
         _previous_row_position = row;
     }
 
