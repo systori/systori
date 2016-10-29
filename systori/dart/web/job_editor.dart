@@ -111,6 +111,7 @@ abstract class HtmlCell implements HtmlElement, Cell {
             return;
         }
 
+        if (preview != null && preview.startsWith('character ')) return;
         if (isLocalEquation) {
             if (resolved != null && resolved.trim() != value.number)
                 preview = "${resolved} = ${value.money}";
