@@ -10,6 +10,7 @@ class TestCell extends Cell {
     String canonical, local, resolved, preview;
     TestCell(_canonical, _value, [_col=0, _row=0])
     {this.canonical=_canonical; this.value=new Decimal(_value); this.column=_col; row=_row;}
+    onRowCalculationFinished() {}
 }
 
 
@@ -48,6 +49,11 @@ List index(String eq, List<int> ints, [eq1=-1, eq2=-1]) {
 double rangeTotal(String eq, [List<int> ints, eq1=-1, eq2=-1]) =>
     range(eq, ints, eq1, eq2).result.value.decimal;
 
+List srcIdx(String eq, [List<int> ints, eq1=-1, eq2=-1]) {
+    var _range = range(eq, ints, eq1, eq2);
+    print(eq.substring(_range.srcStart, _range.srcEnd));
+    return [_range.srcStart, _range.srcEnd];
+}
 
 main() async {
 
@@ -121,6 +127,12 @@ main() async {
             expect(range('@9:9').end, 9);
             expect(range('@').isEndEquation, false);
             expect(range('@:&').isEndEquation, true);
+        });
+
+        test("startIdx/endIdx", () {
+            expect(srcIdx('@'), [0, 1]);
+            expect(srcIdx('@9:'), [0, 3]);
+            expect(srcIdx('1+((@2:&1*2)+!)'), [4, 9]);
         });
 
     });

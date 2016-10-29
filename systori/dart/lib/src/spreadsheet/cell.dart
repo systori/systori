@@ -339,19 +339,19 @@ abstract class ParseEquation<R> {
 
     R call(String eq);
     R parseDecimal(sign, digits);
-    R parseRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, _p.PointedValue<String> end);
+    R parseRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end);
 
-    String rangeToString(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, _p.PointedValue<String> end) =>
-        "${column.value}$direction$startEquation$start$startExclusive$colon$endExclusive$endEquation${end.value}";
+    String rangeToString(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end) =>
+        "${column.value}$direction$startEquation$start$startExclusive$colon$endExclusive$endEquation$end";
 
-    Decimal evalRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, _p.PointedValue<String> end) {
+    Decimal evalRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end) {
         var src = rangeToString(column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end);
         return resolver.resolve(
             column.value, direction,
             startEquation, start,
             startExclusive, colon, endExclusive,
-            endEquation, end.value,
-            column.position.offset, end.position.offset, src
+            endEquation, end,
+            column.position.offset, column.position.offset+src.length, src
         );
     }
 
@@ -371,15 +371,15 @@ abstract class ParseEquation<R> {
     _p.Parser<R> get decimal => (lexeme(sign) + digits.many1 ^ parseDecimal) % 'decimal' as _p.Parser<R>;
 
     _p.Parser<R> get range =>
-           (_p.oneOf('ABC').orElse('').withPosition % 'column' +
-            _p.oneOf('@!') % 'direction' +
-            _p.char('&').orElse('') % 'equation symbol' +
-            (_p.digit.many1 ^ (s)=>s.join()).orElse('') % 'row' +
-            _p.char('[').orElse('') % 'exclusive range' +
-            _p.char(':').orElse('') % 'colon' +
-            _p.char(']').orElse('') % 'exclusive range' +
-            _p.char('&').orElse('') % 'equation symbol' +
-            (_p.digit.many1 ^ (s)=>s.join()).orElse('').withPosition % 'row'
+           (_p.oneOf('ABC').orElse('').withPosition % 'column ABC' +
+            _p.oneOf('@!') % '@ or !' +
+            _p.char('&').orElse('') % '&' +
+            (_p.digit.many1 ^ (s)=>s.join()).orElse('') % 'a row number' +
+            _p.char('[').orElse('') % '[' +
+            _p.char(':').orElse('') % ':' +
+            _p.char(']').orElse('') % ']' +
+            _p.char('&').orElse('') % '&' +
+            (_p.digit.many1 ^ (s)=>s.join()).orElse('') % 'a row number'
             ^ parseRange) as _p.Parser<R>;
 
     rec(_p.Parser<R> f()) => _p.rec(f) as _p.Parser<R>;
@@ -403,7 +403,7 @@ class EvaluateEquation extends ParseEquation<Decimal> {
 
     Decimal parseDecimal(sign, digits) => new Decimal.parse(sign+digits.join());
 
-    Decimal parseRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, _p.PointedValue<String> end) =>
+    Decimal parseRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end) =>
         evalRange(column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end);
 
     get addop => (plus  > _p.success((x, y) => x + y))
@@ -437,7 +437,7 @@ class ConvertEquation extends ParseEquation<String> {
     String parseDecimal(sign, digits) =>
         converter(sign+digits.join());
 
-    String parseRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, _p.PointedValue<String> end) =>
+    String parseRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end) =>
         resolver != null ?
             evalRange(column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end).number :
             rangeToString(column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end);
