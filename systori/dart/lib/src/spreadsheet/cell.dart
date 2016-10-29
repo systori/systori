@@ -1,5 +1,4 @@
 import 'package:systori/decimal.dart';
-import 'package:systori/spreadsheet.dart';
 import 'package:parsers/parsers.dart' as _p;
 
 
@@ -7,9 +6,6 @@ typedef List<Cell> ColumnGetter(int columnIdx);
 
 
 abstract class Cell {
-
-    int row;
-    int column;
 
     String get canonical;
     set canonical(String canonical);
@@ -20,88 +16,100 @@ abstract class Cell {
     String get resolved;
     set resolved(String resolved);
 
+    String get preview;
+    set preview(String preview);
+
+    int row;
+    int column;
+
+    int _previous_row_position;
+    String _previous_local;
+
     Decimal value;
 
     RangeResolver resolver = new RangeResolver();
 
-    int _previous_row_position;
-    String _previous_local;
-    bool get isEquationChanged => _previous_local != local;
-    bool get isPositionChanged => _previous_row_position != row;
-
     static final RegExp ZERO = new RegExp(r"^-?[0.,]*$");
-    static final RegExp NUMBER = new RegExp(r"^-?[0-9.,]+$");
+    static final RegExp NUMBER = new RegExp(r"^-?[0-9., ]+$");
     bool _isBlankOrZero(String txt) => txt.isEmpty || ZERO.hasMatch(txt);
-    /*
-        Cell has three states:
-          1) Blank: null, empty or 0
-          2) Number: valid number (including 0)
-          3) Equation: not Blank and not Number
-     */
-    bool get isBlank => canonical == null || _isBlankOrZero(canonical.trim());
-    bool get isNumber =>  canonical != null && NUMBER.hasMatch(canonical.trim());
-    bool get isEquation => !isBlank && !isNumber;
-    bool get isNotBlank => !isBlank;
+    bool _isNumber(String txt) => txt != null && NUMBER.hasMatch(txt.trim());
+    bool get isCanonicalBlank => canonical == null || _isBlankOrZero(canonical.trim());
+    bool get isCanonicalNotBlank => !isCanonicalBlank;
+    bool get isCanonicalNumber => _isNumber(canonical);
+    bool get isCanonicalEquation => isCanonicalNotBlank && !isCanonicalNumber;
+    bool get isLocalBlank => local == null || _isBlankOrZero(local.trim());
+    bool get isLocalNotBlank => !isLocalBlank;
+    bool get isLocalNumber => _isNumber(local);
+    bool get isLocalEquation => isLocalNotBlank && !isLocalNumber;
 
-    /*
-        Cell has phases:
-          1) Initial load from server, canonical and result.
-          2) Created row, all nulls/blanks.
-          2) Focused, local set from canonical.
-          4) Calculated, resolved set from local.
-     */
-    update(ColumnGetter getColumn, bool dependencyChanged) {
+    bool get isLocalChanged => _previous_local != null && _previous_local != local;
+    bool get isPositionChanged => _previous_row_position != null && _previous_row_position != row;
 
-        if (_previous_local == null)
-            _previous_local = local;
-
-        if (!isEquation) {
-
-            value = isBlank ? new Decimal() : new Decimal.parse(canonical);
-
-        } else {
-
-            if (isEquationChanged) changed();
-
-            calculate(getColumn, dependencyChanged || isPositionChanged);
-
-        }
+    calculate(ColumnGetter getColumn, {bool focused: false, bool changed: false, bool dependenciesChanged: false}) {
 
         _previous_local = local;
         _previous_row_position = row;
 
-    }
-
-    focused() { // setup local if this is the first time we focus here
-        if (local == null || local.isEmpty)
-            local = canonicalToLocal(canonical);
-        return local;
-    }
-
-    changed() { // underlying local changed (due to user edit of equation)
-        canonical = localToCanonical(local);
-        resolver.collectRanges = true;
-    }
-
-    calculate(ColumnGetter getColumn, dependenciesChanged) {
+        if (!focused && !changed && !dependenciesChanged) return;
 
         resolver.thisColumn = column;
         resolver.getColumn = getColumn;
 
-        if (dependenciesChanged)
-            resolver.reset();
+        if (focused) {
 
-        if (resolver.collectRanges && local != null) {
-            resolved = localToResolved(local);
-            resolver.collectRanges = false;
+            if (isLocalBlank && isCanonicalEquation) {
+                local = canonicalToLocal(canonical);
+                resolver.withCollectRanges(() {
+                    resolved = localToResolved(local);
+                });
+            }
+
+        } else if (changed) {
+
+            if (isLocalEquation) {
+                try {
+                    canonical = localToCanonical(local);
+                    resolver.withCollectRanges(() {
+                        resolved = localToResolved(local);
+                    });
+                    value = eval(canonical);
+                    if (resolved != value.number) {
+                        preview = "${resolved} = ${value.money}";
+                    } else {
+                        preview = "";
+                    }
+                } catch(e) {
+                    resolved = '';
+                    preview = e.substring(8);
+                    value = new Decimal();
+                }
+            } else if (isLocalNumber) {
+                value = new Decimal.parse(local);
+                canonical = value.canonical;
+                resolved = '';
+                preview = '';
+            } else {
+                value = new Decimal();
+                canonical = '';
+                resolved = '';
+                preview = '';
+            }
+
+        } else if (dependenciesChanged) {
+
+            if (isCanonicalEquation) {
+                local = '';
+                resolved = '';
+                resolver.withCleanCache(() {
+                    value = eval(canonical);
+                });
+            }
+
         }
-
-        value = eval(canonical);
-        resolver.collectRanges = false;
 
     }
 
-    onCalculationFinished() {}
+    onRowCalculationFinished();
 
     ParseEquation<String> _canonicalToLocal;
     ParseEquation<String> get canonicalToLocal {
@@ -210,10 +218,10 @@ class Range {
         int lastIdx = _cells.length;
         while (cells.moveNext()) { i++;
 
-        if (cells.current.isEquation) equationIdx++;
+        if (cells.current.isCanonicalEquation) equationIdx++;
 
         if ((!isStartEquation && start == i) ||
-            (isStartEquation && cells.current.isEquation && start == equationIdx)) {
+            (isStartEquation && cells.current.isCanonicalEquation && start == equationIdx)) {
             inside = true;
             if (isStartExclusive)
                 // if we're at the start and [ then don't add this row
@@ -231,14 +239,14 @@ class Range {
         }
 
         if ((!isEndEquation && end == i) ||
-            (isEndEquation && cells.current.isEquation && end == equationIdx) ||
+            (isEndEquation && cells.current.isCanonicalEquation && end == equationIdx) ||
             lastIdx == i) {
             // last row means we're not inside anymore
             inside = false;
             if (isEndExclusive)
                 // if we're at the end and ] then don't add this row, break immediately
                 break;
-            if (lastIdx == i && isEndEquation && (!cells.current.isEquation || end != equationIdx)) {
+            if (lastIdx == i && isEndEquation && (!cells.current.isCanonicalEquation || end != equationIdx)) {
                 // we've made it to the end without finding any equations
                 // this whole range is a dud, clear everything and exit
                 result.reset();
@@ -268,28 +276,29 @@ class RangeResolver {
 
     int thisColumn;
     ColumnGetter getColumn;
-    bool _collectRanges = true;
-    bool get collectRanges => _collectRanges;
-    set collectRanges(bool collect) {
-        if (collect) {
-            nextGroup = 1;
-            ranges = [];
-        }
-        _collectRanges = collect;
-    }
 
     int nextGroup = 1;
     List<Range> ranges = [];
     Map<String,RangeResult> results = {};
 
-    reset() {
+    withCleanCache(Function iterate()) {
         results.values.forEach((r)=>r.reset());
-        results.clear();
+        results = {};
+        withCollectRanges(iterate);
+    }
+
+    bool _collectRanges = false;
+    withCollectRanges(Function iterate()) {
+        nextGroup = 1;
+        ranges = [];
+        _collectRanges = true;
+        iterate();
+        _collectRanges = false;
     }
 
     Decimal resolve(column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end, startIdx, endIdx, src) {
 
-        if (results.containsKey(src) && !collectRanges) {
+        if (results.containsKey(src) && !_collectRanges) {
             // short circuit
             return results[src].value;
         }
@@ -306,7 +315,7 @@ class RangeResolver {
             startIdx, endIdx, src
         );
 
-        if (collectRanges)
+        if (_collectRanges)
             ranges.add(range);
 
         if (result.isEmpty) {

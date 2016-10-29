@@ -7,7 +7,7 @@ import 'package:systori/spreadsheet.dart';
 
 
 class TestCell extends Cell {
-    String canonical, local, resolved;
+    String canonical, local, resolved, preview;
     TestCell(_canonical, _value, [_col=0, _row=0])
     {this.canonical=_canonical; this.value=new Decimal(_value); this.column=_col; row=_row;}
 }
@@ -27,7 +27,7 @@ ColumnGetter columnGetterReturns(List<int> ints, [eq1=-1, eq2=-1]) =>
     (col) => cells(ints, eq1, eq2);
 
 Cell eval(String eq, List<int> ints, [eq1=-1, eq2=-1]) =>
-    cell(eq, 0, 0, ints.length)..update(columnGetterReturns(ints, eq1, eq2), true);
+    cell(eq, 0, 0, ints.length)..calculate(columnGetterReturns(ints, eq1, eq2), dependenciesChanged: true);
 
 double cellTotal(String eq, [List<int> ints, eq1=-1, eq2=-1]) =>
     eval(eq, ints!=null?ints:[], eq1, eq2).value.decimal;
@@ -284,113 +284,67 @@ main() async {
     group("Cell attributes", () {
 
         test("isBlank", () {
-            expect(cell(null).isBlank, isTrue);
-            expect(cell('').isBlank, isTrue);
-            expect(cell('0').isBlank, isTrue);
-            expect(cell('-0.0').isBlank, isTrue);
-            expect(cell('-0.1').isBlank, isFalse);
+            expect(cell('').isCanonicalBlank, isTrue);
+            expect(cell('0').isCanonicalBlank, isTrue);
+            expect(cell('-0.0').isCanonicalBlank, isTrue);
+            expect(cell('-0.1').isCanonicalBlank, isFalse);
         });
 
         test("isNumber", () {
-            expect(cell(null).isNumber, isFalse);
-            expect(cell('').isNumber, isFalse);
-            expect(cell('0').isNumber, isTrue);
-            expect(cell('-0.0').isNumber, isTrue);
-            expect(cell('-0.1').isNumber, isTrue);
+            expect(cell('').isCanonicalNumber, isFalse);
+            expect(cell('0').isCanonicalNumber, isTrue);
+            expect(cell('-0.0').isCanonicalNumber, isTrue);
+            expect(cell('-0.1').isCanonicalNumber, isTrue);
         });
 
         test("isEquation", () {
-            expect(cell(null).isEquation, isFalse);
-            expect(cell('').isEquation, isFalse);
-            expect(cell('0').isEquation, isFalse);
-            expect(cell('1,0.0').isEquation, isFalse);
-            expect(cell('-10').isEquation, isFalse);
-            expect(cell('A').isEquation, isTrue);
-            expect(cell('!:').isEquation, isTrue);
-            expect(cell('!+!+!').isEquation, isTrue);
+            expect(cell('').isCanonicalEquation, isFalse);
+            expect(cell('0').isCanonicalEquation, isFalse);
+            expect(cell('1,0.0').isCanonicalEquation, isFalse);
+            expect(cell('-10').isCanonicalEquation, isFalse);
+            expect(cell('1+1').isCanonicalEquation, isTrue);
+            expect(cell('A').isCanonicalEquation, isTrue);
+            expect(cell('!:').isCanonicalEquation, isTrue);
+            expect(cell('!+!+!').isCanonicalEquation, isTrue);
         });
 
         test("isEquationChanged", () {
             var c = cell('');
-            expect(c.isEquationChanged, isFalse);
+            c.local = '';
+            c.calculate((i)=>[]);
+            expect(c.isLocalChanged, isFalse);
 
             c.local = '@';
-            expect(c.isEquationChanged, isTrue);
+            expect(c.isLocalChanged, isTrue);
 
-            c.update((i)=>[],false);
-            expect(c.isEquationChanged, isFalse);
+            c.calculate((i)=>[]);
+            expect(c.isLocalChanged, isFalse);
 
             c.local = '@';
-            expect(c.isEquationChanged, isFalse);
+            expect(c.isLocalChanged, isFalse);
             c.local = '!';
-            expect(c.isEquationChanged, isTrue);
-
+            expect(c.isLocalChanged, isTrue);
         });
 
-        test("isEquationChanged", () {
+        test("isPositionChanged", () {
             var c = cell('');
-
-            // always marked as changed on initial load
-            expect(c.isPositionChanged, isTrue);
-
-            c.update((i)=>[],false);
-            // change saved
+            c.row = 1;
+            c.calculate((i)=>[]);
             expect(c.isPositionChanged, isFalse);
 
             c.row = 9;
-            // changed
             expect(c.isPositionChanged, isTrue);
 
-        });
+            c.calculate((i)=>[]);
+            expect(c.isPositionChanged, isFalse);
 
-        test("RangeResolver.reset()", () {
-            Cell c = eval('!+!+!', [1,2]);
-            RangeResolver rr = c.resolver;
-            expect(rr.results, contains('!'));
-            expect(rr.ranges[0].result.start, 1);
-            expect(rr.ranges[1].result.start, 1);
-
-            rr.reset();
-            expect(rr.results, isEmpty);
-            expect(rr.ranges[0].result.group, 1);
-            expect(rr.ranges[0].result.start, -1);
-            expect(rr.ranges[1].result.start, -1);
-
-            c.resolver.collectRanges = true;
-            c.calculate(columnGetterReturns([1,2]), false);
-            expect(rr.ranges[0].result.group, 1);
-            expect(rr.ranges[0].result.start, 1);
-            expect(rr.ranges[1].result.start, 1);
+            c.row = 10;
+            expect(c.isPositionChanged, isTrue);
         });
 
     });
 
-    group("Cell.calculate()", () {
-
-        test("non-equation, blank", () {
-            var c = cell('');
-            expect(c.value, new Decimal());
-
-            c.update((i)=>[],false);
-            expect(c.value, new Decimal());
-
-            c.local = '   ';
-            c.update((i)=>[],false);
-            expect(c.value, new Decimal());
-        });
-
-        test("non-equation, number", () {
-            var c = cell('7', 9);
-            expect(c.value, new Decimal(9));
-
-            c.update((i)=>[],false);
-            expect(c.value, new Decimal(7));
-
-            c.local = '-9,000.00';
-            c.changed();
-            c.update((i)=>[],false);
-            expect(c.value, new Decimal(-9000));
-        });
+    group("Cell.calculate(): value", () {
 
         test("single number ranges", () {
             expect(cellTotal('!+!+!', [1,2]), 6);
@@ -427,49 +381,128 @@ main() async {
 
     });
 
-    group("Cell phases", () {
+    group("Cell.calculate(): phases", () {
 
-        test("cell calculated before being focused", () {
-            var c = new TestCell("-1000.00+!:", 98.0);
+        test("isNumber && dependenciesChanged", () {
 
-            // initial
+            var c = new TestCell("-1000.00", 0);
+            var results = identityHashCode(c.resolver.results);
+
             expect(c.local, isNull);
             expect(c.resolved, isNull);
-            expect(c.value.decimal, 98);
+            expect(c.value.decimal, 0);
 
-            // should only update the cell value
-            c.calculate(columnGetterReturns([99]), true);
+            // nothing happens for numbers
+            c.calculate((i)=>[], dependenciesChanged: true);
 
-            // after calculation (not focused)
+            // after calculation
             expect(c.local, isNull);
             expect(c.resolved, isNull);
-            expect(c.value.decimal, -901);
+            expect(c.value.decimal, 0);
+            // results map was not reset
+            expect(identityHashCode(c.resolver.results), results);
 
         });
 
-        test("cell focused", () {
-            var c = new TestCell("-1000.00+!:", 98.0);
+        test("isEquation && dependenciesChanged", () {
 
-            // initial
+            var c = new TestCell("2+2", 0);
+            var results = identityHashCode(c.resolver.results);
+
             expect(c.local, isNull);
             expect(c.resolved, isNull);
-            expect(c.value.decimal, 98);
+            expect(c.value.decimal, 0);
 
-            // converts canonical to local so it can be edited
-            c.focused();
+            c.calculate((i)=>[], dependenciesChanged: true);
 
-            // user can now edit the equation
-            expect(c.local, "-1,000 + !:");
+            expect(c.local, '');
+            expect(c.resolved, '');
+            expect(c.value.decimal, 4);
+            // results map should have been reset
+            expect(identityHashCode(c.resolver.results), isNot(results));
+
+        });
+
+        test("isNumber && focused", () {
+            // nothing happens for focused numbers
+
+            var c = new TestCell("-1000.00", 0);
+            var results = identityHashCode(c.resolver.results);
+
+            expect(c.canonical, "-1000.00");
+            expect(c.local, isNull);
             expect(c.resolved, isNull);
-            expect(c.value.decimal, 98);
+            expect(c.value.decimal, 0);
 
-            // focusing also triggers a recalculate
-            c.calculate(columnGetterReturns([99]), true);
+            c.calculate((i)=>[], focused: true);
 
-            // finally the resolved and value are updated
-            expect(c.local, "-1,000 + !:");
-            expect(c.resolved, "-1,000  + 99");
-            expect(c.value.decimal, -901);
+            expect(c.canonical, "-1000.00");
+            expect(c.local, isNull);
+            expect(c.resolved, isNull);
+            expect(c.value.decimal, 0);
+            expect(identityHashCode(c.resolver.results), results);
+
+        });
+
+        test("isEquation && focused", () {
+
+            var c = new TestCell("(2 + 2000) + !", 0);
+            var results = identityHashCode(c.resolver.results);
+
+            expect(c.canonical, "(2 + 2000) + !");
+            expect(c.local, isNull);
+            expect(c.resolved, isNull);
+            expect(c.value.decimal, 0);
+
+            c.calculate(columnGetterReturns([18]), focused: true);
+
+            expect(c.canonical, "(2 + 2000) + !");
+            expect(c.local, "(2 + 2,000) + !");
+            expect(c.resolved, "(2  + 2,000) + 18");
+            expect(c.value.decimal, 0);
+            expect(identityHashCode(c.resolver.results), results);
+
+        });
+
+        test("isNumber && changed", () {
+
+            var c = new TestCell("-1000.00", 0);
+            var results = identityHashCode(c.resolver.results);
+
+            expect(c.canonical, "-1000.00");
+            expect(c.local, isNull);
+            expect(c.resolved, isNull);
+            expect(c.value.decimal, 0);
+
+            c.local = "9,999.00";
+            c.calculate((i)=>[], changed: true);
+
+            expect(c.canonical, "9999");
+            expect(c.local, "9,999.00");
+            expect(c.resolved, '');
+            expect(c.value.decimal, 9999);
+            expect(identityHashCode(c.resolver.results), results);
+
+        });
+
+        test("isEquation && changed", () {
+
+            var c = new TestCell("-1000.00", 0);
+            var results = identityHashCode(c.resolver.results);
+
+            expect(c.canonical, "-1000.00");
+            expect(c.local, isNull);
+            expect(c.resolved, isNull);
+            expect(c.value.decimal, 0);
+
+            c.local = "2+2,000+!";
+            c.calculate(columnGetterReturns([18]), changed: true);
+
+            expect(c.canonical, "(2 + 2000) + !");
+            expect(c.local, "2+2,000+!");
+            expect(c.resolved, "(2 + 2,000) + 18");
+            expect(c.value.decimal, 2020);
+            expect(identityHashCode(c.resolver.results), results);
 
         });
 

@@ -14,40 +14,45 @@ abstract class Row {
     List<Cell> get columns => [qty, price, total];
     Cell getCell(int cell) => columns[cell];
 
-    update(Spreadsheet sheet, int row, bool dependencyChanged) {
+    calculate(Spreadsheet sheet, int row, Cell changedCell,
+        {focused: false, changed: false, moved: false}) {
+
         enumerate/*<Cell>*/(columns).forEach((IndexedValue<Cell> iterator) {
-            iterator.value.row = row;
-            iterator.value.column = iterator.index;
-            iterator.value.update(sheet.getColumn, dependencyChanged);
+            var cell = iterator.value;
+            cell.row = row;
+            cell.column = iterator.index;
+            cell.calculate(sheet.getColumn,
+                focused: cell==changedCell && focused,
+                changed: cell==changedCell && changed,
+                dependenciesChanged: (changedCell.row != -1 && changed) || moved
+            );
         });
+
+        var rowChanged = (changedCell.row == row || changedCell.row != -1) && changed;
+
+        if (rowChanged || moved) {
+            solve();
+        }
+
+        columns.forEach((cell) => cell.onRowCalculationFinished());
+        onRowCalculationFinished();
+
     }
 
     solve() {
 
         var _qty = qty.value;
-        if (hasPercent && qty.isNotBlank)
+        if (hasPercent && qty.isCanonicalNotBlank)
             _qty = qty.value / new Decimal(100);
 
-        if (qty.isNotBlank && price.isNotBlank && total.isBlank)
+        if (qty.isCanonicalNotBlank && price.isCanonicalNotBlank && total.isCanonicalBlank)
             total.value = _qty * price.value; else
-        if (qty.isNotBlank && price.isBlank    && total.isNotBlank)
+        if (qty.isCanonicalNotBlank && price.isCanonicalBlank    && total.isCanonicalNotBlank)
             price.value = total.value / _qty; else
-        if (qty.isBlank    && price.isNotBlank && total.isNotBlank)
-            qty.value = total.value / price.value; else
-        if (qty.isBlank    && price.isBlank    && total.isNotBlank) {
-            qty.value = new Decimal(1);
-            price.value = total.value;
-        }
+        if (qty.isCanonicalBlank    && price.isCanonicalNotBlank && total.isCanonicalNotBlank)
+            qty.value = total.value / price.value;
 
     }
 
-    onCalculationFinished() {
-        columns.forEach((cell) => cell.onCalculationFinished());
-    }
-
-    calculate(Spreadsheet sheet, int row, bool dependencyChanged) {
-        update(sheet, row, dependencyChanged);
-        solve();
-        onCalculationFinished();
-    }
+    onRowCalculationFinished();
 }

@@ -40,7 +40,7 @@ class Group extends Model {
 }
 
 
-class TaskCell extends HtmlElement with Cell {
+abstract class HtmlCell implements HtmlElement, Cell {
 
     String get canonical => dataset['canonical'];
     set canonical(String canonical) => dataset['canonical'] = canonical;
@@ -51,12 +51,10 @@ class TaskCell extends HtmlElement with Cell {
     String get resolved => dataset['resolved'];
     set resolved(String resolved) => dataset['resolved'] = resolved;
 
-    List<StreamSubscription<Event>> subscriptions = [];
+    String get preview => dataset['preview'];
+    set preview(String preview) => dataset['preview'] = preview;
 
-    TaskCell.created(): super.created() {
-        value = new Decimal.parse(text);
-        if (isContentEditable) enableEditing();
-    }
+    List<StreamSubscription<Event>> subscriptions = [];
 
     enableEditing() {
         contentEditable = "true";
@@ -74,42 +72,65 @@ class TaskCell extends HtmlElement with Cell {
     }
 
     handleFocus(Event event) {
-        if (isEquation) {
-            focused();
+        if (isCanonicalEquation) {
+            dispatchCalculate('focused');
             text = local;
+        } else if (isCanonicalBlank) {
+            text = "0";
+            preview = value.money;
+            selectThis();
+        } else {
+            text = canonical;
+            preview = "";
+            selectThis();
         }
-        window.getSelection().selectAllChildren(event.target);
-        dispatchCalculate();
     }
 
     handleInput([Event _]) {
         local = text.trim();
-        changed();
-        dispatchCalculate();
+        dispatchCalculate('changed');
     }
 
     handleBlur([Event _]) {
         text = value.money;
     }
 
-    dispatchCalculate([_]) =>
-        dispatchEvent(new CustomEvent('calculate', detail: this));
+    selectThis() {
+        new Timer(new Duration(milliseconds: 1), () {
+            window.getSelection().selectAllChildren(this);
+        });
+    }
 
-    onCalculationFinished() {
-        super.onCalculationFinished();
+    dispatchCalculate(String event) =>
+        dispatchEvent(new CustomEvent('calculate.$event', detail: this));
+
+    onRowCalculationFinished() {
 
         if (document.activeElement != this) {
             text = value.money;
             return;
         }
 
-        if (isEquation) {
+        if (isLocalEquation) {
             if (resolved != null && resolved.trim() != value.number)
-                dataset['preview'] = "${resolved} = ${value.money}";
+                preview = "${resolved} = ${value.money}";
             else
-                dataset['preview'] = value.money;
+                preview = value.money;
+        } else if (isLocalBlank && value.isNonzero) {
+            preview = value.money;
         }
+        print(preview);
 
+    }
+
+}
+
+
+class TaskCell extends HtmlElement with Cell, HtmlCell {
+
+    TaskCell.created(): super.created() {
+        value = new Decimal.parse(text);
+        if (isContentEditable) enableEditing();
     }
 
 }
@@ -120,6 +141,7 @@ class Task extends Model with Row {
 
     DivElement name;
     DivElement unit;
+    bool get hasPercent => unit.text.contains('%');
     TaskCell qty;
     TaskCell price;
     TaskCell total;
@@ -137,16 +159,19 @@ class Task extends Model with Row {
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
         sheet = this.querySelector(":scope > sys-lineitem-sheet");
-        this.on['calculate'].listen((_) {
-            if (sheet.hasNeverBeenCalculated)
-                sheet.calculate(qty);
-            calculate(sheet, 0, true);
-        });
+        on['calculate.focused'].listen((CustomEvent e) => calculate(sheet, 0, e.detail as Cell, focused: true));
+        on['calculate.changed'].listen((CustomEvent e) => calculate(sheet, 0, e.detail as Cell, changed: true));
+        on['calculate.moved'].listen((CustomEvent e) => calculate(sheet, 0, e.detail as Cell, moved: true));
     }
 
+    onRowCalculationFinished() {
+
+    }
+
+    /*
     solve() {
 
-        if (qty.isNotBlank && total.isBlank) {
+        if (qty.isCanonicalBlankNotBlank && total.isBlank) {
             setDiffCell(new Decimal(0));
             total.value = qty.value * price.value;
         } else
@@ -159,7 +184,7 @@ class Task extends Model with Row {
             setDiffCell(new Decimal(0));
             qty.value = total.value / price.value;
         }
-    }
+    }*/
 
     setDiffCell(Decimal diff) {
         if (diff.isZero) {
@@ -173,88 +198,26 @@ class Task extends Model with Row {
 }
 
 
-class LineItemCell extends HighlightableInput with Cell {
-
-    String get canonical => dataset['canonical'];
-    set canonical(String canonical) => dataset['canonical'] = canonical;
-
-    String get local => dataset['local'];
-    set local(String local) => dataset['local'] = local;
-
-    String get resolved => dataset['resolved'];
-    set resolved(String resolved) => dataset['resolved'] = resolved;
-
-    List<StreamSubscription<Event>> subscriptions = [];
+class LineItemCell extends HighlightableInput with Cell, HtmlCell {
 
     LineItemCell.created(): super.created() {
         value = new Decimal.parse(text);
         if (isContentEditable) enableEditing();
     }
 
-    enableEditing() {
-        contentEditable = "true";
-        subscriptions = [
-            onBlur.listen(handleBlur),
-            onFocus.listen(handleFocus),
-            onInput.listen(handleInput),
-        ];
-    }
-
-    disableEditing() {
-        contentEditable = "false";
-        subscriptions.forEach((s)=>s.cancel());
-        subscriptions = [];
-    }
-
-    handleFocus(Event event) {
-        if (isEquation) {
-            focused();
-            text = local;
-        }
-        //window.getSelection().selectAllChildren(event.target);
-        dispatchCalculate();
-    }
-
-    handleInput([Event _]) {
-        local = text.trim();
-        changed();
-        dispatchCalculate();
-    }
-
-    handleBlur([Event _]) {
-        text = value.money;
-    }
-
-    dispatchCalculate([_]) =>
-        dispatchEvent(new CustomEvent('calculate', detail: this));
-
     static final List<String> COLORS = [
         '187,168,146', '238,114,95', '250,185,75', '0,108,124', '0,161,154', '183,219,193'
     ];
 
-    onCalculationFinished() {
-        super.onCalculationFinished();
-
-        if (document.activeElement != this) {
-            text = value.money;
-            return;
-        }
-
-        if (isEquation) {
-            if (resolved != null && resolved.trim() != value.number)
-                dataset['preview'] = "${resolved} = ${value.money}";
-            else
-                dataset['preview'] = value.money;
-        } else if (isBlank && value.isNonzero) {
-            dataset['preview'] = value.money;
-        } else {
-            dataset['preview'] = "";
-        }
-
+    onRowCalculationFinished() {
+        super.onRowCalculationFinished();
+        if (document.activeElement != this) return;
         if (resolver.ranges.isEmpty) return;
-        highlight(resolver.ranges.map((r) =>
-            new Highlight(r.srcStart, r.srcEnd, COLORS[r.result.group%COLORS.length]))
-        );
+        new Timer(new Duration(milliseconds: 1), () {
+            highlight(resolver.ranges.map((r) =>
+                new Highlight(r.srcStart, r.srcEnd, COLORS[r.result.group%COLORS.length]))
+            );
+        });
     }
 
 }
@@ -278,9 +241,8 @@ class LineItem extends Model with Orderable, Row {
         total = getInput("total");
     }
 
-    onCalculationFinished() {
-        super.onCalculationFinished();
-        if (qty.isNotBlank && price.isNotBlank && total.isNotBlank) {
+    onRowCalculationFinished() {
+        if (qty.isCanonicalNotBlank && price.isCanonicalNotBlank && total.isCanonicalNotBlank) {
             [qty,price,total].forEach((Element e)=>e.style.color = 'red');
         } else {
             [qty,price,total].forEach((Element e)=>e.style.color = null);
@@ -294,15 +256,16 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
     List<LineItem> get rows => this.querySelectorAll(':scope>sys-lineitem');
 
     LineItemSheet.created(): super.created() {
-        on['calculate'].listen((CustomEvent e) => calculate(e.detail as Cell));
+        on['calculate.focused'].listen((CustomEvent e) => calculate(e.detail as Cell, focused: true));
+        on['calculate.changed'].listen((CustomEvent e) => calculate(e.detail as Cell, changed: true));
+        on['calculate.moved'].listen((CustomEvent e) => calculate(e.detail as Cell, moved: true));
         addEventListener('blur', clearHighlighting, true);
     }
 
     onOrderingChanged(Orderable orderable) =>
-        dispatchEvent(new CustomEvent('calculate', detail: (orderable as LineItem).getCell(0)));
+        dispatchEvent(new CustomEvent('calculate.moved', detail: (orderable as LineItem).getCell(0)));
 
     onCalculationFinished(Cell changedCell) {
-        super.onCalculationFinished(changedCell);
 
         if (changedCell.resolver.ranges == null) return;
 

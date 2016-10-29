@@ -10,13 +10,16 @@ abstract class Spreadsheet {
     List<Row> iterated;
     bool get hasNeverBeenCalculated => iterated == null;
 
-    Decimal calculate(Cell changedCell) {
+    Decimal calculate(Cell changedCell, {focused: false, changed: false, moved: false}) {
         iterated = [];
         Decimal total = new Decimal();
         changedCell.row = -1;
         changedCell.column = -1;
         enumerate/*<Row>*/(rows).forEach((IndexedValue<Row> iterator) {
-            iterator.value.calculate(this, iterator.index, changedCell.row!=-1);
+            iterator.value.calculate(
+                this, iterator.index, changedCell,
+                focused: focused, changed: changed, moved: moved
+            );
             total += iterator.value.total.value;
             iterated.add(iterator.value);
         });
@@ -24,7 +27,7 @@ abstract class Spreadsheet {
         return total;
     }
 
-    onCalculationFinished(Cell changedCell) {}
+    onCalculationFinished(Cell changedCell);
 
     List<Cell> getColumn(int column) =>
         iterated.map((Row row) => row.getCell(column)).toList();
