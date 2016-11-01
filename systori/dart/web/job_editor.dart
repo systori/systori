@@ -1,6 +1,7 @@
 import 'dart:html';
 import 'dart:async';
 import 'package:intl/intl.dart';
+import 'package:quiver/iterables.dart';
 import 'package:systori/decimal.dart';
 import 'package:systori/spreadsheet.dart';
 import 'package:systori/orderable.dart';
@@ -10,7 +11,9 @@ import 'package:systori/inputs.dart';
 abstract class Model extends HtmlElement {
 
     int get pk => int.parse(dataset['pk']);
-    int get code => int.parse(dataset['code']);
+    set pk(int id) => dataset['pk'] = id.toString();
+
+    int get order => int.parse(dataset['order']);
 
     List<DivElement> inputs = [];
 
@@ -28,15 +31,94 @@ abstract class Model extends HtmlElement {
 }
 
 
-class Job extends Model {
-    String get zfill => dataset['zfill'];
-    int get levels => int.parse(dataset['levels']);
-    Job.created(): super.created();
+class GAEBHierarchyStructure {
+    // See also Python version in apps/project/models.py
+
+    final String structure;
+    final List<int> zfill;
+
+    GAEBHierarchyStructure(String structure):
+        structure = structure,
+        zfill = structure.split('.').map((s)=>s.length).toList();
+
+    String _format(String position, int zfill) => position.padLeft(zfill, '0');
+    String format_task(String position) => _format(position, zfill[-1]);
+    String format_group(String position, int level) => _format(position, zfill[level]);
+    bool has_level(int level) => 0 <= level && level < (zfill.length-1);
+}
+
+
+class Job extends Group {
+    static Job JOB;
+    GAEBHierarchyStructure structure;
+    int level = 0;
+    Job.created(): super.created(); attached() {
+        structure = new GAEBHierarchyStructure(dataset['structure-format']);
+        JOB = this;
+    }
 }
 
 
 class Group extends Model {
-    Group.created(): super.created();
+
+    Group get parentGroup => parent as Group;
+    DivElement code;
+    DivElement name;
+    DivElement description;
+
+    bool get isEmpty => name.text.isEmpty;
+    int get level => (parent as Group).level + 1;
+
+    set order(int position) {
+        dataset['order'] = position.toString();
+        code.text = "${parentGroup.code.text}.${Job.JOB.structure.format_group(dataset['order'], level)}";
+    }
+
+    Group.created(): super.created() {
+        if (children.isEmpty) {
+            TemplateElement template = document.querySelector('#group-template');
+            var clone = document.importNode(template.content, true);
+            append(clone);
+        }
+        code = getView("code");
+        name = getInput("name");
+        name.onKeyDown.listen(handleKeyboard);
+    }
+
+    handleKeyboard(KeyboardEvent e) {
+        if (e.keyCode == KeyCode.ENTER) {
+            e.preventDefault();
+            if (Job.JOB.structure.has_level(level+1)) {
+                Group child = this.querySelector(':scope>sys-group') as Group;
+                if (child.isEmpty) {
+                    child.name.focus();
+                } else {
+                    Group group = document.createElement('sys-group');
+                    insertBefore(group, child);
+                    group.generateGroups();
+                    updateCode();
+                    group.name.focus();
+                }
+            }
+        }
+    }
+
+    generateGroups() {
+        if (Job.JOB.structure.has_level(level+1)) {
+            Group group = document.createElement('sys-group');
+            children.add(group);
+            group.generateGroups();
+        }
+    }
+
+    updateCode() {
+        enumerate/*<Group>*/(this.querySelectorAll(':scope>sys-group'))
+            .forEach((IndexedValue<Group> g) {
+            g.value.order = g.index+1;
+            g.value.updateCode();
+        });
+    }
+
 }
 
 
