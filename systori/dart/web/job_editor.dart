@@ -42,7 +42,7 @@ class GAEBHierarchyStructure {
         zfill = structure.split('.').map((s)=>s.length).toList();
 
     String _format(String position, int zfill) => position.padLeft(zfill, '0');
-    String format_task(String position) => _format(position, zfill[-1]);
+    String format_task(String position) => _format(position, zfill[zfill.length-1]);
     String format_group(String position, int level) => _format(position, zfill[level]);
     bool has_level(int level) => 0 <= level && level < (zfill.length-1);
 }
@@ -64,9 +64,9 @@ class Group extends Model {
     Group get parentGroup => parent as Group;
     DivElement code;
     DivElement name;
+    bool get isEmpty => name.text.isEmpty;
     DivElement description;
 
-    bool get isEmpty => name.text.isEmpty;
     int get level => (parent as Group).level + 1;
 
     set order(int position) {
@@ -99,6 +99,16 @@ class Group extends Model {
                     updateCode();
                     group.name.focus();
                 }
+            } else {
+                Task child = this.querySelector(':scope>sys-task') as Task;
+                if (child != null && child.isEmpty) {
+                    child.name.focus();
+                } else {
+                    Task task = document.createElement('sys-task');
+                    insertBefore(task, child);
+                    updateCode();
+                    task.name.focus();
+                }
             }
         }
     }
@@ -117,6 +127,18 @@ class Group extends Model {
             g.value.order = g.index+1;
             g.value.updateCode();
         });
+        enumerate/*<Group>*/(this.querySelectorAll(':scope>sys-task'))
+            .forEach((IndexedValue<Group> g) {
+            g.value.order = g.index+1;
+        });
+    }
+
+    createSibling() {
+        Group group = document.createElement('sys-group');
+        parent.insertBefore(group, nextElementSibling);
+        group.generateGroups();
+        (parent as Group).updateCode();
+        group.name.focus();
     }
 
 }
@@ -213,6 +235,9 @@ class TaskCell extends HtmlElement with Cell, HtmlCell {
 
     TaskCell.created(): super.created() {
         value = new Decimal.parse(text);
+    }
+
+    attached() {
         if (isContentEditable) enableEditing();
     }
 
@@ -222,7 +247,9 @@ class TaskCell extends HtmlElement with Cell, HtmlCell {
 
 class Task extends Model with Row {
 
+    DivElement code;
     DivElement name;
+    bool get isEmpty => name.text.isEmpty;
     DivElement unit;
     bool get hasPercent => unit.text.contains('%');
     TaskCell qty;
@@ -231,10 +258,23 @@ class Task extends Model with Row {
     DivElement diffRow;
     DivElement diffCell;
 
+    Group get parentGroup => parent as Group;
+    set order(int position) {
+        dataset['order'] = position.toString();
+        code.text = "${parentGroup.code.text}.${Job.JOB.structure.format_task(dataset['order'])}";
+    }
+
     LineItemSheet sheet;
 
     Task.created(): super.created() {
+        if (children.isEmpty) {
+            TemplateElement template = document.querySelector('#task-template');
+            var clone = document.importNode(template.content, true);
+            append(clone);
+        }
+        code = getView("code");
         name = getInput("name");
+        name.onKeyDown.listen(handleKeyboard);
         qty = getInput("qty");
         unit = getInput("unit");
         price = getInput("price");
@@ -249,6 +289,32 @@ class Task extends Model with Row {
 
     onRowCalculationFinished() {
 
+    }
+
+    handleKeyboard(KeyboardEvent e) {
+        if (e.keyCode == KeyCode.ENTER) {
+            e.preventDefault();
+            if (isEmpty) {
+                (parent as Group).createSibling();
+                remove();
+            } else {
+                LineItem child = this.querySelector(':scope>sys-lineitem-sheet>sys-lineitem') as LineItem;
+                if (child != null && child.isEmpty) {
+                    child.name.focus();
+                } else {
+                    LineItem li = document.createElement('sys-lineitem');
+                    this.querySelector(':scope>sys-lineitem-sheet').insertBefore(li, child);
+                    li.name.focus();
+                }
+            }
+        }
+    }
+
+    createSibling() {
+        Task task = document.createElement('sys-task');
+        parent.insertBefore(task, nextElementSibling);
+        (parent as Group).updateCode();
+        task.name.focus();
     }
 
     /*
@@ -285,6 +351,9 @@ class LineItemCell extends HighlightableInput with Cell, HtmlCell {
 
     LineItemCell.created(): super.created() {
         value = new Decimal.parse(text);
+    }
+
+    attached() {
         if (isContentEditable) enableEditing();
     }
 
@@ -309,6 +378,7 @@ class LineItemCell extends HighlightableInput with Cell, HtmlCell {
 class LineItem extends Model with Orderable, Row {
 
     DivElement name;
+    bool get isEmpty => name.text.isEmpty;
     DivElement unit;
     bool get hasPercent => unit.text.contains('%');
 
@@ -317,11 +387,31 @@ class LineItem extends Model with Orderable, Row {
     LineItemCell total;
 
     LineItem.created(): super.created() {
+        if (children.isEmpty) {
+            TemplateElement template = document.querySelector('#lineitem-template');
+            var clone = document.importNode(template.content, true);
+            append(clone);
+        }
         name = getInput("name");
         qty = getInput("qty");
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
+        this.querySelectorAll(':scope>.editor>.editor-row>div[contenteditable]').onKeyDown.listen(handleKeyboard);
+    }
+
+    handleKeyboard(KeyboardEvent e) {
+        if (e.keyCode == KeyCode.ENTER) {
+            e.preventDefault();
+            if (isEmpty) {
+                (parent.parent as Task).createSibling();
+                remove();
+            } else {
+                LineItem li = document.createElement('sys-lineitem');
+                parent.insertBefore(li, nextElementSibling);
+                li.name.focus();
+            }
+        }
     }
 
     onRowCalculationFinished() {

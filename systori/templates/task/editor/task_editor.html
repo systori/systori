@@ -15,3 +15,16 @@
   </div>
   <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ task.description|safe }}</div>
 </div>
+<sys-lineitem-sheet>
+  {% for lineitem in task.lineitems.all %}
+    <sys-lineitem data-pk="{{ lineitem.pk }}">
+      {% include "task/editor/lineitem_editor.html" with lineitem=lineitem %}
+    </sys-lineitem>
+  {% endfor %}
+</sys-lineitem-sheet>
+<div class="price-difference">
+  <span class="glyphicon glyphicon-exclamation-sign"></span>
+  <div class="name">{% trans 'Line items do not add up to the task price.' %}</div>
+  <div class="total">{{ task.price_difference|ubrdecimal:3 }}</div>
+  <div class="actions"></div>
+</div>
