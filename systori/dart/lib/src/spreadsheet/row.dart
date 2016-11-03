@@ -1,6 +1,4 @@
-import 'package:quiver/iterables.dart';
 import 'package:systori/decimal.dart';
-import 'spreadsheet.dart';
 import 'cell.dart';
 
 
@@ -14,28 +12,18 @@ abstract class Row {
     List<Cell> get columns => [qty, price, total];
     Cell getCell(int cell) => columns[cell];
 
-    calculate(Spreadsheet sheet, int row, Cell changedCell,
-        {focused: false, changed: false, moved: false}) {
+    calculate(ColumnGetter getColumn, int row, bool dependenciesChanged) {
 
-        enumerate/*<Cell>*/(columns).forEach((IndexedValue<Cell> iterator) {
-            var cell = iterator.value;
+        qty.column = 0;
+        price.column = 1;
+        total.column = 2;
+
+        columns.forEach((cell) {
             cell.row = row;
-            cell.column = iterator.index;
-            cell.calculate(sheet.getColumn,
-                focused: cell==changedCell && focused,
-                changed: cell==changedCell && changed,
-                dependenciesChanged: (changedCell.row != -1 && changed) || moved
-            );
+            cell.calculate(getColumn, dependenciesChanged);
         });
 
-        var rowChanged = (changedCell.row == row || changedCell.row != -1) && changed;
-
-        if (rowChanged || moved) {
-            solve();
-        }
-
-        columns.forEach((cell) => cell.onRowCalculationFinished());
-        onRowCalculationFinished();
+        solve();
 
     }
 
@@ -46,13 +34,12 @@ abstract class Row {
             _qty = qty.value / new Decimal(100);
 
         if (qty.isCanonicalNotBlank && price.isCanonicalNotBlank && total.isCanonicalBlank)
-            total.value = _qty * price.value; else
+            total.setCalculated(_qty * price.value); else
         if (qty.isCanonicalNotBlank && price.isCanonicalBlank    && total.isCanonicalNotBlank)
-            price.value = total.value / _qty; else
+            price.setCalculated(total.value / _qty); else
         if (qty.isCanonicalBlank    && price.isCanonicalNotBlank && total.isCanonicalNotBlank)
-            qty.value = total.value / price.value;
+            qty.setCalculated(total.value / price.value);
 
     }
 
-    onRowCalculationFinished();
 }

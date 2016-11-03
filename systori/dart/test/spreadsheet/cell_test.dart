@@ -7,28 +7,100 @@ import 'package:systori/spreadsheet.dart';
 
 
 class TestCell extends Cell {
-    String canonical, local, resolved, preview;
-    TestCell(_canonical, _value, [_col=0, _row=0])
-    {this.canonical=_canonical; this.value=new Decimal(_value); this.column=_col; row=_row;}
-    onRowCalculationFinished() {}
+
+    String text;
+    String canonical;
+    String local;
+    String resolved;
+    String preview;
+
+    TestCell([_text="", _canonical="", _col=0, _row=0])
+    {this.text=_text; this.canonical=_canonical; this.column=_col; this.row=_row;}
+
+    bool isFocused = false; // real implementation uses document.activeElement == this
+
+    @override
+    focused() {
+        isFocused = true;
+        super.focused();
+    }
+
+    @override
+    blurred() {
+        isFocused = false;
+        super.blurred();
+    }
+
+    int canonicalToLocalAccessed = 0;
+    @override
+    ConvertEquation get canonicalToLocal {
+        canonicalToLocalAccessed++;
+        return super.canonicalToLocal;
+    }
+    int canonicalToLocalCreated = 0;
+    @override
+    newCanonicalToLocal() {
+        canonicalToLocalCreated++;
+        return super.newCanonicalToLocal();
+    }
+
+    int localToCanonicalAccessed = 0;
+    @override
+    ConvertEquation get localToCanonical {
+        localToCanonicalAccessed++;
+        return super.localToCanonical;
+    }
+    int localToCanonicalCreated = 0;
+    @override
+    newLocalToCanonical() {
+        localToCanonicalCreated++;
+        return super.newLocalToCanonical();
+    }
+
+    int localToResolvedAccessed = 0;
+    @override
+    ConvertEquation get localToResolved {
+        localToResolvedAccessed++;
+        return super.localToResolved;
+    }
+    int localToResolvedCreated = 0;
+    @override
+    newLocalToResolved() {
+        localToResolvedCreated++;
+        return super.newLocalToResolved();
+    }
+
+    int evalAccessed = 0;
+    @override
+    EvaluateEquation get eval {
+        evalAccessed++;
+        return super.eval;
+    }
+    int evalCreated = 0;
+    @override
+    newEval() {
+        evalCreated++;
+        return super.newEval();
+    }
+
 }
 
 
 // Cell helpers
 
-Cell cell([String txt='', num value=0, _col=0, _row=0]) =>
-    new TestCell(txt, value, _col, _row);
+Cell cell([String txt='', String canonical='', _col=0, _row=0]) =>
+    new TestCell(txt, canonical, _col, _row);
 
-List<Cell> cells(List<int> ints, [eq1=-1, eq2=-1]) =>
-    enumerate(ints).
-    map((total) => cell(eq1==total.index||eq2==total.index ? '!' : '', total.value)).
+List<Cell> cells(List<String> values, [eq1=-1, eq2=-1]) =>
+    enumerate(values).
+    map((total) => cell(total.value, eq1==total.index||eq2==total.index ? '!' : '')..value=new Decimal.parse(total.value)).
     toList();
 
-ColumnGetter columnGetterReturns(List<int> ints, [eq1=-1, eq2=-1]) =>
-    (col) => cells(ints, eq1, eq2);
+ColumnGetter getColumnReturns(List<String> values, [eq1=-1, eq2=-1]) =>
+    (col) => cells(values, eq1, eq2);
 
-Cell eval(String eq, List<int> ints, [eq1=-1, eq2=-1]) =>
-    cell(eq, 0, 0, ints.length)..calculate(columnGetterReturns(ints, eq1, eq2), dependenciesChanged: true);
+Cell eval(String eq, List<int> values, [eq1=-1, eq2=-1]) =>
+    cell('', eq, 0, values.length)..calculate(getColumnReturns(values.map((v)=>v.toString()).toList(), eq1, eq2), true);
 
 double cellTotal(String eq, [List<int> ints, eq1=-1, eq2=-1]) =>
     eval(eq, ints!=null?ints:[], eq1, eq2).value.decimal;
@@ -51,18 +123,17 @@ double rangeTotal(String eq, [List<int> ints, eq1=-1, eq2=-1]) =>
 
 List srcIdx(String eq, [List<int> ints, eq1=-1, eq2=-1]) {
     var _range = range(eq, ints, eq1, eq2);
-    print(eq.substring(_range.srcStart, _range.srcEnd));
     return [_range.srcStart, _range.srcEnd];
 }
 
-main() async {
+main() {
 
     group("Conversion", () {
 
         canonical(String equation) => cell().localToCanonical(equation);
         local(String equation) => cell().canonicalToLocal(equation);
-        resolve(String equation, List<int> ints) =>
-            (cell('', 0, 0, ints.length)..resolver.getColumn = columnGetterReturns(ints))
+        resolve(String equation, List<String> values) =>
+            (cell('', '', 0, values.length)..resolver.getColumn = getColumnReturns(values))
             .localToResolved(equation);
 
         test("locale: de", () {
@@ -76,7 +147,7 @@ main() async {
             expect(local("2 - 1000.001"), "2 - 1.000,001");
             expect(local("2 - -1000.001"), "2 - -1.000,001");
 
-            expect(resolve("2--1.000,001+A!", [99]), "(2 - -1.000,001) + 99");
+            expect(resolve("2--1.000,001+A!", ['99']), "(2 - -1.000,001) + 99");
         });
 
         test("locale: en", () {
@@ -90,7 +161,7 @@ main() async {
             expect(local("2 - 1000.001"), "2 - 1,000.001");
             expect(local("2 - -1000.001"), "2 - -1,000.001");
 
-            expect(resolve("2--1,000.001+A@1:", [99]), "(2 - -1,000.001) + 99");
+            expect(resolve("2--1,000.001+A@1:", ['99']), "(2 - -1,000.001) + 99");
         });
 
         tearDown(() {
@@ -296,62 +367,28 @@ main() async {
     group("Cell attributes", () {
 
         test("isBlank", () {
-            expect(cell('').isCanonicalBlank, isTrue);
-            expect(cell('0').isCanonicalBlank, isTrue);
-            expect(cell('-0.0').isCanonicalBlank, isTrue);
-            expect(cell('-0.1').isCanonicalBlank, isFalse);
+            expect(cell('').isTextBlank, isTrue);
+            expect(cell('0').isTextBlank, isTrue);
+            expect(cell('-0.0').isTextBlank, isTrue);
+            expect(cell('-0.1').isTextBlank, isFalse);
         });
 
         test("isNumber", () {
-            expect(cell('').isCanonicalNumber, isFalse);
-            expect(cell('0').isCanonicalNumber, isTrue);
-            expect(cell('-0.0').isCanonicalNumber, isTrue);
-            expect(cell('-0.1').isCanonicalNumber, isTrue);
+            expect(cell('').isTextNumber, isFalse);
+            expect(cell('0').isTextNumber, isTrue);
+            expect(cell('-0.0').isTextNumber, isTrue);
+            expect(cell('-0.1').isTextNumber, isTrue);
         });
 
         test("isEquation", () {
-            expect(cell('').isCanonicalEquation, isFalse);
-            expect(cell('0').isCanonicalEquation, isFalse);
-            expect(cell('1,0.0').isCanonicalEquation, isFalse);
-            expect(cell('-10').isCanonicalEquation, isFalse);
-            expect(cell('1+1').isCanonicalEquation, isTrue);
-            expect(cell('A').isCanonicalEquation, isTrue);
-            expect(cell('!:').isCanonicalEquation, isTrue);
-            expect(cell('!+!+!').isCanonicalEquation, isTrue);
-        });
-
-        test("isEquationChanged", () {
-            var c = cell('');
-            c.local = '';
-            c.calculate((i)=>[]);
-            expect(c.isLocalChanged, isFalse);
-
-            c.local = '@';
-            expect(c.isLocalChanged, isTrue);
-
-            c.calculate((i)=>[]);
-            expect(c.isLocalChanged, isFalse);
-
-            c.local = '@';
-            expect(c.isLocalChanged, isFalse);
-            c.local = '!';
-            expect(c.isLocalChanged, isTrue);
-        });
-
-        test("isPositionChanged", () {
-            var c = cell('');
-            c.row = 1;
-            c.calculate((i)=>[]);
-            expect(c.isPositionChanged, isFalse);
-
-            c.row = 9;
-            expect(c.isPositionChanged, isTrue);
-
-            c.calculate((i)=>[]);
-            expect(c.isPositionChanged, isFalse);
-
-            c.row = 10;
-            expect(c.isPositionChanged, isTrue);
+            expect(cell('').isTextEquation, isFalse);
+            expect(cell('0').isTextEquation, isFalse);
+            expect(cell('1,0.0').isTextEquation, isFalse);
+            expect(cell('-10').isTextEquation, isFalse);
+            expect(cell('1+1').isTextEquation, isTrue);
+            expect(cell('A').isTextEquation, isTrue);
+            expect(cell('!:').isTextEquation, isTrue);
+            expect(cell('!+!+!').isTextEquation, isTrue);
         });
 
     });
@@ -395,127 +432,457 @@ main() async {
 
     group("Cell.calculate(): phases", () {
 
-        test("isNumber && dependenciesChanged", () {
+        expectCell(TestCell c, {text: "", canonical: "", local: null, resolved: null,
+                                preview: null, decimal: null, isChanged: false,
+                                canonicalToLocal: 0, localToCanonical: 0,
+                                localToResolved: 0, eval: 0,
+                                canonicalToLocalAccessed: null, localToCanonicalAccessed: null,
+                                localToResolvedAccessed: null, evalAccessed: null}) {
+            expect(c.isChanged, isChanged, reason: "isChanged");
+            expect(c.text, text, reason: "text");
+            expect(c.canonical, canonical, reason: "canonical");
+            expect(c.local, local, reason: "local");
+            expect(c.resolved, resolved, reason: "resolved");
+            expect(c.preview, preview, reason: "preview");
+            expect(c.value?.decimal, decimal, reason: "value.decimal");
+            expect(c.canonicalToLocalCreated, canonicalToLocal);
+            expect(c.localToCanonicalCreated, localToCanonical);
+            expect(c.localToResolvedCreated, localToResolved);
+            expect(c.evalCreated, eval);
+            expect(c.canonicalToLocalAccessed, canonicalToLocalAccessed == null ? canonicalToLocal : canonicalToLocalAccessed);
+            expect(c.localToCanonicalAccessed, localToCanonicalAccessed == null ? localToCanonical : localToCanonicalAccessed);
+            expect(c.localToResolvedAccessed, localToResolvedAccessed == null ? localToResolved : localToResolvedAccessed);
+            expect(c.evalAccessed, evalAccessed == null ? eval : evalAccessed);
+        }
 
-            var c = new TestCell("-1000.00", 0);
-            var results = identityHashCode(c.resolver.results);
+        /* Test interaction pattern should roughly be:
 
-            expect(c.local, isNull);
-            expect(c.resolved, isNull);
-            expect(c.value.decimal, 0);
+            var c = new TestCell();
+            c.focused();
+            c.calculate((i)=>[]); // focus always triggers calculate
 
-            // nothing happens for numbers
-            c.calculate((i)=>[], dependenciesChanged: true);
+            // ... change something ...  c.text = "99";
+            expectCell(c, ..., isChanged: true);
+            c.calculate((i)=>[]); // input always triggers calculate
+            expectCell(c, ...);
+            // ... repeat above as necessary ...
 
-            // after calculation
-            expect(c.local, isNull);
-            expect(c.resolved, isNull);
-            expect(c.value.decimal, 0);
-            // results map was not reset
-            expect(identityHashCode(c.resolver.results), results);
+            c.blurred();
+            expectCell(c, ...);  // check cleanup is correct
+
+            c.focused();
+            c.calculate((i)=>[]); // focus always triggers calculate
+            expectCell(c, ...); // check modified state loaded correctly
+
+         */
+
+        test("blank", () {
+            var c = new TestCell();
+            c.focused();
+            c.calculate((i)=>[]);
+            expectCell(c);
+            c.blurred();
+            expectCell(c);
+            c.focused();
+            c.calculate((i)=>[]);
+            expectCell(c);
+        });
+
+        test("blank -> number -> blank", () {
+            var c = new TestCell();
+            c.focused();
+            c.calculate((i) => []);
+
+            c.text = "4,200";
+            expectCell(c,
+                text: "4,200",
+                isChanged: true);
+
+            c.calculate((i) => []);
+            expectCell(c,
+                text: "4,200",
+                canonical: "4200",
+                decimal: 4200);
+
+            c.blurred();
+            expectCell(c,
+                text: "4,200",
+                canonical: "4200",
+                decimal: 4200);
+
+            c.focused();
+            c.calculate((i)=>[]);
+            expectCell(c,
+                text: "4,200",
+                canonical: "4200",
+                decimal: 4200);
+
+            c.text = "";
+            expectCell(c,
+                text: "",
+                canonical: "4200",
+                decimal: 4200,
+                isChanged: true);
+
+            c.calculate((i) => []);
+            expectCell(c);
+
+            c.blurred();
+            expectCell(c);
+
+            c.focused();
+            c.calculate((i)=>[]);
+            expectCell(c);
 
         });
 
-        test("isEquation && dependenciesChanged", () {
+        test("blank -> equation (price col) -> blank", () {
 
-            var c = new TestCell("2+2", 0);
-            var results = identityHashCode(c.resolver.results);
+            var c = new TestCell();
+            c.column = 1;
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
 
-            expect(c.local, isNull);
-            expect(c.resolved, isNull);
-            expect(c.value.decimal, 0);
+            c.text = "!*4,200";
+            expectCell(c,
+                text: "!*4,200",
+                isChanged: true);
 
-            c.calculate((i)=>[], dependenciesChanged: true);
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "!*4,200",
+                canonical: "! * 4200",
+                localToCanonical: 1,
+                resolved: "2 * 4,200",
+                localToResolved: 1,
+                preview: "2 * 4,200 = 8,400.00",
+                decimal: 8400, eval: 1);
 
-            expect(c.local, '');
-            expect(c.resolved, '');
-            expect(c.value.decimal, 4);
-            // results map should have been reset
-            expect(identityHashCode(c.resolver.results), isNot(results));
+            c.blurred();
+            expectCell(c,
+                text: "8,400.00",
+                canonical: "! * 4200",
+                localToCanonical: 1,
+                resolved: "2 * 4,200",
+                localToResolved: 1,
+                preview: "2 * 4,200 = 8,400.00",
+                decimal: 8400, eval: 1);
 
-        });
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "! * 4,200",
+                canonical: "! * 4200",
+                canonicalToLocal: 1,
+                local: "! * 4,200",
+                localToCanonical: 1,
+                resolved: "2 * 4,200",
+                localToResolved: 1,
+                preview: "2 * 4,200 = 8,400.00",
+                decimal: 8400, eval: 1);
 
-        test("isNumber && focused", () {
-            // nothing happens for focused numbers
+            c.text = "";
+            expectCell(c,
+                text: "",
+                canonical: "! * 4200",
+                canonicalToLocal: 1,
+                local: "! * 4,200",
+                localToCanonical: 1,
+                resolved: "2 * 4,200",
+                localToResolved: 1,
+                preview: "2 * 4,200 = 8,400.00",
+                decimal: 8400, eval: 1,
+                isChanged: true);
 
-            var c = new TestCell("-1000.00", 0);
-            var results = identityHashCode(c.resolver.results);
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
 
-            expect(c.canonical, "-1000.00");
-            expect(c.local, isNull);
-            expect(c.resolved, isNull);
-            expect(c.value.decimal, 0);
+            c.blurred();
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
 
-            c.calculate((i)=>[], focused: true);
-
-            expect(c.canonical, "-1000.00");
-            expect(c.local, isNull);
-            expect(c.resolved, isNull);
-            expect(c.value.decimal, 0);
-            expect(identityHashCode(c.resolver.results), results);
-
-        });
-
-        test("isEquation && focused", () {
-
-            var c = new TestCell("(2 + 2000) + !", 0);
-            var results = identityHashCode(c.resolver.results);
-
-            expect(c.canonical, "(2 + 2000) + !");
-            expect(c.local, isNull);
-            expect(c.resolved, isNull);
-            expect(c.value.decimal, 0);
-
-            c.calculate(columnGetterReturns([18]), focused: true);
-
-            expect(c.canonical, "(2 + 2000) + !");
-            expect(c.local, "(2 + 2,000) + !");
-            expect(c.resolved, "(2  + 2,000) + 18");
-            expect(c.value.decimal, 0);
-            expect(identityHashCode(c.resolver.results), results);
-
-        });
-
-        test("isNumber && changed", () {
-
-            var c = new TestCell("-1000.00", 0);
-            var results = identityHashCode(c.resolver.results);
-
-            expect(c.canonical, "-1000.00");
-            expect(c.local, isNull);
-            expect(c.resolved, isNull);
-            expect(c.value.decimal, 0);
-
-            c.local = "9,999.00";
-            c.calculate((i)=>[], changed: true);
-
-            expect(c.canonical, "9999");
-            expect(c.local, "9,999.00");
-            expect(c.resolved, '');
-            expect(c.value.decimal, 9999);
-            expect(identityHashCode(c.resolver.results), results);
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
 
         });
 
-        test("isEquation && changed", () {
+        test("blank -> equation (qty col) -> blank", () {
 
-            var c = new TestCell("-1000.00", 0);
-            var results = identityHashCode(c.resolver.results);
+            var c = new TestCell();
+            c.column = 0;
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
 
-            expect(c.canonical, "-1000.00");
-            expect(c.local, isNull);
-            expect(c.resolved, isNull);
-            expect(c.value.decimal, 0);
+            c.text = "!*4,200";
+            expectCell(c,
+                text: "!*4,200",
+                isChanged: true);
 
-            c.local = "2+2,000+!";
-            c.calculate(columnGetterReturns([18]), changed: true);
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "!*4,200",
+                canonical: "! * 4200",
+                localToCanonical: 1,
+                resolved: "2 * 4,200",
+                localToResolved: 1,
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400, eval: 1);
 
-            expect(c.canonical, "(2 + 2000) + !");
-            expect(c.local, "2+2,000+!");
-            expect(c.resolved, "(2 + 2,000) + 18");
-            expect(c.value.decimal, 2020);
-            expect(identityHashCode(c.resolver.results), results);
+            c.blurred();
+            expectCell(c,
+                text: "8,400",
+                canonical: "! * 4200",
+                localToCanonical: 1,
+                resolved: "2 * 4,200",
+                localToResolved: 1,
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400, eval: 1);
 
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "! * 4,200",
+                canonical: "! * 4200",
+                canonicalToLocal: 1,
+                local: "! * 4,200",
+                localToCanonical: 1,
+                resolved: "2 * 4,200",
+                localToResolved: 1,
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400, eval: 1);
+
+            c.text = "";
+            expectCell(c,
+                text: "",
+                canonical: "! * 4200",
+                canonicalToLocal: 1,
+                local: "! * 4,200",
+                localToCanonical: 1,
+                resolved: "2 * 4,200",
+                localToResolved: 1,
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400, eval: 1,
+                isChanged: true);
+
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
+
+            c.blurred();
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
+
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
+
+        });
+
+        test("number -> equation", () {
+
+            var c = new TestCell("4,200", "4200");
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c, text: "4,200", canonical: "4200", decimal: 4200);
+
+            c.text = "!*4,200";
+            expectCell(c,
+                text: "!*4,200",
+                canonical: "4200",
+                decimal: 4200,
+                isChanged: true);
+
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "!*4,200",
+                canonical: "! * 4200",
+                localToCanonical: 1,
+                resolved: "2 * 4,200",
+                localToResolved: 1,
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400, eval: 1);
+
+            c.blurred();
+            expectCell(c,
+                text: "8,400",
+                canonical: "! * 4200",
+                localToCanonical: 1,
+                resolved: "2 * 4,200",
+                localToResolved: 1,
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400, eval: 1);
+
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "! * 4,200",
+                canonical: "! * 4200",
+                canonicalToLocal: 1,
+                local: "! * 4,200",
+                localToCanonical: 1,
+                resolved: "2 * 4,200",
+                localToResolved: 1,
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400, eval: 1);
+
+        });
+
+        test("equation -> number -> equation", () {
+
+            var c = new TestCell("8,400", "! * 4200");
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "! * 4,200",
+                canonical: "! * 4200",
+                canonicalToLocal: 1,
+                local: "! * 4,200",
+                localToResolved: 1,
+                resolved: "2 * 4,200",
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400, eval: 1);
+
+            c.text = "4200";
+            expectCell(c,
+                text: "4200",
+                canonical: "! * 4200",
+                canonicalToLocal: 1,
+                local: "! * 4,200",
+                localToResolved: 1,
+                resolved: "2 * 4,200",
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400, eval: 1,
+                isChanged: true);
+
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "4200",
+                canonical: "4200",
+                canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                decimal: 4200);
+
+            c.blurred();
+            expectCell(c,
+                text: "4,200",
+                canonical: "4200",
+                canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                decimal: 4200);
+
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "4,200",
+                canonical: "4200",
+                canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                decimal: 4200);
+
+            c.text = "!*4,200";
+            expectCell(c,
+                text: "!*4,200",
+                canonical: "4200",
+                canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                decimal: 4200,
+                isChanged: true);
+
+            c.calculate(getColumnReturns(['2']));
+            // ran three parsers: localToCanonical (1st time), localToResolved (2nd time), eval (2nd time)
+            expectCell(c,
+                text: "!*4,200",
+                canonical: "! * 4200",
+                localToCanonical: 1, canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                localToResolvedAccessed: 2, evalAccessed: 2,
+                resolved: "2 * 4,200",
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400);
+
+            c.blurred();
+            // no parsers accessed, just the usual value->text swap
+            expectCell(c,
+                text: "8,400",
+                canonical: "! * 4200",
+                localToCanonical: 1, canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                localToResolvedAccessed: 2, evalAccessed: 2,
+                resolved: "2 * 4,200",
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400);
+
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            // had to run canonicalToLocal to get the local version of equation
+            expectCell(c,
+                text: "! * 4,200",
+                canonical: "! * 4200",
+                local: "! * 4,200",
+                localToCanonical: 1, canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                canonicalToLocalAccessed: 2, localToResolvedAccessed: 2, evalAccessed: 2,
+                resolved: "2 * 4,200",
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400);
+
+            c.blurred();
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            // nothing should have changed
+            expectCell(c,
+                text: "! * 4,200",
+                canonical: "! * 4200",
+                local: "! * 4,200",
+                localToCanonical: 1, canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                canonicalToLocalAccessed: 2, localToResolvedAccessed: 2, evalAccessed: 2,
+                resolved: "2 * 4,200",
+                preview: "2 * 4,200 = 8,400",
+                decimal: 8400);
+
+        });
+
+        test("equation -> [calculate] -> [calculate:dependencyChanged]", () {
+
+            var c = new TestCell("4,200", "! * 4200");
+            expectCell(c, text: "4,200", canonical: "! * 4200");
+
+            c.calculate(getColumnReturns(['2']));
+            // decimal set but not calculated because not told that dependecyChanged
+            expectCell(c, text: "4,200", canonical: "! * 4200", decimal: 4200);
+
+            c.calculate(getColumnReturns(['2']), true);
+            // same thing as above but this time we are told dependencyChanged
+            expectCell(c, text: "8,400", canonical: "! * 4200", decimal: 8400, eval: 1);
+
+        });
+
+        test("number -> [calculate] -> [calculate:dependencyChanged]", () {
+
+            var c = new TestCell("4,200");
+            expectCell(c, text: "4,200");
+
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c, text: "4,200", decimal: 4200);
+
+            c.calculate(getColumnReturns(['2']), true);
+            // numbers are not evaluated
+            expectCell(c, text: "4,200", decimal: 4200);
+
+        });
+
+        test("empty cell dynamically set and then focused", () {
+            var c = new TestCell("", "", 2);
+            expectCell(c);
+            c.setCalculated(new Decimal(93));
+            expectCell(c, text: "93.00", decimal: 93);
+            c.focused();
+            c.calculate((i)=>[]);
+            expectCell(c, text: "", preview: "93.00", decimal: 93);
+        });
+
+        test("focused cell doesn't get reset during calculation", () {
+            var c = new TestCell("93", "", 2);
+            expectCell(c, text: "93");
+            c.focused();
+            expectCell(c, text: "", preview: "93.00", decimal: 93);
+            c.calculate((i)=>[]);
+            expectCell(c, text: "", preview: "93.00", decimal: 93);
+            c.setCalculated(new Decimal(55));
+            expectCell(c, text: "", preview: "55.00", decimal: 55);
+            c.blurred();
+            expectCell(c, text: "55.00", preview: "55.00", decimal: 55);
         });
 
     });

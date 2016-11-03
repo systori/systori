@@ -2,28 +2,15 @@
 import 'package:test/test.dart';
 import 'package:systori/decimal.dart';
 import 'package:systori/spreadsheet.dart';
-
-
-class TestCell extends Cell {
-    String canonical, local, resolved;
-    TestCell(_value, [canonical="", _col=0, _row=0])
-    {value=_value; this.canonical=canonical; this.column=_col; this.row=_row;}
-}
-
-
-class TestRow extends Row {
-    Cell qty, price, total;
-    bool hasPercent;
-    TestRow(qty, price, total, this.hasPercent):
-            qty = new TestCell(new Decimal(null), qty, 0),
-            price = new TestCell(new Decimal(null), price, 1),
-            total = new TestCell(new Decimal(null), total, 2);
-}
+import 'cell_test.dart';
+import 'row_test.dart';
 
 
 class TestSpreadsheet extends Spreadsheet {
     List<TestRow> rows;
     TestSpreadsheet(this.rows);
+    @override
+    onCalculationFinished(Cell changedCell) {}
 }
 
 
@@ -39,7 +26,7 @@ main() async {
         test("Spreadsheet.calculate()", () {
 
             sheet = new TestSpreadsheet([]);
-            expect(sheet.calculate(new TestCell(new Decimal())).decimal, 0);
+            expect(sheet.calculate(new TestCell()).decimal, 0);
 
             sheet = new TestSpreadsheet([row('1', '1', '')]);
             expect(sheet.calculate(firstCell(sheet)).decimal, 1.00);

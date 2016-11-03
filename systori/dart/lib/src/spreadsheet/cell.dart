@@ -5,7 +5,19 @@ import 'package:parsers/parsers.dart' as _p;
 typedef List<Cell> ColumnGetter(int columnIdx);
 
 
+format(int column, Decimal decimal) {
+    if (column == 1 || column == 2) {
+        return decimal.money;
+    } else { // column == 0
+        return decimal.number;
+    }
+}
+
+
 abstract class Cell {
+
+    String get text;
+    set text(String text);
 
     String get canonical;
     set canonical(String canonical);
@@ -22,9 +34,6 @@ abstract class Cell {
     int row;
     int column;
 
-    int _previous_row_position;
-    String _previous_local;
-
     Decimal value;
 
     RangeResolver resolver = new RangeResolver();
@@ -37,107 +46,166 @@ abstract class Cell {
     bool get isCanonicalNotBlank => !isCanonicalBlank;
     bool get isCanonicalNumber => _isNumber(canonical);
     bool get isCanonicalEquation => isCanonicalNotBlank && !isCanonicalNumber;
-    bool get isLocalBlank => local == null || _isBlankOrZero(local.trim());
-    bool get isLocalNotBlank => !isLocalBlank;
-    bool get isLocalNumber => _isNumber(local);
-    bool get isLocalEquation => isLocalNotBlank && !isLocalNumber;
+    bool get isTextBlank => _isBlankOrZero(text.trim());
+    bool get isTextNotBlank => !isTextBlank;
+    bool get isTextNumber => _isNumber(text);
+    bool get isTextEquation => isTextNotBlank && !isTextNumber;
 
-    bool get isLocalChanged => _previous_local != null && _previous_local != local;
-    bool get isPositionChanged => _previous_row_position != null && _previous_row_position != row;
+    String _previous_text;
+    bool get isChanged => _previous_text != null && text != _previous_text;
+    bool get isFocused; // document.activeElement == this
 
-    calculate(ColumnGetter getColumn, {bool focused: false, bool changed: false, bool dependenciesChanged: false}) {
+    focused() {
+        if (isCanonicalBlank) {
+            if (isTextNumber) {
+                if (value == null) {
+                    value = new Decimal.parse(text);
+                }
+                preview = format(column, value);
+            }
+            text = "";
+        } else if (isCanonicalEquation) {
+            if (local == null) {
+                local = canonicalToLocal(canonical);
+            }
+            text = local;
+        }
+        _previous_text = text;
+    }
 
-        _previous_local = local;
-        _previous_row_position = row;
+    blurred() {
+        text = format(column, value);
+        _previous_text = null;
+    }
 
-        if (!focused && !changed && !dependenciesChanged) return;
+    _set_preview() {
+        if (isCanonicalEquation) {
+            if (resolved != value.number) {
+                preview = "${resolved} = ${format(column, value)}";
+            } else {
+                preview = format(column, value);
+            }
+        } else {
+            preview = null;
+        }
+    }
+
+    setCalculated(Decimal decimal) {
+        value = decimal;
+        if (!isFocused)
+            _previous_text = text = format(column, decimal);
+        else
+            preview = format(column, decimal);
+    }
+
+    calculate(ColumnGetter getColumn, [bool dependenciesChanged=false]) {
 
         resolver.thisColumn = column;
         resolver.getColumn = getColumn;
 
-        if (focused) {
+        if (value == null) {
+            value = isTextNumber ? new Decimal.parse(text) : new Decimal(null);
+        }
 
-            if (isLocalBlank && isCanonicalEquation) {
-                local = canonicalToLocal(canonical);
-                resolver.withCollectRanges(() {
-                    resolved = localToResolved(local);
-                });
-            }
-
-        } else if (changed) {
-
-            if (isLocalEquation) {
-                try {
-                    canonical = localToCanonical(local);
-                    resolver.withCollectRanges(() {
-                        resolved = localToResolved(local);
-                    });
-                    value = eval(canonical);
-                    if (resolved != value.number) {
-                        preview = "${resolved} = ${value.money}";
-                    } else {
-                        preview = "";
-                    }
-                } catch(e) {
-                    resolved = '';
-                    preview = e.substring(8);
-                    value = new Decimal();
-                }
-            } else if (isLocalNumber) {
-                value = new Decimal.parse(local);
-                canonical = value.canonical;
-                resolved = '';
-                preview = '';
-            } else {
-                value = new Decimal();
-                canonical = '';
-                resolved = '';
-                preview = '';
-            }
-
-        } else if (dependenciesChanged) {
+        if (dependenciesChanged) {
 
             if (isCanonicalEquation) {
-                local = '';
-                resolved = '';
+
                 resolver.withCleanCache(() {
                     value = eval(canonical);
                 });
+                text = format(column, value);
+
+                if (local != null) {
+                    if (resolved != null)
+                        resolved = localToResolved(local);
+                    _set_preview();
+                }
+
             }
 
+        } else {
+
+            if (isFocused) {
+
+                if (isChanged) {
+
+                    if (isTextEquation) {
+
+                        var _old_canonical = canonical;
+                        try {
+                            canonical = localToCanonical(text);
+                            resolver.withCollectRanges(() {
+                                resolved = localToResolved(text);
+                            });
+                            value = eval(canonical);
+                            _set_preview();
+                        } catch(e) {
+                            canonical = _old_canonical;
+                            resolved = '';
+                            preview = e.substring(8);
+                            value = new Decimal();
+                        }
+
+                    } else {
+
+                        value = new Decimal.parse(text);
+                        canonical = value.canonical;
+                        local = null;
+                        resolved = null;
+                        preview = null;
+
+                    }
+
+                } else {
+
+                    if (isTextEquation && resolved == null) {
+                        resolver.withCollectRanges(() {
+                            resolved = localToResolved(text);
+                        });
+                        value = eval(canonical);
+                        _set_preview();
+                    }
+                }
+
+            }
         }
 
+        _previous_text = text;
+
     }
 
-    onRowCalculationFinished();
-
-    ParseEquation<String> _canonicalToLocal;
-    ParseEquation<String> get canonicalToLocal {
+    ConvertEquation _canonicalToLocal;
+    ConvertEquation get canonicalToLocal {
         if (_canonicalToLocal == null)
-            _canonicalToLocal = new ConvertEquation(ConvertEquation.canonicalToLocal);
+            _canonicalToLocal = newCanonicalToLocal();
         return _canonicalToLocal;
     }
+    newCanonicalToLocal() => new ConvertEquation(ConvertEquation.canonicalToLocal);
 
-    ParseEquation<String> _localToCanonical;
-    ParseEquation<String> get localToCanonical {
+    ConvertEquation _localToCanonical;
+    ConvertEquation get localToCanonical {
         if (_localToCanonical == null)
-            _localToCanonical = new ConvertEquation(ConvertEquation.localToCanonical);
+            _localToCanonical = newLocalToCanonical();
         return _localToCanonical;
     }
+    newLocalToCanonical() => new ConvertEquation(ConvertEquation.localToCanonical);
 
-    ParseEquation<String> _localToResolved;
-    ParseEquation<String> get localToResolved {
+    ConvertEquation _localToResolved;
+    ConvertEquation get localToResolved {
         if (_localToResolved == null)
-            _localToResolved = new ConvertEquation(ConvertEquation.passThrough, resolver);
+            _localToResolved = newLocalToResolved();
         return _localToResolved;
     }
+    newLocalToResolved() => new ConvertEquation(ConvertEquation.localToLocal, resolver);
 
     EvaluateEquation _eval;
     EvaluateEquation get eval {
         if (_eval == null)
-            _eval = new EvaluateEquation(resolver);
+            _eval = newEval();
         return _eval;
     }
+    newEval() => new EvaluateEquation(resolver);
 
 }
 
@@ -422,6 +490,7 @@ class ConvertEquation extends ParseEquation<String> {
     // Converters
     static String canonicalToLocal(String decimal)=>new Decimal(double.parse(decimal)).number;
     static String localToCanonical(String decimal)=>new Decimal.parse(decimal).canonical;
+    static String localToLocal(String decimal)=>new Decimal.parse(decimal).number;
     static String passThrough(String decimal)=>decimal;
 
     Converter converter;

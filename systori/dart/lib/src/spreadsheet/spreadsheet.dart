@@ -1,4 +1,3 @@
-import 'package:quiver/iterables.dart';
 import 'package:systori/decimal.dart';
 import 'row.dart';
 import 'cell.dart';
@@ -10,19 +9,16 @@ abstract class Spreadsheet {
     List<Row> iterated;
     bool get hasNeverBeenCalculated => iterated == null;
 
-    Decimal calculate(Cell changedCell, {focused: false, changed: false, moved: false}) {
+    Decimal calculate(Cell changedCell) {
         iterated = [];
         Decimal total = new Decimal();
         changedCell.row = -1;
-        changedCell.column = -1;
-        enumerate/*<Row>*/(rows).forEach((IndexedValue<Row> iterator) {
-            iterator.value.calculate(
-                this, iterator.index, changedCell,
-                focused: focused, changed: changed, moved: moved
-            );
-            total += iterator.value.total.value;
-            iterated.add(iterator.value);
-        });
+        int rowNum = 0;
+        for (var row in rows) {
+            row.calculate(this.getColumn, rowNum++, changedCell.row != -1);
+            total += row.total.value;
+            iterated.add(row);
+        }
         onCalculationFinished(changedCell);
         return total;
     }

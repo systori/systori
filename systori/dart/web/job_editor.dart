@@ -122,6 +122,7 @@ class Group extends Model {
     }
 
     updateCode() {
+        /*
         enumerate/*<Group>*/(this.querySelectorAll(':scope>sys-group'))
             .forEach((IndexedValue<Group> g) {
             g.value.order = g.index+1;
@@ -131,6 +132,7 @@ class Group extends Model {
             .forEach((IndexedValue<Group> g) {
             g.value.order = g.index+1;
         });
+        */
     }
 
     createSibling() {
@@ -158,10 +160,11 @@ abstract class HtmlCell implements HtmlElement, Cell {
     String get preview => dataset['preview'];
     set preview(String preview) => dataset['preview'] = preview;
 
+    bool get isFocused => document.activeElement == this;
+
     List<StreamSubscription<Event>> subscriptions = [];
 
     enableEditing() {
-        contentEditable = "true";
         subscriptions = [
             onBlur.listen(handleBlur),
             onFocus.listen(handleFocus),
@@ -169,35 +172,23 @@ abstract class HtmlCell implements HtmlElement, Cell {
         ];
     }
 
-    disableEditing() {
-        contentEditable = "false";
-        subscriptions.forEach((s)=>s.cancel());
-        subscriptions = [];
-    }
-
     handleFocus(Event event) {
-        if (isCanonicalEquation) {
-            dispatchCalculate('focused');
-            text = local;
-        } else if (isCanonicalBlank) {
-            text = "0";
-            preview = value.money;
-            selectThis();
-        } else {
-            text = canonical;
-            preview = "";
-            selectThis();
-        }
+        focused();
+        if (isCanonicalNumber) selectThis();
+        dispatchCalculate();
+        onCalculationFinished();
     }
 
-    handleInput([Event _]) {
-        local = text.trim();
-        dispatchCalculate('changed');
-    }
+    onCalculationFinished();
 
-    handleBlur([Event _]) {
-        text = value.money;
-    }
+    handleInput([Event _]) =>
+        dispatchCalculate();
+
+    handleBlur([Event _]) =>
+        blurred();
+
+    dispatchCalculate() =>
+        dispatchEvent(new CustomEvent('calculate', detail: this));
 
     selectThis() {
         new Timer(new Duration(milliseconds: 1), () {
@@ -205,44 +196,12 @@ abstract class HtmlCell implements HtmlElement, Cell {
         });
     }
 
-    dispatchCalculate(String event) =>
-        dispatchEvent(new CustomEvent('calculate.$event', detail: this));
-
-    onRowCalculationFinished() {
-
-        if (document.activeElement != this) {
-            text = value.money;
-            return;
-        }
-
-        if (preview != null && preview.startsWith('character ')) return;
-        if (isLocalEquation) {
-            if (resolved != null && resolved.trim() != value.number)
-                preview = "${resolved} = ${value.money}";
-            else
-                preview = value.money;
-        } else if (isLocalBlank && value.isNonzero) {
-            preview = value.money;
-        }
-        print(preview);
-
-    }
-
 }
 
 
 class TaskCell extends HtmlElement with Cell, HtmlCell {
-
-    TaskCell.created(): super.created() {
-        value = new Decimal.parse(text);
-    }
-
-    attached() {
-        if (isContentEditable) enableEditing();
-    }
-
+    TaskCell.created(): super.created();
 }
-
 
 
 class Task extends Model with Row {
@@ -282,13 +241,7 @@ class Task extends Model with Row {
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
         sheet = this.querySelector(":scope > sys-lineitem-sheet");
-        on['calculate.focused'].listen((CustomEvent e) => calculate(sheet, 0, e.detail as Cell, focused: true));
-        on['calculate.changed'].listen((CustomEvent e) => calculate(sheet, 0, e.detail as Cell, changed: true));
-        on['calculate.moved'].listen((CustomEvent e) => calculate(sheet, 0, e.detail as Cell, moved: true));
-    }
-
-    onRowCalculationFinished() {
-
+        on['calculate'].listen((CustomEvent e) => calculate(sheet.getColumn, 0, true));
     }
 
     handleKeyboard(KeyboardEvent e) {
@@ -349,9 +302,7 @@ class Task extends Model with Row {
 
 class LineItemCell extends HighlightableInput with Cell, HtmlCell {
 
-    LineItemCell.created(): super.created() {
-        value = new Decimal.parse(text);
-    }
+    LineItemCell.created(): super.created();
 
     attached() {
         if (isContentEditable) enableEditing();
@@ -361,9 +312,8 @@ class LineItemCell extends HighlightableInput with Cell, HtmlCell {
         '187,168,146', '238,114,95', '250,185,75', '0,108,124', '0,161,154', '183,219,193'
     ];
 
-    onRowCalculationFinished() {
-        super.onRowCalculationFinished();
-        if (document.activeElement != this) return;
+    onCalculationFinished() {
+        (parent.parent.parent as LineItem).markRedWhenAllColumnsSet();
         if (resolver.ranges.isEmpty) return;
         new Timer(new Duration(milliseconds: 1), () {
             highlight(resolver.ranges.map((r) =>
@@ -414,7 +364,7 @@ class LineItem extends Model with Orderable, Row {
         }
     }
 
-    onRowCalculationFinished() {
+    markRedWhenAllColumnsSet() {
         if (qty.isCanonicalNotBlank && price.isCanonicalNotBlank && total.isCanonicalNotBlank) {
             [qty,price,total].forEach((Element e)=>e.style.color = 'red');
         } else {
@@ -429,14 +379,12 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
     List<LineItem> get rows => this.querySelectorAll(':scope>sys-lineitem');
 
     LineItemSheet.created(): super.created() {
-        on['calculate.focused'].listen((CustomEvent e) => calculate(e.detail as Cell, focused: true));
-        on['calculate.changed'].listen((CustomEvent e) => calculate(e.detail as Cell, changed: true));
-        on['calculate.moved'].listen((CustomEvent e) => calculate(e.detail as Cell, moved: true));
+        on['calculate'].listen((CustomEvent e) => calculate(e.detail as Cell));
         addEventListener('blur', clearHighlighting, true);
     }
 
     onOrderingChanged(Orderable orderable) =>
-        dispatchEvent(new CustomEvent('calculate.moved', detail: (orderable as LineItem).getCell(0)));
+        dispatchEvent(new CustomEvent('calculate', detail: (orderable as LineItem).getCell(0)));
 
     onCalculationFinished(Cell changedCell) {
 

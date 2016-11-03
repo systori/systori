@@ -1,89 +1,60 @@
 @TestOn("vm")
 import 'package:test/test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:quiver/iterables.dart';
 import 'package:systori/decimal.dart';
 import 'package:systori/spreadsheet.dart';
-
-
-class TestCell extends Cell {
-    String canonical, local, resolved;
-    TestCell(_value, [canonical="", _col=0, _row=0])
-    {value=_value; this.canonical=canonical; this.column=_col; this.row=_row;}
-}
+import 'cell_test.dart';
 
 
 class TestRow extends Row {
-    Cell qty, price, total;
+    Cell qty;
+    Cell price;
+    Cell total;
     bool hasPercent=false;
-    TestRow(qty, price, total):
-        qty = new TestCell(new Decimal(null), qty, 0),
-        price = new TestCell(new Decimal(null), price, 1),
-        total = new TestCell(new Decimal(null), total, 2);
+    TestRow(qty, price, total, [hasPercent = false]):
+        qty = new TestCell(qty, qty, 0),
+        price = new TestCell(price, price, 1),
+        total = new TestCell(total, total, 2),
+        hasPercent = hasPercent;
 }
 
+Row row(String qty, String price, String total, [hasPercent=false]) =>
+    new TestRow(qty, price, total, hasPercent);
 
-class MockSpreadsheet extends Mock implements Spreadsheet {}
-Spreadsheet mockSheet(List<int> ints, int eq1, int eq2) {
-    ints = ints != null ? ints : [];
-    var sheet = new MockSpreadsheet();
-    for (var col in range(3)) {
-        when(sheet.getColumn(col)).thenReturn(
-            enumerate(ints).
-            map((total) =>
-            new TestCell(
-                new Decimal(total.value),
-                eq1==total.index||eq2==total.index ? '!' : '',
-                col
-            )
-            ).toList()
-        );
-    }
-    return sheet;
-}
+Row eval(String qty, String price, String total, List<int> ints, {eq1=-1, eq2=-1, hasPercent=false}) =>
+    row(qty, price, total, hasPercent)
+        ..calculate(getColumnReturns(ints.map((v)=>v.toString()).toList(), eq1, eq2), ints.length, true);
 
+double total(String qty, String price, String total, {List<int> ints=null, eq1=-1, eq2=-1, hasPercent=false}) =>
+    eval(qty, price, total, ints==null?[]:ints, eq1:eq1, eq2:eq2, hasPercent:hasPercent).total.value.decimal;
 
-Row row(String qty, String price, String total, [List<int> ints, eq1=-1, eq2=-1]) {
-    var r = new TestRow(qty, price, total);
-    r.calculate(mockSheet(ints, eq1, eq2), ints!=null?ints.length:0, true);
-    return r;
-}
-
-double total(String qty, String price, String total, [List<int> ints, eq1=-1, eq2=-1]) =>
-    row(qty, price, total, ints, eq1, eq1).total.value.decimal;
+double price(String qty, String price, String total, [List<int> ints, eq1=-1, eq2=-1]) =>
+    eval(qty, price, total, ints==null?[]:ints, eq1:eq1, eq2:eq2).price.value.decimal;
 
 double qty(String qty, String price, String total, [List<int> ints, eq1=-1, eq2=-1]) =>
-    row(qty, price, total, ints, eq1, eq1).qty.value.decimal;
+    eval(qty, price, total, ints==null?[]:ints, eq1:eq1, eq2:eq2).qty.value.decimal;
 
-main() async {
 
-    group("Row.calculate() without ranges", () {
+main() {
 
-        double percent(String qty, String price) {
-            var r = new TestRow(qty, price, '');
-            r.hasPercent = true;
-            r.calculate(mockSheet([], null, null), 0, true);
-            return r.total.value.decimal;
-        }
+    group("Row.calculate()", () {
 
-        test("basic calculation for qty", () {
+        test("qty", () {
             expect(qty('', '7', '21'), 3.00);
             expect(qty('', '5', '2.5'), 0.50);
         });
 
-        test("basic calculation for total", () {
+        test("price", () {
+            expect(price('7', '', '21'), 3.00);
+        });
+
+        test("total", () {
             expect(total('2', '3', ''), 6.00);
             expect(total('2', '5', ''), 10.00);
         });
 
         test("percent", () {
-            expect(percent('20', '12'), 2.40);
-        });
-
-        test("##/unit", () {
-            var r = row('7', '', '21');
-            expect(r.price.value.money, '3.00');
-            expect(r.total.value.money, '21.00');
+            expect(total('20', '12', '', hasPercent: true), 2.40);
         });
 
     });
