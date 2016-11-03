@@ -180,6 +180,7 @@ class HtmlCell extends HighlightableInput with Cell {
                 window.getSelection().selectAllChildren(this);
             });
         }
+        doHighlighting();
     }
 
     static final List<String> COLORS = [
@@ -190,6 +191,16 @@ class HtmlCell extends HighlightableInput with Cell {
         if (e.keyCode == KeyCode.LEFT || e.keyCode == KeyCode.RIGHT) return;
         dispatchCalculate('changed');
         (parent.parent.parent as LineItem).markRedWhenAllColumnsSet();
+        doHighlighting();
+    }
+
+    handleBlur([Event _]) =>
+        blurred();
+
+    dispatchCalculate(String event) =>
+        dispatchEvent(new CustomEvent('calculate.$event', detail: this));
+
+    doHighlighting() {
         if (isTextEquation) {
             new Timer(new Duration(milliseconds: 1), () =>
                 highlight(resolver.ranges.map((r) =>
@@ -199,12 +210,6 @@ class HtmlCell extends HighlightableInput with Cell {
             );
         }
     }
-
-    handleBlur([Event _]) =>
-        blurred();
-
-    dispatchCalculate(String event) =>
-        dispatchEvent(new CustomEvent('calculate.$event', detail: this));
 
 }
 
