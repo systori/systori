@@ -177,38 +177,36 @@ class HtmlCell extends HighlightableInput with Cell {
     handleFocus(Event event) {
         focused();
         dispatchCalculate('focused');
-    }
-
-    handleInput([Event _]) {
-        dispatchCalculate('changed');
-        (parent.parent.parent as LineItem).markRedWhenAllColumnsSet();
-    }
-
-    handleBlur([Event _]) =>
-        blurred();
-
-    dispatchCalculate(String event) {
-        dispatchEvent(new CustomEvent('calculate.$event', detail: this));
-        maybeHighlightOrSelect();
+        if (isTextNumber) {
+            new Timer(new Duration(milliseconds: 1), () {
+                window.getSelection().selectAllChildren(this);
+            });
+        }
     }
 
     static final List<String> COLORS = [
         '187,168,146', '238,114,95', '250,185,75', '0,108,124', '0,161,154', '183,219,193'
     ];
 
-    maybeHighlightOrSelect() {
-        if (isTextNumber) {
-            new Timer(new Duration(milliseconds: 1), () {
-                window.getSelection().selectAllChildren(this);
-            });
-        } else if (isTextEquation) {
+    handleInput(KeyboardEvent e) {
+        if (e.keyCode == KeyCode.LEFT || e.keyCode == KeyCode.RIGHT) return;
+        dispatchCalculate('changed');
+        (parent.parent.parent as LineItem).markRedWhenAllColumnsSet();
+        if (isTextEquation) {
             new Timer(new Duration(milliseconds: 1), () =>
                 highlight(resolver.ranges.map((r) =>
-                    new Highlight(r.srcStart, r.srcEnd, COLORS[r.result.group%COLORS.length]))
+                new Highlight(r.srcStart, r.srcEnd,
+                    COLORS[r.result.group % COLORS.length]))
                 )
             );
         }
     }
+
+    handleBlur([Event _]) =>
+        blurred();
+
+    dispatchCalculate(String event) =>
+        dispatchEvent(new CustomEvent('calculate.$event', detail: this));
 
 }
 
@@ -289,6 +287,17 @@ class Task extends Model with Row {
         parent.insertBefore(task, nextElementSibling);
         (parent as Group).updateCode();
         task.name.focus();
+    }
+
+    solve() {
+
+        if (qty.isCanonicalNotBlank && price.isCanonicalNotBlank && total.isCanonicalBlank)
+            total.setCalculated(qty.value * price.value); else
+        if (qty.value.isNonzero && price.isCanonicalBlank    && total.isCanonicalNotBlank)
+            price.setCalculated(total.value / qty.value); else
+        if (qty.isCanonicalBlank    && price.value.isNonzero && total.isCanonicalNotBlank)
+            qty.setCalculated(total.value / price.value);
+
     }
 
     /*
