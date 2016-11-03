@@ -146,61 +146,80 @@ class Group extends Model {
 }
 
 
-abstract class HtmlCell implements HtmlElement, Cell {
+class HtmlCell extends HighlightableInput with Cell {
 
-    String get canonical => dataset['canonical'];
+    String get canonical => dataset['canonical'] ?? "";
     set canonical(String canonical) => dataset['canonical'] = canonical;
 
-    String get local => dataset['local'];
+    String get local => dataset['local'] ?? "";
     set local(String local) => dataset['local'] = local;
 
-    String get resolved => dataset['resolved'];
+    String get resolved => dataset['resolved'] ?? "";
     set resolved(String resolved) => dataset['resolved'] = resolved;
 
-    String get preview => dataset['preview'];
+    String get preview => dataset['preview'] ?? "";
     set preview(String preview) => dataset['preview'] = preview;
 
     bool get isFocused => document.activeElement == this;
 
     List<StreamSubscription<Event>> subscriptions = [];
 
-    enableEditing() {
+    HtmlCell.created(): super.created();
+
+    attached() {
         subscriptions = [
             onBlur.listen(handleBlur),
             onFocus.listen(handleFocus),
-            onInput.listen(handleInput),
+            onKeyUp.listen(handleInput),
         ];
     }
 
     handleFocus(Event event) {
         focused();
-        if (isCanonicalNumber) selectThis();
-        dispatchCalculate();
-        onCalculationFinished();
+        dispatchCalculate('focused');
     }
 
-    onCalculationFinished();
-
-    handleInput([Event _]) =>
-        dispatchCalculate();
+    handleInput([Event _]) {
+        dispatchCalculate('changed');
+        (parent.parent.parent as LineItem).markRedWhenAllColumnsSet();
+    }
 
     handleBlur([Event _]) =>
         blurred();
 
-    dispatchCalculate() =>
-        dispatchEvent(new CustomEvent('calculate', detail: this));
+    dispatchCalculate(String event) {
+        dispatchEvent(new CustomEvent('calculate.$event', detail: this));
+        maybeHighlightOrSelect();
+    }
 
-    selectThis() {
-        new Timer(new Duration(milliseconds: 1), () {
-            window.getSelection().selectAllChildren(this);
-        });
+    static final List<String> COLORS = [
+        '187,168,146', '238,114,95', '250,185,75', '0,108,124', '0,161,154', '183,219,193'
+    ];
+
+    maybeHighlightOrSelect() {
+        if (isTextNumber) {
+            new Timer(new Duration(milliseconds: 1), () {
+                window.getSelection().selectAllChildren(this);
+            });
+        } else if (isTextEquation) {
+            new Timer(new Duration(milliseconds: 1), () =>
+                highlight(resolver.ranges.map((r) =>
+                    new Highlight(r.srcStart, r.srcEnd, COLORS[r.result.group%COLORS.length]))
+                )
+            );
+        }
     }
 
 }
 
 
-class TaskCell extends HtmlElement with Cell, HtmlCell {
+class TaskCell extends HtmlCell {
     TaskCell.created(): super.created();
+}
+
+
+class LineItemCell extends HtmlCell {
+    LineItemCell.created(): super.created();
 }
 
 
@@ -241,7 +260,9 @@ class Task extends Model with Row {
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
         sheet = this.querySelector(":scope > sys-lineitem-sheet");
-        on['calculate'].listen((CustomEvent e) => calculate(sheet.getColumn, 0, true));
+        on['calculate.focused'].listen((CustomEvent e) => calculate(sheet.getColumn, 0, false));
+        on['calculate.changed'].listen((CustomEvent e) => calculate(sheet.getColumn, 0, true));
+        on['calculate.moved'].listen((CustomEvent e) => calculate(sheet.getColumn, 0, true));
     }
 
     handleKeyboard(KeyboardEvent e) {
@@ -300,31 +321,6 @@ class Task extends Model with Row {
 }
 
 
-class LineItemCell extends HighlightableInput with Cell, HtmlCell {
-
-    LineItemCell.created(): super.created();
-
-    attached() {
-        if (isContentEditable) enableEditing();
-    }
-
-    static final List<String> COLORS = [
-        '187,168,146', '238,114,95', '250,185,75', '0,108,124', '0,161,154', '183,219,193'
-    ];
-
-    onCalculationFinished() {
-        (parent.parent.parent as LineItem).markRedWhenAllColumnsSet();
-        if (resolver.ranges.isEmpty) return;
-        new Timer(new Duration(milliseconds: 1), () {
-            highlight(resolver.ranges.map((r) =>
-                new Highlight(r.srcStart, r.srcEnd, COLORS[r.result.group%COLORS.length]))
-            );
-        });
-    }
-
-}
-
-
 class LineItem extends Model with Orderable, Row {
 
     DivElement name;
@@ -379,12 +375,14 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
     List<LineItem> get rows => this.querySelectorAll(':scope>sys-lineitem');
 
     LineItemSheet.created(): super.created() {
-        on['calculate'].listen((CustomEvent e) => calculate(e.detail as Cell));
+        on['calculate.focused'].listen((CustomEvent e) => calculate(e.detail as Cell, focused: true));
+        on['calculate.changed'].listen((CustomEvent e) => calculate(e.detail as Cell, focused: false));
+        on['calculate.moved'].listen((CustomEvent e) => calculate(rows[0].getCell(0), focused: false));
         addEventListener('blur', clearHighlighting, true);
     }
 
     onOrderingChanged(Orderable orderable) =>
-        dispatchEvent(new CustomEvent('calculate', detail: (orderable as LineItem).getCell(0)));
+        dispatchEvent(new CustomEvent('calculate.moved'));
 
     onCalculationFinished(Cell changedCell) {
 
@@ -416,7 +414,7 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
                     case -1: col.style.background = '#D41351'; break;
                     case 0: col.style.background = null; break;
                     default:
-                        col.style.background = 'rgba(${LineItemCell.COLORS[group%LineItemCell.COLORS.length]},0.2)';
+                        col.style.background = 'rgba(${HtmlCell.COLORS[group%HtmlCell.COLORS.length]},0.2)';
                 }
             }
         }

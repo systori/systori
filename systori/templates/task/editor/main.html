@@ -1,4 +1,4 @@
-{% extends "project.html" %}
+{% extends "base.html" %}
 {% load i18n l10n static dartium customformatting %}
 
 {% block title %}{{ project.name }} > {{ job.name }}{% endblock %}
@@ -6,17 +6,16 @@
   <li><a href="{% url 'project.view' project.pk %}">{{ project.name }}</a></li>
   <li class="active"><a href="{% url 'tasks' project.pk job.pk %}">{{ job.name }}</a></li>
 {% endblock %}
-{% block sidebar %}
-  {% include "project/sidebar.html" with section='jobs' %}
-{% endblock %}
 
-{% block content %}
+{% block container %}
   <style>
 
-    @media (min-width: 1200px) {
-      .main {
-        width: 970px;
-      }
+    #editor-area {
+      max-width: 1100px;
+      padding-top: 50px;
+      padding-left: 50px;
+      padding-bottom:100px;
+      margin: auto;
     }
 
     sys-job,
@@ -130,7 +129,7 @@
 
     .qty {
       flex: 0 0 auto;
-      width: 80px;
+      width: 100px;
       text-align: right;
     }
 
@@ -143,7 +142,7 @@
     sys-lineitem > .editor .total,
     .price {
       flex: 0 0 auto;
-      width: 80px;
+      width: 100px;
       text-align: right;
       padding-right: 4px;
       background-color: #fff;
@@ -380,6 +379,8 @@
 
   </style>
 
+  <div id="editor-area">
+
   <sys-job id="task-editor" data-pk="{{ job.pk }}" data-code="{{ job.code }}"
            data-structure-format="{{ job.project.structure_format }}">
     {% include "task/editor/group_editor.html" with group=job %}
@@ -390,6 +391,8 @@
       {% include "task/editor/task_loop.html" with task=task %}
     {% endfor %}
   </sys-job>
+
+  </div>
 
   <template id="group-template">
     {% include "task/editor/group_editor.html" with group=blank_group %}
@@ -403,7 +406,7 @@
     {% include "task/editor/lineitem_editor.html" with lineitem=blank_lineitem %}
   </template>
 
-{% endblock content %}
+{% endblock %}
 
 {% block extra_js %}
   {% dart "job_editor.dart" %}

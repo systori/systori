@@ -8,11 +8,11 @@ import 'package:systori/spreadsheet.dart';
 
 class TestCell extends Cell {
 
-    String text;
-    String canonical;
-    String local;
-    String resolved;
-    String preview;
+    String text = "";
+    String canonical = "";
+    String local = "";
+    String resolved = "";
+    String preview = "";
 
     TestCell([_text="", _canonical="", _col=0, _row=0])
     {this.text=_text; this.canonical=_canonical; this.column=_col; this.row=_row;}
@@ -118,6 +118,12 @@ List index(String eq, List<int> ints, [eq1=-1, eq2=-1]) {
     return [_range.result.start, _range.result.end];
 }
 
+List groups(String eq, [List<int> ints, eq1=-1, eq2=-1]) =>
+    eval(eq, ints!=null?ints:[], eq1, eq2).resolver.results.values.map((r)=>r.group).toList();
+
+List rangeGroups(String eq, [List<int> ints, eq1=-1, eq2=-1]) =>
+    eval(eq, ints!=null?ints:[], eq1, eq2).resolver.ranges.map((r)=>r.result.group).toList();
+
 double rangeTotal(String eq, [List<int> ints, eq1=-1, eq2=-1]) =>
     range(eq, ints, eq1, eq2).result.value.decimal;
 
@@ -157,6 +163,7 @@ main() {
             expect(canonical("2-1,000.001"), "2 - 1000.001");
             expect(canonical("2--1,000.001"), "2 - -1000.001");
             expect(canonical("2--1,000.001+A@1:&"), "(2 - -1000.001) + A@1:&");
+            expect(canonical("\u{00a0}A!\u{00a0}+\u{00a0}B!:\u{00a0}"), "A! + B!:");
 
             expect(local("2 - 1000.001"), "2 - 1,000.001");
             expect(local("2 - -1000.001"), "2 - -1,000.001");
@@ -310,6 +317,35 @@ main() {
 
     });
 
+    group("RangeResult.group", () {
+
+        test("result.group", () {
+            expect(groups('@'), [1]);
+            expect(groups('@+!'), [1,2]);
+            expect(groups('@+!+!'), [1,2]);
+        });
+
+        test("range.result.group", () {
+            expect(rangeGroups('@'), [1]);
+            expect(rangeGroups('@+!'), [1,2]);
+            expect(rangeGroups('@+!+!'), [1,2,2]);
+        });
+
+        test("ranges change but cache stays", () {
+            var c = new TestCell("8,400", "! * 4200", 2);
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            expect(c.resolver.nextGroup, 2);
+            expect(c.resolver.results['!'].group, 1);
+            c.text = '!*4200+@';
+            c.calculate(getColumnReturns(['2']));
+            expect(c.resolver.nextGroup, 3);
+            expect(c.resolver.results['!'].group, 1);
+            expect(c.resolver.results['@'].group, 2);
+        });
+
+    });
+
     group("RangeResult.start/end", () {
 
         test("top-down, no range", () {
@@ -418,6 +454,7 @@ main() {
             expect(cellTotal('@:2+!:2', [1,2,3,4,5,6]), 14);
             expect(cellTotal('@:3+!:3', [1,2,3,4,5,6]), 21);
             expect(cellTotal('@:+!:', [1,2,3,4,5,6]), 42);
+            expect(cellTotal('A! + B!', [6]), 12);
         });
 
         test("solve with negative numbers", () {
@@ -426,14 +463,15 @@ main() {
             expect(cellTotal(" -16.0 / (5-3) "), -8.0);
             expect(cellTotal(" 16.0 /  -1*(5-3) "), -32.0);
             expect(cellTotal(" 16.0 / (-1*(5-3)) "), -8.0);
+            expect(cellTotal("  -16/(5 +-3)"), -8.0);
         });
 
     });
 
     group("Cell.calculate(): phases", () {
 
-        expectCell(TestCell c, {text: "", canonical: "", local: null, resolved: null,
-                                preview: null, decimal: null, isChanged: false,
+        expectCell(TestCell c, {text: "", canonical: "", local: "", resolved: "",
+                                preview: "", decimal: null, isChanged: false,
                                 canonicalToLocal: 0, localToCanonical: 0,
                                 localToResolved: 0, eval: 0,
                                 canonicalToLocalAccessed: null, localToCanonicalAccessed: null,
@@ -578,6 +616,7 @@ main() {
                 localToCanonical: 1,
                 resolved: "2 * 4,200",
                 localToResolved: 1,
+                localToResolvedAccessed: 2,
                 preview: "2 * 4,200 = 8,400.00",
                 decimal: 8400, eval: 1);
 
@@ -590,19 +629,20 @@ main() {
                 localToCanonical: 1,
                 resolved: "2 * 4,200",
                 localToResolved: 1,
+                localToResolvedAccessed: 2,
                 preview: "2 * 4,200 = 8,400.00",
                 decimal: 8400, eval: 1,
                 isChanged: true);
 
             c.calculate(getColumnReturns(['2']));
-            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, localToResolvedAccessed: 2, eval: 1);
 
             c.blurred();
-            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, localToResolvedAccessed: 2, eval: 1);
 
             c.focused();
             c.calculate(getColumnReturns(['2']));
-            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, localToResolvedAccessed: 2, eval: 1);
 
         });
 
@@ -648,6 +688,7 @@ main() {
                 localToCanonical: 1,
                 resolved: "2 * 4,200",
                 localToResolved: 1,
+                localToResolvedAccessed: 2,
                 preview: "2 * 4,200 = 8,400",
                 decimal: 8400, eval: 1);
 
@@ -660,19 +701,20 @@ main() {
                 localToCanonical: 1,
                 resolved: "2 * 4,200",
                 localToResolved: 1,
+                localToResolvedAccessed: 2,
                 preview: "2 * 4,200 = 8,400",
                 decimal: 8400, eval: 1,
                 isChanged: true);
 
             c.calculate(getColumnReturns(['2']));
-            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, localToResolvedAccessed: 2, eval: 1);
 
             c.blurred();
-            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, localToResolvedAccessed: 2, eval: 1);
 
             c.focused();
             c.calculate(getColumnReturns(['2']));
-            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, eval: 1);
+            expectCell(c, canonicalToLocal: 1, localToCanonical: 1, localToResolved: 1, localToResolvedAccessed: 2, eval: 1);
 
         });
 
@@ -720,6 +762,7 @@ main() {
                 localToCanonical: 1,
                 resolved: "2 * 4,200",
                 localToResolved: 1,
+                localToResolvedAccessed: 2,
                 preview: "2 * 4,200 = 8,400",
                 decimal: 8400, eval: 1);
 
@@ -738,7 +781,7 @@ main() {
                 localToResolved: 1,
                 resolved: "2 * 4,200",
                 preview: "2 * 4,200 = 8,400",
-                decimal: 8400, eval: 1);
+                decimal: 8400, eval: 0);
 
             c.text = "4200";
             expectCell(c,
@@ -749,21 +792,21 @@ main() {
                 localToResolved: 1,
                 resolved: "2 * 4,200",
                 preview: "2 * 4,200 = 8,400",
-                decimal: 8400, eval: 1,
+                decimal: 8400, eval: 0,
                 isChanged: true);
 
             c.calculate(getColumnReturns(['2']));
             expectCell(c,
                 text: "4200",
                 canonical: "4200",
-                canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                canonicalToLocal: 1, localToResolved: 1, eval: 0,
                 decimal: 4200);
 
             c.blurred();
             expectCell(c,
                 text: "4,200",
                 canonical: "4200",
-                canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                canonicalToLocal: 1, localToResolved: 1, eval: 0,
                 decimal: 4200);
 
             c.focused();
@@ -771,24 +814,24 @@ main() {
             expectCell(c,
                 text: "4,200",
                 canonical: "4200",
-                canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                canonicalToLocal: 1, localToResolved: 1, eval: 0,
                 decimal: 4200);
 
             c.text = "!*4,200";
             expectCell(c,
                 text: "!*4,200",
                 canonical: "4200",
-                canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                canonicalToLocal: 1, localToResolved: 1, eval: 0,
                 decimal: 4200,
                 isChanged: true);
 
             c.calculate(getColumnReturns(['2']));
-            // ran three parsers: localToCanonical (1st time), localToResolved (2nd time), eval (2nd time)
+            // ran three parsers: localToCanonical (1st time), localToResolved (2nd time), eval (1st time)
             expectCell(c,
                 text: "!*4,200",
                 canonical: "! * 4200",
                 localToCanonical: 1, canonicalToLocal: 1, localToResolved: 1, eval: 1,
-                localToResolvedAccessed: 2, evalAccessed: 2,
+                localToResolvedAccessed: 2,
                 resolved: "2 * 4,200",
                 preview: "2 * 4,200 = 8,400",
                 decimal: 8400);
@@ -799,7 +842,7 @@ main() {
                 text: "8,400",
                 canonical: "! * 4200",
                 localToCanonical: 1, canonicalToLocal: 1, localToResolved: 1, eval: 1,
-                localToResolvedAccessed: 2, evalAccessed: 2,
+                localToResolvedAccessed: 2,
                 resolved: "2 * 4,200",
                 preview: "2 * 4,200 = 8,400",
                 decimal: 8400);
@@ -812,7 +855,7 @@ main() {
                 canonical: "! * 4200",
                 local: "! * 4,200",
                 localToCanonical: 1, canonicalToLocal: 1, localToResolved: 1, eval: 1,
-                canonicalToLocalAccessed: 2, localToResolvedAccessed: 2, evalAccessed: 2,
+                canonicalToLocalAccessed: 2, localToResolvedAccessed: 3,
                 resolved: "2 * 4,200",
                 preview: "2 * 4,200 = 8,400",
                 decimal: 8400);
@@ -826,10 +869,71 @@ main() {
                 canonical: "! * 4200",
                 local: "! * 4,200",
                 localToCanonical: 1, canonicalToLocal: 1, localToResolved: 1, eval: 1,
-                canonicalToLocalAccessed: 2, localToResolvedAccessed: 2, evalAccessed: 2,
+                canonicalToLocalAccessed: 2, localToResolvedAccessed: 3,
                 resolved: "2 * 4,200",
                 preview: "2 * 4,200 = 8,400",
                 decimal: 8400);
+
+        });
+
+        test("equation -> equation", () {
+
+            var c = new TestCell("8,400", "! * 4200", 2);
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "! * 4,200",
+                canonical: "! * 4200",
+                canonicalToLocal: 1,
+                local: "! * 4,200",
+                localToResolved: 1,
+                resolved: "2 * 4,200",
+                preview: "2 * 4,200 = 8,400.00",
+                decimal: 8400, eval: 0);
+
+            c.text = "!*4,200+@";
+            expectCell(c,
+                text: "!*4,200+@",
+                canonical: "! * 4200",
+                canonicalToLocal: 1,
+                local: "! * 4,200",
+                localToResolved: 1,
+                resolved: "2 * 4,200",
+                preview: "2 * 4,200 = 8,400.00",
+                decimal: 8400, eval: 0,
+                isChanged: true);
+
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "!*4,200+@",
+                canonical: "(! * 4200) + @",
+                localToCanonical: 1, canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                canonicalToLocalAccessed: 1, localToResolvedAccessed: 2,
+                resolved: "(2 * 4,200) + 2",
+                preview: "(2 * 4,200) + 2 = 8,402.00",
+                decimal: 8402);
+
+            c.blurred();
+            expectCell(c,
+                text: "8,402.00",
+                canonical: "(! * 4200) + @",
+                localToCanonical: 1, canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                canonicalToLocalAccessed: 1, localToResolvedAccessed: 2,
+                resolved: "(2 * 4,200) + 2",
+                preview: "(2 * 4,200) + 2 = 8,402.00",
+                decimal: 8402);
+
+            c.focused();
+            c.calculate(getColumnReturns(['2']));
+            expectCell(c,
+                text: "(! * 4,200) + @",
+                canonical: "(! * 4200) + @",
+                local: "(! * 4,200) + @",
+                localToCanonical: 1, canonicalToLocal: 1, localToResolved: 1, eval: 1,
+                canonicalToLocalAccessed: 2, localToResolvedAccessed: 3,
+                resolved: "(2 * 4,200) + 2",
+                preview: "(2 * 4,200) + 2 = 8,402.00",
+                decimal: 8402);
 
         });
 

@@ -41,14 +41,13 @@ abstract class Cell {
     static final RegExp ZERO = new RegExp(r"^-?[0.,]*$");
     static final RegExp NUMBER = new RegExp(r"^-?[0-9., ]+$");
     bool _isBlankOrZero(String txt) => txt.isEmpty || ZERO.hasMatch(txt);
-    bool _isNumber(String txt) => txt != null && NUMBER.hasMatch(txt.trim());
-    bool get isCanonicalBlank => canonical == null || _isBlankOrZero(canonical.trim());
+    bool get isCanonicalBlank => _isBlankOrZero(canonical.trim());
     bool get isCanonicalNotBlank => !isCanonicalBlank;
-    bool get isCanonicalNumber => _isNumber(canonical);
+    bool get isCanonicalNumber => NUMBER.hasMatch(canonical.trim());
     bool get isCanonicalEquation => isCanonicalNotBlank && !isCanonicalNumber;
     bool get isTextBlank => _isBlankOrZero(text.trim());
     bool get isTextNotBlank => !isTextBlank;
-    bool get isTextNumber => _isNumber(text);
+    bool get isTextNumber => NUMBER.hasMatch(text.trim());
     bool get isTextEquation => isTextNotBlank && !isTextNumber;
 
     String _previous_text;
@@ -56,6 +55,11 @@ abstract class Cell {
     bool get isFocused; // document.activeElement == this
 
     focused() {
+
+        if (value == null) {
+            value = isTextNumber ? new Decimal.parse(text) : new Decimal(null);
+        }
+
         if (isCanonicalBlank) {
             if (isTextNumber) {
                 if (value == null) {
@@ -65,8 +69,9 @@ abstract class Cell {
             }
             text = "";
         } else if (isCanonicalEquation) {
-            if (local == null) {
+            if (local == "") {
                 local = canonicalToLocal(canonical);
+                resolved = ""; // need to trigger parsing to get new range locations
             }
             text = local;
         }
@@ -86,7 +91,7 @@ abstract class Cell {
                 preview = format(column, value);
             }
         } else {
-            preview = null;
+            preview = "";
         }
     }
 
@@ -116,9 +121,10 @@ abstract class Cell {
                 });
                 text = format(column, value);
 
-                if (local != null) {
-                    if (resolved != null)
+                if (local != "") {
+                    if (resolved != "") {
                         resolved = localToResolved(local);
+                    }
                     _set_preview();
                 }
 
@@ -129,6 +135,8 @@ abstract class Cell {
             if (isFocused) {
 
                 if (isChanged) {
+
+                    local = "";
 
                     if (isTextEquation) {
 
@@ -142,30 +150,36 @@ abstract class Cell {
                             _set_preview();
                         } catch(e) {
                             canonical = _old_canonical;
-                            resolved = '';
-                            preview = e.substring(8);
+                            resolver.withCollectRanges((){
+                                resolved = "";
+                            });
                             value = new Decimal();
+                            preview = e.substring(8);
                         }
 
                     } else {
 
                         value = new Decimal.parse(text);
                         canonical = value.canonical;
-                        local = null;
-                        resolved = null;
-                        preview = null;
+                        resolved = "";
+                        preview = "";
 
                     }
 
                 } else {
 
-                    if (isTextEquation && resolved == null) {
-                        resolver.withCollectRanges(() {
-                            resolved = localToResolved(text);
-                        });
-                        value = eval(canonical);
-                        _set_preview();
+                    if (isTextEquation && resolved == "") {
+                        try {
+                            resolver.withCollectRanges(() {
+                                resolved = localToResolved(text);
+                            });
+                            _set_preview();
+                        } catch(e) {
+                            resolved = "";
+                            preview = "";
+                        }
                     }
+
                 }
 
             }
@@ -350,6 +364,7 @@ class RangeResolver {
     Map<String,RangeResult> results = {};
 
     withCleanCache(Function iterate()) {
+        nextGroup = 1;
         results.values.forEach((r)=>r.reset());
         results = {};
         withCollectRanges(iterate);
@@ -357,7 +372,6 @@ class RangeResolver {
 
     bool _collectRanges = false;
     withCollectRanges(Function iterate()) {
-        nextGroup = 1;
         ranges = [];
         _collectRanges = true;
         iterate();
@@ -425,7 +439,11 @@ abstract class ParseEquation<R> {
 
     _p.Parser<R> buildParser() => expr() < (_p.eof as _p.Parser<R>);
 
-    _p.Parser<R> lexeme(_p.Parser<R> parser) => parser < (_p.spaces as _p.Parser<R>);
+    static final _spaces = " \u{00a0}\t\n\r\v\f";
+    static final _p.Parser<String> space = _p.oneOf(_spaces) % 'space';
+    final _p.Parser<R> spaces = ((space.many > _p.success(null)) % 'spaces') as _p.Parser<R>;
+
+    _p.Parser<R> lexeme(_p.Parser<R> parser) => parser < spaces;
     _p.Parser<R> token(str)               => lexeme(_p.string(str) as _p.Parser<R>);
     _p.Parser<R> parens(parser)           => parser.between(token('('), token(')')) as _p.Parser<R>;
 
