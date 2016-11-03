@@ -57,6 +57,22 @@ main() {
             expect(total('20', '12', '', hasPercent: true), 2.40);
         });
 
+        test("reset previously calculated cells when calculation not possible", () {
+            var r = new TestRow('2', '2', '');
+
+            r.calculate((i)=>[], 0, false);
+            expect(r.total.text, '4.00');
+            expect(r.total.value.decimal, 4);
+
+            r.qty.focused();
+            r.calculate((i)=>[], 0, false);
+            r.qty.text = '';
+
+            r.calculate((i)=>[], 0, false);
+            expect(r.total.text, '');
+            expect(r.total.value.decimal, 0);
+        });
+
     });
 
 }

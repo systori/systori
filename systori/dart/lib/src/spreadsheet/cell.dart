@@ -79,7 +79,7 @@ abstract class Cell {
     }
 
     blurred() {
-        text = format(column, value);
+        text = value.isNonzero ? format(column, value) : "";
         _previous_text = null;
     }
 
@@ -97,10 +97,10 @@ abstract class Cell {
 
     setCalculated(Decimal decimal) {
         value = decimal;
-        if (!isFocused)
-            _previous_text = text = format(column, decimal);
-        else
-            preview = format(column, decimal);
+        preview = value.isNonzero ? format(column, decimal) : "";
+        if (!isFocused) {
+            _previous_text = text = preview;
+        }
     }
 
     calculate(ColumnGetter getColumn, [bool dependenciesChanged=false]) {

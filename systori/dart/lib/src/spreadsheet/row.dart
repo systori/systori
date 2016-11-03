@@ -40,6 +40,15 @@ abstract class Row {
         if (qty.isCanonicalBlank    && price.isCanonicalNotBlank && total.isCanonicalNotBlank)
             qty.setCalculated(total.value / price.value);
 
+        var resetCalculations = columns.where((c)=>c.isCanonicalBlank).length > 1;
+        if (resetCalculations) {
+            columns.forEach((c) {
+                // all purely calculated cells should get reset
+                if (c.isCanonicalBlank)
+                    c.setCalculated(new Decimal());
+            });
+        }
+
     }
 
 }

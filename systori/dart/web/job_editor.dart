@@ -122,7 +122,6 @@ class Group extends Model {
     }
 
     updateCode() {
-        /*
         enumerate/*<Group>*/(this.querySelectorAll(':scope>sys-group'))
             .forEach((IndexedValue<Group> g) {
             g.value.order = g.index+1;
@@ -132,7 +131,6 @@ class Group extends Model {
             .forEach((IndexedValue<Group> g) {
             g.value.order = g.index+1;
         });
-        */
     }
 
     createSibling() {
