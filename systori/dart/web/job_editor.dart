@@ -190,7 +190,7 @@ class HtmlCell extends HighlightableInput with Cell {
     handleInput(KeyboardEvent e) {
         if (e.keyCode == KeyCode.LEFT || e.keyCode == KeyCode.RIGHT) return;
         dispatchCalculate('changed');
-        (parent.parent.parent as LineItem).markRedWhenAllColumnsSet();
+        (parent.parent.parent as HtmlRow).markRedWhenAllColumnsSet();
         doHighlighting();
     }
 
@@ -198,7 +198,7 @@ class HtmlCell extends HighlightableInput with Cell {
         blurred();
 
     dispatchCalculate(String event) =>
-        dispatchEvent(new CustomEvent('calculate.$event', detail: this));
+        dispatchEvent(new CustomEvent('calculate', detail: {'cell': this, 'event': event}));
 
     doHighlighting() {
         if (isTextEquation) {
@@ -208,6 +208,25 @@ class HtmlCell extends HighlightableInput with Cell {
                     COLORS[r.result.group % COLORS.length]))
                 )
             );
+        }
+    }
+
+}
+
+
+abstract class HtmlRow implements Row {
+
+    HtmlCell qty;
+    HtmlCell price;
+    DivElement unit;
+    bool get hasPercent => unit.text.contains('%');
+    HtmlCell total;
+
+    markRedWhenAllColumnsSet() {
+        if (qty.isCanonicalNotBlank && price.isCanonicalNotBlank && total.isCanonicalNotBlank) {
+            [qty,price,total].forEach((Element e)=>e.style.color = 'red');
+        } else {
+            [qty,price,total].forEach((Element e)=>e.style.color = null);
         }
     }
 
@@ -224,16 +243,11 @@ class LineItemCell extends HtmlCell {
 }
 
 
-class Task extends Model with Row {
+class Task extends Model with Row, TotalRow, HtmlRow {
 
     DivElement code;
     DivElement name;
     bool get isEmpty => name.text.isEmpty;
-    DivElement unit;
-    bool get hasPercent => unit.text.contains('%');
-    TaskCell qty;
-    TaskCell price;
-    TaskCell total;
     DivElement diffRow;
     DivElement diffCell;
 
@@ -261,9 +275,10 @@ class Task extends Model with Row {
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
         sheet = this.querySelector(":scope > sys-lineitem-sheet");
-        on['calculate.focused'].listen((CustomEvent e) => calculate(sheet.getColumn, 0, false));
-        on['calculate.changed'].listen((CustomEvent e) => calculate(sheet.getColumn, 0, true));
-        on['calculate.moved'].listen((CustomEvent e) => calculate(sheet.getColumn, 0, true));
+        on['calculate'].listen((CustomEvent e) {
+            if (sheet.total == null) sheet.calculate(qty);
+            calculateTotal(sheet.total);
+        });
     }
 
     handleKeyboard(KeyboardEvent e) {
@@ -292,36 +307,8 @@ class Task extends Model with Row {
         task.name.focus();
     }
 
-    solve() {
-
-        if (qty.isCanonicalNotBlank && price.isCanonicalNotBlank && total.isCanonicalBlank)
-            total.setCalculated(qty.value * price.value); else
-        if (qty.value.isNonzero && price.isCanonicalBlank    && total.isCanonicalNotBlank)
-            price.setCalculated(total.value / qty.value); else
-        if (qty.isCanonicalBlank    && price.value.isNonzero && total.isCanonicalNotBlank)
-            qty.setCalculated(total.value / price.value);
-
-    }
-
-    /*
-    solve() {
-
-        if (qty.isCanonicalBlankNotBlank && total.isBlank) {
-            setDiffCell(new Decimal(0));
-            total.value = qty.value * price.value;
-        } else
-        if (qty.isNotBlank && total.isNotBlank) {
-            var task_price = total.value / qty.value;
-            setDiffCell(task_price  - price.value);
-            price.value = total.value / qty.value;
-        } else
-        if (qty.isBlank && total.isNotBlank) {
-            setDiffCell(new Decimal(0));
-            qty.value = total.value / price.value;
-        }
-    }*/
-
-    setDiffCell(Decimal diff) {
+    setDiff(Decimal diff) {
+        print(diff.decimal);
         if (diff.isZero) {
             diffRow.style.visibility = 'hidden';
             diffCell.text = '0';
@@ -333,16 +320,10 @@ class Task extends Model with Row {
 }
 
 
-class LineItem extends Model with Orderable, Row {
+class LineItem extends Model with Orderable, Row, HtmlRow {
 
     DivElement name;
     bool get isEmpty => name.text.isEmpty;
-    DivElement unit;
-    bool get hasPercent => unit.text.contains('%');
-
-    LineItemCell qty;
-    LineItemCell price;
-    LineItemCell total;
 
     LineItem.created(): super.created() {
         if (children.isEmpty) {
@@ -372,13 +353,6 @@ class LineItem extends Model with Orderable, Row {
         }
     }
 
-    markRedWhenAllColumnsSet() {
-        if (qty.isCanonicalNotBlank && price.isCanonicalNotBlank && total.isCanonicalNotBlank) {
-            [qty,price,total].forEach((Element e)=>e.style.color = 'red');
-        } else {
-            [qty,price,total].forEach((Element e)=>e.style.color = null);
-        }
-    }
 }
 
 
@@ -387,14 +361,19 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
     List<LineItem> get rows => this.querySelectorAll(':scope>sys-lineitem');
 
     LineItemSheet.created(): super.created() {
-        on['calculate.focused'].listen((CustomEvent e) => calculate(e.detail as Cell, focused: true));
-        on['calculate.changed'].listen((CustomEvent e) => calculate(e.detail as Cell, focused: false));
-        on['calculate.moved'].listen((CustomEvent e) => calculate(rows[0].getCell(0), focused: false));
+        on['calculate'].listen((CustomEvent e) {
+            Cell cell = (e.detail as Map)['cell'] as Cell;
+            var event = (e.detail as Map)['event'];
+            if (event == 'focused')
+                calculate(cell, focused: true);
+            else
+                calculate(cell, focused: false);
+        });
         addEventListener('blur', clearHighlighting, true);
     }
 
     onOrderingChanged(Orderable orderable) =>
-        dispatchEvent(new CustomEvent('calculate.moved'));
+        dispatchEvent(new CustomEvent('calculate.moved', detail: {'cell': rows[0].getCell(0), 'event': 'moved'}));
 
     onCalculationFinished(Cell changedCell) {
 

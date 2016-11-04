@@ -13,18 +13,18 @@ abstract class Row {
     Cell getCell(int cell) => columns[cell];
 
     calculate(ColumnGetter getColumn, int row, bool dependenciesChanged) {
-
-        qty.column = 0;
-        price.column = 1;
-        total.column = 2;
-
+        setColumns();
         columns.forEach((cell) {
             cell.row = row;
             cell.calculate(getColumn, dependenciesChanged);
         });
-
         solve();
+    }
 
+    setColumns() {
+        qty.column = 0;
+        price.column = 1;
+        total.column = 2;
     }
 
     solve() {
@@ -50,5 +50,35 @@ abstract class Row {
         }
 
     }
+
+}
+
+
+abstract class TotalRow implements Row {
+
+    calculateTotal(Decimal priceTotal) {
+        setColumns();
+
+        qty.calculate((i)=>[], false);
+        price.calculate((i)=>[], false);
+        if (price.isCanonicalBlank)
+            price.setCalculated(priceTotal);
+        total.calculate((i)=>[], false);
+
+        var _qty = qty.value;
+        if (hasPercent && qty.value.isNonzero)
+            _qty = qty.value / new Decimal(100);
+
+        if (qty.value.isNonzero  && price.value.isNonzero  && total.isCanonicalBlank)
+            total.setCalculated(_qty * price.value); else
+        if (qty.value.isNonzero  && price.isCanonicalBlank && total.isCanonicalNotBlank)
+            price.setCalculated(total.value / _qty); else
+        if (qty.isCanonicalBlank && price.value.isNonzero  && total.isCanonicalNotBlank)
+            qty.setCalculated(total.value / price.value);
+
+        setDiff(priceTotal  - price.value);
+    }
+
+    setDiff(Decimal decimal);
 
 }

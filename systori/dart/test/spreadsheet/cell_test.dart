@@ -970,7 +970,7 @@ main() {
             var c = new TestCell("", "", 2);
             expectCell(c);
             c.setCalculated(new Decimal(93));
-            expectCell(c, text: "93.00", decimal: 93);
+            expectCell(c, text: "93.00", preview: "93.00", decimal: 93);
             c.focused();
             c.calculate((i)=>[]);
             expectCell(c, text: "", preview: "93.00", decimal: 93);

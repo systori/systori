@@ -5,7 +5,7 @@ Decimal sum(Iterable<Decimal> decimals) => decimals.reduce((i, j) => i + j);
 
 
 makeNumberFormat() => new NumberFormat("#,###,###,##0.####");
-makeMoneyFormat() => new NumberFormat("#,###,###,##0.00");
+makeMoneyFormat() => new NumberFormat("#,###,###,##0.00#");
 
 
 class Decimal implements Comparable<Decimal> {

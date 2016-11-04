@@ -112,7 +112,57 @@ abstract class Cell {
             value = isTextNumber ? new Decimal.parse(text) : new Decimal(null);
         }
 
-        if (dependenciesChanged) {
+        if (isFocused) {
+
+            if (isChanged) {
+
+                local = "";
+
+                if (isTextEquation) {
+
+                    var _old_canonical = canonical;
+                    try {
+                        canonical = localToCanonical(text);
+                        resolver.withCollectRanges(() {
+                            resolved = localToResolved(text);
+                        });
+                        value = eval(canonical);
+                        _set_preview();
+                    } catch(e) {
+                        canonical = _old_canonical;
+                        resolver.withCollectRanges((){
+                            resolved = "";
+                        });
+                        value = new Decimal();
+                        preview = e.substring(8);
+                    }
+
+                } else {
+
+                    value = new Decimal.parse(text);
+                    canonical = value.canonical;
+                    resolved = "";
+                    preview = "";
+
+                }
+
+            } else {
+
+                if (isTextEquation && resolved == "") {
+                    try {
+                        resolver.withCollectRanges(() {
+                            resolved = localToResolved(text);
+                        });
+                        _set_preview();
+                    } catch(e) {
+                        resolved = "";
+                        preview = "";
+                    }
+                }
+
+            }
+
+        } else if (dependenciesChanged) {
 
             if (isCanonicalEquation) {
 
@@ -130,59 +180,6 @@ abstract class Cell {
 
             }
 
-        } else {
-
-            if (isFocused) {
-
-                if (isChanged) {
-
-                    local = "";
-
-                    if (isTextEquation) {
-
-                        var _old_canonical = canonical;
-                        try {
-                            canonical = localToCanonical(text);
-                            resolver.withCollectRanges(() {
-                                resolved = localToResolved(text);
-                            });
-                            value = eval(canonical);
-                            _set_preview();
-                        } catch(e) {
-                            canonical = _old_canonical;
-                            resolver.withCollectRanges((){
-                                resolved = "";
-                            });
-                            value = new Decimal();
-                            preview = e.substring(8);
-                        }
-
-                    } else {
-
-                        value = new Decimal.parse(text);
-                        canonical = value.canonical;
-                        resolved = "";
-                        preview = "";
-
-                    }
-
-                } else {
-
-                    if (isTextEquation && resolved == "") {
-                        try {
-                            resolver.withCollectRanges(() {
-                                resolved = localToResolved(text);
-                            });
-                            _set_preview();
-                        } catch(e) {
-                            resolved = "";
-                            preview = "";
-                        }
-                    }
-
-                }
-
-            }
         }
 
         _previous_text = text;

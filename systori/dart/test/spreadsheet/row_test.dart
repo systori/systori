@@ -1,6 +1,5 @@
 @TestOn("vm")
 import 'package:test/test.dart';
-import 'package:quiver/iterables.dart';
 import 'package:systori/decimal.dart';
 import 'package:systori/spreadsheet.dart';
 import 'cell_test.dart';
@@ -11,12 +10,23 @@ class TestRow extends Row {
     Cell price;
     Cell total;
     bool hasPercent=false;
-    TestRow(qty, price, total, [hasPercent = false]):
+    TestRow(String qty, String price, String total, [hasPercent = false]):
         qty = new TestCell(qty, qty, 0),
         price = new TestCell(price, price, 1),
         total = new TestCell(total, total, 2),
         hasPercent = hasPercent;
+    TestRow.dartSdkBug27754(qty, price, total, hasPercent):
+            this(qty, price, total, hasPercent);
 }
+
+
+class TestTotalRow extends TestRow with TotalRow {
+    Decimal diff;
+    TestTotalRow(String qty, String price, String total, [hasPercent = false]):
+            super.dartSdkBug27754(qty, price, total, hasPercent);
+    setDiff(Decimal decimal) => diff = decimal;
+}
+
 
 Row row(String qty, String price, String total, [hasPercent=false]) =>
     new TestRow(qty, price, total, hasPercent);
@@ -75,4 +85,43 @@ main() {
 
     });
 
+    group("TotalRow.calculate()", () {
+
+        test("can't calculate", () {
+            var r = new TestTotalRow('', '', '');
+            r.calculateTotal(new Decimal(5));
+            expect(r.qty.value.decimal, null);
+            expect(r.price.value.decimal, 5);
+            expect(r.total.value.decimal, null);
+            expect(r.diff.decimal, 0);
+        });
+
+        test("fully calculated", () {
+            var r = new TestTotalRow('3', '', '');
+            r.calculateTotal(new Decimal(5));
+            expect(r.qty.value.decimal, 3);
+            expect(r.price.value.decimal, 5);
+            expect(r.total.value.decimal, 15);
+            expect(r.diff.decimal, 0);
+        });
+
+        test("reverse calculating price", () {
+            var r = new TestTotalRow('3', '2', '');
+            r.calculateTotal(new Decimal(5));
+            expect(r.qty.value.decimal, 3);
+            expect(r.price.value.decimal, 2);
+            expect(r.total.value.decimal, 6);
+            expect(r.diff.decimal, 3);
+        });
+
+        test("reverse calculating total", () {
+            var r = new TestTotalRow('3', '', '12');
+            r.calculateTotal(new Decimal(2));
+            expect(r.qty.value.decimal, 3);
+            expect(r.price.value.decimal, 4);
+            expect(r.total.value.decimal, 12);
+            expect(r.diff.decimal, -2);
+        });
+
+    });
 }
