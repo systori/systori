@@ -123,14 +123,12 @@
 
     /* task, lineitem */
 
-    sys-task {
-      padding-bottom: 20px;
+    [contenteditable]:focus {
+      outline: none;
     }
 
-    .qty {
-      flex: 0 0 auto;
-      width: 100px;
-      text-align: right;
+    sys-task {
+      padding-bottom: 20px;
     }
 
     .unit {
@@ -140,7 +138,7 @@
     }
 
     sys-lineitem > .editor .total,
-    .price {
+    .qty, .price {
       flex: 0 0 auto;
       width: 100px;
       text-align: right;
@@ -154,7 +152,6 @@
 
     sys-task > .editor .price {
       position: relative;
-      font-weight: bold;
       border: 1px solid black;
       margin-left: 10px;
     }
@@ -207,7 +204,7 @@
       color: red;
       font-weight: bold;
       border-color: red;
-      min-width: 80px;
+      min-width: 100px;
     }
 
     sys-task > .editor:not(:only-child):after {
@@ -233,6 +230,75 @@
       border-right: 1px solid #e9e9e9;
       z-index: -1;
     }
+
+    /* line item */
+
+    sys-lineitem {
+      background-color: white;
+    }
+
+    sys-lineitem > a {
+      position: absolute;
+      top: -150px;
+    }
+
+    sys-lineitem,
+    .sys-lineitem-placeholder {
+      margin-bottom: 10px;
+    }
+
+    sys-cell[data-canonical=""] {
+      font-weight: bold;
+    }
+
+    sys-cell[data-resolved] {
+      font-style: italic;
+    }
+
+    sys-cell {
+      position: relative;
+    }
+
+    sys-cell:focus {
+      outline: none;
+    }
+
+    sys-lineitem sys-cell[data-preview]:focus:after {
+      display: block;
+      position: absolute;
+      content: attr(data-preview);
+      font-size: 10px;
+      color: dimgrey;
+      bottom: -10px;
+      right: 4px;
+      width: 400px;
+    }
+
+    .sys-lineitem-handle {
+      cursor: pointer;
+    }
+
+    sys-lineitem-sheet {
+      -webkit-user-select: none;
+      user-select: none;
+      margin-left: 100px;
+      display: block;
+      position: relative;
+    }
+
+    sys-lineitem-sheet:after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 1px;
+      top: 0px;
+      bottom: 0px;
+      right: 100px;
+      border-right: 1px solid #e9e9e9;
+      z-index: -1;
+    }
+
+    /* description */
 
     sys-job > .editor .description {
       margin-right: 180px;
@@ -273,82 +339,15 @@
       display: inline;
     }
 
-    /* line item */
+    /* other */
 
-    sys-lineitem {
-      background-color: white;
-    }
-
-    sys-lineitem > a {
-      position: absolute;
-      top: -150px;
-    }
-
-    sys-lineitem,
-    .sys-lineitem-placeholder {
-      margin-bottom: 10px;
-    }
-
-    sys-lineitem-cell[data-canonical=""] {
-      font-weight: bold;
-    }
-
-    sys-lineitem-cell[data-resolved] {
-      font-style: italic;
-    }
-
-    sys-lineitem-cell {
-      position: relative;
-    }
-
-    sys-lineitem-cell:focus {
-      position: relative;
-      outline: none;
-    }
-
-    sys-lineitem-cell[data-preview]:focus:after {
-      display: block;
-      position: absolute;
-      content: attr(data-preview);
-      font-size: 10px;
-      color: dimgrey;
-      bottom: -10px;
-      right: 4px;
-      width: 400px;
-    }
-
-    .sys-lineitem-handle {
-      cursor: pointer;
-    }
-
-    sys-lineitem-sheet {
-      -webkit-user-select: none;
-      user-select: none;
-      margin-left: 100px;
-      display: block;
-      position: relative;
-    }
-
-    sys-lineitem-sheet:after {
-      display: block;
-      position: absolute;
-      content: "";
-      width: 1px;
-      top: 0px;
-      bottom: 0px;
-      right: 100px;
-      border-right: 1px solid #e9e9e9;
-      z-index: -1;
-    }
-
-
-    div[contenteditable][placeholder]:empty:before {
+    [contenteditable][placeholder]:empty:before {
       content: attr(placeholder);
       font-style: italic;
       color: #d9d9d9;
     }
 
-    div[contenteditable][placeholder]:empty:focus:before {
+    [contenteditable][placeholder]:empty:focus:before {
       content: "";
     }
 

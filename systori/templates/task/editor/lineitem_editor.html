@@ -3,11 +3,11 @@
 <div class="editor">
   <div class="editor-row">
     <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
-    <div               class="name"  placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name|safe }}</div>
-    <sys-lineitem-cell class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ lineitem.qty_equation }}"   contenteditable>{{ lineitem.qty|ubrdecimal }}</sys-lineitem-cell>
-    <div               class="unit"  placeholder="{% trans 'unit' %}"                                                 contenteditable>{{ lineitem.unit }}</div>
-    <sys-lineitem-cell class="price" placeholder="{% trans 'price' %}" data-canonical="{{ lineitem.price_equation }}" contenteditable>{{ lineitem.price|ubrdecimal }}</sys-lineitem-cell>
-    <sys-lineitem-cell class="total" placeholder="{% trans 'total' %}" data-canonical="{{ lineitem.total_equation }}" contenteditable>{{ lineitem.total|ubrdecimal:3 }}</sys-lineitem-cell>
+    <div      class="name"  placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name|safe }}</div>
+    <sys-cell class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ lineitem.qty_equation }}"   contenteditable>{{ lineitem.qty|ubrdecimal }}</sys-cell>
+    <div      class="unit"  placeholder="{% trans 'unit' %}"                                                 contenteditable>{{ lineitem.unit }}</div>
+    <sys-cell class="price" placeholder="{% trans 'price' %}" data-canonical="{{ lineitem.price_equation }}" contenteditable>{{ lineitem.price|ubrdecimal }}</sys-cell>
+    <sys-cell class="total" placeholder="{% trans 'total' %}" data-canonical="{{ lineitem.total_equation }}" contenteditable>{{ lineitem.total|ubrdecimal:3 }}</sys-cell>
     <div class="actions">
       <span class="is_hidden glyphicon glyphicon-eye-close {{ lineitem.is_hidden }}"></span>
       <span class="is_flagged glyphicon glyphicon-flag {{ lineitem.is_flagged }}"></span>

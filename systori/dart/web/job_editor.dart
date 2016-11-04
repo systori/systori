@@ -233,16 +233,6 @@ abstract class HtmlRow implements Row {
 }
 
 
-class TaskCell extends HtmlCell {
-    TaskCell.created(): super.created();
-}
-
-
-class LineItemCell extends HtmlCell {
-    LineItemCell.created(): super.created();
-}
-
-
 class Task extends Model with Row, TotalRow, HtmlRow {
 
     DivElement code;
@@ -366,14 +356,16 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
             var event = (e.detail as Map)['event'];
             if (event == 'focused')
                 calculate(cell, focused: true);
+            else if (event == 'moved')
+                calculate(cell, moved: true);
             else
-                calculate(cell, focused: false);
+                calculate(cell);
         });
         addEventListener('blur', clearHighlighting, true);
     }
 
     onOrderingChanged(Orderable orderable) =>
-        dispatchEvent(new CustomEvent('calculate.moved', detail: {'cell': rows[0].getCell(0), 'event': 'moved'}));
+        dispatchEvent(new CustomEvent('calculate', detail: {'cell': rows[0].getCell(0), 'event': 'moved'}));
 
     onCalculationFinished(Cell changedCell) {
 
@@ -399,7 +391,7 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
         for (int rowIdx = 0; rowIdx < matrix.length; rowIdx++) {
             var row = rows[rowIdx];
             for (int colIdx = 0; colIdx < 3; colIdx++) {
-                var col = row.getCell(colIdx) as LineItemCell;
+                var col = row.getCell(colIdx) as HtmlCell;
                 var group = matrix[rowIdx][colIdx];
                 switch(group) {
                     case -1: col.style.background = '#D41351'; break;
@@ -424,10 +416,9 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
 
 void main() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
-    document.registerElement('sys-lineitem-cell', LineItemCell);
+    document.registerElement('sys-cell', HtmlCell);
     document.registerElement('sys-lineitem', LineItem);
     document.registerElement('sys-lineitem-sheet', LineItemSheet);
-    document.registerElement('sys-task-cell', TaskCell);
     document.registerElement('sys-task', Task);
     document.registerElement('sys-job', Job);
     document.registerElement('sys-group', Group);
