@@ -111,7 +111,7 @@ main() {
             expect(r.qty.value.decimal, 3);
             expect(r.price.value.decimal, 2);
             expect(r.total.value.decimal, 6);
-            expect(r.diff.decimal, 3);
+            expect(r.diff.decimal, -3);
         });
 
         test("reverse calculating total", () {
@@ -120,7 +120,7 @@ main() {
             expect(r.qty.value.decimal, 3);
             expect(r.price.value.decimal, 4);
             expect(r.total.value.decimal, 12);
-            expect(r.diff.decimal, -2);
+            expect(r.diff.decimal, 2);
         });
 
     });

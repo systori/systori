@@ -304,7 +304,7 @@ class Task extends Model with Row, TotalRow, HtmlRow {
             diffCell.text = '0';
         } else {
             diffRow.style.visibility = 'visible';
-            diffCell.text = diff.money;
+            diffCell.text = diff.difference;
         }
     }
 }

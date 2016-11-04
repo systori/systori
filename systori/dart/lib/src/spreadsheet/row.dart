@@ -69,7 +69,7 @@ abstract class TotalRow implements Row {
         if (qty.isCanonicalBlank && price.value.isNonzero  && total.isCanonicalNotBlank)
             qty.setCalculated(total.value / price.value);
 
-        setDiff(priceTotal  - price.value);
+        setDiff(price.value - priceTotal);
     }
 
     setDiff(Decimal decimal);

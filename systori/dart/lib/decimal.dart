@@ -6,16 +6,19 @@ Decimal sum(Iterable<Decimal> decimals) => decimals.reduce((i, j) => i + j);
 
 makeNumberFormat() => new NumberFormat("#,###,###,##0.####");
 makeMoneyFormat() => new NumberFormat("#,###,###,##0.00#");
+makeDifferenceFormat() => new NumberFormat("+#,###,###,##0.00#");
 
 
 class Decimal implements Comparable<Decimal> {
 
     static NumberFormat MONEY = makeMoneyFormat();
     static NumberFormat NUMBER = makeNumberFormat();
+    static NumberFormat DIFFERENCE = makeDifferenceFormat();
     static NumberFormat CANONICAL = new NumberFormat("0.####", "en");
     static updateFormats() {
         MONEY = makeMoneyFormat();
         NUMBER = makeNumberFormat();
+        DIFFERENCE = makeDifferenceFormat();
     }
 
     final int _decimal;
@@ -29,6 +32,7 @@ class Decimal implements Comparable<Decimal> {
     double get decimal => isNull ? _decimal : _decimal / _precision;
     String get money => isNull ? "" : MONEY.format(decimal);
     String get number => isNull ? "" : NUMBER.format(decimal);
+    String get difference => isNull ? "" : DIFFERENCE.format(decimal);
     String get canonical => isNull ? "" : CANONICAL.format(decimal);
 
     Decimal([num number=0, precision=1000]):
