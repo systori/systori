@@ -10,7 +10,7 @@ abstract class Spreadsheet {
     List<Row> iterated;
     bool get hasNeverBeenCalculated => iterated == null;
 
-    Decimal calculate(Cell changedCell, {focused: true}) {
+    Decimal calculate(Cell changedCell, {focused: false}) {
         iterated = [];
         total = new Decimal();
         changedCell.row = -1;

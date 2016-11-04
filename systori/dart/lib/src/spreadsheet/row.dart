@@ -13,21 +13,15 @@ abstract class Row {
     Cell getCell(int cell) => columns[cell];
 
     calculate(ColumnGetter getColumn, int row, bool dependenciesChanged) {
-        setColumns();
+
+        qty.column = 0;
+        price.column = 1;
+        total.column = 2;
+
         columns.forEach((cell) {
             cell.row = row;
             cell.calculate(getColumn, dependenciesChanged);
         });
-        solve();
-    }
-
-    setColumns() {
-        qty.column = 0;
-        price.column = 1;
-        total.column = 2;
-    }
-
-    solve() {
 
         var _qty = qty.value;
         if (hasPercent && qty.isCanonicalNotBlank)
@@ -57,7 +51,6 @@ abstract class Row {
 abstract class TotalRow implements Row {
 
     calculateTotal(Decimal priceTotal) {
-        setColumns();
 
         qty.calculate((i)=>[], false);
         price.calculate((i)=>[], false);

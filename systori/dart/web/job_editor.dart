@@ -267,11 +267,11 @@ class Task extends Model with Row, TotalRow, HtmlRow {
         }
         code = getView("code");
         name = getInput("name");
-        name.onKeyDown.listen(handleKeyboard);
         qty = getInput("qty");
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
+        this.querySelectorAll(':scope>.editor [contenteditable]').onKeyDown.listen(handleKeyboard);
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
         sheet = this.querySelector(":scope > sys-lineitem-sheet");
@@ -336,7 +336,7 @@ class LineItem extends Model with Orderable, Row, HtmlRow {
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
-        this.querySelectorAll(':scope>.editor>.editor-row>div[contenteditable]').onKeyDown.listen(handleKeyboard);
+        this.querySelectorAll(':scope>.editor [contenteditable]').onKeyDown.listen(handleKeyboard);
     }
 
     handleKeyboard(KeyboardEvent e) {

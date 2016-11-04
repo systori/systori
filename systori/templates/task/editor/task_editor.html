@@ -22,7 +22,7 @@
     </sys-lineitem>
   {% endfor %}
 </sys-lineitem-sheet>
-<div class="price-difference">
+<div class="price-difference" style="visibility: hidden;">
   <span class="glyphicon glyphicon-exclamation-sign"></span>
   <div class="name">{% trans 'Line items do not add up to the task price.' %}</div>
   <div class="total">{{ task.price_difference|ubrdecimal:3 }}</div>
