@@ -1,4 +1,5 @@
-from tastypie.api import Api
+from rest_framework.routers import DefaultRouter
 
-api = Api()
-urlpatterns = api.urls
+router = DefaultRouter()
+urlpatterns = router.urls
+

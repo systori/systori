@@ -17,8 +17,6 @@ SHARED_MODELS = [
     'company.access',
     'company.worker',
     'user.user',
-    'tastypie.apiaccess',
-    'tastypie.apikey'
 ]
 
 BROKER_URL = 'amqp://guest:guest@192.168.0.99:5672//'
@@ -62,7 +60,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'django_dartium',
-    'tastypie',
     'rest_framework',
     'ordered_model',
     'bootstrapform',

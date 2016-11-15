@@ -1,12 +1,11 @@
 from django.test import TestCase
-from django.test.client import Client
+from rest_framework.test import APIClient
 from django.conf import settings
-from tastypie.test import TestApiClient, ResourceTestCaseMixin
 
 from systori.apps.company.factories import CompanyFactory
 
 
-class SubdomainClient(Client):
+class SubdomainClient(APIClient):
     """
     Enable Systori HTTP_HOST/subdomain functionality on test client requests
     """
@@ -19,23 +18,6 @@ class SubdomainClient(Client):
 
 class SystoriTestCase(TestCase):
     client_class = SubdomainClient
-
-
-class SubdomainApiClient(TestApiClient):
-
-    def __init__(self):
-        super().__init__()
-        self.client = SubdomainClient()
-
-
-class ApiTestCase(ResourceTestCaseMixin, SystoriTestCase):
-
-    def setUp(self):
-        super().setUp()
-        self.api_client = SubdomainApiClient()
-
-    def get_credentials(self):
-        return self.create_basic('test@systori.com', 'open sesame')
 
 
 def template_debug_output():
