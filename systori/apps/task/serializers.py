@@ -63,7 +63,7 @@ class LineItemSerializer(serializers.ModelSerializer):
             'qty', 'qty_equation',
             'unit',
             'price', 'price_equation',
-            'total', 'total_equation'
+            'total', 'total_equation',
             'is_flagged',
             'is_hidden',
         ]
@@ -79,6 +79,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = [
+            'group',
             'name', 'description', 'order',
             'qty', 'qty_equation',
             'unit',
@@ -90,12 +91,12 @@ class TaskSerializer(serializers.ModelSerializer):
         ]
 
     @staticmethod
-    def create(validated_data, group):
+    def create(validated_data):
         lineitems = validated_data.pop('lineitems', [])
-        task = Task.objects.create(group=group, **validated_data)
+        task = Task.objects.create(**validated_data)
         for lineitem in lineitems:
             LineItemSerializer.create(lineitem, task=task)
-        return group
+        return task
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -115,7 +116,8 @@ class GroupSerializer(serializers.ModelSerializer):
         groups = validated_data.pop('groups', [])
         group = Group.objects.create(parent=parent, **validated_data)
         for task in tasks:
-            TaskSerializer.create(task, group=group)
+            task['group'] = group
+            TaskSerializer.create(task)
         for subgroup in groups:
             GroupSerializer.create(subgroup, parent=group)
         return group

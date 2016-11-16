@@ -244,16 +244,16 @@ class Job(Group):
 
 class Task(OrderedModel):
     name = models.CharField(_("Name"), max_length=512)
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
     qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
-    qty_equation = models.CharField(max_length=512)
+    qty_equation = models.CharField(max_length=512, blank=True)
     complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=0.0)
-    unit = models.CharField(_("Unit"), max_length=512)
+    unit = models.CharField(_("Unit"), max_length=512, blank=True)
     price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=0.0)
-    price_equation = models.CharField(max_length=512)
+    price_equation = models.CharField(max_length=512, blank=True)
     total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=0.0)
-    total_equation = models.CharField(max_length=512)
+    total_equation = models.CharField(max_length=512, blank=True)
 
     started_on = models.DateField(blank=True, null=True)
     completed_on = models.DateField(blank=True, null=True)
@@ -365,19 +365,19 @@ class Task(OrderedModel):
 
 class LineItem(OrderedModel):
 
-    name = models.CharField(_("Name"), max_length=512)
+    name = models.CharField(_("Name"), max_length=512, blank=True)
 
     qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
-    qty_equation = models.CharField(max_length=512)
+    qty_equation = models.CharField(max_length=512, blank=True)
     complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=0.0)
 
-    unit = models.CharField(_("Unit"), max_length=512)
+    unit = models.CharField(_("Unit"), max_length=512, blank=True)
 
     price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=0.0)
-    price_equation = models.CharField(max_length=512)
+    price_equation = models.CharField(max_length=512, blank=True)
 
     total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=0.0)
-    total_equation = models.CharField(max_length=512)
+    total_equation = models.CharField(max_length=512, blank=True)
 
     # flagged items will appear in the project dashboard as needing attention
     # could be set automatically by the system from temporal triggers (materials should have been delivered by now)
