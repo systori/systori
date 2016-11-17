@@ -22,8 +22,8 @@ from systori.lib.accounting.tools import Amount as A
 DART_APP_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 
-def write_test_html(name, html):
-    file_path = os.path.join(DART_APP_ROOT, 'test', name+'_test.html')
+def write_test_html(path, name, html):
+    file_path = os.path.join(DART_APP_ROOT, 'test', path, name+'_test.html')
     with open(file_path, 'wb') as test_file:
         test_file.write(html)
         test_file.write(b'<link rel="x-dart-test" href="'+name.encode()+b'_test.dart">\n')
@@ -84,22 +84,22 @@ def generate_pages():
     client.login(username=data.user.email, password='open sesame')
 
     job_editor = client.get(reverse('tasks', args=[data.project.id, data.job1.id]), HTTP_HOST=host)
-    write_test_html('job_editor', job_editor.content)
+    write_test_html('editor', 'job_editor', job_editor.content)
 
-    proposal_create = client.get(reverse('proposal.create', args=[data.project.id]), HTTP_HOST=host)
-    write_test_html('proposal_editor', proposal_create.content)
+    #proposal_create = client.get(reverse('proposal.create', args=[data.project.id]), HTTP_HOST=host)
+    #write_test_html('apps', 'proposal_editor', proposal_create.content)
 
     payment_create = client.get(reverse('payment.create', args=[data.project.id]), HTTP_HOST=host)
-    write_test_html('payment_editor', payment_create.content)
+    write_test_html('apps', 'payment_editor', payment_create.content)
 
     adjustment_create = client.get(reverse('adjustment.create', args=[data.project.id]), HTTP_HOST=host)
-    write_test_html('adjustment_editor', adjustment_create.content)
+    write_test_html('apps', 'adjustment_editor', adjustment_create.content)
 
     refund_create = client.get(reverse('refund.create', args=[data.project.id]), HTTP_HOST=host)
-    write_test_html('refund_editor', refund_create.content)
+    write_test_html('apps', 'refund_editor', refund_create.content)
 
     activate('de')
-    write_test_html('amount', generate_amount_test_html(data))
+    write_test_html('inputs', 'amount', generate_amount_test_html(data))
 
 
 if __name__ == "__main__":

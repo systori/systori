@@ -4,7 +4,7 @@ from .models import Group, Task, LineItem
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 from ..project.factories import ProjectFactory
-from .factories import JobFactory, GroupFactory
+from .factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 
 
 class BaseTestCase(SystoriTestCase):
@@ -74,3 +74,20 @@ class TaskApiTest(BaseTestCase):
         self.assertEqual('lineitem', task.lineitems.all()[0].name)
         self.assertEqual('lineitem 2', task.lineitems.all()[1].name)
 
+    def test_update(self):
+        group = GroupFactory(name='group for update', parent=JobFactory(project=ProjectFactory()))
+        task = TaskFactory(group=group)
+        lineitem = LineItemFactory(task=task)
+        response = self.client.patch(
+            reverse('task-detail', args=[task.pk]), {
+                'qty': 11,
+                'lineitems': [
+                    {'id': lineitem.pk, 'qty': 22},
+                ]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        task = group.tasks.all()[0]
+        self.assertEqual(11, task.qty)
+        self.assertEqual(22, task.lineitems.all()[0].qty)

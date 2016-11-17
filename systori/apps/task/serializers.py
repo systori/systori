@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
 from .models import Group, Task, LineItem
 
 
@@ -56,10 +57,12 @@ class RecursiveField(serializers.Field):
 
 
 class LineItemSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = LineItem
         fields = [
-            'name', 'order',
+            'id', 'name', 'order',
             'qty', 'qty_equation',
             'unit',
             'price', 'price_equation',
@@ -69,8 +72,18 @@ class LineItemSerializer(serializers.ModelSerializer):
         ]
 
     @staticmethod
-    def create(validated_data, task=None):
-        return LineItem.objects.create(task=task, **validated_data)
+    def create_or_update_many(lineitems, task):
+        for lineitem_data in lineitems:
+            if 'id' in lineitem_data:
+                lineitem = get_object_or_404(
+                    LineItem.objects.all(),
+                    id=lineitem_data.pop('id')
+                )
+                for attr, val in lineitem_data.items():
+                    setattr(lineitem, attr, val)
+                lineitem.save()
+            else:
+                LineItem.objects.create(task=task, **lineitem_data)
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -90,12 +103,16 @@ class TaskSerializer(serializers.ModelSerializer):
             'lineitems',
         ]
 
-    @staticmethod
-    def create(validated_data):
+    def create(self, validated_data):
         lineitems = validated_data.pop('lineitems', [])
         task = Task.objects.create(**validated_data)
-        for lineitem in lineitems:
-            LineItemSerializer.create(lineitem, task=task)
+        LineItemSerializer.create_or_update_many(lineitems, task)
+        return task
+
+    def update(self, task, validated_data):
+        lineitems = validated_data.pop('lineitems', [])
+        super().update(task, validated_data)
+        LineItemSerializer.create_or_update_many(lineitems, task)
         return task
 
 
