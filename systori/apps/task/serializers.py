@@ -57,12 +57,13 @@ class RecursiveField(serializers.Field):
 
 
 class LineItemSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(required=False)
+    pk = serializers.IntegerField(required=False)
+    token = serializers.IntegerField(required=False)
 
     class Meta:
         model = LineItem
         fields = [
-            'id', 'name', 'order',
+            'token', 'pk', 'name', 'order',
             'qty', 'qty_equation',
             'unit',
             'price', 'price_equation',
@@ -73,26 +74,32 @@ class LineItemSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def create_or_update_many(lineitems, task):
+        data = []
         for lineitem_data in lineitems:
-            if 'id' in lineitem_data:
+            if 'token' in lineitem_data:
+                token = lineitem_data.pop('token')
+                lineitem = LineItem.objects.create(task=task, **lineitem_data)
+                data.append({'pk': lineitem.pk, 'token': token})
+            elif 'pk' in lineitem_data:
                 lineitem = get_object_or_404(
                     LineItem.objects.all(),
-                    id=lineitem_data.pop('id')
+                    id=lineitem_data.pop('pk')
                 )
                 for attr, val in lineitem_data.items():
                     setattr(lineitem, attr, val)
                 lineitem.save()
-            else:
-                LineItem.objects.create(task=task, **lineitem_data)
+                data.append({'pk': lineitem.pk})
+        return data
 
 
 class TaskSerializer(serializers.ModelSerializer):
     lineitems = LineItemSerializer(many=True)
+    token = serializers.IntegerField(required=False)
 
     class Meta:
         model = Task
         fields = [
-            'group',
+            'token', 'group',
             'name', 'description', 'order',
             'qty', 'qty_equation',
             'unit',
@@ -104,37 +111,55 @@ class TaskSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        token = validated_data.pop('token')
         lineitems = validated_data.pop('lineitems', [])
         task = Task.objects.create(**validated_data)
-        LineItemSerializer.create_or_update_many(lineitems, task)
-        return task
+        self._data = {
+            'pk': task.pk,
+            'token': token,
+        }
+        changed_lineitems = LineItemSerializer.create_or_update_many(lineitems, task)
+        if changed_lineitems: self._data['lineitems'] = changed_lineitems
+        return self._data
 
     def update(self, task, validated_data):
         lineitems = validated_data.pop('lineitems', [])
         super().update(task, validated_data)
-        LineItemSerializer.create_or_update_many(lineitems, task)
-        return task
+        self._data = {'pk': task.pk}
+        changed_lineitems = LineItemSerializer.create_or_update_many(lineitems, task)
+        if changed_lineitems: self._data['lineitems'] = changed_lineitems
+        return self._data
 
 
 class GroupSerializer(serializers.ModelSerializer):
     groups = RecursiveField(required=False)
     tasks = TaskSerializer(many=True, required=False)
+    token = serializers.IntegerField(required=False)
 
     class Meta:
         model = Group
         fields = [
-            'name', 'description', 'order',
+            'token', 'name', 'description', 'order',
             'groups', 'tasks'
         ]
 
-    @staticmethod
-    def create(validated_data, parent=None):
+    def create(self, validated_data, parent=None):
+        token = validated_data.pop('token')
         tasks = validated_data.pop('tasks', [])
         groups = validated_data.pop('groups', [])
         group = Group.objects.create(parent=parent, **validated_data)
+        data = {'pk': group.pk, 'token': token}
         for task in tasks:
+            if 'tasks' not in data: data['tasks'] = []
             task['group'] = group
-            TaskSerializer.create(task)
+            data['tasks'].append(TaskSerializer.create(task))
         for subgroup in groups:
-            GroupSerializer.create(subgroup, parent=group)
-        return group
+            if 'groups' not in data: data['groups'] = []
+            data['groups'].append(GroupSerializer().create(subgroup, parent=group))
+        self._data = data
+        return data
+
+    def update(self, group, validated_data):
+        super().update(group, validated_data)
+        self._data = {'pk': group.pk}
+        return self._data

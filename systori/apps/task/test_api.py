@@ -1,3 +1,4 @@
+import json
 from django.core.urlresolvers import reverse
 from systori.lib.testing import SystoriTestCase
 from .models import Group, Task, LineItem
@@ -20,11 +21,11 @@ class GroupApiTest(BaseTestCase):
     def test_create(self):
         response = self.client.post(
             reverse('group-list'), {
-                'name': 'test group',
+                'token': 7, 'name': 'test group',
                 'groups': [
-                    {'name': 'sub group'},
-                    {'name': 'sub group 2', 'groups': [
-                        {'name': 'sub sub group'},
+                    {'token': 8, 'name': 'sub group'},
+                    {'token': 9, 'name': 'sub group 2', 'groups': [
+                        {'token': 10, 'name': 'sub sub group'},
                     ]}
                 ]
             },
@@ -37,6 +38,16 @@ class GroupApiTest(BaseTestCase):
         self.assertEqual('sub group', group.groups.all()[0].name)
         self.assertEqual('sub group 2', group.groups.all()[1].name)
         self.assertEqual('sub sub group', group.groups.all()[1].groups.all()[0].name)
+        self.assertDictEqual({
+            'token': 7,
+            'pk': 1,
+            'groups': [
+                {'token': 8, 'pk': 2},
+                {'token': 9, 'pk': 3, 'groups': [
+                    {'token': 10, 'pk': 4},
+                ]}
+            ]
+        }, response.data)
 
     def test_update(self):
         group = GroupFactory(name='group for update')
@@ -48,6 +59,16 @@ class GroupApiTest(BaseTestCase):
         self.assertEqual(response.status_code, 200, response.data)
         group.refresh_from_db()
         self.assertEqual('updated group', group.name)
+        self.assertDictEqual({'pk': group.id}, response.data)
+
+    def test_delete(self):
+        project = ProjectFactory(structure_format="0.0.0.0")
+        job = JobFactory(project=project)
+        job.generate_groups()
+        self.assertEqual(3, Group.objects.count())
+        response = self.client.delete(reverse('group-detail', args=[2]), format='json')
+        self.assertEqual(response.status_code, 204, response.data)
+        self.assertEqual(1, Group.objects.count())
 
 
 class TaskApiTest(BaseTestCase):
@@ -56,12 +77,12 @@ class TaskApiTest(BaseTestCase):
         group = GroupFactory(name='group for update', parent=JobFactory(project=ProjectFactory()))
         response = self.client.post(
             reverse('task-list'), {
-                'group': group.pk,
+                'group': group.pk, 'token': 5,
                 'name': 'test task', 'description': '',
                 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': '',
                 'lineitems': [
-                    {'name': 'lineitem', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
-                    {'name': 'lineitem 2', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
+                    {'token': 6, 'name': 'lineitem', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
+                    {'token': 7, 'name': 'lineitem 2', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
                 ]
             },
             format='json'
@@ -73,21 +94,55 @@ class TaskApiTest(BaseTestCase):
         self.assertEqual('test task', task.name)
         self.assertEqual('lineitem', task.lineitems.all()[0].name)
         self.assertEqual('lineitem 2', task.lineitems.all()[1].name)
+        self.assertDictEqual({
+            'token': 5, 'pk': 1,
+            'lineitems': [
+                {'token': 6, 'pk': 1},
+                {'token': 7, 'pk': 2}
+            ]
+        }, response.data)
+
+    def test_delete(self):
+        project = ProjectFactory(structure_format="0.0.0.0")
+        job = JobFactory(project=project)
+        job.generate_groups()
+        self.assertEqual(3, Group.objects.count())
+        response = self.client.delete(reverse('group-detail', args=[2]), format='json')
+        self.assertEqual(response.status_code, 204, response.data)
+        self.assertEqual(1, Group.objects.count())
 
     def test_update(self):
-        group = GroupFactory(name='group for update', parent=JobFactory(project=ProjectFactory()))
+        group = JobFactory(project=ProjectFactory())
         task = TaskFactory(group=group)
         lineitem = LineItemFactory(task=task)
         response = self.client.patch(
             reverse('task-detail', args=[task.pk]), {
-                'qty': 11,
+                'total': 11,
                 'lineitems': [
-                    {'id': lineitem.pk, 'qty': 22},
+                    {'pk': lineitem.pk, 'total': 22},
                 ]
             },
             format='json'
         )
         self.assertEqual(response.status_code, 200, response.data)
         task = group.tasks.all()[0]
-        self.assertEqual(11, task.qty)
-        self.assertEqual(22, task.lineitems.all()[0].qty)
+        self.assertEqual(11, task.total)
+        self.assertEqual(22, task.lineitems.all()[0].total)
+        self.assertDictEqual({
+            'pk': 1,
+            'lineitems': [
+                {'pk': 1},
+            ]
+        }, response.data)
+
+
+class LineItemApiTest(BaseTestCase):
+
+    def test_delete(self):
+        task = TaskFactory(group=JobFactory(project=ProjectFactory()))
+        LineItemFactory(task=task)
+        LineItemFactory(task=task)
+        self.assertEqual(2, LineItem.objects.count())
+        response = self.client.delete(reverse('lineitem-detail', args=[2]), format='json')
+        self.assertEqual(response.status_code, 204, response.data)
+        self.assertEqual(1, LineItem.objects.count())

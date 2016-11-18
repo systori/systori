@@ -1,7 +1,7 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.routers import DefaultRouter
-from .models import Group, Task
-from .serializers import GroupSerializer, TaskSerializer
+from .models import Group, Task, LineItem
+from .serializers import GroupSerializer, TaskSerializer, LineItemSerializer
 from .permissions import HasStaffAccess
 
 
@@ -17,7 +17,14 @@ class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = [HasStaffAccess]
 
 
+class LineItemViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    queryset = LineItem.objects.all()
+    serializer_class = LineItemSerializer
+    permission_classes = [HasStaffAccess]
+
+
 router = DefaultRouter()
 router.register(r'group', GroupViewSet)
 router.register(r'task', TaskViewSet)
+router.register(r'lineitem', LineItemViewSet)
 urlpatterns = router.urls
