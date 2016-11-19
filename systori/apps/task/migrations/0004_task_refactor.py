@@ -18,7 +18,7 @@ def upgrade_taskinstance_to_task(apps, schema_editor):
 
             variant_group = 100
 
-            for task in job.alltasks.all():
+            for task in job.all_tasks.all():
 
                 order_max = None
 
@@ -57,6 +57,7 @@ def upgrade_taskinstance_to_task(apps, schema_editor):
                         lineitem.total = lineitem.qty * lineitem.price
                         task.price += lineitem.total
                         lineitem.task = task
+                        lineitem.job = task.job
                         lineitem.save()
                         if is_variant_mode: print(".", end='')
                     if is_variant_mode: print("")
@@ -142,6 +143,11 @@ class Migration(migrations.Migration):
             name='task',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='lineitems', to='task.Task'),
         ),
+        migrations.AddField(
+            model_name='lineitem',
+            name='job',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='all_lineitems', to='task.Job'),
+        ),
         # properly set all of the jobs
         migrations.RunSQL('SET CONSTRAINTS ALL IMMEDIATE', reverse_sql=migrations.RunSQL.noop),
         migrations.RunPython(upgrade_taskinstance_to_task),
@@ -150,6 +156,11 @@ class Migration(migrations.Migration):
             model_name='lineitem',
             name='task',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lineitems', to='task.Task'),
+        ),
+        migrations.AlterField(
+            model_name='lineitem',
+            name='job',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='all_lineitems', to='task.Job'),
         ),
         # Cleanup...
         migrations.RemoveField('lineitem', 'taskinstance'),

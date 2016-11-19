@@ -55,8 +55,11 @@ class Group(OrderedModel):
 
     name = models.CharField(_("Name"), default="", blank=True, max_length=512)
     description = models.TextField(_("Description"), default="", blank=True)
-    parent = models.ForeignKey('self', related_name='groups', null=True, on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', related_name='groups', null=True)
+    job = models.ForeignKey('Job', null=True, related_name='all_groups')
     order_with_respect_to = 'parent'
+
+    token = models.IntegerField('api token', null=True)
 
     class Meta:
         verbose_name = _("Group")
@@ -64,15 +67,8 @@ class Group(OrderedModel):
         ordering = ('order',)
 
     @property
-    def _job(self):
-        if self.is_root:
-            return self.job
-        else:
-            return self.parent._job
-
-    @property
     def _structure(self):
-        return self._job.project.structure
+        return self.job.project.structure
 
     @property
     def is_root(self):
@@ -95,6 +91,7 @@ class Group(OrderedModel):
         tasks = self.tasks.all()
         self.pk = None
         self.parent = new_group
+        self.job = new_group.job
         self.order = new_order
         self.save()
         for group in groups:
@@ -104,7 +101,7 @@ class Group(OrderedModel):
 
     def generate_groups(self):
         if self._structure.has_level(self.level+1):
-            Group.objects.create(parent=self).generate_groups()
+            Group.objects.create(parent=self, job=self.job).generate_groups()
 
     def _calc(self, field):
         total = Decimal(0.0)
@@ -160,7 +157,7 @@ class JobManager(BaseManager.from_queryset(JobQuerySet)):
 
 class Job(Group):
     account = models.OneToOneField('accounting.Account', related_name="job", null=True, on_delete=models.SET_NULL)
-    root = models.OneToOneField('task.Group', parent_link=True, primary_key=True)
+    root = models.OneToOneField('task.Group', parent_link=True, primary_key=True, related_name='+')
     project = models.ForeignKey('project.Project', related_name="jobs")
     order_with_respect_to = 'project'
 
@@ -233,7 +230,7 @@ class Job(Group):
 
     @property
     def is_billable(self):
-        for task in self.alltasks.all():
+        for task in self.all_tasks.all():
             if task.is_billable:
                 return True
         return False
@@ -258,7 +255,7 @@ class Task(OrderedModel):
     started_on = models.DateField(blank=True, null=True)
     completed_on = models.DateField(blank=True, null=True)
 
-    job = models.ForeignKey(Job, related_name="alltasks")
+    job = models.ForeignKey(Job, related_name="all_tasks")
     group = models.ForeignKey(Group, related_name="tasks")
     order_with_respect_to = 'group'
 
@@ -283,6 +280,8 @@ class Task(OrderedModel):
 
     status = FSMField(blank=True, choices=STATE_CHOICES)
 
+    token = models.IntegerField('api token', null=True)
+
     class Meta:
         verbose_name = _("Task")
         verbose_name_plural = _("Task")
@@ -290,7 +289,7 @@ class Task(OrderedModel):
 
     def __init__(self, *args, **kwargs):
         if 'job' not in kwargs and 'group' in kwargs:
-            kwargs['job'] = kwargs['group']._job
+            kwargs['job'] = kwargs['group'].job
         super().__init__(*args, **kwargs)
 
     @property
@@ -348,7 +347,7 @@ class Task(OrderedModel):
         lineitems = self.lineitems.exclude(is_correction=True).all()
         self.pk = None
         self.group = new_group
-        self.job = new_group._job
+        self.job = new_group.job
         self.order = new_order
         self.complete = 0.0
         self.started_on = None
@@ -393,14 +392,18 @@ class LineItem(OrderedModel):
     task = models.ForeignKey(Task, related_name="lineitems")
     order_with_respect_to = 'task'
 
+    job = models.ForeignKey(Job, related_name="all_lineitems")
+    token = models.IntegerField('api token', null=True)
+
     class Meta:
         verbose_name = _("Line Item")
         verbose_name_plural = _("Line Items")
         ordering = ('order',)
 
-    @property
-    def job(self):
-        return self.task.job
+    def __init__(self, *args, **kwargs):
+        if 'job' not in kwargs and 'task' in kwargs:
+            kwargs['job'] = kwargs['task'].job
+        super().__init__(*args, **kwargs)
 
     @property
     def project(self):

@@ -10,6 +10,13 @@ class JobFactory(django.DjangoModelFactory):
 
     name = fuzzy.FuzzyText(length=15)
 
+    @classmethod
+    def _create(cls, *args, **kwargs):
+        obj = super()._create(*args, **kwargs)
+        obj.job = obj
+        obj.save()
+        return obj
+
 
 class GroupFactory(django.DjangoModelFactory):
     class Meta:

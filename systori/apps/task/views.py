@@ -87,11 +87,14 @@ class JobCreate(CreateView):
 
     def form_valid(self, form):
         response = super(JobCreate, self).form_valid(form)
+
+        self.object.job = self.object
+        self.object.account = create_account_for_job(self.object)
+
         if isinstance(form, JobForm) and form.cleaned_data['job_template']:
             tmpl = form.cleaned_data['job_template']
             tmpl.clone_to(self.object)
 
-        self.object.account = create_account_for_job(self.object)
         self.object.save()
 
         return response

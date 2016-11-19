@@ -15,6 +15,7 @@ def make_job_inherit_from_group(apps, schema_editor):
         for job in Job.objects.all():
             job.root = Group.objects.create(
                 id=job.id,
+                job=job.id,
                 name=job.name,
                 description=job.description,
                 order=job.job_code
@@ -35,6 +36,7 @@ def copy_groups_and_relink_tasks(apps, schema_editor):
             for taskgroup in job.taskgroups.all():
                 group = Group.objects.create(
                     parent=job.root,
+                    job=job.pk,
                     name=taskgroup.name,
                     description=taskgroup.description,
                     order=taskgroup.order + 1 + job.taskgroup_offset
@@ -60,6 +62,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(blank=True, default='', max_length=512, verbose_name='Name')),
                 ('description', models.TextField(blank=True, default='', verbose_name='Description')),
                 ('parent', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='groups', to='task.Group')),
+                ('job', models.IntegerField())
             ],
             options={
                 'ordering': ('order',),
@@ -77,7 +80,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='job',
             name='root',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, to='task.Group')
+            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, related_name='+', to='task.Group')
         ),
         migrations.RunPython(make_job_inherit_from_group),
         migrations.RemoveField(
@@ -87,7 +90,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='job',
             name='root',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, to='task.Group'),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, related_name='+', to='task.Group'),
         ),
 
         # Migrate TaskGroup to Group
@@ -100,7 +103,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='job',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='alltasks', to='task.Job'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='all_tasks', to='task.Job'),
         ),
         migrations.RunPython(copy_groups_and_relink_tasks),
         migrations.AlterField(
@@ -111,7 +114,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='job',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='alltasks', to='task.Job'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='all_tasks', to='task.Job'),
         ),
 
         # Cleanup...

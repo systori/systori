@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -12,6 +13,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name='group',
+            name='job',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, null=True, related_name='all_groups', to='task.Job'),
+        ),
+        migrations.AddField(
+            model_name='group',
+            name='token',
+            field=models.IntegerField(null=True, verbose_name='api token'),
+        ),
         migrations.RemoveField(
             model_name='lineitem',
             name='billable',
@@ -26,43 +37,53 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='lineitem',
+            name='token',
+            field=models.IntegerField(null=True, verbose_name='api token'),
+        ),
+        migrations.AddField(
+            model_name='lineitem',
             name='complete',
             field=models.DecimalField(decimal_places=4, default=0.0, max_digits=14, verbose_name='Completed'),
         ),
         migrations.AddField(
             model_name='lineitem',
             name='price_equation',
-            field=models.CharField(default='', max_length=512),
+            field=models.CharField(blank=True, default='', max_length=512),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='lineitem',
             name='qty_equation',
-            field=models.CharField(default='', max_length=512),
+            field=models.CharField(blank=True, default='', max_length=512),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='lineitem',
             name='total_equation',
-            field=models.CharField(default='', max_length=512),
+            field=models.CharField(blank=True, default='', max_length=512),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='task',
+            name='token',
+            field=models.IntegerField(null=True, verbose_name='api token'),
+        ),
+        migrations.AddField(
+            model_name='task',
             name='qty_equation',
-            field=models.CharField(default='', max_length=512),
+            field=models.CharField(blank=True, default='', max_length=512),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='task',
             name='total_equation',
-            field=models.CharField(default='', max_length=512),
+            field=models.CharField(blank=True, default='', max_length=512),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='lineitem',
             name='unit',
-            field=models.CharField(max_length=512, verbose_name='Unit'),
+            field=models.CharField(blank=True, max_length=512, verbose_name='Unit'),
         ),
         migrations.AlterField(
             model_name='task',
@@ -72,12 +93,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='unit',
-            field=models.CharField(max_length=512, verbose_name='Unit'),
+            field=models.CharField(blank=True, max_length=512, verbose_name='Unit'),
         ),
         migrations.AddField(
             model_name='task',
             name='price_equation',
-            field=models.CharField(default='', max_length=512),
+            field=models.CharField(blank=True, default='', max_length=512),
             preserve_default=False,
+        ),
+        migrations.AlterField(
+            model_name='lineitem',
+            name='name',
+            field=models.CharField(blank=True, max_length=512, verbose_name='Name'),
+        ),
+        migrations.AlterField(
+            model_name='task',
+            name='description',
+            field=models.TextField(blank=True),
         ),
     ]

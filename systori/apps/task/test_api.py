@@ -19,34 +19,65 @@ class BaseTestCase(SystoriTestCase):
 class GroupApiTest(BaseTestCase):
 
     def test_create(self):
+        job = JobFactory(project=ProjectFactory())
         response = self.client.post(
             reverse('group-list'), {
-                'token': 7, 'name': 'test group',
+                'job': job.pk, 'token': 7, 'parent': job.pk, 'name': 'test group',
                 'groups': [
-                    {'token': 8, 'name': 'sub group'},
-                    {'token': 9, 'name': 'sub group 2', 'groups': [
-                        {'token': 10, 'name': 'sub sub group'},
+                    {'job': job.pk, 'token': 8, 'name': 'sub group'},
+                    {'job': job.pk, 'token': 9, 'name': 'sub group 2', 'groups': [
+                        {'job': job.pk, 'token': 10, 'name': 'sub sub group'},
                     ]}
                 ]
             },
             format='json'
         )
         self.assertEqual(response.status_code, 201, response.data)
-        self.assertEqual(4, Group.objects.count())
-        group = Group.objects.get(parent=None)
+        self.assertEqual(5, Group.objects.count())
+        group = Group.objects.get(parent=job)
         self.assertEqual('test group', group.name)
         self.assertEqual('sub group', group.groups.all()[0].name)
         self.assertEqual('sub group 2', group.groups.all()[1].name)
         self.assertEqual('sub sub group', group.groups.all()[1].groups.all()[0].name)
         self.assertDictEqual({
-            'token': 7,
-            'pk': 1,
+            'job': job.pk, 'token': 7, 'pk': 2,
             'groups': [
-                {'token': 8, 'pk': 2},
-                {'token': 9, 'pk': 3, 'groups': [
-                    {'token': 10, 'pk': 4},
+                {'job': job.pk, 'token': 8, 'pk': 3},
+                {'job': job.pk, 'token': 9, 'pk': 4, 'groups': [
+                    {'job': job.pk, 'token': 10, 'pk': 5},
                 ]}
             ]
+        }, response.data)
+
+    def test_create_idempotent(self):
+        job = JobFactory(project=ProjectFactory())
+
+        response = self.client.post(
+            reverse('group-list'), {
+                'job': job.pk, 'token': 7, 'parent': job.pk, 'name': 'test group',
+                'groups': [{ 'job': job.pk, 'token': 8, 'name': 'sub group'}]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(3, Group.objects.count())
+        self.assertDictEqual({
+            'job': job.pk, 'token': 7, 'pk': 2,
+            'groups': [{'job': job.pk, 'token': 8, 'pk': 3}]
+        }, response.data)
+
+        response = self.client.post(
+            reverse('group-list'), {
+                'job': job.pk, 'token': 7, 'parent': job.pk, 'name': 'test group',
+                'groups': [{ 'job': job.pk, 'token': 8, 'name': 'sub group'}]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(3, Group.objects.count())
+        self.assertDictEqual({
+            'job': job.pk, 'token': 7, 'pk': 2,
+            'groups': [{'job': job.pk, 'token': 8, 'pk': 3}]
         }, response.data)
 
     def test_update(self):
@@ -74,15 +105,15 @@ class GroupApiTest(BaseTestCase):
 class TaskApiTest(BaseTestCase):
 
     def test_create(self):
-        group = GroupFactory(name='group for update', parent=JobFactory(project=ProjectFactory()))
+        job = JobFactory(project=ProjectFactory())
         response = self.client.post(
             reverse('task-list'), {
-                'group': group.pk, 'token': 5,
+                'job': job.pk, 'token': 5, 'group': job.pk,
                 'name': 'test task', 'description': '',
                 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': '',
                 'lineitems': [
-                    {'token': 6, 'name': 'lineitem', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
-                    {'token': 7, 'name': 'lineitem 2', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
+                    {'job': job.pk, 'token': 6, 'name': 'lineitem', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
+                    {'job': job.pk, 'token': 7, 'name': 'lineitem 2', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
                 ]
             },
             format='json'
@@ -90,21 +121,67 @@ class TaskApiTest(BaseTestCase):
         self.assertEqual(response.status_code, 201, response.data)
         self.assertEqual(1, Task.objects.count())
         self.assertEqual(2, LineItem.objects.count())
-        task = group.tasks.all()[0]
+        task = job.tasks.all()[0]
         self.assertEqual('test task', task.name)
         self.assertEqual('lineitem', task.lineitems.all()[0].name)
         self.assertEqual('lineitem 2', task.lineitems.all()[1].name)
         self.assertDictEqual({
-            'token': 5, 'pk': 1,
+            'job': job.pk, 'token': 5, 'pk': 1,
             'lineitems': [
-                {'token': 6, 'pk': 1},
-                {'token': 7, 'pk': 2}
+                {'job': job.pk, 'token': 6, 'pk': 1},
+                {'job': job.pk, 'token': 7, 'pk': 2}
+            ]
+        }, response.data)
+
+    def test_create_idempotent(self):
+        job = JobFactory(project=ProjectFactory())
+
+        response = self.client.post(
+            reverse('task-list'), {
+                'job': job.pk, 'group': job.pk, 'token': 5,
+                'name': 'test task',
+                'lineitems': [
+                    {'job': job.pk, 'token': 6},
+                    {'job': job.pk, 'token': 7}
+                ]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(1, Task.objects.count())
+        self.assertEqual(2, LineItem.objects.count())
+        self.assertDictEqual({
+            'job': job.pk, 'token': 5, 'pk': 1,
+            'lineitems': [
+                {'job': job.pk, 'token': 6, 'pk': 1},
+                {'job': job.pk, 'token': 7, 'pk': 2}
+            ]
+        }, response.data)
+
+        response = self.client.post(
+            reverse('task-list'), {
+                'job': job.pk, 'group': job.pk, 'token': 5,
+                'name': 'test task',
+                'lineitems': [
+                    {'job': job.pk, 'token': 6},
+                    {'job': job.pk, 'token': 7}
+                ]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(1, Task.objects.count())
+        self.assertEqual(2, LineItem.objects.count())
+        self.assertDictEqual({
+            'job': job.pk, 'token': 5, 'pk': 1,
+            'lineitems': [
+                {'job': job.pk, 'token': 6, 'pk': 1},
+                {'job': job.pk, 'token': 7, 'pk': 2}
             ]
         }, response.data)
 
     def test_delete(self):
-        project = ProjectFactory(structure_format="0.0.0.0")
-        job = JobFactory(project=project)
+        job = JobFactory(project=ProjectFactory(structure_format="0.0.0.0"))
         job.generate_groups()
         self.assertEqual(3, Group.objects.count())
         response = self.client.delete(reverse('group-detail', args=[2]), format='json')
