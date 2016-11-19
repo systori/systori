@@ -46,33 +46,9 @@ class Migration(migrations.Migration):
             field=models.DecimalField(decimal_places=4, default=0.0, max_digits=14, verbose_name='Completed'),
         ),
         migrations.AddField(
-            model_name='lineitem',
-            name='price_equation',
-            field=models.CharField(blank=True, default='', max_length=512),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name='lineitem',
-            name='qty_equation',
-            field=models.CharField(blank=True, default='', max_length=512),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name='lineitem',
-            name='total_equation',
-            field=models.CharField(blank=True, default='', max_length=512),
-            preserve_default=False,
-        ),
-        migrations.AddField(
             model_name='task',
             name='token',
             field=models.IntegerField(null=True, verbose_name='api token'),
-        ),
-        migrations.AddField(
-            model_name='task',
-            name='qty_equation',
-            field=models.CharField(blank=True, default='', max_length=512),
-            preserve_default=False,
         ),
         migrations.AddField(
             model_name='task',

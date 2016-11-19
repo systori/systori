@@ -3,10 +3,10 @@
   <div class="editor-row">
     <div class="code">{{ task.code }}</div>
     <div      class="name"  placeholder="{% trans 'task' %}"                                             contenteditable>{{ task.name|safe }}</div>
-    <sys-cell class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ task.qty_equation }}"   contenteditable>{{ task.qty|ubrdecimal }}</sys-cell>
+    <sys-cell class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ task.qty_equation }}"   contenteditable>{{ task.qty|ubrnumber }}</sys-cell>
     <div      class="unit"  placeholder="{% trans 'unit' %}"                                             contenteditable>{{ task.unit }}</div>
     <sys-cell class="price"                                   data-canonical="{{ task.price_equation }}" contenteditable>{{ task.price|ubrdecimal }}</sys-cell>
-    <sys-cell class="total" placeholder="{% trans 'total' %}" data-canonical="{{ task.total_equation }}" contenteditable>{{ task.total|ubrdecimal:3 }}</sys-cell>
+    <sys-cell class="total" placeholder="{% trans 'total' %}" data-canonical="{{ task.total_equation }}" contenteditable>{{ task.total|ubrdecimal }}</sys-cell>
     {% comment %}
     <div class="labels">
       <span class="is_optional {{ task.is_provisional }} label label-primary">{% trans 'Optional' %}</span>

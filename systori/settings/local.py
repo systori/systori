@@ -53,16 +53,3 @@ DATABASES['default'].update({
 
 MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, 'media'))
 
-
-if 'test' in sys.argv[1:]:
-
-    class DisableMigrations:
-
-        def __contains__(self, item):
-            return True
-
-        def __getitem__(self, item):
-            return "notmigrations"
-
-
-    MIGRATION_MODULES = DisableMigrations()

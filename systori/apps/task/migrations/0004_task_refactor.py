@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 from decimal import Decimal
 from django.db import migrations, models
 import django.db.models.deletion
-from systori.lib.templatetags.customformatting import money, ubrdecimal
 
 
 def upgrade_taskinstance_to_task(apps, schema_editor):
@@ -51,17 +50,31 @@ def upgrade_taskinstance_to_task(apps, schema_editor):
                     elif is_variant_mode:
                         print("    Primary: {}.{}".format(task.variant_group, task.variant_serial))
 
+                    task.qty_equation = str(task.qty)
                     task.price = Decimal('0.00')
                     if is_variant_mode: print("    Line items ", end='')
+                    lineitem_order = 0
                     for lineitem in taskinstance.lineitems.all():
-                        lineitem.total = lineitem.qty * lineitem.price
+                        lineitem_order += 1
+                        lineitem.order = lineitem_order
+                        lineitem.qty_equation = str(lineitem.qty)
+                        lineitem.price_equation = str(lineitem.price)
+                        lineitem.total = round(lineitem.qty * lineitem.price, 3)
                         task.price += lineitem.total
                         lineitem.task = task
                         lineitem.job = task.job
                         lineitem.save()
                         if is_variant_mode: print(".", end='')
                     if is_variant_mode: print("")
-                    task.total = task.qty * task.price
+                    task.total = round(task.qty * task.price, 3)
+                    task.save()
+
+        for job in Job.objects.all():
+            for group in job.root.groups.all():
+                task_order = 0
+                for task in group.tasks.all():
+                    task_order += 1
+                    task.order = task_order
                     task.save()
 
 
@@ -107,6 +120,12 @@ class Migration(migrations.Migration):
             field=models.PositiveIntegerField(default=0),
         ),
         migrations.AddField(
+            model_name='task',
+            name='qty_equation',
+            field=models.CharField(blank=True, default='', max_length=512),
+            preserve_default=False,
+        ),
+        migrations.AddField(
             model_name='lineitem',
             name='is_hidden',
             field=models.BooleanField(default=False),
@@ -147,6 +166,24 @@ class Migration(migrations.Migration):
             model_name='lineitem',
             name='job',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='all_lineitems', to='task.Job'),
+        ),
+        migrations.AddField(
+            model_name='lineitem',
+            name='price_equation',
+            field=models.CharField(blank=True, default='', max_length=512),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='lineitem',
+            name='qty_equation',
+            field=models.CharField(blank=True, default='', max_length=512),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='lineitem',
+            name='total_equation',
+            field=models.CharField(blank=True, default='', max_length=512),
+            preserve_default=False,
         ),
         # properly set all of the jobs
         migrations.RunSQL('SET CONSTRAINTS ALL IMMEDIATE', reverse_sql=migrations.RunSQL.noop),

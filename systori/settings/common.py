@@ -141,6 +141,14 @@ DATABASES = {
     }
 }
 
+if 'test' in sys.argv[1:]:
+    class DisableMigrations:
+        def __contains__(self, item):
+            return True
+        def __getitem__(self, item):
+            return None
+    MIGRATION_MODULES = DisableMigrations()
+
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 

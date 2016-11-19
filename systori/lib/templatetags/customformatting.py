@@ -1,7 +1,6 @@
 import locale
-import calendar
 from decimal import Decimal
-from django.utils.formats import get_format, get_language, number_format, to_locale
+from django.utils.formats import get_format, get_language, to_locale
 from django import template
 
 register = template.Library()
@@ -13,31 +12,52 @@ def company_url(company, request):
 
 
 @register.filter
-def ubrdecimal(decimal, decimal_pos=4):
-    if decimal == '': return ''
+def ubrdecimal(number, max_significant=4, min_significant=2):
 
-    if type(decimal) is str:
-        decimal = Decimal(decimal)
+    if number == '':
+        return ''
 
-    decimal = round(decimal, decimal_pos)
+    if type(number) is str:
+        number = Decimal(number)
 
-    decimal = number_format(decimal, decimal_pos=decimal_pos, use_l10n=True, force_grouping=True)
+    number = round(number, max_significant)
 
-    separator = get_format('DECIMAL_SEPARATOR', use_l10n=True)
-    separator_pos = decimal.find(separator)
-    if separator_pos == -1:
-        decimal += separator
-        separator_pos = len(decimal)
+    lang = get_language()
+    radix = get_format('DECIMAL_SEPARATOR', lang, use_l10n=True)
+    grouping = get_format('NUMBER_GROUPING', lang, use_l10n=True)
+    thousand_sep = get_format('THOUSAND_SEPARATOR', lang, use_l10n=True)
 
-    min_decimal_places = 2
-    significand = decimal[separator_pos + 1:]
-    if len(significand) > min_decimal_places:
-        clean_significand = significand[:min_decimal_places] + significand[min_decimal_places:].rstrip('0')
-        return decimal[:separator_pos + 1] + clean_significand
-    elif len(significand) < min_decimal_places:
-        return decimal[:separator_pos + 1] + significand.ljust(min_decimal_places, '0')
+    # sign
+    sign = ''
+    str_number = '{:f}'.format(number)
+    if str_number[0] == '-':
+        sign = '-'
+        str_number = str_number[1:]
+
+    # decimal part
+    if '.' in str_number:
+        int_part, dec_part = str_number.split('.')
+        dec_part = dec_part.rstrip('0').ljust(min_significant, '0')
     else:
-        return decimal
+        int_part, dec_part = str_number, ''
+
+    if dec_part:
+        dec_part = radix + dec_part
+
+    # grouping
+    int_part_gd = ''
+    for cnt, digit in enumerate(int_part[::-1]):
+        if cnt and not cnt % grouping:
+            int_part_gd += thousand_sep[::-1]
+        int_part_gd += digit
+    int_part = int_part_gd[::-1]
+
+    return sign + int_part + dec_part
+
+
+@register.filter
+def ubrnumber(number):
+    return ubrdecimal(number, min_significant=0)
 
 
 @register.filter
