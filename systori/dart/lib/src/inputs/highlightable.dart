@@ -17,9 +17,7 @@ class Highlight {
 }
 
 
-class HighlightableInput extends HtmlElement {
-
-    HighlightableInput.created(): super.created();
+abstract class HighlightableInputMixin implements HtmlElement {
 
     highlight(List<Highlight> highlights) {
 

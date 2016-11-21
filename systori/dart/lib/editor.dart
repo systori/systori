@@ -1,2 +1,5 @@
 library editor;
-export 'src/editor/keyboard.dart';
+
+export 'src/editor/editor.dart';
+export 'src/editor/model.dart';
+export 'src/editor/changemanager.dart';

@@ -1,11 +1,10 @@
 @TestOn("browser")
 import 'dart:html';
 import 'package:test/test.dart';
-import 'package:systori/inputs.dart' as inputs;
-import 'package:systori/inputs.dart' show Highlight;
+import 'package:systori/inputs.dart';
 
 
-class HighlightableInput extends inputs.HighlightableInput {
+class HighlightableInput extends HtmlElement with HighlightableInputMixin {
     HighlightableInput.created(): super.created() {
         contentEditable = "true";
     }

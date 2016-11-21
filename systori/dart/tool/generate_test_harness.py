@@ -28,6 +28,9 @@ def write_test_html(path, name, html):
         test_file.write(html)
         test_file.write(b'<link rel="x-dart-test" href="'+name.encode()+b'_test.dart">\n')
         test_file.write(b'<script src="packages/test/dart.js"></script>\n')
+        test_file.write(b'<!--\n')
+        test_file.write(b'<script type="application/dart" src="'+name.encode()+b'_test.dart"></script>\n')
+        test_file.write(b'-->\n')
 
 
 def create_data():
@@ -84,7 +87,7 @@ def generate_pages():
     client.login(username=data.user.email, password='open sesame')
 
     job_editor = client.get(reverse('tasks', args=[data.project.id, data.job1.id]), HTTP_HOST=host)
-    write_test_html('editor', 'job_editor', job_editor.content)
+    write_test_html('editor', 'editor', job_editor.content)
 
     #proposal_create = client.get(reverse('proposal.create', args=[data.project.id]), HTTP_HOST=host)
     #write_test_html('apps', 'proposal_editor', proposal_create.content)
