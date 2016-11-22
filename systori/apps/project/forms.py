@@ -14,8 +14,7 @@ class ProjectCreateForm(ModelForm):
 
     class Meta:
         model = Project
-        fields = ['name', 'description', 'job_zfill', 'taskgroup_zfill', 'task_zfill',
-                  'address', 'postal_code', 'city']
+        fields = ['name', 'description', 'address', 'postal_code', 'city', 'structure_format']
 
 
 class ProjectImportForm(forms.Form):
@@ -23,9 +22,11 @@ class ProjectImportForm(forms.Form):
 
 
 class ProjectUpdateForm(ModelForm):
+    # TODO: User should only be able to change the formatting of the
+    #       structure_format but not the number of levels. Need validation.
     class Meta:
         model = Project
-        fields = ['name', 'description', 'job_zfill', 'taskgroup_zfill', 'task_zfill']
+        fields = ['name', 'description', 'structure_format']
 
 
 class JobSiteForm(ModelForm):

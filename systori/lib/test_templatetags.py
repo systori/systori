@@ -1,14 +1,15 @@
-from decimal import Decimal
 from django.test import TestCase
 from django.utils.translation import activate
 from .templatetags.customformatting import *
 
 
 class CustomFormattingTest(TestCase):
+
     def test_ubrdecimal_en(self):
         activate('en')
 
         self.assertEqual('1.00', ubrdecimal(Decimal('1')))
+        self.assertEqual('10.00', ubrdecimal(Decimal('10')))
 
         self.assertEqual('1.00', ubrdecimal(Decimal('1.0')))
         self.assertEqual('1.10', ubrdecimal(Decimal('1.1')))
@@ -29,10 +30,14 @@ class CustomFormattingTest(TestCase):
 
         self.assertEqual('1,234,567,891.0004', ubrdecimal(Decimal('1234567891.000400')))
 
+        self.assertEqual('1,000', ubrdecimal(Decimal('1000'), 2, 0))
+        self.assertEqual('1,000.01', ubrdecimal(Decimal('1000.009'), 2, 0))
+
     def test_ubrdecimal_de(self):
         activate('de')
 
         self.assertEqual('1,00', ubrdecimal(Decimal('1')))
+        self.assertEqual('10,00', ubrdecimal(Decimal('10')))
 
         self.assertEqual('1,00', ubrdecimal(Decimal('1.0')))
         self.assertEqual('1,10', ubrdecimal(Decimal('1.1')))
@@ -52,3 +57,6 @@ class CustomFormattingTest(TestCase):
         self.assertEqual('1,00', ubrdecimal(Decimal('1.000010')))
 
         self.assertEqual('1.234.567.891,0004', ubrdecimal(Decimal('1234567891.000400')))
+
+        self.assertEqual('1.000', ubrdecimal(Decimal('1000'), 2, 0))
+        self.assertEqual('1.000,01', ubrdecimal(Decimal('1000.009'), 2, 0))

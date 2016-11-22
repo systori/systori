@@ -1,48 +1,165 @@
-from math import floor, ceil
+import re
 from decimal import Decimal
+from functools import partialmethod
 from datetime import datetime
 from string import ascii_lowercase
 from django.db import models
 from django.db.models.manager import BaseManager
-from ordered_model.models import OrderedModel
 from django.utils.translation import ugettext_lazy as _
 from django.utils.formats import date_format
 from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
+from systori.lib.utils import nice_percent
 
 
-class BetterOrderedModel(OrderedModel):
+class OrderedModel(models.Model):
+
+    order = models.PositiveIntegerField(editable=False, db_index=True)
+    order_with_respect_to = None
+
     class Meta:
         abstract = True
+
+    def get_ordering_queryset(self):
+        assert self.order_with_respect_to is not None, "Subclasses of OrderbleModel must set order_with_respect_to."
+        return self.__class__.objects.filter((self.order_with_respect_to, getattr(self, self.order_with_respect_to)))
 
     def save(self, *args, **kwargs):
         if not self.pk and self.order is not None:
             qs = self.get_ordering_queryset()
             qs.filter(order__gte=self.order).update(order=models.F('order') + 1)
-        super(BetterOrderedModel, self).save(*args, **kwargs)
+        if self.order is None:
+            c = self.get_ordering_queryset().aggregate(models.Max('order')).get('order__max')
+            self.order = 1 if c is None else c + 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        qs = self.get_ordering_queryset()
+        qs.filter(order__gt=self.order).update(order=models.F('order')-1)
+        super().delete(*args, **kwargs)
+
+    def move_to(self, order):
+        if order is None or self.order == order:
+            # object is already at desired position
+            return
+        qs = self.get_ordering_queryset()
+        if self.order > order:
+            qs.filter(order__lt=self.order, order__gte=order).update(order=models.F('order')+1)
+        else:
+            qs.filter(order__gt=self.order, order__lte=order).update(order=models.F('order')-1)
+        self.order = order
+        self.save()
+
+
+class Group(OrderedModel):
+
+    name = models.CharField(_("Name"), default="", blank=True, max_length=512)
+    description = models.TextField(_("Description"), default="", blank=True)
+    parent = models.ForeignKey('self', related_name='groups', null=True)
+    job = models.ForeignKey('Job', null=True, related_name='all_groups')
+    order_with_respect_to = 'parent'
+
+    token = models.IntegerField('api token', null=True)
+
+    class Meta:
+        verbose_name = _("Group")
+        verbose_name_plural = _("Groups")
+        ordering = ('order',)
+
+    @property
+    def _structure(self):
+        return self.job.project.structure
+
+    @property
+    def is_root(self):
+        return self.parent is None
+
+    @cached_property
+    def level(self):
+        return 0 if self.is_root else self.parent.level + 1
+
+    @cached_property
+    def code(self):
+        if self.name:
+            code = self._structure.format_group(self.order, self.level)
+        else:
+            code = '_'
+        return code if self.is_root else "{}.{}".format(self.parent.code, code)
+
+    def clone_to(self, new_group, new_order):
+        groups = self.groups.all()
+        tasks = self.tasks.all()
+        self.pk = None
+        self.parent = new_group
+        self.job = new_group.job
+        self.order = new_order
+        self.save()
+        for group in groups:
+            group.clone_to(self, group.order)
+        for task in tasks:
+            task.clone_to(self, task.order)
+
+    def generate_groups(self):
+        if self._structure.has_level(self.level+1):
+            Group.objects.create(parent=self, job=self.job).generate_groups()
+
+    def _calc(self, field):
+        total = Decimal(0.0)
+        for group in self.groups.all():
+            total += getattr(group, field)
+        for task in self.tasks.all():
+            if field != 'total' or task.include_estimate:
+                total += getattr(task, field)
+        return total
+
+    @property
+    def total(self):
+        return self._calc('total')
+
+    @property
+    def progress(self):
+        return self._calc('progress')
+
+    @property
+    def progress_percent(self):
+        return nice_percent(self.progress, self.total)
+
+    def __str__(self):
+        return self.name
 
 
 class JobQuerySet(models.QuerySet):
-    def estimate_total(self):
-        return sum([job.estimate_total for job in self])
 
-    def progress_total(self):
-        return sum([job.progress_total for job in self])
+    def total(self):
+        return sum([job.total for job in self])
+
+    def progress(self):
+        return sum([job.progress for job in self])
+
+    def prefetch_groups(self, project):
+        level = 3
+        prefetch = []
+        while self.has_level(level):
+            prefetch.append('children')
+            level += 1
+        prefetch += ['tasks', 'lineitems']
+        return list(
+            self._taskgroups
+                .filter(level=2)
+                .prefetch_related('__'.join(prefetch))
+                .all()
+        )
 
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
     use_for_related_fields = True
 
 
-class Job(models.Model):
-    name = models.CharField(_('Job Name'), max_length=512)
-    job_code = models.PositiveSmallIntegerField(_('Code'), default=0)
-    description = models.TextField(_('Description'), blank=True)
-    project = models.ForeignKey('project.Project', related_name="jobs")
-
-    taskgroup_offset = models.PositiveSmallIntegerField(_("Task Group Offset"), default=0)
-
+class Job(Group):
     account = models.OneToOneField('accounting.Account', related_name="job", null=True, on_delete=models.SET_NULL)
+    root = models.OneToOneField('task.Group', parent_link=True, primary_key=True, related_name='+')
+    project = models.ForeignKey('project.Project', related_name="jobs")
+    order_with_respect_to = 'project'
 
     ESTIMATE_INCREMENT = 0.05
     ESTIMATE_INCREMENT_DISPLAY = '{:.0%}'.format(ESTIMATE_INCREMENT)
@@ -78,7 +195,6 @@ class Job(models.Model):
     class Meta:
         verbose_name = _("Job")
         verbose_name_plural = _("Job")
-        ordering = ['job_code']
 
     @transition(field=status, source="*", target=DRAFT)
     def draft(self):
@@ -108,168 +224,47 @@ class Job(models.Model):
     def can_propose(self):
         return self.status in self.STATUS_FOR_PROPOSAL
 
-    @property
-    def billable_taskgroups(self):
-        for taskgroup in self.taskgroups.all():
-            if taskgroup.is_billable:
-                yield taskgroup
+    def clone_to(self, new_job, *args):
+        for group in self.groups.all():
+            group.clone_to(new_job.root, None)
 
     @property
     def is_billable(self):
-        for taskgroup in self.billable_taskgroups:
-            return True
+        for task in self.all_tasks.all():
+            if task.is_billable:
+                return True
         return False
-
-    @staticmethod
-    def prefetch(job_id):
-        return \
-            Job.objects.filter(id=job_id) \
-                .prefetch_related('taskgroups__tasks__taskinstances__lineitems') \
-                .get()
-
-    def clone_to(self, other_job):
-        taskgroups = self.taskgroups.all()
-        for taskgroup in taskgroups:
-            taskgroup.clone_to(other_job, taskgroup.order)
-
-    def _total_calc(self, calc_type):
-        field = "{}_{}".format(self.billing_method, calc_type)
-        total = Decimal(0.0)
-        for taskgroup in self.taskgroups.all():
-            total += getattr(taskgroup, field)
-        return total
-
-    def estimate_total_modify(self, worker, action):
-        for taskgroup in self.taskgroups.all():
-            taskgroup.estimate_total_modify(worker, action, self.ESTIMATE_INCREMENT)
-
-    @property
-    def estimate_total(self):
-        return self._total_calc('estimate')
-
-    @property
-    def progress_total(self):
-        return self._total_calc('progress')
-
-    @property
-    def progress_percent(self):
-        percent = self.progress_total / self.estimate_total * 100 if self.estimate_total else 0
-        if percent < 100:
-            return floor(percent)
-        elif percent > 100:
-            return ceil(percent)
-        else:
-            return 100
-
-    @property
-    def code(self):
-        return str(self.job_code).zfill(self.project.job_zfill)
 
     def __str__(self):
         return self.name
 
 
-class TaskGroup(BetterOrderedModel):
+class Task(OrderedModel):
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField(blank=True)
 
-    job = models.ForeignKey(Job, related_name="taskgroups")
-    order_with_respect_to = 'job'
-
-    class Meta:
-        verbose_name = _("Task Group")
-        verbose_name_plural = _("Task Groups")
-        ordering = ['order']
-
-    @property
-    def billable_tasks(self):
-        for task in self.tasks.all():
-            if task.is_billable:
-                yield task
-
-    @property
-    def is_billable(self):
-        for task in self.billable_tasks:
-            return True
-        return False
-
-    def _total_calc(self, field, include_optional=True):
-        total = Decimal(0.0)
-        for task in self.tasks.all():
-            if include_optional or not task.is_optional:
-                total += getattr(task, field)
-        return total
-
-    def estimate_total_modify(self, worker, action, rate):
-        for task in self.tasks.all():
-            task.estimate_total_modify(worker, action, rate)
-
-    @property
-    def fixed_price_estimate(self):
-        return self._total_calc('fixed_price_estimate', include_optional=False)
-
-    @property
-    def fixed_price_progress(self):
-        return self._total_calc('fixed_price_progress')
-
-    @property
-    def time_and_materials_estimate(self):
-        return self._total_calc('time_and_materials_estimate', include_optional=False)
-
-    @property
-    def time_and_materials_progress(self):
-        return self._total_calc('time_and_materials_progress')
-
-    @property
-    def estimate_total(self):
-        return self.fixed_price_estimate
-
-    @property
-    def progress_total(self):
-        return self.fixed_price_progress
-
-    @property
-    def code(self):
-        parent_code = self.job.code
-        offset = self.job.taskgroup_offset
-        self_code = str(self.order + 1 + offset).zfill(self.job.project.taskgroup_zfill)
-        return '{}.{}'.format(parent_code, self_code)
-
-    def __str__(self):
-        return '{} {}'.format(self.code, self.name)
-
-    def clone_to(self, new_job, new_order):
-        tasks = self.tasks.all()
-        self.pk = None
-        self.job = new_job
-        self.order = new_order
-        self.save()
-        for task in tasks:
-            task.clone_to(self, task.order)
-
-
-class Task(BetterOrderedModel):
-    name = models.CharField(_("Name"), max_length=512)
-    description = models.TextField()
-
-    # tracking completion of this task by a quantifiable indicator, an estimate
     qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
-
-    # unit for the completion tracking quantifiable indicator
-    unit = models.CharField(_("Unit"), max_length=64)
-
-    # how much of the project is complete in units of quantity
-    # may be more than qty
-    complete = models.DecimalField(_("Complete"), max_digits=14, decimal_places=4, default=0.0)
-
-    # tasks marked optional aren't included in the total
-    is_optional = models.BooleanField(default=False)
+    qty_equation = models.CharField(max_length=512, blank=True)
+    complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=0.0)
+    unit = models.CharField(_("Unit"), max_length=512, blank=True)
+    price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=0.0)
+    price_equation = models.CharField(max_length=512, blank=True)
+    total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=0.0)
+    total_equation = models.CharField(max_length=512, blank=True)
 
     started_on = models.DateField(blank=True, null=True)
     completed_on = models.DateField(blank=True, null=True)
 
-    taskgroup = models.ForeignKey(TaskGroup, related_name="tasks")
-    order_with_respect_to = 'taskgroup'
+    job = models.ForeignKey(Job, related_name="all_tasks")
+    group = models.ForeignKey(Group, related_name="tasks")
+    order_with_respect_to = 'group'
+
+    # GAEB Spec 2.7.5.2
+    variant_group = models.PositiveIntegerField(null=True)
+    variant_serial = models.PositiveIntegerField(default=0)
+
+    # GAEB Spec 2.7.5.3
+    is_provisional = models.BooleanField(default=False)
 
     APPROVED = "approved"
     READY = "ready"
@@ -285,255 +280,148 @@ class Task(BetterOrderedModel):
 
     status = FSMField(blank=True, choices=STATE_CHOICES)
 
+    token = models.IntegerField('api token', null=True)
+
     class Meta:
         verbose_name = _("Task")
         verbose_name_plural = _("Task")
-        ordering = ['order']
+        ordering = ('order',)
+
+    def __init__(self, *args, **kwargs):
+        if 'job' not in kwargs and 'group' in kwargs:
+            kwargs['job'] = kwargs['group'].job
+        super().__init__(*args, **kwargs)
 
     @property
     def is_billable(self):
         return self.complete > 0
 
-    def estimate_total_modify(self, worker, action, rate):
-        for instance in self.taskinstances.all():
-            instance.estimate_total_modify(worker, action, rate)
+    @property
+    def is_variant(self):
+        return self.variant_group is not None
 
-    @cached_property
-    def instance(self):
-        for instance in self.taskinstances.all():
-            if instance.selected:
-                return instance
-        raise self.taskinstances.model.DoesNotExist
+    @property
+    def include_estimate(self):
+        if self.is_provisional:
+            return False
+        if self.is_variant and self.variant_serial != 0:
+            return False
+        return True
+
+    @property
+    def lineitem_price(self):
+        """ The task price as defined by lineitems.
+            For most cases, use the Task.price instead of this.
+        """
+        price = Decimal('0.00')
+        for li in self.lineitems.all():
+            price += li.total
+        return price
+
+    @property
+    def price_difference(self):
+        """ Normally the Task.price == lineitem_price and thus diff is 0.
+            In cases where the user has defined the total manually and then the
+            lineitem_price (sum of lineitem totals) != Task.price
+            this will return the amount of the discrepancy.
+        """
+        return self.price - self.lineitem_price
+
+    @property
+    def progress(self):
+        return round(self.price * self.complete, 2)
 
     @property
     def complete_percent(self):
-        return round(self.complete / self.qty * 100) if self.qty else 0
-
-    @property
-    def unit_price(self):
-        return self.instance.unit_price
-
-    @property
-    def fixed_price_estimate(self):
-        return self.instance.fixed_price_estimate
-
-    @property
-    def fixed_price_progress(self):
-        return self.instance.fixed_price_progress
-
-    @property
-    def time_and_materials_estimate(self):
-        return self.instance.time_and_materials_estimate
-
-    @property
-    def time_and_materials_progress(self):
-        return self.instance.time_and_materials_progress
+        return nice_percent(self.complete, self.qty)
 
     @property
     def code(self):
-        parent_code = self.taskgroup.code
-        self_code = str(self.order + 1).zfill(self.taskgroup.job.project.task_zfill)
-        return '{}.{}'.format(parent_code, self_code)
+        code = self.group._structure.format_task(self.order)
+        return '{}.{}'.format(self.group.code, code)
 
     def __str__(self):
-        return '{} {}'.format(self.code, self.name)
+        return self.name
 
-    def clone_to(self, new_taskgroup, new_order):
-        taskinstances = self.taskinstances.all()
+    def clone_to(self, new_group, new_order):
+        lineitems = self.lineitems.exclude(is_correction=True).all()
         self.pk = None
-        self.taskgroup = new_taskgroup
+        self.group = new_group
+        self.job = new_group.job
         self.order = new_order
-        self.qty = 0.0
         self.complete = 0.0
         self.started_on = None
         self.completed_on = None
         self.status = ''
         self.save()
-        for taskinstance in taskinstances:
-            taskinstance.clone_to(self, taskinstance.order)
-
-
-class TaskInstance(BetterOrderedModel):
-    """
-    A TaskInstance is a concrete version of a task that can actually be executed.
-    For example, a Task could be to "Install a window."
-    This task could have two TaskInstances:
-      1. Install a standard window.
-      2. Install an insulated window.
-    A single TaskInstance must be chosen (by customer) before a Task can be invoiced or tracked.
-    """
-
-    name = models.CharField(_("Name"), max_length=512)
-    description = models.TextField()
-
-    # By default the first TaskInstance created for a task
-    # will be the selected one.
-    selected = models.BooleanField(default=False)
-
-    task = models.ForeignKey(Task, related_name="taskinstances")
-    order_with_respect_to = 'task'
-
-    class Meta:
-        verbose_name = _("Task Instance")
-        verbose_name_plural = _("Task Instances")
-        ordering = ['order']
-
-    def estimate_total_modify(self, worker, action, rate):
-        correction = self.lineitems.filter(is_correction=True).first()
-        if action in ['increase', 'decrease']:
-            correction = correction or LineItem(taskinstance=self, is_correction=True, price=0)
-            correction.name = _("Price correction from %(worker)s on %(date)s") % \
-                              {'worker': worker.get_full_name(), 'date': date_format(datetime.now())}
-            correction.unit_qty = 1.0
-            correction.unit = _("correction")
-            direction = {'increase': 1, 'decrease': -1}[action]
-            correction.price += self.unit_price * Decimal(rate) * direction
-            correction.save()
-        elif action == 'reset' and correction:
-            correction.delete()
-
-    @property
-    def full_name(self):
-        if not self.selected:
-            return _("Alternative") + ": " + self.task.name + " " + self.name
-        else:
-            return self.task.name + " " + self.name
-
-    @property
-    def full_description(self):
-        return self.task.description + " " + self.description
-
-    # For fixed price billing, returns the price
-    # per unit of this task
-    @property
-    def unit_price(self):
-        t = Decimal(0.0)
-        for lineitem in self.lineitems.all():
-            t += lineitem.price_per_task_unit
-        return t
-
-    # For fixed price billing, returns the estimated price
-    # to complete this task.
-    @property
-    def fixed_price_estimate(self):
-        return round(self.unit_price * self.task.qty, 2)
-
-    # For fixed price billing, returns the price based
-    # on what has been completed.
-    @property
-    def fixed_price_progress(self):
-        return round(self.unit_price * self.task.complete, 2)
-
-    # For time and materials billing, returns
-    # the estimated amount that will been expended by
-    # all line items contained by this task.
-    @property
-    def time_and_materials_estimate(self):
-        t = Decimal(0.0)
-        for lineitem in self.lineitems.all():
-            t += lineitem.time_and_materials_estimate
-        return t
-
-    # For time and materials billing, returns
-    # the total amount that has been expended by
-    # all line items contained by this task.
-    @property
-    def time_and_materials_progress(self):
-        t = Decimal(0.0)
-        for lineitem in self.lineitems.all():
-            t += lineitem.time_and_materials_progress
-        return t
-
-    @property
-    def code(self):
-        parent_code = self.task.code
-        if self.task.taskinstances.count() > 1:
-            return '{}{}'.format(parent_code, ascii_lowercase[self.order])
-        else:
-            return parent_code
-
-    def __str__(self):
-        return '{} {}'.format(self.code, self.name)
-
-    def clone_to(self, new_task, new_order):
-        lineitems = self.lineitems.exclude(is_correction=True).all()
-        self.pk = None
-        self.task = new_task
-        self.order = new_order
-        self.save()
         for lineitem in lineitems:
             lineitem.pk = None
+            lineitem.complete = 0.0
             lineitem.is_flagged = False
-            lineitem.taskinstance = self
+            lineitem.task = self
             lineitem.save()
 
 
-class LineItem(models.Model):
-    name = models.CharField(_("Name"), max_length=512)
+class LineItem(OrderedModel):
 
-    # fixed billing, amount of hours or materials to complete just one unit of the task
-    unit_qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
+    name = models.CharField(_("Name"), max_length=512, blank=True)
 
-    # time and materials billing, amount of hours or materials to complete the entire task
-    task_qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
+    qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
+    qty_equation = models.CharField(max_length=512, blank=True)
+    complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=0.0)
 
-    # time and materials billing, how many units of this have been delivered/expended and can thus be billed
-    billable = models.DecimalField(_("Billable"), max_digits=14, decimal_places=4, default=0.0)
+    unit = models.CharField(_("Unit"), max_length=512, blank=True)
 
-    # unit for the quantity
-    unit = models.CharField(_("Unit"), max_length=64)
-
-    # price per unit
     price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=0.0)
+    price_equation = models.CharField(max_length=512, blank=True)
 
-    # when labor is true, this will cause this line item to show up in time sheet and other
-    # labor related parts of the system
-    is_labor = models.BooleanField(default=False)
-
-    # when material is true, this will cause this line item to show up in materials tracking
-    # and other inventory parts of the system
-    is_material = models.BooleanField(default=False)
+    total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=0.0)
+    total_equation = models.CharField(max_length=512, blank=True)
 
     # flagged items will appear in the project dashboard as needing attention
     # could be set automatically by the system from temporal triggers (materials should have been delivered by now)
     # or it could be set manual by a user
     is_flagged = models.BooleanField(default=False)
 
+    # hidden lineitems are not included in the total
+    is_hidden = models.BooleanField(default=False)
+
     # this line item is a price correction
     is_correction = models.BooleanField(default=False)
 
-    taskinstance = models.ForeignKey(TaskInstance, related_name="lineitems")
+    task = models.ForeignKey(Task, related_name="lineitems")
+    order_with_respect_to = 'task'
+
+    job = models.ForeignKey(Job, related_name="all_lineitems")
+    token = models.IntegerField('api token', null=True)
 
     class Meta:
         verbose_name = _("Line Item")
         verbose_name_plural = _("Line Items")
-        ordering = ['id']
+        ordering = ('order',)
 
-    # For fixed price billing, returns the price
-    # of this line item per 1 unit of the parent task.
-    @property
-    def price_per_task_unit(self):
-        return round(self.price * self.unit_qty, 2)
-
-    # For time and materials billing, returns the estimated price
-    # of this line item to complete the entire task.
-    @property
-    def time_and_materials_estimate(self):
-        return round(self.price * self.task_qty, 2)
-
-    # For time and materials billing, returns
-    # the total amount that has been expended.
-    @property
-    def time_and_materials_progress(self):
-        return round(self.price * self.billable, 2)
-
-    @property
-    def job(self):
-        return self.taskinstance.task.taskgroup.job
+    def __init__(self, *args, **kwargs):
+        if 'job' not in kwargs and 'task' in kwargs:
+            kwargs['job'] = kwargs['task'].job
+        super().__init__(*args, **kwargs)
 
     @property
     def project(self):
         return self.job.project
+
+    # regex should math the one in dart app spreadsheet/cell.dart
+    NUMBER = re.compile(r"^-?[0-9.,]+$")
+
+    def _is_equation(self, column):
+        val = getattr(self, column+'_equation')
+        if not val:
+            return False
+        if self.NUMBER.search(val):
+            return False
+        return True
+    is_qty_equation = property(lambda self: self._is_equation('qty'))
+    is_price_equation = property(lambda self: self._is_equation('price'))
+    is_total_equation = property(lambda self: self._is_equation('total'))
 
 
 class ProgressReport(models.Model):
@@ -558,7 +446,7 @@ class ProgressReport(models.Model):
     class Meta:
         verbose_name = _("Progress Report")
         verbose_name_plural = _("Progress Reports")
-        ordering = ['-timestamp']
+        ordering = ('-timestamp',)
 
 
 class ProgressAttachment(models.Model):
@@ -568,4 +456,4 @@ class ProgressAttachment(models.Model):
     class Meta:
         verbose_name = _("Attachment")
         verbose_name_plural = _("Attachments")
-        ordering = ['id']
+        ordering = ('id',)

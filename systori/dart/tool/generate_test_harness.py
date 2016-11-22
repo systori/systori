@@ -1,19 +1,17 @@
 import os
 import types
-import django
+import django; django.setup()
 from decimal import Decimal as D
 from django.db import transaction
 from django.template import Context, Template
 from django.test.client import Client
-from django.core.urlresolvers import reverse
 from django.test.runner import setup_databases
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings.travis")
-django.setup()
-
+from django.core.urlresolvers import reverse
+from django.utils.translation import activate
 from django.conf import settings
 from systori.apps.company.factories import CompanyFactory
 from systori.apps.project.factories import ProjectFactory
-from systori.apps.task.factories import JobFactory
+from systori.apps.task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from systori.apps.user.factories import UserFactory
 from systori.apps.accounting.models import Entry, create_account_for_job
 from systori.apps.accounting.forms import PaymentRowForm
@@ -24,12 +22,15 @@ from systori.lib.accounting.tools import Amount as A
 DART_APP_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 
-def write_test_html(name, html):
-    file_path = os.path.join(DART_APP_ROOT, 'test', name+'_test.html')
+def write_test_html(path, name, html):
+    file_path = os.path.join(DART_APP_ROOT, 'test', path, name+'_test.html')
     with open(file_path, 'wb') as test_file:
         test_file.write(html)
         test_file.write(b'<link rel="x-dart-test" href="'+name.encode()+b'_test.dart">\n')
         test_file.write(b'<script src="packages/test/dart.js"></script>\n')
+        test_file.write(b'<!--\n')
+        test_file.write(b'<script type="application/dart" src="'+name.encode()+b'_test.dart"></script>\n')
+        test_file.write(b'-->\n')
 
 
 def create_data():
@@ -37,13 +38,20 @@ def create_data():
     data.company = CompanyFactory()
     create_chart_of_accounts()
     data.user = UserFactory(email='test@systori.com', company=data.company)
-    data.project = ProjectFactory(name="Test Project")
+    data.project = ProjectFactory(name="Test Project", structure_format="0.00.00.000")
 
     data.job1 = JobFactory(name="Test Job", project=data.project)
+    data.job1.generate_groups()
     data.job1.account = create_account_for_job(data.job1)
     data.job1.save()
+    group = data.job1.groups.first().groups.first()
+    task = TaskFactory(name="Sample Task", group=group, job=data.job1)
+    LineItemFactory(task=task)
+    LineItemFactory(task=task)
+    LineItemFactory(task=task)
 
     data.job2 = JobFactory(name="Test Job", project=data.project)
+    data.job2.generate_groups()
     data.job2.account = create_account_for_job(data.job2)
     data.job2.save()
 
@@ -69,7 +77,7 @@ def generate_amount_test_html(data):
     {% amount_input "test-amount-input" form1 "split" %}
     {% amount_stateful "test-amount-stateful" form1 "discount" %}
     </tr></table>""")
-    return template.render({'TAX_RATE': '0.19', 'form1': form}).encode()
+    return template.render(Context({'TAX_RATE': '0.19', 'form1': form})).encode()
 
 
 def generate_pages():
@@ -78,22 +86,23 @@ def generate_pages():
     client = Client()
     client.login(username=data.user.email, password='open sesame')
 
-    editor = client.get(reverse('tasks', args=[data.project.id, data.job1.id]), HTTP_HOST=host)
-    write_test_html('task_editor', editor.content)
+    job_editor = client.get(reverse('tasks', args=[data.project.id, data.job1.id]), HTTP_HOST=host)
+    write_test_html('editor', 'editor', job_editor.content)
 
-    proposal_create = client.get(reverse('proposal.create', args=[data.project.id]), HTTP_HOST=host)
-    write_test_html('proposal_editor', proposal_create.content)
+    #proposal_create = client.get(reverse('proposal.create', args=[data.project.id]), HTTP_HOST=host)
+    #write_test_html('apps', 'proposal_editor', proposal_create.content)
 
     payment_create = client.get(reverse('payment.create', args=[data.project.id]), HTTP_HOST=host)
-    write_test_html('payment_editor', payment_create.content)
+    write_test_html('apps', 'payment_editor', payment_create.content)
 
     adjustment_create = client.get(reverse('adjustment.create', args=[data.project.id]), HTTP_HOST=host)
-    write_test_html('adjustment_editor', adjustment_create.content)
+    write_test_html('apps', 'adjustment_editor', adjustment_create.content)
 
     refund_create = client.get(reverse('refund.create', args=[data.project.id]), HTTP_HOST=host)
-    write_test_html('refund_editor', refund_create.content)
+    write_test_html('apps', 'refund_editor', refund_create.content)
 
-    write_test_html('amount', generate_amount_test_html(data))
+    activate('de')
+    write_test_html('inputs', 'amount', generate_amount_test_html(data))
 
 
 if __name__ == "__main__":

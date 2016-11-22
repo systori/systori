@@ -2,12 +2,13 @@ from math import floor, ceil
 from datetime import date
 from django.db import models
 from django.conf import settings
-from ordered_model.models import OrderedModel
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
+from django.utils.functional import cached_property
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
 from django_fsm import FSMField, transition
-from ..task.models import Job
+from systori.lib.utils import nice_percent
+from systori.apps.task.models import Job
 from geopy import geocoders
 
 
@@ -19,18 +20,44 @@ class ProjectQuerySet(models.QuerySet):
         return self.exclude(is_template=True)
 
 
+class GAEBHierarchyStructure:
+    """ See: docs/GAEB_DA_XML_3.0_en.pdf """
+
+    MAXLEVELS = 6  # 1 Lot/Job + 4 Categories + 1 Task
+
+    def __init__(self, format):
+        self.format = format
+        self.zfill = [len(p) for p in format.split('.')]
+        assert 2 <= len(self.zfill) <= self.MAXLEVELS,\
+            "GAEB hiearchy is outside the allowed hierarchy depth."
+
+    @staticmethod
+    def _format(code, zfill):
+        return str(code).zfill(zfill)
+
+    def format_task(self, code):
+        return self._format(code, self.zfill[-1])
+
+    def format_group(self, code, level):
+        assert self.has_level(level), "Group level is outside the allowed hierarchy depth."
+        return self._format(code, self.zfill[level])
+
+    def has_level(self, level):
+        return 0 <= level < (len(self.zfill)-1)
+
+
 class Project(models.Model):
     name = models.CharField(_('Project Name'), max_length=512)
     description = models.TextField(_('Project Description'), blank=True, null=True)
     is_template = models.BooleanField(default=False)
-
-    job_zfill = models.PositiveSmallIntegerField(_("Job Code Zero Fill"), default=1)
-    taskgroup_zfill = models.PositiveSmallIntegerField(_("Task Group Code Zero Fill"), default=1)
-    task_zfill = models.PositiveSmallIntegerField(_("Task Code Zero Fill"), default=1)
-
+    structure_format = models.CharField(_('Numbering Structure'), max_length=124, default="01.01.001")
     account = models.OneToOneField('accounting.Account', related_name="project", null=True)
 
     objects = ProjectQuerySet.as_manager()
+
+    @cached_property
+    def structure(self):
+        return GAEBHierarchyStructure(self.structure_format)
 
     PROSPECTIVE = "prospective"
     TENDERING = "tendering"
@@ -200,22 +227,16 @@ class Project(models.Model):
                 .get()
 
     @property
-    def estimate_total(self):
-        return self.jobs.estimate_total()
+    def estimate(self):
+        return self.jobs.total()
 
     @property
-    def progress_total(self):
-        return self.jobs.progress_total()
+    def progress(self):
+        return self.jobs.progress()
 
     @property
     def progress_percent(self):
-        percent = self.progress_total / self.estimate_total * 100 if self.estimate_total else 0
-        if percent < 100:
-            return floor(percent)
-        elif percent > 100:
-            return ceil(percent)
-        else:
-            return 100
+        return nice_percent(self.progress, self.estimate)
 
     @property
     def jobs_for_proposal(self):

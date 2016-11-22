@@ -71,7 +71,7 @@ class ProposalRowForm(DocumentRowForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.estimate_amount = Amount.from_net(self.job.estimate_total, TAX_RATE)
+        self.estimate_amount = Amount.from_net(self.job.total, TAX_RATE)
 
     @property
     def json(self):

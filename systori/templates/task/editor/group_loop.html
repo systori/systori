@@ -1,0 +1,12 @@
+<sys-group
+    {% if group.pk %}data-pk="{{ group.pk }}"{% endif %}
+    {% if group.order %}data-order="{{ group.order }}"{% endif %}
+    {% if not group.name %}class="empty"{% endif %}>
+  {% include "task/editor/group_editor.html" with group=group %}
+  {% for subgroup in group.groups.all %}
+    {% include "task/editor/group_loop.html" with group=subgroup %}
+  {% endfor %}
+  {% for task in group.tasks.all %}
+    {% include "task/editor/task_loop.html" with task=task %}
+  {% endfor %}
+</sys-group>

@@ -1,207 +1,225 @@
-from systori.lib.testing import ApiTestCase
-from .models import Job, TaskGroup, Task, TaskInstance, LineItem
-from .test_models import create_task_data
+import json
+from django.core.urlresolvers import reverse
+from systori.lib.testing import SystoriTestCase
+from .models import Group, Task, LineItem
+from ..company.factories import CompanyFactory
+from ..user.factories import UserFactory
+from ..project.factories import ProjectFactory
+from .factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 
 
-class ResourceTestCaseBase(ApiTestCase):
-
-    def setUp(self):
-        super().setUp()
-        create_task_data(self)
-        self.api_client.client.login(username=self.user.email, password='open sesame')
-
-
-class JobOrderResourceTest(ResourceTestCaseBase):
-    url = '/api/v1/job/'
-
-    def test_get_jobs(self):
-        resp = self.api_client.get(self.url, data={})
-        self.assertValidJSONResponse(resp)
-        objects = self.deserialize(resp)['objects']
-        self.assertEqual(len(objects), 2)
-        keys = objects[0].keys()
-        expected_keys = [
-            'id', 'job_code', 'name', 'description', 'project', 'billing_method', 'status', 'taskgroup_offset',
-            'resource_uri', 'is_revenue_recognized'
-        ]
-        self.assertEqual(sorted(expected_keys), sorted(keys))
-
-    def test_update_job(self):
-        url = self.url + '{}/'.format(Job.objects.first().pk)
-        data = {"name": "updated job", "description": "updated desc"}
-        resp = self.api_client.put(url, data=data, format='json')
-        self.assertHttpAccepted(resp)
-        job = Job.objects.get(pk=self.job.id)
-        self.assertEqual("updated job", job.name)
-        self.assertEqual("updated desc", job.description)
-
-    def test_create_job(self):
-        data = {
-            "project": "/api/v1/project/{}/".format(self.project.id),
-            "name": "new job",
-            "description": "new desc",
-            "job_code": 99
-        }
-        resp = self.api_client.post(self.url, data=data, format='json')
-        self.assertHttpCreated(resp)
-        job = Job.objects.order_by('id').last()
-        self.assertEqual("new job", job.name)
-        self.assertEqual("new desc", job.description)
-
-
-class TaskGroupResourceTest(ResourceTestCaseBase):
-    url = '/api/v1/taskgroup/'
-
-    def test_update_task_group(self):
-        url = self.url + '{}/'.format(self.group.id)
-        data = {"name": "new name"}
-        resp = self.api_client.put(url, data=data, format='json')
-        self.assertHttpAccepted(resp)
-        group = TaskGroup.objects.get(pk=self.group.id)
-        self.assertEqual("new name", group.name)
-
-    def test_create_task_group(self):
-        data = {
-            "job": "/api/v1/job/{}/".format(self.job.id),
-            "name": "created group"
-        }
-        resp = self.api_client.post(self.url, data=data, format='json')
-        self.assertHttpCreated(resp)
-        group = TaskGroup.objects.last()
-        self.assertEqual("created group", group.name)
-        self.assertEqual(self.job.id, group.job.id)
-
-    def test_delete_task_group(self):
-        start_count = TaskGroup.objects.count()
-        url = self.url + '{}/'.format(self.group.id)
-        resp = self.api_client.delete(url, format='json')
-        self.assertHttpAccepted(resp)
-        new_count = TaskGroup.objects.count()
-        self.assertEqual(start_count - 1, new_count)
-
-    def test_autocomplete_no_matches(self):
-        url = self.url + 'autocomplete/'
-        resp = self.api_client.get(url, data={"query": "green"}, format='json')
-        self.assertHttpOK(resp)
-        self.assertEqual(b'', resp.content.strip())
-
-    def test_autocomplete_has_matches(self):
-        url = self.url + 'autocomplete/'
-        resp = self.api_client.get(url, data={"query": "group"}, format='json')
-        self.assertHttpOK(resp)
-        self.assertEqual(2, str(resp.content).count('group'))
-
-
-class TaskResourceTest(ResourceTestCaseBase):
-    url = '/api/v1/task/'
+class BaseTestCase(SystoriTestCase):
 
     def setUp(self):
-        super(TaskResourceTest, self).setUp()
-        self.task3 = Task.objects.create(name="my task three green", qty=0, taskgroup=self.group)
-        self.task4 = Task.objects.create(name="my task four green", qty=0, taskgroup=self.group)
-
-    def test_update_task(self):
-        url = self.url + '{}/'.format(self.task.id)
-        data = {"name": "new name"}
-        resp = self.api_client.put(url, data=data, format='json')
-        self.assertHttpAccepted(resp)
-        task = Task.objects.get(pk=self.task.id)
-        self.assertEqual("new name", task.name)
-
-    def test_create_task(self):
-        data = {
-            "taskgroup": "/api/v1/taskgroup/{}/".format(self.group.id),
-            "name": "created task",
-            "qty": 5
-        }
-        resp = self.api_client.post(self.url, data=data, format='json')
-        self.assertHttpCreated(resp)
-        task = Task.objects.last()
-        self.assertEqual("created task", task.name)
-        self.assertEqual(self.group.id, task.taskgroup.id)
-        self.assertEqual(5, task.qty)
-
-    def test_delete_task(self):
-        start_count = Task.objects.count()
-        url = self.url + '{}/'.format(self.task.id)
-        resp = self.api_client.delete(url, format='json')
-        self.assertHttpAccepted(resp)
-        new_count = Task.objects.count()
-        self.assertEqual(start_count - 1, new_count)
-
-    def test_clone_task(self):
-        url = self.url + '{}/clone/'.format(self.task.id)
-        data = {
-            "target": "/api/v1/taskgroup/{}/".format(self.group.id),
-            "pos": 1
-        }
-        self.assertEqual(2, Task.objects.filter(name=self.task.name).count())
-        response = self.api_client.post(url, data=data, format='json')
-        self.assertEqual(3, Task.objects.filter(name=self.task.name).count())
-        new_task = Task.objects.get(taskgroup=self.group.id, order=1)
-        self.assertContains(response, '<ubr-task data-pk="{0}">'.format(new_task.id), 1, 201)
+        self.company = CompanyFactory()
+        self.worker = UserFactory(company=self.company, language='en', password='open sesame').access.first()
+        self.client.login(username=self.worker.email, password='open sesame')
 
 
-class TaskInstanceResourceTest(ResourceTestCaseBase):
-    url = '/api/v1/taskinstance/'
+class GroupApiTest(BaseTestCase):
 
-    def test_update_taskinstance(self):
-        url = self.url + '{}/'.format(self.task.instance.id)
-        data = {"name": "new name"}
-        resp = self.api_client.put(url, data=data, format='json')
-        self.assertHttpAccepted(resp)
-        task = TaskInstance.objects.get(pk=self.task.instance.id)
-        self.assertEqual("new name", task.name)
+    def test_create(self):
+        job = JobFactory(project=ProjectFactory())
+        response = self.client.post(
+            reverse('group-list'), {
+                'job': job.pk, 'token': 7, 'parent': job.pk, 'name': 'test group',
+                'groups': [
+                    {'job': job.pk, 'token': 8, 'name': 'sub group'},
+                    {'job': job.pk, 'token': 9, 'name': 'sub group 2', 'groups': [
+                        {'job': job.pk, 'token': 10, 'name': 'sub sub group'},
+                    ]}
+                ]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(5, Group.objects.count())
+        group = Group.objects.get(parent=job)
+        self.assertEqual('test group', group.name)
+        self.assertEqual('sub group', group.groups.all()[0].name)
+        self.assertEqual('sub group 2', group.groups.all()[1].name)
+        self.assertEqual('sub sub group', group.groups.all()[1].groups.all()[0].name)
+        self.assertDictEqual({
+            'job': job.pk, 'token': 7, 'pk': 2,
+            'groups': [
+                {'job': job.pk, 'token': 8, 'pk': 3},
+                {'job': job.pk, 'token': 9, 'pk': 4, 'groups': [
+                    {'job': job.pk, 'token': 10, 'pk': 5},
+                ]}
+            ]
+        }, response.data)
 
-    def test_create_taskinstance(self):
-        data = {
-            "task": "/api/v1/task/{}/".format(self.task.id),
-            "name": "created task instance"
-        }
-        resp = self.api_client.post(self.url, data=data, format='json')
-        self.assertHttpCreated(resp)
-        task = TaskInstance.objects.last()
-        self.assertEqual("created task instance", task.name)
-        self.assertEqual(self.task.id, task.task.id)
+    def test_create_idempotent(self):
+        job = JobFactory(project=ProjectFactory())
 
-    def test_delete_taskinstance(self):
-        start_count = TaskInstance.objects.count()
-        url = self.url + '{}/'.format(self.task.instance.id)
-        resp = self.api_client.delete(url, format='json')
-        self.assertHttpAccepted(resp)
-        new_count = TaskInstance.objects.count()
-        self.assertEqual(start_count - 1, new_count)
+        response = self.client.post(
+            reverse('group-list'), {
+                'job': job.pk, 'token': 7, 'parent': job.pk, 'name': 'test group',
+                'groups': [{ 'job': job.pk, 'token': 8, 'name': 'sub group'}]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(3, Group.objects.count())
+        self.assertDictEqual({
+            'job': job.pk, 'token': 7, 'pk': 2,
+            'groups': [{'job': job.pk, 'token': 8, 'pk': 3}]
+        }, response.data)
+
+        response = self.client.post(
+            reverse('group-list'), {
+                'job': job.pk, 'token': 7, 'parent': job.pk, 'name': 'test group',
+                'groups': [{ 'job': job.pk, 'token': 8, 'name': 'sub group'}]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(3, Group.objects.count())
+        self.assertDictEqual({
+            'job': job.pk, 'token': 7, 'pk': 2,
+            'groups': [{'job': job.pk, 'token': 8, 'pk': 3}]
+        }, response.data)
+
+    def test_update(self):
+        group = GroupFactory(name='group for update')
+        response = self.client.patch(
+            reverse('group-detail', args=[group.pk]),
+            {'name': 'updated group'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        group.refresh_from_db()
+        self.assertEqual('updated group', group.name)
+        self.assertDictEqual({'pk': group.id}, response.data)
+
+    def test_delete(self):
+        project = ProjectFactory(structure_format="0.0.0.0")
+        job = JobFactory(project=project)
+        job.generate_groups()
+        self.assertEqual(3, Group.objects.count())
+        response = self.client.delete(reverse('group-detail', args=[2]), format='json')
+        self.assertEqual(response.status_code, 204, response.data)
+        self.assertEqual(1, Group.objects.count())
 
 
-class LineItemResourceTest(ResourceTestCaseBase):
-    url = '/api/v1/lineitem/'
+class TaskApiTest(BaseTestCase):
 
-    def test_update_lineitem(self):
-        url = self.url + '{}/'.format(self.lineitem.id)
-        data = {"name": "new name"}
-        resp = self.api_client.put(url, data=data, format='json')
-        self.assertHttpAccepted(resp)
-        lineitem = LineItem.objects.get(pk=self.lineitem.id)
-        self.assertEqual("new name", lineitem.name)
+    def test_create(self):
+        job = JobFactory(project=ProjectFactory())
+        response = self.client.post(
+            reverse('task-list'), {
+                'job': job.pk, 'token': 5, 'group': job.pk,
+                'name': 'test task', 'description': '',
+                'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': '',
+                'lineitems': [
+                    {'job': job.pk, 'token': 6, 'name': 'lineitem', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
+                    {'job': job.pk, 'token': 7, 'name': 'lineitem 2', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
+                ]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(1, Task.objects.count())
+        self.assertEqual(2, LineItem.objects.count())
+        task = job.tasks.all()[0]
+        self.assertEqual('test task', task.name)
+        self.assertEqual('lineitem', task.lineitems.all()[0].name)
+        self.assertEqual('lineitem 2', task.lineitems.all()[1].name)
+        self.assertDictEqual({
+            'job': job.pk, 'token': 5, 'pk': 1,
+            'lineitems': [
+                {'job': job.pk, 'token': 6, 'pk': 1},
+                {'job': job.pk, 'token': 7, 'pk': 2}
+            ]
+        }, response.data)
 
-    def test_create_lineitem(self):
-        data = {
-            "taskinstance": "/api/v1/taskinstance/{}/".format(self.task.instance.id),
-            "name": "created line item",
-            "unit_qty": "8",
-            "price": "20"
-        }
-        resp = self.api_client.post(self.url, data=data, format='json')
-        self.assertHttpCreated(resp)
-        lineitem = LineItem.objects.last()
-        self.assertEqual("created line item", lineitem.name)
-        self.assertEqual(self.task.instance.id, lineitem.taskinstance.id)
-        self.assertEqual(160, lineitem.price_per_task_unit)
+    def test_create_idempotent(self):
+        job = JobFactory(project=ProjectFactory())
 
-    def test_delete_lineitem(self):
-        start_count = LineItem.objects.count()
-        url = self.url + '{}/'.format(self.lineitem.id)
-        resp = self.api_client.delete(url, format='json')
-        self.assertHttpAccepted(resp)
-        new_count = LineItem.objects.count()
-        self.assertEqual(start_count - 1, new_count)
+        response = self.client.post(
+            reverse('task-list'), {
+                'job': job.pk, 'group': job.pk, 'token': 5,
+                'name': 'test task',
+                'lineitems': [
+                    {'job': job.pk, 'token': 6},
+                    {'job': job.pk, 'token': 7}
+                ]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(1, Task.objects.count())
+        self.assertEqual(2, LineItem.objects.count())
+        self.assertDictEqual({
+            'job': job.pk, 'token': 5, 'pk': 1,
+            'lineitems': [
+                {'job': job.pk, 'token': 6, 'pk': 1},
+                {'job': job.pk, 'token': 7, 'pk': 2}
+            ]
+        }, response.data)
+
+        response = self.client.post(
+            reverse('task-list'), {
+                'job': job.pk, 'group': job.pk, 'token': 5,
+                'name': 'test task',
+                'lineitems': [
+                    {'job': job.pk, 'token': 6},
+                    {'job': job.pk, 'token': 7}
+                ]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(1, Task.objects.count())
+        self.assertEqual(2, LineItem.objects.count())
+        self.assertDictEqual({
+            'job': job.pk, 'token': 5, 'pk': 1,
+            'lineitems': [
+                {'job': job.pk, 'token': 6, 'pk': 1},
+                {'job': job.pk, 'token': 7, 'pk': 2}
+            ]
+        }, response.data)
+
+    def test_delete(self):
+        job = JobFactory(project=ProjectFactory(structure_format="0.0.0.0"))
+        job.generate_groups()
+        self.assertEqual(3, Group.objects.count())
+        response = self.client.delete(reverse('group-detail', args=[2]), format='json')
+        self.assertEqual(response.status_code, 204, response.data)
+        self.assertEqual(1, Group.objects.count())
+
+    def test_update(self):
+        group = JobFactory(project=ProjectFactory())
+        task = TaskFactory(group=group)
+        lineitem = LineItemFactory(task=task)
+        response = self.client.patch(
+            reverse('task-detail', args=[task.pk]), {
+                'total': 11,
+                'lineitems': [
+                    {'pk': lineitem.pk, 'total': 22},
+                ]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        task = group.tasks.all()[0]
+        self.assertEqual(11, task.total)
+        self.assertEqual(22, task.lineitems.all()[0].total)
+        self.assertDictEqual({
+            'pk': 1,
+            'lineitems': [
+                {'pk': 1},
+            ]
+        }, response.data)
+
+
+class LineItemApiTest(BaseTestCase):
+
+    def test_delete(self):
+        task = TaskFactory(group=JobFactory(project=ProjectFactory()))
+        LineItemFactory(task=task)
+        LineItemFactory(task=task)
+        self.assertEqual(2, LineItem.objects.count())
+        response = self.client.delete(reverse('lineitem-detail', args=[2]), format='json')
+        self.assertEqual(response.status_code, 204, response.data)
+        self.assertEqual(1, LineItem.objects.count())

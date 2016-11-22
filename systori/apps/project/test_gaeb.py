@@ -3,10 +3,30 @@ from django.conf import settings
 from django.test import TestCase
 from ..task.models import *
 from .models import *
-
-from ..task.test_models import create_task_data
-
 from .gaeb_utils import *
+
+
+class GAEBStructureTests(TestCase):
+
+    def test_task_formatting(self):
+        struct = GAEBHierarchyStructure("9.01.02.0009")
+        self.assertEqual('0001', struct.format_task(1))
+        self.assertEqual('12345', struct.format_task(12345))
+
+    def test_group_formatting(self):
+        struct = GAEBHierarchyStructure("9.000.00.0000")
+        self.assertEqual('1', struct.format_group(1, 0))
+        self.assertEqual('099', struct.format_group(99, 1))
+        self.assertEqual('99', struct.format_group(99, 2))
+
+    def test_has_level(self):
+        struct = GAEBHierarchyStructure("9.000.00.0000")
+        self.assertEqual(struct.has_level(-1), False)
+        self.assertEqual(struct.has_level(0), True)
+        self.assertEqual(struct.has_level(1), True)
+        self.assertEqual(struct.has_level(2), True)
+        self.assertEqual(struct.has_level(3), False)
+        self.assertEqual(struct.has_level(4), False)
 
 
 class GaebImportTests(TestCase):

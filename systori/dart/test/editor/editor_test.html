@@ -1,0 +1,721 @@
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+<link rel="apple-touch-icon" sizes="57x57" href="/static/img/favicon/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/static/img/favicon/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/static/img/favicon/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/static/img/favicon/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/static/img/favicon/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/static/img/favicon/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/static/img/favicon/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/static/img/favicon/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/img/favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-194x194.png" sizes="194x194">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/static/img/favicon/android-chrome-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="/static/img/favicon/manifest.json">
+<link rel="mask-icon" href="/static/img/favicon/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="msapplication-TileImage" content="/static/img/favicon/mstile-144x144.png">
+<meta name="theme-color" content="#ffffff">
+
+    <title>Test Project > Test Job</title>
+
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+    <link href="/static/css/main.css" rel="stylesheet">
+  
+</head>
+
+
+<body>
+
+
+
+<!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/"><img alt="Systori" src="/static/img/systori_logo_nav.svg" style="margin-top:-10px;"></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              
+                <a class="navbar-brand" href="#">FipMkinMCEoyvWv</a>
+              
+            </li>
+            
+            <li><a href="/projects/">Projekte</a></li>
+            
+            
+  <li><a href="/project-2">Test Project</a></li>
+  <li class="active"><a href="/project-2/job-1/tasks">Test Job</a></li>
+
+          </ul>
+
+          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='fD77c8bUIHAsOXwHhHonhiL7yAaouGtjtYwF9lUX75wUJnz0ULskxTpxOL2SpFfh' />
+          <input type="hidden" name="language" value=""/>
+        </form>
+
+        <ul class="nav navbar-nav navbar-right">
+
+          
+          
+          <li><a
+              href="javascript:window.open('/field/', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">öffne Field App</a>
+          </li>
+          
+          
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">HKoqcQkUFCVFhpI <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="/settings">Einstellungen</a></li>
+              <li><a href="/logout">Abmelden</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">de<b class="caret"></b></a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
+              
+              
+                
+              
+                
+                  <li><a class="language-link" href="#"
+                         data-language="en">English</a></li>
+                
+              
+            </ul>
+          </li>
+
+        </ul>
+
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+
+
+  <style>
+
+    #editor-area {
+      max-width: 1100px;
+      padding-top: 50px;
+      padding-left: 50px;
+      padding-bottom:100px;
+      margin: auto;
+    }
+
+    sys-job,
+    sys-group,
+    sys-task,
+    sys-lineitem,
+    sys-task > div.price-difference {
+      display: block;
+      position: relative;
+      margin-right: 15px;
+    }
+
+    sys-job,
+    sys-group {
+      border-right: 1px solid #e9e9e9;
+    }
+
+    sys-job > .editor,
+    sys-group > .editor,
+    sys-task > .editor {
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .editor-row {
+      display: flex;
+    }
+
+    /* job, group, task */
+
+    .code {
+      flex: 0 1 auto;
+      font-family: monospace;
+    }
+
+    .name {
+      flex: 1 1 auto;
+      margin: 0 10px 0 10px;
+    }
+
+    .total {
+      flex: 0 1 auto;
+      text-align: right;
+      padding: 0 4px 0 4px;
+      margin-right: -5px;
+      border: 1px solid black;
+      background-color: #fff;
+      z-index: 2;
+    }
+
+    .description {
+      margin-left: 50px;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    sys-group > .editor .name {
+      font-weight: bold;
+    }
+
+    sys-group > .editor .total:after,
+    sys-task > .editor .total:after {
+      display: block;
+      position: absolute;
+      content: "+";
+
+      width: 11px;
+      height: 10px;
+
+      top: 0px;
+      right: -16px;
+
+      color: #e9e9e9;
+      font-size: 9px;
+      text-align: left;
+
+      padding-left: 2px;
+      border-bottom: 1px solid #e9e9e9;
+    }
+
+    /* cover up end of line when last child */
+    sys-group:last-child:after,
+    sys-task:last-child:after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 3px;
+      top: 10px;
+      bottom: 0px;
+      right: -17px;
+      background-color: white;
+    }
+
+    /* cover up line if empty group */
+    sys-group > .editor:only-child:after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 1px;
+      top: 0px;
+      bottom: 0px;
+      right: -1px;
+      background-color: white;
+    }
+
+    /* task, lineitem */
+
+    [contenteditable]:focus {
+      outline: none;
+    }
+
+    sys-task {
+      padding-bottom: 20px;
+    }
+
+    .unit {
+      flex: 0 0 auto;
+      width: 40px;
+      padding-left: 4px;
+    }
+
+    sys-lineitem > .editor .total,
+    .qty, .price {
+      flex: 0 0 auto;
+      width: 100px;
+      text-align: right;
+      padding-right: 4px;
+      background-color: #fff;
+    }
+
+    sys-lineitem > .editor .total {
+      border: 1px solid #e9e9e9;
+    }
+
+    sys-task > .editor .price {
+      position: relative;
+      border: 1px solid black;
+      margin-left: 10px;
+    }
+
+    sys-task > .editor .price:before {
+      display: block;
+      position: absolute;
+      content: "x";
+      width: 180px;
+      height: 1px;
+      padding-right: 2px;
+      border-top: 1px solid #e9e9e9;
+      top: -1px;
+      left: -181px;
+      color: #e9e9e9;
+      font-size: 8px;
+      text-align: right;
+    }
+
+    sys-task > .editor .price:after {
+      display: block;
+      position: absolute;
+      content: "=";
+      width: 10px;
+      padding-left: 2px;
+      border-top: 1px solid #e9e9e9;
+      top: 1px;
+      right: -11px;
+      color: #e9e9e9;
+      font-size: 8px;
+      text-align: left;
+    }
+
+    sys-task > .editor .total {
+      width: 90px;
+      margin-left: 10px;
+    }
+
+    sys-task > div.price-difference {
+      display: flex;
+      margin-bottom: 10px;
+      margin-left: 100px;
+    }
+
+    sys-task > div.price-difference > .glyphicon {
+      color: red;
+    }
+
+    sys-task > div.price-difference > .total {
+      color: red;
+      font-weight: bold;
+      border-color: red;
+      min-width: 100px;
+    }
+
+    sys-task > .editor:not(:only-child):after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 1px;
+      top: 0px;
+      bottom: 0px;
+      right: 100px;
+      border-right: 1px solid #e9e9e9;
+      z-index: -1;
+    }
+
+    sys-lineitem:not(:last-child):after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 1px;
+      top: 0px;
+      bottom: 0px;
+      right: 85px;
+      border-right: 1px solid #e9e9e9;
+      z-index: -1;
+    }
+
+    /* line item */
+
+    sys-lineitem {
+      background-color: white;
+    }
+
+    sys-lineitem > a {
+      position: absolute;
+      top: -150px;
+    }
+
+    sys-lineitem,
+    .sys-lineitem-placeholder {
+      margin-bottom: 10px;
+    }
+
+    sys-cell[data-canonical=""] {
+      font-weight: bold;
+    }
+
+    sys-cell[data-resolved] {
+      font-style: italic;
+    }
+
+    sys-cell {
+      position: relative;
+    }
+
+    sys-cell:focus {
+      outline: none;
+    }
+
+    sys-lineitem sys-cell[data-preview]:focus:after {
+      display: block;
+      position: absolute;
+      content: attr(data-preview);
+      font-size: 10px;
+      color: dimgrey;
+      bottom: -10px;
+      right: 4px;
+      width: 400px;
+    }
+
+    .sys-lineitem-handle {
+      cursor: pointer;
+    }
+
+    sys-lineitem-sheet {
+      -webkit-user-select: none;
+      user-select: none;
+      margin-left: 100px;
+      display: block;
+      position: relative;
+    }
+
+    sys-lineitem-sheet:after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 1px;
+      top: 0px;
+      bottom: 0px;
+      right: 100px;
+      border-right: 1px solid #e9e9e9;
+      z-index: -1;
+    }
+
+    /* description */
+
+    sys-job > .editor .description {
+      margin-right: 180px;
+    }
+    sys-job > sys-group > .editor .description {
+      margin-right: 165px;
+    }
+    sys-job > sys-group > sys-group > .editor .description {
+      margin-right: 150px;
+    }
+    sys-job > sys-group > sys-group > sys-group > .editor .description {
+      margin-right: 135px;
+    }
+    sys-job > sys-group > sys-group > sys-group > sys-group > .editor .description {
+      margin-right: 120px;
+    }
+    sys-task > .editor .description {
+      margin-right: 105px;
+    }
+
+    /* actions */
+
+    .actions {
+      width: 85px;
+      padding-left: 20px;
+    }
+
+    .actions > span:hover {
+      cursor: pointer;
+    }
+
+    .actions > span.False {
+      display: none;
+      color: #f0f0f0;
+    }
+
+    .editor:hover > .editor-row > .actions > span.False {
+      display: inline;
+    }
+
+    /* other */
+
+    [contenteditable][placeholder]:empty:before {
+      content: attr(placeholder);
+      font-style: italic;
+      color: #d9d9d9;
+    }
+
+    [contenteditable][placeholder]:empty:focus:before {
+      content: "";
+    }
+
+
+    sys-autocomplete {
+      z-index: 100;
+      display: none;
+      position: absolute;
+      background: white;
+      left: 80px;
+      width: 480px;
+      border: 1px solid lightgrey;
+      top: 20px;
+      -webkit-transition: top 0.1s;
+      -moz-transition: top 0.1s;
+      -ms-transition: top 0.1s;
+      -o-transition: top 0.1s;
+      transition: top 0.1s;
+    }
+
+    sys-autocomplete > div {
+      border-bottom: 1px solid lightgrey;
+    }
+
+    sys-autocomplete > div.active {
+      background: orange;
+    }
+
+  </style>
+
+  <div id="editor-area">
+
+  <sys-job id="task-editor" data-pk="1" data-code="1"
+           data-structure-format="0.00.00.000">
+    
+<div class="editor">
+  <div class="editor-row">
+    <div class="code">1</div>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Test Job</sys-input>
+    <div class="total">0,00</div>
+  </div>
+  <sys-input class="description" placeholder="Beschreibung" contenteditable></sys-input>
+</div>
+    
+      <sys-group
+    data-pk="2"
+    data-token=""
+    data-order="1">
+  
+<div class="editor">
+  <div class="editor-row">
+    <div class="code">1._</div>
+    <sys-input class="name" placeholder="Gruppe" contenteditable></sys-input>
+    <div class="total">0,00</div>
+  </div>
+  <sys-input class="description" placeholder="Beschreibung" contenteditable></sys-input>
+</div>
+  
+    <sys-group
+    data-pk="3"
+    data-token=""
+    data-order="1">
+  
+<div class="editor">
+  <div class="editor-row">
+    <div class="code">1._._</div>
+    <sys-input class="name" placeholder="Gruppe" contenteditable></sys-input>
+    <div class="total">0,00</div>
+  </div>
+  <sys-input class="description" placeholder="Beschreibung" contenteditable></sys-input>
+</div>
+  
+  
+    
+<sys-task
+    data-pk="1"
+    data-token=""
+    data-order="1">
+  
+
+<div class="editor">
+  <div class="editor-row">
+    <div class="code">1._._.001</div>
+    <sys-input class="name"  placeholder="Position"                                             contenteditable>Sample Task</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical=""   contenteditable>0</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                             contenteditable></sys-input>
+    <sys-cell  class="price"                                   data-canonical="" contenteditable>0,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>0,00</sys-cell>
+    
+  </div>
+  <sys-input class="description" placeholder="Beschreibung" contenteditable></sys-input>
+</div>
+
+<sys-lineitem-sheet>
+  
+    <sys-lineitem
+        data-pk="1"
+        data-token=""
+        data-order="1">
+      
+<a name="lineitem-1"></a>
+<div class="editor">
+  <div class="editor-row">
+    <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>tQkmqllrMDNrxZI</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical=""   contenteditable>0</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable></sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="" contenteditable>0,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>0,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="2"
+        data-token=""
+        data-order="2">
+      
+<a name="lineitem-2"></a>
+<div class="editor">
+  <div class="editor-row">
+    <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>HsEAaVqKTDArOCM</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical=""   contenteditable>0</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable></sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="" contenteditable>0,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>0,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="3"
+        data-token=""
+        data-order="3">
+      
+<a name="lineitem-3"></a>
+<div class="editor">
+  <div class="editor-row">
+    <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>neotyCVFJImZIAA</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical=""   contenteditable>0</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable></sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="" contenteditable>0,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>0,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+</sys-lineitem-sheet>
+
+<div class="price-difference" style="visibility: hidden;">
+  <span class="glyphicon glyphicon-exclamation-sign"></span>
+  <div class="name">Line items do not add up to the task price.</div>
+  <div class="total">0,00</div>
+  <div class="actions"></div>
+</div>
+
+</sys-task>
+  
+</sys-group>
+  
+  
+</sys-group>
+    
+    
+  </sys-job>
+
+  </div>
+
+  <template id="group-template">
+    
+<div class="editor">
+  <div class="editor-row">
+    <div class="code">_</div>
+    <sys-input class="name" placeholder="Gruppe" contenteditable></sys-input>
+    <div class="total">0,00</div>
+  </div>
+  <sys-input class="description" placeholder="Beschreibung" contenteditable></sys-input>
+</div>
+  </template>
+
+  <template id="task-template">
+    
+
+<div class="editor">
+  <div class="editor-row">
+    <div class="code"></div>
+    <sys-input class="name"  placeholder="Position"                                             contenteditable></sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical=""   contenteditable>0</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                             contenteditable></sys-input>
+    <sys-cell  class="price"                                   data-canonical="" contenteditable>0,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>0,00</sys-cell>
+    
+  </div>
+  <sys-input class="description" placeholder="Beschreibung" contenteditable></sys-input>
+</div>
+
+<sys-lineitem-sheet>
+  
+</sys-lineitem-sheet>
+
+<div class="price-difference" style="visibility: hidden;">
+  <span class="glyphicon glyphicon-exclamation-sign"></span>
+  <div class="name">Line items do not add up to the task price.</div>
+  <div class="total"></div>
+  <div class="actions"></div>
+</div>
+
+  </template>
+
+  <template id="lineitem-template">
+    
+<a name="lineitem-None"></a>
+<div class="editor">
+  <div class="editor-row">
+    <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable></sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical=""   contenteditable>0</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable></sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="" contenteditable>0,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>0,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+  </template>
+
+
+
+
+<script src="/static/js/jquery-1.11.2.min.js"></script>
+<script src="/static/js/jquery-ui.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/dart/build/packages/web_components/webcomponents-lite.min.js"></script>
+
+
+<script src="/static/js/language_picker.js"></script>
+
+
+  <script src="/static/dart/build/job_editor.dart.js"></script>
+
+
+</body>
+</html>
+<link rel="x-dart-test" href="editor_test.dart">
+<script src="packages/test/dart.js"></script>
+<!--
+<script type="application/dart" src="editor_test.dart"></script>
+-->

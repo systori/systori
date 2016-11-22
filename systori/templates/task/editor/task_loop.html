@@ -1,0 +1,4 @@
+{% load i18n customformatting %}
+<sys-task data-pk="{{ task.pk }}">
+  {% include "task/editor/task_editor.html" with task=task %}
+</sys-task>

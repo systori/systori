@@ -1,7 +1,6 @@
 .idea
 *.pyc
 .settings/
-src/
 Systori.egg-info
 bitbucket.login
 __pycache__

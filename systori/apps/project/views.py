@@ -11,7 +11,7 @@ from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Project, JobSite
 from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
 from .forms import JobSiteForm, FilterForm
-from ..task.models import Job, TaskGroup
+from ..task.models import Job, Group
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
 from ..accounting.report import create_invoice_report
 from ..accounting.models import create_account_for_job
@@ -152,9 +152,9 @@ class ProjectView(DetailView):
         context['TAX_RATE_DISPLAY'] = '{}%'.format(ubrdecimal(TAX_RATE*100, 2))
         return context
 
-    def get_queryset(self):
-        return super().get_queryset()\
-            .prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
+    #def get_queryset(self):
+    #    return super().get_queryset()\
+    #        .prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
 
 
 class ProjectCreate(CreateView):
@@ -168,7 +168,7 @@ class ProjectCreate(CreateView):
         job.account = create_account_for_job(job)
         job.save()
 
-        TaskGroup.objects.create(name='', job=job)
+        Group.objects.create(name='', job=job)
 
         jobsite = JobSite()
         jobsite.project = self.object
@@ -204,7 +204,10 @@ class ProjectUpdate(UpdateView):
     form_class = ProjectUpdateForm
 
     def get_success_url(self):
-        return reverse('project.view', args=[self.object.id])
+        if 'save_goto_project' in self.request.POST:
+            return reverse('project.view', args=[self.object.id])
+        else:
+            return reverse('projects')
 
 
 class ProjectDelete(DeleteView):

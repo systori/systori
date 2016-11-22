@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect
-from django.views.generic import View, ListView
+from django.views.generic import View, ListView, TemplateView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse
@@ -42,29 +42,19 @@ class JobEstimateModification(SingleObjectMixin, View):
         return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
 
 
-class TaskEditor(SingleObjectMixin, ListView):
-    template_name = "task/editor.html"
+class TaskEditor(DetailView):
+    model = Job
+    template_name = "task/editor/main.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['job'] = self.object
-        context['blank_taskgroup'] = TaskGroup(job=self.object, order=0)
+        context['blank_group'] = Group()
         context['blank_task'] = Task()
-        context['blank_taskinstance'] = TaskInstance()
         context['blank_lineitem'] = LineItem()
         context['tax_rate'] = TAX_RATE
         context['tax_rate_percent'] = TAX_RATE * 100
-        context['job_total_net'] = self.object.estimate_total
-        context['job_total_gross'], _ = compute_gross_tax(context['job_total_net'], TAX_RATE)
         return context
-
-    def get_object(self):
-        queryset = Job.objects.prefetch_related('taskgroups__tasks__taskinstances__lineitems')
-        return super().get_object(queryset)
-
-    def get_queryset(self):
-        self.object = self.get_object()
-        return self.object.taskgroups.all()
 
 
 class JobView(DetailView):
@@ -97,11 +87,14 @@ class JobCreate(CreateView):
 
     def form_valid(self, form):
         response = super(JobCreate, self).form_valid(form)
+
+        self.object.job = self.object
+        self.object.account = create_account_for_job(self.object)
+
         if isinstance(form, JobForm) and form.cleaned_data['job_template']:
             tmpl = form.cleaned_data['job_template']
             tmpl.clone_to(self.object)
 
-        self.object.account = create_account_for_job(self.object)
         self.object.save()
 
         return response

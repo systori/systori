@@ -437,7 +437,7 @@ class AdjustmentRowForm(DocumentRowForm):
         state.invoiced_amount = self.job.account.invoiced
         state.invoiced_diff_amount = state.invoiced_amount - state.paid_amount
 
-        state.progress_amount = Amount.from_net(self.job.progress_total, TAX_RATE)
+        state.progress_amount = Amount.from_net(self.job.progress, TAX_RATE)
         state.progress_diff_amount = state.progress_amount - state.invoiced_amount
 
     def calculate_initial_values(self):
@@ -684,7 +684,7 @@ class RefundRowForm(DocumentRowForm):
         state.invoiced_diff_amount = state.invoiced_amount - state.paid_amount
 
         # Billable Column
-        state.progress_amount = Amount.from_net(self.job.progress_total, TAX_RATE)
+        state.progress_amount = Amount.from_net(self.job.progress, TAX_RATE)
         state.progress_diff_amount = state.progress_amount - state.invoiced_amount
 
     def calculate_initial_values(self):

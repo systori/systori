@@ -2,7 +2,7 @@ from lxml import objectify, etree
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-from ..task.models import Job, TaskGroup, Task, TaskInstance
+from ..task.models import Job, Group, Task
 from ..accounting.models import Account
 from .models import Project, JobSite
 
@@ -68,7 +68,7 @@ def gaeb_import(file):
     for ctgy in root.Award.BoQ.BoQBody.BoQCtgy:
         job = Job.objects.create(name=" ".join(ctgy.LblTx.xpath(".//text()")), project=project)
         for grp in ctgy.BoQBody.BoQCtgy:
-            taskgroup = TaskGroup.objects.create(name=" ".join(grp.LblTx.xpath(".//text()")), job=job)
+            taskgroup = Group.objects.create(name=" ".join(grp.LblTx.xpath(".//text()")), job=job)
             for item in grp.BoQBody.Itemlist.getchildren():
                 task = Task.objects.create(taskgroup=taskgroup)
                 task.qty = get(item, "Qty", default=0)
@@ -82,7 +82,7 @@ def gaeb_import(file):
                                 task.description += str(_(" Info: Picture was in Imported File."))
                 for text_node in item.Description.CompleteText.OutlineText.getchildren():
                     task.name = " ".join(text_node.xpath(".//text()"))
-                TaskInstance.objects.create(task=task, selected=True)
+                #TaskInstance.objects.create(task=task, selected=True)
                 task.save()
             taskgroup.save()
         job.save()

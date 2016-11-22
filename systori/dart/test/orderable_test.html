@@ -1,0 +1,52 @@
+<style>
+  orderable-container {
+    display: block;
+    position: relative;
+    -webkit-user-select: none;
+  }
+  orderable-item {
+    display: block;
+    background-color: white;
+  }
+  .orderable-item-handle {
+    cursor: pointer;
+  }
+  .orderable-item-placeholder {
+    background-color: ghostwhite;
+  }
+  .filler {
+    height: 2000px;
+  }
+</style>
+
+<div style="">
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+<orderable-container id="first-container">
+  <orderable-item><span class="orderable-item-handle">::</span> 1984</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> Animal Farm</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> Wind Up Girl</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> Do Androids Dream of Electric Sheep?</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> Brave New World</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> The Chrysalids</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> A Clockwork Orange</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> Farenheit 451</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> The Handmaid's Tale</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> The Hunger Games</orderable-item>
+</orderable-container>
+</div>
+
+<div class="filler"></div>
+
+<orderable-container id="second-container">
+  <orderable-item><span class="orderable-item-handle">::</span> One</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> Two</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> Three</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> Four</orderable-item>
+  <orderable-item><span class="orderable-item-handle">::</span> Five</orderable-item>
+</orderable-container>
+
+<link rel="x-dart-test" href="orderable_test.dart">
+<script src="packages/test/dart.js"></script>
+<!--
+<script type="application/dart" src="orderable_test.dart"></script>
+-->
