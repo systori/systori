@@ -1,7 +1,7 @@
 <sys-group
-    {% if group.pk %}data-pk="{{ group.pk }}"{% endif %}
-    {% if group.order %}data-order="{{ group.order }}"{% endif %}
-    {% if not group.name %}class="empty"{% endif %}>
+    data-pk="{% if group.pk %}{{ group.pk }}{% endif %}"
+    data-token="{% if group.token %}{{ group.token }}{% endif %}"
+    data-order="{% if group.order %}{{ group.order }}{% endif %}">
   {% include "task/editor/group_editor.html" with group=group %}
   {% for subgroup in group.groups.all %}
     {% include "task/editor/group_loop.html" with group=subgroup %}

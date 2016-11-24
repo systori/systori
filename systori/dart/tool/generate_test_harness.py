@@ -1,4 +1,5 @@
 import os
+import re
 import types
 import django; django.setup()
 from decimal import Decimal as D
@@ -21,9 +22,12 @@ from systori.lib.accounting.tools import Amount as A
 
 DART_APP_ROOT = os.path.dirname(os.path.dirname(__file__))
 
+CSRFINPUT = re.compile(rb"(<input type='hidden' name='csrfmiddlewaretoken' value=')[0-9A-Za-z]+(' />)")
+
 
 def write_test_html(path, name, html):
     file_path = os.path.join(DART_APP_ROOT, 'test', path, name+'_test.html')
+    html = CSRFINPUT.sub(rb'\1abc\2', html)
     with open(file_path, 'wb') as test_file:
         test_file.write(html)
         test_file.write(b'<link rel="x-dart-test" href="'+name.encode()+b'_test.dart">\n')
@@ -35,20 +39,25 @@ def write_test_html(path, name, html):
 
 def create_data():
     data = types.SimpleNamespace()
-    data.company = CompanyFactory()
+    data.company = CompanyFactory(name="ACME Industries")
     create_chart_of_accounts()
-    data.user = UserFactory(email='test@systori.com', company=data.company)
+    data.user = UserFactory(first_name="Ben", last_name="Zimmermann", email='test@systori.com', company=data.company)
     data.project = ProjectFactory(name="Test Project", structure_format="0.00.00.000")
 
     data.job1 = JobFactory(name="Test Job", project=data.project)
     data.job1.generate_groups()
     data.job1.account = create_account_for_job(data.job1)
     data.job1.save()
-    group = data.job1.groups.first().groups.first()
-    task = TaskFactory(name="Sample Task", group=group, job=data.job1)
-    LineItemFactory(task=task)
-    LineItemFactory(task=task)
-    LineItemFactory(task=task)
+    group1 = data.job1.groups.first()
+    group1.name = 'Group 1'
+    group1.save()
+    group2 = group1.groups.first()
+    group2.name = 'Group 2'
+    group2.save()
+    task = TaskFactory(name="Sample Task", group=group2, job=data.job1)
+    LineItemFactory(name='First Item', task=task)
+    LineItemFactory(name='Second Item', task=task)
+    LineItemFactory(name='Third Item', task=task)
 
     data.job2 = JobFactory(name="Test Job", project=data.project)
     data.job2.generate_groups()

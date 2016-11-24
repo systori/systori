@@ -29,12 +29,12 @@ void main() {
 
             nav.sendEnter();
 
-            expect(nav.activeModel.pk, 2);
+            expect(nav.activeModel.pk, null);
             expect(nav.activeModel is Group, isTrue);
 
             nav.sendEnter();
 
-            expect(nav.activeModel.pk, 3);
+            expect(nav.activeModel.pk, null);
             expect(nav.activeModel is Group, isTrue);
 
             nav.sendEnter();
@@ -53,7 +53,7 @@ void main() {
 
     group("ChangeManager", () {
 
-        test("successful save", () {
+        test("successful update save", () {
 
             Job job = querySelector('sys-job');
 
@@ -82,5 +82,36 @@ void main() {
 
         });
 
+        test("successful create save", () {
+
+            expect(changeManager.save, isEmpty);
+            expect(changeManager.saving, isEmpty);
+
+            nav.sendEnter();
+
+            nav.sendText('group changed');
+
+            expect(changeManager.save.length, 1);
+            expect(changeManager.saving, isEmpty);
+
+            changeManager.sync();
+
+            expect(changeManager.save, isEmpty);
+            expect(changeManager.saving.length, 1);
+
+            Group group = nav.activeModel;
+
+            expect(group.pk, null);
+            expect(group.state.committed, {'name': '', 'description': ''});
+
+            repository.complete();
+
+            expect(group.pk, 1);
+            expect(group.state.committed, {'name': 'group changed', 'description': ''});
+
+            expect(changeManager.save, isEmpty);
+            expect(changeManager.saving, isEmpty);
+
+        });
     });
 }

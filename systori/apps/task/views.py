@@ -89,6 +89,7 @@ class JobCreate(CreateView):
         response = super(JobCreate, self).form_valid(form)
 
         self.object.job = self.object
+        self.object.generate_groups()
         self.object.account = create_account_for_job(self.object)
 
         if isinstance(form, JobForm) and form.cleaned_data['job_template']:

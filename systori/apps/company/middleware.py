@@ -60,7 +60,7 @@ class CompanyMiddleware:
 class WorkerMiddleware:
 
     @staticmethod
-    def process_view(request, view, args, kwargs):
+    def process_request(request):
         request.worker = None
         if request.user.is_authenticated() and request.company:
             try:

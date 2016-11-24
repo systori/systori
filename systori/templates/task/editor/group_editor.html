@@ -2,8 +2,8 @@
 <div class="editor">
   <div class="editor-row">
     <div class="code">{{ group.code }}</div>
-    <div class="name" placeholder="{% trans 'group' %}" contenteditable>{{ group.name|safe }}</div>
+    <sys-input class="name" placeholder="{% trans 'group' %}" contenteditable>{{ group.name|safe }}</sys-input>
     <div class="total">{{ group.total|ubrdecimal:2 }}</div>
   </div>
-  <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ group.description|safe }}</div>
+  <sys-input class="description" placeholder="{% trans 'description' %}" contenteditable>{{ group.description|safe }}</sys-input>
 </div>

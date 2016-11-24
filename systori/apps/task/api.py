@@ -8,19 +8,19 @@ from .permissions import HasStaffAccess
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = [HasStaffAccess]
+    permission_classes = []#[HasStaffAccess]
 
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [HasStaffAccess]
+    permission_classes = []#[HasStaffAccess]
 
 
 class LineItemViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = LineItem.objects.all()
     serializer_class = LineItemSerializer
-    permission_classes = [HasStaffAccess]
+    permission_classes = []#[HasStaffAccess]
 
 
 router = DefaultRouter()

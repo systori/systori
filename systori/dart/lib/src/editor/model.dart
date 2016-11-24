@@ -57,7 +57,7 @@ class ModelState {
 class Token {
     static int _previous = 0;
     static next() {
-        var token = new DateTime.now().millisecondsSinceEpoch;
+        var token = new DateTime.now().millisecondsSinceEpoch - 1479970650895;
         if (token <= _previous) {
             token = ++_previous;
         } else {
@@ -69,6 +69,8 @@ class Token {
 
 
 abstract class Model extends HtmlElement {
+
+    String get type => nodeName.toLowerCase().substring(4);
 
     int get pk => int.parse(dataset['pk'], onError: (s)=>null);
     set pk(int id) => dataset['pk'] = id.toString();

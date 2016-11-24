@@ -1,27 +1,33 @@
 {% load i18n customformatting %}
+
 <div class="editor">
   <div class="editor-row">
     <div class="code">{{ task.code }}</div>
-    <div      class="name"  placeholder="{% trans 'task' %}"                                             contenteditable>{{ task.name|safe }}</div>
-    <sys-cell class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ task.qty_equation }}"   contenteditable>{{ task.qty|ubrnumber }}</sys-cell>
-    <div      class="unit"  placeholder="{% trans 'unit' %}"                                             contenteditable>{{ task.unit }}</div>
-    <sys-cell class="price"                                   data-canonical="{{ task.price_equation }}" contenteditable>{{ task.price|ubrdecimal }}</sys-cell>
-    <sys-cell class="total" placeholder="{% trans 'total' %}" data-canonical="{{ task.total_equation }}" contenteditable>{{ task.total|ubrdecimal }}</sys-cell>
+    <sys-input class="name"  placeholder="{% trans 'task' %}"                                             contenteditable>{{ task.name|safe }}</sys-input>
+    <sys-cell  class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ task.qty_equation }}"   contenteditable>{{ task.qty|ubrnumber }}</sys-cell>
+    <sys-input class="unit"  placeholder="{% trans 'unit' %}"                                             contenteditable>{{ task.unit }}</sys-input>
+    <sys-cell  class="price"                                   data-canonical="{{ task.price_equation }}" contenteditable>{{ task.price|ubrdecimal }}</sys-cell>
+    <sys-cell  class="total" placeholder="{% trans 'total' %}" data-canonical="{{ task.total_equation }}" contenteditable>{{ task.total|ubrdecimal }}</sys-cell>
     {% comment %}
-    <div class="labels">
-      <span class="is_optional {{ task.is_provisional }} label label-primary">{% trans 'Optional' %}</span>
-    </div>
+      <div class="labels">
+        <span class="is_optional {{ task.is_provisional }} label label-primary">{% trans 'Optional' %}</span>
+      </div>
     {% endcomment %}
   </div>
-  <div class="description" placeholder="{% trans 'description' %}" contenteditable>{{ task.description|safe }}</div>
+  <sys-input class="description" placeholder="{% trans 'description' %}" contenteditable>{{ task.description|safe }}</sys-input>
 </div>
+
 <sys-lineitem-sheet>
   {% for lineitem in task.lineitems.all %}
-    <sys-lineitem data-pk="{{ lineitem.pk }}">
+    <sys-lineitem
+        data-pk="{% if lineitem.pk %}{{ lineitem.pk }}{% endif %}"
+        data-token="{% if lineitem.token %}{{ lineitem.token }}{% endif %}"
+        data-order="{% if lineitem.order %}{{ lineitem.order }}{% endif %}">
       {% include "task/editor/lineitem_editor.html" with lineitem=lineitem %}
     </sys-lineitem>
   {% endfor %}
 </sys-lineitem-sheet>
+
 <div class="price-difference" style="visibility: hidden;">
   <span class="glyphicon glyphicon-exclamation-sign"></span>
   <div class="name">{% trans 'Line items do not add up to the task price.' %}</div>

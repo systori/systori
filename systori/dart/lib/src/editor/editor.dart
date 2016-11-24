@@ -60,9 +60,7 @@ class Group extends Model {
 
     attached() {
         if (children.isEmpty) {
-            print('child is empty');
-            TemplateElement template = document.querySelector(
-                '#group-template');
+            TemplateElement template = document.querySelector('#group-template');
             var clone = document.importNode(template.content, true);
             append(clone);
         }
@@ -73,6 +71,16 @@ class Group extends Model {
             input.onKeyEvent.listen(handleKeyboard)
         );
         super.attached();
+    }
+
+    Map save() {
+        var data = super.save();
+        if (pk == null) {
+            data['job'] = Job.JOB.pk;
+            data['parent'] = parentGroup.pk;
+            data['token'] = token;
+        }
+        return data;
     }
 
     handleKeyboard(KeyEvent e) {
@@ -299,7 +307,6 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     }
 
     setDiff(Decimal diff) {
-        print(diff.decimal);
         if (diff.isZero) {
             diffRow.style.visibility = 'hidden';
             diffCell.text = '0';
@@ -421,7 +428,6 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
 
 registerElements() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
-    changeManager = new ChangeManager(new Repository());
     document.registerElement('sys-input', Input);
     document.registerElement('sys-cell', HtmlCell);
     document.registerElement('sys-lineitem', LineItem);
