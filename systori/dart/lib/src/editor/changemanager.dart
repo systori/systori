@@ -89,7 +89,10 @@ class ChangeManager {
         for (var model in save) {
             if (model.isChanged) {
                 saving.add(model);
-                repository.save(model).then((map)=>saved(map, model));
+                repository.save(model).then(
+                    (map)=>saved(map, model),
+                    onError: (_)=>failed(model)
+                );
             }
         }
         save = stillPending;
@@ -99,6 +102,12 @@ class ChangeManager {
         model.state.commit();
         model.pk = result['pk'];
         saving.remove(model);
+    }
+
+    failed(Model model) {
+        model.state.rollback();
+        saving.remove(model);
+        save.add(model);
     }
 
     changed(Model model) => save.add(model);
