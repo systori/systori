@@ -8,12 +8,14 @@ import '../scaffolding.dart';
 
 
 void main() {
+    tokenGenerator = new FakeToken();
     registerElements();
     Scaffolding scaffold = new Scaffolding(querySelector('#editor-area'));
     KeyboardNavigator nav = new KeyboardNavigator();
     FakeRepository repository;
 
     setUp(() {
+        tokenGenerator = new FakeToken();
         scaffold.reset();
         nav.reset();
         repository = new FakeRepository();
@@ -53,7 +55,7 @@ void main() {
 
     group("ChangeManager", () {
 
-        test("successful update save", () {
+        test("group successful update", () {
 
             Job job = querySelector('sys-job');
 
@@ -82,7 +84,7 @@ void main() {
 
         });
 
-        test("successful create save", () {
+        test("group successful create", () {
 
             expect(changeManager.save, isEmpty);
             expect(changeManager.saving, isEmpty);
@@ -113,5 +115,40 @@ void main() {
             expect(changeManager.saving, isEmpty);
 
         });
+
+        test("save() with new parent", () {
+
+            nav.sendEnter();
+            nav.sendEnter();
+
+            nav.sendText('group changed');
+
+            Group group = nav.activeModel;
+            Group parentGroup = group.parentGroup;
+
+            expect(changeManager.save, [group]);
+            expect(changeManager.saving, isEmpty);
+
+            changeManager.sync();
+
+            expect(changeManager.save, [group]);
+            expect(changeManager.saving, [parentGroup]);
+
+            expect(group.pk, null);
+            expect(parentGroup.pk, null);
+            expect(group.state.pending, {'name': 'group changed'});
+            expect(repository.lastRequestMap, {
+                'token': 101, 'job': 1, 'parent': 1,
+                'groups': [
+                    {'token': 102, 'name': 'group changed', 'job': 1}
+                ]
+            });
+
+            repository.complete();
+
+            expect(parentGroup.pk, 1);
+            expect(group.pk, 2);
+        });
+
     });
 }

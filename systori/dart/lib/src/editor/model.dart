@@ -2,6 +2,9 @@ import 'dart:html';
 import 'dart:async';
 
 
+Token tokenGenerator = new Token();
+
+
 class Input extends HtmlElement {
     String get name => className;
     StreamController<KeyEvent> controller = new StreamController<KeyEvent>(sync: true);
@@ -55,8 +58,8 @@ class ModelState {
 
 
 class Token {
-    static int _previous = 0;
-    static next() {
+    int _previous = 0;
+    next() {
         var token = new DateTime.now().millisecondsSinceEpoch - 1479970650895;
         if (token <= _previous) {
             token = ++_previous;
@@ -71,6 +74,8 @@ class Token {
 abstract class Model extends HtmlElement {
 
     String get type => nodeName.toLowerCase().substring(4);
+
+    List<String> childTypes = [];
 
     int get pk => int.parse(dataset['pk'], onError: (s)=>null);
     set pk(int id) => dataset['pk'] = id.toString();
@@ -87,7 +92,7 @@ abstract class Model extends HtmlElement {
     Model.created(): super.created() {
         if (!dataset.containsKey('pk')) dataset['pk'] = '';
         if (!dataset.containsKey('order')) dataset['order'] = '';
-        if (!dataset.containsKey('token')) dataset['token'] = Token.next().toString();
+        if (!dataset.containsKey('token')) dataset['token'] = tokenGenerator.next().toString();
     }
 
     attached() => state = new ModelState(this);
@@ -102,8 +107,56 @@ abstract class Model extends HtmlElement {
         return div;
     }
 
+    bool hasDirtyChildren = false;
     bool get isChanged => state.delta.isNotEmpty;
-    Map save() => state.save();
+    Map save() {
+        var data = new Map.from(state.save());
+        if (pk == null) {
+            data['token'] = token;
+        }
+        if (hasDirtyChildren) {
+            for (var childType in childTypes) {
+                var dirtyChildren = [];
+                for (Model child in this.querySelectorAll(':scope>sys-$childType')) {
+                    if (child.isChanged || child.hasDirtyChildren) {
+                        dirtyChildren.add(child.save());
+                    }
+                }
+                if (dirtyChildren.isNotEmpty) {
+                    data['${childType}s'] = dirtyChildren;
+                }
+            }
+        }
+        return data;
+    }
+
+    setPKs(Map result) {
+        pk = result['pk'];
+        for (var childType in childTypes) {
+            var listName = '${childType}s';
+            if (result.containsKey(listName)) {
+                for (Model child in this.querySelectorAll(':scope>sys-$childType')) {
+                    for (Map childResult in result[listName]) {
+                        print(child.token); print(childResult);
+                        if (childResult['token'] == child.token) {
+                            child.setPKs(childResult);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Model getRootModelForCreate() {
+        Model root = this;
+        while (root.parent is Model) {
+            if ((root.parent as Model).pk == null) {
+                root = root.parent;
+                root.hasDirtyChildren = true;
+            } else {
+                break;
+            }
+        }
+        return root;
+    }
 }
-
-

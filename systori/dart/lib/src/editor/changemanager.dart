@@ -53,16 +53,6 @@ class Repository {
 
 class ChangeManager {
 
-    /*
-    When a child of a new create is modified,
-    find the parent and mark all ancestors as dirty.
-    When the parent is finally being saved it will
-    only save children marked as dirty.
-    This prevents the case where use is hitting
-    enter and getting throw away groups/tasks,
-    we don't want to save those.
-     */
-
     Timer timer;
     Repository repository;
     Set<Model> save = new Set();
@@ -88,6 +78,20 @@ class ChangeManager {
         var stillPending = new Set();
         for (var model in save) {
             if (model.isChanged) {
+                if (model.pk == null) {
+                    var root = model.getRootModelForCreate();
+                    if (root != model) {
+                        stillPending.add(model);
+                        if (!saving.contains(root)) {
+                            saving.add(root);
+                            repository.save(root).then(
+                                (map)=>saved(map, root),
+                                onError: (_)=>failed(root)
+                            );
+                        }
+                        continue;
+                    }
+                }
                 saving.add(model);
                 repository.save(model).then(
                     (map)=>saved(map, model),
@@ -100,7 +104,7 @@ class ChangeManager {
 
     saved(Map result, Model model) {
         model.state.commit();
-        model.pk = result['pk'];
+        model.setPKs(result);
         saving.remove(model);
     }
 

@@ -44,6 +44,8 @@ class Job extends Group {
 class Group extends Model {
 
     Group get parentGroup => parent as Group;
+    List<String> childTypes = ['group', 'task'];
+
     DivElement code;
     Input name;
     Input description;
@@ -77,8 +79,8 @@ class Group extends Model {
         var data = super.save();
         if (pk == null) {
             data['job'] = Job.JOB.pk;
-            data['parent'] = parentGroup.pk;
-            data['token'] = token;
+            if (parentGroup.pk != null)
+                data['parent'] = parentGroup.pk;
         }
         return data;
     }
@@ -234,6 +236,8 @@ abstract class HtmlRow implements Row {
 
 
 class Task extends Model with Row, TotalRow, HtmlRow {
+
+    List<String> childTypes = ['lineitem'];
 
     DivElement code;
     Input name;

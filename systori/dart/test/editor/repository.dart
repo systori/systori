@@ -2,6 +2,12 @@ import 'dart:async';
 import 'package:systori/editor.dart';
 
 
+class FakeToken extends Token {
+    int _previous = 100;
+    next() => ++_previous;
+}
+
+
 class FakeRequest {
 
     static int _group_pk;
@@ -32,28 +38,36 @@ class FakeRequest {
     fail() => completer.completeError('failed');
 
     complete() {
-        var objectPK;
+        var result = {'token': data['token']};
         if (data.containsKey('pk')) {
-            objectPK = data['pk'];
+            result['pk'] = data['pk'];
         } else {
             switch (objectType) {
                 case 'group':
-                    objectPK = group_pk; break;
+                    result['pk'] = group_pk;
+                    if (data.containsKey('groups')) {
+                        result['groups'] = [];
+                        for (var group in data['groups']) {
+                            result['groups'].add({'pk': group_pk, 'token': group['token']});
+                        }
+                    }
+                    break;
                 case 'task':
-                    objectPK = task_pk; break;
+                    result['pk'] = task_pk; break;
             }
         }
-        completer.complete({
-            'pk': objectPK
-        });
+        completer.complete(result);
     }
 
 }
 
 
-class FakeRepository implements Repository {
+class FakeRepository extends Repository {
 
     List<FakeRequest> _requests = [];
+
+    Map get lastRequestMap =>
+        _requests.last.data;
 
     FakeRepository() {
         FakeRequest.reset();
@@ -80,4 +94,5 @@ class FakeRepository implements Repository {
     Future<bool> delete(Model model) {
 
     }
+
 }
