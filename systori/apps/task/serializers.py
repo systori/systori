@@ -123,8 +123,7 @@ class TaskSerializer(serializers.ModelSerializer):
         for lineitem in lineitems:
             if 'lineitems' not in data: data['lineitems'] = []
             pk, instance = lineitem.pop('pk', None), None
-            if pk:
-                instance = get_object_or_404(LineItem.objects.all(), id=pk)
+            if pk: instance = get_object_or_404(LineItem.objects.all(), id=pk)
             serializer = LineItemSerializer(instance=instance, data=lineitem, partial=True)
             serializer.is_valid(raise_exception=True)
             data['lineitems'].append(serializer.save(job=task.job, task=task))
@@ -169,8 +168,7 @@ class GroupSerializer(serializers.ModelSerializer):
         for task in tasks:
             if 'tasks' not in data: data['tasks'] = []
             pk, instance = task.pop('pk', None), None
-            if pk:
-                instance = get_object_or_404(Task.objects.all(), id=pk)
+            if pk: instance = get_object_or_404(Task.objects.all(), id=pk)
             serializer = TaskSerializer(instance=instance, data=task, partial=True)
             serializer.is_valid(raise_exception=True)
             data['tasks'].append(serializer.save(job=group.job, group=group))
@@ -178,8 +176,7 @@ class GroupSerializer(serializers.ModelSerializer):
         for subgroup in groups:
             if 'groups' not in data: data['groups'] = []
             pk, instance = subgroup.pop('pk', None), None
-            if pk:
-                instance = get_object_or_404(Group.objects.all(), id=pk)
+            if pk: instance = get_object_or_404(Group.objects.all(), id=pk)
             serializer = GroupSerializer(instance=instance, data=subgroup, partial=True)
             serializer.is_valid(raise_exception=True)
             data['groups'].append(serializer.save(job=group.job, parent=group))
@@ -189,16 +186,41 @@ class GroupSerializer(serializers.ModelSerializer):
         return data
 
 
+class DeleteSerializer(serializers.Serializer):
+    groups = serializers.ListField(child=serializers.IntegerField(), required=False)
+    tasks = serializers.ListField(child=serializers.IntegerField(), required=False)
+    lineitems = serializers.ListField(child=serializers.IntegerField(), required=False)
+
+    def perform(self):
+
+        groups = self.initial_data.pop('groups', [])
+        if groups:
+            Group.objects.filter(pk__in=groups).delete()
+
+        tasks = self.initial_data.pop('tasks', [])
+        if tasks:
+            Task.objects.filter(pk__in=tasks).delete()
+
+        lineitems = self.initial_data.pop('lineitems', [])
+        if lineitems:
+            LineItem.objects.filter(pk__in=lineitems).delete()
+
+
 class JobSerializer(serializers.ModelSerializer):
     groups = GroupSerializer(many=True, required=False)
     tasks = TaskSerializer(many=True, required=False)
+    delete = DeleteSerializer(required=False)
 
     class Meta:
         model = Job
-        fields = ['name', 'description', 'groups', 'tasks']
+        fields = ['name', 'description', 'groups', 'tasks', 'delete']
 
     def update(self, job, validated_data):
+
+        DeleteSerializer(data=validated_data.pop('delete', {})).perform()
+
         serializer = GroupSerializer(job, data=validated_data, partial=True)
         serializer.is_valid(raise_exception=True)
         self._data = serializer.save()
+
         return self._data

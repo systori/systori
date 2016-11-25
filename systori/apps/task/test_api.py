@@ -123,8 +123,13 @@ class EditorApiTest(BaseTestCase):
         job = JobFactory(project=project)
         job.generate_groups()
         self.assertEqual(3, Group.objects.count())
-        response = self.client.delete(reverse('group-detail', args=[2]), format='json')
-        self.assertEqual(response.status_code, 204, response.data)
+        response = self.client.post(
+            reverse('editor.save', args=(job.pk,)), {
+                'delete': {'groups': [2]}
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(1, Group.objects.count())
 
     def test_create_task_idempotent(self):
@@ -195,11 +200,17 @@ class EditorApiTest(BaseTestCase):
 
     def test_delete_task(self):
         job = JobFactory(project=ProjectFactory(structure_format="0.0.0.0"))
-        job.generate_groups()
-        self.assertEqual(3, Group.objects.count())
-        response = self.client.delete(reverse('group-detail', args=[2]), format='json')
-        self.assertEqual(response.status_code, 204, response.data)
-        self.assertEqual(1, Group.objects.count())
+        TaskFactory(group=job)
+        TaskFactory(group=job)
+        self.assertEqual(2, Task.objects.count())
+        response = self.client.post(
+            reverse('editor.save', args=(job.pk,)), {
+                'delete': {'tasks': [1]}
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(1, Task.objects.count())
 
     def test_update_task(self):
         job = JobFactory(project=ProjectFactory())
@@ -230,10 +241,16 @@ class EditorApiTest(BaseTestCase):
 
 
     def test_delete_lineitem(self):
-        task = TaskFactory(group=JobFactory(project=ProjectFactory()))
+        job = JobFactory(project=ProjectFactory())
+        task = TaskFactory(group=job)
         LineItemFactory(task=task)
         LineItemFactory(task=task)
         self.assertEqual(2, LineItem.objects.count())
-        response = self.client.delete(reverse('lineitem-detail', args=[2]), format='json')
-        self.assertEqual(response.status_code, 204, response.data)
+        response = self.client.post(
+            reverse('editor.save', args=(job.pk,)), {
+                'delete': {'lineitems': [1]}
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(1, LineItem.objects.count())
