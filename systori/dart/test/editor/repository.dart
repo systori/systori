@@ -29,34 +29,45 @@ class FakeRequest {
     }
 
     final Map data;
-    final String objectType;
     final Completer<Map> completer;
 
-    FakeRequest(this.objectType, this.data):
+    FakeRequest(this.data):
         completer = new Completer.sync();
 
+    complete() => completer.complete(response('group', data));
     fail() => completer.completeError('failed');
 
-    complete() {
-        var result = {'token': data['token']};
+    Map response(String objectType, Map data) {
+        var result = {};
+
+        if (data.containsKey('token')) {
+            result['token'] = data['token'];
+        }
+
         if (data.containsKey('pk')) {
             result['pk'] = data['pk'];
         } else {
             switch (objectType) {
                 case 'group':
-                    result['pk'] = group_pk;
-                    if (data.containsKey('groups')) {
-                        result['groups'] = [];
-                        for (var group in data['groups']) {
-                            result['groups'].add({'pk': group_pk, 'token': group['token']});
-                        }
-                    }
-                    break;
+                    result['pk'] = group_pk; break;
                 case 'task':
                     result['pk'] = task_pk; break;
+                case 'lineitem':
+                    result['pk'] = lineitem_pk; break;
             }
         }
-        completer.complete(result);
+
+        for (var childType in ['group', 'task', 'lineitem']) {
+            var childList = '${childType}s';
+            if (data.containsKey(childList)) {
+                result[childList] = [];
+                for (var child in data[childList]) {
+                    result[childList].add(response(childType, child));
+                }
+            }
+        }
+
+        return result;
     }
 
 }
@@ -85,14 +96,10 @@ class FakeRepository extends Repository {
         _requests.clear();
     }
 
-    Future<Map> save(Model model) {
-        var request = new FakeRequest(model.type, model.save());
+    Future<Map> save(int jobId, Map data) {
+        var request = new FakeRequest(data);
         _requests.add(request);
         return request.completer.future;
-    }
-
-    Future<bool> delete(Model model) {
-
     }
 
 }

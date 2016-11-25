@@ -75,16 +75,6 @@ class Group extends Model {
         super.attached();
     }
 
-    Map save() {
-        var data = super.save();
-        if (pk == null) {
-            data['job'] = Job.JOB.pk;
-            if (parentGroup.pk != null)
-                data['parent'] = parentGroup.pk;
-        }
-        return data;
-    }
-
     handleKeyboard(KeyEvent e) {
         if (e.keyCode == KeyCode.ENTER) {
             e.preventDefault();
@@ -110,8 +100,6 @@ class Group extends Model {
                     task.name.focus();
                 }
             }
-        } else {
-            changeManager.changed(this);
         }
     }
 

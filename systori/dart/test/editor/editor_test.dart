@@ -19,7 +19,7 @@ void main() {
         scaffold.reset();
         nav.reset();
         repository = new FakeRepository();
-        changeManager = new ChangeManager(repository);
+        changeManager = new ChangeManager(Job.JOB, repository);
     });
 
     group("Keyboard", () {
@@ -59,19 +59,14 @@ void main() {
 
             Job job = querySelector('sys-job');
 
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving, isEmpty);
-
             // job name is changed
             nav.sendText(' Changed');
 
-            expect(changeManager.save.length, 1);
-            expect(changeManager.saving, isEmpty);
+            expect(changeManager.saving, isFalse);
 
-            changeManager.sync();
+            changeManager.save();
 
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving.length, 1);
+            expect(changeManager.saving, isTrue);
 
             expect(job.state.committed, {'name': 'Test Job', 'description': ''});
 
@@ -79,27 +74,21 @@ void main() {
 
             expect(job.state.committed, {'name': 'Test Job Changed', 'description': ''});
 
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving, isEmpty);
+            expect(changeManager.saving, isFalse);
 
         });
 
         test("group successful create", () {
 
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving, isEmpty);
-
             nav.sendEnter();
 
             nav.sendText('group changed');
 
-            expect(changeManager.save.length, 1);
-            expect(changeManager.saving, isEmpty);
+            expect(changeManager.saving, isFalse);
 
-            changeManager.sync();
+            changeManager.save();
 
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving.length, 1);
+            expect(changeManager.saving, isTrue);
 
             Group group = nav.activeModel;
 
@@ -111,43 +100,8 @@ void main() {
             expect(group.pk, 1);
             expect(group.state.committed, {'name': 'group changed', 'description': ''});
 
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving, isEmpty);
+            expect(changeManager.saving, isFalse);
 
-        });
-
-        test("save() with new parent", () {
-
-            nav.sendEnter();
-            nav.sendEnter();
-
-            nav.sendText('group changed');
-
-            Group group = nav.activeModel;
-            Group parentGroup = group.parentGroup;
-
-            expect(changeManager.save, [group]);
-            expect(changeManager.saving, isEmpty);
-
-            changeManager.sync();
-
-            expect(changeManager.save, [group]);
-            expect(changeManager.saving, [parentGroup]);
-
-            expect(group.pk, null);
-            expect(parentGroup.pk, null);
-            expect(group.state.pending, {'name': 'group changed'});
-            expect(repository.lastRequestMap, {
-                'token': 101, 'job': 1, 'parent': 1,
-                'groups': [
-                    {'token': 102, 'name': 'group changed', 'job': 1}
-                ]
-            });
-
-            repository.complete();
-
-            expect(parentGroup.pk, 1);
-            expect(group.pk, 2);
         });
 
     });

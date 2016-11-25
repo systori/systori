@@ -61,33 +61,6 @@ main() {
         part = querySelector('sys-part');
     });
 
-    group("Model", () {
-
-        test("type", () {
-            expect(thing.type, 'thing');
-            expect(part.type, 'part');
-        });
-
-        test("save() with new parent", () {
-
-            expect(thing.hasDirtyChildren, isFalse);
-            expect(thing.state.pending, null);
-
-            part.name.text = 'foo';
-
-            expect(part.getRootModelForCreate(), thing);
-            expect(thing.hasDirtyChildren, isTrue);
-            expect(thing.save(), {
-                'token': 11,
-                'parts': [
-                    {'token': 21, 'name': 'foo'}
-                ]
-            });
-
-        });
-
-    });
-
     group("ModelState", () {
 
         test("succesful workflow", () {

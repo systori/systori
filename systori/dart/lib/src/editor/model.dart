@@ -23,6 +23,8 @@ class ModelState {
     final Map committed;
           Map pending;
 
+    bool get isSaving => pending != null;
+
     ModelState(model) :
         model = model,
         committed = inputMap(model.inputs);
@@ -107,56 +109,60 @@ abstract class Model extends HtmlElement {
         return div;
     }
 
-    bool hasDirtyChildren = false;
     bool get isChanged => state.delta.isNotEmpty;
-    Map save() {
-        var data = new Map.from(state.save());
-        if (pk == null) {
-            data['token'] = token;
+
+    Iterable<Model> childrenOfType(String childType) sync* {
+        var NODE_NAME = 'SYS-${childType.toUpperCase()}';
+        for (Element child in children) {
+            if (child.nodeName==NODE_NAME) {
+                yield child;
+            }
         }
-        if (hasDirtyChildren) {
-            for (var childType in childTypes) {
-                var dirtyChildren = [];
-                for (Model child in this.querySelectorAll(':scope>sys-$childType')) {
-                    if (child.isChanged || child.hasDirtyChildren) {
-                        dirtyChildren.add(child.save());
-                    }
-                }
-                if (dirtyChildren.isNotEmpty) {
-                    data['${childType}s'] = dirtyChildren;
-                }
+    }
+
+    Map save() {
+        var data = isChanged ? new Map.from(state.save()) : {};
+        for (var childType in childTypes) {
+            var saveChildren = childrenOfType(childType)
+                .map((Model model) => model.save())
+                .where((Map m) => m.isNotEmpty)
+                .toList();
+            if (saveChildren.isNotEmpty) {
+                data['${childType}s'] = saveChildren;
+            }
+        }
+        if (data.isNotEmpty) {
+            if (pk == null) {
+                data['token'] = token;
+            } else {
+                data['pk'] = pk;
             }
         }
         return data;
     }
 
-    setPKs(Map result) {
+    rollback() {
+        if (state.isSaving) state.rollback();
+        for (var childType in childTypes) {
+            childrenOfType(childType).map((Model m) => m.rollback());
+        }
+    }
+
+    commit(Map result) {
         pk = result['pk'];
+        if (state.isSaving) state.commit();
         for (var childType in childTypes) {
             var listName = '${childType}s';
-            if (result.containsKey(listName)) {
-                for (Model child in this.querySelectorAll(':scope>sys-$childType')) {
-                    for (Map childResult in result[listName]) {
-                        print(child.token); print(childResult);
-                        if (childResult['token'] == child.token) {
-                            child.setPKs(childResult);
-                        }
+            if (!result.containsKey(listName)) continue;
+            for (Model child in childrenOfType(childType)) {
+                for (Map childResult in result[listName]) {
+                    if (childResult['pk'] == child.pk ||
+                        childResult['token'] == child.token) {
+                        child.commit(childResult);
                     }
                 }
             }
         }
     }
 
-    Model getRootModelForCreate() {
-        Model root = this;
-        while (root.parent is Model) {
-            if ((root.parent as Model).pk == null) {
-                root = root.parent;
-                root.hasDirtyChildren = true;
-            } else {
-                break;
-            }
-        }
-        return root;
-    }
 }
