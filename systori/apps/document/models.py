@@ -1,6 +1,5 @@
 from collections import OrderedDict
 from itertools import chain
-from calendar import monthrange
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -8,6 +7,8 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.utils.timezone import localtime, now
+from django.utils.formats import date_format
 from django_fsm import FSMField, transition
 from jsonfield import JSONField
 
@@ -291,11 +292,15 @@ class DocumentTemplate(models.Model):
             project_contact.contact.first_name,
             project_contact.contact.last_name)
 
+        date_now = localtime(now()).date()
         return OrderedDict([
             (_('salutation'), project_contact.contact.salutation),
             (_('firstname'), project_contact.contact.first_name),
             (_('lastname'), project_contact.contact.last_name),
-            (_('name'), full_name.strip())
+            (_('name'), full_name.strip()),
+            (_('today'), date_format(date_now, use_l10n=True)),
+            (_('today +14'), date_format(date_now+timedelta(14), use_l10n=True)),
+            (_('today +21'), date_format(date_now+timedelta(21), use_l10n=True)),
         ])
 
     def render(self, project=None):
