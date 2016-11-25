@@ -6,8 +6,11 @@ from decimal import Decimal
 from django.db import migrations, models
 import django.db.models.deletion
 
+TOKEN = 11000
+
 
 def upgrade_taskinstance_to_task(apps, schema_editor):
+    global TOKEN
     from systori.apps.company.models import Company
     Job = apps.get_model("task", "Job")
     for company in Company.objects.all():
@@ -42,7 +45,9 @@ def upgrade_taskinstance_to_task(apps, schema_editor):
                         if order_max is None:
                             order_max = task.group.tasks.aggregate(models.Max('order')).get('order__max')
                         order_max += 1
+                        TOKEN += 1
                         task.id = None
+                        task.token = TOKEN
                         task.order = order_max
                         task.variant_serial += 1
                         task.save()
@@ -55,7 +60,9 @@ def upgrade_taskinstance_to_task(apps, schema_editor):
                     if is_variant_mode: print("    Line items ", end='')
                     lineitem_order = 0
                     for lineitem in taskinstance.lineitems.all():
+                        TOKEN += 1
                         lineitem_order += 1
+                        lineitem.token = TOKEN
                         lineitem.order = lineitem_order
                         lineitem.qty_equation = str(lineitem.qty)
                         lineitem.price_equation = str(lineitem.price)
@@ -96,6 +103,11 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='task',
+            name='token',
+            field=models.IntegerField(null=True, verbose_name='api token'),
+        ),
+        migrations.AddField(
+            model_name='task',
             name='price',
             field=models.DecimalField(decimal_places=4, default=0.0, max_digits=14, verbose_name='Price'),
         ),
@@ -124,6 +136,11 @@ class Migration(migrations.Migration):
             name='qty_equation',
             field=models.CharField(blank=True, default='', max_length=512),
             preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='lineitem',
+            name='token',
+            field=models.IntegerField(null=True, verbose_name='api token'),
         ),
         migrations.AddField(
             model_name='lineitem',

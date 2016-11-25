@@ -56,10 +56,9 @@ class Group(OrderedModel):
     name = models.CharField(_("Name"), default="", blank=True, max_length=512)
     description = models.TextField(_("Description"), default="", blank=True)
     parent = models.ForeignKey('self', related_name='groups', null=True)
+    token = models.IntegerField('api token')
     job = models.ForeignKey('Job', null=True, related_name='all_groups')
     order_with_respect_to = 'parent'
-
-    token = models.IntegerField('api token', null=True)
 
     class Meta:
         verbose_name = _("Group")
