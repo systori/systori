@@ -2,7 +2,9 @@ psycopg2==2.6.1
 celery==3.1.23
 fabric3==1.12.post1
 
-django==1.10.1
+git+https://github.com/eukreign/django.git@sync_apps_use_editor_fix
+#django==1.10.1
+#-e ../django
 django-ordered-model==1.2.1
 django-fsm==2.4.0
 django-bootstrap-form==3.2.1
