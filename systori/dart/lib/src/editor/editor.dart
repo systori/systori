@@ -136,6 +136,11 @@ class Group extends Model {
 
 class HtmlCell extends Input with HighlightableInputMixin, Cell {
 
+    Map<String,dynamic> get values => {
+        className: text,
+        '${className}_equation': canonical
+    };
+
     String get canonical => dataset['canonical'] ?? "";
     set canonical(String canonical) => dataset['canonical'] = canonical;
 
@@ -271,6 +276,9 @@ class Task extends Model with Row, TotalRow, HtmlRow {
         super.attached();
     }
 
+    Iterable<Model> childrenOfType(String childType) =>
+        this.querySelectorAll(":scope > sys-lineitem-sheet > sys-lineitem") as List<Model>;
+
     handleKeyboard(KeyEvent e) {
         if (e.keyCode == KeyCode.ENTER) {
             e.preventDefault();
@@ -325,12 +333,16 @@ class LineItem extends Model with Orderable, Row, HtmlRow {
             var clone = document.importNode(template.content, true);
             append(clone);
         }
+    }
+
+    attached() {
         name = getInput("name");
         qty = getInput("qty");
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
         this.querySelectorAll(':scope>.editor [contenteditable]').onKeyDown.listen(handleKeyboard);
+        super.attached();
     }
 
     handleKeyboard(KeyboardEvent e) {

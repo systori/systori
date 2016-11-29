@@ -1,7 +1,7 @@
 @TestOn('browser')
 import 'dart:html';
 import 'package:test/test.dart';
-import 'package:systori/src/editor/model.dart';
+import 'package:systori/editor.dart';
 import '../scaffolding.dart';
 import 'repository.dart';
 
@@ -10,7 +10,7 @@ class Thing extends Model {
 
     Input name;
     Input description;
-    Input qty;
+    HtmlCell qty;
 
     List<String> childTypes = ['part'];
 
@@ -30,7 +30,7 @@ class Part extends Model {
 
     Input name;
     Input description;
-    Input qty;
+    HtmlCell qty;
 
     Part.created(): super.created();
 
@@ -47,6 +47,7 @@ class Part extends Model {
 main() {
     tokenGenerator = new FakeToken();
     document.registerElement('sys-input', Input);
+    document.registerElement('sys-cell', HtmlCell);
     document.registerElement('sys-part', Part);
     document.registerElement('sys-thing', Thing);
 
@@ -65,26 +66,26 @@ main() {
 
         test("succesful workflow", () {
             // initial state: delta empty and committed equals inputs
-            expect(thing.state.delta, {});
+            expect(thing.state.delta, {'qty': '0'});
             expect(thing.state.pending, null);
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': ''});
+                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
 
-            thing.qty.text = '2';
+            thing.name.text = 'new';
 
             // input changes: delta reflects change, committed is unmodified
-            expect(thing.state.delta, {'qty': '2'});
+            expect(thing.state.delta, {'name': 'new', 'qty': '0'});
             expect(thing.state.pending, null);
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': ''});
+                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
 
             thing.state.save();
 
             // state saved: delta empty, pending has changes, committed is unmodified
             expect(thing.state.delta, {});
-            expect(thing.state.pending, {'qty': '2'});
+            expect(thing.state.pending, {'name': 'new', 'qty': '0'});
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': ''});
+                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
 
             thing.state.commit();
 
@@ -92,7 +93,7 @@ main() {
             expect(thing.state.delta, {});
             expect(thing.state.pending, null);
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': '2'});
+                {'name': 'new', 'description': '', 'qty': '0', 'qty_equation': ''});
         });
 
         test("edits while saving", () {
@@ -104,21 +105,21 @@ main() {
             expect(thing.state.delta, {'name': 'bar'});
             expect(thing.state.pending, {'qty': '2'});
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': ''});
+                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
 
             // edit same field that's being saved
             thing.qty.text = '3';
             expect(thing.state.delta, {'name': 'bar', 'qty': '3'});
             expect(thing.state.pending, {'qty': '2'});
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': ''});
+                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
 
             // after commit, qty is still dirty
             thing.state.commit();
             expect(thing.state.delta, {'name': 'bar', 'qty': '3'});
             expect(thing.state.pending, null);
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': '2'});
+                {'name': '', 'description': '', 'qty': '2', 'qty_equation': ''});
         });
 
         test("save rolledback", () {
@@ -133,7 +134,7 @@ main() {
             expect(thing.state.delta, {'name': 'bar', 'qty': '2'});
             expect(thing.state.pending, null);
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': ''});
+                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
         });
     });
 

@@ -2,7 +2,7 @@ from django.conf.urls import url
 from rest_framework import viewsets, mixins
 from .models import Job
 from .serializers import JobSerializer
-from .permissions import HasStaffAccess
+from ..user.permissions import HasStaffAccess
 
 
 class EditorAPI(mixins.UpdateModelMixin, viewsets.GenericViewSet):

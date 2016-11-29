@@ -6,7 +6,7 @@ Token tokenGenerator = new Token();
 
 
 class Input extends HtmlElement {
-    String get name => className;
+    Map<String,dynamic> get values => {className: text};
     StreamController<KeyEvent> controller = new StreamController<KeyEvent>(sync: true);
     Stream<KeyEvent> get onKeyEvent => controller.stream;
     Input.created(): super.created() {
@@ -27,7 +27,14 @@ class ModelState {
 
     ModelState(model) :
         model = model,
-        committed = inputMap(model.inputs);
+        committed = initialCommitted(model);
+
+    static Map<String,dynamic> initialCommitted(Model model) =>
+        model.pk != null
+            ? inputMap(model.inputs)
+            : new Map.fromIterable(inputMap(model.inputs).keys,
+                key: (String key) => key, value: (String key) => ''
+            );
 
     Map save() {
         assert(pending == null);
@@ -46,15 +53,25 @@ class ModelState {
         pending = null;
     }
 
-    Map get delta => inputMap(model.inputs.where((i) {
-        if (pending != null && pending.containsKey(i.name))
-            return pending[i.name] != i.text;
-        return committed[i.name] != i.text;
-    }));
+    bool isChanged(field, value) {
+        if (pending != null && pending.containsKey(field))
+            return pending[field] != value;
+        return committed[field] != value;
+    }
 
-    static Map inputMap(Iterable<Input> inputs) => new Map.fromIterable(
-        inputs, key: (i)=>i.name, value: (i)=>i.text
-    );
+    Map<String,dynamic> get delta {
+        var result = {};
+        inputMap(model.inputs).forEach((String key, dynamic value) {
+            if (isChanged(key, value)) result[key] = value;
+        });
+        return result;
+    }
+
+    static Map<String,dynamic> inputMap(Iterable<Input> inputs) {
+        var result = {};
+        inputs.forEach((Input input) => result.addAll(input.values));
+        return result;
+    }
 
 }
 
