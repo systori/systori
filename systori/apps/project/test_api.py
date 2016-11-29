@@ -1,7 +1,9 @@
+from django.core.urlresolvers import reverse
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 from ..project.factories import ProjectFactory
 from ..document.factories import DocumentTemplateFactory
+from ..directory.factories import ContactFactory, ProjectContactFactory
 from systori.lib.testing import SystoriTestCase
 from ..project.models import Project
 
@@ -15,10 +17,12 @@ class BaseTestCase(SystoriTestCase):
         self.worker = UserFactory(company=self.company, language='en', password='open sesame').access.first()
         self.client.login(username=self.worker.email, password='open sesame')
         self.doctemp = DocumentTemplateFactory()
+        self.contact = ContactFactory()
+        #self.project_contact = ProjectContactFactory()
 
 
 class DocumentTemplateApiTest(BaseTestCase):
 
     def test_true(self):
-        print(self.client.get("api/1/document-template/1"))
+        self.client.get(reverse('api.document.template', args=[1, 1]))
         self.assertEqual("1", "1")
