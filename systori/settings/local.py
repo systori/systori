@@ -2,6 +2,7 @@ from .common import *
 
 SERVER_NAME = 'systori.localhost'
 SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
+ALLOWED_HOSTS = ['.'+SERVER_NAME]
 
 DEBUG = True
 
