@@ -2,8 +2,11 @@ import 'dart:html';
 import 'dart:async';
 
 
+Token tokenGenerator = new Token();
+
+
 class Input extends HtmlElement {
-    String get name => className;
+    Map<String,dynamic> get values => {className: text};
     StreamController<KeyEvent> controller = new StreamController<KeyEvent>(sync: true);
     Stream<KeyEvent> get onKeyEvent => controller.stream;
     Input.created(): super.created() {
@@ -20,9 +23,18 @@ class ModelState {
     final Map committed;
           Map pending;
 
+    bool get isSaving => pending != null;
+
     ModelState(model) :
         model = model,
-        committed = inputMap(model.inputs);
+        committed = initialCommitted(model);
+
+    static Map<String,dynamic> initialCommitted(Model model) =>
+        model.pk != null
+            ? inputMap(model.inputs)
+            : new Map.fromIterable(inputMap(model.inputs).keys,
+                key: (String key) => key, value: (String key) => ''
+            );
 
     Map save() {
         assert(pending == null);
@@ -41,22 +53,32 @@ class ModelState {
         pending = null;
     }
 
-    Map get delta => inputMap(model.inputs.where((i) {
-        if (pending != null && pending.containsKey(i.name))
-            return pending[i.name] != i.text;
-        return committed[i.name] != i.text;
-    }));
+    bool isChanged(field, value) {
+        if (pending != null && pending.containsKey(field))
+            return pending[field] != value;
+        return committed[field] != value;
+    }
 
-    static Map inputMap(Iterable<Input> inputs) => new Map.fromIterable(
-        inputs, key: (i)=>i.name, value: (i)=>i.text
-    );
+    Map<String,dynamic> get delta {
+        var result = {};
+        inputMap(model.inputs).forEach((String key, dynamic value) {
+            if (isChanged(key, value)) result[key] = value;
+        });
+        return result;
+    }
+
+    static Map<String,dynamic> inputMap(Iterable<Input> inputs) {
+        var result = {};
+        inputs.forEach((Input input) => result.addAll(input.values));
+        return result;
+    }
 
 }
 
 
 class Token {
-    static int _previous = 0;
-    static next() {
+    int _previous = 0;
+    next() {
         var token = new DateTime.now().millisecondsSinceEpoch - 1479970650895;
         if (token <= _previous) {
             token = ++_previous;
@@ -71,6 +93,8 @@ class Token {
 abstract class Model extends HtmlElement {
 
     String get type => nodeName.toLowerCase().substring(4);
+
+    List<String> childTypes = [];
 
     int get pk => int.parse(dataset['pk'], onError: (s)=>null);
     set pk(int id) => dataset['pk'] = id.toString();
@@ -87,7 +111,7 @@ abstract class Model extends HtmlElement {
     Model.created(): super.created() {
         if (!dataset.containsKey('pk')) dataset['pk'] = '';
         if (!dataset.containsKey('order')) dataset['order'] = '';
-        if (!dataset.containsKey('token')) dataset['token'] = Token.next().toString();
+        if (!dataset.containsKey('token')) dataset['token'] = tokenGenerator.next().toString();
     }
 
     attached() => state = new ModelState(this);
@@ -103,7 +127,59 @@ abstract class Model extends HtmlElement {
     }
 
     bool get isChanged => state.delta.isNotEmpty;
-    Map save() => state.save();
+
+    Iterable<Model> childrenOfType(String childType) sync* {
+        var NODE_NAME = 'SYS-${childType.toUpperCase()}';
+        for (Element child in children) {
+            if (child.nodeName==NODE_NAME) {
+                yield child;
+            }
+        }
+    }
+
+    Map save() {
+        var data = isChanged ? new Map.from(state.save()) : {};
+        for (var childType in childTypes) {
+            var saveChildren = childrenOfType(childType)
+                .map((Model model) => model.save())
+                .where((Map m) => m.isNotEmpty)
+                .toList();
+            if (saveChildren.isNotEmpty) {
+                data['${childType}s'] = saveChildren;
+            }
+        }
+        if (data.isNotEmpty) {
+            if (pk == null) {
+                data['token'] = token;
+            } else {
+                data['pk'] = pk;
+            }
+        }
+        return data;
+    }
+
+    rollback() {
+        if (state.isSaving) state.rollback();
+        for (var childType in childTypes) {
+            childrenOfType(childType).map((Model m) => m.rollback());
+        }
+    }
+
+    commit(Map result) {
+        pk = result['pk'];
+        if (state.isSaving) state.commit();
+        for (var childType in childTypes) {
+            var listName = '${childType}s';
+            if (!result.containsKey(listName)) continue;
+            for (Model child in childrenOfType(childType)) {
+                for (Map childResult in result[listName]) {
+                    if (childResult['pk'] == child.pk ||
+                        childResult['token'] == child.token) {
+                        child.commit(childResult);
+                    }
+                }
+            }
+        }
+    }
+
 }
-
-

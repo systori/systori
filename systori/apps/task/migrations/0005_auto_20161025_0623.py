@@ -18,11 +18,6 @@ class Migration(migrations.Migration):
             name='job',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, null=True, related_name='all_groups', to='task.Job'),
         ),
-        migrations.AddField(
-            model_name='group',
-            name='token',
-            field=models.IntegerField(null=True, verbose_name='api token'),
-        ),
         migrations.RemoveField(
             model_name='lineitem',
             name='billable',
@@ -37,18 +32,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='lineitem',
-            name='token',
-            field=models.IntegerField(null=True, verbose_name='api token'),
-        ),
-        migrations.AddField(
-            model_name='lineitem',
             name='complete',
             field=models.DecimalField(decimal_places=4, default=0.0, max_digits=14, verbose_name='Completed'),
-        ),
-        migrations.AddField(
-            model_name='task',
-            name='token',
-            field=models.IntegerField(null=True, verbose_name='api token'),
         ),
         migrations.AddField(
             model_name='task',

@@ -8,16 +8,18 @@ import '../scaffolding.dart';
 
 
 void main() {
+    tokenGenerator = new FakeToken();
     registerElements();
     Scaffolding scaffold = new Scaffolding(querySelector('#editor-area'));
     KeyboardNavigator nav = new KeyboardNavigator();
     FakeRepository repository;
 
     setUp(() {
+        tokenGenerator = new FakeToken();
         scaffold.reset();
         nav.reset();
         repository = new FakeRepository();
-        changeManager = new ChangeManager(repository);
+        changeManager = new ChangeManager(Job.JOB, repository);
     });
 
     group("Keyboard", () {
@@ -53,23 +55,18 @@ void main() {
 
     group("ChangeManager", () {
 
-        test("successful update save", () {
+        test("group successful update", () {
 
             Job job = querySelector('sys-job');
-
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving, isEmpty);
 
             // job name is changed
             nav.sendText(' Changed');
 
-            expect(changeManager.save.length, 1);
-            expect(changeManager.saving, isEmpty);
+            expect(changeManager.saving, isFalse);
 
-            changeManager.sync();
+            changeManager.save();
 
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving.length, 1);
+            expect(changeManager.saving, isTrue);
 
             expect(job.state.committed, {'name': 'Test Job', 'description': ''});
 
@@ -77,27 +74,21 @@ void main() {
 
             expect(job.state.committed, {'name': 'Test Job Changed', 'description': ''});
 
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving, isEmpty);
+            expect(changeManager.saving, isFalse);
 
         });
 
-        test("successful create save", () {
-
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving, isEmpty);
+        test("group successful create", () {
 
             nav.sendEnter();
 
             nav.sendText('group changed');
 
-            expect(changeManager.save.length, 1);
-            expect(changeManager.saving, isEmpty);
+            expect(changeManager.saving, isFalse);
 
-            changeManager.sync();
+            changeManager.save();
 
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving.length, 1);
+            expect(changeManager.saving, isTrue);
 
             Group group = nav.activeModel;
 
@@ -109,9 +100,9 @@ void main() {
             expect(group.pk, 1);
             expect(group.state.committed, {'name': 'group changed', 'description': ''});
 
-            expect(changeManager.save, isEmpty);
-            expect(changeManager.saving, isEmpty);
+            expect(changeManager.saving, isFalse);
 
         });
+
     });
 }

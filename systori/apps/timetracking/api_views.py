@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Timer
 from ..company.models import Worker
 from .utils import get_worker_dashboard_report
-from .permissions import HasStaffAccess
+from ..user.permissions import HasStaffAccess
 from .serializers import TimerStartSerializer, TimerStopSerializer, TimerSerializer
 
 
@@ -38,7 +38,6 @@ class TimerView(views.APIView):
         timer.end_latitude = serializer.validated_data['end_latitude']
         timer.stop()
         return Response()
-
 
     def get(self, request):
         timer = get_object_or_404(Timer.objects.filter_running(), worker=request.worker)

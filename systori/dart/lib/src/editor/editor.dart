@@ -44,6 +44,8 @@ class Job extends Group {
 class Group extends Model {
 
     Group get parentGroup => parent as Group;
+    List<String> childTypes = ['group', 'task'];
+
     DivElement code;
     Input name;
     Input description;
@@ -73,16 +75,6 @@ class Group extends Model {
         super.attached();
     }
 
-    Map save() {
-        var data = super.save();
-        if (pk == null) {
-            data['job'] = Job.JOB.pk;
-            data['parent'] = parentGroup.pk;
-            data['token'] = token;
-        }
-        return data;
-    }
-
     handleKeyboard(KeyEvent e) {
         if (e.keyCode == KeyCode.ENTER) {
             e.preventDefault();
@@ -108,8 +100,6 @@ class Group extends Model {
                     task.name.focus();
                 }
             }
-        } else {
-            changeManager.changed(this);
         }
     }
 
@@ -145,6 +135,11 @@ class Group extends Model {
 
 
 class HtmlCell extends Input with HighlightableInputMixin, Cell {
+
+    Map<String,dynamic> get values => {
+        className: text,
+        '${className}_equation': canonical
+    };
 
     String get canonical => dataset['canonical'] ?? "";
     set canonical(String canonical) => dataset['canonical'] = canonical;
@@ -235,6 +230,8 @@ abstract class HtmlRow implements Row {
 
 class Task extends Model with Row, TotalRow, HtmlRow {
 
+    List<String> childTypes = ['lineitem'];
+
     DivElement code;
     Input name;
     Input description;
@@ -278,6 +275,9 @@ class Task extends Model with Row, TotalRow, HtmlRow {
         });
         super.attached();
     }
+
+    Iterable<Model> childrenOfType(String childType) =>
+        this.querySelectorAll(":scope > sys-lineitem-sheet > sys-lineitem") as List<Model>;
 
     handleKeyboard(KeyEvent e) {
         if (e.keyCode == KeyCode.ENTER) {
@@ -333,12 +333,16 @@ class LineItem extends Model with Orderable, Row, HtmlRow {
             var clone = document.importNode(template.content, true);
             append(clone);
         }
+    }
+
+    attached() {
         name = getInput("name");
         qty = getInput("qty");
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
         this.querySelectorAll(':scope>.editor [contenteditable]').onKeyDown.listen(handleKeyboard);
+        super.attached();
     }
 
     handleKeyboard(KeyboardEvent e) {

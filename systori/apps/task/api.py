@@ -1,30 +1,18 @@
+from django.conf.urls import url
 from rest_framework import viewsets, mixins
-from rest_framework.routers import DefaultRouter
-from .models import Group, Task, LineItem
-from .serializers import GroupSerializer, TaskSerializer, LineItemSerializer
-from .permissions import HasStaffAccess
+from .models import Job
+from .serializers import JobSerializer
+from ..user.permissions import HasStaffAccess
 
 
-class GroupViewSet(viewsets.ModelViewSet):
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    permission_classes = []#[HasStaffAccess]
+class EditorAPI(mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    queryset = Job.objects.all()
+    serializer_class = JobSerializer
+    permission_classes = [HasStaffAccess]
 
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, partial=True, **kwargs)
 
-class TaskViewSet(viewsets.ModelViewSet):
-    queryset = Task.objects.all()
-    serializer_class = TaskSerializer
-    permission_classes = []#[HasStaffAccess]
-
-
-class LineItemViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    queryset = LineItem.objects.all()
-    serializer_class = LineItemSerializer
-    permission_classes = []#[HasStaffAccess]
-
-
-router = DefaultRouter()
-router.register(r'group', GroupViewSet)
-router.register(r'task', TaskViewSet)
-router.register(r'lineitem', LineItemViewSet)
-urlpatterns = router.urls
+urlpatterns = [
+    url(r'^job/(?P<pk>\d+)/editor/save$', EditorAPI.as_view({'post': 'update'}), name='editor.save'),
+]

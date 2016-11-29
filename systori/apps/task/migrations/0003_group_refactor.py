@@ -5,17 +5,22 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import django.db.models.deletion
 
+TOKEN = 0
+
 
 def make_job_inherit_from_group(apps, schema_editor):
+    global TOKEN
     from systori.apps.company.models import Company
     Job = apps.get_model("task", "Job")
     Group = apps.get_model("task", "Group")
     for company in Company.objects.all():
         company.activate()
         for job in Job.objects.all():
+            TOKEN += 1
             job.root = Group.objects.create(
                 id=job.id,
                 job=job.id,
+                token=TOKEN,
                 name=job.name,
                 description=job.description,
                 order=job.job_code
@@ -27,6 +32,7 @@ def make_job_inherit_from_group(apps, schema_editor):
 
 
 def copy_groups_and_relink_tasks(apps, schema_editor):
+    global TOKEN
     from systori.apps.company.models import Company
     Job = apps.get_model("task", "Job")
     Group = apps.get_model("task", "Group")
@@ -34,14 +40,18 @@ def copy_groups_and_relink_tasks(apps, schema_editor):
         company.activate()
         for job in Job.objects.all():
             for taskgroup in job.taskgroups.all():
+                TOKEN += 1
                 group = Group.objects.create(
                     parent=job.root,
                     job=job.pk,
                     name=taskgroup.name,
+                    token=TOKEN,
                     description=taskgroup.description,
                     order=taskgroup.order + 1 + job.taskgroup_offset
                 )
                 for task in taskgroup.tasks.all():
+                    TOKEN += 1
+                    task.token = TOKEN
                     task.job = job
                     task.group = group
                     task.save()
@@ -58,6 +68,7 @@ class Migration(migrations.Migration):
             name='Group',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('token', models.IntegerField(verbose_name='api token')),
                 ('order', models.PositiveIntegerField(db_index=True, editable=False)),
                 ('name', models.CharField(blank=True, default='', max_length=512, verbose_name='Name')),
                 ('description', models.TextField(blank=True, default='', verbose_name='Description')),
