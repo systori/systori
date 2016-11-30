@@ -1,8 +1,6 @@
 import factory
 from factory import fuzzy
-
 from .models import Contact, ProjectContact
-from ..project.models import Project
 
 
 class ContactFactory(factory.django.DjangoModelFactory):
