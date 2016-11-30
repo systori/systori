@@ -14,5 +14,5 @@ class EditorAPI(mixins.UpdateModelMixin, viewsets.GenericViewSet):
         return super().update(request, *args, partial=True, **kwargs)
 
 urlpatterns = [
-    url(r'^job/(?P<pk>\d+)/editor/save$', EditorAPI.as_view({'post': 'update'}), name='editor.save'),
+    url(r'^job/(?P<pk>\d+)/editor/save$', EditorAPI.as_view({'post': 'update'}), name='api.editor.save'),
 ]

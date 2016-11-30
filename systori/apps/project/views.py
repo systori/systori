@@ -161,25 +161,6 @@ class ProjectCreate(CreateView):
     model = Project
     form_class = ProjectCreateForm
 
-    def form_valid(self, form):
-        response = super(ProjectCreate, self).form_valid(form)
-
-        job = Job.objects.create(job_code=1, name=_('Default'), project=self.object)
-        job.account = create_account_for_job(job)
-        job.save()
-
-        Group.objects.create(name='', job=job)
-
-        jobsite = JobSite()
-        jobsite.project = self.object
-        jobsite.name = _('Main Site')
-        jobsite.address = form.cleaned_data['address']
-        jobsite.city = form.cleaned_data['city']
-        jobsite.postal_code = form.cleaned_data['postal_code']
-        jobsite.save(skip_geocoding=self.request.POST.get('skip_geocode', False))
-
-        return response
-
     def get_success_url(self):
         if 'save_goto_project' in self.request.POST:
             return reverse('project.view', args=[self.object.id])
@@ -193,7 +174,7 @@ class ProjectImport(FormView):
 
     def form_valid(self, form):
         self.object = gaeb_import(self.request.FILES['file'])
-        return super(ProjectImport, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse('project.view', args=[self.object.id])  # otherwise this will fail
@@ -290,18 +271,16 @@ class JobSiteCreate(CreateView):
     form_class = JobSiteForm
 
     def get_form_kwargs(self):
-        kwargs = super(JobSiteCreate, self).get_form_kwargs()
-
-        kwargs['instance'] = JobSite(project=self.request.project)
-
-        address = self.request.project.jobsites.first()
-        kwargs['initial'].update({
-            'address': address.address,
-            'city': address.city,
-            'postal_code': address.postal_code
-        })
-
-        return kwargs
+        project = self.request.project
+        address = project.jobsites.first()
+        return {
+            'instance': JobSite(project=project),
+            'initial': {
+                'address': address.address,
+                'city': address.city,
+                'postal_code': address.postal_code
+            }
+        }
 
     def get_success_url(self):
         return self.object.project.get_absolute_url()

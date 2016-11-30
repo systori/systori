@@ -10,7 +10,7 @@ class EditorApiTest(ClientTestCase):
     def test_create_group(self):
         job = JobFactory(project=ProjectFactory())
         response = self.client.post(
-            reverse('editor.save', args=(job.pk,)), {
+            reverse('api.editor.save', args=(job.pk,)), {
                 'groups': [{
                     'token': 7, 'name': 'test group',
                     'groups': [
@@ -48,7 +48,7 @@ class EditorApiTest(ClientTestCase):
         job = JobFactory(project=ProjectFactory())
 
         response = self.client.post(
-            reverse('editor.save', args=(job.pk,)), {
+            reverse('api.editor.save', args=(job.pk,)), {
                 'groups': [{
                     'token': 7, 'name': 'test group',
                     'groups': [{'token': 8, 'name': 'sub group'}]
@@ -67,7 +67,7 @@ class EditorApiTest(ClientTestCase):
         }, response.data)
 
         response = self.client.post(
-            reverse('editor.save', args=(job.pk,)), {
+            reverse('api.editor.save', args=(job.pk,)), {
                 'groups': [{
                     'token': 7, 'name': 'test group',
                     'groups': [{'token': 8, 'name': 'sub group'}]
@@ -92,7 +92,7 @@ class EditorApiTest(ClientTestCase):
         self.assertEqual('group for update', group.name)
 
         response = self.client.post(
-            reverse('editor.save', args=(job.pk,)), {
+            reverse('api.editor.save', args=(job.pk,)), {
                 'groups': [{'pk': group.pk, 'name': 'updated group'}]
             },
             format='json'
@@ -113,7 +113,7 @@ class EditorApiTest(ClientTestCase):
         job.generate_groups()
         self.assertEqual(3, Group.objects.count())
         response = self.client.post(
-            reverse('editor.save', args=(job.pk,)), {
+            reverse('api.editor.save', args=(job.pk,)), {
                 'delete': {'groups': [2]}
             },
             format='json'
@@ -124,7 +124,7 @@ class EditorApiTest(ClientTestCase):
     def test_create_task_idempotent(self):
         job = JobFactory(project=ProjectFactory())
         response = self.client.post(
-            reverse('editor.save', args=(job.pk,)), {
+            reverse('api.editor.save', args=(job.pk,)), {
                 'tasks': [{
                     'token': 5, 'name': 'test task', 'description': '',
                     'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': '',
@@ -156,7 +156,7 @@ class EditorApiTest(ClientTestCase):
         }, response.data)
 
         response = self.client.post(
-            reverse('editor.save', args=(job.pk,)), {
+            reverse('api.editor.save', args=(job.pk,)), {
                 'tasks': [{
                     'token': 5, 'name': 'test task', 'description': '',
                     'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': '',
@@ -193,7 +193,7 @@ class EditorApiTest(ClientTestCase):
         TaskFactory(group=job)
         self.assertEqual(2, Task.objects.count())
         response = self.client.post(
-            reverse('editor.save', args=(job.pk,)), {
+            reverse('api.editor.save', args=(job.pk,)), {
                 'delete': {'tasks': [1]}
             },
             format='json'
@@ -206,7 +206,7 @@ class EditorApiTest(ClientTestCase):
         task = TaskFactory(group=job)
         lineitem = LineItemFactory(task=task)
         response = self.client.post(
-            reverse('editor.save', args=(job.pk,)), {
+            reverse('api.editor.save', args=(job.pk,)), {
                 'tasks': [{
                     'pk': task.pk, 'total': 11,
                     'lineitems': [
@@ -235,7 +235,7 @@ class EditorApiTest(ClientTestCase):
         LineItemFactory(task=task)
         self.assertEqual(2, LineItem.objects.count())
         response = self.client.post(
-            reverse('editor.save', args=(job.pk,)), {
+            reverse('api.editor.save', args=(job.pk,)), {
                 'delete': {'lineitems': [1]}
             },
             format='json'

@@ -1,10 +1,11 @@
 from django.forms import ModelForm, Form
-from django.forms.models import inlineformset_factory
 from django import forms
-from ..accounting.models import Transaction, Entry
 from .models import Project, JobSite
 from .gaeb_utils import gaeb_validator
 from django.utils.translation import ugettext_lazy as _
+
+from ..task.models import Job
+from ..task.forms import JobForm
 
 
 class ProjectCreateForm(ModelForm):
@@ -15,6 +16,25 @@ class ProjectCreateForm(ModelForm):
     class Meta:
         model = Project
         fields = ['name', 'description', 'address', 'postal_code', 'city', 'structure_format']
+
+    def save(self, commit=True, address_lookup=True):
+
+        project = super().save(commit)
+
+        JobForm(data={
+            'name': _('Default'),
+            'billing_method': Job.FIXED_PRICE,
+        }, instance=Job(project=project)).save(commit)
+
+        JobSiteForm(data={
+            'name': _('Main Site'),
+            'address': self.cleaned_data['address'],
+            'city': self.cleaned_data['city'],
+            'postal_code': self.cleaned_data['postal_code'],
+            'project': project,
+        }, instance=JobSite(project=project)).save(commit, address_lookup)
+
+        return project
 
 
 class ProjectImportForm(forms.Form):
@@ -33,6 +53,11 @@ class JobSiteForm(ModelForm):
     class Meta:
         model = JobSite
         fields = ['name', 'address', 'postal_code', 'city', 'travel_time']
+
+    def save(self, commit=True, address_lookup=True):
+        if address_lookup:
+            self.instance.geocode_address()
+        return super().save(commit)
 
 
 class FilterForm(Form):

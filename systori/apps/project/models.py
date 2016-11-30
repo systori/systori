@@ -277,19 +277,16 @@ class JobSite(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, *args, skip_geocoding=False, **kwargs):
+    def geocode_address(self):
         try:
-            if not skip_geocoding:
-                g = geocoders.GoogleV3()
-                address = smart_str("{}, {}, {}, {}".format(self.address, self.city, self.postal_code, self.country))
-                location = g.geocode(address)
-                self.latitude = location.latitude
-                self.longitude = location.longitude
+            g = geocoders.GoogleV3()
+            address = smart_str("{}, {}, {}, {}".format(self.address, self.city, self.postal_code, self.country))
+            location = g.geocode(address)
+            self.latitude = location.latitude
+            self.longitude = location.longitude
         except:
             self.latitude = None
             self.longitude = None
-        finally:
-            super(JobSite, self).save(*args, **kwargs)
 
 
 class DailyPlanQuerySet(models.QuerySet):

@@ -15,3 +15,15 @@ class ContactFactory(factory.django.DjangoModelFactory):
     first_name = fuzzy.FuzzyText(length=8)
     last_name = fuzzy.FuzzyText(length=12)
 
+    @classmethod
+    def _create(cls, *args, **kwargs):
+        project = kwargs.pop('project', None)
+        is_billable = kwargs.pop('is_billable', False)
+        contact = super()._create(*args, **kwargs)
+        if project is not None:
+            ProjectContact.objects.create(
+                project=project,
+                contact=contact,
+                is_billable=is_billable
+            )
+        return contact

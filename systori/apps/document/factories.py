@@ -4,7 +4,15 @@ import factory
 from factory import fuzzy
 from django.conf import settings
 
-from .models import Proposal, Letterhead, DocumentSettings
+from .models import Proposal, Letterhead, DocumentSettings, DocumentTemplate
+
+
+class DocumentTemplateFactory(factory.django.DjangoModelFactory):
+
+    name = fuzzy.FuzzyText(length=15)
+
+    class Meta:
+        model = DocumentTemplate
 
 
 class ProposalFactory(factory.django.DjangoModelFactory):

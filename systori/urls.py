@@ -6,12 +6,10 @@ from django.conf import settings
 
 
 urlpatterns = [
-    url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT,}),
+    url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 
-    url(r'^api/', include('systori.apps.project.api_urls')),
     url(r'^api/', include('systori.apps.task.api')),
     url(r'^api/', include('systori.apps.document.api')),
-    url(r'^api/', include('systori.apps.directory.api')),
     url(r'^api/v1/timetracking/', include('systori.apps.timetracking.api_urls')),
 
     url(r'^i18n/', include('django.conf.urls.i18n')),
