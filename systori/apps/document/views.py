@@ -196,7 +196,7 @@ class ProposalViewMixin:
         return context
 
     def get_form_kwargs(self):
-        jobs = self.request.project.jobs.prefetch_related('taskgroups__tasks__taskinstances__lineitems').all()
+        jobs = self.request.project.jobs.all()
         kwargs = {
             'jobs': jobs,
             'instance': self.model(project=self.request.project),
