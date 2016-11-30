@@ -1,7 +1,6 @@
 from factory import django
 from factory import fuzzy
 from .models import Job, Group, Task, LineItem
-from systori.lib.templatetags.customformatting import ubrdecimal
 
 
 class JobFactory(django.DjangoModelFactory):
@@ -24,12 +23,24 @@ class GroupFactory(django.DjangoModelFactory):
 
     name = fuzzy.FuzzyText(length=15)
 
+    @classmethod
+    def _create(cls, *args, **kwargs):
+        if 'job' not in kwargs:
+            kwargs['job'] = kwargs['parent'].job
+        return super()._create(*args, **kwargs)
+
 
 class TaskFactory(django.DjangoModelFactory):
     class Meta:
         model = Task
 
     name = fuzzy.FuzzyText(length=15)
+
+    @classmethod
+    def _create(cls, *args, **kwargs):
+        if 'job' not in kwargs:
+            kwargs['job'] = kwargs['group'].job
+        return super()._create(*args, **kwargs)
 
 
 class LineItemFactory(django.DjangoModelFactory):
@@ -55,5 +66,6 @@ class LineItemFactory(django.DjangoModelFactory):
             if kwargs.get('unit') == '%':
                 _qty /= 100.00
             kwargs['total'] = round(_qty * kwargs.get('price', 0), 2)
-        obj = super()._create(*args, **kwargs)
-        return obj
+        if 'job' not in kwargs:
+            kwargs['job'] = kwargs['task'].job
+        return super()._create(*args, **kwargs)

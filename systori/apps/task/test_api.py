@@ -1,22 +1,11 @@
-import json
 from django.core.urlresolvers import reverse
-from systori.lib.testing import SystoriTestCase
+from systori.lib.testing import ClientTestCase
 from .models import Group, Task, LineItem
-from ..company.factories import CompanyFactory
-from ..user.factories import UserFactory
 from ..project.factories import ProjectFactory
 from .factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 
 
-class BaseTestCase(SystoriTestCase):
-
-    def setUp(self):
-        self.company = CompanyFactory()
-        self.worker = UserFactory(company=self.company, language='en', password='open sesame').access.first()
-        self.client.login(username=self.worker.email, password='open sesame')
-
-
-class EditorApiTest(BaseTestCase):
+class EditorApiTest(ClientTestCase):
 
     def test_create_group(self):
         job = JobFactory(project=ProjectFactory())
@@ -34,7 +23,7 @@ class EditorApiTest(BaseTestCase):
             },
             format='json'
         )
-        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(5, Group.objects.count())
         group = Group.objects.get(parent=job)
         self.assertEqual('test group', group.name)
@@ -98,7 +87,7 @@ class EditorApiTest(BaseTestCase):
 
     def test_update_group(self):
         job = JobFactory(project=ProjectFactory())
-        group = GroupFactory(name='group for update', parent=job, job=job)
+        group = GroupFactory(name='group for update', parent=job)
         self.assertEqual(2, Group.objects.count())
         self.assertEqual('group for update', group.name)
 
@@ -238,7 +227,6 @@ class EditorApiTest(BaseTestCase):
                 'lineitems': [{'pk': 1, 'token': None}]
             }]
         }, response.data)
-
 
     def test_delete_lineitem(self):
         job = JobFactory(project=ProjectFactory())

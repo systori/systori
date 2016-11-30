@@ -11,7 +11,7 @@ from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Project, JobSite
 from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
 from .forms import JobSiteForm, FilterForm
-from ..task.models import Job, Group
+from ..task.models import Job, Group, ProgressReport
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
 from ..accounting.report import create_invoice_report
 from ..accounting.models import create_account_for_job
@@ -321,3 +321,9 @@ class JobSiteDelete(DeleteView):
     def get_success_url(self):
         return self.object.project.get_absolute_url()
 
+
+class AllProjectsProgress(ListView):
+    model = ProgressReport
+    queryset = model.objects.prefetch_related('task__taskgroup__job__project').prefetch_related('worker__user')
+    context_object_name = 'progressreport_list'
+    paginate_by = 30

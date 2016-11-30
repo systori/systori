@@ -1,12 +1,9 @@
 import re
 from decimal import Decimal
-from functools import partialmethod
-from datetime import datetime
-from string import ascii_lowercase
 from django.db import models
 from django.db.models.manager import BaseManager
 from django.utils.translation import ugettext_lazy as _
-from django.utils.formats import date_format
+from django.core.urlresolvers import reverse
 from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
 from systori.lib.utils import nice_percent
@@ -56,7 +53,7 @@ class Group(OrderedModel):
     name = models.CharField(_("Name"), default="", blank=True, max_length=512)
     description = models.TextField(_("Description"), default="", blank=True)
     parent = models.ForeignKey('self', related_name='groups', null=True)
-    token = models.IntegerField('api token')
+    token = models.IntegerField('api token', null=True)
     job = models.ForeignKey('Job', null=True, related_name='all_groups')
     order_with_respect_to = 'parent'
 
@@ -234,6 +231,12 @@ class Job(Group):
                 return True
         return False
 
+    def get_absolute_url(self):
+        if self.project.is_template:
+            return reverse('job.editor', args=[self.pk])
+        else:
+            return reverse('job.editor', args=[self.project.id, self.pk])
+
     def __str__(self):
         return self.name
 
@@ -358,6 +361,7 @@ class Task(OrderedModel):
             lineitem.complete = 0.0
             lineitem.is_flagged = False
             lineitem.task = self
+            lineitem.job = self.job
             lineitem.save()
 
 

@@ -1,8 +1,6 @@
 from django.conf.urls import url
 from ..user.authorization import office_auth
-from ..accounting.views import PaymentCreate, PaymentDelete
 from .views import *
-from ..task.views import AllProjectsProgress
 
 urlpatterns = [
 

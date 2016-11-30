@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 from django.conf import settings
 
 from systori.apps.company.factories import CompanyFactory
+from systori.apps.user.factories import UserFactory
 
 
 class SubdomainClient(APIClient):
@@ -18,6 +19,16 @@ class SubdomainClient(APIClient):
 
 class SystoriTestCase(TestCase):
     client_class = SubdomainClient
+
+
+class ClientTestCase(SystoriTestCase):
+    password = 'open sesame'
+
+    def setUp(self):
+        self.company = CompanyFactory()
+        self.user = UserFactory(company=self.company, language='en', password=self.password)
+        self.worker = self.user.access.first()
+        self.client.login(username=self.worker.email, password=self.password)
 
 
 def template_debug_output():
