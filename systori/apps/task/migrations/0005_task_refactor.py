@@ -97,10 +97,26 @@ def remove_old_content_types(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0003_group_refactor'),
+        ('task', '0004_data_migration'),
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name='task',
+            name='job',
+            field=models.ForeignKey('task.Job', models.CASCADE, related_name='all_tasks'),
+        ),
+        migrations.AlterField(
+            model_name='task',
+            name='group',
+            field=models.ForeignKey('task.Group', models.CASCADE, related_name='tasks'),
+        ),
+        migrations.RemoveField(
+            model_name='task',
+            name='taskgroup',
+        ),
+        migrations.DeleteModel('taskgroup'),
+        migrations.DeleteModel('oldjob'),
         migrations.AddField(
             model_name='task',
             name='token',
@@ -220,4 +236,58 @@ class Migration(migrations.Migration):
         migrations.RemoveField('lineitem', 'taskinstance'),
         migrations.DeleteModel('taskinstance'),
         migrations.RunPython(remove_old_content_types),
+        migrations.RemoveField(
+            model_name='lineitem',
+            name='billable',
+        ),
+        migrations.RemoveField(
+            model_name='lineitem',
+            name='is_labor',
+        ),
+        migrations.RemoveField(
+            model_name='lineitem',
+            name='is_material',
+        ),
+        migrations.AddField(
+            model_name='lineitem',
+            name='complete',
+            field=models.DecimalField(decimal_places=4, default=0.0, max_digits=14, verbose_name='Completed'),
+        ),
+        migrations.AddField(
+            model_name='task',
+            name='total_equation',
+            field=models.CharField(blank=True, default='', max_length=512),
+            preserve_default=False,
+        ),
+        migrations.AlterField(
+            model_name='lineitem',
+            name='unit',
+            field=models.CharField(blank=True, max_length=512, verbose_name='Unit'),
+        ),
+        migrations.AlterField(
+            model_name='task',
+            name='complete',
+            field=models.DecimalField(decimal_places=4, default=0.0, max_digits=14, verbose_name='Completed'),
+        ),
+        migrations.AlterField(
+            model_name='task',
+            name='unit',
+            field=models.CharField(blank=True, max_length=512, verbose_name='Unit'),
+        ),
+        migrations.AddField(
+            model_name='task',
+            name='price_equation',
+            field=models.CharField(blank=True, default='', max_length=512),
+            preserve_default=False,
+        ),
+        migrations.AlterField(
+            model_name='lineitem',
+            name='name',
+            field=models.CharField(blank=True, max_length=512, verbose_name='Name'),
+        ),
+        migrations.AlterField(
+            model_name='task',
+            name='description',
+            field=models.TextField(blank=True),
+        ),
     ]

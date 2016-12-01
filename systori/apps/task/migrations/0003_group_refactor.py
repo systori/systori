@@ -3,58 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import django.db.models.deletion
-
-TOKEN = 0
-
-
-def make_job_inherit_from_group(apps, schema_editor):
-    global TOKEN
-    from systori.apps.company.models import Company
-    Job = apps.get_model("task", "Job")
-    Group = apps.get_model("task", "Group")
-    for company in Company.objects.all():
-        company.activate()
-        for job in Job.objects.all():
-            TOKEN += 1
-            job.root = Group.objects.create(
-                id=job.id,
-                job=job.id,
-                token=TOKEN,
-                name=job.name,
-                description=job.description,
-                order=job.job_code
-            )
-            job.save()
-        schema_editor.execute(
-            "select setval(pg_get_serial_sequence('task_group', 'id'), max(id)) from task_group;"
-        )
-
-
-def copy_groups_and_relink_tasks(apps, schema_editor):
-    global TOKEN
-    from systori.apps.company.models import Company
-    Job = apps.get_model("task", "Job")
-    Group = apps.get_model("task", "Group")
-    for company in Company.objects.all():
-        company.activate()
-        for job in Job.objects.all():
-            for taskgroup in job.taskgroups.all():
-                TOKEN += 1
-                group = Group.objects.create(
-                    parent=job.root,
-                    job=job.pk,
-                    name=taskgroup.name,
-                    token=TOKEN,
-                    description=taskgroup.description,
-                    order=taskgroup.order + 1 + job.taskgroup_offset
-                )
-                for task in taskgroup.tasks.all():
-                    TOKEN += 1
-                    task.token = TOKEN
-                    task.job = job
-                    task.group = group
-                    task.save()
+import django_fsm
 
 
 class Migration(migrations.Migration):
@@ -68,12 +17,11 @@ class Migration(migrations.Migration):
             name='Group',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.IntegerField(verbose_name='api token')),
+                ('token', models.IntegerField(verbose_name='api token', null=True)),
                 ('order', models.PositiveIntegerField(db_index=True, editable=False)),
                 ('name', models.CharField(blank=True, default='', max_length=512, verbose_name='Name')),
                 ('description', models.TextField(blank=True, default='', verbose_name='Description')),
-                ('parent', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='groups', to='task.Group')),
-                ('job', models.IntegerField())
+                ('parent', models.ForeignKey('self', models.CASCADE, null=True, related_name='groups')),
             ],
             options={
                 'ordering': ('order',),
@@ -81,74 +29,36 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Groups',
             },
         ),
-
-        # Migrate data so that Job inherits from Group
-
-        migrations.AlterModelOptions(
-            name='job',
-            options={'verbose_name': 'Job', 'verbose_name_plural': 'Job'},
+        migrations.RenameModel('Job', 'OldJob'),
+        migrations.CreateModel(
+            name='Job',
+            fields=[
+                ('billing_method', models.CharField(max_length=128, default='fixed_price', choices=[('fixed_price', 'Fixed Price'), ('time_and_materials', 'Time and Materials')], verbose_name='Billing Method')),
+                ('is_revenue_recognized', models.BooleanField(default=False)),
+                ('status', django_fsm.FSMField(max_length=50, default='draft', choices=[('draft', 'Draft'), ('proposed', 'Proposed'), ('approved', 'Approved'), ('started', 'Started'), ('completed', 'Completed')])),
+                ('account', models.OneToOneField('accounting.Account', models.SET_NULL, related_name='job', null=True)),
+                ('project', models.ForeignKey('project.Project', models.CASCADE, related_name='jobs')),
+                ('root', models.OneToOneField('task.Group', models.CASCADE, parent_link=True, primary_key=True, related_name='+')),
+            ],
+            bases=('task.Group',),
+            options={
+                'verbose_name': 'Job',
+                'verbose_name_plural': 'Job',
+            },
         ),
         migrations.AddField(
-            model_name='job',
-            name='root',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, related_name='+', to='task.Group')
+            model_name='group',
+            name='job',
+            field=models.ForeignKey('task.Job', models.CASCADE, null=True, related_name='all_groups'),
         ),
-        migrations.RunPython(make_job_inherit_from_group),
-        migrations.RemoveField(
-            model_name='job',
-            name='id',
+        migrations.AddField(
+            model_name='task',
+            name='job',
+            field=models.ForeignKey('task.Job', models.CASCADE, null=True, related_name='all_tasks'),
         ),
-        migrations.AlterField(
-            model_name='job',
-            name='root',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, related_name='+', to='task.Group'),
-        ),
-
-        # Migrate TaskGroup to Group
-
         migrations.AddField(
             model_name='task',
             name='group',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='tasks', to='task.Group'),
-        ),
-        migrations.AddField(
-            model_name='task',
-            name='job',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='all_tasks', to='task.Job'),
-        ),
-        migrations.RunPython(copy_groups_and_relink_tasks),
-        migrations.AlterField(
-            model_name='task',
-            name='group',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tasks', to='task.Group'),
-        ),
-        migrations.AlterField(
-            model_name='task',
-            name='job',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='all_tasks', to='task.Job'),
-        ),
-
-        # Cleanup...
-
-        migrations.RemoveField(
-            model_name='task',
-            name='taskgroup',
-        ),
-        migrations.DeleteModel('taskgroup'),
-        migrations.RemoveField(
-            model_name='job',
-            name='name',
-        ),
-        migrations.RemoveField(
-            model_name='job',
-            name='description',
-        ),
-        migrations.RemoveField(
-            model_name='job',
-            name='job_code',
-        ),
-        migrations.RemoveField(
-            model_name='job',
-            name='taskgroup_offset',
+            field=models.ForeignKey('task.Group', models.CASCADE, null=True, related_name='tasks'),
         ),
     ]
