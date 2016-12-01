@@ -19,7 +19,8 @@ layers:
     context:
       - .
     build:
-      - cd systori/dart && pub get && pub build && cd -
+      - cd systori/dart && pub get && pub build
+      - cd /app
       - pip3 install --src=/src -r requirements/app.pip
       - export DJANGO_SETTINGS_MODULE=systori.settings.common
       - python3 manage.py collectstatic --noinput
