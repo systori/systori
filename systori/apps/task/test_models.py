@@ -10,7 +10,7 @@ from .models import Group, Task
 from ..company.factories import CompanyFactory
 from ..project.factories import ProjectFactory
 from ..document.factories import ProposalFactory, LetterheadFactory
-from ..task.factories import JobFactory, GroupFactory, TaskFactory
+from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from ..user.factories import UserFactory
 
 
@@ -60,6 +60,18 @@ class CalculationTests(TestCase):
         self.assertTrue(task.is_billable)
         self.assertEqual(task.progress, 24)
         self.assertEqual(task.complete_percent, 60)
+
+    def test_blank_task_price_difference(self):
+        """ To prevent regression, used to throw:
+            TypeError: unsupported operand type(s) for -: 'float' and 'decimal.Decimal'
+        """
+        task = Task()  # type: Task
+        self.assertEqual(task.price_difference, 0)
+
+    def test_task_price_difference(self):
+        task = TaskFactory(group=self.job, price=0)  # type: Task
+        LineItemFactory(task=task, total=10)
+        self.assertTrue(task.price_difference, 2)
 
     def test_task_estimate_determination(self):
         """ Determines if a task should be included in totals. """

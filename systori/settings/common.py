@@ -1,8 +1,3 @@
-# Systori Settings
-
-# Pre-populates all addresses and used by geocoding
-# for address-> lat/long coordinates.
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import sys
 
@@ -25,8 +20,6 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 
 # Django Settings
-
-TASTYPIE_DEFAULT_FORMATS = ['json']
 
 AUTH_USER_MODEL = 'user.User'
 LOGIN_URL = '/login'
@@ -141,7 +134,15 @@ DATABASES = {
     }
 }
 
-if 'test' in sys.argv[1:]:
+GEOCODE_ADDRESSES = True
+
+if TESTING:
+
+    GEOCODE_ADDRESSES = False
+
+    # in Django 2.1 this will be the default:
+    TEMPLATES[0]['OPTIONS']['debug'] = True
+
     class DisableMigrations:
         def __contains__(self, item):
             return True

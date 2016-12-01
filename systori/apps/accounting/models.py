@@ -31,7 +31,7 @@ class Account(BaseAccount):
 
 
 class Entry(BaseEntry):
-    job = models.ForeignKey('task.Job', null=True, related_name="+")
+    job = models.ForeignKey('task.Job', models.SET_NULL, null=True, related_name="+")
 
 
 class Transaction(BaseTransaction):

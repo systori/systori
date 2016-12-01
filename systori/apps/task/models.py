@@ -245,13 +245,13 @@ class Task(OrderedModel):
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField(blank=True)
 
-    qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
+    qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     qty_equation = models.CharField(max_length=512, blank=True)
-    complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=0.0)
+    complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     unit = models.CharField(_("Unit"), max_length=512, blank=True)
-    price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=0.0)
+    price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     price_equation = models.CharField(max_length=512, blank=True)
-    total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=0.0)
+    total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     total_equation = models.CharField(max_length=512, blank=True)
 
     started_on = models.DateField(blank=True, null=True)
@@ -369,16 +369,16 @@ class LineItem(OrderedModel):
 
     name = models.CharField(_("Name"), max_length=512, blank=True)
 
-    qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=0.0)
+    qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     qty_equation = models.CharField(max_length=512, blank=True)
-    complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=0.0)
+    complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
 
     unit = models.CharField(_("Unit"), max_length=512, blank=True)
 
-    price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=0.0)
+    price = models.DecimalField(_("Price"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     price_equation = models.CharField(max_length=512, blank=True)
 
-    total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=0.0)
+    total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     total_equation = models.CharField(max_length=512, blank=True)
 
     # flagged items will appear in the project dashboard as needing attention
@@ -436,7 +436,7 @@ class ProgressReport(models.Model):
 
     # how much of the project is complete in units of quantity
     # this gets copied into task.complete with the latest progress report value
-    complete = models.DecimalField(_("Complete"), max_digits=14, decimal_places=4, default=0.0)
+    complete = models.DecimalField(_("Complete"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
 
     task = models.ForeignKey(Task, related_name="progressreports")
 

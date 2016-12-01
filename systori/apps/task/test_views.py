@@ -4,7 +4,7 @@ from systori.lib.testing import ClientTestCase
 
 from ..project.factories import ProjectFactory
 
-from .factories import JobFactory
+from .factories import JobFactory, TaskFactory, LineItemFactory
 from .models import Job
 
 

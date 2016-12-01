@@ -7,7 +7,7 @@ from django.db.models import Max
 from ..accounting.constants import TAX_RATE
 
 from .models import *
-from .forms import JobForm, JobTemplateForm
+from .forms import JobCreateForm, JobTemplateCreateForm
 
 
 class JobCreate(CreateView):
@@ -15,9 +15,9 @@ class JobCreate(CreateView):
 
     def get_form_class(self):
         if self.request.project.is_template:
-            return JobTemplateForm
+            return JobTemplateCreateForm
         else:
-            return JobForm
+            return JobCreateForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -37,8 +37,6 @@ class JobEditor(DetailView):
         context['blank_group'] = Group()
         context['blank_task'] = Task()
         context['blank_lineitem'] = LineItem()
-        context['tax_rate'] = TAX_RATE
-        context['tax_rate_percent'] = TAX_RATE * 100
         return context
 
 

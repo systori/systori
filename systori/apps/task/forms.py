@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from ..accounting.models import create_account_for_job
 
 
-class JobTemplateForm(forms.ModelForm):
+class JobTemplateCreateForm(forms.ModelForm):
 
     class Meta:
         model = Job
@@ -23,7 +23,7 @@ class JobTemplateForm(forms.ModelForm):
         return job
 
 
-class JobForm(forms.ModelForm):
+class JobCreateForm(forms.ModelForm):
 
     job_template = forms.ModelChoiceField(
         label=_('Job Template'),
@@ -48,4 +48,5 @@ class JobForm(forms.ModelForm):
             tmpl.clone_to(job)
         else:
             job.generate_groups()
+        job.save()
         return job

@@ -27,14 +27,15 @@ class ProjectFormTest(TestCase):
     def test_create_save(self):
         form = forms.ProjectCreateForm(data={
             'name': 'new project',
-            'structure_format': '0.0',
+            'structure_format': '01.0',
             'address': '1 Fake Ave',
             'city': 'Village',
             'postal_code': '12345'
         })
         self.assertTrue(form.is_valid())
-        project = form.save(address_lookup=False)
+        project = form.save()
         self.assertEquals(len(project.jobs.all()), 1)
+        self.assertEquals(project.jobs.first().code, '01')
         self.assertEquals(len(project.jobsites.all()), 1)
 
     def test_update_save(self):

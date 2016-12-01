@@ -278,15 +278,20 @@ class JobSite(models.Model):
         return self.name
 
     def geocode_address(self):
-        try:
-            g = geocoders.GoogleV3()
-            address = smart_str("{}, {}, {}, {}".format(self.address, self.city, self.postal_code, self.country))
-            location = g.geocode(address)
-            self.latitude = location.latitude
-            self.longitude = location.longitude
-        except:
-            self.latitude = None
-            self.longitude = None
+        if settings.GEOCODE_ADDRESSES:
+            try:
+                g = geocoders.GoogleV3()
+                address = smart_str("{}, {}, {}, {}".format(
+                    self.address,
+                    self.city, self.postal_code,
+                    self.country
+                ))
+                location = g.geocode(address)
+                self.latitude = location.latitude
+                self.longitude = location.longitude
+            except:
+                self.latitude = None
+                self.longitude = None
 
 
 class DailyPlanQuerySet(models.QuerySet):

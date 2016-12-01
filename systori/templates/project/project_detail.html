@@ -47,7 +47,6 @@
         <th>{% trans "Status" %}</th>
         <th>{% trans "Billing Method" %}</th>
         <th style="text-align: right;">{% trans "Estimate" %}</th>
-        <th></th>
         <th style="text-align: right;">{% trans "Progress" %}</th>
         <th></th>
         <th style="text-align: right;">{% trans "Actions" %}</th>
@@ -56,24 +55,11 @@
       <tbody>
       {% for job in project.jobs.all %}
         <tr>
-          <td><a href="{% url 'tasks' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
+          <td><a href="{% url 'job.editor' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
           <td>{{ job.get_status_display }}</td>
           <td>{{ job.get_billing_method_display }}</td>
           <td style="text-align: right; white-space: nowrap;">
             {{ job.total|money }}
-          </td>
-          <td>
-            <div class="btn-group" style="width:80px;">
-              <a class="btn btn-default btn-xs" href="{% url 'job.estimate' project.id job.id 'increase' %}"
-                 title="{% blocktrans with percent=job.ESTIMATE_INCREMENT_DISPLAY %}Increase estimate by {{ percent }}.{% endblocktrans %}"><span
-                  class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
-              <a class="btn btn-default btn-xs" href="{% url 'job.estimate' project.id job.id 'decrease' %}"
-                 title="{% blocktrans with percent=job.ESTIMATE_INCREMENT_DISPLAY %}Decrease estimate by {{ percent }}.{% endblocktrans %}"><span
-                  class="glyphicon glyphicon-minus" aria-hidden="true"></span></a>
-              <a class="btn btn-default btn-xs" href="{% url 'job.estimate' project.id job.id 'reset' %}"
-                 title="{% trans 'Reset estimate to original amount.' %}"><span class="glyphicon glyphicon-unchecked"
-                                                                                aria-hidden="true"></span></a>
-            </div>
           </td>
           <td style="text-align: right; white-space: nowrap;">{{ job.progress|money }}</td>
           <td><small>{{ job.progress_percent }}%</small></td>
@@ -82,7 +68,6 @@
               <a href="{% url 'job.transition' project.id job.id state.name %}">{{ state.custom.label }}</a>
             {% endfor %}
             {% if job.status == job.DRAFT %}
-              <a href="{% url 'job.edit' project.id job.id %}">{% trans "Edit" %}</a>
               <a href="{% url 'job.delete' project.id job.id %}">{% trans "Delete" %}</a>
             {% endif %}
           </td>

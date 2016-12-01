@@ -19,13 +19,13 @@ class JobFormTest(TestCase):
     def test_validation(self):
         activate('en')
 
-        form = forms.JobTemplateForm(data={})
+        form = forms.JobTemplateCreateForm(data={})
         self.assertFalse(form.is_valid())
         self.assertEqual({
             'name': ['This field is required.'],
         }, form.errors)
 
-        form = forms.JobForm(data={})
+        form = forms.JobCreateForm(data={})
         self.assertFalse(form.is_valid())
         self.assertEqual({
             'name': ['This field is required.'],
@@ -34,7 +34,7 @@ class JobFormTest(TestCase):
 
     def test_save(self):
 
-        form = forms.JobTemplateForm(data={
+        form = forms.JobTemplateCreateForm(data={
             'name': 'job tpl',
             'description': 'sample job description'
         }, instance=Job(project=Project.objects.template().get()))
@@ -47,10 +47,10 @@ class JobFormTest(TestCase):
 
         self.assertEqual(
             template.name,
-            list(forms.JobForm().fields['job_template'].choices)[1][1])
+            list(forms.JobCreateForm().fields['job_template'].choices)[1][1])
 
         # Using Template
-        form = forms.JobForm(data={
+        form = forms.JobCreateForm(data={
             'name': 'new job',
             'billing_method': Job.FIXED_PRICE,
             'job_template': template.pk
@@ -60,10 +60,13 @@ class JobFormTest(TestCase):
         self.assertEquals('group template', new_job.groups.first().name)
 
         # Not Using Template
-        form = forms.JobForm(data={
+        form = forms.JobCreateForm(data={
             'name': 'new job 2',
             'billing_method': Job.FIXED_PRICE,
         }, instance=Job(project=self.project))
         self.assertTrue(form.is_valid())
         new_job = form.save()
         self.assertEquals('', new_job.groups.first().name)
+
+        job = Job.objects.get(id=new_job.id)
+        self.assertEquals('02', job.code)
