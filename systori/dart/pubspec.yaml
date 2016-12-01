@@ -9,4 +9,6 @@ dependencies:
   quiver: any
 dev_dependencies:
   test: any
-  mockito: any
+transformers:
+  - $dart2js:
+      $include: web/job_editor.dart
