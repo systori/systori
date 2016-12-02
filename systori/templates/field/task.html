@@ -6,8 +6,8 @@
 
     <div class="row back-buttons">
       <div class="col-xs-8"><a
-          href="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id task.taskgroup.job.id %}"
-          class="btn btn-default btn-block">&laquo; {{ task.taskgroup.job.name }}</a></div>
+          href="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id task.job.id %}"
+          class="btn btn-default btn-block">&laquo; {{ task.job.name }}</a></div>
       <div class="col-xs-4"><a
           href="{% if request.GET.origin %}{{ request.GET.origin }}{% else %}{% url 'field.dashboard' %}{% endif %}"
           class="btn btn-default btn-block">&laquo;
@@ -72,7 +72,7 @@
           <div class="panel-footer clearfix">
             <div class="pull-right">
               <input type="hidden" name="origin"
-                     value="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id task.taskgroup.job.id %}"/>
+                     value="{% url 'field.dailyplan.job' jobsite.id dailyplan.url_id task.job.id %}"/>
               <input type="submit" class="btn btn-primary" id="task-submit" value="{% trans 'Save Progress' %}"/>
             </div>
           </div>

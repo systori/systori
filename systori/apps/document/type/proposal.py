@@ -221,43 +221,41 @@ def serialize(proposal):
 
         job_data['taskgroups'] = []
 
-        for taskgroup in job_obj.taskgroups.all():
+        for taskgroup in job_obj.groups.all():
             taskgroup_dict = {
                 'id': taskgroup.id,
                 'code': taskgroup.code,
                 'name': taskgroup.name,
                 'description': taskgroup.description,
-                'estimate_net': taskgroup.estimate_total,
+                'estimate_net': taskgroup.total,
                 'tasks': []
             }
             job_data['taskgroups'].append(taskgroup_dict)
 
             for task in taskgroup.tasks.all():
 
-                for instance in task.taskinstances.all():
+                task_dict = {
+                    'id': task.id,
+                    'code': task.code,
+                    'name': task.full_name,
+                    'description': task.full_description,
+                    'selected': task.selected,
+                    'is_optional': task.is_optional,
+                    'qty': task.qty,
+                    'unit': task.unit,
+                    'price': task.price,
+                    'estimate_net': task.total,
+                    'lineitems': []
+                }
+                taskgroup_dict['tasks'].append(task_dict)
 
-                    task_dict = {
-                        'id': task.id,
-                        'code': instance.code,
-                        'name': instance.full_name,
-                        'description': instance.full_description,
-                        'selected': instance.selected,
-                        'is_optional': task.is_optional,
-                        'qty': task.qty,
-                        'unit': task.unit,
-                        'price': instance.unit_price,
-                        'estimate_net': instance.fixed_price_estimate,
-                        'lineitems': []
+                for lineitem in task.lineitems.all():
+                    lineitem_dict = {
+                        'id': lineitem.id,
+                        'name': lineitem.name,
+                        'qty': lineitem.qty,
+                        'unit': lineitem.unit,
+                        'price': lineitem.price,
+                        'price_per': lineitem.total,
                     }
-                    taskgroup_dict['tasks'].append(task_dict)
-
-                    for lineitem in task.instance.lineitems.all():
-                        lineitem_dict = {
-                            'id': lineitem.id,
-                            'name': lineitem.name,
-                            'qty': lineitem.unit_qty,
-                            'unit': lineitem.unit,
-                            'price': lineitem.price,
-                            'price_per': lineitem.price_per_task_unit,
-                        }
-                        task_dict['lineitems'].append(lineitem_dict)
+                    task_dict['lineitems'].append(lineitem_dict)

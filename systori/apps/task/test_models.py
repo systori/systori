@@ -3,45 +3,12 @@ import datetime
 from unittest import skip
 from django.test import TestCase
 from django.utils.translation import activate
-from django.conf import settings
-
 from .models import Group, Task
 
 from ..company.factories import CompanyFactory
 from ..project.factories import ProjectFactory
 from ..document.factories import ProposalFactory, LetterheadFactory
 from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
-from ..user.factories import UserFactory
-
-
-def create_task_data(self, create_user=True, create_company=True):
-    if create_company:
-        self.company = CompanyFactory()
-    if create_user:
-        self.user = UserFactory(company=self.company)
-    letterhead_pdf = os.path.join(settings.BASE_DIR, 'apps/document/test_data/letterhead.pdf')
-    self.letterhead = Letterhead.objects.create(name="Test Letterhead", letterhead_pdf=letterhead_pdf)
-    DocumentSettings.objects.create(language='de',
-                                    evidence_letterhead=self.letterhead,
-                                    proposal_letterhead=self.letterhead,
-                                    invoice_letterhead=self.letterhead)
-    self.project = ProjectFactory()
-    self.project2 = ProjectFactory(has_level_3=True)
-    self.job = JobFactory(project=self.project)
-    self.job2 = JobFactory(project=self.project)
-    self.group = GroupFactory(name="my group", job=self.job, level=2)
-    self.group2 = GroupFactory(name="my group 2", job=self.job, level=2)
-    self.group2.generate_children()
-    self.task = TaskFactory(name="my task one", qty=10, taskgroup=self.group, job=self.job, status=Task.RUNNING)
-    TaskInstanceFactory(task=self.task, selected=True, unit_price=96)
-    self.lineitem = LineItemFactory(unit_qty=8, price=12, taskinstance=self.task.instance)
-    self.task2 = TaskFactory(name="my task two", qty=0, taskgroup=self.group, job=self.job)
-    TaskInstanceFactory(task=self.task2, selected=True, unit_price=0)
-    self.lineitem2 = LineItemFactory(unit_qty=0, price=0, taskinstance=self.task2.instance)
-    self.group3 = GroupFactory(job=self.job2, level=2)
-    self.task3 = TaskFactory(name="my task one", qty=10, taskgroup=self.group3, job=self.job2)
-    TaskInstanceFactory(task=self.task3, selected=True, unit_price=96)
-    self.lineitem3 = LineItemFactory(unit_qty=8, price=12, taskinstance=self.task3.instance)
 
 
 class CalculationTests(TestCase):

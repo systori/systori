@@ -1,25 +1,40 @@
 from decimal import Decimal as D
 from django.test import TestCase
+
+from systori.lib.testing import make_amount as A
+from systori.lib.accounting.tools import Amount
 from systori.apps.field.utils import days_ago
-from .report import create_invoice_report, create_invoice_table
-from .models import Entry
-from .workflow import debit_jobs, credit_jobs, adjust_jobs, refund_jobs
-from .test_workflow import create_data, A, Amount, TAX_RATE, create_account_for_job
+
+from ..company.factories import CompanyFactory
+from ..project.factories import ProjectFactory
 from ..task.factories import JobFactory
+
+from .report import create_invoice_report, create_invoice_table
+from .models import Entry, create_account_for_job
+from .workflow import debit_jobs, credit_jobs, adjust_jobs, refund_jobs
+from .workflow import create_chart_of_accounts
+from .constants import TAX_RATE
 
 
 class TestTransactionsTable(TestCase):
+
     def setUp(self):
-        create_data(self)
-        self.job3 = JobFactory(project=self.project)
-        self.job3.account = create_account_for_job(self.job3)
-        self.job3.save()
-        self.job4 = JobFactory(project=self.project)
-        self.job4.account = create_account_for_job(self.job4)
-        self.job4.save()
-        self.job5 = JobFactory(project=self.project)
-        self.job5.account = create_account_for_job(self.job5)
-        self.job5.save()
+        self.company = CompanyFactory()
+        self.project = ProjectFactory()
+        create_chart_of_accounts(self)
+
+        jobs = []
+        for i in range(5):
+            job = JobFactory(project=self.project)
+            job.account = create_account_for_job(job)
+            job.save()
+            jobs.append(job)
+
+        self.job = jobs[0]
+        self.job2 = jobs[1]
+        self.job3 = jobs[2]
+        self.job4 = jobs[3]
+        self.job5 = jobs[4]
 
     def tbl(self, invoice_txn=None, jobs=None):
         if not invoice_txn:

@@ -236,13 +236,13 @@ def serialize(invoice):
 
         job_data['taskgroups'] = []
 
-        for taskgroup in job_obj.taskgroups.all():
+        for taskgroup in job_obj.groups.all():
             taskgroup_dict = {
                 'id': taskgroup.id,
                 'code': taskgroup.code,
                 'name': taskgroup.name,
                 'description': taskgroup.description,
-                'total': taskgroup.progress_total,
+                'total': taskgroup.total,
                 'tasks': []
             }
             job_data['taskgroups'].append(taskgroup_dict)
@@ -250,25 +250,25 @@ def serialize(invoice):
             for task in taskgroup.tasks.all():
                 task_dict = {
                     'id': task.id,
-                    'code': task.instance.code,
-                    'name': task.instance.full_name,
-                    'description': task.instance.full_description,
+                    'code': task.code,
+                    'name': task.full_name,
+                    'description': task.full_description,
                     'complete': task.complete,
                     'unit': task.unit,
-                    'price': task.instance.unit_price,
-                    'total': task.fixed_price_progress,
+                    'price': task.price,
+                    'total': task.progress,
                     'lineitems': []
                 }
                 taskgroup_dict['tasks'].append(task_dict)
 
-                for lineitem in task.instance.lineitems.all():
+                for lineitem in task.lineitems.all():
                     lineitem_dict = {
                         'id': lineitem.id,
                         'name': lineitem.name,
                         'qty': lineitem.unit_qty,
                         'unit': lineitem.unit,
                         'price': lineitem.price,
-                        'price_per': lineitem.price_per_task_unit,
+                        'price_per': lineitem.total,
                     }
                     task_dict['lineitems'].append(lineitem_dict)
 

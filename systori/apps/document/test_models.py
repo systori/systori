@@ -1,18 +1,24 @@
-from decimal import Decimal
 from django.test import TestCase
-from django.contrib.auth import get_user_model
 from django.utils.translation import activate
-from .models import *
 
-from ..task.test_models import create_task_data
-from ..directory.test_models import create_contact_data
-from ..directory.models import ProjectContact
+from ..company.factories import CompanyFactory
+from ..project.factories import ProjectFactory
+from ..directory.factories import ContactFactory
+
+from .models import Proposal
+from .factories import LetterheadFactory, DocumentTemplateFactory
 
 
 class ProposalTests(TestCase):
+
     def setUp(self):
         activate('en')
-        create_task_data(self)
+        CompanyFactory()
+        self.project = ProjectFactory()
+        ContactFactory(
+            project=self.project
+        )
+        self.letterhead = LetterheadFactory()
 
     def test_proposal_new(self):
         d = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
@@ -32,30 +38,45 @@ class ProposalTests(TestCase):
 
 
 class DocumentTemplateTests(TestCase):
+
     def setUp(self):
-        create_contact_data(self)
-        self.pc = ProjectContact.objects.create(project=self.project, contact=self.contact, is_billable=True)
+        CompanyFactory()
+        self.project = ProjectFactory()
+        ContactFactory(
+            first_name='Ludwig',
+            last_name='von Mises',
+            project=self.project, is_billable=True
+        )
+        self.letterhead = LetterheadFactory()
 
     def test_render_english_tpl(self):
-        d = DocumentTemplate.objects.create(name="DocTpl", header="Dear [lastname]", footer="Thanks [firstname]!",
-                                            document_type="invoice")
         activate('en')
+        d = DocumentTemplateFactory(
+            header="Dear [lastname]",
+            footer="Thanks [firstname]!",
+        )
         r = d.render(self.project)
         self.assertEqual("Dear von Mises", r['header'])
         self.assertEqual("Thanks Ludwig!", r['footer'])
 
     def test_render_german_tpl(self):
-        d = DocumentTemplate.objects.create(name="DocTpl", header="Dear [Nachname]", footer="Thanks [Vorname]!",
-                                            document_type="invoice")
         activate('de')
+        d = DocumentTemplateFactory(
+            header="Dear [Nachname]",
+            footer="Thanks [Vorname]!",
+            document_type="invoice"
+        )
         r = d.render(self.project)
         self.assertEqual("Dear von Mises", r['header'])
         self.assertEqual("Thanks Ludwig!", r['footer'])
 
     def test_render_sample_tpl(self):
-        d = DocumentTemplate.objects.create(name="DocTpl", header="Dear [lastname]", footer="Thanks [firstname]!",
-                                            document_type="invoice")
         activate('en')
+        d = DocumentTemplateFactory(
+            header="Dear [lastname]",
+            footer="Thanks [firstname]!",
+            document_type="invoice"
+        )
         r = d.render()
         self.assertEqual("Dear Smith", r['header'])
         self.assertEqual("Thanks John!", r['footer'])

@@ -17,11 +17,13 @@ class ContactFactory(factory.django.DjangoModelFactory):
     def _create(cls, *args, **kwargs):
         project = kwargs.pop('project', None)
         is_billable = kwargs.pop('is_billable', False)
+        association = kwargs.pop('association', ProjectContact.CUSTOMER)
         contact = super()._create(*args, **kwargs)
         if project is not None:
             ProjectContact.objects.create(
                 project=project,
                 contact=contact,
+                association=association,
                 is_billable=is_billable
             )
         return contact

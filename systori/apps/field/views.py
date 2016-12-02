@@ -319,8 +319,8 @@ class FieldTaskView(UpdateView):
 
     def get_queryset(self):
         return super().get_queryset()\
-            .prefetch_related('taskgroup__job__project') \
-            .prefetch_related('taskinstances__lineitems') \
+            .prefetch_related('job__project') \
+            .prefetch_related('lineitems') \
             .prefetch_related('dailyplans') \
             .prefetch_related('progressreports__worker__user')
 

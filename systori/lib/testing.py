@@ -1,9 +1,14 @@
+from decimal import Decimal
+
 from django.test import TestCase
 from rest_framework.test import APIClient
 from django.conf import settings
 
+from systori.apps.accounting.constants import TAX_RATE
 from systori.apps.company.factories import CompanyFactory
 from systori.apps.user.factories import UserFactory
+
+from .accounting.tools import Amount
 
 
 class SubdomainClient(APIClient):
@@ -29,6 +34,20 @@ class ClientTestCase(SystoriTestCase):
         self.user = UserFactory(company=self.company, language='en', password=self.password)
         self.worker = self.user.access.first()
         self.client.login(username=self.worker.email, password=self.password)
+
+
+def make_amount(g=None, n=None, t=None):
+    if g and n == 0 and t == 0:
+        return Amount(Decimal(0), Decimal(0), Decimal(g))
+    if g:
+        return Amount.from_gross(Decimal(g), TAX_RATE)
+    if n and not t:
+        return Amount(Decimal(n), Decimal(0))
+    if not n and t:
+        return Amount(Decimal(0), Decimal(t))
+    if n and t:
+        return Amount(Decimal(n), Decimal(t))
+    return Amount.zero()
 
 
 def template_debug_output():

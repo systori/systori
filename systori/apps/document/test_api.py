@@ -2,10 +2,12 @@ from datetime import timedelta
 from django.core.urlresolvers import reverse
 from django.utils.timezone import localtime, now
 from django.utils.formats import date_format
+
+from systori.lib.testing import ClientTestCase
+
 from ..project.factories import ProjectFactory
 from ..document.factories import DocumentTemplateFactory
 from ..directory.factories import ContactFactory
-from systori.lib.testing import ClientTestCase
 
 
 class DocumentTemplateApiTest(ClientTestCase):

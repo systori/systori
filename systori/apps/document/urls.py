@@ -1,6 +1,5 @@
 from django.conf.urls import url
 from ..user.authorization import office_auth, owner_auth
-from ..accounting.views import *
 from .views import *
 
 urlpatterns = [

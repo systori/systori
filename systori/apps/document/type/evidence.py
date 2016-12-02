@@ -37,7 +37,7 @@ def render(project, letterhead):
         pages = []
 
         for job in project.jobs.all():
-            for taskgroup in job.taskgroups.all():
+            for taskgroup in job.groups.all():
                 for task in taskgroup.tasks.all():
 
                     pages.append(Table([[b(_('Evidence Sheet'), font), nr(proposal_date, font)]]))

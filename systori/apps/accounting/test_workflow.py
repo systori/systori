@@ -1,49 +1,46 @@
 from decimal import Decimal as D
 from django.test import TestCase
+
 from systori.lib.accounting.tools import Amount
-from ..task.test_models import create_task_data
+from systori.lib.testing import make_amount as A
+
+from ..company.factories import CompanyFactory
+from ..project.factories import ProjectFactory
+from ..task.factories import JobFactory, TaskFactory
+
 from .models import Account, Transaction, Entry, create_account_for_job
-from .workflow import create_chart_of_accounts
 from .workflow import debit_jobs, credit_jobs, adjust_jobs, refund_jobs
-from .constants import *
+from .workflow import create_chart_of_accounts
+from .constants import SKR03_BANK_CODE, SKR03_CASH_DISCOUNT_CODE,\
+    SKR03_INCOME_CODE, SKR03_PARTIAL_PAYMENTS_CODE, SKR03_PROMISED_PAYMENTS_CODE,\
+    SKR03_TAX_PAYMENTS_CODE
 
 
-def A(g=None, n=None, t=None):
-    if g and n == 0 and t == 0:
-        return Amount(D(0), D(0), D(g))
-    if g:
-        return Amount.from_gross(D(g), TAX_RATE)
-    if n and not t:
-        return Amount(D(n), D(0))
-    if not n and t:
-        return Amount(D(0), D(t))
-    if n and t:
-        return Amount(D(n), D(t))
-    return Amount.zero()
-
-
-def create_data(self):
-    create_task_data(self)
-    create_chart_of_accounts(self)
-    self.job.account = create_account_for_job(self.job)
-    self.job.save()
-    self.job2.account = create_account_for_job(self.job2)
-    self.job2.save()
-
-
-class AccountingTestCase(TestCase):
+class WorkflowTestCase(TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.addTypeEqualityFunc(Amount, 'assertAmountEqual')
 
+    def setUp(self):
+        self.company = CompanyFactory()
+        self.project = ProjectFactory()
+
+        create_chart_of_accounts(self)
+
+        self.job = JobFactory(project=self.project)
+        self.job.account = create_account_for_job(self.job)
+        self.job.save()
+        TaskFactory(qty=10, complete=5, price=96, group=self.job)
+
+        self.job2 = JobFactory(project=self.project)
+        self.job2.account = create_account_for_job(self.job2)
+        self.job2.save()
+
     def assertAmountEqual(self, expected, actual, msg):
         self.assertEqual(expected.net, actual.net, 'net')
         self.assertEqual(expected.tax, actual.tax, 'tax')
         self.assertEqual(expected.gross, actual.gross, 'gross')
-
-    def setUp(self):
-        create_data(self)
 
     def assert_balances(self, bank=A(), balance=A(),
                         invoiced=None, debited=None,
@@ -89,7 +86,7 @@ class AccountingTestCase(TestCase):
             self.job = original_job
 
 
-class TestDeletingThings(AccountingTestCase):
+class TestDeletingThings(WorkflowTestCase):
     def setUp(self):
         super().setUp()
         credit_jobs([(self.job, A(100), A(), A())], D(100))
@@ -106,7 +103,7 @@ class TestDeletingThings(AccountingTestCase):
         self.assertFalse(Account.objects.filter(id=account_id).exists())
 
 
-class TestCompletedContractAccountingMethod(AccountingTestCase):
+class TestCompletedContractAccountingMethod(WorkflowTestCase):
     """ http://accountingexplained.com/financial/revenue/completed-contract-method """
 
     # Before Revenue Recognition
@@ -492,7 +489,7 @@ class TestCompletedContractAccountingMethod(AccountingTestCase):
                              switch_to_job=self.job2)
 
 
-class TestRevenueRecognitionEdgeCases(AccountingTestCase):
+class TestRevenueRecognitionEdgeCases(WorkflowTestCase):
     """ The revenue recognition algorithm needs to handle situations
         where the net/tax on the balance are actually different signs or zero/non-zero,
         we test four cases:

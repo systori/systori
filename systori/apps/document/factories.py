@@ -1,10 +1,12 @@
 import os.path
-
 import factory
 from factory import fuzzy
 from django.conf import settings
 
-from .models import Proposal, Letterhead, DocumentSettings, DocumentTemplate
+from systori.lib.accounting.tools import Amount
+
+from .models import Proposal, Invoice
+from .models import Letterhead, DocumentSettings, DocumentTemplate
 
 
 class DocumentTemplateFactory(factory.django.DjangoModelFactory):
@@ -19,6 +21,14 @@ class ProposalFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Proposal
+
+
+class InvoiceFactory(factory.django.DjangoModelFactory):
+
+    json = {'debit': Amount.zero()}
+
+    class Meta:
+        model = Invoice
 
 
 class DocumentSettingsFactory(factory.django.DjangoModelFactory):

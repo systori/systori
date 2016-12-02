@@ -1,15 +1,14 @@
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from systori.lib.testing import SystoriTestCase
-from ..accounting.test_workflow import create_data
+from systori.lib.testing import ClientTestCase
 from .models import Equipment, RefuelingStop, Maintenance
 
 
-class EquipmentTestCase(SystoriTestCase):
+class EquipmentTestCase(ClientTestCase):
 
     def setUp(self):
-        create_data(self)
+        super().setUp()
         self.equipment = Equipment.objects.create(
             active=True,
             name='Test Equipment0',
@@ -18,7 +17,6 @@ class EquipmentTestCase(SystoriTestCase):
             number_of_seats=2,
             fuel='diesel'
         )
-        self.client.login(username=self.user.email, password='open sesame')
 
 
 class RefuelingStopTest(EquipmentTestCase):

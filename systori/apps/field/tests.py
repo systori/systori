@@ -1,15 +1,17 @@
 import json
-from datetime import date, timedelta
+from datetime import timedelta
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
-from systori.lib.testing import SystoriTestCase
+from systori.lib.testing import ClientTestCase
+
+from ..project.factories import ProjectFactory
+from ..task.factories import JobFactory, TaskFactory
+
 from ..project.models import TeamMember, DailyPlan, JobSite, EquipmentAssignment
-from ..company.models import Worker
 from ..equipment.models import Equipment
-from ..task.test_models import create_task_data
 from ..user.factories import *
-from .utils import find_next_workday, days_ago, date
+from .utils import find_next_workday, date
 
 
 class TestDateCalculations(TestCase):
@@ -21,11 +23,13 @@ class TestDateCalculations(TestCase):
         self.assertEqual(date(2015, 3, 24), find_next_workday(date(2015, 3, 23)))
 
 
-class TestFieldTaskView(SystoriTestCase):
+class TestFieldTaskView(ClientTestCase):
 
     def setUp(self):
-        create_task_data(self)
-        self.client.login(username=self.user.email, password='open sesame')
+        super().setUp()
+        self.project = ProjectFactory()
+        self.job = JobFactory(project=self.project)
+        self.task = TaskFactory(group=self.job)
 
     def test_complete_assigns_task_to_user_dailyplan(self):
         jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
@@ -55,11 +59,11 @@ class TestFieldTaskView(SystoriTestCase):
         self.assertTrue(self.task.dailyplans.filter(id=dailyplan.id).exists())
 
 
-class TestCutPaste(SystoriTestCase):
+class TestCutPaste(ClientTestCase):
 
     def setUp(self):
-        create_task_data(self)
-        self.client.login(username=self.user.email, password='open sesame')
+        super().setUp()
+        self.project = ProjectFactory()
 
     def test_move_worker(self):
         jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
@@ -100,11 +104,11 @@ class TestCutPaste(SystoriTestCase):
         self.assertEqual(1, dailyplan2.assigned_equipment.count())
 
 
-class TestAssignEquipment(SystoriTestCase):
+class TestAssignEquipment(ClientTestCase):
 
     def setUp(self):
-        create_task_data(self)
-        self.client.login(username=self.user.email, password='open sesame')
+        super().setUp()
+        self.project = ProjectFactory()
         self.jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
         self.dailyplan = DailyPlan.objects.create(jobsite=self.jobsite)
         self.equipment = Equipment.objects.create(name='truck')
@@ -136,11 +140,11 @@ class TestAssignEquipment(SystoriTestCase):
         self.assertEqual(1, self.dailyplan.assigned_equipment.count())
 
 
-class TestAssignWorkers(SystoriTestCase):
+class TestAssignWorkers(ClientTestCase):
 
     def setUp(self):
-        create_task_data(self)
-        self.client.login(username=self.user.email, password='open sesame')
+        super().setUp()
+        self.project = ProjectFactory()
         self.jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
         self.dailyplan = DailyPlan.objects.create(jobsite=self.jobsite)
         self.access, _ = Worker.objects.get_or_create(user=self.user, company=self.company)
@@ -167,11 +171,11 @@ class TestAssignWorkers(SystoriTestCase):
         self.assertEqual(1, self.dailyplan.workers.count())
 
 
-class TestCopyDailyPlans(SystoriTestCase):
+class TestCopyDailyPlans(ClientTestCase):
 
     def setUp(self):
-        create_task_data(self)
-        self.client.login(username=self.user.email, password='open sesame')
+        super().setUp()
+        self.project = ProjectFactory()
 
     def test_generate(self):
         today = date.today()
