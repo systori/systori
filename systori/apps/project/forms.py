@@ -57,15 +57,3 @@ class JobSiteForm(ModelForm):
     def save(self, commit=True):
         self.instance.geocode_address()
         return super().save(commit)
-
-
-class FilterForm(Form):
-    OPTIONS = {
-        ('contacts', _("Limit search to Contacts.")),
-        ('jobs', _("Limit search to Jobs."))
-    }
-
-    search_option = forms.MultipleChoiceField(label=_('Limits'), widget=forms.CheckboxSelectMultiple,
-                                              choices=OPTIONS, required=False)
-    search_term = forms.CharField(label=_('Search'), max_length=50, required=False)
-

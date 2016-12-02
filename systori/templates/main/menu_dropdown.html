@@ -1,0 +1,40 @@
+{% load i18n %}
+
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        {% trans "Menu" %}
+        <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li {% if not section %}class="active"{% endif %}>
+            <a href="/">{% trans 'Dashboard' %}</a></li>
+        <li {% if section == 'projects' %}class="active"{% endif %}>
+            <a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
+        <li {% if section == 'directory' %}class="active"{% endif %}>
+            <a href="{% url 'directory' %}">{% trans 'Directory' %}</a></li>
+        <li {% if section == 'equipment' %}class="active"{% endif %}>
+            <a href="{% url 'equipment.list' %}">{% trans 'Equipment' %}</a></li>
+        <li {% if section == 'dailyplans' %}class="active"{% endif %}>
+            <a href="{% url 'day_based_overview' %}">{% trans 'Daily Plans' %}</a></li>
+        <li {% if section == 'progressreports' %}class="active"{% endif %}>
+            <a href="{% url 'project.progress.all' %}">{% trans 'Progress Reports' %}</a></li>
+        {% if worker.has_owner %}
+            <li {% if section == 'invoices' %}class="active"{% endif %}>
+                <a href="{% url 'invoice.list' %}">{% trans 'Invoices' %}</a></li>
+        {% endif %}
+        <li {% if section == 'templates' %}class="active"{% endif %}>
+            <a href="{% url 'templates' %}">{% trans 'Templates' %}</a></li>
+        <li {% if section == 'users' %}class="active"{% endif %}>
+            <a href="{% url 'users' %}">{% trans 'Users' %}</a></li>
+        {% if worker.has_owner %}
+            <li {% if section == 'accounts' %}class="active"{% endif %}>
+                <a href="{% url 'accounts' %}">{% trans 'Accounts' %}</a></li>
+        {% endif %}
+        {% if worker.has_staff %}
+          <li {% if section == 'timetracking' %}class="active"{% endif %}>
+              <a href="{% url 'timetracking' %}">{% trans 'Timetracking' %}</a></li>
+          <li {% if section == 'timesheets' %}class="active"{% endif %}>
+              <a href="{% url 'timesheets' %}">{% trans 'Timesheets' %}</a></li>
+        {% endif %}
+    </ul>
+</li>

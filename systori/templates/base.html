@@ -54,13 +54,11 @@
                 <a class="navbar-brand" href="#">{{ selected_company.name }}</a>
               {% endif %}
             </li>
-            {% if selected_company %}
-            <li><a href="{% url 'projects' %}">{% trans 'Projects' %}</a></li>
-            {% endif %}
+            {% block menu_dropdown %}{% endblock %}
             {% block head_navbar %}{% endblock %}
           </ul>
 
-          <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+            <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
           <input type="hidden" name="language" value=""/>
         </form>
 
@@ -96,7 +94,11 @@
           </li>
 
         </ul>
-
+        <form class="navbar-form navbar-right">
+            <div class="form-group form-group-sm">
+              <input type="text" id="goto_project" onkeyup="gotoProject(event)" style="width:60px; margin-top:3px;" class="form-control" placeholder="#">
+            </div>
+        </form>
         </div><!--/.nav-collapse -->
       </div>
     </nav>
@@ -110,6 +112,13 @@
 <script src="{% static "js/jquery-ui.min.js" %}"></script>
 <script src="{% static "js/bootstrap.min.js" %}"></script>
 {% webcomponents 'lite' %}
+<script type="text/javascript">
+    function gotoProject(e) {
+        if(e.keyCode == 13) {
+            window.location.href = window.location.origin+"/project-" + document.querySelector("#goto_project").value;
+        }
+    }
+</script>
 {% endblock base_js %}
 
 {% block lang_js %}<script src="{% static "js/language_picker.js" %}"></script>{% endblock lang_js %}

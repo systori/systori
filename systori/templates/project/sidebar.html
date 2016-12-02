@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {% if project.is_template %}
-  {% include "main/sidebar.html" with section="templates" %}
+  {% include "main/menu_dropdown.html" with section="templates" %}
 {% else %}
   <ul class="nav nav-sidebar">
     <li {% if section == 'dashboard' or not section %}class="active"{% endif %}><a
