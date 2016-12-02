@@ -70,7 +70,7 @@ def gaeb_import(file):
         for grp in ctgy.BoQBody.BoQCtgy:
             taskgroup = Group.objects.create(name=" ".join(grp.LblTx.xpath(".//text()")), job=job)
             for item in grp.BoQBody.Itemlist.getchildren():
-                task = Task.objects.create(taskgroup=taskgroup)
+                task = Task.objects.create(group=taskgroup)
                 task.qty = get(item, "Qty", default=0)
                 task.unit = get(item, "QU", default="INFO")
                 for text_node in item.Description.CompleteText.DetailTxt.getchildren():
@@ -82,7 +82,6 @@ def gaeb_import(file):
                                 task.description += str(_(" Info: Picture was in Imported File."))
                 for text_node in item.Description.CompleteText.OutlineText.getchildren():
                     task.name = " ".join(text_node.xpath(".//text()"))
-                #TaskInstance.objects.create(task=task, selected=True)
                 task.save()
             taskgroup.save()
         job.save()

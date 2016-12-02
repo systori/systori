@@ -1,48 +1,53 @@
 from django.test import TestCase
-from django.contrib.auth import get_user_model
 from django.utils.translation import activate
-from ..task.models import *
-from ..document.models import *
-from .models import *
 
-from ..task.test_models import create_task_data
+from ..company.factories import CompanyFactory
+from ..task.factories import JobFactory, TaskFactory
+from ..document.factories import ProposalFactory, LetterheadFactory
 
-User = get_user_model()
+from .factories import ProjectFactory
+from .models import Project
 
 
 class ProjectTotalTests(TestCase):
+
     def setUp(self):
-        create_task_data(self)
+        CompanyFactory()
 
     def test_zero(self):
-        project = Project.objects.get(pk=self.project2.pk)
-        self.assertEqual(0, project.estimate_total)
+        project = ProjectFactory()  # type: Project
+        self.assertEqual(0, project.estimate)
 
     def test_nonzero(self):
-        project = Project.objects.get(pk=self.project.pk)
-        self.assertEqual(1920, project.estimate_total)
+        project = ProjectFactory()  # type: Project
+        job = JobFactory(project=project)
+        TaskFactory(group=job, total=1920)
+        self.assertEqual(1920, project.estimate)
 
 
 class ProjectPhaseTests(TestCase):
+
     def setUp(self):
         activate('en')
-        create_task_data(self)
+        CompanyFactory()
+        self.project = ProjectFactory()
+        self.letterhead = LetterheadFactory()
 
     def test_project_new(self):
         self.assertEquals('Prospective', self.project.get_phase_display())
         self.assertEquals('Active', self.project.get_state_display())
 
     def test_project_with_proposal(self):
-        Proposal.objects.create(project=self.project, letterhead=self.letterhead)
+        ProposalFactory(project=self.project, letterhead=self.letterhead)
         self.project.refresh_from_db()
         self.assertEquals('Tendering', self.project.get_phase_display())
         self.assertEquals('Active', self.project.get_state_display())
 
     def test_project_with_approved_proposal(self):
-        proposal = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
-        proposal.send();
+        proposal = ProposalFactory(project=self.project, letterhead=self.letterhead)
+        proposal.send()
         proposal.save()
-        proposal.approve();
+        proposal.approve()
         proposal.save()
         self.project.refresh_from_db()
         self.assertEquals('Planning', self.project.get_phase_display())
@@ -50,15 +55,16 @@ class ProjectPhaseTests(TestCase):
 
     def test_project_with_started_job(self):
         # first get to planning
-        proposal = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
-        proposal.send();
+        proposal = ProposalFactory(project=self.project, letterhead=self.letterhead)
+        proposal.send()
         proposal.save()
-        proposal.approve();
+        proposal.approve()
         proposal.save()
 
         # now get to executing
-        self.job.status = self.job.STARTED
-        self.job.save()
+        job = JobFactory(project=self.project)
+        job.status = job.STARTED
+        job.save()
 
         self.project.refresh_from_db()
         self.assertEquals('Executing', self.project.get_phase_display())

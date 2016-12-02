@@ -1,9 +1,12 @@
 import os.path
+
 from django.conf import settings
 from django.test import TestCase
-from ..task.models import *
-from .models import *
-from .gaeb_utils import *
+
+from ..company.factories import CompanyFactory
+
+from .models import GAEBHierarchyStructure
+from .gaeb_utils import gaeb_import
 
 
 class GAEBStructureTests(TestCase):
@@ -30,8 +33,9 @@ class GAEBStructureTests(TestCase):
 
 
 class GaebImportTests(TestCase):
+
     def setUp(self):
-        create_task_data(self)
+        CompanyFactory()
 
     def test_import(self):
         file_path = os.path.join(settings.BASE_DIR, "apps/project/test_data/gaeb.x83")
