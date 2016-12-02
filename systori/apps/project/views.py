@@ -1,26 +1,25 @@
 from collections import OrderedDict
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import View, TemplateView, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView, FormMixin
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q
+from django.contrib.postgres.search import SearchVector
 
 from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Project, JobSite
 from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
-from .forms import JobSiteForm, FilterForm
+from .forms import JobSiteForm
 from ..task.models import Job, Group, ProgressReport
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
-from ..accounting.report import create_invoice_report
 from ..accounting.models import create_account_for_job
 from ..accounting.constants import TAX_RATE
 from .gaeb_utils import gaeb_import
 
 
-class ProjectList(FormMixin, ListView):
-    form_class = FilterForm
+class ProjectList(ListView):
     queryset = Project._default_manager.all()
 
     phase_order = [
@@ -33,106 +32,51 @@ class ProjectList(FormMixin, ListView):
         "finished"
     ]
 
-    def get_form_kwargs(self):
-        return {
-          'data': self.request.GET or None
-        }
-
-    def get_queryset(self, search_term=None, search_option=None):
-        '''
-        this function builds a query from multiple Q() objects to have a search behaviour like
-        (TERM_A = project_name OR project_description OR ...)
-        AND
-        (TERM_B = project_name OR project_description OR ...)
-        :param search_term: a single string with search terms, will get split by whitespace
-        :param search_option: select where to search (project, jobs, projectContacts)
-        :return: a query filter
-        '''
-        query = Project.objects.without_template().prefetch_related('jobsites')\
-                .prefetch_related('project_contacts__contact')
-
-        if search_term:
-            project_filter = Q()
-            searchable_paths = {}
-
-            search_terms = search_term.split(' ')
-            for term in search_terms:
-                project_query = Q(name__icontains=term) | Q(description__icontains=term) | \
-                                Q(jobsites__name__icontains=term) | \
-                                Q(jobsites__address__icontains=term) | \
-                                Q(jobsites__city__icontains=term)
-                jobs_query =  Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
-                              Q(jobs__taskgroups__name__icontains=term) | \
-                              Q(jobs__taskgroups__description__icontains=term) | \
-                              Q(jobs__taskgroups__tasks__name__icontains=term) | \
-                              Q(jobs__taskgroups__tasks__description__icontains=term) | \
-                              Q(jobs__taskgroups__tasks__taskinstances__name__icontains=term) | \
-                              Q(jobs__taskgroups__tasks__taskinstances__description__icontains=term) | \
-                              Q(jobs__taskgroups__tasks__taskinstances__lineitems__name=term)
-                contacts_query =  Q(contacts__business__icontains=term) | \
-                                  Q(contacts__first_name__icontains=term) | \
-                                  Q(contacts__last_name__icontains=term) | \
-                                  Q(contacts__phone__icontains=term) | \
-                                  Q(contacts__email__icontains=term) | \
-                                  Q(contacts__website__icontains=term) | \
-                                  Q(contacts__address__icontains=term) | \
-                                  Q(contacts__notes__icontains=term) | \
-                                  Q(project_contacts__association__icontains=term)
-                documents_query = Q(invoices__invoice_no__icontains=term)
-                searchable_paths[term] = Q()
-
-                if not search_option:
-                    searchable_paths[term] |= project_query
-                    searchable_paths[term] |= jobs_query
-                    searchable_paths[term] |= contacts_query
-                    searchable_paths[term] |= documents_query
-
-                if 'contacts' in search_option:
-                    searchable_paths[term] |= contacts_query
-
-                if 'jobs' in search_option:
-                    searchable_paths[term] |= jobs_query
-
-                if 'jobs' in search_option and 'contacts' in search_option:
-                    searchable_paths[term] |= contacts_query
-                    searchable_paths[term] |= jobs_query
-
-            for key in searchable_paths.keys():
-                project_filter &= searchable_paths[key]
-
-            return query.without_template().filter(project_filter).distinct()
-        else:
-            return query.without_template().all()
-
-
     def get(self, request, *args, **kwargs):
-
         project_groups = OrderedDict([(phase, []) for phase in self.phase_order])
-
-        form = self.get_form(self.get_form_class())
-
         self.object_list = self.get_queryset().exclude(is_template=True)
 
-        if form.is_valid():
-            self.object_list = self.get_queryset(search_term=form.cleaned_data['search_term'],
-                                                 search_option=form.cleaned_data['search_option'])
-        else:
-            self.object_list = self.get_queryset().without_template()
-
-        if kwargs['phase_filter']:
-            assert kwargs['phase_filter'] in self.phase_order
-            self.object_list = self.object_list.filter(phase=kwargs['phase_filter'])
-        else:
-            #self.object_list = self.object_list.exclude(phase=Project.FINISHED)
-            self.object_list = self.object_list
-
-        for project in self.object_list:
+        for project in self.object_list.order_by('id'):
             project_groups[project.phase].append(project)
 
-        context = super(ProjectList, self).get_context_data(form=form, **kwargs)
+        context = super(ProjectList, self).get_context_data(**kwargs)
         context['project_groups'] = project_groups
+        context['phases'] = [phase for phase in Project.PHASE_CHOICES]
 
         return self.render_to_response(context)
+
+
+class ProjectSearchApi(View):
+
+    def get(self, request):
+        query = Project.objects.without_template().prefetch_related('jobsites') \
+                .prefetch_related('project_contacts__contact').prefetch_related('jobs').prefetch_related('invoices')
+
+        project_filter = Q()
+        searchable_paths = {}
+
+        search_terms = [term for term in request.GET.get('search').split(' ')]
+        for term in search_terms:
+            searchable_paths[term] = Q(id__icontains=term) | Q(name__icontains=term) | Q(description__icontains=term) |\
+                                     Q(jobsites__name__icontains=term) | \
+                                     Q(jobsites__address__icontains=term) | \
+                                     Q(jobsites__city__icontains=term) | \
+                                     Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
+                                     Q(contacts__business__icontains=term) | \
+                                     Q(contacts__first_name__icontains=term) | \
+                                     Q(contacts__last_name__icontains=term) | \
+                                     Q(contacts__address__icontains=term) | \
+                                     Q(contacts__notes__icontains=term) | \
+                                     Q(project_contacts__association__icontains=term) | \
+                                     Q(invoices__invoice_no__icontains=term) | \
+                                     Q(contacts__email__icontains=term)
+        for key in searchable_paths.keys():
+            project_filter &= searchable_paths[key]
+
+        query = query.without_template().filter(project_filter).distinct()
+        projects = [p.id for p in query]
+
+        return JsonResponse({'projects': projects})
 
 
 class ProjectView(DetailView):

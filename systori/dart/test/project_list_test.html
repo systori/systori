@@ -1,0 +1,1851 @@
+<meta charset="utf-8">
+<style>
+
+    body {
+        padding-top: 180px;
+    }
+    #filter-bar {
+        margin-top: -130px;
+    }
+    @media (min-width: 580px) {
+        body {
+            padding-top: 148px;
+        }
+        #filter-bar {
+            margin-top: -98px;
+        }
+    }
+    @media (min-width: 1034px) {
+        body {
+            padding-top: 90px;
+        }
+        #filter-bar {
+            margin-top: -38px;
+        }
+    }
+    #filter-bar {
+        position:fixed;
+        left: 0px;
+        height: 38px;
+        width: 100%;
+        padding-top: 4px;
+        background-color: #fff;
+    }
+    #tile-container{
+        display:flex;
+        flex-wrap:wrap;
+        align-items: stretch;
+    }
+    .tile{
+        flex: 1 0 150px;
+        max-width: 100%;
+        margin: 2px;
+        padding: 5px;
+        background: #c0c0c0;
+        border-radius: 3px;
+        word-wrap: break-word;
+    }
+    .tile span {
+        color: rgba(0,0,0,0.75);
+        font-weight:bold;
+    }
+    .tile a {
+        color: rgba(0,0,0,0.75);
+    }
+
+    .btn {
+        text-shadow: none;
+    }
+
+    .btn span.glyphicon {
+        opacity: 0;
+    }
+    .btn.active span.glyphicon {
+        opacity: 1;
+    }
+    .line_through {
+        text-decoration: line-through !important;
+    }
+    .hidden {
+        display:none;
+    }
+
+    #search_input {
+        width: 172px;
+    }
+    #search_clear {
+        position: absolute;
+        right: 5px;
+        top: 0;
+        bottom: 0;
+        height: 20px;
+        margin: auto;
+        font-size: 14px;
+        cursor: pointer;
+        color: #ccc;
+        z-index:10;
+    }
+</style>
+
+
+
+
+
+<!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/"><img alt="Systori" src="" style="margin-top:-10px;"></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  Mehr Handwerk
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="dropdown-header">verfügbare Firmen</li>
+
+
+                      <li><a href="http://demo.systori.localhost:8000">Demo</a></li>
+
+
+
+                      <li><a href="http://cm3p.systori.localhost:8000">cm3p development GmbH</a></li>
+
+
+
+
+
+                      <li><a href="http://waldpark.systori.localhost:8000">Designbuero Waldpark</a></li>
+
+
+                </ul>
+
+            </li>
+
+
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Menu
+        <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li >
+            <a href="/">Pinnwand</a></li>
+        <li class="active">
+            <a href="/projects/">Projekte</a></li>
+        <li >
+            <a href="/directory">Adressbuch</a></li>
+        <li >
+            <a href="/equipment/">Ausrüstung</a></li>
+        <li >
+            <a href="/day-based-overview/">Tagesplan</a></li>
+        <li >
+            <a href="/progress">Stundenzettel</a></li>
+
+            <li >
+                <a href="/invoices/">Rechnungen</a></li>
+
+        <li >
+            <a href="/templates">Vorlagen</a></li>
+        <li >
+            <a href="/users">Benutzer</a></li>
+
+            <li >
+                <a href="/accounts">Konten</a></li>
+
+
+          <li >
+              <a href="/timetracking/">Zeiterfassung</a></li>
+          <li >
+              <a href="/timesheets/">Timesheets</a></li>
+
+    </ul>
+</li>
+
+          </ul>
+
+          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='Y50KbtuBMdiaK0a7G72Kg40FjsBq7Fg1Z67OPOInyDFWrAR62JlLTgI2vJMVf63e' />
+          <input type="hidden" name="language" value=""/>
+        </form>
+
+        <ul class="nav navbar-nav navbar-right">
+
+
+
+          <li><a
+              href="javascript:window.open('/field/', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">öffne Field App</a>
+          </li>
+
+
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Marius <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="/settings">Einstellungen</a></li>
+              <li><a href="/logout">Abmelden</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">de<b class="caret"></b></a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
+
+
+
+
+
+                  <li><a class="language-link" href="#"
+                         data-language="en">English</a></li>
+
+
+            </ul>
+          </li>
+
+        </ul>
+
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+
+
+<div id="filter-bar">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" id="search_input" placeholder="Filter">
+                                <button class="glyphicon glyphicon-remove" id="search_clear" class="hidden"></button>
+                            </div>
+                            <div class="btn-group">
+                                <sys-sort-button type="button" data-type="id" data-reversed=true class="btn btn-sm btn-default">
+                                    by ID ↓↑</sys-sort-button>
+                                <sys-sort-button type="button" data-type="name" data-reversed=false class="btn btn-sm btn-default">
+                                    by name ↓↑</sys-sort-button>
+                                <sys-sort-button type="button" data-type="phase" data-reversed=false class="btn btn-sm btn-default active">
+                                    by phase ↓↑</sys-sort-button>
+                            </div>
+                            <div class="btn-group" data-toggle="buttons">
+
+                                <sys-phase-button type="button" class="btn btn-default btn-sm active prospective" data-phase="prospective" data-hide-phase="false">
+                                    angehend
+                                </sys-phase-button>
+
+                                <sys-phase-button type="button" class="btn btn-default btn-sm active tendering" data-phase="tendering" data-hide-phase="false">
+                                    angeboten
+                                </sys-phase-button>
+
+                                <sys-phase-button type="button" class="btn btn-default btn-sm active planning" data-phase="planning" data-hide-phase="false">
+                                    vorbereiten
+                                </sys-phase-button>
+
+                                <sys-phase-button type="button" class="btn btn-default btn-sm active executing" data-phase="executing" data-hide-phase="false">
+                                    ausführen
+                                </sys-phase-button>
+
+                                <sys-phase-button type="button" class="btn btn-default btn-sm active settlement" data-phase="settlement" data-hide-phase="false">
+                                    abrechnen
+                                </sys-phase-button>
+
+                                <sys-phase-button type="button" class="btn btn-default btn-sm active warranty" data-phase="warranty" data-hide-phase="false">
+                                    gewährleisten
+                                </sys-phase-button>
+
+                                <sys-phase-button type="button" class="btn btn-default btn-sm active finished" data-phase="finished" data-hide-phase="false">
+                                    beendet
+                                </sys-phase-button>
+
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div id="tile-container">
+
+
+                        <sys-project-tile data-pk="40" data-name="firma - 40"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-40"><span>#40</span><br>Firma</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="246" data-name="danziger-baumgang-78-88-tonderner-weg-3-25-mannheim - 246"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-246"><span>#246</span><br>Danziger Baumgang 78-88, Tonderner Weg 3- 25, Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="248" data-name="rhein-neckar-stadion-umkleidegebaude-stadt-mannheim - 248"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-248"><span>#248</span><br>Rhein Neckar Stadion, Umkleidegebäude Stadt Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="250" data-name="dachaddichtungsarbeiten-freibad-willersinn - 250"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-250"><span>#250</span><br>Dachaddichtungsarbeiten Freibad Willersinn</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="258" data-name="eugen-neter-schule-dachsanierung-werkstattgebaude - 258"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-258"><span>#258</span><br>Eugen-Neter-Schule Dachsanierung Werkstattgebäude</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="262" data-name="arztehaus-seckenheim - 262"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-262"><span>#262</span><br>Ärztehaus Seckenheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="265" data-name="sportanlage-speckweg - 265"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-265"><span>#265</span><br>Sportanlage Speckweg</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="273" data-name="rheinaustr-16-ma - 273"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-273"><span>#273</span><br>Rheinaustr. 16, MA</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="277" data-name="elisabeth-altmann-gottheiner-str-26-68309-ma - 277"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-277"><span>#277</span><br>Elisabeth-Altmann-Gottheiner-Str. 26, 68309 MA</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="282" data-name="leiblstr5-68163-mannheim - 282"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-282"><span>#282</span><br>Leiblstr.5, 68163 Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="284" data-name="tfc-ludwigshafen - 284"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-284"><span>#284</span><br>TFC Ludwigshafen</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="288" data-name="tsv-mannheim - 288"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-288"><span>#288</span><br>TSV Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="290" data-name="bf-darmstadt-eberstadt-db-station-service-ag - 290"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-290"><span>#290</span><br>Bf Darmstadt -Eberstadt, DB Station &amp; Service AG</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="291" data-name="weingut-bechtheim-neubau-betriebsgelandereprasentationsgebaude-bechtheim - 291"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-291"><span>#291</span><br>Weingut Bechtheim, Neubau Betriebsgelände+Repräsentationsgebäude, Bechtheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="292" data-name="wasserwerk-rheinau-dachsanierung-burogebaude - 292"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-292"><span>#292</span><br>Wasserwerk Rheinau, Dachsanierung Bürogebäude</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="296" data-name="neubau-grn-betreuungszentrum-weinheim-flachdachabdichtung - 296"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-296"><span>#296</span><br>Neubau GRN-Betreuungszentrum Weinheim - Flachdachabdichtung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="297" data-name="dacherneuerung-burogebaude-wasserwerk-rheinau-netrion - 297"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-297"><span>#297</span><br>Dacherneuerung Bürogebäude, Wasserwerk Rheinau NETRION</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="300" data-name="umbau-eines-efh - 300"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-300"><span>#300</span><br>Umbau eines EFH</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="301" data-name="heinrich-lanz-schule-dachabdichtung-erweiterungsbau-7-og-chemie-labore - 301"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-301"><span>#301</span><br>Heinrich-Lanz-Schule / Dachabdichtung Erweiterungsbau 7. OG / Chemie Labore</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="303" data-name="gbg-ums-ba6 - 303"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-303"><span>#303</span><br>GBG UMS BA6</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="306" data-name="otto-dill-str-8-67061-ludwigshafen - 306"
+                             data-phase="prospective" class="tile prospective">
+
+                            <a href="/project-306"><span>#306</span><br>Otto-Dill Str. 8, 67061 Ludwigshafen</a>
+                        </sys-project-tile>
+
+
+
+                        <sys-project-tile data-pk="3" data-name="hayer-bocklinstr - 3"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-3"><span>#3</span><br>Hayer Böcklinstr.</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="43" data-name="lauffener-str-49 - 43"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-43"><span>#43</span><br>Lauffener Str. 49</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="48" data-name="ezh-statische-ertuchtigung-rote-halle - 48"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-48"><span>#48</span><br>EZH Statische Ertüchtigung Rote Halle </a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="54" data-name="epiphaniaskirche-feudenheim - 54"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-54"><span>#54</span><br>Epiphaniaskirche Feudenheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="79" data-name="flachdachsanierung-1og-familienpraxis - 79"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-79"><span>#79</span><br>Flachdachsanierung 1.OG Familienpraxis</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="101" data-name="brunnenweg-40 - 101"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-101"><span>#101</span><br>Brunnenweg 40</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="107" data-name="dahlberghaus - 107"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-107"><span>#107</span><br>Dahlberghaus</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="112" data-name="flachdach-1og - 112"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-112"><span>#112</span><br>Flachdach 1.OG</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="116" data-name="sanierungsmanahmen - 116"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-116"><span>#116</span><br>Sanierungsmaßnahmen</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="132" data-name="13ha-freiheit-kopfbauten - 132"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-132"><span>#132</span><br>13ha Freiheit Kopfbauten</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="135" data-name="frau-kuttner - 135"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-135"><span>#135</span><br>Frau Küttner</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="154" data-name="neubau-von-2-pultdachern - 154"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-154"><span>#154</span><br>Neubau von 2 Pultdächern</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="162" data-name="dachsanierung-mit-bodendammung - 162"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-162"><span>#162</span><br>Dachsanierung mit Bodendämmung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="173" data-name="liebersbacher-birkenau - 173"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-173"><span>#173</span><br>Liebersbacher Birkenau</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="178" data-name="tausch-eines-dachfensters - 178"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-178"><span>#178</span><br>Tausch eines Dachfensters</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="180" data-name="baucraft-fam-leufer-bv-heidelberger-str-33-in-69221-dossenheim - 180"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-180"><span>#180</span><br>baucraft / Fam. Leufer  BV: Heidelberger Str. 33 in 69221 Dossenheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="181" data-name="obg-hochbau-gmbh-co-kg-johann-sebastian-bach-gymnasium-mannheim - 181"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-181"><span>#181</span><br>OBG Hochbau GmbH&amp; Co. KG / Johann-Sebastian-Bach-Gymnasium, Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="187" data-name="dachreparatur - 187"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-187"><span>#187</span><br>Dachreparatur</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="190" data-name="lu-hohenzollernstr - 190"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-190"><span>#190</span><br>LU - Hohenzollernstr.</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="191" data-name="lu-sauerbruchstr - 191"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-191"><span>#191</span><br>LU - Sauerbruchstr.</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="192" data-name="b-29 - 192"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-192"><span>#192</span><br>B 2,9</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="193" data-name="lu-rontgenstr - 193"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-193"><span>#193</span><br>LU - Röntgenstr.</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="194" data-name="s6-1-2 - 194"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-194"><span>#194</span><br>S6, 1-2</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="195" data-name="s6-5-7 - 195"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-195"><span>#195</span><br>S6, 5-7</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="198" data-name="burgstr-8-weg-hr-hausverwaltung - 198"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-198"><span>#198</span><br>Burgstr. 8 WEG H+R Hausverwaltung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="204" data-name="fam-prinz-bv-im-oberen-falltor-28-68259-mannheim-neubau-ef-reihenmittelhaus - 204"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-204"><span>#204</span><br>Fam. Prinz // BV Im Oberen Falltor 28, 68259 Mannheim // Neubau EF-Reihenmittelhaus</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="205" data-name="aufstockung-eines-wohnhauses - 205"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-205"><span>#205</span><br>Aufstockung eines Wohnhauses</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="206" data-name="dachsanierung - 206"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-206"><span>#206</span><br>Dachsanierung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="223" data-name="dachsanierung-hordt - 223"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-223"><span>#223</span><br>Dachsanierung / Hördt</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="245" data-name="villa-rehe - 245"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-245"><span>#245</span><br>Villa Rehe</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="247" data-name="dachsanierung-hauptenbuchner - 247"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-247"><span>#247</span><br>Dachsanierung / Hauptenbuchner</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="256" data-name="anbau-eines-lagers - 256"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-256"><span>#256</span><br>Anbau eines Lagers</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="271" data-name="tausch-eines-dachfensters - 271"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-271"><span>#271</span><br>Tausch eines Dachfensters</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="274" data-name="hubsteigereinsatz - 274"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-274"><span>#274</span><br>Hubsteigereinsatz</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="278" data-name="medardusring-138-67112-mutterstadt - 278"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-278"><span>#278</span><br>Medardusring 138, 67112 Mutterstadt</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="279" data-name="f1-3-68159-mannheim - 279"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-279"><span>#279</span><br>F1-3, 68159 Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="287" data-name="pro-clima-schwetzingen-dachsanierung-mit-sandwichelementen - 287"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-287"><span>#287</span><br>Pro Clima Schwetzingen / Dachsanierung mit Sandwichelementen</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="289" data-name="eichelsheimer-str-26-68163-mannheim - 289"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-289"><span>#289</span><br>Eichelsheimer Str. 26, 68163 Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="299" data-name="neubau-kunsthalle-mannheim-spenglerarbeiten - 299"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-299"><span>#299</span><br>Neubau Kunsthalle Mannheim, Spenglerarbeiten</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="304" data-name="waldschule-bauteil-bk2 - 304"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-304"><span>#304</span><br>Waldschule Bauteil BK2</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="305" data-name="e7-2-mannheim - 305"
+                             data-phase="tendering" class="tile tendering">
+
+                            <a href="/project-305"><span>#305</span><br>E7, 2 Mannheim</a>
+                        </sys-project-tile>
+
+
+
+                        <sys-project-tile data-pk="62" data-name="verstarkung-revisionsplattform - 62"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-62"><span>#62</span><br>Verstärkung Revisionsplattform</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="129" data-name="erneuerung-der-dachflache-innenhofseite-u512-68159-mannheim - 129"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-129"><span>#129</span><br>Erneuerung der Dachfläche Innenhofseite U5,12 68159 Mannheim </a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="176" data-name="hr-fehrenbacher-bautzener-weg-30-68309-mannheim - 176"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-176"><span>#176</span><br>Hr. Fehrenbacher, Bautzener Weg 30, 68309 Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="186" data-name="kinderhaus-seckenheim-kaiserstuhlring-72-mannheim - 186"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-186"><span>#186</span><br>Kinderhaus Seckenheim / Kaiserstuhlring 72, Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="208" data-name="roll-bv-schwetzingerstr-3-68165-mannheim - 208"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-208"><span>#208</span><br>Roll BV Schwetzingerstr. 3, 68165 Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="259" data-name="sandhofenschule-sanierungerweiterung - 259"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-259"><span>#259</span><br>Sandhofenschule Sanierung+Erweiterung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="260" data-name="flachdachreparatur - 260"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-260"><span>#260</span><br>Flachdachreparatur</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="261" data-name="kaminkopf-aufmauern - 261"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-261"><span>#261</span><br>Kaminkopf aufmauern</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="266" data-name="pro-clima-schwetzingen-rinnenstutzenreinigung - 266"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-266"><span>#266</span><br>Pro Clima Schwetzingen / Rinnen+Stutzenreinigung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="268" data-name="j-1-7-8-in-68159-mannheim-werner-liegenschaftsverwaltung-schriesheim - 268"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-268"><span>#268</span><br>J 1, 7-8 in 68159 Mannheim / Werner Liegenschaftsverwaltung Schriesheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="269" data-name="jugendtreff-lindenhof-pfalzplatz-29-mannheim - 269"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-269"><span>#269</span><br>Jugendtreff Lindenhof / Pfalzplatz 29, Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="286" data-name="becker - 286"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-286"><span>#286</span><br>Becker</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="302" data-name="kobig-mannheim-kranarbeiten - 302"
+                             data-phase="planning" class="tile planning">
+
+                            <a href="/project-302"><span>#302</span><br>KÖBIG Mannheim Kranarbeiten</a>
+                        </sys-project-tile>
+
+
+
+                        <sys-project-tile data-pk="11" data-name="vr-bank-augustaanlage - 11"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-11"><span>#11</span><br>VR Bank Augustaanlage</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="28" data-name="chinapalast-6890-rhein-neckar-stadion - 28"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-28"><span>#28</span><br>Chinapalast 6890 Rhein Neckar Stadion</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="38" data-name="zz-urlaubeberbachfrei - 38"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-38"><span>#38</span><br>ZZ Urlaub/Eberbach/frei</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="41" data-name="turley-cube - 41"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-41"><span>#41</span><br>Turley Cube</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="42" data-name="zz-krank - 42"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-42"><span>#42</span><br>ZZ Krank</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="50" data-name="herschelbad - 50"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-50"><span>#50</span><br>Herschelbad</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="76" data-name="neckarstaden-24 - 76"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-76"><span>#76</span><br>Neckarstaden 24</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="84" data-name="zz-pettenkoferstr10 - 84"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-84"><span>#84</span><br>ZZ Pettenkoferstr.10</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="87" data-name="zz-schlechtwetter - 87"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-87"><span>#87</span><br>ZZ Schlechtwetter</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="88" data-name="zz-wbs - 88"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-88"><span>#88</span><br>ZZ WBS</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="93" data-name="energetische-dachsanierung-fliederstr-14-bv-ruf - 93"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-93"><span>#93</span><br>Energetische Dachsanierung - Fliederstr. 14 BV Ruf</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="124" data-name="roonstr-2-lu - 124"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-124"><span>#124</span><br>Roonstr. 2 LU</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="125" data-name="eintrachtstr-rasener - 125"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-125"><span>#125</span><br>Eintrachtstr. Räsener</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="143" data-name="q-14-flachdachsanierung - 143"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-143"><span>#143</span><br>Q 1,4  Flachdachsanierung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="160" data-name="f1-rathaus - 160"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-160"><span>#160</span><br>F1 Rathaus</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="165" data-name="wynaendts-van-resandt-schwetzingen - 165"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-165"><span>#165</span><br>Wynaendts van Resandt Schwetzingen</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="166" data-name="zz-wbs-softronic - 166"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-166"><span>#166</span><br>ZZ WBS Softronic</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="171" data-name="hochster-str28 - 171"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-171"><span>#171</span><br>Höchster Str.2+8</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="172" data-name="koppert - 172"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-172"><span>#172</span><br>Koppert</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="174" data-name="spah-ludwig-beck-str-8 - 174"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-174"><span>#174</span><br>Späh Ludwig Beck Str. 8</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="189" data-name="fam-nendel-dacharbeiten-bv-relaisstr-68-mannheim - 189"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-189"><span>#189</span><br>Fam. Nendel / Dacharbeiten BV: Relaisstr. 68, Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="196" data-name="munch-neckarauer-waldweg-80-68199-mannheim - 196"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-196"><span>#196</span><br>Münch / Neckarauer Waldweg 80, 68199 Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="199" data-name="o75 - 199"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-199"><span>#199</span><br>O7,5</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="209" data-name="sievert-neubau-efh-mit-carport - 209"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-209"><span>#209</span><br>Sievert // Neubau EFH mit Carport</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="211" data-name="wanddurchbruch-lenaustr-38-mannheim - 211"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-211"><span>#211</span><br>Wanddurchbruch - Lenaustr. 38, Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="212" data-name="staatl-blindenschule-ilvesheim-sanierung-dach - 212"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-212"><span>#212</span><br>Staatl. Blindenschule Ilvesheim // Sanierung Dach</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="216" data-name="dacherneuerung-fam-henrion - 216"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-216"><span>#216</span><br>Dacherneuerung // Fam. Henrion</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="217" data-name="haus-im-gluckstein - 217"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-217"><span>#217</span><br>HAUS im GLÜCKstein</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="221" data-name="schwetzingerhaus-windmuhlstr-12-14-in-ma-bh-hr-jennewein - 221"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-221"><span>#221</span><br>Schwetzingerhaus / Windmühlstr. 12-14 in MA // BH: Hr. Jennewein</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="224" data-name="waldschule-bauteil-sporthalle - 224"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-224"><span>#224</span><br>Waldschule Bauteil Sporthalle</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="233" data-name="gbg-ums-ba5 - 233"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-233"><span>#233</span><br>GBG UMS BA5</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="240" data-name="aufstockung-und-umbau-des-ochsenpferchbunkers - 240"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-240"><span>#240</span><br>Aufstockung und Umbau des Ochsenpferchbunkers</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="241" data-name="d-410-forderband-zimmerarbeiten-disponr-500252527 - 241"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-241"><span>#241</span><br>D 4,10 Förderband  Zimmerarbeiten DispoNR 500252527</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="242" data-name="d-410-forderband-dachdeckerarbeiten-disponr-500252532 - 242"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-242"><span>#242</span><br>D 4,10 Förderband Dachdeckerarbeiten DispoNr 500252532</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="243" data-name="feudenheim-schule-rissesanierung-ba-1-turnhalle-u-ba-2-alte-schule - 243"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-243"><span>#243</span><br>Feudenheim Schule Rissesanierung BA 1 &quot;Turnhalle u. BA 2 &quot;Alte Schule&quot;</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="244" data-name="stahlstutze-solarrolladen - 244"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-244"><span>#244</span><br>Stahlstütze / Solarrolladen</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="249" data-name="beilstr-19-gbg - 249"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-249"><span>#249</span><br>Beilstr. 19 GBG</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="263" data-name="pflege-im-quadrat-gmbh - 263"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-263"><span>#263</span><br>Pflege im Quadrat GmbH</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="267" data-name="franz-sigel-str1-68199-mannheim - 267"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-267"><span>#267</span><br>Franz-Sigel-Str.1, 68199 Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="270" data-name="hossfeld-ludwig-beck-str-9-11 - 270"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-270"><span>#270</span><br>Hossfeld, Ludwig-Beck-Str. 9-11</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="272" data-name="lang-rubenstr-24-60596-frankfurt-am - 272"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-272"><span>#272</span><br>Lang, Rubenstr. 24, 60596 Frankfurt a.M.</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="283" data-name="jugendtreff-lindenhof - 283"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-283"><span>#283</span><br>Jugendtreff Lindenhof</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="293" data-name="f71-kindergarten - 293"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-293"><span>#293</span><br>F7,1 Kindergarten</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="295" data-name="pflege-im-quadrat-fassadenarbeiten - 295"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-295"><span>#295</span><br>Pflege im Quadrat - Fassadenarbeiten</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="298" data-name="dachunterhaltung - 298"
+                             data-phase="executing" class="tile executing">
+
+                            <a href="/project-298"><span>#298</span><br>Dachunterhaltung</a>
+                        </sys-project-tile>
+
+
+
+                        <sys-project-tile data-pk="23" data-name="e414-musikschule - 23"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-23"><span>#23</span><br>E4,14 Musikschule </a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="24" data-name="becker-garagenabdeckung - 24"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-24"><span>#24</span><br>Becker Garagenabdeckung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="27" data-name="b-410-zimmerer - 27"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-27"><span>#27</span><br>B 4,10 Zimmerer</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="31" data-name="trummergrundstuck - 31"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-31"><span>#31</span><br>Trümmergrundstück</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="33" data-name="b-410-spengler - 33"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-33"><span>#33</span><br>B 4,10 Spengler</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="34" data-name="d-412-forderband - 34"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-34"><span>#34</span><br>D 4,12 Förderband </a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="35" data-name="burgerdienste-neckarau - 35"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-35"><span>#35</span><br>Bürgerdienste Neckarau</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="64" data-name="sollner - 64"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-64"><span>#64</span><br>Söllner</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="66" data-name="elisabeth-gym - 66"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-66"><span>#66</span><br>Elisabeth Gym</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="78" data-name="ernst-throm-str17 - 78"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-78"><span>#78</span><br>Ernst-Throm-Str.17</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="83" data-name="d412-taglohn - 83"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-83"><span>#83</span><br>D4,12 Taglohn</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="91" data-name="e414-musikschule-taglohn - 91"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-91"><span>#91</span><br>E4,14 Musikschule Taglohn</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="92" data-name="vfr-theodor-heuss-anlage-19 - 92"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-92"><span>#92</span><br>VfR Theodor-Heuss-Anlage 19</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="100" data-name="industriestr-35 - 100"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-100"><span>#100</span><br>Industriestr. 35</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="118" data-name="sentastrae-19-kinderhaus - 118"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-118"><span>#118</span><br>Sentastraße 19 / Kinderhaus</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="120" data-name="m27-stadtkindergarten - 120"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-120"><span>#120</span><br>M2,7 Stadtkindergarten</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="128" data-name="deck-feudenheim - 128"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-128"><span>#128</span><br>Deck, Feudenheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="136" data-name="kiga-heidelberg - 136"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-136"><span>#136</span><br>KIGA Heidelberg</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="149" data-name="john-deere-str1 - 149"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-149"><span>#149</span><br>John-Deere-Str.1</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="155" data-name="u419a - 155"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-155"><span>#155</span><br>U4,19a</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="175" data-name="ding - 175"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-175"><span>#175</span><br>Ding</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="184" data-name="h116-18 - 184"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-184"><span>#184</span><br>H1,16-18</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="188" data-name="ezh-zimmerer-u-holzbauarbeiten-vergabenummer-25139050 - 188"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-188"><span>#188</span><br>EZH Zimmerer u. Holzbauarbeiten Vergabenummer 25139050</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="200" data-name="e-34-68159-mannheim-stefan-kiefer - 200"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-200"><span>#200</span><br>E 3,4  68159 Mannheim // Stefan Kiefer</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="202" data-name="ezh-metallbauarbeiten-vergabenummer-25139040 - 202"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-202"><span>#202</span><br>EZH Metallbauarbeiten Vergabenummer 25139040</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="226" data-name="horr - 226"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-226"><span>#226</span><br>Hörr</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="227" data-name="holzstr-3 - 227"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-227"><span>#227</span><br>Holzstr. 3</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="228" data-name="kinderhaus-neckarau - 228"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-228"><span>#228</span><br>Kinderhaus Neckarau</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="231" data-name="elektro-auracher - 231"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-231"><span>#231</span><br>Elektro Auracher</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="251" data-name="neuhofer-strae-27 - 251"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-251"><span>#251</span><br>Neuhofer Straße 27</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="252" data-name="astrid-lindgren-schule - 252"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-252"><span>#252</span><br>Astrid Lindgren Schule</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="253" data-name="waldschule - 253"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-253"><span>#253</span><br>Waldschule</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="254" data-name="carl-benz-bad - 254"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-254"><span>#254</span><br>Carl - Benz Bad</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="257" data-name="weg-neuhoferstr-27 - 257"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-257"><span>#257</span><br>WEG Neuhoferstr. 27</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="264" data-name="abdichtung-burocontainer - 264"
+                             data-phase="settlement" class="tile settlement">
+
+                            <a href="/project-264"><span>#264</span><br>Abdichtung Bürocontainer</a>
+                        </sys-project-tile>
+
+
+
+                        <sys-project-tile data-pk="12" data-name="bilfinger-trimborn - 12"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-12"><span>#12</span><br>Bilfinger-Trimborn</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="17" data-name="proclima - 17"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-17"><span>#17</span><br>ProClima</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="18" data-name="leuther-edingen-neckarhausen - 18"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-18"><span>#18</span><br>Leuther Edingen-Neckarhausen</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="20" data-name="q18-hellerschmid - 20"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-20"><span>#20</span><br>Q1,8 Hellerschmid</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="32" data-name="topfer-handlauf - 32"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-32"><span>#32</span><br>Töpfer Handlauf</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="44" data-name="bormann - 44"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-44"><span>#44</span><br>Bormann</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="45" data-name="corden-pharma - 45"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-45"><span>#45</span><br>Corden Pharma</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="51" data-name="kinderhaus-am-park - 51"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-51"><span>#51</span><br>Kinderhaus am Park</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="55" data-name="restle - 55"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-55"><span>#55</span><br>Restle</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="56" data-name="hohoff-dirk - 56"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-56"><span>#56</span><br>Hohoff, Dirk</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="59" data-name="breisacher-str-2-schmucker - 59"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-59"><span>#59</span><br>Breisacher Str. 2 Schmucker</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="73" data-name="muckle - 73"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-73"><span>#73</span><br>Muckle</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="97" data-name="beilstrae-10 - 97"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-97"><span>#97</span><br>Beilstraße 10</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="99" data-name="gbg-ums-ba2 - 99"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-99"><span>#99</span><br>GBG UMS BA2</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="106" data-name="13ha-freiheit-mittelbau - 106"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-106"><span>#106</span><br>13ha Freiheit Mittelbau</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="113" data-name="pranckstr-44 - 113"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-113"><span>#113</span><br>Pranckstr. 44</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="121" data-name="pessel-umbau-eg - 121"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-121"><span>#121</span><br>Pessel / Umbau EG</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="130" data-name="zimmerarbeiten-mannerwohnheim-u6-20 - 130"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-130"><span>#130</span><br>Zimmerarbeiten Männerwohnheim U6-20</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="150" data-name="gbg-ums-ba3 - 150"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-150"><span>#150</span><br>GBG UMS BA3</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="151" data-name="tausch-von-dachfenstern - 151"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-151"><span>#151</span><br>Tausch von Dachfenstern</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="159" data-name="leuther-edingen-neckarhausen - 159"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-159"><span>#159</span><br>Leuther Edingen-Neckarhausen</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="163" data-name="max-hachenburg-schule-dachdeckerarbeiten - 163"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-163"><span>#163</span><br>Max Hachenburg Schule Dachdeckerarbeiten</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="164" data-name="max-hachenburg-schule-spenglerarbeiten - 164"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-164"><span>#164</span><br>Max Hachenburg Schule Spenglerarbeiten</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="177" data-name="rohde-immobilien-gmbh-herr-schmitt - 177"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-177"><span>#177</span><br>Rohde Immobilien GmbH / Herr Schmitt</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="185" data-name="arztehaus-seckenheim - 185"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-185"><span>#185</span><br>Ärztehaus Seckenheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="203" data-name="gbg-ums-ba4 - 203"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-203"><span>#203</span><br>GBG UMS BA4</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="214" data-name="christuskirche-mannheim-m1-1a-68161-mannheim - 214"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-214"><span>#214</span><br>Christuskirche Mannheim // M1-1a, 68161 Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="218" data-name="dachsanierung-ahnen - 218"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-218"><span>#218</span><br>Dachsanierung / Ahnen</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="239" data-name="olivari - 239"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-239"><span>#239</span><br>Olivari</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="281" data-name="schriesheimer-str-103-pannewitz - 281"
+                             data-phase="warranty" class="tile warranty">
+
+                            <a href="/project-281"><span>#281</span><br>Schriesheimer Str. 103, Pannewitz</a>
+                        </sys-project-tile>
+
+
+
+                        <sys-project-tile data-pk="4" data-name="herr-ehret - 4"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-4"><span>#4</span><br>Herr Ehret</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="6" data-name="am-schaferstock-1-3 - 6"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-6"><span>#6</span><br>Am Schäferstock 1-3</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="7" data-name="am-schaferstock-5 - 7"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-7"><span>#7</span><br>Am Schäferstock 5</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="8" data-name="am-schaferstock-7b - 8"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-8"><span>#8</span><br>Am Schäferstock 7b</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="10" data-name="kohler-uhlandstr-30 - 10"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-10"><span>#10</span><br>Köhler Uhlandstr. 30 </a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="13" data-name="kohler-edingen-nt - 13"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-13"><span>#13</span><br>Köhler Edingen NT</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="14" data-name="nietzschestr-8 - 14"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-14"><span>#14</span><br>Nietzschestr. 8</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="16" data-name="spenglerarbeiten-fassade - 16"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-16"><span>#16</span><br>Spenglerarbeiten Fassade</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="19" data-name="herr-fu-neckarstadt - 19"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-19"><span>#19</span><br>Herr Fuß Neckarstadt</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="21" data-name="s-417-stegmayer - 21"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-21"><span>#21</span><br>S 4,17 Stegmayer</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="22" data-name="gbg-untermuhlaustr-alt - 22"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-22"><span>#22</span><br>GBG Untermühlaustr. (alt)</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="25" data-name="sternwarte - 25"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-25"><span>#25</span><br>Sternwarte</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="26" data-name="k-41-dachbalkon - 26"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-26"><span>#26</span><br>K 4,1 Dachbalkon</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="29" data-name="zokai - 29"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-29"><span>#29</span><br>Zokai</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="36" data-name="hartmann-la - 36"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-36"><span>#36</span><br>Hartmann LA</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="37" data-name="schmucker-feudenheim - 37"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-37"><span>#37</span><br>Schmucker Feudenheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="57" data-name="terrassensanierung - 57"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-57"><span>#57</span><br>Terrassensanierung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="60" data-name="fam-putzer-feudenheim - 60"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-60"><span>#60</span><br>Fam. Putzer Feudenheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="61" data-name="garagensanierung - 61"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-61"><span>#61</span><br>Garagensanierung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="63" data-name="dachsanierung-herr-andre-hochstattstr-6 - 63"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-63"><span>#63</span><br>Dachsanierung - Herr Andre - Hochstättstr. 6</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="68" data-name="hauptenbuchner-beilstr-18 - 68"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-68"><span>#68</span><br>Hauptenbuchner - Beilstr. 18</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="69" data-name="hauptenbuchner-beilstr-24 - 69"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-69"><span>#69</span><br>Hauptenbuchner - Beilstr. 24</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="70" data-name="moll-gymnasium-dachabdichtungsarbeiten - 70"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-70"><span>#70</span><br>Moll - Gymnasium Dachabdichtungsarbeiten</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="71" data-name="neubau-dhh-mit-garage - 71"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-71"><span>#71</span><br>Neubau DHH mit Garage</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="72" data-name="boehringerstrae-14-albrecht - 72"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-72"><span>#72</span><br>Boehringerstraße 14 (Albrecht)</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="74" data-name="geschossdecke-db-schenker-rail-ag - 74"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-74"><span>#74</span><br>Geschossdecke - DB Schenker Rail AG</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="75" data-name="terrassensanierung-gerlinger - 75"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-75"><span>#75</span><br>Terrassensanierung - Gerlinger</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="81" data-name="kirchbergstr-24 - 81"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-81"><span>#81</span><br>Kirchbergstr. 24</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="89" data-name="krugel - 89"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-89"><span>#89</span><br>Krügel</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="90" data-name="hubsteigerarbeiten-weiherstr-11-herr-kamrad - 90"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-90"><span>#90</span><br>Hubsteigerarbeiten - Weiherstr. 11 - Herr Kamrad</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="95" data-name="asbest-entsorgung-stadthalle-heidelberg - 95"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-95"><span>#95</span><br>Asbest Entsorgung - Stadthalle Heidelberg</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="96" data-name="engelhorn-he-immobilien - 96"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-96"><span>#96</span><br>Engelhorn - HE Immobilien</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="103" data-name="nahestrae-20 - 103"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-103"><span>#103</span><br>Nahestraße 20</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="108" data-name="dachfenster-tausch-meersburger-str-45 - 108"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-108"><span>#108</span><br>Dachfenster Tausch - Meersburger Str. 45</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="111" data-name="giebelwandverblechung - 111"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-111"><span>#111</span><br>Giebelwandverblechung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="114" data-name="brunnengasse-15 - 114"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-114"><span>#114</span><br>Brunnengasse 15</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="115" data-name="uberdachung - 115"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-115"><span>#115</span><br>Überdachung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="119" data-name="bildungsverein-heidelberg - 119"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-119"><span>#119</span><br>Bildungsverein Heidelberg</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="122" data-name="flachdachsanierung-wasgaustr-38-ludwigshafen - 122"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-122"><span>#122</span><br>Flachdachsanierung / Wasgaustr. 38, Ludwigshafen</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="123" data-name="dachsanierung-kramer-kus-kus - 123"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-123"><span>#123</span><br>Dachsanierung / Krämer Kus-Kus</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="126" data-name="bockstr-15 - 126"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-126"><span>#126</span><br>Böckstr. 15</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="127" data-name="beilstrae-8 - 127"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-127"><span>#127</span><br>Beilstraße 8</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="131" data-name="dachrenovierung-schwarzwaldstr - 131"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-131"><span>#131</span><br>Dachrenovierung Schwarzwaldstr</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="134" data-name="becker - 134"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-134"><span>#134</span><br>Becker</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="139" data-name="bv-grigull-laudenbach - 139"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-139"><span>#139</span><br>BV Grigull Laudenbach</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="140" data-name="fr-kemptner-vordach-aus-plexiglas - 140"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-140"><span>#140</span><br>Fr. Kemptner - Vordach aus Plexiglas</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="141" data-name="schwetzingerhaus-seniorengerechtes-wohnen - 141"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-141"><span>#141</span><br>Schwetzingerhaus - Seniorengerechtes Wohnen</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="142" data-name="siemes-schuhcenter-bruhl - 142"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-142"><span>#142</span><br>Siemes Schuhcenter Brühl</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="145" data-name="draisstr-26 - 145"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-145"><span>#145</span><br>Draisstr. 26</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="146" data-name="trockenestrich - 146"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-146"><span>#146</span><br>Trockenestrich</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="147" data-name="gertrud-riemann - 147"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-147"><span>#147</span><br>Gertrud Riemann</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="148" data-name="uhlandstr-1-verschattung - 148"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-148"><span>#148</span><br>Uhlandstr. 1 - Verschattung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="156" data-name="gbg-ums-dachsicherung-haus-110 - 156"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-156"><span>#156</span><br>GBG UMS Dachsicherung Haus 110</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="157" data-name="schmid-energy-solution - 157"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-157"><span>#157</span><br>Schmid Energy Solution</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="158" data-name="max-hachenburg-schule-mannheim - 158"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-158"><span>#158</span><br>Max-Hachenburg-Schule Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="167" data-name="jungbuschstr-18-hubsteigerarbeiten - 167"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-167"><span>#167</span><br>Jungbuschstr. 18 Hubsteigerarbeiten</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="168" data-name="beilstr-29 - 168"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-168"><span>#168</span><br>Beilstr. 29</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="169" data-name="bv-hellmich-20151105-eintrachtstr18-mannheim - 169"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-169"><span>#169</span><br>BV: Hellmich 20151105 Eintrachtstr.18 Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="179" data-name="baucraft-walldorf-schwetzinger-str - 179"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-179"><span>#179</span><br>baucraft / Walldorf Schwetzinger Str.</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="182" data-name="lempfert-sahavi - 182"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-182"><span>#182</span><br>Lempfert, Sahavi</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="183" data-name="maier-seckenheimerstr-56 - 183"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-183"><span>#183</span><br>Maier / Seckenheimerstr. 56</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="201" data-name="sascha-knx - 201"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-201"><span>#201</span><br>Sascha KNX</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="207" data-name="laule - 207"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-207"><span>#207</span><br>Laule</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="213" data-name="pflasterer-weinheim-balkonerneuerung - 213"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-213"><span>#213</span><br>Pflästerer / Weinheim / Balkonerneuerung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="215" data-name="deck-bv-begutachtung-dach - 215"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-215"><span>#215</span><br>Deck // BV: Begutachtung Dach</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="220" data-name="rinnensauberung - 220"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-220"><span>#220</span><br>Rinnensäuberung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="222" data-name="gaubenreparatur - 222"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-222"><span>#222</span><br>Gaubenreparatur</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="225" data-name="jungbuschstr-15-mannheim-thomas-fischer - 225"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-225"><span>#225</span><br>Jungbuschstr. 15, Mannheim // Thomas Fischer</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="229" data-name="wittig - 229"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-229"><span>#229</span><br>Wittig</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="230" data-name="bv-hafenstr-66-mannheim - 230"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-230"><span>#230</span><br>BV: Hafenstr. 66, Mannheim</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="234" data-name="dachreinigung - 234"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-234"><span>#234</span><br>Dachreinigung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="235" data-name="karlstern-uberdachung - 235"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-235"><span>#235</span><br>Karlstern Überdachung</a>
+                        </sys-project-tile>
+
+                        <sys-project-tile data-pk="255" data-name="villa-rehe-lv-erstellung - 255"
+                             data-phase="finished" class="tile finished">
+
+                            <a href="/project-255"><span>#255</span><br>Villa Rehe LV-Erstellung</a>
+                        </sys-project-tile>
+
+
+    </div>
+</div>
+
+
+<!--
+<link rel="x-dart-test" href="project_list_test.dart">
+<script src="packages/test/dart.js"></script>
+-->
+<script type="application/dart" src="project_list_test.dart"></script>

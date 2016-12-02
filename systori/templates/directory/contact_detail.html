@@ -1,7 +1,7 @@
 {% extends "frame.html" %}
 {% load i18n bootstrap %}
 
-{% block sidebar %}{% include "main/sidebar.html" with section='directory' %}{% endblock %}
+{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='directory' %}{% endblock %}
 
 {% block content %}
   <h2>{% trans 'Contact Details' %} - <a href="{% url 'contact.edit' object.id %}">{% trans 'edit' %}</a></h2>

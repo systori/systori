@@ -21,4 +21,6 @@ urlpatterns = [
 
     url(r'^project-(?P<pk>\d+)/progress', office_auth(ProjectProgress.as_view()), name='project.progress'),
     url(r'^progress$', office_auth(AllProjectsProgress.as_view()), name='project.progress.all'),
+
+    url(r'project-search$', office_auth(ProjectSearchApi.as_view()), name='project.search'),
 ]

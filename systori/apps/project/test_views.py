@@ -10,12 +10,16 @@ from .models import Project
 class TestProjectListView(ClientTestCase):
 
     def test_load_without_search_term(self):
-        response = self.client.get(reverse('projects'), {})
+        response = self.client.get(reverse('projects'))
         self.assertEqual(200, response.status_code)
 
-    def test_load_with_search_term(self):
-        response = self.client.get(reverse('projects'), {'search_term': 'one two'})
-        self.assertEqual(200, response.status_code)
+    def test_load_expected_variables(self):
+        ProjectFactory()
+        response = self.client.get(reverse('projects'))
+        for element in ['sys-sort-button', 'sys-phase-button', 'sys-project-tile']:
+            self.assertContains(response, element)
+        for phase in dict(Project.PHASE_CHOICES).keys():
+            self.assertContains(response, phase)
 
 
 class TestProgressViews(ClientTestCase):

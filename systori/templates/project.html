@@ -6,7 +6,13 @@
   </li>
 {% endblock %}
 
-{% block title %}#{{ project.id }} {{ project.name }}{% endblock %}
+{% block title %}
+    {% if project.is_template %}
+    {% trans 'Templates' %}
+    {% else %}
+        #{{ project.id }} {{ project.name }}
+    {% endif %}
+{% endblock title %}
 
 {% block head_navbar %}
   <li class="active"><a href="{% url 'project.view' project.id %}">{{ project.name }}

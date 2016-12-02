@@ -1,10 +1,7 @@
-import json
-
 from django.shortcuts import get_object_or_404
-from django.views.generic import View
-from django.http import HttpResponse, Http404
+from django.http import Http404
 from django.core.exceptions import ValidationError
-from rest_framework import status, views
+from rest_framework import views
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
