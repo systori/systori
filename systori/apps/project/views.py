@@ -96,9 +96,8 @@ class ProjectView(DetailView):
         context['TAX_RATE_DISPLAY'] = '{}%'.format(ubrdecimal(TAX_RATE*100, 2))
         return context
 
-    #def get_queryset(self):
-    #    return super().get_queryset()\
-    #        .prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
+    def get_queryset(self):
+        return super().get_queryset().with_totals()
 
 
 class ProjectCreate(CreateView):

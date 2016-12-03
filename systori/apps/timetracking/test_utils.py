@@ -1,3 +1,4 @@
+from unittest import skip
 from unittest.mock import patch
 from datetime import timedelta, datetime, time
 
@@ -195,6 +196,7 @@ class TimeSpanTest(TestCase):
 
 class AutoPilotTest(TestCase):
 
+    @skip
     @patch.object(Timer, 'objects')
     def test_perform_autopilot_duties(self, manager_mock):
         company = CompanyFactory()

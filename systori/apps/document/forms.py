@@ -295,7 +295,7 @@ class InvoiceRowForm(DocumentRowForm):
 
     def calculate_accounting_state(self, state):
 
-        state.estimate_amount = Amount.from_net(self.job.total, TAX_RATE)
+        state.estimate_amount = Amount.from_net(self.job.estimate, TAX_RATE)
 
         state.progress_amount = Amount.from_net(self.job.progress, TAX_RATE)
         state.progress_percent = self.job.progress_percent
@@ -787,7 +787,7 @@ class ProposalRowForm(DocumentRowForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.estimate_amount = Amount.from_net(self.job.total, TAX_RATE)
+        self.estimate_amount = Amount.from_net(self.job.estimate, TAX_RATE)
 
     @property
     def json(self):
