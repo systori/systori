@@ -13,16 +13,38 @@ class ProjectTotalTests(TestCase):
 
     def setUp(self):
         CompanyFactory()
+        self.project = ProjectFactory()
+        self.qs = Project.objects.filter(pk=self.project.id)
 
-    def test_zero(self):
-        project = ProjectFactory()  # type: Project
+    def test_missing_annotations(self):
+        project = self.qs.first()  # type: Project
+        with self.assertRaises(ValueError):
+            self.assertEqual(0, project.estimate)
+        with self.assertRaises(ValueError):
+            self.assertEqual(0, project.progress)
+        with self.assertRaises(ValueError):
+            self.assertEqual(0, project.progress_percent)
+        with self.assertRaises(ValueError):
+            self.assertEqual(False, project.is_billable)
+
+    def test_initial(self):
+        project = self.qs.with_totals().first()  # type: Project
         self.assertEqual(0, project.estimate)
+        self.assertEqual(0, project.progress)
+        self.assertEqual(0, project.progress_percent)
+        project = self.qs.with_is_billable().first()  # type: Project
+        self.assertEqual(False, project.is_billable)
 
-    def test_nonzero(self):
-        project = ProjectFactory()  # type: Project
-        job = JobFactory(project=project)
-        TaskFactory(group=job, total=1920)
-        self.assertEqual(1920, project.estimate)
+    def test_correct_annotations(self):
+        job = JobFactory(project=self.project)
+        TaskFactory(group=job, price=5, complete=10, total=100)
+        TaskFactory(group=job, price=5, complete=10, total=100)
+        TaskFactory(group=job, price=5, complete=10, total=100, is_provisional=True)
+        project = self.qs.with_totals().with_is_billable().first()  # type: Project
+        self.assertEqual(200, project.estimate)  # 100 + 100
+        self.assertEqual(150, project.progress)  # 50 + 50 + 50
+        self.assertEqual(75, project.progress_percent)
+        self.assertEqual(True, project.is_billable)
 
 
 class ProjectPhaseTests(TestCase):

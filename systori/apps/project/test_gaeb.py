@@ -31,6 +31,12 @@ class GAEBStructureTests(TestCase):
         self.assertEqual(struct.has_level(3), False)
         self.assertEqual(struct.has_level(4), False)
 
+    def test_depth(self):
+        gaeb = GAEBHierarchyStructure
+        self.assertEqual(gaeb('0.0').depth, 0)
+        self.assertEqual(gaeb('0.0.0').depth, 1)
+        self.assertEqual(gaeb('0.0.0.0').depth, 2)
+
 
 class GaebImportTests(TestCase):
 

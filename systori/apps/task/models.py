@@ -1,6 +1,7 @@
 import re
 from decimal import Decimal
 from django.db import models
+from django.db.models.expressions import RawSQL
 from django.db.models.manager import BaseManager
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
@@ -104,21 +105,35 @@ class Group(OrderedModel):
         for group in self.groups.all():
             total += getattr(group, field)
         for task in self.tasks.all():
-            if field != 'total' or task.include_estimate:
-                total += getattr(task, field)
+            if field == 'estimate' and task.include_estimate:
+                total += task.total
+            elif field == 'progress':
+                total += task.progress
         return total
 
     @property
-    def total(self):
-        return self._calc('total')
+    def estimate(self):
+        if not hasattr(self, '_estimate'):
+            self._estimate = self._calc('estimate')
+        return self._estimate
+
+    @estimate.setter
+    def estimate(self, value):
+        self._estimate = value
 
     @property
     def progress(self):
-        return self._calc('progress')
+        if not hasattr(self, '_progress'):
+            self._progress = self._calc('progress')
+        return self._progress
 
-    @property
+    @progress.setter
+    def progress(self, value):
+        self._progress = value
+
+    @cached_property
     def progress_percent(self):
-        return nice_percent(self.progress, self.total)
+        return nice_percent(self.progress, self.estimate)
 
     def __str__(self):
         return self.name
@@ -126,25 +141,56 @@ class Group(OrderedModel):
 
 class JobQuerySet(models.QuerySet):
 
-    def total(self):
-        return sum([job.total for job in self])
+    IS_BILLABLE_SQL = """
+        SELECT
+            COUNT(task_task) > 0
+        FROM
+          task_task
+        WHERE
+          task_task.complete > 0 AND
+          task_task.job_id = task_job.root_id
+    """
 
-    def progress(self):
-        return sum([job.progress for job in self])
+    def with_is_billable(self):
+        return self.annotate(is_billable=RawSQL(self.IS_BILLABLE_SQL, []))
 
-    def prefetch_groups(self, project):
-        level = 3
+    ESTIMATE_SQL = """
+        SELECT
+            COALESCE(SUM(task_task.total), 0)
+        FROM
+          task_task
+        WHERE
+          task_task.is_provisional = false AND
+          task_task.variant_serial = 0 AND
+          task_task.job_id = task_job.root_id
+    """
+
+    def with_estimate(self):
+        return self.annotate(estimate=RawSQL(self.ESTIMATE_SQL, []))
+
+    PROGRESS_SQL = """
+        SELECT
+            COALESCE(SUM(task_task.complete * task_task.price), 0)
+        FROM
+          task_task
+        WHERE
+          task_task.job_id = task_job.root_id
+    """
+
+    def with_progress(self):
+        return self.annotate(progress=RawSQL(self.PROGRESS_SQL, []))
+
+    def with_totals(self):
+        return self.with_estimate().with_progress()
+
+    def with_hierarchy(self, project):
+        depth = project.structure.depth
         prefetch = []
-        while self.has_level(level):
-            prefetch.append('children')
-            level += 1
+        while depth > 0:
+            prefetch.append('groups')
+            depth -= 1
         prefetch += ['tasks', 'lineitems']
-        return list(
-            self._taskgroups
-                .filter(level=2)
-                .prefetch_related('__'.join(prefetch))
-                .all()
-        )
+        return self.prefetch_related('__'.join(prefetch))
 
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
@@ -226,10 +272,13 @@ class Job(Group):
 
     @property
     def is_billable(self):
-        for task in self.all_tasks.all():
-            if task.is_billable:
-                return True
-        return False
+        if not hasattr(self, '_is_billable'):
+            self._is_billable = self.all_tasks.billable().exists()
+        return self._is_billable
+
+    @is_billable.setter
+    def is_billable(self, value):
+        self._is_billable = value
 
     def get_absolute_url(self):
         if self.project.is_template:
@@ -239,6 +288,16 @@ class Job(Group):
 
     def __str__(self):
         return self.name
+
+
+class TaskQuerySet(models.QuerySet):
+
+    def billable(self):
+        return self.filter(complete__gt=0)
+
+
+class TaskManager(BaseManager.from_queryset(TaskQuerySet)):
+    use_for_related_fields = True
 
 
 class Task(OrderedModel):
@@ -283,6 +342,8 @@ class Task(OrderedModel):
     status = FSMField(blank=True, choices=STATE_CHOICES)
 
     token = models.IntegerField('api token', null=True)
+
+    objects = TaskManager()
 
     class Meta:
         verbose_name = _("Task")

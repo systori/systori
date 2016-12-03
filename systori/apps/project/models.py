@@ -1,23 +1,19 @@
-from math import floor, ceil
 from datetime import date
-from django.db import models
+
 from django.conf import settings
+from django.db import models
+from django.db.models.expressions import RawSQL
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django.utils.functional import cached_property
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
 from django_fsm import FSMField, transition
+
 from systori.lib.utils import nice_percent
-from systori.apps.task.models import Job
+
+from ..task.models import Job, JobQuerySet
+
 from geopy import geocoders
-
-
-class ProjectQuerySet(models.QuerySet):
-    def template(self):
-        return self.filter(is_template=True)
-
-    def without_template(self):
-        return self.exclude(is_template=True)
 
 
 class GAEBHierarchyStructure:
@@ -28,7 +24,7 @@ class GAEBHierarchyStructure:
     def __init__(self, format):
         self.format = format
         self.zfill = [len(p) for p in format.split('.')]
-        assert 2 <= len(self.zfill) <= self.MAXLEVELS,\
+        assert 2 <= len(self.zfill) <= self.MAXLEVELS, \
             "GAEB hiearchy is outside the allowed hierarchy depth."
 
     @staticmethod
@@ -44,6 +40,42 @@ class GAEBHierarchyStructure:
 
     def has_level(self, level):
         return 0 <= level < (len(self.zfill)-1)
+
+    @property
+    def depth(self):
+        return len(self.zfill)-2
+
+
+def _job_annotation(type, inner):
+    return "SELECT {} FROM task_job WHERE task_job.project_id=project_project.id".format({
+        'bool': "COALESCE(BOOL_OR(({})), false)".format(inner),
+        'sum': "COALESCE(SUM(({})), 0)".format(inner),
+    }[type])
+
+
+class ProjectQuerySet(models.QuerySet):
+
+    IS_BILLABLE_SQL = _job_annotation('bool', JobQuerySet.IS_BILLABLE_SQL)
+    ESTIMATE_SQL = _job_annotation('sum', JobQuerySet.ESTIMATE_SQL)
+    PROGRESS_SQL = _job_annotation('sum', JobQuerySet.PROGRESS_SQL)
+
+    def with_is_billable(self):
+        return self.annotate(is_billable=RawSQL(self.IS_BILLABLE_SQL, []))
+
+    def with_estimate(self):
+        return self.annotate(estimate=RawSQL(self.ESTIMATE_SQL, []))
+
+    def with_progress(self):
+        return self.annotate(progress=RawSQL(self.PROGRESS_SQL, []))
+
+    def with_totals(self):
+        return self.with_estimate().with_progress()
+
+    def template(self):
+        return self.filter(is_template=True)
+
+    def without_template(self):
+        return self.exclude(is_template=True)
 
 
 class Project(models.Model):
@@ -219,22 +251,46 @@ class Project(models.Model):
         verbose_name_plural = _("Projects")
         ordering = ['name']
 
-    @staticmethod
-    def prefetch(project_id):
-        return \
-            Project.objects.filter(id=project_id) \
-                .prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems') \
-                .get()
+    @property
+    def is_billable(self):
+        if not hasattr(self, '_is_billable'):
+            raise ValueError(
+                'Project instance created without using with_is_billable() annotation.'
+                'Hint: Project.objects.with_is_billable()'
+            )
+        return self._is_billable
+
+    @is_billable.setter
+    def is_billable(self, value):
+        self._is_billable = value
 
     @property
     def estimate(self):
-        return self.jobs.total()
+        if not hasattr(self, '_estimate'):
+            raise ValueError(
+                'Project instance created without using with_estimate() annotation.'
+                'Hint: Project.objects.with_estimate() or Project.objects.with_totals()'
+            )
+        return self._estimate
+
+    @estimate.setter
+    def estimate(self, value):
+        self._estimate = value
 
     @property
     def progress(self):
-        return self.jobs.progress()
+        if not hasattr(self, '_progress'):
+            raise ValueError(
+                'Project instance created without using with_progress() annotation.'
+                'Hint: Project.objects.with_progress() or Project.objects.with_totals()'
+            )
+        return self._progress
 
-    @property
+    @progress.setter
+    def progress(self, value):
+        self._progress = value
+
+    @cached_property
     def progress_percent(self):
         return nice_percent(self.progress, self.estimate)
 
