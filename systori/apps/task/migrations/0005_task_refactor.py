@@ -26,12 +26,12 @@ def upgrade_taskinstance_to_task(apps, schema_editor):
 
                 is_variant_mode = task.taskinstances.count() > 1
                 if is_variant_mode:
-                    if variant_group == 100:
-                        print('Project {}: {}, Job {}: {}'.format(
-                            task.job.project.id, task.job.project.name,
-                            task.job.pk, task.job.root.name)
-                        )
-                    print('  Variations for {}: {}'.format(task.id, task.name))
+                    #if variant_group == 100:
+                    #    print('Project {}: {}, Job {}: {}'.format(
+                    #        task.job.project.id, task.job.project.name,
+                    #        task.job.pk, task.job.root.name)
+                    #    )
+                    #print('  Variations for {}: {}'.format(task.id, task.name))
                     variant_group += 1
                     task.variant_group = variant_group
                     task.save()
@@ -51,13 +51,14 @@ def upgrade_taskinstance_to_task(apps, schema_editor):
                         task.order = order_max
                         task.variant_serial += 1
                         task.save()
-                        print("    Variant: {}.{}".format(task.variant_group, task.variant_serial))
+                        #print("    Variant: {}.{}".format(task.variant_group, task.variant_serial))
                     elif is_variant_mode:
-                        print("    Primary: {}.{}".format(task.variant_group, task.variant_serial))
+                        pass
+                        #print("    Primary: {}.{}".format(task.variant_group, task.variant_serial))
 
                     task.qty_equation = str(task.qty)
                     task.price = Decimal('0.00')
-                    if is_variant_mode: print("    Line items ", end='')
+                    #if is_variant_mode: print("    Line items ", end='')
                     lineitem_order = 0
                     for lineitem in taskinstance.lineitems.all():
                         TOKEN += 1
@@ -71,8 +72,8 @@ def upgrade_taskinstance_to_task(apps, schema_editor):
                         lineitem.task = task
                         lineitem.job = task.job
                         lineitem.save()
-                        if is_variant_mode: print(".", end='')
-                    if is_variant_mode: print("")
+                        #if is_variant_mode: print(".", end='')
+                    #if is_variant_mode: print("")
                     task.total = round(task.qty * task.price, 3)
                     task.save()
 
