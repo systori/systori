@@ -4,10 +4,11 @@ from calendar import LocaleHTMLCalendar, month_name
 from itertools import groupby
 
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
 from django.db.models import Q, Count, Prefetch
 from django.utils.http import urlquote
 from django.utils.formats import to_locale, get_language
-from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView
+from django.views.generic import View, DetailView, ListView, UpdateView, DeleteView, TemplateView
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
 
@@ -154,9 +155,7 @@ class FieldProjectView(DetailView):
 
         daily_plans = daily_plan_objects() \
             .filter(jobsite__in=project.jobsites.all()) \
-            .filter(day__lte=selected_day) \
-            .filter(day__gte=selected_day - timedelta(days=3)) \
-            .all()
+            .filter(day__lte=selected_day)[:3]
 
         grouped_by_days = []
         for day, plans in groupby(daily_plans, lambda o: o.day):
@@ -256,6 +255,18 @@ class FieldCopyPasteDailyPlans(View):
                 )
 
         return HttpResponseRedirect(reverse('field.project', args=[project.id, selected_day.isoformat()]))
+
+
+class FieldDeleteDailyPlan(DeleteView):
+
+    model = DailyPlan
+
+    def get_object(self):
+        return self.request.dailyplan
+
+    def get_success_url(self):
+        selected_day = self.request.dailyplan.url_id[:10]
+        return reverse('field.planning', args=[selected_day])
 
 
 class FieldGenerateAllDailyPlans(View):

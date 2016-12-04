@@ -24,6 +24,7 @@ dailyplan_urls = [
     url(r'^member-(?P<pk>\d+)/remove$', field_auth(FieldMemberRemove.as_view()), name='field.dailyplan.member-remove'),
     url(r'^add-self-as-(?P<role>(foreman|laborer))$', field_auth(FieldAddSelfToDailyPlan.as_view()), name='field.dailyplan.self.add'),
     url(r'^remove-self$', field_auth(FieldRemoveSelfFromDailyPlan.as_view()), name='field.dailyplan.self.remove'),
+    url(r'^delete$', field_auth(FieldDeleteDailyPlan.as_view()), name='field.dailyplan.delete'),
 
 ]
 

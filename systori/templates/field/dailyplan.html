@@ -8,9 +8,14 @@
     <a name="plan-{{  dailyplan.id }}"></a>
     {% if worker.has_laborer %}
     <div class="pull-right">
-      <button class="btn btn-default btn-sm paste-button" style="display: none;">
-        <span class="glyphicon glyphicon-paste"></span>
-      </button>
+      <div class="btn-group" role="group">
+        <button class="btn btn-default btn-sm paste-button" style="display: none;">
+          <span class="glyphicon glyphicon-paste"></span>
+        </button>
+        <a class="btn btn-danger btn-sm" href="{% url 'field.dailyplan.delete' jobsite.id dailyplan.url_id %}">
+          <span class="glyphicon glyphicon-trash"></span>
+        </a>
+      </div>
     </div>
     {% endif %}
     {{ jobsite.name }}<br/>
