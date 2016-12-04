@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('company', '0004_worker'),
         ('document', '0006_documentsettings_timetracking_letterhead'),
+        ('task', '0004_data_migration'),
     ]
 
     operations = [
@@ -38,5 +39,10 @@ class Migration(migrations.Migration):
             model_name='documentsettings',
             old_name='timetracking_letterhead',
             new_name='timesheet_letterhead',
+        ),
+        migrations.AlterField(
+            model_name='proposal',
+            name='jobs',
+            field=models.ManyToManyField(verbose_name='Jobs', to='task.Job', related_name='proposals'),
         ),
     ]

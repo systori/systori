@@ -2,7 +2,9 @@ from django.core.urlresolvers import reverse
 
 from systori.lib.testing import ClientTestCase
 
+from ..document.factories import ProposalFactory, LetterheadFactory
 from ..task.factories import JobFactory
+
 from .factories import ProjectFactory
 from .models import Project
 
@@ -53,6 +55,12 @@ class TestProjectViews(ClientTestCase):
 
     def test_view_project(self):
         project = ProjectFactory()
-        JobFactory(project=project)
+        job = JobFactory(project=project)
+        proposal = ProposalFactory(
+            project=project,
+            letterhead=LetterheadFactory(),
+        )
+        proposal.jobs.add(job)
         response = self.client.get(reverse('project.view', args=[project.pk]), {})
         self.assertEqual(200, response.status_code)
+        print(response.content.decode('utf8'))
