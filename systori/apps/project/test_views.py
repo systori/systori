@@ -5,8 +5,8 @@ from systori.lib.testing import ClientTestCase
 from ..document.factories import ProposalFactory, LetterheadFactory
 from ..task.factories import JobFactory
 
-from .factories import ProjectFactory
-from .models import Project
+from .factories import ProjectFactory, JobSiteFactory
+from .models import Project, JobSite
 
 
 class TestProjectListView(ClientTestCase):
@@ -43,15 +43,23 @@ class TestProjectViews(ClientTestCase):
         response = self.client.get(reverse('project.create'), {})
         self.assertEqual(200, response.status_code)
 
-        response = self.client.post(reverse('project.create'), {
+        data = {
             'name': 'new test project',
             'address': 'One Street',
             'city': 'Town',
             'postal_code': '12345',
             'structure_format': '0.0',
-        })
+        }
+
+        response = self.client.post(reverse('project.create'), data)
         self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, reverse('projects'))
         self.assertTrue(Project.objects.filter(name='new test project').exists())
+
+        data['save_goto_project'] = ''
+        response = self.client.post(reverse('project.create'), data)
+        self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, reverse('project.view', args=[3]))
 
     def test_view_project(self):
         project = ProjectFactory()
@@ -63,3 +71,48 @@ class TestProjectViews(ClientTestCase):
         proposal.jobs.add(job)
         response = self.client.get(reverse('project.view', args=[project.pk]), {})
         self.assertEqual(200, response.status_code)
+
+    def test_phase_transition(self):
+        project = ProjectFactory()
+        self.assertEqual(project.phase, Project.PROSPECTIVE)
+        for action, phase in [('begin_tendering', Project.TENDERING), ('begin_planning', Project.PLANNING)]:
+            response = self.client.get(
+                reverse('project.transition.phase', args=[project.pk, action])
+            )
+            self.assertEqual(response.status_code, 302)
+            project.refresh_from_db()
+            self.assertEqual(project.phase, phase)
+
+    def test_state_transition(self):
+        project = ProjectFactory()
+        self.assertEqual(project.state, Project.ACTIVE)
+        for action, state in [('pause', Project.PAUSED), ('stop', Project.STOPPED)]:
+            response = self.client.get(
+                reverse('project.transition.state', args=[project.pk, action])
+            )
+            self.assertEqual(response.status_code, 302)
+            project.refresh_from_db()
+            self.assertEqual(project.state, state)
+
+
+class TestJobSiteViews(ClientTestCase):
+    def setUp(self):
+        super().setUp()
+        self.project = ProjectFactory()
+        JobSiteFactory(project=self.project)
+
+    def test_create_jobsite(self):
+
+        response = self.client.get(reverse('jobsite.create', args=[self.project.pk]), {})
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'name': '1st floor',
+            'address': 'One Street',
+            'city': 'Town',
+            'postal_code': '12345',
+        }
+
+        response = self.client.post(reverse('jobsite.create', args=[self.project.pk]), data)
+        self.assertEqual(302, response.status_code)
+        self.assertTrue(JobSite.objects.filter(name='1st floor').exists())

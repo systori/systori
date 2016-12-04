@@ -9,7 +9,6 @@ urlpatterns = [
     url(r'^import-project$', office_auth(ProjectImport.as_view()), name='project.import'),
     url(r'^project-(?P<pk>\d+)$', office_auth(ProjectView.as_view()), name='project.view'),
     url(r'^project-(?P<pk>\d+)/edit$', office_auth(ProjectUpdate.as_view()), name='project.edit'),
-    url(r'^project-(?P<pk>\d+)/plan$', office_auth(ProjectPlanning.as_view()), name='project.plan'),
     url(r'^project-(?P<pk>\d+)/delete$', office_auth(ProjectDelete.as_view()), name='project.delete'),
     url(r'^project-(?P<pk>\d+)/transition/phase/(?P<transition>\w+)$', office_auth(ProjectManualPhaseTransition.as_view()), name='project.transition.phase'),
     url(r'^project-(?P<pk>\d+)/transition/state/(?P<transition>\w+)$', office_auth(ProjectManualStateTransition.as_view()), name='project.transition.state'),

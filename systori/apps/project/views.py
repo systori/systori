@@ -139,17 +139,6 @@ class ProjectDelete(DeleteView):
     success_url = reverse_lazy('projects')
 
 
-class ProjectPlanning(DetailView):
-    model = Project
-    template_name = 'project/project_planning.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(ProjectPlanning, self).get_context_data(**kwargs)
-        context['jobs'] = self.object.jobs.all()
-        context['users'] = ["Fred", "Bob", "Frank", "John", "Jay", "Lex", "Marius"]
-        return context
-
-
 class ProjectProgress(DetailView):
     model = Project
     template_name = 'project/project_progress.html'
@@ -214,16 +203,18 @@ class JobSiteCreate(CreateView):
     form_class = JobSiteForm
 
     def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
         project = self.request.project
         address = project.jobsites.first()
-        return {
+        kwargs.update({
             'instance': JobSite(project=project),
             'initial': {
                 'address': address.address,
                 'city': address.city,
                 'postal_code': address.postal_code
             }
-        }
+        })
+        return kwargs
 
     def get_success_url(self):
         return self.object.project.get_absolute_url()
