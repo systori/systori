@@ -77,8 +77,8 @@ def collate_tasks(proposal, font, available_width):
                 task_total_column = money(task['estimate_net'])
                 if task['is_optional']:
                     task_total_column = _('Optional')
-                elif not task['selected']:
-                    task_total_column = _('Alternative')
+                #elif not task['selected']:
+                #    task_total_column = _('Alternative')
 
                 items.row('', '', ubrdecimal(task['qty']), p(task['unit'], font), money(task['price']), task_total_column)
                 items.row_style('ALIGNMENT', 1, -1, "RIGHT")
@@ -227,7 +227,7 @@ def serialize(proposal):
                 'code': taskgroup.code,
                 'name': taskgroup.name,
                 'description': taskgroup.description,
-                'estimate_net': taskgroup.total,
+                'estimate_net': taskgroup.estimate,
                 'tasks': []
             }
             job_data['taskgroups'].append(taskgroup_dict)
@@ -237,10 +237,9 @@ def serialize(proposal):
                 task_dict = {
                     'id': task.id,
                     'code': task.code,
-                    'name': task.full_name,
-                    'description': task.full_description,
-                    'selected': task.selected,
-                    'is_optional': task.is_optional,
+                    'name': task.name,
+                    'description': task.description,
+                    'is_optional': task.is_provisional,
                     'qty': task.qty,
                     'unit': task.unit,
                     'price': task.price,

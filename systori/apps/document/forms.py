@@ -728,7 +728,6 @@ class RefundRowForm(DocumentRowForm):
 RefundFormSet = formset_factory(RefundRowForm, formset=BaseDocumentFormSet, extra=0)
 
 
-
 class ProposalForm(DocumentForm):
 
     doc_template = forms.ModelChoiceField(

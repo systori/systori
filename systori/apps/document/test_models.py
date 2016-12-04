@@ -1,10 +1,13 @@
+from decimal import Decimal
 from django.test import TestCase
 from django.utils.translation import activate
 
 from ..company.factories import CompanyFactory
 from ..project.factories import ProjectFactory
+from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from ..directory.factories import ContactFactory
 
+from . import type as pdf_type
 from .models import Proposal
 from .factories import LetterheadFactory, DocumentTemplateFactory
 
@@ -19,15 +22,19 @@ class ProposalTests(TestCase):
             project=self.project
         )
         self.letterhead = LetterheadFactory()
+        self.job = JobFactory(project=self.project)
+        self.group = GroupFactory(parent=self.job)
+        self.task = TaskFactory(group=self.group)
+        self.lineitem = LineItemFactory(task=self.task)
 
-    def test_proposal_new(self):
+    def test_status_new(self):
         d = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
         self.assertEquals('New', d.get_status_display())
         self.assertEquals(['Send'], [t.custom['label'] for t in d.get_available_status_transitions()])
 
-    def test_proposal_send(self):
+    def test_status_sent(self):
         d = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
-        d.send();
+        d.send()
         d.save()
         d = Proposal.objects.get(pk=d.pk)
         self.assertEquals('Sent', d.get_status_display())
@@ -35,6 +42,44 @@ class ProposalTests(TestCase):
         labels = [str(t.custom['label']) for t in d.get_available_status_transitions()]
         labels.sort()
         self.assertEquals(['Approve', 'Decline'], labels)
+
+    def test_serialize(self):
+        proposal = Proposal.objects.create(project=self.project, letterhead=self.letterhead)
+        proposal.json = {
+            'jobs': [{'job': self.job}],
+            'add_terms': False
+        }
+        pdf_type.proposal.serialize(proposal)
+        self.maxDiff = None
+        self.assertEqual({
+            'jobs': [{
+                'taskgroups': [{
+                    'id': 2, 'code': '01.01',
+                    'name': self.group.name,
+                    'description': '',
+                    'estimate_net': Decimal('0.0000'),
+                    'tasks': [{
+                        'id': 1, 'code': '01.01.001',
+                        'name': self.task.name,
+                        'price': Decimal('0.0000'),
+                        'qty': Decimal('0.0000'),
+                        'unit': '',
+                        'description': '',
+                        'estimate_net': Decimal('0.0000'),
+                        'is_optional': False,
+                        'lineitems': [{
+                            'id': 1,
+                            'name': self.lineitem.name,
+                            'price': Decimal('0.0000'),
+                            'price_per': Decimal('0.0000'),
+                            'qty': Decimal('0.0000'),
+                            'unit': ''
+                        }],
+                    }],
+                }],
+            }],
+            'add_terms': False
+        }, proposal.json)
 
 
 class DocumentTemplateTests(TestCase):

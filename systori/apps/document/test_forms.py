@@ -20,7 +20,7 @@ from .models import Proposal, Invoice, Payment
 from .factories import LetterheadFactory
 
 
-class AccountingTestCase(TestCase):
+class BaseTestCase(TestCase):
 
     def setUp(self):
 
@@ -48,7 +48,7 @@ class AccountingTestCase(TestCase):
         LetterheadFactory()
 
 
-class TestForm(AccountingTestCase):
+class TestForm(BaseTestCase):
     model = None
     form = None
     form_set = None

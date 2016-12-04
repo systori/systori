@@ -8,7 +8,7 @@ from systori.lib.testing import ClientTestCase
 from systori.lib.accounting.tools import Amount
 
 from ..project.factories import ProjectFactory
-from ..task.factories import JobFactory, TaskFactory
+from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from ..directory.factories import ContactFactory
 
 from ..accounting.models import Account, create_account_for_job
@@ -44,7 +44,9 @@ class DocumentTestCase(ClientTestCase):
         self.job = JobFactory(project=self.project)
         self.job.account = create_account_for_job(self.job)
         self.job.save()
-        TaskFactory(qty=10, complete=5, price=96, group=self.job)
+        self.group = GroupFactory(parent=self.job)
+        self.task = TaskFactory(qty=10, complete=5, price=96, group=self.group)
+        self.lineitem = LineItemFactory(task=self.task)
 
         self.job2 = JobFactory(project=self.project)
         self.job2.account = create_account_for_job(self.job2)
