@@ -25,8 +25,8 @@ class GroupFactory(django.DjangoModelFactory):
 
     @classmethod
     def _create(cls, *args, **kwargs):
-        if 'job' not in kwargs:
-            kwargs['job'] = kwargs['parent'].job
+        assert 'job' not in kwargs
+        kwargs['job'] = kwargs['parent'].job
         return super()._create(*args, **kwargs)
 
 
@@ -38,8 +38,8 @@ class TaskFactory(django.DjangoModelFactory):
 
     @classmethod
     def _create(cls, *args, **kwargs):
-        if 'job' not in kwargs:
-            kwargs['job'] = kwargs['group'].job
+        assert 'job' not in kwargs
+        kwargs['job'] = kwargs['group'].job
         return super()._create(*args, **kwargs)
 
 
@@ -51,21 +51,6 @@ class LineItemFactory(django.DjangoModelFactory):
 
     @classmethod
     def _create(cls, *args, **kwargs):
-        if 'qty' in kwargs and 'qty_equation' not in kwargs:
-            kwargs['qty_equation'] = kwargs['qty']
-        if 'price' in kwargs and 'price_equation' not in kwargs:
-            kwargs['price_equation'] = round(kwargs['price'], 2)
-        if 'total' in kwargs and 'total_equation' not in kwargs:
-            kwargs['total_equation'] = round(kwargs['total'], 2)
-        if 'price' in kwargs and 'total' in kwargs and 'qty' not in kwargs:
-            kwargs['qty'] = round(kwargs['total'] / kwargs['price'], 2)
-        if 'qty' in kwargs and 'total' in kwargs and 'price' not in kwargs:
-            kwargs['price'] = round(kwargs['total'] / kwargs['qty'], 2)
-        if 'total' not in kwargs and 'total_equation' not in kwargs:
-            _qty = kwargs.get('qty', 0)
-            if kwargs.get('unit') == '%':
-                _qty /= 100.00
-            kwargs['total'] = round(_qty * kwargs.get('price', 0), 2)
-        if 'job' not in kwargs:
-            kwargs['job'] = kwargs['task'].job
+        assert 'job' not in kwargs
+        kwargs['job'] = kwargs['task'].job
         return super()._create(*args, **kwargs)

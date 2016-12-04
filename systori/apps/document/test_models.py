@@ -7,8 +7,10 @@ from ..project.factories import ProjectFactory
 from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from ..directory.factories import ContactFactory
 
+from systori.lib.accounting.tools import Amount
+
 from . import type as pdf_type
-from .models import Proposal
+from .models import Proposal, Invoice
 from .factories import LetterheadFactory, DocumentTemplateFactory
 
 
@@ -80,6 +82,65 @@ class ProposalTests(TestCase):
             }],
             'add_terms': False
         }, proposal.json)
+
+
+class InvoiceTests(TestCase):
+
+    def setUp(self):
+        activate('en')
+        CompanyFactory()
+        self.project = ProjectFactory()
+        ContactFactory(
+            project=self.project
+        )
+        self.letterhead = LetterheadFactory()
+        self.job = JobFactory(project=self.project)
+        self.group = GroupFactory(parent=self.job)
+        self.task = TaskFactory(group=self.group)
+        self.lineitem = LineItemFactory(task=self.task)
+
+    def test_serialize(self):
+        invoice = Invoice.objects.create(project=self.project, letterhead=self.letterhead)
+        invoice.json = {
+            'jobs': [{'job': self.job}],
+            'add_terms': False
+        }
+        pdf_type.invoice.serialize(invoice)
+        self.maxDiff = None
+        self.assertEqual({
+            'jobs': [{
+                'taskgroups': [{
+                    'id': 2, 'code': '01.01',
+                    'name': self.group.name,
+                    'description': '',
+                    'total': Decimal('0.00'),
+                    'tasks': [{
+                        'id': 1, 'code': '01.01.001',
+                        'name': self.task.name,
+                        'price': Decimal('0.0000'),
+                        'total': Decimal('0.00'),
+                        'unit': '',
+                        'description': '',
+                        'complete': Decimal('0.0000'),
+                        'lineitems': [{
+                            'id': 1,
+                            'name': self.lineitem.name,
+                            'price': Decimal('0.0000'),
+                            'price_per': Decimal('0.0000'),
+                            'qty': Decimal('0.0000'),
+                            'unit': ''
+                        }],
+                    }],
+                }],
+            }],
+            'add_terms': False,
+            'debit': Amount.zero(),
+            'invoiced': Amount.zero(),
+            'paid': Amount.zero(),
+            'unpaid': Amount.zero(),
+            'payments': [],
+            'job_debits': {}
+        }, invoice.json)
 
 
 class DocumentTemplateTests(TestCase):

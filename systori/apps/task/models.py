@@ -350,11 +350,6 @@ class Task(OrderedModel):
         verbose_name_plural = _("Task")
         ordering = ('order',)
 
-    def __init__(self, *args, **kwargs):
-        if 'job' not in kwargs and 'group' in kwargs:
-            kwargs['job'] = kwargs['group'].job
-        super().__init__(*args, **kwargs)
-
     @property
     def is_billable(self):
         return self.complete > 0
@@ -463,29 +458,6 @@ class LineItem(OrderedModel):
         verbose_name = _("Line Item")
         verbose_name_plural = _("Line Items")
         ordering = ('order',)
-
-    def __init__(self, *args, **kwargs):
-        if 'job' not in kwargs and 'task' in kwargs:
-            kwargs['job'] = kwargs['task'].job
-        super().__init__(*args, **kwargs)
-
-    @property
-    def project(self):
-        return self.job.project
-
-    # regex should math the one in dart app spreadsheet/cell.dart
-    NUMBER = re.compile(r"^-?[0-9.,]+$")
-
-    def _is_equation(self, column):
-        val = getattr(self, column+'_equation')
-        if not val:
-            return False
-        if self.NUMBER.search(val):
-            return False
-        return True
-    is_qty_equation = property(lambda self: self._is_equation('qty'))
-    is_price_equation = property(lambda self: self._is_equation('price'))
-    is_total_equation = property(lambda self: self._is_equation('total'))
 
 
 class ProgressReport(models.Model):

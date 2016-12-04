@@ -230,30 +230,37 @@ class CloningTests(TestCase):
     def test_clone(self):
         job = JobFactory(project=ProjectFactory())
         group = GroupFactory(name="my group", parent=job)
-        TaskFactory(group=group)
-        TaskFactory(group=group)
-        TaskFactory(
+        group = GroupFactory(name="my subgroup", parent=group)
+        task = TaskFactory(
+            group=group,
             name="running task",
-            group=GroupFactory(parent=job),
             qty=7, complete=7, status=Task.RUNNING,
             started_on=datetime.date.today(),
             completed_on=datetime.date.today()
         )
+        LineItemFactory(task=task)
+        TaskFactory(group=group)
+        TaskFactory(group=group)
 
         new_job = JobFactory(project=ProjectFactory())
         self.assertEqual(new_job.groups.count(), 0)
+        self.assertEqual(new_job.all_groups.count(), 1)  # Job itself is a Group
         self.assertEqual(new_job.all_tasks.count(), 0)
+        self.assertEqual(new_job.all_lineitems.count(), 0)
 
         job.clone_to(new_job)
-        self.assertEqual(new_job.groups.count(), 2)
-        self.assertEqual(new_job.all_tasks.count(), 3)
 
-        new_group = new_job.groups.first()
-        self.assertEqual(new_group.tasks.count(), 2)
+        self.assertEqual(new_job.groups.count(), 1)
+        self.assertEqual(new_job.all_groups.count(), 3)
+        self.assertEqual(new_job.all_tasks.count(), 3)
+        self.assertEqual(new_job.all_lineitems.count(), 1)
+
+        new_group = new_job.groups.first().groups.first()
+        self.assertEqual(new_group.tasks.count(), 3)
         self.assertEqual(group.name, new_group.name)
         self.assertNotEqual(group.pk, new_group.pk)
 
-        new_task = new_job.groups.all()[1].tasks.first()
+        new_task = new_group.tasks.first()
         self.assertEqual(new_task.name, "running task")
         self.assertEqual(new_task.complete, 0)
         self.assertEqual(new_task.status, '')

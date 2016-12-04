@@ -242,7 +242,7 @@ def serialize(invoice):
                 'code': taskgroup.code,
                 'name': taskgroup.name,
                 'description': taskgroup.description,
-                'total': taskgroup.total,
+                'total': taskgroup.estimate,
                 'tasks': []
             }
             job_data['taskgroups'].append(taskgroup_dict)
@@ -251,8 +251,8 @@ def serialize(invoice):
                 task_dict = {
                     'id': task.id,
                     'code': task.code,
-                    'name': task.full_name,
-                    'description': task.full_description,
+                    'name': task.name,
+                    'description': task.description,
                     'complete': task.complete,
                     'unit': task.unit,
                     'price': task.price,
@@ -265,7 +265,7 @@ def serialize(invoice):
                     lineitem_dict = {
                         'id': lineitem.id,
                         'name': lineitem.name,
-                        'qty': lineitem.unit_qty,
+                        'qty': lineitem.qty,
                         'unit': lineitem.unit,
                         'price': lineitem.price,
                         'price_per': lineitem.total,
