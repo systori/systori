@@ -60,7 +60,7 @@ class CalculationTests(TestCase):
         """ To prevent regression, used to throw:
             TypeError: unsupported operand type(s) for -: 'float' and 'decimal.Decimal'
         """
-        task = Task()  # type: Task
+        task = Task(group=self.group)  # type: Task
         self.assertEqual(task.price_difference, 0)
 
     def test_task_price_difference(self):

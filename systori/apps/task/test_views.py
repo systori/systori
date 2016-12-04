@@ -41,13 +41,15 @@ class JobViewsTest(ClientTestCase):
             description='new job description',
             project=ProjectFactory()
         )  # type: Job
+
         self.assertEqual(job.status, Job.DRAFT)
-        response = self.client.get(
-            reverse('job.transition', args=[job.project.pk, job.pk, 'propose'])
-        )
-        self.assertEqual(response.status_code, 302)
-        job.refresh_from_db()
-        self.assertEqual(job.status, Job.PROPOSED)
+        for action, phase in [('propose', Job.PROPOSED), ('approve', Job.APPROVED)]:
+            response = self.client.get(
+                reverse('job.transition', args=[job.project.pk, job.pk, action])
+            )
+            self.assertEqual(response.status_code, 302)
+            job.refresh_from_db()
+            self.assertEqual(job.status, phase)
 
     def test_delete(self):
         job = JobFactory(project=ProjectFactory())

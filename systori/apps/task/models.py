@@ -63,6 +63,11 @@ class Group(OrderedModel):
         verbose_name_plural = _("Groups")
         ordering = ('order',)
 
+    def __init__(self, *args, **kwargs):
+        if 'parent' in kwargs and 'job' not in kwargs:
+            kwargs['job'] = kwargs['parent'].job
+        super().__init__(*args, **kwargs)
+
     @property
     def _structure(self):
         return self.job.project.structure
@@ -98,7 +103,7 @@ class Group(OrderedModel):
 
     def generate_groups(self):
         if self._structure.has_level(self.level+1):
-            Group.objects.create(parent=self, job=self.job).generate_groups()
+            Group.objects.create(parent=self).generate_groups()
 
     def _calc(self, field):
         total = Decimal(0.0)
@@ -350,6 +355,11 @@ class Task(OrderedModel):
         verbose_name_plural = _("Task")
         ordering = ('order',)
 
+    def __init__(self, *args, **kwargs):
+        if 'group' in kwargs and 'job' not in kwargs:
+            kwargs['job'] = kwargs['group'].job
+        super().__init__(*args, **kwargs)
+
     @property
     def is_billable(self):
         return self.complete > 0
@@ -458,6 +468,11 @@ class LineItem(OrderedModel):
         verbose_name = _("Line Item")
         verbose_name_plural = _("Line Items")
         ordering = ('order',)
+
+    def __init__(self, *args, **kwargs):
+        if 'task' in kwargs and 'job' not in kwargs:
+            kwargs['job'] = kwargs['task'].job
+        super().__init__(*args, **kwargs)
 
 
 class ProgressReport(models.Model):

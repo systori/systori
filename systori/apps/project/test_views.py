@@ -63,4 +63,3 @@ class TestProjectViews(ClientTestCase):
         proposal.jobs.add(job)
         response = self.client.get(reverse('project.view', args=[project.pk]), {})
         self.assertEqual(200, response.status_code)
-        print(response.content.decode('utf8'))

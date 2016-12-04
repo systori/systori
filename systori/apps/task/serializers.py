@@ -73,7 +73,7 @@ class LineItemSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         lineitem, _ = LineItem.objects.update_or_create(
             validated_data,
-            job=validated_data['job'],
+            job=validated_data['task'].job,
             token=validated_data['token']
         )
         return self.update(lineitem, {})
@@ -107,7 +107,7 @@ class TaskSerializer(serializers.ModelSerializer):
         lineitems = validated_data.pop('lineitems', [])
         task, _ = Task.objects.update_or_create(
             validated_data,
-            job=validated_data['job'],
+            job=validated_data['group'].job,
             token=validated_data['token']
         )
         return self.update(task, {'lineitems': lineitems})
@@ -126,7 +126,7 @@ class TaskSerializer(serializers.ModelSerializer):
             if pk: instance = get_object_or_404(LineItem.objects.all(), id=pk)
             serializer = LineItemSerializer(instance=instance, data=lineitem, partial=True)
             serializer.is_valid(raise_exception=True)
-            data['lineitems'].append(serializer.save(job=task.job, task=task))
+            data['lineitems'].append(serializer.save(task=task))
 
         self._data = data
 
@@ -151,7 +151,7 @@ class GroupSerializer(serializers.ModelSerializer):
         groups = validated_data.pop('groups', [])
         group, _ = Group.objects.update_or_create(
             validated_data,
-            job=validated_data['job'],
+            job=validated_data['parent'].job,
             token=validated_data['token']
         )
         return self.update(group, {'tasks': tasks, 'groups': groups})
@@ -171,7 +171,7 @@ class GroupSerializer(serializers.ModelSerializer):
             if pk: instance = get_object_or_404(Task.objects.all(), id=pk)
             serializer = TaskSerializer(instance=instance, data=task, partial=True)
             serializer.is_valid(raise_exception=True)
-            data['tasks'].append(serializer.save(job=group.job, group=group))
+            data['tasks'].append(serializer.save(group=group))
 
         for subgroup in groups:
             if 'groups' not in data: data['groups'] = []
@@ -179,7 +179,7 @@ class GroupSerializer(serializers.ModelSerializer):
             if pk: instance = get_object_or_404(Group.objects.all(), id=pk)
             serializer = GroupSerializer(instance=instance, data=subgroup, partial=True)
             serializer.is_valid(raise_exception=True)
-            data['groups'].append(serializer.save(job=group.job, parent=group))
+            data['groups'].append(serializer.save(parent=group))
 
         self._data = data
 
