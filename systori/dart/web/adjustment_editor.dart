@@ -1,6 +1,6 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
-import 'amount_element.dart';
+import 'package:systori/inputs.dart';
 
 
 class AdjustmentTable extends TableElement {
@@ -26,8 +26,8 @@ class AdjustmentTable extends TableElement {
     }
 
     recalculate() {
-        Amount adjustment_total = new Amount(0, 0, tax_rate),
-               corrected_total = new Amount(0, 0, tax_rate);
+        Amount adjustment_total = new Amount.from(0, 0, tax_rate),
+               corrected_total = new Amount.from(0, 0, tax_rate);
         for (AdjustmentRow row in rows) {
             adjustment_total += row.adjustment_cell.amount;
             corrected_total += row.corrected_cell.amount;

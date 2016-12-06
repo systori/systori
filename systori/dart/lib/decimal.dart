@@ -34,6 +34,7 @@ class Decimal implements Comparable<Decimal> {
     String get number => isNull ? "" : NUMBER.format(decimal);
     String get difference => isNull ? "" : DIFFERENCE.format(decimal);
     String get canonical => isNull ? "" : CANONICAL.format(decimal);
+    String get percent => isNull ? "" : "{(decimal*100).round()}%";
 
     Decimal([num number=0, precision=1000]):
             this._(number != null ? (number * precision).round() : number, precision);
@@ -73,4 +74,10 @@ class Decimal implements Comparable<Decimal> {
 
     bool operator >= (Decimal other) =>
         _decimal >= other._decimal;
+
+    int get hashCode {
+        // TODO: re-implement this when dart sdk exposes _JenkinsSmiHash
+        //  SEE: https://github.com/dart-lang/sdk/issues/11617
+        return _decimal.hashCode ^ _precision.hashCode;
+    }
 }

@@ -11,4 +11,15 @@ dev_dependencies:
   test: any
 transformers:
   - $dart2js:
-      $include: web/job_editor.dart
+      $include:
+        - web/adjustment_editor.dart
+        - web/field.dart
+        - web/field_planning.dart
+        - web/invoice_editor.dart
+        - web/job_editor.dart
+        - web/payment_editor.dart
+        - web/project_list.dart
+        - web/proposal_editor.dart
+        - web/refund_editor.dart
+        - web/timetracking.dart
+      commandLineOptions: [--show-package-warnings]

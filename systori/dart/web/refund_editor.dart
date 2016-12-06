@@ -1,6 +1,7 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
-import 'amount_element.dart';
+import 'package:systori/inputs.dart';
+import 'package:systori/decimal.dart';
 
 
 class RefundTable extends TableElement {
@@ -24,13 +25,13 @@ class RefundTable extends TableElement {
 
     recalculate() {
 
-        Amount refund_total = new Amount(0, 0, tax_rate);
+        Amount refund_total = new Amount.from(0, 0, tax_rate);
         for (RefundRow row in rows) {
             refund_total += row.refund_cell.amount;
         }
         refund_total_cell.update(refund_total);
 
-        Amount credit_total = new Amount(0, 0, tax_rate);
+        Amount credit_total = new Amount.from(0, 0, tax_rate);
         for (RefundRow row in rows) {
             refund_total = row.consume_refund(refund_total);
             credit_total += row.credit_cell.amount;
@@ -67,7 +68,7 @@ class RefundRow extends TableRowElement {
     }
 
     consume_refund(Amount refund) {
-        if (refund_cell.amount.gross > 0) {
+        if (refund_cell.amount.gross.decimal > 0) {
             // don't apply the refunds back on the row that's being refunded
             credit_cell.zero();
             return refund;

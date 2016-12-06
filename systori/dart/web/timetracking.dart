@@ -14,7 +14,7 @@ class Resource {
     String url;
     int id;
 
-    Resource() {
+    Resource(url): url = url {
         var csrftoken = (querySelector('input[name=csrfmiddlewaretoken]') as InputElement).value;
         headers = {
             "X-CSRFToken": csrftoken,
@@ -66,7 +66,7 @@ class Resource {
 
 
 class TimetrackingTimer extends Resource {
-    String url = "/api/v1/timetracking/timer/";
+
     InputElement box = querySelector('#timer-box');
     HtmlElement button;
     String _current_button_icon = 'play';
@@ -77,6 +77,8 @@ class TimetrackingTimer extends Resource {
     int minutes = 0;
     int seconds = 0;
     Timer timer;
+
+    TimetrackingTimer(): super("/api/v1/timetracking/timer/");
 
     void initialize() {
         report_table = document.querySelector('#timer-report');
@@ -203,7 +205,7 @@ class TimetrackingTimer extends Resource {
 
 
 class Report extends Resource {
-    String url = "/api/v1/timetracking/report/";
+    Report(): super("/api/v1/timetracking/report/");
 }
 
 
@@ -212,7 +214,7 @@ class ReportTableRow extends TableRowElement with MapMixin {
 
     ReportTableRow.created() : super.created(); attached() {
         mapping = new Map<String, TableCellElement>();
-        this.children.forEach((TableCellElement cell) {
+        (this.children as ElementList<TableCellElement>).forEach((cell) {
             var cell_name = cell.dataset['mapping'];
             mapping[cell_name] = cell;
             cell.classes.add('cell-${cell_name}');
@@ -283,7 +285,7 @@ class ReportTable extends TableElement {
         var data_pivot = data.iterator;
         data_pivot.moveNext();
         // Skipping table head
-        this.body.children.skip(1).forEach((row) {
+        (this.body.children as ElementList<ReportTableRow>).skip(1).forEach((row) {
             row.fill(data_pivot.current);
             data_pivot.moveNext();
         });

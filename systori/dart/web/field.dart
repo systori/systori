@@ -1,6 +1,6 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
-import 'common.dart';
+import 'package:systori/decimal.dart';
 
 
 void main() {
@@ -10,24 +10,23 @@ void main() {
     InputElement complete_input = querySelector('input[name="complete"]');
     InputElement submit_button = querySelector('#task-submit');
     HtmlElement percent_label = querySelector('#percent');
-    double complete_range_max = double.parse(complete_range_slider.attributes['max']);
+    Decimal complete_range_max = new Decimal.parse(complete_range_slider.attributes['max']);
 
     complete_range_slider.onInput.listen((e) {
-        double range_position = double.parse(e.currentTarget.value);
-        int percent_value = (range_position / complete_range_max * 100).round();
-        percent_label.innerHtml = '$percent_value%';
-        complete_input.value = CURRENCY.format(range_position);
+        Decimal range_position = new Decimal.parse(complete_range_slider.value);
+        percent_label.innerHtml = (range_position / complete_range_max).percent;
+        complete_input.value = range_position.money;
     });
 
     complete_input.onKeyUp.listen((e) {
-        String input = e.currentTarget.value;
-        double parsed_input;
+        String input = complete_input.value;
+        Decimal parsed_input;
         if (input == '') {
             percent_label.innerHtml = '0%';
-            complete_range_slider.value = CURRENCY.format(0);
+            complete_range_slider.value = new Decimal(0).money;
         } else {
             try {
-                parsed_input = parse_decimal(input);
+                parsed_input = new Decimal.parse(input);
             } catch(e) {
                 complete_input.parent.classes.add('has-error');
                 submit_button.attributes['disabled'] = 'disabled';
@@ -35,9 +34,8 @@ void main() {
             }
             complete_input.parent.classes.remove('has-error');
             submit_button.attributes.remove('disabled');
-            int percent_value = (parsed_input / complete_range_max * 100).round();
-            percent_label.innerHtml = '$percent_value%';
-            complete_range_slider.value = parsed_input.round().toString();
+            percent_label.innerHtml = (parsed_input / complete_range_max).percent;
+            complete_range_slider.value = parsed_input.decimal.round().toString();
         }
     });
 }

@@ -1,6 +1,7 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
-import 'amount_element.dart';
+import 'package:systori/inputs.dart';
+import 'package:systori/decimal.dart';
 
 
 class ProposalTable extends TableElement {
@@ -19,7 +20,7 @@ class ProposalTable extends TableElement {
     }
 
     recalculate() {
-        var estimate_total = new Amount(0, 0, tax_rate);
+        var estimate_total = new Amount.from(0, 0, tax_rate);
         for (var row in rows) {
             estimate_total += row.estimate_cell.amount;
         }

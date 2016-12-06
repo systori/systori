@@ -60,7 +60,7 @@ class ModelState {
     }
 
     Map<String,dynamic> get delta {
-        var result = {};
+        var result = <String,dynamic>{};
         inputMap(model.inputs).forEach((String key, dynamic value) {
             if (isChanged(key, value)) result[key] = value;
         });
@@ -68,7 +68,7 @@ class ModelState {
     }
 
     static Map<String,dynamic> inputMap(Iterable<Input> inputs) {
-        var result = {};
+        var result = <String,dynamic>{};
         inputs.forEach((Input input) => result.addAll(input.values));
         return result;
     }
@@ -114,7 +114,7 @@ abstract class Model extends HtmlElement {
         if (!dataset.containsKey('token')) dataset['token'] = tokenGenerator.next().toString();
     }
 
-    attached() => state = new ModelState(this);
+    attached() { state = new ModelState(this); }
 
     HtmlElement getView(String field) =>
         this.querySelector(":scope>.editor .${field}");

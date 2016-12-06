@@ -30,7 +30,7 @@ class Repository {
                 })
         );
 
-        var result = new Completer<int>();
+        var result = new Completer<bool>();
         wait_for_response.then((response) {
             if (response.status == 200) {
                 result.complete(true);
@@ -83,16 +83,17 @@ class FieldClipboard extends HtmlElement {
             workers.join(', ') + '<br />' +
             equipment.join(', ')
         );
+        var dailyPlans = querySelectorAll('daily-plan') as List<DailyPlan>;
         if (equipment.isEmpty && workers.isEmpty) {
-            querySelectorAll('daily-plan').forEach((DailyPlan dp) => dp.hidePasteButton());
+            dailyPlans.forEach((dp) => dp.hidePasteButton());
             style.display = 'none';
         } else {
-            querySelectorAll('daily-plan').forEach((DailyPlan dp) => dp.showPasteButton());
+            dailyPlans.forEach((dp) => dp.showPasteButton());
             style.display = 'block';
         }
     }
 
-    cancel([_]) {
+    cancel([MouseEvent _]) {
         workers.forEach((w) => w.cancelCopy());
         workers.clear();
         equipment.forEach((e) => e.cancelCopy());
@@ -103,7 +104,7 @@ class FieldClipboard extends HtmlElement {
     pasteTo(DailyPlan dp) {
         var dailyplans = [dp];
         [workers, equipment].forEach((list) => list.forEach((FieldItem i) {
-            !dailyplans.contains(i.plan) && dailyplans.add(i.plan);
+            if (!dailyplans.contains(i.plan)) dailyplans.add(i.plan);
         }));
         workers.forEach((w) => dp.addWorker(w));
         equipment.forEach((e) => dp.addEquipment(e));
@@ -172,8 +173,8 @@ class DailyPlan extends HtmlElement {
     }
 
     showPasteButton() {
-        var items = this.querySelectorAll('field-worker,field-equipment');
-        var has_selected = items.any((FieldItem fi) => fi.selected);
+        var items = this.querySelectorAll('field-worker,field-equipment') as List<FieldItem>;
+        var has_selected = items.any((fi) => fi.selected);
         if (has_selected) {
             hidePasteButton();
         } else {
@@ -184,7 +185,7 @@ class DailyPlan extends HtmlElement {
 }
 
 
-class FieldItem extends HtmlElement {
+abstract class FieldItem extends HtmlElement {
 
     static String SELECTED = 'list-group-item-warning';
 
@@ -205,7 +206,7 @@ class FieldItem extends HtmlElement {
 
     String toString() => '<span class="badge">' + name + '</span>';
 
-    toggleCopy([_]) {
+    toggleCopy([MouseEvent _]) {
         this.classes.remove(SELECTED);
         if (!containsSelf()) {
             this.classes.add(SELECTED);

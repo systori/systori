@@ -1,6 +1,7 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
-import 'amount_element.dart';
+import 'package:systori/inputs.dart';
+import 'package:systori/decimal.dart';
 
 
 class InvoiceTable extends TableElement {
@@ -28,11 +29,11 @@ class InvoiceTable extends TableElement {
 
     recalculate() {
 
-        var estimate_total = new Amount(0, 0, tax_rate),
-            progress_total = new Amount(0, 0, tax_rate),
-            invoiced_total = new Amount(0, 0, tax_rate),
-            itemized_total = new Amount(0, 0, tax_rate),
-            debit_total = new Amount(0, 0, tax_rate);
+        var estimate_total = new Amount.from(0, 0, tax_rate),
+            progress_total = new Amount.from(0, 0, tax_rate),
+            invoiced_total = new Amount.from(0, 0, tax_rate),
+            itemized_total = new Amount.from(0, 0, tax_rate),
+            debit_total = new Amount.from(0, 0, tax_rate);
 
         for (var row in rows) {
             estimate_total += row.estimate_cell.amount;
@@ -45,12 +46,12 @@ class InvoiceTable extends TableElement {
         estimate_total_cell.update(estimate_total);
 
         progress_total_cell.update(progress_total);
-        progress_total_cell.update_percent(
-                estimate_total.net > 0 ? progress_total.net/estimate_total.net * 100 : 0.0);
+        progress_total_cell.updatePercent(
+                estimate_total.net.decimal > 0 ? (progress_total.net/estimate_total.net).decimal * 100 : 0.0);
 
         invoiced_total_cell.update(invoiced_total);
-        invoiced_total_cell.update_percent(
-                progress_total.net > 0 ? invoiced_total.net/progress_total.net * 100 : 0.0);
+        invoiced_total_cell.updatePercent(
+                progress_total.net.decimal > 0 ? (invoiced_total.net/progress_total.net).decimal * 100 : 0.0);
 
         itemized_total_cell.update(itemized_total);
 
@@ -123,7 +124,7 @@ class InvoiceRow extends TableRowElement {
             itemized_cell.classes.remove('selected');
         }
 
-        if (itemized_cell.amount != debit_cell.amount && debit_cell.amount.gross > 0) {
+        if (itemized_cell.amount != debit_cell.amount && debit_cell.amount.gross.decimal > 0) {
             is_override_input.value = 'True';
             classes.add('override');
         } else {
