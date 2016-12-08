@@ -59,10 +59,20 @@ class GAEBStructureFieldTests(TestCase):
             GAEBStructureField().clean('01.0001.0001.001.0.0.0', None)
 
     def test_depth_field(self):
-        project = Project()
-        self.assertEquals(project.structure.structure, '01.01.001')
+
+        project = Project(structure='01.01.001')
+        self.assertEquals(project.structure.pattern, '01.01.001')
         self.assertEquals(project.structure_depth, 1)
-        project.structure = GAEBStructure('01.01.01.001')
+
+        # setting `structure` automatically updates `structure_depth`
+        project.structure = '01.01.01.001'
+        self.assertEquals(project.structure_depth, 2)
+
+        # structure str automatically get converted to GAEBStructure
+        self.assertIsInstance(project.structure, GAEBStructure)
+
+        # directly setting `structure_depth` is a no-op
+        project.structure_depth = 99
         self.assertEquals(project.structure_depth, 2)
 
 

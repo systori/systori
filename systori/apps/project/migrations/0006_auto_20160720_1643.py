@@ -11,11 +11,12 @@ def zfill_field_renamed(apps, schema_editor):
     for company in Company.objects.all():
         company.activate()
         for project in Project.objects.all():
-            project.structure_format = "{}.{}.{}".format(
+            project.structure = "{}.{}.{}".format(
                 '1'.zfill(project.job_zfill),
                 '1'.zfill(project.taskgroup_zfill),
                 '1'.zfill(project.task_zfill)
             )
+            project._meta.local_concrete_fields = project._meta.local_concrete_fields[:-1]
             project.save()
 
 

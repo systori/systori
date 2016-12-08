@@ -11,16 +11,16 @@ class GAEBStructure:
 
     MAXLEVELS = 6  # 1 Lot/Job + 4 Categories + 1 Task
 
-    def __init__(self, structure):
+    def __init__(self, pattern):
 
-        if not structure:
+        if not pattern:
             raise exceptions.ValidationError(
                 "GAEB hierarchy cannot be blank.",
                 code='invalid',
             )
 
-        self.structure = structure
-        self.zfill = [len(p) for p in structure.split('.')]
+        self.pattern = pattern
+        self.zfill = [len(p) for p in pattern.split('.')]
 
         if not (2 <= len(self.zfill) <= self.MAXLEVELS):
             raise exceptions.ValidationError(
@@ -124,7 +124,7 @@ class GAEBStructureField(models.Field):
     def get_prep_value(self, value):
         value = super().get_prep_value(value)
         value = self.to_python(value)
-        return value.structure
+        return value.pattern
 
     def formfield(self, **kwargs):
         defaults = {
