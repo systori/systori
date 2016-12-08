@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 
 from ..company.factories import CompanyFactory
 
+from .models import Project
 from .gaeb import GAEBStructure, GAEBStructureField
 from .gaeb_utils import gaeb_import
 
@@ -56,6 +57,13 @@ class GAEBStructureFieldTests(TestCase):
     def test_too_long(self):
         with self.assertRaisesMessage(ValidationError, 'outside the allowed hierarchy'):
             GAEBStructureField().clean('01.0001.0001.001.0.0.0', None)
+
+    def test_depth_field(self):
+        project = Project()
+        self.assertEquals(project.structure.structure, '01.01.001')
+        self.assertEquals(project.structure_depth, 1)
+        project.structure = GAEBStructure('01.01.01.001')
+        self.assertEquals(project.structure_depth, 2)
 
 
 class GaebImportTests(TestCase):
