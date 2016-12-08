@@ -16,7 +16,7 @@ class JobFormTest(TestCase):
         self.company = CompanyFactory()  # type: Company
         self.project = ProjectFactory()  # type: Project
 
-    def test_validation(self):
+    def test_required_field_validation(self):
         activate('en')
 
         form = forms.JobTemplateCreateForm(data={})

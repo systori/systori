@@ -8,16 +8,16 @@ class ProjectFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Project
-        django_get_or_create = ('name',)
 
     name = fuzzy.FuzzyText(length=15)
+    structure = "01.01.001"
+    maximum_depth = 1
 
 
 class JobSiteFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = JobSite
-        django_get_or_create = ('name',)
 
     name = fuzzy.FuzzyText(length=15)
     address = fuzzy.FuzzyText(length=15)

@@ -15,9 +15,11 @@ class ProjectCreateForm(ModelForm):
 
     class Meta:
         model = Project
-        fields = ['name', 'description', 'address', 'postal_code', 'city', 'structure_format']
+        fields = ['name', 'description', 'address', 'postal_code', 'city', 'structure']
 
     def save(self, commit=True):
+
+        self.instance.maximum_depth = self.instance.structure.maximum_depth
 
         project = super().save(commit)
 
@@ -42,11 +44,22 @@ class ProjectImportForm(forms.Form):
 
 
 class ProjectUpdateForm(ModelForm):
-    # TODO: User should only be able to change the formatting of the
-    #       structure_format but not the number of levels. Need validation.
+
     class Meta:
         model = Project
-        fields = ['name', 'description', 'structure_format']
+        fields = ['name', 'description', 'structure']
+
+    def clean_structure(self):
+        structure = self.cleaned_data.get("structure")
+        if self.instance.maximum_depth != structure.maximum_depth:
+            raise forms.ValidationError(
+                "Cannot change depth after project has been created.",
+                code='invalid',
+            )
+
+    def save(self, commit=True):
+        self.instance.maximum_depth = self.instance.structure.maximum_depth
+        return super().save(commit)
 
 
 class JobSiteForm(ModelForm):

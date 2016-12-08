@@ -53,6 +53,7 @@ class Group(OrderedModel):
 
     name = models.CharField(_("Name"), default="", blank=True, max_length=512)
     description = models.TextField(_("Description"), default="", blank=True)
+    depth = models.PositiveIntegerField(editable=False, db_index=True)
     parent = models.ForeignKey('self', related_name='groups', null=True)
     token = models.IntegerField('api token', null=True)
     job = models.ForeignKey('Job', null=True, related_name='all_groups')

@@ -14,36 +14,7 @@ from systori.lib.utils import nice_percent
 from ..task.models import Job, JobQuerySet
 
 from geopy import geocoders
-
-
-class GAEBHierarchyStructure:
-    """ See: docs/GAEB_DA_XML_3.0_en.pdf """
-
-    MAXLEVELS = 6  # 1 Lot/Job + 4 Categories + 1 Task
-
-    def __init__(self, format):
-        self.format = format
-        self.zfill = [len(p) for p in format.split('.')]
-        assert 2 <= len(self.zfill) <= self.MAXLEVELS, \
-            "GAEB hiearchy is outside the allowed hierarchy depth."
-
-    @staticmethod
-    def _format(code, zfill):
-        return str(code).zfill(zfill)
-
-    def format_task(self, code):
-        return self._format(code, self.zfill[-1])
-
-    def format_group(self, code, level):
-        assert self.has_level(level), "Group level is outside the allowed hierarchy depth."
-        return self._format(code, self.zfill[level])
-
-    def has_level(self, level):
-        return 0 <= level < (len(self.zfill)-1)
-
-    @property
-    def depth(self):
-        return len(self.zfill)-2
+from .gaeb import GAEBStructureField
 
 
 def _job_annotation(type, inner):
@@ -82,14 +53,16 @@ class Project(models.Model):
     name = models.CharField(_('Project Name'), max_length=512)
     description = models.TextField(_('Project Description'), blank=True, null=True)
     is_template = models.BooleanField(default=False)
-    structure_format = models.CharField(_('Numbering Structure'), max_length=124, default="01.01.001")
+    structure = GAEBStructureField(_('Numbering Structure'), default="01.01.001")
+    maximum_depth = models.PositiveIntegerField(editable=False, db_index=True)
     account = models.OneToOneField('accounting.Account', related_name="project", null=True)
 
     objects = ProjectQuerySet.as_manager()
 
-    @cached_property
-    def structure(self):
-        return GAEBHierarchyStructure(self.structure_format)
+    class Meta:
+        verbose_name = _("Project")
+        verbose_name_plural = _("Projects")
+        ordering = ['name']
 
     PROSPECTIVE = "prospective"
     TENDERING = "tendering"
@@ -245,11 +218,6 @@ class Project(models.Model):
             return reverse('templates')
         else:
             return reverse('project.view', args=[self.id])
-
-    class Meta:
-        verbose_name = _("Project")
-        verbose_name_plural = _("Projects")
-        ordering = ['name']
 
     @property
     def is_billable(self):

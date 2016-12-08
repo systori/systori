@@ -22,6 +22,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(blank=True, default='', max_length=512, verbose_name='Name')),
                 ('description', models.TextField(blank=True, default='', verbose_name='Description')),
                 ('parent', models.ForeignKey('self', models.CASCADE, null=True, related_name='groups')),
+                ('depth', models.PositiveIntegerField(db_index=True, editable=False)),
             ],
             options={
                 'ordering': ('order',),

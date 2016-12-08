@@ -8,26 +8,12 @@ import 'package:systori/orderable.dart';
 import 'package:systori/inputs.dart';
 import 'model.dart';
 import 'changemanager.dart';
+import 'gaeb.dart';
 
 
 ChangeManager changeManager;
 
 
-class GAEBHierarchyStructure {
-    // See also Python version in apps/project/models.py
-
-    final String structure;
-    final List<int> zfill;
-
-    GAEBHierarchyStructure(String structure):
-        structure = structure,
-        zfill = structure.split('.').map((s)=>s.length).toList();
-
-    String _format(String position, int zfill) => position.padLeft(zfill, '0');
-    String format_task(String position) => _format(position, zfill[zfill.length-1]);
-    String format_group(String position, int level) => _format(position, zfill[level]);
-    bool has_level(int level) => 0 <= level && level < (zfill.length-1);
-}
 
 
 class Job extends Group {
@@ -43,15 +29,16 @@ class Job extends Group {
 
 class Group extends Model {
 
-    Group get parentGroup => parent as Group;
-    List<String> childTypes = ['group', 'task'];
-
     DivElement code;
     Input name;
     Input description;
     bool get isEmpty => name.text.isEmpty;
 
-    int get level => (parent as Group).level + 1;
+    List<String> childTypes = ['group', 'task'];
+    Group get parentGroup => parent as Group;
+    ElementList<Group> get groups => this.querySelectorAll(':scope>sys-group');
+    ElementList<Task> get tasks => this.querySelectorAll(':scope>sys-task');
+    int get depth => (parent as Group).depth + 1;
 
     set order(int position) {
         dataset['order'] = position.toString();
@@ -112,13 +99,13 @@ class Group extends Model {
     }
 
     updateCode() {
-        enumerate/*<Group>*/(this.querySelectorAll(':scope>sys-group'))
+        enumerate<Group>(this.querySelectorAll(':scope>sys-group'))
             .forEach((IndexedValue<Group> g) {
             g.value.order = g.index+1;
             g.value.updateCode();
         });
-        enumerate/*<Group>*/(this.querySelectorAll(':scope>sys-task'))
-            .forEach((IndexedValue<Group> g) {
+        enumerate<Task>(this.querySelectorAll(':scope>sys-task'))
+            .forEach((IndexedValue<Task> g) {
             g.value.order = g.index+1;
         });
     }
@@ -277,7 +264,7 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     }
 
     Iterable<Model> childrenOfType(String childType) =>
-        this.querySelectorAll(":scope > sys-lineitem-sheet > sys-lineitem") as List<Model>;
+        this.querySelectorAll<Model>(":scope > sys-lineitem-sheet > sys-lineitem");
 
     handleKeyboard(KeyEvent e) {
         if (e.keyCode == KeyCode.ENTER) {
@@ -286,7 +273,7 @@ class Task extends Model with Row, TotalRow, HtmlRow {
                 (parent as Group).createSibling();
                 remove();
             } else {
-                LineItem child = this.querySelector(':scope>sys-lineitem-sheet>sys-lineitem') as LineItem;
+                LineItem child = this.querySelector(':scope>sys-lineitem-sheet>sys-lineitem');
                 if (child != null && child.isEmpty) {
                     child.name.focus();
                 } else {
@@ -364,7 +351,7 @@ class LineItem extends Model with Orderable, Row, HtmlRow {
 
 class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
 
-    List<LineItem> get rows => this.querySelectorAll(':scope>sys-lineitem') as List<LineItem>;
+    List<LineItem> get rows => this.querySelectorAll<LineItem>(':scope>sys-lineitem');
 
     LineItemSheet.created(): super.created() {
         on['calculate'].listen((CustomEvent e) {
