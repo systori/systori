@@ -19,8 +19,6 @@ class ProjectCreateForm(ModelForm):
 
     def save(self, commit=True):
 
-        self.instance.maximum_depth = self.instance.structure.maximum_depth
-
         project = super().save(commit)
 
         JobCreateForm(data={
@@ -57,10 +55,6 @@ class ProjectUpdateForm(ModelForm):
                 code='invalid',
             )
         return structure
-
-    def save(self, commit=True):
-        self.instance.maximum_depth = self.instance.structure.maximum_depth
-        return super().save(commit)
 
 
 class JobSiteForm(ModelForm):

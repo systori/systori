@@ -45,7 +45,7 @@ class ProjectFormTest(TestCase):
         })
         self.assertTrue(form.is_valid())
         project = form.save()
-        self.assertEquals(project.maximum_depth, 2)
+        self.assertEquals(project.structure_depth, 2)
         self.assertEquals(len(project.jobs.all()), 1)
         self.assertEquals(project.jobs.first().code, '01')
         self.assertEquals(len(project.jobsites.all()), 1)
@@ -60,7 +60,7 @@ class ProjectFormTest(TestCase):
         self.assertTrue(form.is_valid(), form.errors)
         form.save()
         project.refresh_from_db()
-        self.assertEquals(project.maximum_depth, 1)
+        self.assertEquals(project.structure_depth, 1)
         self.assertEqual(project.name, 'updated project')
 
     def test_update_structure_validation(self):

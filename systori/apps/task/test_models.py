@@ -180,15 +180,15 @@ class CodeFormattingTests(TestCase):
         CompanyFactory()
 
     def test_job_code(self):
-        project = ProjectFactory(structure_format="0.0")
+        project = ProjectFactory(structure="0.0")
         self.assertEqual(JobFactory(project=project).code, '1')
         self.assertEqual(JobFactory(project=project).code, '2')
-        project = ProjectFactory(structure_format="000.0")
+        project = ProjectFactory(structure="000.0")
         self.assertEqual(JobFactory(project=project).code, '001')
         self.assertEqual(JobFactory(project=project).code, '002')
 
     def test_group_code(self):
-        job = JobFactory(project=ProjectFactory(structure_format="0.000.00.0"))
+        job = JobFactory(project=ProjectFactory(structure="0.000.00.0"))
         group = GroupFactory(parent=job)
         self.assertEqual(group.code, '1.001')
         self.assertEqual(GroupFactory(parent=group).code, '1.001.01')
@@ -199,20 +199,20 @@ class CodeFormattingTests(TestCase):
 
     def test_job_direct_tasks_code(self):
         """ Tasks are attached directly to the job. """
-        job = JobFactory(project=ProjectFactory(structure_format="00.000"))
+        job = JobFactory(project=ProjectFactory(structure="00.000"))
         task = TaskFactory(group=job)
         self.assertEqual(task.code, '01.001')
 
     def test_blank_group_task_code(self):
         """ One of the groups in the hierarchy is blank. """
-        job = JobFactory(project=ProjectFactory(structure_format="00.00.000"))
+        job = JobFactory(project=ProjectFactory(structure="00.00.000"))
         group = GroupFactory(name='', parent=job)
         task = TaskFactory(group=group)
         self.assertEqual(task.code, '01._.001')
 
     def test_complex_groups_task_code(self):
         """ A more comprehensive test case. """
-        job = JobFactory(project=ProjectFactory(structure_format="0.00.00.0000"))
+        job = JobFactory(project=ProjectFactory(structure="0.00.00.0000"))
         group1 = GroupFactory(parent=job)
         GroupFactory(parent=group1)
         GroupFactory(parent=group1)
@@ -279,14 +279,14 @@ class GroupTests(TestCase):
         CompanyFactory()
 
     def test_no_groups_to_generate_for_job(self):
-        project = ProjectFactory(structure_format="0.0")
+        project = ProjectFactory(structure="0.0")
         job = JobFactory(project=project)
         self.assertEqual(Group.objects.count(), 1)
         job.generate_groups()
         self.assertEqual(Group.objects.count(), 1)
 
     def test_two_subgroups_generated_from_job(self):
-        project = ProjectFactory(structure_format="0.0.0.0")
+        project = ProjectFactory(structure="0.0.0.0")
         job = JobFactory(project=project)
         self.assertEqual(Group.objects.count(), 1)
         job.generate_groups()
@@ -296,7 +296,7 @@ class GroupTests(TestCase):
         self.assertEqual(job.groups.first().groups.first().pk, 3)
 
     def test_prefetching(self):
-        project = ProjectFactory(structure_format="0.00.00.00.00.0000")
+        project = ProjectFactory(structure="0.00.00.00.00.0000")
         job = JobFactory(project=project)  # type: Job
         job.generate_groups()
 

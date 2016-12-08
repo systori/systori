@@ -188,7 +188,7 @@ class EditorApiTest(ClientTestCase):
         }, response.data)
 
     def test_delete_task(self):
-        job = JobFactory(project=ProjectFactory(structure_format="0.0.0.0"))
+        job = JobFactory(project=ProjectFactory(structure="0.0.0.0"))
         TaskFactory(group=job)
         TaskFactory(group=job)
         self.assertEqual(2, Task.objects.count())

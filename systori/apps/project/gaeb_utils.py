@@ -68,7 +68,7 @@ def gaeb_import(file):
     for ctgy in root.Award.BoQ.BoQBody.BoQCtgy:
         job = Job.objects.create(name=" ".join(ctgy.LblTx.xpath(".//text()")), project=project)
         for grp in ctgy.BoQBody.BoQCtgy:
-            taskgroup = Group.objects.create(name=" ".join(grp.LblTx.xpath(".//text()")), job=job)
+            taskgroup = Group.objects.create(name=" ".join(grp.LblTx.xpath(".//text()")), parent=job)
             for item in grp.BoQBody.Itemlist.getchildren():
                 task = Task.objects.create(group=taskgroup)
                 task.qty = get(item, "Qty", default=0)

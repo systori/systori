@@ -48,7 +48,7 @@ class TestProjectViews(ClientTestCase):
             'address': 'One Street',
             'city': 'Town',
             'postal_code': '12345',
-            'structure_format': '0.0',
+            'structure': '0.0',
         }
 
         response = self.client.post(reverse('project.create'), data)

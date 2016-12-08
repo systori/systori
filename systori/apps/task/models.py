@@ -190,7 +190,7 @@ class JobQuerySet(models.QuerySet):
         return self.with_estimate().with_progress()
 
     def with_hierarchy(self, project):
-        depth = project.structure.depth
+        depth = project.structure.maximum_depth
         prefetch = []
         while depth > 0:
             prefetch.append('groups')
@@ -247,6 +247,12 @@ class Job(Group):
     def __init__(self, *args, **kwargs):
         kwargs['depth'] = 0
         super().__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.job_id is None:
+            self.job = self
+            self.save()
 
     @transition(field=status, source="*", target=DRAFT)
     def draft(self):
