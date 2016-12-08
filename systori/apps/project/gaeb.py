@@ -1,5 +1,6 @@
 from django.db import models
 from django.core import exceptions, validators
+from django.forms import forms
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -46,17 +47,65 @@ class GAEBStructure:
         return 0 <= depth <= self.maximum_depth
 
 
+class GAEBStructureFormField(forms.Field):
+
+    def __init__(self, max_length=None, *args, **kwargs):
+        self.max_length = max_length
+        super().__init__(*args, **kwargs)
+
+    def to_python(self, value):
+        if isinstance(value, GAEBStructure) or value is None:
+            return value
+        return GAEBStructure(value)
+
+    def widget_attrs(self, widget):
+        attrs = super().widget_attrs(widget)
+        attrs['maxlength'] = self.max_length
+        return attrs
+
+
+class GAEBStructureProperty:
+
+    def __init__(self, name):
+        self.name = name
+
+    def __get__(self, instance, type=None):
+        return instance.__dict__[self.name]
+
+    def __set__(self, instance, value):
+        if isinstance(value, str):
+            value = GAEBStructure(value)
+        if isinstance(value, GAEBStructure):
+            instance.__dict__[self.name] = value
+            instance.__dict__[self.name+'_depth'] = value.maximum_depth
+        else:
+            raise TypeError("%s value must be a GAEBStructure instance, not '%r'" % (self.name, value))
+
+
 class GAEBStructureField(models.Field):
     description = _("Pattern for the GAEB hierarchy code structure.")
 
     def __init__(self, *args, **kwargs):
-        kwargs['max_length'] = 256
+        kwargs['max_length'] = 64
         super().__init__(*args, **kwargs)
 
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
         del kwargs["max_length"]
         return name, path, args, kwargs
+
+    def contribute_to_class(self, cls, name, **kwargs):
+        super().contribute_to_class(cls, name)
+
+        setattr(cls, name, GAEBStructureProperty(name))
+
+        depth_name = name+'_depth'
+        depth_field = models.PositiveIntegerField(editable=False, db_index=True)
+        cls.add_to_class(depth_name, depth_field)
+        setattr(cls, depth_name, property(
+            fget=lambda obj: obj.__dict__[depth_name],
+            fset=lambda obj, val: None,
+        ))
 
     def get_internal_type(self):
         return "CharField"
@@ -76,3 +125,13 @@ class GAEBStructureField(models.Field):
         value = super().get_prep_value(value)
         value = self.to_python(value)
         return value.structure
+
+    def formfield(self, **kwargs):
+        defaults = {
+            'form_class': GAEBStructureFormField,
+            'max_length': self.max_length
+        }
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
+
+

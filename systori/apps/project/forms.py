@@ -51,11 +51,12 @@ class ProjectUpdateForm(ModelForm):
 
     def clean_structure(self):
         structure = self.cleaned_data.get("structure")
-        if self.instance.maximum_depth != structure.maximum_depth:
+        if self.instance.structure_depth != structure.maximum_depth:
             raise forms.ValidationError(
                 "Cannot change depth after project has been created.",
                 code='invalid',
             )
+        return structure
 
     def save(self, commit=True):
         self.instance.maximum_depth = self.instance.structure.maximum_depth

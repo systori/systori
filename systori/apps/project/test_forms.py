@@ -32,7 +32,7 @@ class ProjectFormTest(TestCase):
             self.assertIn('structure', form.errors, 'No validation error triggered.')
             return form.errors['structure']
 
-        self.assertEqual(errors(''), ['This field is required.'])
+        self.assertEqual(errors(''), ['GAEB hierarchy cannot be blank.'])
         self.assertEqual(errors('0'), ['GAEB hierarchy is outside the allowed hierarchy depth.'])
 
     def test_create_save(self):
@@ -55,23 +55,23 @@ class ProjectFormTest(TestCase):
         self.assertEqual(project.name, 'new project')
         form = forms.ProjectUpdateForm(data={
             'name': 'updated project',
-            'structure': '0.0',
+            'structure': '0.0.0',
         }, instance=project)
         self.assertTrue(form.is_valid(), form.errors)
         form.save()
         project.refresh_from_db()
-        self.assertEquals(project.maximum_depth, 0)
+        self.assertEquals(project.maximum_depth, 1)
         self.assertEqual(project.name, 'updated project')
 
-#    def test_update_structure_validation(self):
-#        activate('en')
-#        project = ProjectFactory(name='new project')
-#
-#        def errors(s):
-#            form = forms.ProjectUpdateForm(data={'structure': s}, instance=project)
-#            self.assertIn('structure', form.errors, 'No validation error triggered.')
-#            return form.errors['structure']
-#
-#        self.assertEqual(errors(''), ['This field is required.'])
-#        self.assertEqual(errors('0'), ['GAEB hierarchy is outside the allowed hierarchy depth.'])
-#        self.assertEqual(errors('0.0.0.0'), ['Cannot change depth after project has been created.'])
+    def test_update_structure_validation(self):
+        activate('en')
+        project = ProjectFactory(name='new project')
+
+        def errors(s):
+            form = forms.ProjectUpdateForm(data={'structure': s}, instance=project)
+            self.assertIn('structure', form.errors, 'No validation error triggered.')
+            return form.errors['structure']
+
+        self.assertEqual(errors(''), ['GAEB hierarchy cannot be blank.'])
+        self.assertEqual(errors('0'), ['GAEB hierarchy is outside the allowed hierarchy depth.'])
+        self.assertEqual(errors('0.0.0.0'), ['Cannot change depth after project has been created.'])

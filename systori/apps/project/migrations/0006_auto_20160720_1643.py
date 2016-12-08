@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='project',
-            name='maximum_depth',
+            name='structure_depth',
             field=models.PositiveIntegerField(db_index=True, default=1, editable=False),
             preserve_default=False,
         ),

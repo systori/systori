@@ -53,9 +53,8 @@ class Project(models.Model):
     name = models.CharField(_('Project Name'), max_length=512)
     description = models.TextField(_('Project Description'), blank=True, null=True)
     is_template = models.BooleanField(default=False)
-    structure = GAEBStructureField(_('Numbering Structure'), default="01.01.001")
-    maximum_depth = models.PositiveIntegerField(editable=False, db_index=True)
     account = models.OneToOneField('accounting.Account', related_name="project", null=True)
+    structure = GAEBStructureField(_('Numbering Structure'), default="01.01.001")
 
     objects = ProjectQuerySet.as_manager()
 

@@ -108,7 +108,7 @@ class EditorApiTest(ClientTestCase):
         }, response.data)
 
     def test_delete_group(self):
-        project = ProjectFactory(structure_format="0.0.0.0")
+        project = ProjectFactory(structure="0.0.0.0")
         job = JobFactory(project=project)
         job.generate_groups()
         self.assertEqual(3, Group.objects.count())

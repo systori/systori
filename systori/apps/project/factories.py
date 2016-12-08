@@ -10,8 +10,6 @@ class ProjectFactory(factory.django.DjangoModelFactory):
         model = Project
 
     name = fuzzy.FuzzyText(length=15)
-    structure = "01.01.001"
-    maximum_depth = 1
 
 
 class JobSiteFactory(factory.django.DjangoModelFactory):
