@@ -36,6 +36,13 @@ class TestProgressViews(ClientTestCase):
         self.assertEqual(200, response.status_code)
 
 
+class TestProjectTemplateViews(ClientTestCase):
+
+    def test_view_templates(self):
+        response = self.client.get(reverse('templates'), {})
+        self.assertEqual(200, response.status_code)
+
+
 class TestProjectViews(ClientTestCase):
 
     def test_create_project(self):
@@ -61,6 +68,27 @@ class TestProjectViews(ClientTestCase):
         self.assertEqual(302, response.status_code)
         self.assertRedirects(response, reverse('project.view', args=[3]))
 
+    def test_update_project(self):
+        project = ProjectFactory()
+        response = self.client.get(reverse('project.edit', args=[project.pk]), {})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('01.01.001', project.structure.pattern)
+
+        data = {
+            'name': 'updated project',
+            'structure': '0.0.0'
+        }
+        response = self.client.post(reverse('project.edit', args=[project.pk]), data)
+        self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, reverse('projects'))
+        project.refresh_from_db()
+        self.assertEqual('0.0.0', project.structure.pattern)
+
+        data['save_goto_project'] = ''
+        response = self.client.post(reverse('project.edit', args=[project.pk]), data)
+        self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, reverse('project.view', args=[2]))
+
     def test_view_project(self):
         project = ProjectFactory()
         job = JobFactory(project=project)
@@ -83,6 +111,16 @@ class TestProjectViews(ClientTestCase):
             project.refresh_from_db()
             self.assertEqual(project.phase, phase)
 
+    def test_phase_invalid_action_does_nothing(self):
+        project = ProjectFactory()
+        self.assertEqual(project.phase, Project.PROSPECTIVE)
+        response = self.client.get(
+            reverse('project.transition.phase', args=[project.pk, 'invalid'])
+        )
+        self.assertEqual(response.status_code, 302)
+        project.refresh_from_db()
+        self.assertEqual(project.phase, Project.PROSPECTIVE)
+
     def test_state_transition(self):
         project = ProjectFactory()
         self.assertEqual(project.state, Project.ACTIVE)
@@ -94,8 +132,19 @@ class TestProjectViews(ClientTestCase):
             project.refresh_from_db()
             self.assertEqual(project.state, state)
 
+    def test_state_invalid_action_does_nothing(self):
+        project = ProjectFactory()
+        self.assertEqual(project.state, Project.ACTIVE)
+        response = self.client.get(
+            reverse('project.transition.state', args=[project.pk, 'invalid'])
+        )
+        self.assertEqual(response.status_code, 302)
+        project.refresh_from_db()
+        self.assertEqual(project.state, Project.ACTIVE)
+
 
 class TestJobSiteViews(ClientTestCase):
+
     def setUp(self):
         super().setUp()
         self.project = ProjectFactory()
@@ -116,3 +165,30 @@ class TestJobSiteViews(ClientTestCase):
         response = self.client.post(reverse('jobsite.create', args=[self.project.pk]), data)
         self.assertEqual(302, response.status_code)
         self.assertTrue(JobSite.objects.filter(name='1st floor').exists())
+
+    def test_update_jobsite(self):
+
+        jobsite = JobSiteFactory(project=self.project)
+
+        response = self.client.get(reverse('jobsite.edit', args=[self.project.pk, jobsite.pk]), {})
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'name': '1st floor',
+            'address': 'One Street',
+            'city': 'Town',
+            'postal_code': '12345',
+        }
+        response = self.client.post(reverse('jobsite.edit', args=[self.project.pk, jobsite.pk]), data)
+        self.assertEqual(302, response.status_code)
+        jobsite.refresh_from_db()
+        self.assertEqual(data['name'], jobsite.name)
+
+    def test_delete_jobsite(self):
+        jobsite = JobSiteFactory(project=self.project)
+        self.assertEqual(2, JobSite.objects.count())
+        response = self.client.get(reverse('jobsite.delete', args=[self.project.pk, jobsite.pk]), {})
+        self.assertEqual(200, response.status_code)
+        response = self.client.post(reverse('jobsite.delete', args=[self.project.pk, jobsite.pk]), {})
+        self.assertEqual(302, response.status_code)
+        self.assertEqual(1, JobSite.objects.count())
