@@ -24,6 +24,7 @@ def copy_old_job_to_new_job(apps, schema_editor):
                 id=old_job.id,
                 token=TOKEN,
                 order=old_job.job_code,
+                depth=0,
                 name=old_job.name,
                 description=old_job.description,
                 billing_method=old_job.billing_method,
@@ -43,7 +44,8 @@ def copy_old_job_to_new_job(apps, schema_editor):
                     token=TOKEN,
                     name=taskgroup.name,
                     description=taskgroup.description,
-                    order=taskgroup.order + 1 + old_job.taskgroup_offset
+                    order=taskgroup.order + 1 + old_job.taskgroup_offset,
+                    depth=1
                 )
                 for task in taskgroup.tasks.all():
                     TOKEN += 1

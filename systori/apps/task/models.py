@@ -53,6 +53,7 @@ class Group(OrderedModel):
 
     name = models.CharField(_("Name"), default="", blank=True, max_length=512)
     description = models.TextField(_("Description"), default="", blank=True)
+    depth = models.PositiveIntegerField(editable=False, db_index=True)
     parent = models.ForeignKey('self', related_name='groups', null=True)
     token = models.IntegerField('api token', null=True)
     job = models.ForeignKey('Job', null=True, related_name='all_groups')
@@ -64,29 +65,33 @@ class Group(OrderedModel):
         ordering = ('order',)
 
     def __init__(self, *args, **kwargs):
-        if 'parent' in kwargs and 'job' not in kwargs:
-            kwargs['job'] = kwargs['parent'].job
+        if 'parent' in kwargs:
+            if 'job' not in kwargs:
+                kwargs['job'] = kwargs['parent'].job
+            if 'depth' not in kwargs:
+                kwargs['depth'] = kwargs['parent'].depth+1
         super().__init__(*args, **kwargs)
-
-    @property
-    def _structure(self):
-        return self.job.project.structure
 
     @property
     def is_root(self):
         return self.parent is None
 
-    @cached_property
-    def level(self):
-        return 0 if self.is_root else self.parent.level + 1
+    @property
+    def _structure(self):
+        return self.job.project.structure
 
     @cached_property
     def code(self):
         if self.name:
-            code = self._structure.format_group(self.order, self.level)
+            code = self._structure.format_group(self.order, self.depth)
         else:
             code = '_'
         return code if self.is_root else "{}.{}".format(self.parent.code, code)
+
+    def generate_groups(self):
+        next_depth = self.depth + 1
+        if self._structure.is_valid_depth(next_depth):
+            Group.objects.create(parent=self, depth=next_depth).generate_groups()
 
     def clone_to(self, new_group, new_order):
         groups = self.groups.all()
@@ -100,10 +105,6 @@ class Group(OrderedModel):
             group.clone_to(self, group.order)
         for task in tasks:
             task.clone_to(self, task.order)
-
-    def generate_groups(self):
-        if self._structure.has_level(self.level+1):
-            Group.objects.create(parent=self).generate_groups()
 
     def _calc(self, field):
         total = Decimal(0.0)
@@ -242,6 +243,10 @@ class Job(Group):
     class Meta:
         verbose_name = _("Job")
         verbose_name_plural = _("Job")
+
+    def __init__(self, *args, **kwargs):
+        kwargs['depth'] = 0
+        super().__init__(*args, **kwargs)
 
     @transition(field=status, source="*", target=DRAFT)
     def draft(self):

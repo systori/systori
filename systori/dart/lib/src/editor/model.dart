@@ -94,7 +94,7 @@ abstract class Model extends HtmlElement {
 
     String get type => nodeName.toLowerCase().substring(4);
 
-    List<String> childTypes = [];
+    List<String> get childTypes => [];
 
     int get pk => int.parse(dataset['pk'], onError: (s)=>null);
     set pk(int id) => dataset['pk'] = id.toString();

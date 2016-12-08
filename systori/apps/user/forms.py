@@ -37,14 +37,14 @@ class UserForm(ModelForm):
         return password2
 
     def clean(self):
-        cleaned_data = super(UserForm, self).clean()
+        cleaned_data = super().clean()
         if not cleaned_data.get('first_name') and\
            not cleaned_data.get('last_name') and\
            not cleaned_data.get('email'):
             raise forms.ValidationError(_('A name or email is required.'))
 
     def save(self, commit=True):
-        user = super(UserForm, self).save(commit=False)
+        user = super().save(commit=False)
         if self.cleaned_data.get('password1'):
             user.set_password(self.cleaned_data['password1'])
         if commit:
