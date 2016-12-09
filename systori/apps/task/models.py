@@ -1,7 +1,7 @@
 import re
 from decimal import Decimal
 from django.db import models
-from django.db.models.expressions import RawSQL
+from django.db.models.expressions import Q, RawSQL
 from django.db.models.manager import BaseManager
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
@@ -49,6 +49,29 @@ class OrderedModel(models.Model):
         self.save()
 
 
+class GroupQuerySet(models.QuerySet):
+
+    def groups_with_remaining_depth(self, remaining):
+        """ Return all groups that have a specific depth to the right.
+            When 'remaining' is,
+                0: return all leaf groups
+                1: there is exactly one other group between this one and the tasks
+                ..
+                3: maximum group depth for 'remaining'
+        """
+        assert 0 <= remaining <= 3
+        q = Q()
+        depth = remaining + 1
+        while depth < 5:
+            q |= Q(job__project__structure_depth=depth) & Q(depth=depth-remaining)
+            depth += 1
+        return self.filter(q)
+
+
+class GroupManager(BaseManager.from_queryset(GroupQuerySet)):
+    use_for_related_fields = True
+
+
 class Group(OrderedModel):
 
     name = models.CharField(_("Name"), default="", blank=True, max_length=512)
@@ -58,6 +81,8 @@ class Group(OrderedModel):
     token = models.IntegerField('api token', null=True)
     job = models.ForeignKey('Job', null=True, related_name='all_groups')
     order_with_respect_to = 'parent'
+
+    objects = GroupManager()
 
     class Meta:
         verbose_name = _("Group")

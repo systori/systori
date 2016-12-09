@@ -1,6 +1,7 @@
 import datetime
 from django.test import TestCase
 from django.utils.translation import activate
+from django.db.models import Q
 
 from ..project.models import Project
 from ..project.factories import ProjectFactory
@@ -333,3 +334,43 @@ class GroupTests(TestCase):
             self.assertIsNotNone(traverse_children(
                 Job.objects.with_hierarchy(project).get(pk=job.pk)
             ))
+
+
+class AutoCompleteSearchTest(TestCase):
+
+    def setUp(self):
+
+        CompanyFactory()
+
+        en_names = ['one',  'two',  'three', 'four']
+        de_names = ['eins', 'zwei', 'drei',  'vier']
+        uk_names = ['один', 'два',  'три',   'чотири']
+        ro_names = ['unu',  'doi',  'trei',  'patru']
+
+        def add_names(group, names, depth=0):
+            for subgroup in group.groups.all():
+                subgroup.name = names[depth]
+                subgroup.save()
+                add_names(subgroup, names, depth+1)
+
+        project1 = ProjectFactory(structure='01.001', with_job=True)
+        project2 = ProjectFactory(structure='01.01.001', with_job=True)
+        add_names(project2.jobs.first(), ro_names)
+        project3 = ProjectFactory(structure='01.01.01.001', with_job=True)
+        add_names(project3.jobs.first(), uk_names)
+        project4 = ProjectFactory(structure='01.01.01.01.001', with_job=True)
+        add_names(project4.jobs.first(), de_names)
+        project5 = ProjectFactory(structure='01.01.01.01.01.001', with_job=True)
+        add_names(project5.jobs.first(), en_names)
+
+    def test_available_groups(self):
+
+        def available(depth):
+            return list(Group.objects
+                        .groups_with_remaining_depth(depth)
+                        .values_list('name', flat=True))
+
+        self.assertEqual(available(0), ['unu', 'два', 'drei', 'four'])
+        self.assertEqual(available(1), ['один', 'zwei', 'three'])
+        self.assertEqual(available(2), ['eins', 'two'])
+        self.assertEqual(available(3), ['one'])
