@@ -51,6 +51,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.contrib.postgres',
     'django_dartium',
     'rest_framework',
     'ordered_model',
@@ -128,8 +129,7 @@ LATEX_WORKING_DIR = os.path.join(BASE_DIR, 'templates/document/latex')
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'ENGINE': 'tuath.backends.postgres',
+        'ENGINE': 'systori.db',
     }
 }
 
@@ -153,6 +153,7 @@ if TESTING:
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 
 LANGUAGE_CODE = 'de'
+LANGUAGE_NAME = 'german'  # used by postgresql full text indexing
 
 gettext_noop = lambda s: s
 LANGUAGES = (

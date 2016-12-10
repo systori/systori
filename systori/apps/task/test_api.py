@@ -242,3 +242,9 @@ class EditorApiTest(ClientTestCase):
         )
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(1, LineItem.objects.count())
+
+
+class AutocompleteApiTest(ClientTestCase):
+
+    def test_compatible_completion(self):
+        pass

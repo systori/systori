@@ -1,7 +1,8 @@
 import datetime
 from django.test import TestCase
+from django.conf import settings
 from django.utils.translation import activate
-from django.db.models import Q
+from django.contrib.postgres.search import SearchQuery, Func, FloatField
 
 from ..project.models import Project
 from ..project.factories import ProjectFactory
@@ -336,6 +337,31 @@ class GroupTests(TestCase):
             ))
 
 
+class SearchRank(Func):
+    function = 'ts_rank'
+    _output_field = FloatField()
+
+    def __init__(self, vector, query, **extra):
+        if not hasattr(query, 'resolve_expression'):
+            query = SearchQuery(query, config=settings.LANGUAGE_NAME)
+        self.weights = None
+        super().__init__(vector, query, **extra)
+
+    def as_sql(self, compiler, connection, function=None, template=None):
+        extra_params = []
+        extra_context = {}
+        if template is None and self.extra.get('weights'):
+            if self.weights:
+                template = '%(function)s(%(weights)s, %(expressions)s)'
+                weight_sql, extra_params = compiler.compile(self.weights)
+                extra_context['weights'] = weight_sql
+        sql, params = super(SearchRank, self).as_sql(
+            compiler, connection,
+            function=function, template=template, **extra_context
+        )
+        return sql, extra_params + params
+
+
 class AutoCompleteSearchTest(TestCase):
 
     def setUp(self):
@@ -354,6 +380,11 @@ class AutoCompleteSearchTest(TestCase):
                 add_names(subgroup, names, depth+1)
 
         project1 = ProjectFactory(structure='01.001', with_job=True)
+        self.job = job = project1.jobs.first()
+        [TaskFactory(total=i, name=en_names[i], group=job) for i in range(4)]
+        [TaskFactory(total=i+10, name=' '.join([en_names[i], de_names[i]]), group=job) for i in range(4)]
+        [TaskFactory(total=i+20, name=' '.join([en_names[i], de_names[i], uk_names[i]]), group=job) for i in range(4)]
+
         project2 = ProjectFactory(structure='01.01.001', with_job=True)
         add_names(project2.jobs.first(), ro_names)
         project3 = ProjectFactory(structure='01.01.01.001', with_job=True)
@@ -374,3 +405,19 @@ class AutoCompleteSearchTest(TestCase):
         self.assertEqual(available(1), ['один', 'zwei', 'three'])
         self.assertEqual(available(2), ['eins', 'two'])
         self.assertEqual(available(3), ['one'])
+
+    def test_task_text_search(self):
+
+        def search(terms):
+            return list(Task.objects
+                        .annotate(rank=SearchRank('search', terms))
+                        .order_by('-rank')
+                        .values_list('name', flat=True))
+
+        long_text = 'Voranstrich aus Bitumenlösung, Untergrund Beton, einschl. ' \
+                    'Aufkantungen, wie Attika, Schächte und Fundamente.'
+        TaskFactory(group=self.job, total=31, name='aus Bitumenlösung', description=long_text)
+        TaskFactory(group=self.job, total=32, name='Schächte und', description=long_text)
+
+        self.assertEqual(search('schacht')[:2], ['Schächte und', 'aus Bitumenlösung'])
+        self.assertEqual(search('bitumenlos')[:2], ['aus Bitumenlösung', 'Schächte und'])

@@ -1,5 +1,5 @@
-import re
 from decimal import Decimal
+from django.conf import settings
 from django.db import models
 from django.db.models.expressions import Q, RawSQL
 from django.db.models.manager import BaseManager
@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
 from systori.lib.utils import nice_percent
+from systori.db.fields import TSVector, TSVectorField
 
 
 class OrderedModel(models.Model):
@@ -80,6 +81,10 @@ class Group(OrderedModel):
     parent = models.ForeignKey('self', related_name='groups', null=True)
     token = models.IntegerField('api token', null=True)
     job = models.ForeignKey('Job', null=True, related_name='all_groups')
+    search = TSVectorField([
+        TSVector('name', 'A'),
+        TSVector('description', 'D'),
+    ], settings.LANGUAGE_NAME)
     order_with_respect_to = 'parent'
 
     objects = GroupManager()
@@ -344,6 +349,10 @@ class TaskManager(BaseManager.from_queryset(TaskQuerySet)):
 class Task(OrderedModel):
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField(blank=True)
+    search = TSVectorField([
+        TSVector('name', 'A'),
+        TSVector('description', 'D'),
+    ], settings.LANGUAGE_NAME)
 
     qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     qty_equation = models.CharField(max_length=512, blank=True)
