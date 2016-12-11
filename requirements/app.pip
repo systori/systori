@@ -3,12 +3,7 @@
 hg+https://eukreign@bitbucket.org/rptlab/reportlab
 hg+https://eukreign@bitbucket.org/rptlab/preppy
 git+ssh://git@rlextra.github.com/systori/rlextra.git
-#-e ../rlextra
-
 git+ssh://git@django-tuath.bitbucket.org/damoti/django-tuath.git
-#-e ../django-tuath
-
 git+https://github.com/damoti/pyth.git@pyth-py3
-#-e ../pyth
 
 -e .

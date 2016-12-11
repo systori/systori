@@ -1,8 +1,8 @@
 import datetime
 from django.test import TestCase
-from django.conf import settings
 from django.utils.translation import activate
-from django.contrib.postgres.search import SearchQuery, Func, FloatField
+from django.contrib.postgres.search import SearchRank, SearchQuery
+from django.db.models.expressions import F
 
 from ..project.models import Project
 from ..project.factories import ProjectFactory
@@ -337,31 +337,6 @@ class GroupTests(TestCase):
             ))
 
 
-class SearchRank(Func):
-    function = 'ts_rank'
-    _output_field = FloatField()
-
-    def __init__(self, vector, query, **extra):
-        if not hasattr(query, 'resolve_expression'):
-            query = SearchQuery(query, config=settings.LANGUAGE_NAME)
-        self.weights = None
-        super().__init__(vector, query, **extra)
-
-    def as_sql(self, compiler, connection, function=None, template=None):
-        extra_params = []
-        extra_context = {}
-        if template is None and self.extra.get('weights'):
-            if self.weights:
-                template = '%(function)s(%(weights)s, %(expressions)s)'
-                weight_sql, extra_params = compiler.compile(self.weights)
-                extra_context['weights'] = weight_sql
-        sql, params = super(SearchRank, self).as_sql(
-            compiler, connection,
-            function=function, template=template, **extra_context
-        )
-        return sql, extra_params + params
-
-
 class AutoCompleteSearchTest(TestCase):
 
     def setUp(self):
@@ -410,7 +385,7 @@ class AutoCompleteSearchTest(TestCase):
 
         def search(terms):
             return list(Task.objects
-                        .annotate(rank=SearchRank('search', terms))
+                        .annotate(rank=SearchRank(F('search'), SearchQuery(terms, config='german')))
                         .order_by('-rank')
                         .values_list('name', flat=True))
 
