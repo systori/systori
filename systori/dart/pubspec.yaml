@@ -6,7 +6,9 @@ dependencies:
   intl: any
   web_components: any
   parsers: any
-  quiver: any
+  quiver:
+    git: git://github.com/google/quiver-dart.git
+    #path: ../../../quiver-dart
 dev_dependencies:
   test: any
 transformers:
