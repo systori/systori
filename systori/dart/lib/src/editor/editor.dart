@@ -19,7 +19,7 @@ ChangeManager changeManager;
 class Job extends Group {
     static Job JOB;
     GAEBHierarchyStructure structure;
-    int level = 0;
+    int depth = 0;
     Job.created(): super.created() {
         structure = new GAEBHierarchyStructure(dataset['structure-format']);
         JOB = this;
@@ -42,7 +42,7 @@ class Group extends Model {
 
     set order(int position) {
         dataset['order'] = position.toString();
-        code.text = "${parentGroup.code.text}.${Job.JOB.structure.format_group(dataset['order'], level)}";
+        code.text = "${parentGroup.code.text}.${Job.JOB.structure.formatGroup(dataset['order'], position)}";
     }
 
     Group.created(): super.created();
@@ -65,7 +65,7 @@ class Group extends Model {
     handleKeyboard(KeyEvent e) {
         if (e.keyCode == KeyCode.ENTER) {
             e.preventDefault();
-            if (Job.JOB.structure.has_level(level+1)) {
+            if (Job.JOB.structure.isValidDepth(depth+1)) {
                 Group child = this.querySelector(':scope>sys-group') as Group;
                 if (child.isEmpty) {
                     child.name.focus();
@@ -91,7 +91,7 @@ class Group extends Model {
     }
 
     generateGroups() {
-        if (Job.JOB.structure.has_level(level+1)) {
+        if (Job.JOB.structure.isValidDepth(depth+1)) {
             Group group = document.createElement('sys-group');
             children.add(group);
             group.generateGroups();
@@ -229,7 +229,7 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     Group get parentGroup => parent as Group;
     set order(int position) {
         dataset['order'] = position.toString();
-        code.text = "${parentGroup.code.text}.${Job.JOB.structure.format_task(dataset['order'])}";
+        code.text = "${parentGroup.code.text}.${Job.JOB.structure.formatTask(dataset['order'])}";
     }
 
     LineItemSheet sheet;
