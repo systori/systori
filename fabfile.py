@@ -127,52 +127,56 @@ def initsettings(envname='local'):
             s.write('from .{} import *\n'.format(envname))
 
 
-def getdart():
-    "download latest version of dart"
-    is_64bits = sys.maxsize > 2**32
-    BIN_DIR = os.path.expanduser('~/bin')
-    if not os.path.exists(BIN_DIR):
-        os.mkdir(BIN_DIR)
-    url = (
-        'http://storage.googleapis.com/dart-archive/channels'
-        '/stable/release/latest/sdk/dartsdk-linux-%s-release.zip'
-    ) % ('x64' if is_64bits else 'ia32')
-    with lcd(BIN_DIR):
-        local("curl %s > dartsdk.zip" % url)
-        local("unzip -qo dartsdk.zip")
-    env_lines = """\
-export DART_SDK="%s"
-export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
-""" % os.path.join(BIN_DIR, 'dart-sdk')
-    bash_rc_file = os.path.expanduser('~/.bashrc')
-    if not os.path.exists(bash_rc_file):
-        print("Add to your environment:")
-        print(env_lines)
-    elif not 'DART_SDK' in open(bash_rc_file, 'r').read():
-        with open(bash_rc_file, 'a') as file_handle:
-            file_handle.write(env_lines)
+def getdartium(version='1.21.0', channel='stable'):
+    "get dartium and content-shell for linux, on Mac use homebrew"
 
+    BIN = os.path.expanduser('~/bin')
+    DOWNLOAD = os.path.join(BIN, 'downloads')
+    if not os.path.exists(BIN):
+        os.mkdir(BIN)
+    if not os.path.exists(DOWNLOAD):
+        os.mkdir(DOWNLOAD)
 
-def getcontentshell():
-    "download content shell for linux, on mac use homebrew"
-    VERSION = '1.20.0-dev.10.0'
-    BIN_DIR = os.path.expanduser('~/bin')
-    if not os.path.exists(BIN_DIR):
-        os.mkdir(BIN_DIR)
-    url = ('https://storage.googleapis.com/dart-archive/channels/dev'
-           '/release/{}/dartium/content_shell-linux-x64-release.zip'.format(VERSION))
-    with lcd(BIN_DIR):
-        local("curl %s > content_shell.zip" % url)
-        local("unzip -qo content_shell.zip")
-        local("mv drt-linux-x64-dev-{}.0 content-shell".format(VERSION))
-    env_lines = 'export PATH="%s:$PATH"' % os.path.join(BIN_DIR, 'content-shell')
-    bash_rc_file = os.path.expanduser('~/.bashrc')
-    if not os.path.exists(bash_rc_file):
+    paths = []
+    with lcd(BIN):
+
+        for app in ('content_shell', 'dartium',):
+
+            zipfile = os.path.join(DOWNLOAD, '{}-{}-{}.zip'.format(app, version, channel))
+
+            if not os.path.exists(zipfile):
+                url = (
+                    'https://storage.googleapis.com/dart-archive/channels/{}/release/'
+                    '{}/dartium/{}-linux-x64-release.zip'.format(channel, version, app)
+                )
+                local("curl {} > {}".format(url, zipfile))
+
+            outdir = local('unzip -l {} | head -n 4 | tail -n 1'.format(zipfile), capture=True)
+            outdir = outdir.split(' ')[-1]
+
+            if not os.path.exists(os.path.join(BIN, outdir)):
+                local("unzip -qo {}".format(zipfile))
+
+            local("ln -sfn {} {}".format(outdir, app))
+            paths.append(os.path.join(BIN, app))
+
+        lib = 'libfontconfig1_2.11.0-0ubuntu4.2_amd64.deb'
+        libfile = os.path.join(DOWNLOAD, lib)
+        if not os.path.exists(libfile):
+            liburl = (
+                'http://security.ubuntu.com/ubuntu/pool/main/f/fontconfig/'+lib
+            )
+            local("curl {} > {}".format(liburl, libfile))
+
+        local(
+            "dpkg --fsys-tarfile {} | tar xOf - ./usr/lib/x86_64-linux-gnu/libfontconfig.so.1.8.0"
+            " > content_shell/lib/libfontconfig.so.1".format(libfile)
+        )
+
+    not_present = [path for path in paths if path not in os.environ['PATH']]
+    if not_present:
         print("Add to your environment:")
-        print(env_lines)
-    elif not 'content-shell' in open(bash_rc_file, 'r').read():
-        with open(bash_rc_file, 'a') as file_handle:
-            file_handle.write(env_lines)
+        print('export PATH="%s:$PATH"' % ':'.join(not_present))
 
 
 def linkdart():
