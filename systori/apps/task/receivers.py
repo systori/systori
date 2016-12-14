@@ -2,7 +2,7 @@ from django.db.models.signals import pre_delete, m2m_changed
 from django_fsm.signals import post_transition
 from django.dispatch import receiver
 from ..document.models import Proposal
-from ..task.models import Job
+from .models import Job
 
 
 def update_job_status(proposal, job):

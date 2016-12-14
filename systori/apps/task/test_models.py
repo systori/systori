@@ -2,7 +2,6 @@ import datetime
 from django.test import TestCase
 from django.utils.translation import activate
 from django.contrib.postgres.search import SearchRank, SearchQuery
-from django.db.models.expressions import F
 
 from ..project.models import Project
 from ..project.factories import ProjectFactory
@@ -369,6 +368,11 @@ class AutoCompleteSearchTest(TestCase):
         project5 = ProjectFactory(structure='01.01.01.01.01.001', with_job=True)
         add_names(project5.jobs.first(), en_names)
 
+        long_text = 'Voranstrich aus Bitumenlösung, Untergrund Beton, einschl. ' \
+                    'Aufkantungen, wie Attika, Schächte und Fundamente.'
+        TaskFactory(group=self.job, total=31, name='aus Bitumenlösung', description=long_text)
+        TaskFactory(group=self.job, total=32, name='Schächte und', description=long_text)
+
     def test_available_groups(self):
 
         def available(depth):
@@ -381,18 +385,34 @@ class AutoCompleteSearchTest(TestCase):
         self.assertEqual(available(2), ['eins', 'two'])
         self.assertEqual(available(3), ['one'])
 
+    def test_group_text_search(self):
+
+        def search(depth, terms):
+            return list(Group.objects
+                        .groups_with_remaining_depth(depth)
+                        .search(terms)
+                        .values_list('match_name', flat=True))
+
+        self.assertEqual(search(0, 'unu'), ['<b>unu</b>'])
+        self.assertEqual(search(0, 'doi'), [])
+        self.assertEqual(search(1, 'один'), ['<b>один</b>'])
+        self.assertEqual(search(1, 'два'), [])
+        self.assertEqual(search(2, 'eins'), ['<b>eins</b>'])
+        self.assertEqual(search(3, 'one'), ['<b>one</b>'])
+        self.assertEqual(search(3, 'two'), [])
+
     def test_task_text_search(self):
 
-        def search(terms):
-            return list(Task.objects
-                        .annotate(rank=SearchRank(F('search'), SearchQuery(terms, config='german')))
-                        .order_by('-rank')
-                        .values_list('name', flat=True))
+        schacht = Task.objects.search('schacht').values_list('name', 'match_name')
+        self.assertEqual(schacht.count(), 2)
+        self.assertEqual(list(schacht), [
+            ('Schächte und', '<b>Schächte</b> und'),
+            ('aus Bitumenlösung', 'aus Bitumenlösung'),
+        ])
 
-        long_text = 'Voranstrich aus Bitumenlösung, Untergrund Beton, einschl. ' \
-                    'Aufkantungen, wie Attika, Schächte und Fundamente.'
-        TaskFactory(group=self.job, total=31, name='aus Bitumenlösung', description=long_text)
-        TaskFactory(group=self.job, total=32, name='Schächte und', description=long_text)
-
-        self.assertEqual(search('schacht')[:2], ['Schächte und', 'aus Bitumenlösung'])
-        self.assertEqual(search('bitumenlos')[:2], ['aus Bitumenlösung', 'Schächte und'])
+        bitumenlos = Task.objects.search('bitumenlos').values_list('name', 'match_name')
+        self.assertEqual(bitumenlos.count(), 2)
+        self.assertEqual(list(bitumenlos), [
+            ('aus Bitumenlösung', 'aus <b>Bitumenlösung</b>'),
+            ('Schächte und', 'Schächte und'),
+        ])

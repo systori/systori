@@ -153,7 +153,6 @@ if TESTING:
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 
 LANGUAGE_CODE = 'de'
-LANGUAGE_NAME = 'german'  # used by postgresql full text indexing
 
 gettext_noop = lambda s: s
 LANGUAGES = (
@@ -162,6 +161,10 @@ LANGUAGES = (
     #    ('uk', gettext_noop('Українською')),
     #    ('ru', gettext_noop('По-русски')),
 )
+
+# used by postgresql full text indexing
+# TODO: refactor to use be configurable per-Company schema
+SEARCH_VECTOR_LANGUAGE = 'german'
 
 TIME_ZONE = 'Europe/Berlin'
 
