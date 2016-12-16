@@ -39,17 +39,4 @@ class Migration(migrations.Migration):
 
         migrations.RunPython(convert_user_to_worker),
 
-        # Make 'user_access' not null now that it's been set.
-
-        migrations.AlterField(
-            model_name='timer',
-            name='worker',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='timers', to='company.Worker'),
-        ),
-
-        # Remove the 'user' based fields.
-
-        migrations.RemoveField('timer', 'user'),
-        migrations.RemoveField('timer', 'altered_by'),
-
     ]

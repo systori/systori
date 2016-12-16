@@ -5,7 +5,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
-from tuath.models import AbstractSchema
+from postgres_schema.models import AbstractSchema
 from ..timetracking.utils import BreakSpan
 
 

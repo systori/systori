@@ -3,10 +3,11 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 import django.core.validators
-import tuath.base
+import postgres_schema.base
 
 
 class Migration(migrations.Migration):
+    initial = True
 
     dependencies = [
     ]
@@ -34,6 +35,6 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(tuath.base.SharedSchemaMixin, models.Model),
+            bases=(postgres_schema.base.SharedSchemaMixin, models.Model),
         ),
     ]

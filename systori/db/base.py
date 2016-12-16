@@ -1,6 +1,10 @@
 from django.db.backends.postgresql import base
-from .schema import DatabaseSchemaEditor
+from postgres_schema import schema as postgres_schema
+from tsvector_field import schema as tsvector_schema
 
 
 class DatabaseWrapper(base.DatabaseWrapper):
-    SchemaEditorClass = DatabaseSchemaEditor
+    SchemaEditorClass = type('DatabaseSchemaEditor', (
+        postgres_schema.DatabaseSchemaEditor,
+        tsvector_schema.DatabaseSchemaEditor,
+    ), {})

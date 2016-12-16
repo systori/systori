@@ -246,5 +246,17 @@ class EditorApiTest(ClientTestCase):
 
 class AutocompleteApiTest(ClientTestCase):
 
-    def test_compatible_completion(self):
-        pass
+    def test_group_completion(self):
+        job = JobFactory(project=ProjectFactory(structure='01.01.001'), generate_groups=True)
+        GroupFactory(parent=job, name='Voranstrich aus Bitumenlösung')
+        GroupFactory(parent=job, name='Schächte und Fundamente')
+        response = self.client.post(
+            reverse('api.editor.autocomplete'), {
+                'model_type': 'group',
+                'position': 1,
+                'terms': 'bitumenlos'
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        print(response.data)

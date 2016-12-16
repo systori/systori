@@ -5,7 +5,7 @@ DEFAULT_COUNTRY = "Deutschland"
 
 GOOGLE_MAPS_API_KEY = "AIzaSyAEhGj7BuZtHzx8lHow-cm6lTCja1txOX4"
 
-SCHEMA_MODEL = 'company.Company'
+POSTGRES_SCHEMA_MODEL = 'company.Company'
 SCHEMA_USER_RELATED_NAME = 'companies'
 
 SHARED_MODELS = [
@@ -57,6 +57,7 @@ INSTALLED_APPS = (
     'ordered_model',
     'bootstrapform',
     'datetimewidget',
+    'postgres_schema',
     'systori.lib',
     'systori.apps.user',
     'systori.apps.project',

@@ -1,4 +1,4 @@
-from tuath.apps import TuathConfig
+from postgres_schema.apps import PostgresSchemaConfig
 
-class CompanyConfig(TuathConfig):
+class CompanyConfig(PostgresSchemaConfig):
     name = 'systori.apps.company'

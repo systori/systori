@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
                 ('is_revenue_recognized', models.BooleanField(default=False)),
                 ('status', django_fsm.FSMField(max_length=50, default='draft', choices=[('draft', 'Draft'), ('proposed', 'Proposed'), ('approved', 'Approved'), ('started', 'Started'), ('completed', 'Completed')])),
                 ('account', models.OneToOneField('accounting.Account', models.SET_NULL, related_name='job', null=True)),
-                ('project', models.ForeignKey('project.Project', models.CASCADE, related_name='jobs')),
+                ('project', models.ForeignKey('project.Project', models.CASCADE, related_name='jobs', db_index=False)),
                 ('root', models.OneToOneField('task.Group', models.CASCADE, parent_link=True, primary_key=True, related_name='+')),
             ],
             bases=('task.Group',),
