@@ -8,7 +8,6 @@ django-fsm==2.4.0
 django-bootstrap-form==3.2.1
 django-datetime-widget==0.9.3
 djangorestframework==3.5.3
-django-tsvector-field
 django-dartium
 
 geopy==1.11.0
