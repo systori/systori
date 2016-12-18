@@ -52,7 +52,7 @@ class CompanyMiddleware:
             current = request.company.schema if request.company else ''
             response.context_data['available_companies'] = [
                 {'name': c.name, 'schema': c.schema, 'url': c.url(request), 'current': c.schema == current}
-                for c in request.user.visible_companies
+                for c in request.user.companies.all()
             ]
         return response
 

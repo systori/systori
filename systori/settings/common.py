@@ -5,15 +5,6 @@ DEFAULT_COUNTRY = "Deutschland"
 
 GOOGLE_MAPS_API_KEY = "AIzaSyAEhGj7BuZtHzx8lHow-cm6lTCja1txOX4"
 
-POSTGRES_SCHEMA_MODEL = 'company.Company'
-SCHEMA_USER_RELATED_NAME = 'companies'
-
-SHARED_MODELS = [
-    'company.access',
-    'company.worker',
-    'user.user',
-]
-
 BROKER_URL = 'amqp://guest:guest@192.168.0.99:5672//'
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -60,6 +51,8 @@ INSTALLED_APPS = (
     'postgres_schema',
     'systori.lib',
     'systori.apps.user',
+    'systori.apps.main',
+    'systori.apps.company',
     'systori.apps.project',
     'systori.apps.directory',
     'systori.apps.task',
@@ -67,9 +60,19 @@ INSTALLED_APPS = (
     'systori.apps.field',
     'systori.apps.equipment',
     'systori.apps.accounting',
-    'systori.apps.main',
-    'systori.apps.company',
     'systori.apps.timetracking',
+)
+
+POSTGRES_SCHEMA_MODEL = 'company.Company'
+POSTGRES_SCHEMA_TENANTS = (
+    'project',
+    'directory',
+    'task',
+    'document',
+    'field',
+    'equipment',
+    'accounting',
+    'timetracking',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -25,9 +25,10 @@ class AutocompleteAPI(views.APIView):
         terms = serializer.validated_data['terms']
         if model_type == 'group':
             position = serializer.validated_data.get('position', 1)
+            groups = Group.objects.search(terms)
             results = AutocompleteGroupSerializer(
                 #Group.objects.groups_with_remaining_depth(position).search(terms),
-                Group.objects.search(terms),
+                groups,
                 many=True
             )
             return response.Response(results.data)
