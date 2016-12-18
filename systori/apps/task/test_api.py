@@ -259,4 +259,3 @@ class AutocompleteApiTest(ClientTestCase):
             format='json'
         )
         self.assertEqual(response.status_code, 200, response.data)
-        print(response.data)
