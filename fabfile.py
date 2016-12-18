@@ -69,10 +69,16 @@ def fetchdb(envname='production'):
     sudo('rm {}'.format(dump_path))
 
 
+def dbexists(name):
+    dbs = local('psql -lqt | cut -d \| -f 1', capture=True).split()
+    return name in dbs
+
+
 def getdb(envname='production'):
     ":envname=production -- fetch and load remote database"
     fetchdb(envname)
-    local('dropdb systori_local')
+    if dbexists('systori_local'):
+        local('dropdb systori_local')
     local('createdb systori_local')
     local('pg_restore -d systori_local -O systori.'+envname+'.dump')
     local('rm systori.'+envname+'.dump')
