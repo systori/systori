@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 import django.core.validators
-import postgres_schema.base
 
 
 class Migration(migrations.Migration):
@@ -35,6 +34,5 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(postgres_schema.base.SharedSchemaMixin, models.Model),
         ),
     ]
