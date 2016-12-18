@@ -5,94 +5,89 @@ from __future__ import unicode_literals
 from decimal import Decimal
 from django.db import migrations, models
 import django.db.models.deletion
+from postgres_schema.operations import RunInSchemas
 
 TOKEN = 11000
 
 
 def upgrade_taskinstance_to_task(apps, schema_editor):
     global TOKEN
-    from systori.apps.company.models import Company
     Job = apps.get_model("task", "Job")
-    for company in Company.objects.all():
-        company.activate()
 
-        for job in Job.objects.all():
+    for job in Job.objects.all():
 
-            variant_group = 100
+        variant_group = 100
 
-            for task in job.all_tasks.all():
+        for task in job.all_tasks.all():
 
-                order_max = None
+            order_max = None
 
-                is_variant_mode = task.taskinstances.count() > 1
-                if is_variant_mode:
-                    #if variant_group == 100:
-                    #    print('Project {}: {}, Job {}: {}'.format(
-                    #        task.job.project.id, task.job.project.name,
-                    #        task.job.pk, task.job.root.name)
-                    #    )
-                    #print('  Variations for {}: {}'.format(task.id, task.name))
-                    variant_group += 1
-                    task.variant_group = variant_group
+            is_variant_mode = task.taskinstances.count() > 1
+            if is_variant_mode:
+                #if variant_group == 100:
+                #    print('Project {}: {}, Job {}: {}'.format(
+                #        task.job.project.id, task.job.project.name,
+                #        task.job.pk, task.job.root.name)
+                #    )
+                #print('  Variations for {}: {}'.format(task.id, task.name))
+                variant_group += 1
+                task.variant_group = variant_group
+                task.save()
+
+            for taskinstance in task.taskinstances.order_by('-selected'):
+
+                if not taskinstance.selected and not is_variant_mode:
+                    raise AssertionError("If only one task instance it must be selected.")
+
+                if not taskinstance.selected:
+                    if order_max is None:
+                        order_max = task.group.tasks.aggregate(models.Max('order')).get('order__max')
+                    order_max += 1
+                    TOKEN += 1
+                    task.id = None
+                    task.token = TOKEN
+                    task.order = order_max
+                    task.variant_serial += 1
                     task.save()
+                    #print("    Variant: {}.{}".format(task.variant_group, task.variant_serial))
+                elif is_variant_mode:
+                    pass
+                    #print("    Primary: {}.{}".format(task.variant_group, task.variant_serial))
 
-                for taskinstance in task.taskinstances.order_by('-selected'):
+                task.qty_equation = str(task.qty)
+                task.price = Decimal('0.00')
+                #if is_variant_mode: print("    Line items ", end='')
+                lineitem_order = 0
+                for lineitem in taskinstance.lineitems.all():
+                    TOKEN += 1
+                    lineitem_order += 1
+                    lineitem.token = TOKEN
+                    lineitem.order = lineitem_order
+                    lineitem.qty_equation = str(lineitem.qty)
+                    lineitem.price_equation = str(lineitem.price)
+                    lineitem.total = round(lineitem.qty * lineitem.price, 3)
+                    task.price += lineitem.total
+                    lineitem.task = task
+                    lineitem.job = task.job
+                    lineitem.save()
+                    #if is_variant_mode: print(".", end='')
+                #if is_variant_mode: print("")
+                task.total = round(task.qty * task.price, 3)
+                task.save()
 
-                    if not taskinstance.selected and not is_variant_mode:
-                        raise AssertionError("If only one task instance it must be selected.")
-
-                    if not taskinstance.selected:
-                        if order_max is None:
-                            order_max = task.group.tasks.aggregate(models.Max('order')).get('order__max')
-                        order_max += 1
-                        TOKEN += 1
-                        task.id = None
-                        task.token = TOKEN
-                        task.order = order_max
-                        task.variant_serial += 1
-                        task.save()
-                        #print("    Variant: {}.{}".format(task.variant_group, task.variant_serial))
-                    elif is_variant_mode:
-                        pass
-                        #print("    Primary: {}.{}".format(task.variant_group, task.variant_serial))
-
-                    task.qty_equation = str(task.qty)
-                    task.price = Decimal('0.00')
-                    #if is_variant_mode: print("    Line items ", end='')
-                    lineitem_order = 0
-                    for lineitem in taskinstance.lineitems.all():
-                        TOKEN += 1
-                        lineitem_order += 1
-                        lineitem.token = TOKEN
-                        lineitem.order = lineitem_order
-                        lineitem.qty_equation = str(lineitem.qty)
-                        lineitem.price_equation = str(lineitem.price)
-                        lineitem.total = round(lineitem.qty * lineitem.price, 3)
-                        task.price += lineitem.total
-                        lineitem.task = task
-                        lineitem.job = task.job
-                        lineitem.save()
-                        #if is_variant_mode: print(".", end='')
-                    #if is_variant_mode: print("")
-                    task.total = round(task.qty * task.price, 3)
-                    task.save()
-
-        for job in Job.objects.all():
-            for group in job.root.groups.all():
-                task_order = 0
-                for task in group.tasks.all():
-                    task_order += 1
-                    task.order = task_order
-                    task.save()
+    for job in Job.objects.all():
+        for group in job.root.groups.all():
+            task_order = 0
+            for task in group.tasks.all():
+                task_order += 1
+                task.order = task_order
+                task.save()
 
 
 def remove_old_content_types(apps, schema_editor):
-    from systori.apps.company.models import Company as Company
     from django.contrib.contenttypes.models import ContentType
-    for company in Company.objects.all():
-        company.activate()
-        ContentType.objects.filter(app_label='task', model='taskgroup').delete()
-        ContentType.objects.filter(app_label='task', model='taskinstance').delete()
+    ContentType.objects.filter(app_label='task', model='taskgroup').delete()
+    ContentType.objects.filter(app_label='task', model='taskinstance').delete()
 
 
 class Migration(migrations.Migration):
@@ -221,7 +216,7 @@ class Migration(migrations.Migration):
         ),
         # properly set all of the jobs
         migrations.RunSQL('SET CONSTRAINTS ALL IMMEDIATE', reverse_sql=migrations.RunSQL.noop),
-        migrations.RunPython(upgrade_taskinstance_to_task),
+        RunInSchemas(migrations.RunPython(upgrade_taskinstance_to_task)),
         # Now alter making it NOT NULL
         migrations.AlterField(
             model_name='lineitem',

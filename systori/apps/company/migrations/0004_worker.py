@@ -7,11 +7,8 @@ from django.db import migrations, models
 
 
 def remove_company_access_content_type(apps, schema_editor):
-    from systori.apps.company.models import Company as Company
     from django.contrib.contenttypes.models import ContentType
-    for company in Company.objects.all():
-        company.activate()
-        ContentType.objects.filter(app_label='company', model='access').delete()
+    ContentType.objects.filter(app_label='company', model='access').delete()
 
 
 class Migration(migrations.Migration):

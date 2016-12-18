@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-from postgres_schema.operations import RunInSchema
+from postgres_schema.operations import RunInSchemas
 import django.db.models.deletion
 import tsvector_field
 
@@ -20,13 +20,13 @@ class Migration(migrations.Migration):
             name='search',
             field=tsvector_field.SearchVectorField(columns=[tsvector_field.WeightedColumn('name', 'A'), tsvector_field.WeightedColumn('description', 'D')], language='german'),
         ),
-        RunInSchema(tsvector_field.IndexSearchVector('group', 'search')),
+        RunInSchemas(tsvector_field.IndexSearchVector('group', 'search')),
         migrations.AddField(
             model_name='task',
             name='search',
             field=tsvector_field.SearchVectorField(columns=[tsvector_field.WeightedColumn('name', 'A'), tsvector_field.WeightedColumn('description', 'D')], language='german'),
         ),
-        RunInSchema(tsvector_field.IndexSearchVector('task', 'search')),
+        RunInSchemas(tsvector_field.IndexSearchVector('task', 'search')),
         migrations.AlterField(
             model_name='job',
             name='project',

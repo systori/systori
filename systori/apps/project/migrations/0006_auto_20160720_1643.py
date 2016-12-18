@@ -3,21 +3,19 @@
 from django.db import migrations, models
 import django.db.models.deletion
 from systori.apps.project.gaeb import GAEBStructureField
+from postgres_schema.operations import RunInSchemas
 
 
 def zfill_field_renamed(apps, schema_editor):
-    from systori.apps.company.models import Company
     Project = apps.get_model("project", "Project")
-    for company in Company.objects.all():
-        company.activate()
-        for project in Project.objects.all():
-            project.structure = "{}.{}.{}".format(
-                '1'.zfill(project.job_zfill),
-                '1'.zfill(project.taskgroup_zfill),
-                '1'.zfill(project.task_zfill)
-            )
-            project._meta.local_concrete_fields = project._meta.local_concrete_fields[:-1]
-            project.save()
+    for project in Project.objects.all():
+        project.structure = "{}.{}.{}".format(
+            '1'.zfill(project.job_zfill),
+            '1'.zfill(project.taskgroup_zfill),
+            '1'.zfill(project.task_zfill)
+        )
+        project._meta.local_concrete_fields = project._meta.local_concrete_fields[:-1]
+        project.save()
 
 
 class Migration(migrations.Migration):
@@ -38,7 +36,7 @@ class Migration(migrations.Migration):
             field=models.PositiveIntegerField(db_index=True, default=1, editable=False),
             preserve_default=False,
         ),
-        migrations.RunPython(zfill_field_renamed),
+        RunInSchemas(migrations.RunPython(zfill_field_renamed)),
         migrations.RemoveField(
             model_name='project',
             name='job_zfill',
