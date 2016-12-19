@@ -251,10 +251,10 @@ class AutocompleteApiTest(ClientTestCase):
         GroupFactory(parent=job, name='Voranstrich aus Bitumenlösung')
         GroupFactory(parent=job, name='Schächte und Fundamente')
         response = self.client.post(
-            reverse('api.editor.autocomplete'), {
+            reverse('api.editor.search'), {
                 'model_type': 'group',
-                'position': 1,
-                'terms': 'bitumenlos'
+                'remaining_depth': 0,
+                'terms': 'bitumenlos',
             },
             format='json'
         )

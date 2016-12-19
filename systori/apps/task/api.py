@@ -3,7 +3,6 @@ from rest_framework import views, viewsets, mixins
 from rest_framework import response
 from .models import Job, Group
 from .serializers import JobSerializer
-from .serializers import AutocompleteQuerySerializer, AutocompleteGroupSerializer
 from ..user.permissions import HasStaffAccess
 
 
@@ -16,25 +15,24 @@ class EditorAPI(mixins.UpdateModelMixin, viewsets.GenericViewSet):
         return super().update(request, *args, partial=True, **kwargs)
 
 
-class AutocompleteAPI(views.APIView):
+class SearchAPI(views.APIView):
 
     def post(self, request, *args, **kwargs):
-        serializer = AutocompleteQuerySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        model_type = serializer.validated_data['model_type']
-        terms = serializer.validated_data['terms']
+        model_type = request.data['model_type']
+        terms = request.data['terms']
         if model_type == 'group':
-            position = serializer.validated_data.get('position', 1)
-            groups = Group.objects.search(terms)
-            results = AutocompleteGroupSerializer(
-                #Group.objects.groups_with_remaining_depth(position).search(terms),
-                groups,
-                many=True
-            )
-            return response.Response(results.data)
+            remaining_depth = request.data['remaining_depth']
+            return response.Response(list(
+                Group.objects
+                .groups_with_remaining_depth(remaining_depth)
+                .search(terms)
+                .values_list(
+                    'id', 'match_name', 'match_description'
+                )[:10]
+            ))
 
 
 urlpatterns = [
     url(r'^job/(?P<pk>\d+)/editor/save$', EditorAPI.as_view({'post': 'update'}), name='api.editor.save'),
-    url(r'^editor/autocomplete$', AutocompleteAPI.as_view(), name='api.editor.autocomplete'),
+    url(r'^editor/search$', SearchAPI.as_view(), name='api.editor.search'),
 ]

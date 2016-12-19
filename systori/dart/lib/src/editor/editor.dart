@@ -11,9 +11,8 @@ import 'changemanager.dart';
 import 'gaeb.dart';
 
 
+Repository repository;
 ChangeManager changeManager;
-
-
 
 
 class Job extends Group {
@@ -40,6 +39,8 @@ class Group extends Model {
     ElementList<Task> get tasks => this.querySelectorAll(':scope>sys-task');
     int get depth => (parent as Group).depth + 1;
 
+    DivElement autocomplete;
+
     set order(int position) {
         dataset['order'] = position.toString();
         code.text = "${parentGroup.code.text}.${Job.JOB.structure.formatGroup(dataset['order'], position)}";
@@ -55,10 +56,22 @@ class Group extends Model {
         }
         code = getView("code");
         name = getInput("name");
+        name.onKeyUp.listen(search);
+
+        autocomplete = document.createElement('div');
+        autocomplete.id = 'autocomplete';
+        autocomplete.style.visibility = 'hidden';
+        autocomplete.style.position = 'absolute';
+        autocomplete.style.top = name.offsetHeight.toString()+'px';
+        autocomplete.style.left = name.offsetLeft.toString()+'px';
+        autocomplete.style.width = '600px';
+        name.parent.children.add(autocomplete);
+        //name.onBlur.listen((e) => autocomplete.style.visibility = 'hidden');
+
         description = getInput("description");
-        inputs.forEach((Input input) =>
-            input.onKeyEvent.listen(handleKeyboard)
-        );
+        inputs.forEach((Input input) {
+            input.onKeyEvent.listen(handleKeyboard);
+        });
         super.attached();
     }
 
@@ -88,6 +101,23 @@ class Group extends Model {
                 }
             }
         }
+    }
+
+    search(KeyboardEvent e) {
+        repository.search('group', name.text, 0).then(
+            (List result) {
+                var html = new StringBuffer();
+                for (List row in result) {
+                    html.write('<h4>');
+                    html.write(row[1]);
+                    html.write('</h4>');
+                    html.write(row[2]);
+                    html.write('<br />');
+                }
+                autocomplete.setInnerHtml(html.toString(), treeSanitizer: NodeTreeSanitizer.trusted);
+                autocomplete.style.visibility = 'visible';
+            }
+        );
     }
 
     generateGroups() {

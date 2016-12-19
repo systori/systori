@@ -27,6 +27,20 @@ class Repository {
         return JSON.decode(response.responseText);
     }
 
+    Future<List<List>> search(String modelType, String terms, int remaining_depth) async {
+        var response = await HttpRequest.request(
+            "/api/editor/search",
+            method: "POST",
+            requestHeaders: headers,
+            sendData: JSON.encode({
+                'model_type': modelType,
+                'terms': terms,
+                'remaining_depth': remaining_depth
+            })
+        );
+        return JSON.decode(response.responseText);
+
+    }
 }
 
 
@@ -34,8 +48,7 @@ class ChangeManager {
 
     Timer timer;
     Model root;
-    Repository repository;
-    ChangeManager(this.root, this.repository);
+    ChangeManager(this.root);
 
     bool saving = false;
 

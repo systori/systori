@@ -2,6 +2,7 @@ import 'package:systori/editor.dart';
 
 main() {
     registerElements();
-    changeManager = new ChangeManager(Job.JOB, new Repository());
+    repository = new Repository();
+    changeManager = new ChangeManager(Job.JOB);
     changeManager.startAutoSync();
 }

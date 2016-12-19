@@ -224,24 +224,3 @@ class JobSerializer(serializers.ModelSerializer):
         self._data = serializer.save()
 
         return self._data
-
-
-class AutocompleteQuerySerializer(serializers.Serializer):
-    model_type = serializers.CharField(required=True)
-    terms = serializers.CharField(required=True)
-    position = serializers.IntegerField(required=False)
-
-
-class AutocompleteResultSerializer(serializers.Serializer):
-    model_type = serializers.CharField()
-    name = serializers.CharField()
-    position = serializers.IntegerField()
-
-
-class AutocompleteGroupSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Group
-        fields = [
-            'pk', 'name', 'description'
-        ]

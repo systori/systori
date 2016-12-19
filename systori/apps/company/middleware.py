@@ -50,10 +50,12 @@ class CompanyMiddleware:
         if response.context_data is not None:
             response.context_data['selected_company'] = request.company
             current = request.company.schema if request.company else ''
-            response.context_data['available_companies'] = [
-                {'name': c.name, 'schema': c.schema, 'url': c.url(request), 'current': c.schema == current}
-                for c in request.user.companies.all()
-            ]
+            response.context_data['available_companies'] = []
+            if request.user.is_authenticated():
+                response.context_data['available_companies'] = [
+                    {'name': c.name, 'schema': c.schema, 'url': c.url(request), 'current': c.schema == current}
+                    for c in request.user.companies.all()
+                ]
         return response
 
 

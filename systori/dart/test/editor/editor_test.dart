@@ -12,14 +12,13 @@ void main() {
     registerElements();
     Scaffolding scaffold = new Scaffolding(querySelector('#editor-area'));
     KeyboardNavigator nav = new KeyboardNavigator();
-    FakeRepository repository;
 
     setUp(() {
         tokenGenerator = new FakeToken();
         scaffold.reset();
         nav.reset();
         repository = new FakeRepository();
-        changeManager = new ChangeManager(Job.JOB, repository);
+        changeManager = new ChangeManager(Job.JOB);
     });
 
     group("Keyboard", () {
