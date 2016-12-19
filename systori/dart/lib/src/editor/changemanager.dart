@@ -27,7 +27,7 @@ class Repository {
         return JSON.decode(response.responseText);
     }
 
-    Future<List<List>> search(String modelType, String terms, int remaining_depth) async {
+    Future<List<List>> search(String modelType, String terms, [int remaining_depth=0]) async {
         var response = await HttpRequest.request(
             "/api/editor/search",
             method: "POST",

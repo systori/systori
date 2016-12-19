@@ -259,3 +259,18 @@ class AutocompleteApiTest(ClientTestCase):
             format='json'
         )
         self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(len(response.data), 1)
+
+    def test_task_completion(self):
+        job = JobFactory(project=ProjectFactory(structure='01.001'))
+        TaskFactory(group=job, name='Voranstrich aus Bitumenlösung')
+        TaskFactory(group=job, name='Schächte und Fundamente')
+        response = self.client.post(
+            reverse('api.editor.search'), {
+                'model_type': 'task',
+                'terms': 'bitumenlos',
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(len(response.data), 1)

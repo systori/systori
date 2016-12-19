@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from rest_framework import views, viewsets, mixins
 from rest_framework import response
-from .models import Job, Group
+from .models import Job, Group, Task
 from .serializers import JobSerializer
 from ..user.permissions import HasStaffAccess
 
@@ -27,6 +27,14 @@ class SearchAPI(views.APIView):
                 .groups_with_remaining_depth(remaining_depth)
                 .search(terms)
                 .values_list(
+                    'id', 'match_name', 'match_description'
+                )[:10]
+            ))
+        elif model_type == 'task':
+            return response.Response(list(
+                Task.objects
+                    .search(terms)
+                    .values_list(
                     'id', 'match_name', 'match_description'
                 )[:10]
             ))

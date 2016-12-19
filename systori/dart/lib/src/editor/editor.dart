@@ -56,8 +56,8 @@ class Group extends Model {
         }
         code = getView("code");
         name = getInput("name");
-        name.onKeyUp.listen(search);
 
+        name.onKeyUp.listen(search);
         autocomplete = document.createElement('div');
         autocomplete.id = 'autocomplete';
         autocomplete.style.visibility = 'hidden';
@@ -66,7 +66,7 @@ class Group extends Model {
         autocomplete.style.left = name.offsetLeft.toString()+'px';
         autocomplete.style.width = '600px';
         name.parent.children.add(autocomplete);
-        //name.onBlur.listen((e) => autocomplete.style.visibility = 'hidden');
+        name.onBlur.listen((e) => autocomplete.style.visibility = 'hidden');
 
         description = getInput("description");
         inputs.forEach((Input input) {
@@ -263,6 +263,7 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     }
 
     LineItemSheet sheet;
+    DivElement autocomplete;
 
     Task.created(): super.created() {
         if (children.isEmpty) {
@@ -275,6 +276,18 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     attached() {
         code = getView("code");
         name = getInput("name");
+
+        name.onKeyUp.listen(search);
+        autocomplete = document.createElement('div');
+        autocomplete.id = 'autocomplete';
+        autocomplete.style.visibility = 'hidden';
+        autocomplete.style.position = 'absolute';
+        autocomplete.style.top = name.offsetHeight.toString()+'px';
+        autocomplete.style.left = name.offsetLeft.toString()+'px';
+        autocomplete.style.width = '600px';
+        name.parent.children.add(autocomplete);
+        name.onBlur.listen((e) => autocomplete.style.visibility = 'hidden');
+
         description = getInput("description");
         qty = getInput("qty");
         unit = getInput("unit");
@@ -313,6 +326,23 @@ class Task extends Model with Row, TotalRow, HtmlRow {
                 }
             }
         }
+    }
+
+    search(KeyboardEvent e) {
+        repository.search('task', name.text).then(
+                (List result) {
+                var html = new StringBuffer();
+                for (List row in result) {
+                    html.write('<h4>');
+                    html.write(row[1]);
+                    html.write('</h4>');
+                    html.write(row[2]);
+                    html.write('<br />');
+                }
+                autocomplete.setInnerHtml(html.toString(), treeSanitizer: NodeTreeSanitizer.trusted);
+                autocomplete.style.visibility = 'visible';
+            }
+        );
     }
 
     createSibling() {
