@@ -354,13 +354,11 @@
 
     sys-autocomplete {
       z-index: 100;
-      display: none;
+      visibility: hidden;
       position: absolute;
       background: white;
-      left: 80px;
       width: 480px;
       border: 1px solid lightgrey;
-      top: 20px;
       -webkit-transition: top 0.1s;
       -moz-transition: top 0.1s;
       -ms-transition: top 0.1s;
@@ -404,6 +402,8 @@
   <template id="lineitem-template">
     {% include "task/editor/lineitem_editor.html" with lineitem=blank_lineitem %}
   </template>
+
+  <sys-autocomplete></sys-autocomplete>
 
 {% endblock %}
 

@@ -9,10 +9,12 @@ import 'package:systori/inputs.dart';
 import 'model.dart';
 import 'changemanager.dart';
 import 'gaeb.dart';
+import 'autocomplete.dart';
 
 
 Repository repository;
 ChangeManager changeManager;
+Autocomplete autocomplete;
 
 
 class Job extends Group {
@@ -26,7 +28,7 @@ class Job extends Group {
 }
 
 
-class Group extends Model {
+class Group extends Model implements AutocompleteReceiver {
 
     DivElement code;
     Input name;
@@ -38,8 +40,6 @@ class Group extends Model {
     ElementList<Group> get groups => this.querySelectorAll(':scope>sys-group');
     ElementList<Task> get tasks => this.querySelectorAll(':scope>sys-task');
     int get depth => (parent as Group).depth + 1;
-
-    DivElement autocomplete;
 
     set order(int position) {
         dataset['order'] = position.toString();
@@ -56,18 +56,10 @@ class Group extends Model {
         }
         code = getView("code");
         name = getInput("name");
-
-        name.onKeyUp.listen(search);
-        autocomplete = document.createElement('div');
-        autocomplete.id = 'autocomplete';
-        autocomplete.style.visibility = 'hidden';
-        autocomplete.style.position = 'absolute';
-        autocomplete.style.top = name.offsetHeight.toString()+'px';
-        autocomplete.style.left = name.offsetLeft.toString()+'px';
-        autocomplete.style.width = '600px';
-        name.parent.children.add(autocomplete);
-        name.onBlur.listen((e) => autocomplete.style.visibility = 'hidden');
-
+        name.onFocus.listen((e) => autocomplete.bind(this, {
+            'model_type': 'group',
+            'remaining_depth': '0'  // TODO: calculate remaining depth
+        }));
         description = getInput("description");
         inputs.forEach((Input input) {
             input.onKeyEvent.listen(handleKeyboard);
@@ -101,23 +93,6 @@ class Group extends Model {
                 }
             }
         }
-    }
-
-    search(KeyboardEvent e) {
-        repository.search('group', name.text, 0).then(
-            (List result) {
-                var html = new StringBuffer();
-                for (List row in result) {
-                    html.write('<h4>');
-                    html.write(row[1]);
-                    html.write('</h4>');
-                    html.write(row[2]);
-                    html.write('<br />');
-                }
-                autocomplete.setInnerHtml(html.toString(), treeSanitizer: NodeTreeSanitizer.trusted);
-                autocomplete.style.visibility = 'visible';
-            }
-        );
     }
 
     generateGroups() {
@@ -245,7 +220,7 @@ abstract class HtmlRow implements Row {
 }
 
 
-class Task extends Model with Row, TotalRow, HtmlRow {
+class Task extends Model with Row, TotalRow, HtmlRow implements AutocompleteReceiver {
 
     List<String> childTypes = ['lineitem'];
 
@@ -263,7 +238,6 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     }
 
     LineItemSheet sheet;
-    DivElement autocomplete;
 
     Task.created(): super.created() {
         if (children.isEmpty) {
@@ -276,18 +250,9 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     attached() {
         code = getView("code");
         name = getInput("name");
-
-        name.onKeyUp.listen(search);
-        autocomplete = document.createElement('div');
-        autocomplete.id = 'autocomplete';
-        autocomplete.style.visibility = 'hidden';
-        autocomplete.style.position = 'absolute';
-        autocomplete.style.top = name.offsetHeight.toString()+'px';
-        autocomplete.style.left = name.offsetLeft.toString()+'px';
-        autocomplete.style.width = '600px';
-        name.parent.children.add(autocomplete);
-        name.onBlur.listen((e) => autocomplete.style.visibility = 'hidden');
-
+        name.onFocus.listen((e) =>
+            autocomplete.bind(this, {'model_type': 'task'})
+        );
         description = getInput("description");
         qty = getInput("qty");
         unit = getInput("unit");
@@ -326,23 +291,6 @@ class Task extends Model with Row, TotalRow, HtmlRow {
                 }
             }
         }
-    }
-
-    search(KeyboardEvent e) {
-        repository.search('task', name.text).then(
-                (List result) {
-                var html = new StringBuffer();
-                for (List row in result) {
-                    html.write('<h4>');
-                    html.write(row[1]);
-                    html.write('</h4>');
-                    html.write(row[2]);
-                    html.write('<br />');
-                }
-                autocomplete.setInnerHtml(html.toString(), treeSanitizer: NodeTreeSanitizer.trusted);
-                autocomplete.style.visibility = 'visible';
-            }
-        );
     }
 
     createSibling() {
@@ -486,4 +434,5 @@ registerElements() {
     document.registerElement('sys-task', Task);
     document.registerElement('sys-job', Job);
     document.registerElement('sys-group', Group);
+    document.registerElement('sys-autocomplete', Autocomplete);
 }

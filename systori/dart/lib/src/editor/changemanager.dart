@@ -27,19 +27,14 @@ class Repository {
         return JSON.decode(response.responseText);
     }
 
-    Future<List<List>> search(String modelType, String terms, [int remaining_depth=0]) async {
+    Future<List<List>> search(Map<String,String> criteria) async {
         var response = await HttpRequest.request(
             "/api/editor/search",
             method: "POST",
             requestHeaders: headers,
-            sendData: JSON.encode({
-                'model_type': modelType,
-                'terms': terms,
-                'remaining_depth': remaining_depth
-            })
+            sendData: JSON.encode(criteria)
         );
         return JSON.decode(response.responseText);
-
     }
 }
 

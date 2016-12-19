@@ -21,7 +21,7 @@ class SearchAPI(views.APIView):
         model_type = request.data['model_type']
         terms = request.data['terms']
         if model_type == 'group':
-            remaining_depth = request.data['remaining_depth']
+            remaining_depth = int(request.data['remaining_depth'])
             return response.Response(list(
                 Group.objects
                 .groups_with_remaining_depth(remaining_depth)
