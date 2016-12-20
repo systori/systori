@@ -123,6 +123,8 @@ class Group extends Model implements AutocompleteReceiver {
         group.name.focus();
     }
 
+    onAutocompleteFinished(String id) {
+    }
 }
 
 
@@ -311,8 +313,7 @@ class Task extends Model with Row, TotalRow, HtmlRow implements AutocompleteRece
         }
     }
 
-    getChanges() {
-        return {};
+    onAutocompleteFinished(String id) {
     }
 }
 
