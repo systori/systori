@@ -6,7 +6,7 @@ import 'model.dart';
 
 abstract class AutocompleteReceiver {
     Input name;
-    onAutocompleteFinished(int id);
+    onAutocompleteFinished(String id);
 }
 
 
@@ -14,46 +14,57 @@ class Autocomplete extends HtmlElement {
 
     Autocomplete.created(): super.created();
 
-    Input boundInput;
+    AutocompleteReceiver boundReceiver;
     Map<String,String> extraCriteria;
     List<StreamSubscription> eventStreams;
+
+    int offsetFromTop;
 
     bool searching = false;
     bool searchRequested = false;
 
     bind(AutocompleteReceiver receiver, Map<String,String> criteria) {
-        if (boundInput != null) {
+
+        if (boundReceiver != null) {
             eventStreams.forEach((s) => s.cancel());
         }
-        boundInput = receiver.name;
-        boundInput.insertAdjacentElement('afterEnd', this);
+
+        boundReceiver = receiver;
         extraCriteria = criteria;
+
+        var input = receiver.name;
+        input.insertAdjacentElement('afterEnd', this);
         eventStreams = <StreamSubscription>[
-            boundInput.onKeyUp.listen(search),
-            boundInput.onBlur.listen(blur)
+            input.onKeyDown.listen(handleKey),
+            input.onBlur.listen(handleBlur)
         ];
-        style.top = boundInput.offsetHeight.toString()+'px';
-        style.left = boundInput.offsetLeft.toString()+'px';
+
+        offsetFromTop = input.offsetHeight;
+        style.top = '${offsetFromTop}px';
+        style.left = '${input.offsetLeft}px';
+
     }
 
-    search([KeyboardEvent e]) async {
+    search() async {
         if (searching) {
             searchRequested = true;
             return;
         }
         try {
             var criteria = {
-                'terms': boundInput.text
+                'terms': boundReceiver.name.text
             };
             criteria.addAll(extraCriteria);
             var result = await repository.search(criteria);
             var html = new StringBuffer();
             for (List row in result) {
-                html.write('<h4>');
+                html.write('<div data-id="');
+                html.write(row[0]);
+                html.write('"><div>');
                 html.write(row[1]);
-                html.write('</h4>');
+                html.write('</div><p>');
                 html.write(row[2]);
-                html.write('<br />');
+                html.write('</p></div>');
             }
             setInnerHtml(
                 html.toString(),
@@ -69,7 +80,57 @@ class Autocomplete extends HtmlElement {
         }
     }
 
-    blur([Event _]) {
+    handleKey(KeyboardEvent e) {
+        switch(e.keyCode) {
+            case KeyCode.UP:
+                e.preventDefault();
+                handleUp();
+                break;
+            case KeyCode.DOWN:
+                e.preventDefault();
+                handleDown();
+                break;
+            case KeyCode.ENTER:
+                e.preventDefault();
+                handleEnter();
+                break;
+            default:
+                search();
+        }
+    }
+
+    handleUp() {
+        var current = this.querySelector('.active');
+        if (current == null) return;
+        var previous = current.previousElementSibling;
+        if (previous != null) {
+            children.forEach((e) => e.classes.clear());
+            previous.classes.add('active');
+            style.top = "${offsetFromTop - previous.offsetTop}px";
+        }
+    }
+
+    handleDown() {
+        var current = this.querySelector('.active');
+        if (current == null) {
+            this.children.first.classes.add('active');
+        } else {
+            var next = current.nextElementSibling;
+            if (next != null) {
+                children.forEach((e) => e.classes.clear());
+                next.classes.add('active');
+                this.style.top = "${offsetFromTop - next.offsetTop}px";
+            }
+        }
+    }
+
+    handleEnter() {
+        var current = this.querySelector('.active');
+        if (current != null)
+            boundReceiver.onAutocompleteFinished(current.dataset['id']);
+    }
+
+    handleBlur([Event _]) {
         style.visibility = 'hidden';
     }
 
