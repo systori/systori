@@ -274,3 +274,18 @@ class AutocompleteApiTest(ClientTestCase):
         )
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(len(response.data), 1)
+
+    def test_group_injection(self):
+        job = JobFactory(project=ProjectFactory(structure='01.01.001'), generate_groups=True)
+        GroupFactory(parent=job, name='Voranstrich aus Bitumenlösung')
+        GroupFactory(parent=job, name='Schächte und Fundamente')
+        response = self.client.post(
+            reverse('api.editor.inject'), {
+                'model_type': 'group',
+                'parent_pk': 0,
+                'terms': 'bitumenlos',
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(len(response.data), 1)

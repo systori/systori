@@ -3,7 +3,7 @@
   <div class="editor-row">
     <div class="code">{{ group.code }}</div>
     <sys-input class="name" placeholder="{% trans 'group' %}" contenteditable>{{ group.name|safe }}</sys-input>
-    <div class="total">{{ group.total|ubrdecimal:2 }}</div>
+    <div class="total">{{ group.estimate|ubrdecimal:2 }}</div>
   </div>
   <sys-input class="description" placeholder="{% trans 'description' %}" contenteditable>{{ group.description|safe }}</sys-input>
 </div>

@@ -1,4 +1,6 @@
 from django.conf.urls import url
+from django.views import View
+from django.template.response import TemplateResponse
 from rest_framework import views, viewsets, mixins
 from rest_framework import response
 from .models import Job, Group, Task
@@ -40,7 +42,24 @@ class SearchAPI(views.APIView):
             ))
 
 
+class InjectAPI(View):
+
+    def post(self, request, *args, **kwargs):
+        model_type = request.data['model_type']
+        model_class = {
+            'group': Group,
+            'task': Task
+        }[model_type]
+        source = model_class.objects.get(pk=int(request.data['source_pk']))
+        target = model_class.objects.get(pk=int(request.data['target_pk']))
+        target.copy(source)
+        return TemplateResponse(request, 'task/editor/{}_loop.html'.format(model_type), {
+            model_type: target
+        })
+
+
 urlpatterns = [
     url(r'^job/(?P<pk>\d+)/editor/save$', EditorAPI.as_view({'post': 'update'}), name='api.editor.save'),
     url(r'^editor/search$', SearchAPI.as_view(), name='api.editor.search'),
+    url(r'^editor/inject$', InjectAPI.as_view(), name='api.editor.inject'),
 ]

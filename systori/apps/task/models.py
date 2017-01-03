@@ -140,18 +140,26 @@ class Group(OrderedModel):
         if self._structure.is_valid_depth(next_depth):
             Group.objects.create(parent=self, depth=next_depth).generate_groups()
 
-    def clone_to(self, new_group, new_order):
+    def copy(self, source):
+        self.name = source.name
+        self.description = source.description
+        self.save()
+        for group in source.groups.all():
+            group.clone_to(self)
+        for task in source.tasks.all():
+            task.clone_to(self)
+
+    def clone_to(self, new_parent):
         groups = self.groups.all()
         tasks = self.tasks.all()
         self.pk = None
-        self.parent = new_group
-        self.job = new_group.job
-        self.order = new_order
+        self.parent = new_parent
+        self.job = new_parent.job
         self.save()
         for group in groups:
-            group.clone_to(self, group.order)
+            group.clone_to(self)
         for task in tasks:
-            task.clone_to(self, task.order)
+            task.clone_to(self)
 
     def _calc(self, field):
         total = Decimal(0.0)
@@ -473,6 +481,19 @@ class Task(OrderedModel):
     def __str__(self):
         return self.name
 
+    def copy(self, source):
+        self.name = source.name
+        self.description = source.description
+        self.qty = source.qty
+        self.qty_equation = source.qty_equation
+        self.unit = source.unit
+        self.price = source.price
+        self.price_equation = source.price_equation
+        self.total = source.total
+        self.total_equation = source.total_equation
+        for lineitem in source.lineitems.exclude(is_correction=True).all():
+            lineitem.clone_to(self)
+
     def clone_to(self, new_group, new_order):
         lineitems = self.lineitems.exclude(is_correction=True).all()
         self.pk = None
@@ -485,12 +506,7 @@ class Task(OrderedModel):
         self.status = ''
         self.save()
         for lineitem in lineitems:
-            lineitem.pk = None
-            lineitem.complete = 0.0
-            lineitem.is_flagged = False
-            lineitem.task = self
-            lineitem.job = self.job
-            lineitem.save()
+            lineitem.clone_to(self)
 
 
 class LineItem(OrderedModel):
@@ -535,6 +551,14 @@ class LineItem(OrderedModel):
         if 'task' in kwargs and 'job' not in kwargs:
             kwargs['job'] = kwargs['task'].job
         super().__init__(*args, **kwargs)
+
+    def clone_to(self, new_task):
+        self.pk = None
+        self.complete = 0.0
+        self.is_flagged = False
+        self.task = new_task
+        self.job = new_task.job
+        self.save()
 
 
 class ProgressReport(models.Model):

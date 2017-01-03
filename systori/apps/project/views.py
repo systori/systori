@@ -84,6 +84,7 @@ class ProjectView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ProjectView, self).get_context_data(**kwargs)
+        context['jobs'] = self.object.jobs.with_totals().all()
         context['proposals'] = self.object.proposals.prefetch_related('jobs__project').all()
         context['project_contacts'] = self.object.project_contacts.prefetch_related('contact').all()
         context['jobsites'] = self.object.jobsites.all()

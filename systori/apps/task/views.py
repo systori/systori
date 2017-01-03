@@ -39,6 +39,9 @@ class JobEditor(DetailView):
         context['blank_lineitem'] = LineItem()
         return context
 
+    def get_queryset(self):
+        return super().get_queryset().with_hierarchy(self.request.project)
+
 
 class JobTransition(SingleObjectMixin, View):
     model = Job
