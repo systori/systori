@@ -1,8 +1,6 @@
 from django.conf.urls import url
-from django.views import View
-from django.template.response import TemplateResponse
 from rest_framework import views, viewsets, mixins
-from rest_framework import response
+from rest_framework import response, renderers
 from .models import Job, Group, Task
 from .serializers import JobSerializer
 from ..user.permissions import HasStaffAccess
@@ -42,7 +40,9 @@ class SearchAPI(views.APIView):
             ))
 
 
-class InjectAPI(View):
+class InjectAPI(views.APIView):
+
+    renderer_classes = (renderers.TemplateHTMLRenderer,)
 
     def post(self, request, *args, **kwargs):
         model_type = request.data['model_type']
@@ -53,9 +53,9 @@ class InjectAPI(View):
         source = model_class.objects.get(pk=int(request.data['source_pk']))
         target = model_class.objects.get(pk=int(request.data['target_pk']))
         target.copy(source)
-        return TemplateResponse(request, 'task/editor/{}_loop.html'.format(model_type), {
-            model_type: target
-        })
+        return response.Response(
+            {model_type: target},template_name='task/editor/{}_loop.html'.format(model_type)
+        )
 
 
 urlpatterns = [

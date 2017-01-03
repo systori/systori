@@ -277,13 +277,14 @@ class AutocompleteApiTest(ClientTestCase):
 
     def test_group_injection(self):
         job = JobFactory(project=ProjectFactory(structure='01.01.001'), generate_groups=True)
-        GroupFactory(parent=job, name='Voranstrich aus Bitumenlösung')
-        GroupFactory(parent=job, name='Schächte und Fundamente')
+        group = GroupFactory(parent=job, name='Voranstrich aus Bitumenlösung')
+        job2 = JobFactory(project=ProjectFactory(structure='01.01.001'), generate_groups=True)
+        group2 = GroupFactory(parent=job2, name='')
         response = self.client.post(
             reverse('api.editor.inject'), {
                 'model_type': 'group',
-                'parent_pk': 0,
-                'terms': 'bitumenlos',
+                'source_pk': group.pk,
+                'target_pk': group2.pk,
             },
             format='json'
         )

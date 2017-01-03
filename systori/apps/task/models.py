@@ -339,7 +339,7 @@ class Job(Group):
 
     def clone_to(self, new_job, *args):
         for group in self.groups.all():
-            group.clone_to(new_job.root, None)
+            group.clone_to(new_job.root)
 
     @property
     def is_billable(self):
@@ -494,12 +494,12 @@ class Task(OrderedModel):
         for lineitem in source.lineitems.exclude(is_correction=True).all():
             lineitem.clone_to(self)
 
-    def clone_to(self, new_group, new_order):
+    def clone_to(self, new_group):#, new_order):
         lineitems = self.lineitems.exclude(is_correction=True).all()
         self.pk = None
         self.group = new_group
         self.job = new_group.job
-        self.order = new_order
+        #self.order = new_order
         self.complete = 0.0
         self.started_on = None
         self.completed_on = None
