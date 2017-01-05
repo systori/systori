@@ -1,19 +1,50 @@
 import 'dart:html';
 import 'dart:async';
+import 'dart:convert';
 
 
+Repository repository;
+ChangeManager changeManager;
 Token tokenGenerator = new Token();
 
 
+abstract class KeyboardHandler {
+    // Returning false will stop propagating the event to
+    // subsequent handlers.
+    bool onKeyEvent(KeyEvent e, Input input);
+    onFocusEvent(Input input) {}
+    onBlurEvent(Input input) {}
+}
+
+
 class Input extends HtmlElement {
+
     Map<String,dynamic> get values => {className: text};
-    StreamController<KeyEvent> controller = new StreamController<KeyEvent>(sync: true);
-    Stream<KeyEvent> get onKeyEvent => controller.stream;
+    List<KeyboardHandler> _handlers = [];
+
     Input.created(): super.created() {
-        onKeyDown.listen((KeyboardEvent ke) {
-            controller.add(new KeyEvent.wrap(ke));
-        });
+        onKeyDown.listen((KeyboardEvent ke) =>
+            dispatchHandlers(new KeyEvent.wrap(ke))
+        );
+        onKeyUp.listen((KeyboardEvent ke) =>
+            dispatchHandlers(new KeyEvent.wrap(ke))
+        );
+        onBlur.listen((Event) =>
+            _handlers.forEach((h) => h.onBlurEvent(this))
+        );
     }
+
+    addHandler(KeyboardHandler handler) {
+        _handlers.add(handler);
+    }
+
+    dispatchHandlers(KeyEvent e) {
+        for (KeyboardHandler handler in _handlers) {
+            if (!handler.onKeyEvent(e, this))
+                break;
+        }
+    }
+
 }
 
 
@@ -179,6 +210,98 @@ abstract class Model extends HtmlElement {
                     }
                 }
             }
+        }
+    }
+
+}
+
+
+class Repository {
+
+    Map<String, String> headers;
+
+    Repository() {
+        var csrftoken = (querySelector('input[name=csrfmiddlewaretoken]') as InputElement).value;
+        headers = {
+            "X-CSRFToken": csrftoken,
+            "Content-Type": "application/json"
+        };
+    }
+
+    Future<Map> save(int jobId, Map data) async {
+        var response = await HttpRequest.request(
+            "/api/job/$jobId/editor/save",
+            method: "POST",
+            requestHeaders: headers,
+            sendData: JSON.encode(data)
+        );
+        return JSON.decode(response.responseText);
+    }
+
+    Future<List<List>> search(Map<String,String> criteria) async {
+        var response = await HttpRequest.request(
+            "/api/editor/search",
+            method: "POST",
+            requestHeaders: headers,
+            sendData: JSON.encode(criteria)
+        );
+        return JSON.decode(response.responseText);
+    }
+
+    Future<String> inject(Map<String,String> params) async {
+        var response = await HttpRequest.request(
+            "/api/editor/inject",
+            method: "POST",
+            requestHeaders: headers,
+            sendData: JSON.encode(params)
+        );
+        return response.responseText;
+    }
+}
+
+
+class ChangeManager {
+
+    Timer timer;
+    Model root;
+    ChangeManager(this.root);
+
+    startAutoSync() =>
+        timer = new Timer.periodic(new Duration(seconds: 5), (_)=>save());
+
+    Completer saving;
+    Completer saveRequest;
+
+    Future _save() async {
+        try {
+            var data = root.save();
+            if (data.isNotEmpty) {
+                Map response = await repository.save(root.pk, data);
+                root.commit(response);
+            }
+            saving.complete();
+        } catch (e) {
+            root.rollback();
+            saving.completeError(e);
+        } finally {
+            saving = saveRequest;
+            saveRequest = null;
+            if (saving != null) {
+                _save();
+            }
+
+        }
+    }
+
+    Future save() {
+        if (saving == null) {
+            saving = new Completer();
+            _save();
+            return saving.future;
+        } else {
+            if (saveRequest == null)
+                saveRequest = new Completer();
+            return saveRequest.future;
         }
     }
 

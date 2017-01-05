@@ -7,14 +7,8 @@ import 'package:systori/spreadsheet.dart';
 import 'package:systori/orderable.dart';
 import 'package:systori/inputs.dart';
 import 'model.dart';
-import 'changemanager.dart';
 import 'gaeb.dart';
 import 'autocomplete.dart';
-
-
-Repository repository;
-ChangeManager changeManager;
-Autocomplete autocomplete;
 
 
 class Job extends Group {
@@ -28,7 +22,42 @@ class Job extends Group {
 }
 
 
-class Group extends Model implements AutocompleteReceiver {
+class GroupKeyboardHandler implements KeyboardHandler {
+    Group group;
+    GroupKeyboardHandler(this.group);
+    bool onKeyEvent(KeyEvent e, Input input) {
+        if (e.keyCode == KeyCode.ENTER) {
+            print('handleKeyboard.ENTER');
+            e.preventDefault();
+            if (Job.JOB.structure.isValidDepth(depth+1)) {
+                Group child = this.querySelector(':scope>sys-group') as Group;
+                if (child.isEmpty) {
+                    child.name.focus();
+                } else {
+                    Group group = document.createElement('sys-group');
+                    insertBefore(group, child);
+                    group.generateGroups();
+                    updateCode();
+                    group.name.focus();
+                }
+            } else {
+                Task child = this.querySelector(':scope>sys-task') as Task;
+                if (child != null && child.isEmpty) {
+                    child.name.focus();
+                } else {
+                    Task task = document.createElement('sys-task');
+                    insertBefore(task, child);
+                    updateCode();
+                    task.name.focus();
+                }
+            }
+        }
+        return true;
+    }
+}
+
+
+class Group extends Model {
 
     DivElement code;
     Input name;
@@ -56,43 +85,13 @@ class Group extends Model implements AutocompleteReceiver {
         }
         code = getView("code");
         name = getInput("name");
-        name.onFocus.listen((e) => autocomplete.bind(this, {
-            'model_type': 'group',
+        name.addHandler(new AutocompleteKeyboardHandler(this, {
             'remaining_depth': '0'  // TODO: calculate remaining depth
-        }));
+        }, injectAutocomplete));
         description = getInput("description");
-        inputs.forEach((Input input) {
-            input.onKeyEvent.listen(handleKeyboard);
-        });
+        var handler = new GroupKeyboardHandler(this);
+        inputs.forEach((Input input) => input.addHandler(handler));
         super.attached();
-    }
-
-    handleKeyboard(KeyEvent e) {
-        if (e.keyCode == KeyCode.ENTER) {
-            e.preventDefault();
-            if (Job.JOB.structure.isValidDepth(depth+1)) {
-                Group child = this.querySelector(':scope>sys-group') as Group;
-                if (child.isEmpty) {
-                    child.name.focus();
-                } else {
-                    Group group = document.createElement('sys-group');
-                    insertBefore(group, child);
-                    group.generateGroups();
-                    updateCode();
-                    group.name.focus();
-                }
-            } else {
-                Task child = this.querySelector(':scope>sys-task') as Task;
-                if (child != null && child.isEmpty) {
-                    child.name.focus();
-                } else {
-                    Task task = document.createElement('sys-task');
-                    insertBefore(task, child);
-                    updateCode();
-                    task.name.focus();
-                }
-            }
-        }
     }
 
     generateGroups() {
@@ -123,8 +122,10 @@ class Group extends Model implements AutocompleteReceiver {
         group.name.focus();
     }
 
-    onAutocompleteFinished(String id) {
+    injectAutocomplete(String id) {
+
     }
+
 }
 
 
@@ -222,7 +223,7 @@ abstract class HtmlRow implements Row {
 }
 
 
-class Task extends Model with Row, TotalRow, HtmlRow implements AutocompleteReceiver {
+class Task extends Model with Row, TotalRow, HtmlRow {
 
     List<String> childTypes = ['lineitem'];
 
@@ -252,9 +253,7 @@ class Task extends Model with Row, TotalRow, HtmlRow implements AutocompleteRece
     attached() {
         code = getView("code");
         name = getInput("name");
-        name.onFocus.listen((e) =>
-            autocomplete.bind(this, {'model_type': 'task'})
-        );
+        name.onFocus.listen((e) => autocomplete.bind(this));
         description = getInput("description");
         qty = getInput("qty");
         unit = getInput("unit");
@@ -271,6 +270,18 @@ class Task extends Model with Row, TotalRow, HtmlRow implements AutocompleteRece
             calculateTotal(sheet.total);
         });
         super.attached();
+    }
+
+    Map<String,String> getAutocompleteSearchCriteria(Map<String,String> criteria) {
+        criteria['model_type'] = 'task';
+        return criteria;
+    }
+
+    Map<String,String> getAutocompleteInjectParams(Map<String,String> params) {
+        params['model_type'] = 'task';
+        params['parent_pk'] = parentGroup.pk.toString();
+        params['order'] = order.toString();
+        return params;
     }
 
     Iterable<Model> childrenOfType(String childType) =>
@@ -313,8 +324,6 @@ class Task extends Model with Row, TotalRow, HtmlRow implements AutocompleteRece
         }
     }
 
-    onAutocompleteFinished(String id) {
-    }
 }
 
 

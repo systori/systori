@@ -4,9 +4,54 @@ import 'editor.dart';
 import 'model.dart';
 
 
-abstract class AutocompleteReceiver {
-    Input name;
-    onAutocompleteFinished(String id);
+Autocomplete autocomplete;
+
+
+typedef void AutocompleteSelectionCallback(String id);
+
+class AutocompleteKeyboardHandler implements KeyboardHandler {
+
+    Model model;
+    Map<String,String> criteria;
+    AutocompleteSelectionCallback autocompleteSelection;
+
+    AutocompleteKeyboardHandler(this.model, this.criteria, this.autocompleteSelection) {
+        criteria['model_type'] = this.model.type;
+    }
+
+    onFocusEvent(Input input) {
+        autocomplete.criteria = criteria;
+        autocomplete.reposition(input);
+
+    }
+
+    onBlurEvent(Input input) {
+        autocomplete.criteria = {};
+        autocomplete.hide();
+    }
+
+    bool onKeyEvent(KeyEvent e, Input input) {
+        switch(e.keyCode) {
+            case KeyCode.UP:
+                autocomplete.handleUp();
+                return false;
+            case KeyCode.DOWN:
+                autocomplete.handleDown();
+                return false;
+            case KeyCode.ENTER:
+                print('Autocomplete.ENTER');
+                String id = autocomplete.handleEnter();
+                if (id != null) autocompleteSelection(id);
+                return false;
+            default:
+                autocomplete.criteria['terms'] = input.text;
+                autocomplete.search();
+                return false;
+        }
+        return true;
+    }
+
+
 }
 
 
@@ -14,8 +59,7 @@ class Autocomplete extends HtmlElement {
 
     Autocomplete.created(): super.created();
 
-    AutocompleteReceiver boundReceiver;
-    Map<String,String> extraCriteria;
+    Map<String,String> criteria;
     List<StreamSubscription> eventStreams;
 
     int offsetFromTop;
@@ -23,26 +67,15 @@ class Autocomplete extends HtmlElement {
     bool searching = false;
     bool searchRequested = false;
 
-    bind(AutocompleteReceiver receiver, Map<String,String> criteria) {
-
-        if (boundReceiver != null) {
-            eventStreams.forEach((s) => s.cancel());
-        }
-
-        boundReceiver = receiver;
-        extraCriteria = criteria;
-
-        var input = receiver.name;
+    reposition(Input input) {
         input.insertAdjacentElement('afterEnd', this);
-        eventStreams = <StreamSubscription>[
-            input.onKeyDown.listen(handleKey),
-            input.onBlur.listen(handleBlur)
-        ];
-
         offsetFromTop = input.offsetHeight;
         style.top = '${offsetFromTop}px';
         style.left = '${input.offsetLeft}px';
+    }
 
+    hide() {
+        style.visibility = 'hidden';
     }
 
     search() async {
@@ -50,11 +83,8 @@ class Autocomplete extends HtmlElement {
             searchRequested = true;
             return;
         }
+        searching = true;
         try {
-            var criteria = {
-                'terms': boundReceiver.name.text
-            };
-            criteria.addAll(extraCriteria);
             var result = await repository.search(criteria);
             var html = new StringBuffer();
             for (List row in result) {
@@ -77,25 +107,6 @@ class Autocomplete extends HtmlElement {
                 searchRequested = false;
                 search();
             }
-        }
-    }
-
-    handleKey(KeyboardEvent e) {
-        switch(e.keyCode) {
-            case KeyCode.UP:
-                e.preventDefault();
-                handleUp();
-                break;
-            case KeyCode.DOWN:
-                e.preventDefault();
-                handleDown();
-                break;
-            case KeyCode.ENTER:
-                e.preventDefault();
-                handleEnter();
-                break;
-            default:
-                search();
         }
     }
 
@@ -126,12 +137,9 @@ class Autocomplete extends HtmlElement {
 
     handleEnter() {
         var current = this.querySelector('.active');
-        if (current != null)
-            boundReceiver.onAutocompleteFinished(current.dataset['id']);
-    }
-
-    handleBlur([Event _]) {
-        style.visibility = 'hidden';
+        if (current != null) {
+            return current.dataset['id'];
+        }
     }
 
 }
