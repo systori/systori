@@ -135,11 +135,6 @@ class Group(OrderedModel):
             code = '_'
         return code if self.is_root else "{}.{}".format(self.parent.code, code)
 
-    def generate_groups(self):
-        next_depth = self.depth + 1
-        if self._structure.is_valid_depth(next_depth):
-            Group.objects.create(parent=self, depth=next_depth).generate_groups()
-
     def copy(self, source):
         self.name = source.name
         self.description = source.description

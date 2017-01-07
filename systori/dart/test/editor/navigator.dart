@@ -22,7 +22,10 @@ class KeyboardNavigator {
     sendKey(int keyCode, [int times = 1]) {
         Input input = document.activeElement;
         range(times).forEach((i) {
-            input.dispatchHandlers(new KeyEvent('keydown', keyCode: keyCode));
+            input.dispatchKeyDownHandlers(new KeyEvent('keydown', keyCode: keyCode));
+        });
+        range(times).forEach((i) {
+            input.dispatchKeyUpHandlers(new KeyEvent('keyup', keyCode: keyCode));
         });
     }
 
@@ -33,7 +36,8 @@ class KeyboardNavigator {
         Input input = document.activeElement;
         text.codeUnits.forEach((int key) {
             input.appendText(new String.fromCharCode(key));
-            input.dispatchHandlers(new KeyEvent('keydown', charCode: key));
+            input.dispatchKeyDownHandlers(new KeyEvent('keydown', charCode: key));
+            input.dispatchKeyUpHandlers(new KeyEvent('keyup', charCode: key));
         });
     }
 

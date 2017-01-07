@@ -80,22 +80,18 @@ class FakeSaveRequest extends FakeRequest<Map> {
 
 class FakeSearchRequest extends FakeRequest<List> {
     FakeSearchRequest(Map data): super(data);
-    List<List> response(Map data) => [
-        ['42', 'a name', 'a description']
-    ];
-}
-
-
-class FakeInjectRequest extends FakeRequest<Map> {
-
-    FakeInjectRequest(Map data): super(data);
-
-    Map response(Map data) {
-        var result = {};
-        return result;
+    List<List> response(Map data) {
+        print('responding from response');
+        return [['42', 'a name', 'a description']];
     }
-
 }
+
+
+class FakeInjectRequest extends FakeRequest<String> {
+    FakeInjectRequest(Map data): super(data);
+    String response(Map data) => '';
+}
+
 
 class FakeRepository extends Repository {
 
@@ -117,6 +113,8 @@ class FakeRepository extends Repository {
     }
 
     complete() {
+        print('complete():');
+        print(_requests);
         _requests.forEach((request) => request.complete());
         _requests.clear();
     }

@@ -9,7 +9,7 @@ Autocomplete autocomplete;
 
 typedef void AutocompleteSelectionCallback(String id);
 
-class AutocompleteKeyboardHandler implements KeyboardHandler {
+class AutocompleteKeyboardHandler extends KeyboardHandler {
 
     Model model;
     Map<String,String> criteria;
@@ -19,17 +19,27 @@ class AutocompleteKeyboardHandler implements KeyboardHandler {
         criteria['model_type'] = this.model.type;
     }
 
+    bool get canAutocomplete => model.hasNoPk && model.hasNoChildModels;
+
+    @override
     onFocusEvent(Input input) {
+        if (!canAutocomplete) return;
         autocomplete.criteria = criteria;
         autocomplete.reposition(input);
     }
 
+    @override
     onBlurEvent(Input input) {
+        if (!canAutocomplete) return;
         autocomplete.criteria = {};
         autocomplete.hide();
     }
 
-    bool onKeyEvent(KeyEvent e, Input input) {
+    @override
+    bool onKeyDownEvent(KeyEvent e, Input input) {
+        print('canAutocomplete: $canAutocomplete');
+        print(e.charCode);
+        if (!canAutocomplete) return true;
         switch(e.keyCode) {
             case KeyCode.UP:
                 autocomplete.handleUp();
@@ -39,14 +49,20 @@ class AutocompleteKeyboardHandler implements KeyboardHandler {
                 return false;
             case KeyCode.ENTER:
                 String id = autocomplete.handleEnter();
-                if (id != null) autocompleteSelection(id);
-                return false;
+                if (id != null) {
+                    autocompleteSelection(id);
+                    return false;
+                } else {
+                    // autocomplete is active but nothing was selected
+                    // allow event propagation
+                    return true;
+                }
             default:
+                print('calling search');
                 autocomplete.criteria['terms'] = input.text;
                 autocomplete.search();
                 return false;
         }
-        return true;
     }
 
 }
@@ -72,17 +88,21 @@ class Autocomplete extends HtmlElement {
     }
 
     hide() {
+        setInnerHtml('');
         style.visibility = 'hidden';
     }
 
     search() async {
         if (searching) {
+            print('already searching!');
             searchRequested = true;
             return;
         }
         searching = true;
         try {
+            print('searching...');
             var result = await repository.search(criteria);
+            print('results: $result');
             var html = new StringBuffer();
             for (List row in result) {
                 html.write('<div data-id="');

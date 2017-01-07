@@ -10,11 +10,13 @@ Token tokenGenerator = new Token();
 
 
 abstract class KeyboardHandler {
-    // Returning false will stop propagating the event to
-    // subsequent handlers.
-    bool onKeyEvent(KeyEvent e, Input input);
+    bool onKeyDownEvent(KeyEvent e, Input input) => true;
+    bool onKeyUpEvent(KeyEvent e, Input input) => true;
     onFocusEvent(Input input) {}
     onBlurEvent(Input input) {}
+    bindAll(Iterable<Input> inputs) =>
+        inputs.forEach((Input input) =>
+            input.addHandler(this));
 }
 
 
@@ -28,10 +30,10 @@ class Input extends HtmlElement {
             _handlers.forEach((h) => h.onFocusEvent(this))
         );
         onKeyDown.listen((KeyboardEvent ke) =>
-            dispatchHandlers(new KeyEvent.wrap(ke))
+            dispatchKeyDownHandlers(new KeyEvent.wrap(ke))
         );
         onKeyUp.listen((KeyboardEvent ke) =>
-            dispatchHandlers(new KeyEvent.wrap(ke))
+            dispatchKeyUpHandlers(new KeyEvent.wrap(ke))
         );
         onBlur.listen((Event) =>
             _handlers.forEach((h) => h.onBlurEvent(this))
@@ -42,13 +44,19 @@ class Input extends HtmlElement {
         _handlers.add(handler);
     }
 
-    dispatchHandlers(KeyEvent e) {
+    dispatchKeyDownHandlers(KeyEvent e) {
         for (KeyboardHandler handler in _handlers) {
-            if (!handler.onKeyEvent(e, this))
+            if (!handler.onKeyDownEvent(e, this))
                 break;
         }
     }
 
+    dispatchKeyUpHandlers(KeyEvent e) {
+        for (KeyboardHandler handler in _handlers) {
+            if (!handler.onKeyUpEvent(e, this))
+                break;
+        }
+    }
 }
 
 
@@ -65,7 +73,7 @@ class ModelState {
         committed = initialCommitted(model);
 
     static Map<String,dynamic> initialCommitted(Model model) =>
-        model.pk != null
+        model.hasPK
             ? inputMap(model.inputs)
             : new Map.fromIterable(inputMap(model.inputs).keys,
                 key: (String key) => key, value: (String key) => ''
@@ -131,6 +139,19 @@ abstract class Model extends HtmlElement {
 
     List<String> get childTypes => [];
 
+    bool get hasChildModels {
+        for (var childType in childTypes) {
+            if (childrenOfType(childType).isNotEmpty) {
+                return true;
+            }
+        }
+        return false;
+    }
+    bool get hasNoChildModels => !hasChildModels;
+
+    bool get hasPK => pk != null;
+    bool get hasNoPk => !hasPK;
+
     int get pk => int.parse(dataset['pk'], onError: (s)=>null);
     set pk(int id) => dataset['pk'] = id.toString();
 
@@ -184,7 +205,7 @@ abstract class Model extends HtmlElement {
             }
         }
         if (data.isNotEmpty) {
-            if (pk == null) {
+            if (hasNoPk) {
                 data['token'] = token;
             } else {
                 data['pk'] = pk;
@@ -292,7 +313,6 @@ class ChangeManager {
             if (saving != null) {
                 _save();
             }
-
         }
     }
 

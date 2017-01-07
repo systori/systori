@@ -18,7 +18,6 @@ class JobTemplateCreateForm(forms.ModelForm):
         job = super().save(commit)
         job.job = job
         job.account = create_account_for_job(job)
-        job.generate_groups()
         job.save()
         return job
 
@@ -46,7 +45,5 @@ class JobCreateForm(forms.ModelForm):
         if self.cleaned_data['job_template']:
             tmpl = self.cleaned_data['job_template']
             tmpl.clone_to(job)
-        else:
-            job.generate_groups()
         job.save()
         return job

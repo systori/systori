@@ -45,22 +45,16 @@ def create_data():
     data.project = ProjectFactory(name="Test Project", structure="0.00.00.000")
 
     data.job1 = JobFactory(name="Test Job", project=data.project)
-    data.job1.generate_groups()
     data.job1.account = create_account_for_job(data.job1)
     data.job1.save()
-    group1 = data.job1.groups.first()
-    group1.name = 'Group 1'
-    group1.save()
-    group2 = group1.groups.first()
-    group2.name = 'Group 2'
-    group2.save()
-    task = TaskFactory(name="Sample Task", group=group2, job=data.job1)
+    group1 = GroupFactory(name='Group 1', parent=data.job1)
+    group2 = GroupFactory(name='Group 2', parent=group1)
+    task = TaskFactory(name="Sample Task", group=group2)
     LineItemFactory(name='First Item', task=task)
     LineItemFactory(name='Second Item', task=task)
     LineItemFactory(name='Third Item', task=task)
 
     data.job2 = JobFactory(name="Test Job", project=data.project)
-    data.job2.generate_groups()
     data.job2.account = create_account_for_job(data.job2)
     data.job2.save()
 

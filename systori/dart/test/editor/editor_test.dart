@@ -13,7 +13,6 @@ void main() {
     registerElements();
     Scaffolding scaffold = new Scaffolding(querySelector('#editor-area'));
     KeyboardNavigator nav = new KeyboardNavigator();
-    autocomplete = querySelector('sys-autocomplete');
     FakeRepository fakeRepository;
 
     setUp(() {
@@ -22,6 +21,11 @@ void main() {
         nav.reset();
         fakeRepository = repository = new FakeRepository();
         changeManager = new ChangeManager(Job.JOB);
+        autocomplete = querySelector('sys-autocomplete');
+    });
+
+    tearDown(() {
+        fakeRepository.complete();
     });
 
     group("Keyboard", () {
@@ -30,45 +34,79 @@ void main() {
 
             expect(nav.activeModel.pk, 1);
             expect(nav.activeModel is Job, isTrue);
+            expect((nav.activeModel as Job).depth, 0);
+
+            nav.sendEnter();
+
+            nav.sendText('first group');
+            expect(nav.activeModel.pk, null);
+            expect(nav.activeModel is Group, isTrue);
+            expect((nav.activeModel as Group).depth, 1);
+
+            nav.sendEnter();
+
+            nav.sendText('second group');
+            expect(nav.activeModel.pk, null);
+            expect(nav.activeModel is Group, isTrue);
+            expect((nav.activeModel as Group).depth, 2);
+
+            nav.sendEnter();
+
+            nav.sendText('first task');
+            expect(nav.activeModel.pk, null);
+            expect(nav.activeModel is Task, isTrue);
 
             nav.sendEnter();
 
             expect(nav.activeModel.pk, null);
-            expect(nav.activeModel is Group, isTrue);
+            expect(nav.activeModel is LineItem, isTrue);
 
-            nav.sendEnter();
-
-            expect(nav.activeModel.pk, null);
-            expect(nav.activeModel is Group, isTrue);
+            // blank models make [Enter] travel up the hierarchy
 
             nav.sendEnter();
 
             expect(nav.activeModel.pk, null);
             expect(nav.activeModel is Task, isTrue);
 
-            nav.sendText('test task');
             nav.sendEnter();
 
             expect(nav.activeModel.pk, null);
-            expect(nav.activeModel is LineItem, isTrue);
+            expect(nav.activeModel is Group, isTrue);
+            expect((nav.activeModel as Group).depth, 2);
+
+            nav.sendEnter();
+
+            expect(nav.activeModel.pk, null);
+            expect(nav.activeModel is Group, isTrue);
+            expect((nav.activeModel as Group).depth, 1);
+
+            // [Enter] in empty group just below root does nothing
+            nav.sendEnter();
+
+            expect(nav.activeModel.pk, null);
+            expect(nav.activeModel is Group, isTrue);
+            expect((nav.activeModel as Group).depth, 1);
+
         });
 
     });
 
     group("ChangeManager", () {
 
-        test("group successful update", () {
+        test("group successful update", () async {
 
             Job job = querySelector('sys-job');
 
             // job name is changed
             nav.sendText(' Changed');
 
-            expect(changeManager.saving, isFalse);
+            expect(changeManager.saving, isNull);
 
             changeManager.save();
 
-            expect(changeManager.saving, isTrue);
+            await new Future.value(); // run event loop
+
+            expect(changeManager.saving, new isInstanceOf<Completer>());
 
             expect(job.state.committed, {'name': 'Test Job', 'description': ''});
 
@@ -76,21 +114,23 @@ void main() {
 
             expect(job.state.committed, {'name': 'Test Job Changed', 'description': ''});
 
-            expect(changeManager.saving, isFalse);
+            expect(changeManager.saving, isNull);
 
         });
 
-        test("group successful create", () {
+        test("group successful create", () async {
 
             nav.sendEnter();
 
             nav.sendText('group changed');
 
-            expect(changeManager.saving, isFalse);
+            expect(changeManager.saving, isNull);
 
             changeManager.save();
 
-            expect(changeManager.saving, isTrue);
+            await new Future.value(); // run event loop
+
+            expect(changeManager.saving, new isInstanceOf<Completer>());
 
             Group group = nav.activeModel;
 
@@ -102,7 +142,7 @@ void main() {
             expect(group.pk, 1);
             expect(group.state.committed, {'name': 'group changed', 'description': ''});
 
-            expect(changeManager.saving, isFalse);
+            expect(changeManager.saving, isNull);
 
         });
 
@@ -111,6 +151,8 @@ void main() {
     group("Inject Autocompleted Result", () {
 
         test("basic use case", () async {
+            print('autocomplete.searching');
+            print(autocomplete.searching);
             nav.sendEnter();
             nav.sendText('a');
             await new Future.value();

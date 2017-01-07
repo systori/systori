@@ -11,6 +11,23 @@ import 'gaeb.dart';
 import 'autocomplete.dart';
 
 
+class TextareaKeyboardHandler extends KeyboardHandler {
+    /*
+        Add this keyboard handler before any other handlers
+        to multi-line textareas so that [Enter]+[Shift] could
+        be used to enter new lines.
+     */
+    @override
+    bool onKeyDownEvent(KeyEvent e, Input input) {
+        if (e.keyCode == KeyCode.ENTER && e.shiftKey) {
+            /* don't run any other handlers */
+            return false;
+        }
+        return true;
+    }
+}
+
+
 class Job extends Group {
     static Job JOB;
     GAEBHierarchyStructure structure;
@@ -19,6 +36,7 @@ class Job extends Group {
         structure = new GAEBHierarchyStructure(dataset['structure-format']);
         JOB = this;
     }
+    createSibling() => createChild();
 }
 
 
@@ -27,31 +45,16 @@ class GroupKeyboardHandler extends KeyboardHandler {
     Group group;
     GroupKeyboardHandler(this.group);
 
-    bool onKeyEvent(KeyEvent e, Input input) {
+    @override
+    bool onKeyDownEvent(KeyEvent e, Input input) {
         if (e.keyCode == KeyCode.ENTER) {
-            print('handleKeyboard.ENTER');
             e.preventDefault();
-            if (Job.JOB.structure.isValidDepth(group.depth+1)) {
-                Group child = group.querySelector(':scope>sys-group') as Group;
-                if (child.isEmpty) {
-                    child.name.focus();
-                } else {
-                    Group newGroup = document.createElement('sys-group');
-                    group.insertBefore(newGroup, child);
-                    newGroup.generateGroups();
-                    group.updateCode();
-                    newGroup.name.focus();
-                }
+            if (group.isBlank) {
+                Group parent = group.parent as Group;
+                group.remove();
+                parent.createSibling();
             } else {
-                Task child = group.querySelector(':scope>sys-task') as Task;
-                if (child != null && child.isEmpty) {
-                    child.name.focus();
-                } else {
-                    Task task = document.createElement('sys-task');
-                    group.insertBefore(task, child);
-                    group.updateCode();
-                    task.name.focus();
-                }
+                group.createChild();
             }
         }
         return true;
@@ -64,7 +67,7 @@ class Group extends Model {
     DivElement code;
     Input name;
     Input description;
-    bool get isEmpty => name.text.isEmpty;
+    bool get isBlank => hasNoPk && name.text.isEmpty;
 
     List<String> childTypes = ['group', 'task'];
     Group get parentGroup => parent as Group;
@@ -74,7 +77,7 @@ class Group extends Model {
 
     set order(int position) {
         dataset['order'] = position.toString();
-        code.text = "${parentGroup.code.text}.${Job.JOB.structure.formatGroup(dataset['order'], position)}";
+        code.text = "${parentGroup.code.text}.${Job.JOB.structure.formatGroup(dataset['order'], depth)}";
     }
 
     Group.created(): super.created();
@@ -87,23 +90,13 @@ class Group extends Model {
         }
         code = getView("code");
         name = getInput("name");
-        if (pk == null) {
-            name.addHandler(new AutocompleteKeyboardHandler(this, {
-                'remaining_depth': '0' // TODO: calculate remaining depth
-            }, injectAutocomplete));
-        }
+        name.addHandler(new AutocompleteKeyboardHandler(this, {
+            'remaining_depth': '0' // TODO: calculate remaining depth
+        }, injectAutocomplete));
         description = getInput("description");
-        var handler = new GroupKeyboardHandler(this);
-        inputs.forEach((Input input) => input.addHandler(handler));
+        description.addHandler(new TextareaKeyboardHandler());
+        new GroupKeyboardHandler(this).bindAll(inputs);
         super.attached();
-    }
-
-    generateGroups() {
-        if (Job.JOB.structure.isValidDepth(depth+1)) {
-            Group group = document.createElement('sys-group');
-            children.add(group);
-            group.generateGroups();
-        }
     }
 
     updateCode() {
@@ -119,11 +112,24 @@ class Group extends Model {
     }
 
     createSibling() {
-        Group group = document.createElement('sys-group');
-        parent.insertBefore(group, nextElementSibling);
-        group.generateGroups();
+        Group newGroup = document.createElement('sys-group');
+        parent.insertBefore(newGroup, nextElementSibling);
         (parent as Group).updateCode();
-        group.name.focus();
+        newGroup.name.focus();
+    }
+
+    createChild() {
+        if (Job.JOB.structure.isValidDepth(depth+1)) {
+            Group group = document.createElement('sys-group');
+            append(group);
+            updateCode();
+            group.name.focus();
+        } else {
+            Task task = document.createElement('sys-task');
+            append(task);
+            updateCode();
+            task.name.focus();
+        }
     }
 
     injectAutocomplete(String id) {
@@ -227,30 +233,24 @@ abstract class HtmlRow implements Row {
 }
 
 
-
 class TaskKeyboardHandler extends KeyboardHandler {
 
     Task task;
-
     TaskKeyboardHandler(this.task);
 
-    bool onKeyEvent(KeyEvent e, Input input) {
+    @override
+    bool onKeyDownEvent(KeyEvent e, Input input) {
         if (e.keyCode == KeyCode.ENTER) {
             e.preventDefault();
-            if (task.isEmpty) {
-                (task.parent as Group).createSibling();
+            if (task.isBlank) {
+                Group parent = task.parent as Group;
                 task.remove();
+                parent.createSibling();
             } else {
-                LineItem child = task.querySelector(':scope>sys-lineitem-sheet>sys-lineitem');
-                if (child != null && child.isEmpty) {
-                    child.name.focus();
-                } else {
-                    LineItem li = document.createElement('sys-lineitem');
-                    task.querySelector(':scope>sys-lineitem-sheet').insertBefore(li, child);
-                    li.name.focus();
-                }
+                task.sheet.createChild();
             }
         }
+        return true;
     }
 }
 
@@ -262,7 +262,7 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     DivElement code;
     Input name;
     Input description;
-    bool get isEmpty => name.text.isEmpty;
+    bool get isBlank => hasNoPk && name.text.isEmpty;
     DivElement diffRow;
     DivElement diffCell;
 
@@ -285,16 +285,14 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     attached() {
         code = getView("code");
         name = getInput("name");
-        if (pk == null) {
-            name.addHandler(new AutocompleteKeyboardHandler(this, {}, injectAutocomplete));
-        }
+        name.addHandler(new AutocompleteKeyboardHandler(this, {}, injectAutocomplete));
         description = getInput("description");
+        description.addHandler(new TextareaKeyboardHandler());
         qty = getInput("qty");
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
-        var handler = new TaskKeyboardHandler(this);
-        inputs.forEach((Input input) => input.addHandler(handler));
+        new TaskKeyboardHandler(this).bindAll(inputs);
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
         sheet = this.querySelector(":scope > sys-lineitem-sheet");
@@ -318,7 +316,6 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     createSibling() {
         Task task = document.createElement('sys-task');
         parent.insertBefore(task, nextElementSibling);
-        parent.appendHtml('', treeSanitizer: NodeTreeSanitizer.trusted);
         (parent as Group).updateCode();
         task.name.focus();
     }
@@ -340,10 +337,32 @@ class Task extends Model with Row, TotalRow, HtmlRow {
 }
 
 
+class LineItemKeyboardHandler extends KeyboardHandler {
+
+    LineItem li;
+    LineItemKeyboardHandler(this.li);
+
+    @override
+    bool onKeyDownEvent(KeyEvent e, Input input) {
+        if (e.keyCode == KeyCode.ENTER) {
+            e.preventDefault();
+            if (li.isBlank) {
+                Task parent = li.parent.parent as Task;
+                li.remove();
+                parent.createSibling();
+            } else {
+                li.createSibling();
+            }
+        }
+        return true;
+    }
+}
+
+
 class LineItem extends Model with Orderable, Row, HtmlRow {
 
     Input name;
-    bool get isEmpty => name.text.isEmpty;
+    bool get isBlank => hasNoPk && name.text.isEmpty;
 
     LineItem.created(): super.created() {
         if (children.isEmpty) {
@@ -359,22 +378,14 @@ class LineItem extends Model with Orderable, Row, HtmlRow {
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
-        this.querySelectorAll(':scope>.editor [contenteditable]').onKeyDown.listen(handleKeyboard);
+        new LineItemKeyboardHandler(this).bindAll(inputs);
         super.attached();
     }
 
-    handleKeyboard(KeyboardEvent e) {
-        if (e.keyCode == KeyCode.ENTER) {
-            e.preventDefault();
-            if (isEmpty) {
-                (parent.parent as Task).createSibling();
-                remove();
-            } else {
-                LineItem li = document.createElement('sys-lineitem');
-                parent.insertBefore(li, nextElementSibling);
-                li.name.focus();
-            }
-        }
+    createSibling() {
+        LineItem li = document.createElement('sys-lineitem');
+        parent.insertBefore(li, nextElementSibling);
+        li.name.focus();
     }
 
 }
@@ -443,6 +454,12 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
             row.price.style.background = null;
             row.total.style.background = null;
         }
+    }
+
+    createChild() {
+        LineItem li = document.createElement('sys-lineitem');
+        append(li);
+        li.name.focus();
     }
 
 }
