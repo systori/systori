@@ -216,45 +216,50 @@ def serialize(proposal):
         pass  # TODO: Calculate the terms.
 
     for job_data in proposal.json['jobs']:
-
         job_obj = job_data.pop('job')
-
         job_data['taskgroups'] = []
+        job_data['tasks'] = []
+        _serialize(job_data, job_obj)
 
-        for taskgroup in job_obj.groups.all():
-            taskgroup_dict = {
-                'id': taskgroup.id,
-                'code': taskgroup.code,
-                'name': taskgroup.name,
-                'description': taskgroup.description,
-                'estimate_net': taskgroup.estimate,
-                'tasks': []
+
+def _serialize(data, parent):
+
+    for group in parent.groups.all():
+        group_dict = {
+            'id': group.id,
+            'code': group.code,
+            'name': group.name,
+            'description': group.description,
+            'estimate_net': group.estimate,
+            'tasks': [],
+            'taskgroups': []
+        }
+        data['taskgroups'].append(group_dict)
+        _serialize(group_dict, group)
+
+    for task in parent.tasks.all():
+
+        task_dict = {
+            'id': task.id,
+            'code': task.code,
+            'name': task.name,
+            'description': task.description,
+            'is_optional': task.is_provisional,
+            'qty': task.qty,
+            'unit': task.unit,
+            'price': task.price,
+            'estimate_net': task.total,
+            'lineitems': []
+        }
+        data['tasks'].append(task_dict)
+
+        for lineitem in task.lineitems.all():
+            lineitem_dict = {
+                'id': lineitem.id,
+                'name': lineitem.name,
+                'qty': lineitem.qty,
+                'unit': lineitem.unit,
+                'price': lineitem.price,
+                'price_per': lineitem.total,
             }
-            job_data['taskgroups'].append(taskgroup_dict)
-
-            for task in taskgroup.tasks.all():
-
-                task_dict = {
-                    'id': task.id,
-                    'code': task.code,
-                    'name': task.name,
-                    'description': task.description,
-                    'is_optional': task.is_provisional,
-                    'qty': task.qty,
-                    'unit': task.unit,
-                    'price': task.price,
-                    'estimate_net': task.total,
-                    'lineitems': []
-                }
-                taskgroup_dict['tasks'].append(task_dict)
-
-                for lineitem in task.lineitems.all():
-                    lineitem_dict = {
-                        'id': lineitem.id,
-                        'name': lineitem.name,
-                        'qty': lineitem.qty,
-                        'unit': lineitem.unit,
-                        'price': lineitem.price,
-                        'price_per': lineitem.total,
-                    }
-                    task_dict['lineitems'].append(lineitem_dict)
+            task_dict['lineitems'].append(lineitem_dict)
