@@ -1,5 +1,6 @@
 @TestOn('browser')
 import 'dart:html';
+import 'dart:async';
 import 'package:test/test.dart';
 import 'package:systori/editor.dart';
 import 'navigator.dart';
@@ -12,12 +13,14 @@ void main() {
     registerElements();
     Scaffolding scaffold = new Scaffolding(querySelector('#editor-area'));
     KeyboardNavigator nav = new KeyboardNavigator();
+    autocomplete = querySelector('sys-autocomplete');
+    FakeRepository fakeRepository;
 
     setUp(() {
         tokenGenerator = new FakeToken();
         scaffold.reset();
         nav.reset();
-        repository = new FakeRepository();
+        fakeRepository = repository = new FakeRepository();
         changeManager = new ChangeManager(Job.JOB);
     });
 
@@ -69,7 +72,7 @@ void main() {
 
             expect(job.state.committed, {'name': 'Test Job', 'description': ''});
 
-            repository.complete();
+            fakeRepository.complete();
 
             expect(job.state.committed, {'name': 'Test Job Changed', 'description': ''});
 
@@ -94,13 +97,27 @@ void main() {
             expect(group.pk, null);
             expect(group.state.committed, {'name': '', 'description': ''});
 
-            repository.complete();
+            fakeRepository.complete();
 
             expect(group.pk, 1);
             expect(group.state.committed, {'name': 'group changed', 'description': ''});
 
             expect(changeManager.saving, isFalse);
 
+        });
+
+    });
+
+    group("Inject Autocompleted Result", () {
+
+        test("basic use case", () async {
+            nav.sendEnter();
+            nav.sendText('a');
+            await new Future.value();
+            fakeRepository.complete();
+            nav.sendDown();
+            nav.sendEnter();
+            fakeRepository.complete();
         });
 
     });

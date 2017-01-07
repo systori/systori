@@ -61,15 +61,13 @@
               
             </li>
             
-            <li><a href="/projects/">Projekte</a></li>
-            
             
   <li><a href="/project-2">Test Project</a></li>
-  <li class="active"><a href="/project-2/job-1/tasks">Test Job</a></li>
+  <li class="active"><a href="/project-2/job-1/editor">Test Job</a></li>
 
           </ul>
 
-          <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='abc' />
+            <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='abc' />
           <input type="hidden" name="language" value=""/>
         </form>
 
@@ -107,7 +105,11 @@
           </li>
 
         </ul>
-
+        <form class="navbar-form navbar-right">
+            <div class="form-group form-group-sm">
+              <input type="text" id="goto_project" onkeyup="gotoProject(event)" style="width:60px; margin-top:3px;" class="form-control" placeholder="#">
+            </div>
+        </form>
         </div><!--/.nav-collapse -->
       </div>
     </nav>
@@ -174,6 +176,7 @@
     }
 
     .description {
+      display: block;
       margin-left: 50px;
       padding-top: 20px;
       padding-bottom: 20px;
@@ -461,13 +464,11 @@
 
     sys-autocomplete {
       z-index: 100;
-      display: none;
+      visibility: hidden;
       position: absolute;
       background: white;
-      left: 80px;
       width: 480px;
       border: 1px solid lightgrey;
-      top: 20px;
       -webkit-transition: top 0.1s;
       -moz-transition: top 0.1s;
       -ms-transition: top 0.1s;
@@ -477,6 +478,14 @@
 
     sys-autocomplete > div {
       border-bottom: 1px solid lightgrey;
+    }
+
+    sys-autocomplete > div > div.name {
+      font-size: 14px;
+    }
+
+    sys-autocomplete > div > p {
+      font-size: 12px;
     }
 
     sys-autocomplete > div.active {
@@ -620,7 +629,7 @@
 
 <div class="price-difference" style="visibility: hidden;">
   <span class="glyphicon glyphicon-exclamation-sign"></span>
-  <div class="name">Line items do not add up to the task price.</div>
+  <div class="name">Die Kalkulation geht noch nicht auf.</div>
   <div class="total">0,00</div>
   <div class="actions"></div>
 </div>
@@ -671,8 +680,8 @@
 
 <div class="price-difference" style="visibility: hidden;">
   <span class="glyphicon glyphicon-exclamation-sign"></span>
-  <div class="name">Line items do not add up to the task price.</div>
-  <div class="total"></div>
+  <div class="name">Die Kalkulation geht noch nicht auf.</div>
+  <div class="total">0,00</div>
   <div class="actions"></div>
 </div>
 
@@ -697,6 +706,8 @@
 </div>
   </template>
 
+  <sys-autocomplete></sys-autocomplete>
+
 
 
 
@@ -704,6 +715,13 @@
 <script src="/static/js/jquery-ui.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
 <script src="/static/dart/build/packages/web_components/webcomponents-lite.min.js"></script>
+<script type="text/javascript">
+    function gotoProject(e) {
+        if(e.keyCode == 13) {
+            window.location.href = window.location.origin+"/project-" + document.querySelector("#goto_project").value;
+        }
+    }
+</script>
 
 
 <script src="/static/js/language_picker.js"></script>

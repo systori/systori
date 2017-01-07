@@ -22,32 +22,34 @@ class Job extends Group {
 }
 
 
-class GroupKeyboardHandler implements KeyboardHandler {
+class GroupKeyboardHandler extends KeyboardHandler {
+
     Group group;
     GroupKeyboardHandler(this.group);
+
     bool onKeyEvent(KeyEvent e, Input input) {
         if (e.keyCode == KeyCode.ENTER) {
             print('handleKeyboard.ENTER');
             e.preventDefault();
-            if (Job.JOB.structure.isValidDepth(depth+1)) {
-                Group child = this.querySelector(':scope>sys-group') as Group;
+            if (Job.JOB.structure.isValidDepth(group.depth+1)) {
+                Group child = group.querySelector(':scope>sys-group') as Group;
                 if (child.isEmpty) {
                     child.name.focus();
                 } else {
-                    Group group = document.createElement('sys-group');
-                    insertBefore(group, child);
-                    group.generateGroups();
-                    updateCode();
-                    group.name.focus();
+                    Group newGroup = document.createElement('sys-group');
+                    group.insertBefore(newGroup, child);
+                    newGroup.generateGroups();
+                    group.updateCode();
+                    newGroup.name.focus();
                 }
             } else {
-                Task child = this.querySelector(':scope>sys-task') as Task;
+                Task child = group.querySelector(':scope>sys-task') as Task;
                 if (child != null && child.isEmpty) {
                     child.name.focus();
                 } else {
                     Task task = document.createElement('sys-task');
-                    insertBefore(task, child);
-                    updateCode();
+                    group.insertBefore(task, child);
+                    group.updateCode();
                     task.name.focus();
                 }
             }
@@ -85,9 +87,11 @@ class Group extends Model {
         }
         code = getView("code");
         name = getInput("name");
-        name.addHandler(new AutocompleteKeyboardHandler(this, {
-            'remaining_depth': '0'  // TODO: calculate remaining depth
-        }, injectAutocomplete));
+        if (pk == null) {
+            name.addHandler(new AutocompleteKeyboardHandler(this, {
+                'remaining_depth': '0' // TODO: calculate remaining depth
+            }, injectAutocomplete));
+        }
         description = getInput("description");
         var handler = new GroupKeyboardHandler(this);
         inputs.forEach((Input input) => input.addHandler(handler));
@@ -223,6 +227,34 @@ abstract class HtmlRow implements Row {
 }
 
 
+
+class TaskKeyboardHandler extends KeyboardHandler {
+
+    Task task;
+
+    TaskKeyboardHandler(this.task);
+
+    bool onKeyEvent(KeyEvent e, Input input) {
+        if (e.keyCode == KeyCode.ENTER) {
+            e.preventDefault();
+            if (task.isEmpty) {
+                (task.parent as Group).createSibling();
+                task.remove();
+            } else {
+                LineItem child = task.querySelector(':scope>sys-lineitem-sheet>sys-lineitem');
+                if (child != null && child.isEmpty) {
+                    child.name.focus();
+                } else {
+                    LineItem li = document.createElement('sys-lineitem');
+                    task.querySelector(':scope>sys-lineitem-sheet').insertBefore(li, child);
+                    li.name.focus();
+                }
+            }
+        }
+    }
+}
+
+
 class Task extends Model with Row, TotalRow, HtmlRow {
 
     List<String> childTypes = ['lineitem'];
@@ -253,15 +285,16 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     attached() {
         code = getView("code");
         name = getInput("name");
-        name.onFocus.listen((e) => autocomplete.bind(this));
+        if (pk == null) {
+            name.addHandler(new AutocompleteKeyboardHandler(this, {}, injectAutocomplete));
+        }
         description = getInput("description");
         qty = getInput("qty");
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
-        inputs.forEach((Input input) =>
-            input.onKeyEvent.listen(handleKeyboard)
-        );
+        var handler = new TaskKeyboardHandler(this);
+        inputs.forEach((Input input) => input.addHandler(handler));
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
         sheet = this.querySelector(":scope > sys-lineitem-sheet");
@@ -270,11 +303,6 @@ class Task extends Model with Row, TotalRow, HtmlRow {
             calculateTotal(sheet.total);
         });
         super.attached();
-    }
-
-    Map<String,String> getAutocompleteSearchCriteria(Map<String,String> criteria) {
-        criteria['model_type'] = 'task';
-        return criteria;
     }
 
     Map<String,String> getAutocompleteInjectParams(Map<String,String> params) {
@@ -286,25 +314,6 @@ class Task extends Model with Row, TotalRow, HtmlRow {
 
     Iterable<Model> childrenOfType(String childType) =>
         this.querySelectorAll<Model>(":scope > sys-lineitem-sheet > sys-lineitem");
-
-    handleKeyboard(KeyEvent e) {
-        if (e.keyCode == KeyCode.ENTER) {
-            e.preventDefault();
-            if (isEmpty) {
-                (parent as Group).createSibling();
-                remove();
-            } else {
-                LineItem child = this.querySelector(':scope>sys-lineitem-sheet>sys-lineitem');
-                if (child != null && child.isEmpty) {
-                    child.name.focus();
-                } else {
-                    LineItem li = document.createElement('sys-lineitem');
-                    this.querySelector(':scope>sys-lineitem-sheet').insertBefore(li, child);
-                    li.name.focus();
-                }
-            }
-        }
-    }
 
     createSibling() {
         Task task = document.createElement('sys-task');
@@ -322,6 +331,10 @@ class Task extends Model with Row, TotalRow, HtmlRow {
             diffRow.style.visibility = 'visible';
             diffCell.text = diff.difference;
         }
+    }
+
+    injectAutocomplete(String id) {
+
     }
 
 }
@@ -437,6 +450,7 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
 
 registerElements() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
+    CSRFToken = (querySelector('input[name=csrfmiddlewaretoken]') as InputElement).value;
     document.registerElement('sys-input', Input);
     document.registerElement('sys-cell', HtmlCell);
     document.registerElement('sys-lineitem', LineItem);

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 
 
+String CSRFToken;
 Repository repository;
 ChangeManager changeManager;
 Token tokenGenerator = new Token();
@@ -23,6 +24,9 @@ class Input extends HtmlElement {
     List<KeyboardHandler> _handlers = [];
 
     Input.created(): super.created() {
+        onFocus.listen((Event) =>
+            _handlers.forEach((h) => h.onFocusEvent(this))
+        );
         onKeyDown.listen((KeyboardEvent ke) =>
             dispatchHandlers(new KeyEvent.wrap(ke))
         );
@@ -221,9 +225,8 @@ class Repository {
     Map<String, String> headers;
 
     Repository() {
-        var csrftoken = (querySelector('input[name=csrfmiddlewaretoken]') as InputElement).value;
         headers = {
-            "X-CSRFToken": csrftoken,
+            "X-CSRFToken": CSRFToken,
             "Content-Type": "application/json"
         };
     }

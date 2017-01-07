@@ -8,7 +8,17 @@ class FakeToken extends Token {
 }
 
 
-class FakeRequest {
+abstract class FakeRequest<T> {
+    final Map data;
+    final Completer<T> completer = new Completer.sync();
+    FakeRequest(this.data);
+    complete() => completer.complete(response(data));
+    fail() => completer.completeError('failed');
+    T response(Map data);
+}
+
+
+class FakeSaveRequest extends FakeRequest<Map> {
 
     static int _group_pk;
     set group_pk(int pk) => _group_pk = pk;
@@ -28,16 +38,11 @@ class FakeRequest {
         _lineitem_pk = 1;
     }
 
-    final Map data;
-    final Completer<Map> completer;
+    FakeSaveRequest(Map data): super(data);
 
-    FakeRequest(this.data):
-        completer = new Completer.sync();
+    Map response(Map data) => _response('job', data);
 
-    complete() => completer.complete(response('group', data));
-    fail() => completer.completeError('failed');
-
-    Map response(String objectType, Map data) {
+    Map _response(String objectType, Map data) {
         var result = {};
 
         if (data.containsKey('token')) {
@@ -62,7 +67,7 @@ class FakeRequest {
             if (data.containsKey(childList)) {
                 result[childList] = [];
                 for (var child in data[childList]) {
-                    result[childList].add(response(childType, child));
+                    result[childList].add(_response(childType, child));
                 }
             }
         }
@@ -73,15 +78,37 @@ class FakeRequest {
 }
 
 
+class FakeSearchRequest extends FakeRequest<List> {
+    FakeSearchRequest(Map data): super(data);
+    List<List> response(Map data) => [
+        ['42', 'a name', 'a description']
+    ];
+}
+
+
+class FakeInjectRequest extends FakeRequest<Map> {
+
+    FakeInjectRequest(Map data): super(data);
+
+    Map response(Map data) {
+        var result = {};
+        return result;
+    }
+
+}
+
 class FakeRepository extends Repository {
 
     List<FakeRequest> _requests = [];
 
+    FakeRequest get lastRequest =>
+        _requests.last;
+
     Map get lastRequestMap =>
-        _requests.last.data;
+        lastRequest.data;
 
     FakeRepository() {
-        FakeRequest.reset();
+        FakeSaveRequest.reset();
     }
 
     fail() {
@@ -90,14 +117,26 @@ class FakeRepository extends Repository {
     }
 
     complete() {
-        _requests.forEach((request) {
-             request.complete();
-        });
+        _requests.forEach((request) => request.complete());
         _requests.clear();
     }
 
+    FakeRequest pop() => _requests.removeLast();
+
     Future<Map> save(int jobId, Map data) {
-        var request = new FakeRequest(data);
+        var request = new FakeSaveRequest(data);
+        _requests.add(request);
+        return request.completer.future;
+    }
+
+    Future<List<List>> search(Map<String,String> criteria) {
+        var request = new FakeSearchRequest(criteria);
+        _requests.add(request);
+        return request.completer.future;
+    }
+
+    Future<String> inject(Map<String,String> params) {
+        var request = new FakeInjectRequest(params);
         _requests.add(request);
         return request.completer.future;
     }

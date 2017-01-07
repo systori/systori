@@ -388,7 +388,7 @@
   <div id="editor-area">
 
   <sys-job id="task-editor" data-pk="{{ job.pk }}" data-code="{{ job.code }}"
-           data-structure-format="{{ job.project.structure_format }}">
+           data-structure-format="{{ job.project.structure.pattern}}">
     {% include "task/editor/group_editor.html" with group=job %}
     {% for group in job.groups.all %}
       {% include "task/editor/group_loop.html" with group=group %}

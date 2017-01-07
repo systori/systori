@@ -22,7 +22,6 @@ class AutocompleteKeyboardHandler implements KeyboardHandler {
     onFocusEvent(Input input) {
         autocomplete.criteria = criteria;
         autocomplete.reposition(input);
-
     }
 
     onBlurEvent(Input input) {
@@ -39,7 +38,6 @@ class AutocompleteKeyboardHandler implements KeyboardHandler {
                 autocomplete.handleDown();
                 return false;
             case KeyCode.ENTER:
-                print('Autocomplete.ENTER');
                 String id = autocomplete.handleEnter();
                 if (id != null) autocompleteSelection(id);
                 return false;
@@ -50,7 +48,6 @@ class AutocompleteKeyboardHandler implements KeyboardHandler {
         }
         return true;
     }
-
 
 }
 

@@ -6,7 +6,7 @@ from decimal import Decimal as D
 from django.db import transaction
 from django.template import Context, Template
 from django.test.client import Client
-from django.test.runner import setup_databases
+from django.test.utils import setup_databases
 from django.core.urlresolvers import reverse
 from django.utils.translation import activate
 from django.conf import settings
@@ -15,7 +15,7 @@ from systori.apps.project.factories import ProjectFactory
 from systori.apps.task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from systori.apps.user.factories import UserFactory
 from systori.apps.accounting.models import Entry, create_account_for_job
-from systori.apps.accounting.forms import PaymentRowForm
+from systori.apps.document.forms import PaymentRowForm
 from systori.apps.accounting.workflow import debit_jobs, create_chart_of_accounts
 from systori.lib.accounting.tools import Amount as A
 
@@ -42,7 +42,7 @@ def create_data():
     data.company = CompanyFactory(name="ACME Industries")
     create_chart_of_accounts()
     data.user = UserFactory(first_name="Ben", last_name="Zimmermann", email='test@systori.com', company=data.company)
-    data.project = ProjectFactory(name="Test Project", structure_format="0.00.00.000")
+    data.project = ProjectFactory(name="Test Project", structure="0.00.00.000")
 
     data.job1 = JobFactory(name="Test Job", project=data.project)
     data.job1.generate_groups()
@@ -95,7 +95,7 @@ def generate_pages():
     client = Client()
     client.login(username=data.user.email, password='open sesame')
 
-    job_editor = client.get(reverse('tasks', args=[data.project.id, data.job1.id]), HTTP_HOST=host)
+    job_editor = client.get(reverse('job.editor', args=[data.project.id, data.job1.id]), HTTP_HOST=host)
     write_test_html('editor', 'editor', job_editor.content)
 
     #proposal_create = client.get(reverse('proposal.create', args=[data.project.id]), HTTP_HOST=host)
@@ -115,6 +115,14 @@ def generate_pages():
 
 
 if __name__ == "__main__":
+
+    class DisableMigrations:
+        def __contains__(self, item):
+            return True
+        def __getitem__(self, item):
+            return None
+    settings.MIGRATION_MODULES = DisableMigrations()
+
     setup_databases(verbosity=1, interactive=False, keepdb=True)
 
     # Start Transaction
