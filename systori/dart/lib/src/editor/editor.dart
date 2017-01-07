@@ -121,12 +121,12 @@ class Group extends Model {
     createChild() {
         if (Job.JOB.structure.isValidDepth(depth+1)) {
             Group group = document.createElement('sys-group');
-            append(group);
+            insertBefore(group, this.querySelector(':scope>sys-group'));
             updateCode();
             group.name.focus();
         } else {
             Task task = document.createElement('sys-task');
-            append(task);
+            insertBefore(task, this.querySelector(':scope>sys-task'));
             updateCode();
             task.name.focus();
         }
@@ -458,7 +458,7 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
 
     createChild() {
         LineItem li = document.createElement('sys-lineitem');
-        append(li);
+        insertBefore(li, this.querySelector(':scope>sys-lineitem'));
         li.name.focus();
     }
 
