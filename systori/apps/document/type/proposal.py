@@ -224,6 +224,11 @@ def serialize(proposal):
 
 def _serialize(data, parent):
 
+    data['job_id'] = parent.job_id
+    data['code'] = parent.code
+    data['name'] = parent.name
+    data['description'] = parent.description
+
     for group in parent.groups.all():
         group_dict = {
             'id': group.id,

@@ -1,10 +1,13 @@
+from datetime import date
 from decimal import Decimal
 from django.test import TestCase
 from django.utils.translation import activate
 
 from ..company.factories import CompanyFactory
 from ..project.factories import ProjectFactory
+from ..project.models import Project
 from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
+from ..task.models import Job, Group, Task
 from ..directory.factories import ContactFactory
 
 from systori.lib.accounting.tools import Amount
@@ -54,6 +57,7 @@ class ProposalTests(TestCase):
         pdf_type.proposal.serialize(proposal)
         self.maxDiff = None
         self.assertEqual({
+            'add_terms': False,
             'jobs': [{
                 'tasks': [],
                 'taskgroups': [{
@@ -80,10 +84,79 @@ class ProposalTests(TestCase):
                             'unit': ''
                         }],
                     }],
+                    'id': 2,'job_id':self.job.job_id, 'code': '01.01',
+                    'name': self.group.name,
+                    'description': '',
+                    'estimate_net': Decimal('0.0000'),
+
                 }],
+                'tasks': []
             }],
-            'add_terms': False
         }, proposal.json)
+
+    def test_render_small_project(self):
+        small_project = ProjectFactory(structure="01.0001")
+        ContactFactory(
+            project=small_project
+        )
+        job = JobFactory(project=small_project)
+        task = TaskFactory(group=job)
+        lineitem = LineItemFactory(task=task)
+        project = Project.objects.with_estimate().get(pk=small_project.pk)
+        proposal = Proposal.objects.create(project=project, letterhead=self.letterhead)
+        proposal.json = {
+            'jobs': [{'job': self.job}],
+            'add_terms': False
+        }
+        pdf_type.proposal.serialize(proposal)
+        proposal.json['business'] = 'testBusiness'
+        proposal.json['salutation'] = project.project_contacts.first().contact.salutation
+        proposal.json['first_name'] = project.project_contacts.first().contact.first_name
+        proposal.json['last_name'] = project.project_contacts.first().contact.first_name
+        proposal.json['address'] = project.project_contacts.first().contact.address
+        proposal.json['postal_code'] = project.project_contacts.first().contact.postal_code
+        proposal.json['city'] = project.project_contacts.first().contact.city
+        proposal.json['document_date'] = date.today().isoformat()
+        proposal.json['title'] = 'testProposal'
+        proposal.json['header'] = 'dear sir or madam'
+        proposal.json['footer'] = 'bye'
+        proposal.json['estimate_total'] = Amount.from_gross(project.estimate, Decimal('0.19'))
+        file = pdf_type.proposal.render(proposal.json, self.letterhead, False, 'print')
+        f = open('test_small.pdf', 'wb+')
+        f.write(file)
+        f.close()
+
+    def test_render_big_project(self):
+        project = ProjectFactory(structure="0.00.00.00.00.0000")
+        job = JobFactory(project=project)  # type: Job
+        #job.generate_groups()
+
+        group = GroupFactory(parent=job)  # type: Group
+        #group.generate_groups()
+
+
+        proposal = Proposal.objects.create(project=project, letterhead=self.letterhead)
+        proposal.json = {
+            'jobs': [{'job': self.job}],
+            'add_terms': False
+        }
+        pdf_type.proposal.serialize(proposal)
+        proposal.json['business'] = 'testBusiness'
+        proposal.json['salutation'] = project.project_contacts.first().contact.salutation
+        proposal.json['first_name'] = project.project_contacts.first().contact.first_name
+        proposal.json['last_name'] = project.project_contacts.first().contact.first_name
+        proposal.json['address'] = project.project_contacts.first().contact.address
+        proposal.json['postal_code'] = project.project_contacts.first().contact.postal_code
+        proposal.json['city'] = project.project_contacts.first().contact.city
+        proposal.json['document_date'] = date.today().isoformat()
+        proposal.json['title'] = 'testProposal'
+        proposal.json['header'] = 'dear sir or madam'
+        proposal.json['footer'] = 'bye'
+        proposal.json['estimate_total'] = Amount.from_gross(project.estimate, Decimal('0.19'))
+        file = pdf_type.proposal.render(proposal.json, self.letterhead, False, 'print')
+        f = open('test_big.pdf', 'wb+')
+        f.write(file)
+        f.close()
 
 
 class InvoiceTests(TestCase):
