@@ -65,14 +65,14 @@ def upgrade_taskinstance_to_task(apps, schema_editor):
                     lineitem.order = lineitem_order
                     lineitem.qty_equation = str(lineitem.qty)
                     lineitem.price_equation = str(lineitem.price)
-                    lineitem.total = round(lineitem.qty * lineitem.price, 3)
+                    lineitem.total = round(lineitem.qty * lineitem.price, 2)
                     task.price += lineitem.total
                     lineitem.task = task
                     lineitem.job = task.job
                     lineitem.save()
                     #if is_variant_mode: print(".", end='')
                 #if is_variant_mode: print("")
-                task.total = round(task.qty * task.price, 3)
+                task.total = round(task.qty * task.price, 2)
                 task.save()
 
     for job in Job.objects.all():
