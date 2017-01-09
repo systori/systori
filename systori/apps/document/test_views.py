@@ -1,5 +1,7 @@
 from datetime import date
 from decimal import Decimal
+from PyPDF2 import PdfFileReader
+from io import BytesIO
 
 from django.utils import timezone
 from django.core.urlresolvers import reverse
@@ -386,10 +388,15 @@ class ProposalViewTests(DocumentTestCase):
         ]), {'with_lineitems': True})
         self.assertEqual(200, response.status_code)
 
-    def test_serialize_n_render_proposal_extended(self):
+    def test_serialize_n_render_small_structure(self):
+        self.project = ProjectFactory(structure="0.0")
+        self.job = JobFactory(project=self.project)
+        self.task = TaskFactory(qty=10, complete=5, price=96, group=self.job)
 
-        response = self.client.get(reverse('proposal.create', args=[self.project.id]))
-        self.assertEqual(200, response.status_code)
+        self.contact = ContactFactory(
+            project=self.project,
+            is_billable=True
+        )
 
         data = self.form_data({
             'title': 'Proposal #1',
@@ -398,9 +405,7 @@ class ProposalViewTests(DocumentTestCase):
             'footer': 'bye',
             'add_terms': False,
             'job-0-job_id': self.job.id,
-            'job-0-is_attached': 'True',
-            'job-1-job_id': self.job2.id,
-            'job-1-is_attached': 'True',
+            'job-0-is_attached': 'True'
         })
         response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
         self.assertEqual(302, response.status_code)
@@ -413,6 +418,41 @@ class ProposalViewTests(DocumentTestCase):
             'print',
             Proposal.objects.first().id
         ]), {}) # empty {} == 'with_lineitems': False
+        self.assertTrue(self.job.name in PdfFileReader(BytesIO(response.content)).getPage(0).extractText())
+        f = open('test_big.pdf', 'wb+')
+        f.write(response.content)
+        f.close()
+
+    def test_serialize_n_render_big_structure(self):
+        self.project = ProjectFactory(structure="0.0.0.0.0.0")
+        self.task = TaskFactory(qty=10, complete=5, price=96, group=self.project)
+
+        self.contact = ContactFactory(
+            project=self.project,
+            is_billable=True
+        )
+
+        data = self.form_data({
+            'title': 'Proposal #1',
+            'document_date': '2015-01-01',
+            'header': 'hello',
+            'footer': 'bye',
+            'add_terms': False,
+            'job-0-job_id': self.job.id,
+            'job-0-is_attached': 'True'
+        })
+        response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        # render
+
+
+        response = self.client.get(reverse('proposal.pdf', args=[
+            self.project.id,
+            'print',
+            Proposal.objects.first().id
+        ]), {}) # empty {} == 'with_lineitems': False
+        self.assertTrue(self.job.name in PdfFileReader(BytesIO(response.content)).getPage(0).extractText())
         f = open('test_big.pdf', 'wb+')
         f.write(response.content)
         f.close()
