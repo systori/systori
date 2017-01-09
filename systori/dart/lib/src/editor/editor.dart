@@ -56,6 +56,7 @@ class GroupKeyboardHandler extends KeyboardHandler {
             } else {
                 group.createChild();
             }
+            return false;
         }
         return true;
     }
@@ -260,6 +261,7 @@ class TaskKeyboardHandler extends KeyboardHandler {
             } else {
                 task.sheet.createChild();
             }
+            return false;
         }
         return true;
     }
@@ -367,6 +369,7 @@ class LineItemKeyboardHandler extends KeyboardHandler {
             } else {
                 li.createSibling();
             }
+            return false;
         }
         return true;
     }

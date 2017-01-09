@@ -32,6 +32,7 @@ class KeyboardNavigator {
         text.codeUnits.forEach((int key) {
             input.dispatchKeyDownHandlers(new KeyEvent('keydown', charCode: key));
             input.appendText(new String.fromCharCode(key));
+            input.dispatchInputHandlers(new Event('input'));
             input.dispatchKeyUpHandlers(new KeyEvent('keyup', charCode: key));
         });
     }

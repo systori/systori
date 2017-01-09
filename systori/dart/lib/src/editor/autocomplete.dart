@@ -29,8 +29,14 @@ class AutocompleteKeyboardHandler extends KeyboardHandler {
     }
 
     @override
+    onInputEvent(Input input) {
+        if (!canAutocomplete) return true;
+        autocomplete.criteria['terms'] = input.text;
+        autocomplete.search();
+    }
+
+    @override
     onBlurEvent(Input input) {
-        if (!canAutocomplete) return;
         autocomplete.criteria = {};
         autocomplete.hide();
     }
@@ -40,14 +46,17 @@ class AutocompleteKeyboardHandler extends KeyboardHandler {
         if (!canAutocomplete) return true;
         switch(e.keyCode) {
             case KeyCode.UP:
+                e.preventDefault();
                 autocomplete.handleUp();
                 return false;
             case KeyCode.DOWN:
+                e.preventDefault();
                 autocomplete.handleDown();
                 return false;
             case KeyCode.ENTER:
                 String id = autocomplete.handleEnter();
                 if (id != null) {
+                    e.preventDefault();
                     autocompleteSelection(id);
                     return false;
                 } else {
@@ -56,9 +65,7 @@ class AutocompleteKeyboardHandler extends KeyboardHandler {
                     return true;
                 }
             default:
-                autocomplete.criteria['terms'] = input.text;
-                autocomplete.search();
-                return false;
+                return true;
         }
     }
 

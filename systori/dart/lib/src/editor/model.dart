@@ -14,6 +14,7 @@ abstract class KeyboardHandler {
     bool onKeyUpEvent(KeyEvent e, Input input) => true;
     onFocusEvent(Input input) {}
     onBlurEvent(Input input) {}
+    onInputEvent(Input input) {}
     bindAll(Iterable<Input> inputs) =>
         inputs.forEach((Input input) =>
             input.addHandler(this));
@@ -26,19 +27,18 @@ class Input extends HtmlElement {
     Map<String,dynamic> get values => {className: text};
     List<KeyboardHandler> _handlers = [];
 
-    String beforeText;
-
     Input.created(): super.created() {
-        onFocus.listen((Event) =>
+        onFocus.listen((Event e) =>
             _handlers.forEach((h) => h.onFocusEvent(this))
         );
         onKeyDown.listen((KeyboardEvent ke) =>
             dispatchKeyDownHandlers(new KeyEvent.wrap(ke))
         );
+        onInput.listen(dispatchInputHandlers);
         onKeyUp.listen((KeyboardEvent ke) =>
             dispatchKeyUpHandlers(new KeyEvent.wrap(ke))
         );
-        onBlur.listen((Event) =>
+        onBlur.listen((Event e) =>
             _handlers.forEach((h) => h.onBlurEvent(this))
         );
     }
@@ -48,7 +48,6 @@ class Input extends HtmlElement {
     }
 
     dispatchKeyDownHandlers(KeyEvent e) {
-        beforeText = text;
         for (KeyboardHandler handler in _handlers) {
             if (!handler.onKeyDownEvent(e, this))
                 break;
@@ -56,13 +55,18 @@ class Input extends HtmlElement {
     }
 
     dispatchKeyUpHandlers(KeyEvent e) {
-        if (beforeText != text && model != null)
-            model.updateVisualState('changed');
         for (KeyboardHandler handler in _handlers) {
             if (!handler.onKeyUpEvent(e, this))
                 break;
         }
     }
+
+    dispatchInputHandlers(Event e) {
+        if (model != null)
+            model.updateVisualState('changed');
+        _handlers.forEach((h) => h.onInputEvent(this));
+    }
+
 }
 
 
@@ -211,6 +215,9 @@ abstract class Model extends HtmlElement {
 
     Map save() {
         var data = (isChanged && canSave) ? new Map.from(state.save()) : {};
+        if (data.isNotEmpty) {
+            updateVisualState('saving');
+        }
         for (var childType in childTypes) {
             var saveChildren = childrenOfType(childType)
                 .map((Model model) => model.save())
@@ -221,7 +228,6 @@ abstract class Model extends HtmlElement {
             }
         }
         if (data.isNotEmpty) {
-            updateVisualState('saving');
             if (hasNoPk) {
                 data['token'] = token;
             } else {
