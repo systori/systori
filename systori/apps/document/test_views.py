@@ -386,6 +386,37 @@ class ProposalViewTests(DocumentTestCase):
         ]), {'with_lineitems': True})
         self.assertEqual(200, response.status_code)
 
+    def test_serialize_n_render_proposal_extended(self):
+
+        response = self.client.get(reverse('proposal.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
+        data = self.form_data({
+            'title': 'Proposal #1',
+            'document_date': '2015-01-01',
+            'header': 'hello',
+            'footer': 'bye',
+            'add_terms': False,
+            'job-0-job_id': self.job.id,
+            'job-0-is_attached': 'True',
+            'job-1-job_id': self.job2.id,
+            'job-1-is_attached': 'True',
+        })
+        response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        # render
+
+
+        response = self.client.get(reverse('proposal.pdf', args=[
+            self.project.id,
+            'print',
+            Proposal.objects.first().id
+        ]), {}) # empty {} == 'with_lineitems': False
+        f = open('test_big.pdf', 'wb+')
+        f.write(response.content)
+        f.close()
+
     def test_update_proposal(self):
 
         proposal = Proposal.objects.create(

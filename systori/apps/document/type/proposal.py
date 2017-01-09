@@ -45,63 +45,108 @@ def collate_tasks(proposal, font, available_width):
 
     description_width = 314.0
 
+    def add_task(task):
+        items.row(p(task['code'], font), p(task['name'], font))
+        items.row_style('SPAN', 1, -2)
+        lines = simpleSplit(task['description'], font.normal.fontName, items.font_size, description_width)
+        for line in lines:
+            items.row('', p(line, font))
+            items.row_style('SPAN', 1, -1)
+            items.row_style('TOPPADDING', 0, -1, 1)
+
+        task_total_column = money(task['estimate_net'])
+        if task['is_optional']:
+            task_total_column = _('Optional')
+
+        items.row('', '', ubrdecimal(task['qty']), p(task['unit'], font), money(task['price']), task_total_column)
+        items.row_style('ALIGNMENT', 1, -1, "RIGHT")
+        items.row_style('BOTTOMPADDING', 0, -1, 10)
+
+    def traverse(parent, depth):
+        items.row(b(parent['code'], font), b(parent['name'], font))
+        items.row_style('SPAN', 1, -1)
+        lines = simpleSplit(parent['description'], font.normal.fontName, items.font_size, description_width)
+        for line in lines:
+            items.row('', p(line, font))
+            items.row_style('SPAN', 1, -1)
+            items.row_style('TOPPADDING', 0, -1, 1)
+        items.row_style('BOTTOMPADDING', 0, -1, 10)
+
+        for group in parent.get('taskgroups', []):
+            traverse(group, depth + 1)
+        for task in parent['tasks']:
+            add_task(task)
+
     for job in proposal['jobs']:
 
         items.row(b(job['code'], font), b(job['name'], font))
         items.row_style('SPAN', 1, -1)
 
-        taskgroup_subtotals_added = False
-
-        for taskgroup in job['taskgroups']:
-            items.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
-            items.row_style('SPAN', 1, -1)
-
-            lines = simpleSplit(taskgroup['description'], font.normal.fontName, items.font_size, description_width)
-
-            for line in lines:
-                items.row('', p(line, font))
-                items.row_style('SPAN', 1, -1)
-                items.row_style('TOPPADDING', 0, -1, 1)
-            items.row_style('BOTTOMPADDING', 0, -1, 10)
-
-            for task in taskgroup['tasks']:
-                items.row(p(task['code'], font), p(task['name'], font))
-                items.row_style('SPAN', 1, -2)
-
-                lines = simpleSplit(task['description'], font.normal.fontName, items.font_size, description_width)
-                for line in lines:
-                    items.row('', p(line, font))
-                    items.row_style('SPAN', 1, -1)
-                    items.row_style('TOPPADDING', 0, -1, 1)
-
-                task_total_column = money(task['estimate_net'])
-                if task['is_optional']:
-                    task_total_column = _('Optional')
-                #elif not task['selected']:
-                #    task_total_column = _('Alternative')
-
-                items.row('', '', ubrdecimal(task['qty']), p(task['unit'], font), money(task['price']), task_total_column)
-                items.row_style('ALIGNMENT', 1, -1, "RIGHT")
-                items.row_style('BOTTOMPADDING', 0, -1, 10)
-
-            items.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
-                  '', '', '', money(taskgroup['estimate_net']))
+        for group in job.get('taskgroups', []):
+            traverse(group, 1)
+            items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
+                      '', '', '', money(group['estimate_net']))
             items.row_style('FONTNAME', 0, -1, font.bold)
             items.row_style('ALIGNMENT', -1, -1, "RIGHT")
             items.row_style('SPAN', 1, 4)
             items.row_style('VALIGN', 0, -1, "BOTTOM")
 
             items.row('')
+        for task in job.get('tasks', []):  # support old JSON
+            add_task(task)
 
-            if len(proposal['jobs']) == 1:
-                totals.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
-                    money(taskgroup['estimate_net']))
-                taskgroup_subtotals_added = True
-
-        if not taskgroup_subtotals_added:
-            # taskgroup subtotals are added if there is only 1 job *and* it is itemized
-            # in all other cases we're going to show the job total
-            totals.row(b('{} {} - {}'.format(_('Total'), job['code'], job['name']), font), money(job['estimate'].net))
+        # taskgroup_subtotals_added = False
+        #
+        # for taskgroup in job['taskgroups']:
+        #     items.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
+        #     items.row_style('SPAN', 1, -1)
+        #
+        #     lines = simpleSplit(taskgroup['description'], font.normal.fontName, items.font_size, description_width)
+        #
+        #     for line in lines:
+        #         items.row('', p(line, font))
+        #         items.row_style('SPAN', 1, -1)
+        #         items.row_style('TOPPADDING', 0, -1, 1)
+        #     items.row_style('BOTTOMPADDING', 0, -1, 10)
+        #
+        #     for task in taskgroup['tasks']:
+        #         items.row(p(task['code'], font), p(task['name'], font))
+        #         items.row_style('SPAN', 1, -2)
+        #
+        #         lines = simpleSplit(task['description'], font.normal.fontName, items.font_size, description_width)
+        #         for line in lines:
+        #             items.row('', p(line, font))
+        #             items.row_style('SPAN', 1, -1)
+        #             items.row_style('TOPPADDING', 0, -1, 1)
+        #
+        #         task_total_column = money(task['estimate_net'])
+        #         if task['is_optional']:
+        #             task_total_column = _('Optional')
+        #         #elif not task['selected']:
+        #         #    task_total_column = _('Alternative')
+        #
+        #         items.row('', '', ubrdecimal(task['qty']), p(task['unit'], font), money(task['price']), task_total_column)
+        #         items.row_style('ALIGNMENT', 1, -1, "RIGHT")
+        #         items.row_style('BOTTOMPADDING', 0, -1, 10)
+        #
+        #     items.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
+        #           '', '', '', money(taskgroup['estimate_net']))
+        #     items.row_style('FONTNAME', 0, -1, font.bold)
+        #     items.row_style('ALIGNMENT', -1, -1, "RIGHT")
+        #     items.row_style('SPAN', 1, 4)
+        #     items.row_style('VALIGN', 0, -1, "BOTTOM")
+        #
+        #     items.row('')
+        #
+        #     if len(proposal['jobs']) == 1:
+        #         totals.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
+        #             money(taskgroup['estimate_net']))
+        #         taskgroup_subtotals_added = True
+        #
+        # if not taskgroup_subtotals_added:
+        #     # taskgroup subtotals are added if there is only 1 job *and* it is itemized
+        #     # in all other cases we're going to show the job total
+        #     totals.row(b('{} {} - {}'.format(_('Total'), job['code'], job['name']), font), money(job['estimate'].net))
 
     totals.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
     totals.row(_("Total without VAT"), money(proposal['estimate_total'].net))
@@ -167,7 +212,7 @@ def collate_lineitems(proposal, available_width, font):
     return pages
 
 
-def render(proposal, letterhead, with_line_items, format):
+def render(proposal, letterhead, with_lineitems, format):
 
     with BytesIO() as buffer:
 
@@ -200,7 +245,7 @@ def render(proposal, letterhead, with_line_items, format):
 
             KeepTogether(Paragraph(force_break(proposal['footer']), font.normal)),
 
-        ] + (collate_lineitems(proposal, available_width, font) if with_line_items else [])
+        ] + (collate_lineitems(proposal, available_width, font) if with_lineitems else [])
 
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)
