@@ -40,26 +40,28 @@ class SearchAPI(views.APIView):
             ))
 
 
-class InjectAPI(views.APIView):
+class CloneAPI(views.APIView):
 
     renderer_classes = (renderers.TemplateHTMLRenderer,)
 
     def post(self, request, *args, **kwargs):
-        model_type = request.data['model_type']
-        model_class = {
+        source_type = request.data['source_type']
+        position = request.data['position']
+        source_class = {
             'group': Group,
             'task': Task
-        }[model_type]
-        source = model_class.objects.get(pk=int(request.data['source_pk']))
-        target = model_class.objects.get(pk=int(request.data['target_pk']))
-        target.copy(source)
+        }[source_type]
+        source = source_class.objects.get(pk=int(request.data['source_pk']))
+        target = Group.objects.get(pk=int(request.data['target_pk']))
+        source.clone_to(target, position)
+        source = source_class.objects.get(pk=source.pk)
         return response.Response(
-            {model_type: target},template_name='task/editor/{}_loop.html'.format(model_type)
+            {source_type: source}, template_name='task/editor/{}_loop.html'.format(source_type)
         )
 
 
 urlpatterns = [
     url(r'^job/(?P<pk>\d+)/editor/save$', EditorAPI.as_view({'post': 'update'}), name='api.editor.save'),
     url(r'^editor/search$', SearchAPI.as_view(), name='api.editor.search'),
-    url(r'^editor/inject$', InjectAPI.as_view(), name='api.editor.inject'),
+    url(r'^editor/clone$', CloneAPI.as_view(), name='api.editor.clone'),
 ]

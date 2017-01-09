@@ -7,6 +7,7 @@ from ..task.models import Job
 
 from ..company.factories import CompanyFactory
 from ..project.factories import ProjectFactory
+from .factories import GroupFactory
 from . import forms
 
 
@@ -41,9 +42,7 @@ class JobFormTest(TestCase):
         self.assertTrue(form.is_valid())
         template = form.save()
 
-        group_template = template.groups.first()
-        group_template.name = 'group template'
-        group_template.save()
+        GroupFactory(parent=template, name='group template')
 
         self.assertEqual(
             template.name,
@@ -66,7 +65,7 @@ class JobFormTest(TestCase):
         }, instance=Job(project=self.project))
         self.assertTrue(form.is_valid())
         new_job = form.save()
-        self.assertEquals('', new_job.groups.first().name)
+        self.assertEquals(0, new_job.groups.count())
 
         job = Job.objects.get(id=new_job.id)
         self.assertEquals('02', job.code)

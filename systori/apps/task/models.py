@@ -135,26 +135,18 @@ class Group(OrderedModel):
             code = '_'
         return code if self.is_root else "{}.{}".format(self.parent.code, code)
 
-    def copy(self, source):
-        self.name = source.name
-        self.description = source.description
-        self.save()
-        for group in source.groups.all():
-            group.clone_to(self)
-        for task in source.tasks.all():
-            task.clone_to(self)
-
-    def clone_to(self, new_parent):
+    def clone_to(self, new_parent, new_order):
         groups = self.groups.all()
         tasks = self.tasks.all()
         self.pk = None
         self.parent = new_parent
         self.job = new_parent.job
+        self.order = new_order
         self.save()
         for group in groups:
-            group.clone_to(self)
+            group.clone_to(self, group.order)
         for task in tasks:
-            task.clone_to(self)
+            task.clone_to(self, task.order)
 
     def _calc(self, field):
         total = Decimal(0.0)
@@ -334,7 +326,7 @@ class Job(Group):
 
     def clone_to(self, new_job, *args):
         for group in self.groups.all():
-            group.clone_to(new_job.root)
+            group.clone_to(new_job.root, None)
 
     @property
     def is_billable(self):
@@ -476,25 +468,12 @@ class Task(OrderedModel):
     def __str__(self):
         return self.name
 
-    def copy(self, source):
-        self.name = source.name
-        self.description = source.description
-        self.qty = source.qty
-        self.qty_equation = source.qty_equation
-        self.unit = source.unit
-        self.price = source.price
-        self.price_equation = source.price_equation
-        self.total = source.total
-        self.total_equation = source.total_equation
-        for lineitem in source.lineitems.exclude(is_correction=True).all():
-            lineitem.clone_to(self)
-
-    def clone_to(self, new_group):#, new_order):
+    def clone_to(self, new_group, new_order):
         lineitems = self.lineitems.exclude(is_correction=True).all()
         self.pk = None
         self.group = new_group
         self.job = new_group.job
-        #self.order = new_order
+        self.order = new_order
         self.complete = 0.0
         self.started_on = None
         self.completed_on = None

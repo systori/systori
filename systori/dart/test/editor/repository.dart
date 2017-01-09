@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:html';
 import 'package:systori/editor.dart';
 
 
@@ -80,16 +81,19 @@ class FakeSaveRequest extends FakeRequest<Map> {
 
 class FakeSearchRequest extends FakeRequest<List> {
     FakeSearchRequest(Map data): super(data);
-    List<List> response(Map data) {
-        print('responding from response');
-        return [['42', 'a name', 'a description']];
-    }
+    List<List> response(Map data) => [
+        ['42', 'a name', 'a description']
+    ];
 }
 
 
-class FakeInjectRequest extends FakeRequest<String> {
-    FakeInjectRequest(Map data): super(data);
-    String response(Map data) => '';
+class FakeCloneRequest extends FakeRequest<String> {
+    FakeCloneRequest(Map data): super(data);
+    String response(Map data) {
+        Group group = document.createElement('sys-group');
+        group.pk = 99;
+        return group.outerHtml;
+    }
 }
 
 
@@ -107,15 +111,19 @@ class FakeRepository extends Repository {
         FakeSaveRequest.reset();
     }
 
-    fail() {
-        _requests.forEach((request) => request.fail());
+    fail() async {
+        await new Future.value();
+        for (var request in _requests) {
+            request.fail();
+        }
         _requests.clear();
     }
 
-    complete() {
-        print('complete():');
-        print(_requests);
-        _requests.forEach((request) => request.complete());
+    complete() async {
+        await new Future.value();
+        for (var request in _requests) {
+            request.complete();
+        }
         _requests.clear();
     }
 
@@ -133,8 +141,8 @@ class FakeRepository extends Repository {
         return request.completer.future;
     }
 
-    Future<String> inject(Map<String,String> params) {
-        var request = new FakeInjectRequest(params);
+    Future<String> clone(Map<String,String> params) {
+        var request = new FakeCloneRequest(params);
         _requests.add(request);
         return request.completer.future;
     }

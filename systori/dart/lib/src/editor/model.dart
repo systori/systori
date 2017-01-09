@@ -22,8 +22,11 @@ abstract class KeyboardHandler {
 
 class Input extends HtmlElement {
 
+    Model model;
     Map<String,dynamic> get values => {className: text};
     List<KeyboardHandler> _handlers = [];
+
+    String beforeText;
 
     Input.created(): super.created() {
         onFocus.listen((Event) =>
@@ -45,6 +48,7 @@ class Input extends HtmlElement {
     }
 
     dispatchKeyDownHandlers(KeyEvent e) {
+        beforeText = text;
         for (KeyboardHandler handler in _handlers) {
             if (!handler.onKeyDownEvent(e, this))
                 break;
@@ -52,6 +56,8 @@ class Input extends HtmlElement {
     }
 
     dispatchKeyUpHandlers(KeyEvent e) {
+        if (beforeText != text && model != null)
+            model.updateVisualState('changed');
         for (KeyboardHandler handler in _handlers) {
             if (!handler.onKeyUpEvent(e, this))
                 break;
@@ -163,23 +169,28 @@ abstract class Model extends HtmlElement {
 
     ModelState state;
     List<Input> inputs = [];
+    DivElement editor;
 
     Model.created(): super.created() {
         if (!dataset.containsKey('pk')) dataset['pk'] = '';
         if (!dataset.containsKey('order')) dataset['order'] = '';
         if (!dataset.containsKey('token')) dataset['token'] = tokenGenerator.next().toString();
+        editor = this.querySelector(":scope>.editor");
     }
+
+    bool get canSave;
 
     attached() { state = new ModelState(this); }
 
     HtmlElement getView(String field) =>
-        this.querySelector(":scope>.editor .${field}");
+        editor.querySelector(".${field}");
 
     Input getInput(String field) {
-        var div = getView(field);
-        assert(!inputs.contains(div));
-        inputs.add(div);
-        return div;
+        var input = getView(field) as Input;
+        assert(!inputs.contains(input));
+        input.model = this;
+        inputs.add(input);
+        return input;
     }
 
     bool get isChanged => state.delta.isNotEmpty;
@@ -194,7 +205,7 @@ abstract class Model extends HtmlElement {
     }
 
     Map save() {
-        var data = isChanged ? new Map.from(state.save()) : {};
+        var data = (isChanged && canSave) ? new Map.from(state.save()) : {};
         for (var childType in childTypes) {
             var saveChildren = childrenOfType(childType)
                 .map((Model model) => model.save())
@@ -205,6 +216,7 @@ abstract class Model extends HtmlElement {
             }
         }
         if (data.isNotEmpty) {
+            updateVisualState('saving');
             if (hasNoPk) {
                 data['token'] = token;
             } else {
@@ -215,6 +227,7 @@ abstract class Model extends HtmlElement {
     }
 
     rollback() {
+        updateVisualState('changed');
         if (state.isSaving) state.rollback();
         for (var childType in childTypes) {
             childrenOfType(childType).map((Model m) => m.rollback());
@@ -222,6 +235,7 @@ abstract class Model extends HtmlElement {
     }
 
     commit(Map result) {
+        updateVisualState('saved');
         pk = result['pk'];
         if (state.isSaving) state.commit();
         for (var childType in childTypes) {
@@ -235,6 +249,23 @@ abstract class Model extends HtmlElement {
                     }
                 }
             }
+        }
+    }
+
+    updateVisualState(String state) {
+        print('updating visual state');
+        switch(state) {
+            case 'changed':
+                if (!editor.classes.contains(state) && isChanged) {
+                    editor.classes = ['editor', 'changed'];
+                }
+                break;
+            case 'saving':
+                editor.classes = ['editor', 'saving'];
+                break;
+            case 'saved':
+                editor.classes = ['editor'];
+                break;
         }
     }
 
@@ -272,9 +303,9 @@ class Repository {
         return JSON.decode(response.responseText);
     }
 
-    Future<String> inject(Map<String,String> params) async {
+    Future<String> clone(Map<String,String> params) async {
         var response = await HttpRequest.request(
-            "/api/editor/inject",
+            "/api/editor/clone",
             method: "POST",
             requestHeaders: headers,
             sendData: JSON.encode(params)

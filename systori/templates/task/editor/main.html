@@ -38,6 +38,28 @@
     sys-task > .editor {
       position: relative;
       padding-bottom: 10px;
+      border-left: white 1px solid;
+    }
+    sys-lineitem > .editor {
+      border-left: white 1px solid;
+    }
+
+    sys-job > .editor.changed,
+    sys-group > .editor.changed,
+    sys-task > .editor.changed {
+      border-left-color: orange;
+    }
+    sys-lineitem > .editor.changed {
+      border-left-color: orange;
+    }
+
+    sys-job > .editor.saving,
+    sys-group > .editor.saving,
+    sys-task > .editor.saving {
+      border-left-color: yellow;
+    }
+    sys-lineitem > .editor.saving {
+      border-left-color: yellow;
     }
 
     .editor-row {
@@ -411,8 +433,6 @@
   <template id="lineitem-template">
     {% include "task/editor/lineitem_editor.html" with lineitem=blank_lineitem %}
   </template>
-
-  <sys-autocomplete></sys-autocomplete>
 
 {% endblock %}
 

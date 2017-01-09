@@ -67,13 +67,15 @@ class Group extends Model {
     DivElement code;
     Input name;
     Input description;
-    bool get isBlank => hasNoPk && name.text.isEmpty;
 
     List<String> childTypes = ['group', 'task'];
     Group get parentGroup => parent as Group;
     ElementList<Group> get groups => this.querySelectorAll(':scope>sys-group');
     ElementList<Task> get tasks => this.querySelectorAll(':scope>sys-task');
     int get depth => (parent as Group).depth + 1;
+
+    bool get isBlank => hasNoPk && name.text.isEmpty;
+    bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
 
     set order(int position) {
         dataset['order'] = position.toString();
@@ -91,8 +93,8 @@ class Group extends Model {
         code = getView("code");
         name = getInput("name");
         name.addHandler(new AutocompleteKeyboardHandler(this, {
-            'remaining_depth': '0' // TODO: calculate remaining depth
-        }, injectAutocomplete));
+            'remaining_depth': Job.JOB.structure.remainingDepth(depth).toString()
+        }, replaceWithCloneOf));
         description = getInput("description");
         description.addHandler(new TextareaKeyboardHandler());
         new GroupKeyboardHandler(this).bindAll(inputs);
@@ -132,8 +134,22 @@ class Group extends Model {
         }
     }
 
-    injectAutocomplete(String id) {
-
+    replaceWithCloneOf(String id) async {
+        // make sure parent is saved and has pk
+        await changeManager.save();
+        var params = {
+            'source_type': 'group',
+            'source_pk': id,
+            'target_pk': parentGroup.pk.toString(),
+            'position': order.toString(),
+        };
+        var html = await repository.clone(params);
+        var fragment = document.createDocumentFragment();
+        fragment.setInnerHtml(html, treeSanitizer: NodeTreeSanitizer.trusted);
+        var parent = this.parent;
+        var idx = parent.children.indexOf(this);
+        replaceWith(fragment.children[0]);
+        (parent.children[idx] as Group).name.focus();
     }
 
 }
@@ -257,12 +273,14 @@ class TaskKeyboardHandler extends KeyboardHandler {
 
 class Task extends Model with Row, TotalRow, HtmlRow {
 
+    bool get isBlank => hasNoPk && name.text.isEmpty;
+    bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
+
     List<String> childTypes = ['lineitem'];
 
     DivElement code;
     Input name;
     Input description;
-    bool get isBlank => hasNoPk && name.text.isEmpty;
     DivElement diffRow;
     DivElement diffCell;
 
@@ -285,7 +303,7 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     attached() {
         code = getView("code");
         name = getInput("name");
-        name.addHandler(new AutocompleteKeyboardHandler(this, {}, injectAutocomplete));
+        name.addHandler(new AutocompleteKeyboardHandler(this, {}, replaceWithCloneOf));
         description = getInput("description");
         description.addHandler(new TextareaKeyboardHandler());
         qty = getInput("qty");
@@ -301,13 +319,6 @@ class Task extends Model with Row, TotalRow, HtmlRow {
             calculateTotal(sheet.total);
         });
         super.attached();
-    }
-
-    Map<String,String> getAutocompleteInjectParams(Map<String,String> params) {
-        params['model_type'] = 'task';
-        params['parent_pk'] = parentGroup.pk.toString();
-        params['order'] = order.toString();
-        return params;
     }
 
     Iterable<Model> childrenOfType(String childType) =>
@@ -330,8 +341,22 @@ class Task extends Model with Row, TotalRow, HtmlRow {
         }
     }
 
-    injectAutocomplete(String id) {
-
+    replaceWithCloneOf(String id) async {
+        // make sure parent is saved and has pk
+        await changeManager.save();
+        var params = {
+            'source_type': 'task',
+            'source_pk': id,
+            'target_pk': parentGroup.pk.toString(),
+            'position': order.toString(),
+        };
+        var html = await repository.clone(params);
+        var fragment = document.createDocumentFragment();
+        fragment.setInnerHtml(html, treeSanitizer: NodeTreeSanitizer.trusted);
+        var parent = this.parent;
+        var idx = parent.children.indexOf(this);
+        replaceWith(fragment.children[0]);
+        (parent.children[idx] as Task).name.focus();
     }
 
 }
@@ -363,6 +388,7 @@ class LineItem extends Model with Orderable, Row, HtmlRow {
 
     Input name;
     bool get isBlank => hasNoPk && name.text.isEmpty;
+    bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
 
     LineItem.created(): super.created() {
         if (children.isEmpty) {

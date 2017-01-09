@@ -14,11 +14,6 @@ class KeyboardNavigator {
         return null;
     }
 
-    reset() {
-        Job job = querySelector('sys-job');
-        job.name.focus();
-    }
-
     sendKey(int keyCode, [int times = 1]) {
         Input input = document.activeElement;
         range(times).forEach((i) {
@@ -35,8 +30,8 @@ class KeyboardNavigator {
     sendText(String text) {
         Input input = document.activeElement;
         text.codeUnits.forEach((int key) {
-            input.appendText(new String.fromCharCode(key));
             input.dispatchKeyDownHandlers(new KeyEvent('keydown', charCode: key));
+            input.appendText(new String.fromCharCode(key));
             input.dispatchKeyUpHandlers(new KeyEvent('keyup', charCode: key));
         });
     }

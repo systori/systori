@@ -279,36 +279,32 @@ class GroupTests(TestCase):
     def setUp(self):
         CompanyFactory()
 
-    def test_no_groups_to_generate_for_job(self):
+    def test_factory_no_groups_to_generate_for_job(self):
         project = ProjectFactory(structure="0.0")
         job = JobFactory(project=project)
-        self.assertEqual(Group.objects.count(), 1)
-        job.generate_groups()
-        self.assertEqual(Group.objects.count(), 1)
+        self.assertEqual(job.all_groups.count(), 1)
+        job = JobFactory(project=project, generate_groups=True)
+        self.assertEqual(job.all_groups.count(), 1)
 
-    def test_two_subgroups_generated_from_job(self):
+    def test_factory_two_subgroups_generated_from_job(self):
         project = ProjectFactory(structure="0.0.0.0")
         job = JobFactory(project=project)
-        self.assertEqual(Group.objects.count(), 1)
-        job.generate_groups()
-        self.assertEqual(Group.objects.count(), 3)
-        self.assertEqual(job.root.pk, 1)
-        self.assertEqual(job.groups.first().pk, 2)
-        self.assertEqual(job.groups.first().groups.first().pk, 3)
+        self.assertEqual(job.all_groups.count(), 1)
+        job = JobFactory(project=project, generate_groups=True)
+        self.assertEqual(job.all_groups.count(), 3)
+        self.assertEqual(job.root.pk, 2)
+        self.assertEqual(job.groups.first().pk, 3)
+        self.assertEqual(job.groups.first().groups.first().pk, 4)
 
     def test_prefetching(self):
         project = ProjectFactory(structure="0.00.00.00.00.0000")
-        job = JobFactory(project=project)  # type: Job
-        job.generate_groups()
-
-        group = GroupFactory(parent=job)  # type: Group
-        group.generate_groups()
-
-        leaf_group1 = job.groups.first().groups.first().groups.first().groups.first()
-        leaf_group2 = group.groups.first().groups.first().groups.first()
-
-        LineItemFactory(name='the lineitem', task=TaskFactory(group=leaf_group1))
-        LineItemFactory(name='the lineitem', task=TaskFactory(group=leaf_group2))
+        job = JobFactory(project=project, generate_groups=True)  # type: Job
+        leaf = job.groups.first().groups.first().groups.first().groups.first()
+        LineItemFactory(name='first lineitem', task=TaskFactory(group=leaf))
+        LineItemFactory(name='second lineitem', task=TaskFactory(group=leaf))
+        LineItemFactory(name='third lineitem', task=TaskFactory(group=leaf))
+        job.groups.first().clone_to(job, 2)
+        job.groups.first().clone_to(job, 3)
 
         def traverse_children(group, depth=0):
             if depth == 4:
@@ -324,7 +320,7 @@ class GroupTests(TestCase):
             return result
 
         # no prefetch
-        with self.assertNumQueries(12):
+        with self.assertNumQueries(17):
             self.assertIsNotNone(traverse_children(
                 Job.objects.get(pk=job.pk)
             ))

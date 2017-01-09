@@ -69,7 +69,7 @@ main() {
             nav.sendText('a');
             await new Future.value();
             expect(autocomplete.innerHtml, isEmpty);
-            fakeRepository.complete();
+            await fakeRepository.complete();
             expect(autocomplete.innerHtml, isNotEmpty);
             nav.sendDown();
             nav.sendEnter();

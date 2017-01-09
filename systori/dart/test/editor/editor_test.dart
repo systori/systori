@@ -18,14 +18,11 @@ void main() {
     setUp(() {
         tokenGenerator = new FakeToken();
         scaffold.reset();
-        nav.reset();
+        Job job = querySelector('sys-job');
+        job.name.focus();
         fakeRepository = repository = new FakeRepository();
-        changeManager = new ChangeManager(Job.JOB);
-        autocomplete = querySelector('sys-autocomplete');
-    });
-
-    tearDown(() {
-        fakeRepository.complete();
+        changeManager = new ChangeManager(job);
+        autocomplete = document.createElement('sys-autocomplete');
     });
 
     group("Keyboard", () {
@@ -110,7 +107,7 @@ void main() {
 
             expect(job.state.committed, {'name': 'Test Job', 'description': ''});
 
-            fakeRepository.complete();
+            await fakeRepository.complete();
 
             expect(job.state.committed, {'name': 'Test Job Changed', 'description': ''});
 
@@ -122,7 +119,10 @@ void main() {
 
             nav.sendEnter();
 
+            Group group = nav.activeModel;
+
             nav.sendText('group changed');
+            group.description.focus(); // cannot save while focus is in name
 
             expect(changeManager.saving, isNull);
 
@@ -132,12 +132,10 @@ void main() {
 
             expect(changeManager.saving, new isInstanceOf<Completer>());
 
-            Group group = nav.activeModel;
-
             expect(group.pk, null);
             expect(group.state.committed, {'name': '', 'description': ''});
 
-            fakeRepository.complete();
+            await fakeRepository.complete();
 
             expect(group.pk, 1);
             expect(group.state.committed, {'name': 'group changed', 'description': ''});
@@ -151,15 +149,26 @@ void main() {
     group("Inject Autocompleted Result", () {
 
         test("basic use case", () async {
-            print('autocomplete.searching');
-            print(autocomplete.searching);
             nav.sendEnter();
+
+            Group group = nav.activeModel;
+            expect(group.pk, isNull);
+            expect(group.hasChildModels, isFalse);
+
             nav.sendText('a');
-            await new Future.value();
-            fakeRepository.complete();
-            nav.sendDown();
-            nav.sendEnter();
-            fakeRepository.complete();
+            await fakeRepository.complete(); // repository.search()
+
+            nav.sendDown(); // move into autocomplete dropdown
+            nav.sendEnter(); // select first 'match'
+
+            await fakeRepository.complete(); // repository.save()
+            await fakeRepository.complete(); // repository.clone()
+
+            Group newGroup = nav.activeModel;
+
+            // injection replaces the active element with new one from server
+            expect(newGroup, isNot(equals(group)));
+            expect(newGroup.pk, 99);
         });
 
     });

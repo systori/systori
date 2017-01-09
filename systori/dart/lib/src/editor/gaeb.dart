@@ -22,4 +22,7 @@ class GAEBHierarchyStructure {
     bool isValidDepth(int depth) =>
         0 <= depth && depth <= maximum_depth;
 
+    int remainingDepth(int depth) =>
+        maximum_depth - depth;
+
 }

@@ -5,6 +5,6 @@ main() {
     registerElements();
     repository = new Repository();
     changeManager = new ChangeManager(Job.JOB);
-    autocomplete = document.querySelector('sys-autocomplete');
+    autocomplete = document.createElement('sys-autocomplete');
     changeManager.startAutoSync();
 }

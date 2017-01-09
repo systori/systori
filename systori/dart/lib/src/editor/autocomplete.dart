@@ -37,8 +37,6 @@ class AutocompleteKeyboardHandler extends KeyboardHandler {
 
     @override
     bool onKeyDownEvent(KeyEvent e, Input input) {
-        print('canAutocomplete: $canAutocomplete');
-        print(e.charCode);
         if (!canAutocomplete) return true;
         switch(e.keyCode) {
             case KeyCode.UP:
@@ -58,7 +56,6 @@ class AutocompleteKeyboardHandler extends KeyboardHandler {
                     return true;
                 }
             default:
-                print('calling search');
                 autocomplete.criteria['terms'] = input.text;
                 autocomplete.search();
                 return false;
@@ -72,6 +69,7 @@ class Autocomplete extends HtmlElement {
 
     Autocomplete.created(): super.created();
 
+    Input input;
     Map<String,String> criteria;
     List<StreamSubscription> eventStreams;
 
@@ -81,6 +79,7 @@ class Autocomplete extends HtmlElement {
     bool searchRequested = false;
 
     reposition(Input input) {
+        this.input = input;
         input.insertAdjacentElement('afterEnd', this);
         offsetFromTop = input.offsetHeight;
         style.top = '${offsetFromTop}px';
@@ -88,21 +87,19 @@ class Autocomplete extends HtmlElement {
     }
 
     hide() {
+        input = null;
         setInnerHtml('');
         style.visibility = 'hidden';
     }
 
     search() async {
         if (searching) {
-            print('already searching!');
             searchRequested = true;
             return;
         }
         searching = true;
         try {
-            print('searching...');
             var result = await repository.search(criteria);
-            print('results: $result');
             var html = new StringBuffer();
             for (List row in result) {
                 html.write('<div data-id="');

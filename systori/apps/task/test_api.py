@@ -109,8 +109,7 @@ class EditorApiTest(ClientTestCase):
 
     def test_delete_group(self):
         project = ProjectFactory(structure="0.0.0.0")
-        job = JobFactory(project=project)
-        job.generate_groups()
+        job = JobFactory(project=project, generate_groups=True)
         self.assertEqual(3, Group.objects.count())
         response = self.client.post(
             reverse('api.editor.save', args=(job.pk,)), {
@@ -275,18 +274,39 @@ class AutocompleteApiTest(ClientTestCase):
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(len(response.data), 1)
 
-    def test_group_injection(self):
-        job = JobFactory(project=ProjectFactory(structure='01.01.001'), generate_groups=True)
-        group = GroupFactory(parent=job, name='Voranstrich aus Bitumenlösung')
-        job2 = JobFactory(project=ProjectFactory(structure='01.01.001'), generate_groups=True)
-        group2 = GroupFactory(parent=job2, name='')
+    def test_group_clone(self):
+        job = JobFactory(project=ProjectFactory(structure='01.01.001'))
+        group = GroupFactory(parent=job, name='Groupy Group')
+        job2 = JobFactory(project=ProjectFactory(structure='01.01.001'))
+        self.assertEqual(job2.groups.count(), 0)
         response = self.client.post(
-            reverse('api.editor.inject'), {
-                'model_type': 'group',
+            reverse('api.editor.clone'), {
+                'source_type': 'group',
                 'source_pk': group.pk,
-                'target_pk': group2.pk,
+                'target_pk': job2.pk,
+                'position': 1
             },
             format='json'
         )
+        self.assertEqual(job2.groups.first().name, 'Groupy Group')
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(len(response.data), 1)
+
+    def test_task_clone(self):
+        job = JobFactory(project=ProjectFactory(structure='01.01.001'))
+        group = GroupFactory(parent=job, name='Groupy Group')
+        task = TaskFactory(group=group, name='Easy Task')
+        job2 = JobFactory(project=ProjectFactory(structure='01.001'))
+        self.assertEqual(job2.tasks.count(), 0)
+        response = self.client.post(
+            reverse('api.editor.clone'), {
+                'source_type': 'task',
+                'source_pk': task.pk,
+                'target_pk': job2.pk,
+                'position': 1
+            },
+            format='json'
+        )
+        self.assertEqual(job2.tasks.first().name, 'Easy Task')
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(len(response.data), 1)

@@ -12,7 +12,11 @@ class JobFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def generate_groups(self: Job, create, extracted, **kwargs):
         if create and extracted:
-            self.generate_groups()
+            parent = self
+            next_depth = 1
+            while self.project.structure.is_valid_depth(next_depth):
+                parent = GroupFactory(parent=parent, depth=next_depth)
+                next_depth += 1
 
 
 class GroupFactory(factory.django.DjangoModelFactory):

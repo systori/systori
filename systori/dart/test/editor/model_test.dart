@@ -1,12 +1,16 @@
 @TestOn('browser')
 import 'dart:html';
+import 'dart:async';
 import 'package:test/test.dart';
 import 'package:systori/editor.dart';
 import '../scaffolding.dart';
 import 'repository.dart';
+import 'navigator.dart';
 
 
 class Thing extends Model {
+
+    bool get canSave => name.text.isNotEmpty;
 
     Input name;
     Input description;
@@ -27,6 +31,8 @@ class Thing extends Model {
 
 
 class Part extends Model {
+
+    bool get canSave => name.text.isNotEmpty;
 
     Input name;
     Input description;
@@ -52,6 +58,8 @@ main() {
     document.registerElement('sys-thing', Thing);
 
     Scaffolding scaffolding = new Scaffolding(querySelector('#scaffolding'));
+    KeyboardNavigator nav = new KeyboardNavigator();
+    FakeRepository fakeRepository;
     Thing thing;
     Part part;
 
@@ -60,6 +68,8 @@ main() {
         scaffolding.reset();
         thing = querySelector('sys-thing');
         part = querySelector('sys-part');
+        changeManager = new ChangeManager(thing);
+        fakeRepository = repository = new FakeRepository();
     });
 
     group("ModelState", () {
@@ -136,6 +146,20 @@ main() {
             expect(thing.state.committed,
                 {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
         });
+
+        test("state indicator class", () async {
+            DivElement editor = thing.querySelector(':scope>div.editor');
+            expect(editor.classes, ['editor']);
+            thing.name.focus();
+            nav.sendText('a');
+            expect(editor.classes, ['editor', 'changed']);
+            changeManager.save();
+            await new Future.value();
+            expect(editor.classes, ['editor', 'saving']);
+            await fakeRepository.complete();
+            expect(editor.classes, ['editor']);
+        });
+
     });
 
 }
