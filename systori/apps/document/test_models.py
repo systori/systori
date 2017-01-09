@@ -55,11 +55,13 @@ class ProposalTests(TestCase):
         self.maxDiff = None
         self.assertEqual({
             'jobs': [{
+                'tasks': [],
                 'taskgroups': [{
                     'id': 2, 'code': '01.01',
                     'name': self.group.name,
                     'description': '',
                     'estimate_net': Decimal('0.0000'),
+                    'taskgroups': [],
                     'tasks': [{
                         'id': 1, 'code': '01.01.001',
                         'name': self.task.name,
