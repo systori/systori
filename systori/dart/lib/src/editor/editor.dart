@@ -85,11 +85,6 @@ class Group extends Model {
     Group.created(): super.created();
 
     attached() {
-        if (children.isEmpty) {
-            TemplateElement template = document.querySelector('#group-template');
-            var clone = document.importNode(template.content, true);
-            append(clone);
-        }
         code = getView("code");
         name = getInput("name");
         name.addHandler(new AutocompleteKeyboardHandler(this, {
@@ -292,13 +287,7 @@ class Task extends Model with Row, TotalRow, HtmlRow {
 
     LineItemSheet sheet;
 
-    Task.created(): super.created() {
-        if (children.isEmpty) {
-            TemplateElement template = document.querySelector('#task-template');
-            var clone = document.importNode(template.content, true);
-            append(clone);
-        }
-    }
+    Task.created(): super.created();
 
     attached() {
         code = getView("code");
@@ -390,13 +379,7 @@ class LineItem extends Model with Orderable, Row, HtmlRow {
     bool get isBlank => hasNoPk && name.text.isEmpty;
     bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
 
-    LineItem.created(): super.created() {
-        if (children.isEmpty) {
-            TemplateElement template = document.querySelector('#lineitem-template');
-            var clone = document.importNode(template.content, true);
-            append(clone);
-        }
-    }
+    LineItem.created(): super.created();
 
     attached() {
         name = getInput("name");

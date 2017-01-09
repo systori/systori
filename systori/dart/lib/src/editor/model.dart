@@ -175,6 +175,11 @@ abstract class Model extends HtmlElement {
         if (!dataset.containsKey('pk')) dataset['pk'] = '';
         if (!dataset.containsKey('order')) dataset['order'] = '';
         if (!dataset.containsKey('token')) dataset['token'] = tokenGenerator.next().toString();
+        if (children.isEmpty) {
+            TemplateElement template = document.querySelector('#${type}-template');
+            var clone = document.importNode(template.content, true);
+            append(clone);
+        }
         editor = this.querySelector(":scope>.editor");
     }
 
