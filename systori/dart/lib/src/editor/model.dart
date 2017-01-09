@@ -253,7 +253,6 @@ abstract class Model extends HtmlElement {
     }
 
     updateVisualState(String state) {
-        print('updating visual state');
         switch(state) {
             case 'changed':
                 if (!editor.classes.contains(state) && isChanged) {
