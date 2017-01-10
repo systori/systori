@@ -23,7 +23,6 @@ DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
 def collate_tasks(proposal, font, available_width):
-
     items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
@@ -46,6 +45,19 @@ def collate_tasks(proposal, font, available_width):
     description_width = 314.0
 
     def add_task(task):
+
+        task_total_column = money(task['estimate_net'])
+        if task['is_optional']:
+            task_total_column = _('Optional')
+
+        if task['variant_group'] != None:
+            if task['variant_serial'] == 0:
+                task['name'] = _('Variant {}.0: {}').format(task['variant_group'], task['name'])
+            else:
+                task['name'] = _('Variant {}.{}: {} - Alternative for Variant {}.0').format(
+                    task['variant_group'], task['variant_serial'], task['name'], task['variant_group'])
+                task_total_column = _('unit price only')
+
         items.row(p(task['code'], font), p(task['name'], font))
         items.row_style('SPAN', 1, -2)
         lines = simpleSplit(task['description'], font.normal.fontName, items.font_size, description_width)
@@ -53,10 +65,6 @@ def collate_tasks(proposal, font, available_width):
             items.row('', p(line, font))
             items.row_style('SPAN', 1, -1)
             items.row_style('TOPPADDING', 0, -1, 1)
-
-        task_total_column = money(task['estimate_net'])
-        if task['is_optional']:
-            task_total_column = _('Optional')
 
         items.row('', '', ubrdecimal(task['qty']), p(task['unit'], font), money(task['price']), task_total_column)
         items.row_style('ALIGNMENT', 1, -1, "RIGHT")
@@ -94,6 +102,8 @@ def collate_tasks(proposal, font, available_width):
             items.row('')
         for task in job.get('tasks', []):  # support old JSON
             add_task(task)
+
+        totals.row(b('{} {} - {}'.format(_('Total'), job['code'], job['name']), font), money(job['estimate'].net))
 
         # taskgroup_subtotals_added = False
         #
@@ -295,6 +305,8 @@ def _serialize(data, parent):
             'name': task.name,
             'description': task.description,
             'is_optional': task.is_provisional,
+            'variant_group': task.variant_group,
+            'variant_serial': task.variant_serial,
             'qty': task.qty,
             'unit': task.unit,
             'price': task.price,

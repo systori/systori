@@ -418,14 +418,29 @@ class ProposalViewTests(DocumentTestCase):
             'print',
             Proposal.objects.first().id
         ]), {}) # empty {} == 'with_lineitems': False
-        self.assertTrue(self.job.name in PdfFileReader(BytesIO(response.content)).getPage(0).extractText())
-        f = open('test_big.pdf', 'wb+')
-        f.write(response.content)
-        f.close()
+        extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
+        for text in ['Proposal', 'hello', 'bye', self.job.name, self.task.name]:
+            self.assertTrue(text in extractedText)
 
     def test_serialize_n_render_big_structure(self):
         self.project = ProjectFactory(structure="0.0.0.0.0.0")
-        self.task = TaskFactory(qty=10, complete=5, price=96, group=self.project)
+        self.job = JobFactory(project=self.project, generate_groups=True)
+        self.task = TaskFactory(qty=10, complete=5, price=96, group=self.job.all_groups.order_by('id').last())
+        self.job2 = JobFactory(project=self.project, generate_groups=True)
+        for number in range(1,11,1):
+            TaskFactory(name="task {}".format(number), qty=10, complete=5, price=96,
+                        group=self.job2.all_groups.order_by('id').last())
+        TaskFactory(name="task 11", qty=10, complete=5, price=96, is_provisional=True,
+                    group=self.job2.all_groups.order_by('id').last())
+        TaskFactory(name='window cheap', qty=10, complete=5, price=50, total=500, variant_group=1, variant_serial=0,
+                    group=self.job2.all_groups.order_by('id').last())
+        TaskFactory(name="window premium", qty=10, complete=5, price=125, total=1250, variant_group=1, variant_serial=1,
+                    group=self.job2.all_groups.order_by('id').last())
+        group = GroupFactory(parent=self.job2)
+        group1 = GroupFactory(parent=group)
+        group2 = GroupFactory(parent=group1)
+        group3 = GroupFactory(parent=group2)
+        TaskFactory(name="task 14", qty=10, complete=5, price=96, group=group3)
 
         self.contact = ContactFactory(
             project=self.project,
@@ -439,14 +454,14 @@ class ProposalViewTests(DocumentTestCase):
             'footer': 'bye',
             'add_terms': False,
             'job-0-job_id': self.job.id,
-            'job-0-is_attached': 'True'
+            'job-0-is_attached': 'True',
+            'job-1-job_id': self.job2.id,
+            'job-1-is_attached': 'True'
         })
         response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
         self.assertEqual(302, response.status_code)
 
         # render
-
-
         response = self.client.get(reverse('proposal.pdf', args=[
             self.project.id,
             'print',
