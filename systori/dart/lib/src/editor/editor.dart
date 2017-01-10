@@ -37,6 +37,9 @@ class Job extends Group {
         JOB = this;
     }
     createSibling() => createChild();
+    calculationChanged() {
+        updateTotal();
+    }
 }
 
 
@@ -63,11 +66,27 @@ class GroupKeyboardHandler extends KeyboardHandler {
 }
 
 
+class DecimalElement extends HtmlElement {
+    Decimal _decimal;
+    Decimal get value {
+        if (_decimal == null)
+            _decimal = new Decimal.parse(text);
+        return _decimal;
+    }
+    set value(Decimal d) {
+        _decimal = d;
+        text = d.money;
+    }
+    DecimalElement.created(): super.created();
+}
+
+
 class Group extends Model {
 
     DivElement code;
     Input name;
     Input description;
+    DecimalElement total;
 
     List<String> childTypes = ['group', 'task'];
     Group get parentGroup => parent as Group;
@@ -87,6 +106,7 @@ class Group extends Model {
 
     attached() {
         code = getView("code");
+        total = getView("total");
         name = getInput("name");
         name.addHandler(new AutocompleteKeyboardHandler(this, {
             'remaining_depth': Job.JOB.structure.remainingDepth(depth).toString()
@@ -104,9 +124,25 @@ class Group extends Model {
             g.value.updateCode();
         });
         enumerate<Task>(this.querySelectorAll(':scope>sys-task'))
-            .forEach((IndexedValue<Task> g) {
-            g.value.order = g.index+1;
+            .forEach((IndexedValue<Task> t) {
+            t.value.order = t.index+1;
         });
+    }
+
+    updateTotal() {
+        var _total = new Decimal();
+        for (Group g in this.querySelectorAll(':scope>sys-group')) {
+            _total += g.total.value;
+        }
+        for (Task t in this.querySelectorAll(':scope>sys-task')) {
+            _total += t.total.value;
+        }
+        total.value = _total;
+    }
+
+    calculationChanged() {
+        updateTotal();
+        parentGroup.calculationChanged();
     }
 
     createSibling() {
@@ -282,9 +318,9 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
     }
 
     onCalculate(String event, Cell cell) {
-        print('recalculating');
         sheet.calculate(qty);
         calculateTotal(sheet.total);
+        (parent as Group).calculationChanged();
         /*
         if (sheet.total == null) sheet.calculate(qty);
         calculateTotal(sheet.total);
@@ -472,6 +508,7 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
 registerElements() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
     CSRFToken = (querySelector('input[name=csrfmiddlewaretoken]') as InputElement).value;
+    document.registerElement('sys-decimal', DecimalElement);
     document.registerElement('sys-input', Input);
     document.registerElement('sys-cell', HtmlCell);
     document.registerElement('sys-lineitem', LineItem);
