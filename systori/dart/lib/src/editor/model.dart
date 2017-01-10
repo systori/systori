@@ -64,7 +64,9 @@ class Input extends HtmlElement {
     dispatchInputHandlers(Event e) {
         if (model != null)
             model.updateVisualState('changed');
-        _handlers.forEach((h) => h.onInputEvent(this));
+        for (KeyboardHandler handler in _handlers) {
+            handler.onInputEvent(this);
+        }
     }
 
 }
@@ -132,7 +134,7 @@ class ModelState {
 class Token {
     int _previous = 0;
     next() {
-        var token = new DateTime.now().millisecondsSinceEpoch - 1479970650895;
+        var token = new DateTime.now().millisecondsSinceEpoch;
         if (token <= _previous) {
             token = ++_previous;
         } else {

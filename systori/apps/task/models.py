@@ -96,7 +96,7 @@ class Group(OrderedModel):
     description = models.TextField(_("Description"), default="", blank=True)
     depth = models.PositiveIntegerField(editable=False, db_index=True)
     parent = models.ForeignKey('self', related_name='groups', null=True)
-    token = models.IntegerField('api token', null=True)
+    token = models.BigIntegerField('api token', null=True)
     job = models.ForeignKey('Job', null=True, related_name='all_groups')
     search = tsvector_field.SearchVectorField([
         tsvector_field.WeightedColumn('name', 'A'),
@@ -403,7 +403,7 @@ class Task(OrderedModel):
 
     status = FSMField(blank=True, choices=STATE_CHOICES)
 
-    token = models.IntegerField('api token', null=True)
+    token = models.BigIntegerField('api token', null=True)
 
     objects = TaskManager()
 
@@ -514,7 +514,7 @@ class LineItem(OrderedModel):
     order_with_respect_to = 'task'
 
     job = models.ForeignKey(Job, related_name="all_lineitems")
-    token = models.IntegerField('api token', null=True)
+    token = models.BigIntegerField('api token', null=True)
 
     class Meta:
         verbose_name = _("Line Item")

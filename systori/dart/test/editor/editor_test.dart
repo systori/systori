@@ -172,4 +172,29 @@ void main() {
         });
 
     });
+
+    group("Calculation", () {
+
+        test("basic use case", () async {
+
+            nav.sendEnter();
+            nav.sendText('first group, depth 1');
+
+            nav.sendEnter();
+            nav.sendText('second group, depth 2');
+
+            nav.sendEnter();
+            nav.sendText('task one');
+            Task task = nav.activeModel;
+            task.total.focus();
+
+            nav.sendEnter();
+
+            expect(nav.activeModel.pk, null);
+            expect(nav.activeModel is LineItem, isTrue);
+
+        });
+
+    });
+
 }

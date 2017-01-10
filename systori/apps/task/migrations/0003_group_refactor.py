@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             name='Group',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.IntegerField(verbose_name='api token', null=True)),
+                ('token', models.BigIntegerField(verbose_name='api token', null=True)),
                 ('order', models.PositiveIntegerField(db_index=True, editable=False)),
                 ('name', models.CharField(blank=True, default='', max_length=512, verbose_name='Name')),
                 ('description', models.TextField(blank=True, default='', verbose_name='Description')),

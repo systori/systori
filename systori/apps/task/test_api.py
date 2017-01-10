@@ -12,11 +12,11 @@ class EditorApiTest(ClientTestCase):
         response = self.client.post(
             reverse('api.editor.save', args=(job.pk,)), {
                 'groups': [{
-                    'token': 7, 'name': 'test group',
+                    'token': 9006199254740991, 'name': 'test group',
                     'groups': [
-                        {'token': 8, 'name': 'sub group'},
-                        {'token': 9, 'name': 'sub group 2', 'groups': [
-                            {'token': 10, 'name': 'sub sub group'},
+                        {'token': 9006199254740992, 'name': 'sub group'},
+                        {'token': 9006199254740993, 'name': 'sub group 2', 'groups': [
+                            {'token': 9006199254740994, 'name': 'sub sub group'},
                         ]}
                     ]
                 }]
@@ -34,11 +34,11 @@ class EditorApiTest(ClientTestCase):
         self.assertDictEqual({
             'token': None, 'pk': 1,
             'groups': [{
-                'token': 7, 'pk': 2,
+                'token': 9006199254740991, 'pk': 2,
                 'groups': [
-                    {'token': 8, 'pk': 3},
-                    {'token': 9, 'pk': 4, 'groups': [
-                        {'token': 10, 'pk': 5},
+                    {'token': 9006199254740992, 'pk': 3},
+                    {'token': 9006199254740993, 'pk': 4, 'groups': [
+                        {'token': 9006199254740994, 'pk': 5},
                     ]}
                 ]
             }]
@@ -125,11 +125,11 @@ class EditorApiTest(ClientTestCase):
         response = self.client.post(
             reverse('api.editor.save', args=(job.pk,)), {
                 'tasks': [{
-                    'token': 5, 'name': 'test task', 'description': '',
+                    'token': 9006199254740991, 'name': 'test task', 'description': '',
                     'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': '',
                     'lineitems': [
-                        {'token': 6, 'name': 'lineitem', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
-                        {'token': 7, 'name': 'lineitem 2', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
+                        {'token': 9006199254740992, 'name': 'lineitem', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
+                        {'token': 9006199254740993, 'name': 'lineitem 2', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
                     ]
                 }]
             },
@@ -146,10 +146,10 @@ class EditorApiTest(ClientTestCase):
         self.assertDictEqual({
             'pk': 1, 'token': None,
             'tasks': [{
-                'pk': 1, 'token': 5,
+                'pk': 1, 'token': 9006199254740991,
                 'lineitems': [
-                    {'token': 6, 'pk': 1},
-                    {'token': 7, 'pk': 2},
+                    {'token': 9006199254740992, 'pk': 1},
+                    {'token': 9006199254740993, 'pk': 2},
                 ]
             }]
         }, response.data)
@@ -157,11 +157,11 @@ class EditorApiTest(ClientTestCase):
         response = self.client.post(
             reverse('api.editor.save', args=(job.pk,)), {
                 'tasks': [{
-                    'token': 5, 'name': 'test task', 'description': '',
+                    'token': 9006199254740991, 'name': 'test task', 'description': '',
                     'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': '',
                     'lineitems': [
-                        {'token': 6, 'name': 'lineitem', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
-                        {'token': 7, 'name': 'lineitem 2', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
+                        {'token': 9006199254740992, 'name': 'lineitem', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
+                        {'token': 9006199254740993, 'name': 'lineitem 2', 'qty_equation': '', 'unit': '', 'price_equation': '', 'total_equation': ''},
                     ]
                 }]
             },
@@ -178,10 +178,10 @@ class EditorApiTest(ClientTestCase):
         self.assertDictEqual({
             'pk': 1, 'token': None,
             'tasks': [{
-                'pk': 1, 'token': 5,
+                'pk': 1, 'token': 9006199254740991,
                 'lineitems': [
-                    {'token': 6, 'pk': 1},
-                    {'token': 7, 'pk': 2},
+                    {'token': 9006199254740992, 'pk': 1},
+                    {'token': 9006199254740993, 'pk': 2},
                 ]
             }]
         }, response.data)

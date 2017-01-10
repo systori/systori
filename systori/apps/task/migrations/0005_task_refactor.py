@@ -7,12 +7,11 @@ from django.db import migrations, models
 import django.db.models.deletion
 from postgres_schema.operations import RunInSchemas
 
-TOKEN = 11000
 
 
 def upgrade_taskinstance_to_task(apps, schema_editor):
-    global TOKEN
     Job = apps.get_model("task", "Job")
+    TOKEN = 11000
 
     for job in Job.objects.all():
 
@@ -116,7 +115,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='token',
-            field=models.IntegerField(null=True, verbose_name='api token'),
+            field=models.BigIntegerField(verbose_name='api token', null=True)
         ),
         migrations.AddField(
             model_name='task',
@@ -152,7 +151,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='lineitem',
             name='token',
-            field=models.IntegerField(null=True, verbose_name='api token'),
+            field=models.BigIntegerField(verbose_name='api token', null=True)
         ),
         migrations.AddField(
             model_name='lineitem',

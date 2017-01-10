@@ -151,7 +151,7 @@ class Group extends Model {
 }
 
 
-class HtmlCell extends Input with HighlightableInputMixin, Cell {
+class HtmlCell extends Input with HighlightableInputMixin, Cell, KeyboardHandler {
 
     Map<String,dynamic> get values => {
         className: text,
@@ -172,21 +172,14 @@ class HtmlCell extends Input with HighlightableInputMixin, Cell {
 
     bool get isFocused => document.activeElement == this;
 
-    List<StreamSubscription<Event>> subscriptions = [];
-
-    HtmlCell.created(): super.created();
-
-    attached() {
-        subscriptions = [
-            onBlur.listen(handleBlur),
-            onFocus.listen(handleFocus),
-            onKeyUp.listen(handleInput),
-        ];
+    HtmlCell.created(): super.created() {
+        addHandler(this);
     }
 
-    handleFocus(Event event) {
+    @override
+    onFocusEvent(Input cell) {
         focused();
-        dispatchCalculate('focused');
+        (parent.parent.parent as HtmlRow).onCalculate('focused', this);
         if (isTextNumber) {
             new Timer(new Duration(milliseconds: 1), () {
                 window.getSelection().selectAllChildren(this);
@@ -195,22 +188,19 @@ class HtmlCell extends Input with HighlightableInputMixin, Cell {
         doHighlighting();
     }
 
+    @override
+    onBlurEvent(Input cell) => blurred();
+
     static final List<String> COLORS = [
         '187,168,146', '238,114,95', '250,185,75', '0,108,124', '0,161,154', '183,219,193'
     ];
 
-    handleInput(KeyboardEvent e) {
-        if (e.keyCode == KeyCode.LEFT || e.keyCode == KeyCode.RIGHT) return;
-        dispatchCalculate('changed');
+    @override
+    onInputEvent(Input cell) {
+        (parent.parent.parent as HtmlRow).onCalculate('changed', this);
         (parent.parent.parent as HtmlRow).markRedWhenAllColumnsSet();
         doHighlighting();
     }
-
-    handleBlur([Event _]) =>
-        blurred();
-
-    dispatchCalculate(String event) =>
-        dispatchEvent(new CustomEvent('calculate', detail: {'cell': this, 'event': event}));
 
     doHighlighting() {
         if (isTextEquation) {
@@ -242,33 +232,12 @@ abstract class HtmlRow implements Row {
         }
     }
 
+    onCalculate(String event, Cell cell);
+
 }
 
 
-class TaskKeyboardHandler extends KeyboardHandler {
-
-    Task task;
-    TaskKeyboardHandler(this.task);
-
-    @override
-    bool onKeyDownEvent(KeyEvent e, Input input) {
-        if (e.keyCode == KeyCode.ENTER) {
-            e.preventDefault();
-            if (task.isBlank) {
-                Group parent = task.parent as Group;
-                task.remove();
-                parent.createSibling();
-            } else {
-                task.sheet.createChild();
-            }
-            return false;
-        }
-        return true;
-    }
-}
-
-
-class Task extends Model with Row, TotalRow, HtmlRow {
+class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 
     bool get isBlank => hasNoPk && name.text.isEmpty;
     bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
@@ -292,7 +261,9 @@ class Task extends Model with Row, TotalRow, HtmlRow {
     Task.created(): super.created();
 
     attached() {
+
         code = getView("code");
+
         name = getInput("name");
         name.addHandler(new AutocompleteKeyboardHandler(this, {}, replaceWithCloneOf));
         description = getInput("description");
@@ -301,15 +272,27 @@ class Task extends Model with Row, TotalRow, HtmlRow {
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
-        new TaskKeyboardHandler(this).bindAll(inputs);
+        bindAll(inputs);
+
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
         sheet = this.querySelector(":scope > sys-lineitem-sheet");
-        on['calculate'].listen((CustomEvent e) {
-            if (sheet.total == null) sheet.calculate(qty);
-            calculateTotal(sheet.total);
-        });
         super.attached();
+
+    }
+
+    onCalculate(String event, Cell cell) {
+        print('recalculating');
+        sheet.calculate(qty);
+        calculateTotal(sheet.total);
+        /*
+        if (sheet.total == null) sheet.calculate(qty);
+        calculateTotal(sheet.total);
+        if (event == 'focused')
+            sheet.calculate(cell, focused: true);
+        else
+            sheet.calculate(cell);
+            */
     }
 
     Iterable<Model> childrenOfType(String childType) =>
@@ -348,6 +331,22 @@ class Task extends Model with Row, TotalRow, HtmlRow {
         var idx = parent.children.indexOf(this);
         replaceWith(fragment.children[0]);
         (parent.children[idx] as Task).name.focus();
+    }
+
+    @override
+    bool onKeyDownEvent(KeyEvent e, Input input) {
+        if (e.keyCode == KeyCode.ENTER) {
+            e.preventDefault();
+            if (isBlank) {
+                Group p = parentGroup;
+                remove();
+                p.createSibling();
+            } else {
+                sheet.createChild();
+            }
+            return false;
+        }
+        return true;
     }
 
 }
@@ -400,6 +399,9 @@ class LineItem extends Model with Orderable, Row, HtmlRow {
         li.name.focus();
     }
 
+    onCalculate(String event, Cell cell) =>
+        (parent.parent as Task).onCalculate(event, cell);
+
 }
 
 
@@ -408,21 +410,11 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
     List<LineItem> get rows => this.querySelectorAll<LineItem>(':scope>sys-lineitem');
 
     LineItemSheet.created(): super.created() {
-        on['calculate'].listen((CustomEvent e) {
-            Cell cell = (e.detail as Map)['cell'] as Cell;
-            var event = (e.detail as Map)['event'];
-            if (event == 'focused')
-                calculate(cell, focused: true);
-            else if (event == 'moved')
-                calculate(cell, moved: true);
-            else
-                calculate(cell);
-        });
         addEventListener('blur', clearHighlighting, true);
     }
 
     onOrderingChanged(Orderable orderable) =>
-        dispatchEvent(new CustomEvent('calculate', detail: {'cell': rows[0].getCell(0), 'event': 'moved'}));
+        (parent as Task).onCalculate('moved', rows[0].getCell(0));
 
     onCalculationFinished(Cell changedCell) {
 
