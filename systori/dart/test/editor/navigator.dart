@@ -36,6 +36,11 @@ class KeyboardNavigator {
             input.dispatchKeyUpHandlers(new KeyEvent('keyup', charCode: key));
         });
     }
+    setText(String text) {
+        Input input = document.activeElement;
+        input.text = '';
+        sendText(text);
+    }
 
 }
 

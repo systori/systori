@@ -295,9 +295,7 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
     Task.created(): super.created();
 
     attached() {
-
         code = getView("code");
-
         name = getInput("name");
         name.addHandler(new AutocompleteKeyboardHandler(this, {}, replaceWithCloneOf));
         description = getInput("description");
@@ -313,6 +311,9 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
         sheet = this.querySelector(":scope > sys-lineitem-sheet");
         super.attached();
 
+        if (total.value == null) {
+            total.value = total.isTextNumber ? new Decimal.parse(total.text) : new Decimal(null);
+        }
     }
 
     onCalculate(String event, Cell cell) {

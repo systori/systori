@@ -52,6 +52,10 @@ abstract class TotalRow implements Row {
 
     calculateTotal(Decimal priceTotal) {
 
+        qty.column = 0;
+        price.column = 1;
+        total.column = 2;
+
         qty.calculate((i)=>[], false);
         price.calculate((i)=>[], false);
         if (price.isCanonicalBlank)

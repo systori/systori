@@ -174,7 +174,7 @@ void main() {
 
     group("Calculation", () {
 
-        test("Calculation propagates from lineitem all the way to job.", () {
+        test("basic lineitem to job calculation", () {
 
             nav.sendEnter();
             nav.sendText('first group, depth 1');
@@ -187,34 +187,59 @@ void main() {
             nav.sendEnter();
             nav.sendText('task one');
             Task task = nav.activeModel;
-            task.qty.focus();
-            nav.sendText('2');
-
             nav.sendEnter();
             nav.sendText('lineitem one');
             LineItem li = nav.activeModel;
+
+            expect(li.total.text, '0,00');
+            expect(task.price.text, '0,00');
+            expect(task.total.text, '0,00');
+            expect(group2.total.text, '0,00');
+            expect(group1.total.text, '0,00');
+            expect(Job.JOB.total.text, '0,00');
+
+            task.qty.focus();
+            nav.sendText('2');
+
             li.qty.focus();
             nav.sendText('5');
             li.price.focus();
-
-            expect(li.total.value.decimal, 0);
-            expect(task.price.value.decimal, 0);
-            expect(task.total.value.decimal, 0);
-            expect(group2.total.value.decimal, 0);
-            expect(group1.total.value.decimal, 0);
-            expect(Job.JOB.total.value.decimal, 0);
-
             nav.sendText('5');
 
-            expect(li.total.value.decimal, 25);
-            expect(task.price.value.decimal, 25);
-            expect(task.total.value.decimal, 50);
-            expect(group2.total.value.decimal, 50);
-            expect(group1.total.value.decimal, 50);
-            expect(Job.JOB.total.value.decimal, 50);
+            expect(li.total.text, '25,00');
+            expect(task.price.text, '25,00');
+            expect(task.total.text, '50,00');
+            expect(group2.total.text, '50,00');
+            expect(group1.total.text, '50,00');
+            expect(Job.JOB.total.text, '50,00');
 
         });
 
+        test("blank task row does not interfer with group totals", () {
+
+            Group group1 = Job.JOB.childrenOfType('group').first;
+            Group group2 = group1.childrenOfType('group').first;
+            Task task = group2.childrenOfType('task').first;
+            LineItem li = task.childrenOfType('lineitem').first;
+
+            task.qty.focus();
+            nav.sendText('2');
+            li.qty.focus();
+            nav.sendText('5');
+            li.price.focus();
+            nav.sendText('5');
+            expect(group2.total.text, '50,00');
+
+            li.name.focus();
+            nav.sendEnter(); // blank li
+            nav.sendEnter(); // new blank task
+
+            task.qty.focus();
+            nav.setText('3'); // update previous valid task, group should update
+
+            expect(group2.total.text, '75,00');
+
+        });
     });
 
 }
