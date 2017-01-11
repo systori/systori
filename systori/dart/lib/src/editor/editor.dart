@@ -37,9 +37,7 @@ class Job extends Group {
         JOB = this;
     }
     createSibling() => createChild();
-    calculationChanged() {
-        updateTotal();
-    }
+    calculationChanged() => updateTotal();
 }
 
 

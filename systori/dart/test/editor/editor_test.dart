@@ -18,10 +18,9 @@ void main() {
     setUp(() {
         tokenGenerator = new FakeToken();
         scaffold.reset();
-        Job job = querySelector('sys-job');
-        job.name.focus();
+        Job.JOB.name.focus();
         fakeRepository = repository = new FakeRepository();
-        changeManager = new ChangeManager(job);
+        changeManager = new ChangeManager(Job.JOB);
         autocomplete = document.createElement('sys-autocomplete');
     });
 
@@ -175,23 +174,44 @@ void main() {
 
     group("Calculation", () {
 
-        test("basic use case", () async {
+        test("Calculation propagates from lineitem all the way to job.", () {
 
             nav.sendEnter();
             nav.sendText('first group, depth 1');
+            Group group1 = nav.activeModel;
 
             nav.sendEnter();
             nav.sendText('second group, depth 2');
+            Group group2 = nav.activeModel;
 
             nav.sendEnter();
             nav.sendText('task one');
             Task task = nav.activeModel;
-            task.total.focus();
+            task.qty.focus();
+            nav.sendText('2');
 
             nav.sendEnter();
+            nav.sendText('lineitem one');
+            LineItem li = nav.activeModel;
+            li.qty.focus();
+            nav.sendText('5');
+            li.price.focus();
 
-            expect(nav.activeModel.pk, null);
-            expect(nav.activeModel is LineItem, isTrue);
+            expect(li.total.value.decimal, 0);
+            expect(task.price.value.decimal, 0);
+            expect(task.total.value.decimal, 0);
+            expect(group2.total.value.decimal, 0);
+            expect(group1.total.value.decimal, 0);
+            expect(Job.JOB.total.value.decimal, 0);
+
+            nav.sendText('5');
+
+            expect(li.total.value.decimal, 25);
+            expect(task.price.value.decimal, 25);
+            expect(task.total.value.decimal, 50);
+            expect(group2.total.value.decimal, 50);
+            expect(group1.total.value.decimal, 50);
+            expect(Job.JOB.total.value.decimal, 50);
 
         });
 
