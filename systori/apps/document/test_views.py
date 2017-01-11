@@ -436,11 +436,10 @@ class ProposalViewTests(DocumentTestCase):
                     group=self.job2.all_groups.order_by('id').last())
         TaskFactory(name="window premium", qty=10, complete=5, price=125, total=1250, variant_group=1, variant_serial=1,
                     group=self.job2.all_groups.order_by('id').last())
-        group = GroupFactory(parent=self.job2)
-        group1 = GroupFactory(parent=group)
-        group2 = GroupFactory(parent=group1)
-        group3 = GroupFactory(parent=group2)
+        group3 = GroupFactory(parent=self.job2.all_groups.order_by('id')[3])
         TaskFactory(name="task 14", qty=10, complete=5, price=96, group=group3)
+        for number in range(1,3):
+            LineItemFactory(qty=2, price=1.23, unit='m³', task=self.task)
 
         self.contact = ContactFactory(
             project=self.project,
@@ -466,11 +465,17 @@ class ProposalViewTests(DocumentTestCase):
             self.project.id,
             'print',
             Proposal.objects.first().id
-        ]), {}) # empty {} == 'with_lineitems': False
-        self.assertTrue(self.job.name in PdfFileReader(BytesIO(response.content)).getPage(0).extractText())
-        f = open('test_big.pdf', 'wb+')
-        f.write(response.content)
-        f.close()
+        ]), {'with_lineitems': True}) # empty {} == 'with_lineitems': False
+
+        pdfFileObject = PdfFileReader(BytesIO(response.content))
+        extractedText = ""
+        for page in range(pdfFileObject.getNumPages()):
+            extractedText += pdfFileObject.getPage(page).extractText()
+        for text in ['Proposal', 'hello', 'bye', 'window premium', 'Optional', self.job.name, self.task.name]:
+            self.assertTrue(text in extractedText)
+        file = open("test_big.pdf", "wb+")
+        file.write(response.content)
+        file.close()
 
     def test_update_proposal(self):
 

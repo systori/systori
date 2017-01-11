@@ -15,10 +15,10 @@
     <tbody>
     {% for job in jobs %}
       <tr>
-        <td><a href="{% url 'tasks' job.id %}">{{ job }}</a></td>
+        <td><a href="{% url 'job.editor' project.id job.id %}">{{ job }}</a></td>
         <td>
-          <a href="{% url 'job.edit' job.id %}">{% trans "Edit" %}</a>
-          <a href="{% url 'job.delete' job.id %}">{% trans "Delete" %}</a>
+          <a href="{% url 'job.editor' project.id job.id %}">{% trans "Edit" %}</a>
+          <a href="{% url 'job.delete' project.id job.id %}">{% trans "Delete" %}</a>
         </td>
       </tr>
     {% endfor %}
