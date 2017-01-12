@@ -484,7 +484,7 @@ class EvaluateEquation extends ParseEquation<Decimal> {
 
     Decimal call(String eq) => parser.parse(eq.trim());
 
-    Decimal parseDecimal(sign, digits) => new Decimal.parse(sign+digits.join());
+    Decimal parseDecimal(sign, digits) => new Decimal(double.parse(sign+digits.join()));
 
     Decimal parseRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end) =>
         evalRange(column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end);

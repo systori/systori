@@ -154,6 +154,11 @@ main() {
             expect(local("2 - -1000.001"), "2 - -1.000,001");
 
             expect(resolve("2--1.000,001+A!", ['99']), "(2 - -1.000,001) + 99");
+
+            // regression test from 01/12/2017
+            // EvaluateEquation.parseDecimal was using localized parser on
+            // canonical values, resulting in 1.1 being parsed as 11
+            expect(cellTotal("18 * 1.1"), 19.8);
         });
 
         test("locale: en", () {

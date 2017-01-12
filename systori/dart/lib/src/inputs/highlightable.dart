@@ -19,7 +19,7 @@ class Highlight {
 
 abstract class HighlightableInputMixin implements HtmlElement {
 
-    highlight(List<Highlight> highlights) {
+    highlight(Iterable<Highlight> highlights) {
 
         var buffer = new StringBuffer();
 

@@ -3,6 +3,8 @@ import 'dart:html';
 import 'dart:async';
 import 'package:test/test.dart';
 import 'package:systori/editor.dart';
+import 'package:systori/spreadsheet.dart';
+import 'package:systori/decimal.dart';
 import 'navigator.dart';
 import 'repository.dart';
 import '../scaffolding.dart';
@@ -24,12 +26,13 @@ void main() {
         autocomplete = document.createElement('sys-autocomplete');
     });
 
-    group("Keyboard", () {
+    group("KeyboardHandler", () {
 
         test("[enter]", () {
 
             expect(nav.activeModel.pk, 1);
             expect(nav.activeModel is Job, isTrue);
+            expect((nav.activeModel as Job).code.text, '1');
             expect((nav.activeModel as Job).depth, 0);
 
             nav.sendEnter();
@@ -37,6 +40,7 @@ void main() {
             nav.sendText('first group');
             expect(nav.activeModel.pk, null);
             expect(nav.activeModel is Group, isTrue);
+            expect((nav.activeModel as Group).code.text, '1.01');
             expect((nav.activeModel as Group).depth, 1);
 
             nav.sendEnter();
@@ -44,6 +48,7 @@ void main() {
             nav.sendText('second group');
             expect(nav.activeModel.pk, null);
             expect(nav.activeModel is Group, isTrue);
+            expect((nav.activeModel as Group).code.text, '1.01.01');
             expect((nav.activeModel as Group).depth, 2);
 
             nav.sendEnter();
@@ -51,6 +56,7 @@ void main() {
             nav.sendText('first task');
             expect(nav.activeModel.pk, null);
             expect(nav.activeModel is Task, isTrue);
+            expect((nav.activeModel as Task).code.text, '1.01.01.001');
 
             nav.sendEnter();
 
@@ -63,18 +69,21 @@ void main() {
 
             expect(nav.activeModel.pk, null);
             expect(nav.activeModel is Task, isTrue);
+            expect((nav.activeModel as Task).code.text, '1.01.01.002');
 
             nav.sendEnter();
 
             expect(nav.activeModel.pk, null);
             expect(nav.activeModel is Group, isTrue);
             expect((nav.activeModel as Group).depth, 2);
+            expect((nav.activeModel as Group).code.text, '1.01.02');
 
             nav.sendEnter();
 
             expect(nav.activeModel.pk, null);
             expect(nav.activeModel is Group, isTrue);
             expect((nav.activeModel as Group).depth, 1);
+            expect((nav.activeModel as Group).code.text, '1.02');
 
             // [Enter] in empty group just below root does nothing
             nav.sendEnter();
@@ -82,6 +91,7 @@ void main() {
             expect(nav.activeModel.pk, null);
             expect(nav.activeModel is Group, isTrue);
             expect((nav.activeModel as Group).depth, 1);
+            expect((nav.activeModel as Group).code.text, '1.02');
 
         });
 
@@ -145,9 +155,9 @@ void main() {
 
     });
 
-    group("Inject Autocompleted Result", () {
+    group("Autocomplete", () {
 
-        test("basic use case", () async {
+        test("select search result & clone into document tree", () async {
             nav.sendEnter();
 
             Group group = nav.activeModel;
@@ -172,10 +182,9 @@ void main() {
 
     });
 
-    group("Calculation", () {
+    group("Basic Spreadsheet", () {
 
-        test("basic lineitem to job calculation", () {
-
+        test("calculation propagation", () {
             nav.sendEnter();
             nav.sendText('first group, depth 1');
             Group group1 = nav.activeModel;
@@ -196,7 +205,7 @@ void main() {
             expect(task.total.text, '0,00');
             expect(group2.total.text, '0,00');
             expect(group1.total.text, '0,00');
-            expect(Job.JOB.total.text, '0,00');
+            expect(Job.JOB.total.text, '14.996,00');
 
             task.qty.focus();
             nav.sendText('2');
@@ -211,24 +220,37 @@ void main() {
             expect(task.total.text, '50,00');
             expect(group2.total.text, '50,00');
             expect(group1.total.text, '50,00');
-            expect(Job.JOB.total.text, '50,00');
-
+            expect(Job.JOB.total.text, '15.046,00');
         });
 
-        test("blank task row does not interfer with group totals", () {
+        test("blank task & lineitem row has valid defaults", () {
+            Group group1 = Job.JOB.childrenOfType('group').first;
+            Group group2 = group1.childrenOfType('group').first;
+            group2.name.focus();
+            nav.sendEnter();
+            Task task = nav.activeModel;
 
+            expect(task.qty.value, new Decimal(0));
+            expect(task.price.value, new Decimal(0));
+            expect(task.total.value, new Decimal(0));
+
+            task.name.focus();
+            nav.sendText('task one');
+            nav.sendEnter();
+
+            LineItem li = nav.activeModel;
+            expect(li.qty.value, new Decimal(0));
+            expect(li.price.value, new Decimal(0));
+            expect(li.total.value, new Decimal(0));
+        });
+
+        test("blank task row has valid defaults", () {
             Group group1 = Job.JOB.childrenOfType('group').first;
             Group group2 = group1.childrenOfType('group').first;
             Task task = group2.childrenOfType('task').first;
             LineItem li = task.childrenOfType('lineitem').first;
 
-            task.qty.focus();
-            nav.sendText('2');
-            li.qty.focus();
-            nav.sendText('5');
-            li.price.focus();
-            nav.sendText('5');
-            expect(group2.total.text, '50,00');
+            expect(group2.total.text, '14.996,00');
 
             li.name.focus();
             nav.sendEnter(); // blank li
@@ -237,9 +259,138 @@ void main() {
             task.qty.focus();
             nav.setText('3'); // update previous valid task, group should update
 
-            expect(group2.total.text, '75,00');
+            expect(group2.total.text, '224,94');
+        });
+
+    });
+
+    group("Isomorphic Spreadsheet", () {
+
+        /*
+          The goal of this set of tests is to make sure that
+          the spreadsheet models pre-rendered on the server
+          from previously saved data result in identically
+          functional structures as the spreadsheet models
+          freshly created on the client. There are quite
+          a few differences in how the client side treats
+          these two paths. Most obvious one is that when
+          browser loads a large document it does not
+          evaluate all spreadsheets, instead this is done
+          lazily as-needed in contrast to newly client side
+          created data which starts off with already
+          evaluated spreadsheet.
+         */
+
+        Group root;
+        Group group1;
+        Task task1;
+        LineItem lineitem1;
+        LineItem lineitem2;
+        LineItem lineitem3;
+
+        spreadsheetTests() {
+
+            testCell(Cell cell, String text, String reason) {
+                expect(cell.text, text, reason: reason);
+                expect(cell.value, new Decimal.parse(text), reason: reason);
+            }
+
+            testRow(HtmlRow row, String qty, String unit, String price, String total) {
+                testCell(row.qty, qty, 'qty');
+                expect(row.unit.text, unit, reason: 'unit');
+                testCell(row.price, price, 'price');
+                testCell(row.total, total, 'total');
+            }
+
+            test("initial state", () {
+                expect(lineitem1.name.text, 'Labor');
+                testRow(lineitem1, '0,1', 'hr', '19,80', '1,98');
+                expect(lineitem2.name.text, 'Equipment Rental');
+                testRow(lineitem2, '0,1', 'hr', '50,00', '5,00');
+                expect(lineitem3.name.text, 'Materials');
+                testRow(lineitem3, '4', 'm', '17,00', '68,00');
+
+                expect(task1.name.text, 'Fence');
+                testRow(task1, '200', 'm²', '74,98', '14.996,00');
+
+                expect(group1.total.text, '14.996,00');
+                expect(root.total.text, '14.996,00');
+            });
+
+        }
+
+        group("Generated Server Side", () {
+
+            setUp(() {
+                root = Job.JOB.childrenOfType('group').first;
+                group1 = root.childrenOfType('group').first;
+                task1 = group1.childrenOfType('task').first;
+                var lineitems = task1.childrenOfType('lineitem').toList();
+                lineitem1 = lineitems[0];
+                lineitem2 = lineitems[1];
+                lineitem3 = lineitems[2];
+            });
+
+            spreadsheetTests();
 
         });
+
+        group("Generated Client Side", () {
+
+            setUp(() {
+                nav.sendEnter();
+                nav.sendText('first group, depth 1');
+                root = nav.activeModel;
+
+                nav.sendEnter();
+                nav.sendText('second group, depth 2');
+                group1 = nav.activeModel;
+
+                nav.sendEnter();
+                nav.sendText('Fence');
+                task1 = nav.activeModel;
+                task1.qty.focus();
+                nav.sendText('200');
+                task1.unit.focus();
+                nav.sendText('m²');
+
+                nav.sendEnter();
+                nav.sendText('Labor');
+                lineitem1 = nav.activeModel;
+                lineitem1.qty.focus();
+                nav.sendText('0,1');
+                lineitem1.unit.focus();
+                nav.sendText('hr');
+                lineitem1.price.focus();
+                nav.sendText('18*1,1');
+
+                nav.sendEnter();
+                nav.sendText('Equipment Rental');
+                lineitem2 = nav.activeModel;
+                lineitem2.qty.focus();
+                nav.sendText('!');
+                lineitem2.unit.focus();
+                nav.sendText('hr');
+                lineitem2.price.focus();
+                nav.sendText('50');
+
+                nav.sendEnter();
+                nav.sendText('Materials');
+                lineitem3 = nav.activeModel;
+                lineitem3.qty.focus();
+                nav.sendText('4');
+                lineitem3.unit.focus();
+                nav.sendText('m');
+                lineitem3.price.focus();
+                nav.sendText('17');
+
+                nav.sendEnter();
+            });
+
+            spreadsheetTests();
+
+        });
+
     });
 
 }

@@ -51,9 +51,11 @@ class GroupKeyboardHandler extends KeyboardHandler {
         if (e.keyCode == KeyCode.ENTER) {
             e.preventDefault();
             if (group.isBlank) {
-                Group parent = group.parent as Group;
-                group.remove();
-                parent.createSibling();
+                if (group.parent is! Job) {
+                    Group parent = group.parent as Group;
+                    group.remove();
+                    parent.createSibling();
+                }
             } else {
                 group.createChild();
             }
@@ -188,7 +190,7 @@ class Group extends Model {
 class HtmlCell extends Input with HighlightableInputMixin, Cell, KeyboardHandler {
 
     Map<String,dynamic> get values => {
-        className: text,
+        className: value.canonical,
         '${className}_equation': canonical
     };
 
@@ -208,6 +210,9 @@ class HtmlCell extends Input with HighlightableInputMixin, Cell, KeyboardHandler
 
     HtmlCell.created(): super.created() {
         addHandler(this);
+        if (value == null) {
+            value = isTextNumber ? new Decimal.parse(text) : new Decimal(null);
+        }
     }
 
     @override
@@ -310,10 +315,6 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
         diffCell = diffRow.querySelector(":scope> .total");
         sheet = this.querySelector(":scope > sys-lineitem-sheet");
         super.attached();
-
-        if (total.value == null) {
-            total.value = total.isTextNumber ? new Decimal.parse(total.text) : new Decimal(null);
-        }
     }
 
     onCalculate(String event, Cell cell) {
