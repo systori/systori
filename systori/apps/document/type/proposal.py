@@ -87,8 +87,13 @@ def collate_tasks(proposal, font, available_width):
             traverse(group, depth + 1)
 
             if not group.get('taskgroups', []) and group.get('tasks', []):
-                totals.row(b('totals1 {} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                           money(group['estimate_net']))
+                items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
+                          '', '', '', money(group['estimate_net']))
+                items.row_style('FONTNAME', 0, -1, font.bold)
+                items.row_style('ALIGNMENT', -1, -1, "RIGHT")
+                items.row_style('SPAN', 1, 4)
+                items.row_style('VALIGN', 0, -1, "BOTTOM")
+                items.row('')
 
         for task in parent['tasks']:
             add_task(task)
@@ -100,23 +105,19 @@ def collate_tasks(proposal, font, available_width):
 
         for group in job.get('taskgroups', []):
             traverse(group, 1)
-            items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                      '', '', '', money(group['estimate_net']))
-            items.row_style('FONTNAME', 0, -1, font.bold)
-            items.row_style('ALIGNMENT', -1, -1, "RIGHT")
-            items.row_style('SPAN', 1, 4)
-            items.row_style('VALIGN', 0, -1, "BOTTOM")
-            items.row('')
-            totals.row(b('totals2 {} {} - {}'.format(_('Total'), group['code'], group['name']), font),
+            if not group.get('taskgroups', []) and group.get('tasks', []):
+                items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
+                          '', '', '', money(group['estimate_net']))
+                items.row_style('FONTNAME', 0, -1, font.bold)
+                items.row_style('ALIGNMENT', -1, -1, "RIGHT")
+                items.row_style('SPAN', 1, 4)
+                items.row_style('VALIGN', 0, -1, "BOTTOM")
+                items.row('')
+            totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
                        money(group['estimate_net']))
 
         for task in job.get('tasks', []):  # support old JSON
             add_task(task)
-
-        if not job.get('taskgroups', []) and job.get('tasks', []):
-            totals.row(b('totals3 {} {} - {}'.format(_('Total'), job['code'], job['name']), font),
-                       money(job['estimate'].net))
-        totals.row(b('totals4 {} {} - {}'.format(_('Total'), job['code'], job['name']), font), money(job['estimate'].net))
 
     totals.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
     totals.row(_("Total without VAT"), money(proposal['estimate_total'].net))
