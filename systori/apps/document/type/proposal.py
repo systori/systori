@@ -27,7 +27,7 @@ def collate_tasks(proposal, font, available_width):
     items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     items.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
-    items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
+    #items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
     items.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
 
     items.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
@@ -43,7 +43,7 @@ def collate_tasks(proposal, font, available_width):
     totals.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
     totals.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
     totals.row('','')
-    items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
+    #items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
 
     description_width = 314.0
 
@@ -85,8 +85,10 @@ def collate_tasks(proposal, font, available_width):
 
         for group in parent.get('taskgroups', []):
             traverse(group, depth + 1)
-            totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                       money(group['estimate_net']))
+
+            if not group.get('taskgroups', []) and group.get('tasks', []):
+                totals.row(b('totals1 {} {} - {}'.format(_('Total'), group['code'], group['name']), font),
+                           money(group['estimate_net']))
 
         for task in parent['tasks']:
             add_task(task)
@@ -105,13 +107,16 @@ def collate_tasks(proposal, font, available_width):
             items.row_style('SPAN', 1, 4)
             items.row_style('VALIGN', 0, -1, "BOTTOM")
             items.row('')
-            totals.row(b(    '{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
+            totals.row(b('totals2 {} {} - {}'.format(_('Total'), group['code'], group['name']), font),
                        money(group['estimate_net']))
 
         for task in job.get('tasks', []):  # support old JSON
             add_task(task)
 
-        #totals.row(b('{} {} - {}'.format(_('Total'), job['code'], job['name']), font), money(job['estimate'].net))
+        if not job.get('taskgroups', []) and job.get('tasks', []):
+            totals.row(b('totals3 {} {} - {}'.format(_('Total'), job['code'], job['name']), font),
+                       money(job['estimate'].net))
+        totals.row(b('totals4 {} {} - {}'.format(_('Total'), job['code'], job['name']), font), money(job['estimate'].net))
 
     totals.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
     totals.row(_("Total without VAT"), money(proposal['estimate_total'].net))
@@ -186,7 +191,6 @@ def collate_lineitems(proposal, available_width, font):
             add_task(task)
 
     return pages
-
 
 def render(proposal, letterhead, with_lineitems, format):
 
