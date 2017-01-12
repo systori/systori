@@ -318,11 +318,11 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
     }
 
     onCalculate(String event, Cell cell) {
-        sheet.calculate(qty);
+        //if (sheet.total == null) sheet.calculate(qty);
+        sheet.calculate(cell);
         calculateTotal(sheet.total);
         (parent as Group).calculationChanged();
         /*
-        if (sheet.total == null) sheet.calculate(qty);
         calculateTotal(sheet.total);
         if (event == 'focused')
             sheet.calculate(cell, focused: true);
