@@ -1,75 +1,13 @@
 import 'dart:html';
 import 'dart:async';
 import 'dart:convert';
+import 'package:systori/inputs.dart';
 
 
 String CSRFToken;
 Repository repository;
 ChangeManager changeManager;
 Token tokenGenerator = new Token();
-
-
-abstract class KeyboardHandler {
-    bool onKeyDownEvent(KeyEvent e, Input input) => true;
-    bool onKeyUpEvent(KeyEvent e, Input input) => true;
-    onFocusEvent(Input input) {}
-    onBlurEvent(Input input) {}
-    onInputEvent(Input input) {}
-    bindAll(Iterable<Input> inputs) =>
-        inputs.forEach((Input input) =>
-            input.addHandler(this));
-}
-
-
-class Input extends HtmlElement {
-
-    Model model;
-    Map<String,dynamic> get values => {className: text};
-    List<KeyboardHandler> _handlers = [];
-
-    Input.created(): super.created() {
-        onFocus.listen((Event e) =>
-            _handlers.forEach((h) => h.onFocusEvent(this))
-        );
-        onKeyDown.listen((KeyboardEvent ke) =>
-            dispatchKeyDownHandlers(new KeyEvent.wrap(ke))
-        );
-        onInput.listen(dispatchInputHandlers);
-        onKeyUp.listen((KeyboardEvent ke) =>
-            dispatchKeyUpHandlers(new KeyEvent.wrap(ke))
-        );
-        onBlur.listen((Event e) =>
-            _handlers.forEach((h) => h.onBlurEvent(this))
-        );
-    }
-
-    addHandler(KeyboardHandler handler) {
-        _handlers.add(handler);
-    }
-
-    dispatchKeyDownHandlers(KeyEvent e) {
-        for (KeyboardHandler handler in _handlers) {
-            if (!handler.onKeyDownEvent(e, this))
-                break;
-        }
-    }
-
-    dispatchKeyUpHandlers(KeyEvent e) {
-        for (KeyboardHandler handler in _handlers) {
-            if (!handler.onKeyUpEvent(e, this))
-                break;
-        }
-    }
-
-    dispatchInputHandlers(Event e) {
-        if (model != null)
-            model.updateVisualState('changed');
-        for (KeyboardHandler handler in _handlers) {
-            handler.onInputEvent(this);
-        }
-    }
-
-}
 
 
 class ModelState {
@@ -199,7 +137,6 @@ abstract class Model extends HtmlElement {
     Input getInput(String field) {
         var input = getView(field) as Input;
         assert(!inputs.contains(input));
-        input.model = this;
         inputs.add(input);
         return input;
     }

@@ -1,6 +1,22 @@
 import 'dart:async';
 import 'dart:html';
 import 'package:systori/editor.dart';
+import '../keyboard.dart';
+export '../scaffolding.dart';
+
+
+class KeyboardNavigator extends Keyboard {
+
+    Model get activeModel {
+        var e = document.activeElement;
+        while (e != null) {
+            if (e is Model) return e;
+            e = e.parent;
+        }
+        return null;
+    }
+
+}
 
 
 class FakeToken extends Token {

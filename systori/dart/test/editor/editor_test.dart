@@ -5,9 +5,7 @@ import 'package:test/test.dart';
 import 'package:systori/editor.dart';
 import 'package:systori/spreadsheet.dart';
 import 'package:systori/decimal.dart';
-import 'navigator.dart';
-import 'repository.dart';
-import '../scaffolding.dart';
+import 'tools.dart';
 
 
 void main() {
@@ -27,6 +25,32 @@ void main() {
     });
 
     group("KeyboardHandler", () {
+
+        test("cursor", () {
+            Job job = nav.activeModel;
+
+            expect(job.name.text, 'Test Job');
+            expect(nav.caretOffset, 0);
+
+            nav.sendText('A ');
+            expect(job.name.text, 'A Test Job');
+            expect(nav.caretOffset, 2);
+
+            nav.caretToEnd();
+            nav.sendText(' One');
+            expect(job.name.text, 'A Test Job One');
+            expect(nav.caretOffset, 14);
+
+            nav.selectAll();
+            nav.sendText('Rock Gym');
+            expect(job.name.text, 'Rock Gym');
+            expect(nav.caretOffset, 8);
+
+            nav.caretOffset = 4;
+            nav.sendText(' Climbing');
+            expect(job.name.text, 'Rock Climbing Gym');
+            expect(nav.caretOffset, 13);
+        });
 
         test("[enter]", () {
 
@@ -260,6 +284,32 @@ void main() {
             nav.setText('3'); // update previous valid task, group should update
 
             expect(group2.total.text, '224,94');
+        });
+
+        test("re-calculation does not reset cursor position", () {
+            Group group1 = Job.JOB.childrenOfType('group').first;
+            Group group2 = group1.childrenOfType('group').first;
+            Task task = group2.childrenOfType('task').first;
+            LineItem li = task.childrenOfType('lineitem').toList()[1];
+
+            li.qty.focus();
+            expect(nav.caretOffset, 0);
+            expect(li.qty.text, '!');
+
+            nav.selectAll();
+            nav.sendText('(1/100)');
+            expect(nav.caretOffset, 7);
+            expect(li.qty.preview, '1 / 100 = 0,01');
+
+            nav.caretOffset = 0;
+            nav.sendText('!+');
+            expect(nav.caretOffset, 2);
+            expect(li.qty.preview, '0,1 + (1 / 100) = 0,11');
+
+            nav.caretToEnd();
+            nav.sendText('+!');
+            expect(nav.caretOffset, 11);
+            expect(li.qty.preview, '(0,1 + (1 / 100)) + 0,1 = 0,21');
         });
 
     });

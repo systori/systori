@@ -1,7 +1,7 @@
 import 'dart:html';
 import 'dart:async';
-import 'editor.dart';
 import 'model.dart';
+import 'package:systori/inputs.dart';
 
 
 Autocomplete autocomplete;
@@ -43,29 +43,29 @@ class AutocompleteKeyboardHandler extends KeyboardHandler {
 
     @override
     bool onKeyDownEvent(KeyEvent e, Input input) {
-        if (!canAutocomplete) return true;
+        if (!canAutocomplete) return false;
         switch(e.keyCode) {
             case KeyCode.UP:
                 e.preventDefault();
                 autocomplete.handleUp();
-                return false;
+                return true;
             case KeyCode.DOWN:
                 e.preventDefault();
                 autocomplete.handleDown();
-                return false;
+                return true;
             case KeyCode.ENTER:
                 String id = autocomplete.handleEnter();
                 if (id != null) {
                     e.preventDefault();
                     autocompleteSelection(id);
-                    return false;
                 } else {
                     // autocomplete is active but nothing was selected
                     // allow event propagation
-                    return true;
+                    return false;
                 }
-            default:
                 return true;
+            default:
+                return false;
         }
     }
 

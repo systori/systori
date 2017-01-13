@@ -3,9 +3,8 @@ import 'dart:html';
 import 'dart:async';
 import 'package:test/test.dart';
 import 'package:systori/editor.dart';
-import '../scaffolding.dart';
-import 'repository.dart';
-import 'navigator.dart';
+import 'package:systori/inputs.dart';
+import 'tools.dart';
 
 
 class Thing extends Model {

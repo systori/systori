@@ -21,9 +21,9 @@ class TextareaKeyboardHandler extends KeyboardHandler {
     bool onKeyDownEvent(KeyEvent e, Input input) {
         if (e.keyCode == KeyCode.ENTER && e.shiftKey) {
             /* don't run any other handlers */
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 }
 
@@ -38,31 +38,6 @@ class Job extends Group {
     }
     createSibling() => createChild();
     calculationChanged() => updateTotal();
-}
-
-
-class GroupKeyboardHandler extends KeyboardHandler {
-
-    Group group;
-    GroupKeyboardHandler(this.group);
-
-    @override
-    bool onKeyDownEvent(KeyEvent e, Input input) {
-        if (e.keyCode == KeyCode.ENTER) {
-            e.preventDefault();
-            if (group.isBlank) {
-                if (group.parent is! Job) {
-                    Group parent = group.parent as Group;
-                    group.remove();
-                    parent.createSibling();
-                }
-            } else {
-                group.createChild();
-            }
-            return false;
-        }
-        return true;
-    }
 }
 
 
@@ -81,7 +56,7 @@ class DecimalElement extends HtmlElement {
 }
 
 
-class Group extends Model {
+class Group extends Model with KeyboardHandler {
 
     DivElement code;
     Input name;
@@ -113,7 +88,7 @@ class Group extends Model {
         }, replaceWithCloneOf));
         description = getInput("description");
         description.addHandler(new TextareaKeyboardHandler());
-        new GroupKeyboardHandler(this).bindAll(inputs);
+        bindAll(inputs);
         super.attached();
     }
 
@@ -183,6 +158,28 @@ class Group extends Model {
         replaceWith(fragment.children[0]);
         (parent.children[idx] as Group).name.focus();
     }
+
+    @override
+    bool onKeyDownEvent(KeyEvent e, Input input) {
+        if (e.keyCode == KeyCode.ENTER) {
+            e.preventDefault();
+            if (isBlank) {
+                if (parent is! Job) {
+                    Group this_parent = parent as Group;
+                    remove();
+                    this_parent.createSibling();
+                }
+            } else {
+                createChild();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @override
+    bool onInputEvent(Input input) =>
+        updateVisualState('changed');
 
 }
 
@@ -380,38 +377,19 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
             } else {
                 sheet.createChild();
             }
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
-
-}
-
-
-class LineItemKeyboardHandler extends KeyboardHandler {
-
-    LineItem li;
-    LineItemKeyboardHandler(this.li);
 
     @override
-    bool onKeyDownEvent(KeyEvent e, Input input) {
-        if (e.keyCode == KeyCode.ENTER) {
-            e.preventDefault();
-            if (li.isBlank) {
-                Task parent = li.parent.parent as Task;
-                li.remove();
-                parent.createSibling();
-            } else {
-                li.createSibling();
-            }
-            return false;
-        }
-        return true;
-    }
+    bool onInputEvent(Input input) =>
+        updateVisualState('changed');
+
 }
 
 
-class LineItem extends Model with Orderable, Row, HtmlRow {
+class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
 
     Input name;
     bool get isBlank => hasNoPk && name.text.isEmpty;
@@ -425,7 +403,7 @@ class LineItem extends Model with Orderable, Row, HtmlRow {
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
-        new LineItemKeyboardHandler(this).bindAll(inputs);
+        bindAll(inputs);
         super.attached();
     }
 
@@ -438,6 +416,25 @@ class LineItem extends Model with Orderable, Row, HtmlRow {
     onCalculate(String event, Cell cell) =>
         (parent.parent as Task).onCalculate(event, cell);
 
+    @override
+    bool onKeyDownEvent(KeyEvent e, Input input) {
+        if (e.keyCode == KeyCode.ENTER) {
+            e.preventDefault();
+            if (isBlank) {
+                Task this_parent = parent.parent as Task;
+                remove();
+                this_parent.createSibling();
+            } else {
+                createSibling();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @override
+    bool onInputEvent(Input input) =>
+        updateVisualState('changed');
 }
 
 
