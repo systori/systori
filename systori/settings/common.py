@@ -126,8 +126,6 @@ LOCALE_PATHS = (
     os.path.join(ROOT_DIR, 'locale'),
 )
 
-LATEX_WORKING_DIR = os.path.join(BASE_DIR, 'templates/document/latex')
-
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
