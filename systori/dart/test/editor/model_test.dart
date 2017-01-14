@@ -60,13 +60,11 @@ main() {
     KeyboardNavigator nav = new KeyboardNavigator();
     FakeRepository fakeRepository;
     Thing thing;
-    Part part;
 
     setUp(() {
         tokenGenerator = new FakeToken();
         scaffolding.reset();
         thing = querySelector('sys-thing');
-        part = querySelector('sys-part');
         changeManager = new ChangeManager(thing);
         fakeRepository = repository = new FakeRepository();
     });

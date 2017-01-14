@@ -202,6 +202,11 @@ abstract class Model extends HtmlElement {
         }
     }
 
+    delete() {
+        if (pk != null) changeManager.delete(type, pk);
+        remove();
+    }
+
     updateVisualState(String state) {
         switch(state) {
             case 'changed':
@@ -237,7 +242,7 @@ class Repository {
             "/api/job/$jobId/editor/save",
             method: "POST",
             requestHeaders: headers,
-            sendData: JSON.encode(data)
+            sendData: JSON.encode(data, toEncodable: (o) => o is Set ? o.toList(): o)
         );
         return JSON.decode(response.responseText);
     }
@@ -268,6 +273,8 @@ class ChangeManager {
 
     Timer timer;
     Model root;
+    Map<String,Set<int>> deletes = {};
+    Map<String,Set<int>> pendingDeletes = {};
     ChangeManager(this.root);
 
     startAutoSync() =>
@@ -279,13 +286,20 @@ class ChangeManager {
     Future _save() async {
         try {
             var data = root.save();
+            if (deletes.isNotEmpty) {
+                data['delete'] = deletes;
+                pendingDeletes = deletes;
+                deletes = {};
+            }
             if (data.isNotEmpty) {
                 Map response = await repository.save(root.pk, data);
                 root.commit(response);
             }
+            pendingDeletes = {};
             saving.complete();
         } catch (e) {
             root.rollback();
+            rollbackDeletes();
             saving.completeError(e);
         } finally {
             saving = saveRequest;
@@ -306,6 +320,19 @@ class ChangeManager {
                 saveRequest = new Completer();
             return saveRequest.future;
         }
+    }
+
+    rollbackDeletes() {
+        for (var objectType in pendingDeletes.keys) {
+            deletes
+                .putIfAbsent(objectType, ()=>new Set())
+                .addAll(pendingDeletes[objectType]);
+        }
+        pendingDeletes = {};
+    }
+
+    delete(String objectType, int pk) {
+        deletes.putIfAbsent(objectType+'s', ()=>new Set()).add(pk);
     }
 
 }

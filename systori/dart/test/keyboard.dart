@@ -1,5 +1,4 @@
 import 'dart:html';
-import 'package:quiver/iterables.dart';
 import 'package:systori/inputs.dart';
 
 
@@ -42,15 +41,14 @@ class Keyboard {
         sel.addRange(range);
     }
 
-    sendEnter([int times = 1]) => sendKey(KeyCode.ENTER, times);
-    sendUp([int times = 1]) => sendKey(KeyCode.UP, times);
-    sendDown([int times = 1]) => sendKey(KeyCode.DOWN, times);
-    sendKey(int keyCode, [int times = 1]) {
+    sendEnter({bool shiftKey: false}) => sendKey(KeyCode.ENTER, shiftKey: shiftKey);
+    sendUp({bool shiftKey: false}) => sendKey(KeyCode.UP, shiftKey: shiftKey);
+    sendDown({bool shiftKey: false}) => sendKey(KeyCode.DOWN, shiftKey: shiftKey);
+    sendDelete({bool shiftKey: false}) => sendKey(KeyCode.DELETE, shiftKey: shiftKey);
+    sendKey(int keyCode, {bool shiftKey: false}) {
         Input input = document.activeElement;
-        range(times).forEach((i) {
-            input.dispatchKeyDownEvent(new KeyEvent('keydown', keyCode: keyCode));
-            input.dispatchKeyUpEvent(new KeyEvent('keyup', keyCode: keyCode));
-        });
+        input.dispatchKeyDownEvent(new KeyEvent('keydown', keyCode: keyCode, shiftKey: shiftKey));
+        input.dispatchKeyUpEvent(new KeyEvent('keyup', keyCode: keyCode, shiftKey: shiftKey));
     }
 
     sendText(String text) {

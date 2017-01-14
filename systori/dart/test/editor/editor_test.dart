@@ -1,6 +1,7 @@
 @TestOn('browser')
 import 'dart:html';
 import 'dart:async';
+import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:systori/editor.dart';
 import 'package:systori/spreadsheet.dart';
@@ -195,6 +196,97 @@ void main() {
             expect(group.pk, 1);
             expect(group.state.committed, {'name': 'group changed', 'description': ''});
 
+            expect(changeManager.saving, isNull);
+
+        });
+
+        test("group successful delete", () async {
+
+            Group group1 = Job.JOB.childrenOfType('group').first;
+            group1.name.focus();
+
+            nav.sendDelete();
+            expect(group1.parent, isNotNull);
+            expect(changeManager.deletes, {});
+
+            nav.sendDelete(shiftKey: true);
+            expect(group1.parent, isNull);
+            expect(changeManager.deletes, {'groups': [2]});
+
+            changeManager.save();
+
+            await new Future.value(); // run event loop
+
+            expect(changeManager.deletes, {});
+            expect(changeManager.pendingDeletes, {'groups': [2]});
+
+            await fakeRepository.complete();
+
+            expect(changeManager.deletes, {});
+            expect(changeManager.pendingDeletes, {});
+            expect(changeManager.saving, isNull);
+
+        });
+
+        test("task successful delete", () async {
+
+            Group group1 = Job.JOB.childrenOfType('group').first;
+            Group group2 = group1.childrenOfType('group').first;
+            Task task = group2.childrenOfType('task').first;
+
+            task.name.focus();
+
+            nav.sendDelete();
+            expect(task.parent, isNotNull);
+            expect(changeManager.deletes, {});
+
+            nav.sendDelete(shiftKey: true);
+            expect(task.parent, isNull);
+            expect(changeManager.deletes, {'tasks': [1]});
+
+            changeManager.save();
+
+            await new Future.value(); // run event loop
+
+            expect(changeManager.deletes, {});
+            expect(changeManager.pendingDeletes, {'tasks': [1]});
+
+            await fakeRepository.complete();
+
+            expect(changeManager.deletes, {});
+            expect(changeManager.pendingDeletes, {});
+            expect(changeManager.saving, isNull);
+
+        });
+
+        test("lineitem successful delete", () async {
+
+            Group group1 = Job.JOB.childrenOfType('group').first;
+            Group group2 = group1.childrenOfType('group').first;
+            Task task = group2.childrenOfType('task').first;
+            LineItem li = task.childrenOfType('lineitem').first;
+
+            li.name.focus();
+
+            nav.sendDelete();
+            expect(li.parent, isNotNull);
+            expect(changeManager.deletes, {});
+
+            nav.sendDelete(shiftKey: true);
+            expect(li.parent, isNull);
+            expect(changeManager.deletes, {'lineitems': [1]});
+
+            changeManager.save();
+
+            await new Future.value(); // run event loop
+
+            expect(changeManager.deletes, {});
+            expect(changeManager.pendingDeletes, {'lineitems': [1]});
+
+            await fakeRepository.complete();
+
+            expect(changeManager.deletes, {});
+            expect(changeManager.pendingDeletes, {});
             expect(changeManager.saving, isNull);
 
         });

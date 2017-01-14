@@ -161,18 +161,36 @@ class Group extends Model with KeyboardHandler {
 
     @override
     bool onKeyDownEvent(KeyEvent e, Input input) {
-        if (e.keyCode == KeyCode.ENTER) {
-            e.preventDefault();
-            if (isBlank) {
-                if (parent is! Job) {
-                    Group this_parent = parent as Group;
-                    remove();
-                    this_parent.createSibling();
+        switch (e.keyCode) {
+            case KeyCode.ENTER:
+                e.preventDefault();
+                if (isBlank) {
+                    if (parent is! Job) {
+                        Group this_parent = parent as Group;
+                        remove();
+                        this_parent.createSibling();
+                    }
+                } else {
+                    createChild();
                 }
-            } else {
-                createChild();
-            }
-            return true;
+                return true;
+            case KeyCode.DELETE:
+                if (!e.shiftKey || this is Job) break;
+                e.preventDefault();
+                Group this_parent = parent;
+                Group next_focus;
+                if (nextElementSibling is Group) {
+                    next_focus = nextElementSibling;
+                } else if (previousElementSibling is Group) {
+                    next_focus = previousElementSibling;
+                } else {
+                    next_focus = this_parent;
+                }
+                delete();
+                next_focus.name.scrollIntoView();
+                next_focus.name.focus();
+                this_parent.updateCode();
+                return true;
         }
         return false;
     }
@@ -368,16 +386,34 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 
     @override
     bool onKeyDownEvent(KeyEvent e, Input input) {
-        if (e.keyCode == KeyCode.ENTER) {
-            e.preventDefault();
-            if (isBlank) {
-                Group p = parentGroup;
-                remove();
-                p.createSibling();
-            } else {
-                sheet.createChild();
-            }
-            return true;
+        switch(e.keyCode) {
+            case KeyCode.ENTER:
+                e.preventDefault();
+                if (isBlank) {
+                    Group p = parentGroup;
+                    remove();
+                    p.createSibling();
+                } else {
+                    sheet.createChild();
+                }
+                return true;
+            case KeyCode.DELETE:
+                if (!e.shiftKey) break;
+                e.preventDefault();
+                Group this_parent = parent;
+                if (nextElementSibling is Task) {
+                    (nextElementSibling as Task).name.scrollIntoView();
+                    (nextElementSibling as Task).name.focus();
+                } else if (previousElementSibling is Task) {
+                    (previousElementSibling as Task).name.scrollIntoView();
+                    (previousElementSibling as Task).name.focus();
+                } else {
+                    this_parent.name.scrollIntoView();
+                    this_parent.name.focus();
+                }
+                delete();
+                this_parent.updateCode();
+                return true;
         }
         return false;
     }
@@ -418,16 +454,29 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
 
     @override
     bool onKeyDownEvent(KeyEvent e, Input input) {
-        if (e.keyCode == KeyCode.ENTER) {
-            e.preventDefault();
-            if (isBlank) {
-                Task this_parent = parent.parent as Task;
-                remove();
-                this_parent.createSibling();
-            } else {
-                createSibling();
-            }
-            return true;
+        switch(e.keyCode) {
+            case KeyCode.ENTER:
+                e.preventDefault();
+                if (isBlank) {
+                    Task this_parent = parent.parent as Task;
+                    remove();
+                    this_parent.createSibling();
+                } else {
+                    createSibling();
+                }
+                return true;
+            case KeyCode.DELETE:
+                if (!e.shiftKey) break;
+                e.preventDefault();
+                if (nextElementSibling is LineItem) {
+                    (nextElementSibling as LineItem).name.focus();
+                } else if (previousElementSibling is LineItem) {
+                    (previousElementSibling as LineItem).name.focus();
+                } else {
+                    (parent as Task).name.focus();
+                }
+                delete();
+                return true;
         }
         return false;
     }

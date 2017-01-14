@@ -1,3 +1,4 @@
+/*
 import 'dart:html';
 import 'dart:async';
 import 'dart:convert';
@@ -1067,3 +1068,4 @@ void main() {
     document.registerElement('ubr-lineitem', LineItemElement);
     setup_input_mode_buttons();
 }
+*/
