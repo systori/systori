@@ -53,3 +53,18 @@ class Input extends HtmlElement {
         _handlers.any((h) => h.onKeyUpEvent(e, this));
 
 }
+
+
+class StyledInput extends Input {
+    Map<String,dynamic> get values => {
+        className: innerHtml
+            .replaceAll('<div>', '<br />')
+            .replaceAll('</div>', '')
+            // can't support formatting yet
+            .replaceAll(new RegExp(r'<\/?i>'), '')
+            .replaceAll(new RegExp(r'<\/?b>'), '')
+            .replaceAll(new RegExp(r'<\/?span.*?>'), '')
+            .replaceAll('<br>', '<br />')
+    };
+    StyledInput.created(): super.created();
+}

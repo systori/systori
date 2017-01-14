@@ -5,5 +5,5 @@
     <sys-input class="name" placeholder="{% trans 'group' %}" contenteditable>{{ group.name|safe }}</sys-input>
     <sys-decimal class="total">{{ group.estimate|ubrdecimal:2 }}</sys-decimal>
   </div>
-  <sys-input class="description" placeholder="{% trans 'description' %}" contenteditable>{{ group.description|safe }}</sys-input>
+  <sys-styled-input class="description" placeholder="{% trans 'description' %}" contenteditable>{{ group.description|safe }}</sys-styled-input>
 </div>

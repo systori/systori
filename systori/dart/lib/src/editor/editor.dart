@@ -507,6 +507,7 @@ registerElements() {
     CSRFToken = (querySelector('input[name=csrfmiddlewaretoken]') as InputElement).value;
     document.registerElement('sys-decimal', DecimalElement);
     document.registerElement('sys-input', Input);
+    document.registerElement('sys-styled-input', StyledInput);
     document.registerElement('sys-cell', HtmlCell);
     document.registerElement('sys-lineitem', LineItem);
     document.registerElement('sys-lineitem-sheet', LineItemSheet);

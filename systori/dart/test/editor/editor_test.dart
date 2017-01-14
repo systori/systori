@@ -123,9 +123,31 @@ void main() {
 
     group("ChangeManager", () {
 
+        test("test new line processing in text fields", () {
+
+            Job.JOB.name.setInnerHtml('hello <br />world', treeSanitizer: NodeTreeSanitizer.trusted);
+            Job.JOB.description.setInnerHtml('hello <br />world', treeSanitizer: NodeTreeSanitizer.trusted);
+            expect(Job.JOB.state.delta, {
+                'name': 'hello world',
+                'description': 'hello <br />world',
+            });
+
+            Group group1 = Job.JOB.childrenOfType('group').first;
+            Group group2 = group1.childrenOfType('group').first;
+            Task task = group2.childrenOfType('task').first;
+
+            task.name.setInnerHtml('hello <br />world', treeSanitizer: NodeTreeSanitizer.trusted);
+            task.description.setInnerHtml('hello <br />world', treeSanitizer: NodeTreeSanitizer.trusted);
+            expect(task.state.delta, {
+                'name': 'hello world',
+                'description': 'hello <br />world',
+            });
+
+        });
+
         test("group successful update", () async {
 
-            Job job = querySelector('sys-job');
+            Job job = nav.activeModel;
 
             // job name is changed
             nav.sendText(' Changed');
