@@ -1,7 +1,6 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
 import 'package:systori/inputs.dart';
-import 'package:systori/decimal.dart';
 
 
 class RefundTable extends TableElement {
