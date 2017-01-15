@@ -19,16 +19,18 @@ PROD_MEDIA_FILE = 'systori.media.tgz'
 def prepare(service, branch):
     "copy database and migrate"
 
+    settings = {
+        'HOST': 'db',
+        'NAME': 'systori_{}'.format(service),
+        'USER': 'postgres'
+    }
+
     if service != 'production':
-        settings = {
-            'HOST': 'db',
-            'NAME': 'systori_{}'.format(service),
-            'USER': 'postgres'
-        }
         local('dropdb -h {HOST} -U {USER} {NAME}'.format(**settings))
         local('createdb -T systori_production -h {HOST} -U {USER} {NAME}'.format(**settings))
 
     local('./manage.py migrate --noinput')
+    local('psql -c "VACUUM ANALYZE" -h {HOST} -U {USER} {NAME}'.format(**settings))
 
 
 def uwsgi():
@@ -81,6 +83,7 @@ def getdb(envname='production'):
         local('dropdb systori_local')
     local('createdb systori_local')
     local('pg_restore -d systori_local -O systori.'+envname+'.dump')
+    local('psql -c "ANALYZE" systori_local')
     local('rm systori.'+envname+'.dump')
 
 
