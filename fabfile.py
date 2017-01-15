@@ -115,15 +115,6 @@ def dockergetdb(container='app', envname='production'):
         container, dump_file, **settings))
     local('rm ' + dump_file)
 
-def copyproductiontodev():
-    from systori.settings.dev import DATABASES as DEVDB
-    from systori.settings.production import DATABASES as PRODDB
-    devdb = DEVDB['default']
-    proddb = PRODDB['default']
-    local('dropdb -h {HOST} -U {USER} {NAME}'.format(**devdb))
-    local('createdb -h {HOST} -U {USER} {NAME}'.format(**devdb))
-    local('pg_dump -h {HOST} -U {USER} -f prod.sql {NAME}'.format(**proddb))
-    local('psql -h {HOST} -U {USER} -f prod.sql {NAME}'.format(**devdb))
 
 def initsettings(envname='local'):
     ":envname=local -- creates __init__.py in settings folder"
@@ -136,7 +127,7 @@ def initsettings(envname='local'):
             s.write('from .{} import *\n'.format(envname))
 
 
-def getdartium(version='1.21.0', channel='stable'):
+def getdartium(version='1.21.1', channel='stable'):
     "get dartium and content-shell for linux, on Mac use homebrew"
 
     BIN = os.path.expanduser('~/bin')
@@ -186,6 +177,39 @@ def getdartium(version='1.21.0', channel='stable'):
     if not_present:
         print("Add to your environment:")
         print('export PATH="%s:$PATH"' % ':'.join(not_present))
+
+
+def linkfonts():
+    TRUETYPE = '/usr/share/fonts/truetype'
+    FONTS = {
+        'msttcorefonts': {
+            'fonts': [
+                'Arial', 'Comic_Sans_MS', 'Courier_New', 'Georgia', 'Impact',
+                'Trebuchet_MS', 'Times_New_Roman', 'Verdana',
+            ],
+            'variants': ['_Bold', '_Italic', '_Bold_Italic']
+        },
+        'kochi': {
+            'fonts': ['kochi-gothic', 'kochi-mincho'],
+        },
+        'ttf-indic-fonts-core': {
+            'fonts': ['lohit_hi', 'lohit_ta', 'MuktiNarrow'],
+        },
+        'ttf-punjabi-fonts': {
+            'fonts': ['lohit_pa'],
+        }
+    }
+    for family, fonts in FONTS.items():
+        family_path = os.path.join(TRUETYPE, family)
+        if not os.path.exists(family_path):
+            local('sudo mkdir {}'.format(family_path))
+        with lcd(family_path):
+            for font in fonts['fonts']:
+                for variant in fonts.get('variants', ['']):
+                    font_file = font+variant+'.ttf'
+                    font_path = os.path.join(family_path, font_file)
+                    if not os.path.exists(font_path):
+                        local('sudo ln -s ../dejavu/DejaVuSans-Bold.ttf {}'.format(font_file))
 
 
 def linkdart():
