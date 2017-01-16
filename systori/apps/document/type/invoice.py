@@ -101,6 +101,39 @@ def collate_itemized_listing(invoice, font, available_width):
     totals.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
     totals.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
 
+    if DEBUG_DOCUMENT:
+        items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
+        totals.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
+
+    def add_task(task):
+        items.row(p(task['code'], font), p(task['name'], font))
+        items.row_style('SPAN', 1, -2)
+
+        items.row('', '', ubrdecimal(task['complete']), p(task['unit'], font), money(task['price']),
+                  money(task['total']))
+        items.row_style('ALIGNMENT', 1, -1, "RIGHT")
+        items.keep_previous_n_rows_together(2)
+
+
+    def traverse(parent, depth):
+        items.row(b(parent['code'], font), b(parent['name'], font))
+        items.row_style('SPAN', 1, -1)
+        items.keep_next_n_rows_together(2)
+
+        for group in parent.get('taskgroups', []):
+            traverse(group, depth + 1)
+
+        for task in parent.get('tasks', []):
+            add_task(task)
+
+        items.row('', b('{} {} - {}'.format(_('Total'), parent['code'], parent['name']), font),
+                  '', '', '', money(parent['total']))
+        items.row_style('FONTNAME', 0, -1, font.bold)
+        items.row_style('ALIGNMENT', -1, -1, "RIGHT")
+        items.row_style('SPAN', 1, 4)
+        items.row_style('VALIGN', 0, -1, "BOTTOM")
+        items.row('')
+
     for job in invoice['jobs']:
 
         items.row(b(job['code'], font), b(job['name'], font))
@@ -110,32 +143,12 @@ def collate_itemized_listing(invoice, font, available_width):
 
         if job['invoiced'].net == job['progress'].net:
 
-            for taskgroup in job['taskgroups']:
-                items.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
-                items.row_style('SPAN', 1, -1)
-                items.keep_next_n_rows_together(2)
-
-                for task in taskgroup['tasks']:
-                    items.row(p(task['code'], font), p(task['name'], font))
-                    items.row_style('SPAN', 1, -2)
-
-                    items.row('', '', ubrdecimal(task['complete']), p(task['unit'], font), money(task['price']),
-                              money(task['total']))
-                    items.row_style('ALIGNMENT', 1, -1, "RIGHT")
-                    items.keep_previous_n_rows_together(2)
-
-                items.row('', b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
-                          '', '', '', money(taskgroup['total']))
-                items.row_style('FONTNAME', 0, -1, font.bold)
-                items.row_style('ALIGNMENT', -1, -1, "RIGHT")
-                items.row_style('SPAN', 1, 4)
-                items.row_style('VALIGN', 0, -1, "BOTTOM")
-
-                items.row('')
+            for group in job.get('taskgroups', []):
+                traverse(group, 1)
 
                 if len(invoice['jobs']) == 1:
-                    totals.row(b('{} {} - {}'.format(_('Total'), taskgroup['code'], taskgroup['name']), font),
-                               money(taskgroup['total']))
+                    totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
+                               money(group['total']))
                     taskgroup_subtotals_added = True
 
         else:
@@ -230,48 +243,61 @@ def serialize(invoice):
 
     job_objs = []
     for job_data in invoice.json['jobs']:
-
         job_obj = job_data.pop('job')
         job_objs.append(job_obj)
-
         job_data['taskgroups'] = []
-
-        for taskgroup in job_obj.groups.all():
-            taskgroup_dict = {
-                'id': taskgroup.id,
-                'code': taskgroup.code,
-                'name': taskgroup.name,
-                'description': taskgroup.description,
-                'total': taskgroup.estimate,
-                'tasks': []
-            }
-            job_data['taskgroups'].append(taskgroup_dict)
-
-            for task in taskgroup.tasks.all():
-                task_dict = {
-                    'id': task.id,
-                    'code': task.code,
-                    'name': task.name,
-                    'description': task.description,
-                    'complete': task.complete,
-                    'unit': task.unit,
-                    'price': task.price,
-                    'total': task.progress,
-                    'lineitems': []
-                }
-                taskgroup_dict['tasks'].append(task_dict)
-
-                for lineitem in task.lineitems.all():
-                    lineitem_dict = {
-                        'id': lineitem.id,
-                        'name': lineitem.name,
-                        'qty': lineitem.qty,
-                        'unit': lineitem.unit,
-                        'price': lineitem.price,
-                        'price_per': lineitem.total,
-                    }
-                    task_dict['lineitems'].append(lineitem_dict)
+        job_data['tasks'] = []
+        _serialize(job_data, job_obj)
 
     invoice.json.update(create_invoice_report(invoice.transaction, job_objs))
 
-    return invoice
+def _serialize(data, parent):
+
+    data['job_id'] = parent.job_id
+    data['code'] = parent.code
+    data['name'] = parent.name
+    data['description'] = parent.description
+
+    for group in parent.groups.all():
+        group_dict = {
+                'id': group.id,
+                'code': group.code,
+                'name': group.name,
+                'description': group.description,
+                'total': group.estimate,
+                'tasks': [],
+                'taskgroups': []
+            }
+        data['taskgroups'].append(group_dict)
+        _serialize(group_dict, group)
+
+    for task in parent.tasks.all():
+
+        task_dict = {
+            'id': task.id,
+            'code': task.code,
+            'name': task.name,
+            'description': task.description,
+            'is_optional': task.is_provisional,
+            'variant_group': task.variant_group,
+            'variant_serial': task.variant_serial,
+            'complete': task.complete,
+            'qty': task.qty,
+            'unit': task.unit,
+            'price': task.price,
+            'total': task.progress,
+            'estimate_net': task.total,
+            'lineitems': []
+        }
+        data['tasks'].append(task_dict)
+
+        for lineitem in task.lineitems.all():
+            lineitem_dict = {
+                'id': lineitem.id,
+                'name': lineitem.name,
+                'qty': lineitem.qty,
+                'unit': lineitem.unit,
+                'price': lineitem.price,
+                'price_per': lineitem.total,
+            }
+            task_dict['lineitems'].append(lineitem_dict)

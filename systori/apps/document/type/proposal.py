@@ -27,7 +27,7 @@ def collate_tasks(proposal, font, available_width):
     items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     items.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
-    #items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
+
     items.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
 
     items.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
@@ -43,7 +43,9 @@ def collate_tasks(proposal, font, available_width):
     totals.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
     totals.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
     totals.row('','')
-    #items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
+    if DEBUG_DOCUMENT:
+        items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
+        totals.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
 
     description_width = 314.0
 

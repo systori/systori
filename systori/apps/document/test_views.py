@@ -412,7 +412,6 @@ class ProposalViewTests(DocumentTestCase):
 
         # render
 
-
         response = self.client.get(reverse('proposal.pdf', args=[
             self.project.id,
             'print',
@@ -473,9 +472,6 @@ class ProposalViewTests(DocumentTestCase):
             extractedText += pdfFileObject.getPage(page).extractText()
         for text in ['Proposal', 'hello', 'bye', 'window premium', 'Optional', self.job.name, self.task.name]:
             self.assertTrue(text in extractedText)
-        file = open("test_big.pdf", "wb+")
-        file.write(response.content)
-        file.close()
 
     def test_update_proposal(self):
 
