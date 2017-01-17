@@ -34,7 +34,7 @@ class Decimal implements Comparable<Decimal> {
     String get number => isNull ? "" : NUMBER.format(decimal);
     String get difference => isNull ? "" : DIFFERENCE.format(decimal);
     String get canonical => isNull ? "" : CANONICAL.format(decimal);
-    String get percent => isNull ? "" : "{(decimal*100).round()}%";
+    String get percent => isNull ? "" : "${(decimal*100).round()}%";
 
     Decimal([num number=0, precision=1000]):
             this._(number != null ? (number * precision).round() : number, precision);
