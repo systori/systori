@@ -143,13 +143,18 @@ def collate_itemized_listing(invoice, font, available_width):
 
         if job['invoiced'].net == job['progress'].net:
 
-            for group in job.get('taskgroups', []):
-                traverse(group, 1)
+            for job in invoice['jobs']:
 
-                if len(invoice['jobs']) == 1:
-                    totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                               money(group['total']))
-                    taskgroup_subtotals_added = True
+                for group in job.get('taskgroups', []):
+                    traverse(group, 1)
+
+                    if len(invoice['jobs']) == 1:
+                        totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
+                                   money(group['total']))
+                        taskgroup_subtotals_added = True
+
+                for task in job.get('tasks', []):
+                    add_task(task)
 
         else:
 
