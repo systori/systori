@@ -1,7 +1,6 @@
 @TestOn('browser')
 import 'dart:html';
 import 'dart:async';
-import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:systori/editor.dart';
 import 'package:systori/spreadsheet.dart';
@@ -151,6 +150,7 @@ void main() {
             Job job = nav.activeModel;
 
             // job name is changed
+            nav.caretToEnd();
             nav.sendText(' Changed');
 
             expect(changeManager.saving, isNull);
