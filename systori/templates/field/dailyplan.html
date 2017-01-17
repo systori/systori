@@ -74,7 +74,7 @@
 
   {% if worker.has_laborer %}
     <a class="list-group-item sub-header clearfix"
-       href="{% url 'field.dailyplan.assign-tasks' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
+       href="{% url 'field.dailyplan.group' jobsite.id dailyplan.url_id %}?origin={{ request.path }}%23plan-{{ dailyplan.id }}">
       {% trans "Tasks" %}<span class="pull-right">{% trans 'edit' %} &raquo;</span>
     </a>
   {% else %}

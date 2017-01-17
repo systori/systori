@@ -6,9 +6,9 @@ from django.core.urlresolvers import reverse
 from systori.lib.testing import ClientTestCase
 
 from ..project.factories import ProjectFactory
-from ..task.factories import JobFactory, TaskFactory
+from ..task.factories import JobFactory, GroupFactory, TaskFactory
 
-from ..project.models import TeamMember, DailyPlan, JobSite, EquipmentAssignment
+from ..project.models import Project, TeamMember, DailyPlan, JobSite, EquipmentAssignment
 from ..equipment.models import Equipment
 from ..user.factories import *
 from .utils import find_next_workday, date
@@ -23,13 +23,120 @@ class TestDateCalculations(TestCase):
         self.assertEqual(date(2015, 3, 24), find_next_workday(date(2015, 3, 23)))
 
 
+class TestGroupTraversalView(ClientTestCase):
+
+    def group_url(self, jobsite, dailyplan, *args):
+        return reverse('field.dailyplan.group', args=(jobsite.pk, dailyplan.url_id)+args)
+
+    def test_job_with_tasks(self):
+        project = ProjectFactory(structure='01.001')  # type: Project
+        job = JobFactory(name='JobGroup', project=project)
+        task = TaskFactory(name='Fence', group=job, qty=200, qty_equation='200', unit='m²', price=74.98, total=14996)
+        jobsite = JobSite.objects.create(project=project, name='a', address='a', city='a', postal_code='a')
+        dailyplan = DailyPlan.objects.create(jobsite=jobsite)
+
+        # Project
+        response = self.client.get(self.group_url(jobsite, dailyplan))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['is_parent_project'])
+        self.assertFalse(response.context['is_parent_job'])
+        self.assertTrue(response.context['parent_has_subgroups'])
+        self.assertFalse(response.context['parent_has_tasks'])
+        self.assertFalse(response.context['subgroups_have_subgroups'])
+        self.assertTrue(response.context['subgroups_have_tasks'])
+        self.assertEqual(response.context['groups'].count(), 1)
+        self.assertIsNone(response.context['tasks'])
+
+        # Job
+        response = self.client.get(self.group_url(jobsite, dailyplan, job.pk))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['is_parent_project'])
+        self.assertTrue(response.context['is_parent_job'])
+        self.assertFalse(response.context['parent_has_subgroups'])
+        self.assertTrue(response.context['parent_has_tasks'])
+        self.assertFalse(response.context['subgroups_have_subgroups'])
+        self.assertFalse(response.context['subgroups_have_tasks'])
+        self.assertIsNone(response.context['groups'])
+        self.assertEqual(response.context['tasks'].count(), 1)
+
+    def test_job_with_groups_with_tasks(self):
+        project = ProjectFactory(structure='01.01.01.01.001')
+        job = JobFactory(name='JobGroup', project=project)
+        group1 = GroupFactory(name='Group1', parent=job)
+        group2 = GroupFactory(name='Group2', parent=group1)
+        group3 = GroupFactory(name='Group3', parent=group2)
+        task = TaskFactory(name='Fence', group=group3, qty=200, qty_equation='200', unit='m²', price=74.98, total=14996)
+        jobsite = JobSite.objects.create(project=project, name='a', address='a', city='a', postal_code='a')
+        dailyplan = DailyPlan.objects.create(jobsite=jobsite)
+
+        # Project
+        response = self.client.get(self.group_url(jobsite, dailyplan))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['is_parent_project'])
+        self.assertFalse(response.context['is_parent_job'])
+        self.assertTrue(response.context['parent_has_subgroups'])
+        self.assertFalse(response.context['parent_has_tasks'])
+        self.assertTrue(response.context['subgroups_have_subgroups'])
+        self.assertFalse(response.context['subgroups_have_tasks'])
+        self.assertEqual(response.context['groups'].count(), 1)
+        self.assertIsNone(response.context['tasks'])
+
+        # Job
+        response = self.client.get(self.group_url(jobsite, dailyplan, job.pk))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['is_parent_project'])
+        self.assertTrue(response.context['is_parent_job'])
+        self.assertTrue(response.context['parent_has_subgroups'])
+        self.assertFalse(response.context['parent_has_tasks'])
+        self.assertTrue(response.context['subgroups_have_subgroups'])
+        self.assertFalse(response.context['subgroups_have_tasks'])
+        self.assertEqual(response.context['groups'].count(), 1)
+        self.assertIsNone(response.context['tasks'])
+
+        # Group 1
+        response = self.client.get(self.group_url(jobsite, dailyplan, group1.pk))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['is_parent_project'])
+        self.assertFalse(response.context['is_parent_job'])
+        self.assertTrue(response.context['parent_has_subgroups'])
+        self.assertFalse(response.context['parent_has_tasks'])
+        self.assertTrue(response.context['subgroups_have_subgroups'])
+        self.assertFalse(response.context['subgroups_have_tasks'])
+        self.assertEqual(response.context['groups'].count(), 1)
+        self.assertIsNone(response.context['tasks'])
+
+        # Group 2
+        response = self.client.get(self.group_url(jobsite, dailyplan, group2.pk))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['is_parent_project'])
+        self.assertFalse(response.context['is_parent_job'])
+        self.assertTrue(response.context['parent_has_subgroups'])
+        self.assertFalse(response.context['parent_has_tasks'])
+        self.assertFalse(response.context['subgroups_have_subgroups'])
+        self.assertTrue(response.context['subgroups_have_tasks'])
+        self.assertEqual(response.context['groups'].count(), 1)
+        self.assertIsNone(response.context['tasks'])
+
+        # Group 3
+        response = self.client.get(self.group_url(jobsite, dailyplan, group3.pk))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['is_parent_project'])
+        self.assertFalse(response.context['is_parent_job'])
+        self.assertFalse(response.context['parent_has_subgroups'])
+        self.assertTrue(response.context['parent_has_tasks'])
+        self.assertFalse(response.context['subgroups_have_subgroups'])
+        self.assertFalse(response.context['subgroups_have_tasks'])
+        self.assertIsNone(response.context['groups'])
+        self.assertEqual(response.context['tasks'].count(), 1)
+
+
 class TestFieldTaskView(ClientTestCase):
 
     def setUp(self):
         super().setUp()
         self.project = ProjectFactory()
         self.job = JobFactory(project=self.project)
-        self.task = TaskFactory(group=self.job)
+        self.task = TaskFactory(name='the task', group=self.job)
 
     def test_complete_assigns_task_to_user_dailyplan(self):
         jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
@@ -57,6 +164,19 @@ class TestFieldTaskView(ClientTestCase):
         )
         self.task.refresh_from_db()
         self.assertTrue(self.task.dailyplans.filter(id=dailyplan.id).exists())
+
+    def test_add_and_remove_task_in_dailyplan(self):
+        project = ProjectFactory(with_job=True)
+        TaskFactory(name='the task', group=project.jobs.first())
+        jobsite = JobSite.objects.create(project=project, name='a', address='a', city='a', postal_code='a')
+        dailyplan = DailyPlan.objects.create(jobsite=jobsite)
+        self.assertEqual(dailyplan.tasks.count(), 0)
+        response = self.client.get(reverse('field.dailyplan.task.add', args=['1', dailyplan.url_id, self.task.pk]))
+        self.assertEqual(response.status_code, 302)  # redirect
+        self.assertEqual(dailyplan.tasks.first().name, 'the task')
+        response = self.client.get(reverse('field.dailyplan.task.remove', args=['1', dailyplan.url_id, self.task.pk]))
+        self.assertEqual(response.status_code, 302)  # redirect
+        self.assertEqual(dailyplan.tasks.count(), 0)
 
 
 class TestCutPaste(ClientTestCase):

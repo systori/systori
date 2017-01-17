@@ -13,7 +13,7 @@ from django.core.urlresolvers import reverse
 
 from ..company.models import Worker
 from ..project.models import Project, DailyPlan, EquipmentAssignment, TeamMember
-from ..task.models import Job, Task, ProgressReport
+from ..task.models import Job, Group, Task, ProgressReport
 from ..equipment.models import Equipment
 from ..timetracking import utils as timetracking_utils
 from .forms import CompletionForm, DailyPlanNoteForm
@@ -33,8 +33,8 @@ def project_success_url(request):
 
 def task_success_url(request, task):
     if request.jobsite.project.jobs.count() > 1:
-        return reverse('field.dailyplan.job',
-                       args=[request.jobsite.id, request.dailyplan.url_id, task.taskgroup.job.id])
+        return reverse('field.dailyplan.group',
+                       args=[request.jobsite.id, request.dailyplan.url_id, task.job.id])
     else:
         return _origin_success_url(request,
                                    reverse('field.dailyplan.task',
@@ -290,31 +290,61 @@ class FieldPickJobSite(TemplateView):
     template_name = "field/jobsite_list.html"
 
 
-class FieldJobList(TemplateView):
-    template_name = "field/job_list.html"
+class FieldGroupView(DetailView):
+    model = Group
+    pk_url_kwarg = 'group_pk'
+    template_name = 'field/group.html'
+    context_object_name = 'parent'
 
-    def dispatch(self, request, *args, **kwargs):
-        if request.jobsite.project.jobs.count() == 1:
-            kwargs['job_pk'] = request.jobsite.project.jobs.first().id
-            return FieldJobView.as_view()(request, *args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_parent_project'] = isinstance(self.object, Project)
+        context['is_parent_job'] = isinstance(self.object, Group) and self.object.is_root
+
+        if context['is_parent_project']:
+            depth = -1
+            groups = self.object.jobs
         else:
-            return super(FieldJobList, self).dispatch(request, *args, **kwargs)
+            depth = self.object.depth
+            groups = self.object.groups
 
+        structure = self.request.jobsite.project.structure
 
-class FieldJobView(DetailView):
-    model = Job
-    pk_url_kwarg = 'job_pk'
-    template_name = "field/job.html"
+        context.update({
+            'parent_has_subgroups': False,
+            'parent_has_tasks': False,
+            'subgroups_have_subgroups': False,
+            'subgroups_have_tasks': False,
+            'groups': None,
+            'tasks': None
+        })
 
-    def get_queryset(self):
-        return super().get_queryset()\
-            .prefetch_related('taskgroups__tasks__progressreports')
+        if structure.is_valid_depth(depth+1):
+            context['parent_has_subgroups'] = True
+            if structure.is_valid_depth(depth+2):
+                context['subgroups_have_subgroups'] = True
+                context['groups'] = groups.prefetch_related('groups')
+            else:
+                context['subgroups_have_tasks'] = True
+                context['groups'] = groups.prefetch_related('tasks__progressreports')
+        else:
+            context['parent_has_tasks'] = True
+            context['tasks'] = self.object.tasks.prefetch_related('progressreports')
+
+        return context
+
+    def get_object(self, queryset=None):
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        if pk:
+            return super().get_object()
+        else:
+            return self.request.jobsite.project
 
 
 class FieldTaskView(UpdateView):
     model = Task
     pk_url_kwarg = 'task_pk'
-    template_name = "field/task.html"
+    template_name = 'field/task.html'
     form_class = CompletionForm
 
     def get_queryset(self):

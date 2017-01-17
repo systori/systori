@@ -8,7 +8,7 @@ class FieldMiddleware:
             return
 
         if 'jobsite_pk' in kwargs:
-            request.jobsite = JobSite.objects.get(pk=kwargs['jobsite_pk'])
+            request.jobsite = JobSite.objects.select_related('project').get(pk=kwargs['jobsite_pk'])
             if 'dailyplan_url_id' in kwargs:
                 year, month, day, plan = map(int, kwargs['dailyplan_url_id'].split('-'))
                 if plan:

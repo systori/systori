@@ -10,8 +10,8 @@ dailyplan_urls = [
     url(r'^labor$', field_auth(FieldAssignLabor.as_view()), name='field.dailyplan.assign-labor'),
 
     # assign-tasks
-    url(r'^jobs$', field_auth(FieldJobList.as_view()), name='field.dailyplan.assign-tasks'),
-    url(r'^job-(?P<job_pk>\d+)$', field_auth(FieldJobView.as_view()), name='field.dailyplan.job'),
+    url(r'^jobs$', field_auth(FieldGroupView.as_view()), name='field.dailyplan.group'),
+    url(r'^group-(?P<group_pk>\d+)$', field_auth(FieldGroupView.as_view()), name='field.dailyplan.group'),
     url(r'^task-(?P<task_pk>\d+)$', field_auth(FieldTaskView.as_view()), name='field.dailyplan.task'),
     url(r'^task-(?P<task_pk>\d+)/add$', field_auth(FieldAddTask.as_view()), name='field.dailyplan.task.add'),
     url(r'^task-(?P<task_pk>\d+)/remove$', field_auth(FieldRemoveTask.as_view()), name='field.dailyplan.task.remove'),

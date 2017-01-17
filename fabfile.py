@@ -127,7 +127,7 @@ def initsettings(envname='local'):
             s.write('from .{} import *\n'.format(envname))
 
 
-def getdartium(version='1.21.1', channel='stable'):
+def getdartium(version='1.22.0-dev.7.0', channel='dev'):
     "get dartium and content-shell for linux, on Mac use homebrew"
 
     BIN = os.path.expanduser('~/bin')
@@ -156,6 +156,9 @@ def getdartium(version='1.21.1', channel='stable'):
 
             if not os.path.exists(os.path.join(BIN, outdir)):
                 local("unzip -qo {}".format(zipfile))
+                if app == 'dartium':
+                    with lcd(outdir):
+                        local("ln -s chrome dartium")
 
             local("ln -sfn {} {}".format(outdir, app))
             paths.append(os.path.join(BIN, app))
@@ -187,17 +190,11 @@ def linkfonts():
                 'Arial', 'Comic_Sans_MS', 'Courier_New', 'Georgia', 'Impact',
                 'Trebuchet_MS', 'Times_New_Roman', 'Verdana',
             ],
-            'variants': ['_Bold', '_Italic', '_Bold_Italic']
+            'variants': ['', '_Bold', '_Italic', '_Bold_Italic']
         },
-        'kochi': {
-            'fonts': ['kochi-gothic', 'kochi-mincho'],
-        },
-        'ttf-indic-fonts-core': {
-            'fonts': ['lohit_hi', 'lohit_ta', 'MuktiNarrow'],
-        },
-        'ttf-punjabi-fonts': {
-            'fonts': ['lohit_pa'],
-        }
+        'kochi': {'fonts': ['kochi-gothic', 'kochi-mincho']},
+        'ttf-indic-fonts-core': {'fonts': ['lohit_hi', 'lohit_ta', 'MuktiNarrow']},
+        'ttf-punjabi-fonts': {'fonts': ['lohit_pa']}
     }
     for family, fonts in FONTS.items():
         family_path = os.path.join(TRUETYPE, family)

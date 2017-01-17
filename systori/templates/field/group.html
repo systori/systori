@@ -1,0 +1,110 @@
+{% extends "field/base.html" %}
+{% load i18n staticfiles field_app customformatting %}
+
+{% block container %}
+  <div class="container">
+
+    <div class="row back-buttons">
+      <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo;
+        {% trans 'Dashboard' %}</a></div>
+      <div class="col-xs-4"><a href="{% url 'field.planning' request.dailyplan.day.isoformat %}#project-{{ jobsite.project.id }}"
+                               class="btn btn-default btn-block btn-back">&laquo; {% trans 'Planning' %}</a></div>
+      <div class="col-xs-4"><a href="{% url 'field.project' jobsite.project.id dailyplan.day.isoformat %}"
+                               class="btn btn-default btn-block btn-back">&laquo; {{ jobsite.project.name }}</a></div>
+    </div>
+
+    <div class="input-group"> <span class="input-group-addon">{% trans 'search' %}</span>
+      <input id="filter" type="text" class="form-control" placeholder={%  trans "Type here..." %}>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        {{ parent.name }}
+      </div>
+
+      {% if parent_has_subgroups %}
+      <ul class="list-group">
+        {% for group in groups.all %}
+
+          <a href="{% url 'field.dailyplan.group' jobsite.id dailyplan.url_id group.pk %}"
+            class="list-group-item sub-header clearfix searchable">
+            {{ group.code }} {{ group.name }}
+          </a>
+
+          {% if subgroups_have_subgroups %}
+            {% for subgroup in group.groups.all %}
+              <a href="{% url 'field.dailyplan.group' jobsite.id dailyplan.url_id subgroup.pk %}"
+                class="list-group-item clearfix searchable">
+                {{ subgroup.code }} {{ subgroup.name }}
+              </a>
+            {% endfor %}
+          {% endif %}
+
+          {% if subgroups_have_tasks %}
+            {% for task in group.tasks.all %}
+              {% task_dailyplans_count task dailyplan.day as is_assigned %}
+              <a name="{{ task.id }}" id="task_{{forloop.parentloop.counter0}}_{{ forloop.counter0 }}" href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={% url 'field.dailyplan.group' jobsite.id dailyplan.url_id %}#{{ task.id }}"
+                 class="list-group-item clearfix{% if is_assigned %} list-group-item-success{% endif %} searchable">
+                {{ task.code }} <b>{{ task.name }}</b> {% if task.is_optional %} <span class="label label-warning">{% trans 'Optional' %}</span> {% endif %}<br>
+                {{ task.description }}<br>
+                {{ task.qty|ubrdecimal }} {{ task.unit }}
+                {% if task.complete_percent > 0 %}
+                  <span class="badge">{{ task.complete_percent }}%</span>
+                  <span class="badge">{{ task.complete|ubrdecimal }} {{ task.unit }}</span>
+                {% else %}
+                  <span class="pull-right">&raquo;</span>
+                {% endif %}
+              </a>
+            {% endfor %}
+          {% endif %}
+
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      {% if parent_has_tasks %}
+      <ul class="list-group">
+        {% for task in tasks.all %}
+          {% task_dailyplans_count task dailyplan.day as is_assigned %}
+          <a name="{{ task.id }}" id="task_{{forloop.parentloop.counter0}}_{{ forloop.counter0 }}" href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={% url 'field.dailyplan.group' jobsite.id dailyplan.url_id %}#{{ task.id }}"
+             class="list-group-item clearfix{% if is_assigned %} list-group-item-success{% endif %} searchable">
+            {{ task.code }} <b>{{ task.name }}</b> {% if task.is_optional %} <span class="label label-warning">{% trans 'Optional' %}</span> {% endif %}<br>
+            {{ task.description }}<br>
+            {{ task.qty|ubrdecimal }} {{ task.unit }}
+            {% if task.complete_percent > 0 %}
+              <span class="badge">{{ task.complete_percent }}%</span>
+              <span class="badge">{{ task.complete|ubrdecimal }} {{ task.unit }}</span>
+            {% else %}
+              <span class="pull-right">&raquo;</span>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script type="application/javascript">
+  $(document).ready(function () {
+
+      (function ($) {
+
+          $('#filter').keyup(function () {
+
+              var rex = new RegExp($(this).val(), 'i');
+              $('.searchable').hide();
+              $('.searchable').filter(function () {
+                  return rex.test($(this).text());
+              }).show();
+
+          })
+
+      }(jQuery));
+
+  });
+  </script>
+
+{% endblock %}
