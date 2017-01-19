@@ -6,6 +6,7 @@ from . import views
 
 urlpatterns = [
     url(r'^timetracking/$', office_auth(views.HomeView.as_view()), name='timetracking'),
+    url(r'^timetracking/list/$', office_auth(views.TimerListView.as_view()), name='timetracking.list'),
     url(r'^timetracking/workers/(?P<worker_id>\d+)$',
         office_auth(views.WorkerReportView.as_view()), name='timetracking_worker'),
     url(r'^timesheet/pdf/(?P<year>\d+)/(?P<month>\d+)/(?P<worker_id>\d+)?$',

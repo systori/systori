@@ -13,6 +13,7 @@ from django.core.exceptions import ValidationError
 from systori.apps.document.views import DocumentRenderView
 from systori.apps.document.type import timesheet
 from systori.apps.document.models import DocumentSettings, Timesheet
+from systori.apps.company.models import Worker
 
 from . import utils
 from . import forms
@@ -64,6 +65,28 @@ class HomeView(PeriodFilterMixin, FormView):
     def form_invalid(self, form):
         period_form = self.period_form_class(initial={'period': timezone.now()})
         return self.render_to_response(self.get_context_data(form=form, period_form=period_form))
+
+
+class TimerListView(FormView):
+    template_name = 'timetracking/list.html'
+    form_class = forms.WorkerManualTimerForm
+
+    def get_worker_checkboxes(self):
+        return self.request.company.active_workers().values_list('id', 'user__first_name', 'user__last_name')\
+            .filter(is_active=True) \
+            .order_by('user__first_name')
+
+    def get_form_kwargs(self):
+        default_kwargs = super().get_form_kwargs()
+        default_kwargs['company'] = self.request.company
+        return default_kwargs
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            workers = self.get_worker_checkboxes(),
+            **kwargs
+        )
+
 
 
 class WorkerReportView(PeriodFilterMixin, FormView):
