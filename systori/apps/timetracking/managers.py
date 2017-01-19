@@ -100,58 +100,35 @@ class TimerQuerySet(QuerySet):
         naive_now = datetime.now()
         now = timezone.now()
         period = period or timezone.now()
-        queryset = self.filter_month(period.year, period.month)
+        queryset = self.filter_month(period.year, period.month).order_by('date').order_by('id')
 
         report = OrderedDict()
         for timer in queryset:
-            report.setdefault(timer.date, OrderedDict({
-                'work': {
-                    'start': None,
-                    'end': None,
-                    'duration': 0,
-                    'overtime': 0,
-                    'total': 0,
-                    'locations': []
-                },
-                'holiday': {
-                    'start': None,
-                    'end': None,
-                    'duration': 0,
-                },
-                'illness': {
-                    'start': None,
-                    'end': None,
-                    'duration': 0,
-                },
-                'correction': {
-                    'start': None,
-                    'end': None,
-                    'duration': 0,
-                },
-                'education': {
-                    'start': None,
-                    'end': None,
-                    'duration': 0,
+            date = timer.date.isoformat()
+            if not report.get(date, False):
+                report[date] = {}
+                report[date]['timers'] = OrderedDict()
+            report[date]['timers'][str(timer.pk)] = {
+                'pk': timer.pk,
+                'kind': timer.kind,
+                'start': timer.start,
+                'end': timer.end,
+                'duration': timer.duration,
+                'comment': timer.comment,
+                'locations': {
+                    'start' : (timer.start_latitude, timer.start_longitude),
+                    'end': (timer.end_latitude, timer.end_longitude)
                 }
-            }))
-            report_row = report[timer.start.date()][timer.kind]
-            if not report_row['start'] or report_row['start'] > timer.start:
-                report_row['start'] = timer.start
-            if report_row['end'] and timer.end and timer.end > report_row['end']:
-                report_row['end'] = timer.end
-            else:
-                if timer.end:
-                    report_row['end'] = timer.end
-                else:
-                    report_row['end'] = now
-            report_row['duration'] += timer.get_duration_seconds(now)
-            if timer.kind == self.model.WORK:
-                report_row['total'] += timer.get_duration_seconds(now)
-                report_row['overtime'] = report_row['duration'] - self.model.WORK_HOURS
-                report_row['total'] += report_row['overtime']
-                report_row['locations'].append(
-                    ((timer.start_latitude, timer.start_longitude), (timer.end_latitude, timer.end_longitude))
-                )
+            }
+            if not report[date].get('total', False):
+                report[date]['total'] = 0
+            report[date]['total'] += timer.duration
+            report[date]['date'] = timer.date
+            # if timer.kind == self.model.WORK:
+            #     report_row['total'] += timer.get_duration_seconds(now)
+            #     report_row['overtime'] = report_row['duration'] - self.model.WORK_HOURS
+            #     report_row['total'] += report_row['overtime']
+
         return report
 
     def generate_daily_workers_report(self, date, workers):
@@ -181,15 +158,26 @@ class TimerQuerySet(QuerySet):
             report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
         return reports
 
-    def create_batch(self, worker, start: datetime, end: datetime, commit=True, include_weekends=False, **kwargs):
+    def create_batch(self, worker, start: datetime, end: datetime, commit=True, include_weekends=False,
+                     morning_break=True, lunch_break=True, **kwargs):
         tz = worker.company.timezone
 
         # Requested start/end times must be of the same timezone as the company breaks.
         assert all(dt.tzinfo.zone == tz.zone for dt in (start, end))
-        time_spans = list(get_timespans_split_by_breaks(start.time(), end.time(), worker.company.breaks))
+
+        days = [day for day in get_dates_in_range(start.date(), end.date(), include_weekends)
+                if not self.filter(worker=worker, date=day).exists()]
+
+        breaks = []
+        if morning_break:
+            breaks.append(worker.company.breaks[0])
+        if lunch_break:
+            breaks.append(worker.company.breaks[1])
+
+        time_spans = list(get_timespans_split_by_breaks(start.time(), end.time(), breaks))
 
         timers = []
-        for day in get_dates_in_range(start.date(), end.date(), include_weekends):
+        for day in days:
             for start_time, end_time in time_spans:
                 timer = self.model(worker=worker, **kwargs)
                 timer.date = day

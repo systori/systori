@@ -18,6 +18,9 @@ class Timer(models.Model):
     TRAINING = 'training'
     HOLIDAY = 'holiday'
     ILLNESS = 'illness'
+    PUBLIC_HOLIDAY = 'public_holiday'
+    UNPAID_LEAVE = 'unpaid_leave'
+    #TODO: public_holiday (8hrs work time) and unpaid_leave (0hrs work time) types
 
     KIND_CHOICES = (
         (WORK, _('Work')),
@@ -25,6 +28,8 @@ class Timer(models.Model):
         (ILLNESS, _('Illness')),
         (CORRECTION, _('Correction')),
         (TRAINING, _('Training')),
+        (PUBLIC_HOLIDAY, _('Public holiday')),
+        (UNPAID_LEAVE, _('Unpaid leave')),
     )
     FULL_DAY_KINDS = (WORK, HOLIDAY, ILLNESS)
 
@@ -38,7 +43,9 @@ class Timer(models.Model):
         ILLNESS: lambda start, end: (end - start).total_seconds(),
         HOLIDAY: lambda start, end: (end - start).total_seconds(),
         CORRECTION: lambda start, end: (end - start).total_seconds(),
-        TRAINING: lambda start, end: (end - start).total_seconds()
+        TRAINING: lambda start, end: (end - start).total_seconds(),
+        PUBLIC_HOLIDAY: lambda start, end: (end - start).total_seconds(),
+        UNPAID_LEAVE: lambda start, end: (end - start).total_seconds(),
     }
 
     worker = models.ForeignKey('company.Worker', related_name='timers')
@@ -64,8 +71,8 @@ class Timer(models.Model):
         ordering = ('start',)
 
     def __str__(self):
-        return 'Timer for worker#{}: start={}, end={}, duration={}, date={}'.format(
-            self.worker_id, self.start, self.end, self.duration, self.date
+        return 'Timer #{}: date={:%Y-%m-%d}, start={:%H:%M}, end={:%H:%M}, duration={}'.format(
+            self.id, self.date, self.start, self.end, self.get_duration_formatted()
         )
 
     @classmethod

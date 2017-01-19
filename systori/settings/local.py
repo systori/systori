@@ -40,6 +40,10 @@ if False:
             #'django.db.models.sql'
         )
     }
+    INTERNAL_IPS = (
+        '127.0.0.1',
+        '172.16.140.1',
+    )
 
 STATICFILES_DIRS += (
     ('dart/src', 'systori/dart/web'),

@@ -12,6 +12,16 @@ def seconds_to_hours(value):
     return utils.format_seconds(value or 0)
 
 
+@register.filter
+def seconds_to_pixels(value):
+    pixel = value/60
+    return 130 if pixel < 130 else pixel
+
+
+@register.filter
+def overtime_from_total(value):
+    return utils.format_seconds(value-28800)
+
 class StatusLoader(template.Node):
     var_name = 'user_statuses'
 

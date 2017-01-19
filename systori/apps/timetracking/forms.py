@@ -53,6 +53,10 @@ class DurationField(forms.Field):
 
 class ManualTimerForm(ModelForm):
 
+    include_weekends = forms.BooleanField(label=_("Include weekends"), initial=False, required=False)
+    morning_break = forms.BooleanField(label=_("Morning break"), initial=True, required=False)
+    lunch_break = forms.BooleanField(label=_("Lunch break"), initial=True, required=False)
+
     class Meta:
         model = Timer
         fields = ['worker', 'start', 'end', 'kind', 'comment']

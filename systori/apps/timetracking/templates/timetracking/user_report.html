@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n static bootstrap timetracking %}
+{% load i18n l10n static bootstrap timetracking %}
 
 {% block head %}
 {{ block.super }}
@@ -31,8 +31,10 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
-    {% trans "Time Report for" %} {{ user.get_full_name }} - {{ report_period|date:"F Y" }}
-    <a class="btn btn-info btn-sm" href="{% url 'timesheet' report_period.year report_period.month user.id %}">{% trans "Timesheet" %}</a>
+    {% trans "Time Report for" %} {{ timesheet_worker.get_full_name }} - {{ report_period|date:"F Y" }}
+    <a class="btn btn-info btn-sm {% if not timesheet %}disabled{% endif %}"
+       href="{% url 'timesheet' report_period.year report_period.month timesheet_worker.id %}">{% trans "Timesheet" %}
+    </a>
     </h3>
   </div>
   <div class="panel-body">
@@ -48,9 +50,6 @@
 </div>
 <div class="panel panel-default">
   <div class="panel-body">
-    <div class="alert alert-warning">
-      {% trans "Fixed breaks from 9:00-9:30 and 12:30-13:00 are always subtracted for all kinds." %}
-    </div>
     <form class="form-inline" method="POST">
     {% csrf_token %}
     {{ form|bootstrap_inline }}
@@ -65,79 +64,42 @@
   <table class="table table-striped table-bordered" id="timer-report">
     <tr>
       <th>{% trans "Date" %}</th>
-      <th>{% trans "Activity" %}</th>
-      <th>{% trans "Start" %}</th>
-      <th>{% trans "End" %}</th>
-      <th>{% trans "Hours" %}</th>
+      <th></th>
       <th>{% trans "Overtime" %}</th>
-      <th>{% trans "Total Hours" %}</th>
+      <th>{% trans "delete" %}</th>
     </tr>
-    {% for date, date_entries in report.rows.items %}
-      {% for kind, row in date_entries.items %}
-        {% if row.start %}
-    <tr>
-      <td>{{ date }}</td>
-          {% if kind == 'work' %}
-      <td>
-        {% trans "Work" %}
-        {% for start_location, end_location in row.locations %}
-          <div class="btn-group">
-            {% if start_location.0 %}
-              <a href="https://www.google.com/maps/place/{{ start_location.0 }},{{ start_location.1 }}"
-                 class="btn btn-xs btn-info"
-                 role="button"
-                 title="{% trans "start" %}"
-                 target="_blank">
-                <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
-              </a>&nbsp;
-            {% endif %}
-            {% if end_location.0 %}
-              <a href="https://www.google.com/maps/place/{{ end_location.0 }},{{ end_location.1 }}"
-                 class="btn btn-xs btn-success"
-                 role="button"
-                 title="{% trans "end" %}"
-                 target="_blank">
-                <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
-              </a>
-            {% endif %}
-          </div>
-        {% endfor %}
-    </td>
-      </td>
-      <td>{{ row.start|date:"H:i" }}</td>
-      <td>{{ row.end|date:"H:i"}}</td>
-      <td>{{ row.duration|seconds_to_hours }}</td>
-      <td>{{ row.overtime|seconds_to_hours}}</td>
-      <td>{{ row.total|seconds_to_hours }}</td>
-          {% elif kind == 'holiday' %}
-      <td>{% trans "Holiday" %}</td>
-      <td colspan="5">{{ row.duration|seconds_to_hours }}</td>
-          {% elif kind == 'illness' %}
-      <td>{% trans "Illness" %}</td>
-      <td>{{ row.start|date:"H:i" }}</td>
-      <td>{{ row.end|date:"H:i" }}</td>
-      <td>{{ row.duration|seconds_to_hours }}</td>
-      <td colspan="3"></td>
-          {% elif kind == 'correction' %}
-      <td>{% trans "Correction" %}</td>
-      <td>{{ row.start|date:"H:i" }}</td>
-      <td>{{ row.end|date:"H:i" }}</td>
-      <td>{{ row.duration|seconds_to_hours }}</td>
-      <td colspan="3">{{ row.comment }}</td>
-          {% elif kind == 'education' and row.start %}
-      <td>{% trans "Education" %}</td>
-      <td>{{ row.start|date:"H:i" }}</td>
-      <td>{{ row.end|date:"H:i" }}</td>
-      <td>{{ row.duration|seconds_to_hours }}</td>
-      <td colspan="3"></td>
-          {% endif %}
-        {% endif %}
-    </tr>
-      {% endfor %}
-    {% empty %}
-    <tr><td colspan="5">{% trans "No entries" %}</td></tr>
+    {% for date, entry in report.rows.items %}
+     <tr>
+         <td>{{ entry.date|localize }}</td>
+         <td>
+            <div class="progress">
+             {% for pk, timer in entry.timers.items %}
+                  <div class="progress-bar
+                    {% if timer.kind == "work" %} progress-bar-success
+                    {% elif timer.kind == "holiday" %} progress-bar-warning
+                    {% endif %}" role="progressbar" style="width:{{ timer.duration|seconds_to_pixels }}px">
+                    {{ timer.start|time:"H:i" }} - {{ timer.end|time:"H:i" }} ({{ timer.duration|seconds_to_hours }})
+                    <a href="{% url 'timer.delete' pk %}">
+                       <span class="glyphicon glyphicon-trash" aria-hidden="true" style="top:2px;"></span>
+                    </a>
+                  </div>
+
+                 {% if not forloop.last %}
+                     <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" style="width:25px"></div>
+                 {% endif %}
+            {% endfor %}
+            </div>
+         </td>
+         <td>{{ entry.total|overtime_from_total }} ({{ entry.total|seconds_to_hours }})</td>
+         <td>
+            <a href="{% url 'timer.delete.selected_day' date timesheet_worker.id %}">
+               <span class="glyphicon glyphicon-trash" aria-hidden="true" style="top:2px;"></span>
+            </a>
+        </td>
+     </tr>
     {% endfor %}
   </table>
+
 </div>
 
 <div class="panel panel-default">
