@@ -255,51 +255,44 @@ def serialize(invoice):
     for job_data in invoice.json['jobs']:
         job_obj = job_data.pop('job')
         job_objs.append(job_obj)
-        job_data['group'] = []
+        job_data['groups'] = []
         job_data['tasks'] = []
         _serialize(job_data, job_obj)
 
     invoice.json.update(create_invoice_report(invoice.transaction, job_objs))
 
-def _serialize(data, parent):
 
-    data['job_id'] = parent.job_id
-    data['code'] = parent.code
-    data['name'] = parent.name
-    data['description'] = parent.description
+def _serialize(data, parent):
 
     for group in parent.groups.all():
         group_dict = {
-                'id': group.id,
-                'code': group.code,
-                'name': group.name,
-                'description': group.description,
-                'tasks': [],
-                'group': [],
-                'progress': group.progress,
-                'progress_percent': group.progress_percent,
-                'estimate': group.estimate
-            }
-        data['group'].append(group_dict)
+            'group.id': group.id,
+            'code': group.code,
+            'name': group.name,
+            'description': group.description,
+            'tasks': [],
+            'groups': [],
+            'progress': group.progress,
+            'estimate': group.estimate
+        }
+        data['groups'].append(group_dict)
         _serialize(group_dict, group)
 
     for task in parent.tasks.all():
-
         task_dict = {
-            'id': task.id,
+            'task.id': task.id,
             'code': task.code,
             'name': task.name,
             'description': task.description,
-            'is_optional': task.is_provisional,
+            'is_provisional': task.is_provisional,
             'variant_group': task.variant_group,
             'variant_serial': task.variant_serial,
-            'complete': task.complete,
             'qty': task.qty,
+            'complete': task.complete,
             'unit': task.unit,
             'price': task.price,
-            'complete_percent': task.complete_percent,
-            'total': task.progress,
-            'estimate_net': task.total,
+            'progress': task.progress,
+            'estimate': task.total,
             'lineitems': []
         }
         data['tasks'].append(task_dict)
@@ -311,6 +304,6 @@ def _serialize(data, parent):
                 'qty': lineitem.qty,
                 'unit': lineitem.unit,
                 'price': lineitem.price,
-                'price_per': lineitem.total,
+                'estimate': lineitem.total,
             }
             task_dict['lineitems'].append(lineitem_dict)

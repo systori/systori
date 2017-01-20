@@ -350,6 +350,7 @@ class InvoiceRowForm(DocumentRowForm):
                 'job.id': self.job.id,
                 'code': self.job.code,
                 'name': self.job.name,
+                'description': self.job.description,
                 'is_invoiced': True,
                 'debit': self.debit_amount,
                 'is_itemized': self.is_itemized,

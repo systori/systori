@@ -273,28 +273,28 @@ def _serialize(data, parent):
     for task in parent.tasks.all():
 
         task_dict = {
-            'id': task.id,
+            'task.id': task.id,
             'code': task.code,
             'name': task.name,
             'description': task.description,
-            'is_optional': task.is_provisional,
+            'is_provisional': task.is_provisional,
             'variant_group': task.variant_group,
             'variant_serial': task.variant_serial,
             'qty': task.qty,
             'unit': task.unit,
             'price': task.price,
-            'estimate_net': task.total,
+            'estimate': task.total,
             'lineitems': []
         }
         data['tasks'].append(task_dict)
 
         for lineitem in task.lineitems.all():
             lineitem_dict = {
-                'id': lineitem.id,
+                'lineitem.id': lineitem.id,
                 'name': lineitem.name,
                 'qty': lineitem.qty,
                 'unit': lineitem.unit,
                 'price': lineitem.price,
-                'price_per': lineitem.total,
+                'estimate': lineitem.total,
             }
             task_dict['lineitems'].append(lineitem_dict)
