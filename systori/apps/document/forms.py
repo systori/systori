@@ -797,6 +797,7 @@ class ProposalRowForm(DocumentRowForm):
                 'job.id': self.job.id,
                 'code': self.job.code,
                 'name': self.job.name,
+                'description': self.job.description,
                 'is_attached': True,
                 'estimate': self.estimate_amount
             }

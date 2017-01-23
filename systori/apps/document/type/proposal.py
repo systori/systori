@@ -51,8 +51,8 @@ def collate_tasks(proposal, font, available_width):
 
     def add_task(task):
 
-        task_total_column = money(task['estimate_net'])
-        if task['is_optional']:
+        task_total_column = money(task['estimate'])
+        if task['is_provisional']:
             task_total_column = _('Optional')
 
         if task.get('variant_group', None) != None:
@@ -85,12 +85,12 @@ def collate_tasks(proposal, font, available_width):
             items.row_style('TOPPADDING', 0, -1, 1)
         items.row_style('BOTTOMPADDING', 0, -1, 10)
 
-        for group in parent.get('taskgroups', []):
+        for group in parent.get('groups', []):
             traverse(group, depth + 1)
 
-            if not group.get('taskgroups', []) and group.get('tasks', []):
+            if not group.get('groups', []) and group.get('tasks', []):
                 items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                          '', '', '', money(group['estimate_net']))
+                          '', '', '', money(group['estimate']))
                 items.row_style('FONTNAME', 0, -1, font.bold)
                 items.row_style('ALIGNMENT', -1, -1, "RIGHT")
                 items.row_style('SPAN', 1, 4)
@@ -105,18 +105,18 @@ def collate_tasks(proposal, font, available_width):
         items.row(b(job['code'], font), b(job['name'], font))
         items.row_style('SPAN', 1, -1)
 
-        for group in job.get('taskgroups', []):
+        for group in job.get('groups', []):
             traverse(group, 1)
-            if not group.get('taskgroups', []) and group.get('tasks', []):
+            if not group.get('groups', []) and group.get('tasks', []):
                 items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                          '', '', '', money(group['estimate_net']))
+                          '', '', '', money(group['estimate']))
                 items.row_style('FONTNAME', 0, -1, font.bold)
                 items.row_style('ALIGNMENT', -1, -1, "RIGHT")
                 items.row_style('SPAN', 1, 4)
                 items.row_style('VALIGN', 0, -1, "BOTTOM")
                 items.row('')
             totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                       money(group['estimate_net']))
+                       money(group['estimate']))
 
         for task in job.get('tasks', []):  # support old JSON
             add_task(task)
@@ -245,29 +245,24 @@ def serialize(proposal):
 
     for job_data in proposal.json['jobs']:
         job_obj = job_data.pop('job')
-        job_data['taskgroups'] = []
+        job_data['groups'] = []
         job_data['tasks'] = []
         _serialize(job_data, job_obj)
 
 
 def _serialize(data, parent):
 
-    data['job_id'] = parent.job_id
-    data['code'] = parent.code
-    data['name'] = parent.name
-    data['description'] = parent.description
-
     for group in parent.groups.all():
         group_dict = {
-            'id': group.id,
+            'group.id': group.id,
             'code': group.code,
             'name': group.name,
             'description': group.description,
-            'estimate_net': group.estimate,
+            'estimate': group.estimate,
             'tasks': [],
-            'taskgroups': []
+            'groups': []
         }
-        data['taskgroups'].append(group_dict)
+        data['groups'].append(group_dict)
         _serialize(group_dict, group)
 
     for task in parent.tasks.all():

@@ -299,7 +299,7 @@ def _serialize(data, parent):
 
         for lineitem in task.lineitems.all():
             lineitem_dict = {
-                'id': lineitem.id,
+                'lineitem.id': lineitem.id,
                 'name': lineitem.name,
                 'qty': lineitem.qty,
                 'unit': lineitem.unit,
