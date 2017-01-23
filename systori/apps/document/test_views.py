@@ -1,5 +1,7 @@
 from datetime import date
 from decimal import Decimal
+from PyPDF2 import PdfFileReader
+from io import BytesIO
 
 from django.utils import timezone
 from django.core.urlresolvers import reverse
@@ -385,6 +387,91 @@ class ProposalViewTests(DocumentTestCase):
             Proposal.objects.first().id
         ]), {'with_lineitems': True})
         self.assertEqual(200, response.status_code)
+
+    def test_serialize_n_render_small_structure(self):
+        self.project = ProjectFactory(structure="0.0")
+        self.job = JobFactory(project=self.project)
+        self.task = TaskFactory(qty=10, complete=5, price=96, group=self.job)
+
+        self.contact = ContactFactory(
+            project=self.project,
+            is_billable=True
+        )
+
+        data = self.form_data({
+            'title': 'Proposal #1',
+            'document_date': '2015-01-01',
+            'header': 'hello',
+            'footer': 'bye',
+            'add_terms': False,
+            'job-0-job_id': self.job.id,
+            'job-0-is_attached': 'True'
+        })
+        response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        # render
+
+        response = self.client.get(reverse('proposal.pdf', args=[
+            self.project.id,
+            'print',
+            Proposal.objects.first().id
+        ]), {}) # empty {} == 'with_lineitems': False
+        extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
+        for text in ['Proposal', 'hello', 'bye', self.job.name, self.task.name]:
+            self.assertTrue(text in extractedText)
+
+    def test_serialize_n_render_big_structure(self):
+        self.project = ProjectFactory(structure="0.0.0.0.0.0")
+        self.job = JobFactory(project=self.project, generate_groups=True)
+        self.task = TaskFactory(qty=10, complete=5, price=96, group=self.job.all_groups.order_by('id').last())
+        self.job2 = JobFactory(project=self.project, generate_groups=True)
+        for number in range(1,11,1):
+            TaskFactory(name="task {}".format(number), qty=10, complete=5, price=96,
+                        group=self.job2.all_groups.order_by('id').last())
+        TaskFactory(name="task 11", qty=10, complete=5, price=96, is_provisional=True,
+                    group=self.job2.all_groups.order_by('id').last())
+        TaskFactory(name='window cheap', qty=10, complete=5, price=50, total=500, variant_group=1, variant_serial=0,
+                    group=self.job2.all_groups.order_by('id').last())
+        TaskFactory(name="window premium", qty=10, complete=5, price=125, total=1250, variant_group=1, variant_serial=1,
+                    group=self.job2.all_groups.order_by('id').last())
+        group3 = GroupFactory(parent=self.job2.all_groups.order_by('id')[3])
+        TaskFactory(name="task 14", qty=10, complete=5, price=96, group=group3)
+        for number in range(1,3):
+            LineItemFactory(qty=2, price=1.23, unit='m³', task=self.task)
+
+        self.contact = ContactFactory(
+            project=self.project,
+            is_billable=True
+        )
+
+        data = self.form_data({
+            'title': 'Proposal #1',
+            'document_date': '2015-01-01',
+            'header': 'hello',
+            'footer': 'bye',
+            'add_terms': False,
+            'job-0-job_id': self.job.id,
+            'job-0-is_attached': 'True',
+            'job-1-job_id': self.job2.id,
+            'job-1-is_attached': 'True'
+        })
+        response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        # render
+        response = self.client.get(reverse('proposal.pdf', args=[
+            self.project.id,
+            'print',
+            Proposal.objects.first().id
+        ]), {'with_lineitems': True}) # empty {} == 'with_lineitems': False
+
+        pdfFileObject = PdfFileReader(BytesIO(response.content))
+        extractedText = ""
+        for page in range(pdfFileObject.getNumPages()):
+            extractedText += pdfFileObject.getPage(page).extractText()
+        for text in ['Proposal', 'hello', 'bye', 'window premium', 'Optional', self.job.name, self.task.name]:
+            self.assertTrue(text in extractedText)
 
     def test_update_proposal(self):
 

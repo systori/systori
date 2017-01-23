@@ -1,10 +1,13 @@
+from datetime import date
 from decimal import Decimal
 from django.test import TestCase
 from django.utils.translation import activate
 
 from ..company.factories import CompanyFactory
 from ..project.factories import ProjectFactory
+from ..project.models import Project
 from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
+from ..task.models import Job, Group, Task
 from ..directory.factories import ContactFactory
 
 from systori.lib.accounting.tools import Amount
@@ -54,36 +57,41 @@ class ProposalTests(TestCase):
         pdf_type.proposal.serialize(proposal)
         self.maxDiff = None
         self.assertEqual({
+            'add_terms': False,
             'jobs': [{
                 'tasks': [],
-                'taskgroups': [{
-                    'id': 2, 'code': '01.01',
+                'groups': [{
+                    'group.id': 2,
+                    'code': '01.01',
                     'name': self.group.name,
                     'description': '',
-                    'estimate_net': Decimal('0.0000'),
-                    'taskgroups': [],
+                    'estimate': Decimal('0.0000'),
+                    'groups': [],
                     'tasks': [{
-                        'id': 1, 'code': '01.01.001',
+                        'task.id': 1,
+                        'code': '01.01.001',
                         'name': self.task.name,
-                        'price': Decimal('0.0000'),
+                        'description': '',
+                        'is_provisional': False,
+                        'variant_group': None,
+                        'variant_serial': 0,
                         'qty': Decimal('0.0000'),
                         'unit': '',
-                        'description': '',
-                        'estimate_net': Decimal('0.0000'),
-                        'is_optional': False,
+                        'price': Decimal('0.0000'),
+                        'estimate': Decimal('0.0000'),
                         'lineitems': [{
-                            'id': 1,
+                            'lineitem.id': 1,
                             'name': self.lineitem.name,
                             'price': Decimal('0.0000'),
-                            'price_per': Decimal('0.0000'),
+                            'estimate': Decimal('0.0000'),
                             'qty': Decimal('0.0000'),
                             'unit': ''
                         }],
                     }],
                 }],
             }],
-            'add_terms': False
         }, proposal.json)
+
 
 
 class InvoiceTests(TestCase):
@@ -111,28 +119,38 @@ class InvoiceTests(TestCase):
         self.maxDiff = None
         self.assertEqual({
             'jobs': [{
-                'taskgroups': [{
-                    'id': 2, 'code': '01.01',
+                'tasks': [],
+                'groups': [{
+                    'group.id': 2,
+                    'code': '01.01',
                     'name': self.group.name,
                     'description': '',
-                    'total': Decimal('0.00'),
+                    'progress': Decimal('0.00'),
+                    'estimate': Decimal('0.0000'),
                     'tasks': [{
-                        'id': 1, 'code': '01.01.001',
+                        'task.id': 1,
+                        'code': '01.01.001',
                         'name': self.task.name,
-                        'price': Decimal('0.0000'),
-                        'total': Decimal('0.00'),
-                        'unit': '',
                         'description': '',
+                        'is_provisional': False,
+                        'variant_group': None,
+                        'variant_serial': 0,
+                        'qty': Decimal('0.0000'),
                         'complete': Decimal('0.0000'),
+                        'unit': '',
+                        'price': Decimal('0.0000'),
+                        'progress': Decimal('0.00'),
+                        'estimate': Decimal('0.0000'),
                         'lineitems': [{
-                            'id': 1,
+                            'lineitem.id': 1,
                             'name': self.lineitem.name,
-                            'price': Decimal('0.0000'),
-                            'price_per': Decimal('0.0000'),
                             'qty': Decimal('0.0000'),
-                            'unit': ''
+                            'unit': '',
+                            'price': Decimal('0.0000'),
+                            'estimate': Decimal('0.0000'),
                         }],
                     }],
+                    'groups': [],
                 }],
             }],
             'add_terms': False,
