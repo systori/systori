@@ -631,13 +631,17 @@ class FieldAssignEquipment(TemplateView):
 class FieldPaste(View):
     def post(self, request, *args, **kwargs):
         dailyplan = self.request.dailyplan
+
         clipboard = json.loads(request.body.decode('utf-8'))
+
         member_ids = clipboard.get('workers', [])
         members = TeamMember.objects.filter(id__in=member_ids)
         members.update(dailyplan=dailyplan)
+
         equipment_ids = clipboard.get('equipment', [])
         equipment = EquipmentAssignment.objects.filter(id__in=equipment_ids)
         equipment.update(dailyplan=dailyplan)
+
         plans = clipboard.get('empty-plans', [])
         for plan in daily_plan_objects().filter(id__in=plans):
             delete_when_empty(plan)

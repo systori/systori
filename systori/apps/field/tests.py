@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 
 from systori.lib.testing import ClientTestCase
 
-from ..project.factories import ProjectFactory
+from ..project.factories import ProjectFactory, JobSiteFactory
 from ..task.factories import JobFactory, GroupFactory, TaskFactory
 
 from ..project.models import Project, TeamMember, DailyPlan, JobSite, EquipmentAssignment
@@ -181,36 +181,44 @@ class TestFieldTaskView(ClientTestCase):
 
 class TestCutPaste(ClientTestCase):
 
-    def setUp(self):
-        super().setUp()
-        self.project = ProjectFactory()
-
     def test_move_worker(self):
-        jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
+        project = ProjectFactory()
+        jobsite = JobSiteFactory(project=project)
         dailyplan = DailyPlan.objects.create(jobsite=jobsite)
-        access, _ = Worker.objects.get_or_create(user=self.user, company=self.company)
-        member = TeamMember.objects.create(dailyplan=dailyplan, worker=access)
 
-        jobsite2 = JobSite.objects.create(project=self.project, name='b', address='b', city='b', postal_code='b')
+        user1 = UserFactory(company=self.company, first_name='A', language='en', password=self.password)
+        worker1 = user1.access.first()
+        user2 = UserFactory(company=self.company, first_name='B', language='en', password=self.password)
+        worker2 = user2.access.first()
+
+        member1 = TeamMember.objects.create(dailyplan=dailyplan, worker=worker1)
+        member2 = TeamMember.objects.create(dailyplan=dailyplan, worker=worker2)
+
+        jobsite2 = JobSiteFactory(project=project)
         dailyplan2 = DailyPlan.objects.create(jobsite=jobsite2)
 
-        self.assertEqual(1, dailyplan.workers.count())
-        self.assertEqual(0, dailyplan2.workers.count())
+        self.assertEqual(2, dailyplan.members.count())
+        self.assertEqual(member1, dailyplan.members.all()[0])
+        self.assertEqual(member2, dailyplan.members.all()[1])
+        self.assertEqual(0, dailyplan2.members.count())
         self.client.post(
             reverse('field.dailyplan.paste', args=['1', dailyplan2.url_id]),
-            json.dumps({'workers': [member.id]}),
+            json.dumps({'workers': [member1.id]}),
             content_type='application/json'
         )
-        self.assertEqual(0, dailyplan.workers.count())
-        self.assertEqual(1, dailyplan2.workers.count())
+        self.assertEqual(1, dailyplan.members.count())
+        self.assertEqual(member2, dailyplan.members.all()[0])
+        self.assertEqual(1, dailyplan2.members.count())
+        self.assertEqual(member1, dailyplan2.members.all()[0])
 
     def test_move_equipment(self):
-        jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
+        project = ProjectFactory()
+        jobsite = JobSite.objects.create(project=project, name='a', address='a', city='a', postal_code='a')
         dailyplan = DailyPlan.objects.create(jobsite=jobsite)
         equipment = Equipment.objects.create(name='truck')
         assignment = EquipmentAssignment.objects.create(dailyplan=dailyplan, equipment=equipment)
 
-        jobsite2 = JobSite.objects.create(project=self.project, name='b', address='b', city='b', postal_code='b')
+        jobsite2 = JobSite.objects.create(project=project, name='b', address='b', city='b', postal_code='b')
         dailyplan2 = DailyPlan.objects.create(jobsite=jobsite2)
 
         self.assertEqual(1, dailyplan.assigned_equipment.count())

@@ -28,14 +28,14 @@
     <div class="list-group-item sub-header workers-header">{% trans "Workers" %}</div>
   {% endif %}
 
-  {% for daily_worker in dailyplan.workers.all %}
+  {% for member in dailyplan.members.all %}
 
-    {% if worker.has_laborer %}
+    {% if member.worker.has_laborer %}
     <field-worker
         class="list-group-item"
-        data-id="{{ daily_worker.id }}">{% show_user_status daily_worker.user %}{{ daily_worker.get_full_name }}</field-worker>
+        data-id="{{ member.id }}">{% show_user_status member.worker.user %}{{ member.worker.get_full_name }}</field-worker>
     {% else %}
-    <div class="list-group-item">{% show_user_status daily_worker.user %}{{ daily_worker.get_full_name }}</div>
+    <div class="list-group-item">{% show_user_status member.worker.user %}{{ member.worker.get_full_name }}</div>
     {% endif %}
 
   {% endfor %}
