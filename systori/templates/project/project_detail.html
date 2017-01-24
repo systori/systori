@@ -10,6 +10,9 @@
     <tbody>
       <tr>
         <td>
+        <div class="pull-left">
+            <a href="{% url 'project.edit' project.id %}" class="btn btn-xs btn-info">{% trans "edit" %}</a>
+        </div>
           <div class="pull-right">
             {% project_states as states %}
             {% for name, label, is_current, transition in states %}

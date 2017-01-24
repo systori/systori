@@ -28,6 +28,9 @@ class GAEBStructure:
                 code='invalid',
             )
 
+    def __str__(self):
+        return self.pattern
+
     @property
     def maximum_depth(self):
         return len(self.zfill)-2
@@ -133,5 +136,3 @@ class GAEBStructureField(models.Field):
         }
         defaults.update(kwargs)
         return super().formfield(**defaults)
-
-
