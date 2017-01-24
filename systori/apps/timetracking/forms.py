@@ -97,6 +97,39 @@ class WorkerManualTimerForm(ManualTimerForm):
         }
 
 
+class MultipleWorkerManualTimerForm(ManualTimerForm):
+
+    class Meta(ManualTimerForm.Meta):
+        exclude = ['worker']
+
+    def __init__(self, company=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['start'].widget = DateTimeWidget(
+            options={'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'},
+            attrs={'id':'timetracking-form-start'},
+            bootstrap_version=3
+        )
+        self.fields['end'].widget = DateTimeWidget(
+            options={'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'},
+            attrs={'id':'timetracking-form-end'},
+            bootstrap_version=3
+        )
+        self.fields['start'].required = True
+        self.fields['end'].required = True
+        if company:
+            self.fields['worker'].queryset = company.active_workers()
+
+    def clean(self):
+        data = self.cleaned_data
+        if data['start'] and data['end'] and data['start'] > data['end']:
+            raise ValidationError({'start': __('Timer cannot be negative')})
+        return data
+
+    def save(self, commit=True):
+        return self._meta.model.objects.create_batch(commit=commit, **self.cleaned_data)
+
+
 class MonthPickerForm(forms.Form):
 
     period = forms.DateField(widget=DateTimeWidget(

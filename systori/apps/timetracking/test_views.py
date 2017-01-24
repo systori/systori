@@ -156,3 +156,12 @@ class UserReportViewTest(SystoriTestCase):
         self.client.login(username=self.worker.email, password=self.password)
         response = self.client.get(reverse('timetracking_worker', args=[self.worker.pk]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_manualTimerForm(self):
+        self.url = reverse('timetracking_worker', args=[self.worker.pk])
+        self.client.login(username=self.worker.email, password=self.password)
+        response = self.client.post(self.url, {'end': '2017-01-01 16:00:00', 'start': '2017-01-01 07:00:00', 'kind': 'work',
+                                    'worker': self.worker.pk}, **{'HTTP_REFERER': self.url})
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        response2 = self.client.get(self.url)
+        self.assertEqual(response2.status_code, status.HTTP_200_OK)

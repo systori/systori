@@ -69,7 +69,7 @@ class HomeView(PeriodFilterMixin, FormView):
 
 class TimerListView(FormView):
     template_name = 'timetracking/list.html'
-    form_class = forms.WorkerManualTimerForm
+    form_class = forms.MultipleWorkerManualTimerForm
 
     def get_worker_checkboxes(self):
         return self.request.company.active_workers().values_list('id', 'user__first_name', 'user__last_name')\
@@ -79,6 +79,9 @@ class TimerListView(FormView):
     def get_form_kwargs(self):
         default_kwargs = super().get_form_kwargs()
         default_kwargs['company'] = self.request.company
+        for worker in self.get_worker_checkboxes():
+            if worker in self.request.POST:
+                default_kwargs[worker]= worker
         return default_kwargs
 
     def get_context_data(self, **kwargs):
@@ -87,6 +90,10 @@ class TimerListView(FormView):
             **kwargs
         )
 
+    def form_valid(self, form):
+        form.save()
+        # return redirect('timetracking')
+        return redirect(self.request.META['HTTP_REFERER'])
 
 
 class WorkerReportView(PeriodFilterMixin, FormView):
