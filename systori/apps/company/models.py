@@ -64,6 +64,12 @@ class Worker(models.Model):
                                                 'active. Unselect this instead of deleting accounts. '
                                                 'This will remove user from any present and future daily plans.'))
 
+    # timetracking = models.BooleanField(_('timetracking'), default=True,
+    #                                 help_text=_('Designates whether this user is part of timetracking.'))
+    #
+    # tracks_time = models.BooleanField(_('tracks time'), default=False,
+    #                                    help_text=_('Designates whether this user is allowed to use his/her own Timer.'))
+
     @classmethod
     def grant_superuser_access(cls, user, company):
         """ Creates a temporary Access object dynamically to allow superusers access to any company. """

@@ -53,7 +53,7 @@ class HomeView(PeriodFilterMixin, FormView):
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             report=utils.get_daily_workers_report(
-                self.request.company.active_workers(), self.report_period),
+                self.request.company.active_workers().filter(timetracking=True), self.report_period),
             **kwargs
         )
 
@@ -65,35 +65,6 @@ class HomeView(PeriodFilterMixin, FormView):
     def form_invalid(self, form):
         period_form = self.period_form_class(initial={'period': timezone.now()})
         return self.render_to_response(self.get_context_data(form=form, period_form=period_form))
-
-
-class TimerListView(FormView):
-    template_name = 'timetracking/list.html'
-    form_class = forms.MultipleWorkerManualTimerForm
-
-    def get_worker_checkboxes(self):
-        return self.request.company.active_workers().values_list('id', 'user__first_name', 'user__last_name')\
-            .filter(is_active=True) \
-            .order_by('user__first_name')
-
-    def get_form_kwargs(self):
-        default_kwargs = super().get_form_kwargs()
-        default_kwargs['company'] = self.request.company
-        for worker in self.get_worker_checkboxes():
-            if worker in self.request.POST:
-                default_kwargs[worker]= worker
-        return default_kwargs
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            workers = self.get_worker_checkboxes(),
-            **kwargs
-        )
-
-    def form_valid(self, form):
-        form.save()
-        # return redirect('timetracking')
-        return redirect(self.request.META['HTTP_REFERER'])
 
 
 class WorkerReportView(PeriodFilterMixin, FormView):

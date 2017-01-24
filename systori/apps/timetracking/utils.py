@@ -1,5 +1,5 @@
 from datetime import time, timedelta, date, datetime
-from collections import UserDict, namedtuple
+from collections import UserDict, namedtuple, OrderedDict
 from typing import Iterator, Tuple
 
 from django.utils import timezone
@@ -68,8 +68,23 @@ def get_worker_dashboard_report(worker):
     from .models import Timer
     now = timezone.now()
     timers = Timer.objects.filter_month(now.year, now.month).filter(
-        worker=worker, kind=Timer.WORK).order_by('start')
-    return timers
+        worker=worker).order_by('start')
+    report = OrderedDict()
+    for timer in timers:
+        date = timer.date.isoformat()
+        if not report.get(date, False):
+            report[date] = {}
+            report[date]['date'] = timer.date
+            report[date]['timers'] = []
+            report[date]['total'] = 0
+            report[date]['overtime'] = 0
+        report[date]['timers'].append(timer)
+        report[date]['total'] += timer.get_duration_seconds()
+
+    for date, row in report.items():
+        row['overtime'] = row['total'] - Timer.WORK_HOURS
+
+    return report
 
 
 def get_worker_monthly_report(worker, period):

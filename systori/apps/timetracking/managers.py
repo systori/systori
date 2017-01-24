@@ -135,27 +135,18 @@ class TimerQuerySet(QuerySet):
         date = date or timezone.now().date()
         queryset = self.filter(worker__in=workers).filter(date=date).select_related('worker__user')
         reports = OrderedDict((worker, {
-            'day_start': None,
-            'day_end': None,
+            'timers': [],
             'total_duration': 0,
             'total': 0,
             'overtime': 0
         }) for worker in workers)
         for timer in queryset:
             worker_report = reports[timer.worker]
-            if not worker_report['day_start'] or worker_report['day_start'] > timer.start:
-                worker_report['day_start'] = timer.start
-
-            if not worker_report['day_end'] or timer.end and timer.end > worker_report['day_end']:
-                worker_report['day_end'] = timer.end
+            worker_report['timers'].append(timer)
             worker_report['total_duration'] += timer.get_duration_seconds()
 
         for _, report_data in reports.items():
-            if report_data['total_duration'] >= self.model.DAILY_BREAK:
-                report_data['total'] = report_data['total_duration'] - self.model.DAILY_BREAK
-            else:
-                report_data['total'] = report_data['total_duration']
-            report_data['overtime'] = report_data['total'] - self.model.WORK_HOURS
+            report_data['overtime'] = report_data['total_duration'] - self.model.WORK_HOURS
         return reports
 
     def create_batch(self, worker, start: datetime, end: datetime, commit=True, include_weekends=False,

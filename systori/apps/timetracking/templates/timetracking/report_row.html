@@ -1,7 +1,13 @@
-{% load timetracking %}
-<tr is="timetracking-report-row">
-    <td data-mapping="date">{{ row.start|date:"d.m.Y" }}</td>
-    <td data-mapping="start">{{ row.start|date:"H:i" }}</td>
-    <td data-mapping="end">{{ row.end|date:"H:i" }}</td>
-    <td data-mapping="duration">{{ row.duration|seconds_to_hours }}</td>
+{% load timetracking l10n %}
+<tr>
+    <td data-mapping="date">{{ row.date|localize }}</td>
+    <td>
+    {% for timer in row.timers %}
+        {{ timer.start|time:"H:i" }} - {{ timer.end|time:"H:i" }} ({{ timer.duration|seconds_to_hours }})
+        {% if not forloop.last %}
+         <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+        {% endif %}
+    {% endfor %}
+    </td>
+    <td>{{ row.overtime|seconds_to_hours }}</td>
 </tr>
