@@ -15,15 +15,20 @@ from . import utils
 NOW = timezone.now().replace(hour=16)
 
 
-class RoundToNearestMultipleTest(TestCase):
+class UtilsTest(TestCase):
 
-    def test_round_seconds(self):
+    def test_round_to_nearest_multiple(self):
         self.assertEquals(0, utils.round_to_nearest_multiple(1))
         self.assertEquals(0, utils.round_to_nearest_multiple(17))
         self.assertEquals(36, utils.round_to_nearest_multiple(18))
         self.assertEquals(36, utils.round_to_nearest_multiple(35))
         self.assertEquals(252, utils.round_to_nearest_multiple(250))
         self.assertEquals(216, utils.round_to_nearest_multiple(230))
+
+    def test_seconds_to_time(self):
+        self.assertEqual(utils.seconds_to_time(28530), time(7, 56, 0))
+        self.assertEqual(utils.seconds_to_time(270), time(0, 5, 0))
+        self.assertEqual(utils.seconds_to_time(300), time(0, 5, 0))
 
 
 class ReportsTest(TestCase):

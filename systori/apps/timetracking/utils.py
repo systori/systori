@@ -25,6 +25,12 @@ def regroup(items, getter):
 def seconds_to_time(seconds):
     seconds = int(seconds)
     minutes, seconds = divmod(seconds, 60)
+    if minutes > 0:
+        if seconds >= 30:
+            minutes += 1
+            seconds = 0
+        else:
+            seconds = 0
     hours, minutes = divmod(minutes, 60)
     try:
         return time(hours, minutes, seconds)
