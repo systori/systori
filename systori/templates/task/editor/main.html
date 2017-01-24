@@ -2,6 +2,8 @@
 {% load i18n l10n static dartium customformatting %}
 
 {% block title %}{{ project.name }} > {{ job.name }}{% endblock %}
+
+{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
 {% block head_navbar %}
   <li><a href="{% url 'project.view' project.pk %}">{{ project.name }}</a></li>
   <li class="active"><a href="{% url 'job.editor' project.pk job.pk %}">{{ job.name }}</a></li>
