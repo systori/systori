@@ -2,6 +2,7 @@ from datetime import date
 from decimal import Decimal
 from PyPDF2 import PdfFileReader
 from io import BytesIO
+from textwrap import dedent
 
 from django.utils import timezone
 from django.core.urlresolvers import reverse
@@ -37,20 +38,23 @@ class DocumentTestCase(ClientTestCase):
         self.project = ProjectFactory()
 
         self.contact = ContactFactory(
+            salutation='Professor',
+            first_name='Ludwig',
+            last_name='von Mises',
             project=self.project,
             is_billable=True
         )
 
         create_chart_of_accounts(self)
 
-        self.job = JobFactory(project=self.project)
+        self.job = JobFactory(name='Job One', project=self.project)
         self.job.account = create_account_for_job(self.job)
         self.job.save()
         self.group = GroupFactory(parent=self.job)
         self.task = TaskFactory(qty=10, complete=5, price=96, group=self.group)
         self.lineitem = LineItemFactory(task=self.task)
 
-        self.job2 = JobFactory(project=self.project)
+        self.job2 = JobFactory(name='Job Two', project=self.project)
         self.job2.account = create_account_for_job(self.job2)
         self.job2.save()
 
@@ -135,6 +139,61 @@ class InvoiceViewTests(DocumentTestCase):
         self.assertEqual(invoice.document_date, date(2015, 7, 28))
         self.assertEqual(invoice.json['header'], 'new header')
         self.assertEqual(invoice.json['footer'], 'new footer')
+
+    def test_render_simple_invoice(self):
+        data = {
+            'title': 'Invoice #1',
+            'header': 'The Header',
+            'footer': 'The Footer',
+            'invoice_no': '2015/01/01',
+            'document_date': '2015-01-01',
+
+            'job-0-is_invoiced': 'True',
+            'job-0-job_id': self.job.id,
+            'job-0-debit_net': '1',
+            'job-0-debit_tax': '1',
+
+            'job-1-is_invoiced': 'True',
+            'job-1-job_id': self.job2.id,
+            'job-1-debit_net': '1',
+            'job-1-debit_tax': '1',
+        }
+        data.update(self.make_management_form())
+        response = self.client.post(reverse('invoice.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        response = self.client.get(reverse('invoice.pdf', args=[
+            self.project.id, 'print', Invoice.objects.first().id
+        ]))
+        self.assertEqual(200, response.status_code)
+
+        pdf = PdfFileReader(BytesIO(response.content))
+        extractedText = pdf.getPage(0).extractText()
+        self.assertEqual(extractedText, dedent(
+        """\
+        Professor Ludwig von Mises
+
+
+        Invoice #1
+        Jan. 1, 2015
+        Invoice No. 2015/01/01
+        Please indicate the correct invoice number on your payment.
+        The Header
+
+        consideration
+        19% tax
+        gross
+        Project progress
+        $2.00
+        $2.00
+        $4.00
+        This Invoice
+        $2.00
+        $2.00
+        $4.00
+        The Footer
+        Page 1 of 2
+        """))
 
 
 class PaymentViewTests(DocumentTestCase):
