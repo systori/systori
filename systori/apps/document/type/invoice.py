@@ -112,7 +112,7 @@ def collate_itemized_listing(invoice, font, available_width):
         items.row_style('SPAN', 1, -2)
 
         items.row('', '', ubrdecimal(task['complete']), p(task['unit'], font), money(task['price']),
-                  money(task['total']))
+                  money(task['progress']))
         items.row_style('ALIGNMENT', 1, -1, "RIGHT")
         items.keep_previous_n_rows_together(2)
 
@@ -147,18 +147,11 @@ def collate_itemized_listing(invoice, font, available_width):
 
         if job['invoiced'].net == job['progress'].net:
 
-            for job in invoice['jobs']:
+            for group in job.get('groups', []):
+                traverse(group, 1)
 
-                for group in job.get('group', []):
-                    traverse(group, 1)
-
-                    # if len(invoice['jobs']) == 1:
-                    #     totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                    #                money(group['total']))
-                    #     group_subtotals_added = True
-
-                for task in job.get('tasks', []):
-                    add_task(task)
+            for task in job.get('tasks', []):
+                add_task(task)
 
         else:
 
