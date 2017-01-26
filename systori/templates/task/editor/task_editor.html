@@ -2,7 +2,7 @@
 
 <div class="editor">
   <div class="editor-row">
-    <div class="code">{{ task.code }}</div>
+    <sys-code-input class="code" data-order="{% if task.order %}{{ task.order }}{% endif %}">{{ task.code }}</sys-code-input>
     <sys-input class="name"  placeholder="{% trans 'task' %}"                                             contenteditable>{{ task.name|safe }}</sys-input>
     <sys-cell  class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ task.qty_equation }}"   contenteditable>{{ task.qty|ubrnumber }}</sys-cell>
     <sys-input class="unit"  placeholder="{% trans 'unit' %}"                                             contenteditable>{{ task.unit }}</sys-input>
@@ -21,8 +21,7 @@
   {% for lineitem in task.lineitems.all %}
     <sys-lineitem
         data-pk="{% if lineitem.pk %}{{ lineitem.pk }}{% endif %}"
-        data-token="{% if lineitem.token %}{{ lineitem.token }}{% endif %}"
-        data-order="{% if lineitem.order %}{{ lineitem.order }}{% endif %}">
+        data-token="{% if lineitem.token %}{{ lineitem.token }}{% endif %}">
       {% include "task/editor/lineitem_editor.html" with lineitem=lineitem %}
     </sys-lineitem>
   {% endfor %}

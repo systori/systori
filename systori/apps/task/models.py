@@ -30,7 +30,7 @@ class SearchableModelQuerySet(models.QuerySet):
 
 class OrderedModel(models.Model):
 
-    order = models.PositiveIntegerField(editable=False, db_index=True)
+    order = models.PositiveIntegerField(db_index=True)
     order_with_respect_to = None
 
     class Meta:
@@ -41,30 +41,10 @@ class OrderedModel(models.Model):
         return self.__class__.objects.filter((self.order_with_respect_to, getattr(self, self.order_with_respect_to)))
 
     def save(self, *args, **kwargs):
-        if not self.pk and self.order is not None:
-            qs = self.get_ordering_queryset()
-            qs.filter(order__gte=self.order).update(order=models.F('order') + 1)
         if self.order is None:
             c = self.get_ordering_queryset().aggregate(models.Max('order')).get('order__max')
             self.order = 1 if c is None else c + 1
         super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        qs = self.get_ordering_queryset()
-        qs.filter(order__gt=self.order).update(order=models.F('order')-1)
-        super().delete(*args, **kwargs)
-
-    def move_to(self, order):
-        if order is None or self.order == order:
-            # object is already at desired position
-            return
-        qs = self.get_ordering_queryset()
-        if self.order > order:
-            qs.filter(order__lt=self.order, order__gte=order).update(order=models.F('order')+1)
-        else:
-            qs.filter(order__gt=self.order, order__lte=order).update(order=models.F('order')-1)
-        self.order = order
-        self.save()
 
 
 class GroupQuerySet(SearchableModelQuerySet):

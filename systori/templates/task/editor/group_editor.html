@@ -1,7 +1,7 @@
 {% load i18n customformatting %}
 <div class="editor">
   <div class="editor-row">
-    <div class="code">{{ group.code }}</div>
+    <sys-code-input class="code" data-order="{% if group.order %}{{ group.order }}{% endif %}">{{ group.code }}</sys-code-input>
     <sys-input class="name" placeholder="{% trans 'group' %}" contenteditable>{{ group.name|safe }}</sys-input>
     <sys-decimal class="total">{{ group.estimate|ubrdecimal:2 }}</sys-decimal>
   </div>

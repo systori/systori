@@ -12,11 +12,11 @@ class EditorApiTest(ClientTestCase):
         response = self.client.post(
             reverse('api.editor.save', args=(job.pk,)), {
                 'groups': [{
-                    'token': 9006199254740991, 'name': 'test group',
+                    'token': 9006199254740991, 'name': 'test group', 'order': 5,
                     'groups': [
-                        {'token': 9006199254740992, 'name': 'sub group'},
-                        {'token': 9006199254740993, 'name': 'sub group 2', 'groups': [
-                            {'token': 9006199254740994, 'name': 'sub sub group'},
+                        {'token': 9006199254740992, 'name': 'sub group', 'order': 7},
+                        {'token': 9006199254740993, 'name': 'sub group 2', 'order': 8, 'groups': [
+                            {'token': 9006199254740994, 'name': 'sub sub group', 'order': 1},
                         ]}
                     ]
                 }]
@@ -27,8 +27,10 @@ class EditorApiTest(ClientTestCase):
         self.assertEqual(5, Group.objects.count())
         group = Group.objects.get(parent=job)
         self.assertEqual('test group', group.name)
+        self.assertEqual(5, group.order)
         self.assertEqual('sub group', group.groups.all()[0].name)
         self.assertEqual('sub group 2', group.groups.all()[1].name)
+        self.assertEqual(8, group.groups.all()[1].order)
         self.assertEqual('sub sub group', group.groups.all()[1].groups.all()[0].name)
         self.maxDiff = None
         self.assertDictEqual({
@@ -87,24 +89,35 @@ class EditorApiTest(ClientTestCase):
 
     def test_update_group(self):
         job = JobFactory(project=ProjectFactory())
-        group = GroupFactory(name='group for update', parent=job)
-        self.assertEqual(2, Group.objects.count())
-        self.assertEqual('group for update', group.name)
+        group1 = GroupFactory(name='group 1 for update', parent=job)
+        group2 = GroupFactory(name='group 2 for update', parent=job)
+        self.assertEqual(3, Group.objects.count())
+        self.assertSequenceEqual(
+            job.groups.values_list('name', flat=True),
+            [group1.name, group2.name]
+        )
 
         response = self.client.post(
             reverse('api.editor.save', args=(job.pk,)), {
-                'groups': [{'pk': group.pk, 'name': 'updated group'}]
+                'groups': [
+                    {'pk': group1.pk, 'name': 'updated group', 'order': 2},
+                    {'pk': group2.pk, 'order': 1},
+                ]
             },
             format='json'
         )
         self.assertEqual(response.status_code, 200, response.data)
+        self.assertSequenceEqual(
+            job.groups.values_list('name', flat=True),
+            [group2.name, 'updated group']
+        )
 
-        group.refresh_from_db()
-        self.assertEqual(2, Group.objects.count())
-        self.assertEqual('updated group', group.name)
+        group1.refresh_from_db()
+        self.assertEqual(3, Group.objects.count())
+        self.assertEqual('updated group', group1.name)
         self.assertDictEqual({
             'token': None, 'pk': 1,
-            'groups': [{'token': None, 'pk': group.pk}]
+            'groups': [{'token': None, 'pk': group1.pk}, {'token': None, 'pk': group2.pk}]
         }, response.data)
 
     def test_delete_group(self):

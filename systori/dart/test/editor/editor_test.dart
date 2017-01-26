@@ -161,11 +161,11 @@ void main() {
 
             expect(changeManager.saving, new isInstanceOf<Completer>());
 
-            expect(job.state.committed, {'name': 'Test Job', 'description': ''});
+            expect(job.state.committed, {'name': 'Test Job', 'description': '', 'order': 1});
 
             await fakeRepository.complete();
 
-            expect(job.state.committed, {'name': 'Test Job Changed', 'description': ''});
+            expect(job.state.committed, {'name': 'Test Job Changed', 'description': '', 'order': 1});
 
             expect(changeManager.saving, isNull);
 
@@ -189,14 +189,37 @@ void main() {
             expect(changeManager.saving, new isInstanceOf<Completer>());
 
             expect(group.pk, null);
-            expect(group.state.committed, {'name': '', 'description': ''});
+            expect(group.state.committed, {'name': '', 'description': '', 'order': ''});
 
             await fakeRepository.complete();
 
             expect(group.pk, 1);
-            expect(group.state.committed, {'name': 'group changed', 'description': ''});
+            expect(group.state.committed, {'name': 'group changed', 'description': '', 'order': 1});
 
             expect(changeManager.saving, isNull);
+
+        });
+
+        test("group created shifts position of others", () async {
+
+            nav.sendEnter();
+            nav.sendText('new group');
+            Group group = nav.activeModel;
+            group.description.focus();
+
+            changeManager.save();
+
+            await new Future.value(); // run event loop
+
+            expect(fakeRepository.lastRequestMap, {
+                'pk': 1,
+                'groups': [
+                    {'order': 1, 'name': 'new group', 'token': 101},
+                    {'order': 2, 'pk': 2} // previously first group moved to 'order': 2
+                ],
+            });
+
+            await fakeRepository.complete();
 
         });
 
@@ -225,6 +248,38 @@ void main() {
             expect(changeManager.deletes, {});
             expect(changeManager.pendingDeletes, {});
             expect(changeManager.saving, isNull);
+
+        });
+
+        test("task created shifts position of others", () async {
+
+            Group group1 = Job.JOB.childrenOfType('group').first;
+            Group group2 = group1.childrenOfType('group').first;
+            group2.name.focus();
+            nav.sendEnter();
+            nav.sendText('new task');
+            Task task2 = nav.activeModel;
+            task2.description.focus();
+
+            changeManager.save();
+
+            await new Future.value(); // run event loop
+
+            expect(fakeRepository.lastRequestMap, {
+                'pk': 1,
+                'groups': [{
+                    'pk': 2,
+                    'groups': [{
+                        'pk': 3,
+                        'tasks': [
+                            {'order': 1, 'name': 'new task', 'token': 101, 'qty': '0', 'price': '0', 'total': '0'},
+                            {'order': 2, 'pk': 1} // previously first task moved to 'order': 2
+                        ],
+                    }],
+                }],
+            });
+
+            await fakeRepository.complete();
 
         });
 

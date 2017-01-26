@@ -58,7 +58,7 @@ class DecimalElement extends HtmlElement {
 
 class Group extends Model with KeyboardHandler {
 
-    DivElement code;
+    CodeInput code;
     Input name;
     Input description;
     DecimalElement total;
@@ -72,15 +72,10 @@ class Group extends Model with KeyboardHandler {
     bool get isBlank => hasNoPk && name.text.isEmpty;
     bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
 
-    set order(int position) {
-        dataset['order'] = position.toString();
-        code.text = "${parentGroup.code.text}.${Job.JOB.structure.formatGroup(dataset['order'], depth)}";
-    }
-
     Group.created(): super.created();
 
     attached() {
-        code = getView("code");
+        code = getInput("code");
         total = getView("total");
         name = getInput("name");
         name.addHandler(new AutocompleteKeyboardHandler(this, {
@@ -95,13 +90,14 @@ class Group extends Model with KeyboardHandler {
     updateCode() {
         enumerate<Group>(this.querySelectorAll(':scope>sys-group'))
             .forEach((IndexedValue<Group> g) {
-            g.value.order = g.index+1;
+            g.value.code.position = g.index+1;
             g.value.updateCode();
         });
         enumerate<Task>(this.querySelectorAll(':scope>sys-task'))
             .forEach((IndexedValue<Task> t) {
-            t.value.order = t.index+1;
+            t.value.code.position = t.index+1;
         });
+        maybeChildrenChanged();
     }
 
     updateTotal() {
@@ -148,7 +144,7 @@ class Group extends Model with KeyboardHandler {
             'source_type': 'group',
             'source_pk': id,
             'target_pk': parentGroup.pk.toString(),
-            'position': order.toString(),
+            'position': code.position.toString(),
         };
         var html = await repository.clone(params);
         var fragment = document.createDocumentFragment();
@@ -199,6 +195,22 @@ class Group extends Model with KeyboardHandler {
     bool onInputEvent(Input input) =>
         updateVisualState('changed');
 
+}
+
+
+class CodeInput extends Input {
+    Map<String,dynamic> get values => {'order': position};
+    int get position => int.parse(dataset['order'], onError: (s)=>null);
+    set position(int position) {
+        dataset['order'] = position.toString();
+        var model = parent.parent.parent;
+        if (model is Task) {
+            text = "${model.parentGroup.code.text}.${Job.JOB.structure.formatTask(dataset['order'])}";
+        } else if (model is Group) {
+            text = "${model.parentGroup.code.text}.${Job.JOB.structure.formatGroup(dataset['order'], model.depth)}";
+        } // lineitem doesn't display any code
+    }
+    CodeInput.created(): super.created();
 }
 
 
@@ -298,24 +310,20 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 
     List<String> childTypes = ['lineitem'];
 
-    DivElement code;
+    CodeInput code;
     Input name;
     Input description;
     DivElement diffRow;
     DivElement diffCell;
 
     Group get parentGroup => parent as Group;
-    set order(int position) {
-        dataset['order'] = position.toString();
-        code.text = "${parentGroup.code.text}.${Job.JOB.structure.formatTask(dataset['order'])}";
-    }
 
     LineItemSheet sheet;
 
     Task.created(): super.created();
 
     attached() {
-        code = getView("code");
+        code = getInput("code");
         name = getInput("name");
         name.addHandler(new AutocompleteKeyboardHandler(this, {}, replaceWithCloneOf));
         description = getInput("description");
@@ -373,7 +381,7 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
             'source_type': 'task',
             'source_pk': id,
             'target_pk': parentGroup.pk.toString(),
-            'position': order.toString(),
+            'position': code.position.toString(),
         };
         var html = await repository.clone(params);
         var fragment = document.createDocumentFragment();
@@ -427,6 +435,7 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 
 class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
 
+    CodeInput dragHandle;
     Input name;
     bool get isBlank => hasNoPk && name.text.isEmpty;
     bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
@@ -434,6 +443,7 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
     LineItem.created(): super.created();
 
     attached() {
+        dragHandle = getInput("sys-lineitem-handle");
         name = getInput("name");
         qty = getInput("qty");
         unit = getInput("unit");
@@ -454,15 +464,16 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
 
     @override
     bool onKeyDownEvent(KeyEvent e, Input input) {
+        Task this_parent = parent.parent as Task;
         switch(e.keyCode) {
             case KeyCode.ENTER:
                 e.preventDefault();
                 if (isBlank) {
-                    Task this_parent = parent.parent as Task;
                     remove();
                     this_parent.createSibling();
                 } else {
                     createSibling();
+                    this_parent.maybeChildrenChanged();
                 }
                 return true;
             case KeyCode.DELETE:
@@ -473,9 +484,9 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
                 } else if (previousElementSibling is LineItem) {
                     (previousElementSibling as LineItem).name.focus();
                 } else {
-                    (parent as Task).name.focus();
+                    this_parent.name.focus();
                 }
-                delete();
+                (parent as LineItemSheet).deleteChild(this);
                 return true;
         }
         return false;
@@ -489,14 +500,21 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
 
 class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
 
+    Task get task => parent;
+
     List<LineItem> get rows => this.querySelectorAll<LineItem>(':scope>sys-lineitem');
 
     LineItemSheet.created(): super.created() {
         addEventListener('blur', clearHighlighting, true);
     }
 
-    onOrderingChanged(Orderable orderable) =>
-        (parent as Task).onCalculate('moved', rows[0].getCell(0));
+    onOrderingChanged(Orderable orderable) {
+        enumerate<LineItem>(rows).forEach((IndexedValue<LineItem> t) {
+            t.value.dragHandle.position = t.index+1;
+        });
+        task.maybeChildrenChanged();
+        task.onCalculate('moved', rows[0].getCell(0));
+    }
 
     onCalculationFinished(Cell changedCell) {
 
@@ -548,6 +566,11 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
         li.name.focus();
     }
 
+    deleteChild(LineItem li) {
+        li.delete();
+        onOrderingChanged(li);
+    }
+
 }
 
 
@@ -557,6 +580,7 @@ registerElements() {
     document.registerElement('sys-decimal', DecimalElement);
     document.registerElement('sys-input', Input);
     document.registerElement('sys-styled-input', StyledInput);
+    document.registerElement('sys-code-input', CodeInput);
     document.registerElement('sys-cell', HtmlCell);
     document.registerElement('sys-lineitem', LineItem);
     document.registerElement('sys-lineitem-sheet', LineItemSheet);

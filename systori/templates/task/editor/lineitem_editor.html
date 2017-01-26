@@ -2,7 +2,7 @@
 <a name="lineitem-{{ lineitem.pk }}"></a>
 <div class="editor">
   <div class="editor-row">
-    <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="{% if lineitem.order %}{{ lineitem.order }}{% endif %}"></sys-code-input>
     <sys-input class="name"  placeholder="{% trans 'line item' %}" contenteditable>{{ lineitem.name|safe }}</sys-input>
     <sys-cell  class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ lineitem.qty_equation }}"   contenteditable>{{ lineitem.qty|ubrnumber }}</sys-cell>
     <sys-input class="unit"  placeholder="{% trans 'unit' %}"                                                 contenteditable>{{ lineitem.unit }}</sys-input>

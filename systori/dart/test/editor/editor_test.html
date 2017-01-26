@@ -61,6 +61,39 @@
               
             </li>
             
+
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Menu
+        <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li >
+            <a href="/">Pinnwand</a></li>
+        <li class="active">
+            <a href="/projects/">Projekte</a></li>
+        <li >
+            <a href="/directory">Adressbuch</a></li>
+        <li >
+            <a href="/equipment/">Ausrüstung</a></li>
+        <li >
+            <a href="/day-based-overview/">Tagesplan</a></li>
+        <li >
+            <a href="/progress">Stundenzettel</a></li>
+        
+        <li >
+            <a href="/templates">Vorlagen</a></li>
+        <li >
+            <a href="/users">Benutzer</a></li>
+        
+        
+          <li >
+              <a href="/timetracking/">Zeiterfassung</a></li>
+          <li >
+              <a href="/timesheets/">Stundenzettel</a></li>
+        
+    </ul>
+</li>
             
   <li><a href="/project-2">Test Project</a></li>
   <li class="active"><a href="/project-2/job-1/editor">Test Job</a></li>
@@ -522,7 +555,7 @@
     
 <div class="editor">
   <div class="editor-row">
-    <div class="code">1</div>
+    <sys-code-input class="code" data-order="1">1</sys-code-input>
     <sys-input class="name" placeholder="Gruppe" contenteditable>Test Job</sys-input>
     <sys-decimal class="total">14.996,00</sys-decimal>
   </div>
@@ -531,12 +564,11 @@
     
       <sys-group
     data-pk="2"
-    data-token=""
-    data-order="1">
+    data-token="">
   
 <div class="editor">
   <div class="editor-row">
-    <div class="code">1.01</div>
+    <sys-code-input class="code" data-order="1">1.01</sys-code-input>
     <sys-input class="name" placeholder="Gruppe" contenteditable>Group 1</sys-input>
     <sys-decimal class="total">14.996,00</sys-decimal>
   </div>
@@ -545,12 +577,11 @@
   
     <sys-group
     data-pk="3"
-    data-token=""
-    data-order="1">
+    data-token="">
   
 <div class="editor">
   <div class="editor-row">
-    <div class="code">1.01.01</div>
+    <sys-code-input class="code" data-order="1">1.01.01</sys-code-input>
     <sys-input class="name" placeholder="Gruppe" contenteditable>Group 2</sys-input>
     <sys-decimal class="total">14.996,00</sys-decimal>
   </div>
@@ -561,13 +592,12 @@
     
 <sys-task
     data-pk="1"
-    data-token=""
-    data-order="1">
+    data-token="">
   
 
 <div class="editor">
   <div class="editor-row">
-    <div class="code">1.01.01.001</div>
+    <sys-code-input class="code" data-order="1">1.01.01.001</sys-code-input>
     <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
@@ -582,13 +612,12 @@
   
     <sys-lineitem
         data-pk="1"
-        data-token=""
-        data-order="1">
+        data-token="">
       
 <a name="lineitem-1"></a>
 <div class="editor">
   <div class="editor-row">
-    <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="1"></sys-code-input>
     <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Labor</sys-input>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical="0.1"   contenteditable>0,1</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
@@ -604,13 +633,12 @@
   
     <sys-lineitem
         data-pk="2"
-        data-token=""
-        data-order="2">
+        data-token="">
       
 <a name="lineitem-2"></a>
 <div class="editor">
   <div class="editor-row">
-    <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="2"></sys-code-input>
     <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Equipment Rental</sys-input>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical="!"   contenteditable>0,1</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
@@ -626,13 +654,12 @@
   
     <sys-lineitem
         data-pk="3"
-        data-token=""
-        data-order="3">
+        data-token="">
       
 <a name="lineitem-3"></a>
 <div class="editor">
   <div class="editor-row">
-    <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="3"></sys-code-input>
     <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Materials</sys-input>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical="4"   contenteditable>4</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>m</sys-input>
@@ -671,7 +698,7 @@
     
 <div class="editor">
   <div class="editor-row">
-    <div class="code">_</div>
+    <sys-code-input class="code" data-order="">_</sys-code-input>
     <sys-input class="name" placeholder="Gruppe" contenteditable></sys-input>
     <sys-decimal class="total">0,00</sys-decimal>
   </div>
@@ -684,7 +711,7 @@
 
 <div class="editor">
   <div class="editor-row">
-    <div class="code"></div>
+    <sys-code-input class="code" data-order=""></sys-code-input>
     <sys-input class="name"  placeholder="Position"                                             contenteditable></sys-input>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical=""   contenteditable>0</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                             contenteditable></sys-input>
@@ -713,7 +740,7 @@
 <a name="lineitem-None"></a>
 <div class="editor">
   <div class="editor-row">
-    <span class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger"></span>
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order=""></sys-code-input>
     <sys-input class="name"  placeholder="Kalkulationselement" contenteditable></sys-input>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical=""   contenteditable>0</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable></sys-input>

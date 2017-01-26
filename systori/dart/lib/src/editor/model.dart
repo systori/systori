@@ -105,9 +105,6 @@ abstract class Model extends HtmlElement {
     int get pk => int.parse(dataset['pk'], onError: (s)=>null);
     set pk(int id) => dataset['pk'] = id.toString();
 
-    int get order => int.parse(dataset['order'], onError: (s)=>null);
-    set order(int order) => dataset['order'] = order.toString();
-
     int get token => int.parse(dataset['token'], onError: (s)=>null);
     set token(int token) => dataset['token'] = token.toString();
 
@@ -117,7 +114,6 @@ abstract class Model extends HtmlElement {
 
     Model.created(): super.created() {
         if (!dataset.containsKey('pk')) dataset['pk'] = '';
-        if (!dataset.containsKey('order')) dataset['order'] = '';
         if (!dataset.containsKey('token')) dataset['token'] = tokenGenerator.next().toString();
         if (children.isEmpty) {
             TemplateElement template = document.querySelector('#${type}-template');
@@ -205,6 +201,14 @@ abstract class Model extends HtmlElement {
     delete() {
         if (pk != null) changeManager.delete(type, pk);
         remove();
+    }
+
+    maybeChildrenChanged() {
+        for (var childType in childTypes) {
+            for (var child in childrenOfType(childType)) {
+                child.updateVisualState('changed');
+            }
+        }
     }
 
     updateVisualState(String state) {

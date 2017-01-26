@@ -1,7 +1,6 @@
 {% load i18n customformatting %}
 <sys-task
     data-pk="{% if task.pk %}{{ task.pk }}{% endif %}"
-    data-token="{% if task.token %}{{ task.token }}{% endif %}"
-    data-order="{% if task.order %}{{ task.order }}{% endif %}">
+    data-token="{% if task.token %}{{ task.token }}{% endif %}">
   {% include "task/editor/task_editor.html" with task=task %}
 </sys-task>
