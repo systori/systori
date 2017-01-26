@@ -208,7 +208,7 @@ class Report extends Resource {
 }
 
 
-class ReportTableRow extends TableRowElement with MapMixin {
+class ReportTableRow extends TableRowElement with MapMixin<Object,String> {
     Map<String, TableCellElement> mapping;
 
     ReportTableRow.created() : super.created(); attached() {
@@ -234,7 +234,7 @@ class ReportTableRow extends TableRowElement with MapMixin {
 
     Iterable<String> get keys => mapping.keys;
     void clear() => mapping.clear();
-    void remove([Object key]) => super.remove(key);
+    String remove([Object key]) => super.remove(key);
 
 }
 
