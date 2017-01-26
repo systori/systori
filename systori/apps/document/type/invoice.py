@@ -107,6 +107,21 @@ def collate_itemized_listing(invoice, font, available_width):
 
     group_subtotals_added = False
 
+    def add_total(group):
+        global group_subtotals_added
+
+        if not group.get('groups') and group.get('tasks'):
+            items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
+                      '', '', '', money(group['progress']))
+            items.row_style('FONTNAME', 0, -1, font.bold)
+            items.row_style('ALIGNMENT', -1, -1, "RIGHT")
+            items.row_style('SPAN', 1, 4)
+            items.row_style('VALIGN', 0, -1, "BOTTOM")
+            items.row('')
+
+            totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font), money(group['progress']))
+            group_subtotals_added = True
+
     def add_task(task):
         items.row(p(task['code'], font), p(task['name'], font))
         items.row_style('SPAN', 1, -2)
@@ -117,27 +132,18 @@ def collate_itemized_listing(invoice, font, available_width):
         items.keep_previous_n_rows_together(2)
 
     def traverse(parent, depth):
-        global group_subtotals_added
         items.row(b(parent['code'], font), b(parent['name'], font))
         items.row_style('SPAN', 1, -1)
         items.keep_next_n_rows_together(2)
 
         for group in parent.get('groups', []):
             traverse(group, depth + 1)
-
-            if not group.get('groups', []) and group.get('tasks', []):
-                items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                          '', '', '', money(group['progress']))
-                items.row_style('FONTNAME', 0, -1, font.bold)
-                items.row_style('ALIGNMENT', -1, -1, "RIGHT")
-                items.row_style('SPAN', 1, 4)
-                items.row_style('VALIGN', 0, -1, "BOTTOM")
-                items.row('')
-
-                group_subtotals_added = True
+            add_total(group)
 
         for task in parent.get('tasks', []):
             add_task(task)
+
+        add_total(parent)
 
     for job in invoice['jobs']:
 
@@ -167,6 +173,7 @@ def collate_itemized_listing(invoice, font, available_width):
                 items.row_style('SPAN', 1, -2)
                 items.row_style('ALIGNMENT', -1, -1, "RIGHT")
 
+        global group_subtotals_added
         if not group_subtotals_added:
             # taskgroup subtotals are added if there is only 1 job *and* it is itemized
             # in all other cases we're going to show the job total
