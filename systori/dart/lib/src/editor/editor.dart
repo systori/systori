@@ -464,16 +464,17 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
 
     @override
     bool onKeyDownEvent(KeyEvent e, Input input) {
-        Task this_parent = parent.parent as Task;
+        LineItemSheet sheet_parent = parent as LineItemSheet;
+        Task task_parent = sheet_parent.parent as Task;
         switch(e.keyCode) {
             case KeyCode.ENTER:
                 e.preventDefault();
                 if (isBlank) {
                     remove();
-                    this_parent.createSibling();
+                    task_parent.createSibling();
                 } else {
                     createSibling();
-                    this_parent.maybeChildrenChanged();
+                    sheet_parent.onOrderingChanged();
                 }
                 return true;
             case KeyCode.DELETE:
@@ -484,9 +485,10 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
                 } else if (previousElementSibling is LineItem) {
                     (previousElementSibling as LineItem).name.focus();
                 } else {
-                    this_parent.name.focus();
+                    task_parent.name.focus();
                 }
-                (parent as LineItemSheet).deleteChild(this);
+                delete();
+                sheet_parent.onOrderingChanged();
                 return true;
         }
         return false;
@@ -508,7 +510,7 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
         addEventListener('blur', clearHighlighting, true);
     }
 
-    onOrderingChanged(Orderable orderable) {
+    onOrderingChanged([Orderable orderable]) {
         enumerate<LineItem>(rows).forEach((IndexedValue<LineItem> t) {
             t.value.dragHandle.position = t.index+1;
         });
@@ -564,11 +566,6 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
         LineItem li = document.createElement('sys-lineitem');
         insertBefore(li, this.querySelector(':scope>sys-lineitem'));
         li.name.focus();
-    }
-
-    deleteChild(LineItem li) {
-        li.delete();
-        onOrderingChanged(li);
     }
 
 }
