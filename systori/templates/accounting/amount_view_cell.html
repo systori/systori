@@ -1,5 +1,5 @@
 {% load i18n customformatting amount %}
-<td is="amount-{% if has_form %}stateful{% else %}view{% endif %}" class="{{ css_class }}" data-tax-rate="{{ TAX_RATE }}">
+<td is="amount-{% if has_form %}stateful{% else %}view{% endif %}" class="{{ css_class }}" data-tax-rate="{{ TAX_RATE|ubrdecimal:2 }}">
   <div class="amount-gross{% if bold == "gross" %} bold{% endif %}">
     {% amount_diff_part diff 'gross' %}
     {% amount_value_part amount 'gross' %}

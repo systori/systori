@@ -1,6 +1,6 @@
 @TestOn("vm")
 import 'package:test/test.dart';
-import 'package:systori/decimal.dart';
+import 'package:systori/numbers.dart';
 import 'package:systori/spreadsheet.dart';
 import 'cell_test.dart';
 

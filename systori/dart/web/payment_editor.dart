@@ -1,7 +1,7 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
 import 'package:systori/inputs.dart';
-import 'package:systori/decimal.dart';
+import 'package:systori/numbers.dart';
 
 
 class PaymentSplitTable extends TableElement {
@@ -14,7 +14,7 @@ class PaymentSplitTable extends TableElement {
     AmountViewCell credit_gross_total;
 
     Decimal discount_percent;
-    double tax_rate;
+    Amount tax_rate;
 
     Decimal get payment => new Decimal.parse(payment_input.value);
 
@@ -30,12 +30,12 @@ class PaymentSplitTable extends TableElement {
         payment_input.onKeyUp.listen(auto_split);
         discount_select = this.querySelector('select[name="discount"]');
         discount_select.onChange.listen(auto_split);
-        discount_percent = new Decimal.parse(discount_select.value);
-        tax_rate = double.parse(this.dataset['tax-rate']);
+        discount_percent = new Decimal(double.parse(discount_select.value));
+        tax_rate = new Amount.fromStrings('0', '0', this.dataset['tax-rate']);
     }
 
     auto_split([Event e]) {
-        discount_percent = new Decimal.parse(discount_select.value);
+        discount_percent = new Decimal(double.parse(discount_select.value));
         var remaining = payment;
         for (PaymentSplit row in rows) {
             remaining = row.consume_payment(remaining);
@@ -45,9 +45,9 @@ class PaymentSplitTable extends TableElement {
 
     recalculate() {
 
-        Amount split_total = new Amount.from(0, 0, tax_rate),
-               discount_total = new Amount.from(0, 0, tax_rate),
-               credit_total = new Amount.from(0, 0, tax_rate);
+        Amount split_total = tax_rate.zero(),
+               discount_total = tax_rate.zero(),
+               credit_total = tax_rate.zero();
 
         var rows = this.querySelectorAll(":scope tr.payment-split-row");
         for (PaymentSplit row in rows) {

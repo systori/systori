@@ -33,7 +33,7 @@
 
     <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %} table-responsive">
     {{ form.formset.management_form }}
-    <table is="refund-table" class="table table-striped" data-tax-rate="{{ TAX_RATE }}">
+    <table is="refund-table" class="table table-striped" data-tax-rate="{{ TAX_RATE|ubrdecimal:2 }}">
       <thead>
       <tr>
         <th class="job-name">{% trans 'Job' %}</th>

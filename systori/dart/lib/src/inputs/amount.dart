@@ -1,72 +1,9 @@
 import 'dart:html';
 import 'dart:async';
-import 'package:systori/decimal.dart';
+import 'package:systori/numbers.dart';
 
 
-class Amount {
-
-    final Decimal net;
-    final Decimal tax;
-    Decimal get gross => net + tax;
-    final Decimal tax_rate;
-
-    Amount(this.net, this.tax, this.tax_rate);
-
-    Amount.fromStrings(String net, String tax, String rate): this(
-        new Decimal.parse(net),
-        new Decimal.parse(tax),
-        new Decimal.parse(rate)
-    );
-
-    Amount.from(num net, num tax, num rate): this(
-        new Decimal(net),
-        new Decimal(tax),
-        new Decimal(rate)
-    );
-
-    factory
-    Amount.fromGross(Decimal gross, Decimal tax_rate) {
-        var net = gross / (new Decimal(1) + tax_rate);
-        var tax = gross - net;
-        return new Amount(net, tax, tax_rate);
-    }
-
-    Amount zero() =>
-        new Amount(new Decimal(), new Decimal(), tax_rate);
-
-    Amount adjustNet(Decimal new_net) =>
-        new Amount(new_net, gross - new_net, tax_rate);
-
-    Amount adjustTax(Decimal new_tax) =>
-        new Amount(gross - new_tax, new_tax, tax_rate);
-
-    Amount adjustGross(Decimal new_gross) =>
-        new Amount.fromGross(new_gross, tax_rate);
-
-    Amount zeroNegatives() =>
-        new Amount(net.decimal < 0 ? new Decimal() : net, tax.decimal < 0 ? new Decimal() : tax, tax_rate);
-
-    Amount operator * (Decimal multiple) =>
-        new Amount(net * multiple, tax * multiple, tax_rate);
-
-    Amount operator - (Amount other) =>
-        new Amount(net - other.net, tax - other.tax, tax_rate);
-
-    Amount operator + (Amount other) =>
-        new Amount(net + other.net, tax + other.tax, tax_rate);
-
-    bool operator == (dynamic other) =>
-        other is Amount && net == other.net && tax == other.tax;
-
-    int get hashCode {
-        // TODO: re-implement this when dart sdk exposes _JenkinsSmiHash
-        //  SEE: https://github.com/dart-lang/sdk/issues/11617
-        return net.hashCode ^ tax.hashCode;
-    }
-}
-
-
-class AmountDivs {
+abstract class AmountDivs {
 
     SpanElement _net_span;
     SpanElement _tax_span;
@@ -78,7 +15,8 @@ class AmountDivs {
 
     DivElement _percent_div;
 
-    String _tax_rate;
+    String get _tax_rate;
+    set _tax_rate(String tax_rate);
 
     updateViews(Amount amount) {
         _net_span.text = amount.net.money;
@@ -87,9 +25,9 @@ class AmountDivs {
     }
 
     updateDiff(Amount amount) {
-        _update_diff_value(_net_span, amount.net);
-        _update_diff_value(_tax_span, amount.tax);
-        _update_diff_value(_gross_span, amount.gross);
+        _update_diff_value(_net_span_diff, amount.net);
+        _update_diff_value(_tax_span_diff, amount.tax);
+        _update_diff_value(_gross_span_diff, amount.gross);
     }
 
     _update_diff_value(SpanElement span, Decimal value) {
@@ -131,18 +69,19 @@ class AmountDivs {
     }
 
     Amount amountFromViews() =>
-        new Amount.fromStrings(_net_span.text, _tax_span.text, _tax_rate);
+        new Amount.fromStringsZeroBlank(_net_span.text, _tax_span.text, _tax_rate);
 
 }
 
 
-class AmountInputs {
+abstract class AmountInputs {
 
     InputElement _net_input;
     InputElement _tax_input;
     InputElement _gross_input;
 
-    String _tax_rate;
+    String get _tax_rate;
+    set _tax_rate(String tax_rate);
 
     updateInputs(Amount amount) {
         _net_input.value = amount.net.money;
@@ -158,7 +97,7 @@ class AmountInputs {
     }
 
     Amount amountFromInputs() =>
-        new Amount.fromStrings(_net_input.value, _tax_input.value, _tax_rate);
+        new Amount.fromStringsZeroBlank(_net_input.value, _tax_input.value, _tax_rate);
 
 }
 
@@ -177,6 +116,7 @@ abstract class AmountCell extends TableCellElement {
 
 
 class AmountViewCell extends AmountCell with AmountDivs {
+    String _tax_rate;
 
     AmountViewCell.created() : super.created(); attached() {
         cacheViews(this);
@@ -210,6 +150,8 @@ class AmountChangeEvent {
 
 
 class AmountInputCell extends AmountCell with AmountInputs {
+
+    String _tax_rate;
 
     StreamController<AmountChangeEvent> controller = new StreamController<AmountChangeEvent>();
     get onAmountChange => controller.stream;
@@ -261,6 +203,8 @@ class AmountInputCell extends AmountCell with AmountInputs {
 
 
 class AmountStatefulCell extends AmountCell with AmountDivs, AmountInputs {
+
+    String _tax_rate;
 
     AmountStatefulCell.created() : super.created(); attached() {
         cacheViews(this);

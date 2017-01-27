@@ -17,6 +17,7 @@ from systori.apps.user.factories import UserFactory
 from systori.apps.accounting.models import Entry, create_account_for_job
 from systori.apps.document.forms import PaymentRowForm
 from systori.apps.accounting.workflow import debit_jobs, create_chart_of_accounts
+from systori.apps.accounting.constants import TAX_RATE
 from systori.lib.accounting.tools import Amount as A
 
 
@@ -75,12 +76,13 @@ def generate_amount_test_html(data):
     form.calculate_accounting_state(form.pre_txn)
     form.calculate_initial_values()
     template = Template("""{% load amount %}
+    <div id="scaffold">
     <table><tr>
     {% amount_view "test-amount-view" form1 "balance" %}
     {% amount_input "test-amount-input" form1 "split" %}
     {% amount_stateful "test-amount-stateful" form1 "discount" %}
-    </tr></table>""")
-    return template.render(Context({'TAX_RATE': '0.19', 'form1': form})).encode()
+    </tr></table></div>""")
+    return template.render(Context({'TAX_RATE': TAX_RATE, 'form1': form})).encode()
 
 
 def generate_pages():

@@ -26,7 +26,7 @@
       <h2 class="sub-header">{% trans "Jobs" %}</h2>
       <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %} table-responsive">
       {{ form.formset.management_form }}
-      <table is="proposal-table" class="table table-striped" data-tax-rate="{{ TAX_RATE }}">
+      <table is="proposal-table" class="table table-striped" data-tax-rate="{{ TAX_RATE|ubrdecimal:2 }}">
         <thead>
         <tr>
           <th class="job-is-attached"></th>

@@ -2,7 +2,7 @@
 import 'package:test/test.dart';
 import 'package:intl/intl.dart';
 import 'package:quiver/iterables.dart';
-import 'package:systori/decimal.dart';
+import 'package:systori/numbers.dart';
 import 'package:systori/spreadsheet.dart';
 
 

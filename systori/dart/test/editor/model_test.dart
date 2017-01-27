@@ -2,18 +2,18 @@
 import 'dart:html';
 import 'dart:async';
 import 'package:test/test.dart';
-import 'package:systori/editor.dart';
+import 'package:systori/src/editor/model.dart';
 import 'package:systori/inputs.dart';
 import 'tools.dart';
 
 
-class Thing extends Model {
+class Thing extends Model with KeyboardHandler {
 
     bool get canSave => name.text.isNotEmpty;
 
     Input name;
     Input description;
-    HtmlCell qty;
+    Input qty;
 
     List<String> childTypes = ['part'];
 
@@ -23,8 +23,13 @@ class Thing extends Model {
         name = getInput('name');
         description = getInput('description');
         qty = getInput('qty');
+        bindAll(inputs);
         super.attached();
     }
+
+    @override
+    bool onInputEvent(Input input) =>
+        updateVisualState('changed');
 
 }
 
@@ -35,7 +40,7 @@ class Part extends Model {
 
     Input name;
     Input description;
-    HtmlCell qty;
+    Input qty;
 
     Part.created(): super.created();
 
@@ -52,7 +57,6 @@ class Part extends Model {
 main() {
     tokenGenerator = new FakeToken();
     document.registerElement('sys-input', Input);
-    document.registerElement('sys-cell', HtmlCell);
     document.registerElement('sys-part', Part);
     document.registerElement('sys-thing', Thing);
 
@@ -76,7 +80,7 @@ main() {
             expect(thing.state.delta, {'qty': '0'});
             expect(thing.state.pending, null);
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
+                {'name': '', 'description': '', 'qty': ''});
 
             thing.name.text = 'new';
 
@@ -84,7 +88,7 @@ main() {
             expect(thing.state.delta, {'name': 'new', 'qty': '0'});
             expect(thing.state.pending, null);
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
+                {'name': '', 'description': '', 'qty': ''});
 
             thing.state.save();
 
@@ -92,7 +96,7 @@ main() {
             expect(thing.state.delta, {});
             expect(thing.state.pending, {'name': 'new', 'qty': '0'});
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
+                {'name': '', 'description': '', 'qty': ''});
 
             thing.state.commit();
 
@@ -100,11 +104,12 @@ main() {
             expect(thing.state.delta, {});
             expect(thing.state.pending, null);
             expect(thing.state.committed,
-                {'name': 'new', 'description': '', 'qty': '0', 'qty_equation': ''});
+                {'name': 'new', 'description': '', 'qty': '0'});
         });
 
         test("edits while saving", () {
-            thing.qty.text = '2';
+            thing.qty.focus();
+            nav.setText('2');
             thing.state.save();
 
             // edit another field
@@ -112,21 +117,21 @@ main() {
             expect(thing.state.delta, {'name': 'bar'});
             expect(thing.state.pending, {'qty': '2'});
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
+                {'name': '', 'description': '', 'qty': ''});
 
             // edit same field that's being saved
             thing.qty.text = '3';
             expect(thing.state.delta, {'name': 'bar', 'qty': '3'});
             expect(thing.state.pending, {'qty': '2'});
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
+                {'name': '', 'description': '', 'qty': ''});
 
             // after commit, qty is still dirty
             thing.state.commit();
             expect(thing.state.delta, {'name': 'bar', 'qty': '3'});
             expect(thing.state.pending, null);
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': '2', 'qty_equation': ''});
+                {'name': '', 'description': '', 'qty': '2'});
         });
 
         test("save rolledback", () {
@@ -141,7 +146,7 @@ main() {
             expect(thing.state.delta, {'name': 'bar', 'qty': '2'});
             expect(thing.state.pending, null);
             expect(thing.state.committed,
-                {'name': '', 'description': '', 'qty': '', 'qty_equation': ''});
+                {'name': '', 'description': '', 'qty': ''});
         });
 
         test("state indicator class", () async {

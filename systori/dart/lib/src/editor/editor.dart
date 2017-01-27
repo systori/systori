@@ -2,7 +2,7 @@ import 'dart:html';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:quiver/iterables.dart';
-import 'package:systori/decimal.dart';
+import 'package:systori/numbers.dart';
 import 'package:systori/spreadsheet.dart';
 import 'package:systori/orderable.dart';
 import 'package:systori/inputs.dart';
@@ -474,8 +474,8 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
                     task_parent.createSibling();
                 } else {
                     createSibling();
-                    sheet_parent.onOrderingChanged();
                 }
+                sheet_parent.onOrderingChanged();
                 return true;
             case KeyCode.DELETE:
                 if (!e.shiftKey) break;
@@ -515,12 +515,12 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
             t.value.dragHandle.position = t.index+1;
         });
         task.maybeChildrenChanged();
-        task.onCalculate('moved', rows[0].getCell(0));
+        task.onCalculate('moved', rows.isNotEmpty ? rows.first.getCell(0) : null);
     }
 
     onCalculationFinished(Cell changedCell) {
 
-        if (changedCell.resolver.ranges == null) return;
+        if (changedCell == null || changedCell.resolver.ranges == null) return;
 
         var matrix = new List.generate(rows.length, (i)=>[0,0,0]);
 

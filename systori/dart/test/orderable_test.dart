@@ -31,9 +31,9 @@ printVisibleNodeNames() {
        screen.
      */
     range(500).forEach((y) {
-        var el = document.elementFromPoint(10, y);
+        var el = document.elementFromPoint(20, y);
         if (el!=null) {
-            print("$y ${el.nodeName}");
+            print("$y ${el.nodeName}: ${el.text.length >= 20 ? el.text.substring(0, 20)+'...' : el.text}");
         }
     });
 }
@@ -46,18 +46,17 @@ void main() {
 
         test("move item in first container, before scroll", () {
             /*  this test is tricky in content-shell because the screen
-                appears to only be 150 pixels high... so the list
+                appears to only be 150 high x 284 wide... so the list
                 is not even visible on the screen, to still somewhat
                 emulate offsetting we at least scroll to the first P tag
              */
             var container = querySelector('#first-container');
             var first = container.children.first;
-            querySelector('p').scrollIntoView();
-            var offset = container.offsetTop;
-
+            querySelector('p').scrollIntoView(ScrollAlignment.TOP);
             expect(container.children.indexOf(first), 0);
-            mouseDownAt(10, 10+offset);
-            mouseMoveTo(10, 50+offset);
+            //printVisibleNodeNames();
+            mouseDownAt(10, 30);
+            mouseMoveTo(10, 70);
             mouseUp();
             expect(container.children.indexOf(first), 2);
         });
@@ -65,10 +64,10 @@ void main() {
         test("move item in second container, after scroll", () {
             var container = querySelector('#second-container');
             var first = container.children.first;
-            container.scrollIntoView();
-            var offset = container.offsetTop - window.scrollY;
-
+            container.scrollIntoView(ScrollAlignment.TOP);
             expect(container.children.indexOf(first), 0);
+            var offset = container.offsetTop - window.scrollY;
+            //printVisibleNodeNames();
             mouseDownAt(10, 10+offset);
             mouseMoveTo(10, 50+offset);
             mouseUp();

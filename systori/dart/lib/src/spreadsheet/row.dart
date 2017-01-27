@@ -1,4 +1,4 @@
-import 'package:systori/decimal.dart';
+import 'package:systori/numbers.dart';
 import 'cell.dart';
 
 

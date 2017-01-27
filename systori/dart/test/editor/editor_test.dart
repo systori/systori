@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:test/test.dart';
 import 'package:systori/editor.dart';
 import 'package:systori/spreadsheet.dart';
-import 'package:systori/decimal.dart';
+import 'package:systori/numbers.dart';
 import 'tools.dart';
 
 
@@ -465,8 +465,7 @@ void main() {
             expect(nav.caretOffset, 0);
             expect(li.qty.text, '!');
 
-            nav.selectAll();
-            nav.sendText('(1/100)');
+            nav.setText('(1/100)');
             expect(nav.caretOffset, 7);
             expect(li.qty.preview, '1 / 100 = 0,01');
 

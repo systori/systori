@@ -59,7 +59,7 @@
 
       </style>
       <h2 class="sub-header">{% trans "Debits" %}</h2>
-      <table is="invoice-table" class="table" data-tax-rate="{{ TAX_RATE }}">
+      <table is="invoice-table" class="table" data-tax-rate="{{ TAX_RATE|ubrdecimal:2 }}">
         <thead>
         <tr>
           <th class="job-is-invoiced"></th>

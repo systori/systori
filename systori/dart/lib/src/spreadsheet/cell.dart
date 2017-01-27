@@ -1,4 +1,4 @@
-import 'package:systori/decimal.dart';
+import 'package:systori/numbers.dart';
 import 'package:parsers/parsers.dart' as _p;
 
 

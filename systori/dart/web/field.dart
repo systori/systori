@@ -1,6 +1,6 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
-import 'package:systori/decimal.dart';
+import 'package:systori/numbers.dart';
 
 
 void main() {

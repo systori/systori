@@ -1,6 +1,7 @@
 import 'dart:html';
 import 'package:intl/intl.dart';
 import 'package:systori/inputs.dart';
+import 'package:systori/numbers.dart';
 
 
 class AdjustmentTable extends TableElement {
@@ -8,7 +9,7 @@ class AdjustmentTable extends TableElement {
     AmountViewCell adjustment_total_cell;
     AmountViewCell corrected_total_cell;
 
-    double tax_rate;
+    Amount tax_rate;
 
     ElementList<AdjustmentRow> get rows =>
             this.querySelectorAll(":scope tr.adjustment-row");
@@ -17,7 +18,7 @@ class AdjustmentTable extends TableElement {
         TableRowElement totals = this.querySelector(":scope tr.adjustment-table-totals");
         this.adjustment_total_cell = totals.querySelector(":scope>.job-adjustment");
         this.corrected_total_cell = totals.querySelector(":scope>.job-corrected");
-        tax_rate = double.parse(this.dataset['tax-rate']);
+        tax_rate = new Amount.fromStrings('0', '0', this.dataset['tax-rate']);
 
         querySelector('#match-overpaid')?.onClick?.listen(match_overpaid);
         querySelector('#match-underpaid')?.onClick?.listen(match_underpaid);
@@ -26,8 +27,8 @@ class AdjustmentTable extends TableElement {
     }
 
     recalculate() {
-        Amount adjustment_total = new Amount.from(0, 0, tax_rate),
-               corrected_total = new Amount.from(0, 0, tax_rate);
+        Amount adjustment_total = tax_rate.zero(),
+               corrected_total = tax_rate.zero();
         for (AdjustmentRow row in rows) {
             adjustment_total += row.adjustment_cell.amount;
             corrected_total += row.corrected_cell.amount;
@@ -97,11 +98,11 @@ class AdjustmentRow extends TableRowElement {
         table = parent.parent;
 
         paid_cell = this.querySelector(":scope>.job-paid");
-        paid_cell?.onClick?.listen(column_clicked);
+        paid_cell?.onClick?.listen((e)=>column_clicked(paid_cell));
         invoiced_cell = this.querySelector(":scope>.job-invoiced");
-        invoiced_cell.onClick.listen(column_clicked);
+        invoiced_cell.onClick.listen((e)=>column_clicked(invoiced_cell));
         progress_cell = this.querySelector(":scope>.job-progress");
-        progress_cell?.onClick?.listen(column_clicked);
+        progress_cell?.onClick?.listen((e)=>column_clicked(progress_cell));
 
         adjustment_cell = this.querySelector(":scope>.job-adjustment");
         adjustment_cell.onAmountChange.listen(adjustment_changed);
@@ -121,10 +122,8 @@ class AdjustmentRow extends TableRowElement {
         table.recalculate();
     }
 
-    column_clicked(MouseEvent e) {
-        Amount new_corrected_amount = (e.currentTarget as AmountViewCell).amount;
-        corrected_cell.update(new_corrected_amount, triggerEvent: true);
-    }
+    column_clicked(AmountViewCell cell) =>
+        corrected_cell.update(cell.amount, triggerEvent: true);
 
     update_selected() {
         for (AmountCell cell in [paid_cell, invoiced_cell, progress_cell]) {
