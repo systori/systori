@@ -44,7 +44,37 @@ class ManualTimerFormTest(TestCase):
         }, company=self.company)
         self.assertTrue(form.is_valid())
         timer = form.save()[0]
+        self.assertEqual(timer.duration, 60 * 60 * 9)
+
+    def test_save_with_morning_break(self):
+        tz = timezone.get_current_timezone()
+        start = tz.localize(datetime(2016, 9, 1, 7))
+        end = start + timedelta(hours=9)
+        form = forms.ManualTimerForm(data={
+            'worker': self.worker.pk,
+            'start': start.strftime('%d.%m.%Y %H:%M'),
+            'end': end.strftime('%d.%m.%Y %H:%M'),
+            'kind': Timer.HOLIDAY,
+            'morning_break': True
+        }, company=self.company)
+        self.assertTrue(form.is_valid())
+        timer = form.save()[0]
         self.assertEqual(timer.duration, 60 * 60 * 2)
+
+    def test_save_with_lunch_break(self):
+        tz = timezone.get_current_timezone()
+        start = tz.localize(datetime(2016, 9, 1, 7))
+        end = start + timedelta(hours=9)
+        form = forms.ManualTimerForm(data={
+            'worker': self.worker.pk,
+            'start': start.strftime('%d.%m.%Y %H:%M'),
+            'end': end.strftime('%d.%m.%Y %H:%M'),
+            'kind': Timer.HOLIDAY,
+            'lunch_break': True
+        }, company=self.company)
+        self.assertTrue(form.is_valid())
+        timer = form.save()[1]
+        self.assertEqual(timer.duration, 60 * 60 * 3)
 
     def test_save_days_span(self):
         """ This will test that the correct number of breaks were applied
@@ -57,11 +87,13 @@ class ManualTimerFormTest(TestCase):
             'worker': self.worker.pk,
             'start': start.strftime('%d.%m.%Y %H:%M'),
             'end': end.strftime('%d.%m.%Y %H:%M'),
-            'kind': Timer.WORK
+            'kind': Timer.WORK,
+            'morning_break': True,
+            'lunch_break': True
         }, company=self.company)
         self.assertTrue(form.is_valid())
         timers = form.save()
-        self.assertEqual(len(timers), 6)  # 3 breaks per day, for 2 days
+        self.assertEqual(len(timers), 6)  # 2 breaks per day, for 2 days
 
     def test_worker_dropdown_label(self):
         f = forms.ManualTimerForm(company=self.company)

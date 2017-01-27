@@ -18,8 +18,6 @@ class Timer(models.Model):
     TRAINING = 'training'
     HOLIDAY = 'holiday'
     ILLNESS = 'illness'
-    # PUBLIC_HOLIDAY = 'public_holiday'
-    # UNPAID_LEAVE = 'unpaid_leave'
     #TODO: public_holiday (8hrs work time) and unpaid_leave (0hrs work time) types
 
     KIND_CHOICES = (
@@ -28,8 +26,6 @@ class Timer(models.Model):
         (ILLNESS, _('Illness')),
         (CORRECTION, _('Correction')),
         (TRAINING, _('Training')),
-        # (PUBLIC_HOLIDAY, _('Public holiday')),
-        # (UNPAID_LEAVE, _('Unpaid leave')),
     )
     FULL_DAY_KINDS = (WORK, HOLIDAY, ILLNESS)
 
@@ -44,8 +40,6 @@ class Timer(models.Model):
         HOLIDAY: lambda start, end: (end - start).total_seconds(),
         CORRECTION: lambda start, end: (end - start).total_seconds(),
         TRAINING: lambda start, end: (end - start).total_seconds(),
-        # PUBLIC_HOLIDAY: lambda start, end: (end - start).total_seconds(),
-        # UNPAID_LEAVE: lambda start, end: (end - start).total_seconds(),
     }
 
     worker = models.ForeignKey('company.Worker', related_name='timers')
