@@ -67,6 +67,7 @@
     .editor-row {
       display: flex;
       align-items: flex-start;
+      padding-bottom: 3px;
     }
 
     /* job, group, task */
@@ -275,7 +276,8 @@
     }
 
     sys-cell[data-resolved] {
-      font-style: italic;
+      font-weight: bold;
+      border-bottom: green 2px dotted;
     }
 
     sys-cell {
@@ -292,9 +294,10 @@
       content: attr(data-preview);
       font-size: 10px;
       color: dimgrey;
-      bottom: -10px;
+      bottom: -15px;
       right: 4px;
       width: 400px;
+      white-space: nowrap;
     }
 
     .sys-lineitem-handle {

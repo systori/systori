@@ -228,10 +228,22 @@ class HtmlCell extends Input with HighlightableInputMixin, Cell, KeyboardHandler
     set local(String local) => dataset['local'] = local;
 
     String get resolved => dataset['resolved'] ?? "";
-    set resolved(String resolved) => dataset['resolved'] = resolved;
+    set resolved(String resolved) {
+        if (resolved == "") {
+            dataset.remove('resolved');
+        } else {
+            dataset['resolved'] = resolved;
+        }
+    }
 
     String get preview => dataset['preview'] ?? "";
-    set preview(String preview) => dataset['preview'] = preview;
+    set preview(String preview) {
+        if (preview == "") {
+            dataset.remove('preview');
+        } else {
+            dataset['preview'] = preview;
+        }
+    }
 
     bool get isFocused => document.activeElement == this;
 

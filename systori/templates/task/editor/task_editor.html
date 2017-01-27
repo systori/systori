@@ -1,13 +1,13 @@
-{% load i18n customformatting %}
+{% load i18n customformatting task %}
 
 <div class="editor">
   <div class="editor-row">
     <sys-code-input class="code" data-order="{% if task.order %}{{ task.order }}{% endif %}">{{ task.code }}</sys-code-input>
     <sys-input class="name"  placeholder="{% trans 'task' %}"                                             contenteditable>{{ task.name|safe }}</sys-input>
-    <sys-cell  class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ task.qty_equation }}"   contenteditable>{{ task.qty|ubrnumber }}</sys-cell>
+    <sys-cell  class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ task.qty_equation }}"   {% if task.qty_equation|is_formula %}data-resolved="" {% endif %}contenteditable>{{ task.qty|ubrnumber }}</sys-cell>
     <sys-input class="unit"  placeholder="{% trans 'unit' %}"                                             contenteditable>{{ task.unit }}</sys-input>
-    <sys-cell  class="price"                                   data-canonical="{{ task.price_equation }}" contenteditable>{{ task.price|ubrdecimal }}</sys-cell>
-    <sys-cell  class="total" placeholder="{% trans 'total' %}" data-canonical="{{ task.total_equation }}" contenteditable>{{ task.total|ubrdecimal }}</sys-cell>
+    <sys-cell  class="price"                                   data-canonical="{{ task.price_equation }}" {% if task.price_equation|is_formula %}data-resolved="" {% endif %}contenteditable>{{ task.price|ubrdecimal }}</sys-cell>
+    <sys-cell  class="total" placeholder="{% trans 'total' %}" data-canonical="{{ task.total_equation }}" {% if task.total_equation|is_formula %}data-resolved="" {% endif %}contenteditable>{{ task.total|ubrdecimal }}</sys-cell>
     {% comment %}
       <div class="labels">
         <span class="is_optional {{ task.is_provisional }} label label-primary">{% trans 'Optional' %}</span>

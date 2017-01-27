@@ -130,7 +130,7 @@ abstract class Cell {
                         _set_preview();
                     } catch(e) {
                         canonical = _old_canonical;
-                        resolver.withCollectRanges((){
+                        resolver.withCollectRanges(() {
                             resolved = "";
                         });
                         value = new Decimal();
