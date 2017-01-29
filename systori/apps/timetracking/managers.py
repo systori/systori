@@ -95,12 +95,8 @@ class TimerQuerySet(QuerySet):
             yield day
 
     def generate_monthly_worker_report(self, period=None):
-        from .utils import format_seconds
-
-        naive_now = datetime.now()
-        now = timezone.now()
         period = period or timezone.now()
-        queryset = self.filter_month(period.year, period.month).order_by('date').order_by('id')
+        queryset = self.filter_month(period.year, period.month)
 
         report = OrderedDict()
         for timer in queryset:
