@@ -54,7 +54,7 @@ class ReportsTest(TestCase):
             worker=self.worker1, start=today, end=today + timedelta(hours=2)
         )
         worker1_timer2 = Timer.objects.create(
-            worker=self.worker1, start=today + timedelta(hours=3), end=today + timedelta(hours=9)
+            worker=self.worker1, start=today + timedelta(hours=3), end=today + timedelta(hours=8)
         )
 
         Timer.objects.create(
@@ -76,36 +76,33 @@ class ReportsTest(TestCase):
 
         report = utils.get_daily_workers_report(self.company.workers.order_by('pk'))
 
-        self.assertEqual(report[self.worker1]['day_start'], worker1_timer1.start)
-        self.assertEqual(report[self.worker1]['day_end'], worker1_timer2.end)
+        self.assertEqual(report[self.worker1]['timers'][0].start, worker1_timer1.start)
+        self.assertEqual(report[self.worker1]['timers'][1].end, worker1_timer2.end)
         self.assertEqual(
             report[self.worker1]['total_duration'],
             worker1_timer1.duration + worker1_timer2.duration)
-        self.assertEqual(
-            report[self.worker1]['total'],
-            worker1_timer1.duration + worker1_timer2.duration - Timer.DAILY_BREAK)
         self.assertEqual(report[self.worker1]['overtime'], -3600)
 
-        self.assertEqual(report[self.worker2]['day_start'], worker2_timer1.start)
-        self.assertEqual(report[self.worker2]['day_end'], worker2_timer2.end)
+        self.assertEqual(report[self.worker2]['timers'][0].start, worker2_timer1.start)
+        self.assertEqual(report[self.worker2]['timers'][1].end, worker2_timer2.end)
         self.assertEqual(
             report[self.worker2]['total_duration'],
             worker2_timer1.duration + worker2_timer2.duration)
         self.assertEqual(
-            report[self.worker2]['total'],
-            worker2_timer1.duration + worker2_timer2.duration - Timer.DAILY_BREAK)
-        self.assertEqual(report[self.worker2]['overtime'], -10800)
+            report[self.worker2]['total_duration'],
+            worker2_timer1.duration + worker2_timer2.duration)
+        self.assertEqual(report[self.worker2]['overtime'], -7200)
 
-        self.assertEqual(report[self.worker3]['day_start'], worker3_timer1.start)
-        self.assertEqual(report[self.worker3]['day_end'], None)
+        self.assertEqual(report[self.worker3]['timers'][0].start, worker3_timer1.start)
+        self.assertEqual(report[self.worker3]['timers'][0].end, None)
         self.assertEqual(report[self.worker3]['total_duration'], worker3_timer1.get_duration_seconds())
         self.assertEqual(
-            report[self.worker3]['total'],
-            worker3_timer1.get_duration_seconds() - Timer.DAILY_BREAK
+            report[self.worker3]['total_duration'],
+            worker3_timer1.get_duration_seconds()
         )
-        self.assertEqual(report[self.worker3]['overtime'], -7200)
+        self.assertEqual(report[self.worker3]['overtime'], -3600)
 
-        self.assertFalse(report[self.worker4]['total'])
+        self.assertFalse(report[self.worker4]['total_duration'])
 
 
 class UserStatusesTest(TestCase):

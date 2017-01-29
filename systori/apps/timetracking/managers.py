@@ -136,7 +136,6 @@ class TimerQuerySet(QuerySet):
         reports = OrderedDict((worker, {
             'timers': [],
             'total_duration': 0,
-            'total': 0,
             'overtime': 0
         }) for worker in workers)
         for timer in queryset:
