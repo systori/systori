@@ -123,6 +123,9 @@ void searchProjectsApi([_]) {
 }
 
 void filterProjects([_]) {
+  SystoriWarningMessage warning = querySelector('sys-warning-message');
+  warning.hideWarningMessage = true;
+
   var projects = querySelectorAll('.tile');
   projects..classes.add('hidden');
   for (var project in projects) {
@@ -130,6 +133,11 @@ void filterProjects([_]) {
     if (!isProjectInPhases(project, phaseFilter)) continue;
     project.classes.remove('hidden');
   }
+
+  warning.warnPhaseFilteredProjects(
+      searchMatches.length - querySelectorAll('.tile:not(.hidden)').length
+  );
+
 }
 
 void clearFilter([_]) {
@@ -202,6 +210,8 @@ class SystoriSortButton extends HtmlElement {
       btn.active = false;
     }
     this.active = true;
+    localStorage['sys-sort-button'] = this.type;
+    localStorage['sys-sort-button-reversed'] = this.reversed.toString();
   }
 
   SystoriSortButton.created() : super.created() {
@@ -226,17 +236,32 @@ class SystoriProjectTile extends HtmlElement {
   factory SystoriProjectTile() => new Element.tag(tag);
 }
 
-void main() {
-  document.registerElement('sys-phase-button', SystoriPhaseButton);
-  querySelectorAll('sys-phase-button').onClick.listen(updatePhaseFilter);
-  document.registerElement('sys-project-tile', SystoriProjectTile);
-  document.registerElement('sys-sort-button', SystoriSortButton);
-  querySelectorAll('sys-sort-button').onClick.listen(sortProjects);
+class SystoriWarningMessage extends HtmlElement {
+  static final tag = 'sys-warning-message';
 
-  search_clear = querySelector('#search_clear');
-  search_input = querySelector('#search_input');
-  search_clear.onClick.listen(clearFilter);
-  search_input.onInput.listen(searchProjectsApi);
+  warnPhaseFilteredProjects(int phaseFilteredProjects) {
+    if (phaseFilteredProjects > 0) {
+      this.children.first.text =
+          querySelector('#sys-phaseFilteredProjects-translated').text
+              .replaceAll(new RegExp(r'(\$phaseFilteredProjects)'), phaseFilteredProjects.toString());
+      this.classes.remove('hidden');
+    }
+  }
+
+  bool get hideWarningMessage => this.classes.contains('hidden');
+  set hideWarningMessage(bool hideWarningMessage) {
+    hideWarningMessage
+      ? this.classes.add('hidden')
+      : this.classes.remove('hidden');
+  }
+
+  SystoriWarningMessage.created() : super.created() {}
+  factory SystoriWarningMessage() => new Element.tag(tag);
+}
+
+void loadLocalStorage() {
+  querySelector('#filter-bar').classes.remove('hidden');
+  querySelector('#tile-container').classes.remove('hidden');
 
   if (localStorage['search_input'] != "" &&
       localStorage['search_input'] != null) {
@@ -262,4 +287,28 @@ void main() {
     ];
     setPhaseFilter();
   }
+  if (localStorage['sys-sort-button'] != "" &&
+      localStorage['sys-sort-button'] != null) {
+      String type = localStorage['sys-sort-button'];
+      SystoriSortButton btn = document.querySelector("sys-sort-button[data-type='$type']");
+      btn.reversed = localStorage['sys-sort-button-reversed'] == "true";
+      btn.click();
+  }
+}
+
+void main() {
+  document.registerElement('sys-phase-button', SystoriPhaseButton);
+  document.registerElement('sys-project-tile', SystoriProjectTile);
+  document.registerElement('sys-sort-button', SystoriSortButton);
+  document.registerElement('sys-warning-message', SystoriWarningMessage);
+
+  search_clear = querySelector('#search_clear');
+  search_input = querySelector('#search_input');
+
+  search_clear.onClick.listen(clearFilter);
+  search_input.onInput.listen(searchProjectsApi);
+  querySelectorAll('sys-sort-button').onClick.listen(sortProjects);
+  querySelectorAll('sys-phase-button').onClick.listen(updatePhaseFilter);
+
+  loadLocalStorage();
 }
