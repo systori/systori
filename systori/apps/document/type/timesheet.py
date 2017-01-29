@@ -184,7 +184,7 @@ class TimeSheetCollector:
 
 
 def serialize(timers, year, month):
-    """ Timers must all be for the same user and within a single month. """
+    """ Timers must all be for the same worker and within a single month. """
 
     data = {}
 
@@ -195,12 +195,12 @@ def serialize(timers, year, month):
         assert timer.date.year == year
         assert timer.date.month == month
 
-        if 'user_id' not in data:
-            data['user_id'] = timer.user_id
-            data['first_name'] = timer.user.first_name
-            data['last_name'] = timer.user.last_name
+        if 'worker_id' not in data:
+            data['worker_id'] = timer.worker_id
+            data['first_name'] = timer.worker.first_name
+            data['last_name'] = timer.worker.last_name
         else:
-            assert data['user_id'] == timer.user_id
+            assert data['worker_id'] == timer.worker_id
 
         collector.add(timer)
 

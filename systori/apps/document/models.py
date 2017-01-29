@@ -24,8 +24,7 @@ class Document(models.Model):
     notes = models.TextField(_("Notes"), blank=True, null=True)
 
     def __str__(self):
-        return '{} {} {}'.format(self.get_status_display(),
-                                 self.__class__.__name__, self.created_on)
+        return '{} {}'.format(self.__class__.__name__, self.created_on)
 
     class Meta:
         abstract = True

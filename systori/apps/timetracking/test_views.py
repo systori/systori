@@ -156,3 +156,51 @@ class UserReportViewTest(SystoriTestCase):
         self.client.login(username=self.worker.email, password=self.password)
         response = self.client.get(reverse('timetracking_worker', args=[self.worker.pk]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class TimerDeleteViewTest(SystoriTestCase):
+    password = 'UserReportViewTest'
+
+    def setUp(self):
+        self.another_company = CompanyFactory(schema='another_testcompany')
+        self.another_worker = UserFactory(company=self.another_company, password=self.password).access.first()
+        self.company = CompanyFactory()
+        self.worker = UserFactory(company=self.company, password=self.password).access.first()
+
+    def test_delete_single_timer(self):
+        self.client.login(username=self.worker.email, password=self.password)
+        day = timezone.now().replace(day=1, hour=18, minute=0, second=0, microsecond=0)
+        timer0 = Timer.objects.create(
+            worker=self.worker,
+            start=day - timedelta(hours=10),
+            end=day - timedelta(hours=3)
+        )
+        response = self.client.get(reverse('timer.delete', args=[timer0.id]), follow=True)
+        post_response = self.client.post(reverse('timer.delete', args=[timer0.id]), follow=True)
+        self.assertRedirects(post_response, reverse('timetracking_worker', args=[self.worker.id]), status_code=302)
+        self.assertFalse(Timer.objects.exists())
+
+    def test_delete_complete_day(self):
+        self.client.login(username=self.worker.email, password=self.password)
+        day = timezone.now().replace(day=1, hour=18, minute=0, second=0, microsecond=0)
+        Timer.objects.create(
+            worker=self.worker,
+            start=day - timedelta(hours=11),
+            end=day - timedelta(hours=2)
+        )
+        Timer.objects.create(
+            worker=self.worker,
+            start=day - timedelta(hours=8),
+            end=day - timedelta(hours=4)
+        )
+        Timer.objects.create(
+            worker=self.worker,
+            start=day - timedelta(hours=3),
+            end=day - timedelta(hours=1)
+        )
+        self.client.get(reverse('timer.delete.selected_day',
+                                args=[day.date().isoformat(), self.worker.id]),follow=True)
+        post_response = self.client.post(reverse('timer.delete.selected_day',
+                                                 args=[day.date().isoformat(), self.worker.id]), follow=True)
+        self.assertRedirects(post_response, reverse('timetracking_worker', args=[self.worker.id]), status_code=302)
+        self.assertFalse(Timer.objects.exists())

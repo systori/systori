@@ -25,13 +25,7 @@
     display: default;
   }
   #timetracking-report td.user {
-    width: 40%;
-  }
-  #id_user {
-    width: 200px;
-  }
-  #id_duration {
-    width: 80px !important;
+    width: 18%;
   }
 </style>
 {{ form.media.css }}
@@ -84,22 +78,31 @@
     <table id="timetracking-report" class="table table-striped table-bordered">
       <tr>
         <th>{% trans "User" %}</th>
-        <th>{% trans "Start" %}</th>
-        <th>{% trans "End" %}</th>
-        <th>{% trans "Total Duration" %}</th>
-        <th>{% trans "Total" %}</th>
+        <th>{% trans "Timer" %}</th>
         <th>{% trans "Overtime" %}</th>
       </tr>
-      {% for user, row in report.items %}
+      {% for worker, items in report.items %}
       <tr>
         <td class="user">
-          <a href="{% url 'timetracking_worker' user.pk %}">{{ user.get_full_name }}</a>
+          <a href="{% url 'timetracking_worker' worker.pk %}">{{ worker.get_full_name }}</a>
         </td>
-        <td>{{ row.day_start|date:"H:i" }}</td>
-        <td>{{ row.day_end|date:"H:i" }}</td>
-        <td>{{ row.total_duration|seconds_to_hours }}</td>
-        <td>{{ row.total|seconds_to_hours }}</td>
-        <td>{{ row.overtime|seconds_to_hours }}</td>
+          <td>
+            <div class="progress">
+              {% for timer in items.timers %}
+                  <div class="progress-bar
+                    {% if timer.kind == "work" %} progress-bar-success
+                    {% elif timer.kind == "holiday" %} progress-bar-warning
+                    {% endif %}" role="progressbar" style="width:{{ timer.duration|seconds_to_pixels }}px">
+                    {{ timer.start|time:"H:i" }} - {{ timer.end|time:"H:i" }} ({{ timer.duration|seconds_to_hours }})
+                  </div>
+
+                 {% if not forloop.last %}
+                     <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" style="width:25px"></div>
+                 {% endif %}
+              {% endfor %}
+            </div>
+          </td>
+        <td>{{ items.overtime|seconds_to_hours }}</td>
       </tr>
       {% empty %}
         {% trans "No users" %}
