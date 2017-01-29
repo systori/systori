@@ -232,7 +232,14 @@ class SystoriProjectTile extends HtmlElement {
         : this.classes.remove('hidden');
   }
 
-  SystoriProjectTile.created() : super.created() {}
+  void gotoProject(event) {
+    window.location.href = window.location.origin
+        +"/project-"+event.target.dataset['pk'];
+  }
+
+  SystoriProjectTile.created() : super.created() {
+    this.onClick.listen((event) => gotoProject(event));
+  }
   factory SystoriProjectTile() => new Element.tag(tag);
 }
 

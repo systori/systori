@@ -179,23 +179,44 @@ td[is=amount-stateful].selected>div {
 }
 
 .prospective {
-    background: linear-gradient(to bottom,rgba(183,219,193,0.4) 0%,rgba(183,219,193,0.65) 100%) !important;
+    background: linear-gradient(to bottom,rgba(183,219,193,0.05) 0%,rgba(183,219,193,0.4) 100%) !important;
+}
+.prospective:hover {
+    background: rgba(183,219,193,0.8) !important;
 }
 .tendering {
-    background: linear-gradient(to bottom,rgba(0,161,154,0.4) 0%,rgba(0,161,154,0.65) 100%) !important;
+    background: linear-gradient(to bottom,rgba(0,161,154,0.05) 0%,rgba(0,161,154,0.4) 100%) !important;
+}
+.tendering:hover {
+    background: rgba(0,161,154,0.8) !important;
 }
 .planning {
-    background: linear-gradient(to bottom,rgba(0,108,124,0.4) 0%,rgba(0,108,124,0.65) 100%) !important;
+    background: linear-gradient(to bottom,rgba(0,108,124,0.05) 0%,rgba(0,108,124,0.4) 100%) !important;
+}
+.planning:hover {
+    background: rgba(0,108,124,0.5) !important;
 }
 .executing {
-    background: linear-gradient(to bottom,rgba(250,185,75,0.4) 0%,rgba(250,185,75,0.65) 100%) !important;
+    background: linear-gradient(to bottom,rgba(250,185,75,0.05) 0%,rgba(250,185,75,0.4) 100%) !important;
+}
+.executing:hover {
+    background: rgba(250,185,75,0.8) !important;
 }
 .settlement {
-    background: linear-gradient(to bottom,rgba(238,114,95,0.4) 0%,rgba(238,114,95,0.65) 100%) !important;
+    background: linear-gradient(to bottom,rgba(238,114,95,0.05) 0%,rgba(238,114,95,0.4) 100%) !important;
+}
+.settlement:hover {
+    background: rgba(238,114,95,0.8) !important;
 }
 .warranty {
-    background: linear-gradient(to bottom,rgba(198,198,204,0.4) 0%,rgba(198,198,204,0.65) 100%) !important;
+    background: linear-gradient(to bottom,rgba(198,198,204,0.05) 0%,rgba(198,198,204,0.4) 100%) !important;
+}
+.warranty:hover {
+    background: rgba(198,198,204,1) !important;
 }
 .finished {
-    background: linear-gradient(to bottom,rgba(238,238,238,0.4) 0%,rgba(238,238,238,0.65) 100%) !important;
+    background: linear-gradient(to bottom,rgba(238,238,238,0.05) 0%,rgba(238,238,238,0.4) 100%) !important;
+}
+.finished:hover {
+    background: rgba(238,238,238,1) !important;
 }
