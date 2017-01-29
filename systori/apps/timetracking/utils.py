@@ -93,12 +93,13 @@ def get_worker_monthly_report(worker, period):
 
     holidays_used = get_holidays_duration(worker, period.year, period.month)
     report = Timer.objects.filter(worker=worker).generate_monthly_worker_report(period)
-    # overtime = sum(day['work']['overtime'] for day in report.values())
+    overtime = sum(day['overtime'] for day in report.values())
+
     return {
         'holidays_used': format_days(holidays_used),
         'holidays_available': format_days(HOLIDAYS_PER_MONTH - holidays_used),
         'rows': report,
-        'overtime': None,
+        'overtime': overtime,
     }
 
 

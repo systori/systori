@@ -65,7 +65,6 @@ class WorkerForm(ModelForm):
     class Meta:
         model = Worker
         fields = ['is_active', 'is_owner', 'is_staff', 'is_foreman', 'is_laborer']
-        #fields = ['is_active', 'is_owner', 'is_staff', 'is_foreman', 'is_laborer', 'timetracking', 'tracks_time']
 
 
 class LanguageForm(ModelForm):

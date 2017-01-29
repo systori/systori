@@ -124,10 +124,9 @@ class TimerQuerySet(QuerySet):
                 report[date]['total'] = 0
             report[date]['total'] += timer.duration
             report[date]['date'] = timer.date
-            # if timer.kind == self.model.WORK:
-            #     report_row['total'] += timer.get_duration_seconds(now)
-            #     report_row['overtime'] = report_row['duration'] - self.model.WORK_HOURS
-            #     report_row['total'] += report_row['overtime']
+
+        for day in report.values():
+            day['overtime'] = day['total'] - self.model.WORK_HOURS
 
         return report
 
