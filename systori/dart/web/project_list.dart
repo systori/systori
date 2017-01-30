@@ -186,7 +186,6 @@ class SystoriPhaseButton extends HtmlElement {
 
     SystoriPhaseButton.created() : super.created() {
         if (dataset.containsKey('phase')) phase = dataset['phase'];
-        this.onClick.listen(updatePhaseFilter);
     }
 
     factory SystoriPhaseButton() => new Element.tag(tag);
@@ -325,7 +324,7 @@ void main() {
     search_clear.onClick.listen(clearFilter);
     search_input.onInput.listen(searchProjectsApi);
     querySelectorAll('sys-sort-button').onClick.listen(sortProjects);
-    //querySelectorAll('sys-phase-button').onClick.listen(updatePhaseFilter);
+    querySelectorAll('sys-phase-button').onClick.listen(updatePhaseFilter);
 
     loadLocalStorage();
 }
