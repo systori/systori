@@ -18,7 +18,8 @@ class Timer(models.Model):
     TRAINING = 'training'
     HOLIDAY = 'holiday'
     ILLNESS = 'illness'
-    #TODO: public_holiday (8hrs work time) and unpaid_leave (0hrs work time) types
+    PUBLIC_HOLIDAY = 'public_holiday'
+    PAID_LEAVE = 'paid_leave'
 
     KIND_CHOICES = (
         (WORK, _('Work')),
@@ -26,6 +27,8 @@ class Timer(models.Model):
         (ILLNESS, _('Illness')),
         (CORRECTION, _('Correction')),
         (TRAINING, _('Training')),
+        (PUBLIC_HOLIDAY, _('Public holiday')),
+        (PAID_LEAVE, _('Paid leave'))
     )
     FULL_DAY_KINDS = (WORK, HOLIDAY, ILLNESS)
 
@@ -34,12 +37,16 @@ class Timer(models.Model):
     WORK_DAY_START = (7, 00)
     SHORT_DURATION_THRESHOLD = 59
 
+    simple_duration = lambda start, end: (end - start).total_seconds()
+
     duration_formulas = {
-        WORK: lambda start, end: (end - start).total_seconds(),
-        ILLNESS: lambda start, end: (end - start).total_seconds(),
-        HOLIDAY: lambda start, end: (end - start).total_seconds(),
-        CORRECTION: lambda start, end: (end - start).total_seconds(),
-        TRAINING: lambda start, end: (end - start).total_seconds(),
+        WORK: simple_duration,
+        ILLNESS: simple_duration,
+        HOLIDAY: simple_duration,
+        CORRECTION: simple_duration,
+        TRAINING: simple_duration,
+        PUBLIC_HOLIDAY: simple_duration,
+        PAID_LEAVE: lambda start, end: 0
     }
 
     worker = models.ForeignKey('company.Worker', related_name='timers')
@@ -99,6 +106,11 @@ class Timer(models.Model):
         elif self.duration:
             self.end = self.start + timedelta(seconds=self.duration)
 
+    def _pre_save_for_special(self):
+        if self.kind == self.PUBLIC_HOLIDAY:
+            self.start = self.start.replace(hour=7, minute=0, second=0, microsecond=0)
+            self.end = self.end.replace(hour=15, minute=0, second=0, microsecond=0)
+
     def clean(self):
         if self.pk:
             return
@@ -123,6 +135,7 @@ class Timer(models.Model):
             raise ValidationError(__('Timer cannot be negative'))
 
     def save(self, *args, **kwargs):
+        self._pre_save_for_special()
         self._pre_save_for_generic()
 
         if not self.date:

@@ -81,7 +81,6 @@ class TimerTest(TestCase):
 
     @freeze_time(NOW)
     def test_save_regular_timer(self):
-        # Regular timer
         timer = Timer(worker=self.worker)
         timer.save()
         self.assertEqual(timer.start, NOW)
@@ -91,6 +90,20 @@ class TimerTest(TestCase):
         with self.assertRaises(ValidationError):
             timer = Timer(worker=self.worker)
             timer.clean()
+
+    @freeze_time(NOW)
+    def test_save_public_holiday_timer(self):
+        now = timezone.now()
+        start = now.replace(hour=12, minute=30)
+        end = now.replace(hour=16, minute=45)
+        expected_start = now.replace(hour=7, minute=0, second=0, microsecond=0)
+        expected_end = now.replace(hour=15, minute=0, second=0, microsecond=0)
+        timer = Timer(worker=self.worker, kind=Timer.PUBLIC_HOLIDAY, start=start, end=end)
+        timer.save()
+        self.assertEqual(timer.start, expected_start)
+        self.assertEqual(timer.end, expected_end)
+        self.assertEqual(timer.date, now.date())
+        self.assertEqual(timer.duration, 60 * 60 * 8)
 
     @freeze_time(NOW)
     def test_save_with_end(self):
