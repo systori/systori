@@ -116,6 +116,27 @@ def dockergetdb(container='app', envname='production'):
     local('rm ' + dump_file)
 
 
+def localdockergetdb(container='app', envname='production'):
+    """\
+    :container=app,envname=production -- fetch and load remote database
+    Useful for setups where the app is run locally and postgresql is dockerized
+    """
+    dump_file = 'systori.'+envname+'.dump'
+    settings = {
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'HOST': 'localhost'
+    }
+    fetchdb(envname)
+    local('dropdb -h {HOST} -U {USER} {NAME}'.format(
+        container, **settings))
+    local('createdb -h {HOST} -U {USER} {NAME}'.format(
+        container, **settings))
+    local('pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(
+        container, dump_file, **settings))
+    local('rm ' + dump_file)
+
+
 def initsettings(envname='local'):
     ":envname=local -- creates __init__.py in settings folder"
     assert envname in ['dev', 'production', 'local', 'jenkins']
