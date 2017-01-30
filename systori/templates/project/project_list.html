@@ -40,6 +40,7 @@
     }
     .tile a {
         color: rgba(0,0,0,0.85);
+        text-decoration: none;
     }
 
     .btn {
@@ -70,7 +71,6 @@
         height: 20px;
         margin: auto;
         font-size: 14px;
-        cursor: pointer;
         color: #ccc;
         z-index:10;
     }
@@ -136,9 +136,10 @@
           {% for phase, projects in project_groups.items %}
                 {% for project in projects %}
                         <sys-project-tile data-pk="{{ project.id }}" data-name="{{ project|slugify }} - {{ project.id }}"
-                             data-phase="{{ phase }}" class="tile {{ phase }}">
-
-                            <span>#{{ project.id }}</span><br>{{ project }}
+                             data-phase="{{ phase }}" class="tile {{ phase }}" href="#">
+                            <a href="{% url 'project.view' project.id %}" style="display: block">
+                                <span>#{{ project.id }}</span><br>{{ project }}
+                            </a>
                         </sys-project-tile>
                 {% endfor %}
           {% endfor %}
