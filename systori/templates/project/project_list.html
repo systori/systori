@@ -21,22 +21,26 @@
         display: flex;
         flex-wrap: wrap;
         align-items: stretch;
+        padding-bottom: 60px;
     }
     .tile{
-        flex: 1 0 150px;
+        flex: 1 0 250px;
         max-width: 100%;
         margin: 2px;
         padding: 5px;
         background: #c0c0c0;
         border-radius: 3px;
         word-wrap: break-word;
+        font-size: 15px;
+        cursor: pointer;
     }
     .tile span {
-        color: rgba(0,0,0,0.75);
+        color: rgba(0,0,0,0.85);
         font-weight:bold;
     }
     .tile a {
-        color: rgba(0,0,0,0.75);
+        color: rgba(0,0,0,0.85);
+        text-decoration: none;
     }
 
     .btn {
@@ -67,9 +71,17 @@
         height: 20px;
         margin: auto;
         font-size: 14px;
-        cursor: pointer;
         color: #ccc;
         z-index:10;
+    }
+
+    sys-warning-message {
+        position: fixed;
+        bottom: 10px;
+        left: 20px;
+        height: 40px;
+        padding: 10px;
+        background: rgb(255, 255, 255);
     }
 
 </style>
@@ -80,7 +92,7 @@
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
 
 {% block container %}
-<div id="filter-bar">
+<div id="filter-bar" class="hidden">
     <div class="container-fluid">
         <div class="row">
             <div class="col-xs-12" style="overflow:scroll;">
@@ -120,18 +132,25 @@
     </div>
 </div>
 <div class="container-fluid">
-    <div id="tile-container">
+    <div id="tile-container" class="hidden">
           {% for phase, projects in project_groups.items %}
                 {% for project in projects %}
                         <sys-project-tile data-pk="{{ project.id }}" data-name="{{ project|slugify }} - {{ project.id }}"
-                             data-phase="{{ phase }}" class="tile {{ phase }}">
-
-                            <a href="{% url 'project.view' project.id %}"><span>#{{ project.id }}</span><br>{{ project }}</a>
+                             data-phase="{{ phase }}" class="tile {{ phase }}" href="#">
+                            <a href="{% url 'project.view' project.id %}" style="display: block">
+                                <span>#{{ project.id }}</span><br>{{ project }}
+                            </a>
                         </sys-project-tile>
                 {% endfor %}
           {% endfor %}
     </div>
 </div>
+
+<sys-warning-message class="hidden">
+    <span></span> {# placeholder for the dynamic part of the warning message #}
+</sys-warning-message>
+
+<div id="sys-phaseFilteredProjects-translated" class="hidden">{% trans "$phaseFilteredProjects projects aren't displayed." %}</div>
 
 {% endblock container %}
 
