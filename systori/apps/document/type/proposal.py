@@ -1,5 +1,6 @@
 from io import BytesIO
 from datetime import date
+from decimal import Decimal
 
 from reportlab.lib.units import mm
 from reportlab.lib.utils import simpleSplit
@@ -162,24 +163,25 @@ def collate_lineitems(proposal, available_width, font):
         t.style.append(('ALIGNMENT', (1, 0), (1, -1), 'RIGHT'))
         t.style.append(('ALIGNMENT', (3, 0), (-1, -1), 'RIGHT'))
 
+        task_price = Decimal('0')
         for lineitem in task['lineitems']:
             t.row(p(lineitem['name'], font),
                   ubrdecimal(lineitem['qty']),
                   p(lineitem['unit'], font),
-                  money(lineitem['price']),
-                  money(lineitem['price_per'])
+                  money(lineitem['estimate'])
                   )
+            task_price += lineitem['estimate']
 
         t.row_style('LINEBELOW', 0, -1, 0.25, colors.black)
 
-        t.row('', ubrdecimal(task['qty']), b(task['unit'], font), '', money(task['estimate_net']))
+        t.row('', ubrdecimal(task['qty']/task['qty']), b(task['unit'], font), money(task_price), '')
         t.row_style('FONTNAME', 0, -1, font.bold)
 
         pages.append(t.get_table(ContinuationTable))
 
 
     def traverse(parent, depth):
-        for group in parent.get('taskgroups', []):
+        for group in parent.get('groups', []):
             traverse(group, depth + 1)
 
         for task in parent['tasks']:
@@ -187,7 +189,7 @@ def collate_lineitems(proposal, available_width, font):
 
     for job in proposal['jobs']:
 
-        for group in job.get('taskgroups', []):
+        for group in job.get('groups', []):
             traverse(group, 1)
 
         for task in job.get('tasks', []):
