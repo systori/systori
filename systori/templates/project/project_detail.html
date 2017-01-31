@@ -35,7 +35,7 @@
         <td>
           <div class="btn-group pull-right" role="group">
             <a type="button" class="btn btn-default" href="{% url 'project.progress' project.id %}">{% trans "Project Progress" %}</a>
-            <a type="button" class="btn btn-default" href="{% url 'evidence.pdf' project.id %}">{% trans "Evidence preprinted form" %}</a>
+            <a target="_blank" type="button" class="btn btn-default" href="{% url 'evidence.pdf' project.id %}">{% trans "Evidence preprinted form" %}</a>
           </div>
         </td>
       </tr>
