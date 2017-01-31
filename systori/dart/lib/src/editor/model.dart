@@ -189,8 +189,8 @@ abstract class Model extends HtmlElement {
             if (!result.containsKey(listName)) continue;
             for (Model child in childrenOfType(childType)) {
                 for (Map childResult in result[listName]) {
-                    if (childResult['pk'] == child.pk ||
-                        childResult['token'] == child.token) {
+                    if ((child.pk != null && childResult['pk'] == child.pk) ||
+                        (child.token != null && childResult['token'] == child.token)) {
                         child.commit(childResult);
                     }
                 }
