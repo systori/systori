@@ -18,8 +18,9 @@ class Company(AbstractSchema):
             port = ':'+request.META['HTTP_HOST'].split(':')[1]
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
 
-    def active_workers(self):
-        return self.workers.filter(is_active=True).select_related('user')
+    def active_workers(self, **flags):
+        flags = {'flags__{}'.format(k): v for k, v in flags.items()}
+        return self.workers.filter(is_active=True, **flags).select_related('user')
 
     @property
     def breaks(self) -> List[BreakSpan]:
@@ -37,7 +38,6 @@ class Company(AbstractSchema):
 
 
 class Worker(models.Model):
-
     company = models.ForeignKey('Company', related_name="workers")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="access")
 
@@ -115,3 +115,18 @@ class Worker(models.Model):
 
     def __str__(self):
         return self.user.get_full_name()
+
+    def save(self, *args, **kwargs):
+        created = not self.pk
+        super().save(*args, **kwargs)
+        if created:
+            WorkerFlags.objects.create(worker=self)
+
+
+class WorkerFlags(models.Model):
+    worker = models.OneToOneField(Worker, related_name='flags')
+
+    timetracking_enabled = models.BooleanField(
+        _('timetracking enabled'), default=True, help_text=_('enable timetracking for this worker'))
+    can_track_time = models.BooleanField(
+        _('can track time'), default=False, help_text=_('allow this worker to start/stop work timer'))

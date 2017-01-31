@@ -1,7 +1,7 @@
 {% load i18n %}
 {% csrf_token %}
 
-{% if worker.tracks_time %}
+{% if worker.flags.can_track_time %}
     <div id="timer-box">{{ timetracking_timer_duration }}</div>
     <button type="button" class="btn btn-default" id="timer-toggle" value="Start">
       <span class="glyphicon glyphicon-play"></span>
@@ -12,6 +12,7 @@
     </button>
 {% endif %}
 
+{% if worker.flags.timetracking_enabled %}
   <div class="table-responsive">
       <table class="table" is="timetracking-report" id="timer-report">
           <thead>
@@ -28,4 +29,4 @@
           </tbody>
       </table>
   </div>
-
+{% endif %}

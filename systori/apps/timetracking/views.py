@@ -53,7 +53,7 @@ class HomeView(PeriodFilterMixin, FormView):
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             report=utils.get_daily_workers_report(
-                self.request.company.active_workers(), self.report_period),
+                utils.get_timetracking_workers(self.request.company), self.report_period),
             **kwargs
         )
 
@@ -74,7 +74,8 @@ class WorkerReportView(PeriodFilterMixin, FormView):
 
     @cached_property
     def worker(self):
-        return get_object_or_404(self.request.company.active_workers(), pk=self.kwargs['worker_id'])
+        return get_object_or_404(
+            utils.get_timetracking_workers(self.request.company), pk=self.kwargs['worker_id'])
 
     def get_form_kwargs(self):
         default_kwargs = super().get_form_kwargs()

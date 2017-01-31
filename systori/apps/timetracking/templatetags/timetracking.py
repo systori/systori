@@ -22,11 +22,13 @@ def seconds_to_pixels(value):
 def overtime_from_total(value):
     return utils.format_seconds(value-28800)
 
+
 class StatusLoader(template.Node):
     var_name = 'user_statuses'
 
     def render(self, context):
-        context[self.var_name] = utils.get_workers_statuses(Worker.objects.all())
+        context[self.var_name] = utils.get_workers_statuses(
+            Worker.objects.filter(flags__timetracking_enabled=True))
         return ''
 
 

@@ -10,10 +10,11 @@ from ..company.models import Worker
 from .utils import get_worker_dashboard_report
 from ..user.permissions import HasStaffAccess
 from .serializers import TimerStartSerializer, TimerStopSerializer, TimerSerializer
+from .permissions import HasTimetrackingAccess, CanTrackTime
 
 
 class TimerView(views.APIView):
-    permissions = (IsAuthenticated,)
+    permissions = (CanTrackTime,)
 
     def post(self, request):
         """
