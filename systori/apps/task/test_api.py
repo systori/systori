@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.core.urlresolvers import reverse
 from systori.lib.testing import ClientTestCase
 from .models import Group, Task, LineItem
@@ -259,7 +260,7 @@ class EditorApiTest(ClientTestCase):
 class AutocompleteApiTest(ClientTestCase):
 
     def test_group_completion(self):
-        job = JobFactory(project=ProjectFactory(structure='01.01.001'), generate_groups=True)
+        job = JobFactory(name='The Job', project=ProjectFactory(structure='01.01.001'), generate_groups=True)
         GroupFactory(parent=job, name='Voranstrich aus Bitumenlösung')
         GroupFactory(parent=job, name='Schächte und Fundamente')
         response = self.client.post(
@@ -271,11 +272,28 @@ class AutocompleteApiTest(ClientTestCase):
             format='json'
         )
         self.assertEqual(response.status_code, 200, response.data)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data, [{
+            'id': 3,
+            'job__name': 'The Job',
+            'match_name': 'Voranstrich aus <b>Bitumenlösung</b>',
+            'match_description': ''
+        }])
+
+    def test_group_info(self):
+        job = JobFactory(name='The Job', project=ProjectFactory(structure='01.001'))
+        group = GroupFactory(parent=job, name='Voranstrich aus Bitumenlösung')
+        TaskFactory(group=group, total=59.97)
+        response = self.client.get(reverse('api.editor.info', args=['group', group.pk]), format='json')
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertDictEqual(response.data, {
+            'name': 'Voranstrich aus Bitumenlösung',
+            'description': '',
+            'total': Decimal('59.9700'),
+        })
 
     def test_task_completion(self):
-        job = JobFactory(project=ProjectFactory(structure='01.001'))
-        TaskFactory(group=job, name='Voranstrich aus Bitumenlösung')
+        job = JobFactory(name='The Job', project=ProjectFactory(structure='01.001'))
+        TaskFactory(group=job, name='Voranstrich aus Bitumenlösung', qty=3, unit='m', price=19.99, total=59.97)
         TaskFactory(group=job, name='Schächte und Fundamente')
         response = self.client.post(
             reverse('api.editor.search'), {
@@ -285,7 +303,34 @@ class AutocompleteApiTest(ClientTestCase):
             format='json'
         )
         self.assertEqual(response.status_code, 200, response.data)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data, [{
+            'id': 1,
+            'job__name': 'The Job',
+            'match_name': 'Voranstrich aus <b>Bitumenlösung</b>',
+            'match_description': '',
+        }])
+
+    def test_task_info(self):
+        job = JobFactory(name='The Job', project=ProjectFactory(structure='01.001'))
+        task = TaskFactory(group=job, name='Voranstrich aus Bitumenlösung', qty=3, unit='m', price=19.99, total=59.97)
+        LineItemFactory(task=task, name='The Line Item', qty=1, unit='h', price=19.99, total=19.99)
+        response = self.client.get(reverse('api.editor.info', args=['task', task.pk]), format='json')
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertDictEqual(response.data, {
+            'name': 'Voranstrich aus Bitumenlösung',
+            'description': '',
+            'qty': Decimal('3.0000'),
+            'unit': 'm',
+            'price': Decimal('19.9900'),
+            'total': Decimal('59.9700'),
+            'lineitems': [{
+                'name': 'The Line Item',
+                'qty': Decimal('1.00'),
+                'unit': 'h',
+                'price': Decimal('19.99'),
+                'total': Decimal('19.99'),
+            }]
+        })
 
     def test_group_clone(self):
         job = JobFactory(project=ProjectFactory(structure='01.01.001'))

@@ -1,5 +1,6 @@
 import 'dart:html';
 import 'dart:async';
+import 'dart:convert';
 import 'model.dart';
 import 'package:systori/inputs.dart';
 
@@ -108,13 +109,13 @@ class Autocomplete extends HtmlElement {
         try {
             var result = await repository.search(criteria);
             var html = new StringBuffer();
-            for (List row in result) {
+            for (Map row in result) {
                 html.write('<div data-id="');
-                html.write(row[0]);
-                html.write('"><div>');
-                html.write(row[1]);
-                html.write('</div><p>');
-                html.write(row[2]);
+                html.write(row['id']);
+                html.write('"><h2>');
+                html.write(row['match_name']);
+                html.write('</h2><p>');
+                html.write(row['match_description']);
                 html.write('</p></div>');
             }
             setInnerHtml(
@@ -136,24 +137,83 @@ class Autocomplete extends HtmlElement {
         if (current == null) return;
         var previous = current.previousElementSibling;
         if (previous != null) {
-            children.forEach((e) => e.classes.clear());
-            previous.classes.add('active');
-            style.top = "${offsetFromTop - previous.offsetTop}px";
+            select(current, previous);
         }
     }
 
     handleDown() {
         var current = this.querySelector('.active');
         if (current == null) {
-            this.children.first.classes.add('active');
+            select(current, children.first);
         } else {
             var next = current.nextElementSibling;
             if (next != null) {
-                children.forEach((e) => e.classes.clear());
-                next.classes.add('active');
-                this.style.top = "${offsetFromTop - next.offsetTop}px";
+                select(current, next);
             }
         }
+    }
+
+    select(DivElement previous, DivElement current) {
+
+        if (previous != null) {
+            var previousInfo = previous.querySelector(':scope>.autocomplete-info');
+            if (previousInfo != null) {
+                previousInfo.style.visibility = 'hidden';
+            }
+        }
+
+        children.forEach((e) => e.classes.clear());
+        current.classes.add('active');
+        this.style.top = "${offsetFromTop - current.offsetTop}px";
+
+        DivElement info = current.querySelector(':scope>.autocomplete-info');
+        if (info != null) {
+            info.style.visibility = 'visible';
+        } else {
+            info = document.createElement('div');
+            info.classes.add('autocomplete-info');
+            info.text = '...';
+            current.children.add(info);
+            repository.info(criteria['model_type'], current.dataset['id']).then((Map data) {
+                info.setInnerHtml(
+                    criteria['model_type'] == 'task' ?
+                        createTaskInfo(data) :
+                        createGroupInfo(data),
+                    treeSanitizer: NodeTreeSanitizer.trusted
+                );
+                /* make sure user hasn't selected some other item while
+                   we were waiting on the server before making this visible
+                */
+                if (current == this.querySelector('.active')) {
+                    info.style.visibility = 'visible';
+                }
+            });
+        }
+    }
+
+    String createGroupInfo(Map data) {
+        var html = new StringBuffer();
+        html.write("<p>${data['name']} - <b>${data['total']}</b></b></p>");
+        html.write("<p>${data['description']}</p>");
+        return html.toString();
+    }
+
+    String createTaskInfo(Map data) {
+        var html = new StringBuffer();
+        html.write("<p>${data['name']}</p>");
+        html.write("<p><b>${data['qty']}${data['unit']} X ${data['price']} = ${data['total']}</b></p>");
+        html.write("<p>${data['description']}</p>");
+        html.write('<table>');
+        for (Map li in data['lineitems']) {
+            html.write("<tr>");
+            html.write("<td>${li['name']}</td>");
+            html.write("<td>${li['qty']}${li['unit']}</td>");
+            html.write("<td>${li['price']}</td>");
+            html.write("<td>${li['total']}</td>");
+            html.write("</tr>");
+        }
+        html.write("</table>");
+        return html.toString();
     }
 
     handleEnter() {

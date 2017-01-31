@@ -251,7 +251,16 @@ class Repository {
         return JSON.decode(response.responseText);
     }
 
-    Future<List<List>> search(Map<String,String> criteria) async {
+    Future<Map> info(String model, String id) async {
+        var response = await HttpRequest.request(
+            "/api/editor/info/$model/$id",
+            method: "GET",
+            requestHeaders: headers,
+        );
+        return JSON.decode(response.responseText);
+    }
+
+    Future<List<Map>> search(Map<String,String> criteria) async {
         var response = await HttpRequest.request(
             "/api/editor/search",
             method: "POST",

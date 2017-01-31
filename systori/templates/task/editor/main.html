@@ -394,10 +394,11 @@
     }
 
     sys-autocomplete > div {
+      position: relative;
       border-bottom: 1px solid lightgrey;
     }
 
-    sys-autocomplete > div > div.name {
+    sys-autocomplete > div > h2 {
       font-size: 14px;
     }
 
@@ -405,9 +406,18 @@
       font-size: 12px;
     }
 
+    sys-autocomplete > div > div {
+      position: absolute;
+      left: 480px;
+      top: 0px;
+      width: 240px;
+      background: orange;
+    }
+
     sys-autocomplete > div.active {
       background: orange;
     }
+
 
   </style>
 

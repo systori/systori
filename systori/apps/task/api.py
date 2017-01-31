@@ -26,18 +26,43 @@ class SearchAPI(views.APIView):
                 Group.objects
                 .groups_with_remaining_depth(remaining_depth)
                 .search(terms)
-                .values_list(
-                    'id', 'match_name', 'match_description'
+                .values(
+                    'id', 'job__name', 'match_name', 'match_description'
                 )[:10]
             ))
         elif model_type == 'task':
             return response.Response(list(
                 Task.objects
                     .search(terms)
-                    .values_list(
-                    'id', 'match_name', 'match_description'
-                )[:10]
+                    .values(
+                        'id', 'job__name', 'match_name', 'match_description'
+                    )[:10]
             ))
+
+
+class InfoAPI(views.APIView):
+
+    def get(self, request, *args, **kwargs):
+        model_type = kwargs['model_type']
+        model_pk = int(kwargs['pk'])
+        if model_type == 'group':
+            group = Group.objects.get(pk=model_pk)
+            return response.Response({
+                'name': group.name,
+                'description': group.description,
+                'total': group.estimate
+            })
+        elif model_type == 'task':
+            task = Task.objects.get(pk=model_pk)
+            return response.Response({
+                'name': task.name,
+                'description': task.description,
+                'qty': task.qty,
+                'unit': task.unit,
+                'price': task.price,
+                'total': task.total,
+                'lineitems': list(task.lineitems.values('name', 'qty', 'unit', 'price', 'total'))
+            })
 
 
 class CloneAPI(views.APIView):
@@ -63,5 +88,6 @@ class CloneAPI(views.APIView):
 urlpatterns = [
     url(r'^job/(?P<pk>\d+)/editor/save$', EditorAPI.as_view({'post': 'update'}), name='api.editor.save'),
     url(r'^editor/search$', SearchAPI.as_view(), name='api.editor.search'),
+    url(r'^editor/info/(?P<model_type>(group|task))/(?P<pk>\d+)$', InfoAPI.as_view(), name='api.editor.info'),
     url(r'^editor/clone$', CloneAPI.as_view(), name='api.editor.clone'),
 ]
