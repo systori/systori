@@ -52,7 +52,7 @@ class StatusRenderer(template.Node):
         context = {
             'user': user, 'status': status
         }
-        return loaded_template.render(template.context.Context(context))#, autoescape=context.autoescape))
+        return loaded_template.render(template.context.Context(context))
 
 
 @register.tag
