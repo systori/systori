@@ -26,8 +26,8 @@ class Migration(migrations.Migration):
                 ('document_date', models.DateField(blank=True, default=datetime.date.today, verbose_name='Date')),
                 ('notes', models.TextField(null=True, verbose_name='Notes', blank=True)),
                 ('invoice', models.OneToOneField(null=True, to='document.Invoice', on_delete=django.db.models.deletion.SET_NULL, related_name='adjustment')),
-                ('letterhead', models.ForeignKey(to='document.Letterhead', related_name='adjustment_documents')),
-                ('project', models.ForeignKey(to='project.Project', related_name='adjustments')),
+                ('letterhead', models.ForeignKey(to='document.Letterhead', related_name='adjustment_documents', on_delete=models.CASCADE)),
+                ('project', models.ForeignKey(to='project.Project', related_name='adjustments', on_delete=models.CASCADE)),
                 ('transaction', models.OneToOneField(null=True, to='accounting.Transaction', on_delete=django.db.models.deletion.SET_NULL, related_name='adjustment')),
             ],
             options={
@@ -44,8 +44,8 @@ class Migration(migrations.Migration):
                 ('created_on', models.DateTimeField(auto_now_add=True)),
                 ('document_date', models.DateField(verbose_name='Date', blank=True, default=datetime.date.today)),
                 ('notes', models.TextField(blank=True, verbose_name='Notes', null=True)),
-                ('letterhead', models.ForeignKey(to='document.Letterhead', related_name='payment_documents')),
-                ('project', models.ForeignKey(to='project.Project', related_name='payments')),
+                ('letterhead', models.ForeignKey(to='document.Letterhead', related_name='payment_documents', on_delete=models.CASCADE)),
+                ('project', models.ForeignKey(to='project.Project', related_name='payments', on_delete=models.CASCADE)),
                 ('transaction', models.OneToOneField(related_name='payment', on_delete=django.db.models.deletion.SET_NULL, to='accounting.Transaction', null=True)),
             ],
             options={

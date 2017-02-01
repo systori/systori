@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 ('association', models.CharField(max_length=128, default='customer', choices=[('customer', 'Customer'), ('contractor', 'Contractor'), ('supplier', 'Supplier'), ('architect', 'Architect'), ('other', 'Other')], verbose_name='Association')),
                 ('is_billable', models.BooleanField(default=False, verbose_name='Is Billable?')),
                 ('notes', models.TextField(verbose_name='Notes', blank=True)),
-                ('contact', models.ForeignKey(to='directory.Contact', related_name='project_contacts')),
+                ('contact', models.ForeignKey(to='directory.Contact', related_name='project_contacts', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['association', 'id'],

@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='projectcontact',
             name='project',
-            field=models.ForeignKey(to='project.Project', related_name='project_contacts'),
+            field=models.ForeignKey(to='project.Project', related_name='project_contacts', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='contact',

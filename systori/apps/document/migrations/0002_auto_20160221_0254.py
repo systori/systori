@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='refund',
             name='project',
-            field=models.ForeignKey(to='project.Project', related_name='refunds'),
+            field=models.ForeignKey(to='project.Project', related_name='refunds', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='refund',
@@ -33,27 +33,27 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='proposal',
             name='letterhead',
-            field=models.ForeignKey(to='document.Letterhead', related_name='proposal_documents'),
+            field=models.ForeignKey(to='document.Letterhead', related_name='proposal_documents', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='proposal',
             name='project',
-            field=models.ForeignKey(to='project.Project', related_name='proposals'),
+            field=models.ForeignKey(to='project.Project', related_name='proposals', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='invoice',
             name='letterhead',
-            field=models.ForeignKey(to='document.Letterhead', related_name='invoice_documents'),
+            field=models.ForeignKey(to='document.Letterhead', related_name='invoice_documents', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='invoice',
             name='parent',
-            field=models.ForeignKey(to='document.Invoice', related_name='invoices', null=True),
+            field=models.ForeignKey(to='document.Invoice', related_name='invoices', null=True, on_delete=models.SET_NULL),
         ),
         migrations.AddField(
             model_name='invoice',
             name='project',
-            field=models.ForeignKey(to='project.Project', related_name='invoices'),
+            field=models.ForeignKey(to='project.Project', related_name='invoices', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='invoice',

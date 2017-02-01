@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('end', models.DateTimeField(db_index=True, null=True, blank=True)),
                 ('duration', models.IntegerField(default=0, help_text='in seconds')),
                 ('kind', models.PositiveIntegerField(default=10, choices=[(10, 'Work'), (20, 'Holiday'), (30, 'Illness')], db_index=True)),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'timers',

@@ -21,12 +21,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='access',
             name='company',
-            field=models.ForeignKey(to='company.Company', related_name='users_access'),
+            field=models.ForeignKey(to='company.Company', related_name='users_access', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='access',
             name='user',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='companies_access'),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='companies_access', on_delete=models.CASCADE),
         ),
         migrations.AlterUniqueTogether(
             name='access',

@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('is_revenue_recognized', models.BooleanField(default=False)),
                 ('status', django_fsm.FSMField(max_length=50, default='draft', choices=[('draft', 'Draft'), ('proposed', 'Proposed'), ('approved', 'Approved'), ('started', 'Started'), ('completed', 'Completed')])),
                 ('account', models.OneToOneField(to='accounting.Account', on_delete=django.db.models.deletion.SET_NULL, related_name='job', null=True)),
-                ('project', models.ForeignKey(to='project.Project', related_name='jobs')),
+                ('project', models.ForeignKey(to='project.Project', related_name='jobs', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['job_code'],
@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
                 ('timestamp', models.DateTimeField(auto_now_add=True)),
                 ('comment', models.TextField()),
                 ('complete', models.DecimalField(max_digits=14, default=0.0, verbose_name='Complete', decimal_places=4)),
-                ('access', models.ForeignKey(to='company.Access', related_name='filedreports')),
+                ('access', models.ForeignKey(to='company.Access', related_name='filedreports', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ('-timestamp',),
@@ -111,7 +111,7 @@ class Migration(migrations.Migration):
                 ('order', models.PositiveIntegerField(db_index=True, editable=False)),
                 ('name', models.CharField(max_length=512, verbose_name='Name')),
                 ('description', models.TextField(blank=True)),
-                ('job', models.ForeignKey(to='task.Job', related_name='taskgroups')),
+                ('job', models.ForeignKey(to='task.Job', related_name='taskgroups', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['order'],
@@ -127,7 +127,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=512, verbose_name='Name')),
                 ('description', models.TextField()),
                 ('selected', models.BooleanField(default=False)),
-                ('task', models.ForeignKey(to='task.Task', related_name='taskinstances')),
+                ('task', models.ForeignKey(to='task.Task', related_name='taskinstances', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['order'],
@@ -138,21 +138,21 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='taskgroup',
-            field=models.ForeignKey(to='task.TaskGroup', related_name='tasks'),
+            field=models.ForeignKey(to='task.TaskGroup', related_name='tasks', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='progressreport',
             name='task',
-            field=models.ForeignKey(to='task.Task', related_name='progressreports'),
+            field=models.ForeignKey(to='task.Task', related_name='progressreports', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='progressattachment',
             name='report',
-            field=models.ForeignKey(to='task.ProgressReport', related_name='attachments'),
+            field=models.ForeignKey(to='task.ProgressReport', related_name='attachments', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='lineitem',
             name='taskinstance',
-            field=models.ForeignKey(to='task.TaskInstance', related_name='lineitems'),
+            field=models.ForeignKey(to='task.TaskInstance', related_name='lineitems', on_delete=models.CASCADE),
         ),
     ]

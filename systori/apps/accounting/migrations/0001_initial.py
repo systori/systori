@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('entry_type', models.CharField(max_length=32, default='other', choices=[('payment', 'Payment'), ('refund-credit', 'Refund Credit'), ('discount', 'Discount'), ('work-debit', 'Work Debit'), ('flat-debit', 'Flat Debit'), ('refund-debit', 'Refund Debit'), ('adjustment', 'Adjustment'), ('other', 'Other')], verbose_name='Entry Type')),
                 ('reconciled_on', models.DateField(null=True, verbose_name='Date Reconciled')),
                 ('is_reconciled', models.BooleanField(default=False, verbose_name='Reconciled')),
-                ('account', models.ForeignKey(to='accounting.Account', related_name='entries')),
+                ('account', models.ForeignKey(to='accounting.Account', related_name='entries', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['transaction__transacted_on', 'id'],

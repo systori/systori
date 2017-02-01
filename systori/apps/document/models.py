@@ -103,7 +103,7 @@ class Invoice(Document):
 
     invoice_no = models.CharField(_("Invoice No."), max_length=30, unique=True)
     project = models.ForeignKey("project.Project", related_name="invoices", on_delete=models.CASCADE)
-    parent = models.ForeignKey("self", related_name="invoices", null=True, on_delete=models.CASCADE)
+    parent = models.ForeignKey("self", related_name="invoices", null=True, on_delete=models.SET_NULL)
 
     transaction = models.OneToOneField('accounting.Transaction', related_name="invoice", null=True, on_delete=models.SET_NULL)
 

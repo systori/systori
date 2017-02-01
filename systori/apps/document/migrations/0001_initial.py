@@ -95,7 +95,7 @@ class Migration(migrations.Migration):
                 ('created_on', models.DateTimeField(auto_now_add=True)),
                 ('document_date', models.DateField(default=datetime.date.today, verbose_name='Date', blank=True)),
                 ('notes', models.TextField(null=True, verbose_name='Notes', blank=True)),
-                ('letterhead', models.ForeignKey(to='document.Letterhead', related_name='refund_documents')),
+                ('letterhead', models.ForeignKey(to='document.Letterhead', related_name='refund_documents', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['id'],

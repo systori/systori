@@ -15,11 +15,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='entry',
             name='job',
-            field=models.ForeignKey(to='task.Job', related_name='+', null=True),
+            field=models.ForeignKey(to='task.Job', related_name='+', null=True, on_delete=models.SET_NULL),
         ),
         migrations.AddField(
             model_name='entry',
             name='transaction',
-            field=models.ForeignKey(to='accounting.Transaction', related_name='entries'),
+            field=models.ForeignKey(to='accounting.Transaction', related_name='entries', on_delete=models.CASCADE),
         ),
     ]

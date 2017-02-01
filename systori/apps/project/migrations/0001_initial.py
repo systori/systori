@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                 ('task_zfill', models.PositiveSmallIntegerField(default=1, verbose_name='Task Code Zero Fill')),
                 ('phase', django_fsm.FSMField(max_length=50, default='prospective', choices=[('prospective', 'Prospective'), ('tendering', 'Tendering'), ('planning', 'Planning'), ('executing', 'Executing'), ('settlement', 'Settlement'), ('warranty', 'Warranty'), ('finished', 'Finished')])),
                 ('state', django_fsm.FSMField(max_length=50, default='active', choices=[('active', 'Active'), ('paused', 'Paused'), ('disputed', 'Disputed'), ('stopped', 'Stopped')])),
-                ('account', models.OneToOneField(to='accounting.Account', related_name='project', null=True)),
+                ('account', models.OneToOneField(to='accounting.Account', related_name='project', null=True, on_delete=models.SET_NULL)),
             ],
             options={
                 'ordering': ['name'],
@@ -64,8 +64,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('is_foreman', models.BooleanField(default=False)),
-                ('access', models.ForeignKey(to='company.Access', related_name='assignments')),
-                ('dailyplan', models.ForeignKey(to='project.DailyPlan', related_name='workers')),
+                ('access', models.ForeignKey(to='company.Access', related_name='assignments', on_delete=models.CASCADE)),
+                ('dailyplan', models.ForeignKey(to='project.DailyPlan', related_name='workers', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['-is_foreman', 'access__user__first_name'],
@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobsite',
             name='project',
-            field=models.ForeignKey(to='project.Project', related_name='jobsites'),
+            field=models.ForeignKey(to='project.Project', related_name='jobsites', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='dailyplan',
@@ -89,6 +89,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='dailyplan',
             name='jobsite',
-            field=models.ForeignKey(to='project.JobSite', related_name='dailyplans'),
+            field=models.ForeignKey(to='project.JobSite', related_name='dailyplans', on_delete=models.CASCADE),
         ),
     ]

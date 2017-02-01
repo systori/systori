@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='timer',
             name='altered_by',
-            field=models.ForeignKey(null=True, blank=True, to=settings.AUTH_USER_MODEL, related_name='timers_altered'),
+            field=models.ForeignKey(null=True, blank=True, to=settings.AUTH_USER_MODEL, related_name='timers_altered', on_delete=models.SET_NULL),
         ),
     ]
