@@ -35,24 +35,24 @@ class HasTimetrackingAccessTest(TestCase):
 
     def test_cannot_get_for_worker_without_timetracking_access(self):
         user = UserFactory(company=CompanyFactory())
-        worker_flags = user.access.first().flags
-        worker_flags.timetracking_enabled = False
-        worker_flags.save()
+        worker = user.access.first()
+        worker.timetracking_enabled = False
+        worker.save()
         request = RequestFactory().get('/')
         request.user = user
-        request.worker = user.access.first()
+        request.worker = worker
         view_instance = HasTimetrackingAccessView()
         response = view_instance.dispatch(request)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_can_get_for_worker_with_timetracking_access(self):
         user = UserFactory(company=CompanyFactory())
-        worker_flags = user.access.first().flags
-        worker_flags.timetracking_enabled = True
-        worker_flags.save()
+        worker = user.access.first()
+        worker.timetracking_enabled = True
+        worker.save()
         request = RequestFactory().get('/')
         request.user = user
-        request.worker = user.access.first()
+        request.worker = worker
         view_instance = HasTimetrackingAccessView()
         response = view_instance.dispatch(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -68,24 +68,24 @@ class CanTrackTimeTest(TestCase):
 
     def test_canot_get_for_worker_who_cannot_track_time(self):
         user = UserFactory(company=CompanyFactory())
+        worker = user.access.first()
+        worker.can_track_time = False
+        worker.save()
         request = RequestFactory().get('/')
         request.user = user
-        request.worker = user.access.first()
-        worker_flags = user.access.first().flags
-        worker_flags.can_track_time = False
-        worker_flags.save()
+        request.worker = worker
         view_instance = CanTrackTimeView()
         response = view_instance.dispatch(request)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_can_get_for_worker_who_can_track_time(self):
         user = UserFactory(company=CompanyFactory())
-        worker_flags = user.access.first().flags
-        worker_flags.can_track_time = True
-        worker_flags.save()
+        worker = user.access.first()
+        worker.can_track_time = True
+        worker.save()
         request = RequestFactory().get('/')
         request.user = user
-        request.worker = user.access.first()
+        request.worker = worker
         view_instance = CanTrackTimeView()
         response = view_instance.dispatch(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

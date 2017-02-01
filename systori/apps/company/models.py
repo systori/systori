@@ -19,7 +19,7 @@ class Company(AbstractSchema):
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
 
     def active_workers(self, **flags):
-        flags = {'flags__{}'.format(k): v for k, v in flags.items()}
+        flags = {'{}'.format(k): v for k, v in flags.items()}
         return self.workers.filter(is_active=True, **flags).select_related('user')
 
     @property
@@ -44,6 +44,8 @@ class Worker(models.Model):
     class Meta:
         unique_together = ("company", "user")
 
+    # Permission flags
+
     is_owner = models.BooleanField(_('Owner'), default=False,
                                    help_text=_('Owner has full and unlimited Access to Systori.'))
 
@@ -63,6 +65,13 @@ class Worker(models.Model):
                                     help_text=_('Designates whether this user should be treated as '
                                                 'active. Unselect this instead of deleting accounts. '
                                                 'This will remove user from any present and future daily plans.'))
+
+    # Feature flags
+
+    timetracking_enabled = models.BooleanField(_('timetracking enabled'), default=True,
+                                               help_text=_('enable timetracking for this worker'))
+    can_track_time = models.BooleanField(_('can track time'), default=False,
+                                         help_text=_('allow this worker to start/stop work timer'))
 
     @classmethod
     def grant_superuser_access(cls, user, company):
@@ -115,18 +124,3 @@ class Worker(models.Model):
 
     def __str__(self):
         return self.user.get_full_name()
-
-    def save(self, *args, **kwargs):
-        created = not self.pk
-        super().save(*args, **kwargs)
-        if created:
-            WorkerFlags.objects.create(worker=self)
-
-
-class WorkerFlags(models.Model):
-    worker = models.OneToOneField(Worker, related_name='flags')
-
-    timetracking_enabled = models.BooleanField(
-        _('timetracking enabled'), default=True, help_text=_('enable timetracking for this worker'))
-    can_track_time = models.BooleanField(
-        _('can track time'), default=False, help_text=_('allow this worker to start/stop work timer'))

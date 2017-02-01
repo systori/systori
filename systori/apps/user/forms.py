@@ -3,7 +3,7 @@ from django.forms import ModelForm
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm as BaseAuthenticationForm
 from .models import *
-from ..company.models import Worker, WorkerFlags
+from ..company.models import Worker
 
 
 class UserForm(ModelForm):
@@ -64,14 +64,7 @@ class WorkerForm(ModelForm):
     
     class Meta:
         model = Worker
-        fields = ['is_active', 'is_owner', 'is_staff', 'is_foreman', 'is_laborer']
-
-
-class WorkerFlagsForm(ModelForm):
-
-    class Meta:
-        model = WorkerFlags
-        exclude = ['worker']
+        exclude = ['company', 'user']
 
 
 class LanguageForm(ModelForm):
