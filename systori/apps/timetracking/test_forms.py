@@ -95,6 +95,22 @@ class ManualTimerFormTest(TestCase):
         timers = form.save()
         self.assertEqual(len(timers), 6)  # 2 breaks per day, for 2 days
 
+    def test_save_days_span_public_holiday(self):
+        tz = timezone.get_current_timezone()
+        start = datetime(2017, 1, 13, 7)
+        end = start + timedelta(days=5, hours=5)
+        form = forms.ManualTimerForm(data={
+            'worker': self.worker.pk,
+            'start': start.strftime('%d.%m.%Y %H:%M'),
+            'end': end.strftime('%d.%m.%Y %H:%M'),
+            'kind': Timer.PUBLIC_HOLIDAY,
+            'morning_break': True,
+            'lunch_break': True
+        }, company=self.company)
+        self.assertTrue(form.is_valid())
+        timers = form.save()
+        self.assertEqual(len(timers), 4)  # timespan of 6 days minus 2 weekend days
+
     def test_worker_dropdown_label(self):
         f = forms.ManualTimerForm(company=self.company)
         self.assertEqual(
