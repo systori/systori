@@ -145,6 +145,11 @@ class TimerQuerySet(QuerySet):
 
     def create_batch(self, worker, start: datetime, end: datetime, commit=True, include_weekends=False,
                      morning_break=True, lunch_break=True, **kwargs):
+        if kwargs.get('kind') == self.model.PUBLIC_HOLIDAY:
+            morning_break = False
+            lunch_break = False
+            include_weekends=False
+
         tz = worker.company.timezone
 
         # Requested start/end times must be of the same timezone as the company breaks.
