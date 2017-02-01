@@ -79,12 +79,10 @@ def create_timesheet_table(json, available_width, font):
     def fmthr(hr):
         return "{:.1f}".format(hr) if hr else ""
 
-    def render_row(secs, project, special, bold_last=False):
+    def render_row(secs, project):
         columns = [""]*31 + [fmthr(sum(secs)), project]
         for i, sec in enumerate(secs):
             columns[i] = fmthr(sec)
-        if bold_last:
-            columns[-1] = b(columns[-1])
         return columns
 
     stripe_idx = 1
@@ -108,7 +106,7 @@ def create_timesheet_table(json, available_width, font):
 
     kind_choices = dict(Timer.KIND_CHOICES)
     for name, secs in special:
-        ts.row(*render_row(secs, kind_choices[name], special))
+        ts.row(*render_row(secs, kind_choices[name]))
         stripe()
 
     ts.row(*render_row(totals, _("Total")))
@@ -163,7 +161,8 @@ class TimeSheetCollector:
         elif category in self.special:
             slot = self.special[category]
         slot[day_idx] += hours
-        self.totals[day_idx] += hours
+        if category != timer.UNPAID_LEAVE:
+            self.totals[day_idx] += hours
 
     @property
     def data(self):
