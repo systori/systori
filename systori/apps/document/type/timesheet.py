@@ -79,7 +79,7 @@ def create_timesheet_table(json, available_width, font):
     def fmthr(hr):
         return "{:.1f}".format(hr) if hr else ""
 
-    def render_row(secs, project, bold_last=False):
+    def render_row(secs, project, special, bold_last=False):
         columns = [""]*31 + [fmthr(sum(secs)), project]
         for i, sec in enumerate(secs):
             columns[i] = fmthr(sec)
@@ -95,7 +95,7 @@ def create_timesheet_table(json, available_width, font):
             ts.row_style('BACKGROUND', 0, -1, colors.HexColor(0xCCFFFF))
         stripe_idx += 1
 
-    project_rows = 12
+    project_rows = 9
     for project, secs in projects:
         ts.row(*render_row(secs, project))
         stripe()
@@ -106,8 +106,9 @@ def create_timesheet_table(json, available_width, font):
         stripe()
         project_rows -= 1
 
+    kind_choices = dict(Timer.KIND_CHOICES)
     for name, secs in special:
-        ts.row(*render_row(secs, name))
+        ts.row(*render_row(secs, kind_choices[name], special))
         stripe()
 
     ts.row(*render_row(totals, _("Total")))
