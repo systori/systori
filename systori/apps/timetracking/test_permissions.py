@@ -36,7 +36,7 @@ class HasTimetrackingAccessTest(TestCase):
     def test_cannot_get_for_worker_without_timetracking_access(self):
         user = UserFactory(company=CompanyFactory())
         worker = user.access.first()
-        worker.timetracking_enabled = False
+        worker.is_timetracking_enabled = False
         worker.save()
         request = RequestFactory().get('/')
         request.user = user
@@ -48,7 +48,7 @@ class HasTimetrackingAccessTest(TestCase):
     def test_can_get_for_worker_with_timetracking_access(self):
         user = UserFactory(company=CompanyFactory())
         worker = user.access.first()
-        worker.timetracking_enabled = True
+        worker.is_timetracking_enabled = True
         worker.save()
         request = RequestFactory().get('/')
         request.user = user

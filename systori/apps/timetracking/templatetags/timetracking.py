@@ -28,7 +28,7 @@ class StatusLoader(template.Node):
 
     def render(self, context):
         context[self.var_name] = utils.get_workers_statuses(
-            Worker.objects.filter(timetracking_enabled=True))
+            Worker.objects.filter(is_timetracking_enabled=True))
         return ''
 
 

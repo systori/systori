@@ -10,7 +10,7 @@ class HasTimetrackingAccess(permissions.IsAuthenticated):
         is_authenticated = super().has_permission(request, view)
         if not is_authenticated:
             return False
-        return request.worker.timetracking_enabled
+        return request.worker.is_timetracking_enabled
 
 
 class CanTrackTime(permissions.IsAuthenticated):

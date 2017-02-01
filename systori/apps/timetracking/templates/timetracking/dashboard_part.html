@@ -12,7 +12,7 @@
     </button>
 {% endif %}
 
-{% if worker.timetracking_enabled %}
+{% if worker.is_timetracking_enabled %}
   <div class="table-responsive">
       <table class="table" is="timetracking-report" id="timer-report">
           <thead>

@@ -67,7 +67,7 @@ class Worker(models.Model):
 
     # Feature flags
 
-    timetracking_enabled = models.BooleanField(_('timetracking enabled'), default=True,
+    is_timetracking_enabled = models.BooleanField(_('timetracking enabled'), default=True,
                                                help_text=_('enable timetracking for this worker'))
     can_track_time = models.BooleanField(_('can track time'), default=False,
                                          help_text=_('allow this worker to start/stop work timer'))
