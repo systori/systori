@@ -34,9 +34,8 @@ class UtilsTest(TestCase):
         company = CompanyFactory()
         worker1 = UserFactory(company=company).access.first()
         worker2 = UserFactory(company=company).access.first()
-        flags = worker1.flags
-        flags.timetracking_enabled = False
-        flags.save()
+        worker1.timetracking_enabled = False
+        worker1.save()
         timetracking_workers = utils.get_timetracking_workers(company)
         self.assertNotIn(worker1, timetracking_workers)
         self.assertIn(worker2, timetracking_workers)

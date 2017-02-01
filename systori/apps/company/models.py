@@ -18,9 +18,8 @@ class Company(AbstractSchema):
             port = ':'+request.META['HTTP_HOST'].split(':')[1]
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
 
-    def active_workers(self, **flags):
-        flags = {'{}'.format(k): v for k, v in flags.items()}
-        return self.workers.filter(is_active=True, **flags).select_related('user')
+    def active_workers(self, **params):
+        return self.workers.filter(is_active=True, **params).select_related('user')
 
     @property
     def breaks(self) -> List[BreakSpan]:
