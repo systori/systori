@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from rest_framework import views, viewsets, mixins
 from rest_framework import response, renderers
+from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Job, Group, Task
 from .serializers import JobSerializer
 from ..user.permissions import HasStaffAccess
@@ -9,13 +10,15 @@ from ..user.permissions import HasStaffAccess
 class EditorAPI(mixins.UpdateModelMixin, viewsets.GenericViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
-    permission_classes = [HasStaffAccess]
+    permission_classes = (HasStaffAccess,)
 
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, partial=True, **kwargs)
 
 
 class SearchAPI(views.APIView):
+
+    permission_classes = (HasStaffAccess,)
 
     def post(self, request, *args, **kwargs):
         model_type = request.data['model_type']
@@ -24,23 +27,23 @@ class SearchAPI(views.APIView):
             remaining_depth = int(request.data['remaining_depth'])
             return response.Response(list(
                 Group.objects
-                .groups_with_remaining_depth(remaining_depth)
-                .search(terms)
-                .values(
-                    'id', 'job__name', 'match_name', 'match_description'
-                )[:10]
+                    .groups_with_remaining_depth(remaining_depth)
+                    .search(terms)
+                    .distinct('name', 'rank')
+                    .values('id', 'job__name', 'match_name', 'match_description', 'rank')[:10]
             ))
         elif model_type == 'task':
             return response.Response(list(
                 Task.objects
                     .search(terms)
-                    .values(
-                        'id', 'job__name', 'match_name', 'match_description'
-                    )[:10]
+                    .distinct('name', 'total', 'rank')
+                    .values('id', 'job__name', 'match_name', 'match_description', 'rank')[:10]
             ))
 
 
 class InfoAPI(views.APIView):
+
+    permission_classes = (HasStaffAccess,)
 
     def get(self, request, *args, **kwargs):
         model_type = kwargs['model_type']
@@ -50,24 +53,31 @@ class InfoAPI(views.APIView):
             return response.Response({
                 'name': group.name,
                 'description': group.description,
-                'total': group.estimate
+                'total': ubrdecimal(group.estimate)
             })
         elif model_type == 'task':
             task = Task.objects.get(pk=model_pk)
             return response.Response({
                 'name': task.name,
                 'description': task.description,
-                'qty': task.qty,
+                'qty': ubrdecimal(task.qty, min_significant=0),
                 'unit': task.unit,
-                'price': task.price,
-                'total': task.total,
-                'lineitems': list(task.lineitems.values('name', 'qty', 'unit', 'price', 'total'))
+                'price': ubrdecimal(task.price),
+                'total': ubrdecimal(task.total),
+                'lineitems': [{
+                    'name': li['name'],
+                    'qty': ubrdecimal(li['qty'], min_significant=0),
+                    'unit': li['unit'],
+                    'price': ubrdecimal(li['price']),
+                    'total': ubrdecimal(li['total']),
+                } for li in task.lineitems.values('name', 'qty', 'unit', 'price', 'total')]
             })
 
 
 class CloneAPI(views.APIView):
 
     renderer_classes = (renderers.TemplateHTMLRenderer,)
+    permission_classes = (HasStaffAccess,)
 
     def post(self, request, *args, **kwargs):
         source_type = request.data['source_type']

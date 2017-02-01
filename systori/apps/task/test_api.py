@@ -1,5 +1,5 @@
 from decimal import Decimal
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from systori.lib.testing import ClientTestCase
 from .models import Group, Task, LineItem
 from ..project.factories import ProjectFactory
@@ -276,10 +276,13 @@ class AutocompleteApiTest(ClientTestCase):
             'id': 3,
             'job__name': 'The Job',
             'match_name': 'Voranstrich aus <b>Bitumenlösung</b>',
-            'match_description': ''
+            'match_description': '',
+            'rank': 0.607927,
         }])
 
     def test_group_info(self):
+        self.user.language = 'de'
+        self.user.save()
         job = JobFactory(name='The Job', project=ProjectFactory(structure='01.001'))
         group = GroupFactory(parent=job, name='Voranstrich aus Bitumenlösung')
         TaskFactory(group=group, total=59.97)
@@ -288,7 +291,7 @@ class AutocompleteApiTest(ClientTestCase):
         self.assertDictEqual(response.data, {
             'name': 'Voranstrich aus Bitumenlösung',
             'description': '',
-            'total': Decimal('59.9700'),
+            'total': '59,97',
         })
 
     def test_task_completion(self):
@@ -308,27 +311,31 @@ class AutocompleteApiTest(ClientTestCase):
             'job__name': 'The Job',
             'match_name': 'Voranstrich aus <b>Bitumenlösung</b>',
             'match_description': '',
+            'rank': 0.607927,
         }])
 
     def test_task_info(self):
+        self.user.language = 'de'
+        self.user.save()
         job = JobFactory(name='The Job', project=ProjectFactory(structure='01.001'))
         task = TaskFactory(group=job, name='Voranstrich aus Bitumenlösung', qty=3, unit='m', price=19.99, total=59.97)
         LineItemFactory(task=task, name='The Line Item', qty=1, unit='h', price=19.99, total=19.99)
         response = self.client.get(reverse('api.editor.info', args=['task', task.pk]), format='json')
         self.assertEqual(response.status_code, 200, response.data)
+        self.maxDiff = None
         self.assertDictEqual(response.data, {
             'name': 'Voranstrich aus Bitumenlösung',
             'description': '',
-            'qty': Decimal('3.0000'),
+            'qty': '3',
             'unit': 'm',
-            'price': Decimal('19.9900'),
-            'total': Decimal('59.9700'),
+            'price': '19,99',
+            'total': '59,97',
             'lineitems': [{
                 'name': 'The Line Item',
-                'qty': Decimal('1.00'),
+                'qty': '1',
                 'unit': 'h',
-                'price': Decimal('19.99'),
-                'total': Decimal('19.99'),
+                'price': '19,99',
+                'total': '19,99',
             }]
         })
 

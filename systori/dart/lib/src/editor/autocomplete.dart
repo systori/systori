@@ -65,6 +65,10 @@ class AutocompleteKeyboardHandler extends KeyboardHandler {
                     return false;
                 }
                 return true;
+            case KeyCode.ESC:
+                e.preventDefault();
+                autocomplete.handleEscape();
+                return true;
             default:
                 return false;
         }
@@ -164,7 +168,7 @@ class Autocomplete extends HtmlElement {
 
         children.forEach((e) => e.classes.clear());
         current.classes.add('active');
-        this.style.top = "${offsetFromTop - current.offsetTop}px";
+        style.top = "${offsetFromTop - current.offsetTop}px";
 
         DivElement info = current.querySelector(':scope>.autocomplete-info');
         if (info != null) {
@@ -200,21 +204,28 @@ class Autocomplete extends HtmlElement {
 
     String createTaskInfo(Map data) {
         var html = new StringBuffer();
-        html.write("<p>${data['name']}</p>");
-        html.write("<p><b>${data['qty']}${data['unit']} X ${data['price']} = ${data['total']}</b></p>");
-        html.write("<p>${data['description']}</p>");
-        html.write('<table>');
+        html.write("<table>");
+        html.write("<tr><td colspan='5'>${data['name']}</td></tr>");
+        html.write("<tr><td colspan='2'></td>");
+        html.write("<td class='info-decimal info-qty'>${data['qty']} ${data['unit']}</td>");
+        html.write("<td class='info-decimal info-price'>${data['price']}</td>");
+        html.write("<td class='info-decimal info-total'>${data['total']}</td>");
+        html.write("</tr>");
+        html.write("<tr><td colspan='5'>${data['description']}</td></tr>");
         for (Map li in data['lineitems']) {
             html.write("<tr>");
             html.write("<td>${li['name']}</td>");
-            html.write("<td>${li['qty']}${li['unit']}</td>");
-            html.write("<td>${li['price']}</td>");
-            html.write("<td>${li['total']}</td>");
+            html.write("<td class='info-decimal info-qty'>${li['qty']} ${li['unit']}</td>");
+            html.write("<td class='info-decimal info-price'>${li['price']}</td>");
+            html.write("<td class='info-decimal info-total'>${li['total']}</td>");
+            html.write("<td></td>");
             html.write("</tr>");
         }
         html.write("</table>");
         return html.toString();
     }
+
+    handleEscape() => hide();
 
     handleEnter() {
         var current = this.querySelector('.active');
