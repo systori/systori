@@ -770,7 +770,7 @@ class ProposalForm(DocumentForm):
 
         super().save(commit)
 
-        proposal.jobs = self.formset.get_transaction_rows()
+        proposal.jobs.set(self.formset.get_transaction_rows())
 
 
 class BaseProposalFormSet(BaseDocumentFormSet):
