@@ -18,8 +18,8 @@ class Company(AbstractSchema):
             port = ':'+request.META['HTTP_HOST'].split(':')[1]
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
 
-    def active_workers(self):
-        return self.workers.filter(is_active=True).select_related('user')
+    def active_workers(self, **params):
+        return self.workers.filter(is_active=True, **params).select_related('user')
 
     @property
     def breaks(self) -> List[BreakSpan]:
@@ -37,12 +37,13 @@ class Company(AbstractSchema):
 
 
 class Worker(models.Model):
-
     company = models.ForeignKey('Company', related_name="workers", on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="access", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("company", "user")
+
+    # Permission flags
 
     is_owner = models.BooleanField(_('Owner'), default=False,
                                    help_text=_('Owner has full and unlimited Access to Systori.'))
@@ -63,6 +64,13 @@ class Worker(models.Model):
                                     help_text=_('Designates whether this user should be treated as '
                                                 'active. Unselect this instead of deleting accounts. '
                                                 'This will remove user from any present and future daily plans.'))
+
+    # Feature flags
+
+    is_timetracking_enabled = models.BooleanField(_('timetracking enabled'), default=True,
+                                               help_text=_('enable timetracking for this worker'))
+    can_track_time = models.BooleanField(_('can track time'), default=False,
+                                         help_text=_('allow this worker to start/stop work timer'))
 
     @classmethod
     def grant_superuser_access(cls, user, company):

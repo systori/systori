@@ -30,6 +30,16 @@ class UtilsTest(TestCase):
         self.assertEqual(utils.seconds_to_time(270), time(0, 5, 0))
         self.assertEqual(utils.seconds_to_time(300), time(0, 5, 0))
 
+    def test_get_timetracking_workers(self):
+        company = CompanyFactory()
+        worker1 = UserFactory(company=company).access.first()
+        worker2 = UserFactory(company=company).access.first()
+        worker1.is_timetracking_enabled = False
+        worker1.save()
+        timetracking_workers = utils.get_timetracking_workers(company)
+        self.assertNotIn(worker1, timetracking_workers)
+        self.assertIn(worker2, timetracking_workers)
+
 
 class ReportsTest(TestCase):
 

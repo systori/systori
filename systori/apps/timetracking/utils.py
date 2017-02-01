@@ -61,6 +61,10 @@ def round_to_nearest_multiple(seconds, multiplier=36):
     else:
         return seconds - remainder
 
+def get_timetracking_workers(company):
+    return company.active_workers(is_timetracking_enabled=True)
+
+
 ### Reports
 
 

@@ -22,11 +22,13 @@ def seconds_to_pixels(value):
 def overtime_from_total(value):
     return utils.format_seconds(value-28800)
 
+
 class StatusLoader(template.Node):
     var_name = 'user_statuses'
 
     def render(self, context):
-        context[self.var_name] = utils.get_workers_statuses(Worker.objects.all())
+        context[self.var_name] = utils.get_workers_statuses(
+            Worker.objects.filter(is_timetracking_enabled=True))
         return ''
 
 
@@ -50,7 +52,7 @@ class StatusRenderer(template.Node):
         context = {
             'user': user, 'status': status
         }
-        return loaded_template.render(template.context.Context(context))#, autoescape=context.autoescape))
+        return loaded_template.render(template.context.Context(context))
 
 
 @register.tag
