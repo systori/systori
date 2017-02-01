@@ -10,7 +10,7 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 
 def owner_auth(view):
     def is_authorized(request):
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             return False
         if request.worker.has_owner:
             return True
@@ -32,7 +32,7 @@ def office_auth(view):
 
 def field_auth(view):
     def is_authorized(request):
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             return False  # redirect to login
         if request.worker.has_laborer:
             return True  # all good

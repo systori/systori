@@ -39,7 +39,7 @@ class CompanyMiddleware(MiddlewareMixin):
                     request.company = company
                     return
 
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
 
             companies = request.user.visible_companies
             if len(companies) == 1:

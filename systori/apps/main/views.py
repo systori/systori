@@ -30,7 +30,7 @@ class OfficeDashboard(TemplateView):
 
 class IndexView(View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             if not request.company:
                 return HttpResponseRedirect(reverse('companies'))
             if get_flavour() == 'full' and request.worker.has_staff:
