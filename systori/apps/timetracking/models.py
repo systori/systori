@@ -49,7 +49,7 @@ class Timer(models.Model):
         TRAINING: simple_duration,
         PUBLIC_HOLIDAY: simple_duration,
         PAID_LEAVE: simple_duration,
-        UNPAID_LEAVE: lambda start, end: 0
+        UNPAID_LEAVE: simple_duration,
     }
 
     worker = models.ForeignKey('company.Worker', related_name='timers', on_delete=models.CASCADE)
