@@ -41,10 +41,6 @@ class SetLanguageViewTest(LanguageTestCase):
 class SetLanguageMiddlewareTest(LanguageTestCase):
 
     def test_process_request(self):
-        self.assertIn(
-            'systori.apps.user.middleware.SetLanguageMiddleware', 
-            settings.MIDDLEWARE_CLASSES)
-
         self.user.language = 'en'
         self.user.save()
         response = self.client.get('/')
