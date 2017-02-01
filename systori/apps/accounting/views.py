@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView, ListView
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 
 from .forms import AccountForm, BankAccountForm
 from .models import Account, Transaction

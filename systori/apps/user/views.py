@@ -1,7 +1,7 @@
 from django.views.generic import View, TemplateView
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.views.i18n import set_language
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.decorators import login_required

@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models.expressions import F, Q, RawSQL
 from django.db.models.manager import BaseManager
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
 from systori.lib.utils import nice_percent
@@ -75,9 +75,9 @@ class Group(OrderedModel):
     name = models.CharField(_("Name"), default="", blank=True, max_length=512)
     description = models.TextField(_("Description"), default="", blank=True)
     depth = models.PositiveIntegerField(editable=False, db_index=True)
-    parent = models.ForeignKey('self', related_name='groups', null=True)
+    parent = models.ForeignKey('self', related_name='groups', null=True, on_delete=models.CASCADE)
     token = models.BigIntegerField('api token', null=True)
-    job = models.ForeignKey('Job', null=True, related_name='all_groups')
+    job = models.ForeignKey('Job', null=True, related_name='all_groups', on_delete=models.CASCADE)
     search = tsvector_field.SearchVectorField([
         tsvector_field.WeightedColumn('name', 'A'),
         tsvector_field.WeightedColumn('description', 'D'),
@@ -227,8 +227,8 @@ class JobManager(BaseManager.from_queryset(JobQuerySet)):
 
 class Job(Group):
     account = models.OneToOneField('accounting.Account', related_name="job", null=True, on_delete=models.SET_NULL)
-    root = models.OneToOneField('task.Group', parent_link=True, primary_key=True, related_name='+')
-    project = models.ForeignKey('project.Project', related_name="jobs")
+    root = models.OneToOneField('task.Group', parent_link=True, primary_key=True, related_name='+', on_delete=models.CASCADE)
+    project = models.ForeignKey('project.Project', related_name="jobs", on_delete=models.CASCADE)
     order_with_respect_to = 'project'
 
     ESTIMATE_INCREMENT = 0.05
@@ -358,8 +358,8 @@ class Task(OrderedModel):
     started_on = models.DateField(blank=True, null=True)
     completed_on = models.DateField(blank=True, null=True)
 
-    job = models.ForeignKey(Job, related_name="all_tasks")
-    group = models.ForeignKey(Group, related_name="tasks")
+    job = models.ForeignKey(Job, related_name="all_tasks", on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, related_name="tasks", on_delete=models.CASCADE)
     order_with_respect_to = 'group'
 
     # GAEB Spec 2.7.5.2
@@ -490,10 +490,10 @@ class LineItem(OrderedModel):
     # this line item is a price correction
     is_correction = models.BooleanField(default=False)
 
-    task = models.ForeignKey(Task, related_name="lineitems")
+    task = models.ForeignKey(Task, related_name="lineitems", on_delete=models.CASCADE)
     order_with_respect_to = 'task'
 
-    job = models.ForeignKey(Job, related_name="all_lineitems")
+    job = models.ForeignKey(Job, related_name="all_lineitems", on_delete=models.CASCADE)
     token = models.BigIntegerField('api token', null=True)
 
     class Meta:
@@ -526,9 +526,9 @@ class ProgressReport(models.Model):
     # this gets copied into task.complete with the latest progress report value
     complete = models.DecimalField(_("Complete"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
 
-    task = models.ForeignKey(Task, related_name="progressreports")
+    task = models.ForeignKey(Task, related_name="progressreports", on_delete=models.CASCADE)
 
-    worker = models.ForeignKey('company.Worker', related_name="filedreports")
+    worker = models.ForeignKey('company.Worker', related_name="filedreports", on_delete=models.CASCADE)
 
     @property
     def complete_percent(self):
@@ -541,7 +541,7 @@ class ProgressReport(models.Model):
 
 
 class ProgressAttachment(models.Model):
-    report = models.ForeignKey(ProgressReport, related_name="attachments")
+    report = models.ForeignKey(ProgressReport, related_name="attachments", on_delete=models.CASCADE)
     attachment = models.FileField()
 
     class Meta:

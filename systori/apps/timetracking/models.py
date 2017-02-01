@@ -49,7 +49,7 @@ class Timer(models.Model):
         PAID_LEAVE: lambda start, end: 0
     }
 
-    worker = models.ForeignKey('company.Worker', related_name='timers')
+    worker = models.ForeignKey('company.Worker', related_name='timers', on_delete=models.CASCADE)
     date = models.DateField(db_index=True)
     start = models.DateTimeField(blank=True, null=True, db_index=True)
     end = models.DateTimeField(blank=True, null=True, db_index=True)
@@ -60,7 +60,7 @@ class Timer(models.Model):
     start_longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     end_latitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     end_longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
-    job_site = models.ForeignKey(JobSite, blank=True, null=True)
+    job_site = models.ForeignKey(JobSite, blank=True, null=True, on_delete=models.SET_NULL)
     is_auto_started = models.BooleanField(default=False)
     is_auto_stopped = models.BooleanField(default=False)
 

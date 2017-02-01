@@ -66,7 +66,7 @@ class Equipment(models.Model):
 
 class RefuelingStop(models.Model):
 
-    equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
+    equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'), on_delete=models.CASCADE)
     datetime = models.DateTimeField(default=timezone.now, db_index=True)
     mileage = models.DecimalField(_('mileage'), max_digits=9, decimal_places=2,
                                   validators=[MinValueValidator(Decimal('0.01'))])
@@ -130,7 +130,7 @@ def calc_average_consumption_cascade(sender, instance, **kwargs):
 
 class Maintenance(models.Model):
 
-    equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'))
+    equipment = models.ForeignKey(Equipment, verbose_name=_('equipment'), on_delete=models.CASCADE)
     date = models.DateField(_('date'), default=timezone.now)
     mileage = models.DecimalField(_('mileage'), max_digits=9, decimal_places=2,
                                   validators=[MinValueValidator(Decimal('0.01'))])

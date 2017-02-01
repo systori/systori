@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import View, TemplateView, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView, FormMixin
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q
 from django.contrib.postgres.search import SearchVector

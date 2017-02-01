@@ -5,7 +5,7 @@ from io import BytesIO
 from textwrap import dedent
 
 from django.utils import timezone
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from systori.lib.testing import ClientTestCase
 from systori.lib.accounting.tools import Amount

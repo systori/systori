@@ -38,8 +38,8 @@ class Company(AbstractSchema):
 
 class Worker(models.Model):
 
-    company = models.ForeignKey('Company', related_name="workers")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="access")
+    company = models.ForeignKey('Company', related_name="workers", on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="access", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("company", "user")

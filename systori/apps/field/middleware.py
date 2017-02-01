@@ -1,8 +1,10 @@
 from datetime import date
+from django.utils.deprecation import MiddlewareMixin
 from ..project.models import JobSite, DailyPlan
 
 
-class FieldMiddleware:
+class FieldMiddleware(MiddlewareMixin):
+
     def process_view(self, request, view, args, kwargs):
         if not request.company:
             return

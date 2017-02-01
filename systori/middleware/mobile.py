@@ -1,3 +1,4 @@
+from django.utils.deprecation import MiddlewareMixin
 import re
 import threading
 
@@ -75,7 +76,7 @@ def _init_flavour(request):
         _local.flavour = FLAVOURS[0]
 
 
-class SetFlavourMiddleware(object):
+class SetFlavourMiddleware(MiddlewareMixin):
 
     @staticmethod
     def process_request(request):
@@ -92,7 +93,7 @@ class SetFlavourMiddleware(object):
         return response
 
 
-class MobileDetectionMiddleware(object):
+class MobileDetectionMiddleware(MiddlewareMixin):
     user_agents_test_match = (
         "w3c ", "acs-", "alav", "alca", "amoi", "audi",
         "avan", "benq", "bird", "blac", "blaz", "brew",
@@ -118,11 +119,10 @@ class MobileDetectionMiddleware(object):
     ))
     http_accept_regex = re.compile("application/vnd\.wap\.xhtml\+xml", re.IGNORECASE)
 
-    def __init__(self):
-        user_agents_test_match = r'^(?:%s)' % '|'.join(self.user_agents_test_match)
-        self.user_agents_test_match_regex = re.compile(user_agents_test_match, re.IGNORECASE)
-        self.user_agents_test_search_regex = re.compile(self.user_agents_test_search, re.IGNORECASE)
-        self.user_agents_exception_search_regex = re.compile(self.user_agents_exception_search, re.IGNORECASE)
+    user_agents_test_match = r'^(?:%s)' % '|'.join(user_agents_test_match)
+    user_agents_test_match_regex = re.compile(user_agents_test_match, re.IGNORECASE)
+    user_agents_test_search_regex = re.compile(user_agents_test_search, re.IGNORECASE)
+    user_agents_exception_search_regex = re.compile(user_agents_exception_search, re.IGNORECASE)
 
     def process_request(self, request):
         is_mobile = False

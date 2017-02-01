@@ -21,7 +21,7 @@ def owner_auth(view):
 
 def office_auth(view):
     def is_authorized(request):
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             return False  # redirect to login
         if request.worker.has_staff:
             return True  # all good

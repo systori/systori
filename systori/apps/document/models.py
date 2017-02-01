@@ -45,8 +45,8 @@ class Timesheet(Document):
         verbose_name = _("Timesheet")
         verbose_name_plural = _("Timesheets")
 
-    letterhead = models.ForeignKey('document.Letterhead', related_name="timesheet_documents")
-    worker = models.ForeignKey('company.Worker', related_name='timesheets')
+    letterhead = models.ForeignKey('document.Letterhead', related_name="timesheet_documents", on_delete=models.CASCADE)
+    worker = models.ForeignKey('company.Worker', related_name='timesheets', on_delete=models.CASCADE)
 
     objects = TimesheetQuerySet.as_manager()
 
@@ -57,9 +57,9 @@ class Proposal(Document):
         verbose_name = _("Proposal")
         verbose_name_plural = _("Proposals")
 
-    letterhead = models.ForeignKey('document.Letterhead', related_name="proposal_documents")
+    letterhead = models.ForeignKey('document.Letterhead', related_name="proposal_documents", on_delete=models.CASCADE)
 
-    project = models.ForeignKey("project.Project", related_name="proposals")
+    project = models.ForeignKey("project.Project", related_name="proposals", on_delete=models.CASCADE)
     jobs = models.ManyToManyField("task.Job", verbose_name=_('Jobs'), related_name="proposals")
 
     NEW = "new"
@@ -99,11 +99,11 @@ class Invoice(Document):
         verbose_name = _("Invoice")
         verbose_name_plural = _("Invoices")
 
-    letterhead = models.ForeignKey('document.Letterhead', related_name="invoice_documents")
+    letterhead = models.ForeignKey('document.Letterhead', related_name="invoice_documents", on_delete=models.CASCADE)
 
     invoice_no = models.CharField(_("Invoice No."), max_length=30, unique=True)
-    project = models.ForeignKey("project.Project", related_name="invoices")
-    parent = models.ForeignKey("self", related_name="invoices", null=True)
+    project = models.ForeignKey("project.Project", related_name="invoices", on_delete=models.CASCADE)
+    parent = models.ForeignKey("self", related_name="invoices", null=True, on_delete=models.CASCADE)
 
     transaction = models.OneToOneField('accounting.Transaction', related_name="invoice", null=True, on_delete=models.SET_NULL)
 
@@ -193,8 +193,8 @@ class Adjustment(Document):
         verbose_name = _("Adjustment")
         verbose_name_plural = _("Adjustment")
 
-    letterhead = models.ForeignKey('document.Letterhead', related_name="adjustment_documents")
-    project = models.ForeignKey("project.Project", related_name="adjustments")
+    letterhead = models.ForeignKey('document.Letterhead', related_name="adjustment_documents", on_delete=models.CASCADE)
+    project = models.ForeignKey("project.Project", related_name="adjustments", on_delete=models.CASCADE)
     invoice = models.OneToOneField('Invoice', related_name="adjustment", null=True, on_delete=models.SET_NULL)
     transaction = models.OneToOneField('accounting.Transaction', related_name="adjustment", null=True, on_delete=models.SET_NULL)
 
@@ -217,8 +217,8 @@ class Payment(Document):
         verbose_name_plural = _("Payments")
         ordering = ['document_date']
 
-    letterhead = models.ForeignKey('document.Letterhead', related_name="payment_documents")
-    project = models.ForeignKey("project.Project", related_name="payments")
+    letterhead = models.ForeignKey('document.Letterhead', related_name="payment_documents", on_delete=models.CASCADE)
+    project = models.ForeignKey("project.Project", related_name="payments", on_delete=models.CASCADE)
     invoice = models.OneToOneField('Invoice', related_name="payment", null=True, on_delete=models.SET_NULL)
     transaction = models.OneToOneField('accounting.Transaction', related_name="payment", null=True, on_delete=models.SET_NULL)
 
@@ -235,8 +235,8 @@ class Payment(Document):
 
 
 class Refund(Document):
-    letterhead = models.ForeignKey('document.Letterhead', related_name="refund_documents")
-    project = models.ForeignKey("project.Project", related_name="refunds")
+    letterhead = models.ForeignKey('document.Letterhead', related_name="refund_documents", on_delete=models.CASCADE)
+    project = models.ForeignKey("project.Project", related_name="refunds", on_delete=models.CASCADE)
     transaction = models.OneToOneField('accounting.Transaction', related_name="refund", null=True,
                                        on_delete=models.SET_NULL)
 

@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from systori.lib.testing import SystoriTestCase
 from systori.apps.company.factories import CompanyFactory

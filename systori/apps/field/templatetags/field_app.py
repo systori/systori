@@ -1,16 +1,16 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django import template
 register = template.Library()
 
 from systori.apps.project.models import DailyPlan
 
 
-@register.assignment_tag
+@register.simple_tag
 def task_dailyplans_count(task, date):
     return task.dailyplans.filter(day=date).count()
 
 
-@register.assignment_tag
+@register.simple_tag
 def equipment_dailyplans_count(equipment, date):
     return equipment.dailyplans.filter(day=date).count()
 
@@ -23,13 +23,12 @@ def add_daily_plan_url(project, date, jobsite=None):
     else:
         return reverse('field.dailyplan.pick-jobsite', args=[project.id, date.isoformat()])
 
+
 @register.simple_tag
 def is_assigned(plan, worker):
     return DailyPlan.is_worker_assigned(plan, worker)
 
+
 @register.filter
-#
-#
-#
 def task_total(lineitem):
     return lineitem.taskinstance.task.qty * lineitem.unit_qty

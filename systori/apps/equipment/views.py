@@ -1,7 +1,7 @@
 from django.http import Http404
 from django.views.generic import \
     ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.urls import reverse_lazy, reverse
 
 from .models import Equipment, RefuelingStop, Maintenance
 from .forms import EquipmentForm, RefuelingStopForm, MaintenanceForm

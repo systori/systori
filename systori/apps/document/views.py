@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import View, ListView, TemplateView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import get_language
 
 from systori.lib.accounting.tools import Amount

@@ -1,3 +1,4 @@
+from django.utils.deprecation import MiddlewareMixin
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from .models import Company, Worker
@@ -15,7 +16,7 @@ def get_subdomain(request):
     return subdomain
 
 
-class CompanyMiddleware:
+class CompanyMiddleware(MiddlewareMixin):
 
     @staticmethod
     def process_request(request):
@@ -51,7 +52,7 @@ class CompanyMiddleware:
             response.context_data['selected_company'] = request.company
             current = request.company.schema if request.company else ''
             response.context_data['available_companies'] = []
-            if request.user.is_authenticated():
+            if request.user.is_authenticated:
                 response.context_data['available_companies'] = [
                     {'name': c.name, 'schema': c.schema, 'url': c.url(request), 'current': c.schema == current}
                     for c in request.user.companies.all()
@@ -59,12 +60,12 @@ class CompanyMiddleware:
         return response
 
 
-class WorkerMiddleware:
+class WorkerMiddleware(MiddlewareMixin):
 
     @staticmethod
     def process_request(request):
         request.worker = None
-        if request.user.is_authenticated() and request.company:
+        if request.user.is_authenticated and request.company:
             try:
                 request.worker = Worker.objects.select_related("user").get(user=request.user, company=request.company)
             except Worker.DoesNotExist:

@@ -9,7 +9,7 @@ from django.utils.http import urlquote
 from django.utils.formats import to_locale, get_language
 from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView
 from django.views.generic.detail import SingleObjectMixin
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from ..company.models import Worker
 from ..project.models import Project, DailyPlan, EquipmentAssignment, TeamMember

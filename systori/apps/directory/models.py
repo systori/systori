@@ -51,8 +51,8 @@ class ProjectContact(models.Model):
     association = models.CharField(_('Association'), max_length=128, choices=ASSOCIATION_TYPE, default=CUSTOMER)
     is_billable = models.BooleanField(_('Is Billable?'), default=False)
 
-    project = models.ForeignKey("project.Project", related_name="project_contacts")
-    contact = models.ForeignKey(Contact, related_name="project_contacts")
+    project = models.ForeignKey("project.Project", related_name="project_contacts", on_delete=models.CASCADE)
+    contact = models.ForeignKey(Contact, related_name="project_contacts", on_delete=models.CASCADE)
 
     notes = models.TextField(_("Notes"), blank=True)
 

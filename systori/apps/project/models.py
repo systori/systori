@@ -6,7 +6,7 @@ from django.db.models.expressions import RawSQL
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django.utils.functional import cached_property
 from django.utils.encoding import smart_str
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django_fsm import FSMField, transition
 
 from systori.lib.utils import nice_percent
@@ -53,7 +53,7 @@ class Project(models.Model):
     name = models.CharField(_('Project Name'), max_length=512)
     description = models.TextField(_('Project Description'), blank=True, null=True)
     is_template = models.BooleanField(default=False)
-    account = models.OneToOneField('accounting.Account', related_name="project", null=True)
+    account = models.OneToOneField('accounting.Account', related_name="project", null=True, on_delete=models.SET_NULL)
     structure = GAEBStructureField(_('Numbering Structure'), default="01.01.001")
 
     objects = ProjectQuerySet.as_manager()
@@ -284,7 +284,7 @@ class Project(models.Model):
 class JobSite(models.Model):
     """ A project can have one or more job sites. """
 
-    project = models.ForeignKey(Project, related_name="jobsites")
+    project = models.ForeignKey(Project, related_name="jobsites", on_delete=models.CASCADE)
     name = models.CharField(_('Site Name'), max_length=512)
 
     address = models.CharField(_("Address"), max_length=512)
@@ -327,7 +327,7 @@ class DailyPlan(models.Model):
         a list of workers performing the tasks and a job site at which they
         will perform the tasks. All on a particular day.
     """
-    jobsite = models.ForeignKey(JobSite, related_name="dailyplans")
+    jobsite = models.ForeignKey(JobSite, related_name="dailyplans", on_delete=models.CASCADE)
     day = models.DateField(_("Day"), default=date.today)
     workers = models.ManyToManyField('company.Worker', through='TeamMember', related_name="dailyplans")
     tasks = models.ManyToManyField('task.Task', related_name="dailyplans")
@@ -356,8 +356,8 @@ class TeamMember(models.Model):
     """ When a worker is assigned to a DailyPlan we need to record
         if they are a foreman or a regular worker.
     """
-    dailyplan = models.ForeignKey(DailyPlan, related_name="members")
-    worker = models.ForeignKey('company.Worker', related_name="assignments")
+    dailyplan = models.ForeignKey(DailyPlan, related_name="members", on_delete=models.CASCADE)
+    worker = models.ForeignKey('company.Worker', related_name="assignments", on_delete=models.CASCADE)
     is_foreman = models.BooleanField(default=False)
 
     class Meta:
@@ -365,5 +365,5 @@ class TeamMember(models.Model):
 
 
 class EquipmentAssignment(models.Model):
-    dailyplan = models.ForeignKey(DailyPlan, related_name="assigned_equipment")
-    equipment = models.ForeignKey('equipment.Equipment', related_name="assignments")
+    dailyplan = models.ForeignKey(DailyPlan, related_name="assigned_equipment", on_delete=models.CASCADE)
+    equipment = models.ForeignKey('equipment.Equipment', related_name="assignments", on_delete=models.CASCADE)

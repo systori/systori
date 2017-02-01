@@ -4,7 +4,7 @@ from django.views.generic.base import View
 from django.views.generic.list import ListView, MultipleObjectMixin
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 
 from .models import Contact, ProjectContact
 from .forms import ContactForm, ProjectContactForm

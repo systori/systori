@@ -1,5 +1,5 @@
 from datetime import timedelta
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.timezone import localtime, now
 from django.utils.formats import date_format
 

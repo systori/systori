@@ -1,7 +1,7 @@
 import json
 import datetime
 
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic.edit import FormView, DeleteView
 from django.views.generic.list import ListView

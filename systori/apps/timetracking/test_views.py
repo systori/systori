@@ -4,7 +4,7 @@ from unittest import skip
 
 from urllib.parse import urlencode
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 

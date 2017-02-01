@@ -285,8 +285,8 @@ class BaseEntry(models.Model):
     """ Represents the tax, net or gross portion of a debit or credit to an account.
     """
 
-    transaction = models.ForeignKey('Transaction', related_name="entries")
-    account = models.ForeignKey('Account', related_name="entries")
+    transaction = models.ForeignKey('Transaction', related_name="entries", on_delete=models.CASCADE)
+    account = models.ForeignKey('Account', related_name="entries", on_delete=models.CASCADE)
 
     value = models.DecimalField(_("Value"), max_digits=14, decimal_places=2)
 

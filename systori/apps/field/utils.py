@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 
 def find_next_workday(start_date):

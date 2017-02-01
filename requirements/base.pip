@@ -2,8 +2,7 @@ psycopg2==2.6.1
 celery==3.1.23
 fabric3==1.12.post1
 
-git+https://github.com/django/django.git@8db6a6c
-django-ordered-model==1.2.1
+git+https://github.com/django/django.git@ac5f886
 django-fsm==2.4.0
 django-bootstrap-form==3.2.1
 django-datetime-widget==0.9.3

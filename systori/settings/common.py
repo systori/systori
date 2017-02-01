@@ -45,7 +45,6 @@ INSTALLED_APPS = (
     'django.contrib.postgres',
     'django_dartium',
     'rest_framework',
-    'ordered_model',
     'bootstrapform',
     'datetimewidget',
     'postgres_schema',
@@ -75,7 +74,8 @@ POSTGRES_SCHEMA_TENANTS = (
     'timetracking',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
