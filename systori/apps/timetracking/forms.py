@@ -77,7 +77,7 @@ class ManualTimerForm(ModelForm):
         self.fields['start'].required = True
         self.fields['end'].required = True
         if company:
-            self.fields['worker'].queryset = company.active_workers()
+            self.fields['worker'].queryset = company.active_workers(flags__timetracking_enabled=True)
 
     def clean(self):
         data = self.cleaned_data
