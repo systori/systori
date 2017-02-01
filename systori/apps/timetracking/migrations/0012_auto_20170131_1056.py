@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='timer',
             name='kind',
-            field=models.CharField(choices=[('work', 'Work'), ('holiday', 'Holiday'), ('illness', 'Illness'), ('correction', 'Correction'), ('training', 'Training'), ('public_holiday', 'Public holiday'), ('paid_leave', 'Paid leave')], db_index=True, default='work', max_length=32),
+            field=models.CharField(choices=[('work', 'Work'), ('holiday', 'Holiday'), ('illness', 'Illness'), ('correction', 'Correction'), ('training', 'Training'), ('public_holiday', 'Public holiday'), ('unpaid_leave', 'Unpaid leave')], db_index=True, default='work', max_length=32),
         ),
     ]
