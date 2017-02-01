@@ -109,7 +109,7 @@ class ManualTimerFormTest(TestCase):
         }, company=self.company)
         self.assertTrue(form.is_valid())
         timers = form.save()
-        self.assertEqual(len(timers), 2)  # timespan of 6 days minus 2 weekend days
+        self.assertEqual(len(timers), 4)  # timespan of 6 days minus 2 weekend days
 
     def test_worker_dropdown_label(self):
         f = forms.ManualTimerForm(company=self.company)
