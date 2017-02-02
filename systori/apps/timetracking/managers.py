@@ -178,7 +178,7 @@ class TimerQuerySet(QuerySet):
 
         return timers
 
-    def worker_pk_list(self):        return Worker.objects \
+    def get_workers(self):
+        return Worker.objects \
             .filter(pk__in=self.values_list('worker')) \
-            .order_by('user__last_name') \
-            .values_list('pk', flat=True)
+            .order_by('user__last_name')

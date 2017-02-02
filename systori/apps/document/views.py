@@ -245,11 +245,10 @@ class TimesheetsGenerateView(View):
         Timesheet.objects.period(year, month).delete()
 
         # get workers that have timers for which timesheets can be generated
-        worker_ids = Timer.objects.filter_month(year, month).worker_pk_list()
+        workers = Timer.objects.filter_month(year, month).get_workers()
 
         # start generating
-        for worker_id in worker_ids:
-            worker = Worker.objects.get(id=worker_id)
+        for worker in workers:
             ts = Timesheet(letterhead=letterhead, worker=worker, document_date=date(year, month, 1))
             ts.json = pdf_type.timesheet.serialize(
                 Timer.objects.filter_month(year, month).filter(worker=worker).all(),

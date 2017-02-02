@@ -18,10 +18,10 @@
         {% for report in progressreport_list %}
           <tr>
             <td>{{ report.timestamp|localize }}</td>
-            <td><a href="{% url 'project.view' report.task.taskgroup.job.project.id %}">{{ report.task.taskgroup.job.project }}</a></td>
+            <td><a href="{% url 'project.view' report.task.job.project.id %}">#{{ report.task.job.project.id }} {{ report.task.job.project.name }}</a></td>
             <td>{{ report.worker.get_full_name }}</td>
             <td>
-              <a target="_blank" href="{% url 'tasks' report.task.taskgroup.job.project.id report.task.taskgroup.job.id %}">{{ report.task|truncatechars:60 }}</a>
+              {{ report.task|truncatechars:60 }}
             </td>
             <td style="text-align: right;">{{ report.complete|ubrdecimal }}</td>
             <td>{{ report.task.unit }}</td>
