@@ -432,6 +432,21 @@
       background: orange;
     }
 
+    sys-group[data-pk=""] > .editor sys-input.name,
+    sys-task[data-pk=""] > .editor sys-input.name {
+      position: relative;
+      margin-left: 20px;
+    }
+
+    sys-group[data-pk=""] > .editor sys-input.name:after,
+    sys-task[data-pk=""] > .editor sys-input.name:after {
+      position: absolute;
+      left: -17px;
+      font-family: 'Glyphicons Halflings';
+      font-size: small;
+      content: "\e003";
+      color: black;
+    }
 
   </style>
 
