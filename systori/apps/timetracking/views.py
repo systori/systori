@@ -53,7 +53,7 @@ class HomeView(PeriodFilterMixin, FormView):
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             report=utils.get_daily_workers_report(
-                utils.get_timetracking_workers(self.request.company), self.report_period),
+                utils.get_timetracking_workers(self.request.company).order_by('user__last_name'), self.report_period),
             **kwargs
         )
 

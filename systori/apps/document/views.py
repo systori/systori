@@ -245,7 +245,7 @@ class TimesheetsGenerateView(View):
         Timesheet.objects.period(year, month).delete()
 
         # get workers that have timers for which timesheets can be generated
-        worker_ids = Timer.objects.filter_month(year, month).distinct_workers_list()
+        worker_ids = Timer.objects.filter_month(year, month).worker_pk_list()
 
         # start generating
         for worker_id in worker_ids:

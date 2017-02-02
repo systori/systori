@@ -7,7 +7,7 @@ from django.db.transaction import atomic
 from django.utils import timezone
 from .utils import get_timespans_split_by_breaks, get_dates_in_range
 from systori.lib import date_utils
-
+from ..company.models import Worker
 
 ABANDONED_CUTOFF = (16, 00)
 
@@ -178,8 +178,7 @@ class TimerQuerySet(QuerySet):
 
         return timers
 
-    def distinct_workers_list(self):
-        return self \
-            .order_by() \
-            .values_list('worker', flat=True) \
-            .distinct('worker')
+    def worker_pk_list(self):        return Worker.objects \
+            .filter(pk__in=self.values_list('worker')) \
+            .order_by('user__last_name') \
+            .values_list('pk', flat=True)
