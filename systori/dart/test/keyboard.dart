@@ -43,6 +43,8 @@ class Keyboard {
 
     sendEnter({bool shiftKey: false}) => sendKey(KeyCode.ENTER, shiftKey: shiftKey);
     sendUp({bool shiftKey: false}) => sendKey(KeyCode.UP, shiftKey: shiftKey);
+    sendLeft({bool shiftKey: false}) => sendKey(KeyCode.LEFT, shiftKey: shiftKey);
+    sendRight({bool shiftKey: false}) => sendKey(KeyCode.RIGHT, shiftKey: shiftKey);
     sendDown({bool shiftKey: false}) => sendKey(KeyCode.DOWN, shiftKey: shiftKey);
     sendDelete({bool shiftKey: false}) => sendKey(KeyCode.DELETE, shiftKey: shiftKey);
     sendKey(int keyCode, {bool shiftKey: false}) {

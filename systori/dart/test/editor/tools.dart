@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:html';
 import 'package:systori/editor.dart';
+import 'package:systori/inputs.dart';
 import '../keyboard.dart';
 export '../scaffolding.dart';
 
@@ -15,6 +16,8 @@ class KeyboardNavigator extends Keyboard {
         }
         return null;
     }
+
+    String get inputName => (document.activeElement as Input).name;
 
 }
 
@@ -97,9 +100,11 @@ class FakeSaveRequest extends FakeRequest<Map> {
 
 class FakeSearchRequest extends FakeRequest<List> {
     FakeSearchRequest(Map data): super(data);
-    List<List> response(Map data) => [
-        ['42', 'a name', 'a description']
-    ];
+    List<Map> response(Map data) => [{
+        'id': '42',
+        'name_match': 'a name',
+        'description_match': 'a description'
+    }];
 }
 
 
@@ -151,7 +156,7 @@ class FakeRepository extends Repository {
         return request.completer.future;
     }
 
-    Future<List<List>> search(Map<String,String> criteria) {
+    Future<List<Map>> search(Map<String,String> criteria) {
         var request = new FakeSearchRequest(criteria);
         _requests.add(request);
         return request.completer.future;

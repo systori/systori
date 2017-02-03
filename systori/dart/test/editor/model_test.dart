@@ -23,7 +23,7 @@ class Thing extends Model with KeyboardHandler {
         name = getInput('name');
         description = getInput('description');
         qty = getInput('qty');
-        bindAll(inputs);
+        bindAll(inputs.values);
         super.attached();
     }
 
