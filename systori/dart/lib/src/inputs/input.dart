@@ -2,6 +2,11 @@ import 'dart:html';
 
 
 abstract class KeyboardHandler {
+    /*
+        onKeyDownEvent() and onKeyUpEvent()
+        returns false: continue calling subsequent event handlers
+        returns true: event was handled, stop propagating
+     */
     bool onKeyDownEvent(KeyEvent e, Input input) => false;
     bool onKeyUpEvent(KeyEvent e, Input input) => false;
     onFocusEvent(Input input) {}
@@ -15,7 +20,9 @@ abstract class KeyboardHandler {
 
 class Input extends HtmlElement {
 
-    Map<String,dynamic> get values => {className: text};
+    String get name => classes.first;
+
+    Map<String,dynamic> get values => {name: text};
 
     List<KeyboardHandler> _handlers = [];
 

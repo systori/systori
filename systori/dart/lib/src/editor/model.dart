@@ -24,8 +24,8 @@ class ModelState {
 
     static Map<String,dynamic> initialCommitted(Model model) =>
         model.hasPK
-            ? inputMap(model.inputs)
-            : new Map.fromIterable(inputMap(model.inputs).keys,
+            ? inputMap(model.inputs.values)
+            : new Map.fromIterable(inputMap(model.inputs.values).keys,
                 key: (String key) => key, value: (String key) => ''
             );
 
@@ -54,7 +54,7 @@ class ModelState {
 
     Map<String,dynamic> get delta {
         var result = <String,dynamic>{};
-        inputMap(model.inputs).forEach((String key, dynamic value) {
+        inputMap(model.inputs.values).forEach((String key, dynamic value) {
             if (isChanged(key, value)) result[key] = value;
         });
         return result;
@@ -109,7 +109,7 @@ abstract class Model extends HtmlElement {
     set token(int token) => dataset['token'] = token.toString();
 
     ModelState state;
-    List<Input> inputs = [];
+    Map<String,Input> inputs = {};
     DivElement editor;
 
     Model.created(): super.created() {
@@ -132,8 +132,8 @@ abstract class Model extends HtmlElement {
 
     Input getInput(String field) {
         var input = getView(field) as Input;
-        assert(!inputs.contains(input));
-        inputs.add(input);
+        assert(!inputs.containsKey(input.name));
+        inputs[input.name] = input;
         return input;
     }
 
@@ -225,6 +225,53 @@ abstract class Model extends HtmlElement {
                 editor.classes = ['editor'];
                 break;
         }
+    }
+
+    Model firstAbove() {
+        Model match;
+
+        // try siblings
+        match = this.previousElementSibling;
+        if (match is Model) {
+            while (true) {
+                Iterable<Model> modelChildren = null;
+                for (var childType in match.childTypes) {
+                    if (match.childrenOfType(childType).isNotEmpty) {
+                        modelChildren = match.childrenOfType(childType);
+                        break;
+                    }
+                }
+                if (modelChildren == null) break;
+                match = modelChildren.last;
+            }
+            return match;
+        }
+
+        return parent is Model ? parent : null;
+    }
+
+    Model firstBelow() {
+        // check children
+        for (var childType in childTypes) {
+            for (Model child in childrenOfType(childType)) {
+                return child;
+            }
+        }
+        // now try siblings
+        if (nextElementSibling is Model) {
+            return nextElementSibling;
+        }
+        // visit the ancestors
+        var ancestor = parent;
+        while (ancestor is Model) {
+            var sibling = ancestor.nextElementSibling;
+            if (sibling is Model) {
+                return sibling;
+            }
+            ancestor = ancestor.parent;
+        }
+
+        return null;
     }
 
 }

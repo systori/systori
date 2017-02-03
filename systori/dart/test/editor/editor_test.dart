@@ -119,6 +119,70 @@ void main() {
 
         });
 
+        test("arrow navigation", () {
+            expect(nav.activeModel is Job, isTrue);
+            expect(nav.inputName, 'name');
+
+            nav.sendDown(shiftKey: true);
+            expect(nav.activeModel is Job, isTrue);
+            expect(nav.inputName, 'description');
+
+            nav.sendDown(shiftKey: true);
+            expect(nav.activeModel is Group, isTrue);
+            expect(nav.inputName, 'name');
+
+            nav.sendDown(shiftKey: true);
+            expect(nav.activeModel is Group, isTrue);
+            expect(nav.inputName, 'description');
+
+            nav.sendDown(shiftKey: true);
+            expect(nav.activeModel is Task, isTrue);
+            expect(nav.inputName, 'name');
+
+            nav.sendRight(shiftKey: true);
+            expect(nav.activeModel is Task, isTrue);
+            expect(nav.inputName, 'qty');
+
+            nav.sendRight(shiftKey: true);
+            expect(nav.activeModel is Task, isTrue);
+            expect(nav.inputName, 'unit');
+
+            nav.sendRight(shiftKey: true);
+            expect(nav.activeModel is Task, isTrue);
+            expect(nav.inputName, 'price');
+
+            nav.sendRight(shiftKey: true);
+            expect(nav.activeModel is Task, isTrue);
+            expect(nav.inputName, 'total');
+
+            nav.sendDown(shiftKey: true);
+            expect(nav.activeModel is LineItem, isTrue);
+            expect(nav.inputName, 'total');
+
+            nav.sendLeft(shiftKey: true);
+            expect(nav.activeModel is LineItem, isTrue);
+            expect(nav.inputName, 'price');
+
+            nav.sendLeft(shiftKey: true); // unit
+            nav.sendLeft(shiftKey: true); // qty
+
+            nav.sendLeft(shiftKey: true);
+            expect(nav.activeModel is LineItem, isTrue);
+            expect(nav.inputName, 'name');
+
+            nav.sendUp(shiftKey: true);
+            expect(nav.activeModel is Task, isTrue);
+            expect(nav.inputName, 'description');
+
+            nav.sendUp(shiftKey: true);
+            expect(nav.activeModel is Task, isTrue);
+            expect(nav.inputName, 'name');
+
+            nav.sendUp(shiftKey: true);
+            expect(nav.activeModel is Group, isTrue);
+            expect(nav.inputName, 'description');
+        });
+
     });
 
     group("ChangeManager", () {

@@ -9,6 +9,7 @@ import 'package:systori/inputs.dart';
 import 'model.dart';
 import 'gaeb.dart';
 import 'autocomplete.dart';
+import 'navigation.dart';
 
 
 class TextareaKeyboardHandler extends KeyboardHandler {
@@ -56,6 +57,15 @@ class DecimalElement extends HtmlElement {
 }
 
 
+class GroupArrowKeyHandler extends ArrowNavigationHandler {
+    static var MAP = ArrowNavigationHandler.buildNavigationMap([
+        ['name'],
+        ['description']
+    ]);
+    GroupArrowKeyHandler(Group group): super(MAP, group);
+}
+
+
 class Group extends Model with KeyboardHandler {
 
     CodeInput code;
@@ -83,7 +93,8 @@ class Group extends Model with KeyboardHandler {
         }, replaceWithCloneOf));
         description = getInput("description");
         description.addHandler(new TextareaKeyboardHandler());
-        bindAll(inputs);
+        bindAll(inputs.values);
+        new GroupArrowKeyHandler(this);
         super.attached();
     }
 
@@ -315,6 +326,15 @@ abstract class HtmlRow implements Row {
 }
 
 
+class TaskArrowKeyHandler extends ArrowNavigationHandler {
+    static var MAP = ArrowNavigationHandler.buildNavigationMap([
+        ['name', 'qty', 'unit', 'price', 'total'],
+        ['description']
+    ]);
+    TaskArrowKeyHandler(Task task): super(MAP, task);
+}
+
+
 class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 
     bool get isBlank => hasNoPk && name.text.isEmpty;
@@ -344,7 +364,8 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
-        bindAll(inputs);
+        bindAll(inputs.values);
+        new TaskArrowKeyHandler(this);
 
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
@@ -445,6 +466,14 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 }
 
 
+class LineItemArrowKeyHandler extends ArrowNavigationHandler {
+    static var MAP = ArrowNavigationHandler.buildNavigationMap([
+        ['name', 'qty', 'unit', 'price', 'total'],
+    ]);
+    LineItemArrowKeyHandler(LineItem li): super(MAP, li);
+}
+
+
 class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
 
     CodeInput dragHandle;
@@ -461,7 +490,8 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
-        bindAll(inputs);
+        bindAll(inputs.values);
+        new LineItemArrowKeyHandler(this);
         super.attached();
     }
 
@@ -509,6 +539,28 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
     @override
     bool onInputEvent(Input input) =>
         updateVisualState('changed');
+
+    Model firstAbove() =>
+        previousElementSibling is Model
+            ? previousElementSibling
+            : parent.parent;
+
+    Model firstBelow() {
+        // now try siblings
+        if (nextElementSibling is Model) {
+            return nextElementSibling;
+        }
+        // visit the ancestors
+        var ancestor = parent.parent;
+        while (ancestor is Model) {
+            var sibling = ancestor.nextElementSibling;
+            if (sibling is Model) {
+                return sibling;
+            }
+            ancestor = ancestor.parent;
+        }
+        return null;
+    }
 }
 
 
