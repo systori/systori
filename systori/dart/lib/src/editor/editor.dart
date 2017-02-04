@@ -9,6 +9,7 @@ import 'package:systori/inputs.dart';
 import 'model.dart';
 import 'gaeb.dart';
 import 'autocomplete.dart';
+import 'stickyheader.dart';
 import 'navigation.dart';
 
 
@@ -31,12 +32,16 @@ class TextareaKeyboardHandler extends KeyboardHandler {
 
 class Job extends Group {
     static Job JOB;
+    StickyHeader stickyHeader;
     GAEBHierarchyStructure structure;
     int depth = 0;
+
     Job.created(): super.created() {
+        new StickyHeader(this);
         structure = new GAEBHierarchyStructure(dataset['structure-format']);
         JOB = this;
     }
+
     createSibling() => createChild();
     calculationChanged() => updateTotal();
 }

@@ -1,13 +1,14 @@
 import os
 import re
 import types
+import string
 import django; django.setup()
 from decimal import Decimal as D
 from django.db import transaction
 from django.template import Context, Template
 from django.test.client import Client
 from django.test.utils import setup_databases
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.translation import activate
 from django.conf import settings
 from systori.apps.company.factories import CompanyFactory
@@ -63,6 +64,35 @@ def create_data():
         (data.job1, A(D(388.8), D(91.2)), Entry.WORK_DEBIT),
         (data.job2, A(D(100), D(19)), Entry.WORK_DEBIT)
     ])
+
+    data.big_project = ProjectFactory(name="Big Project", structure="0.00.00.00.00.000")
+    data.big_job = JobFactory(name="Big Job", project=data.big_project)
+    data.big_job.account = create_account_for_job(data.big_job)
+    data.big_job.save()
+
+    def add_task(group):
+        task = TaskFactory(name='Fence', group=group, qty=200, qty_equation='200', unit='m²', price=74.98, total=14996)
+        LineItemFactory(name='Labor', task=task, qty=0.1, qty_equation='0.1', unit='hr', price=19.8, price_equation='18*1.1', total=1.98)
+        LineItemFactory(name='Equipment Rental', task=task, qty=0.1, qty_equation='!', unit='hr', price=50, price_equation='50', total=5)
+        LineItemFactory(name='Materials', task=task, qty=4, qty_equation='4', unit='m', price=17, price_equation='17', total=68)
+
+    for groupset in range(3):
+        groupset = string.ascii_uppercase[groupset]
+        group = GroupFactory(name='Main Group {}1'.format(groupset), parent=data.big_job)
+        groups = []
+        for depth in range(2, 5):
+            groups = [
+                GroupFactory(name='Group {}{}.1'.format(groupset, depth), parent=group),
+                GroupFactory(name='Group {}{}.2'.format(groupset, depth), parent=group),
+            ]
+            group = groups[1]
+        if groupset == 'B':
+            for g in groups:
+                add_task(g)
+                add_task(g)
+        else:
+            add_task(group)
+
     return data
 
 
@@ -105,6 +135,9 @@ def generate_pages():
 
     refund_create = client.get(reverse('refund.create', args=[data.project.id]), HTTP_HOST=host)
     write_test_html('apps', 'refund_editor', refund_create.content)
+
+    sticky_header = client.get(reverse('job.editor', args=[data.big_project.id, data.big_job.id]), HTTP_HOST=host)
+    write_test_html('editor', 'sticky_header', sticky_header.content)
 
     activate('de')
     write_test_html('inputs', 'amount', generate_amount_test_html(data))

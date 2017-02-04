@@ -1,0 +1,1617 @@
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+<link rel="apple-touch-icon" sizes="57x57" href="/static/img/favicon/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/static/img/favicon/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/static/img/favicon/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/static/img/favicon/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/static/img/favicon/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/static/img/favicon/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/static/img/favicon/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/static/img/favicon/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/img/favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-194x194.png" sizes="194x194">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/static/img/favicon/android-chrome-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="/static/img/favicon/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="/static/img/favicon/manifest.json">
+<link rel="mask-icon" href="/static/img/favicon/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="msapplication-TileImage" content="/static/img/favicon/mstile-144x144.png">
+<meta name="theme-color" content="#ffffff">
+
+    <title>Big Project > Big Job</title>
+
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+    <link href="/static/css/main.css" rel="stylesheet">
+  
+</head>
+
+
+<body>
+
+
+
+<!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/"><img alt="Systori" src="/static/img/systori_logo_nav.svg" style="margin-top:-10px;"></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              
+                <a class="navbar-brand" href="#">ACME Industries</a>
+              
+            </li>
+            
+
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Menu
+        <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li >
+            <a href="/">Pinnwand</a></li>
+        <li class="active">
+            <a href="/projects/">Projekte</a></li>
+        <li >
+            <a href="/directory">Adressbuch</a></li>
+        <li >
+            <a href="/equipment/">Ausrüstung</a></li>
+        <li >
+            <a href="/day-based-overview/">Tagesplan</a></li>
+        <li >
+            <a href="/progress">Aufmaß Meldungen</a></li>
+        
+        <li >
+            <a href="/templates">Vorlagen</a></li>
+        <li >
+            <a href="/users">Benutzer</a></li>
+        
+        
+          <li >
+              <a href="/timetracking/">Zeiterfassung</a></li>
+          <li >
+              <a href="/timesheets/">Stundenzettel</a></li>
+        
+    </ul>
+</li>
+            
+  <li><a href="/project-3">Big Project</a></li>
+  <li class="active"><a href="/project-3/job-5/editor">Big Job</a></li>
+
+          </ul>
+
+            <form id="set-language" action="/set_language" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='abc' />
+          <input type="hidden" name="language" value=""/>
+        </form>
+
+        <ul class="nav navbar-nav navbar-right">
+
+          
+          
+          <li><a
+              href="javascript:window.open('/field/', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">öffne Field App</a>
+          </li>
+          
+          
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Ben <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="/settings">Einstellungen</a></li>
+              <li><a href="/logout">Abmelden</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">de<b class="caret"></b></a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
+              
+              
+                
+              
+                
+                  <li><a class="language-link" href="#"
+                         data-language="en">English</a></li>
+                
+              
+            </ul>
+          </li>
+
+        </ul>
+        <form class="navbar-form navbar-right">
+            <div class="form-group form-group-sm">
+              <input type="text" id="goto_project" onkeyup="gotoProject(event)" style="width:60px; margin-top:3px;" class="form-control" placeholder="#">
+            </div>
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+
+
+  <style>
+
+    #editor-area {
+      max-width: 1100px;
+      padding-top: 50px;
+      padding-left: 50px;
+      padding-bottom:100px;
+      margin: auto;
+    }
+
+    sys-job,
+    sys-group,
+    sys-task,
+    sys-lineitem,
+    sys-task > div.price-difference {
+      display: block;
+      position: relative;
+      margin-right: 15px;
+    }
+
+    sys-job,
+    sys-group {
+      border-right: 1px solid #e9e9e9;
+    }
+
+    sys-job > .editor,
+    sys-group > .editor,
+    sys-task > .editor {
+      position: relative;
+      padding-bottom: 10px;
+      border-left: white 1px solid;
+    }
+    sys-lineitem > .editor {
+      border-left: white 1px solid;
+    }
+
+    sys-job > .editor.changed,
+    sys-group > .editor.changed,
+    sys-task > .editor.changed {
+      border-left-color: orange;
+    }
+    sys-lineitem > .editor.changed {
+      border-left-color: orange;
+    }
+
+    sys-job > .editor.saving,
+    sys-group > .editor.saving,
+    sys-task > .editor.saving {
+      border-left-color: yellow;
+    }
+    sys-lineitem > .editor.saving {
+      border-left-color: yellow;
+    }
+
+    .editor-row {
+      display: flex;
+      align-items: flex-start;
+      padding-bottom: 3px;
+    }
+
+    /* job, group, task */
+
+    .code {
+      flex: 0 0 auto;
+      font-family: monospace;
+    }
+
+    .name {
+      flex: 1 1 auto;
+      margin: 0 10px 0 10px;
+    }
+
+    .total {
+      flex: 0 0 auto;
+      position: relative;
+      min-width: 90px;
+      text-align: right;
+      padding: 0 4px 0 4px;
+      margin-right: -5px;
+      margin-left: 10px;
+      border: 1px solid black;
+      background-color: #fff;
+      z-index: 2;
+    }
+
+    .description {
+      display: block;
+      margin-left: 50px;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    sys-group > .editor .name {
+      font-weight: bold;
+    }
+
+    sys-group > .editor .total:after,
+    sys-task > .editor .total:after {
+      display: block;
+      position: absolute;
+      content: "+";
+
+      width: 11px;
+      height: 10px;
+
+      top: 0px;
+      right: -12px;
+
+      color: #e9e9e9;
+      font-size: 9px;
+      text-align: left;
+
+      padding-left: 2px;
+      border-bottom: 1px solid #e9e9e9;
+    }
+
+    /* cover up end of line when last child */
+    sys-group:last-child:after,
+    sys-task:last-child:after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 3px;
+      top: 10px;
+      bottom: 0px;
+      right: -17px;
+      background-color: white;
+    }
+
+    /* cover up line if empty group */
+    sys-group > .editor:only-child:after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 1px;
+      top: 0px;
+      bottom: 0px;
+      right: -1px;
+      background-color: white;
+    }
+
+    /* task, lineitem */
+
+    [contenteditable]:focus {
+      outline: none;
+    }
+
+    sys-task {
+      padding-bottom: 20px;
+    }
+
+    .unit {
+      flex: 0 0 auto;
+      width: 70px;
+      padding-left: 4px;
+    }
+
+    sys-lineitem > .editor .total,
+    .qty, .price {
+      flex: 0 0 auto;
+      width: 100px;
+      text-align: right;
+      padding-right: 4px;
+      background-color: #fff;
+    }
+
+    sys-lineitem > .editor .total {
+      border: 1px solid #e9e9e9;
+    }
+
+    sys-task > .editor .price {
+      position: relative;
+      border: 1px solid black;
+      margin-left: 10px;
+    }
+
+    sys-task > .editor .price:before {
+      display: block;
+      position: absolute;
+      content: "x";
+      width: 180px;
+      height: 1px;
+      padding-right: 2px;
+      border-top: 1px solid #e9e9e9;
+      top: -1px;
+      left: -181px;
+      color: #e9e9e9;
+      font-size: 8px;
+      text-align: right;
+    }
+
+    sys-task > .editor .price:after {
+      display: block;
+      position: absolute;
+      content: "=";
+      width: 10px;
+      padding-left: 2px;
+      border-top: 1px solid #e9e9e9;
+      top: 1px;
+      right: -11px;
+      color: #e9e9e9;
+      font-size: 8px;
+      text-align: left;
+    }
+
+    sys-task > div.price-difference {
+      display: flex;
+      margin-bottom: 10px;
+      margin-left: 100px;
+    }
+
+    sys-task > div.price-difference > .glyphicon {
+      color: red;
+    }
+
+    sys-task > div.price-difference > .total {
+      color: red;
+      font-weight: bold;
+      border-color: red;
+      min-width: 100px;
+    }
+
+    sys-task > .editor:not(:only-child):after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 1px;
+      top: 0px;
+      bottom: 0px;
+      right: 100px;
+      border-right: 1px solid #e9e9e9;
+      z-index: -1;
+    }
+
+    sys-lineitem:not(:last-child):after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 1px;
+      top: 0px;
+      bottom: 0px;
+      right: 85px;
+      border-right: 1px solid #e9e9e9;
+    }
+
+    /* line item */
+
+    sys-lineitem {
+      background-color: white;
+    }
+
+    sys-lineitem > a {
+      position: absolute;
+      top: -150px;
+    }
+
+    sys-lineitem,
+    .sys-lineitem-placeholder {
+      margin-bottom: 10px;
+    }
+
+    sys-cell[data-canonical=""] {
+      font-weight: bold;
+    }
+
+    sys-cell[data-resolved] {
+      font-weight: bold;
+      border-bottom: green 2px dotted;
+    }
+
+    sys-cell {
+      position: relative;
+    }
+
+    sys-cell:focus {
+      outline: none;
+    }
+
+    sys-lineitem sys-cell[data-preview]:focus:after {
+      display: block;
+      position: absolute;
+      content: attr(data-preview);
+      font-size: 10px;
+      color: dimgrey;
+      bottom: -15px;
+      right: 4px;
+      width: 400px;
+      white-space: nowrap;
+    }
+
+    .sys-lineitem-handle {
+      cursor: pointer;
+    }
+
+    sys-lineitem-sheet {
+      -webkit-user-select: none;
+      user-select: none;
+      margin-left: 100px;
+      display: block;
+      position: relative;
+    }
+
+    sys-lineitem-sheet:after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 1px;
+      top: 0px;
+      bottom: 0px;
+      right: 100px;
+      border-right: 1px solid #e9e9e9;
+      z-index: -1;
+    }
+
+    /* description */
+
+    sys-job > .editor .description {
+      margin-right: 180px;
+    }
+    sys-job > sys-group > .editor .description {
+      margin-right: 165px;
+    }
+    sys-job > sys-group > sys-group > .editor .description {
+      margin-right: 150px;
+    }
+    sys-job > sys-group > sys-group > sys-group > .editor .description {
+      margin-right: 135px;
+    }
+    sys-job > sys-group > sys-group > sys-group > sys-group > .editor .description {
+      margin-right: 120px;
+    }
+    sys-task > .editor .description {
+      margin-right: 105px;
+    }
+
+    /* actions */
+
+    .actions {
+      flex: 0 0 auto;
+      width: 85px;
+      padding-left: 20px;
+    }
+
+    .actions > span:hover {
+      cursor: pointer;
+    }
+
+    .actions > span.False {
+      display: none;
+      color: #f0f0f0;
+    }
+
+    .editor:hover > .editor-row > .actions > span.False {
+      display: inline;
+    }
+
+    /* other */
+
+    [contenteditable][placeholder]:empty:before {
+      content: attr(placeholder);
+      font-style: italic;
+      color: #d9d9d9;
+    }
+
+    [contenteditable][placeholder]:empty:focus:before {
+      content: "";
+    }
+
+
+    sys-autocomplete {
+      z-index: 100;
+      visibility: hidden;
+      position: absolute;
+      background: white;
+      width: 480px;
+      border: 1px solid lightgrey;
+      -webkit-transition: top 0.1s;
+      -moz-transition: top 0.1s;
+      -ms-transition: top 0.1s;
+      -o-transition: top 0.1s;
+      transition: top 0.1s;
+    }
+
+    sys-autocomplete > div {
+      position: relative;
+      border-bottom: 1px solid lightgrey;
+    }
+
+    sys-autocomplete > div > h2 {
+      font-size: 14px;
+      margin-top: 0px;
+    }
+
+    sys-autocomplete > div > p {
+      font-size: 12px;
+    }
+
+    sys-autocomplete > div > div {
+      position: absolute;
+      left: 480px;
+      top: 0px;
+      width: 360px;
+      background: #FFE0A6;
+    }
+
+    sys-autocomplete > div > div > table {
+      width: 100%;
+    }
+
+    sys-autocomplete > div > div > table .info-decimal {
+      padding-left: 3px;
+      text-align: right;
+    }
+
+    sys-autocomplete > div > div > table .info-total {
+      font-weight: bold;
+    }
+
+    sys-autocomplete > div.active {
+      background: orange;
+    }
+
+    sys-group[data-pk=""] > .editor sys-input.name,
+    sys-task[data-pk=""] > .editor sys-input.name {
+      position: relative;
+      margin-left: 20px;
+    }
+
+    sys-group[data-pk=""] > .editor sys-input.name:after,
+    sys-task[data-pk=""] > .editor sys-input.name:after {
+      position: absolute;
+      left: -17px;
+      font-family: 'Glyphicons Halflings';
+      font-size: small;
+      content: "\e003";
+      color: black;
+    }
+
+    .sticky-header {
+      position: fixed;
+      background-color: white;
+      z-index: 100;
+    }
+
+    .sticky-header.sliding {
+      color: lightgray;
+      z-index: 99;
+    }
+
+  </style>
+
+  <div id="editor-area">
+
+  <sys-job id="task-editor" data-pk="5" data-code="1"
+           data-structure-format="0.00.00.00.00.000">
+    
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Big Job</sys-input>
+    <sys-decimal class="total">89.976,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+    
+      <sys-group
+    data-pk="6"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.01</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Main Group A1</sys-input>
+    <sys-decimal class="total">14.996,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+    <sys-group
+    data-pk="7"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.01.01</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group A2.1</sys-input>
+    <sys-decimal class="total">0,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+</sys-group>
+  
+    <sys-group
+    data-pk="8"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.01.02</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group A2.2</sys-input>
+    <sys-decimal class="total">14.996,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+    <sys-group
+    data-pk="9"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.01.02.01</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group A3.1</sys-input>
+    <sys-decimal class="total">0,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+</sys-group>
+  
+    <sys-group
+    data-pk="10"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.01.02.02</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group A3.2</sys-input>
+    <sys-decimal class="total">14.996,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+    <sys-group
+    data-pk="11"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.01.02.02.01</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group A4.1</sys-input>
+    <sys-decimal class="total">0,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+</sys-group>
+  
+    <sys-group
+    data-pk="12"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.01.02.02.02</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group A4.2</sys-input>
+    <sys-decimal class="total">14.996,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+    
+<sys-task
+    data-pk="2"
+    data-token="">
+  
+
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.01.02.02.02.001</sys-code-input>
+    <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
+    <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
+    
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+
+<sys-lineitem-sheet>
+  
+    <sys-lineitem
+        data-pk="4"
+        data-token="">
+      
+<a name="lineitem-4"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="1"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Labor</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="0.1"   contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="5"
+        data-token="">
+      
+<a name="lineitem-5"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="2"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Equipment Rental</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="!"   data-resolved="" contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="6"
+        data-token="">
+      
+<a name="lineitem-6"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="3"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Materials</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="4"   contenteditable>4</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>m</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+</sys-lineitem-sheet>
+
+<div class="price-difference" style="visibility: hidden;">
+  <span class="glyphicon glyphicon-exclamation-sign"></span>
+  <div class="name">Die Kalkulation geht noch nicht auf.</div>
+  <div class="total">0,00</div>
+  <div class="actions"></div>
+</div>
+
+</sys-task>
+  
+</sys-group>
+  
+  
+</sys-group>
+  
+  
+</sys-group>
+  
+  
+</sys-group>
+    
+      <sys-group
+    data-pk="13"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.02</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Main Group B1</sys-input>
+    <sys-decimal class="total">59.984,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+    <sys-group
+    data-pk="14"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.02.01</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group B2.1</sys-input>
+    <sys-decimal class="total">0,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+</sys-group>
+  
+    <sys-group
+    data-pk="15"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.02.02</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group B2.2</sys-input>
+    <sys-decimal class="total">59.984,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+    <sys-group
+    data-pk="16"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.02.02.01</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group B3.1</sys-input>
+    <sys-decimal class="total">0,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+</sys-group>
+  
+    <sys-group
+    data-pk="17"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.02.02.02</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group B3.2</sys-input>
+    <sys-decimal class="total">59.984,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+    <sys-group
+    data-pk="18"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.02.02.02.01</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group B4.1</sys-input>
+    <sys-decimal class="total">29.992,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+    
+<sys-task
+    data-pk="3"
+    data-token="">
+  
+
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.02.02.02.01.001</sys-code-input>
+    <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
+    <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
+    
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+
+<sys-lineitem-sheet>
+  
+    <sys-lineitem
+        data-pk="7"
+        data-token="">
+      
+<a name="lineitem-7"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="1"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Labor</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="0.1"   contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="8"
+        data-token="">
+      
+<a name="lineitem-8"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="2"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Equipment Rental</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="!"   data-resolved="" contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="9"
+        data-token="">
+      
+<a name="lineitem-9"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="3"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Materials</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="4"   contenteditable>4</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>m</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+</sys-lineitem-sheet>
+
+<div class="price-difference" style="visibility: hidden;">
+  <span class="glyphicon glyphicon-exclamation-sign"></span>
+  <div class="name">Die Kalkulation geht noch nicht auf.</div>
+  <div class="total">0,00</div>
+  <div class="actions"></div>
+</div>
+
+</sys-task>
+  
+    
+<sys-task
+    data-pk="4"
+    data-token="">
+  
+
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.02.02.02.01.002</sys-code-input>
+    <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
+    <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
+    
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+
+<sys-lineitem-sheet>
+  
+    <sys-lineitem
+        data-pk="10"
+        data-token="">
+      
+<a name="lineitem-10"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="1"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Labor</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="0.1"   contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="11"
+        data-token="">
+      
+<a name="lineitem-11"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="2"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Equipment Rental</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="!"   data-resolved="" contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="12"
+        data-token="">
+      
+<a name="lineitem-12"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="3"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Materials</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="4"   contenteditable>4</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>m</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+</sys-lineitem-sheet>
+
+<div class="price-difference" style="visibility: hidden;">
+  <span class="glyphicon glyphicon-exclamation-sign"></span>
+  <div class="name">Die Kalkulation geht noch nicht auf.</div>
+  <div class="total">0,00</div>
+  <div class="actions"></div>
+</div>
+
+</sys-task>
+  
+</sys-group>
+  
+    <sys-group
+    data-pk="19"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.02.02.02.02</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group B4.2</sys-input>
+    <sys-decimal class="total">29.992,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+    
+<sys-task
+    data-pk="5"
+    data-token="">
+  
+
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.02.02.02.02.001</sys-code-input>
+    <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
+    <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
+    
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+
+<sys-lineitem-sheet>
+  
+    <sys-lineitem
+        data-pk="13"
+        data-token="">
+      
+<a name="lineitem-13"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="1"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Labor</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="0.1"   contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="14"
+        data-token="">
+      
+<a name="lineitem-14"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="2"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Equipment Rental</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="!"   data-resolved="" contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="15"
+        data-token="">
+      
+<a name="lineitem-15"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="3"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Materials</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="4"   contenteditable>4</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>m</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+</sys-lineitem-sheet>
+
+<div class="price-difference" style="visibility: hidden;">
+  <span class="glyphicon glyphicon-exclamation-sign"></span>
+  <div class="name">Die Kalkulation geht noch nicht auf.</div>
+  <div class="total">0,00</div>
+  <div class="actions"></div>
+</div>
+
+</sys-task>
+  
+    
+<sys-task
+    data-pk="6"
+    data-token="">
+  
+
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.02.02.02.02.002</sys-code-input>
+    <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
+    <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
+    
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+
+<sys-lineitem-sheet>
+  
+    <sys-lineitem
+        data-pk="16"
+        data-token="">
+      
+<a name="lineitem-16"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="1"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Labor</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="0.1"   contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="17"
+        data-token="">
+      
+<a name="lineitem-17"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="2"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Equipment Rental</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="!"   data-resolved="" contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="18"
+        data-token="">
+      
+<a name="lineitem-18"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="3"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Materials</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="4"   contenteditable>4</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>m</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+</sys-lineitem-sheet>
+
+<div class="price-difference" style="visibility: hidden;">
+  <span class="glyphicon glyphicon-exclamation-sign"></span>
+  <div class="name">Die Kalkulation geht noch nicht auf.</div>
+  <div class="total">0,00</div>
+  <div class="actions"></div>
+</div>
+
+</sys-task>
+  
+</sys-group>
+  
+  
+</sys-group>
+  
+  
+</sys-group>
+  
+  
+</sys-group>
+    
+      <sys-group
+    data-pk="20"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="3">1.03</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Main Group C1</sys-input>
+    <sys-decimal class="total">14.996,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+    <sys-group
+    data-pk="21"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.03.01</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group C2.1</sys-input>
+    <sys-decimal class="total">0,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+</sys-group>
+  
+    <sys-group
+    data-pk="22"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.03.02</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group C2.2</sys-input>
+    <sys-decimal class="total">14.996,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+    <sys-group
+    data-pk="23"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.03.02.01</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group C3.1</sys-input>
+    <sys-decimal class="total">0,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+</sys-group>
+  
+    <sys-group
+    data-pk="24"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.03.02.02</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group C3.2</sys-input>
+    <sys-decimal class="total">14.996,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+    <sys-group
+    data-pk="25"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.03.02.02.01</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group C4.1</sys-input>
+    <sys-decimal class="total">0,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+</sys-group>
+  
+    <sys-group
+    data-pk="26"
+    data-token="">
+  
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="2">1.03.02.02.02</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable>Group C4.2</sys-input>
+    <sys-decimal class="total">14.996,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  
+  
+    
+<sys-task
+    data-pk="7"
+    data-token="">
+  
+
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="1">1.03.02.02.02.001</sys-code-input>
+    <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
+    <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
+    
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+
+<sys-lineitem-sheet>
+  
+    <sys-lineitem
+        data-pk="19"
+        data-token="">
+      
+<a name="lineitem-19"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="1"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Labor</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="0.1"   contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="20"
+        data-token="">
+      
+<a name="lineitem-20"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="2"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Equipment Rental</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="!"   data-resolved="" contenteditable>0,1</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+    <sys-lineitem
+        data-pk="21"
+        data-token="">
+      
+<a name="lineitem-21"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="3"></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Materials</sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="4"   contenteditable>4</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>m</sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+    </sys-lineitem>
+  
+</sys-lineitem-sheet>
+
+<div class="price-difference" style="visibility: hidden;">
+  <span class="glyphicon glyphicon-exclamation-sign"></span>
+  <div class="name">Die Kalkulation geht noch nicht auf.</div>
+  <div class="total">0,00</div>
+  <div class="actions"></div>
+</div>
+
+</sys-task>
+  
+</sys-group>
+  
+  
+</sys-group>
+  
+  
+</sys-group>
+  
+  
+</sys-group>
+    
+    
+  </sys-job>
+
+  </div>
+
+  <template id="group-template">
+    
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order="">_</sys-code-input>
+    <sys-input class="name" placeholder="Gruppe" contenteditable></sys-input>
+    <sys-decimal class="total">0,00</sys-decimal>
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+  </template>
+
+  <template id="task-template">
+    
+
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="code" data-order=""></sys-code-input>
+    <sys-input class="name"  placeholder="Position"                                             contenteditable></sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical=""   contenteditable>0</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                             contenteditable></sys-input>
+    <sys-cell  class="price"                                   data-canonical="" contenteditable>0,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>0,00</sys-cell>
+    
+  </div>
+  <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
+</div>
+
+<sys-lineitem-sheet>
+  
+</sys-lineitem-sheet>
+
+<div class="price-difference" style="visibility: hidden;">
+  <span class="glyphicon glyphicon-exclamation-sign"></span>
+  <div class="name">Die Kalkulation geht noch nicht auf.</div>
+  <div class="total">0,00</div>
+  <div class="actions"></div>
+</div>
+
+  </template>
+
+  <template id="lineitem-template">
+    
+<a name="lineitem-None"></a>
+<div class="editor">
+  <div class="editor-row">
+    <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order=""></sys-code-input>
+    <sys-input class="name"  placeholder="Kalkulationselement" contenteditable></sys-input>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical=""   contenteditable>0</sys-cell>
+    <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable></sys-input>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="" contenteditable>0,00</sys-cell>
+    <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>0,00</sys-cell>
+    <div class="actions">
+      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
+      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+    </div>
+  </div>
+</div>
+  </template>
+
+
+
+
+<script src="/static/js/jquery-1.11.2.min.js"></script>
+<script src="/static/js/jquery-ui.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/dart/build/packages/web_components/webcomponents-lite.min.js"></script>
+<script type="text/javascript">
+    function gotoProject(e) {
+        if(e.keyCode == 13) {
+            window.location.href = window.location.origin+"/project-" + document.querySelector("#goto_project").value;
+        }
+    }
+</script>
+
+
+<script src="/static/js/language_picker.js"></script>
+
+
+  <script src="http://localhost:8080/job_editor.dart.js"></script>
+
+
+</body>
+</html>
+<!--
+<link rel="x-dart-test" href="sticky_header_test.dart">
+<script src="packages/test/dart.js"></script>
+-->
+<script type="application/dart" src="sticky_header_test.dart"></script>
