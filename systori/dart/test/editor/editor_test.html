@@ -79,7 +79,7 @@
         <li >
             <a href="/day-based-overview/">Tagesplan</a></li>
         <li >
-            <a href="/progress">Stundenzettel</a></li>
+            <a href="/progress">Aufmaß Meldungen</a></li>
         
         <li >
             <a href="/templates">Vorlagen</a></li>
@@ -207,6 +207,7 @@
     .editor-row {
       display: flex;
       align-items: flex-start;
+      padding-bottom: 3px;
     }
 
     /* job, group, task */
@@ -415,7 +416,8 @@
     }
 
     sys-cell[data-resolved] {
-      font-style: italic;
+      font-weight: bold;
+      border-bottom: green 2px dotted;
     }
 
     sys-cell {
@@ -432,9 +434,10 @@
       content: attr(data-preview);
       font-size: 10px;
       color: dimgrey;
-      bottom: -10px;
+      bottom: -15px;
       right: 4px;
       width: 400px;
+      white-space: nowrap;
     }
 
     .sys-lineitem-handle {
@@ -531,19 +534,69 @@
     }
 
     sys-autocomplete > div {
+      position: relative;
       border-bottom: 1px solid lightgrey;
     }
 
-    sys-autocomplete > div > div.name {
+    sys-autocomplete > div > h2 {
       font-size: 14px;
+      margin-top: 0px;
     }
 
     sys-autocomplete > div > p {
       font-size: 12px;
     }
 
+    sys-autocomplete > div > div {
+      position: absolute;
+      left: 480px;
+      top: 0px;
+      width: 360px;
+      background: #FFE0A6;
+    }
+
+    sys-autocomplete > div > div > table {
+      width: 100%;
+    }
+
+    sys-autocomplete > div > div > table .info-decimal {
+      padding-left: 3px;
+      text-align: right;
+    }
+
+    sys-autocomplete > div > div > table .info-total {
+      font-weight: bold;
+    }
+
     sys-autocomplete > div.active {
       background: orange;
+    }
+
+    sys-group[data-pk=""] > .editor sys-input.name,
+    sys-task[data-pk=""] > .editor sys-input.name {
+      position: relative;
+      margin-left: 20px;
+    }
+
+    sys-group[data-pk=""] > .editor sys-input.name:after,
+    sys-task[data-pk=""] > .editor sys-input.name:after {
+      position: absolute;
+      left: -17px;
+      font-family: 'Glyphicons Halflings';
+      font-size: small;
+      content: "\e003";
+      color: black;
+    }
+
+    .sticky-header {
+      position: fixed;
+      background-color: white;
+      z-index: 100;
+    }
+
+    .sticky-header.sliding {
+      color: lightgray;
+      z-index: 99;
     }
 
   </style>
@@ -621,7 +674,7 @@
     <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Labor</sys-input>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical="0.1"   contenteditable>0,1</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
-    <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" contenteditable>19,80</sys-cell>
+    <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
     <div class="actions">
       <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
@@ -640,7 +693,7 @@
   <div class="editor-row">
     <sys-code-input class="sys-lineitem-handle glyphicon glyphicon-menu-hamburger" data-order="2"></sys-code-input>
     <sys-input class="name"  placeholder="Kalkulationselement" contenteditable>Equipment Rental</sys-input>
-    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="!"   contenteditable>0,1</sys-cell>
+    <sys-cell  class="qty"   placeholder="Menge"   data-canonical="!"   data-resolved="" contenteditable>0,1</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                                 contenteditable>hr</sys-input>
     <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
@@ -778,8 +831,8 @@
 
 </body>
 </html>
-<!--
 <link rel="x-dart-test" href="editor_test.dart">
 <script src="packages/test/dart.js"></script>
--->
+<!--
 <script type="application/dart" src="editor_test.dart"></script>
+-->
