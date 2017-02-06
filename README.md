@@ -61,7 +61,12 @@ Now run some tests to make sure everything is working:
 ```
 $ ./manage.py test
 ```
-
+To run dart tests go into dart directory and call:
+```
+$ pub run test
+# or with specific tests
+$ pub run test test/spreadsheet/
+```
 Finally setup a database for local development and start the app:
 
 ```
