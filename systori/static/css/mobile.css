@@ -122,7 +122,7 @@ input[type=range]::before {
 }
 
 input[type=range]::after {
-  content: attr(max) " " attr(data-unit);
+  content: attr(data-max-local) " " attr(data-unit);
   position: absolute;
   right: 1px;
   top: -20px;

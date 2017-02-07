@@ -10,10 +10,10 @@ void main() {
     InputElement complete_input = querySelector('input[name="complete"]');
     InputElement submit_button = querySelector('#task-submit');
     HtmlElement percent_label = querySelector('#percent');
-    Decimal complete_range_max = new Decimal.parse(complete_range_slider.attributes['max']);
+    Decimal complete_range_max = new Decimal(double.parse(complete_range_slider.attributes["max"]));
 
     complete_range_slider.onInput.listen((e) {
-        Decimal range_position = new Decimal.parse(complete_range_slider.value);
+        Decimal range_position = new Decimal(double.parse(complete_range_slider.value));
         percent_label.innerHtml = (range_position / complete_range_max).percent;
         complete_input.value = range_position.money;
     });
