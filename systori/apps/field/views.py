@@ -119,7 +119,8 @@ class FieldPlanning(TemplateView):
         context['is_selected_future'] = selected_day > date.today()
 
         context['latest_daily_plan'] = DailyPlan.objects.first()
-        context['latest_days_with_plans'] = DailyPlan.objects.values('day').distinct()[:5]
+        if selected_day > date.today():
+            context['latest_days_with_plans'] = DailyPlan.objects.values('day').distinct()[:5]
 
         return context
 
