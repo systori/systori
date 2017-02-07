@@ -146,7 +146,12 @@ class ProjectProgress(DetailView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
+        return queryset
+        # return queryset.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data()
+
 
 
 class ProjectManualPhaseTransition(SingleObjectMixin, View):

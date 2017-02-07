@@ -8,11 +8,11 @@
     <table class="table">
     <tr>
       <td>{% trans 'offered' %}</td>
-      <td>{{ project.estimate_total|money }}</td>
+      <td>{{ project.estimate|money }}</td>
     </tr>
     <tr>
       <td>{% trans 'billable' %}</td>
-      <td>{{ project.progress_total|money }}</td>
+      <td>{{ project.progress|money }}</td>
     </tr>
     <tr>
       <td>{% trans 'percent' %}</td>
@@ -27,11 +27,11 @@
         <table class="table">
         <tr>
           <td>{% trans 'offered' %}</td>
-          <td>{{ job.estimate_total|money }}</td>
+          <td>{{ job.estimate|money }}</td>
         </tr>
         <tr>
           <td>{% trans 'billable' %}</td>
-          <td>{{ job.progress_total|money }}</td>
+          <td>{{ job.progress|money }}</td>
         </tr>
         <tr>
           <td>{% trans 'percent' %}</td>
@@ -87,20 +87,20 @@
                 {{ job.description|truncatechars:60 }}
             </td>
         <tr><td colspan="8"></td></tr>
-        {% for taskgroup in job.taskgroups.all %}
+        {% for group in job.groups.all %}
             <tr style="background-color:#5da79d; color:white;">
                 <td>
-                    {{ taskgroup.code }}
+                    {{ group.code }}
                 </td>
                 <td colspan="2">
-                    {{ taskgroup.name }}
+                    {{ group.name }}
                 </td>
                 <td colspan="5">
-                    {{ taskgroup.description|truncatechars:60 }}
+                    {{ group.description|truncatechars:60 }}
                 </td>
             </tr>
             <tr><td colspan="5"></td></tr>
-            {% for task in taskgroup.tasks.all %}
+            {% for task in group.tasks.all %}
             <tr>
                 <td>
                     {{ task.code }}
@@ -118,10 +118,10 @@
                     {{ task.unit }}
                 </td>
                 <td>
-                    {{ task.unit_price|ubrdecimal:3 }}
+                    {{ task.price|ubrdecimal }}
                 </td>
                 <td>
-                    {{ task.fixed_price_progress|ubrdecimal:3 }}
+                    {{ task.progress|ubrdecimal }}
                 </td>
                 <td>
                     {{ task.complete_percent }} %
@@ -129,9 +129,9 @@
             </tr>
             <tr><td colspan="8"></td></tr>
             {% endfor %}
-            <tr style="font-weight: bold;"><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ taskgroup.code }} - {% trans 'total' %}</td><td colspan="2">{{ taskgroup.progress_total|money }}</td></tr>
+            <tr style="font-weight: bold;"><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ group.code }} - {% trans 'total' %}</td><td colspan="2">{{ group.progress|money }}</td></tr>
         {% endfor %}
-        <tr style="font-weight: bold;"><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ job.code }} - {% trans 'total' %}</td><td colspan="2">{{ job.progress_total|money }}</td></tr>
+        <tr style="font-weight: bold;"><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ job.code }} - {% trans 'total' %}</td><td colspan="2">{{ job.progress|money }}</td></tr>
     {% endfor %}
     </tbody>
 </table>
