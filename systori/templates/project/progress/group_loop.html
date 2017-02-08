@@ -1,0 +1,19 @@
+{% load i18n customformatting %}
+<tr style="background-color:#5da79d; color:white;">
+    <td>
+        {{ group.code }}
+    </td>
+    <td colspan="2">
+        {{ group.name }}
+    </td>
+    <td colspan="5">
+        {{ group.description|truncatechars:60 }}
+    </td>
+</tr>
+{% for subgroup in group.groups.all %}
+    {% include "project/progress/group_loop.html" with group=subgroup %}
+    <tr><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ subgroup.code }} - {% trans 'total' %}</td><td colspan="2">{{ subgroup.progress|money }}</td></tr>
+{% endfor %}
+{% for task in group.tasks.all %}
+    {% include "project/progress/task_loop.html" with task=task %}
+{% endfor %}

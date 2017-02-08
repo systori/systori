@@ -1,0 +1,27 @@
+{% load customformatting i18n %}
+<tr>
+    <td>
+        {{ task.code }}
+    </td>
+    <td>
+        {{ task.name|truncatechars:40 }}
+    </td>
+    <td>
+        {{ task.qty|ubrdecimal }}
+    </td>
+    <td>
+         {{ task.complete|ubrdecimal }}
+    </td>
+    <td>
+        {{ task.unit }}
+    </td>
+    <td>
+        {{ task.price|ubrdecimal }}
+    </td>
+    <td>
+        {{ task.progress|ubrdecimal }}
+    </td>
+    <td>
+        {{ task.complete_percent }} %
+    </td>
+</tr>

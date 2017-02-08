@@ -2,7 +2,10 @@
 {% load i18n %}
 
 {% block open_field_app %}
-  <li><a href="javascript:window.open('{% url 'field.project' project.id %}', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">{% trans 'open field app' %}</a>
+  <li>
+      <a href="javascript:window.open('{% url 'field.project' project.id %}', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">
+      {% trans 'open field app' %}
+      </a>
   </li>
 {% endblock %}
 
@@ -13,6 +16,8 @@
         #{{ project.id }} {{ project.name }}
     {% endif %}
 {% endblock title %}
+
+{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
 
 {% block head_navbar %}
   <li class="active"><a href="{% url 'project.view' project.id %}">{{ project.name }}
