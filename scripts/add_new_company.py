@@ -6,7 +6,7 @@ import django
 
 django.setup()
 
-from systori.apps.company.models import Company, Access
+from systori.apps.company.models import Company, Worker
 
 schema = input("schema name: ")
 name = input("company name: ")
@@ -27,12 +27,12 @@ user.set_password(password)
 user.save()
 
 for email in ['lex@damoti.com', 'mr@mehr-handwerk.de']:
-    Access.objects.create(
+    Worker.objects.create(
         company=company,
         user=User.objects.get(email=email)
     )
 
-access = Access.objects.create(company=company, user=user, is_owner=True)
+worker = Worker.objects.create(company=company, user=user, is_owner=True)
 
 from systori.apps.project.models import Project
 

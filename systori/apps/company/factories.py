@@ -1,10 +1,8 @@
-import string
-
 import factory
 from factory import fuzzy
 
 from ..project.factories import ProjectFactory
-from .models import Company
+from .models import Company, Worker
 
 
 class CompanyFactory(factory.django.DjangoModelFactory):
@@ -22,3 +20,8 @@ class CompanyFactory(factory.django.DjangoModelFactory):
         obj.activate()
         ProjectFactory(is_template=True)
         return obj
+
+
+class WorkerFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Worker

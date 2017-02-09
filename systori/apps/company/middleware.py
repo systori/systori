@@ -41,7 +41,7 @@ class CompanyMiddleware(MiddlewareMixin):
 
         if request.user.is_authenticated:
 
-            companies = request.user.visible_companies
+            companies = request.user.companies.all()
             if len(companies) == 1:
                 company_url = companies[0].url(request)
                 return HttpResponseRedirect(company_url)
