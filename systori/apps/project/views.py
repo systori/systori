@@ -144,9 +144,36 @@ class ProjectProgress(DetailView):
     model = Project
     template_name = 'project/project_progress.html'
 
+    def get_summary(self, jobs):
+        summary = {}
+        summary['estimate'] = []
+        summary['progress'] = []
+        summary['percent'] = []
+        summary['estimate'].append(self.object.estimate)
+        summary['progress'].append(self.object.progress)
+        summary['percent'].append(self.object.progress_percent)
+        for job in jobs:
+            summary['estimate'].append(job.estimate)
+            summary['progress'].append(job.progress)
+            summary['percent'].append(job.progress_percent)
+        return summary
+
+    def get_names(self, jobs):
+        names = []
+        names.append(self.object.name)
+        names.extend([job.name for job in jobs])
+        return names
+
     def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.prefetch_related('jobs__taskgroups__tasks__taskinstances__lineitems')
+        return super().get_queryset().with_totals()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        jobs = self.object.jobs.with_hierarchy(self.object).with_totals()
+        context['jobs'] = jobs
+        context['summary'] = self.get_summary(jobs)
+        context['names'] = self.get_names(jobs)
+        return context
 
 
 class ProjectManualPhaseTransition(SingleObjectMixin, View):

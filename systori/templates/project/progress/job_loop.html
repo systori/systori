@@ -1,0 +1,20 @@
+{% load i18n customformatting %}
+<tr style="background-color:#d1725e; color:#eee;">
+    <td>
+        {{ job.code }}
+    </td>
+    <td colspan="2">
+        {{ job.name }}
+    </td>
+    <td colspan="5">
+        {{ job.description|truncatechars:60 }}
+    </td>
+</tr>
+{% for group in job.groups.all %}
+    {% include "project/progress/group_loop.html" with group=group %}
+    <tr><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ group.code }} - {% trans 'total' %}</td><td colspan="2">{{ group.progress|money }}</td></tr>
+{% endfor %}
+{% for task in job.tasks.all %}
+    {% include "project/progress/task_loop.html" with task=task %}
+{% endfor %}
+<tr style="font-weight: bold;"><td colspan="4"></td><td colspan="2" style="text-align: right;">{{ job.code }} - {% trans 'total' %}</td><td colspan="2">{{ job.progress|money }}</td></tr>
