@@ -74,7 +74,7 @@ th.rotate > div > span {
             </th>
         </thead>
         <tbody>
-        {% for job in project.jobs.all %}
+        {% for job in jobs %}
             {% include "project/progress/job_loop.html" with job=job %}
         {% endfor %}
         </tbody>
