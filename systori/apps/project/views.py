@@ -171,8 +171,8 @@ class ProjectProgress(DetailView):
         context = super().get_context_data(**kwargs)
         jobs = self.object.jobs.with_hierarchy(self.object).with_totals()
         context['jobs'] = jobs
-        context['summary'] = self.get_summary(jobs=jobs)
-        context['names'] = self.get_names(jobs=jobs)
+        context['summary'] = self.get_summary(jobs)
+        context['names'] = self.get_names(jobs)
         return context
 
 
