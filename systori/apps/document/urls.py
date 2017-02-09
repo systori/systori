@@ -58,6 +58,7 @@ urlpatterns = [
     url(r'^templates/document-settings-(?P<pk>\d+)/delete$', office_auth(DocumentSettingsDelete.as_view()), name='document-settings.delete'),
 
     url(r'^timesheets/$', office_auth(TimesheetsList.as_view()), name='timesheets'),
+    url(r'^timesheet/(?P<pk>\d+)/update$', office_auth(TimesheetUpdate.as_view()), name='timesheet.update'),
     url(r'^timesheets/(?P<year>\d+)/(?P<month>\d+)/generate$', office_auth(TimesheetsGenerateView.as_view()), name='timesheets.generate'),
     url(r'^timesheets/(?P<year>\d+)/(?P<month>\d+)/download$', office_auth(TimesheetsPDF.as_view()), name='timesheets.pdf'),
 ]

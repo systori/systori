@@ -1,0 +1,17 @@
+{% extends "frame.html" %}
+{% load i18n l10n static dartium bootstrap customformatting ubrutils amount %}
+
+{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='timesheets' %}{% endblock %}
+
+{% block content %}
+  <form method="post" autocomplete="off">{% csrf_token %}
+    {{ form|bootstrap }}
+    <div class="form-group">
+      <button name="save" type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block extra_js %}
+  {% dart "payment_editor.dart" %}
+{% endblock extra_js %}

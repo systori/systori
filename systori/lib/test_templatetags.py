@@ -60,3 +60,27 @@ class CustomFormattingTest(TestCase):
 
         self.assertEqual('1.000', ubrdecimal(Decimal('1000'), 2, 0))
         self.assertEqual('1.000,01', ubrdecimal(Decimal('1000.009'), 2, 0))
+
+    def test_split_rows_vertical(self):
+        self.assertEqual([], split_rows_vertically([], 1))
+        self.assertEqual([], split_rows_vertically([], 2))
+        self.assertEqual([['A']], split_rows_vertically(['A'], 1))
+        self.assertEqual([['A', '']], split_rows_vertically(['A'], 2))
+        self.assertEqual([['A', 'C'], ['B', '']], split_rows_vertically(['A', 'B', 'C'], 2))
+        self.assertEqual([['A', 'C'], ['B', 'D']], split_rows_vertically(['A', 'B', 'C', 'D'], 2))
+        self.assertEqual([['A'], ['B'], ['C'], ['D']], split_rows_vertically(['A', 'B', 'C', 'D'], 1))
+        self.assertEqual([['A', 'C', ''], ['B', 'D', '']], split_rows_vertically(['A', 'B', 'C', 'D'], 3))
+        self.assertEqual([['A', 'B', 'C', 'D']], split_rows_vertically(['A', 'B', 'C', 'D'], 4))
+        self.assertEqual([['A', 'B', 'C', 'D']], split_rows_vertically(['A', 'B', 'C', 'D'], 4))
+        self.assertEqual([['A', 'C', 'E'], ['B', 'D', '']], split_rows_vertically(['A', 'B', 'C', 'D', 'E'], 3))
+
+    def test_split_rows_horizontally(self):
+        self.assertEqual([], split_rows_horizontally([], 1))
+        self.assertEqual([], split_rows_horizontally([], 2))
+        self.assertEqual([['A']], split_rows_horizontally(['A'], 1))
+        self.assertEqual([['A', '']], split_rows_horizontally(['A'], 2))
+        self.assertEqual([['A', 'B'], ['C', '']], split_rows_horizontally(['A', 'B', 'C'], 2))
+        self.assertEqual([['A', 'B'], ['C', 'D']], split_rows_horizontally(['A', 'B', 'C', 'D'], 2))
+        self.assertEqual([['A'], ['B'], ['C'], ['D']], split_rows_horizontally(['A', 'B', 'C', 'D'], 1))
+        self.assertEqual([['A', 'B', 'C'], ['D', '', '']], split_rows_horizontally(['A', 'B', 'C', 'D'], 3))
+        self.assertEqual([['A', 'B', 'C', 'D']], split_rows_horizontally(['A', 'B', 'C', 'D'], 4))

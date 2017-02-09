@@ -17,6 +17,7 @@ from .models import Proposal, Invoice, Adjustment, Payment, Refund, Timesheet
 from .models import DocumentTemplate, Letterhead, DocumentSettings
 from .forms import ProposalForm, InvoiceForm, AdjustmentForm, PaymentForm, RefundForm
 from .forms import LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
+from .forms import TimesheetForm
 from . import type as pdf_type
 
 
@@ -206,7 +207,8 @@ TimesheetMonth = namedtuple(
     'TimesheetMonth', (
         'date',
         'can_generate',
-        'count'
+        'count',
+        'timesheets'
     )
 )
 
@@ -227,12 +229,20 @@ class TimesheetsList(TemplateView):
                         (month == today.month or month == today.month-1) and
                         Timer.objects.filter_month(year, month).exists()
                     ),
-                    count=Timesheet.objects.period(year, month).count()
+                    count=Timesheet.objects.period(year, month).count(),
+                    timesheets=Timesheet.objects.period(year, month).all()
                 )
             )
             month -= 1
         context['months'] = months
         return context
+
+
+class TimesheetUpdate(UpdateView):
+    model = Timesheet
+    form_class = TimesheetForm
+    template_name = 'document/timesheet.html'
+    success_url = reverse_lazy('timesheets')
 
 
 class TimesheetsGenerateView(View):

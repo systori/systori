@@ -17,6 +17,7 @@ from ..accounting.models import Entry
 
 from .models import Invoice, Adjustment, Payment, Refund, Proposal
 from .models import DocumentTemplate, DocumentSettings, Letterhead
+from .models import Timesheet
 from .letterhead_utils import clean_letterhead_pdf
 
 from . import type as pdf_type
@@ -809,6 +810,18 @@ class ProposalRowForm(DocumentRowForm):
 
 
 ProposalFormSet = formset_factory(ProposalRowForm, formset=BaseProposalFormSet, extra=0)
+
+
+class TimesheetForm(forms.ModelForm):
+
+    class Meta:
+        model = Timesheet
+        fields = [
+            'holiday_override',
+            'holiday_override_notes',
+            'overtime_override',
+            'overtime_override_notes',
+        ]
 
 
 class LetterheadCreateForm(forms.ModelForm):

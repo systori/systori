@@ -48,7 +48,26 @@ class Timesheet(Document):
     letterhead = models.ForeignKey('document.Letterhead', related_name="timesheet_documents", on_delete=models.CASCADE)
     worker = models.ForeignKey('company.Worker', related_name='timesheets', on_delete=models.CASCADE)
 
+    holiday_transferred = models.IntegerField(default=0, help_text=_('in seconds'))
+    holiday_new = models.IntegerField(default=0, help_text=_('in seconds'))
+    holiday_override = models.IntegerField(default=0, help_text=_('in seconds'))
+    holiday_override_notes = models.TextField(default='', blank=True)
+    holiday_expended = models.IntegerField(default=0, help_text=_('in seconds'))
+
+    overtime_transferred = models.IntegerField(default=0, help_text=_('in seconds'))
+    overtime_new = models.IntegerField(default=0, help_text=_('in seconds'))
+    overtime_override = models.IntegerField(default=0, help_text=_('in seconds'))
+    overtime_override_notes = models.TextField(default='', blank=True)
+
     objects = TimesheetQuerySet.as_manager()
+
+    @property
+    def holiday_balance(self):
+        return (self.holiday_transferred + self.holiday_new + self.holiday_override) - self.holiday_expended
+
+    @property
+    def overtime_balance(self):
+        return self.overtime_transferred + self.overtime_new + self.overtime_override
 
 
 class Proposal(Document):
