@@ -9,6 +9,10 @@
     <table class="table table-striped">
     <tbody>
       <tr>
+          <td>{{ project.description }}</td>
+      </tr>
+      <tr><td></td></tr>
+      <tr>
         <td>
         <div class="pull-left">
             <a href="{% url 'project.edit' project.id %}" class="btn btn-xs btn-info">{% trans "edit" %}</a>
