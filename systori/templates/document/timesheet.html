@@ -4,7 +4,67 @@
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='timesheets' %}{% endblock %}
 
 {% block content %}
+
   <form method="post" autocomplete="off">{% csrf_token %}
+
+    <h2>
+      {{ object.json.last_name }},
+      {{ object.json.first_name }},
+      {{ object.document_date|date:"F Y" }}
+      <a href="{% url 'timesheet.pdf' timesheet.pk %}">{% trans "PDF" %}</a>
+    </h2>
+
+    <table class="table table-bordered table-hover table-condensed">
+
+      <thead>
+        <tr>
+          {% for _ in object.json.totals %}
+            <th>{{ forloop.counter }}</th>
+          {% endfor %}
+          <th>&#931;</th>
+          <th></th>
+        </tr>
+      </thead>
+
+      {% for project, seconds in object.json.projects %}
+      <tr>
+        {% for total in seconds %}
+          <td>{{ total|ubrhour }}</td>
+        {% endfor %}
+        <td class="info">{{ seconds|sum|ubrhour }}</td>
+        <td></td>
+      </tr>
+      {% endfor %}
+
+      {% for category, seconds in object.json.special %}
+        <tr>
+          {% for total in seconds %}
+            <td>{{ total|ubrhour }}</td>
+          {% endfor %}
+          <td class="info">{{ seconds|sum|ubrhour }}</td>
+          <td>{{ category|lookup:KIND_CHOICES }}</td>
+        </tr>
+      {% endfor %}
+
+      <tr>
+        {% for total in object.json.totals %}
+          <td class="info">{{ total|ubrhour }}</td>
+        {% endfor %}
+        <td class="info">{{ object.json.totals|sum|ubrhour }}</td>
+        <td></td>
+      </tr>
+
+      <tr>
+        {% for total in object.json.overhead %}
+          <td>{{ total|ubrhour }}</td>
+        {% endfor %}
+        <td>{{ object.json.overhead|sum|ubrhour }}</td>
+        <td>{% trans "Overtime" %}</td>
+      </tr>
+
+    </table>
+
+
     {{ form|bootstrap }}
     <div class="form-group">
       <button name="save" type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>

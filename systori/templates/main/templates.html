@@ -99,7 +99,7 @@
     <tbody>
     {% for object in letterheads %}
       <tr>
-        <td><a href="{% url 'letterhead.view' object.id %}">{{ object.name }}</a></td>
+        <td><a href="{% url 'letterhead.update' object.id %}">{{ object.name }}</a></td>
         <td>
           <a href="{% url 'letterhead.update' object.id %}">{% trans "Edit" %}</a>
           <a href="{% url 'letterhead.delete' object.id %}">{% trans "Delete" %}</a>

@@ -52,6 +52,7 @@ class LetterheadFactory(factory.django.DjangoModelFactory):
             language='de',
             evidence_letterhead=obj,
             proposal_letterhead=obj,
-            invoice_letterhead=obj
+            invoice_letterhead=obj,
+            timesheet_letterhead=obj,
         )
         return obj

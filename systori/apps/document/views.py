@@ -244,6 +244,11 @@ class TimesheetUpdate(UpdateView):
     template_name = 'document/timesheet.html'
     success_url = reverse_lazy('timesheets')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['KIND_CHOICES'] = dict(Timer.KIND_CHOICES)
+        return context
+
 
 class TimesheetsGenerateView(View):
 
@@ -327,6 +332,14 @@ class TimesheetsPDF(DocumentRenderView):
         queryset = Timesheet.objects.period(year, month)
         letterhead = DocumentSettings.objects.first().timesheet_letterhead
         return pdf_type.timesheet.render(queryset, letterhead)
+
+
+class TimesheetPDF(DocumentRenderView):
+    model = Timesheet
+
+    def pdf(self):
+        letterhead = DocumentSettings.objects.first().timesheet_letterhead
+        return pdf_type.timesheet.render([self.get_object()], letterhead)
 
 
 class InvoicePDF(DocumentRenderView):
@@ -488,10 +501,6 @@ class DocumentTemplateDelete(DeleteView):
 
 
 # Letterhead
-
-
-class LetterheadView(DetailView):
-    model = Letterhead
 
 
 class LetterheadCreate(CreateView):

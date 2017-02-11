@@ -48,15 +48,15 @@ class Timesheet(Document):
     letterhead = models.ForeignKey('document.Letterhead', related_name="timesheet_documents", on_delete=models.CASCADE)
     worker = models.ForeignKey('company.Worker', related_name='timesheets', on_delete=models.CASCADE)
 
-    holiday_transferred = models.IntegerField(default=0, help_text=_('in seconds'))
-    holiday_new = models.IntegerField(default=0, help_text=_('in seconds'))
-    holiday_override = models.IntegerField(default=0, help_text=_('in seconds'))
+    holiday_transferred = models.IntegerField(default=0, help_text=_('in hours'))
+    holiday_new = models.IntegerField(default=0, help_text=_('in hours'))
+    holiday_override = models.IntegerField(default=0, help_text=_('in hours'))
     holiday_override_notes = models.TextField(default='', blank=True)
-    holiday_expended = models.IntegerField(default=0, help_text=_('in seconds'))
+    holiday_expended = models.IntegerField(default=0, help_text=_('in hours'))
 
-    overtime_transferred = models.IntegerField(default=0, help_text=_('in seconds'))
-    overtime_new = models.IntegerField(default=0, help_text=_('in seconds'))
-    overtime_override = models.IntegerField(default=0, help_text=_('in seconds'))
+    overtime_transferred = models.IntegerField(default=0, help_text=_('in hours'))
+    overtime_new = models.IntegerField(default=0, help_text=_('in hours'))
+    overtime_override = models.IntegerField(default=0, help_text=_('in hours'))
     overtime_override_notes = models.TextField(default='', blank=True)
 
     objects = TimesheetQuerySet.as_manager()

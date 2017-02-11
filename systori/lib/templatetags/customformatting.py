@@ -7,6 +7,16 @@ from django import template
 register = template.Library()
 
 
+@register.filter('sum')
+def _sum(data):
+    return sum(data)
+
+
+@register.filter
+def lookup(key, data):
+    return data[key]
+
+
 @register.filter
 def split_rows_vertically(data, cols):
     if not data: return data
@@ -88,6 +98,11 @@ def ubrdecimal(number, max_significant=4, min_significant=2):
 @register.filter
 def ubrnumber(number):
     return ubrdecimal(number, min_significant=0)
+
+
+@register.filter
+def ubrhour(number):
+    return ubrdecimal(number, max_significant=1, min_significant=0)
 
 
 @register.filter
