@@ -15,6 +15,8 @@ from ..accounting.workflow import Account, credit_jobs, debit_jobs, adjust_jobs,
 from ..accounting.constants import TAX_RATE
 from ..accounting.models import Entry
 
+from ..timetracking.utils import round_to_nearest_multiple
+
 from .models import Invoice, Adjustment, Payment, Refund, Proposal
 from .models import DocumentTemplate, DocumentSettings, Letterhead
 from .models import Timesheet
@@ -814,14 +816,52 @@ ProposalFormSet = formset_factory(ProposalRowForm, formset=BaseProposalFormSet, 
 
 class TimesheetForm(forms.ModelForm):
 
+    work_correction = forms.DecimalField()
+    work_correction_notes = forms.CharField(required=False, widget=forms.Textarea())
+
+    holiday_correction = forms.DecimalField()
+    holiday_correction_notes = forms.CharField(required=False, widget=forms.Textarea())
+
+    overtime_correction = forms.DecimalField()
+    overtime_correction_notes = forms.CharField(required=False, widget=forms.Textarea())
+
     class Meta:
         model = Timesheet
-        fields = [
-            'holiday_override',
-            'holiday_override_notes',
-            'overtime_override',
-            'overtime_override_notes',
-        ]
+        fields = []
+
+    def __init__(self, **kwargs):
+        kwargs.pop('initial')
+        super().__init__(
+            initial={
+               'work_correction': kwargs['instance'].json['work_correction']/60.0/60.0,
+               'work_correction_notes': kwargs['instance'].json['work_correction_notes'],
+               'holiday_correction': kwargs['instance'].json['holiday_correction']/60.0/60.0,
+               'holiday_correction_notes': kwargs['instance'].json['holiday_correction_notes'],
+               'overtime_correction': kwargs['instance'].json['overtime_correction']/60.0/60.0,
+               'overtime_correction_notes': kwargs['instance'].json['overtime_correction_notes'],
+            }, **kwargs
+        )
+
+    def clean(self):
+        cleaned = super().clean()
+        for field in ['work', 'overtime', 'holiday']:
+            if cleaned[field+'_correction'] and not cleaned[field+'_correction_notes']:
+                self.add_error(
+                    field+'_correction_notes',
+                    _('Explanation required for correction.')
+                )
+
+    def save(self, commit=True):
+        work_correction = round_to_nearest_multiple(int(self.cleaned_data['work_correction']*60*60))
+        self.instance.json['work_correction'] = work_correction
+        self.instance.json['work_correction_notes'] = self.cleaned_data['work_correction_notes']
+        holiday_correction = round_to_nearest_multiple(int(self.cleaned_data['holiday_correction']*60*60))
+        self.instance.json['holiday_correction'] = holiday_correction
+        self.instance.json['holiday_correction_notes'] = self.cleaned_data['holiday_correction_notes']
+        overtime_correction = round_to_nearest_multiple(int(self.cleaned_data['overtime_correction']*60*60))
+        self.instance.json['overtime_correction'] = overtime_correction
+        self.instance.json['overtime_correction_notes'] = self.cleaned_data['overtime_correction_notes']
+        return super().save(commit)
 
 
 class LetterheadCreateForm(forms.ModelForm):

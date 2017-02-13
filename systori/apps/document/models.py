@@ -48,32 +48,40 @@ class Timesheet(Document):
     letterhead = models.ForeignKey('document.Letterhead', related_name="timesheet_documents", on_delete=models.CASCADE)
     worker = models.ForeignKey('company.Worker', related_name='timesheets', on_delete=models.CASCADE)
 
-    holiday_transferred = models.IntegerField(default=0, help_text=_('in seconds'))
-    holiday_new = models.IntegerField(default=0, help_text=_('in seconds'))
-    holiday_override = models.IntegerField(default=0, help_text=_('in seconds'))
-    holiday_override_notes = models.TextField(default='', blank=True)
-    holiday_expended = models.IntegerField(default=0, help_text=_('in seconds'))
-    holiday_balance = models.IntegerField(default=0, help_text=_('in seconds'))
-
-    overtime_transferred = models.IntegerField(default=0, help_text=_('in seconds'))
-    overtime_new = models.IntegerField(default=0, help_text=_('in seconds'))
-    overtime_override = models.IntegerField(default=0, help_text=_('in seconds'))
-    overtime_override_notes = models.TextField(default='', blank=True)
-    overtime_balance = models.IntegerField(default=0, help_text=_('in seconds'))
-
     objects = TimesheetQuerySet.as_manager()
 
+    def calculate_work_balance(self):
+        return (
+            self.json['work_total'] +
+            self.json['work_correction']
+        )
+
     def calculate_holiday_balance(self):
-        return (self.holiday_transferred + self.holiday_new + self.holiday_override) - self.holiday_expended
+        return (
+            self.json['holiday_transferred'] +
+            self.json['holiday_added'] +
+            self.json['holiday_correction']
+        ) - self.json['holiday_total']
 
     def calculate_overtime_balance(self):
-        return self.overtime_transferred + self.overtime_new + self.overtime_override
+        return (
+            self.json['overtime_transferred'] +
+            self.json['overtime_total'] +
+            self.json['overtime_correction']
+        )
+
+    def calculate_transferred_amounts(self):
+        previous_month = (self.document_date.replace(day=1)-timedelta(days=2)).replace(day=1)
+        previous_query = Timesheet.objects.filter(worker=self.worker, document_date=previous_month)
+        if previous_query.exists():
+            previous = previous_query.get()
+            self.json['holiday_transferred'] = previous.json['holiday_balance']
+            self.json['overtime_transferred'] = previous.json['overtime_balance']
 
     def save(self, **kwargs):
-        self.overtime_new = self.json['overtime_total']
-        self.holiday_expended = self.json['holiday_total']
-        self.holiday_balance = self.calculate_holiday_balance()
-        self.overtime_balance = self.calculate_overtime_balance()
+        self.json['work_balance'] = self.calculate_work_balance()
+        self.json['holiday_balance'] = self.calculate_holiday_balance()
+        self.json['overtime_balance'] = self.calculate_overtime_balance()
         return super().save(**kwargs)
 
 

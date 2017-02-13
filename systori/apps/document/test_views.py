@@ -690,16 +690,14 @@ class TimesheetViewTests(ClientTestCase):
         self.assertEqual(sheet.json['overtime'][8], 60*60)
         self.assertEqual(sheet.json['overtime'][9], 0)
         self.assertEqual(sheet.json['overtime_total'], 60*60)
-        self.assertEqual(sheet.overtime_transferred, 0)
-        self.assertEqual(sheet.overtime_new, 60*60)
-        self.assertEqual(sheet.overtime_balance, 60*60)
+        self.assertEqual(sheet.json['overtime_transferred'], 0)
+        self.assertEqual(sheet.json['overtime_balance'], 60*60)
         self.assertEqual(sheet.json['holiday'][8], 0)
         self.assertEqual(sheet.json['holiday'][9], 8*60*60)
         self.assertEqual(sheet.json['holiday_total'], 8*60*60)
-        self.assertEqual(sheet.holiday_transferred, 0)
-        self.assertEqual(sheet.holiday_new, 2.5*8*60*60)
-        self.assertEqual(sheet.holiday_expended, 8*60*60)
-        self.assertEqual(sheet.holiday_balance, 12*60*60)
+        self.assertEqual(sheet.json['holiday_transferred'], 0)
+        self.assertEqual(sheet.json['holiday_added'], 2.5*8*60*60)
+        self.assertEqual(sheet.json['holiday_balance'], 12*60*60)
         self.assertEqual(sheet.json['work'][8], 8*60*60)
         self.assertEqual(sheet.json['work'][9], 8*60*60)
         self.assertEqual(sheet.json['work_total'], 16*60*60)
@@ -716,10 +714,29 @@ class TimesheetViewTests(ClientTestCase):
         self.client.get(reverse('timesheets.generate', args=[2017, 2]))
         self.assertEqual(Timesheet.objects.count(), 2)
         sheet = Timesheet.objects.get(pk=2)
-        self.assertEqual(sheet.overtime_transferred, 60*60)
-        self.assertEqual(sheet.overtime_new, 60*60)
-        self.assertEqual(sheet.overtime_balance, 2*60*60)
-        self.assertEqual(sheet.holiday_transferred, 12*60*60)
-        self.assertEqual(sheet.holiday_new, 2.5*8*60*60)
-        self.assertEqual(sheet.holiday_expended, 0)
-        self.assertEqual(sheet.holiday_balance, 32*60*60)
+        self.assertEqual(sheet.json['overtime_transferred'], 60*60)
+        self.assertEqual(sheet.json['overtime_total'], 60*60)
+        self.assertEqual(sheet.json['overtime_balance'], 2*60*60)
+        self.assertEqual(sheet.json['holiday_transferred'], 12*60*60)
+        self.assertEqual(sheet.json['holiday_added'], 2.5*8*60*60)
+        self.assertEqual(sheet.json['holiday_total'], 0)
+        self.assertEqual(sheet.json['holiday_balance'], 32*60*60)
+
+    def test_correction(self):
+        self.create_january_timesheet()
+        sheet = Timesheet.objects.get()
+        self.client.post(reverse('timesheet.update', args=[sheet.pk]), data={
+            'overtime_correction': 5.5,
+            'overtime_correction_notes': 'added 5.5',
+            'holiday_correction': 6.5,
+            'holiday_correction_notes': 'added 6.5',
+            'work_correction': 7.5,
+            'work_correction_notes': 'added 7.5',
+        })
+        sheet.refresh_from_db()
+        self.assertEqual(sheet.json['overtime_correction'], 5.5*60*60)
+        self.assertEqual(sheet.json['overtime_correction_notes'], 'added 5.5')
+        self.assertEqual(sheet.json['holiday_correction'], 6.5*60*60)
+        self.assertEqual(sheet.json['holiday_correction_notes'], 'added 6.5')
+        self.assertEqual(sheet.json['work_correction'], 7.5*60*60)
+        self.assertEqual(sheet.json['work_correction_notes'], 'added 7.5')
