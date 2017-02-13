@@ -91,7 +91,7 @@
       <tr>
         <td>{% trans "Holiday" %}</td>
         <td>{{ object.holiday_transferred|ubrhour }}</td>
-        <td>{{ object.holiday_new|ubrhour }}-{{ object.holiday_expended|ubrhour }}</td>
+        <td>{{ object.holiday_new|ubrhour }}{% if object.holiday_expended != 0 %}-{{ object.holiday_expended|ubrhour }}{% endif %}</td>
         <td class="info">{{ object.holiday_balance|ubrhour }}</td>
       </tr>
 
