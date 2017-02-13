@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from collections import OrderedDict, namedtuple
 
 from django.http import HttpResponse, HttpResponseRedirect
@@ -269,6 +269,13 @@ class TimesheetsGenerateView(View):
                 Timer.objects.filter_month(year, month).filter(worker=worker).all(),
                 year, month
             )
+            ts.holiday_new = request.company.holiday
+            previous_month = (date(year, month, 1)-timedelta(days=2)).replace(day=1)
+            previous_query = Timesheet.objects.filter(worker=worker, document_date=previous_month)
+            if previous_query.exists():
+                previous = previous_query.get()
+                ts.holiday_transferred = previous.holiday_balance
+                ts.overtime_transferred = previous.overtime_balance
             ts.save()
 
         return HttpResponseRedirect(reverse('timesheets'))

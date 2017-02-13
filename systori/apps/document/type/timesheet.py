@@ -37,10 +37,6 @@ def create_timesheet_table(json, available_width, font):
 
     start = json['first_weekday']
     days = json['total_days']
-    projects = json['projects']
-    special = json['special']
-    totals = json['totals']
-    overhead = json['overhead']
 
     names = []
     numbers = []
@@ -76,12 +72,12 @@ def create_timesheet_table(json, available_width, font):
     ts.row_style('ALIGNMENT', 0, -1, "CENTER")
     ts.row_style('LINEBELOW', 0, -1, 1.25, colors.black)
 
-    def fmthr(hr):
-        return "{:.1f}".format(hr) if hr else ""
+    def fmthr(sec):
+        return "{:.1f}".format(sec/60.0/60.0) if sec else ""
 
-    def render_row(secs, project):
-        columns = [""]*31 + [fmthr(sum(secs)), project]
-        for i, sec in enumerate(secs):
+    def render_row(days, total, name):
+        columns = [""]*31 + [fmthr(total), name]
+        for i, sec in enumerate(days):
             columns[i] = fmthr(sec)
         return columns
 
@@ -94,8 +90,8 @@ def create_timesheet_table(json, available_width, font):
         stripe_idx += 1
 
     project_rows = 9
-    for project, secs in projects:
-        ts.row(*render_row(secs, project))
+    for project in json['projects']:
+        ts.row(*render_row(project['days'], project['total'], project['name']))
         stripe()
         project_rows -= 1
 
@@ -105,13 +101,16 @@ def create_timesheet_table(json, available_width, font):
         project_rows -= 1
 
     kind_choices = dict(Timer.KIND_CHOICES)
-    for name, secs in special:
-        ts.row(*render_row(secs, kind_choices[name]))
+    for special in json['special']:
+        ts.row(*render_row(special['days'], special['total'], kind_choices[special['name']]))
         stripe()
 
-    ts.row(*render_row(totals, _("Total")))
+    ts.row(*render_row(json['holiday'], json['holiday_total'], _('Holiday')))
+    stripe()
+
+    ts.row(*render_row(json['work'], json['work_total'], _("Total")))
     ts.row_style('LINEABOVE', 0, -1, 1.25, colors.black)
-    ts.row(*render_row(overhead, _("Overhead")))
+    ts.row(*render_row(json['overtime'], json['overtime_total'], _("Overtime")))
 
     return ts.get_table(colWidths=[(available_width-132)/31]*31+[32, 100], rowHeights=18)
 
@@ -145,41 +144,62 @@ class TimeSheetCollector:
         self.first_weekday, self.total_days = calendar.monthrange(year, month)
         self.projects = OrderedDict()
         self.special = OrderedDict([
-            (c, [Decimal(0)]*self.total_days)
-            for c in [p[0] for p in Timer.KIND_CHOICES if p[0] != Timer.WORK]
+            (c, {'name': c, 'days': [0]*self.total_days, 'total': 0})
+            for c in [p[0] for p in Timer.KIND_CHOICES if p[0] not in (Timer.WORK, Timer.HOLIDAY)]
         ])
-        self.totals = [Decimal(0)]*self.total_days
-        self.overhead = [Decimal(0)]*self.total_days
+        self.work = [0]*self.total_days
+        self.work_total = 0
+        self.overtime = [0]*self.total_days
+        self.overtime_total = 0
+        self.holiday = [0]*self.total_days
+        self.holiday_total = 0
 
     def add(self, timer):
         day_idx = timer.date.day-1
-        hours = seconds_to_hours(timer.duration)
         category = timer.kind
+
         slot = None
         if category == Timer.WORK:
-            slot = self.projects.setdefault(None, [Decimal(0)]*self.total_days)
+            slot = self.projects.setdefault(
+                None, {'name': '', 'days': [0]*self.total_days, 'total': 0}
+            )
         elif category in self.special:
             slot = self.special[category]
-        slot[day_idx] += hours
+
+        if slot:
+            slot['days'][day_idx] += timer.duration
+            slot['total'] += timer.duration
+
+        if category == timer.HOLIDAY:
+            self.holiday[day_idx] += timer.duration
+            self.holiday_total += timer.duration
+
         if category != timer.UNPAID_LEAVE:
-            self.totals[day_idx] += hours
+            self.work[day_idx] += timer.duration
 
     @property
     def data(self):
-        # Calculate Overhead
-        for idx, total in enumerate(self.totals):
-            if total > Decimal(8):
-                self.totals[idx] = Decimal(8)
-                self.overhead[idx] = total - Decimal(8)
-            elif total > Decimal(0):
-                self.overhead[idx] = total - Decimal(8)
+        # Calculate Overtime
+        for idx, total in enumerate(self.work):
+            if total > Timer.WORK_HOURS:
+                self.work[idx] = Timer.WORK_HOURS
+                self.work_total += Timer.WORK_HOURS
+                self.overtime[idx] = total - Timer.WORK_HOURS
+            elif total > 0:
+                self.work_total += total
+                self.overtime[idx] = total - Timer.WORK_HOURS
+            self.overtime_total += self.overtime[idx]
         return {
             'first_weekday': self.first_weekday,
             'total_days': self.total_days,
-            'projects': self.projects.items(),
-            'special': self.special.items(),
-            'totals': self.totals,
-            'overhead': self.overhead
+            'projects': list(self.projects.values()),
+            'special': list(self.special.values()),
+            'work': self.work,
+            'work_total': self.work_total,
+            'overtime': self.overtime,
+            'overtime_total': self.overtime_total,
+            'holiday': self.holiday,
+            'holiday_total': self.holiday_total,
         }
 
 

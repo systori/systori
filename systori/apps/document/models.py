@@ -48,26 +48,33 @@ class Timesheet(Document):
     letterhead = models.ForeignKey('document.Letterhead', related_name="timesheet_documents", on_delete=models.CASCADE)
     worker = models.ForeignKey('company.Worker', related_name='timesheets', on_delete=models.CASCADE)
 
-    holiday_transferred = models.IntegerField(default=0, help_text=_('in hours'))
-    holiday_new = models.IntegerField(default=0, help_text=_('in hours'))
-    holiday_override = models.IntegerField(default=0, help_text=_('in hours'))
+    holiday_transferred = models.IntegerField(default=0, help_text=_('in seconds'))
+    holiday_new = models.IntegerField(default=0, help_text=_('in seconds'))
+    holiday_override = models.IntegerField(default=0, help_text=_('in seconds'))
     holiday_override_notes = models.TextField(default='', blank=True)
-    holiday_expended = models.IntegerField(default=0, help_text=_('in hours'))
+    holiday_expended = models.IntegerField(default=0, help_text=_('in seconds'))
+    holiday_balance = models.IntegerField(default=0, help_text=_('in seconds'))
 
-    overtime_transferred = models.IntegerField(default=0, help_text=_('in hours'))
-    overtime_new = models.IntegerField(default=0, help_text=_('in hours'))
-    overtime_override = models.IntegerField(default=0, help_text=_('in hours'))
+    overtime_transferred = models.IntegerField(default=0, help_text=_('in seconds'))
+    overtime_new = models.IntegerField(default=0, help_text=_('in seconds'))
+    overtime_override = models.IntegerField(default=0, help_text=_('in seconds'))
     overtime_override_notes = models.TextField(default='', blank=True)
+    overtime_balance = models.IntegerField(default=0, help_text=_('in seconds'))
 
     objects = TimesheetQuerySet.as_manager()
 
-    @property
-    def holiday_balance(self):
+    def calculate_holiday_balance(self):
         return (self.holiday_transferred + self.holiday_new + self.holiday_override) - self.holiday_expended
 
-    @property
-    def overtime_balance(self):
+    def calculate_overtime_balance(self):
         return self.overtime_transferred + self.overtime_new + self.overtime_override
+
+    def save(self, **kwargs):
+        self.overtime_new = self.json['overtime_total']
+        self.holiday_expended = self.json['holiday_total']
+        self.holiday_balance = self.calculate_holiday_balance()
+        self.overtime_balance = self.calculate_overtime_balance()
+        return super().save(**kwargs)
 
 
 class Proposal(Document):

@@ -102,7 +102,7 @@ def ubrnumber(number):
 
 @register.filter
 def ubrhour(number):
-    return ubrdecimal(number, max_significant=1, min_significant=0)
+    return ubrdecimal(number/60.0/60.0, max_significant=1, min_significant=0)
 
 
 @register.filter

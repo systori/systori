@@ -1,5 +1,6 @@
 import pytz
 from datetime import date, time
+from decimal import Decimal
 from typing import List
 from django.db import models
 from django.conf import settings
@@ -23,11 +24,16 @@ class Company(AbstractSchema):
 
     @property
     def breaks(self) -> List[BreakSpan]:
-        """ TODO: store in database for each company. """
+        """ TODO: store in database for each worker type/contract. """
         return [
             BreakSpan(time(9, 00), time(9, 30)),
             BreakSpan(time(12, 30), time(13, 00)),
         ]
+
+    @property
+    def holiday(self) -> int:
+        """ TODO: store in database for each worker type/contract. """
+        return int(2.5 * 60 * 60)
 
     @property
     def timezone(self) -> pytz.tzinfo.StaticTzInfo:

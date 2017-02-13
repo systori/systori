@@ -4,6 +4,11 @@
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='timesheets' %}{% endblock %}
 
 {% block content %}
+  <style>
+  .table-nonfluid {
+     width: auto !important;
+  }
+  </style>
 
   <form method="post" autocomplete="off">{% csrf_token %}
 
@@ -18,7 +23,7 @@
 
       <thead>
         <tr>
-          {% for _ in object.json.totals %}
+          {% for _ in object.json.work %}
             <th>{{ forloop.counter }}</th>
           {% endfor %}
           <th>&#931;</th>
@@ -26,44 +31,80 @@
         </tr>
       </thead>
 
-      {% for project, seconds in object.json.projects %}
+      {% for project in object.json.projects %}
       <tr>
-        {% for total in seconds %}
+        {% for total in project.days %}
           <td>{{ total|ubrhour }}</td>
         {% endfor %}
-        <td class="info">{{ seconds|sum|ubrhour }}</td>
-        <td></td>
+        <td class="info">{{ project.total|ubrhour }}</td>
+        <td>{{project.name}}</td>
       </tr>
       {% endfor %}
 
-      {% for category, seconds in object.json.special %}
+      {% for special in object.json.special %}
         <tr>
-          {% for total in seconds %}
+          {% for total in special.days %}
             <td>{{ total|ubrhour }}</td>
           {% endfor %}
-          <td class="info">{{ seconds|sum|ubrhour }}</td>
-          <td>{{ category|lookup:KIND_CHOICES }}</td>
+          <td class="info">{{ special.total|ubrhour }}</td>
+          <td>{{ special.name|lookup:KIND_CHOICES }}</td>
         </tr>
       {% endfor %}
 
       <tr>
-        {% for total in object.json.totals %}
-          <td class="info">{{ total|ubrhour }}</td>
+        {% for total in object.json.holiday %}
+          <td>{{ total|ubrhour }}</td>
         {% endfor %}
-        <td class="info">{{ object.json.totals|sum|ubrhour }}</td>
-        <td></td>
+        <td class="info">{{ object.json.holiday_total|ubrhour }}</td>
+        <td>{% trans "Holiday" %}</td>
       </tr>
 
       <tr>
-        {% for total in object.json.overhead %}
+        {% for total in object.json.work %}
+          <td class="info">{{ total|ubrhour }}</td>
+        {% endfor %}
+        <td class="info">{{ object.json.work_total|ubrhour }}</td>
+        <td>{% trans "Total" %}</td>
+      </tr>
+
+      <tr>
+        {% for total in object.json.overtime %}
           <td>{{ total|ubrhour }}</td>
         {% endfor %}
-        <td>{{ object.json.overhead|sum|ubrhour }}</td>
+        <td>{{ object.json.overtime_total|ubrhour }}</td>
         <td>{% trans "Overtime" %}</td>
       </tr>
 
     </table>
 
+    <table class="table table-bordered table-condensed table-nonfluid pull-right">
+
+      <thead>
+      <tr>
+        <th></th>
+        <th>{% trans "Previous" %}</th>
+        <th>{{ object.document_date|date:"F" }}</th>
+        <th>{% trans "Balance" %}</th>
+      </tr>
+      </thead>
+
+      <tr>
+        <td>{% trans "Holiday" %}</td>
+        <td>{{ object.holiday_transferred|ubrhour }}</td>
+        <td>{{ object.holiday_expended|ubrhour }}+{{ object.holiday_new|ubrhour }}</td>
+        <td class="info">{{ object.holiday_balance|ubrhour }}</td>
+      </tr>
+
+      <tr>
+        <td>{% trans "Overtime" %}</td>
+        <td>{{ object.overtime_transferred|ubrhour }}</td>
+        <td>{{ object.overtime_new|ubrhour }}</td>
+        <td class="info">{{ object.overtime_balance|ubrhour }}</td>
+      </tr>
+
+    </table>
+
+    <div class="clearfix"></div>
 
     {{ form|bootstrap }}
     <div class="form-group">
