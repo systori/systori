@@ -256,6 +256,17 @@ class TimesheetsGenerateView(View):
         year, month = int(self.kwargs['year']), int(self.kwargs['month'])
         letterhead = DocumentSettings.objects.first().timesheet_letterhead
 
+        # preserve corrections
+        corrections = {}
+        for old in Timesheet.objects.period(year, month).all():
+            corrections[old.worker_id] = {
+                'overtime_correction': old.json['overtime_correction'],
+                'overtime_correction_notes': old.json['overtime_correction_notes'],
+                'holiday_correction': old.json['holiday_correction'],
+                'holiday_correction_notes': old.json['holiday_correction_notes'],
+                'work_correction': old.json['work_correction'],
+                'work_correction_notes': old.json['work_correction_notes'],
+            }
         # clear existing timesheets for this period
         Timesheet.objects.period(year, month).delete()
 
@@ -270,6 +281,8 @@ class TimesheetsGenerateView(View):
                 year, month
             )
             ts.json['holiday_added'] = request.company.holiday
+            if worker.pk in corrections:
+                ts.json.update(corrections[worker.pk])
             ts.calculate_transferred_amounts()
             ts.save()
 
@@ -474,8 +487,9 @@ class ItemizedListingPDF(DocumentRenderView):
     model = Project
 
     def pdf(self):
-        project = Project.prefetch(self.kwargs['project_pk'])
-        return pdf_type.itemized_listing.render(project, self.kwargs['format'])
+        doc_settings = DocumentSettings.get_for_language(get_language())
+        letterhead = doc_settings.itemized_letterhead
+        return pdf_type.itemized_listing.render(self.request.project, letterhead, self.kwargs['format'])
 
 
 # Document Template

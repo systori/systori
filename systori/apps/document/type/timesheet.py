@@ -25,12 +25,12 @@ from .font import FontManager
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-def seconds_to_hours(seconds):
-    return Decimal(seconds / 60.0 / 60.0)
-
-
 WEEKDAYS = [_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun')]
 CATEGORIES = [p[0] for p in Timer.KIND_CHOICES if p[0] != Timer.WORK]
+
+
+def fmthr(sec):
+    return "{:.1f}".format(sec/60.0/60.0) if sec else ""
 
 
 def create_timesheet_table(json, available_width, font):
@@ -72,9 +72,6 @@ def create_timesheet_table(json, available_width, font):
     ts.row_style('ALIGNMENT', 0, -1, "CENTER")
     ts.row_style('LINEBELOW', 0, -1, 1.25, colors.black)
 
-    def fmthr(sec):
-        return "{:.1f}".format(sec/60.0/60.0) if sec else ""
-
     def render_row(days, total, name):
         columns = [""]*31 + [fmthr(total), name]
         for i, sec in enumerate(days):
@@ -89,7 +86,7 @@ def create_timesheet_table(json, available_width, font):
             ts.row_style('BACKGROUND', 0, -1, colors.HexColor(0xCCFFFF))
         stripe_idx += 1
 
-    project_rows = 9
+    project_rows = 3
     for project in json['projects']:
         ts.row(*render_row(project['days'], project['total'], project['name']))
         stripe()
@@ -115,6 +112,22 @@ def create_timesheet_table(json, available_width, font):
     return ts.get_table(colWidths=[(available_width-132)/31]*31+[32, 100], rowHeights=18)
 
 
+def create_rolling_balances(month, json, font):
+    ts = TableStyler(font, base_style=False)
+    ts.style.append(('GRID', (0, 0), (-1, -1), 0.25, colors.black))
+    ts.row("", _("Previous"), "", month, _("Balance"))
+    ts.row(_("Holiday"), fmthr(json['holiday_transferred']), fmthr(json['holiday_correction']), fmthr(json['holiday_total']), fmthr(json['holiday_balance']))
+    ts.row(_("Overtime"), fmthr(json['overtime_transferred']), fmthr(json['overtime_correction']), fmthr(json['overtime_total']), fmthr(json['overtime_balance']))
+    return ts.get_table(colWidths=[100, 100, 32, 80, 100], rowHeights=18, hAlign='RIGHT')
+
+
+def create_final_total(json, font):
+    ts = TableStyler(font, base_style=False)
+    ts.style.append(('GRID', (0, 0), (-1, -1), 1, colors.black))
+    ts.row(b(_("Final Total"), font), fmthr(json['work_correction']), b(fmthr(json['work_balance']), font), _("Approved")+": "+'_'*8)
+    return ts.get_table(colWidths=[100, 32, 80, 100], rowHeights=18, hAlign='RIGHT')
+
+
 def create_timesheets(timesheets, available_width, available_height, font):
     for timesheet in timesheets:
         json = timesheet.json
@@ -125,6 +138,10 @@ def create_timesheets(timesheets, available_width, available_height, font):
             font.h2)
         yield Spacer(0, 4*mm)
         yield create_timesheet_table(json, available_width, font)
+        yield Spacer(0, 4*mm)
+        yield create_rolling_balances(date_format(timesheet.document_date, "F", use_l10n=True), json, font)
+        yield Spacer(0, 4*mm)
+        yield create_final_total(json, font)
         yield PageBreak()
 
 

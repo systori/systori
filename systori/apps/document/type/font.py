@@ -11,7 +11,8 @@ rl_config.TTFSearchPath = [os.path.join(settings.BASE_DIR, 'static/fonts')]
 font_families = [
     "OpenSans",
     "DroidSerif",
-    "Tinos"
+    "Tinos",
+    "Ubuntu"
 ]
 
 for font_name in font_families:

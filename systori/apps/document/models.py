@@ -15,6 +15,8 @@ from jsonfield import JSONField
 from systori.lib import date_utils
 from systori.lib.accounting.tools import Amount, JSONEncoder
 
+from .type.font import font_families
+
 
 class Document(models.Model):
     json = JSONField(default={}, dump_kwargs={'cls': JSONEncoder},
@@ -414,16 +416,9 @@ class Letterhead(models.Model):
 
     debug = models.BooleanField(_("Debug Mode"), default=True)
 
-    OPEN_SANS = "OpenSans"
-    DROID_SERIF = "DroidSerif"
-    TINOS = "Tinos"
-    FONT = (
-        (OPEN_SANS, "Open Sans"),
-        (DROID_SERIF, "Droid Serif"),
-        (TINOS, "Tinos")
-    )
-    font = models.CharField(_('Font'), max_length=15,
-                            choices=FONT, default=OPEN_SANS)
+    FONTS = tuple((font, font) for font in font_families)
+
+    font = models.CharField(_('Font'), max_length=15, choices=FONTS, default=FONTS[0])
 
     def __str__(self):
         return self.name

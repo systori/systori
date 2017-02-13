@@ -702,7 +702,7 @@ class TimesheetViewTests(ClientTestCase):
         self.assertEqual(sheet.json['work'][9], 8*60*60)
         self.assertEqual(sheet.json['work_total'], 16*60*60)
 
-    def test_timesheet_carried_totals(self):
+    def test_timesheet_transferred_totals(self):
         self.create_january_timesheet()
         february = datetime(2017, 2, 6, 9)
         Timer.objects.create(
@@ -734,6 +734,15 @@ class TimesheetViewTests(ClientTestCase):
             'work_correction_notes': 'added 7.5',
         })
         sheet.refresh_from_db()
+        self.assertEqual(sheet.json['overtime_correction'], 5.5*60*60)
+        self.assertEqual(sheet.json['overtime_correction_notes'], 'added 5.5')
+        self.assertEqual(sheet.json['holiday_correction'], 6.5*60*60)
+        self.assertEqual(sheet.json['holiday_correction_notes'], 'added 6.5')
+        self.assertEqual(sheet.json['work_correction'], 7.5*60*60)
+        self.assertEqual(sheet.json['work_correction_notes'], 'added 7.5')
+        # regenerating does not wipe out the corrections
+        self.client.get(reverse('timesheets.generate', args=[2017, 1]))
+        sheet = Timesheet.objects.get()
         self.assertEqual(sheet.json['overtime_correction'], 5.5*60*60)
         self.assertEqual(sheet.json['overtime_correction_notes'], 'added 5.5')
         self.assertEqual(sheet.json['holiday_correction'], 6.5*60*60)
