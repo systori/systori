@@ -48,7 +48,6 @@ urlpatterns = [
     url(r'^templates/document-template-(?P<pk>\d+)/delete$', office_auth(DocumentTemplateDelete.as_view()), name='document-template.delete'),
 
     url(r'^templates/create-letterhead$', office_auth(LetterheadCreate.as_view()), name='letterhead.create'),
-    url(r'^templates/letterhead-(?P<pk>\d+)$', office_auth(LetterheadView.as_view()), name='letterhead.view'),
     url(r'^templates/letterhead-(?P<pk>\d+)/update$', office_auth(LetterheadUpdate.as_view()), name='letterhead.update'),
     url(r'^templates/letterhead-(?P<pk>\d+)/delete$', office_auth(LetterheadDelete.as_view()), name='letterhead.delete'),
     url(r'^templates/letterhead-(?P<pk>\d+)/preview$', office_auth(LetterheadPreview.as_view()), name='letterhead.preview'),
@@ -58,6 +57,8 @@ urlpatterns = [
     url(r'^templates/document-settings-(?P<pk>\d+)/delete$', office_auth(DocumentSettingsDelete.as_view()), name='document-settings.delete'),
 
     url(r'^timesheets/$', office_auth(TimesheetsList.as_view()), name='timesheets'),
+    url(r'^timesheet/(?P<pk>\d+)/update$', office_auth(TimesheetUpdate.as_view()), name='timesheet.update'),
+    url(r'^timesheet/(?P<pk>\d+)/pdf$', office_auth(TimesheetPDF.as_view()), name='timesheet.pdf'),
     url(r'^timesheets/(?P<year>\d+)/(?P<month>\d+)/generate$', office_auth(TimesheetsGenerateView.as_view()), name='timesheets.generate'),
     url(r'^timesheets/(?P<year>\d+)/(?P<month>\d+)/download$', office_auth(TimesheetsPDF.as_view()), name='timesheets.pdf'),
 ]

@@ -1,9 +1,49 @@
 import locale
+import math
 from decimal import Decimal
 from django.utils.formats import get_format, get_language, to_locale
 from django import template
 
 register = template.Library()
+
+
+@register.filter('sum')
+def _sum(data):
+    return sum(data)
+
+
+@register.filter
+def lookup(key, data):
+    return data[key]
+
+
+@register.filter
+def split_rows_vertically(data, cols):
+    if not data: return data
+    data = list(data)
+    max_rows = math.ceil(len(data)/cols) if len(data) > cols else 1
+    rows = []
+    for rowIdx in range(max_rows):
+        row = []
+        for colIdx in range(cols):
+            dataIdx = rowIdx + colIdx*max_rows
+            row.append(data[dataIdx] if dataIdx < len(data) else '')
+        rows.append(row)
+    return rows
+
+
+@register.filter
+def split_rows_horizontally(data, cols):
+    data = list(data)
+    max_rows = int(len(data)/cols) + len(data) % cols
+    rows = []
+    for rowIdx in range(max_rows):
+        row = []
+        for colIdx in range(cols):
+            dataIdx = (rowIdx*cols) + colIdx
+            row.append(data[dataIdx] if dataIdx < len(data) else '')
+        rows.append(row)
+    return rows
 
 
 @register.simple_tag
@@ -58,6 +98,11 @@ def ubrdecimal(number, max_significant=4, min_significant=2):
 @register.filter
 def ubrnumber(number):
     return ubrdecimal(number, min_significant=0)
+
+
+@register.filter
+def ubrhour(number):
+    return ubrdecimal(number/60.0/60.0, max_significant=1, min_significant=0)
 
 
 @register.filter

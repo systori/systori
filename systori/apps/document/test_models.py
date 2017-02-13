@@ -1,13 +1,10 @@
-from datetime import date
 from decimal import Decimal
 from django.test import TestCase
 from django.utils.translation import activate
 
 from ..company.factories import CompanyFactory
 from ..project.factories import ProjectFactory
-from ..project.models import Project
 from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
-from ..task.models import Job, Group, Task
 from ..directory.factories import ContactFactory
 
 from systori.lib.accounting.tools import Amount
@@ -91,7 +88,6 @@ class ProposalTests(TestCase):
                 }],
             }],
         }, proposal.json)
-
 
 
 class InvoiceTests(TestCase):

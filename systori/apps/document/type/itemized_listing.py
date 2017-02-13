@@ -18,8 +18,6 @@ from .style import NumberedLetterheadCanvasWithoutFirstPage, NumberedCanvas
 from .style import get_available_width_height_and_pagesize
 from .invoice import collate_itemized_listing, serialize
 
-from systori.apps.document.models import DocumentSettings
-
 from . import font
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
@@ -62,9 +60,7 @@ def collate_payments(invoice, available_width):
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def render(project, format):
-
-    letterhead = DocumentSettings.objects.first().itemized_letterhead
+def render(project, letterhead, format):
 
     with BytesIO() as buffer:
         available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)

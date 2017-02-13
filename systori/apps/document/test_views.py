@@ -1,8 +1,9 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from PyPDF2 import PdfFileReader
 from io import BytesIO
 from textwrap import dedent
+from freezegun import freeze_time
 
 from django.utils import timezone
 from django.urls import reverse
@@ -14,6 +15,7 @@ from ..project.factories import ProjectFactory
 from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from ..directory.factories import ContactFactory
 
+from ..timetracking.models import Timer
 from ..accounting.models import Account, create_account_for_job
 from ..accounting.workflow import create_chart_of_accounts
 
@@ -23,7 +25,7 @@ from .forms import AdjustmentForm, AdjustmentFormSet
 from .forms import RefundForm, RefundFormSet
 from .forms import ProposalForm, ProposalFormSet
 from .models import Invoice, Payment, Adjustment, Refund
-from .models import Proposal, Letterhead
+from .models import Proposal, Letterhead, Timesheet
 from .factories import InvoiceFactory, LetterheadFactory
 
 
@@ -652,3 +654,98 @@ class InvoiceListViewTest(ClientTestCase):
 
         response = self.client.get(reverse('invoice.list', kwargs={'status_filter': 'draft'}))
         self.assertEqual(response.status_code, 200)
+
+
+@freeze_time('2017-04-10 18:30')
+class TimesheetViewTests(ClientTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.letterhead = LetterheadFactory()
+
+    def create_january_timesheet(self):
+        january = datetime(2017, 1, 9, 9)
+        Timer.objects.create(
+            worker=self.worker,
+            start=january,
+            end=january.replace(hour=18),
+            kind=Timer.WORK
+        )
+        Timer.objects.create(
+            worker=self.worker,
+            start=january.replace(day=10),
+            end=january.replace(day=10, hour=17),
+            kind=Timer.HOLIDAY
+        )
+        return self.client.get(reverse('timesheets.generate', args=[2017, 1]))
+
+    def test_generate_timesheet(self):
+        self.assertEqual(Timesheet.objects.count(), 0)
+        response = self.create_january_timesheet()
+        self.assertEqual(response.status_code, 302)
+        sheet = Timesheet.objects.get()
+        self.assertEqual(sheet.json['first_weekday'], 6)
+        self.assertEqual(sheet.json['projects'][0]['days'][8], 9*60*60)
+        self.assertEqual(sheet.json['projects'][0]['days'][9], 0)
+        self.assertEqual(sheet.json['overtime'][8], 60*60)
+        self.assertEqual(sheet.json['overtime'][9], 0)
+        self.assertEqual(sheet.json['overtime_total'], 60*60)
+        self.assertEqual(sheet.json['overtime_transferred'], 0)
+        self.assertEqual(sheet.json['overtime_balance'], 60*60)
+        self.assertEqual(sheet.json['holiday'][8], 0)
+        self.assertEqual(sheet.json['holiday'][9], 8*60*60)
+        self.assertEqual(sheet.json['holiday_total'], 8*60*60)
+        self.assertEqual(sheet.json['holiday_transferred'], 0)
+        self.assertEqual(sheet.json['holiday_added'], 2.5*8*60*60)
+        self.assertEqual(sheet.json['holiday_balance'], 12*60*60)
+        self.assertEqual(sheet.json['work'][8], 8*60*60)
+        self.assertEqual(sheet.json['work'][9], 8*60*60)
+        self.assertEqual(sheet.json['work_total'], 16*60*60)
+
+    def test_timesheet_transferred_totals(self):
+        self.create_january_timesheet()
+        february = datetime(2017, 2, 6, 9)
+        Timer.objects.create(
+            worker=self.worker,
+            start=february,
+            end=february.replace(hour=18),
+            kind=Timer.WORK
+        )
+        self.client.get(reverse('timesheets.generate', args=[2017, 2]))
+        self.assertEqual(Timesheet.objects.count(), 2)
+        sheet = Timesheet.objects.get(pk=2)
+        self.assertEqual(sheet.json['overtime_transferred'], 60*60)
+        self.assertEqual(sheet.json['overtime_total'], 60*60)
+        self.assertEqual(sheet.json['overtime_balance'], 2*60*60)
+        self.assertEqual(sheet.json['holiday_transferred'], 12*60*60)
+        self.assertEqual(sheet.json['holiday_added'], 2.5*8*60*60)
+        self.assertEqual(sheet.json['holiday_total'], 0)
+        self.assertEqual(sheet.json['holiday_balance'], 32*60*60)
+
+    def test_correction(self):
+        self.create_january_timesheet()
+        sheet = Timesheet.objects.get()
+        self.client.post(reverse('timesheet.update', args=[sheet.pk]), data={
+            'overtime_correction': 5.5,
+            'overtime_correction_notes': 'added 5.5',
+            'holiday_correction': 6.5,
+            'holiday_correction_notes': 'added 6.5',
+            'work_correction': 7.5,
+            'work_correction_notes': 'added 7.5',
+        })
+        sheet.refresh_from_db()
+        self.assertEqual(sheet.json['overtime_correction'], 5.5*60*60)
+        self.assertEqual(sheet.json['overtime_correction_notes'], 'added 5.5')
+        self.assertEqual(sheet.json['holiday_correction'], 6.5*60*60)
+        self.assertEqual(sheet.json['holiday_correction_notes'], 'added 6.5')
+        self.assertEqual(sheet.json['work_correction'], 7.5*60*60)
+        self.assertEqual(sheet.json['work_correction_notes'], 'added 7.5')
+        # regenerating does not wipe out the corrections
+        self.client.get(reverse('timesheets.generate', args=[2017, 1]))
+        sheet = Timesheet.objects.get()
+        self.assertEqual(sheet.json['overtime_correction'], 5.5*60*60)
+        self.assertEqual(sheet.json['overtime_correction_notes'], 'added 5.5')
+        self.assertEqual(sheet.json['holiday_correction'], 6.5*60*60)
+        self.assertEqual(sheet.json['holiday_correction_notes'], 'added 6.5')
+        self.assertEqual(sheet.json['work_correction'], 7.5*60*60)
+        self.assertEqual(sheet.json['work_correction_notes'], 'added 7.5')

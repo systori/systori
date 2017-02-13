@@ -15,6 +15,8 @@ from jsonfield import JSONField
 from systori.lib import date_utils
 from systori.lib.accounting.tools import Amount, JSONEncoder
 
+from .type.font import font_families
+
 
 class Document(models.Model):
     json = JSONField(default={}, dump_kwargs={'cls': JSONEncoder},
@@ -49,6 +51,40 @@ class Timesheet(Document):
     worker = models.ForeignKey('company.Worker', related_name='timesheets', on_delete=models.CASCADE)
 
     objects = TimesheetQuerySet.as_manager()
+
+    def calculate_work_balance(self):
+        return (
+            self.json['work_total'] +
+            self.json['work_correction']
+        )
+
+    def calculate_holiday_balance(self):
+        return (
+            self.json['holiday_transferred'] +
+            self.json['holiday_added'] +
+            self.json['holiday_correction']
+        ) - self.json['holiday_total']
+
+    def calculate_overtime_balance(self):
+        return (
+            self.json['overtime_transferred'] +
+            self.json['overtime_total'] +
+            self.json['overtime_correction']
+        )
+
+    def calculate_transferred_amounts(self):
+        previous_month = (self.document_date.replace(day=1)-timedelta(days=2)).replace(day=1)
+        previous_query = Timesheet.objects.filter(worker=self.worker, document_date=previous_month)
+        if previous_query.exists():
+            previous = previous_query.get()
+            self.json['holiday_transferred'] = previous.json['holiday_balance']
+            self.json['overtime_transferred'] = previous.json['overtime_balance']
+
+    def save(self, **kwargs):
+        self.json['work_balance'] = self.calculate_work_balance()
+        self.json['holiday_balance'] = self.calculate_holiday_balance()
+        self.json['overtime_balance'] = self.calculate_overtime_balance()
+        return super().save(**kwargs)
 
 
 class Proposal(Document):
@@ -380,16 +416,9 @@ class Letterhead(models.Model):
 
     debug = models.BooleanField(_("Debug Mode"), default=True)
 
-    OPEN_SANS = "OpenSans"
-    DROID_SERIF = "DroidSerif"
-    TINOS = "Tinos"
-    FONT = (
-        (OPEN_SANS, "Open Sans"),
-        (DROID_SERIF, "Droid Serif"),
-        (TINOS, "Tinos")
-    )
-    font = models.CharField(_('Font'), max_length=15,
-                            choices=FONT, default=OPEN_SANS)
+    FONTS = tuple((font, font) for font in font_families)
+
+    font = models.CharField(_('Font'), max_length=15, choices=FONTS, default=FONTS[0][0])
 
     def __str__(self):
         return self.name

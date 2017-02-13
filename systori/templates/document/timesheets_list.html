@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n %}
+{% load i18n customformatting %}
 
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='timesheets' %}{% endblock %}
 
@@ -9,7 +9,7 @@
     <thead>
     <tr>
       <th>{% trans 'Month' %}</th>
-      <th>{% trans 'Timesheets' %}</th>
+      <th colspan="3">{% trans 'Timesheets' %}</th>
       <th>{% trans 'Actions' %}</th>
     </tr>
     </thead>
@@ -17,7 +17,7 @@
     {% for month in months %}
       <tr>
         <td>{{ month.date|date:"Y F" }}</td>
-        <td>{{ month.count }}</td>
+        <td colspan="3">{{ month.count }}</td>
         <td>
           {% if month.can_generate %}
           <a href="{% url 'timesheets.generate' month.date.year month.date.month %}">{% trans "Generate" %}</a>
@@ -27,6 +27,15 @@
           {% endif %}
         </td>
       </tr>
+      {% for row in month.timesheets|split_rows_vertically:3 %}
+        <tr>
+          <td></td>
+          {% for col in row %}
+            <td>{% if col %}<a href="{% url 'timesheet.update' col.pk %}">{{ col.worker.get_full_name }}</a>{% endif %}</td>
+          {% endfor %}
+          <td></td>
+        </tr>
+      {% endfor %}
     {% endfor %}
     </tbody>
   </table>

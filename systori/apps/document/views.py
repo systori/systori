@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from collections import OrderedDict, namedtuple
 
 from django.http import HttpResponse, HttpResponseRedirect
@@ -17,6 +17,7 @@ from .models import Proposal, Invoice, Adjustment, Payment, Refund, Timesheet
 from .models import DocumentTemplate, Letterhead, DocumentSettings
 from .forms import ProposalForm, InvoiceForm, AdjustmentForm, PaymentForm, RefundForm
 from .forms import LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
+from .forms import TimesheetForm
 from . import type as pdf_type
 
 
@@ -206,7 +207,8 @@ TimesheetMonth = namedtuple(
     'TimesheetMonth', (
         'date',
         'can_generate',
-        'count'
+        'count',
+        'timesheets'
     )
 )
 
@@ -227,11 +229,24 @@ class TimesheetsList(TemplateView):
                         (month == today.month or month == today.month-1) and
                         Timer.objects.filter_month(year, month).exists()
                     ),
-                    count=Timesheet.objects.period(year, month).count()
+                    count=Timesheet.objects.period(year, month).count(),
+                    timesheets=Timesheet.objects.period(year, month).all()
                 )
             )
             month -= 1
         context['months'] = months
+        return context
+
+
+class TimesheetUpdate(UpdateView):
+    model = Timesheet
+    form_class = TimesheetForm
+    template_name = 'document/timesheet.html'
+    success_url = reverse_lazy('timesheets')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['KIND_CHOICES'] = dict(Timer.KIND_CHOICES)
         return context
 
 
@@ -241,6 +256,17 @@ class TimesheetsGenerateView(View):
         year, month = int(self.kwargs['year']), int(self.kwargs['month'])
         letterhead = DocumentSettings.objects.first().timesheet_letterhead
 
+        # preserve corrections
+        corrections = {}
+        for old in Timesheet.objects.period(year, month).all():
+            corrections[old.worker_id] = {
+                'overtime_correction': old.json['overtime_correction'],
+                'overtime_correction_notes': old.json['overtime_correction_notes'],
+                'holiday_correction': old.json['holiday_correction'],
+                'holiday_correction_notes': old.json['holiday_correction_notes'],
+                'work_correction': old.json['work_correction'],
+                'work_correction_notes': old.json['work_correction_notes'],
+            }
         # clear existing timesheets for this period
         Timesheet.objects.period(year, month).delete()
 
@@ -254,6 +280,10 @@ class TimesheetsGenerateView(View):
                 Timer.objects.filter_month(year, month).filter(worker=worker).all(),
                 year, month
             )
+            ts.json['holiday_added'] = request.company.holiday
+            if worker.pk in corrections:
+                ts.json.update(corrections[worker.pk])
+            ts.calculate_transferred_amounts()
             ts.save()
 
         return HttpResponseRedirect(reverse('timesheets'))
@@ -317,6 +347,14 @@ class TimesheetsPDF(DocumentRenderView):
         queryset = Timesheet.objects.period(year, month)
         letterhead = DocumentSettings.objects.first().timesheet_letterhead
         return pdf_type.timesheet.render(queryset, letterhead)
+
+
+class TimesheetPDF(DocumentRenderView):
+    model = Timesheet
+
+    def pdf(self):
+        letterhead = DocumentSettings.objects.first().timesheet_letterhead
+        return pdf_type.timesheet.render([self.get_object()], letterhead)
 
 
 class InvoicePDF(DocumentRenderView):
@@ -450,8 +488,9 @@ class ItemizedListingPDF(DocumentRenderView):
     model = Project
 
     def pdf(self):
-        project = Project.prefetch(self.kwargs['project_pk'])
-        return pdf_type.itemized_listing.render(project, self.kwargs['format'])
+        doc_settings = DocumentSettings.get_for_language(get_language())
+        letterhead = doc_settings.itemized_letterhead
+        return pdf_type.itemized_listing.render(self.request.project, letterhead, self.kwargs['format'])
 
 
 # Document Template
@@ -479,10 +518,6 @@ class DocumentTemplateDelete(DeleteView):
 
 
 # Letterhead
-
-
-class LetterheadView(DetailView):
-    model = Letterhead
 
 
 class LetterheadCreate(CreateView):
