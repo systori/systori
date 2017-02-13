@@ -33,7 +33,7 @@ class Company(AbstractSchema):
     @property
     def holiday(self) -> int:
         """ TODO: store in database for each worker type/contract. """
-        return int(2.5 * 60 * 60)
+        return int(2.5 * 8 * 60 * 60)
 
     @property
     def timezone(self) -> pytz.tzinfo.StaticTzInfo:
