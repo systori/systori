@@ -418,7 +418,7 @@ class Letterhead(models.Model):
 
     FONTS = tuple((font, font) for font in font_families)
 
-    font = models.CharField(_('Font'), max_length=15, choices=FONTS, default=FONTS[0])
+    font = models.CharField(_('Font'), max_length=15, choices=FONTS, default=FONTS[0][0])
 
     def __str__(self):
         return self.name
