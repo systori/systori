@@ -326,7 +326,8 @@ class InvoicePDF(DocumentRenderView):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
         payment_details = self.request.GET.get('payment_details', False)
-        return pdf_type.invoice.render(json, letterhead, payment_details, self.kwargs['format'])
+        lineitem_details = self.request.GET.get('lineitem_details', False)
+        return pdf_type.invoice.render(json, letterhead, payment_details, lineitem_details, self.kwargs['format'])
 
 
 class AdjustmentPDF(DocumentRenderView):

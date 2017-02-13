@@ -82,7 +82,7 @@ def collate_payments(invoice, font, available_width, show_payment_details):
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def collate_itemized_listing(invoice, font, available_width):
+def collate_itemized_listing(invoice, font, available_width, include_lineitems):
 
     # Itemized Listing Table
     items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
@@ -122,14 +122,23 @@ def collate_itemized_listing(invoice, font, available_width):
             totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font), money(group['progress']))
             group_subtotals_added = True
 
+    def add_lineitem(li):
+        items.row('', p(li['name'], font), '', '', money(li['estimate']))
+        items.row_style('ALIGNMENT', 2, -1, "RIGHT")
+
     def add_task(task):
         items.row(p(task['code'], font), p(task['name'], font))
         items.row_style('SPAN', 1, -2)
 
+        if include_lineitems:
+            for li in task['lineitems']:
+                add_lineitem(li)
+
         items.row('', '', ubrdecimal(task['complete']), p(task['unit'], font), money(task['price']),
                   money(task['progress']))
         items.row_style('ALIGNMENT', 1, -1, "RIGHT")
-        items.keep_previous_n_rows_together(2)
+        if not include_lineitems:
+            items.keep_previous_n_rows_together(2)
 
     def traverse(parent, depth):
         items.row(b(parent['code'], font), b(parent['name'], font))
@@ -189,7 +198,7 @@ def collate_itemized_listing(invoice, font, available_width):
     ]
 
 
-def render(invoice, letterhead, show_payment_details, format):
+def render(invoice, letterhead, show_payment_details, show_lineitem_details, format):
 
     with BytesIO() as buffer:
 
@@ -234,7 +243,7 @@ def render(invoice, letterhead, show_payment_details, format):
 
             Spacer(0, 4*mm),
 
-        ] + collate_itemized_listing(invoice, font, available_width)
+        ] + collate_itemized_listing(invoice, font, available_width, show_lineitem_details)
 
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)

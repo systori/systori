@@ -82,8 +82,10 @@
       <ul class="dropdown-menu">
         <li><a target="_blank" href="{% url 'invoice.pdf' project.id 'email' invoice.id %}">{% trans 'Email' %}</a></li>
         <li><a target="_blank" href="{% url 'invoice.pdf' project.id 'email' invoice.id %}?payment_details=1">{% trans 'Email w/ Payment Details' %}</a></li>
+        <li><a target="_blank" href="{% url 'invoice.pdf' project.id 'email' invoice.id %}?lineitem_details=1">{% trans 'Email w/ Line Items' %}</a></li>
         <li><a target="_blank" href="{% url 'invoice.pdf' project.id 'print' invoice.id %}">{% trans 'Print' %}</a></li>
         <li><a target="_blank" href="{% url 'invoice.pdf' project.id 'print' invoice.id %}?payment_details=1">{% trans 'Print w/ Payment Details' %}</a></li>
+        <li><a target="_blank" href="{% url 'invoice.pdf' project.id 'print' invoice.id %}?lineitem_details=1">{% trans 'Print w/ Line Items' %}</a></li>
       </ul>
     </div>
   </div>
