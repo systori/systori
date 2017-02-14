@@ -91,7 +91,10 @@ def collate_itemized_listing(invoice, font, available_width, include_lineitems):
     items.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
     items.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
 
-    items.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
+    if include_lineitems:
+        items.row(_("Pos."), _("Description"), '', _("Qty"), _("Unit"), _("Total"))
+    else:
+        items.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
     items.row_style('ALIGNMENT', 2, -1, "RIGHT")
 
     # Totals Table
@@ -122,10 +125,6 @@ def collate_itemized_listing(invoice, font, available_width, include_lineitems):
             totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font), money(group['progress']))
             group_subtotals_added = True
 
-    def add_lineitem(li):
-        items.row('', p(li['name'], font), '', '', money(li['estimate']))
-        items.row_style('ALIGNMENT', 2, -1, "RIGHT")
-
     def add_task(task):
         items.row(p(task['code'], font), p(task['name'], font))
         items.row_style('SPAN', 1, -2)
@@ -134,13 +133,14 @@ def collate_itemized_listing(invoice, font, available_width, include_lineitems):
             items.row('', p(task['description'], font))
             items.row_style('SPAN', 1, -1)
             for li in task['lineitems']:
-                add_lineitem(li)
+                items.row('', p(li['name'], font), '', ubrdecimal(li['qty']), p(li['unit'], font), money(li['estimate']))
+                items.row_style('SPAN', 1, 2)
+                items.row_style('ALIGNMENT', 2, -1, "RIGHT")
 
-        items.row('', '', ubrdecimal(task['complete']), p(task['unit'], font), money(task['price']),
-                  money(task['progress']))
-        items.row_style('ALIGNMENT', 1, -1, "RIGHT")
-
-        if not include_lineitems:
+        else:
+            items.row('', '', ubrdecimal(task['complete']), p(task['unit'], font), money(task['price']),
+                      money(task['progress']))
+            items.row_style('ALIGNMENT', 1, -1, "RIGHT")
             items.keep_previous_n_rows_together(2)
 
     def traverse(parent, depth):
