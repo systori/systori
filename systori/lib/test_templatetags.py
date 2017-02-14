@@ -84,3 +84,11 @@ class CustomFormattingTest(TestCase):
         self.assertEqual([['A'], ['B'], ['C'], ['D']], split_rows_horizontally(['A', 'B', 'C', 'D'], 1))
         self.assertEqual([['A', 'B', 'C'], ['D', '', '']], split_rows_horizontally(['A', 'B', 'C', 'D'], 3))
         self.assertEqual([['A', 'B', 'C', 'D']], split_rows_horizontally(['A', 'B', 'C', 'D'], 4))
+
+    def test_ubrhourdays(self):
+        activate('en')
+        self.assertEqual(ubrhourdays(60*60*8), '1 day')
+        self.assertEqual(ubrhourdays(60*60*20), '2.5 days')
+        activate('de')
+        self.assertEqual(ubrhourdays(60*60*8), '1 Tag')
+        self.assertEqual(ubrhourdays(60*60*20), '2,5 Tage')

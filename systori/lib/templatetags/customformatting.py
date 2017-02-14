@@ -108,8 +108,9 @@ def ubrhour(seconds):
 
 @register.filter
 def ubrhourdays(seconds):
-    days = ubrdecimal(seconds/60.0/60.0/8.0, max_significant=2, min_significant=0)
-    return ungettext('{} day', '{} days', float(days)).format(days)
+    days = seconds/60.0/60.0/8.0
+    formatted_days = ubrdecimal(days, max_significant=2, min_significant=0)
+    return ungettext('{} day', '{} days', days).format(formatted_days)
 
 
 @register.filter
