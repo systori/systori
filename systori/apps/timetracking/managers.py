@@ -155,8 +155,13 @@ class TimerQuerySet(QuerySet):
         # Requested start/end times must be of the same timezone as the company breaks.
         assert all(dt.tzinfo.zone == tz.zone for dt in (start, end))
 
-        days = [day for day in get_dates_in_range(start.date(), end.date(), include_weekends)
-                if not self.filter(worker=worker, date=day).exists()]
+        # if Timers from a single day, don't skip that day. if multiple days involved skip a day if Timers are present
+        single_day = (end - start).days == 0
+        if single_day:
+            days = [start]
+        else:
+            days = [day for day in get_dates_in_range(start.date(), end.date(), include_weekends)
+                    if not self.filter(worker=worker, date=day).exists()]
 
         breaks = []
         if morning_break:
