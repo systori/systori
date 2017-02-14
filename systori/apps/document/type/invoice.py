@@ -92,7 +92,7 @@ def collate_itemized_listing(invoice, font, available_width, include_lineitems):
     items.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
 
     if include_lineitems:
-        items.row(_("Pos."), _("Description"), '', _("Qty"), _("Unit"), _("Total"))
+        items.row(_("Pos."), _("Description"), _("Qty"), _("Unit"), _("Price"), _("Total"))
     else:
         items.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
     items.row_style('ALIGNMENT', 2, -1, "RIGHT")
@@ -133,8 +133,7 @@ def collate_itemized_listing(invoice, font, available_width, include_lineitems):
             items.row('', p(task['description'], font))
             items.row_style('SPAN', 1, -1)
             for li in task['lineitems']:
-                items.row('', p(li['name'], font), '', ubrdecimal(li['qty']), p(li['unit'], font), money(li['estimate']))
-                items.row_style('SPAN', 1, 2)
+                items.row('', p(li['name'], font), ubrdecimal(li['qty']), p(li['unit'], font), money(li['price']), money(li['estimate']))
                 items.row_style('ALIGNMENT', 2, -1, "RIGHT")
 
         else:
