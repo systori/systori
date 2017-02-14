@@ -8,7 +8,7 @@ from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak, Table
 from reportlab.lib import colors
 
 from django.utils.formats import date_format
-from django.utils.translation import ugettext as _
+from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 
 from systori.apps.timetracking.models import Timer
 from systori.apps.timetracking.utils import format_seconds
@@ -115,17 +115,17 @@ def create_timesheet_table(json, available_width, font):
 def create_rolling_balances(month, json, font):
     ts = TableStyler(font, base_style=False)
     ts.style.append(('GRID', (0, 0), (-1, -1), 0.25, colors.black))
-    ts.row("", _("Previous"), "", month, _("Balance"))
+    ts.row("", pgettext_lazy("timesheet", "Previous"), pgettext_lazy("timesheet", "Correction"), month, pgettext_lazy("timesheet", "Balance"))
     ts.row(_("Holiday"), fmthr(json['holiday_transferred']), fmthr(json['holiday_correction']), fmthr(json['holiday_total']), fmthr(json['holiday_balance']))
     ts.row(_("Overtime"), fmthr(json['overtime_transferred']), fmthr(json['overtime_correction']), fmthr(json['overtime_total']), fmthr(json['overtime_balance']))
-    return ts.get_table(colWidths=[100, 100, 32, 80, 100], rowHeights=18, hAlign='RIGHT')
+    return ts.get_table(colWidths=[90]*4+[100], rowHeights=18, hAlign='RIGHT')
 
 
 def create_final_total(json, font):
     ts = TableStyler(font, base_style=False)
     ts.style.append(('GRID', (0, 0), (-1, -1), 1, colors.black))
-    ts.row(b(_("Final Total"), font), fmthr(json['work_correction']), b(fmthr(json['work_balance']), font), _("Approved")+": "+'_'*8)
-    return ts.get_table(colWidths=[100, 32, 80, 100], rowHeights=18, hAlign='RIGHT')
+    ts.row(b(pgettext_lazy("timesheet", "Final Total"), font), fmthr(json['work_correction']), b(fmthr(json['work_balance']), font), pgettext_lazy("timesheet", "Approved")+": ")
+    return ts.get_table(colWidths=[90]*3+[100], rowHeights=22, hAlign='RIGHT')
 
 
 def create_timesheets(timesheets, available_width, available_height, font):
