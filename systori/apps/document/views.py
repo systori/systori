@@ -258,15 +258,15 @@ class TimesheetsGenerateView(View):
 
         # preserve corrections
         corrections = {}
-        #for old in Timesheet.objects.period(year, month).all():
-        #    corrections[old.worker_id] = {
-        #        'overtime_correction': old.json['overtime_correction'],
-        #        'overtime_correction_notes': old.json['overtime_correction_notes'],
-        #        'holiday_correction': old.json['holiday_correction'],
-        #        'holiday_correction_notes': old.json['holiday_correction_notes'],
-        #        'work_correction': old.json['work_correction'],
-        #        'work_correction_notes': old.json['work_correction_notes'],
-        #    }
+        for old in Timesheet.objects.period(year, month).all():
+            corrections[old.worker_id] = {
+                'overtime_correction': old.json['overtime_correction'],
+                'overtime_correction_notes': old.json['overtime_correction_notes'],
+                'holiday_correction': old.json['holiday_correction'],
+                'holiday_correction_notes': old.json['holiday_correction_notes'],
+                'work_correction': old.json['work_correction'],
+                'work_correction_notes': old.json['work_correction_notes'],
+            }
         # clear existing timesheets for this period
         Timesheet.objects.period(year, month).delete()
 
