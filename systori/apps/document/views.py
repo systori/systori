@@ -256,35 +256,25 @@ class TimesheetsGenerateView(View):
         year, month = int(self.kwargs['year']), int(self.kwargs['month'])
         letterhead = DocumentSettings.objects.first().timesheet_letterhead
 
-        # preserve corrections
-        corrections = {}
-        for old in Timesheet.objects.period(year, month).all():
-            corrections[old.worker_id] = {
-                'overtime_correction': old.json['overtime_correction'],
-                'overtime_correction_notes': old.json['overtime_correction_notes'],
-                'holiday_correction': old.json['holiday_correction'],
-                'holiday_correction_notes': old.json['holiday_correction_notes'],
-                'work_correction': old.json['work_correction'],
-                'work_correction_notes': old.json['work_correction_notes'],
-            }
-        # clear existing timesheets for this period
-        Timesheet.objects.period(year, month).delete()
-
-        # get workers that have timers for which timesheets can be generated
+        current = list(Timesheet.objects.period(year, month))
         workers = Timer.objects.filter_month(year, month).get_workers()
 
-        # start generating
         for worker in workers:
-            ts = Timesheet(letterhead=letterhead, worker=worker, document_date=date(year, month, 1))
-            ts.json = pdf_type.timesheet.serialize(
-                Timer.objects.filter_month(year, month).filter(worker=worker).all(),
-                year, month
-            )
-            ts.json['holiday_added'] = request.company.holiday
-            if worker.pk in corrections:
-                ts.json.update(corrections[worker.pk])
-            ts.calculate_transferred_amounts()
-            ts.save()
+            sheet = None
+            for ts in current:
+                if ts.worker.pk == worker.pk:
+                    sheet = ts
+                    current.remove(ts)
+                    break
+            if not sheet:
+                sheet = Timesheet(document_date=date(year, month, 1), worker=worker)
+            sheet.letterhead = letterhead
+            sheet.calculate()
+            sheet.save()
+
+        # cleanup no longer valid timesheets
+        for sheet in current:
+            sheet.delete()
 
         return HttpResponseRedirect(reverse('timesheets'))
 

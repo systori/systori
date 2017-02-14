@@ -91,6 +91,29 @@ body {
   right: 90px;
 }
 
+.date-header {
+  text-align: center;
+  margin-top: -3px;
+}
+
+.panel-heading {
+  position: relative;
+}
+
+.panel-heading > a[name] {
+  position: absolute;
+  top: -138px;
+}
+
+daily-plan {
+  display: block;
+}
+
+field-worker,
+field-equipment {
+  cursor: pointer;
+}
+
 #percent {
   width: 80px;
 }

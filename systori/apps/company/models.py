@@ -31,11 +31,6 @@ class Company(AbstractSchema):
         ]
 
     @property
-    def holiday(self) -> int:
-        """ TODO: store in database for each worker type/contract. """
-        return int(2.5 * 8 * 60 * 60)
-
-    @property
     def timezone(self) -> pytz.tzinfo.StaticTzInfo:
         """ TODO: store in database for each company. """
         # return pytz.timezone(self.timezone_name)
@@ -77,6 +72,11 @@ class Worker(models.Model):
                                                help_text=_('enable timetracking for this worker'))
     can_track_time = models.BooleanField(_('can track time'), default=False,
                                          help_text=_('allow this worker to start/stop work timer'))
+
+    @property
+    def holiday(self) -> int:
+        """ TODO: store in database for each worker type/contract. """
+        return int(2.5 * 8 * 60 * 60)
 
     @classmethod
     def grant_superuser_access(cls, user, company):

@@ -1,16 +1,19 @@
 from decimal import Decimal
+from datetime import datetime
 from django.test import TestCase
 from django.utils.translation import activate
 
 from ..company.factories import CompanyFactory
+from ..user.factories import UserFactory
 from ..project.factories import ProjectFactory
 from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from ..directory.factories import ContactFactory
 
+from ..timetracking.models import Timer
 from systori.lib.accounting.tools import Amount
 
 from . import type as pdf_type
-from .models import Proposal, Invoice
+from .models import Proposal, Invoice, Timesheet
 from .factories import LetterheadFactory, DocumentTemplateFactory
 
 
@@ -202,3 +205,67 @@ class DocumentTemplateTests(TestCase):
         r = d.render()
         self.assertEqual("Dear Smith", r['header'])
         self.assertEqual("Thanks John!", r['footer'])
+
+
+class TimesheetTests(TestCase):
+
+    def setUp(self):
+        self.worker = UserFactory(company=CompanyFactory()).access.first()
+        self.letterhead = LetterheadFactory()
+
+    def test_generate(self):
+        january = datetime(2017, 1, 9, 9)
+        Timer.objects.create(
+            worker=self.worker,
+            start=january,
+            end=january.replace(hour=18),
+            kind=Timer.WORK
+        )
+        Timer.objects.create(
+            worker=self.worker,
+            start=january.replace(day=10),
+            end=january.replace(day=10, hour=17),
+            kind=Timer.HOLIDAY
+        )
+        sheet = Timesheet(
+            document_date=january.replace(day=1),
+            worker=self.worker,
+            letterhead=self.letterhead
+        )
+        sheet.calculate()
+        sheet.save()
+        self.assertEqual(sheet.json['first_weekday'], 6)
+        self.assertEqual(sheet.json['projects'][0]['days'][8], 9*60*60)
+        self.assertEqual(sheet.json['projects'][0]['days'][9], 0)
+        self.assertEqual(sheet.json['overtime'][8], 60*60)
+        self.assertEqual(sheet.json['overtime'][9], 0)
+        self.assertEqual(sheet.json['overtime_total'], 60*60)
+        self.assertEqual(sheet.json['overtime_transferred'], 0)
+        self.assertEqual(sheet.json['overtime_balance'], 60*60)
+        self.assertEqual(sheet.json['holiday'][8], 0)
+        self.assertEqual(sheet.json['holiday'][9], 8*60*60)
+        self.assertEqual(sheet.json['holiday_total'], 8*60*60)
+        self.assertEqual(sheet.json['holiday_transferred'], 0)
+        self.assertEqual(sheet.json['holiday_added'], 2.5*8*60*60)
+        self.assertEqual(sheet.json['holiday_balance'], 12*60*60)
+        self.assertEqual(sheet.json['work'][8], 8*60*60)
+        self.assertEqual(sheet.json['work'][9], 8*60*60)
+        self.assertEqual(sheet.json['work_total'], 16*60*60)
+
+        february = datetime(2017, 2, 6, 9)
+        Timer.objects.create(
+            worker=self.worker,
+            start=february,
+            end=february.replace(hour=18),
+            kind=Timer.WORK
+        )
+        sheet = Timesheet(document_date=february, worker=self.worker, letterhead=self.letterhead)
+        sheet.calculate()
+        sheet.save()
+        self.assertEqual(sheet.json['overtime_transferred'], 60*60)
+        self.assertEqual(sheet.json['overtime_total'], 60*60)
+        self.assertEqual(sheet.json['overtime_balance'], 2*60*60)
+        self.assertEqual(sheet.json['holiday_transferred'], 12*60*60)
+        self.assertEqual(sheet.json['holiday_added'], 2.5*8*60*60)
+        self.assertEqual(sheet.json['holiday_total'], 0)
+        self.assertEqual(sheet.json['holiday_balance'], 32*60*60)

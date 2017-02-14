@@ -1,13 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n static dartium %}
-
-{% block head %}
-{{ block.super }}
-<style type="text/css">
-  #timer-box { font-size: 300%; display: inline-block; }
-  #timer-toggle { position: relative; top: -10px; }
-</style>
-{% endblock %}
+{% load i18n static customformatting %}
 
 {% block container %}
   <div class="container">
@@ -43,9 +35,9 @@
 
     {% for plan in todays_plans %}
 
-          <div class="day-separator">
-            {{ plan.jobsite.project.name }}
-          </div>
+      <div class="day-separator">
+        {{ plan.jobsite.project.name }}
+      </div>
 
       {% include "field/dailyplan.html" with dailyplan=plan %}
 
@@ -55,11 +47,57 @@
 
     {% endfor %}
 
-    {% include "timetracking/dashboard_part.html" %}
+    {% if worker.can_track_time %}
+      {% include "timetracking/dashboard_part.html" %}
+    {% endif %}
+
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        {% trans "Timesheet" %}
+      </div>
+
+      <table class="table table-striped table-bordered">
+
+        <thead>
+        <tr>
+          <th></th>
+          <th>{% trans "Previous" context "timesheet" %}</th>
+          <th>{{ timesheet.document_date|date:"F" }}</th>
+          <th>{% trans "Balance" context "timesheet" %}</th>
+        </tr>
+        </thead>
+
+        <tr>
+          <td>{% trans "Holiday" %}</td>
+          <td>{{ timesheet.json.holiday_transferred|ubrhour }}</td>
+          <td>{{ timesheet.json.holiday_added|ubrhour }}{% if timesheet.json.holiday_total != 0 %}-{{ timesheet.json.holiday_total|ubrhour }}{% endif %}</td>
+          <td class="info">{{ timesheet.json.holiday_balance|ubrhour }} ({{ timesheet.json.holiday_balance|ubrhourdays }})</td>
+        </tr>
+
+        <tr>
+          <td>{% trans "Overtime" %}</td>
+          <td>{{ timesheet.json.overtime_transferred|ubrhour }}</td>
+          <td>{{ timesheet.json.overtime_total|ubrhour }}</td>
+          <td class="info">{{ timesheet.json.overtime_balance|ubrhour }} ({{ timesheet.json.overtime_balance|ubrhourdays }})</td>
+        </tr>
+
+        <tr>
+          <td>{% trans "Final Total" context "timesheet" %}</td>
+          <td></td>
+          <td>{{ timesheet.json.work_total|ubrhour }}</td>
+          <td class="info">{{ timesheet.json.work_balance|ubrhour }} ({{ timesheet.json.work_balance|ubrhourdays }})</td>
+        </tr>
+
+      </table>
+
+      <div class="panel-footer clearfix">
+        <div class="pull-right">
+          <a href="{% url 'field.timers' %}" class="btn btn-primary">{% trans "Timers" %}</a>
+        </div>
+      </div>
+
+    </div>
 
   </div>
 {% endblock %}
-
-{% block extra_js %}
-  {% dart "timetracking.dart" %}
-{% endblock extra_js %}

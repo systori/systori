@@ -15,6 +15,9 @@ from jsonfield import JSONField
 from systori.lib import date_utils
 from systori.lib.accounting.tools import Amount, JSONEncoder
 
+from ..timetracking.models import Timer
+
+from . import type as pdf_type
 from .type.font import font_families
 
 
@@ -80,11 +83,33 @@ class Timesheet(Document):
             self.json['holiday_transferred'] = previous.json['holiday_balance']
             self.json['overtime_transferred'] = previous.json['overtime_balance']
 
-    def save(self, **kwargs):
-        self.json['work_balance'] = self.calculate_work_balance()
-        self.json['holiday_balance'] = self.calculate_holiday_balance()
-        self.json['overtime_balance'] = self.calculate_overtime_balance()
-        return super().save(**kwargs)
+    def calculate(self):
+        year, month = self.document_date.year, self.document_date.month
+        if not self.json:
+            self.json = {
+                'work_correction': 0,
+                'work_correction_notes': '',
+                'overtime_correction': 0,
+                'overtime_correction_notes': '',
+                'holiday_correction': 0,
+                'holiday_correction_notes': '',
+            }
+        self.json.update(pdf_type.timesheet.serialize(
+            Timer.objects.filter_month(year, month).filter(worker=self.worker).all(),
+            year, month
+        ))
+        self.calculate_transferred_amounts()
+        self.json['holiday_added'] = self.worker.holiday
+        self.json.update({
+            'work_balance': self.calculate_work_balance(),
+            'holiday_balance': self.calculate_holiday_balance(),
+            'overtime_balance': self.calculate_overtime_balance(),
+        })
+        return self
+
+    @staticmethod
+    def generate(period, worker):
+        return Timesheet(document_date=period, worker=worker).calculate()
 
 
 class Proposal(Document):

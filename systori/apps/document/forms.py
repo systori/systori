@@ -863,6 +863,7 @@ class TimesheetForm(forms.ModelForm):
         overtime_correction = round_to_nearest_multiple(int(self.cleaned_data['overtime_correction']*60*60))
         self.instance.json['overtime_correction'] = overtime_correction
         self.instance.json['overtime_correction_notes'] = self.cleaned_data['overtime_correction_notes']
+        self.instance.calculate()
         return super().save(commit)
 
 

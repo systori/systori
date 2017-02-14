@@ -1,7 +1,6 @@
 import 'dart:html';
 import 'dart:async';
 import 'dart:convert';
-import 'dart:collection';
 
 
 final TimetrackingTimer timetracking_timer = new TimetrackingTimer();
@@ -71,7 +70,6 @@ class TimetrackingTimer extends Resource {
     String _current_button_icon = 'play';
     HtmlElement _button_icon;
     HtmlElement _button_label;
-    ReportTable report_table;
     int hours = 0;
     int minutes = 0;
     int seconds = 0;
@@ -80,8 +78,6 @@ class TimetrackingTimer extends Resource {
     TimetrackingTimer(): super("/api/v1/timetracking/timer/");
 
     void initialize() {
-        report_table = document.querySelector('#timer-report');
-
         button = querySelector('#timer-toggle');
         _button_icon = button.querySelector('.glyphicon');
         _button_label = button.querySelector('.btn-label');
@@ -129,7 +125,6 @@ class TimetrackingTimer extends Resource {
                 create(remote_data).then((response) {
                     if (response.status == 200) {
                         run();
-                        report_table.refresh();
                     }
                 });
             } else {
@@ -176,7 +171,6 @@ class TimetrackingTimer extends Resource {
             var remote_data = {'end_latitude': data['latitude'], 'end_longitude': data['longitude']};
             update(remote_data).then((response) {
                 if (response.status == 200) {
-                    report_table.refresh();
                     set_button_icon('play');
                     set_button_label('stopped');
                 }
@@ -203,102 +197,6 @@ class TimetrackingTimer extends Resource {
 }
 
 
-class Report extends Resource {
-    Report(): super("/api/v1/timetracking/report/");
-}
-
-
-class ReportTableRow extends TableRowElement with MapMixin<Object,String> {
-    Map<String, TableCellElement> mapping;
-
-    ReportTableRow.created() : super.created(); attached() {
-        mapping = new Map<String, TableCellElement>();
-        (this.children as ElementList<TableCellElement>).forEach((cell) {
-            var cell_name = cell.dataset['mapping'];
-            mapping[cell_name] = cell;
-            cell.classes.add('cell-${cell_name}');
-        });
-    }
-
-    operator[](Object key) => mapping[key].text;
-
-    void operator []=(Object key, String value) {
-        mapping[key].text = value;
-    }
-
-    void fill(Map data) {
-        mapping.forEach((key, value) {
-            this[key] = data.containsKey(key) ? data[key] : '(None)';
-        });
-    }
-
-    Iterable<String> get keys => mapping.keys;
-    void clear() => mapping.clear();
-    String remove([Object key]) => super.remove(key);
-
-}
-
-
-class ReportTable extends TableElement {
-    List data;
-    var resource;
-    TemplateElement template;
-    TableElement body;
-
-    ReportTable.created() : super.created(); attached() {
-        body = this.querySelector('tbody');
-        TemplateElement template = document.querySelector('template[for="timetracking-report-row"]');
-        template = document.importNode(template.content, true);
-        resource = new Report();
-    }
-
-    void refresh() {
-        resource.get().then((response) {
-            data = JSON.decode(response.responseText);
-            refill(data);
-        }).catchError((Error error) {
-            // don't know what to output yet
-        });
-    }
-
-    void insertReportRow() {
-        body.append(template);
-    }
-
-    void deleteReportRow() {
-        body.deleteRow(-1);
-    }
-
-    void allocateRows(int number) {
-        var row_count = this.body.children.length - 1;
-        new Iterable.generate(row_count - number).forEach((_) {
-            this.deleteReportRow();
-        });
-        new Iterable.generate(number - row_count).forEach((_) {
-            this.insertReportRow();
-        });
-    }
-
-    void refill(List data) {
-        this.allocateRows(data.length);
-        var data_pivot = data.iterator;
-        data_pivot.moveNext();
-        // Skipping table head
-        (this.body.children as ElementList<ReportTableRow>).skip(1).forEach((row) {
-            row.fill(data_pivot.current);
-            data_pivot.moveNext();
-        });
-    }
-}
-
-
-void registerElements() {
-    document.registerElement('timetracking-report', ReportTable, extendsTag:'table');
-    document.registerElement('timetracking-report-row', ReportTableRow, extendsTag:'tr');
-}
-
-
 void main() {
-    registerElements();
     timetracking_timer.initialize();
 }
