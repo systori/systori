@@ -82,35 +82,35 @@
       <thead>
       <tr>
         <th></th>
-        <th>{% trans "Previous" %}</th>
+        <th>{% trans "Previous" context "timesheet" %}</th>
+        <th>{% trans "Correction" context "timesheet" %}</th>
         <th>{{ object.document_date|date:"F" }}</th>
-        <th>&#120491;</th>
-        <th>{% trans "Balance" %}</th>
+        <th>{% trans "Balance" context "timesheet" %}</th>
       </tr>
       </thead>
 
       <tr>
-        <td>{% trans "Worked" %}</td>
-        <td></td>
-        <td>{{ object.json.work_total|ubrhour }}</td>
-        <td>{% if object.json.work_correction != 0 %}{{ object.json.work_correction|ubrhour }}{% endif %}</td>
-        <td class="info">{{ object.json.work_balance|ubrhour }}</td>
-      </tr>
-
-      <tr>
         <td>{% trans "Holiday" %}</td>
         <td>{{ object.json.holiday_transferred|ubrhour }}</td>
-        <td>{{ object.json.holiday_added|ubrhour }}{% if object.json.holiday_total != 0 %}-{{ object.json.holiday_total|ubrhour }}{% endif %}</td>
         <td>{% if object.json.holiday_correction != 0 %}{{ object.json.holiday_correction|ubrhour }}{% endif %}</td>
+        <td>{{ object.json.holiday_added|ubrhour }}{% if object.json.holiday_total != 0 %}-{{ object.json.holiday_total|ubrhour }}{% endif %}</td>
         <td class="info">{{ object.json.holiday_balance|ubrhour }}</td>
       </tr>
 
       <tr>
         <td>{% trans "Overtime" %}</td>
         <td>{{ object.json.overtime_transferred|ubrhour }}</td>
-        <td>{{ object.json.overtime_total|ubrhour }}</td>
         <td>{% if object.json.overtime_correction != 0 %}{{ object.json.overtime_correction|ubrhour }}{% endif %}</td>
+        <td>{{ object.json.overtime_total|ubrhour }}</td>
         <td class="info">{{ object.json.overtime_balance|ubrhour }}</td>
+      </tr>
+
+      <tr>
+        <td>{% trans "Final Total" context "timesheet" %}</td>
+        <td></td>
+        <td>{% if object.json.work_correction != 0 %}{{ object.json.work_correction|ubrhour }}{% endif %}</td>
+        <td>{{ object.json.work_total|ubrhour }}</td>
+        <td class="info">{{ object.json.work_balance|ubrhour }}</td>
       </tr>
 
     </table>
