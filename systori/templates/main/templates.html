@@ -39,7 +39,7 @@
     {% for doc in documents %}
       <tr>
         <td><a href="{% url 'document-template.view' doc.id %}">{{ doc }}</a></td>
-        <td>{{ doc.document_type }}</a></td>
+        <td>{{ doc.get_document_type_display }}</td>
         <td>
           <a href="{% url 'document-template.edit' doc.id %}">{% trans "Edit" %}</a>
           <a href="{% url 'document-template.delete' doc.id %}">{% trans "Delete" %}</a>

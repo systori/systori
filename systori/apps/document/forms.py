@@ -212,6 +212,7 @@ class DocumentRowForm(forms.Form):
 class InvoiceForm(DocumentForm):
 
     doc_template = forms.ModelChoiceField(
+        label=_('Doc template'),
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.INVOICE), required=False)
 
@@ -735,6 +736,7 @@ RefundFormSet = formset_factory(RefundRowForm, formset=BaseDocumentFormSet, extr
 class ProposalForm(DocumentForm):
 
     doc_template = forms.ModelChoiceField(
+        label=_('Doc template'),
         queryset=DocumentTemplate.objects.filter(
             document_type=DocumentTemplate.PROPOSAL), required=False)
 
@@ -816,14 +818,14 @@ ProposalFormSet = formset_factory(ProposalRowForm, formset=BaseProposalFormSet, 
 
 class TimesheetForm(forms.ModelForm):
 
-    work_correction = forms.DecimalField()
-    work_correction_notes = forms.CharField(required=False, widget=forms.Textarea())
+    work_correction = forms.DecimalField(label=_('Work correction'))
+    work_correction_notes = forms.CharField(label=_('Work correction notes'), required=False, widget=forms.Textarea())
 
-    holiday_correction = forms.DecimalField()
-    holiday_correction_notes = forms.CharField(required=False, widget=forms.Textarea())
+    holiday_correction = forms.DecimalField(label=_('Holiday correction'))
+    holiday_correction_notes = forms.CharField(label=_('Holiday correction notes'), required=False, widget=forms.Textarea())
 
-    overtime_correction = forms.DecimalField()
-    overtime_correction_notes = forms.CharField(required=False, widget=forms.Textarea())
+    overtime_correction = forms.DecimalField(label=_('Overtime correction'))
+    overtime_correction_notes = forms.CharField(label=_('Overtime correction notes'), required=False, widget=forms.Textarea())
 
     class Meta:
         model = Timesheet
