@@ -132,7 +132,7 @@ def collate_itemized_listing(invoice, font, available_width, include_lineitems):
 
         if include_lineitems:
             items.row('', p(task['description'], font))
-            items.row_style('SPAN', 1, -2)
+            items.row_style('SPAN', 1, -1)
             for li in task['lineitems']:
                 add_lineitem(li)
 
