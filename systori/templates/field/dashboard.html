@@ -82,13 +82,6 @@
           <td class="info">{{ timesheet.json.overtime_balance|ubrhour }} ({{ timesheet.json.overtime_balance|ubrhourdays }})</td>
         </tr>
 
-        <tr>
-          <td>{% trans "Final Total" context "timesheet" %}</td>
-          <td></td>
-          <td>{{ timesheet.json.work_total|ubrhour }}</td>
-          <td class="info">{{ timesheet.json.work_balance|ubrhour }} ({{ timesheet.json.work_balance|ubrhourdays }})</td>
-        </tr>
-
       </table>
 
       <div class="panel-footer clearfix">

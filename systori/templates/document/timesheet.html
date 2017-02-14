@@ -94,7 +94,7 @@
         <td>{{ object.json.holiday_transferred|ubrhour }}</td>
         <td>{% if object.json.holiday_correction != 0 %}{{ object.json.holiday_correction|ubrhour }}{% endif %}</td>
         <td>{{ object.json.holiday_added|ubrhour }}{% if object.json.holiday_total != 0 %}-{{ object.json.holiday_total|ubrhour }}{% endif %}</td>
-        <td class="info">{{ object.json.holiday_balance|ubrhour }}</td>
+        <td class="info">{{ object.json.holiday_balance|ubrhour }} ({{ object.json.holiday_balance|ubrhourdays }})</td>
       </tr>
 
       <tr>
@@ -102,7 +102,7 @@
         <td>{{ object.json.overtime_transferred|ubrhour }}</td>
         <td>{% if object.json.overtime_correction != 0 %}{{ object.json.overtime_correction|ubrhour }}{% endif %}</td>
         <td>{{ object.json.overtime_total|ubrhour }}</td>
-        <td class="info">{{ object.json.overtime_balance|ubrhour }}</td>
+        <td class="info">{{ object.json.overtime_balance|ubrhour }} ({{ object.json.overtime_balance|ubrhourdays }})</td>
       </tr>
 
       <tr>
