@@ -131,12 +131,15 @@ def collate_itemized_listing(invoice, font, available_width, include_lineitems):
         items.row_style('SPAN', 1, -2)
 
         if include_lineitems:
+            items.row('', p(task['description'], font))
+            items.row_style('SPAN', 1, -2)
             for li in task['lineitems']:
                 add_lineitem(li)
 
         items.row('', '', ubrdecimal(task['complete']), p(task['unit'], font), money(task['price']),
                   money(task['progress']))
         items.row_style('ALIGNMENT', 1, -1, "RIGHT")
+
         if not include_lineitems:
             items.keep_previous_n_rows_together(2)
 
