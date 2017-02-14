@@ -1,32 +1,20 @@
-{% load i18n %}
+{% load i18n dartium %}
 {% csrf_token %}
 
-{% if worker.can_track_time %}
-    <div id="timer-box">{{ timetracking_timer_duration }}</div>
-    <button type="button" class="btn btn-default" id="timer-toggle" value="Start">
-      <span class="glyphicon glyphicon-play"></span>
-      <span class="btn-label"
-        data-label-stopped="{% trans 'Paused' %}"
-        data-label-geolocating="{% trans 'Geolocating...' %}"
-        data-label-running="{% trans 'Running' %}">{% trans 'Paused' %}</span>
-    </button>
-{% endif %}
+<style type="text/css">
+  #timer-box { font-size: 300%; display: inline-block; }
+  #timer-toggle { position: relative; top: -10px; }
+</style>
 
-{% if worker.is_timetracking_enabled %}
-  <div class="table-responsive">
-      <table class="table" is="timetracking-report" id="timer-report">
-          <thead>
-            <tr>
-              <th>{% trans "Date" %}</th>
-              <th>{% trans "Timers" %}</th>
-              <th>{% trans "Overtime" %}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for date, row in timetracking_report.items %}
-              {% include "timetracking/report_row.html" %}
-            {% endfor %}
-          </tbody>
-      </table>
-  </div>
-{% endif %}
+<div id="timer-box">{{ timetracking_timer_duration }}</div>
+<button type="button" class="btn btn-default" id="timer-toggle" value="Start">
+<span class="glyphicon glyphicon-play"></span>
+<span class="btn-label"
+  data-label-stopped="{% trans 'Paused' %}"
+  data-label-geolocating="{% trans 'Geolocating...' %}"
+  data-label-running="{% trans 'Running' %}">{% trans 'Paused' %}</span>
+</button>
+
+{% block extra_js %}
+  {% dart "timetracking.dart" %}
+{% endblock extra_js %}

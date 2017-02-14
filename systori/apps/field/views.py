@@ -16,6 +16,7 @@ from ..project.models import Project, DailyPlan, EquipmentAssignment, TeamMember
 from ..task.models import Job, Group, Task, ProgressReport
 from ..equipment.models import Equipment
 from ..timetracking import utils as timetracking_utils
+from ..document.models import Timesheet
 from .forms import CompletionForm, DailyPlanNoteForm
 from .utils import find_next_workday, days_ago
 
@@ -72,23 +73,35 @@ class FieldDashboard(TemplateView):
     template_name = "field/dashboard.html"
 
     def get_context_data(self, **kwargs):
-        context = super(FieldDashboard, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         worker = self.request.worker
+        today = date.today()
         if worker.is_fake:
             todays_plans = previous_plans = []
         else:
             todays_plans = self.request.worker.todays_plans.all()
             previous_plans = self.request.worker.dailyplans \
                 .filter(day__gt=days_ago(5)) \
-                .exclude(day=date.today()).all()
+                .exclude(day=today).all()
 
         context.update({
             'todays_plans': todays_plans,
             'previous_plans': previous_plans,
-            'timetracking_report': timetracking_utils.get_worker_dashboard_report(self.request.worker),
+            'timesheet': Timesheet.generate(today, self.request.worker),
             'timetracking_timer_duration': timetracking_utils.get_running_timer_duration(self.request.worker)
         })
 
+        return context
+
+
+class FieldTimersList(TemplateView):
+    template_name = "field/timers.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'timetracking_report': timetracking_utils.get_worker_dashboard_report(self.request.worker),
+        })
         return context
 
 

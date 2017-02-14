@@ -2,6 +2,7 @@ import locale
 import math
 from decimal import Decimal
 from django.utils.formats import get_format, get_language, to_locale
+from django.utils.translation import ugettext_lazy as _
 from django import template
 
 register = template.Library()
@@ -101,8 +102,16 @@ def ubrnumber(number):
 
 
 @register.filter
-def ubrhour(number):
-    return ubrdecimal(number/60.0/60.0, max_significant=1, min_significant=0)
+def ubrhour(seconds):
+    return ubrdecimal(seconds/60.0/60.0, max_significant=1, min_significant=0)
+
+
+@register.filter
+def ubrhourdays(seconds):
+    return '{} {}'.format(
+        ubrdecimal(seconds/60.0/60.0/8.0, max_significant=2, min_significant=0),
+        _('days')
+    )
 
 
 @register.filter

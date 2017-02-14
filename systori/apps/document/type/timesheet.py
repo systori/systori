@@ -214,23 +214,17 @@ class TimeSheetCollector:
 
             'work': self.work,
             'work_total': self.work_total,
-            'work_correction': 0,
-            'work_correction_notes': '',
             'work_balance': 0,
 
             'overtime': self.overtime,
             'overtime_total': self.overtime_total,
             'overtime_transferred': 0,
-            'overtime_correction': 0,
-            'overtime_correction_notes': '',
             'overtime_balance': 0,
 
             'holiday': self.holiday,
             'holiday_total': self.holiday_total,
             'holiday_added':  0,
             'holiday_transferred':  0,
-            'holiday_correction': 0,
-            'holiday_correction_notes': '',
             'holiday_balance': 0,
         }
 
