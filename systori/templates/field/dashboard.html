@@ -51,6 +51,7 @@
       {% include "timetracking/dashboard_part.html" %}
     {% endif %}
 
+    {% if worker.is_timetracking_enabled %}
     <div class="panel panel-default">
 
       <div class="panel-heading">
@@ -91,6 +92,7 @@
       </div>
 
     </div>
+    {% endif %}
 
   </div>
 {% endblock %}
