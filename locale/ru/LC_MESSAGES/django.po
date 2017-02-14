@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-14 11:25+0100\n"
+"POT-Creation-Date: 2017-02-14 14:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -485,8 +485,7 @@ msgstr ""
 msgid "Sent"
 msgstr ""
 
-#: systori/apps/document/models.py:109
-#: systori/apps/document/type/timesheet.py:127 systori/apps/task/models.py:255
+#: systori/apps/document/models.py:109 systori/apps/task/models.py:255
 #: systori/apps/task/models.py:378
 msgid "Approved"
 msgstr ""
@@ -972,20 +971,28 @@ msgid "Overtime"
 msgstr ""
 
 #: systori/apps/document/type/timesheet.py:118
-#: systori/templates/document/timesheet.html:85
+msgctxt "timesheet"
 msgid "Previous"
 msgstr ""
 
 #: systori/apps/document/type/timesheet.py:118
-#: systori/templates/accounting/account_list.html:13
-#: systori/templates/accounting/account_list.html:42
-#: systori/templates/accounting/payment_form.html:47
-#: systori/templates/document/timesheet.html:88
+msgctxt "timesheet"
+msgid "Correction"
+msgstr ""
+
+#: systori/apps/document/type/timesheet.py:118
+msgctxt "timesheet"
 msgid "Balance"
 msgstr ""
 
 #: systori/apps/document/type/timesheet.py:127
+msgctxt "timesheet"
 msgid "Final Total"
+msgstr ""
+
+#: systori/apps/document/type/timesheet.py:127
+msgctxt "timesheet"
+msgid "Approved"
 msgstr ""
 
 #: systori/apps/equipment/forms.py:9
@@ -1697,6 +1704,13 @@ msgstr ""
 msgid "Bank Accounts"
 msgstr ""
 
+#: systori/templates/accounting/account_list.html:13
+#: systori/templates/accounting/account_list.html:42
+#: systori/templates/accounting/payment_form.html:47
+#: systori/templates/document/timesheet.html:88
+msgid "Balance"
+msgstr ""
+
 #: systori/templates/accounting/account_list.html:14
 #: systori/templates/accounting/account_list.html:43
 #: systori/templates/company/company_list.html:15
@@ -1977,6 +1991,11 @@ msgstr ""
 msgid "Associated Projects"
 msgstr ""
 
+#: systori/templates/directory/contact_list.html:8
+#: systori/templates/field/group.html:17
+msgid "Type here..."
+msgstr ""
+
 #: systori/templates/directory/contact_list.html:10
 #: systori/templates/main/menu_dropdown.html:14
 msgid "Directory"
@@ -2007,6 +2026,10 @@ msgstr ""
 
 #: systori/templates/document/proposal_detail.html:8
 msgid "Proposal Details"
+msgstr ""
+
+#: systori/templates/document/timesheet.html:85
+msgid "Previous"
 msgstr ""
 
 #: systori/templates/document/timesheet.html:93
@@ -2147,10 +2170,6 @@ msgstr ""
 
 #: systori/templates/field/group.html:16
 msgid "search"
-msgstr ""
-
-#: systori/templates/field/group.html:17
-msgid "Type here..."
 msgstr ""
 
 #: systori/templates/field/jobsite_list.html:19
