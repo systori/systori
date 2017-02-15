@@ -115,9 +115,12 @@ def create_timesheet_table(json, available_width, font):
 def create_rolling_balances(month, json, font):
     ts = TableStyler(font, base_style=False)
     ts.style.append(('GRID', (0, 0), (-1, -1), 0.25, colors.black))
-    ts.row("", pgettext_lazy("timesheet", "Previous"), pgettext_lazy("timesheet", "Correction"), month, pgettext_lazy("timesheet", "Balance"))
-    ts.row(_("Holiday"), fmthr(json['holiday_transferred']), fmthr(json['holiday_correction']), fmthr(json['holiday_total']), fmthr(json['holiday_balance']))
-    ts.row(_("Overtime"), fmthr(json['overtime_transferred']), fmthr(json['overtime_correction']), fmthr(json['overtime_total']), fmthr(json['overtime_balance']))
+    ts.row("", pgettext_lazy("timesheet", "Previous"), pgettext_lazy("timesheet", "Correction"), month,
+           pgettext_lazy("timesheet", "Balance"))
+    ts.row(_("Holiday"), fmthr(json['holiday_transferred']), fmthr(json['holiday_correction']),
+           fmthr(json['holiday_added'])+ '-' + fmthr(json['holiday_total']), fmthr(json['holiday_balance']))
+    ts.row(_("Overtime"), fmthr(json['overtime_transferred']), fmthr(json['overtime_correction']),
+           fmthr(json['overtime_total']), fmthr(json['overtime_balance']))
     return ts.get_table(colWidths=[90]*4+[100], rowHeights=18, hAlign='RIGHT')
 
 
