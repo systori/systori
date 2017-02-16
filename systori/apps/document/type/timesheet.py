@@ -1,36 +1,30 @@
 from io import BytesIO
-from decimal import Decimal
-from datetime import date
 from collections import OrderedDict
 
-from reportlab.lib.units import mm, cm
-from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak, Table, TableStyle
+from reportlab.lib.units import mm
+from reportlab.platypus import Paragraph, Spacer, PageBreak
 from reportlab.lib import colors
 
 from django.utils.formats import date_format
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 
 from systori.apps.timetracking.models import Timer
-from systori.apps.timetracking.utils import format_seconds
 
 import calendar
 
 from .style import SystoriDocument, TableStyler
-from .style import chunk_text, force_break, p, b, br
 from .style import LetterheadCanvas
-from .style import get_available_width_height_and_pagesize
+from .style import get_available_width_height_and_pagesize, b
 from .font import FontManager
 
+from systori.lib.templatetags.customformatting import todecimalhours, hourslabel,\
+    dayshoursgainedverbose, dayshours, workdaysverbose, hoursverbose, hoursdays
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
 WEEKDAYS = [_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun')]
 CATEGORIES = [p[0] for p in Timer.KIND_CHOICES if p[0] != Timer.WORK]
-
-
-def fmthr(sec):
-    return "{:.1f}".format(sec/60.0/60.0) if sec else ""
 
 
 def create_timesheet_table(json, available_width, font):
@@ -60,7 +54,7 @@ def create_timesheet_table(json, available_width, font):
     ts.style.append(('FONTSIZE', (0, 0), (-2, 1), 9))
     ts.style.append(('LEFTPADDING', (0, 0), (-2, -1), 2))
     ts.style.append(('RIGHTPADDING', (0, 0), (-2, -1), 2))
-    ts.style.append(('ALIGNMENT', (0, 2), (-2, -1), "RIGHT"))
+    ts.style.append(('ALIGNMENT', (0, 2), (-2, -1), "CENTER"))
 
     for monday in mondays:
         ts.style.append(('LINEBEFORE', (monday, 0), (monday, -1), 1.5, colors.black))
@@ -73,9 +67,9 @@ def create_timesheet_table(json, available_width, font):
     ts.row_style('LINEBELOW', 0, -1, 1.25, colors.black)
 
     def render_row(days, total, name):
-        columns = [""]*31 + [fmthr(total), name]
+        columns = [""]*31 + [(todecimalhours(total) if total else ''), name]
         for i, sec in enumerate(days):
-            columns[i] = fmthr(sec)
+            columns[i] = (todecimalhours(sec) if sec else '')
         return columns
 
     stripe_idx = 1
@@ -116,19 +110,37 @@ def create_rolling_balances(month, json, font):
     ts = TableStyler(font, base_style=False)
     ts.style.append(('GRID', (0, 0), (-1, -1), 0.25, colors.black))
     ts.row("", pgettext_lazy("timesheet", "Previous"), pgettext_lazy("timesheet", "Correction"), month,
-           pgettext_lazy("timesheet", "Balance"))
-    ts.row(_("Holiday"), fmthr(json['holiday_transferred']), fmthr(json['holiday_correction']),
-           fmthr(json['holiday_added'])+ '-' + fmthr(json['holiday_total']), fmthr(json['holiday_balance']))
-    ts.row(_("Overtime"), fmthr(json['overtime_transferred']), fmthr(json['overtime_correction']),
-           fmthr(json['overtime_total']), fmthr(json['overtime_balance']))
-    return ts.get_table(colWidths=[90]*4+[100], rowHeights=18, hAlign='RIGHT')
+           b(pgettext_lazy("timesheet", "Balance"), font))
+    ts.row(
+        _("Holiday"),
+        (workdaysverbose(json['holiday_transferred']) if json['holiday_transferred'] != 0 else ''),
+        (workdaysverbose(json['holiday_correction']) if json['holiday_correction'] != 0 else '' ),
+        dayshoursgainedverbose(json['holiday_total']),
+        b(dayshours(json['holiday_balance']), font)
+    )
+    ts.row(
+        _("Overtime"),
+        (hoursverbose(json['overtime_transferred']) if json['overtime_transferred'] != 0 else ''),
+        (hoursverbose(json['overtime_correction']) if json['overtime_correction'] != 0 else ''),
+        (hoursverbose(json['overtime_total']) if json['overtime_total'] != 0 else ''),
+        (b(hoursdays(json['overtime_balance']), font) if json['overtime_balance'] != 0 else '')
+    )
+    ts.row(
+        pgettext_lazy("timesheet", "Final Total"),
+        '',
+        (hoursverbose(json['work_correction']) if json['work_correction'] else ''),
+        hoursverbose(json['work_total']),
+        b(hoursverbose(json['work_balance']), font)
+    )
+    return ts.get_table(colWidths=[90]*3+[152]+[132], rowHeights=18, hAlign='RIGHT')
 
 
-def create_final_total(json, font):
+def create_signature(json, font):
     ts = TableStyler(font, base_style=False)
-    ts.style.append(('GRID', (0, 0), (-1, -1), 1, colors.black))
-    ts.row(b(pgettext_lazy("timesheet", "Final Total"), font), fmthr(json['work_correction']), b(fmthr(json['work_balance']), font), pgettext_lazy("timesheet", "Approved")+": ")
-    return ts.get_table(colWidths=[90]*3+[100], rowHeights=22, hAlign='RIGHT')
+    ts.row(pgettext_lazy("timesheet", "Approved") + ": ")
+    ts.style.append(('INNERGRID', (0, 0), (0, 1), 0.25, colors.black))
+
+    return ts.get_table(colWidths=[284], rowHeights=22, hAlign='RIGHT')
 
 
 def create_timesheets(timesheets, available_width, available_height, font):
@@ -144,7 +156,7 @@ def create_timesheets(timesheets, available_width, available_height, font):
         yield Spacer(0, 4*mm)
         yield create_rolling_balances(date_format(timesheet.document_date, "F", use_l10n=True), json, font)
         yield Spacer(0, 4*mm)
-        yield create_final_total(json, font)
+        yield create_signature(json, font)
         yield PageBreak()
 
 

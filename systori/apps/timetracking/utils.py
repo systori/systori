@@ -4,6 +4,8 @@ from typing import Iterator, Tuple
 
 from django.utils import timezone
 
+from systori.lib.templatetags.customformatting import format_seconds
+
 
 WORK_DAY = timedelta(hours=8).total_seconds()
 HOLIDAYS_PER_MONTH = WORK_DAY * 2.5
@@ -20,30 +22,6 @@ def regroup(items, getter):
     for item in items:
         result[getter(item)] = item
     return result
-
-
-def seconds_to_time(seconds):
-    seconds = int(seconds)
-    minutes, seconds = divmod(seconds, 60)
-    if minutes > 0:
-        if seconds >= 30:
-            minutes += 1
-            seconds = 0
-        else:
-            seconds = 0
-    hours, minutes = divmod(minutes, 60)
-    try:
-        return time(hours, minutes, seconds)
-    except ValueError:
-        return time(0, 0, 0)
-
-
-def format_seconds(seconds, strftime_format='%-H:%M'):
-    negative = False
-    if seconds < 0:
-        negative = True
-        seconds = abs(seconds)
-    return ('-' if negative else '') + seconds_to_time(seconds).strftime(strftime_format)
 
 
 def format_days(seconds):

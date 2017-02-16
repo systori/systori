@@ -71,16 +71,16 @@
 
         <tr>
           <td>{% trans "Holiday" %}</td>
-          <td>{{ timesheet.json.holiday_transferred|ubrhour }}</td>
-          <td>{{ timesheet.json.holiday_added|ubrhour }}{% if timesheet.json.holiday_total != 0 %}-{{ timesheet.json.holiday_total|ubrhour }}{% endif %}</td>
-          <td class="info">{{ timesheet.json.holiday_balance|ubrhour }} ({{ timesheet.json.holiday_balance|ubrhourdays }})</td>
+          <td>{{ timesheet.json.holiday_transferred|todecimalhours }}</td>
+          <td>{{ timesheet.json.holiday_added|todecimalhours }}{% if timesheet.json.holiday_total != 0 %}-{{ timesheet.json.holiday_total|todecimalhours }}{% endif %}</td>
+          <td class="info">{{ timesheet.json.holiday_balance|todecimalhours }} ({{ timesheet.json.holiday_balance|toworkdays }})</td>
         </tr>
 
         <tr>
           <td>{% trans "Overtime" %}</td>
-          <td>{{ timesheet.json.overtime_transferred|ubrhour }}</td>
-          <td>{{ timesheet.json.overtime_total|ubrhour }}</td>
-          <td class="info">{{ timesheet.json.overtime_balance|ubrhour }} ({{ timesheet.json.overtime_balance|ubrhourdays }})</td>
+          <td>{{ timesheet.json.overtime_transferred|todecimalhours }}</td>
+          <td>{{ timesheet.json.overtime_total|todecimalhours }}</td>
+          <td class="info">{{ timesheet.json.overtime_balance|todecimalhours }} ({{ timesheet.json.overtime_balance|toworkdays }})</td>
         </tr>
 
       </table>

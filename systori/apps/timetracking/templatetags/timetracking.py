@@ -1,7 +1,8 @@
 from django import template
 
 from systori.apps.company.models import Worker
-from .. import utils
+from systori.lib.templatetags.customformatting import format_seconds
+from ..utils import get_workers_statuses
 
 
 register = template.Library()
@@ -9,7 +10,7 @@ register = template.Library()
 
 @register.filter
 def seconds_to_hours(value):
-    return utils.format_seconds(value or 0)
+    return format_seconds(value or 0)
 
 
 @register.filter
@@ -20,14 +21,14 @@ def seconds_to_pixels(value):
 
 @register.filter
 def overtime_from_total(value):
-    return utils.format_seconds(value-28800)
+    return format_seconds(value-28800)
 
 
 class StatusLoader(template.Node):
     var_name = 'user_statuses'
 
     def render(self, context):
-        context[self.var_name] = utils.get_workers_statuses(
+        context[self.var_name] = get_workers_statuses(
             Worker.objects.filter(is_timetracking_enabled=True))
         return ''
 

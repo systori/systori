@@ -85,10 +85,46 @@ class CustomFormattingTest(TestCase):
         self.assertEqual([['A', 'B', 'C'], ['D', '', '']], split_rows_horizontally(['A', 'B', 'C', 'D'], 3))
         self.assertEqual([['A', 'B', 'C', 'D']], split_rows_horizontally(['A', 'B', 'C', 'D'], 4))
 
-    def test_ubrhourdays(self):
+    def test_workdaysverbose(self):
         activate('en')
-        self.assertEqual(ubrhourdays(60*60*8), '1 day')
-        self.assertEqual(ubrhourdays(60*60*20), '2.5 days')
+        self.assertEqual(workdaysverbose(60 * 60 * 8), '1 day')
+        self.assertEqual(workdaysverbose(60 * 60 * 20), '2.5 days')
         activate('de')
-        self.assertEqual(ubrhourdays(60*60*8), '1 Tag')
-        self.assertEqual(ubrhourdays(60*60*20), '2,5 Tage')
+        self.assertEqual(workdaysverbose(60 * 60 * 8), '1 Tag')
+        self.assertEqual(workdaysverbose(60 * 60 * 20), '2,5 Tage')
+
+    def test_hoursverbose(self):
+        activate('en')
+        self.assertEqual(hoursverbose(60 * 60), '1 hour')
+        self.assertEqual(hoursverbose(60 * 60 * 2), '2 hours')
+        activate('de')
+        self.assertEqual(hoursverbose(60 * 60), '1 Stunde')
+        self.assertEqual(hoursverbose(60 * 60 * 2), '2 Stunden')
+
+    # dear future reader, if the HOLIDAYS_PER_MONTH is within some Worker.Contract model, you're welcome :P
+    def test_holidays_model(self):
+        from systori.apps.timetracking.utils import HOLIDAYS_PER_MONTH as holiday1
+        from systori.lib.templatetags.customformatting import HOLIDAYS_PER_MONTH as holiday2
+        self.assertEqual(holiday1, holiday2)
+
+    # composed test, this test checks several templatetags which are composed
+    def test_dayshoursgainedverbose(self):
+        activate('en')
+        self.assertEqual(dayshoursgainedverbose(60 * 60 * 1), '2.5 - 0.1 days (20 - 1 hour)')
+        self.assertEqual(dayshoursgainedverbose(60*60*8),'2.5 - 1 day (20 - 8 hours)')
+        self.assertEqual(dayshoursgainedverbose(60 * 60 * 12), '2.5 - 1.5 days (20 - 12 hours)')
+        activate('de')
+        self.assertEqual(dayshoursgainedverbose(60 * 60 * 1), '2,5 - 0,1 Tage (20 - 1 Stunde)')
+        self.assertEqual(dayshoursgainedverbose(60*60*8),'2,5 - 1 Tag (20 - 8 Stunden)')
+        self.assertEqual(dayshoursgainedverbose(60 * 60 * 12), '2,5 - 1,5 Tage (20 - 12 Stunden)')
+
+    def test_zeroblank(self):
+        self.assertEqual(zeroblank('0'),'')
+        self.assertEqual(zeroblank('23'),'23')
+
+    def test_tosexagesimalhours(self):
+        from datetime import time
+        self.assertEqual(tosexagesimalhours(60*60*2.5), time(2,30))
+
+    def test_format_seconds(self):
+        self.assertEqual(format_seconds(60*60*2.5+60*5), '2:35')

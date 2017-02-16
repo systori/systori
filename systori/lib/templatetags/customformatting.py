@@ -1,9 +1,13 @@
 import locale
 import math
 from decimal import Decimal
+from datetime import time, timedelta
 from django.utils.formats import get_format, get_language, to_locale
 from django.utils.translation import ungettext
 from django import template
+
+WORK_DAY = timedelta(hours=8).total_seconds()
+HOLIDAYS_PER_MONTH = WORK_DAY * 2.5
 
 register = template.Library()
 
@@ -102,18 +106,6 @@ def ubrnumber(number):
 
 
 @register.filter
-def ubrhour(seconds):
-    return ubrdecimal(seconds/60.0/60.0, max_significant=1, min_significant=0)
-
-
-@register.filter
-def ubrhourdays(seconds):
-    days = seconds/60.0/60.0/8.0
-    formatted_days = ubrdecimal(days, max_significant=2, min_significant=0)
-    return ungettext('{} day', '{} days', days).format(formatted_days)
-
-
-@register.filter
 def money(decimal):
     if decimal == '':
         return ''
@@ -121,3 +113,90 @@ def money(decimal):
         decimal = Decimal(decimal)
     locale.setlocale(locale.LC_ALL, (to_locale(get_language()), 'utf-8'))
     return locale.currency(decimal, True, True)
+
+
+@register.filter
+def todecimalhours(seconds):
+    return ubrdecimal(seconds/60.0/60.0, max_significant=1, min_significant=0)
+
+
+@register.filter
+def hourslabel(seconds):
+    return ungettext('hour', 'hours', seconds/60.0/60.0)
+
+
+@register.filter
+def hoursverbose(seconds):
+    return '{} {}'.format(todecimalhours(seconds), hourslabel(seconds))
+
+
+@register.filter
+def toworkdays(seconds):
+    return ubrdecimal(seconds/60.0/60.0/8.0, max_significant=1, min_significant=0)
+
+
+@register.filter
+def workdayslabel(seconds):
+    return ungettext('day', 'days', seconds/60.0/60.0/8.0)
+
+
+@register.filter
+def workdaysverbose(seconds):
+    return '{} {}'.format(toworkdays(seconds), workdayslabel(seconds))
+
+
+@register.filter
+def daysgained(seconds):
+    return '{} - {}'.format(toworkdays(HOLIDAYS_PER_MONTH), workdaysverbose(seconds))
+
+
+@register.filter
+def hoursgained(seconds):
+    return '{} - {}'.format(todecimalhours(HOLIDAYS_PER_MONTH), hoursverbose(seconds))
+
+
+@register.filter
+def dayshours(seconds):
+    return '{} ({})'.format(workdaysverbose(seconds), hoursverbose(seconds))
+
+
+@register.filter
+def hoursdays(seconds):
+    return '{} ({})'.format(hoursverbose(seconds), workdaysverbose(seconds))
+
+
+@register.filter
+def dayshoursgainedverbose(seconds):
+    return '{} ({})'.format(daysgained(seconds), hoursgained(seconds))
+
+
+@register.filter
+def zeroblank(value):
+    if value == '0': return ''
+    return value
+
+
+@register.filter
+def tosexagesimalhours(seconds):
+    seconds = int(seconds)
+    minutes, seconds = divmod(seconds, 60)
+    if minutes > 0:
+        if seconds >= 30:
+            minutes += 1
+            seconds = 0
+        else:
+            seconds = 0
+    hours, minutes = divmod(minutes, 60)
+    try:
+        return time(hours, minutes, seconds)
+    except ValueError:
+        return time(0, 0, 0)
+
+
+@register.filter
+def format_seconds(seconds, strftime_format='%-H:%M'):
+    negative = False
+    if seconds < 0:
+        negative = True
+        seconds = abs(seconds)
+    return ('-' if negative else '') + tosexagesimalhours(seconds).strftime(strftime_format)

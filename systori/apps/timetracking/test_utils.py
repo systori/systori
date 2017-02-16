@@ -6,6 +6,7 @@ from freezegun import freeze_time
 from django.test import TestCase
 from django.utils import timezone
 
+from systori.lib.templatetags.customformatting import tosexagesimalhours
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 from .models import Timer
@@ -26,9 +27,9 @@ class UtilsTest(TestCase):
         self.assertEquals(216, utils.round_to_nearest_multiple(230))
 
     def test_seconds_to_time(self):
-        self.assertEqual(utils.seconds_to_time(28530), time(7, 56, 0))
-        self.assertEqual(utils.seconds_to_time(270), time(0, 5, 0))
-        self.assertEqual(utils.seconds_to_time(300), time(0, 5, 0))
+        self.assertEqual(tosexagesimalhours(28530), time(7, 56, 0))
+        self.assertEqual(tosexagesimalhours(270), time(0, 5, 0))
+        self.assertEqual(tosexagesimalhours(300), time(0, 5, 0))
 
     def test_get_timetracking_workers(self):
         company = CompanyFactory()

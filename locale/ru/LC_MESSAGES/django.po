@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-14 22:58+0100\n"
+"POT-Creation-Date: 2017-02-15 22:30+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -451,7 +451,7 @@ msgstr ""
 
 #: systori/apps/document/models.py:50
 #: systori/apps/timetracking/templates/timetracking/user_report.html:36
-#: systori/templates/field/dashboard.html:57
+#: systori/templates/field/dashboard.html:58
 msgid "Timesheet"
 msgstr ""
 
@@ -732,7 +732,7 @@ msgstr ""
 
 #: systori/apps/document/type/evidence.py:46
 #: systori/apps/document/type/itemized_listing.py:78
-#: systori/apps/document/type/timesheet.py:54 systori/apps/project/models.py:62
+#: systori/apps/document/type/timesheet.py:57 systori/apps/project/models.py:62
 #: systori/templates/accounting/invoice_list.html:38
 #: systori/templates/directory/contact_detail.html:23
 #: systori/templates/task/editor/task_autocomplete.html:7
@@ -828,8 +828,8 @@ msgstr ""
 #: systori/apps/document/type/proposal.py:93
 #: systori/apps/document/type/proposal.py:112
 #: systori/apps/document/type/proposal.py:119
-#: systori/apps/document/type/timesheet.py:53
-#: systori/apps/document/type/timesheet.py:108 systori/apps/task/models.py:355
+#: systori/apps/document/type/timesheet.py:56
+#: systori/apps/document/type/timesheet.py:111 systori/apps/task/models.py:355
 #: systori/apps/task/models.py:479 systori/templates/document/timesheet.html:67
 msgid "Total"
 msgstr ""
@@ -924,82 +924,82 @@ msgstr ""
 msgid "Continuation"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:28
+#: systori/apps/document/type/timesheet.py:26
 msgid "Mon"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:28
+#: systori/apps/document/type/timesheet.py:26
 msgid "Tue"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:28
+#: systori/apps/document/type/timesheet.py:26
 msgid "Wed"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:28
+#: systori/apps/document/type/timesheet.py:26
 msgid "Thu"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:28
+#: systori/apps/document/type/timesheet.py:26
 msgid "Fri"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:28
+#: systori/apps/document/type/timesheet.py:26
 msgid "Sat"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:28
+#: systori/apps/document/type/timesheet.py:26
 msgid "Sun"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:105
-#: systori/apps/document/type/timesheet.py:119
+#: systori/apps/document/type/timesheet.py:108
+#: systori/apps/document/type/timesheet.py:124
 #: systori/apps/timetracking/models.py:27
 #: systori/templates/document/timesheet.html:59
 #: systori/templates/document/timesheet.html:93
-#: systori/templates/field/dashboard.html:72
+#: systori/templates/field/dashboard.html:73
 msgid "Holiday"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:110
-#: systori/apps/document/type/timesheet.py:120
+#: systori/apps/document/type/timesheet.py:113
+#: systori/apps/document/type/timesheet.py:131
 #: systori/apps/timetracking/templates/timetracking/home.html:82
 #: systori/apps/timetracking/templates/timetracking/user_report.html:68
 #: systori/apps/timetracking/templates/timetracking/user_report.html:114
 #: systori/templates/document/timesheet.html:75
 #: systori/templates/document/timesheet.html:101
-#: systori/templates/field/dashboard.html:79
+#: systori/templates/field/dashboard.html:80
 #: systori/templates/field/timers.html:18
 msgid "Overtime"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:118
+#: systori/apps/document/type/timesheet.py:121
 #: systori/templates/document/timesheet.html:85
-#: systori/templates/field/dashboard.html:65
+#: systori/templates/field/dashboard.html:66
 msgctxt "timesheet"
 msgid "Previous"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:118
+#: systori/apps/document/type/timesheet.py:121
 #: systori/templates/document/timesheet.html:86
 msgctxt "timesheet"
 msgid "Correction"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:118
+#: systori/apps/document/type/timesheet.py:122
 #: systori/templates/document/timesheet.html:88
-#: systori/templates/field/dashboard.html:67
+#: systori/templates/field/dashboard.html:68
 msgctxt "timesheet"
 msgid "Balance"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:127
+#: systori/apps/document/type/timesheet.py:138
 #: systori/templates/document/timesheet.html:109
 msgctxt "timesheet"
 msgid "Final Total"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:127
+#: systori/apps/document/type/timesheet.py:149
 msgctxt "timesheet"
 msgid "Approved"
 msgstr ""
@@ -1680,9 +1680,16 @@ msgstr ""
 msgid "Reconciled"
 msgstr ""
 
-#: systori/lib/templatetags/customformatting.py:113
-msgid "{} day"
-msgid_plural "{} days"
+#: systori/lib/templatetags/customformatting.py:127
+msgid "hour"
+msgid_plural "hours"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: systori/lib/templatetags/customformatting.py:144
+msgid "day"
+msgid_plural "days"
 msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
@@ -2172,7 +2179,7 @@ msgstr ""
 msgid "You have not been assigned to any job sites today."
 msgstr ""
 
-#: systori/templates/field/dashboard.html:89
+#: systori/templates/field/dashboard.html:90
 #: systori/templates/field/timers.html:17
 msgid "Timers"
 msgstr ""

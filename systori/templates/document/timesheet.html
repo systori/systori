@@ -34,9 +34,9 @@
       {% for project in object.json.projects %}
       <tr>
         {% for total in project.days %}
-          <td>{% if total != 0 %}{{ total|ubrhour }}{% endif %}</td>
+          <td>{% if total != 0 %}{{ total|todecimalhours }}{% endif %}</td>
         {% endfor %}
-        <td class="info">{% if project.total != 0 %}{{ project.total|ubrhour }}{% endif %}</td>
+        <td class="info">{% if project.total != 0 %}{{ project.total|todecimalhours }}{% endif %}</td>
         <td>{{project.name}}</td>
       </tr>
       {% endfor %}
@@ -44,34 +44,34 @@
       {% for special in object.json.special %}
         <tr>
           {% for total in special.days %}
-            <td>{% if total != 0 %}{{ total|ubrhour }}{% endif %}</td>
+            <td>{% if total != 0 %}{{ total|todecimalhours }}{% endif %}</td>
           {% endfor %}
-          <td class="info">{{ special.total|ubrhour }}</td>
+          <td class="info">{{ special.total|todecimalhours }}</td>
           <td>{{ special.name|lookup:KIND_CHOICES }}</td>
         </tr>
       {% endfor %}
 
       <tr>
         {% for total in object.json.holiday %}
-          <td>{% if total != 0 %}{{ total|ubrhour }}{% endif %}</td>
+          <td>{% if total != 0 %}{{ total|todecimalhours }}{% endif %}</td>
         {% endfor %}
-        <td class="info">{{ object.json.holiday_total|ubrhour }}</td>
+        <td class="info">{{ object.json.holiday_total|todecimalhours }}</td>
         <td>{% trans "Holiday" %}</td>
       </tr>
 
       <tr>
         {% for total in object.json.work %}
-          <td class="info">{% if total != 0 %}{{ total|ubrhour }}{% endif %}</td>
+          <td class="info">{% if total != 0 %}{{ total|todecimalhours }}{% endif %}</td>
         {% endfor %}
-        <td class="info">{{ object.json.work_total|ubrhour }}</td>
+        <td class="info">{{ object.json.work_total|todecimalhours }}</td>
         <td>{% trans "Total" %}</td>
       </tr>
 
       <tr>
         {% for total in object.json.overtime %}
-          <td>{% if total != 0 %}{{ total|ubrhour }}{% endif %}</td>
+          <td>{% if total != 0 %}{{ total|todecimalhours }}{% endif %}</td>
         {% endfor %}
-        <td>{{ object.json.overtime_total|ubrhour }}</td>
+        <td>{{ object.json.overtime_total|todecimalhours }}</td>
         <td>{% trans "Overtime" %}</td>
       </tr>
 
@@ -91,26 +91,26 @@
 
       <tr>
         <td>{% trans "Holiday" %}</td>
-        <td>{{ object.json.holiday_transferred|ubrhour }}</td>
-        <td>{% if object.json.holiday_correction != 0 %}{{ object.json.holiday_correction|ubrhour }}{% endif %}</td>
-        <td>{{ object.json.holiday_added|ubrhour }}{% if object.json.holiday_total != 0 %}-{{ object.json.holiday_total|ubrhour }}{% endif %}</td>
-        <td class="info">{{ object.json.holiday_balance|ubrhour }} ({{ object.json.holiday_balance|ubrhourdays }})</td>
+        <td>{% if object.json.holiday_transferred != 0 %}{{ object.json.holiday_transferred|workdaysverbose }}{% endif %}</td>
+        <td>{% if object.json.holiday_correction != 0 %}{{ object.json.holiday_correction|workdaysverbose }}{% endif %}</td>
+        <td>{% if object.json.holiday_total != 0 %}{{ object.json.holiday_total|dayshoursgainedverbose }}{% endif %}</td>
+        <td class="info">{{ object.json.holiday_balance|toworkdays }} {{ object.json.holiday_balance|workdayslabel }} ({{ object.json.holiday_balance|todecimalhours }} {{ object.json.holiday_balance|hourslabel }})</td>
       </tr>
 
       <tr>
         <td>{% trans "Overtime" %}</td>
-        <td>{{ object.json.overtime_transferred|ubrhour }}</td>
-        <td>{% if object.json.overtime_correction != 0 %}{{ object.json.overtime_correction|ubrhour }}{% endif %}</td>
-        <td>{{ object.json.overtime_total|ubrhour }}</td>
-        <td class="info">{{ object.json.overtime_balance|ubrhour }} ({{ object.json.overtime_balance|ubrhourdays }})</td>
+        <td>{% if object.json.overtime_transferred != 0 %}{{ object.json.overtime_transferred|hoursverbose }}{% endif %}</td>
+        <td>{% if object.json.overtime_correction != 0 %}{{ object.json.overtime_correction|hoursverbose }}{% endif %}</td>
+        <td>{% if object.json.overtime_total != 0 %}{{ object.json.overtime_total|hoursverbose }}{% endif %}</td>
+        <td class="info">{% if object.json.overtime_balance != 0 %}{{ object.json.overtime_balance|hoursdays }}{% endif %}</td>
       </tr>
 
       <tr>
         <td>{% trans "Final Total" context "timesheet" %}</td>
         <td></td>
-        <td>{% if object.json.work_correction != 0 %}{{ object.json.work_correction|ubrhour }}{% endif %}</td>
-        <td>{{ object.json.work_total|ubrhour }}</td>
-        <td class="info">{{ object.json.work_balance|ubrhour }}</td>
+        <td>{% if object.json.work_correction != 0 %}{{ object.json.work_correction|hoursverbose }}{% endif %}</td>
+        <td>{{ object.json.work_total|hoursverbose }}</td>
+        <td class="info">{{ object.json.work_balance|hoursverbose }}</td>
       </tr>
 
     </table>

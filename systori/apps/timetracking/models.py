@@ -3,10 +3,10 @@ from datetime import timedelta
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
-from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext as __
 from django.core.exceptions import ValidationError
 
+from systori.lib.templatetags.customformatting import format_seconds
 from ..project.models import JobSite
 from .managers import TimerQuerySet
 from .utils import round_to_nearest_multiple
@@ -157,7 +157,6 @@ class Timer(models.Model):
         return [int(v) for v in (seconds // 3600, (seconds % 3600) // 60, seconds % 60)]
 
     def get_duration_formatted(self):
-        from .utils import format_seconds
         return format_seconds(self.get_duration_seconds())
 
     def stop(self, end=None, ignore_short_duration=True, **kwargs):

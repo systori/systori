@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from systori.lib.templatetags.customformatting import format_seconds
 from .models import Timer
 from . import utils
 
@@ -47,4 +48,4 @@ class TimerSerializer(serializers.ModelSerializer):
         return utils.to_current_timezone(obj.end).strftime('%H:%M') if obj.end else '—'
 
     def get_duration(self, obj):
-        return utils.format_seconds(obj.duration) if obj.duration else '—'
+        return format_seconds(obj.duration) if obj.duration else '—'
