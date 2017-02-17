@@ -510,7 +510,7 @@ void main() {
 
             testCell(Cell cell, String text, String reason) {
                 expect(cell.text, text, reason: reason);
-                expect(cell.value, new Decimal.parse(text), reason: reason);
+                expect(cell.value, new Decimal.parse(text, 3), reason: reason);
             }
 
             testRow(HtmlRow row, String qty, String unit, String price, String total) {

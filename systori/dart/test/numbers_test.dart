@@ -33,6 +33,26 @@ main() async {
 
     });
 
+    group("Decimal arithmetic \w precision", () {
+
+        Decimal d(num number, int precision) => new Decimal(number, precision);
+
+        test("addition", () {
+            expect((d(0.19, 2)+d(0.11, 2)).canonical, '0.3');
+            expect((d(0.14, 2)+d(0.14, 2)+d(0.14, 2)).canonical, '0.42');
+            expect((d(0.14, 1)+d(0.14, 1)+d(0.14, 1)).canonical, '0.3');
+        });
+
+        test("multiplication", () {
+            expect((d(100, 2)*d(.19, 2)).money, '19.00');
+        });
+
+        test("division", () {
+            expect((d(1, 2)/d(3, 2)).money, '0.33');
+        });
+
+    });
+
     group("Amount", () {
 
         test("deutsch money formatting", () {

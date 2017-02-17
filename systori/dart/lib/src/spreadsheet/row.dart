@@ -25,7 +25,7 @@ abstract class Row {
 
         var _qty = qty.value;
         if (hasPercent && qty.isCanonicalNotBlank)
-            _qty = qty.value / new Decimal(100);
+            _qty = qty.value / new Decimal(100, 3);
 
         if (qty.isCanonicalNotBlank && price.isCanonicalNotBlank && total.isCanonicalBlank)
             total.setCalculated(_qty * price.value); else
@@ -39,7 +39,7 @@ abstract class Row {
             columns.forEach((c) {
                 // all purely calculated cells should get reset
                 if (c.isCanonicalBlank)
-                    c.setCalculated(new Decimal());
+                    c.setCalculated(new Decimal(0, 3));
             });
         }
 
@@ -64,7 +64,7 @@ abstract class TotalRow implements Row {
 
         var _qty = qty.value;
         if (hasPercent && qty.value.isNonzero)
-            _qty = qty.value / new Decimal(100);
+            _qty = qty.value / new Decimal(100, 3);
 
         if (qty.value.isNonzero  && price.value.isNonzero  && total.isCanonicalBlank)
             total.setCalculated(_qty * price.value); else

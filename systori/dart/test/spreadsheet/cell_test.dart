@@ -93,7 +93,7 @@ Cell cell([String txt='', String canonical='', _col=0, _row=0]) =>
 
 List<Cell> cells(List<String> values, [eq1=-1, eq2=-1]) =>
     enumerate<String>(values).
-    map((total) => cell(total.value, eq1==total.index||eq2==total.index ? '!' : '')..value=new Decimal.parse(total.value)).
+    map((total) => cell(total.value, eq1==total.index||eq2==total.index ? '!' : '')..value=new Decimal.parse(total.value, 3)).
     toList();
 
 ColumnGetter getColumnReturns(List<String> values, [eq1=-1, eq2=-1]) =>
@@ -974,7 +974,7 @@ main() {
         test("empty cell dynamically set and then focused", () {
             var c = new TestCell("", "", 2);
             expectCell(c);
-            c.setCalculated(new Decimal(93));
+            c.setCalculated(new Decimal(93, 3));
             expectCell(c, text: "93.00", preview: "93.00", decimal: 93);
             c.focused();
             c.calculate((i)=>[]);
@@ -988,7 +988,7 @@ main() {
             expectCell(c, text: "", preview: "93.00", decimal: 93);
             c.calculate((i)=>[]);
             expectCell(c, text: "", preview: "93.00", decimal: 93);
-            c.setCalculated(new Decimal(55));
+            c.setCalculated(new Decimal(55, 3));
             expectCell(c, text: "", preview: "55.00", decimal: 55);
             c.blurred();
             expectCell(c, text: "55.00", preview: "55.00", decimal: 55);

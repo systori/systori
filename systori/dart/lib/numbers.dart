@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:intl/intl.dart';
 
 
@@ -36,11 +37,11 @@ class Decimal implements Comparable<Decimal> {
     String get canonical => isNull ? "" : CANONICAL.format(decimal);
     String get percent => isNull ? "" : "${(decimal*100).round()}%";
 
-    Decimal([num number=0, int precision=1000]):
-            this._(number != null ? (number * precision).round() : number, precision);
+    Decimal([num number=0, int precision=2]):
+            this._(number != null ? (number * pow(10, precision)).round() : number, pow(10, precision));
 
-    Decimal.parse(String value):
-            this(value != null && value.length > 0 ? NUMBER.parse(value) : null);
+    Decimal.parse(String value, [int precision=2]):
+            this(value != null && value.length > 0 ? NUMBER.parse(value) : null, precision);
 
     Decimal._(this._decimal, this._precision);
 
