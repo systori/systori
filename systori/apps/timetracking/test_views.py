@@ -155,7 +155,7 @@ class UserReportViewTest(ClientTestCase):
         self.assertEqual(response.context['report_period'].month, 1)
         self.assertEqual(response.context['report_period'].year, 2010)
 
-    def test_create_manual_timer(self):
+    def test_create_manual_timer_invalid_form(self):
         response = self.client.post(reverse('timetracking_worker', args=[self.worker.pk]), {
             'worker': self.worker.pk,
             'start': '18.01.2017 09:00',
@@ -165,15 +165,18 @@ class UserReportViewTest(ClientTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(response.context['form'].is_valid())
 
+    def test_create_manual_timer_happy_path_w_breaks(self):
         self.assertEqual(Timer.objects.count(), 0)
         response = self.client.post(reverse('timetracking_worker', args=[self.worker.pk]), {
             'worker': self.worker.pk,
-            'start': '18.01.2017 09:00',
+            'start': '18.01.2017 08:00',
             'end': '18.01.2017 17:00',
+            'lunch_break': 't',
+            'morning_break': 't',
             'kind': 'work'
         }, HTTP_REFERER=reverse('timetracking'))
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-        self.assertEqual(Timer.objects.count(), 1)
+        self.assertEqual(Timer.objects.count(), 3)
 
 
 class TimerDeleteViewTest(SystoriTestCase):
