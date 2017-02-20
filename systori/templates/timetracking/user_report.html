@@ -32,9 +32,6 @@
   <div class="panel-heading">
     <h3 class="panel-title">
     {% trans "Time Report for" %} {{ timesheet_worker.get_full_name }} - {{ report_period|date:"F Y" }}
-    <a class="btn btn-info btn-sm {% if not timesheet %}disabled{% endif %}"
-       href="{% url 'timesheet' report_period.year report_period.month timesheet_worker.id %}">{% trans "Timesheet" %}
-    </a>
     </h3>
   </div>
   <div class="panel-body">

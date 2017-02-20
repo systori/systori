@@ -1,73 +1,58 @@
-import json
 import datetime
 
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
-from django.views.generic.edit import FormView, DeleteView
+from django.views.generic import TemplateView
+from django.views.generic.edit import BaseCreateView, DeleteView
 from django.views.generic.list import ListView
-from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.core.exceptions import ValidationError
-
-from systori.apps.document.views import DocumentRenderView
-from systori.apps.document.type import timesheet
-from systori.apps.document.models import DocumentSettings, Timesheet
-from systori.apps.company.models import Worker
 
 from . import utils
 from . import forms
 from .models import Timer
 
 
-class PeriodFilterMixin:
-    report_period = None
+class PeriodFilterMixin(TemplateView):
+    period_form_class = None
 
-    def get(self, request, *args, **kwargs):
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-
-        period_form = self.period_form_class(request.GET, initial={'period': timezone.now()})
+    def get_context_data(self, **kwargs):
+        report_period = timezone.now().date()
+        period_form = self.period_form_class(self.request.GET)
         if period_form.is_valid():
-            self.report_period = period_form.cleaned_data['period']
+            report_period = period_form.cleaned_data['period']
         else:
-            self.report_period = timezone.now().date()
-            period_form = self.period_form_class(initial={'period': timezone.now()})
+            period_form = self.period_form_class(initial={'period': report_period})
+        return super().get_context_data(
+            report_period=report_period,
+            period_form=period_form,
+            **kwargs
+        )
 
-        return self.render_to_response(self.get_context_data(
-            form=form, report_period=self.report_period,
-            period_form=period_form
-        ))
 
-
-class HomeView(PeriodFilterMixin, FormView):
+class HomeView(BaseCreateView, PeriodFilterMixin):
     template_name = 'timetracking/home.html'
     form_class = forms.ManualTimerForm
     period_form_class = forms.DayPickerForm
 
     def get_form_kwargs(self):
-        default_kwargs = super().get_form_kwargs()
-        default_kwargs['company'] = self.request.company
-        return default_kwargs
+        kwargs = super().get_form_kwargs()
+        kwargs['company'] = self.request.company
+        return kwargs
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            report=utils.get_daily_workers_report(
-                utils.get_timetracking_workers(self.request.company).order_by('user__last_name'), self.report_period),
-            **kwargs
+        context = super().get_context_data(**kwargs)
+        context['report'] = utils.get_daily_workers_report(
+            utils.get_timetracking_workers(self.request.company).order_by('user__last_name'),
+            context['report_period'],
         )
+        return context
 
-    def form_valid(self, form):
-        form.save()
-        # return redirect('timetracking')
-        return redirect(self.request.META['HTTP_REFERER'])
-
-    def form_invalid(self, form):
-        period_form = self.period_form_class(initial={'period': timezone.now()})
-        return self.render_to_response(self.get_context_data(form=form, period_form=period_form))
+    def get_success_url(self):
+        return self.request.META['HTTP_REFERER']
 
 
-class WorkerReportView(PeriodFilterMixin, FormView):
+class WorkerReportView(BaseCreateView, PeriodFilterMixin):
     template_name = 'timetracking/user_report.html'
     form_class = forms.WorkerManualTimerForm
     period_form_class = forms.MonthPickerForm
@@ -78,9 +63,9 @@ class WorkerReportView(PeriodFilterMixin, FormView):
             utils.get_timetracking_workers(self.request.company), pk=self.kwargs['worker_id'])
 
     def get_form_kwargs(self):
-        default_kwargs = super().get_form_kwargs()
-        default_kwargs['company'] = self.request.company
-        return default_kwargs
+        kwargs = super().get_form_kwargs()
+        kwargs['company'] = self.request.company
+        return kwargs
 
     def get_initial(self):
         initial = super().get_initial()
@@ -88,16 +73,16 @@ class WorkerReportView(PeriodFilterMixin, FormView):
         return initial
 
     def get_context_data(self, **kwargs):
-        timesheet = Timesheet.objects.period(self.report_period.year, self.report_period.month).\
-            filter(worker_id=self.worker.id)
-        return super().get_context_data(
-            timesheet_worker=self.worker, timesheet=timesheet, report=utils.get_worker_monthly_report(
-                self.worker, self.report_period),
-            **kwargs)
+        context = super().get_context_data(**kwargs)
+        context['timesheet_worker'] = self.worker
+        context['report'] = utils.get_worker_monthly_report(
+            context['timesheet_worker'],
+            context['report_period']
+        )
+        return context
 
-    def form_valid(self, form):
-        form.save()
-        return redirect(self.request.META['HTTP_REFERER'])
+    def get_success_url(self):
+        return self.request.META['HTTP_REFERER']
 
 
 class TimerDeleteView(DeleteView):
@@ -136,16 +121,3 @@ class TimerDeleteSelectedDayView(ListView):
 
     def get_success_url(self):
         return reverse_lazy('timetracking_worker', kwargs={'worker_id': self.kwargs['worker_id']})
-
-
-class TimeSheetPDFView(DocumentRenderView):
-    model = Timer
-
-    def pdf(self):
-        month = int(self.kwargs['month'])
-        year = int(self.kwargs['year'])
-        qs = Timesheet.objects.period(year, month).prefetch_related('worker')
-        if self.kwargs['worker_id'] is not None:
-            timesheets = qs.filter(worker_id=self.kwargs['worker_id'])
-        letterhead = DocumentSettings.objects.first().timesheet_letterhead
-        return timesheet.render(timesheets, letterhead)

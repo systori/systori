@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 
-from systori.lib.testing import SystoriTestCase
+from systori.lib.testing import ClientTestCase, SystoriTestCase
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 from .models import Timer
@@ -70,13 +70,9 @@ class TimerViewTest(SystoriTestCase):
         self.assertFalse(timer.is_running)
 
 
-class ReportViewTest(SystoriTestCase):
+class ReportViewTest(ClientTestCase):
     password = 'ReportViewTest'
     url = reverse('report')
-
-    def setUp(self):
-        self.company = CompanyFactory()
-        self.worker = UserFactory(company=self.company, password=self.password).access.first()
 
     @skip
     def test_get(self):
@@ -108,7 +104,6 @@ class ReportViewTest(SystoriTestCase):
             end=now - timedelta(minutes=30)
         )
 
-        self.client.login(username=self.worker.email, password=self.password)
         response = self.client.get(self.url)
         json_response = json.loads(response.content.decode('utf-8'))
 
@@ -133,29 +128,52 @@ class ReportViewTest(SystoriTestCase):
         self.assertEqual(json_response[3]['duration'], '0:30')
 
     def test_get_empty(self):
-        self.client.login(username=self.worker.email, password=self.password)
         response = self.client.get(self.url)
         self.assertEqual(json.loads(response.content.decode('utf-8')), [])
 
 
-class UserReportViewTest(SystoriTestCase):
+class UserReportViewTest(ClientTestCase):
     password = 'UserReportViewTest'
 
-    def setUp(self):
-        self.another_company = CompanyFactory(schema='another_testcompany')
-        self.another_worker = UserFactory(company=self.another_company, password=self.password).access.first()
-        self.company = CompanyFactory()
-        self.worker = UserFactory(company=self.company, password=self.password).access.first()
-
-    def test_user_from_another_company_cannot_be_viewed(self):
-        self.client.login(username=self.worker.email, password=self.password)
-        response = self.client.get(reverse('timetracking_worker', args=[self.another_worker.pk]))
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_user_from_current_company_can_be_viewed(self):
-        self.client.login(username=self.worker.email, password=self.password)
+    def test_default_case(self):
         response = self.client.get(reverse('timetracking_worker', args=[self.worker.pk]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.context['report_period'].month, datetime.now().month)
+        self.assertEqual(response.context['report_period'].year, datetime.now().year)
+
+    def test_user_from_another_company_cannot_be_viewed(self):
+        another_company = CompanyFactory(schema='another_testcompany')
+        another_worker = UserFactory(company=another_company, password=self.password).access.first()
+        response = self.client.get(reverse('timetracking_worker', args=[another_worker.pk]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_custom_report_period(self):
+        response = self.client.get(reverse('timetracking_worker', args=[self.worker.pk]), {
+            'period': '01.2010'
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.context['report_period'].month, 1)
+        self.assertEqual(response.context['report_period'].year, 2010)
+
+    def test_create_manual_timer(self):
+        response = self.client.post(reverse('timetracking_worker', args=[self.worker.pk]), {
+            'worker': self.worker.pk,
+            'start': '18.01.2017 09:00',
+            'end': '18.01.2017 8:00',
+            'kind': 'work'
+        }, HTTP_REFERER=reverse('timetracking'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(response.context['form'].is_valid())
+
+        self.assertEqual(Timer.objects.count(), 0)
+        response = self.client.post(reverse('timetracking_worker', args=[self.worker.pk]), {
+            'worker': self.worker.pk,
+            'start': '18.01.2017 09:00',
+            'end': '18.01.2017 17:00',
+            'kind': 'work'
+        }, HTTP_REFERER=reverse('timetracking'))
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(Timer.objects.count(), 1)
 
 
 class TimerDeleteViewTest(SystoriTestCase):

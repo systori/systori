@@ -49,7 +49,6 @@
   <div class="panel-heading">
     <h3 class="panel-title">
         {% trans "Time Report for" %} {{ report_period|date:"j F Y" }}
-        <a class="btn btn-info btn-sm" href="{% url 'timesheet' report_period.year report_period.month %}">{% trans "Timesheets" %}</a>
     </h3>
   </div>
   <div class="panel-body">
