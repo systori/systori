@@ -5,11 +5,14 @@
 
 {% block content %}
   <form role="form" method="post">
-      {% csrf_token %}
-      {{ form|bootstrap }}
-      <div class="form-group">
-        <button type="submit" class="btn btn-primary" name="save_goto_project" value="{% trans 'Save &raquo; Project' %}">{% trans 'Save &raquo; Project' %}</button>
-        <button type="submit" class="btn btn-primary" name="save_goto_list" value="{% trans 'Save &uarr; List' %}">{% trans 'Save &uarr; List' %}</button>
-      </div>
+    {% csrf_token %}
+    {{ form|bootstrap }}
+    {% if jobsite_form %}
+      {{ jobsite_form|bootstrap }}
+    {% endif %}
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary" name="save_goto_project" value="{% trans 'Save &raquo; Project' %}">{% trans 'Save &raquo; Project' %}</button>
+      <button type="submit" class="btn btn-primary" name="save_goto_list" value="{% trans 'Save &uarr; List' %}">{% trans 'Save &uarr; List' %}</button>
+    </div>
   </form>
 {% endblock %}

@@ -4,8 +4,6 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, DeleteView
 from django.db.models import Max
 
-from ..accounting.constants import TAX_RATE
-
 from .models import *
 from .forms import JobCreateForm, JobTemplateCreateForm
 

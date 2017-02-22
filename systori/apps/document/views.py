@@ -253,29 +253,8 @@ class TimesheetUpdate(UpdateView):
 class TimesheetsGenerateView(View):
 
     def get(self, request, *args, **kwargs):
-        year, month = int(self.kwargs['year']), int(self.kwargs['month'])
-        letterhead = DocumentSettings.objects.first().timesheet_letterhead
-
-        current = list(Timesheet.objects.period(year, month))
-        workers = Timer.objects.filter_month(year, month).get_workers()
-
-        for worker in workers:
-            sheet = None
-            for ts in current:
-                if ts.worker.pk == worker.pk:
-                    sheet = ts
-                    current.remove(ts)
-                    break
-            if not sheet:
-                sheet = Timesheet(document_date=date(year, month, 1), worker=worker)
-            sheet.letterhead = letterhead
-            sheet.calculate()
-            sheet.save()
-
-        # cleanup no longer valid timesheets
-        for sheet in current:
-            sheet.delete()
-
+        year, month = int(kwargs['year']), int(kwargs['month'])
+        Timesheet.generate(year, month)
         return HttpResponseRedirect(reverse('timesheets'))
 
 

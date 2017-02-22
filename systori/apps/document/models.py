@@ -107,9 +107,29 @@ class Timesheet(Document):
         })
         return self
 
-    @staticmethod
-    def generate(period, worker):
-        return Timesheet(document_date=period, worker=worker).calculate()
+    @classmethod
+    def generate(cls, year, month):
+        letterhead = DocumentSettings.objects.first().timesheet_letterhead
+
+        current = list(cls.objects.period(year, month))
+        workers = Timer.objects.filter_month(year, month).get_workers()
+
+        for worker in workers:
+            sheet = None
+            for ts in current:
+                if ts.worker.pk == worker.pk:
+                    sheet = ts
+                    current.remove(ts)
+                    break
+            if not sheet:
+                sheet = cls(document_date=date(year, month, 1), worker=worker)
+            sheet.letterhead = letterhead
+            sheet.calculate()
+            sheet.save()
+
+        # cleanup no longer valid timesheets
+        for sheet in current:
+            sheet.delete()
 
 
 class Proposal(Document):

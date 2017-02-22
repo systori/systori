@@ -87,7 +87,7 @@ class FieldDashboard(TemplateView):
         context.update({
             'todays_plans': todays_plans,
             'previous_plans': previous_plans,
-            'timesheet': Timesheet.generate(today, self.request.worker),
+            'timesheet': Timesheet.objects.period(today.year, today.month).filter(worker=self.request.worker).first(),
             'timetracking_timer_duration': timetracking_utils.get_running_timer_duration(self.request.worker)
         })
 

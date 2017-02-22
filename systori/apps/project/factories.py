@@ -1,3 +1,5 @@
+import random
+
 import factory
 from factory import fuzzy
 
@@ -26,4 +28,4 @@ class JobSiteFactory(factory.django.DjangoModelFactory):
     name = fuzzy.FuzzyText(length=15)
     address = fuzzy.FuzzyText(length=15)
     city = fuzzy.FuzzyText(length=15)
-    postal_code = fuzzy.FuzzyInteger(1024, 9999)
+    postal_code = fuzzy.FuzzyAttribute(lambda: str(random.randint(1024, 9999)))

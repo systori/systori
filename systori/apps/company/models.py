@@ -13,6 +13,9 @@ from ..timetracking.utils import BreakSpan
 class Company(AbstractSchema):
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Worker', blank=True, related_name='companies')
 
+    is_jobsite_required = models.BooleanField(_('Jobsite Required'), default=True,
+                                              help_text=_('Require that all projects have a jobsite.'))
+
     def url(self, request):
         port = ''
         if ':' in request.META['HTTP_HOST']:

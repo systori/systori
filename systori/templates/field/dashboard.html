@@ -58,6 +58,7 @@
         {% trans "Timesheet" %}
       </div>
 
+      {% if timesheet %}
       <table class="table table-striped table-bordered">
 
         <thead>
@@ -84,6 +85,11 @@
         </tr>
 
       </table>
+      {% else %}
+        <div class="panel-body">
+          <p>{% trans "No timesheets have been created yet." %}</p>
+        </div>
+      {% endif %}
 
       <div class="panel-footer clearfix">
         <div class="pull-right">

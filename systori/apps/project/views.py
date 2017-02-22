@@ -2,25 +2,24 @@ from collections import OrderedDict
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import View, TemplateView, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView, FormMixin
-from django.urls import reverse, reverse_lazy
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.utils.translation import ugettext_lazy as _
+from django.urls import reverse, reverse_lazy
 from django.db.models import Q
-from django.contrib.postgres.search import SearchVector
 
 from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Project, JobSite
 from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
 from .forms import JobSiteForm
-from ..task.models import Job, Group, ProgressReport
+from ..task.models import Job, ProgressReport
+from ..task.forms import JobCreateForm
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
-from ..accounting.models import create_account_for_job
 from ..accounting.constants import TAX_RATE
 from .gaeb_utils import gaeb_import
 
 
 class ProjectList(ListView):
-    queryset = Project._default_manager.all()
+    model = Project
 
     phase_order = [
         "prospective",
@@ -39,7 +38,7 @@ class ProjectList(ListView):
         for project in self.object_list.order_by('id'):
             project_groups[project.phase].append(project)
 
-        context = super(ProjectList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['project_groups'] = project_groups
         context['phases'] = [phase for phase in Project.PHASE_CHOICES]
 
@@ -83,7 +82,7 @@ class ProjectView(DetailView):
     model = Project
 
     def get_context_data(self, **kwargs):
-        context = super(ProjectView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['jobs'] = self.object.jobs.with_totals().all()
         context['proposals'] = self.object.proposals.prefetch_related('jobs__project').all()
         context['project_contacts'] = self.object.project_contacts.prefetch_related('contact').all()
@@ -105,11 +104,46 @@ class ProjectCreate(CreateView):
     model = Project
     form_class = ProjectCreateForm
 
-    def get_success_url(self):
+    def get_jobsite_form(self):
+        if self.request.company.is_jobsite_required:
+            kwargs = {'initial': {'name': _('Main Site')}}
+            if self.request.method == 'POST':
+                kwargs['data'] = self.request.POST
+            return JobSiteForm(**kwargs)
+
+    def get_context_data(self, **kwargs):
+        if 'jobsite_form' not in kwargs:
+            kwargs['jobsite_form'] = self.get_jobsite_form()
+        return super().get_context_data(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        jobsite_form = self.get_jobsite_form()
+        if form.is_valid() and (not jobsite_form or jobsite_form.is_valid()):
+            return self.forms_valid(form, jobsite_form)
+        self.object = None
+        return self.render_to_response(self.get_context_data(
+            form=form, jobsite_form=jobsite_form
+        ))
+
+    def forms_valid(self, form, jobsite_form):
+        project = form.save()
+
+        if jobsite_form:
+            jobsite_form.instance.project = project
+            jobsite_form.save()
+
+        JobCreateForm({
+            'name': project.name,
+            'billing_method': Job.FIXED_PRICE,
+        }, instance=Job(project=project)).save()
+
         if 'save_goto_project' in self.request.POST:
-            return reverse('project.view', args=[self.object.id])
+            redirect = reverse('project.view', args=[project.id])
         else:
-            return reverse('projects')
+            redirect = reverse('projects')
+
+        return HttpResponseRedirect(redirect)
 
 
 class ProjectImport(FormView):
@@ -121,7 +155,7 @@ class ProjectImport(FormView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('project.view', args=[self.object.id])  # otherwise this will fail
+        return reverse('project.view', args=[self.object.id])
 
 
 class ProjectUpdate(UpdateView):
@@ -218,7 +252,7 @@ class TemplatesView(TemplateView):
     template_name = 'main/templates.html'
 
     def get_context_data(self, **kwargs):
-        context = super(TemplatesView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['jobs'] = Project.objects.template().get().jobs.all()
         context['documents'] = DocumentTemplate.objects.all()
         context['document_settings'] = DocumentSettings.objects.all()
@@ -233,15 +267,13 @@ class JobSiteCreate(CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         project = self.request.project
-        address = project.jobsites.first()
-        kwargs.update({
-            'instance': JobSite(project=project),
-            'initial': {
-                'address': address.address,
-                'city': address.city,
-                'postal_code': address.postal_code
-            }
-        })
+        previous = project.jobsites.first()
+        if previous:
+            previous.id = None
+            previous.name = ''
+            kwargs['instance'] = previous
+        else:
+            kwargs['instance'] = self.model(project=project)
         return kwargs
 
     def get_success_url(self):
@@ -268,6 +300,3 @@ class AllProjectsProgress(ListView):
     queryset = model.objects.prefetch_related('worker__user')
     context_object_name = 'progressreport_list'
     paginate_by = 30
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data()
