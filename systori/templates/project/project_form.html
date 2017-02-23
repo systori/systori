@@ -13,6 +13,9 @@
     <div class="form-group">
       <button type="submit" class="btn btn-primary" name="save_goto_project" value="{% trans 'Save &raquo; Project' %}">{% trans 'Save &raquo; Project' %}</button>
       <button type="submit" class="btn btn-primary" name="save_goto_list" value="{% trans 'Save &uarr; List' %}">{% trans 'Save &uarr; List' %}</button>
+        {% if object.pk %}
+      <a class="btn btn-danger" href="{% url "project.delete" object.pk%}">{% trans "delete" %}</a>
+        {% endif %}
     </div>
   </form>
 {% endblock %}
