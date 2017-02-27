@@ -180,10 +180,12 @@
     sys-task > .editor {
       position: relative;
       padding-bottom: 10px;
-      border-left: white 1px solid;
+      /* 2px left border is needed by the sticky header sensors */
+      border-left: white 2px solid;
     }
     sys-lineitem > .editor {
-      border-left: white 1px solid;
+      /* 2px left border is needed by the sticky header sensors */
+      border-left: white 2px solid;
     }
 
     sys-job > .editor.changed,
