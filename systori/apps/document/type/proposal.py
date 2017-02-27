@@ -20,7 +20,7 @@ from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .font import FontManager
 
 
-DEBUG_DOCUMENT = False  # Shows boxes in rendered output
+DEBUG_DOCUMENT = True  # Shows boxes in rendered output
 
 
 def collate_tasks(proposal, font, available_width):
@@ -48,7 +48,7 @@ def collate_tasks(proposal, font, available_width):
         items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
         totals.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
 
-    description_width = 314.0
+    description_width = 290.0
 
     def add_task(task):
 

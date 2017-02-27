@@ -45,14 +45,13 @@ class LetterheadFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Letterhead
 
-    @classmethod
-    def _create(cls, *args, **kwargs):
-        obj = super()._create(*args, **kwargs)
-        DocumentSettingsFactory(
-            language='de',
-            evidence_letterhead=obj,
-            proposal_letterhead=obj,
-            invoice_letterhead=obj,
-            timesheet_letterhead=obj,
-        )
-        return obj
+    @factory.post_generation
+    def with_settings(self: Letterhead, create, extracted, **kwargs):
+        if create and extracted:
+            DocumentSettingsFactory(
+                language='de',
+                evidence_letterhead=self,
+                proposal_letterhead=self,
+                invoice_letterhead=self,
+                timesheet_letterhead=self,
+            )

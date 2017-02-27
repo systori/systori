@@ -1,6 +1,7 @@
 from django.test import TestCase
 from decimal import Decimal as D
 from django.utils.translation import activate
+from django.conf import settings
 
 from systori.lib.testing import make_amount as A
 
@@ -16,7 +17,7 @@ from ..accounting.workflow import debit_jobs
 from .forms import InvoiceForm, InvoiceFormSet
 from .forms import PaymentForm, PaymentFormSet
 from .forms import ProposalForm, ProposalFormSet
-from .models import Proposal, Invoice, Payment
+from .models import Proposal, Invoice, Payment, DocumentSettings, DocumentTemplate
 from .factories import LetterheadFactory
 
 
@@ -45,7 +46,7 @@ class BaseTestCase(TestCase):
         self.job2.account = create_account_for_job(self.job2)
         self.job2.save()
 
-        LetterheadFactory()
+        LetterheadFactory(with_settings=True)
 
 
 class TestForm(BaseTestCase):
@@ -271,6 +272,57 @@ class ProposalFormTests(TestForm):
         self.assertEqual(1, len(form.instance.json['jobs']))
         self.assertEqual('hi', form.instance.json['header'])
         self.assertEqual('bye', form.instance.json['footer'])
+
+    def test_reuse_header_footer(self):
+        proposal_text = DocumentTemplate.objects.create(
+            name="default",
+            header="docsettings header",
+            footer="docsettings footer")
+        settings = DocumentSettings.objects.first()
+        settings.proposal_text = proposal_text
+        settings.save()
+
+        form = self.make_form({
+            'document_date': '2015-01-01',
+            'title': 'Proposal #1',
+            'header': 'hi',
+            'footer': 'bye',
+            'job-0-job_id': self.job.id,
+            'job-0-is_attached': 'False',
+            'job-1-job_id': self.job2.id,
+            'job-1-is_attached': 'True',
+        })
+        self.assert_all_forms_valid(form)
+        self.assertEqual(1, len(form.formset.get_json_rows()))
+
+        form.save()
+
+        self.assertEqual(form.instance.json['header'], 'this is a header')
+
+    def test_header_footer_only_set_initially(self):
+        proposal_text = DocumentTemplate.objects.create(
+            name="default",
+            header="this is a header",
+            footer="this is a footer")
+        settings = DocumentSettings.objects.first()
+        settings.proposal_text = proposal_text
+        settings.save()
+
+        form = self.make_form()
+        self.assertEqual(form.initial['header'], 'this is a header')
+        self.assertEqual(form['header'].value(), 'this is a header')
+        self.assertEqual(form.initial['footer'], 'this is a footer')
+        self.assertEqual(form['footer'].value(), 'this is a footer')
+
+        form = self.make_form(initial={'header': 'hi', 'footer': 'bye'})
+        self.assertEqual(form.initial['header'], 'hi')
+        self.assertEqual(form['header'].value(), 'hi')
+        self.assertEqual(form.initial['footer'], 'bye')
+        self.assertEqual(form['footer'].value(), 'bye')
+
+        form = self.make_form(data={'header': 'hi', 'footer': 'bye'})
+        self.assertEqual(form['header'].value(), 'hi')
+        self.assertEqual(form['footer'].value(), 'bye')
 
     def test_no_jobs_selected(self):
         form = self.make_form({

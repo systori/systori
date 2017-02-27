@@ -60,7 +60,7 @@ class DocumentTestCase(ClientTestCase):
         self.job2.account = create_account_for_job(self.job2)
         self.job2.save()
 
-        self.letterhead = LetterheadFactory()
+        self.letterhead = LetterheadFactory(with_settings=True)
 
     def make_management_form(self):
         data = {}
@@ -661,7 +661,7 @@ class TimesheetViewTests(ClientTestCase):
 
     def setUp(self):
         super().setUp()
-        self.letterhead = LetterheadFactory()
+        self.letterhead = LetterheadFactory(with_settings=True)
 
     def create_january_timesheet(self):
         january = datetime(2017, 1, 9, 9)

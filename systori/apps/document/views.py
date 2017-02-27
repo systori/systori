@@ -21,19 +21,9 @@ from .forms import TimesheetForm
 from . import type as pdf_type
 
 
-class EditViewMixin:
-
-    def get_queryset(self):
-        return self.model.objects.prefetch_related('transaction').all()
-
-    def get_form(self):
-        # document forms are very expensive to create
-        if not hasattr(self, '_cached_form'):
-            self._cached_form = super().get_form()
-        return self._cached_form
+class BaseDocumentViewMixin:
 
     def get_form_kwargs(self):
-
         kwargs = {
             'jobs': self.request.project.jobs.prefetch_related(
                 'account'
@@ -56,13 +46,25 @@ class EditViewMixin:
 
         return kwargs
 
+    def get_success_url(self):
+        return self.request.project.get_absolute_url()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['TAX_RATE'] = TAX_RATE
         return context
 
-    def get_success_url(self):
-        return self.request.project.get_absolute_url()
+
+class AccountingDocumentViewMixin(BaseDocumentViewMixin):
+
+    def get_queryset(self):
+        return self.model.objects.prefetch_related('transaction').all()
+
+    def get_form(self):
+        # document forms are very expensive to create
+        if not hasattr(self, '_cached_form'):
+            self._cached_form = super().get_form()
+        return self._cached_form
 
 
 class DeleteViewMixin(DeleteView):
@@ -71,7 +73,7 @@ class DeleteViewMixin(DeleteView):
         return self.request.project.get_absolute_url()
 
 
-class InvoiceViewMixin(EditViewMixin):
+class InvoiceViewMixin(AccountingDocumentViewMixin):
     model = Invoice
     form_class = InvoiceForm
     template_name = 'accounting/invoice_form.html'
@@ -122,7 +124,7 @@ class InvoiceDelete(DeleteViewMixin):
     template_name = 'accounting/invoice_confirm_delete.html'
 
 
-class AdjustmentViewMixin(EditViewMixin):
+class AdjustmentViewMixin(AccountingDocumentViewMixin):
     model = Adjustment
     form_class = AdjustmentForm
     template_name = 'accounting/adjustment_form.html'
@@ -152,7 +154,7 @@ class AdjustmentDelete(DeleteViewMixin):
     template_name = 'accounting/adjustment_confirm_delete.html'
 
 
-class PaymentViewMixin(EditViewMixin):
+class PaymentViewMixin(AccountingDocumentViewMixin):
     model = Payment
     form_class = PaymentForm
     template_name = 'accounting/payment_form.html'
@@ -184,7 +186,7 @@ class PaymentDelete(DeleteViewMixin):
     template_name = 'accounting/payment_confirm_delete.html'
 
 
-class RefundViewMixin(EditViewMixin):
+class RefundViewMixin(AccountingDocumentViewMixin):
     model = Refund
     form_class = RefundForm
     template_name = 'accounting/refund_form.html'
@@ -374,33 +376,19 @@ class ProposalPDF(DocumentRenderView):
         return pdf_type.proposal.render(json, letterhead, with_lineitems, self.kwargs['format'])
 
 
-class ProposalViewMixin:
+class ProposalViewMixin(BaseDocumentViewMixin):
     model = Proposal
     form_class = ProposalForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['TAX_RATE'] = TAX_RATE
-        return context
-
-    def get_form_kwargs(self):
-        jobs = self.request.project.jobs.all()
-        kwargs = {
-            'jobs': jobs,
-            'instance': self.model(project=self.request.project),
-        }
-        if self.request.method == 'POST':
-            kwargs['data'] = self.request.POST.copy()
-        return kwargs
-
-    def get_success_url(self):
-        return self.request.project.get_absolute_url()
 
 
 class ProposalCreate(ProposalViewMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['instance'].json['jobs'] = []
+        previous_proposal = self.model.objects.filter(project=self.request.project).last()
+        if previous_proposal:
+            for field in ['title', 'header', 'footer', 'add_terms']:
+                kwargs['initial'][field] = previous_proposal.json[field]
         return kwargs
 
 
