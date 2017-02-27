@@ -4,10 +4,9 @@ import types
 import string
 import django; django.setup()
 from decimal import Decimal as D
-from django.db import transaction
 from django.template import Context, Template
 from django.test.client import Client
-from django.test.utils import setup_databases
+from django.test.utils import setup_databases, teardown_databases
 from django.urls import reverse
 from django.utils.translation import activate
 from django.conf import settings
@@ -144,22 +143,15 @@ def generate_pages():
 
 
 if __name__ == "__main__":
-
     class DisableMigrations:
         def __contains__(self, item):
             return True
         def __getitem__(self, item):
             return None
     settings.MIGRATION_MODULES = DisableMigrations()
-
-    setup_databases(verbosity=1, interactive=False, keepdb=True)
-
-    # Start Transaction
-    atom = transaction.atomic()
-    atom.__enter__()
-
+    print('Creating test database.')
+    config = setup_databases(verbosity=0, interactive=False)
+    print('Generating scaffolds.')
     generate_pages()
-
-    # Rollback Transaction
-    transaction.set_rollback(True)
-    atom.__exit__(None, None, None)
+    print('Done.')
+    teardown_databases(config, verbosity=0)

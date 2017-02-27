@@ -12,7 +12,11 @@ dependencies:
       ref: master
     #path: ../../../quiver-dart
 dev_dependencies:
-  test: any
+  test:
+    git:
+      url: git://github.com/dart-lang/test.git
+      ref: master
+    #path: ../../../test
 transformers:
   - $dart2js:
       $include:

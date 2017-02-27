@@ -180,10 +180,12 @@
     sys-task > .editor {
       position: relative;
       padding-bottom: 10px;
-      border-left: white 1px solid;
+      /* 2px left border is needed by the sticky header sensors */
+      border-left: white 2px solid;
     }
     sys-lineitem > .editor {
-      border-left: white 1px solid;
+      /* 2px left border is needed by the sticky header sensors */
+      border-left: white 2px solid;
     }
 
     sys-job > .editor.changed,
@@ -1605,13 +1607,13 @@
 <script src="/static/js/language_picker.js"></script>
 
 
-  <script src="http://localhost:8080/job_editor.dart.js"></script>
+  <script src="/static/dart/build/job_editor.dart.js"></script>
 
 
 </body>
 </html>
-<!--
 <link rel="x-dart-test" href="sticky_header_test.dart">
 <script src="packages/test/dart.js"></script>
--->
+<!--
 <script type="application/dart" src="sticky_header_test.dart"></script>
+-->
