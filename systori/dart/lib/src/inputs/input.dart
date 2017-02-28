@@ -13,6 +13,7 @@ abstract class KeyboardHandler implements EventHandler {
         returns true: event was handled, stop propagating
      */
     bool onKeyDownEvent(KeyEvent e, TextInput input) => false;
+    bool onKeyPressEvent(KeyEvent e, TextInput input) => false;
     bool onKeyUpEvent(KeyEvent e, TextInput input) => false;
     onFocusEvent(TextInput input) {}
     onBlurEvent(TextInput input) {}
@@ -50,11 +51,14 @@ class TextInput extends Input {
         onKeyDown.listen((KeyboardEvent e) =>
             dispatchKeyDownEvent(new KeyEvent.wrap(e))
         );
-        onInput.listen((Event e) =>
-            dispatchInputEvent()
+        onKeyPress.listen((KeyboardEvent e) =>
+            dispatchKeyPressEvent(new KeyEvent.wrap(e))
         );
         onKeyUp.listen((KeyboardEvent e) =>
             dispatchKeyUpEvent(new KeyEvent.wrap(e))
+        );
+        onInput.listen((Event e) =>
+            dispatchInputEvent()
         );
         onBlur.listen((Event e) =>
             _keyHandlers.forEach((h) => h.onBlurEvent(this))
@@ -68,6 +72,9 @@ class TextInput extends Input {
 
     dispatchKeyDownEvent(KeyEvent e) =>
         _keyHandlers.any((h) => h.onKeyDownEvent(e, this));
+
+    dispatchKeyPressEvent(KeyEvent e) =>
+        _keyHandlers.any((h) => h.onKeyPressEvent(e, this));
 
     dispatchKeyUpEvent(KeyEvent e) =>
         _keyHandlers.any((h) => h.onKeyUpEvent(e, this));

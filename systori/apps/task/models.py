@@ -363,7 +363,7 @@ class Task(OrderedModel):
     order_with_respect_to = 'group'
 
     # GAEB Spec 2.7.5.2
-    variant_group = models.PositiveIntegerField(null=True)
+    variant_group = models.PositiveIntegerField(default=0)
     variant_serial = models.PositiveIntegerField(default=0)
 
     # GAEB Spec 2.7.5.3
@@ -403,15 +403,12 @@ class Task(OrderedModel):
 
     @property
     def is_variant(self):
-        return self.variant_group is not None
+        return self.variant_group > 0
 
     @property
     def include_estimate(self):
-        if self.is_provisional:
-            return False
-        if self.is_variant and self.variant_serial != 0:
-            return False
-        return True
+        return not self.is_provisional and\
+               self.variant_serial == 0
 
     @property
     def lineitem_price(self):
@@ -444,6 +441,11 @@ class Task(OrderedModel):
     def code(self):
         code = self.group._structure.format_task(self.order)
         return '{}.{}'.format(self.group.code, code)
+
+    @property
+    def variant_allocation(self):
+        return '{}.{}'.format(self.variant_group, self.variant_serial) \
+                if self.is_variant else ''
 
     def __str__(self):
         return self.name

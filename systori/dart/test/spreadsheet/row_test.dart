@@ -10,6 +10,7 @@ class TestRow extends Row {
     Cell price;
     Cell total;
     bool hasPercent=false;
+    bool is_hidden=false;
     TestRow(String qty, String price, String total, [hasPercent = false]):
         qty = new TestCell(qty, qty, 0),
         price = new TestCell(price, price, 1),

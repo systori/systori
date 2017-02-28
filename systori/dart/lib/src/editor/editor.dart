@@ -123,8 +123,8 @@ class Group extends Model with KeyboardHandler {
             _total += g.total.value;
         }
         for (Task t in this.querySelectorAll(':scope>sys-task')) {
-            if (!t.is_provisional)
-                _total += t.total.value;
+            if (t.exclude_from_total) continue;
+            _total += t.total.value;
         }
         total.value = _total;
     }
@@ -342,6 +342,52 @@ class TaskArrowKeyHandler extends ArrowNavigationHandler {
 }
 
 
+class VariantInput extends TextInput with KeyboardHandler {
+
+    static final VALID_INPUT = "0123456789.".codeUnits;
+
+    Map<String,dynamic> get values => {
+        'variant_group': dataset['group'],
+        'variant_serial': dataset['serial']
+    };
+
+    int get group => int.parse(dataset['group'], onError: (s)=>0);
+    int get serial => int.parse(dataset['serial'], onError: (s)=>0);
+
+    VariantInput.created(): super.created() {
+        addKeyHandler(this);
+    }
+
+    @override
+    bool onKeyPressEvent(KeyEvent e, TextInput input) {
+        if (!VALID_INPUT.contains(e.charCode)) {
+            e.preventDefault();
+            return true;
+        }
+        return false;
+    }
+
+    @override
+    onInputEvent(Input input) {
+        if (text.contains('.')) {
+            var parts = text.split('.');
+            dataset['group'] = parts[0].length > 0 ? parts[0]: '0';
+            dataset['serial'] = parts[1].length > 0 ? parts[1] : '0';
+        } else {
+            dataset['group'] = text.length > 0 ? text : '0';
+            dataset['serial'] = '0';
+        }
+    }
+
+    @override
+    onBlurEvent(Input input) {
+        if (dataset['group'] != '0') {
+            text = "${dataset['group']}.${dataset['serial']}";
+        }
+    }
+}
+
+
 class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 
     bool get isBlank => hasNoPk && name.text.isEmpty;
@@ -352,8 +398,10 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
     CodeInput code;
     TextInput name;
     TextInput description;
+    VariantInput variant;
     Toggle is_provisional_toggle;
     bool get is_provisional => is_provisional_toggle.value;
+    bool get exclude_from_total => is_provisional || variant.serial > 0;
     DivElement diffRow;
     DivElement diffCell;
 
@@ -366,6 +414,7 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
     attached() {
         name = getInput("name");
         name.addKeyHandler(new AutocompleteKeyboardHandler(this, {}, replaceWithCloneOf));
+        variant = getInput("variant");
         description = getInput("description");
         description.addKeyHandler(new TextareaKeyboardHandler());
         qty = getInput("qty");
@@ -472,8 +521,8 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 
     @override
     bool onInputEvent(Input input) {
-        if (input.name == 'is_provisional') {
-            classes.toggle('provisional', is_provisional);
+        if (['is_provisional', 'variant'].contains(input.name)) {
+            classes.toggle('excluded', exclude_from_total);
             parentGroup.calculationChanged();
         }
         return updateVisualState('changed');
@@ -670,6 +719,7 @@ registerElements() {
     document.registerElement('sys-toggle', Toggle);
     document.registerElement('sys-styled-input', StyledInput);
     document.registerElement('sys-code-input', CodeInput);
+    document.registerElement('sys-variant-input', VariantInput);
     document.registerElement('sys-cell', HtmlCell);
     document.registerElement('sys-lineitem', LineItem);
     document.registerElement('sys-lineitem-sheet', LineItemSheet);
