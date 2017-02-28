@@ -8,23 +8,23 @@ Autocomplete autocomplete;
 
 
 typedef void AutocompleteSelectionCallback(String id);
+typedef Map<String,String> MakeCriteria();
 
 class AutocompleteKeyboardHandler extends KeyboardHandler {
 
     Model model;
-    Map<String,String> criteria;
+    MakeCriteria makeCriteria;
     AutocompleteSelectionCallback autocompleteSelection;
 
-    AutocompleteKeyboardHandler(this.model, this.criteria, this.autocompleteSelection) {
-        criteria['model_type'] = this.model.type;
-    }
+    AutocompleteKeyboardHandler(this.model, this.makeCriteria, this.autocompleteSelection);
 
     bool get canAutocomplete => model.hasNoPk && model.hasNoChildModels;
 
     @override
     onFocusEvent(Input input) {
         if (!canAutocomplete) return;
-        autocomplete.criteria = criteria;
+        autocomplete.criteria = makeCriteria();
+        autocomplete.criteria['model_type'] = this.model.type;
         autocomplete.reposition(input);
     }
 

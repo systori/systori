@@ -125,7 +125,16 @@ abstract class Model extends HtmlElement {
 
     bool get canSave;
 
-    attached() { state = new ModelState(this); }
+    attached() {
+        if (!_readyCalled) {
+            ready();
+            state = new ModelState(this);
+            _readyCalled = true;
+        }
+    }
+
+    bool _readyCalled = false;
+    ready() {}
 
     HtmlElement getView(String field) =>
         editor.querySelector(".${field}");

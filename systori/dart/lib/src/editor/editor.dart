@@ -89,10 +89,10 @@ class Group extends Model with KeyboardHandler {
 
     Group.created(): super.created();
 
-    attached() {
+    ready() {
         total = getView("total");
         name = getInput("name");
-        name.addKeyHandler(new AutocompleteKeyboardHandler(this, {
+        name.addKeyHandler(new AutocompleteKeyboardHandler(this, () => {
             'remaining_depth': Job.JOB.structure.remainingDepth(depth).toString()
         }, replaceWithCloneOf));
         description = getInput("description");
@@ -101,7 +101,6 @@ class Group extends Model with KeyboardHandler {
         new GroupArrowKeyHandler(this);
         /* add these inputs after we bind all TextInputs */
         code = getInput("code");
-        super.attached();
     }
 
     updateCode() {
@@ -411,9 +410,9 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 
     Task.created(): super.created();
 
-    attached() {
+    ready() {
         name = getInput("name");
-        name.addKeyHandler(new AutocompleteKeyboardHandler(this, {}, replaceWithCloneOf));
+        name.addKeyHandler(new AutocompleteKeyboardHandler(this, ()=>{}, replaceWithCloneOf));
         variant = getInput("variant");
         description = getInput("description");
         description.addKeyHandler(new TextareaKeyboardHandler());
@@ -430,7 +429,6 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
         sheet = this.querySelector(":scope> sys-lineitem-sheet");
-        super.attached();
     }
 
     onCalculate(String event, Cell cell) {
@@ -552,7 +550,7 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
 
     LineItem.created(): super.created();
 
-    attached() {
+    ready() {
         name = getInput("name");
         qty = getInput("qty");
         unit = getInput("unit");
@@ -564,7 +562,6 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
         dragHandle = getInput("sys-lineitem-handle");
         is_hidden_toggle = getInput("is_hidden")..addHandler(this);
         is_flagged_toggle = getInput("is_flagged")..addHandler(this);
-        super.attached();
     }
 
     createSibling() {
