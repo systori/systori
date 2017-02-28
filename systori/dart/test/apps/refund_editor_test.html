@@ -65,6 +65,39 @@
               
             </li>
             
+
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Menu
+        <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li >
+            <a href="/">Pinnwand</a></li>
+        <li class="active">
+            <a href="/projects/">Projekte</a></li>
+        <li >
+            <a href="/directory">Adressbuch</a></li>
+        <li >
+            <a href="/equipment/">Ausrüstung</a></li>
+        <li >
+            <a href="/day-based-overview/">Tagesplan</a></li>
+        <li >
+            <a href="/progress">Aufmaß Meldungen</a></li>
+        
+        <li >
+            <a href="/templates">Vorlagen</a></li>
+        <li >
+            <a href="/users">Benutzer</a></li>
+        
+        
+          <li >
+              <a href="/timetracking/">Zeiterfassung</a></li>
+          <li >
+              <a href="/timesheets/">Stundenzettel</a></li>
+        
+    </ul>
+</li>
             
   <li class="active"><a href="/project-2">Test Project
     <small>(angehend)</small>
@@ -79,7 +112,10 @@
         <ul class="nav navbar-nav navbar-right">
 
           
-  <li><a href="javascript:window.open('/field/project-2/', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">öffne Field App</a>
+  <li>
+      <a href="javascript:window.open('/field/project-2/', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">
+      öffne Field App
+      </a>
   </li>
 
 
@@ -146,7 +182,7 @@
     </style>
 
     <div class="form-group  table-responsive">
-    <input id="id_job-TOTAL_FORMS" name="job-TOTAL_FORMS" type="hidden" value="2" /><input id="id_job-INITIAL_FORMS" name="job-INITIAL_FORMS" type="hidden" value="2" /><input id="id_job-MIN_NUM_FORMS" name="job-MIN_NUM_FORMS" type="hidden" value="0" /><input id="id_job-MAX_NUM_FORMS" name="job-MAX_NUM_FORMS" type="hidden" value="1000" />
+    <input type="hidden" name="job-TOTAL_FORMS" value="2" id="id_job-TOTAL_FORMS" /><input type="hidden" name="job-INITIAL_FORMS" value="2" id="id_job-INITIAL_FORMS" /><input type="hidden" name="job-MIN_NUM_FORMS" value="0" id="id_job-MIN_NUM_FORMS" /><input type="hidden" name="job-MAX_NUM_FORMS" value="1000" id="id_job-MAX_NUM_FORMS" />
     <table is="refund-table" class="table table-striped" data-tax-rate="0,19">
       <thead>
       <tr>
@@ -161,7 +197,7 @@
       <tbody>
       
         <tr is="refund-row" class="refund-row">
-          <td class="job-name"><input id="id_job-0-job_id" name="job-0-job_id" type="hidden" value="1" />Test Job</td>
+          <td class="job-name"><input type="hidden" name="job-0-job_id" value="1" id="id_job-0-job_id" />Test Job</td>
           
 <td is="amount-view" class="job-paid clickable" data-tax-rate="0,19">
   <div class="amount-gross bold">
@@ -245,7 +281,7 @@
         </tr>
       
         <tr is="refund-row" class="refund-row">
-          <td class="job-name"><input id="id_job-1-job_id" name="job-1-job_id" type="hidden" value="4" />Test Job</td>
+          <td class="job-name"><input type="hidden" name="job-1-job_id" value="4" id="id_job-1-job_id" />Test Job</td>
           
 <td is="amount-view" class="job-paid clickable" data-tax-rate="0,19">
   <div class="amount-gross bold">
@@ -469,7 +505,7 @@
         
 
         <div class=" ">
-            <input class=" form-control" id="id_document_date" name="document_date" type="date" value="2017-01-26" /><input id="initial-id_document_date" name="initial-document_date" type="hidden" value="2017-01-26" />
+            <input type="date" name="document_date" value="2017-02-28" class=" form-control" id="id_document_date" /><input type="hidden" name="initial-document_date" value="2017-02-28" id="initial-id_document_date" />
 
             
 
@@ -488,7 +524,7 @@
         
 
         <div class=" ">
-            <input class=" form-control" id="id_title" name="title" type="text" value="Gutschrift" />
+            <input type="text" name="title" value="Gutschrift" class=" form-control" id="id_title" />
 
             
 
@@ -507,7 +543,7 @@
         
 
         <div class=" ">
-            <textarea class=" form-control" cols="40" id="id_header" name="header" rows="10">
+            <textarea name="header" cols="40" rows="10" id="id_header" class=" form-control">
 </textarea>
 
             
@@ -527,7 +563,7 @@
         
 
         <div class=" ">
-            <textarea class=" form-control" cols="40" id="id_footer" name="footer" rows="10">
+            <textarea name="footer" cols="40" rows="10" id="id_footer" class=" form-control">
 </textarea>
 
             
@@ -547,7 +583,7 @@
         
 
         <div class=" ">
-            <textarea class=" form-control" cols="40" id="id_notes" name="notes" rows="10">
+            <textarea name="notes" cols="40" rows="10" id="id_notes" class=" form-control">
 </textarea>
 
             

@@ -65,6 +65,39 @@
               
             </li>
             
+
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Menu
+        <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li >
+            <a href="/">Pinnwand</a></li>
+        <li class="active">
+            <a href="/projects/">Projekte</a></li>
+        <li >
+            <a href="/directory">Adressbuch</a></li>
+        <li >
+            <a href="/equipment/">Ausrüstung</a></li>
+        <li >
+            <a href="/day-based-overview/">Tagesplan</a></li>
+        <li >
+            <a href="/progress">Aufmaß Meldungen</a></li>
+        
+        <li >
+            <a href="/templates">Vorlagen</a></li>
+        <li >
+            <a href="/users">Benutzer</a></li>
+        
+        
+          <li >
+              <a href="/timetracking/">Zeiterfassung</a></li>
+          <li >
+              <a href="/timesheets/">Stundenzettel</a></li>
+        
+    </ul>
+</li>
             
   <li class="active"><a href="/project-2">Test Project
     <small>(angehend)</small>
@@ -79,7 +112,10 @@
         <ul class="nav navbar-nav navbar-right">
 
           
-  <li><a href="javascript:window.open('/field/project-2/', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">öffne Field App</a>
+  <li>
+      <a href="javascript:window.open('/field/project-2/', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">
+      öffne Field App
+      </a>
   </li>
 
 
@@ -134,9 +170,11 @@
         
 
         <div class=" ">
-            <select class=" form-control" id="id_bank_account" name="bank_account" required>
-<option value="" selected>---------</option>
-<option value="6">1200 - Default Bank Account</option>
+            <select name="bank_account" required class=" form-control" id="id_bank_account">
+  <option value="" selected>---------</option>
+
+  <option value="6">1200 - Default Bank Account</option>
+
 </select>
 
             
@@ -155,7 +193,7 @@
         
 
         <div class=" ">
-            <input class=" form-control" id="id_document_date" name="document_date" type="text" value="2017-01-26" required />
+            <input type="text" name="document_date" value="2017-02-28" required class=" form-control" id="id_document_date" />
 
             
 
@@ -186,7 +224,7 @@
     </style>
 
     <div class="form-group ">
-    <input id="id_job-TOTAL_FORMS" name="job-TOTAL_FORMS" type="hidden" value="2" /><input id="id_job-INITIAL_FORMS" name="job-INITIAL_FORMS" type="hidden" value="2" /><input id="id_job-MIN_NUM_FORMS" name="job-MIN_NUM_FORMS" type="hidden" value="0" /><input id="id_job-MAX_NUM_FORMS" name="job-MAX_NUM_FORMS" type="hidden" value="1000" />
+    <input type="hidden" name="job-TOTAL_FORMS" value="2" id="id_job-TOTAL_FORMS" /><input type="hidden" name="job-INITIAL_FORMS" value="2" id="id_job-INITIAL_FORMS" /><input type="hidden" name="job-MIN_NUM_FORMS" value="0" id="id_job-MIN_NUM_FORMS" /><input type="hidden" name="job-MAX_NUM_FORMS" value="1000" id="id_job-MAX_NUM_FORMS" />
     <table is="payment-split-table" class="table table-striped" data-tax-rate="0,19">
       <thead>
       <tr>
@@ -197,15 +235,23 @@
           
         </th>
         <th class="job-split">Zahlung</th>
-        <th class="job-discount">Skonto <select id="id_discount" name="discount" required>
-<option value="0.00">0%</option>
-<option value="0.01">1%</option>
-<option value="0.02">2%</option>
-<option value="0.03">3%</option>
-<option value="0.04">4%</option>
-<option value="0.05">5%</option>
-<option value="0.06">6%</option>
-<option value="0.07">7%</option>
+        <th class="job-discount">Skonto <select name="discount" id="id_discount">
+  <option value="0.00">0%</option>
+
+  <option value="0.01">1%</option>
+
+  <option value="0.02">2%</option>
+
+  <option value="0.03">3%</option>
+
+  <option value="0.04">4%</option>
+
+  <option value="0.05">5%</option>
+
+  <option value="0.06">6%</option>
+
+  <option value="0.07">7%</option>
+
 </select></th>
         <th class="job-credit">Haben</th>
       </tr>
@@ -213,7 +259,7 @@
       <tbody>
       
         <tr is="payment-split" class="payment-split-row">
-          <td class="job-name"><input id="id_job-0-job_id" name="job-0-job_id" type="hidden" value="1" />Test Job</td>
+          <td class="job-name"><input type="hidden" name="job-0-job_id" value="1" id="id_job-0-job_id" />Test Job</td>
           
 <td is="amount-view" class="job-balance" data-tax-rate="0,19">
   <div class="amount-gross bold">
@@ -288,7 +334,7 @@
         </tr>
       
         <tr is="payment-split" class="payment-split-row">
-          <td class="job-name"><input id="id_job-1-job_id" name="job-1-job_id" type="hidden" value="4" />Test Job</td>
+          <td class="job-name"><input type="hidden" name="job-1-job_id" value="4" id="id_job-1-job_id" />Test Job</td>
           
 <td is="amount-view" class="job-balance" data-tax-rate="0,19">
   <div class="amount-gross bold">
