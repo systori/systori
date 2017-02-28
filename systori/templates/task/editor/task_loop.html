@@ -1,5 +1,6 @@
 {% load i18n customformatting %}
 <sys-task
+    {% if task.is_provisional %}class="provisional"{% endif %}
     data-pk="{% if task.pk %}{{ task.pk }}{% endif %}"
     data-token="{% if task.token %}{{ task.token }}{% endif %}">
   {% include "task/editor/task_editor.html" with task=task %}

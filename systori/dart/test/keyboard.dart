@@ -48,13 +48,13 @@ class Keyboard {
     sendDown({bool shiftKey: false}) => sendKey(KeyCode.DOWN, shiftKey: shiftKey);
     sendDelete({bool shiftKey: false}) => sendKey(KeyCode.DELETE, shiftKey: shiftKey);
     sendKey(int keyCode, {bool shiftKey: false}) {
-        Input input = document.activeElement;
+        TextInput input = document.activeElement;
         input.dispatchKeyDownEvent(new KeyEvent('keydown', keyCode: keyCode, shiftKey: shiftKey));
         input.dispatchKeyUpEvent(new KeyEvent('keyup', keyCode: keyCode, shiftKey: shiftKey));
     }
 
     sendText(String text) {
-        Input input = document.activeElement;
+        TextInput input = document.activeElement;
         var sel = window.getSelection();
         var range = sel.getRangeAt(0);
         range.deleteContents();

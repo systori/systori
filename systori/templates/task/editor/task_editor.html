@@ -4,6 +4,9 @@
   <div class="editor-row">
     <sys-code-input class="code" data-order="{% if task.order %}{{ task.order }}{% endif %}">{{ task.code }}</sys-code-input>
     <sys-input class="name"  placeholder="{% trans 'task' %}"                                             contenteditable>{{ task.name|safe }}</sys-input>
+    <div class="actions">
+      <sys-toggle class="is_provisional glyphicon glyphicon-paperclip {{ task.is_provisional }}"></sys-toggle>
+    </div>
     <sys-cell  class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ task.qty_equation }}"   {% if task.qty_equation|is_formula %}data-resolved="" {% endif %}contenteditable>{{ task.qty|ubrnumber }}</sys-cell>
     <sys-input class="unit"  placeholder="{% trans 'unit' %}"                                             contenteditable>{{ task.unit }}</sys-input>
     <sys-cell  class="price"                                   data-canonical="{{ task.price_equation }}" {% if task.price_equation|is_formula %}data-resolved="" {% endif %}contenteditable>{{ task.price|ubrdecimal }}</sys-cell>

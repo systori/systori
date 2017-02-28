@@ -1,34 +1,51 @@
 import 'dart:html';
 
 
-abstract class KeyboardHandler {
+abstract class EventHandler {
+    onInputEvent(Input input) {}
+}
+
+
+abstract class KeyboardHandler implements EventHandler {
     /*
         onKeyDownEvent() and onKeyUpEvent()
         returns false: continue calling subsequent event handlers
         returns true: event was handled, stop propagating
      */
-    bool onKeyDownEvent(KeyEvent e, Input input) => false;
-    bool onKeyUpEvent(KeyEvent e, Input input) => false;
-    onFocusEvent(Input input) {}
-    onBlurEvent(Input input) {}
+    bool onKeyDownEvent(KeyEvent e, TextInput input) => false;
+    bool onKeyUpEvent(KeyEvent e, TextInput input) => false;
+    onFocusEvent(TextInput input) {}
+    onBlurEvent(TextInput input) {}
     onInputEvent(Input input) {}
-    bindAll(Iterable<Input> inputs) =>
-        inputs.forEach((Input input) =>
-            input.addHandler(this));
+    bindAll(Iterable<TextInput> inputs) =>
+        inputs.forEach((TextInput input) =>
+            input.addKeyHandler(this));
 }
 
 
 class Input extends HtmlElement {
 
     String get name => classes.first;
-
     Map<String,dynamic> get values => {name: text};
+    List<EventHandler> _eventHandlers = [];
 
-    List<KeyboardHandler> _handlers = [];
+    Input.created(): super.created();
 
-    Input.created(): super.created() {
+    addHandler(EventHandler handler) =>
+        _eventHandlers.add(handler);
+
+    dispatchInputEvent() =>
+        _eventHandlers.forEach((h) => h.onInputEvent(this));
+}
+
+
+class TextInput extends Input {
+
+    List<KeyboardHandler> _keyHandlers = [];
+
+    TextInput.created(): super.created() {
         onFocus.listen((Event e) =>
-            _handlers.forEach((h) => h.onFocusEvent(this))
+            _keyHandlers.forEach((h) => h.onFocusEvent(this))
         );
         onKeyDown.listen((KeyboardEvent e) =>
             dispatchKeyDownEvent(new KeyEvent.wrap(e))
@@ -40,27 +57,25 @@ class Input extends HtmlElement {
             dispatchKeyUpEvent(new KeyEvent.wrap(e))
         );
         onBlur.listen((Event e) =>
-            _handlers.forEach((h) => h.onBlurEvent(this))
+            _keyHandlers.forEach((h) => h.onBlurEvent(this))
         );
     }
 
-    addHandler(KeyboardHandler handler) {
-        _handlers.add(handler);
+    addKeyHandler(KeyboardHandler handler) {
+        _eventHandlers.add(handler);
+        _keyHandlers.add(handler);
     }
 
     dispatchKeyDownEvent(KeyEvent e) =>
-        _handlers.any((h) => h.onKeyDownEvent(e, this));
-
-    dispatchInputEvent() =>
-        _handlers.forEach((h) => h.onInputEvent(this));
+        _keyHandlers.any((h) => h.onKeyDownEvent(e, this));
 
     dispatchKeyUpEvent(KeyEvent e) =>
-        _handlers.any((h) => h.onKeyUpEvent(e, this));
+        _keyHandlers.any((h) => h.onKeyUpEvent(e, this));
 
 }
 
 
-class StyledInput extends Input {
+class StyledInput extends TextInput {
     Map<String,dynamic> get values => {
         className: innerHtml
             .replaceAll('<div>', '<br />')
@@ -72,4 +87,25 @@ class StyledInput extends Input {
             .replaceAll('<br>', '<br />')
     };
     StyledInput.created(): super.created();
+}
+
+
+class Toggle extends Input {
+
+    bool get value => classes.contains('True');
+    Map<String,dynamic> get values => {name: value};
+
+    Toggle.created(): super.created() {
+        onClick.listen((MouseEvent e) {
+            if (value) {
+                classes.remove('True');
+                classes.add('False');
+            } else {
+                classes.remove('False');
+                classes.add('True');
+            }
+            dispatchInputEvent();
+        });
+    }
+
 }

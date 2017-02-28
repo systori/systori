@@ -14,9 +14,7 @@
 
     #editor-area {
       max-width: 1100px;
-      padding-top: 50px;
-      padding-left: 50px;
-      padding-bottom:100px;
+      padding: 50px 50px 100px 50px;
       margin: auto;
     }
 
@@ -180,6 +178,10 @@
 
     sys-lineitem > .editor .total {
       border: 1px solid #e9e9e9;
+    }
+
+    sys-task.provisional > .editor .total {
+      opacity: 0.2;
     }
 
     sys-task > .editor .price {
@@ -349,23 +351,28 @@
 
     /* actions */
 
-    .actions {
+    sys-task > .editor > .editor-row > .actions {
+      flex: 0 1 auto;
+      padding-right: 5px;
+    }
+
+    sys-lineitem > .editor > .editor-row > .actions {
       flex: 0 0 auto;
       width: 85px;
       padding-left: 20px;
     }
 
-    .actions > span:hover {
+    .actions > sys-toggle:hover {
       cursor: pointer;
     }
 
-    .actions > span.False {
-      display: none;
-      color: #f0f0f0;
+    .actions > sys-toggle.False {
+      visibility: hidden;
+      color: #e9e9e9;
     }
 
-    .editor:hover > .editor-row > .actions > span.False {
-      display: inline;
+    .editor:hover > .editor-row > .actions > sys-toggle.False {
+      visibility: visible;
     }
 
     /* other */

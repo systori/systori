@@ -11,7 +11,7 @@ class Thing extends Model {
 
     String completedId;
 
-    Input name;
+    TextInput name;
 
     Thing.created(): super.created();
 

@@ -8,6 +8,7 @@ abstract class Row {
     Cell get price;
     Cell get total;
     bool get hasPercent;
+    bool get is_hidden;
 
     List<Cell> get columns => [qty, price, total];
     Cell getCell(int cell) => columns[cell];

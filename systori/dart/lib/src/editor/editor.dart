@@ -20,7 +20,7 @@ class TextareaKeyboardHandler extends KeyboardHandler {
         be used to enter new lines.
      */
     @override
-    bool onKeyDownEvent(KeyEvent e, Input input) {
+    bool onKeyDownEvent(KeyEvent e, TextInput input) {
         if (e.keyCode == KeyCode.ENTER && e.shiftKey) {
             /* don't run any other handlers */
             return true;
@@ -74,8 +74,8 @@ class GroupArrowKeyHandler extends ArrowNavigationHandler {
 class Group extends Model with KeyboardHandler {
 
     CodeInput code;
-    Input name;
-    Input description;
+    TextInput name;
+    TextInput description;
     DecimalElement total;
 
     List<String> childTypes = ['group', 'task'];
@@ -90,16 +90,17 @@ class Group extends Model with KeyboardHandler {
     Group.created(): super.created();
 
     attached() {
-        code = getInput("code");
         total = getView("total");
         name = getInput("name");
-        name.addHandler(new AutocompleteKeyboardHandler(this, {
+        name.addKeyHandler(new AutocompleteKeyboardHandler(this, {
             'remaining_depth': Job.JOB.structure.remainingDepth(depth).toString()
         }, replaceWithCloneOf));
         description = getInput("description");
-        description.addHandler(new TextareaKeyboardHandler());
+        description.addKeyHandler(new TextareaKeyboardHandler());
         bindAll(inputs.values);
         new GroupArrowKeyHandler(this);
+        /* add these inputs after we bind all TextInputs */
+        code = getInput("code");
         super.attached();
     }
 
@@ -122,7 +123,8 @@ class Group extends Model with KeyboardHandler {
             _total += g.total.value;
         }
         for (Task t in this.querySelectorAll(':scope>sys-task')) {
-            _total += t.total.value;
+            if (!t.is_provisional)
+                _total += t.total.value;
         }
         total.value = _total;
     }
@@ -172,7 +174,7 @@ class Group extends Model with KeyboardHandler {
     }
 
     @override
-    bool onKeyDownEvent(KeyEvent e, Input input) {
+    bool onKeyDownEvent(KeyEvent e, TextInput input) {
         switch (e.keyCode) {
             case KeyCode.ENTER:
                 e.preventDefault();
@@ -230,7 +232,7 @@ class CodeInput extends Input {
 }
 
 
-class HtmlCell extends Input with HighlightableInputMixin, Cell, KeyboardHandler {
+class HtmlCell extends TextInput with HighlightableInputMixin, Cell, KeyboardHandler {
 
     Map<String,dynamic> get values => {
         className: value.canonical,
@@ -264,14 +266,14 @@ class HtmlCell extends Input with HighlightableInputMixin, Cell, KeyboardHandler
     bool get isFocused => document.activeElement == this;
 
     HtmlCell.created(): super.created() {
-        addHandler(this);
+        addKeyHandler(this);
         if (value == null) {
             value = isTextNumber ? new Decimal.parse(text, 3) : new Decimal(null, 3);
         }
     }
 
     @override
-    onFocusEvent(Input cell) {
+    onFocusEvent(TextInput cell) {
         focused();
         (parent.parent.parent as HtmlRow).onCalculate('focused', this);
         if (isTextNumber) {
@@ -283,7 +285,7 @@ class HtmlCell extends Input with HighlightableInputMixin, Cell, KeyboardHandler
     }
 
     @override
-    onBlurEvent(Input cell) => blurred();
+    onBlurEvent(TextInput cell) => blurred();
 
     static final List<String> COLORS = [
         '187,168,146', '238,114,95', '250,185,75', '0,108,124', '0,161,154', '183,219,193'
@@ -314,7 +316,7 @@ abstract class HtmlRow implements Row {
 
     HtmlCell qty;
     HtmlCell price;
-    Input unit;
+    TextInput unit;
     bool get hasPercent => unit.text.contains('%');
     HtmlCell total;
 
@@ -348,8 +350,10 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
     List<String> childTypes = ['lineitem'];
 
     CodeInput code;
-    Input name;
-    Input description;
+    TextInput name;
+    TextInput description;
+    Toggle is_provisional_toggle;
+    bool get is_provisional => is_provisional_toggle.value;
     DivElement diffRow;
     DivElement diffCell;
 
@@ -360,21 +364,23 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
     Task.created(): super.created();
 
     attached() {
-        code = getInput("code");
         name = getInput("name");
-        name.addHandler(new AutocompleteKeyboardHandler(this, {}, replaceWithCloneOf));
+        name.addKeyHandler(new AutocompleteKeyboardHandler(this, {}, replaceWithCloneOf));
         description = getInput("description");
-        description.addHandler(new TextareaKeyboardHandler());
+        description.addKeyHandler(new TextareaKeyboardHandler());
         qty = getInput("qty");
         unit = getInput("unit");
         price = getInput("price");
         total = getInput("total");
         bindAll(inputs.values);
         new TaskArrowKeyHandler(this);
+        /* add these inputs after we bind all TextInputs */
+        code = getInput("code");
+        is_provisional_toggle = getInput("is_provisional")..addHandler(this);
 
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
-        sheet = this.querySelector(":scope > sys-lineitem-sheet");
+        sheet = this.querySelector(":scope> sys-lineitem-sheet");
         super.attached();
     }
 
@@ -431,7 +437,7 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
     }
 
     @override
-    bool onKeyDownEvent(KeyEvent e, Input input) {
+    bool onKeyDownEvent(KeyEvent e, TextInput input) {
         switch(e.keyCode) {
             case KeyCode.ENTER:
                 e.preventDefault();
@@ -465,8 +471,13 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
     }
 
     @override
-    bool onInputEvent(Input input) =>
-        updateVisualState('changed');
+    bool onInputEvent(Input input) {
+        if (input.name == 'is_provisional') {
+            classes.toggle('provisional', is_provisional);
+            parentGroup.calculationChanged();
+        }
+        return updateVisualState('changed');
+    }
 
 }
 
@@ -482,14 +493,17 @@ class LineItemArrowKeyHandler extends ArrowNavigationHandler {
 class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
 
     CodeInput dragHandle;
-    Input name;
+    TextInput name;
+    Toggle is_hidden_toggle;
+    Toggle is_flagged_toggle;
+    bool get is_hidden => is_hidden_toggle.value;
+    bool get is_flagged => is_flagged_toggle.value;
     bool get isBlank => hasNoPk && name.text.isEmpty;
     bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
 
     LineItem.created(): super.created();
 
     attached() {
-        dragHandle = getInput("sys-lineitem-handle");
         name = getInput("name");
         qty = getInput("qty");
         unit = getInput("unit");
@@ -497,6 +511,10 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
         total = getInput("total");
         bindAll(inputs.values);
         new LineItemArrowKeyHandler(this);
+        /* add these inputs after we bind all TextInputs */
+        dragHandle = getInput("sys-lineitem-handle");
+        is_hidden_toggle = getInput("is_hidden")..addHandler(this);
+        is_flagged_toggle = getInput("is_flagged")..addHandler(this);
         super.attached();
     }
 
@@ -510,7 +528,7 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
         (parent.parent as Task).onCalculate(event, cell);
 
     @override
-    bool onKeyDownEvent(KeyEvent e, Input input) {
+    bool onKeyDownEvent(KeyEvent e, TextInput input) {
         LineItemSheet sheet_parent = parent as LineItemSheet;
         Task task_parent = sheet_parent.parent as Task;
         switch(e.keyCode) {
@@ -542,8 +560,12 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
     }
 
     @override
-    bool onInputEvent(Input input) =>
-        updateVisualState('changed');
+    bool onInputEvent(Input input) {
+        if (input.name == 'is_hidden') {
+            onCalculate('hidden', total);
+        }
+        return updateVisualState('changed');
+    }
 
     Model firstAbove() =>
         previousElementSibling is Model
@@ -644,7 +666,8 @@ registerElements() {
     Intl.systemLocale = (querySelector('html') as HtmlHtmlElement).lang;
     CSRFToken = (querySelector('input[name=csrfmiddlewaretoken]') as InputElement).value;
     document.registerElement('sys-decimal', DecimalElement);
-    document.registerElement('sys-input', Input);
+    document.registerElement('sys-input', TextInput);
+    document.registerElement('sys-toggle', Toggle);
     document.registerElement('sys-styled-input', StyledInput);
     document.registerElement('sys-code-input', CodeInput);
     document.registerElement('sys-cell', HtmlCell);

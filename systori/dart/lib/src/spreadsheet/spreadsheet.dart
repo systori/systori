@@ -18,7 +18,8 @@ abstract class Spreadsheet {
             int rowNum = 0;
             for (var row in rows) {
                 row.calculate(this.getColumn, rowNum++, moved || (!focused && changedCell.row != -1));
-                total += row.total.value;
+                if (!row.is_hidden)
+                    total += row.total.value;
                 iterated.add(row);
             }
         }
