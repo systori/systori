@@ -54,17 +54,17 @@ class BaseDocumentViewMixin:
         context['TAX_RATE'] = TAX_RATE
         return context
 
-
-class AccountingDocumentViewMixin(BaseDocumentViewMixin):
-
-    def get_queryset(self):
-        return self.model.objects.prefetch_related('transaction').all()
-
     def get_form(self):
         # document forms are very expensive to create
         if not hasattr(self, '_cached_form'):
             self._cached_form = super().get_form()
         return self._cached_form
+
+
+class AccountingDocumentViewMixin(BaseDocumentViewMixin):
+
+    def get_queryset(self):
+        return self.model.objects.prefetch_related('transaction').all()
 
 
 class DeleteViewMixin(DeleteView):

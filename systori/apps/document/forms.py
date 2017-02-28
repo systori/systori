@@ -752,6 +752,7 @@ class ProposalForm(DocumentForm):
 
     def __init__(self, *args, jobs, **kwargs):
         super().__init__(*args, formset_class=ProposalFormSet, jobs=jobs, **kwargs)
+
         if 'header' not in self.initial or 'footer' not in self.initial:
             default_text = DocumentSettings.get_for_language(settings.LANGUAGE_CODE)
             if default_text and default_text.proposal_text:

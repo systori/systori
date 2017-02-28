@@ -20,7 +20,7 @@ from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .font import FontManager
 
 
-DEBUG_DOCUMENT = True  # Shows boxes in rendered output
+DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
 def collate_tasks(proposal, font, available_width):

@@ -8,7 +8,7 @@ django.setup()
 from systori.lib.accounting.tools import JSONEncoder
 from systori.apps.company.models import Company
 from systori.apps.project.models import Project
-from systori.apps.task.models import Task, Group
+from systori.apps.task.models import Task, Group, Job, LineItem
 
 
 def has_n(thing):
@@ -18,21 +18,15 @@ def normalize(thing):
     return unicodedata.normalize('NFC', thing)
 
 def check_obj(thing):
-    fixed = 0
     for attr in ['name', 'description']:
         value = getattr(thing, attr, '')
-        if value != normalize(value):
-            setattr(thing, attr, normalize(value))
-            fixed = 1
+        setattr(thing, attr, normalize(value))
         value = getattr(thing, attr, '')
-        if has_n(value):
-            setattr(thing, attr, value.replace('\n', '<br />'))
-            fixed = 1
+        setattr(thing, attr, value.replace('\n', '<br />'))
+        value = getattr(thing, attr, '')
         setattr(thing, attr, value.strip())
-    if fixed:
-        thing.save()
-        return 1
-    return 0
+    thing.save()
+
 
 for company in Company.objects.all():
     company.activate()
@@ -50,11 +44,11 @@ for company in Company.objects.all():
             invoice.json = json.loads(normalize(json_str))
             invoice.save()
 
-        for job in project.jobs.all():
-            check_obj(job)
-            for group in Group.objects.filter(job=job):
-                check_obj(group)
-            for task in Task.objects.filter(job=job):
-                check_obj(task)
-                for lineitem in task.lineitems.all():
-                    check_obj(lineitem)
+    for job in Job.objects.all():
+        check_obj(job)
+    for group in Group.objects.all():
+        check_obj(group)
+    for task in Task.objects.all():
+        check_obj(task)
+    for lineitem in LineItem.objects.all():
+        check_obj(lineitem)
