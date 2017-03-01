@@ -165,6 +165,31 @@ class InvoiceFormTests(TestForm):
         self.assertEqual(D('480.00'), form['debit_net'].value())
         self.assertEqual(D('571.20'), form.debit_amount.gross)
 
+    def test_header_footer_only_set_initially(self):
+        invoice_text = DocumentTemplate.objects.create(
+            name="default",
+            header="doc settings header",
+            footer="doc settings footer")
+        settings = DocumentSettings.objects.first()
+        settings.invoice_text = invoice_text
+        settings.save()
+
+        form = self.make_form()
+        self.assertEqual(form.initial['header'], 'doc settings header')
+        self.assertEqual(form['header'].value(), 'doc settings header')
+        self.assertEqual(form.initial['footer'], 'doc settings footer')
+        self.assertEqual(form['footer'].value(), 'doc settings footer')
+
+        form = self.make_form(initial={'header': 'hi', 'footer': 'bye'})
+        self.assertEqual(form.initial['header'], 'hi')
+        self.assertEqual(form['header'].value(), 'hi')
+        self.assertEqual(form.initial['footer'], 'bye')
+        self.assertEqual(form['footer'].value(), 'bye')
+
+        form = self.make_form(data={'header': 'hi', 'footer': 'bye'})
+        self.assertEqual(form['header'].value(), 'hi')
+        self.assertEqual(form['footer'].value(), 'bye')
+
 
 class PaymentFormTests(TestForm):
     model = Payment
