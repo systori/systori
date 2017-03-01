@@ -752,11 +752,13 @@ class ProposalForm(DocumentForm):
 
     def __init__(self, *args, jobs, **kwargs):
         super().__init__(*args, formset_class=ProposalFormSet, jobs=jobs, **kwargs)
-        default_text = DocumentSettings.get_for_language(settings.LANGUAGE_CODE)
-        if default_text and default_text.proposal_text:
-            rendered = default_text.proposal_text.render(self.instance.project)
-            self.initial['header'] = rendered['header']
-            self.initial['footer'] = rendered['footer']
+
+        if 'header' not in self.initial or 'footer' not in self.initial:
+            default_text = DocumentSettings.get_for_language(settings.LANGUAGE_CODE)
+            if default_text and default_text.proposal_text:
+                rendered = default_text.proposal_text.render(self.instance.project)
+                self.initial['header'] = rendered['header']
+                self.initial['footer'] = rendered['footer']
 
         self.calculate_totals([
             'estimate',

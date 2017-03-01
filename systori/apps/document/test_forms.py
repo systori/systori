@@ -16,7 +16,7 @@ from ..accounting.workflow import debit_jobs
 from .forms import InvoiceForm, InvoiceFormSet
 from .forms import PaymentForm, PaymentFormSet
 from .forms import ProposalForm, ProposalFormSet
-from .models import Proposal, Invoice, Payment
+from .models import Proposal, Invoice, Payment, DocumentSettings, DocumentTemplate
 from .factories import LetterheadFactory
 
 
@@ -45,7 +45,7 @@ class BaseTestCase(TestCase):
         self.job2.account = create_account_for_job(self.job2)
         self.job2.save()
 
-        LetterheadFactory()
+        LetterheadFactory(with_settings=True)
 
 
 class TestForm(BaseTestCase):
@@ -165,6 +165,31 @@ class InvoiceFormTests(TestForm):
         self.assertEqual(D('480.00'), form['debit_net'].value())
         self.assertEqual(D('571.20'), form.debit_amount.gross)
 
+    def test_header_footer_only_set_initially(self):
+        invoice_text = DocumentTemplate.objects.create(
+            name="default",
+            header="doc settings header",
+            footer="doc settings footer")
+        settings = DocumentSettings.objects.first()
+        settings.invoice_text = invoice_text
+        settings.save()
+
+        form = self.make_form()
+        self.assertEqual(form.initial['header'], 'doc settings header')
+        self.assertEqual(form['header'].value(), 'doc settings header')
+        self.assertEqual(form.initial['footer'], 'doc settings footer')
+        self.assertEqual(form['footer'].value(), 'doc settings footer')
+
+        form = self.make_form(initial={'header': 'hi', 'footer': 'bye'})
+        self.assertEqual(form.initial['header'], 'hi')
+        self.assertEqual(form['header'].value(), 'hi')
+        self.assertEqual(form.initial['footer'], 'bye')
+        self.assertEqual(form['footer'].value(), 'bye')
+
+        form = self.make_form(data={'header': 'hi', 'footer': 'bye'})
+        self.assertEqual(form['header'].value(), 'hi')
+        self.assertEqual(form['footer'].value(), 'bye')
+
 
 class PaymentFormTests(TestForm):
     model = Payment
@@ -271,6 +296,31 @@ class ProposalFormTests(TestForm):
         self.assertEqual(1, len(form.instance.json['jobs']))
         self.assertEqual('hi', form.instance.json['header'])
         self.assertEqual('bye', form.instance.json['footer'])
+
+    def test_header_footer_only_set_initially(self):
+        proposal_text = DocumentTemplate.objects.create(
+            name="default",
+            header="doc settings header",
+            footer="doc settings footer")
+        settings = DocumentSettings.objects.first()
+        settings.proposal_text = proposal_text
+        settings.save()
+
+        form = self.make_form()
+        self.assertEqual(form.initial['header'], 'doc settings header')
+        self.assertEqual(form['header'].value(), 'doc settings header')
+        self.assertEqual(form.initial['footer'], 'doc settings footer')
+        self.assertEqual(form['footer'].value(), 'doc settings footer')
+
+        form = self.make_form(initial={'header': 'hi', 'footer': 'bye'})
+        self.assertEqual(form.initial['header'], 'hi')
+        self.assertEqual(form['header'].value(), 'hi')
+        self.assertEqual(form.initial['footer'], 'bye')
+        self.assertEqual(form['footer'].value(), 'bye')
+
+        form = self.make_form(data={'header': 'hi', 'footer': 'bye'})
+        self.assertEqual(form['header'].value(), 'hi')
+        self.assertEqual(form['footer'].value(), 'bye')
 
     def test_no_jobs_selected(self):
         form = self.make_form({
