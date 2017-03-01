@@ -287,7 +287,7 @@ class HtmlCell extends TextInput with HighlightableInputMixin, Cell, KeyboardHan
     onBlurEvent(TextInput cell) => blurred();
 
     static final List<String> COLORS = [
-        '187,168,146', '238,114,95', '250,185,75', '0,108,124', '0,161,154', '183,219,193'
+        '#f0f9fd', '#fefcee', '#f5f9ed', '#fcefec', '#fef2ea'
     ];
 
     @override
@@ -685,7 +685,7 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
                     case -1: col.style.background = '#D41351'; break;
                     case 0: col.style.background = null; break;
                     default:
-                        col.style.background = 'rgba(${HtmlCell.COLORS[group%HtmlCell.COLORS.length]},0.2)';
+                        col.style.background = HtmlCell.COLORS[group%HtmlCell.COLORS.length];
                 }
             }
         }

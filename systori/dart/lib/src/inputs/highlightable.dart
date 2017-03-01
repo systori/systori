@@ -28,7 +28,7 @@ abstract class HighlightableInputMixin implements HtmlElement {
             buffer.write(text.substring(lastEnd, highlight.start));
             buffer.write('<span');
             if (highlight.color!=null)
-                buffer.write(' style="background: rgba(${highlight.color},0.2);"');
+                buffer.write(' style="background: ${highlight.color};"');
             buffer.write('>');
             buffer.write(text.substring(highlight.start, highlight.end));
             buffer.write('</span>');
