@@ -109,6 +109,8 @@ class FieldPlanning(TemplateView):
     template_name = "field/planning.html"
 
     def get_context_data(self, **kwargs):
+        today = date.today()
+
         context = super(FieldPlanning, self).get_context_data(**kwargs)
 
         if not hasattr(self.request, 'selected_day'):
@@ -128,8 +130,9 @@ class FieldPlanning(TemplateView):
             .filter(day=selected_day) \
             .order_by('jobsite__project_id') \
             .all()
-        context['is_selected_today'] = selected_day == date.today()
-        context['is_selected_future'] = selected_day > date.today()
+        context['is_selected_past'] = selected_day < today
+        context['is_selected_today'] = selected_day == today
+        context['is_selected_future'] = selected_day > today
 
         context['latest_daily_plan'] = DailyPlan.objects.first()
         context['latest_days_with_plans'] = []

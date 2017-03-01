@@ -1,6 +1,6 @@
 import json
 from datetime import timedelta
-from django.test import TestCase
+from freezegun import freeze_time
 from django.urls import reverse
 
 from systori.lib.testing import ClientTestCase
@@ -14,13 +14,28 @@ from ..user.factories import *
 from .utils import find_next_workday, date
 
 
-class TestDateCalculations(TestCase):
+class TestDateCalculations(ClientTestCase):
     def test_find_next_workday(self):
         self.assertEqual(date(2015, 3, 20), find_next_workday(date(2015, 3, 19)))
         self.assertEqual(date(2015, 3, 23), find_next_workday(date(2015, 3, 20)))
         self.assertEqual(date(2015, 3, 23), find_next_workday(date(2015, 3, 21)))
         self.assertEqual(date(2015, 3, 23), find_next_workday(date(2015, 3, 22)))
         self.assertEqual(date(2015, 3, 24), find_next_workday(date(2015, 3, 23)))
+
+    @freeze_time('2017-03-01')
+    def test_selected_day_past_future(self):
+
+        response = self.client.get(reverse('field.planning',
+                                           kwargs={'selected_day': date.today() - timedelta(days=1)}))
+        self.assertEqual(response.context['is_selected_past'], True)
+
+        response = self.client.get(reverse('field.planning',
+                                           kwargs={'selected_day': date.today()}))
+        self.assertEqual(response.context['is_selected_today'], True)
+
+        response = self.client.get(reverse('field.planning',
+                                           kwargs={'selected_day': date.today() + timedelta(days=1)}))
+        self.assertEqual(response.context['is_selected_future'], True)
 
 
 class TestGroupTraversalView(ClientTestCase):
