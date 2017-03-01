@@ -60,6 +60,7 @@ class DayBasedOverviewView(TemplateView):
 
         context['selected_day'] = selected_day
         context['selected_plans'] = DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id').all()
+        context['is_selected_past'] = selected_day < date.today()
         context['is_selected_today'] = selected_day == date.today()
         context['is_selected_future'] = selected_day > date.today()
 

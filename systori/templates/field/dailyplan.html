@@ -2,7 +2,9 @@
 
 {% with jobsite=dailyplan.jobsite %}
 {% load_user_statuses %}
-<daily-plan class="panel panel-primary" data-id="{{ dailyplan.id }}" data-paste-url="{% url 'field.dailyplan.paste' jobsite.id dailyplan.url_id %}">
+<daily-plan class="panel {% if is_selected_past %}panel-warning{% endif %}
+                         {% if is_selected_today %}panel-primary{% endif %}
+                         {% if is_selected_future %}panel-info{% endif %}" data-id="{{ dailyplan.id }}" data-paste-url="{% url 'field.dailyplan.paste' jobsite.id dailyplan.url_id %}">
 
   <div class="panel-heading dailyplan-heading">
     <a name="plan-{{  dailyplan.id }}"></a>

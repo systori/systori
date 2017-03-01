@@ -51,7 +51,9 @@
     {% for plan in selected_plans %}
 
       <div class="col-xs-12 col-sm-6 col-md-4 col-lg-2">
-        <div class="panel panel-primary" data-id="{{ plan.id }}">
+        <div class="panel {% if is_selected_past %}panel-warning{% endif %}
+                         {% if is_selected_today %}panel-primary{% endif %}
+                         {% if is_selected_future %}panel-info{% endif %}" data-id="{{ plan.id }}">
 
           <div class="panel-heading fit-text">{{ plan.jobsite.project.id }} - {{ plan.jobsite.project.name }}</div>
           <div class="panel-body">
