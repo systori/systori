@@ -72,7 +72,7 @@
             <div class="list-group">
             {% for day in latest_days_with_plans %}
               <a href="{% url 'field.planning.generate' selected_day day.day|date:'Y-m-d' %}"
-                 class="list-group-item btn list-group-item-warning">
+                 class="list-group-item btn list-group-item-info">
                 {% blocktrans with otherday=day.day|date:'l d. F' %}Copy from {{ otherday }}.{% endblocktrans %}</a>
             {% endfor %}
             </div>
