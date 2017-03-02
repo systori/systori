@@ -1,6 +1,7 @@
 from lxml import objectify, etree
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
+from django import forms
 
 from ..task.models import Job, Group, Task
 from ..accounting.models import Account
@@ -53,14 +54,29 @@ def gaeb_validate(file):
                     pass
 
 
-def gaeb_import(file):
+def gaeb_import(file, existing_project=None):
+    """
+    this imports a Project or a Job according to the GAEB XML 3.0 data model
+    Award ->
+    BoQ -> Bill of Quantities
+    BoQCtgy -> BoQ Category (structural/hierarchical element, can be a lot, a mainsection, section or subsection etc.)
+    :param file: the gaeb xml file
+    :param existing_project: if only Jobs are imported an existing Project has to be passed by pk
+    :return: the created or updated Project
+    """
     tree = objectify.parse(file)
     GAEB_NS = tree.xpath('namespace-uri(.)')
     root = tree.getroot()
     label = root.PrjInfo.LblPrj
-    project = Project.objects.create(name=label)
+
+    if existing_project:
+        project = Project.objects.get(pk=existing_project)
+    else:
+        project = Project.objects.create(name=label)
+
     try:
-        first_job_no = int(root.Award.BoQ.BoQInfo.Name) - 1
+        first_job_no = int(root.Award.BoQ.BoQInfo.Name) - 1 \
+                       + (max([int(job.code) for job in project.jobs.all()]) if existing_project else 0)
         project.job_offset = first_job_no if first_job_no >= 0 else 0
     except:
         pass
@@ -68,9 +84,9 @@ def gaeb_import(file):
     for ctgy in root.Award.BoQ.BoQBody.BoQCtgy:
         job = Job.objects.create(name=" ".join(ctgy.LblTx.xpath(".//text()")), project=project)
         for grp in ctgy.BoQBody.BoQCtgy:
-            taskgroup = Group.objects.create(name=" ".join(grp.LblTx.xpath(".//text()")), parent=job)
+            group = Group.objects.create(name=" ".join(grp.LblTx.xpath(".//text()")), parent=job)
             for item in grp.BoQBody.Itemlist.getchildren():
-                task = Task.objects.create(group=taskgroup)
+                task = Task.objects.create(group=group)
                 task.qty = get(item, "Qty", default=0)
                 task.unit = get(item, "QU", default="INFO")
                 for text_node in item.Description.CompleteText.DetailTxt.getchildren():
@@ -83,12 +99,19 @@ def gaeb_import(file):
                 for text_node in item.Description.CompleteText.OutlineText.getchildren():
                     task.name = " ".join(text_node.xpath(".//text()"))
                 task.save()
-            taskgroup.save()
+            group.save()
         job.save()
     project.save()
-    project.account = Account.objects.create(account_type=Account.ASSET, code=str(10000 + project.id))
-    jobsite = JobSite(project=project, name="Gaeb-Baustelle", address="Pettenkoferstr. 10", city="Mannheim",
-                      postal_code="68169")
-    jobsite.save()
+    if existing_project:
+        pass
+    else:
+        project.account = Account.objects.create(account_type=Account.ASSET, code=str(10000 + project.id))
+        jobsite = JobSite(project=project, name=_('Main Site'), address="Pettenkoferstr. 10", city="Mannheim",
+                          postal_code="68169")
+        jobsite.save()
     project.save()
     return project
+
+
+class GAEBImportForm(forms.Form):
+    file = forms.FileField(validators=[gaeb_validator])

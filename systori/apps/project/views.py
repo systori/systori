@@ -9,13 +9,13 @@ from django.db.models import Q
 
 from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Project, JobSite
-from .forms import ProjectCreateForm, ProjectImportForm, ProjectUpdateForm
+from .forms import ProjectCreateForm, ProjectUpdateForm
 from .forms import JobSiteForm
 from ..task.models import Job, ProgressReport
 from ..task.forms import JobCreateForm
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
 from ..accounting.constants import TAX_RATE
-from .gaeb_utils import gaeb_import
+from .gaeb_utils import gaeb_import, GAEBImportForm
 
 
 class ProjectList(ListView):
@@ -147,8 +147,8 @@ class ProjectCreate(CreateView):
 
 
 class ProjectImport(FormView):
-    form_class = ProjectImportForm
-    template_name = "project/project_form_upload.html"
+    form_class = GAEBImportForm
+    template_name = "project/gaeb_form.html"
 
     def form_valid(self, form):
         self.object = gaeb_import(self.request.FILES['file'])
@@ -157,6 +157,17 @@ class ProjectImport(FormView):
     def get_success_url(self):
         return reverse('project.view', args=[self.object.id])
 
+
+class JobImport(FormView):
+    form_class = GAEBImportForm
+    template_name = "project/gaeb_form.html"
+
+    def form_valid(self, form):
+        self.object = gaeb_import(self.request.FILES['file'], existing_project=self.kwargs['project_pk'])
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('project.view', args=[self.object.id])
 
 class ProjectUpdate(UpdateView):
     model = Project
