@@ -56,7 +56,7 @@ def collate_tasks(proposal, font, available_width):
         if task['is_provisional']:
             task_total_column = _('Optional')
 
-        if task.get('variant_group', None) != 0:
+        if task.get('variant_group', 0) != 0:
             if task['variant_serial'] == 0:
                 task['name'] = _('Variant {}.0: {}').format(task['variant_group'], task['name'])
             else:
