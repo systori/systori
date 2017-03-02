@@ -1,7 +1,6 @@
 from django.forms import ModelForm
 from django import forms
 from .models import Project, JobSite
-from .gaeb_utils import gaeb_validator
 
 
 class ProjectCreateForm(ModelForm):
@@ -9,10 +8,6 @@ class ProjectCreateForm(ModelForm):
     class Meta:
         model = Project
         fields = ['name', 'description', 'structure']
-
-
-class ProjectImportForm(forms.Form):
-    file = forms.FileField(validators=[gaeb_validator])
 
 
 class ProjectUpdateForm(ModelForm):
