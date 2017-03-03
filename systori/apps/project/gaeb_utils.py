@@ -54,7 +54,7 @@ def gaeb_validate(file):
                     pass
 
 
-def gaeb_import(file, existing_project=None):
+def gaeb_import(file, form, existing_project=None):
     """
     this imports a Project or a Job according to the GAEB XML 3.0 data model
     Award ->
@@ -64,27 +64,41 @@ def gaeb_import(file, existing_project=None):
     :param existing_project: if only Jobs are imported an existing Project has to be passed by pk
     :return: the created or updated Project
     """
-    tree = objectify.parse(file)
-    GAEB_NS = tree.xpath('namespace-uri(.)')
-    root = tree.getroot()
-    label = root.PrjInfo.LblPrj
+    def error(msg):
+        form.add_error(None, msg)
+    try:
+        tree = objectify.parse(file)
+        GAEB_NS = tree.xpath('namespace-uri(.)')
+        root = tree.getroot()
+        label = root.PrjInfo.LblPrj
+    except:
+        error(_('File \'%s\' can\'t be imported. Please contact support.') % file.name)
+        return
 
     if existing_project:
         project = Project.objects.get(pk=existing_project)
+        jobs_count_existing = project.jobs.all().count()
+        jobs_count_new = 0
     else:
         project = Project.objects.create(name=label)
 
     try:
-        first_job_no = int(root.Award.BoQ.BoQInfo.Name) - 1 \
+        first_job_no = int(root.Award.BoQ.BoQBody.BoQCtgy.get("RNoPart")) \
                        + (max([int(job.code) for job in project.jobs.all()]) if existing_project else 0)
         project.job_offset = first_job_no if first_job_no >= 0 else 0
     except:
         pass
 
     for ctgy in root.Award.BoQ.BoQBody.BoQCtgy:
-        job = Job.objects.create(name=" ".join(ctgy.LblTx.xpath(".//text()")), project=project)
+        try:
+            job = Job.objects.create(name=" ".join(ctgy.LblTx.xpath(".//text()")), project=project)
+        except:
+            error('Missing job, on line {}.'.format(ctgy.LblTx.sourceline))
         for grp in ctgy.BoQBody.BoQCtgy:
-            group = Group.objects.create(name=" ".join(grp.LblTx.xpath(".//text()")), parent=job)
+            try:
+                group = Group.objects.create(name=" ".join(grp.LblTx.xpath(".//text()")), parent=job)
+            except:
+                error(None, 'Missing group, on line {}.'.format(ctgy.LblTx.sourceline))
             for item in grp.BoQBody.Itemlist.getchildren():
                 task = Task.objects.create(group=group)
                 task.qty = get(item, "Qty", default=0)
@@ -101,17 +115,24 @@ def gaeb_import(file, existing_project=None):
                 task.save()
             group.save()
         job.save()
+        if existing_project:
+            jobs_count_new += 1
     project.save()
     if existing_project:
-        pass
+        for index, job in enumerate(project.jobs.all()):
+            if index < jobs_count_existing:
+                job.order += jobs_count_new
+            else:
+                job.order -= jobs_count_existing
+            job.save()
     else:
         project.account = Account.objects.create(account_type=Account.ASSET, code=str(10000 + project.id))
-        jobsite = JobSite(project=project, name=_('Main Site'), address="Pettenkoferstr. 10", city="Mannheim",
-                          postal_code="68169")
+        jobsite = JobSite(project=project, name=_('Main Site'), address="Friedrichsplatz", city="Mannheim",
+                          postal_code="68161")
         jobsite.save()
     project.save()
     return project
 
 
 class GAEBImportForm(forms.Form):
-    file = forms.FileField(validators=[gaeb_validator])
+    file = forms.FileField()
