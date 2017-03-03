@@ -34,3 +34,7 @@ class JobSiteForm(ModelForm):
     def save(self, commit=True):
         self.instance.geocode_address()
         return super().save(commit)
+
+
+class GAEBImportForm(forms.Form):
+    file = forms.FileField()
