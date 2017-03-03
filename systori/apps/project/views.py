@@ -162,12 +162,17 @@ class JobImport(FormView):
     form_class = GAEBImportForm
     template_name = "project/gaeb_form.html"
 
-    def form_valid(self, form):
-        self.object = gaeb_import(self.request.FILES['file'], existing_project=self.kwargs['project_pk'])
-        return super().form_valid(form)
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            gaeb_import(self.request.FILES['file'], form, self.kwargs['project_pk'])
+            if form.is_valid():
+                return self.form_valid(form)
+        return self.form_invalid(form)
 
     def get_success_url(self):
-        return reverse('project.view', args=[self.object.id])
+        return reverse('project.view', kwargs={'pk':self.kwargs['project_pk']})
+
 
 class ProjectUpdate(UpdateView):
     model = Project
