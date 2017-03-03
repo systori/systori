@@ -54,14 +54,14 @@ def gaeb_validate(file):
                     pass
 
 
-def gaeb_import(file, form, existing_project=None):
+def gaeb_import(file, form, project=None):
     """
     this imports a Project or a Job according to the GAEB XML 3.0 data model
     Award ->
     BoQ -> Bill of Quantities
     BoQCtgy -> BoQ Category (structural/hierarchical element, can be a lot, a mainsection, section or subsection etc.)
     :param file: the gaeb xml file
-    :param existing_project: if only Jobs are imported an existing Project has to be passed by pk
+    :param project: if only Jobs are imported an existing Project has to be passed by pk
     :return: the created or updated Project
     """
     def error(msg):
@@ -75,16 +75,17 @@ def gaeb_import(file, form, existing_project=None):
         error(_('File \'%s\' can\'t be imported. Please contact support.') % file.name)
         return
 
-    if existing_project:
-        project = Project.objects.get(pk=existing_project)
+    project_created = False
+    if project:
         jobs_count_existing = project.jobs.all().count()
         jobs_count_new = 0
     else:
         project = Project.objects.create(name=label)
+        project_created = True
 
     try:
         first_job_no = int(root.Award.BoQ.BoQBody.BoQCtgy.get("RNoPart")) \
-                       + (max([int(job.code) for job in project.jobs.all()]) if existing_project else 0)
+                       + (max([int(job.code) for job in project.jobs.all()]) if project else 0)
         project.job_offset = first_job_no if first_job_no >= 0 else 0
     except:
         pass
@@ -115,10 +116,10 @@ def gaeb_import(file, form, existing_project=None):
                 task.save()
             group.save()
         job.save()
-        if existing_project:
+        if not project_created:
             jobs_count_new += 1
     project.save()
-    if existing_project:
+    if not project_created:
         for index, job in enumerate(project.jobs.all()):
             if index < jobs_count_existing:
                 job.order += jobs_count_new
@@ -132,7 +133,3 @@ def gaeb_import(file, form, existing_project=None):
         jobsite.save()
     project.save()
     return project
-
-
-class GAEBImportForm(forms.Form):
-    file = forms.FileField()

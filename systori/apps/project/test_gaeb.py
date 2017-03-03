@@ -5,8 +5,11 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from ..company.factories import CompanyFactory
+from ..project.factories import ProjectFactory
+from ..task.factories import JobFactory
 
 from .models import Project
+from .forms import GAEBImportForm
 from .gaeb import GAEBStructure, GAEBStructureField
 from .gaeb_utils import gaeb_import
 
@@ -80,13 +83,21 @@ class GaebImportTests(TestCase):
 
     def setUp(self):
         CompanyFactory()
+        self.form = GAEBImportForm()
 
     def test_import(self):
         file_path = os.path.join(settings.BASE_DIR, "apps/project/test_data/gaeb.x83")
-        project = gaeb_import(file_path)
+        project = gaeb_import(file_path, self.form)
         self.assertEqual("7030 Herschelbad", project.name)
 
     def test_import2(self):
         file_path = os.path.join(settings.BASE_DIR, "apps/project/test_data/25144280.x83")
-        project = gaeb_import(file_path)
+        project = gaeb_import(file_path, self.form)
         self.assertEqual("Dachinstandsetzung", project.name)
+
+    def test_import_add_jobs(self):
+        project = ProjectFactory()
+        JobFactory(project=project)
+        file_path = os.path.join(settings.BASE_DIR, "apps/project/test_data/25144280.x83")
+        project = gaeb_import(file_path, self.form, project)
+        self.assertEqual(project.jobs.all().count(), 2)

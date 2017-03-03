@@ -10,12 +10,12 @@ from django.db.models import Q
 from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Project, JobSite
 from .forms import ProjectCreateForm, ProjectUpdateForm
-from .forms import JobSiteForm
+from .forms import JobSiteForm, GAEBImportForm
 from ..task.models import Job, ProgressReport
 from ..task.forms import JobCreateForm
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
 from ..accounting.constants import TAX_RATE
-from .gaeb_utils import gaeb_import, GAEBImportForm
+from .gaeb_utils import gaeb_import
 
 
 class ProjectList(ListView):
@@ -146,32 +146,23 @@ class ProjectCreate(CreateView):
         return HttpResponseRedirect(redirect)
 
 
-class ProjectImport(FormView):
-    form_class = GAEBImportForm
-    template_name = "project/gaeb_form.html"
-
-    def form_valid(self, form):
-        self.object = gaeb_import(self.request.FILES['file'])
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.id])
-
-
-class JobImport(FormView):
+class GAEBImportView(FormView):
     form_class = GAEBImportForm
     template_name = "project/gaeb_form.html"
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
         if form.is_valid():
-            gaeb_import(self.request.FILES['file'], form, self.kwargs['project_pk'])
+            project = None
+            if 'project_pk' in kwargs:
+                project = self.request.project
+            self.object = gaeb_import(self.request.FILES['file'], form, project)
             if form.is_valid():
                 return self.form_valid(form)
         return self.form_invalid(form)
 
     def get_success_url(self):
-        return reverse('project.view', kwargs={'pk':self.kwargs['project_pk']})
+        return reverse('project.view', args=[self.object.id])
 
 
 class ProjectUpdate(UpdateView):
