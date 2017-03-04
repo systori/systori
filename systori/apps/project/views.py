@@ -1,21 +1,21 @@
 from collections import OrderedDict
+
+from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
+from django.urls import reverse, reverse_lazy
+from django.utils.translation import ugettext_lazy as _
 from django.views.generic import View, TemplateView, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
-from django.utils.translation import ugettext_lazy as _
-from django.urls import reverse, reverse_lazy
-from django.db.models import Q
 
 from systori.lib.templatetags.customformatting import ubrdecimal
-from .models import Project, JobSite
-from .forms import ProjectCreateForm, ProjectUpdateForm
 from .forms import JobSiteForm, GAEBImportForm
-from ..task.models import Job, ProgressReport
-from ..task.forms import JobCreateForm
-from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
+from .forms import ProjectCreateForm, ProjectUpdateForm
+from .models import Project, JobSite
 from ..accounting.constants import TAX_RATE
-from .gaeb_utils import gaeb_import
+from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
+from ..task.forms import JobCreateForm
+from ..task.models import Job, ProgressReport
 
 
 class ProjectList(ListView):
@@ -150,19 +150,18 @@ class GAEBImportView(FormView):
     form_class = GAEBImportForm
     template_name = "project/gaeb_form.html"
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if 'project_pk' in kwargs:
+            kwargs['project'] = self.request.project
+        return kwargs
+
     def post(self, request, *args, **kwargs):
         form = self.get_form()
         if form.is_valid():
-            project = None
-            if 'project_pk' in kwargs:
-                project = self.request.project
-            self.object = gaeb_import(self.request.FILES['file'], form, project)
-            if form.is_valid():
-                return self.form_valid(form)
+            project = form.save()
+            return HttpResponseRedirect(project.get_absolute_url())
         return self.form_invalid(form)
-
-    def get_success_url(self):
-        return reverse('project.view', args=[self.object.id])
 
 
 class ProjectUpdate(UpdateView):

@@ -14,7 +14,7 @@ from systori.lib.utils import nice_percent
 from ..task.models import Job, JobQuerySet
 
 from geopy import geocoders
-from .gaeb import GAEBStructureField
+from .gaeb.structure import GAEBStructureField
 
 
 def _job_annotation(type, inner):

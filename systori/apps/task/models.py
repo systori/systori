@@ -99,6 +99,10 @@ class Group(OrderedModel):
                 kwargs['depth'] = kwargs['parent'].depth+1
         super().__init__(*args, **kwargs)
 
+    def refresh_pks(self):
+        self.parent = self.parent
+        self.job = self.job
+
     @property
     def is_root(self):
         return self.parent is None
@@ -270,7 +274,13 @@ class Job(Group):
         kwargs['depth'] = 0
         super().__init__(*args, **kwargs)
 
+    def refresh_pks(self):
+        super().refresh_pks()
+        self.project = self.project
+
     def save(self, *args, **kwargs):
+        if self.job is not None and self.job_id is None:
+            self.job = None
         super().save(*args, **kwargs)
         if self.job_id is None:
             self.job = self
@@ -397,6 +407,10 @@ class Task(OrderedModel):
             kwargs['job'] = kwargs['group'].job
         super().__init__(*args, **kwargs)
 
+    def refresh_pks(self):
+        self.group = self.group
+        self.job = self.job
+
     @property
     def is_billable(self):
         return self.complete > 0
@@ -507,6 +521,10 @@ class LineItem(OrderedModel):
         if 'task' in kwargs and 'job' not in kwargs:
             kwargs['job'] = kwargs['task'].job
         super().__init__(*args, **kwargs)
+
+    def refresh_pks(self):
+        self.task = self.task
+        self.job = self.job
 
     def clone_to(self, new_task):
         self.pk = None

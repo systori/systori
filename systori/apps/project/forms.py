@@ -1,5 +1,7 @@
 from django.forms import ModelForm
 from django import forms
+
+from .gaeb.convert import Import
 from .models import Project, JobSite
 
 
@@ -38,3 +40,13 @@ class JobSiteForm(ModelForm):
 
 class GAEBImportForm(forms.Form):
     file = forms.FileField()
+
+    def __init__(self, project=None, **kwargs):
+        super().__init__(**kwargs)
+        self.importer = Import(self, project)
+
+    def clean(self):
+        self.importer.parse(self.files['file'])
+
+    def save(self):
+        return self.importer.save()
