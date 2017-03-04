@@ -1,10 +1,12 @@
 from django.test import TestCase
 from django.utils.translation import activate
+from django.core.files.uploadedfile import File
 
 from ..company.factories import CompanyFactory
 from .factories import ProjectFactory, JobSiteFactory
 from . import forms
 from .models import JobSite
+from .gaeb.tests import get_test_data_path
 
 
 class ProjectFormTest(TestCase):
@@ -109,3 +111,32 @@ class JobSiteFormTest(TestCase):
         form.save()
         jobsite.refresh_from_db()
         self.assertEqual(jobsite.name, 'updated jobsite')
+
+
+class GAEBImportTests(TestCase):
+
+    def setUp(self):
+        CompanyFactory()
+
+    def test_import(self):
+        path = get_test_data_path('gaeb.x83')
+        form = forms.GAEBImportForm(
+            data={},
+            files={'file': File(path.open())}
+        )
+        self.assertTrue(form.is_valid())
+        project = form.save()
+        self.assertEqual("7030 Herschelbad", project.name)
+
+    def test_import_add_jobs(self):
+        project = ProjectFactory(with_job=True)
+        path = get_test_data_path('25144280.x83')
+        form = forms.GAEBImportForm(
+            project=project,
+            data={},
+            files={'file': File(path.open())}
+        )
+        self.assertTrue(form.is_valid())
+        project = form.save()
+        self.assertEqual(project.jobs.count(), 2)
+        self.assertEqual("Dachdecker- und Klempnerarbeiten", project.jobs.last().name)
