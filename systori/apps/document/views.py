@@ -250,14 +250,15 @@ class TimesheetUpdate(UpdateView):
         context = super().get_context_data()
         lookup = dict(Timer.KIND_CHOICES)
         lookup.update({
+            'payables': _('Total'),
+            'overtime': _('Overtime'),
             'compensation': _('Compensation'),
-            'overtime': _('Overtime')
         })
         context['rows'] = [
             (t, lookup[t], self.object.json[t], self.object.json[t+'_total']) for t in [
                 'work', 'vacation', 'sick', 'public_holiday',
-                'paid_leave', 'unpaid_leave', 'compensation',
-                'overtime'
+                'paid_leave', 'unpaid_leave', 'payables',
+                'overtime', 'compensation',
             ]
         ]
         return context
