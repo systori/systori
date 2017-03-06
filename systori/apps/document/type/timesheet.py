@@ -16,7 +16,7 @@ from .style import LetterheadCanvas
 from .style import get_available_width_height_and_pagesize, b
 from .font import FontManager
 
-from systori.lib.templatetags.customformatting import todecimalhours,\
+from systori.lib.templatetags.customformatting import tosexagesimalhours,\
     dayshoursgainedverbose, dayshours, workdaysverbose, hoursverbose, hoursdays
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
@@ -49,10 +49,14 @@ def create_timesheet_table(json, available_width, font):
     ts.style.append(('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black))
     ts.style.append(('LINEAFTER', (30, 0), (30, -1), 1.5, colors.black))
     ts.style.append(('BOX', (0, 0), (-1, -1), 0.25, colors.black))
-    ts.style.append(('FONTSIZE', (0, 0), (-2, 1), 9))
     ts.style.append(('LEFTPADDING', (0, 0), (-2, -1), 2))
     ts.style.append(('RIGHTPADDING', (0, 0), (-2, -1), 2))
-    ts.style.append(('ALIGNMENT', (0, 2), (-2, -1), "CENTER"))
+    ts.style.append(('ALIGN', (0, 2), (-2, -1), "RIGHT"))
+    ts.style.append(('VALIGN', (0, 2), (-2, -1), "MIDDLE"))
+
+    ts.style.append(('FONTSIZE', (0, 0), (-1, 1), 8))  # table header
+    ts.style.append(('FONTSIZE', (-1, 2), (-1, -1), 8))  # row type names
+    ts.style.append(('FONTSIZE', (0, 2), (-2, -1), 8))  # body
 
     for monday in mondays:
         ts.style.append(('LINEBEFORE', (monday, 0), (monday, -1), 1.5, colors.black))
@@ -65,9 +69,9 @@ def create_timesheet_table(json, available_width, font):
     ts.row_style('LINEBELOW', 0, -1, 1.25, colors.black)
 
     def render_row(days, total, name):
-        columns = [""]*31 + [(todecimalhours(total) if total else ''), name]
+        columns = [""]*31 + [(tosexagesimalhours(total) if total else ''), name]
         for i, sec in enumerate(days):
-            columns[i] = (todecimalhours(sec) if sec else '')
+            columns[i] = (tosexagesimalhours(sec) if sec else '')
         return columns
 
     stripe_idx = 1
@@ -94,7 +98,10 @@ def create_timesheet_table(json, available_width, font):
             ts.row_style('LINEABOVE', 0, -1, 1.25, colors.black)
         ts.row(*render_row(json[row], json[row+'_total'], lookup[row]))
 
-    return ts.get_table(colWidths=[(available_width-132)/31]*31+[32, 100], rowHeights=18)
+    max_days = 31
+    last_columns = [32, 65]  # total, row types
+    day_columns = [(available_width-sum(last_columns))/max_days]*max_days
+    return ts.get_table(colWidths=day_columns+last_columns, rowHeights=18)
 
 
 def create_rolling_balances(month, json, font):

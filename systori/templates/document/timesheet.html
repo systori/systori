@@ -34,9 +34,9 @@
       {% for name, label, row, total in rows %}
         <tr>
           {% for day in row %}
-            <td>{% if day != 0 %}{{ day|todecimalhours }}{% endif %}</td>
+            <td>{% if day != 0 %}{{ day|tosexagesimalhours }}{% endif %}</td>
           {% endfor %}
-          <td {% if name != 'overtime' %}class="info"{% endif %}>{{ total|todecimalhours }}</td>
+          <td {% if name != 'overtime' %}class="info"{% endif %}>{{ total|tosexagesimalhours }}</td>
           <td>{{ label }}</td>
         </tr>
       {% endfor %}

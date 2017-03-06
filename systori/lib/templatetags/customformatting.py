@@ -178,19 +178,14 @@ def zeroblank(value):
 
 @register.filter
 def tosexagesimalhours(seconds):
-    seconds = int(seconds)
-    minutes, seconds = divmod(seconds, 60)
-    if minutes > 0:
-        if seconds >= 30:
-            minutes += 1
-            seconds = 0
-        else:
-            seconds = 0
-    hours, minutes = divmod(minutes, 60)
-    try:
-        return time(hours, minutes, seconds)
-    except ValueError:
-        return time(0, 0, 0)
+    mins, secs = divmod(abs(seconds), 60)
+    if mins > 0:
+        if secs >= 30:
+            mins += 1
+    hours, mins = divmod(mins, 60)
+    return "{}{}:{:02}".format(
+        '-' if seconds < 0 else '', hours, mins
+    )
 
 
 @register.filter
