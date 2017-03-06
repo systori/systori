@@ -823,8 +823,8 @@ class TimesheetForm(forms.ModelForm):
     work_correction = forms.DecimalField(label=_('Work correction'))
     work_correction_notes = forms.CharField(label=_('Work correction notes'), required=False, widget=forms.Textarea())
 
-    holiday_correction = forms.DecimalField(label=_('Holiday correction'))
-    holiday_correction_notes = forms.CharField(label=_('Holiday correction notes'), required=False, widget=forms.Textarea())
+    vacation_correction = forms.DecimalField(label=_('Vacation correction'))
+    vacation_correction_notes = forms.CharField(label=_('Vacation correction notes'), required=False, widget=forms.Textarea())
 
     overtime_correction = forms.DecimalField(label=_('Overtime correction'))
     overtime_correction_notes = forms.CharField(label=_('Overtime correction notes'), required=False, widget=forms.Textarea())
@@ -839,8 +839,8 @@ class TimesheetForm(forms.ModelForm):
             initial={
                'work_correction': kwargs['instance'].json['work_correction']/60.0/60.0,
                'work_correction_notes': kwargs['instance'].json['work_correction_notes'],
-               'holiday_correction': kwargs['instance'].json['holiday_correction']/60.0/60.0,
-               'holiday_correction_notes': kwargs['instance'].json['holiday_correction_notes'],
+               'vacation_correction': kwargs['instance'].json['vacation_correction']/60.0/60.0,
+               'vacation_correction_notes': kwargs['instance'].json['vacation_correction_notes'],
                'overtime_correction': kwargs['instance'].json['overtime_correction']/60.0/60.0,
                'overtime_correction_notes': kwargs['instance'].json['overtime_correction_notes'],
             }, **kwargs
@@ -848,7 +848,7 @@ class TimesheetForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        for field in ['work', 'overtime', 'holiday']:
+        for field in ['work', 'overtime', 'vacation']:
             if cleaned[field+'_correction'] and not cleaned[field+'_correction_notes']:
                 self.add_error(
                     field+'_correction_notes',
@@ -859,9 +859,9 @@ class TimesheetForm(forms.ModelForm):
         work_correction = round_to_nearest_multiple(int(self.cleaned_data['work_correction']*60*60))
         self.instance.json['work_correction'] = work_correction
         self.instance.json['work_correction_notes'] = self.cleaned_data['work_correction_notes']
-        holiday_correction = round_to_nearest_multiple(int(self.cleaned_data['holiday_correction']*60*60))
-        self.instance.json['holiday_correction'] = holiday_correction
-        self.instance.json['holiday_correction_notes'] = self.cleaned_data['holiday_correction_notes']
+        vacation_correction = round_to_nearest_multiple(int(self.cleaned_data['vacation_correction']*60*60))
+        self.instance.json['vacation_correction'] = vacation_correction
+        self.instance.json['vacation_correction_notes'] = self.cleaned_data['vacation_correction_notes']
         overtime_correction = round_to_nearest_multiple(int(self.cleaned_data['overtime_correction']*60*60))
         self.instance.json['overtime_correction'] = overtime_correction
         self.instance.json['overtime_correction_notes'] = self.cleaned_data['overtime_correction_notes']
