@@ -27,9 +27,9 @@ class UtilsTest(TestCase):
         self.assertEquals(216, utils.round_to_nearest_multiple(230))
 
     def test_seconds_to_time(self):
-        self.assertEqual(tosexagesimalhours(28530), time(7, 56, 0))
-        self.assertEqual(tosexagesimalhours(270), time(0, 5, 0))
-        self.assertEqual(tosexagesimalhours(300), time(0, 5, 0))
+        self.assertEqual(tosexagesimalhours(28530), '7:56')
+        self.assertEqual(tosexagesimalhours(270), '0:05')
+        self.assertEqual(tosexagesimalhours(300), '0:05')
 
     def test_get_timetracking_workers(self):
         company = CompanyFactory()
