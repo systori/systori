@@ -3,7 +3,6 @@ from datetime import date
 from decimal import Decimal
 
 from reportlab.lib.units import mm
-from reportlab.lib.utils import simpleSplit
 from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
 from reportlab.lib import colors
 
@@ -16,7 +15,7 @@ from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable
 from .style import chunk_text, force_break, p, b
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import get_available_width_height_and_pagesize
-from .style import heading_and_date, get_address_label, get_address_label_spacer
+from .style import heading_and_date, get_address_label, get_address_label_spacer, simpleSplit
 from .font import FontManager
 
 

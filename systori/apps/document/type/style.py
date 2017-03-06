@@ -15,6 +15,36 @@ from reportlab.lib.units import mm
 from reportlab.lib import colors, pagesizes, units
 
 
+def _simpleSplit(txt,mW,SW):
+    L = []
+    ws = SW(' ')
+    O = []
+    w = -ws
+    for t in txt.split():
+        lt = SW(t)
+        if w+ws+lt<=mW or O==[]:
+            O.append(t)
+            w = w + ws + lt
+        else:
+            L.append(' '.join(O))
+            O = [t]
+            w = lt
+    if O!=[]: L.append(' '.join(O))
+    return L
+
+# from reportlab.lib.utils import simpleSplit
+def simpleSplit(text,fontName,fontSize,maxWidth):
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    lines = text.replace('<br />','\n').split('\n')
+    SW = lambda text, fN=fontName, fS=fontSize: stringWidth(text, fN, fS)
+    if maxWidth:
+        L = []
+        for l in lines:
+            L.extend(_simpleSplit(l,maxWidth,SW))
+        lines = L
+    return lines
+
+
 def get_available_width_height_and_pagesize(letterhead):
     document_unit = getattr(units, letterhead.document_unit)
     pagesize = getattr(pagesizes, letterhead.document_format)
