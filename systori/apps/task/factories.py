@@ -31,7 +31,6 @@ class TaskFactory(factory.django.DjangoModelFactory):
         model = Task
 
     name = fuzzy.FuzzyText(length=15)
-    description = fuzzy.FuzzyText(length=30)
 
 
 class LineItemFactory(factory.django.DjangoModelFactory):

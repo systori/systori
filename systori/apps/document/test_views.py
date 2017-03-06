@@ -630,8 +630,7 @@ class ProposalViewTests(DocumentTestCase):
         extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
         for text in ['Proposal with only groups', 'hello', 'bye', self.job.name]:
             self.assertTrue(text in extractedText)
-        for text in [self.task.name, self.task.description]:
-            self.assertFalse(text in extractedText)
+        self.assertFalse(self.task.name in extractedText)
 
 
 class EvidenceViewTests(DocumentTestCase):
