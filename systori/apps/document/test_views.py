@@ -601,6 +601,38 @@ class ProposalViewTests(DocumentTestCase):
         for text in [self.task.name, self.task.lineitems.first().name]:
             self.assertTrue(text in extractedText)
 
+    def test_serialize_n_render_only_groups(self):
+        self.project = ProjectFactory(structure="0.0.0")
+        self.job = JobFactory(project=self.project)
+        self.group = GroupFactory(job=self.job, depth=1)
+        self.task = TaskFactory(qty=10, complete=0, price=100, group=self.group)
+        self.contact = ContactFactory(project=self.project, is_billable=True)
+
+        data = self.form_data({
+            'title': 'Proposal with only groups',
+            'document_date': '2017-03-06',
+            'header': 'hello',
+            'footer': 'bye',
+            'add_terms': False,
+            'job-0-job_id': self.job.id,
+            'job-0-is_attached': 'True'
+        })
+
+        response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        # render
+
+        response = self.client.get(reverse('proposal.pdf', kwargs={
+            'project_pk':self.project.id,
+            'pk': Proposal.objects.first().id,
+            'format':'print',})+'?only_groups=1')
+        extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
+        for text in ['Proposal with only groups', 'hello', 'bye', self.job.name]:
+            self.assertTrue(text in extractedText)
+        for text in [self.task.name, self.task.description]:
+            self.assertFalse(text in extractedText)
+
 
 class EvidenceViewTests(DocumentTestCase):
 

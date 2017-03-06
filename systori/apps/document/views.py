@@ -400,7 +400,8 @@ class ProposalPDF(DocumentRenderView):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
         with_lineitems = self.request.GET.get('with_lineitems', False)
-        return pdf_type.proposal.render(json, letterhead, with_lineitems, self.kwargs['format'])
+        only_groups = self.request.GET.get('only_groups', False)
+        return pdf_type.proposal.render(json, letterhead, with_lineitems, only_groups, self.kwargs['format'])
 
 
 class ProposalViewMixin(BaseDocumentViewMixin):
