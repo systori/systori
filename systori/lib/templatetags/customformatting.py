@@ -187,11 +187,4 @@ def tosexagesimalhours(seconds):
         '-' if seconds < 0 else '', hours, mins
     )
 
-
-@register.filter
-def format_seconds(seconds, strftime_format='%-H:%M'):
-    negative = False
-    if seconds < 0:
-        negative = True
-        seconds = abs(seconds)
-    return ('-' if negative else '') + tosexagesimalhours(seconds).strftime(strftime_format)
+format_seconds = tosexagesimalhours
