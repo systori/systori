@@ -256,8 +256,8 @@ class TimesheetTests(TestCase):
         rows[6].append(hrs(sheet.json['compensation_total']))
         rows[7].append(hrs(sheet.json['overtime_total']))
         rows.append([
-            hrs(sheet.json['overtime_total']),
             hrs(sheet.json['overtime_transferred']),
+            hrs(sheet.json['overtime_net']),
             hrs(sheet.json['overtime_balance']),
         ])
         rows.append([
@@ -286,7 +286,7 @@ class TimesheetTests(TestCase):
             [0.0],  # unpaid leave
             [0.0],  # compensation
             [0.0],  # overtime
-            # total, transferred, balance overtime
+            # transferred, net, balance overtime
             [0.0, 0.0, 0.0],
             # transferred, added, balance vacation
             [0.0, 20.0, 20.0],
@@ -304,8 +304,8 @@ class TimesheetTests(TestCase):
             [0.0,  0.0],  # unpaid leave
             [8.0,  8.0],  # compensation
             [1.0,  1.0],  # overtime
-            # total, transferred, balance overtime
-            [1.0, 0.0, 1.0],
+            # transferred, net, balance overtime
+            [0.0, 1.0, 1.0],
             # transferred, added, balance vacation
             [0.0, 20.0, 20.0],
         ])
@@ -315,16 +315,16 @@ class TimesheetTests(TestCase):
         self.timer(january, 16)
 
         expected = [
-            [18,    'T'],  # days
-            [7.0,   7.0],  # work
-            [0.0,   0.0],  # vacation
-            [0.0,   0.0],  # sick
-            [1.0,   1.0],  # paid leave
-            [0.0,   0.0],  # unpaid leave
-            [8.0,   8.0],  # compensation
-            [-1.0, -1.0],  # overtime
-            # total, transferred, balance overtime
-            [-1.0, 0.0, -1.0],
+            [18,  'T'],  # days
+            [7.0, 7.0],  # work
+            [0.0, 0.0],  # vacation
+            [0.0, 0.0],  # sick
+            [1.0, 1.0],  # paid leave
+            [0.0, 0.0],  # unpaid leave
+            [8.0, 8.0],  # compensation
+            [0.0, 0.0],  # overtime
+            # transferred, net, balance overtime
+            [0.0, -1.0, -1.0],
             # transferred, added, balance vacation
             [0.0, 20.0, 20.0],
         ]
@@ -349,9 +349,9 @@ class TimesheetTests(TestCase):
             [2.0,   2.0],  # paid leave
             [0.0,   0.0],  # unpaid leave
             [10.0, 10.0],  # compensation
-            [-2.0, -2.0],  # overtime
-            # total, transferred, balance overtime
-            [-2.0, 0.0, -2.0],
+            [0.0,   0.0],  # overtime
+            # transferred, net, balance overtime
+            [0.0, -2.0, -2.0],
             # transferred, added, balance vacation
             [0.0, 20.0, 20.0],
         ])
@@ -369,9 +369,9 @@ class TimesheetTests(TestCase):
             [3.0,   3.0],  # paid leave
             [0.0,   0.0],  # unpaid leave
             [10.0, 10.0],  # compensation
-            [-3.0, -3.0],  # overtime
-            # total, transferred, balance overtime
-            [-3.0, 0.0, -3.0],
+            [0.0,   0.0],  # overtime
+            # transferred, net, balance overtime
+            [0.0, -3.0, -3.0],
             # transferred, added, balance vacation
             [0.0, 20.0, 20.0],
         ])
@@ -381,15 +381,15 @@ class TimesheetTests(TestCase):
         self.timer(january, 16)  # auto paid_leave will be applied
         self.timer(january.replace(day=19), 18)  # overtime generated
         self.assertEqual(self.sheet(january), [
-            [18,    19,  'T'],  # days
-            [7.0,  9.0, 16.0],  # work
-            [0.0,  0.0,  0.0],  # vacation
-            [0.0,  0.0,  0.0],  # sick
-            [1.0,  0.0,  1.0],  # paid leave
-            [0.0,  0.0,  0.0],  # unpaid leave
-            [8.0,  8.0, 16.0],  # compensation
-            [-1.0, 1.0,  0.0],  # overtime
-            # total, transferred, balance overtime
+            [18,   19,  'T'],  # days
+            [7.0, 9.0, 16.0],  # work
+            [0.0, 0.0,  0.0],  # vacation
+            [0.0, 0.0,  0.0],  # sick
+            [1.0, 0.0,  1.0],  # paid leave
+            [0.0, 0.0,  0.0],  # unpaid leave
+            [8.0, 8.0, 16.0],  # compensation
+            [0.0, 1.0,  1.0],  # overtime
+            # transferred, net, balance overtime
             [0.0, 0.0, 0.0],
             # transferred, added, balance vacation
             [0.0, 20.0, 20.0],
@@ -409,7 +409,7 @@ class TimesheetTests(TestCase):
             [1.0, 1.0],  # unpaid leave
             [7.0, 7.0],  # compensation
             [0.0, 0.0],  # overtime
-            # total, transferred, balance overtime
+            # transferred, net, balance overtime
             [0.0, 0.0, 0.0],
             # transferred, added, balance vacation
             [0.0, 20.0, 20.0],
@@ -423,16 +423,16 @@ class TimesheetTests(TestCase):
         self.timer(january.replace(hour=15), 16, Timer.UNPAID_LEAVE)  # 1hr of unpaid leave
         # should get 1hr automatic paid_leave
         self.assertEqual(self.sheet(january), [
-            [18,    'T'],  # days
-            [2.0,   2.0],  # work
-            [2.0,   2.0],  # vacation
-            [2.0,   2.0],  # sick
-            [1.0,   1.0],  # paid leave
-            [1.0,   1.0],  # unpaid leave
-            [7.0,   7.0],  # compensation
-            [-1.0, -1.0],  # overtime
-            # total, transferred, balance overtime
-            [-1.0, 0.0, -1.0],
+            [18,  'T'],  # days
+            [2.0, 2.0],  # work
+            [2.0, 2.0],  # vacation
+            [2.0, 2.0],  # sick
+            [1.0, 1.0],  # paid leave
+            [1.0, 1.0],  # unpaid leave
+            [7.0, 7.0],  # compensation
+            [0.0, 0.0],  # overtime
+            # transferred, net, balance overtime
+            [0.0, -1.0, -1.0],
             # transferred, added, balance vacation
             [0.0, 20.0, 18.0],
         ])
@@ -443,16 +443,16 @@ class TimesheetTests(TestCase):
         self.timer(january.replace(day=19), 13, Timer.VACATION)
         # second day of vacation is half-day, worker gets paid_leave for it
         self.assertEqual(self.sheet(january), [
-            [18,    19,  'T'],  # days
-            [0.0,  0.0,  0.0],  # work
-            [8.0,  4.0, 12.0],  # vacation
-            [0.0,  0.0,  0.0],  # sick
-            [0.0,  4.0,  4.0],  # paid leave
-            [0.0,  0.0,  0.0],  # unpaid leave
-            [8.0,  8.0, 16.0],  # compensation
-            [0.0, -4.0, -4.0],  # overtime
-            # total, transferred, balance overtime
-            [-4.0, 0.0, -4.0],
+            [18,   19,  'T'],  # days
+            [0.0, 0.0,  0.0],  # work
+            [8.0, 4.0, 12.0],  # vacation
+            [0.0, 0.0,  0.0],  # sick
+            [0.0, 4.0,  4.0],  # paid leave
+            [0.0, 0.0,  0.0],  # unpaid leave
+            [8.0, 8.0, 16.0],  # compensation
+            [0.0, 0.0,  0.0],  # overtime
+            # transferred, net, balance overtime
+            [0.0, -4.0, -4.0],
             # transferred, added, balance vacation
             [0.0, 20.0, 8.0],
         ])
@@ -478,7 +478,7 @@ class TimesheetTests(TestCase):
             [0.0, 0.0],  # unpaid leave
             [8.0, 8.0],  # compensation
             [1.0, 1.0],  # overtime
-            # total, transferred, balance overtime
+            # transferred, net, balance overtime
             [1.0, 1.0, 2.0],
             # transferred, added, balance vacation
             [12.0, 20.0, 32.0],
