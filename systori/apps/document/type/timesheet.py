@@ -229,7 +229,7 @@ class TimeSheetCollector:
                 # overtime would be -2. We need to override paid_leave
                 # to be 2hrs to balance the equation.
                 self.paid_leave[day] = -overtime
-            elif overtime < -self.paid_leave[day]:
+            elif overtime < self.paid_leave[day]:
                 # Calculated overtime is less than the manually defined paid_leave.
                 # In this case the manual overrides the calculated.
                 overtime = -self.paid_leave[day]
