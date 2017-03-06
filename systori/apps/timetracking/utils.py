@@ -87,12 +87,12 @@ def get_worker_monthly_report(worker, period):
 
 def get_holidays_duration(worker, year, month):
     from .models import Timer
-    return Timer.objects.filter(worker=worker, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
+    return Timer.objects.filter(worker=worker, kind=Timer.VACATION).filter_month(year, month).get_duration()
 
 
 def get_overtime_duration(worker, year, month):
     from .models import Timer
-    return Timer.objects.filter(worker=worker, kind=Timer.HOLIDAY).filter_month(year, month).get_duration()
+    return Timer.objects.filter(worker=worker, kind=Timer.VACATION).filter_month(year, month).get_duration()
 
 
 def get_daily_workers_report(workers, date=None):

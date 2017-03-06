@@ -40,7 +40,7 @@ class ManualTimerFormTest(TestCase):
             'worker': self.worker.pk,
             'start': start.strftime('%d.%m.%Y %H:%M'),
             'end': end.strftime('%d.%m.%Y %H:%M'),
-            'kind': Timer.HOLIDAY
+            'kind': Timer.VACATION
         }, company=self.company)
         self.assertTrue(form.is_valid())
         timer = form.save()[0]
@@ -54,7 +54,7 @@ class ManualTimerFormTest(TestCase):
             'worker': self.worker.pk,
             'start': start.strftime('%d.%m.%Y %H:%M'),
             'end': end.strftime('%d.%m.%Y %H:%M'),
-            'kind': Timer.HOLIDAY,
+            'kind': Timer.VACATION,
             'morning_break': True
         }, company=self.company)
         self.assertTrue(form.is_valid())
@@ -69,7 +69,7 @@ class ManualTimerFormTest(TestCase):
             'worker': self.worker.pk,
             'start': start.strftime('%d.%m.%Y %H:%M'),
             'end': end.strftime('%d.%m.%Y %H:%M'),
-            'kind': Timer.HOLIDAY,
+            'kind': Timer.VACATION,
             'lunch_break': True
         }, company=self.company)
         self.assertTrue(form.is_valid())

@@ -13,26 +13,36 @@ from .utils import round_to_nearest_multiple
 
 
 class Timer(models.Model):
-    CORRECTION = 'correction'
+
+    # Work produces paid hours up to 8hrs daily.
+    # After 8hrs it produces overtime hours.
     WORK = 'work'
-    TRAINING = 'training'
-    HOLIDAY = 'holiday'
-    ILLNESS = 'illness'
+
+    # Vacation accumulates at some rate during period of employment.
+    # Using vacation subtracts from accumulated vacation balance.
+    # Replaces up to 8hrs of WORK.
+    VACATION = 'vacation'
+
+    # Replaces up to 8hrs of WORK with doctors note.
+    SICK = 'sick'
+
+    # Replaces up to 8hrs of WORK per local holiday laws.
     PUBLIC_HOLIDAY = 'public_holiday'
+
+    # Draws from overtime hours and replaces up to 8hrs of WORK.
     PAID_LEAVE = 'paid_leave'
+
+    # Fills up to 8hrs of WORK as unpaid time.
     UNPAID_LEAVE = 'unpaid_leave'
 
     KIND_CHOICES = (
         (WORK, _('Work')),
-        (HOLIDAY, _('Holiday')),
-        (ILLNESS, _('Illness')),
-        (CORRECTION, _('Correction')),
-        (TRAINING, _('Training')),
+        (VACATION, _('Vacation')),
+        (SICK, _('Sick')),
         (PUBLIC_HOLIDAY, _('Public holiday')),
         (PAID_LEAVE, _('Paid leave')),
         (UNPAID_LEAVE, _('Unpaid leave'))
     )
-    FULL_DAY_KINDS = (WORK, HOLIDAY, ILLNESS)
 
     DAILY_BREAK = 60 * 60  # seconds
     WORK_HOURS = 60 * 60 * 8  # seconds
@@ -43,10 +53,8 @@ class Timer(models.Model):
 
     duration_formulas = {
         WORK: simple_duration,
-        ILLNESS: simple_duration,
-        HOLIDAY: simple_duration,
-        CORRECTION: simple_duration,
-        TRAINING: simple_duration,
+        VACATION: simple_duration,
+        SICK: simple_duration,
         PUBLIC_HOLIDAY: simple_duration,
         PAID_LEAVE: simple_duration,
         UNPAID_LEAVE: simple_duration,
@@ -96,10 +104,6 @@ class Timer(models.Model):
     @property
     def is_working(self):
         return self.kind == self.WORK
-
-    @property
-    def is_busy(self):
-        return self.kind in (self.TRAINING, self.HOLIDAY, self.ILLNESS)
 
     def _pre_save_for_generic(self):
         if not self.start:

@@ -122,23 +122,15 @@ class TimerTest(TestCase):
         self.assertEqual(timer.end, NOW + timedelta(hours=2))
 
     @freeze_time(NOW)
-    def test_save_correction_timer(self):
-        timer = Timer(worker=self.worker, duration=60 * 60 * 2, kind=Timer.CORRECTION)
-        timer.save()
-        self.assertEqual(timer.start, NOW)
-        self.assertEqual(timer.end, NOW + timedelta(hours=2))
-        self.assertEqual(timer.date, NOW.date())
-
-    @freeze_time(NOW)
     def test_save_overlapping_timer(self):
         Timer.objects.create(
             worker=self.worker,
             start=NOW - timedelta(hours=2), end=NOW + timedelta(hours=2),
-            kind=Timer.HOLIDAY)
+            kind=Timer.VACATION)
         timer = Timer(
             worker=self.worker,
             start=NOW - timedelta(hours=1), end=NOW + timedelta(hours=5),
-            kind=Timer.HOLIDAY)
+            kind=Timer.VACATION)
         with self.assertRaises(ValidationError):
             timer.clean()
 
@@ -175,11 +167,6 @@ class TimerQuerySetTest(TestCase):
             worker=self.worker,
             start=yesterday,
             end=yesterday + timedelta(hours=8)
-        )
-        Timer.objects.create(
-            worker=self.worker,
-            duration=3600,
-            kind=Timer.CORRECTION
         )
         self.assertFalse(Timer.objects.filter_running().exists())
 
@@ -221,25 +208,17 @@ class TimerQuerySetTest(TestCase):
         with freeze_time('2016-08-16 07:00'):
             timer1 = Timer.launch(worker=self.worker)
             timer2 = Timer.launch(worker=worker2)
-            outside_timer = Timer.objects.create(
-                worker=self.worker,
-                duration=3600,
-                kind=Timer.CORRECTION,
-                start=timezone.now() - timedelta(days=1)
-            )
 
         with freeze_time('2016-08-16 09:00'):
             now = timezone.now()
             stopped_count = Timer.objects.stop_for_break()
             timer1.refresh_from_db()
             timer2.refresh_from_db()
-            outside_timer.refresh_from_db()
             self.assertEqual(stopped_count, 2)
             self.assertEqual(timer1.end, now)
             self.assertEqual(timer2.end, now)
             self.assertTrue(timer1.is_auto_stopped)
             self.assertTrue(timer2.is_auto_stopped)
-            self.assertEqual(outside_timer.end, outside_timer.start + timedelta(seconds=3600))
 
     def test_launch_after_break(self):
         worker2 = UserFactory(company=self.company).access.first()

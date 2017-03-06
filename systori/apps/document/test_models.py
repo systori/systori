@@ -213,59 +213,233 @@ class TimesheetTests(TestCase):
         self.worker = UserFactory(company=CompanyFactory()).access.first()
         self.letterhead = LetterheadFactory()
 
-    def test_generate(self):
-        january = datetime(2017, 1, 9, 9)
-        Timer.objects.create(
-            worker=self.worker,
-            start=january,
-            end=january.replace(hour=18),
-            kind=Timer.WORK
-        )
-        Timer.objects.create(
-            worker=self.worker,
-            start=january.replace(day=10),
-            end=january.replace(day=10, hour=17),
-            kind=Timer.HOLIDAY
-        )
+    def sheet(self, dt):
+        def hrs(secs):
+            return secs/60/60
+
         sheet = Timesheet(
-            document_date=january.replace(day=1),
+            document_date=dt,
             worker=self.worker,
             letterhead=self.letterhead
-        )
-        sheet.calculate()
-        sheet.save()
-        self.assertEqual(sheet.json['first_weekday'], 6)
-        self.assertEqual(sheet.json['projects'][0]['days'][8], 9*60*60)
-        self.assertEqual(sheet.json['projects'][0]['days'][9], 0)
-        self.assertEqual(sheet.json['overtime'][8], 60*60)
-        self.assertEqual(sheet.json['overtime'][9], 0)
-        self.assertEqual(sheet.json['overtime_total'], 60*60)
-        self.assertEqual(sheet.json['overtime_transferred'], 0)
-        self.assertEqual(sheet.json['overtime_balance'], 60*60)
-        self.assertEqual(sheet.json['holiday'][8], 0)
-        self.assertEqual(sheet.json['holiday'][9], 8*60*60)
-        self.assertEqual(sheet.json['holiday_total'], 8*60*60)
-        self.assertEqual(sheet.json['holiday_transferred'], 0)
-        self.assertEqual(sheet.json['holiday_added'], 2.5*8*60*60)
-        self.assertEqual(sheet.json['holiday_balance'], 12*60*60)
-        self.assertEqual(sheet.json['work'][8], 8*60*60)
-        self.assertEqual(sheet.json['work'][9], 8*60*60)
-        self.assertEqual(sheet.json['work_total'], 16*60*60)
+        ).calculate()
 
-        february = datetime(2017, 2, 6, 9)
+        rows = [
+            [],  # days
+            [],  # work
+            [],  # vacation
+            [],  # sick
+            [],  # paid leave
+            [],  # unpaid leave
+            [],  # compensation
+            [],  # overtime
+        ]
+        for day in range(sheet.json['total_days']):
+            col = [
+                sheet.json['work'][day],
+                sheet.json['vacation'][day],
+                sheet.json['sick'][day],
+                sheet.json['paid_leave'][day],
+                sheet.json['unpaid_leave'][day],
+                sheet.json['compensation'][day],
+                sheet.json['overtime'][day]
+            ]
+            if any(col):
+                rows[0].append(day+1)
+                for row_idx in range(len(col)):
+                    rows[row_idx+1].append(hrs(col[row_idx]))
+        rows[0].append('T')  # total column
+        rows[1].append(hrs(sheet.json['work_total']))
+        rows[2].append(hrs(sheet.json['vacation_total']))
+        rows[3].append(hrs(sheet.json['sick_total']))
+        rows[4].append(hrs(sheet.json['paid_leave_total']))
+        rows[5].append(hrs(sheet.json['unpaid_leave_total']))
+        rows[6].append(hrs(sheet.json['compensation_total']))
+        rows[7].append(hrs(sheet.json['overtime_total']))
+        rows.append([
+            hrs(sheet.json['overtime_total']),
+            hrs(sheet.json['overtime_transferred']),
+            hrs(sheet.json['overtime_balance']),
+        ])
+        rows.append([
+            hrs(sheet.json['vacation_transferred']),
+            hrs(sheet.json['vacation_added']),
+            hrs(sheet.json['vacation_balance']),
+        ])
+        return rows
+
+    def timer(self, start_date, end_hour, kind=Timer.WORK):
         Timer.objects.create(
             worker=self.worker,
-            start=february,
-            end=february.replace(hour=18),
-            kind=Timer.WORK
+            start=start_date,
+            end=start_date.replace(hour=end_hour),
+            kind=kind
         )
-        sheet = Timesheet(document_date=february, worker=self.worker, letterhead=self.letterhead)
-        sheet.calculate()
-        sheet.save()
-        self.assertEqual(sheet.json['overtime_transferred'], 60*60)
-        self.assertEqual(sheet.json['overtime_total'], 60*60)
-        self.assertEqual(sheet.json['overtime_balance'], 2*60*60)
-        self.assertEqual(sheet.json['holiday_transferred'], 12*60*60)
-        self.assertEqual(sheet.json['holiday_added'], 2.5*8*60*60)
-        self.assertEqual(sheet.json['holiday_total'], 0)
-        self.assertEqual(sheet.json['holiday_balance'], 32*60*60)
+
+    def test_no_timers(self):
+        january = datetime(2017, 1, 18, 9)
+        self.assertEqual(self.sheet(january), [
+            ['T'],  # days
+            [0.0],  # work
+            [0.0],  # vacation
+            [0.0],  # sick
+            [0.0],  # paid leave
+            [0.0],  # unpaid leave
+            [0.0],  # compensation
+            [0.0],  # overtime
+            # total, transferred, balance overtime
+            [0.0, 0.0, 0.0],
+            # transferred, added, balance vacation
+            [0.0, 20.0, 20.0],
+        ])
+
+    def test_simple_overtime(self):
+        january = datetime(2017, 1, 18, 9)
+        self.timer(january, 18)
+        self.assertEqual(self.sheet(january), [
+            [18,   'T'],  # days
+            [9.0,  9.0],  # work
+            [0.0,  0.0],  # vacation
+            [0.0,  0.0],  # sick
+            [0.0,  0.0],  # paid leave
+            [0.0,  0.0],  # unpaid leave
+            [8.0,  8.0],  # compensation
+            [1.0,  1.0],  # overtime
+            # total, transferred, balance overtime
+            [1.0, 0.0, 1.0],
+            # transferred, added, balance vacation
+            [0.0, 20.0, 20.0],
+        ])
+
+    def test_paid_leave(self):
+        january = datetime(2017, 1, 18, 9)
+        self.timer(january, 16)
+
+        expected = [
+            [18,    'T'],  # days
+            [7.0,   7.0],  # work
+            [0.0,   0.0],  # vacation
+            [0.0,   0.0],  # sick
+            [1.0,   1.0],  # paid leave
+            [0.0,   0.0],  # unpaid leave
+            [8.0,   8.0],  # compensation
+            [-1.0, -1.0],  # overtime
+            # total, transferred, balance overtime
+            [-1.0, 0.0, -1.0],
+            # transferred, added, balance vacation
+            [0.0, 20.0, 20.0],
+        ]
+
+        # Automatically applied paid_leave
+        self.assertEqual(self.sheet(january), expected)
+
+        # Manually applied paid_leave, should be same result
+        self.timer(january.replace(hour=16), 17, Timer.PAID_LEAVE)
+        self.assertEqual(self.sheet(january), expected)
+
+    def test_overtime_and_paid_leave(self):
+        january = datetime(2017, 1, 18, 9)
+        self.timer(january, 16)  # auto paid_leave will be applied
+        self.timer(january.replace(day=19), 18)  # overtime generated
+        self.assertEqual(self.sheet(january), [
+            [18,    19,  'T'],  # days
+            [7.0,  9.0, 16.0],  # work
+            [0.0,  0.0,  0.0],  # vacation
+            [0.0,  0.0,  0.0],  # sick
+            [1.0,  0.0,  1.0],  # paid leave
+            [0.0,  0.0,  0.0],  # unpaid leave
+            [8.0,  8.0, 16.0],  # compensation
+            [-1.0, 1.0,  0.0],  # overtime
+            # total, transferred, balance overtime
+            [0.0, 0.0, 0.0],
+            # transferred, added, balance vacation
+            [0.0, 20.0, 20.0],
+        ])
+
+    def test_unpaid_leave(self):
+        january = datetime(2017, 1, 18, 9)
+        self.timer(january, 16)
+        self.timer(january.replace(hour=16), 17, Timer.UNPAID_LEAVE)
+        # unpaid_leave prevents automatic overtime and paid_leave
+        self.assertEqual(self.sheet(january), [
+            [18,  'T'],  # days
+            [7.0, 7.0],  # work
+            [0.0, 0.0],  # vacation
+            [0.0, 0.0],  # sick
+            [0.0, 0.0],  # paid leave
+            [1.0, 1.0],  # unpaid leave
+            [7.0, 7.0],  # compensation
+            [0.0, 0.0],  # overtime
+            # total, transferred, balance overtime
+            [0.0, 0.0, 0.0],
+            # transferred, added, balance vacation
+            [0.0, 20.0, 20.0],
+        ])
+
+    def test_long_day(self):
+        january = datetime(2017, 1, 18, 9)
+        self.timer(january, 11)  # 2hr of work
+        self.timer(january.replace(hour=11), 13, Timer.VACATION)  # quick 2hr vacation
+        self.timer(january.replace(hour=13), 15, Timer.SICK)  # sick for 2hr
+        self.timer(january.replace(hour=15), 16, Timer.UNPAID_LEAVE)  # 1hr of unpaid leave
+        # should get 1hr automatic paid_leave
+        self.assertEqual(self.sheet(january), [
+            [18,    'T'],  # days
+            [2.0,   2.0],  # work
+            [2.0,   2.0],  # vacation
+            [2.0,   2.0],  # sick
+            [1.0,   1.0],  # paid leave
+            [1.0,   1.0],  # unpaid leave
+            [7.0,   7.0],  # compensation
+            [-1.0, -1.0],  # overtime
+            # total, transferred, balance overtime
+            [-1.0, 0.0, -1.0],
+            # transferred, added, balance vacation
+            [0.0, 20.0, 18.0],
+        ])
+
+    def test_vacation_with_paid_leave(self):
+        january = datetime(2017, 1, 18, 9)
+        self.timer(january, 17, Timer.VACATION)
+        self.timer(january.replace(day=19), 13, Timer.VACATION)
+        # second day of vacation is half-day, worker gets paid_leave for it
+        self.assertEqual(self.sheet(january), [
+            [18,    19,  'T'],  # days
+            [0.0,  0.0,  0.0],  # work
+            [8.0,  4.0, 12.0],  # vacation
+            [0.0,  0.0,  0.0],  # sick
+            [0.0,  4.0,  4.0],  # paid leave
+            [0.0,  0.0,  0.0],  # unpaid leave
+            [8.0,  8.0, 16.0],  # compensation
+            [0.0, -4.0, -4.0],  # overtime
+            # total, transferred, balance overtime
+            [-4.0, 0.0, -4.0],
+            # transferred, added, balance vacation
+            [0.0, 20.0, 8.0],
+        ])
+
+    def test_previous_vacation_and_overtime_transfer(self):
+        january = datetime(2017, 1, 18, 9)
+        self.timer(january, 18)
+        self.timer(january.replace(day=19), 17, Timer.VACATION)
+        Timesheet(
+            document_date=january,
+            worker=self.worker,
+            letterhead=self.letterhead
+        ).calculate().save()
+
+        february = datetime(2017, 2, 6, 9)
+        self.timer(february, 18)
+        self.assertEqual(self.sheet(february), [
+            [6,   'T'],  # days
+            [9.0, 9.0],  # work
+            [0.0, 0.0],  # vacation
+            [0.0, 0.0],  # sick
+            [0.0, 0.0],  # paid leave
+            [0.0, 0.0],  # unpaid leave
+            [8.0, 8.0],  # compensation
+            [1.0, 1.0],  # overtime
+            # total, transferred, balance overtime
+            [1.0, 1.0, 2.0],
+            # transferred, added, balance vacation
+            [12.0, 20.0, 32.0],
+        ])

@@ -138,7 +138,7 @@ class UserStatusesTest(TestCase):
         worker2_timer = Timer.objects.create(
             worker=self.worker2, start=NOW - timedelta(hours=1), end=NOW + timedelta(hours=2), kind=Timer.WORK)
         worker3_timer = Timer.objects.create(
-            worker=self.worker3, start=yesterday, end=tomorrow, kind=Timer.HOLIDAY)
+            worker=self.worker3, start=yesterday, end=tomorrow, kind=Timer.VACATION)
         self.assertEqual(
             utils.get_workers_statuses(self.company.workers.all()),
             {

@@ -31,49 +31,15 @@
         </tr>
       </thead>
 
-      {% for project in object.json.projects %}
-      <tr>
-        {% for total in project.days %}
-          <td>{% if total != 0 %}{{ total|todecimalhours }}{% endif %}</td>
-        {% endfor %}
-        <td class="info">{% if project.total != 0 %}{{ project.total|todecimalhours }}{% endif %}</td>
-        <td>{{project.name}}</td>
-      </tr>
-      {% endfor %}
-
-      {% for special in object.json.special %}
+      {% for name, label, row, total in rows %}
         <tr>
-          {% for total in special.days %}
-            <td>{% if total != 0 %}{{ total|todecimalhours }}{% endif %}</td>
+          {% for day in row %}
+            <td>{% if day != 0 %}{{ day|todecimalhours }}{% endif %}</td>
           {% endfor %}
-          <td class="info">{{ special.total|todecimalhours }}</td>
-          <td>{{ special.name|lookup:KIND_CHOICES }}</td>
+          <td {% if name != 'overtime' %}class="info"{% endif %}>{{ total|todecimalhours }}</td>
+          <td>{{ label }}</td>
         </tr>
       {% endfor %}
-
-      <tr>
-        {% for total in object.json.holiday %}
-          <td>{% if total != 0 %}{{ total|todecimalhours }}{% endif %}</td>
-        {% endfor %}
-        <td class="info">{{ object.json.holiday_total|todecimalhours }}</td>
-        <td>{% trans "Holiday" %}</td>
-      </tr>
-
-      <tr>
-        {% for total in object.json.work %}
-          <td class="info">{% if total != 0 %}{{ total|todecimalhours }}{% endif %}</td>
-        {% endfor %}
-        <td class="info">{{ object.json.work_total|todecimalhours }}</td>
-        <td>{% trans "Total" %}</td>
-      </tr>
-
-      <tr>
-        {% for total in object.json.overtime %}
-          <td>{% if total != 0 %}{{ total|todecimalhours }}{% endif %}</td>
-        {% endfor %}
-        <td>{{ object.json.overtime_total|todecimalhours }}</td>
-        <td>{% trans "Overtime" %}</td>
-      </tr>
 
     </table>
 
@@ -90,11 +56,11 @@
       </thead>
 
       <tr>
-        <td>{% trans "Holiday" %}</td>
-        <td>{% if object.json.holiday_transferred != 0 %}{{ object.json.holiday_transferred|workdaysverbose }}{% endif %}</td>
-        <td>{% if object.json.holiday_correction != 0 %}{{ object.json.holiday_correction|workdaysverbose }}{% endif %}</td>
-        <td>{% if object.json.holiday_total != 0 %}{{ object.json.holiday_total|dayshoursgainedverbose }}{% endif %}</td>
-        <td class="info">{{ object.json.holiday_balance|toworkdays }} {{ object.json.holiday_balance|workdayslabel }} ({{ object.json.holiday_balance|todecimalhours }} {{ object.json.holiday_balance|hourslabel }})</td>
+        <td>{% trans "Vacation" %}</td>
+        <td>{% if object.json.vacation_transferred != 0 %}{{ object.json.holiday_transferred|workdaysverbose }}{% endif %}</td>
+        <td>{% if object.json.vacation_correction != 0 %}{{ object.json.holiday_correction|workdaysverbose }}{% endif %}</td>
+        <td>{% if object.json.vacation_total != 0 %}{{ object.json.holiday_total|dayshoursgainedverbose }}{% endif %}</td>
+        <td class="info">{{ object.json.vacation_balance|toworkdays }} {{ object.json.holiday_balance|workdayslabel }} ({{ object.json.holiday_balance|todecimalhours }} {{ object.json.holiday_balance|hourslabel }})</td>
       </tr>
 
       <tr>

@@ -61,12 +61,12 @@ class Timesheet(Document):
             self.json['work_correction']
         )
 
-    def calculate_holiday_balance(self):
+    def calculate_vacation_balance(self):
         return (
-            self.json['holiday_transferred'] +
-            self.json['holiday_added'] +
-            self.json['holiday_correction']
-        ) - self.json['holiday_total']
+            self.json['vacation_transferred'] +
+            self.json['vacation_added'] +
+            self.json['vacation_correction']
+        ) - self.json['vacation_total']
 
     def calculate_overtime_balance(self):
         return (
@@ -76,12 +76,17 @@ class Timesheet(Document):
         )
 
     def calculate_transferred_amounts(self):
-        previous_month = (self.document_date.replace(day=1)-timedelta(days=2)).replace(day=1)
-        previous_query = Timesheet.objects.filter(worker=self.worker, document_date=previous_month)
+        previous_month = (self.document_date.replace(day=1)-timedelta(days=2))
+        previous_query = Timesheet.objects\
+            .period(previous_month.year, previous_month.month)\
+            .filter(worker=self.worker)
         if previous_query.exists():
             previous = previous_query.get()
-            self.json['holiday_transferred'] = previous.json['holiday_balance']
+            self.json['vacation_transferred'] = previous.json['vacation_balance']
             self.json['overtime_transferred'] = previous.json['overtime_balance']
+        else:
+            self.json['vacation_transferred'] = 0
+            self.json['overtime_transferred'] = 0
 
     def calculate(self):
         year, month = self.document_date.year, self.document_date.month
@@ -91,18 +96,18 @@ class Timesheet(Document):
                 'work_correction_notes': '',
                 'overtime_correction': 0,
                 'overtime_correction_notes': '',
-                'holiday_correction': 0,
-                'holiday_correction_notes': '',
+                'vacation_correction': 0,
+                'vacation_correction_notes': '',
             }
         self.json.update(pdf_type.timesheet.serialize(
             Timer.objects.filter_month(year, month).filter(worker=self.worker).all(),
             year, month
         ))
         self.calculate_transferred_amounts()
-        self.json['holiday_added'] = self.worker.holiday
+        self.json['vacation_added'] = self.worker.vacation
         self.json.update({
             'work_balance': self.calculate_work_balance(),
-            'holiday_balance': self.calculate_holiday_balance(),
+            'vacation_balance': self.calculate_vacation_balance(),
             'overtime_balance': self.calculate_overtime_balance(),
         })
         return self

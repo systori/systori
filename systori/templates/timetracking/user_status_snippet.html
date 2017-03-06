@@ -1,10 +1,11 @@
 {% load i18n %}
+<span
 {% if not status %}
-<span class="user-status glyphicon glyphicon-minus" style="font-size:70%;color:dimgray" title="{{ status.get_kind_display }}"></span>
+  class="user-status glyphicon glyphicon-minus" style="font-size:70%;color:dimgray"
 {% elif status.is_working %}
-<span class="user-status glyphicon glyphicon-record" style="font-size:70%;color:#04B486" title="{{ status.get_kind_display }}"></span>
-{% elif status.is_busy %}
-<span class="user-status glyphicon glyphicon-ban-circle" style="font-size:70%;color:#B43104" title="{{ status.get_kind_display }}"></span>
+  class="user-status glyphicon glyphicon-record" style="font-size:70%;color:#04B486"
 {% else %}
-<span class="user-status glyphicon glyphicon-pause" style="font-size:70%;color:#FFBF00" title="{% trans 'Idle' %}"></span>
+  class="user-status glyphicon glyphicon-ban-circle" style="font-size:70%;color:#B43104"
 {% endif %}
+  title="{% if status %}{{ status.get_kind_display }}{% endif %}">
+</span>

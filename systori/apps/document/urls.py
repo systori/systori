@@ -59,6 +59,6 @@ urlpatterns = [
     url(r'^timesheets/$', office_auth(TimesheetsList.as_view()), name='timesheets'),
     url(r'^timesheet/(?P<pk>\d+)/update$', office_auth(TimesheetUpdate.as_view()), name='timesheet.update'),
     url(r'^timesheet/(?P<pk>\d+)/pdf$', office_auth(TimesheetPDF.as_view()), name='timesheet.pdf'),
+    url(r'^timesheets/(?P<year>\d+)/(?P<month>\d+)/download$', office_auth(TimesheetsListPDF.as_view()), name='timesheets.pdf'),
     url(r'^timesheets/(?P<year>\d+)/(?P<month>\d+)/generate$', office_auth(TimesheetsGenerateView.as_view()), name='timesheets.generate'),
-    url(r'^timesheets/(?P<year>\d+)/(?P<month>\d+)/download$', office_auth(TimesheetsPDF.as_view()), name='timesheets.pdf'),
 ]

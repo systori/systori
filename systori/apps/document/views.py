@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 from collections import OrderedDict, namedtuple
 
 from django.http import HttpResponse, HttpResponseRedirect
@@ -7,9 +7,9 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import get_language
+from django.utils.translation import ugettext_lazy as _
 
 from systori.lib.accounting.tools import Amount
-from ..company.models import Worker
 from ..project.models import Project
 from ..timetracking.models import Timer
 from ..accounting.constants import TAX_RATE
@@ -248,7 +248,18 @@ class TimesheetUpdate(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        context['KIND_CHOICES'] = dict(Timer.KIND_CHOICES)
+        lookup = dict(Timer.KIND_CHOICES)
+        lookup.update({
+            'compensation': _('Compensation'),
+            'overtime': _('Overtime')
+        })
+        context['rows'] = [
+            (t, lookup[t], self.object.json[t], self.object.json[t+'_total']) for t in [
+                'work', 'vacation', 'sick', 'public_holiday',
+                'paid_leave', 'unpaid_leave', 'compensation',
+                'overtime'
+            ]
+        ]
         return context
 
 
@@ -312,7 +323,7 @@ class DocumentRenderView(SingleObjectMixin, View):
         raise NotImplementedError
 
 
-class TimesheetsPDF(DocumentRenderView):
+class TimesheetsListPDF(DocumentRenderView):
     def pdf(self):
         year, month = int(self.kwargs['year']), int(self.kwargs['month'])
         queryset = Timesheet.objects.period(year, month)
