@@ -685,22 +685,22 @@ class TimesheetViewTests(ClientTestCase):
         self.assertEqual(response.status_code, 302)
         sheet = Timesheet.objects.get()
         self.assertEqual(sheet.json['first_weekday'], 6)
-        self.assertEqual(sheet.json['projects'][0]['days'][8], 9*60*60)
-        self.assertEqual(sheet.json['projects'][0]['days'][9], 0)
+        self.assertEqual(sheet.json['work'][8], 9*60*60)
+        self.assertEqual(sheet.json['work'][9], 0)
         self.assertEqual(sheet.json['overtime'][8], 60*60)
         self.assertEqual(sheet.json['overtime'][9], 0)
         self.assertEqual(sheet.json['overtime_total'], 60*60)
         self.assertEqual(sheet.json['overtime_transferred'], 0)
         self.assertEqual(sheet.json['overtime_balance'], 60*60)
-        self.assertEqual(sheet.json['holiday'][8], 0)
-        self.assertEqual(sheet.json['holiday'][9], 8*60*60)
-        self.assertEqual(sheet.json['holiday_total'], 8*60*60)
-        self.assertEqual(sheet.json['holiday_transferred'], 0)
-        self.assertEqual(sheet.json['holiday_added'], 2.5*8*60*60)
-        self.assertEqual(sheet.json['holiday_balance'], 12*60*60)
-        self.assertEqual(sheet.json['work'][8], 8*60*60)
-        self.assertEqual(sheet.json['work'][9], 8*60*60)
-        self.assertEqual(sheet.json['work_total'], 16*60*60)
+        self.assertEqual(sheet.json['vacation'][8], 0)
+        self.assertEqual(sheet.json['vacation'][9], 8*60*60)
+        self.assertEqual(sheet.json['vacation_total'], 8*60*60)
+        self.assertEqual(sheet.json['vacation_transferred'], 0)
+        self.assertEqual(sheet.json['vacation_added'], 2.5*8*60*60)
+        self.assertEqual(sheet.json['vacation_balance'], 12*60*60)
+        self.assertEqual(sheet.json['compensation'][8], 8*60*60)
+        self.assertEqual(sheet.json['compensation'][9], 8*60*60)
+        self.assertEqual(sheet.json['compensation_total'], 16*60*60)
 
     def test_timesheet_transferred_totals(self):
         self.create_january_timesheet()
@@ -717,10 +717,10 @@ class TimesheetViewTests(ClientTestCase):
         self.assertEqual(sheet.json['overtime_transferred'], 60*60)
         self.assertEqual(sheet.json['overtime_total'], 60*60)
         self.assertEqual(sheet.json['overtime_balance'], 2*60*60)
-        self.assertEqual(sheet.json['holiday_transferred'], 12*60*60)
-        self.assertEqual(sheet.json['holiday_added'], 2.5*8*60*60)
-        self.assertEqual(sheet.json['holiday_total'], 0)
-        self.assertEqual(sheet.json['holiday_balance'], 32*60*60)
+        self.assertEqual(sheet.json['vacation_transferred'], 12*60*60)
+        self.assertEqual(sheet.json['vacation_added'], 2.5*8*60*60)
+        self.assertEqual(sheet.json['vacation_total'], 0)
+        self.assertEqual(sheet.json['vacation_balance'], 32*60*60)
 
     def test_correction(self):
         self.create_january_timesheet()
@@ -728,16 +728,16 @@ class TimesheetViewTests(ClientTestCase):
         self.client.post(reverse('timesheet.update', args=[sheet.pk]), data={
             'overtime_correction': 5.5,
             'overtime_correction_notes': 'added 5.5',
-            'holiday_correction': 6.5,
-            'holiday_correction_notes': 'added 6.5',
+            'vacation_correction': 6.5,
+            'vacation_correction_notes': 'added 6.5',
             'work_correction': 7.5,
             'work_correction_notes': 'added 7.5',
         })
         sheet.refresh_from_db()
         self.assertEqual(sheet.json['overtime_correction'], 5.5*60*60)
         self.assertEqual(sheet.json['overtime_correction_notes'], 'added 5.5')
-        self.assertEqual(sheet.json['holiday_correction'], 6.5*60*60)
-        self.assertEqual(sheet.json['holiday_correction_notes'], 'added 6.5')
+        self.assertEqual(sheet.json['vacation_correction'], 6.5*60*60)
+        self.assertEqual(sheet.json['vacation_correction_notes'], 'added 6.5')
         self.assertEqual(sheet.json['work_correction'], 7.5*60*60)
         self.assertEqual(sheet.json['work_correction_notes'], 'added 7.5')
         # regenerating does not wipe out the corrections, reusing previous timesheet
@@ -746,7 +746,7 @@ class TimesheetViewTests(ClientTestCase):
         self.assertEqual(sheet.pk, sheet2.pk)
         self.assertEqual(sheet2.json['overtime_correction'], 5.5*60*60)
         self.assertEqual(sheet2.json['overtime_correction_notes'], 'added 5.5')
-        self.assertEqual(sheet2.json['holiday_correction'], 6.5*60*60)
-        self.assertEqual(sheet2.json['holiday_correction_notes'], 'added 6.5')
+        self.assertEqual(sheet2.json['vacation_correction'], 6.5*60*60)
+        self.assertEqual(sheet2.json['vacation_correction_notes'], 'added 6.5')
         self.assertEqual(sheet2.json['work_correction'], 7.5*60*60)
         self.assertEqual(sheet2.json['work_correction_notes'], 'added 7.5')
