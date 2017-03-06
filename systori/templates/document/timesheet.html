@@ -57,17 +57,17 @@
 
       <tr>
         <td>{% trans "Vacation" %}</td>
-        <td>{% if object.json.vacation_transferred != 0 %}{{ object.json.holiday_transferred|workdaysverbose }}{% endif %}</td>
-        <td>{% if object.json.vacation_correction != 0 %}{{ object.json.holiday_correction|workdaysverbose }}{% endif %}</td>
-        <td>{% if object.json.vacation_total != 0 %}{{ object.json.holiday_total|dayshoursgainedverbose }}{% endif %}</td>
-        <td class="info">{{ object.json.vacation_balance|toworkdays }} {{ object.json.holiday_balance|workdayslabel }} ({{ object.json.holiday_balance|todecimalhours }} {{ object.json.holiday_balance|hourslabel }})</td>
+        <td>{% if object.json.vacation_transferred != 0 %}{{ object.json.vacation_transferred|workdaysverbose }}{% endif %}</td>
+        <td>{% if object.json.vacation_correction != 0 %}{{ object.json.vacation_correction|workdaysverbose }}{% endif %}</td>
+        <td>{% if object.json.vacation_total != 0 %}{{ object.json.vacation_total|dayshoursgainedverbose }}{% endif %}</td>
+        <td class="info">{{ object.json.vacation_balance|toworkdays }} {{ object.json.vacation_balance|workdayslabel }} ({{ object.json.vacation_balance|todecimalhours }} {{ object.json.vacation_balance|hourslabel }})</td>
       </tr>
 
       <tr>
         <td>{% trans "Overtime" %}</td>
         <td>{% if object.json.overtime_transferred != 0 %}{{ object.json.overtime_transferred|hoursverbose }}{% endif %}</td>
         <td>{% if object.json.overtime_correction != 0 %}{{ object.json.overtime_correction|hoursverbose }}{% endif %}</td>
-        <td>{% if object.json.overtime_total != 0 %}{{ object.json.overtime_total|hoursverbose }}{% endif %}</td>
+        <td>{% if object.json.overtime_net != 0 %}{{ object.json.overtime_net|hoursverbose }}{% endif %}</td>
         <td class="info">{% if object.json.overtime_balance != 0 %}{{ object.json.overtime_balance|hoursdays }}{% endif %}</td>
       </tr>
 

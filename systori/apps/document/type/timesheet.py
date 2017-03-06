@@ -120,7 +120,7 @@ def create_rolling_balances(month, json, font):
         _("Overtime"),
         (hoursverbose(json['overtime_transferred']) if json['overtime_transferred'] != 0 else ''),
         (hoursverbose(json['overtime_correction']) if json['overtime_correction'] != 0 else ''),
-        (hoursverbose(json['overtime_total']) if json['overtime_total'] != 0 else ''),
+        (hoursverbose(json['overtime_net']) if json['overtime_net'] != 0 else ''),
         (b(hoursdays(json['overtime_balance']), font) if json['overtime_balance'] != 0 else '')
     )
     ts.row(
@@ -194,55 +194,32 @@ class TimeSheetCollector:
 
         for day in range(self.total_days):
 
-            # Work is capped at 8hrs.
-            work = self.work[day]
-            if self.work[day] > Timer.WORK_HOURS:
-                work = Timer.WORK_HOURS
+            # Work is capped to 8hrs
+            work = min(self.work[day], Timer.WORK_HOURS)
 
-            # Basic payables excluding paid/unpaid leave.
+            # Payables sans work and consumed overtime (paid_leave)
             payable = sum([
-                work,
                 self.sick[day],
                 self.vacation[day],
                 self.public_holiday[day],
             ])
 
-            if (payable+self.paid_leave[day]) == 0:
-                # Day has nothing, skip it.
+            # Total is sum of all the different payables
+            # plus the unpaid_leave hours that must be
+            # accounted for before we can determine overtime.
+            total = self.work[day] + payable + self.unpaid_leave[day]
+
+            if (total + self.paid_leave[day]) == 0:
                 continue
 
-            total = payable + self.unpaid_leave[day]
+            if total > Timer.WORK_HOURS:
+                if self.work[day] > Timer.WORK_HOURS:
+                    self.overtime[day] = self.work[day] - Timer.WORK_HOURS
+                else:
+                    self.overtime[day] = min(self.work[day], total - Timer.WORK_HOURS)
 
-            overtime = 0
-
-            if total < Timer.WORK_HOURS:
-                # All of the payables + unpaid
-                # did not add up to full work day
-                # leads to negative overtime.
-                overtime = total - Timer.WORK_HOURS
-
-            elif self.work[day] > Timer.WORK_HOURS:
-                # Work hours is greater than full day
-                # leads to accumulated overtime.
-                overtime = self.work[day] - Timer.WORK_HOURS
-
-            # Overtime and paid_leave are two sides of the same coin.
-            # Overtime is calculated based on other payables and
-            # paid_leave is manually set as PAID_LEAVE timers.
-            # They have opposite parity.
-            if -overtime > self.paid_leave[day]:
-                # Calculated overtime was larger than manual paid_leave.
-                # For example, work is 6hrs, paid_leave is 1hr, that means
-                # overtime would be -2. We need to override paid_leave
-                # to be 2hrs to balance the equation.
-                self.paid_leave[day] = -overtime
-            elif overtime < self.paid_leave[day]:
-                # Calculated overtime is less than the manually defined paid_leave.
-                # In this case the manual overrides the calculated.
-                overtime = -self.paid_leave[day]
-
-            self.overtime[day] = overtime
-            self.compensation[day] = payable + self.paid_leave[day]
+            self.paid_leave[day] = max(self.paid_leave[day], Timer.WORK_HOURS - total)
+            self.compensation[day] = work + payable + self.paid_leave[day]
 
         self.calculated = True
 
