@@ -178,7 +178,7 @@ def zeroblank(value):
 
 @register.filter
 def tosexagesimalhours(seconds):
-    mins, secs = divmod(abs(seconds), 60)
+    mins, secs = divmod(abs(int(seconds)), 60)
     if mins > 0:
         if secs >= 30:
             mins += 1
