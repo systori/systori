@@ -336,6 +336,46 @@ class TimesheetTests(TestCase):
         self.timer(january.replace(hour=16), 17, Timer.PAID_LEAVE)
         self.assertEqual(self.sheet(january), expected)
 
+    def test_full_work_day_plus_extra_manual_paid_leave(self):
+        january = datetime(2017, 1, 18, 9)
+        self.timer(january, 17)  # full work day
+        self.timer(january.replace(hour=17), 19, Timer.PAID_LEAVE)
+        # because paid_leave is manually set it takes us over 8hrs compensation
+        self.assertEqual(self.sheet(january), [
+            [18,    'T'],  # days
+            [8.0,   8.0],  # work
+            [0.0,   0.0],  # vacation
+            [0.0,   0.0],  # sick
+            [2.0,   2.0],  # paid leave
+            [0.0,   0.0],  # unpaid leave
+            [10.0, 10.0],  # compensation
+            [-2.0, -2.0],  # overtime
+            # total, transferred, balance overtime
+            [-2.0, 0.0, -2.0],
+            # transferred, added, balance vacation
+            [0.0, 20.0, 20.0],
+        ])
+
+    def test_partial_work_day_plus_extra_manual_paid_leave(self):
+        january = datetime(2017, 1, 18, 9)
+        self.timer(january, 16)  # 7hr work day
+        self.timer(january.replace(hour=16), 19, Timer.PAID_LEAVE)  # 3hr manual paid leave
+        # because paid_leave is manually set it takes us over 8hrs compensation
+        self.assertEqual(self.sheet(january), [
+            [18,    'T'],  # days
+            [7.0,   7.0],  # work
+            [0.0,   0.0],  # vacation
+            [0.0,   0.0],  # sick
+            [3.0,   3.0],  # paid leave
+            [0.0,   0.0],  # unpaid leave
+            [10.0, 10.0],  # compensation
+            [-3.0, -3.0],  # overtime
+            # total, transferred, balance overtime
+            [-3.0, 0.0, -3.0],
+            # transferred, added, balance vacation
+            [0.0, 20.0, 20.0],
+        ])
+
     def test_overtime_and_paid_leave(self):
         january = datetime(2017, 1, 18, 9)
         self.timer(january, 16)  # auto paid_leave will be applied
