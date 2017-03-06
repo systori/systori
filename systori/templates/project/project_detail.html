@@ -136,6 +136,8 @@
                 <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a></li>
                 <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'email' doc.id %}?with_lineitems=1">{% trans 'with Line Items Email' %}</a></li>
                 <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'with Line Items Print' %}</a></li>
+                <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'email' doc.id %}?only_groups=1">{% trans 'only groups Email' %}</a></li>
+                <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}?only_groups=1">{% trans 'only groups Print' %}</a></li>
               </ul>
             </div>
           </td>

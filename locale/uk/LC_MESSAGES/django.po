@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-23 09:46+0100\n"
+"POT-Creation-Date: 2017-03-06 14:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -132,7 +132,7 @@ msgid "Last Name"
 msgstr ""
 
 #: systori/apps/directory/models.py:15
-#: systori/templates/project/project_detail.html:428
+#: systori/templates/project/project_detail.html:430
 msgid "Phone"
 msgstr ""
 
@@ -147,7 +147,7 @@ msgid "Website"
 msgstr ""
 
 #: systori/apps/directory/models.py:19 systori/apps/project/models.py:290
-#: systori/templates/project/project_detail.html:462
+#: systori/templates/project/project_detail.html:464
 msgid "Address"
 msgstr ""
 
@@ -156,7 +156,7 @@ msgid "Postal Code"
 msgstr ""
 
 #: systori/apps/directory/models.py:21 systori/apps/project/models.py:291
-#: systori/templates/project/project_detail.html:463
+#: systori/templates/project/project_detail.html:465
 msgid "City"
 msgstr ""
 
@@ -169,7 +169,7 @@ msgid "auto-generate address label"
 msgstr ""
 
 #: systori/apps/directory/models.py:25
-#: systori/templates/project/project_detail.html:426
+#: systori/templates/project/project_detail.html:428
 msgid "Address Label"
 msgstr ""
 
@@ -178,7 +178,7 @@ msgstr ""
 #: systori/templates/accounting/invoice_detail.html:11
 #: systori/templates/document/evidence_detail.html:10
 #: systori/templates/document/proposal_detail.html:11
-#: systori/templates/field/dailyplan.html:108
+#: systori/templates/field/dailyplan.html:111
 #: systori/templates/project/project_detail.html:109
 msgid "Notes"
 msgstr ""
@@ -189,7 +189,7 @@ msgid "Contact"
 msgstr ""
 
 #: systori/apps/directory/models.py:31
-#: systori/templates/project/project_detail.html:419
+#: systori/templates/project/project_detail.html:421
 #: systori/templates/project/sidebar.html:18
 msgid "Contacts"
 msgstr ""
@@ -217,7 +217,7 @@ msgstr ""
 #: systori/apps/directory/models.py:51
 #: systori/templates/directory/contact_detail.html:24
 #: systori/templates/directory/projectcontact_form_add.html:20
-#: systori/templates/project/project_detail.html:427
+#: systori/templates/project/project_detail.html:429
 msgid "Association"
 msgstr ""
 
@@ -269,7 +269,7 @@ msgstr ""
 msgid "Invoice"
 msgstr ""
 
-#: systori/apps/document/forms.py:284 systori/apps/document/forms.py:786
+#: systori/apps/document/forms.py:284 systori/apps/document/forms.py:788
 msgid "At least one job must be selected."
 msgstr ""
 
@@ -290,7 +290,7 @@ msgstr ""
 #: systori/apps/document/type/adjustment.py:32
 #: systori/lib/accounting/models.py:178 systori/lib/accounting/models.py:323
 #: systori/templates/accounting/adjustment_form.html:56
-#: systori/templates/project/project_detail.html:283
+#: systori/templates/project/project_detail.html:285
 msgid "Adjustment"
 msgstr ""
 
@@ -322,7 +322,7 @@ msgstr ""
 #: systori/apps/document/type/payment.py:28
 #: systori/lib/accounting/models.py:177 systori/lib/accounting/models.py:317
 #: systori/templates/accounting/payment_form.html:50
-#: systori/templates/project/project_detail.html:281
+#: systori/templates/project/project_detail.html:283
 msgid "Payment"
 msgstr ""
 
@@ -386,7 +386,7 @@ msgstr ""
 #: systori/apps/document/type/refund.py:32 systori/lib/accounting/models.py:179
 #: systori/lib/accounting/models.py:322
 #: systori/templates/accounting/refund_form.html:43
-#: systori/templates/project/project_detail.html:368
+#: systori/templates/project/project_detail.html:370
 msgid "Refund"
 msgstr ""
 
@@ -406,31 +406,31 @@ msgstr ""
 msgid "Apply Tax"
 msgstr ""
 
-#: systori/apps/document/forms.py:821
+#: systori/apps/document/forms.py:823
 msgid "Work correction"
 msgstr ""
 
-#: systori/apps/document/forms.py:822
+#: systori/apps/document/forms.py:824
 msgid "Work correction notes"
 msgstr ""
 
-#: systori/apps/document/forms.py:824
+#: systori/apps/document/forms.py:826
 msgid "Holiday correction"
 msgstr ""
 
-#: systori/apps/document/forms.py:825
+#: systori/apps/document/forms.py:827
 msgid "Holiday correction notes"
 msgstr ""
 
-#: systori/apps/document/forms.py:827
+#: systori/apps/document/forms.py:829
 msgid "Overtime correction"
 msgstr ""
 
-#: systori/apps/document/forms.py:828
+#: systori/apps/document/forms.py:830
 msgid "Overtime correction notes"
 msgstr ""
 
-#: systori/apps/document/forms.py:853
+#: systori/apps/document/forms.py:855
 msgid "Explanation required for correction."
 msgstr ""
 
@@ -447,9 +447,9 @@ msgstr ""
 #: systori/templates/accounting/account_detail.html:26
 #: systori/templates/accounting/invoice_list.html:41
 #: systori/templates/field/timers.html:16
-#: systori/templates/project/project_detail.html:280
-#: systori/templates/project/project_detail.html:336
-#: systori/templates/project/project_detail.html:373
+#: systori/templates/project/project_detail.html:282
+#: systori/templates/project/project_detail.html:338
+#: systori/templates/project/project_detail.html:375
 #: systori/templates/timetracking/user_report.html:63
 msgid "Date"
 msgstr ""
@@ -513,7 +513,7 @@ msgstr ""
 #: systori/templates/accounting/invoice_list.html:4
 #: systori/templates/accounting/invoice_list.html:33
 #: systori/templates/main/menu_dropdown.html:23
-#: systori/templates/project/project_detail.html:227
+#: systori/templates/project/project_detail.html:229
 #: systori/templates/project/sidebar.html:16
 msgid "Invoices"
 msgstr ""
@@ -546,7 +546,7 @@ msgstr ""
 
 #: systori/apps/document/models.py:298
 #: systori/templates/accounting/invoice_list.html:40
-#: systori/templates/project/project_detail.html:275
+#: systori/templates/project/project_detail.html:277
 msgid "Payments"
 msgstr ""
 
@@ -568,7 +568,7 @@ msgstr ""
 
 #: systori/apps/document/models.py:349 systori/apps/document/models.py:408
 #: systori/apps/equipment/models.py:28 systori/apps/task/models.py:75
-#: systori/apps/task/models.py:342 systori/apps/task/models.py:468
+#: systori/apps/task/models.py:342 systori/apps/task/models.py:470
 #: systori/lib/accounting/models.py:60
 #: systori/templates/accounting/account_list.html:12
 #: systori/templates/accounting/account_list.html:41
@@ -578,8 +578,8 @@ msgstr ""
 #: systori/templates/main/templates.html:33
 #: systori/templates/main/templates.html:95
 #: systori/templates/project/project_detail.html:54
-#: systori/templates/project/project_detail.html:425
-#: systori/templates/project/project_detail.html:461
+#: systori/templates/project/project_detail.html:427
+#: systori/templates/project/project_detail.html:463
 #: systori/templates/user/user_list.html:12
 msgid "Name"
 msgstr ""
@@ -818,7 +818,7 @@ msgstr ""
 
 #: systori/apps/document/type/invoice.py:94
 #: systori/apps/document/type/proposal.py:34 systori/apps/task/models.py:353
-#: systori/apps/task/models.py:476
+#: systori/apps/task/models.py:478
 msgid "Price"
 msgstr ""
 
@@ -828,11 +828,11 @@ msgstr ""
 #: systori/apps/document/type/invoice.py:186
 #: systori/apps/document/type/proposal.py:34
 #: systori/apps/document/type/proposal.py:93
-#: systori/apps/document/type/proposal.py:112
-#: systori/apps/document/type/proposal.py:119
+#: systori/apps/document/type/proposal.py:114
+#: systori/apps/document/type/proposal.py:121
 #: systori/apps/document/type/timesheet.py:47
 #: systori/apps/document/type/timesheet.py:102 systori/apps/task/models.py:355
-#: systori/apps/task/models.py:479 systori/templates/document/timesheet.html:67
+#: systori/apps/task/models.py:481 systori/templates/document/timesheet.html:67
 msgid "Total"
 msgstr ""
 
@@ -852,7 +852,7 @@ msgid "Adjustment on {date}"
 msgstr ""
 
 #: systori/apps/document/type/invoice.py:188
-#: systori/apps/document/type/proposal.py:126
+#: systori/apps/document/type/proposal.py:129
 msgid "Total without VAT"
 msgstr ""
 
@@ -870,7 +870,7 @@ msgid "gross pay"
 msgstr ""
 
 #: systori/apps/document/type/itemized_listing.py:38
-#: systori/apps/document/type/proposal.py:127
+#: systori/apps/document/type/proposal.py:130
 #: systori/templates/accounting/invoice_card.html:31
 msgid "VAT"
 msgstr ""
@@ -913,7 +913,7 @@ msgstr ""
 msgid "Alternative"
 msgstr ""
 
-#: systori/apps/document/type/proposal.py:128
+#: systori/apps/document/type/proposal.py:131
 msgid "Total including VAT"
 msgstr ""
 
@@ -1121,7 +1121,7 @@ msgstr ""
 #: systori/apps/equipment/models.py:137
 #: systori/templates/equipment/equipment_detail.html:95
 #: systori/templates/task/editor/group_editor.html:8
-#: systori/templates/task/editor/task_editor.html:18
+#: systori/templates/task/editor/task_editor.html:16
 msgid "description"
 msgstr ""
 
@@ -1228,12 +1228,12 @@ msgid "Site Name"
 msgstr ""
 
 #: systori/apps/project/models.py:295
-#: systori/templates/project/project_detail.html:464
+#: systori/templates/project/project_detail.html:466
 msgid "Latitude"
 msgstr ""
 
 #: systori/apps/project/models.py:296
-#: systori/templates/project/project_detail.html:464
+#: systori/templates/project/project_detail.html:466
 msgid "Longitude"
 msgstr ""
 
@@ -1287,7 +1287,7 @@ msgid "Started"
 msgstr ""
 
 #: systori/apps/task/models.py:257 systori/apps/task/models.py:351
-#: systori/apps/task/models.py:472
+#: systori/apps/task/models.py:474
 msgid "Completed"
 msgstr ""
 
@@ -1298,7 +1298,7 @@ msgstr ""
 #: systori/templates/accounting/refund_form.html:39
 #: systori/templates/document/proposal_form.html:34
 #: systori/templates/main/dashboard.html:16
-#: systori/templates/project/project_detail.html:280
+#: systori/templates/project/project_detail.html:282
 #: systori/templates/task/editor/task_autocomplete.html:8
 msgid "Job"
 msgstr ""
@@ -1307,15 +1307,15 @@ msgstr ""
 msgid "Start"
 msgstr ""
 
-#: systori/apps/task/models.py:299 systori/apps/task/models.py:527
+#: systori/apps/task/models.py:299 systori/apps/task/models.py:529
 msgid "Complete"
 msgstr ""
 
-#: systori/apps/task/models.py:349 systori/apps/task/models.py:470
+#: systori/apps/task/models.py:349 systori/apps/task/models.py:472
 msgid "Quantity"
 msgstr ""
 
-#: systori/apps/task/models.py:352 systori/apps/task/models.py:474
+#: systori/apps/task/models.py:352 systori/apps/task/models.py:476
 msgid "Unit"
 msgstr ""
 
@@ -1332,28 +1332,28 @@ msgstr ""
 msgid "Done"
 msgstr ""
 
-#: systori/apps/task/models.py:500 systori/templates/main/dashboard.html:17
+#: systori/apps/task/models.py:502 systori/templates/main/dashboard.html:17
 msgid "Line Item"
 msgstr ""
 
-#: systori/apps/task/models.py:501 systori/templates/field/task.html:87
+#: systori/apps/task/models.py:503 systori/templates/field/task.html:87
 msgid "Line Items"
 msgstr ""
 
-#: systori/apps/task/models.py:538
+#: systori/apps/task/models.py:540
 msgid "Progress Report"
 msgstr ""
 
-#: systori/apps/task/models.py:539 systori/templates/field/task.html:102
+#: systori/apps/task/models.py:541 systori/templates/field/task.html:102
 #: systori/templates/main/menu_dropdown.html:20
 msgid "Progress Reports"
 msgstr ""
 
-#: systori/apps/task/models.py:548
+#: systori/apps/task/models.py:550
 msgid "Attachment"
 msgstr ""
 
-#: systori/apps/task/models.py:549
+#: systori/apps/task/models.py:551
 msgid "Attachments"
 msgstr ""
 
@@ -1528,7 +1528,7 @@ msgstr ""
 
 #: systori/lib/accounting/models.py:319
 #: systori/templates/accounting/payment_form.html:51
-#: systori/templates/project/project_detail.html:282
+#: systori/templates/project/project_detail.html:284
 msgid "Discount"
 msgstr ""
 
@@ -1663,7 +1663,7 @@ msgstr ""
 #: systori/templates/document/proposal_form.html:64
 #: systori/templates/document/timesheet.html:122
 #: systori/templates/equipment/equipment_form.html:11
-#: systori/templates/field/dailyplan.html:115
+#: systori/templates/field/dailyplan.html:118
 #: systori/templates/project/jobsite_form.html:11
 #: systori/templates/project/project_form_upload.html:9
 #: systori/templates/task/job_form.html:11
@@ -1694,11 +1694,11 @@ msgstr ""
 #: systori/templates/main/templates.html:96
 #: systori/templates/project/project_detail.html:60
 #: systori/templates/project/project_detail.html:111
-#: systori/templates/project/project_detail.html:285
-#: systori/templates/project/project_detail.html:337
-#: systori/templates/project/project_detail.html:378
-#: systori/templates/project/project_detail.html:430
-#: systori/templates/project/project_detail.html:465
+#: systori/templates/project/project_detail.html:287
+#: systori/templates/project/project_detail.html:339
+#: systori/templates/project/project_detail.html:380
+#: systori/templates/project/project_detail.html:432
+#: systori/templates/project/project_detail.html:467
 #: systori/templates/user/user_list.html:15
 msgid "Actions"
 msgstr ""
@@ -1712,11 +1712,11 @@ msgstr ""
 #: systori/templates/main/templates.html:44
 #: systori/templates/main/templates.html:81
 #: systori/templates/main/templates.html:104
-#: systori/templates/project/project_detail.html:148
-#: systori/templates/project/project_detail.html:299
-#: systori/templates/project/project_detail.html:347
-#: systori/templates/project/project_detail.html:392
-#: systori/templates/project/project_detail.html:477
+#: systori/templates/project/project_detail.html:150
+#: systori/templates/project/project_detail.html:301
+#: systori/templates/project/project_detail.html:349
+#: systori/templates/project/project_detail.html:394
+#: systori/templates/project/project_detail.html:479
 #: systori/templates/user/user_list.html:33
 msgid "Edit"
 msgstr ""
@@ -1729,11 +1729,11 @@ msgstr ""
 #: systori/templates/main/templates.html:82
 #: systori/templates/main/templates.html:105
 #: systori/templates/project/project_detail.html:77
-#: systori/templates/project/project_detail.html:147
-#: systori/templates/project/project_detail.html:298
-#: systori/templates/project/project_detail.html:346
-#: systori/templates/project/project_detail.html:391
-#: systori/templates/project/project_detail.html:479
+#: systori/templates/project/project_detail.html:149
+#: systori/templates/project/project_detail.html:300
+#: systori/templates/project/project_detail.html:348
+#: systori/templates/project/project_detail.html:393
+#: systori/templates/project/project_detail.html:481
 #: systori/templates/user/user_list.html:34
 msgid "Delete"
 msgstr ""
@@ -1952,9 +1952,9 @@ msgid "Contact Details"
 msgstr ""
 
 #: systori/templates/directory/contact_detail.html:7
-#: systori/templates/field/dailyplan.html:25
-#: systori/templates/field/dailyplan.html:51
-#: systori/templates/field/dailyplan.html:78
+#: systori/templates/field/dailyplan.html:28
+#: systori/templates/field/dailyplan.html:54
+#: systori/templates/field/dailyplan.html:81
 #: systori/templates/project/project_detail.html:18
 msgid "edit"
 msgstr ""
@@ -2065,8 +2065,8 @@ msgstr ""
 
 #: systori/templates/equipment/equipment_list.html:27
 #: systori/templates/field/assign_equipment.html:27
-#: systori/templates/field/dailyplan.html:51
 #: systori/templates/field/dailyplan.html:54
+#: systori/templates/field/dailyplan.html:57
 #: systori/templates/field/dashboard.html:20
 #: systori/templates/main/menu_dropdown.html:16
 msgid "Equipment"
@@ -2102,26 +2102,26 @@ msgstr ""
 msgid "Dashboard"
 msgstr ""
 
-#: systori/templates/field/dailyplan.html:25
 #: systori/templates/field/dailyplan.html:28
+#: systori/templates/field/dailyplan.html:31
 msgid "Workers"
 msgstr ""
 
-#: systori/templates/field/dailyplan.html:44
+#: systori/templates/field/dailyplan.html:47
 msgid "No workers have been assigned."
 msgstr ""
 
-#: systori/templates/field/dailyplan.html:70
+#: systori/templates/field/dailyplan.html:73
 msgid "No equipment has been assigned."
 msgstr ""
 
-#: systori/templates/field/dailyplan.html:78
 #: systori/templates/field/dailyplan.html:81
+#: systori/templates/field/dailyplan.html:84
 #: systori/templates/project/project_planning.html:269
 msgid "Tasks"
 msgstr ""
 
-#: systori/templates/field/dailyplan.html:98
+#: systori/templates/field/dailyplan.html:101
 msgid "No tasks have been assigned."
 msgstr ""
 
@@ -2147,7 +2147,7 @@ msgid "search"
 msgstr ""
 
 #: systori/templates/field/jobsite_list.html:19
-#: systori/templates/project/project_detail.html:455
+#: systori/templates/project/project_detail.html:457
 msgid "Job Sites"
 msgstr ""
 
@@ -2259,7 +2259,7 @@ msgstr ""
 #: systori/templates/project/progress/job_loop.html:15
 #: systori/templates/project/progress/job_loop.html:20
 #: systori/templates/task/editor/lineitem_editor.html:10
-#: systori/templates/task/editor/task_editor.html:10
+#: systori/templates/task/editor/task_editor.html:14
 msgid "total"
 msgstr ""
 
@@ -2295,81 +2295,89 @@ msgstr ""
 msgid "with Line Items Print"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:156
-msgid "Create Proposal"
+#: systori/templates/project/project_detail.html:139
+msgid "only groups Email"
+msgstr ""
+
+#: systori/templates/project/project_detail.html:140
+msgid "only groups Print"
 msgstr ""
 
 #: systori/templates/project/project_detail.html:158
-msgid "No jobs available for new proposal."
+msgid "Create Proposal"
 msgstr ""
 
 #: systori/templates/project/project_detail.html:160
-#: systori/templates/project/project_detail.html:244
-#: systori/templates/project/project_detail.html:258
-#: systori/templates/project/project_detail.html:415
+msgid "No jobs available for new proposal."
+msgstr ""
+
+#: systori/templates/project/project_detail.html:162
+#: systori/templates/project/project_detail.html:246
+#: systori/templates/project/project_detail.html:260
+#: systori/templates/project/project_detail.html:417
 msgid "No billable contact defined."
 msgstr ""
 
-#: systori/templates/project/project_detail.html:238
+#: systori/templates/project/project_detail.html:240
 msgid "Create next invoice in this sequence."
 msgstr ""
 
-#: systori/templates/project/project_detail.html:241
+#: systori/templates/project/project_detail.html:243
 msgid ""
 "Last invoice in sequence must be marked as sent before a new one can be "
 "created."
 msgstr ""
 
-#: systori/templates/project/project_detail.html:254
+#: systori/templates/project/project_detail.html:256
 msgid "Start new invoice sequence."
 msgstr ""
 
-#: systori/templates/project/project_detail.html:284
-#: systori/templates/project/project_detail.html:376
+#: systori/templates/project/project_detail.html:286
+#: systori/templates/project/project_detail.html:378
 msgid "Applied"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:317
+#: systori/templates/project/project_detail.html:319
 msgid "Add Payment"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:331
+#: systori/templates/project/project_detail.html:333
 msgid "Adjustments"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:355
+#: systori/templates/project/project_detail.html:357
 msgid "Add Adjustment"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:375
+#: systori/templates/project/project_detail.html:377
 msgid "Refunded"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:377
+#: systori/templates/project/project_detail.html:379
 msgid "Issued to Customer"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:413
+#: systori/templates/project/project_detail.html:415
 msgid "Add Refund"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:429
+#: systori/templates/project/project_detail.html:431
 msgid "Billable"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:444
+#: systori/templates/project/project_detail.html:446
 msgid "Set Billable"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:445
+#: systori/templates/project/project_detail.html:447
 msgid "Remove"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:453
+#: systori/templates/project/project_detail.html:455
 msgid "Add Contact"
 msgstr ""
 
-#: systori/templates/project/project_detail.html:487
+#: systori/templates/project/project_detail.html:489
 msgid "Create Job Site"
 msgstr ""
 
@@ -2379,6 +2387,11 @@ msgstr ""
 
 #: systori/templates/project/project_form.html:15
 msgid "Save &uarr; List"
+msgstr ""
+
+#: systori/templates/project/project_form.html:17
+#: systori/templates/timetracking/user_report.html:66
+msgid "delete"
 msgstr ""
 
 #: systori/templates/project/project_list.html:108
@@ -2429,7 +2442,7 @@ msgstr ""
 
 #: systori/templates/project/project_progress.html:64
 #: systori/templates/task/editor/lineitem_editor.html:8
-#: systori/templates/task/editor/task_editor.html:8
+#: systori/templates/task/editor/task_editor.html:12
 msgid "unit"
 msgstr ""
 
@@ -2458,15 +2471,31 @@ msgid "line item"
 msgstr ""
 
 #: systori/templates/task/editor/lineitem_editor.html:7
-#: systori/templates/task/editor/task_editor.html:7
+#: systori/templates/task/editor/task_editor.html:11
 msgid "qty"
+msgstr ""
+
+#: systori/templates/task/editor/lineitem_editor.html:12
+msgid "exclude"
+msgstr ""
+
+#: systori/templates/task/editor/lineitem_editor.html:13
+msgid "flag"
 msgstr ""
 
 #: systori/templates/task/editor/task_editor.html:6
 msgid "task"
 msgstr ""
 
-#: systori/templates/task/editor/task_editor.html:33
+#: systori/templates/task/editor/task_editor.html:7
+msgid "variant allocation number"
+msgstr ""
+
+#: systori/templates/task/editor/task_editor.html:9
+msgid "provisional"
+msgstr ""
+
+#: systori/templates/task/editor/task_editor.html:31
 msgid "Line items do not add up to the task price."
 msgstr ""
 
@@ -2508,10 +2537,6 @@ msgstr ""
 #: systori/templates/timetracking/timers_confirm_delete.html:8
 #, python-format
 msgid "Are you sure you want to delete the time range \"%(timerange)s\"?"
-msgstr ""
-
-#: systori/templates/timetracking/user_report.html:66
-msgid "delete"
 msgstr ""
 
 #: systori/templates/timetracking/user_report.html:105

@@ -23,7 +23,7 @@ from .font import FontManager
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-def collate_tasks(proposal, font, available_width):
+def collate_tasks(proposal, only_groups, font, available_width):
     items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
@@ -76,7 +76,7 @@ def collate_tasks(proposal, font, available_width):
         items.row_style('ALIGNMENT', 1, -1, "RIGHT")
         items.row_style('BOTTOMPADDING', 0, -1, 10)
 
-    def traverse(parent, depth):
+    def traverse(parent, depth, only_groups):
         items.row(b(parent['code'], font), b(parent['name'], font))
         items.row_style('SPAN', 1, -1)
         lines = simpleSplit(parent['description'], font.normal.fontName, items.font_size, description_width)
@@ -87,7 +87,7 @@ def collate_tasks(proposal, font, available_width):
         items.row_style('BOTTOMPADDING', 0, -1, 10)
 
         for group in parent.get('groups', []):
-            traverse(group, depth + 1)
+            traverse(group, depth + 1, only_groups)
 
             if not group.get('groups', []) and group.get('tasks', []):
                 items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
@@ -98,16 +98,19 @@ def collate_tasks(proposal, font, available_width):
                 items.row_style('VALIGN', 0, -1, "BOTTOM")
                 items.row('')
 
-        for task in parent['tasks']:
-            add_task(task)
+        if not only_groups:
+            for task in parent['tasks']:
+                add_task(task)
 
     for job in proposal['jobs']:
 
         items.row(b(job['code'], font), b(job['name'], font))
+        if job.get('description', False):
+            items.row('', b(job['description'], font))
         items.row_style('SPAN', 1, -1)
 
         for group in job.get('groups', []):
-            traverse(group, 1)
+            traverse(group, 1, only_groups)
             if not group.get('groups', []) and group.get('tasks', []):
                 items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
                           '', '', '', money(group['estimate']))
@@ -119,8 +122,9 @@ def collate_tasks(proposal, font, available_width):
             totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
                        money(group['estimate']))
 
-        for task in job.get('tasks', []):  # support old JSON
-            add_task(task)
+        if not only_groups:
+            for task in job.get('tasks', []):  # support old JSON
+                add_task(task)
 
     totals.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
     totals.row(_("Total without VAT"), money(proposal['estimate_total'].net))
@@ -197,7 +201,7 @@ def collate_lineitems(proposal, available_width, font):
 
     return pages
 
-def render(proposal, letterhead, with_lineitems, format):
+def render(proposal, letterhead, with_lineitems, only_groups, format):
 
     with BytesIO() as buffer:
 
@@ -224,7 +228,7 @@ def render(proposal, letterhead, with_lineitems, format):
 
             Spacer(0, 4*mm)
 
-        ] + collate_tasks(proposal, font, available_width) + [
+        ] + collate_tasks(proposal, only_groups, font, available_width) + [
 
             Spacer(0, 10*mm),
 
