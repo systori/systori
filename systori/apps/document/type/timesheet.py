@@ -180,8 +180,9 @@ class TimeSheetCollector:
         self.paid_leave = [0]*self.total_days
         self.unpaid_leave = [0]*self.total_days
         # calculated
-        self.compensation = [0]*self.total_days
+        self.payables = [0]*self.total_days
         self.overtime = [0]*self.total_days
+        self.compensation = [0]*self.total_days
         self.errors = []
         self.calculated = False
 
@@ -219,6 +220,7 @@ class TimeSheetCollector:
                     self.overtime[day] = min(self.work[day], total - Timer.WORK_HOURS)
 
             self.paid_leave[day] = max(self.paid_leave[day], Timer.WORK_HOURS - total)
+            self.payables[day] = self.work[day] + payable + self.paid_leave[day]
             self.compensation[day] = work + payable + self.paid_leave[day]
 
         self.calculated = True
@@ -244,10 +246,12 @@ class TimeSheetCollector:
             'unpaid_leave': self.unpaid_leave,
             'unpaid_leave_total': sum(self.unpaid_leave),
 
-            'compensation': self.compensation,
-            'compensation_total': sum(self.compensation),
+            'payables': self.payables,
+            'payables_total': sum(self.payables),
             'overtime': self.overtime,
             'overtime_total': sum(self.overtime),
+            'compensation': self.compensation,
+            'compensation_total': sum(self.compensation),
         }
 
 

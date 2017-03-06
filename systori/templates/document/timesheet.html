@@ -36,7 +36,7 @@
           {% for day in row %}
             <td>{% if day != 0 %}{{ day|tosexagesimalhours }}{% endif %}</td>
           {% endfor %}
-          <td {% if name != 'overtime' %}class="info"{% endif %}>{{ total|tosexagesimalhours }}</td>
+          <td class="info">{{ total|tosexagesimalhours }}</td>
           <td>{{ label }}</td>
         </tr>
       {% endfor %}
@@ -60,23 +60,23 @@
         <td>{% if object.json.vacation_transferred != 0 %}{{ object.json.vacation_transferred|workdaysverbose }}{% endif %}</td>
         <td>{% if object.json.vacation_correction != 0 %}{{ object.json.vacation_correction|workdaysverbose }}{% endif %}</td>
         <td>{% if object.json.vacation_total != 0 %}{{ object.json.vacation_total|dayshoursgainedverbose }}{% endif %}</td>
-        <td class="info">{{ object.json.vacation_balance|toworkdays }} {{ object.json.vacation_balance|workdayslabel }} ({{ object.json.vacation_balance|todecimalhours }} {{ object.json.vacation_balance|hourslabel }})</td>
+        <td class="info">{{ object.json.vacation_balance|toworkdays }} {{ object.json.vacation_balance|workdayslabel }}</td>
       </tr>
 
       <tr>
         <td>{% trans "Overtime" %}</td>
-        <td>{% if object.json.overtime_transferred != 0 %}{{ object.json.overtime_transferred|hoursverbose }}{% endif %}</td>
-        <td>{% if object.json.overtime_correction != 0 %}{{ object.json.overtime_correction|hoursverbose }}{% endif %}</td>
-        <td>{% if object.json.overtime_net != 0 %}{{ object.json.overtime_net|hoursverbose }}{% endif %}</td>
-        <td class="info">{% if object.json.overtime_balance != 0 %}{{ object.json.overtime_balance|hoursdays }}{% endif %}</td>
+        <td>{% if object.json.overtime_transferred != 0 %}{{ object.json.overtime_transferred|tosexagesimalhours }}{% endif %}</td>
+        <td>{% if object.json.overtime_correction != 0 %}{{ object.json.overtime_correction|tosexagesimalhours }}{% endif %}</td>
+        <td>{{ object.json.overtime_net|tosexagesimalhours }} ({{ object.json.overtime_total|tosexagesimalhours }} - {{ object.json.paid_leave_total|tosexagesimalhours }})</td>
+        <td class="info">{{ object.json.overtime_balance|hoursdays }}</td>
       </tr>
 
       <tr>
-        <td>{% trans "Final Total" context "timesheet" %}</td>
+        <td>{% trans "Compensation" context "timesheet" %}</td>
         <td></td>
-        <td>{% if object.json.work_correction != 0 %}{{ object.json.work_correction|hoursverbose }}{% endif %}</td>
-        <td>{{ object.json.work_total|hoursverbose }}</td>
-        <td class="info">{{ object.json.work_balance|hoursverbose }}</td>
+        <td>{% if object.json.work_correction != 0 %}{{ object.json.work_correction|tosexagesimalhours }}{% endif %}</td>
+        <td>{{ object.json.payables_total|tosexagesimalhours }} - {{ object.json.overtime_total|tosexagesimalhours }}</td>
+        <td class="info">{{ object.json.compensation_final|tosexagesimalhours }}</td>
       </tr>
 
     </table>
