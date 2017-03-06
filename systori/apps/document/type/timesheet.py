@@ -1,5 +1,4 @@
 from io import BytesIO
-from collections import OrderedDict
 
 from reportlab.lib.units import mm
 from reportlab.platypus import Paragraph, Spacer, PageBreak
@@ -17,7 +16,7 @@ from .style import LetterheadCanvas
 from .style import get_available_width_height_and_pagesize, b
 from .font import FontManager
 
-from systori.lib.templatetags.customformatting import todecimalhours, hourslabel,\
+from systori.lib.templatetags.customformatting import todecimalhours,\
     dayshoursgainedverbose, dayshours, workdaysverbose, hoursverbose, hoursdays
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
@@ -45,7 +44,6 @@ def create_timesheet_table(json, available_width, font):
             names.append("")
             numbers.append("")
     names.append(_("Total"))
-    names.append(_("Project"))
 
     ts = TableStyler(font, base_style=False)
     ts.style.append(('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black))
@@ -80,28 +78,21 @@ def create_timesheet_table(json, available_width, font):
             ts.row_style('BACKGROUND', 0, -1, colors.HexColor(0xCCFFFF))
         stripe_idx += 1
 
-    project_rows = 3
-    for project in json['projects']:
-        ts.row(*render_row(project['days'], project['total'], project['name']))
+    lookup = dict(Timer.KIND_CHOICES)
+    lookup.update({
+        'compensation': _('Compensation'),
+        'overtime': _('Overtime')
+    })
+    row_types = [
+        'work', 'vacation', 'sick', 'public_holiday',
+        'paid_leave', 'unpaid_leave', 'compensation',
+        'overtime'
+    ]
+    for row in row_types:
         stripe()
-        project_rows -= 1
-
-    while project_rows > 0:
-        ts.row("")
-        stripe()
-        project_rows -= 1
-
-    kind_choices = dict(Timer.KIND_CHOICES)
-    for special in json['special']:
-        ts.row(*render_row(special['days'], special['total'], kind_choices[special['name']]))
-        stripe()
-
-    ts.row(*render_row(json['holiday'], json['holiday_total'], _('Holiday')))
-    stripe()
-
-    ts.row(*render_row(json['work'], json['work_total'], _("Total")))
-    ts.row_style('LINEABOVE', 0, -1, 1.25, colors.black)
-    ts.row(*render_row(json['overtime'], json['overtime_total'], _("Overtime")))
+        if row == 'overtime':
+            ts.row_style('LINEABOVE', 0, -1, 1.25, colors.black)
+        ts.row(*render_row(json[row], json[row+'_total'], lookup[row]))
 
     return ts.get_table(colWidths=[(available_width-132)/31]*31+[32, 100], rowHeights=18)
 
@@ -112,11 +103,11 @@ def create_rolling_balances(month, json, font):
     ts.row("", pgettext_lazy("timesheet", "Previous"), pgettext_lazy("timesheet", "Correction"), month,
            b(pgettext_lazy("timesheet", "Balance"), font))
     ts.row(
-        _("Holiday"),
-        (workdaysverbose(json['holiday_transferred']) if json['holiday_transferred'] != 0 else ''),
-        (workdaysverbose(json['holiday_correction']) if json['holiday_correction'] != 0 else '' ),
-        dayshoursgainedverbose(json['holiday_total']),
-        b(dayshours(json['holiday_balance']), font)
+        _("Vacation"),
+        (workdaysverbose(json['vacation_transferred']) if json['vacation_transferred'] != 0 else ''),
+        (workdaysverbose(json['vacation_correction']) if json['vacation_correction'] != 0 else '' ),
+        dayshoursgainedverbose(json['vacation_total']),
+        b(dayshours(json['vacation_balance']), font)
     )
     ts.row(
         _("Overtime"),
@@ -174,73 +165,105 @@ class TimeSheetCollector:
 
     def __init__(self, year, month):
         self.first_weekday, self.total_days = calendar.monthrange(year, month)
-        self.projects = OrderedDict()
-        self.special = OrderedDict([
-            (c, {'name': c, 'days': [0]*self.total_days, 'total': 0})
-            for c in [p[0] for p in Timer.KIND_CHOICES if p[0] not in (Timer.WORK, Timer.HOLIDAY)]
-        ])
+        # timers
         self.work = [0]*self.total_days
-        self.work_total = 0
+        self.vacation = [0]*self.total_days
+        self.sick = [0]*self.total_days
+        self.public_holiday = [0]*self.total_days
+        self.paid_leave = [0]*self.total_days
+        self.unpaid_leave = [0]*self.total_days
+        # calculated
+        self.compensation = [0]*self.total_days
         self.overtime = [0]*self.total_days
-        self.overtime_total = 0
-        self.holiday = [0]*self.total_days
-        self.holiday_total = 0
+        self.errors = []
+        self.calculated = False
 
     def add(self, timer):
-        day_idx = timer.date.day-1
-        category = timer.kind
+        days = getattr(self, timer.kind)
+        days[timer.date.day-1] += timer.duration
 
-        slot = None
-        if category == Timer.WORK:
-            slot = self.projects.setdefault(
-                None, {'name': '', 'days': [0]*self.total_days, 'total': 0}
-            )
-        elif category in self.special:
-            slot = self.special[category]
+    def calculate(self):
+        assert not self.calculated
 
-        if slot:
-            slot['days'][day_idx] += timer.duration
-            slot['total'] += timer.duration
+        for day in range(self.total_days):
 
-        if category == timer.HOLIDAY:
-            self.holiday[day_idx] += timer.duration
-            self.holiday_total += timer.duration
+            # Work is capped at 8hrs.
+            work = self.work[day]
+            if self.work[day] > Timer.WORK_HOURS:
+                work = Timer.WORK_HOURS
 
-        if category != timer.UNPAID_LEAVE:
-            self.work[day_idx] += timer.duration
+            # Basic payables excluding paid/unpaid leave.
+            payable = sum([
+                work,
+                self.sick[day],
+                self.vacation[day],
+                self.public_holiday[day],
+            ])
+
+            if (payable+self.paid_leave[day]) == 0:
+                # Day has nothing, skip it.
+                continue
+
+            total = payable + self.unpaid_leave[day]
+
+            overtime = 0
+
+            if total < Timer.WORK_HOURS:
+                # All of the payables + unpaid
+                # did not add up to full work day
+                # leads to negative overtime.
+                overtime = total - Timer.WORK_HOURS
+
+            elif self.work[day] > Timer.WORK_HOURS:
+                # Work hours is greater than full day
+                # leads to accumulated overtime.
+                overtime = self.work[day] - Timer.WORK_HOURS
+
+            # Overtime and paid_leave are two sides of the same coin.
+            # Overtime is calculated based on other payables and
+            # paid_leave is manually set as PAID_LEAVE timers.
+            # They have opposite parity.
+            if -overtime > self.paid_leave[day]:
+                # Calculated overtime was larger than manual paid_leave.
+                # For example, work is 6hrs, paid_leave is 1hr, that means
+                # overtime would be -2. We need to override paid_leave
+                # to be 2hrs to balance the equation.
+                self.paid_leave[day] = -overtime
+            elif overtime < -self.paid_leave[day]:
+                # Calculated overtime is less than the manually defined paid_leave.
+                # In this case the manual overrides the calculated.
+                overtime = -self.paid_leave[day]
+
+            self.overtime[day] = overtime
+            self.compensation[day] = payable + self.paid_leave[day]
+
+        self.calculated = True
 
     @property
     def data(self):
-        # Calculate Overtime
-        for idx, total in enumerate(self.work):
-            if total > Timer.WORK_HOURS:
-                self.work[idx] = Timer.WORK_HOURS
-                self.work_total += Timer.WORK_HOURS
-                self.overtime[idx] = total - Timer.WORK_HOURS
-            elif total > 0:
-                self.work_total += total
-                self.overtime[idx] = total - Timer.WORK_HOURS
-            self.overtime_total += self.overtime[idx]
+        if not self.calculated:
+            self.calculate()
         return {
             'first_weekday': self.first_weekday,
             'total_days': self.total_days,
-            'projects': list(self.projects.values()),
-            'special': list(self.special.values()),
 
             'work': self.work,
-            'work_total': self.work_total,
-            'work_balance': 0,
+            'work_total': sum(self.work),
+            'vacation': self.vacation,
+            'vacation_total': sum(self.vacation),
+            'sick': self.sick,
+            'sick_total': sum(self.sick),
+            'public_holiday': self.public_holiday,
+            'public_holiday_total': sum(self.public_holiday),
+            'paid_leave': self.paid_leave,
+            'paid_leave_total': sum(self.paid_leave),
+            'unpaid_leave': self.unpaid_leave,
+            'unpaid_leave_total': sum(self.unpaid_leave),
 
+            'compensation': self.compensation,
+            'compensation_total': sum(self.compensation),
             'overtime': self.overtime,
-            'overtime_total': self.overtime_total,
-            'overtime_transferred': 0,
-            'overtime_balance': 0,
-
-            'holiday': self.holiday,
-            'holiday_total': self.holiday_total,
-            'holiday_added':  0,
-            'holiday_transferred':  0,
-            'holiday_balance': 0,
+            'overtime_total': sum(self.overtime),
         }
 
 

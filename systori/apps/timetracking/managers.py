@@ -18,7 +18,7 @@ class TimerQuerySet(QuerySet):
         return self.aggregate(total_duration=Sum('duration'))['total_duration'] or 0
 
     def filter_running(self):
-        return self.filter(end__isnull=True).exclude(kind=self.model.CORRECTION)
+        return self.filter(end__isnull=True)
 
     @atomic
     def stop_abandoned(self):

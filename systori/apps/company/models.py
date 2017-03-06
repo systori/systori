@@ -77,7 +77,7 @@ class Worker(models.Model):
                                          help_text=_('allow this worker to start/stop work timer'))
 
     @property
-    def holiday(self) -> int:
+    def vacation(self) -> int:
         """ TODO: store in database for each worker type/contract. """
         return int(2.5 * 8 * 60 * 60)
 

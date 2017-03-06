@@ -675,7 +675,7 @@ class TimesheetViewTests(ClientTestCase):
             worker=self.worker,
             start=january.replace(day=10),
             end=january.replace(day=10, hour=17),
-            kind=Timer.HOLIDAY
+            kind=Timer.VACATION
         )
         return self.client.get(reverse('timesheets.generate', args=[2017, 1]))
 
