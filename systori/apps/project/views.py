@@ -152,7 +152,7 @@ class GAEBImportView(FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        if 'project_pk' in kwargs:
+        if 'project_pk' in self.kwargs:
             kwargs['project'] = self.request.project
         return kwargs
 
