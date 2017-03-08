@@ -4,17 +4,17 @@ from django.db import migrations, models
 from postgres_schema.operations import RunInSchemas
 
 
-def rename_timer_kinds(apps, schema_editor):
-    Timer = apps.get_model("timetracking", "Timer")
-    for timer in Timer.objects.filter(kind__in=['holiday', 'training', 'illness']):
+def update_timers(apps, schema_editor):
+
+    from systori.apps.timetracking.models import Timer
+    for timer in Timer.objects.all():
         if timer.kind == 'holiday':
             timer.kind = 'vacation'
         elif timer.kind == 'training':
             timer.kind = 'work'
         elif timer.kind == 'illness':
             timer.kind = 'sick'
-        else:
-            raise AttributeError()
+        timer.duration = timer.running_duration
         timer.save()
 
     from systori.apps.document.models import Timesheet
@@ -33,10 +33,58 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        RunInSchemas(migrations.RunPython(rename_timer_kinds)),
+        migrations.AlterModelOptions(
+            name='timer',
+            options={'ordering': ('started',), 'verbose_name': 'timer', 'verbose_name_plural': 'timers'},
+        ),
+        migrations.RenameField(
+            model_name='timer',
+            old_name='end_latitude',
+            new_name='ending_latitude',
+        ),
+        migrations.RenameField(
+            model_name='timer',
+            old_name='end_longitude',
+            new_name='ending_longitude',
+        ),
+        migrations.RenameField(
+            model_name='timer',
+            old_name='start_latitude',
+            new_name='starting_latitude',
+        ),
+        migrations.RenameField(
+            model_name='timer',
+            old_name='start_longitude',
+            new_name='starting_longitude',
+        ),
+        migrations.AlterField(
+            model_name='timer',
+            name='start',
+            field=models.DateTimeField(db_index=True),
+        ),
+        migrations.RenameField(
+            model_name='timer',
+            old_name='start',
+            new_name='started',
+        ),
+        migrations.RenameField(
+            model_name='timer',
+            old_name='end',
+            new_name='stopped',
+        ),
+        migrations.RemoveField(
+            model_name='timer',
+            name='date',
+        ),
+        migrations.AlterField(
+            model_name='timer',
+            name='duration',
+            field=models.IntegerField(default=0, help_text='in minutes'),
+        ),
         migrations.AlterField(
             model_name='timer',
             name='kind',
             field=models.CharField(choices=[('work', 'Work'), ('vacation', 'Vacation'), ('sick', 'Sick'), ('public_holiday', 'Public holiday'), ('paid_leave', 'Paid leave'), ('unpaid_leave', 'Unpaid leave')], db_index=True, default='work', max_length=32),
         ),
+        RunInSchemas(migrations.RunPython(update_timers)),
     ]

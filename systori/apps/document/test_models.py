@@ -1,6 +1,7 @@
 from decimal import Decimal
 from datetime import datetime
 from django.test import TestCase
+from django.utils import timezone
 from django.utils.translation import activate
 
 from ..company.factories import CompanyFactory
@@ -215,7 +216,7 @@ class TimesheetTests(TestCase):
 
     def sheet(self, dt):
         def hrs(secs):
-            return secs/60/60
+            return secs/60
 
         sheet = Timesheet(
             document_date=dt,
@@ -270,8 +271,8 @@ class TimesheetTests(TestCase):
     def timer(self, start_date, end_hour, kind=Timer.WORK):
         Timer.objects.create(
             worker=self.worker,
-            start=start_date,
-            end=start_date.replace(hour=end_hour),
+            started=start_date.replace(tzinfo=timezone.utc),
+            stopped=start_date.replace(hour=end_hour, tzinfo=timezone.utc),
             kind=kind
         )
 

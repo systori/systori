@@ -79,7 +79,7 @@ class Worker(models.Model):
     @property
     def vacation(self) -> int:
         """ TODO: store in database for each worker type/contract. """
-        return int(2.5 * 8 * 60 * 60)
+        return int(2.5 * 8 * 60)
 
     @classmethod
     def grant_superuser_access(cls, user, company):

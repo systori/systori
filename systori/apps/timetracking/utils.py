@@ -4,7 +4,16 @@ from typing import Iterator, Tuple
 
 from django.utils import timezone
 
-from systori.lib.templatetags.customformatting import format_seconds
+from systori.lib.templatetags.customformatting import tosexagesimalhours
+
+
+def calculate_duration_minutes(started, stopped=None):
+    if stopped is None:
+        stopped = timezone.now()
+    started = started.replace(second=0, microsecond=0)
+    stopped = stopped.replace(second=0, microsecond=0)
+    seconds = (stopped - started).total_seconds()
+    return int(seconds // 60)
 
 
 WORK_DAY = timedelta(hours=8).total_seconds()
@@ -31,14 +40,6 @@ def format_days(seconds):
 def to_current_timezone(date_time):
     return date_time.astimezone(timezone.get_current_timezone())
 
-
-def round_to_nearest_multiple(seconds, multiplier=36):
-    remainder = seconds % multiplier
-    if remainder >= (multiplier/2):
-        return seconds + (multiplier-remainder)
-    else:
-        return seconds - remainder
-
 def get_timetracking_workers(company):
     return company.active_workers(is_timetracking_enabled=True)
 
@@ -49,19 +50,21 @@ def get_timetracking_workers(company):
 def get_worker_dashboard_report(worker):
     from .models import Timer
     now = timezone.now()
-    timers = Timer.objects.filter_month(now.year, now.month).filter(
-        worker=worker).order_by('start')
+    timers = Timer.objects\
+        .filter_month(now.year, now.month)\
+        .filter(worker=worker)\
+        .order_by('started')
     report = OrderedDict()
     for timer in timers:
-        date = timer.date.isoformat()
+        date = timer.started.date().isoformat()
         if not report.get(date, False):
             report[date] = {}
-            report[date]['date'] = timer.date
+            report[date]['date'] = timer.started.date()
             report[date]['timers'] = []
             report[date]['total'] = 0
             report[date]['overtime'] = 0
         report[date]['timers'].append(timer)
-        report[date]['total'] += timer.get_duration_seconds()
+        report[date]['total'] += timer.running_duration
 
     for date, row in report.items():
         row['overtime'] = row['total'] - Timer.WORK_HOURS
@@ -107,8 +110,8 @@ def get_daily_workers_report(workers, date=None):
 def get_running_timer_duration(worker):
     from .models import Timer
     timer = Timer.objects.filter_running().filter(worker=worker).first()
-    duration = timer.get_duration_seconds() if timer else 0
-    return format_seconds(duration, '%H:%M:%S')
+    duration = timer.running_duration if timer else 0
+    return tosexagesimalhours(duration)
 
 
 def get_workers_statuses(workers):

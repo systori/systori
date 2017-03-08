@@ -1,7 +1,7 @@
 from django import template
 
 from systori.apps.company.models import Worker
-from systori.lib.templatetags.customformatting import format_seconds
+from systori.lib.templatetags.customformatting import tosexagesimalhours
 from ..utils import get_workers_statuses
 
 
@@ -10,18 +10,17 @@ register = template.Library()
 
 @register.filter
 def seconds_to_hours(value):
-    return format_seconds(value or 0)
+    return tosexagesimalhours(value or 0)
 
 
 @register.filter
-def seconds_to_pixels(value):
-    pixel = value/60
+def seconds_to_pixels(pixel):
     return 130 if pixel < 130 else pixel
 
 
 @register.filter
 def overtime_from_total(value):
-    return format_seconds(value-28800)
+    return tosexagesimalhours(value-60*8)
 
 
 class StatusLoader(template.Node):
