@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n l10n static bootstrap timetracking %}
+{% load i18n l10n static bootstrap customformatting timetracking %}
 
 {% block head %}
 {{ block.super }}
@@ -75,7 +75,7 @@
                     {% if timer.kind == "work" %} progress-bar-success
                     {% elif timer.kind == "holiday" %} progress-bar-warning
                     {% endif %}" role="progressbar" style="width:{{ timer.duration|seconds_to_pixels }}px">
-                    {{ timer.start|time:"H:i" }} - {{ timer.end|time:"H:i" }} ({{ timer.duration|seconds_to_hours }})
+                    {{ timer.start|time:"H:i" }} - {{ timer.end|time:"H:i" }} ({{ timer.duration|hours }})
                     <a href="{% url 'timer.delete' pk %}">
                        <span class="glyphicon glyphicon-trash" aria-hidden="true" style="top:2px;"></span>
                     </a>
@@ -87,7 +87,7 @@
             {% endfor %}
             </div>
          </td>
-         <td>{{ entry.total|overtime_from_total }} ({{ entry.total|seconds_to_hours }})</td>
+         <td>{{ entry.total|overtime_from_total }} ({{ entry.total|hours }})</td>
          <td>
             <a href="{% url 'timer.delete.selected_day' date timesheet_worker.id %}">
                <span class="glyphicon glyphicon-trash" aria-hidden="true" style="top:2px;"></span>
@@ -108,7 +108,7 @@
       <td>{% trans "Holidays available" %}</td><td>{{ report.holidays_available }}</td>
     </tr>
     <tr>
-      <td>{% trans "Overtime" %}</td><td>{{ report.overtime|seconds_to_hours }}</td>
+      <td>{% trans "Overtime" %}</td><td>{{ report.overtime|hours }}</td>
     </tr>
   </table>
 </div>

@@ -1,13 +1,13 @@
-{% load timetracking l10n %}
+{% load l10n timetracking customformatting %}
 <tr>
     <td data-mapping="date">{{ row.date|localize }}</td>
     <td>
     {% for timer in row.timers %}
-        {{ timer.start|time:"H:i" }} - {{ timer.end|time:"H:i" }} ({{ timer.duration|seconds_to_hours }})
+        {{ timer.start|time:"H:i" }} - {{ timer.end|time:"H:i" }} ({{ timer.duration|hours }})
         {% if not forloop.last %}
          <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
         {% endif %}
     {% endfor %}
     </td>
-    <td>{{ row.overtime|seconds_to_hours }}</td>
+    <td>{{ row.overtime|hours }}</td>
 </tr>
