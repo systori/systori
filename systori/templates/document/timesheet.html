@@ -10,6 +10,13 @@
   }
   </style>
 
+  {% if saved %}
+  <div class="alert alert-success" role="alert">
+    {% trans "Correction saved." %}
+    <a class="alert-link" href="{% url 'timesheets' %}">{% trans "Return to timesheets." %}</a>
+  </div>
+  {% endif %}
+
   <form method="post" autocomplete="off">{% csrf_token %}
 
     <h2>
