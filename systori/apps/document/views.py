@@ -244,10 +244,9 @@ class TimesheetUpdate(UpdateView):
     model = Timesheet
     form_class = TimesheetForm
     template_name = 'document/timesheet.html'
-    success_url = reverse_lazy('timesheets')
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data()
+        context = super().get_context_data(**kwargs)
         lookup = dict(Timer.KIND_CHOICES)
         lookup.update({
             'payables': _('Total'),
@@ -262,6 +261,17 @@ class TimesheetUpdate(UpdateView):
             ]
         ]
         return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        saved = False
+        if form.is_valid():
+            form.save()
+            saved = True
+        return self.render_to_response(self.get_context_data(
+            saved=saved, form=form
+        ))
 
 
 class TimesheetsGenerateView(View):
