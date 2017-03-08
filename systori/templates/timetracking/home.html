@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n static bootstrap timetracking %}
+{% load i18n static bootstrap timetracking customformatting %}
 
 {% block head %}
 {{ block.super }}
@@ -29,16 +29,10 @@
   }
 </style>
 {{ form.media.css }}
-
 {# This is here because of the datepicker init calls in the body #}
 <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
 <script src="{% static "js/jquery-ui.min.js" %}"></script>
 <script src="{% static "js/bootstrap.min.js" %}"></script>
-
-{# <script type="application/dart" src="{% static "dart/timetracking.dart" %}"></script> #}
-<script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
-<script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
-<script src="{% static "dart/packages/browser/dart.js" %}"></script>
 {{ form.media.js }}
 {% endblock head %}
 
@@ -92,7 +86,7 @@
                     {% if timer.kind == "work" %} progress-bar-success
                     {% elif timer.kind == "holiday" %} progress-bar-warning
                     {% endif %}" role="progressbar" style="width:{{ timer.duration|seconds_to_pixels }}px">
-                    {{ timer.start|time:"H:i" }} - {{ timer.end|time:"H:i" }} ({{ timer.duration|seconds_to_hours }})
+                    {{ timer.started|time:"H:i" }} - {{ timer.stopped|time:"H:i" }} ({{ timer.duration|tosexagesimalhours }})
                   </div>
 
                  {% if not forloop.last %}
@@ -101,7 +95,7 @@
               {% endfor %}
             </div>
           </td>
-        <td>{{ items.overtime|seconds_to_hours }}</td>
+        <td>{{ items.overtime|tosexagesimalhours }}</td>
       </tr>
       {% empty %}
         {% trans "No users" %}

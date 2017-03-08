@@ -97,21 +97,22 @@ class TimerDeleteSelectedDayView(ListView):
 
     def get_queryset(self):
         selected_day = datetime.datetime.strptime(self.kwargs['selected_day'], '%Y-%m-%d').date()
-        timers = Timer.objects.filter(date=selected_day).filter(worker_id=self.kwargs['worker_id'])
-
+        timers = Timer.objects.filter(started__date=selected_day).filter(worker_id=self.kwargs['worker_id'])
         return timers
 
     def get_context_data(self, **kwargs):
         timers = [timer for timer in self.get_queryset()]
         current_timer = timers[0]
         for timer in timers:
-            if timer.start < current_timer.start:
-                current_timer.start = timer.start
-            if timer.end > current_timer.end:
-                current_timer.end = timer.end
-        timerange = "{:%Y-%m-%d} {:%H:%M} -> {:%H:%M}".format(current_timer.date,
-                                                              timezone.localtime(current_timer.start),
-                                                              timezone.localtime(current_timer.end))
+            if timer.started < current_timer.started:
+                current_timer.started = timer.started
+            if timer.stopped > current_timer.stopped:
+                current_timer.stopped = timer.stopped
+        timerange = "{:%Y-%m-%d} {:%H:%M} -> {:%H:%M}".format(
+            timezone.localtime(current_timer.started).date(),
+            timezone.localtime(current_timer.started),
+            timezone.localtime(current_timer.stopped)
+        )
         return super().get_context_data(timerange=timerange)
 
     def post(self, request, *args, **kwargs):

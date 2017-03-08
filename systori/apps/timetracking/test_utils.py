@@ -18,18 +18,9 @@ NOW = timezone.now().replace(hour=16)
 
 class UtilsTest(TestCase):
 
-    def test_round_to_nearest_multiple(self):
-        self.assertEquals(0, utils.round_to_nearest_multiple(1))
-        self.assertEquals(0, utils.round_to_nearest_multiple(17))
-        self.assertEquals(36, utils.round_to_nearest_multiple(18))
-        self.assertEquals(36, utils.round_to_nearest_multiple(35))
-        self.assertEquals(252, utils.round_to_nearest_multiple(250))
-        self.assertEquals(216, utils.round_to_nearest_multiple(230))
-
-    def test_seconds_to_time(self):
-        self.assertEqual(tosexagesimalhours(28530), '7:56')
-        self.assertEqual(tosexagesimalhours(270), '0:05')
-        self.assertEqual(tosexagesimalhours(300), '0:05')
+    def test_tosexagesimalhours(self):
+        self.assertEqual(tosexagesimalhours(7*60+56), '7:56')
+        self.assertEqual(tosexagesimalhours(5), '0:05')
 
     def test_get_timetracking_workers(self):
         company = CompanyFactory()
@@ -56,63 +47,59 @@ class ReportsTest(TestCase):
         today = NOW.replace(hour=9)
         yesterday = today - timedelta(days=1)
         Timer.objects.create(
-            worker=self.worker1, start=yesterday, end=yesterday + timedelta(hours=2)
+            worker=self.worker1, started=yesterday, stopped=yesterday + timedelta(hours=2)
         )
         Timer.objects.create(
-            worker=self.worker1, start=yesterday + timedelta(hours=3), end=yesterday + timedelta(hours=9)
+            worker=self.worker1, started=yesterday + timedelta(hours=3), stopped=yesterday + timedelta(hours=9)
         )
         worker1_timer1 = Timer.objects.create(
-            worker=self.worker1, start=today, end=today + timedelta(hours=2)
+            worker=self.worker1, started=today, stopped=today + timedelta(hours=2)
         )
         worker1_timer2 = Timer.objects.create(
-            worker=self.worker1, start=today + timedelta(hours=3), end=today + timedelta(hours=8)
+            worker=self.worker1, started=today + timedelta(hours=3), stopped=today + timedelta(hours=8)
         )
 
         Timer.objects.create(
-            worker=self.worker2, start=yesterday, end=yesterday + timedelta(hours=3)
+            worker=self.worker2, started=yesterday, stopped=yesterday + timedelta(hours=3)
         )
         Timer.objects.create(
-            worker=self.worker2, start=yesterday + timedelta(hours=4), end=yesterday + timedelta(hours=12)
+            worker=self.worker2, started=yesterday + timedelta(hours=4), stopped=yesterday + timedelta(hours=12)
         )
         worker2_timer1 = Timer.objects.create(
-            worker=self.worker2, start=today, end=today + timedelta(hours=3)
+            worker=self.worker2, started=today, stopped=today + timedelta(hours=3)
         )
         worker2_timer2 = Timer.objects.create(
-            worker=self.worker2, start=today + timedelta(hours=6), end=today + timedelta(hours=9)
+            worker=self.worker2, started=today + timedelta(hours=6), stopped=today + timedelta(hours=9)
         )
 
         worker3_timer1 = Timer.objects.create(
-            worker=self.worker3, start=today
+            worker=self.worker3, started=today
         )
 
         report = utils.get_daily_workers_report(self.company.workers.order_by('pk'))
 
-        self.assertEqual(report[self.worker1]['timers'][0].start, worker1_timer1.start)
-        self.assertEqual(report[self.worker1]['timers'][1].end, worker1_timer2.end)
+        self.assertEqual(report[self.worker1]['timers'][0].started, worker1_timer1.started)
+        self.assertEqual(report[self.worker1]['timers'][1].stopped, worker1_timer2.stopped)
         self.assertEqual(
             report[self.worker1]['total_duration'],
             worker1_timer1.duration + worker1_timer2.duration)
-        self.assertEqual(report[self.worker1]['overtime'], -3600)
+        self.assertEqual(report[self.worker1]['overtime'], -60)
 
-        self.assertEqual(report[self.worker2]['timers'][0].start, worker2_timer1.start)
-        self.assertEqual(report[self.worker2]['timers'][1].end, worker2_timer2.end)
+        self.assertEqual(report[self.worker2]['timers'][0].started, worker2_timer1.started)
+        self.assertEqual(report[self.worker2]['timers'][1].stopped, worker2_timer2.stopped)
         self.assertEqual(
             report[self.worker2]['total_duration'],
             worker2_timer1.duration + worker2_timer2.duration)
         self.assertEqual(
             report[self.worker2]['total_duration'],
             worker2_timer1.duration + worker2_timer2.duration)
-        self.assertEqual(report[self.worker2]['overtime'], -7200)
+        self.assertEqual(report[self.worker2]['overtime'], -120)
 
-        self.assertEqual(report[self.worker3]['timers'][0].start, worker3_timer1.start)
-        self.assertEqual(report[self.worker3]['timers'][0].end, None)
-        self.assertEqual(report[self.worker3]['total_duration'], worker3_timer1.get_duration_seconds())
-        self.assertEqual(
-            report[self.worker3]['total_duration'],
-            worker3_timer1.get_duration_seconds()
-        )
-        self.assertEqual(report[self.worker3]['overtime'], -3600)
-
+        self.assertEqual(report[self.worker3]['timers'][0].started, worker3_timer1.started)
+        self.assertEqual(report[self.worker3]['timers'][0].stopped, None)
+        self.assertEqual(report[self.worker3]['total_duration'], worker3_timer1.running_duration)
+        self.assertEqual(report[self.worker3]['total_duration'], worker3_timer1.running_duration)
+        self.assertEqual(report[self.worker3]['overtime'], -60)
         self.assertFalse(report[self.worker4]['total_duration'])
 
 
@@ -130,15 +117,15 @@ class UserStatusesTest(TestCase):
         yesterday = morning - timedelta(days=1)
         tomorrow = morning + timedelta(days=1)
 
-        worker1_timer = Timer.objects.create(worker=self.worker1, start=morning, kind=Timer.WORK)
+        worker1_timer = Timer.objects.create(worker=self.worker1, started=morning, kind=Timer.WORK)
         Timer.objects.create(
-            worker=self.worker1, start=yesterday, end=yesterday + timedelta(hours=8), kind=Timer.WORK)
+            worker=self.worker1, started=yesterday, stopped=yesterday + timedelta(hours=8), kind=Timer.WORK)
         Timer.objects.create(
-            worker=self.worker2, start=morning, end=morning + timedelta(hours=2), kind=Timer.WORK)
+            worker=self.worker2, started=morning, stopped=morning + timedelta(hours=2), kind=Timer.WORK)
         worker2_timer = Timer.objects.create(
-            worker=self.worker2, start=NOW - timedelta(hours=1), end=NOW + timedelta(hours=2), kind=Timer.WORK)
+            worker=self.worker2, started=NOW - timedelta(hours=1), stopped=NOW + timedelta(hours=2), kind=Timer.WORK)
         worker3_timer = Timer.objects.create(
-            worker=self.worker3, start=yesterday, end=tomorrow, kind=Timer.VACATION)
+            worker=self.worker3, started=yesterday, stopped=tomorrow, kind=Timer.VACATION)
         self.assertEqual(
             utils.get_workers_statuses(self.company.workers.all()),
             {

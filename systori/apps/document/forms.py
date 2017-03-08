@@ -15,8 +15,6 @@ from ..accounting.workflow import Account, credit_jobs, debit_jobs, adjust_jobs,
 from ..accounting.constants import TAX_RATE
 from ..accounting.models import Entry
 
-from ..timetracking.utils import round_to_nearest_multiple
-
 from .models import Invoice, Adjustment, Payment, Refund, Proposal
 from .models import DocumentTemplate, DocumentSettings, Letterhead
 from .models import Timesheet
@@ -856,13 +854,13 @@ class TimesheetForm(forms.ModelForm):
                 )
 
     def save(self, commit=True):
-        work_correction = round_to_nearest_multiple(int(self.cleaned_data['work_correction']*60*60))
+        work_correction = int(self.cleaned_data['work_correction']*60)
         self.instance.json['work_correction'] = work_correction
         self.instance.json['work_correction_notes'] = self.cleaned_data['work_correction_notes']
-        vacation_correction = round_to_nearest_multiple(int(self.cleaned_data['vacation_correction']*60*60))
+        vacation_correction = int(self.cleaned_data['vacation_correction']*60)
         self.instance.json['vacation_correction'] = vacation_correction
         self.instance.json['vacation_correction_notes'] = self.cleaned_data['vacation_correction_notes']
-        overtime_correction = round_to_nearest_multiple(int(self.cleaned_data['overtime_correction']*60*60))
+        overtime_correction = int(self.cleaned_data['overtime_correction']*60)
         self.instance.json['overtime_correction'] = overtime_correction
         self.instance.json['overtime_correction_notes'] = self.cleaned_data['overtime_correction_notes']
         self.instance.calculate()

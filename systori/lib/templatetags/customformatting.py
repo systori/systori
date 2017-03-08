@@ -177,14 +177,8 @@ def zeroblank(value):
 
 
 @register.filter
-def tosexagesimalhours(seconds):
-    mins, secs = divmod(abs(int(seconds)), 60)
-    if mins > 0:
-        if secs >= 30:
-            mins += 1
-    hours, mins = divmod(mins, 60)
+def tosexagesimalhours(minutes):
+    hours, mins = divmod(abs(int(minutes)), 60)
     return "{}{}:{:02}".format(
-        '-' if seconds < 0 else '', hours, mins
+        '-' if minutes < 0 else '', hours, mins
     )
-
-format_seconds = tosexagesimalhours

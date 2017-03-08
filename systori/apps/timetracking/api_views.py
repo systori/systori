@@ -32,14 +32,14 @@ class TimerView(views.APIView):
         timer = get_object_or_404(Timer.objects.filter_running(), worker=request.worker)
         serializer = TimerStopSerializer(data=request.data, context={'worker': request.worker})
         serializer.is_valid(raise_exception=True)
-        timer.end_longitude = serializer.validated_data['end_longitude']
-        timer.end_latitude = serializer.validated_data['end_latitude']
+        timer.ending_longitude = serializer.validated_data['ending_longitude']
+        timer.ending_latitude = serializer.validated_data['ending_latitude']
         timer.stop()
         return Response()
 
     def get(self, request):
         timer = get_object_or_404(Timer.objects.filter_running(), worker=request.worker)
-        return Response(timer.to_dict())
+        return Response({'duration': timer.running_duration})
 
 
 class ReportView(views.APIView):

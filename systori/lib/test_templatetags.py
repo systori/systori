@@ -123,7 +123,4 @@ class CustomFormattingTest(TestCase):
         self.assertEqual(zeroblank('23'),'23')
 
     def test_tosexagesimalhours(self):
-        self.assertEqual(tosexagesimalhours(60*60*2.5), '2:30')
-
-    def test_format_seconds(self):
-        self.assertEqual(format_seconds(60*60*2.5+60*5), '2:35')
+        self.assertEqual(tosexagesimalhours(2.5*60+5), '2:35')

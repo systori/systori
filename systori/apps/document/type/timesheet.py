@@ -188,7 +188,7 @@ class TimeSheetCollector:
 
     def add(self, timer):
         days = getattr(self, timer.kind)
-        days[timer.date.day-1] += timer.duration
+        days[timer.started.day-1] += timer.duration
 
     def calculate(self):
         assert not self.calculated
@@ -264,8 +264,8 @@ def serialize(timers, year, month):
 
     for timer in timers:
 
-        assert timer.date.year == year
-        assert timer.date.month == month
+        assert timer.started.year == year
+        assert timer.started.month == month
 
         if 'worker_id' not in data:
             data['worker_id'] = timer.worker_id
