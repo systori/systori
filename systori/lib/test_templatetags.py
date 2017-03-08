@@ -88,9 +88,9 @@ class CustomFormattingTest(TestCase):
     def test_zeroblank(self):
         self.assertEqual(zeroblank(0), '')
         self.assertEqual(zeroblank('0'), '')
-        self.assertEqual(zeroblank(23), '23')
+        self.assertEqual(zeroblank(23), 23)
         self.assertEqual(zeroblank('23'), '23')
-        self.assertEqual(zeroblank(None), 'None')
+        self.assertEqual(zeroblank(None), None)
 
     def test_hours(self):
         self.assertEqual(hours(''), '')
