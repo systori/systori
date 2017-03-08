@@ -19,7 +19,9 @@ def update_timers(apps, schema_editor):
 
     from systori.apps.document.models import Timesheet
     for ts in Timesheet.objects.all():
-        ts.json['vacation_correction'] = ts.json['holiday_correction']
+        ts.json['work_correction'] = int(ts.json['work_correction']//60)
+        ts.json['overtime_correction'] = int(ts.json['overtime_correction']//60)
+        ts.json['vacation_correction'] = int(ts.json['holiday_correction']//60)
         ts.json['vacation_correction_notes'] = ts.json['holiday_correction_notes']
         ts.calculate()
         ts.save()

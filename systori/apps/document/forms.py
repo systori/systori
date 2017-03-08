@@ -835,11 +835,11 @@ class TimesheetForm(forms.ModelForm):
         kwargs.pop('initial')
         super().__init__(
             initial={
-               'work_correction': kwargs['instance'].json['work_correction']/60.0/60.0,
+               'work_correction': kwargs['instance'].json['work_correction']/60.0,
                'work_correction_notes': kwargs['instance'].json['work_correction_notes'],
-               'vacation_correction': kwargs['instance'].json['vacation_correction']/60.0/60.0,
+               'vacation_correction': kwargs['instance'].json['vacation_correction']/60.0,
                'vacation_correction_notes': kwargs['instance'].json['vacation_correction_notes'],
-               'overtime_correction': kwargs['instance'].json['overtime_correction']/60.0/60.0,
+               'overtime_correction': kwargs['instance'].json['overtime_correction']/60.0,
                'overtime_correction_notes': kwargs['instance'].json['overtime_correction_notes'],
             }, **kwargs
         )
@@ -876,7 +876,7 @@ class LetterheadCreateForm(forms.ModelForm):
     def clean(self):
         clean_letterhead_pdf(self.cleaned_data.get('letterhead_pdf'))
 
-    def save(self):
+    def save(self, commit=True):
         return clean_letterhead_pdf(self.cleaned_data.get('letterhead_pdf'), save=True)
 
 
