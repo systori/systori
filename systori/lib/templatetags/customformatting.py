@@ -1,13 +1,10 @@
 import locale
 import math
 from decimal import Decimal
-from datetime import time, timedelta
 from django.utils.formats import get_format, get_language, to_locale
 from django.utils.translation import ungettext
 from django import template
 
-WORK_DAY = timedelta(hours=8).total_seconds()
-HOLIDAYS_PER_MONTH = WORK_DAY * 2.5
 
 register = template.Library()
 
@@ -116,69 +113,22 @@ def money(decimal):
 
 
 @register.filter
-def todecimalhours(seconds):
-    return ubrdecimal(seconds/60.0/60.0, max_significant=1, min_significant=0)
+def hours(minutes):
+    if minutes == '':
+        return ''
+    hours, mins = divmod(abs(int(minutes)), 60)
+    return "{}{}:{:02}".format('-' if minutes < 0 else '', hours, mins)
 
 
 @register.filter
-def hourslabel(seconds):
-    return ungettext('hour', 'hours', seconds/60.0/60.0)
-
-
-@register.filter
-def hoursverbose(seconds):
-    return '{} {}'.format(todecimalhours(seconds), hourslabel(seconds))
-
-
-@register.filter
-def toworkdays(seconds):
-    return ubrdecimal(seconds/60.0/60.0/8.0, max_significant=1, min_significant=0)
-
-
-@register.filter
-def workdayslabel(seconds):
-    return ungettext('day', 'days', seconds/60.0/60.0/8.0)
-
-
-@register.filter
-def workdaysverbose(seconds):
-    return '{} {}'.format(toworkdays(seconds), workdayslabel(seconds))
-
-
-@register.filter
-def daysgained(seconds):
-    return '{} - {}'.format(toworkdays(HOLIDAYS_PER_MONTH), workdaysverbose(seconds))
-
-
-@register.filter
-def hoursgained(seconds):
-    return '{} - {}'.format(todecimalhours(HOLIDAYS_PER_MONTH), hoursverbose(seconds))
-
-
-@register.filter
-def dayshours(seconds):
-    return '{} ({})'.format(workdaysverbose(seconds), hoursverbose(seconds))
-
-
-@register.filter
-def hoursdays(seconds):
-    return '{} ({})'.format(hoursverbose(seconds), workdaysverbose(seconds))
-
-
-@register.filter
-def dayshoursgainedverbose(seconds):
-    return '{} ({})'.format(daysgained(seconds), hoursgained(seconds))
+def workdays(minutes, label=True):
+    if minutes == '':
+        return ''
+    days = minutes / 60 / 8
+    s = ubrdecimal(days, max_significant=1, min_significant=0)
+    return "{} {}".format(s, ungettext('day', 'days', days)) if label else s
 
 
 @register.filter
 def zeroblank(value):
-    if value == '0': return ''
-    return value
-
-
-@register.filter
-def tosexagesimalhours(minutes):
-    hours, mins = divmod(abs(int(minutes)), 60)
-    return "{}{}:{:02}".format(
-        '-' if minutes < 0 else '', hours, mins
-    )
+    return '' if str(value) == '0' else value

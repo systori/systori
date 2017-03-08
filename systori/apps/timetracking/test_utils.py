@@ -6,7 +6,6 @@ from freezegun import freeze_time
 from django.test import TestCase
 from django.utils import timezone
 
-from systori.lib.templatetags.customformatting import tosexagesimalhours
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 from .models import Timer
@@ -17,10 +16,6 @@ NOW = timezone.now().replace(hour=16)
 
 
 class UtilsTest(TestCase):
-
-    def test_tosexagesimalhours(self):
-        self.assertEqual(tosexagesimalhours(7*60+56), '7:56')
-        self.assertEqual(tosexagesimalhours(5), '0:05')
 
     def test_get_timetracking_workers(self):
         company = CompanyFactory()

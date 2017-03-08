@@ -56,24 +56,24 @@ class Timesheet(Document):
     objects = TimesheetQuerySet.as_manager()
 
     def calculate_vacation_balance(self):
-        return (
+        self.json['vacation_added'] = self.worker.vacation
+        self.json['vacation_net'] = self.json['vacation_added'] - self.json['vacation_total']
+        self.json['vacation_balance'] = (
             self.json['vacation_transferred'] +
-            self.json['vacation_added'] +
+            self.json['vacation_net'] +
             self.json['vacation_correction']
-        ) - self.json['vacation_total']
+        )
 
     def calculate_overtime_balance(self):
-        return (
+        self.json['overtime_net'] = self.json['overtime_total'] - self.json['paid_leave_total']
+        self.json['overtime_balance'] = (
             self.json['overtime_transferred'] +
             self.json['overtime_net'] +
             self.json['overtime_correction']
         )
 
     def calculate_final_compensation(self):
-        return (
-            self.json['payables_total'] -
-            self.json['overtime_total']
-        ) + self.json['work_correction']
+        self.json['compensation_final'] = self.json['compensation_total'] + self.json['work_correction']
 
     def calculate_transferred_amounts(self):
         previous_month = (self.document_date.replace(day=1)-timedelta(days=2))
@@ -104,11 +104,9 @@ class Timesheet(Document):
             year, month
         ))
         self.calculate_transferred_amounts()
-        self.json['vacation_added'] = self.worker.vacation
-        self.json['overtime_net'] = self.json['overtime_total'] - self.json['paid_leave_total']
-        self.json['vacation_balance'] = self.calculate_vacation_balance()
-        self.json['overtime_balance'] = self.calculate_overtime_balance()
-        self.json['compensation_final'] = self.calculate_final_compensation()
+        self.calculate_vacation_balance()
+        self.calculate_overtime_balance()
+        self.calculate_final_compensation()
         return self
 
     @classmethod

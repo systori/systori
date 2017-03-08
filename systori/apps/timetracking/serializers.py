@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from systori.lib.templatetags.customformatting import tosexagesimalhours
+from systori.lib.templatetags.customformatting import hours
 from .models import Timer
 from . import utils
 
@@ -44,4 +44,4 @@ class TimerSerializer(serializers.ModelSerializer):
         return utils.to_current_timezone(obj.stopped).strftime('%H:%M') if obj.end else '—'
 
     def get_duration(self, obj):
-        return tosexagesimalhours(obj.duration) if obj.duration else '—'
+        return hours(obj.duration) if obj.duration else '—'
