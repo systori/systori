@@ -16,8 +16,7 @@ from .style import LetterheadCanvas
 from .style import get_available_width_height_and_pagesize, b
 from .font import FontManager
 
-from systori.lib.templatetags.customformatting import tosexagesimalhours,\
-    dayshoursgainedverbose, dayshours, workdaysverbose, hoursverbose, hoursdays
+from systori.lib.templatetags.customformatting import zeroblank, hours, workdays
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
@@ -69,9 +68,9 @@ def create_timesheet_table(json, available_width, font):
     ts.row_style('LINEBELOW', 0, -1, 1.25, colors.black)
 
     def render_row(days, total, name):
-        columns = [""]*31 + [(tosexagesimalhours(total) if total else ''), name]
-        for i, sec in enumerate(days):
-            columns[i] = (tosexagesimalhours(sec) if sec else '')
+        columns = [""]*31 + [hours(zeroblank(total)), name]
+        for i, mins in enumerate(days):
+            columns[i] = hours(zeroblank(mins))
         return columns
 
     stripe_idx = 1
@@ -84,19 +83,22 @@ def create_timesheet_table(json, available_width, font):
 
     lookup = dict(Timer.KIND_CHOICES)
     lookup.update({
+        'payables': _('Total'),
+        'overtime': _('Overtime'),
         'compensation': _('Compensation'),
-        'overtime': _('Overtime')
     })
     row_types = [
         'work', 'vacation', 'sick', 'public_holiday',
-        'paid_leave', 'unpaid_leave', 'compensation',
-        'overtime'
+        'paid_leave', 'unpaid_leave', 'payables',
+        'overtime', 'compensation',
     ]
     for row in row_types:
         stripe()
-        if row == 'overtime':
-            ts.row_style('LINEABOVE', 0, -1, 1.25, colors.black)
         ts.row(*render_row(json[row], json[row+'_total'], lookup[row]))
+        if row == 'payables':
+            ts.row_style('LINEABOVE', 0, -1, 1.5, colors.black)
+        if row == 'compensation':
+            ts.row_style('LINEABOVE', 0, -1, 1.5, colors.black)
 
     max_days = 31
     last_columns = [32, 65]  # total, row types
@@ -111,24 +113,42 @@ def create_rolling_balances(month, json, font):
            b(pgettext_lazy("timesheet", "Balance"), font))
     ts.row(
         _("Vacation"),
-        (workdaysverbose(json['vacation_transferred']) if json['vacation_transferred'] != 0 else ''),
-        (workdaysverbose(json['vacation_correction']) if json['vacation_correction'] != 0 else '' ),
-        dayshoursgainedverbose(json['vacation_total']),
-        b(dayshours(json['vacation_balance']), font)
+        workdays(zeroblank(json['vacation_transferred'])),
+        workdays(zeroblank(json['vacation_correction'])),
+        "{}{}".format(
+            workdays(json['vacation_net']),
+            " ({} - {})".format(
+                workdays(json['vacation_added']),
+                workdays(json['vacation_total'])
+            ) if json['vacation_total'] != 0 else ""
+        ),
+        b(workdays(json['vacation_balance']), font)
     )
     ts.row(
         _("Overtime"),
-        (hoursverbose(json['overtime_transferred']) if json['overtime_transferred'] != 0 else ''),
-        (hoursverbose(json['overtime_correction']) if json['overtime_correction'] != 0 else ''),
-        (hoursverbose(json['overtime_net']) if json['overtime_net'] != 0 else ''),
-        (b(hoursdays(json['overtime_balance']), font) if json['overtime_balance'] != 0 else '')
+        hours(zeroblank(json['overtime_transferred'])),
+        hours(zeroblank(json['overtime_correction'])),
+        "{}{}".format(
+            hours(json['overtime_net']),
+            " ({} - {})".format(
+                hours(json['overtime_total']),
+                hours(json['paid_leave_total'])
+            ) if json['paid_leave_total'] != 0 else ""
+        ),
+        b(hours(json['overtime_balance']), font)
     )
     ts.row(
-        pgettext_lazy("timesheet", "Final Total"),
-        '',
-        (hoursverbose(json['work_correction']) if json['work_correction'] else ''),
-        hoursverbose(json['work_total']),
-        b(hoursverbose(json['work_balance']), font)
+        _("Compensation"),
+        "",
+        hours(zeroblank(json['work_correction'])),
+        "{}{}".format(
+            hours(json['compensation_total']),
+            " ({} - {})".format(
+                hours(json['payables_total']),
+                hours(json['overtime_total'])
+            ) if json['overtime_total'] != 0 else ""
+        ),
+        b(hours(json['compensation_final']), font)
     )
     return ts.get_table(colWidths=[90]*3+[152]+[132], rowHeights=18, hAlign='RIGHT')
 

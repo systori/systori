@@ -4,7 +4,7 @@ from typing import Iterator, Tuple
 
 from django.utils import timezone
 
-from systori.lib.templatetags.customformatting import tosexagesimalhours
+from systori.lib.templatetags.customformatting import hours
 
 
 def calculate_duration_minutes(started, stopped=None):
@@ -111,7 +111,7 @@ def get_running_timer_duration(worker):
     from .models import Timer
     timer = Timer.objects.filter_running().filter(worker=worker).first()
     duration = timer.running_duration if timer else 0
-    return tosexagesimalhours(duration)
+    return hours(duration)
 
 
 def get_workers_statuses(workers):

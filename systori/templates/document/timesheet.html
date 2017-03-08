@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n l10n static dartium bootstrap customformatting ubrutils amount %}
+{% load i18n bootstrap customformatting %}
 
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='timesheets' %}{% endblock %}
 
@@ -41,9 +41,9 @@
       {% for name, label, row, total in rows %}
         <tr>
           {% for day in row %}
-            <td>{% if day != 0 %}{{ day|tosexagesimalhours }}{% endif %}</td>
+            <td>{{ day|zeroblank|hours }}</td>
           {% endfor %}
-          <td class="info">{{ total|tosexagesimalhours }}</td>
+          <td class="info">{{ total|hours }}</td>
           <td>{{ label }}</td>
         </tr>
       {% endfor %}
@@ -64,26 +64,41 @@
 
       <tr>
         <td>{% trans "Vacation" %}</td>
-        <td>{% if object.json.vacation_transferred != 0 %}{{ object.json.vacation_transferred|workdaysverbose }}{% endif %}</td>
-        <td>{% if object.json.vacation_correction != 0 %}{{ object.json.vacation_correction|workdaysverbose }}{% endif %}</td>
-        <td>{% if object.json.vacation_total != 0 %}{{ object.json.vacation_total|dayshoursgainedverbose }}{% endif %}</td>
-        <td class="info">{{ object.json.vacation_balance|toworkdays }} {{ object.json.vacation_balance|workdayslabel }}</td>
+        <td>{{ object.json.vacation_transferred|zeroblank|workdays }}</td>
+        <td>{{ object.json.vacation_correction|zeroblank|workdays }}</td>
+        <td>
+          {{ object.json.vacation_net|workdays }}
+          {% if object.json.vacation_total != 0 %}
+            ({{ object.json.vacation_added|workdays }} - {{ object.json.vacation_total|workdays }})
+          {% endif %}
+        </td>
+        <td class="info">{{ object.json.vacation_balance|workdays }}</td>
       </tr>
 
       <tr>
         <td>{% trans "Overtime" %}</td>
-        <td>{% if object.json.overtime_transferred != 0 %}{{ object.json.overtime_transferred|tosexagesimalhours }}{% endif %}</td>
-        <td>{% if object.json.overtime_correction != 0 %}{{ object.json.overtime_correction|tosexagesimalhours }}{% endif %}</td>
-        <td>{{ object.json.overtime_net|tosexagesimalhours }} ({{ object.json.overtime_total|tosexagesimalhours }} - {{ object.json.paid_leave_total|tosexagesimalhours }})</td>
-        <td class="info">{{ object.json.overtime_balance|hoursdays }}</td>
+        <td>{{ object.json.overtime_transferred|zeroblank|hours }}</td>
+        <td>{{ object.json.overtime_correction|zeroblank|hours }}</td>
+        <td>
+          {{ object.json.overtime_net|hours }}
+          {% if object.json.paid_leave_total != 0 %}
+            ({{ object.json.overtime_total|hours }} - {{ object.json.paid_leave_total|hours }})
+          {% endif %}
+        </td>
+        <td class="info">{{ object.json.overtime_balance|hours }} ({{ object.json.overtime_balance|workdays }})</td>
       </tr>
 
       <tr>
         <td>{% trans "Compensation" context "timesheet" %}</td>
         <td></td>
-        <td>{% if object.json.work_correction != 0 %}{{ object.json.work_correction|tosexagesimalhours }}{% endif %}</td>
-        <td>{{ object.json.payables_total|tosexagesimalhours }} - {{ object.json.overtime_total|tosexagesimalhours }}</td>
-        <td class="info">{{ object.json.compensation_final|tosexagesimalhours }}</td>
+        <td>{{ object.json.work_correction|zeroblank|hours }}</td>
+        <td>
+          {{ object.json.compensation_total|hours }}
+          {% if object.json.overtime_total != 0 %}
+            ({{ object.json.payables_total|hours }} - {{ object.json.overtime_total|hours }})
+          {% endif %}
+        </td>
+        <td class="info">{{ object.json.compensation_final|hours }}</td>
       </tr>
 
     </table>
@@ -96,7 +111,3 @@
     </div>
   </form>
 {% endblock %}
-
-{% block extra_js %}
-  {% dart "payment_editor.dart" %}
-{% endblock extra_js %}

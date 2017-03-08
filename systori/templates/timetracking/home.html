@@ -86,7 +86,7 @@
                     {% if timer.kind == "work" %} progress-bar-success
                     {% elif timer.kind == "holiday" %} progress-bar-warning
                     {% endif %}" role="progressbar" style="width:{{ timer.duration|seconds_to_pixels }}px">
-                    {{ timer.started|time:"H:i" }} - {{ timer.stopped|time:"H:i" }} ({{ timer.duration|tosexagesimalhours }})
+                    {{ timer.started|time:"H:i" }} - {{ timer.stopped|time:"H:i" }} ({{ timer.duration|hours }})
                   </div>
 
                  {% if not forloop.last %}
@@ -95,7 +95,7 @@
               {% endfor %}
             </div>
           </td>
-        <td>{{ items.overtime|tosexagesimalhours }}</td>
+        <td>{{ items.overtime|hours }}</td>
       </tr>
       {% empty %}
         {% trans "No users" %}
