@@ -1,6 +1,5 @@
 from django.conf.urls import include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-#from apps.user.authorization import office_auth
 from django.views.static import serve
 from django.conf import settings
 
@@ -10,7 +9,7 @@ urlpatterns = [
 
     url(r'^api/', include('systori.apps.task.api')),
     url(r'^api/', include('systori.apps.document.api')),
-    url(r'^api/v1/timetracking/', include('systori.apps.timetracking.api_urls')),
+    url(r'^api/', include('systori.apps.timetracking.api')),
 
     url(r'^i18n/', include('django.conf.urls.i18n')),
 
