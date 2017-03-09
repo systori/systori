@@ -32,10 +32,10 @@ class ReportsTest(TestCase):
 
     def setUp(self):
         self.company = CompanyFactory()
-        self.worker1 = UserFactory(company=self.company).access.first()
-        self.worker2 = UserFactory(company=self.company).access.first()
-        self.worker3 = UserFactory(company=self.company).access.first()
-        self.worker4 = UserFactory(company=self.company).access.first()
+        self.worker1 = UserFactory(last_name='a', company=self.company).access.first()
+        self.worker2 = UserFactory(last_name='b', company=self.company).access.first()
+        self.worker3 = UserFactory(last_name='c', company=self.company).access.first()
+        self.worker4 = UserFactory(last_name='d', company=self.company).access.first()
 
     @freeze_time(NOW)
     def test_get_daily_workers_report(self):
@@ -71,31 +71,22 @@ class ReportsTest(TestCase):
             worker=self.worker3, started=today
         )
 
-        report = utils.get_daily_workers_report(self.company.workers.order_by('pk'))
+        report = Timer.objects.get_daily_workers_report(today.date(), self.company.workers.all())
 
         self.assertEqual(report[self.worker1]['timers'][0].started, worker1_timer1.started)
-        self.assertEqual(report[self.worker1]['timers'][1].stopped, worker1_timer2.stopped)
-        self.assertEqual(
-            report[self.worker1]['total_duration'],
-            worker1_timer1.duration + worker1_timer2.duration)
-        self.assertEqual(report[self.worker1]['overtime'], -60)
+        self.assertEqual(report[self.worker1]['timers'][2].stopped, worker1_timer2.stopped)
+        self.assertEqual(report[self.worker1]['total'], worker1_timer1.duration + worker1_timer2.duration)
 
         self.assertEqual(report[self.worker2]['timers'][0].started, worker2_timer1.started)
-        self.assertEqual(report[self.worker2]['timers'][1].stopped, worker2_timer2.stopped)
-        self.assertEqual(
-            report[self.worker2]['total_duration'],
-            worker2_timer1.duration + worker2_timer2.duration)
-        self.assertEqual(
-            report[self.worker2]['total_duration'],
-            worker2_timer1.duration + worker2_timer2.duration)
-        self.assertEqual(report[self.worker2]['overtime'], -120)
+        self.assertEqual(report[self.worker2]['timers'][2].stopped, worker2_timer2.stopped)
+        self.assertEqual(report[self.worker2]['total'], worker2_timer1.duration + worker2_timer2.duration)
+        self.assertEqual(report[self.worker2]['total'], worker2_timer1.duration + worker2_timer2.duration)
 
         self.assertEqual(report[self.worker3]['timers'][0].started, worker3_timer1.started)
         self.assertEqual(report[self.worker3]['timers'][0].stopped, None)
-        self.assertEqual(report[self.worker3]['total_duration'], worker3_timer1.running_duration)
-        self.assertEqual(report[self.worker3]['total_duration'], worker3_timer1.running_duration)
-        self.assertEqual(report[self.worker3]['overtime'], -60)
-        self.assertFalse(report[self.worker4]['total_duration'])
+        self.assertEqual(report[self.worker3]['total'], worker3_timer1.running_duration)
+        self.assertEqual(report[self.worker3]['total'], worker3_timer1.running_duration)
+        self.assertFalse(self.worker4 in report)
 
 
 class UserStatusesTest(TestCase):
@@ -122,11 +113,11 @@ class UserStatusesTest(TestCase):
         worker3_timer = Timer.objects.create(
             worker=self.worker3, started=yesterday, stopped=tomorrow, kind=Timer.VACATION)
         self.assertEqual(
-            utils.get_workers_statuses(self.company.workers.all()),
+            utils.get_workers_statuses(),
             {
-                self.worker1.pk: [worker1_timer],
-                self.worker2.pk: [worker2_timer],
-                self.worker3.pk: [worker3_timer],
+                self.worker1.pk: worker1_timer,
+                self.worker2.pk: worker2_timer,
+                self.worker3.pk: worker3_timer,
             }
         )
 

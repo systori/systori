@@ -9,16 +9,6 @@ from django import template
 register = template.Library()
 
 
-@register.filter('sum')
-def _sum(data):
-    return sum(data)
-
-
-@register.filter
-def lookup(key, data):
-    return data[key]
-
-
 @register.filter
 def split_rows_vertically(data, cols):
     if not data: return data

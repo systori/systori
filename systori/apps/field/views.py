@@ -5,6 +5,7 @@ from itertools import groupby
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q, Count, Prefetch
+from django.utils import timezone
 from django.utils.http import urlquote
 from django.utils.formats import to_locale, get_language
 from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView
@@ -15,7 +16,7 @@ from ..company.models import Worker
 from ..project.models import Project, DailyPlan, EquipmentAssignment, TeamMember
 from ..task.models import Job, Group, Task, ProgressReport
 from ..equipment.models import Equipment
-from ..timetracking import utils as timetracking_utils
+from ..timetracking.models import Timer
 from ..document.models import Timesheet
 from .forms import CompletionForm, DailyPlanNoteForm
 from .utils import find_next_workday, days_ago
@@ -100,7 +101,11 @@ class FieldTimersList(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
-            'timetracking_report': timetracking_utils.get_worker_dashboard_report(self.request.worker),
+            'timetracking_report': Timer.objects
+            .filter_month()
+            .filter(worker=self.request.worker)
+            .order_by('started')
+            .get_report()
         })
         return context
 

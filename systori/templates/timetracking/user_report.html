@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n l10n static bootstrap customformatting timetracking %}
+{% load i18n l10n bootstrap customformatting %}
 
 {% block head %}
 {{ block.super }}
@@ -12,17 +12,6 @@
   }
 </style>
 {{ form.media.css }}
-
-{# This is here because of the datepicker init calls in the body #}
-<script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
-<script src="{% static "js/jquery-ui.min.js" %}"></script>
-<script src="{% static "js/bootstrap.min.js" %}"></script>
-
-{# <script type="application/dart" src="{% static "dart/timetracking.dart" %}"></script> #}
-<script src="{% static "dart/packages/web_components/webcomponents.min.js" %}"></script>
-<script src="{% static "dart/packages/web_components/dart_support.js" %}"></script>
-<script src="{% static "dart/packages/browser/dart.js" %}"></script>
-{{ form.media.js }}
 {% endblock head %}
 
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='timetracking' %}{% endblock %}
@@ -62,56 +51,38 @@
     <tr>
       <th>{% trans "Date" %}</th>
       <th></th>
-      <th>{% trans "Overtime" %}</th>
       <th>{% trans "delete" %}</th>
     </tr>
-    {% for date, entry in report.rows.items %}
+    {% for date, data in report.items %}
      <tr>
-         <td>{{ entry.date|localize }}</td>
+         <td>{{ date|localize }}</td>
          <td>
             <div class="progress">
-             {% for pk, timer in entry.timers.items %}
-                  <div class="progress-bar
-                    {% if timer.kind == "work" %} progress-bar-success
-                    {% elif timer.kind == "holiday" %} progress-bar-warning
-                    {% endif %}" role="progressbar" style="width:{{ timer.duration|seconds_to_pixels }}px">
-                    {{ timer.start|time:"H:i" }} - {{ timer.end|time:"H:i" }} ({{ timer.duration|hours }})
-                    <a href="{% url 'timer.delete' pk %}">
-                       <span class="glyphicon glyphicon-trash" aria-hidden="true" style="top:2px;"></span>
-                    </a>
-                  </div>
-
-                 {% if not forloop.last %}
-                     <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" style="width:25px"></div>
-                 {% endif %}
+             {% for timer in data.timers %}
+               {% include "timetracking/timer.html" with timer=timer can_delete=True %}
             {% endfor %}
             </div>
          </td>
-         <td>{{ entry.total|overtime_from_total }} ({{ entry.total|hours }})</td>
          <td>
-            <a href="{% url 'timer.delete.selected_day' date timesheet_worker.id %}">
-               <span class="glyphicon glyphicon-trash" aria-hidden="true" style="top:2px;"></span>
-            </a>
+           {{ data.total|hours }}
+           <a href="{% url 'timer.delete.selected_day' date timesheet_worker.id %}">
+             <span class="glyphicon glyphicon-trash" aria-hidden="true" style="top:2px;"></span>
+           </a>
         </td>
      </tr>
     {% endfor %}
   </table>
 
 </div>
-
-<div class="panel panel-default">
-  <table class="table table-striped table-bordered">
-    <tr>
-      <td>{% trans "Holidays used" %}</td><td>{{ report.holidays_used }}</td>
-    </tr>
-    <tr>
-      <td>{% trans "Holidays available" %}</td><td>{{ report.holidays_available }}</td>
-    </tr>
-    <tr>
-      <td>{% trans "Overtime" %}</td><td>{{ report.overtime|hours }}</td>
-    </tr>
-  </table>
-</div>
 {% endblock %}
 
-{% block base_js %}{% endblock %}
+{% block extra_js %}
+  {{ form.media.js }}
+  <script>
+  {% autoescape off %}
+  {{ period_form.fields.period.widget.init_javascript }}
+  {{ form.fields.started.widget.init_javascript }}
+  {{ form.fields.stopped.widget.init_javascript }}
+  {% endautoescape %}
+  </script>
+{% endblock %}

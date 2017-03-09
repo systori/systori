@@ -1,5 +1,5 @@
 from datetime import time, timedelta, date, datetime
-from collections import UserDict, namedtuple, OrderedDict
+from collections import namedtuple, OrderedDict
 from typing import Iterator, Tuple
 
 from django.utils import timezone
@@ -16,95 +16,12 @@ def calculate_duration_minutes(started, stopped=None):
     return int(seconds // 60)
 
 
-WORK_DAY = timedelta(hours=8).total_seconds()
-HOLIDAYS_PER_MONTH = WORK_DAY * 2.5
-
-
-class AccumulatorDict(UserDict):
-
-    def __setitem__(self, key, value):
-        self.data.setdefault(key, []).append(value)
-
-
-def regroup(items, getter):
-    result = {}
-    for item in items:
-        result[getter(item)] = item
-    return result
-
-
-def format_days(seconds):
-    return '{:.1f}'.format(seconds / WORK_DAY)
-
-
 def to_current_timezone(date_time):
     return date_time.astimezone(timezone.get_current_timezone())
 
+
 def get_timetracking_workers(company):
     return company.active_workers(is_timetracking_enabled=True)
-
-
-### Reports
-
-
-def get_worker_dashboard_report(worker):
-    from .models import Timer
-    now = timezone.now()
-    timers = Timer.objects\
-        .filter_month(now.year, now.month)\
-        .filter(worker=worker)\
-        .order_by('started')
-    report = OrderedDict()
-    for timer in timers:
-        date = timer.started.date().isoformat()
-        if not report.get(date, False):
-            report[date] = {}
-            report[date]['date'] = timer.started.date()
-            report[date]['timers'] = []
-            report[date]['total'] = 0
-            report[date]['overtime'] = 0
-        report[date]['timers'].append(timer)
-        report[date]['total'] += timer.running_duration
-
-    for date, row in report.items():
-        row['overtime'] = row['total'] - Timer.WORK_HOURS
-
-    return report
-
-
-def get_worker_monthly_report(worker, period):
-    from .models import Timer
-    period = period or timezone.now()
-
-    holidays_used = get_holidays_duration(worker, period.year, period.month)
-    report = Timer.objects.filter(worker=worker).generate_monthly_worker_report(period)
-    overtime = sum(day['overtime'] for day in report.values())
-
-    return {
-        'holidays_used': format_days(holidays_used),
-        'holidays_available': format_days(HOLIDAYS_PER_MONTH - holidays_used),
-        'rows': report,
-        'overtime': overtime,
-    }
-
-
-def get_holidays_duration(worker, year, month):
-    from .models import Timer
-    return Timer.objects.filter(worker=worker, kind=Timer.VACATION).filter_month(year, month).get_duration()
-
-
-def get_overtime_duration(worker, year, month):
-    from .models import Timer
-    return Timer.objects.filter(worker=worker, kind=Timer.VACATION).filter_month(year, month).get_duration()
-
-
-def get_daily_workers_report(workers, date=None):
-    from .models import Timer
-
-    return Timer.objects.generate_daily_workers_report(date=date, workers=workers)
-    # report_by_user = regroup(report, itemgetter('user_id'))
-    # for user in users:
-    #     yield {'user': user, 'report': report_by_user.get(user.pk)}
 
 
 def get_running_timer_duration(worker):
@@ -114,13 +31,12 @@ def get_running_timer_duration(worker):
     return hours(duration)
 
 
-def get_workers_statuses(workers):
+def get_workers_statuses():
     from .models import Timer
-    timers = Timer.objects.filter(worker__in=workers).filter_now()
-    worker_timers = AccumulatorDict()
-    for timer in timers:
-        worker_timers[timer.worker_id] = timer
-    return worker_timers
+    return dict(
+        (timer.worker_id, timer)
+        for timer in Timer.objects.filter_now()
+    )
 
 
 def get_dates_in_range(start: date, end: date, include_weekends=False) -> Iterator[date]:

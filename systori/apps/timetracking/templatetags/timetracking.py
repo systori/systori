@@ -1,66 +1,21 @@
 from django import template
-
-from systori.apps.company.models import Worker
-from systori.lib.templatetags.customformatting import hours
 from ..utils import get_workers_statuses
 
 
 register = template.Library()
 
-
-@register.filter
-def seconds_to_pixels(pixel):
-    return 130 if pixel < 130 else pixel
+USER_STATUSES = '_internal_variable_user_statuses'
 
 
-@register.filter
-def overtime_from_total(value):
-    return hours(value - 60 * 8)
+@register.simple_tag(takes_context=True)
+def load_user_statuses(context):
+    context[USER_STATUSES] = get_workers_statuses()
+    return ''
 
 
-class StatusLoader(template.Node):
-    var_name = 'user_statuses'
-
-    def render(self, context):
-        context[self.var_name] = get_workers_statuses(
-            Worker.objects.filter(is_timetracking_enabled=True))
-        return ''
-
-
-class StatusRenderer(template.Node):
-
-    def __init__(self, user_variable):
-        self.user_variable = template.Variable(user_variable)
-
-    def render(self, context):
-        try:
-            user = self.user_variable.resolve(context)
-        except template.VariableDoesNotExist:
-            return ''
-
-        loaded_template = context.template.engine.get_template('timetracking/user_status_snippet.html')
-        try:
-            status = context[StatusLoader.var_name].get(user.pk, [None])[0]
-        except KeyError:
-            raise template.TemplateSyntaxError('Call {% load_user_statuses %} in the same template block')
-
-        context = {
-            'user': user, 'status': status
-        }
-        return loaded_template.render(template.context.Context(context))
-
-
-@register.tag
-def load_user_statuses(parser, token):
-    return StatusLoader()
-
-
-@register.tag
-def show_user_status(parser, token):
-    try:
-        _, user_variable = token.split_contents()
-    except ValueError:
-        raise template.TemplateSyntaxError(
-            '{} tag requires exactly one argument'.format(token.contents.split()[0])
-        )
-    return StatusRenderer(user_variable)
+@register.inclusion_tag(filename='timetracking/user_status_snippet.html', takes_context=True)
+def show_user_status(context, worker):
+    return {
+        'worker': worker,
+        'status': context[USER_STATUSES].get(worker.pk, None)
+    }

@@ -1,12 +1,12 @@
-from datetime import datetime, timedelta
-from collections import OrderedDict
+from datetime import date, datetime, timedelta
 
 from django.db.models.query import QuerySet
-from django.db.models import Q, Sum, Min, Max
+from django.db.models import Q, Sum
 from django.db.transaction import atomic
 from django.utils import timezone
 from .utils import get_timespans_split_by_breaks, get_dates_in_range
 from systori.lib import date_utils
+from systori.lib.utils import GenOrderedDict
 from ..company.models import Worker
 
 ABANDONED_CUTOFF = (16, 00)
@@ -74,74 +74,55 @@ class TimerQuerySet(QuerySet):
             year, month = now.year, now.month
         return self.filter(started__date__range=date_utils.month_range(year, month))
 
-    def group_for_report(self, order_by='-day_started', separate_by_kind=False):
-        # TODO: Refactor/remove in favor of using non-aggregated Timer queryset (a la generate_daily_workers_report)
-        current_timezone = timezone.get_current_timezone()
-        grouping_values = ['started__date', 'worker_id', 'comment']
-        if separate_by_kind:
-            grouping_values.insert(0, 'kind')
+    def get_report(self, grouping='date'):
+        assert grouping in ('date', 'worker')
 
-        queryset = self.values(*grouping_values).order_by().annotate(
-            total_duration=Sum('duration'),
-            day_started=Min('started'),
-            latest_started=Max('started'),
-            day_stopped=Max('stopped')
-        ).order_by(order_by)
-        for day in queryset:
-            for field in ('day_started', 'day_stopped', 'latest_started'):
-                if not day[field]:
-                    continue
-                day[field] = day[field].astimezone(current_timezone)
-            yield day
-
-    def generate_monthly_worker_report(self, period=None):
-        period = period or timezone.now()
-        queryset = self.filter_month(period.year, period.month)
-
-        report = OrderedDict()
-        for timer in queryset:
-            date = timer.started.date().isoformat()
-            if not report.get(date, False):
-                report[date] = {}
-                report[date]['timers'] = OrderedDict()
-            report[date]['timers'][str(timer.pk)] = {
-                'pk': timer.pk,
-                'kind': timer.kind,
-                'started': timer.started,
-                'stopped': timer.stopped,
-                'duration': timer.duration,
-                'comment': timer.comment,
-                'locations': {
-                    'start': (timer.starting_latitude, timer.starting_longitude),
-                    'end': (timer.ending_latitude, timer.ending_longitude)
+        report = GenOrderedDict(
+            lambda: GenOrderedDict(
+                lambda: {
+                    'timers': [],
+                    'total': 0
                 }
-            }
-            if not report[date].get('total', False):
-                report[date]['total'] = 0
-            report[date]['total'] += timer.duration
-            report[date]['date'] = timer.started.date()
+            )
+        )
 
-        for day in report.values():
-            day['overtime'] = day['total'] - self.model.WORK_HOURS
+        for timer in self:
+            date = timer.started.date()
+            if grouping == 'date':
+                worker_report = report.gen(date).gen(timer.worker)
+            else:
+                worker_report = report.gen(timer.worker).gen(date)
+            worker_report['timers'].append(timer)
+            if timer.kind != timer.UNPAID_LEAVE:
+                worker_report['total'] += timer.running_duration
+
+        for parent_report in report.values():
+            for worker_report in parent_report.values():
+                previous = None
+                with_breaks = []
+                for timer in worker_report['timers']:
+                    if previous:
+                        with_breaks.append(self.model(
+                            worker=timer.worker,
+                            started=previous.stopped,
+                            stopped=timer.started,
+                            kind=self.model.BREAK
+                        ))
+                    with_breaks.append(timer)
+                    previous = timer
+                worker_report['timers'] = with_breaks
 
         return report
 
-    def generate_daily_workers_report(self, date, workers):
-        date = date or timezone.now().date()
-        queryset = self.filter(worker__in=workers).filter(started__date=date).select_related('worker__user')
-        reports = OrderedDict((worker, {
-            'timers': [],
-            'total_duration': 0,
-            'overtime': 0
-        }) for worker in workers)
-        for timer in queryset:
-            worker_report = reports[timer.worker]
-            worker_report['timers'].append(timer)
-            worker_report['total_duration'] += timer.running_duration
-
-        for report_data in reports.values():
-            report_data['overtime'] = report_data['total_duration'] - self.model.WORK_HOURS
-        return reports
+    def get_daily_workers_report(self, day: date, workers):
+        assert isinstance(day, date)
+        return self \
+            .filter(worker__in=workers) \
+            .filter(started__date=day) \
+            .select_related('worker__user') \
+            .order_by('worker__user__last_name', 'started') \
+            .get_report('date') \
+            .get(day, {})
 
     def create_batch(self, worker, started: datetime, stopped: datetime, commit=True,
                      morning_break=True, lunch_break=True, **kwargs):

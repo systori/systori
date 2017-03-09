@@ -16,7 +16,7 @@ from .utils import to_current_timezone as totz
 
 
 class TimerViewTest(ClientTestCase):
-    url = reverse('timer')
+    url = reverse('api.timer')
 
     def test_post(self):
         response = self.client.post(self.url, {'starting_latitude': '52.5076', 'starting_longitude': '131.39043904'})
@@ -53,68 +53,6 @@ class TimerViewTest(ClientTestCase):
         self.assertEqual(response.status_code, 200, response.data)
         timer.refresh_from_db()
         self.assertFalse(timer.is_running)
-
-
-class ReportViewTest(ClientTestCase):
-    password = 'ReportViewTest'
-    url = reverse('report')
-
-    @skip
-    def test_get(self):
-        now = timezone.now().replace(hour=18, minute=0, second=0, microsecond=0)
-        yesterday = now - timedelta(days=1)
-        timer1 = Timer.objects.create(
-            worker=self.worker,
-            start=yesterday - timedelta(hours=10),
-            end=yesterday - timedelta(hours=3)
-        )
-        timer2 = Timer.objects.create(
-            worker=self.worker,
-            start=yesterday - timedelta(hours=2),
-            end=yesterday - timedelta(minutes=30)
-        )
-        timer3 = Timer.objects.create(
-            worker=self.worker,
-            start=now - timedelta(hours=9),
-            end=now - timedelta(hours=3)
-        )
-        timer4 = Timer.objects.create(
-            worker=self.worker,
-            start=now - timedelta(hours=1),
-            end=now - timedelta(minutes=30)
-        )
-        Timer.objects.create(
-            worker=UserFactory(company=self.company).access.first(),
-            start=now - timedelta(hours=1),
-            end=now - timedelta(minutes=30)
-        )
-
-        response = self.client.get(self.url)
-        json_response = json.loads(response.content.decode('utf-8'))
-
-        self.assertEqual(json_response[0]['date'], yesterday.strftime('%d.%m.%Y'))
-        self.assertEqual(json_response[0]['start'], totz(timer1.start).strftime('%H:%M'))
-        self.assertEqual(json_response[0]['end'], totz(timer1.end).strftime('%H:%M'))
-        self.assertEqual(json_response[0]['duration'], '7:00')
-
-        self.assertEqual(json_response[1]['date'], yesterday.strftime('%d.%m.%Y'))
-        self.assertEqual(json_response[1]['start'], totz(timer2.start).strftime('%H:%M'))
-        self.assertEqual(json_response[1]['end'], totz(timer2.end).strftime('%H:%M'))
-        self.assertEqual(json_response[1]['duration'], '1:30')
-
-        self.assertEqual(json_response[2]['date'], now.strftime('%d.%m.%Y'))
-        self.assertEqual(json_response[2]['start'], totz(timer3.start).strftime('%H:%M'))
-        self.assertEqual(json_response[2]['end'], totz(timer3.end).strftime('%H:%M'))
-        self.assertEqual(json_response[2]['duration'], '6:00')
-
-        self.assertEqual(json_response[3]['date'], now.strftime('%d.%m.%Y'))
-        self.assertEqual(json_response[3]['start'], totz(timer4.start).strftime('%H:%M'))
-        self.assertEqual(json_response[3]['end'], totz(timer4.end).strftime('%H:%M'))
-        self.assertEqual(json_response[3]['duration'], '0:30')
-
-    def test_get_empty(self):
-        response = self.client.get(self.url)
-        self.assertEqual(json.loads(response.content.decode('utf-8')), [])
 
 
 class UserReportViewTest(ClientTestCase):
