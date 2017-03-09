@@ -23,7 +23,9 @@ layers:
       - cat /var/lib/shipmaster/ssh/ssh_config
       - cat /var/lib/shipmaster/ssh/keys/django-tuath
       - cat /root/.ssh/known_hosts
-      - ssh-keyscan -t rsa django-tuath.bitbucket.org 2>&1 >> /root/.ssh/known_hosts
+      - ssh-keyscan -t rsa bitbucket.org
+      - ssh-keyscan -t rsa django-tuath.bitbucket.org
+      - ssh-keyscan -t rsa django-tuath.bitbucket.org >> /root/.ssh/known_hosts
       - cat /root/.ssh/known_hosts
       - ssh -v -F /var/lib/shipmaster/ssh/ssh_config -T git@django-tuath.bitbucket.org
         #- cp systori/dart/sdk/html_dart2js.dart /usr/lib/dart/lib/html/dart2js
