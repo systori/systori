@@ -818,13 +818,13 @@ ProposalFormSet = formset_factory(ProposalRowForm, formset=BaseProposalFormSet, 
 
 class TimesheetForm(forms.ModelForm):
 
-    work_correction = forms.DecimalField(label=_('Work correction'))
+    work_correction = forms.DecimalField(label=_('Work correction (hours)'))
     work_correction_notes = forms.CharField(label=_('Work correction notes'), required=False, widget=forms.Textarea())
 
-    vacation_correction = forms.DecimalField(label=_('Vacation correction'))
+    vacation_correction = forms.DecimalField(label=_('Vacation correction (hours)'))
     vacation_correction_notes = forms.CharField(label=_('Vacation correction notes'), required=False, widget=forms.Textarea())
 
-    overtime_correction = forms.DecimalField(label=_('Overtime correction'))
+    overtime_correction = forms.DecimalField(label=_('Overtime correction (hours)'))
     overtime_correction_notes = forms.CharField(label=_('Overtime correction notes'), required=False, widget=forms.Textarea())
 
     class Meta:
