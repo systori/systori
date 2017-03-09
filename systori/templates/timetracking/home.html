@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n static bootstrap timetracking customformatting %}
+{% load i18n static bootstrap customformatting %}
 
 {% block head %}
 {{ block.super }}
@@ -27,13 +27,11 @@
   #timetracking-report td.user {
     width: 18%;
   }
+  #timetracking-report .progress {
+    min-width: 600px;
+  }
 </style>
 {{ form.media.css }}
-{# This is here because of the datepicker init calls in the body #}
-<script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
-<script src="{% static "js/jquery-ui.min.js" %}"></script>
-<script src="{% static "js/bootstrap.min.js" %}"></script>
-{{ form.media.js }}
 {% endblock head %}
 
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='timetracking' %}{% endblock %}
@@ -72,30 +70,21 @@
       <tr>
         <th>{% trans "User" %}</th>
         <th>{% trans "Timer" %}</th>
-        <th>{% trans "Overtime" %}</th>
+        <th>{% trans "Total" %}</th>
       </tr>
-      {% for worker, items in report.items %}
+      {% for worker, day in report.items %}
       <tr>
         <td class="user">
           <a href="{% url 'timetracking_worker' worker.pk %}">{{ worker.get_full_name }}</a>
         </td>
           <td>
             <div class="progress">
-              {% for timer in items.timers %}
-                  <div class="progress-bar
-                    {% if timer.kind == "work" %} progress-bar-success
-                    {% elif timer.kind == "holiday" %} progress-bar-warning
-                    {% endif %}" role="progressbar" style="width:{{ timer.duration|seconds_to_pixels }}px">
-                    {{ timer.started|time:"H:i" }} - {{ timer.stopped|time:"H:i" }} ({{ timer.duration|hours }})
-                  </div>
-
-                 {% if not forloop.last %}
-                     <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" style="width:25px"></div>
-                 {% endif %}
+              {% for timer in day.timers %}
+                {% include "timetracking/timer.html" with timer=timer %}
               {% endfor %}
             </div>
           </td>
-        <td>{{ items.overtime|hours }}</td>
+        <td>{{ day.total|hours }}</td>
       </tr>
       {% empty %}
         {% trans "No users" %}
@@ -105,4 +94,13 @@
 </div>
 {% endblock %}
 
-{% block base_js %}{% endblock %}
+{% block extra_js %}
+  {{ form.media.js }}
+  <script>
+  {% autoescape off %}
+  {{ period_form.fields.period.widget.init_javascript }}
+  {{ form.fields.started.widget.init_javascript }}
+  {{ form.fields.stopped.widget.init_javascript }}
+  {% endautoescape %}
+  </script>
+{% endblock %}

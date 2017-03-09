@@ -33,6 +33,9 @@ class Timer(models.Model):
     # Fills up to 8hrs of WORK as unpaid time.
     UNPAID_LEAVE = 'unpaid_leave'
 
+    # Unsaved kind, used for reports to show breaks between work timers.
+    BREAK = 'break'
+
     KIND_CHOICES = (
         (WORK, _('Work')),
         (VACATION, _('Vacation')),

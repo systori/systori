@@ -1,9 +1,26 @@
+import re
+
 from django import forms
 from django.forms import ModelForm
 from django.utils.translation import ugettext_lazy as _
-from datetimewidget.widgets import DateTimeWidget
+from datetimewidget.widgets import DateTimeWidget as OldDateTimeWidget
 
 from .models import Timer
+
+
+class DateTimeWidget(OldDateTimeWidget):
+
+    EXTRACT_INIT_JS = re.compile('(.*?)<script.*?>(.*?)</script>', re.DOTALL)
+
+    def __init__(self, name, options, required=False):
+        super().__init__(options=options, attrs={'id': 'timetracking-'+name}, bootstrap_version=3)
+        self.required = required
+        self.init_javascript = ''
+
+    def render(self, name, value, attrs=None, renderer=None):
+        rendered_widget = super().render(name, value, attrs)
+        html, self.init_javascript = self.EXTRACT_INIT_JS.search(rendered_widget).groups()
+        return html
 
 
 class ManualTimerForm(ModelForm):
@@ -18,18 +35,14 @@ class ManualTimerForm(ModelForm):
     def __init__(self, *args, company, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['started'].widget = DateTimeWidget(
-            options={'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'},
-            attrs={'id': 'timetracking-form-started'},
-            bootstrap_version=3
+            'form-started', {'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'}, True
         )
         self.fields['stopped'].widget = DateTimeWidget(
-            options={'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'},
-            attrs={'id':'timetracking-form-stopped'},
-            bootstrap_version=3
+            'form-stopped', {'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'}, True
         )
-        self.fields['started'].required = True
-        self.fields['stopped'].required = True
-        self.fields['worker'].queryset = company.active_workers(is_timetracking_enabled=True)
+        self.fields['worker'].queryset = company \
+            .active_workers(is_timetracking_enabled=True) \
+            .order_by('user__last_name')
 
     def clean(self):
         if self.cleaned_data['kind'] != self._meta.model.WORK and \
@@ -51,6 +64,7 @@ class WorkerManualTimerForm(ManualTimerForm):
 class MonthPickerForm(forms.Form):
 
     period = forms.DateField(widget=DateTimeWidget(
+        'report-period',
         options={
             'format': 'mm.yyyy',
             'startView': 3,
@@ -58,14 +72,13 @@ class MonthPickerForm(forms.Form):
             'minView': 3,
             'clearBtn': False
         },
-        attrs={'id': 'timetracking-report-period'},
-        bootstrap_version=3
     ), input_formats=['%m.%Y'])
 
 
 class DayPickerForm(forms.Form):
 
     period = forms.DateField(widget=DateTimeWidget(
+        'report-period',
         options={
             'format': 'dd.mm.yyyy',
             'startView': 2,
@@ -73,6 +86,4 @@ class DayPickerForm(forms.Form):
             'minView': 2,
             'clearBtn': False
         },
-        attrs={'id': 'timetracking-report-period'},
-        bootstrap_version=3
     ), input_formats=['%d.%m.%Y'])
