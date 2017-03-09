@@ -19,14 +19,12 @@ layers:
     context:
       - .
     build:
-      - ssh-keyscan -t rsa bitbucket.org >> /root/.ssh/known_hosts
-      - ssh -v -F /var/lib/shipmaster/ssh/ssh_config -T git@django-tuath.bitbucket.org
-        #- cp systori/dart/sdk/html_dart2js.dart /usr/lib/dart/lib/html/dart2js
-        #- cd systori/dart && pub get && pub build
-        #- cd /app
-        #- pip3 install --src=/src -r requirements/app.pip
-        #- export DJANGO_SETTINGS_MODULE=systori.settings.common
-        #- python3 manage.py collectstatic --noinput
+      - cp systori/dart/sdk/html_dart2js.dart /usr/lib/dart/lib/html/dart2js
+      - cd systori/dart && pub get && pub build
+      - cd /app
+      - pip3 install --src=/src -r requirements/app.pip
+      - export DJANGO_SETTINGS_MODULE=systori.settings.common
+      - python3 manage.py collectstatic --noinput
     prepare: fab prepare:service={service},branch={git-branch}
     start: fab uwsgi
     wait-for: db:5432
