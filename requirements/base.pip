@@ -13,4 +13,4 @@ django-dartium
 
 geopy==1.11.0
 lxml==3.6.0
-jsonfield==1.0.3
+jsonfield==2.0.1
