@@ -21,7 +21,10 @@ layers:
     build:
       - export
       - cat /var/lib/shipmaster/ssh/ssh_config
-      - ssh-add -L
+      - cat /var/lib/shipmaster/ssh/keys/django-tuath
+      - cat /root/.ssh/known_hosts
+      - ssh-keyscan -t rsa django-tuath.bitbucket.org 2>&1 >> /root/.ssh/known_hosts
+      - cat /root/.ssh/known_hosts
       - ssh -v -F /var/lib/shipmaster/ssh/ssh_config -T git@django-tuath.bitbucket.org
         #- cp systori/dart/sdk/html_dart2js.dart /usr/lib/dart/lib/html/dart2js
         #- cd systori/dart && pub get && pub build
