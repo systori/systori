@@ -17,8 +17,8 @@ class Thing extends Model {
 
     attached() {
         name = getInput('name');
-        name.addHandler(new AutocompleteKeyboardHandler(this,
-            {}, (String id) => completedId = id
+        name.addHandler(new AutocompleteKeyboardHandler(
+            this, ()=>{}, (String id) => completedId = id
         ));
         super.attached();
     }
