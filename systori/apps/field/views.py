@@ -1,11 +1,10 @@
 import json
 from datetime import timedelta, date
-from calendar import LocaleHTMLCalendar, month_name
+from calendar import LocaleHTMLCalendar
 from itertools import groupby
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q, Count, Prefetch
-from django.utils import timezone
 from django.utils.http import urlquote
 from django.utils.formats import to_locale, get_language
 from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView
@@ -14,7 +13,7 @@ from django.urls import reverse
 
 from ..company.models import Worker
 from ..project.models import Project, DailyPlan, EquipmentAssignment, TeamMember
-from ..task.models import Job, Group, Task, ProgressReport
+from ..task.models import Group, Task, ProgressReport
 from ..equipment.models import Equipment
 from ..timetracking.models import Timer
 from ..document.models import Timesheet
@@ -88,8 +87,8 @@ class FieldDashboard(TemplateView):
         context.update({
             'todays_plans': todays_plans,
             'previous_plans': previous_plans,
-            'timesheet': Timesheet.objects.period(today.year, today.month).filter(worker=self.request.worker).first(),
-            'timetracking_timer_duration': timetracking_utils.get_running_timer_duration(self.request.worker)
+            'timesheet': Timesheet.objects.get_previous_or_current(worker),
+            'timer': Timer.objects.get_running_timer(worker)
         })
 
         return context
@@ -100,12 +99,10 @@ class FieldTimersList(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        worker = self.request.worker
         context.update({
-            'timetracking_report': Timer.objects
-            .filter_month()
-            .filter(worker=self.request.worker)
-            .order_by('started')
-            .get_report()
+            'timesheet': Timesheet.objects.get_previous_or_current(worker),
+            'report': Timer.objects.get_monthly_worker_report(date.today(), worker)
         })
         return context
 

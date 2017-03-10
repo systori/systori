@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n customformatting %}
+{% load i18n l10n customformatting %}
 
 {% block container %}
   <div class="container">
@@ -9,18 +9,36 @@
                                 class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
     </div>
 
+    {% if timesheet %}
     <div class="table-responsive">
-      <table class="table" is="timetracking-report" id="timer-report">
+      {% include "document/timesheet_summary.html" with timesheet=timesheet full=True extra_css="table-striped"%}
+    </div>
+    {% endif %}
+
+    <div class="table-responsive">
+      <table class="table">
         <thead>
         <tr>
           <th>{% trans "Date" %}</th>
           <th>{% trans "Timers" %}</th>
-          <th>{% trans "Overtime" %}</th>
+          <th>{% trans "Total" %}</th>
         </tr>
         </thead>
         <tbody>
-        {% for date, row in timetracking_report.items %}
-          {% include "timetracking/report_row.html" %}
+        {% for date, data in report.items %}
+          <tr>
+            <td data-mapping="date">{{ date|localize }}</td>
+            <td>
+              {% for timer in data.timers %}
+                {% if timer.kind == timer.BREAK %}
+                  <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+                {% else %}
+                  {{ timer.started|time:"H:i" }} - {{ timer.stopped|time:"H:i" }}
+                {% endif %}
+              {% endfor %}
+            </td>
+            <td>{{ data.total|hours }}</td>
+          </tr>
         {% endfor %}
         </tbody>
       </table>

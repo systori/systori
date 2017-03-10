@@ -11,4 +11,4 @@ def generate_timesheets():
     today = date.today()
     for company in Company.objects.all():
         company.activate()
-        Timesheet.generate(today.year, today.month)
+        Timesheet.generate(today)

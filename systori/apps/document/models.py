@@ -43,6 +43,14 @@ class TimesheetQuerySet(QuerySet):
             document_date__range=date_utils.month_range(year, month)
         )
 
+    def get_previous_or_current(self, worker):
+        today = now().date()
+        previous_month = today.replace(day=1) - timedelta(days=2)
+        for day in (today, previous_month):
+            timesheet = self.period(day.year, day.month).filter(worker=worker).first()
+            if timesheet:
+                return timesheet
+
 
 class Timesheet(Document):
 
@@ -110,11 +118,12 @@ class Timesheet(Document):
         return self
 
     @classmethod
-    def generate(cls, year, month):
-        letterhead = DocumentSettings.objects.first().timesheet_letterhead
+    def generate(cls, day: date):
+        assert isinstance(day, date)
 
-        current = list(cls.objects.period(year, month))
-        workers = Timer.objects.filter_month(year, month).get_workers()
+        letterhead = DocumentSettings.objects.first().timesheet_letterhead
+        current = list(cls.objects.period(day.year, day.month))
+        workers = Timer.objects.filter_month(day.year, day.month).get_workers()
 
         for worker in workers:
             sheet = None
@@ -124,7 +133,8 @@ class Timesheet(Document):
                     current.remove(ts)
                     break
             if not sheet:
-                sheet = cls(document_date=date(year, month, 1), worker=worker)
+                sheet = cls(worker=worker)
+            sheet.document_date = day
             sheet.letterhead = letterhead
             sheet.calculate()
             sheet.save()

@@ -50,58 +50,7 @@
 
     </table>
 
-    <table class="table table-bordered table-condensed table-nonfluid pull-right">
-
-      <thead>
-      <tr>
-        <th></th>
-        <th>{% trans "Previous" context "timesheet" %}</th>
-        <th>{% trans "Correction" context "timesheet" %}</th>
-        <th>{{ object.document_date|date:"F" }}</th>
-        <th>{% trans "Balance" context "timesheet" %}</th>
-      </tr>
-      </thead>
-
-      <tr>
-        <td>{% trans "Vacation" %}</td>
-        <td>{{ object.json.vacation_transferred|zeroblank|workdays }}</td>
-        <td>{{ object.json.vacation_correction|zeroblank|workdays }}</td>
-        <td>
-          {{ object.json.vacation_net|workdays }}
-          {% if object.json.vacation_total != 0 %}
-            ({{ object.json.vacation_added|workdays }} - {{ object.json.vacation_total|workdays }})
-          {% endif %}
-        </td>
-        <td class="info">{{ object.json.vacation_balance|workdays }}</td>
-      </tr>
-
-      <tr>
-        <td>{% trans "Overtime" %}</td>
-        <td>{{ object.json.overtime_transferred|zeroblank|hours }}</td>
-        <td>{{ object.json.overtime_correction|zeroblank|hours }}</td>
-        <td>
-          {{ object.json.overtime_net|hours }}
-          {% if object.json.paid_leave_total != 0 %}
-            ({{ object.json.overtime_total|hours }} - {{ object.json.paid_leave_total|hours }})
-          {% endif %}
-        </td>
-        <td class="info">{{ object.json.overtime_balance|hours }} ({{ object.json.overtime_balance|workdays }})</td>
-      </tr>
-
-      <tr>
-        <td>{% trans "Compensation" context "timesheet" %}</td>
-        <td></td>
-        <td>{{ object.json.work_correction|zeroblank|hours }}</td>
-        <td>
-          {{ object.json.compensation_total|hours }}
-          {% if object.json.overtime_total != 0 %}
-            ({{ object.json.payables_total|hours }} - {{ object.json.overtime_total|hours }})
-          {% endif %}
-        </td>
-        <td class="info">{{ object.json.compensation_final|hours }}</td>
-      </tr>
-
-    </table>
+    {% include "document/timesheet_summary.html" with timesheet=object full=True extra_css="table-nonfluid pull-right" %}
 
     <div class="clearfix"></div>
 

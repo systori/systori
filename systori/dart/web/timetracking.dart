@@ -3,200 +3,158 @@ import 'dart:async';
 import 'dart:convert';
 
 
-final TimetrackingTimer timetracking_timer = new TimetrackingTimer();
+class TimerAPI {
 
+    static final String url = "/api/timer/";
+    final Map<String, String> headers;
 
-class Resource {
+    TimerAPI(): headers = {
+        "X-CSRFToken": (querySelector('input[name=csrfmiddlewaretoken]') as InputElement).value,
+        "Content-Type": "application/json"
+    };
 
-    Map<String, String> headers;
-    String url;
-    int id;
-
-    Resource(url): url = url {
-        var csrftoken = (querySelector('input[name=csrfmiddlewaretoken]') as InputElement).value;
-        headers = {
-            "X-CSRFToken": csrftoken,
-            "Content-Type": "application/json"
-        };
-    }
-
-    String build_request_url() {
-        if (id != null) {
-          return "${url}${id}";
-        } else {
-          return url;
-        }
-    }
-
-    Future<HttpRequest> create([Map data]) {
-        return HttpRequest.request(
-            url,
-            method: "POST",
-            requestHeaders: headers,
-            sendData: JSON.encode(data)
-        );
-    }
-
-    Future<HttpRequest> destroy() {
-        return HttpRequest.request(
-            build_request_url(),
-            method: "DELETE",
-            requestHeaders: headers
-        );
-    }
-
-    Future<HttpRequest> get() {
-        return HttpRequest.request(
-            build_request_url(),
-            method: "GET"
-        );
-    }
-
-    Future<HttpRequest> update([Map data]) {
-        return HttpRequest.request(
-            build_request_url(),
-            method: "PUT",
-            requestHeaders: headers,
-            sendData: JSON.encode(data)
-        );
-    }
-}
-
-
-class TimetrackingTimer extends Resource {
-
-    InputElement box = querySelector('#timer-box');
-    HtmlElement button;
-    String _current_button_icon = 'play';
-    HtmlElement _button_icon;
-    HtmlElement _button_label;
-    int hours = 0;
-    int minutes = 0;
-    int seconds = 0;
-    Timer timer;
-
-    TimetrackingTimer(): super("/api/v1/timetracking/timer/");
-
-    void initialize() {
-        button = querySelector('#timer-toggle');
-        _button_icon = button.querySelector('.glyphicon');
-        _button_label = button.querySelector('.btn-label');
-
-        button.onClick.listen((_) {
-            this.toggle();
-        });
-
-        get().then((response) {
-            Map remote_data = JSON.decode(response.responseText);
-            hours = remote_data['duration'][0];
-            minutes = remote_data['duration'][1];
-            seconds = remote_data['duration'][2];
-            run();
-        }).catchError((Error error) {
-            output();
-        });
-    }
-
-    Future<Map> _get_location() async {
-        var data = new Map();
+    Future<bool> start(bool start, [Map data]) async {
         try {
-            Geoposition position = await window.navigator.geolocation.getCurrentPosition();
-            data['latitude'] = position.coords.latitude.toStringAsFixed(8);
-            data['longitude'] = position.coords.longitude.toStringAsFixed(8);
-        } on PositionError catch (error) {
-            if (window.navigator.userAgent.contains(new RegExp(r"(Chromium)|(Dart)"))) {
-                // Dummy data for Chromium that doesn't support geolocation
-                data['latitude'] = 52.5076;
-                data['longitude'] = 131.39043904;
-            }
-            else {
-                window.alert("Geolocation error: ${error.message} (${error.code})");
-            }
+            var response = await HttpRequest.request(
+                url,
+                method: start ? "POST" : "PUT",
+                requestHeaders: headers,
+                sendData: JSON.encode(data)
+            );
+            return response.status == 200 ? true : false;
+        } catch(e) {
+            return false;
         }
-        return data;
     }
 
-    void start() {
-        set_button_icon('map-marker');
-        set_button_label('geolocating');
-        _get_location().then((data) {
-            if (data.isNotEmpty) {
-                var remote_data = {'start_latitude': data['latitude'], 'start_longitude': data['longitude']};
-                create(remote_data).then((response) {
-                    if (response.status == 200) {
-                        run();
-                    }
-                });
-            } else {
-                set_button_icon('play');
-                set_button_label('stopped');
-            }
-        });
-    }
+}
 
-    void toggle() {
-        isRunning() ? stop() : start();
-    }
 
-    void run() {
-        timer = new Timer.periodic(new Duration(milliseconds: 1000), increment);
-        set_button_icon('pause');
-        set_button_label('running');
-    }
-
-    void increment(Timer timer) {
-        seconds += 1;
-        if (seconds >= 60) {
-            seconds = 0;
-            minutes += 1;
-        }
-        if (minutes >= 60) {
-            minutes = 0;
-            hours += 1;
-        }
-        output();
-    }
-
-    void output() {
-        var hours_string = "${hours}".padLeft(2, "0");
-        var minutes_string = "${minutes}".padLeft(2, "0");
-        var seconds_string = "${seconds}".padLeft(2, "0");
-        box.text = "${hours_string}:${minutes_string}:${seconds_string}";
-    }
-
-    void stop() {
-        set_button_icon('map-marker');
-        set_button_label('geolocating');
-        _get_location().then((data) {
-            var remote_data = {'end_latitude': data['latitude'], 'end_longitude': data['longitude']};
-            update(remote_data).then((response) {
-                if (response.status == 200) {
-                    set_button_icon('play');
-                    set_button_label('stopped');
-                }
-            });
-        });
-        timer.cancel();
-        hours = minutes = seconds = 0;
-        output();
-    }
-
-    bool isRunning() {
-        return timer == null ? false : timer.isActive;
-    }
-
-    void set_button_icon(String name) {
-        _button_icon.classes.remove('glyphicon-${_current_button_icon}');
-        _current_button_icon = name;
-        _button_icon.classes.add('glyphicon-${_current_button_icon}');
-    }
-
-    void set_button_label(String string_constant) {
-        _button_label.text = _button_label.dataset["label-${string_constant}"];
+Future<Map> geoLocate() async {
+    try {
+        Geoposition position = await window.navigator.geolocation.getCurrentPosition();
+        return {
+            'latitude': position.coords.latitude.toStringAsFixed(8),
+            'longitude': position.coords.longitude.toStringAsFixed(8),
+        };
+    } catch(e) {
+        return {};
     }
 }
 
 
-void main() {
-    timetracking_timer.initialize();
+class TimerWidget extends HtmlElement {
+
+    static final bool DEBUG = false;
+
+    DateTime started;
+    Timer ticker;
+    TimerAPI api;
+
+    DivElement digits;
+    ButtonElement toggle;
+    SpanElement toggleIcon;
+    SpanElement toggleLabel;
+
+    TimerWidget.created(): super.created() {
+        api = new TimerAPI();
+        digits = this.querySelector('#timer-digits');
+        toggle = this.querySelector('#timer-toggle');
+        toggle.onClick.listen(toggleState);
+        toggleIcon = toggle.querySelector('.glyphicon');
+        toggleLabel = toggle.querySelector('.btn-label');
+        if (dataset['running'] == 'true') {
+            var elapsed = new Duration(seconds: int.parse(dataset['seconds']));
+            started = new DateTime.now().subtract(elapsed);
+            startTicker();
+        }
+    }
+
+    toggleState(_) =>
+        started != null ? stop() : start();
+
+    start() async {
+        toggle.disabled = true;
+        if (await api.start(true, await geoLocate())) {
+            started = new DateTime.now();
+            toggleIcon.classes.add('glyphicon-pause');
+            toggleIcon.classes.remove('glyphicon-play');
+            toggleLabel.text = toggleLabel.dataset['started'];
+            tick();
+            startTicker();
+        } else {
+            toggleLabel.text = toggleLabel.dataset['start-failed'];
+        }
+        toggle.disabled = false;
+    }
+
+    stop() async {
+        toggle.disabled = true;
+        if (await api.start(false, await geoLocate())) {
+            ticker.cancel();
+            started = null;
+            toggleIcon.classes.add('glyphicon-play');
+            toggleIcon.classes.remove('glyphicon-pause');
+            toggleLabel.text = toggleLabel.dataset['stopped'];
+            tick();
+        } else {
+            toggleLabel.text = toggleLabel.dataset['stop-failed'];
+        }
+        toggle.disabled = false;
+    }
+
+    startTicker() =>
+        ticker = new Timer.periodic(new Duration(seconds: 1), tick);
+
+    tick([_]) {
+        if (started == null) {
+            digits.text = '-:--';
+        } else {
+            var elapsed = new DateTime.now().difference(started);
+            var hours = elapsed.inHours.toString();
+            var minutes = (elapsed.inMinutes % 60).toString().padLeft(2, '0');
+            if (DEBUG) {
+                var seconds = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
+                digits.text = "$hours:$minutes:$seconds";
+            } else {
+                digits.text = "$hours:$minutes";
+            }
+        }
+    }
+
+}
+
+
+class TimerAdminForm extends FormElement {
+
+    SelectElement kind;
+    CheckboxInputElement morningBreak;
+    CheckboxInputElement lunchBreak;
+
+    TimerAdminForm.created(): super.created() {
+        kind = this.querySelector('select[name="kind"]');
+        morningBreak = this.querySelector('input[name="morning_break"]');
+        lunchBreak = this.querySelector('input[name="lunch_break"]');
+        kind.onChange.listen(updateBreaks);
+    }
+
+    updateBreaks(Event e) {
+        var selected = kind.options[kind.selectedIndex].value;
+        switch(selected) {
+            case 'work':
+                morningBreak.disabled = lunchBreak.disabled = false;
+                morningBreak.checked = lunchBreak.checked = true;
+                return;
+            default:
+                morningBreak.disabled = lunchBreak.disabled = true;
+                morningBreak.checked = lunchBreak.checked = false;
+        }
+    }
+
+}
+
+
+main() {
+    document.registerElement('timer-form', TimerAdminForm, extendsTag:'form');
+    document.registerElement('timer-widget', TimerWidget);
 }

@@ -20,44 +20,13 @@ class TimerQuerySet(QuerySet):
     def filter_running(self):
         return self.filter(stopped__isnull=True)
 
-    @atomic
-    def stop_abandoned(self):
-        """
-        Stop timers still running at the end of the day
-        """
-        cutoff_params = dict(hour=ABANDONED_CUTOFF[0], minute=ABANDONED_CUTOFF[1], second=0, microsecond=0)
-        for timer in self.filter_running():
-            if (timer.started.hour, timer.started.minute) >= ABANDONED_CUTOFF:
-                timer.stop(stopped=timer.started + timedelta(minutes=5))
-            else:
-                timer.stop(stopped=timer.started.replace(**cutoff_params))
+    def get_running_timer(self, worker):
+        return self.filter_running().filter(worker=worker).first()
 
-    def stop_for_break(self, stopped=None):
-        """
-        Stop currently running timers automatically.
-        Doesn't validate if it's time for break now or not.
-        """
-        stopped = stopped or timezone.now()
-        counter = 0
-        for timer in self.filter_running().filter(kind=self.model.WORK):
-            timer.stop(stopped=stopped, is_auto_stopped=True)
-            counter += 1
-        return counter
-
-    def launch_after_break(self, started=None):
-        """
-        Launch timers for workers that had timers automatically stopped.
-        """
-        started = started or timezone.now()
-        seen_workers = set()
-        auto_stopped_timers = self.filter_today().filter(
-            kind=self.model.WORK, is_auto_stopped=True).select_related('worker')
-        running_workers = self.filter_running().values_list('worker')
-        for timer in auto_stopped_timers.exclude(worker__in=running_workers):
-            if not timer.worker in seen_workers:
-                self.model.start(timer.worker, started=started, is_auto_started=True)
-                seen_workers.add(timer.worker)
-        return len(seen_workers)
+    def get_workers(self):
+        return Worker.objects \
+            .filter(pk__in=self.values_list('worker')) \
+            .order_by('user__last_name')
 
     def filter_now(self, now: datetime=None):
         now = now or timezone.now()
@@ -124,6 +93,15 @@ class TimerQuerySet(QuerySet):
             .get_report('date') \
             .get(day, {})
 
+    def get_monthly_worker_report(self, month: date, worker):
+        assert isinstance(month, date)
+        return self \
+            .filter(worker=worker) \
+            .filter_month(month.year, month.month) \
+            .order_by('started') \
+            .get_report('worker') \
+            .get(worker, {})
+
     def create_batch(self, worker, started: datetime, stopped: datetime, commit=True,
                      morning_break=True, lunch_break=True, **kwargs):
 
@@ -159,7 +137,41 @@ class TimerQuerySet(QuerySet):
 
         return timers
 
-    def get_workers(self):
-        return Worker.objects \
-            .filter(pk__in=self.values_list('worker')) \
-            .order_by('user__last_name')
+    @atomic
+    def stop_abandoned(self):
+        """
+        Stop timers still running at the end of the day
+        """
+        cutoff_params = dict(hour=ABANDONED_CUTOFF[0], minute=ABANDONED_CUTOFF[1], second=0, microsecond=0)
+        for timer in self.filter_running():
+            if (timer.started.hour, timer.started.minute) >= ABANDONED_CUTOFF:
+                timer.stop(stopped=timer.started + timedelta(minutes=5))
+            else:
+                timer.stop(stopped=timer.started.replace(**cutoff_params))
+
+    def stop_for_break(self, stopped=None):
+        """
+        Stop currently running timers automatically.
+        Doesn't validate if it's time for break now or not.
+        """
+        stopped = stopped or timezone.now()
+        counter = 0
+        for timer in self.filter_running().filter(kind=self.model.WORK):
+            timer.stop(stopped=stopped, is_auto_stopped=True)
+            counter += 1
+        return counter
+
+    def launch_after_break(self, started=None):
+        """
+        Launch timers for workers that had timers automatically stopped.
+        """
+        started = started or timezone.now()
+        seen_workers = set()
+        auto_stopped_timers = self.filter_today().filter(
+            kind=self.model.WORK, is_auto_stopped=True).select_related('worker')
+        running_workers = self.filter_running().values_list('worker')
+        for timer in auto_stopped_timers.exclude(worker__in=running_workers):
+            if not timer.worker in seen_workers:
+                self.model.start(timer.worker, started=started, is_auto_started=True)
+                seen_workers.add(timer.worker)
+        return len(seen_workers)

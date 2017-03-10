@@ -48,52 +48,32 @@
     {% endfor %}
 
     {% if worker.can_track_time %}
-      {% include "timetracking/dashboard_part.html" %}
+      {% include "timetracking/timer.html" %}
     {% endif %}
 
     {% if worker.is_timetracking_enabled %}
     <div class="panel panel-default">
 
       <div class="panel-heading">
-        {% trans "Timesheet" %}
+        {% trans "Timesheet Balances" %}
+        {% if timesheet %}{{ timesheet.document_date|date:"DATE_FORMAT" }}{% endif %}
       </div>
 
       {% if timesheet %}
-      <table class="table table-striped table-bordered">
 
-        <thead>
-        <tr>
-          <th></th>
-          <th>{% trans "Previous" context "timesheet" %}</th>
-          <th>{{ timesheet.document_date|date:"F" }}</th>
-          <th>{% trans "Balance" context "timesheet" %}</th>
-        </tr>
-        </thead>
+        {% include "document/timesheet_summary.html" with timesheet=timesheet extra_css="table-striped"%}
 
-        <tr>
-          <td>{% trans "Holiday" %}</td>
-          <td>{{ timesheet.json.holiday_transferred|todecimalhours }}</td>
-          <td>{{ timesheet.json.holiday_added|todecimalhours }}{% if timesheet.json.holiday_total != 0 %}-{{ timesheet.json.holiday_total|todecimalhours }}{% endif %}</td>
-          <td class="info">{{ timesheet.json.holiday_balance|todecimalhours }} ({{ timesheet.json.holiday_balance|workdays }})</td>
-        </tr>
-
-        <tr>
-          <td>{% trans "Overtime" %}</td>
-          <td>{{ timesheet.json.overtime_transferred|todecimalhours }}</td>
-          <td>{{ timesheet.json.overtime_total|todecimalhours }}</td>
-          <td class="info">{{ timesheet.json.overtime_balance|todecimalhours }} ({{ timesheet.json.overtime_balance|workdays }})</td>
-        </tr>
-
-      </table>
       {% else %}
+
         <div class="panel-body">
-          <p>{% trans "No timesheets have been created yet." %}</p>
+          <p>{% trans "Timesheet balance not available yet." %}</p>
         </div>
+
       {% endif %}
 
       <div class="panel-footer clearfix">
         <div class="pull-right">
-          <a href="{% url 'field.timers' %}" class="btn btn-primary">{% trans "Timers" %}</a>
+          <a href="{% url 'field.timers' %}" class="btn btn-primary">{% trans "Details" %}</a>
         </div>
       </div>
 

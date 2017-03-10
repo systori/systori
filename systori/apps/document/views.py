@@ -6,9 +6,11 @@ from django.views.generic import View, ListView, TemplateView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.translation import get_language
 from django.utils.translation import ugettext_lazy as _
 
+from systori.lib.date_utils import last_day
 from systori.lib.accounting.tools import Amount
 from ..project.models import Project
 from ..timetracking.models import Timer
@@ -278,7 +280,10 @@ class TimesheetsGenerateView(View):
 
     def get(self, request, *args, **kwargs):
         year, month = int(kwargs['year']), int(kwargs['month'])
-        Timesheet.generate(year, month)
+        doc_date = timezone.now().date()
+        if (doc_date.year, doc_date.month) != (year, month):
+            doc_date = last_day(year, month)
+        Timesheet.generate(doc_date)
         return HttpResponseRedirect(reverse('timesheets'))
 
 

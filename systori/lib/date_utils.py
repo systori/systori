@@ -13,3 +13,7 @@ def month_range(year, month):
     start = date(year, month, 1)
     end = date(year, month, _monthrange(year, month)[1])
     return start, end
+
+
+def last_day(year, month):
+    return date(year, month, _monthrange(year, month)[1])

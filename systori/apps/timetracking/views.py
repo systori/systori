@@ -1,5 +1,4 @@
 import datetime
-from collections import OrderedDict
 
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
@@ -44,7 +43,8 @@ class HomeView(BaseCreateView, PeriodFilterMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         workers = utils.get_timetracking_workers(self.request.company)
-        context['report'] = Timer.objects.get_daily_workers_report(context['report_period'], workers)
+        context['report'] = Timer.objects\
+            .get_daily_workers_report(context['report_period'], workers)
         return context
 
     def get_success_url(self):
@@ -74,12 +74,8 @@ class WorkerReportView(BaseCreateView, PeriodFilterMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['timesheet_worker'] = self.worker
-        context['report'] = Timer.objects \
-            .filter(worker=self.worker) \
-            .filter_month(context['report_period'].year, context['report_period'].month) \
-            .order_by('started') \
-            .get_report('worker') \
-            .get(self.worker, {})
+        context['report'] = Timer.objects\
+            .get_monthly_worker_report(context['report_period'], self.worker)
         return context
 
     def get_success_url(self):
