@@ -1,8 +1,8 @@
 {% extends "field/base.html" %}
 {% load i18n dartium customformatting %}
-{% csrf_token %}
 
 {% block container %}
+  {% csrf_token %}
   <div class="container">
 
     {% if worker.has_staff %}
