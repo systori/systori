@@ -1,5 +1,5 @@
 from datetime import time, timedelta, date, datetime
-from collections import namedtuple, OrderedDict
+from collections import namedtuple
 from typing import Iterator, Tuple
 
 from django.utils import timezone
@@ -16,19 +16,21 @@ def calculate_duration_minutes(started, stopped=None):
     return int(seconds // 60)
 
 
+def calculate_duration_seconds(started, stopped=None):
+    if stopped is None:
+        stopped = timezone.now()
+    started = started.replace(microsecond=0)
+    stopped = stopped.replace(microsecond=0)
+    seconds = (stopped - started).total_seconds()
+    return int(seconds)
+
+
 def to_current_timezone(date_time):
     return date_time.astimezone(timezone.get_current_timezone())
 
 
 def get_timetracking_workers(company):
     return company.active_workers(is_timetracking_enabled=True)
-
-
-def get_running_timer_duration(worker):
-    from .models import Timer
-    timer = Timer.objects.filter_running().filter(worker=worker).first()
-    duration = timer.running_duration if timer else 0
-    return hours(duration)
 
 
 def get_workers_statuses():

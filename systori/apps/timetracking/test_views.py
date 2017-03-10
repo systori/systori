@@ -19,7 +19,7 @@ class TimerViewTest(ClientTestCase):
     url = reverse('api.timer')
 
     def test_post(self):
-        response = self.client.post(self.url, {'starting_latitude': '52.5076', 'starting_longitude': '131.39043904'})
+        response = self.client.post(self.url, {'latitude': '52.5076', 'longitude': '131.39043904'})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Timer.objects.filter_running().filter(worker=self.worker).exists())
 
@@ -36,7 +36,7 @@ class TimerViewTest(ClientTestCase):
         timer = Timer.start(self.worker)
         response = self.client.put(
             self.url,
-            urlencode({'ending_latitude': '52.5076', 'ending_longitude': '131.39043904'}),
+            urlencode({'latitude': '52.5076', 'longitude': '131.39043904'}),
             content_type='application/x-www-form-urlencoded'
         )
         self.assertEqual(response.status_code, 200)
@@ -47,7 +47,7 @@ class TimerViewTest(ClientTestCase):
         timer = Timer.objects.create(worker=self.worker, started=timezone.now() - timedelta(hours=1))
         response = self.client.put(
             self.url,
-            urlencode({'ending_latitude': '52.5076', 'ending_longitude': '131.39043904'}),
+            urlencode({'latitude': '52.5076', 'longitude': '131.39043904'}),
             content_type='application/x-www-form-urlencoded'
         )
         self.assertEqual(response.status_code, 200, response.data)

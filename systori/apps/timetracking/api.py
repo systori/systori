@@ -1,13 +1,17 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import views
+from rest_framework import views, serializers
 from rest_framework.response import Response
 
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url
 
 from .models import Timer
-from .serializers import TimerStartSerializer, TimerStopSerializer
 from .permissions import CanTrackTime
+
+
+class LatLongSerializer(serializers.Serializer):
+    latitude = serializers.DecimalField(max_digits=11, decimal_places=8, required=True)
+    longitude = serializers.DecimalField(max_digits=11, decimal_places=8, required=True)
 
 
 class TimerAPI(views.APIView):
@@ -16,26 +20,22 @@ class TimerAPI(views.APIView):
     @staticmethod
     def post(request):
         """ Start a timer """
-        serializer = TimerStartSerializer(data=request.data, context={'worker': request.worker})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        latlong = LatLongSerializer(data=request.data)
+        latlong.is_valid(raise_exception=True)
+        lat, long = latlong.validated_data['latitude'], latlong.validated_data['longitude']
+        Timer.start(request.worker, starting_latitude=lat, starting_longitude=long)
         return Response()
 
     @staticmethod
     def put(request):
         """ Stop a timer """
         timer = get_object_or_404(Timer.objects.filter_running(), worker=request.worker)
-        serializer = TimerStopSerializer(data=request.data, context={'worker': request.worker})
-        serializer.is_valid(raise_exception=True)
-        timer.ending_longitude = serializer.validated_data['ending_longitude']
-        timer.ending_latitude = serializer.validated_data['ending_latitude']
+        latlong = LatLongSerializer(data=request.data)
+        latlong.is_valid(raise_exception=True)
+        timer.ending_longitude = latlong.validated_data['longitude']
+        timer.ending_latitude = latlong.validated_data['latitude']
         timer.stop()
         return Response()
-
-    @staticmethod
-    def get(request):
-        timer = get_object_or_404(Timer.objects.filter_running(), worker=request.worker)
-        return Response({'duration': timer.running_duration})
 
 
 urlpatterns = [

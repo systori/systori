@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 from ..project.models import JobSite
 from .managers import TimerQuerySet
-from .utils import calculate_duration_minutes
+from .utils import calculate_duration_minutes, calculate_duration_seconds
 from systori.lib.model_utils import apply_all_kwargs
 
 
@@ -102,6 +102,12 @@ class Timer(models.Model):
     @property
     def running_duration(self):
         return calculate_duration_minutes(
+            self.started, self.stopped
+        )
+
+    @property
+    def running_duration_seconds(self):
+        return calculate_duration_seconds(
             self.started, self.stopped
         )
 
