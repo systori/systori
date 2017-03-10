@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n static customformatting %}
+{% load i18n dartium customformatting %}
 
 {% block container %}
   <div class="container">
@@ -48,7 +48,39 @@
     {% endfor %}
 
     {% if worker.can_track_time %}
-      {% include "timetracking/timer.html" %}
+      <style type="text/css">
+        #timer-digits {
+          font-family: monospace;
+          font-size: 300%;
+          display: inline-block;
+        }
+        #timer-toggle {
+          position: relative;
+          top: -10px;
+        }
+      </style>
+
+      <timer-widget
+          data-running="{% if timer %}true{% endif %}"
+          data-seconds="{% if timer %}{{ timer.running_duration_seconds }}{% else %}0{% endif %}">
+        <div id="timer-digits">{% if timer %}{{ timer.running_duration|hours }}{% else %}-:--{% endif %}</div>
+        <button type="button" class="btn btn-default" id="timer-toggle">
+          <span class="glyphicon glyphicon-{% if timer %}pause{% else %}play{% endif %}"></span>
+          <span class="btn-label"
+                data-started="{% trans 'Running' %}"
+                data-start-failed="{% trans 'Could not start timer.' %}"
+                data-stopped="{% trans 'Stopped' %}"
+                data-stop-failed="{% trans 'Could not stop timer.' %}"
+                data-geolocating="{% trans 'Geolocating...' %}"
+                data-geolocating-failed="{% trans 'Could not determine location.' %}">
+          {% if timer %}
+            {% trans 'Running' %}
+          {% else %}
+            {% trans 'Stopped' %}
+          {% endif %}
+        </span>
+        </button>
+      </timer-widget>
     {% endif %}
 
     {% if worker.is_timetracking_enabled %}
@@ -82,3 +114,9 @@
 
   </div>
 {% endblock %}
+
+{% if worker.can_track_time %}
+{% block extra_js %}
+  {% dart "timetracking.dart" %}
+{% endblock extra_js %}
+{% endif %}

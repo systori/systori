@@ -1,6 +1,7 @@
 from .common import *
 
-SERVER_NAME = 'systori.localhost'
+#SERVER_NAME = 'systori.localhost'
+SERVER_NAME = 'systori.ubuntu'
 SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
 ALLOWED_HOSTS = ['.'+SERVER_NAME]
 

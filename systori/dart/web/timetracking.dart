@@ -75,7 +75,11 @@ class TimerWidget extends HtmlElement {
 
     start() async {
         toggle.disabled = true;
-        if (await api.start(true, await geoLocate())) {
+        toggleLabel.text = toggleLabel.dataset['geolocating'];
+        var location = await geoLocate();
+        if (location.isEmpty) {
+            toggleLabel.text = toggleLabel.dataset['geolocating-failed'];
+        } else if (await api.start(true, location)) {
             started = new DateTime.now();
             toggleIcon.classes.add('glyphicon-pause');
             toggleIcon.classes.remove('glyphicon-play');
@@ -90,7 +94,11 @@ class TimerWidget extends HtmlElement {
 
     stop() async {
         toggle.disabled = true;
-        if (await api.start(false, await geoLocate())) {
+        toggleLabel.text = toggleLabel.dataset['geolocating'];
+        var location = await geoLocate();
+        if (location.isEmpty) {
+            toggleLabel.text = toggleLabel.dataset['geolocating-failed'];
+        } else if (await api.start(false, await geoLocate())) {
             ticker.cancel();
             started = null;
             toggleIcon.classes.add('glyphicon-play');
