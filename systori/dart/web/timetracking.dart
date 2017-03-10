@@ -45,7 +45,7 @@ Future<Map> geoLocate() async {
 
 class TimerWidget extends HtmlElement {
 
-    static final bool DEBUG = false;
+    static final bool DEBUG = true;
 
     DateTime started;
     Timer ticker;
