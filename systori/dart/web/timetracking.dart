@@ -98,7 +98,7 @@ class TimerWidget extends HtmlElement {
         var location = await geoLocate();
         if (location.isEmpty) {
             toggleLabel.text = toggleLabel.dataset['geolocating-failed'];
-        } else if (await api.start(false, await geoLocate())) {
+        } else if (await api.start(false, location)) {
             ticker.cancel();
             started = null;
             toggleIcon.classes.add('glyphicon-play');
