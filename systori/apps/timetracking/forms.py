@@ -40,9 +40,7 @@ class ManualTimerForm(ModelForm):
         self.fields['stopped'].widget = DateTimeWidget(
             'form-stopped', {'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'}, True
         )
-        self.fields['worker'].queryset = company \
-            .active_workers(is_timetracking_enabled=True) \
-            .order_by('user__last_name')
+        self.fields['worker'].queryset = company.active_workers(is_timetracking_enabled=True)
 
     def clean(self):
         if self.cleaned_data['kind'] != self._meta.model.WORK and \

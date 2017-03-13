@@ -23,7 +23,10 @@ class Company(AbstractSchema):
         return request.scheme+'://'+self.schema+'.'+settings.SERVER_NAME+port
 
     def active_workers(self, **params):
-        return self.workers.filter(is_active=True, **params).select_related('user')
+        return self.workers\
+            .filter(is_active=True, **params)\
+            .select_related('user')\
+            .order_by('user__last_name')
 
     @property
     def breaks(self) -> List[BreakSpan]:

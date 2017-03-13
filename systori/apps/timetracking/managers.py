@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+from collections import OrderedDict
 
 from django.db.models.query import QuerySet
 from django.db.models import Q, Sum
@@ -85,13 +86,19 @@ class TimerQuerySet(QuerySet):
 
     def get_daily_workers_report(self, day: date, workers):
         assert isinstance(day, date)
-        return self \
-            .filter(worker__in=workers) \
-            .filter(started__date=day) \
-            .select_related('worker__user') \
-            .order_by('worker__user__last_name', 'started') \
-            .get_report('date') \
+        report = OrderedDict(
+            (worker, {'timers': [], 'total': 0})
+            for worker in workers
+        )
+        report.update(self
+            .filter(worker__in=workers)
+            .filter(started__date=day)
+            .select_related('worker__user')
+            .order_by('started')
+            .get_report('date')
             .get(day, {})
+        )
+        return report
 
     def get_monthly_worker_report(self, month: date, worker):
         assert isinstance(month, date)
