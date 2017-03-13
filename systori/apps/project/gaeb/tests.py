@@ -6,6 +6,7 @@ from lxml import etree
 
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
+from django.utils.translation import activate
 
 from systori.apps.project.gaeb.convert import Import, Export
 from systori.apps.project.gaeb.structure import GAEBStructure, GAEBStructureField
@@ -218,6 +219,7 @@ class GAEBImportTests(SimpleTestCase):
         return Import().parse(stream)
 
     def test_bad_file(self):
+        activate('en')
         self.assertEqual(
             ["File 'test-file.x83' can't be imported. Please contact support."],
             self.parse('<WTF?>').form.non_field_errors()
