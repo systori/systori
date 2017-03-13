@@ -2343,7 +2343,7 @@ msgstr "Feiertag"
 
 #: systori/apps/timetracking/models.py:44
 msgid "Paid leave"
-msgstr "Sonderurlaub"
+msgstr "Minderstunden"
 
 #: systori/templates/field/timers.html:23
 msgid "Timers"
@@ -2400,7 +2400,7 @@ msgstr "Erlaubt diesen Benutzer selbst Zeiten zu erfassen (Timer starten und sto
 
 #: systori/apps/timetracking/models.py:45
 msgid "Unpaid leave"
-msgstr "Unbezahlter Urlaub"
+msgstr "unbez. Urlaub"
 
 #: systori/apps/document/forms.py:853
 msgid "Explanation required for correction."
