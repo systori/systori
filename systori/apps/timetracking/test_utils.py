@@ -86,7 +86,7 @@ class ReportsTest(TestCase):
         self.assertEqual(report[self.worker3]['timers'][0].stopped, None)
         self.assertEqual(report[self.worker3]['total'], worker3_timer1.running_duration)
         self.assertEqual(report[self.worker3]['total'], worker3_timer1.running_duration)
-        self.assertFalse(self.worker4 in report)
+        self.assertTrue(self.worker4 in report)
 
 
 class UserStatusesTest(TestCase):
