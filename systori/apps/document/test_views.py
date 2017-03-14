@@ -604,7 +604,7 @@ class ProposalViewTests(DocumentTestCase):
     def test_serialize_n_render_only_groups(self):
         self.project = ProjectFactory(structure="0.0.0")
         self.job = JobFactory(project=self.project)
-        self.group = GroupFactory(job=self.job, depth=1)
+        self.group = GroupFactory(parent=self.job, depth=1)
         self.task = TaskFactory(qty=10, complete=0, price=100, group=self.group)
         self.contact = ContactFactory(project=self.project, is_billable=True)
 
@@ -631,6 +631,37 @@ class ProposalViewTests(DocumentTestCase):
         for text in ['Proposal with only groups', 'hello', 'bye', self.job.name]:
             self.assertTrue(text in extractedText)
         self.assertFalse(self.task.name in extractedText)
+
+    def test_serialize_n_render_only_task_names(self):
+        self.project = ProjectFactory(structure="0.0.0")
+        self.job = JobFactory(project=self.project)
+        self.group = GroupFactory(parent=self.job, depth=1)
+        self.task = TaskFactory(qty=10, complete=0, price=100, group=self.group, description="this is a description")
+        self.contact = ContactFactory(project=self.project, is_billable=True)
+
+        data = self.form_data({
+            'title': 'Proposal with only task names',
+            'document_date': '2017-03-06',
+            'header': 'hello',
+            'footer': 'bye',
+            'add_terms': False,
+            'job-0-job_id': self.job.id,
+            'job-0-is_attached': 'True'
+        })
+
+        response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        # render
+
+        response = self.client.get(reverse('proposal.pdf', kwargs={
+            'project_pk':self.project.id,
+            'pk': Proposal.objects.first().id,
+            'format':'print',})+'?only_task_names=1')
+        extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
+        for text in [self.job.name, self.group.name, self.task.name]:
+            self.assertTrue(text in extractedText)
+        self.assertFalse(self.task.description in extractedText)
 
 
 class EvidenceViewTests(DocumentTestCase):

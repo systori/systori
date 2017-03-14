@@ -22,7 +22,7 @@ from .font import FontManager
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-def collate_tasks(proposal, only_groups, font, available_width):
+def collate_tasks(proposal, only_groups, only_task_names, font, available_width):
     items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
@@ -55,7 +55,7 @@ def collate_tasks(proposal, only_groups, font, available_width):
         if task['is_provisional']:
             task_total_column = _('Optional')
 
-        if task.get('variant_group', 0) != 0:
+        if task.get('variant_group'):
             if task['variant_serial'] == 0:
                 task['name'] = _('Variant {}.0: {}').format(task['variant_group'], task['name'])
             else:
@@ -65,28 +65,30 @@ def collate_tasks(proposal, only_groups, font, available_width):
 
         items.row(p(task['code'], font), p(task['name'], font))
         items.row_style('SPAN', 1, -2)
-        lines = simpleSplit(task['description'], font.normal.fontName, items.font_size, description_width)
-        for line in lines:
-            items.row('', p(line, font))
-            items.row_style('SPAN', 1, -1)
-            items.row_style('TOPPADDING', 0, -1, 1)
+        if not only_task_names:
+            lines = simpleSplit(task['description'], font.normal.fontName, items.font_size, description_width)
+            for line in lines:
+                items.row('', p(line, font))
+                items.row_style('SPAN', 1, -1)
+                items.row_style('TOPPADDING', 0, -1, 1)
 
         items.row('', '', ubrdecimal(task['qty']), p(task['unit'], font), money(task['price']), task_total_column)
         items.row_style('ALIGNMENT', 1, -1, "RIGHT")
         items.row_style('BOTTOMPADDING', 0, -1, 10)
 
-    def traverse(parent, depth, only_groups):
+    def traverse(parent, depth, only_groups, only_task_names):
         items.row(b(parent['code'], font), b(parent['name'], font))
         items.row_style('SPAN', 1, -1)
-        lines = simpleSplit(parent['description'], font.normal.fontName, items.font_size, description_width)
-        for line in lines:
-            items.row('', p(line, font))
-            items.row_style('SPAN', 1, -1)
-            items.row_style('TOPPADDING', 0, -1, 1)
-        items.row_style('BOTTOMPADDING', 0, -1, 10)
+        if not only_task_names:
+            lines = simpleSplit(parent['description'], font.normal.fontName, items.font_size, description_width)
+            for line in lines:
+                items.row('', p(line, font))
+                items.row_style('SPAN', 1, -1)
+                items.row_style('TOPPADDING', 0, -1, 1)
+            items.row_style('BOTTOMPADDING', 0, -1, 10)
 
         for group in parent.get('groups', []):
-            traverse(group, depth + 1, only_groups)
+            traverse(group, depth + 1, only_groups, only_task_names)
 
             if not group.get('groups', []) and group.get('tasks', []):
                 items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
@@ -109,7 +111,7 @@ def collate_tasks(proposal, only_groups, font, available_width):
         items.row_style('SPAN', 1, -1)
 
         for group in job.get('groups', []):
-            traverse(group, 1, only_groups)
+            traverse(group, 1, only_groups, only_task_names)
             if not group.get('groups', []) and group.get('tasks', []):
                 items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
                           '', '', '', money(group['estimate']))
@@ -200,7 +202,7 @@ def collate_lineitems(proposal, available_width, font):
 
     return pages
 
-def render(proposal, letterhead, with_lineitems, only_groups, format):
+def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, format):
 
     with BytesIO() as buffer:
 
@@ -227,7 +229,7 @@ def render(proposal, letterhead, with_lineitems, only_groups, format):
 
             Spacer(0, 4*mm)
 
-        ] + collate_tasks(proposal, only_groups, font, available_width) + [
+        ] + collate_tasks(proposal, only_groups, only_task_names, font, available_width) + [
 
             Spacer(0, 10*mm),
 
