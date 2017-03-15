@@ -18,7 +18,7 @@ class AutocompleteKeyboardHandler extends KeyboardHandler {
 
     AutocompleteKeyboardHandler(this.model, this.makeCriteria, this.autocompleteSelection);
 
-    bool get canAutocomplete => model.hasNoPk && model.hasNoChildModels;
+    bool get canAutocomplete => model.hasNoPK && model.hasNoChildModels;
 
     @override
     onFocusEvent(Input input) {

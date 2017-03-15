@@ -18,9 +18,7 @@
 
 <sys-lineitem-sheet>
   {% for lineitem in task.lineitems.all %}
-    <sys-lineitem
-        data-pk="{% if lineitem.pk %}{{ lineitem.pk }}{% endif %}"
-        data-token="{% if lineitem.token %}{{ lineitem.token }}{% endif %}">
+    <sys-lineitem {% if lineitem.pk %}data-pk="{{ lineitem.pk }}"{% endif %}>
       {% include "task/editor/lineitem_editor.html" with lineitem=lineitem %}
     </sys-lineitem>
   {% endfor %}

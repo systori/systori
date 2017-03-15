@@ -1,7 +1,6 @@
 {% load i18n customformatting %}
 <sys-task
     {% if not task.include_estimate %}class="excluded"{% endif %}
-    data-pk="{% if task.pk %}{{ task.pk }}{% endif %}"
-    data-token="{% if task.token %}{{ task.token }}{% endif %}">
+    {% if task.pk %}data-pk="{{ task.pk }}"{% endif %}>
   {% include "task/editor/task_editor.html" with task=task %}
 </sys-task>

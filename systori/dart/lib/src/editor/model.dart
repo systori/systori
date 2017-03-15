@@ -99,13 +99,16 @@ abstract class Model extends HtmlElement {
     }
     bool get hasNoChildModels => !hasChildModels;
 
-    bool get hasPK => pk != null;
-    bool get hasNoPk => !hasPK;
+    bool get hasPK => dataset.containsKey('pk');
+    bool get hasNoPK => !hasPK;
 
-    int get pk => int.parse(dataset['pk'], onError: (s)=>null);
-    set pk(int id) => dataset['pk'] = id.toString();
+    bool get hasToken => dataset.containsKey('token');
+    bool get hasNoToken => !hasToken;
 
-    int get token => int.parse(dataset['token'], onError: (s)=>null);
+    int get pk => hasPK ? int.parse(dataset['pk']) : null;
+    set pk(int pk) => dataset['pk'] = pk.toString();
+
+    int get token => hasToken ? int.parse(dataset['token']) : null;
     set token(int token) => dataset['token'] = token.toString();
 
     ModelState state;
@@ -113,8 +116,7 @@ abstract class Model extends HtmlElement {
     DivElement editor;
 
     Model.created(): super.created() {
-        if (!dataset.containsKey('pk')) dataset['pk'] = '';
-        if (!dataset.containsKey('token')) dataset['token'] = tokenGenerator.next().toString();
+        if (hasNoPK && hasNoToken) this.token = tokenGenerator.next();
         if (children.isEmpty) {
             TemplateElement template = document.querySelector('#${type}-template');
             var clone = document.importNode(template.content, true);
@@ -172,10 +174,10 @@ abstract class Model extends HtmlElement {
             }
         }
         if (data.isNotEmpty) {
-            if (hasNoPk) {
-                data['token'] = token;
-            } else {
+            if (hasPK) {
                 data['pk'] = pk;
+            } else {
+                data['token'] = token;
             }
         }
         return data;
@@ -191,15 +193,18 @@ abstract class Model extends HtmlElement {
 
     commit(Map result) {
         updateVisualState('saved');
-        pk = result['pk'];
+        if (hasNoPK) {
+            pk = result['pk'];
+            dataset.remove('token');
+        }
         if (state.isSaving) state.commit();
         for (var childType in childTypes) {
             var listName = '${childType}s';
             if (!result.containsKey(listName)) continue;
             for (Model child in childrenOfType(childType)) {
                 for (Map childResult in result[listName]) {
-                    if ((child.pk != null && childResult['pk'] == child.pk) ||
-                        (child.token != null && childResult['token'] == child.token)) {
+                    if ((child.hasPK && childResult['pk'] == child.pk) ||
+                        (child.hasNoPK && childResult['token'] == child.token)) {
                         child.commit(childResult);
                     }
                 }
@@ -208,7 +213,7 @@ abstract class Model extends HtmlElement {
     }
 
     delete() {
-        if (pk != null) changeManager.delete(type, pk);
+        if (hasPK) changeManager.delete(type, pk);
         remove();
     }
 

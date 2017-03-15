@@ -1,6 +1,4 @@
-<sys-group
-    data-pk="{% if group.pk %}{{ group.pk }}{% endif %}"
-    data-token="{% if group.token %}{{ group.token }}{% endif %}">
+<sys-group {% if group.pk %}data-pk="{{ group.pk }}"{% endif %}>
   {% include "task/editor/group_editor.html" with group=group %}
   {% for subgroup in group.groups.all %}
     {% include "task/editor/group_loop.html" with group=subgroup %}

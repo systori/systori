@@ -84,7 +84,7 @@ class Group extends Model with KeyboardHandler {
     ElementList<Task> get tasks => this.querySelectorAll(':scope>sys-task');
     int get depth => (parent as Group).depth + 1;
 
-    bool get isBlank => hasNoPk && name.text.isEmpty;
+    bool get isBlank => hasNoPK && name.text.isEmpty;
     bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
 
     Group.created(): super.created();
@@ -389,7 +389,7 @@ class VariantInput extends TextInput with KeyboardHandler {
 
 class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 
-    bool get isBlank => hasNoPk && name.text.isEmpty;
+    bool get isBlank => hasNoPK && name.text.isEmpty;
     bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
 
     List<String> childTypes = ['lineitem'];
@@ -545,7 +545,7 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
     Toggle is_flagged_toggle;
     bool get is_hidden => is_hidden_toggle.value;
     bool get is_flagged => is_flagged_toggle.value;
-    bool get isBlank => hasNoPk && name.text.isEmpty;
+    bool get isBlank => hasNoPK && name.text.isEmpty;
     bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
 
     LineItem.created(): super.created();
