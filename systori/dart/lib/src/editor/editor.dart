@@ -703,6 +703,7 @@ class LineItemSheet extends HtmlElement with OrderableContainer, Spreadsheet {
         LineItem li = document.createElement('sys-lineitem');
         insertBefore(li, this.querySelector(':scope>sys-lineitem'));
         li.name.focus();
+        onOrderingChanged();
     }
 
 }
