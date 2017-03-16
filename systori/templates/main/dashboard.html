@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n customformatting staticfiles %}
+{% load i18n l10n customformatting staticfiles %}
 
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" %}{% endblock %}
 
@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block extra_js %}
+  {% localize off %}
   <script type="text/javascript"
           src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&sensor=false"></script>
   <script type="text/javascript">
@@ -83,4 +84,5 @@
 
     });
   </script>
+  {% endlocalize %}
 {% endblock extra_js %}
