@@ -1,3 +1,4 @@
+from calendar import monthrange
 from collections import OrderedDict
 from itertools import chain
 from datetime import date, timedelta
@@ -12,7 +13,6 @@ from django.utils.formats import date_format
 from django_fsm import FSMField, transition
 from jsonfield import JSONField
 
-from systori.lib import date_utils
 from systori.lib.accounting.tools import Amount, JSONEncoder
 
 from ..timetracking.models import Timer
@@ -39,9 +39,9 @@ class Document(models.Model):
 class TimesheetQuerySet(QuerySet):
 
     def period(self, year, month):
-        return self.filter(
-            document_date__range=date_utils.month_range(year, month)
-        )
+        first = date(year, month, 1)
+        last = date(year, month, monthrange(year, month)[1])
+        return self.filter(document_date__range=(first, last))
 
     def get_previous_or_current(self, worker):
         today = now().date()
@@ -63,8 +63,17 @@ class Timesheet(Document):
 
     objects = TimesheetQuerySet.as_manager()
 
+    initial = {
+        'work_correction': 0,
+        'work_correction_notes': '',
+        'overtime_correction': 0,
+        'overtime_correction_notes': '',
+        'vacation_correction': 0,
+        'vacation_correction_notes': '',
+    }
+
     def calculate_vacation_balance(self):
-        self.json['vacation_added'] = self.worker.vacation
+        self.json['vacation_added'] = self.worker.contract.vacation
         self.json['vacation_net'] = self.json['vacation_added'] - self.json['vacation_total']
         self.json['vacation_balance'] = (
             self.json['vacation_transferred'] +
@@ -99,16 +108,9 @@ class Timesheet(Document):
     def calculate(self):
         year, month = self.document_date.year, self.document_date.month
         if not self.json:
-            self.json = {
-                'work_correction': 0,
-                'work_correction_notes': '',
-                'overtime_correction': 0,
-                'overtime_correction_notes': '',
-                'vacation_correction': 0,
-                'vacation_correction_notes': '',
-            }
+            self.json = self.initial.copy()
         self.json.update(pdf_type.timesheet.serialize(
-            Timer.objects.filter_month(year, month).filter(worker=self.worker).all(),
+            Timer.objects.month(year, month, worker=self.worker).all(),
             year, month
         ))
         self.calculate_transferred_amounts()
@@ -123,7 +125,7 @@ class Timesheet(Document):
 
         letterhead = DocumentSettings.objects.first().timesheet_letterhead
         current = list(cls.objects.period(day.year, day.month))
-        workers = Timer.objects.filter_month(day.year, day.month).get_workers()
+        workers = Timer.objects.month(day.year, day.month).get_workers()
 
         for worker in workers:
             sheet = None

@@ -14,10 +14,6 @@ class OfficeDashboard(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(OfficeDashboard, self).get_context_data(**kwargs)
-        context['flagged_lineitems'] = LineItem.objects \
-            .select_related('task__job__project') \
-            .filter(is_flagged=True) \
-            .all()
         context['job_sites'] = JobSite.objects \
             .select_related('project') \
             .exclude(project__phase=Project.WARRANTY) \

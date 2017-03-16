@@ -1,4 +1,5 @@
 from datetime import date
+from calendar import monthrange
 from collections import OrderedDict, namedtuple
 
 from django.http import HttpResponse, HttpResponseRedirect
@@ -10,7 +11,6 @@ from django.utils import timezone
 from django.utils.translation import get_language
 from django.utils.translation import ugettext_lazy as _
 
-from systori.lib.date_utils import last_day
 from systori.lib.accounting.tools import Amount
 from ..project.models import Project
 from ..timetracking.models import Timer
@@ -247,6 +247,9 @@ class TimesheetUpdate(UpdateView):
     form_class = TimesheetForm
     template_name = 'document/timesheet.html'
 
+    def get_initial(self):
+        return {key: self.object.json[key] for key in Timesheet.initial.keys()}
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         lookup = dict(Timer.KIND_CHOICES)
@@ -280,9 +283,9 @@ class TimesheetsGenerateView(View):
 
     def get(self, request, *args, **kwargs):
         year, month = int(kwargs['year']), int(kwargs['month'])
-        doc_date = timezone.now().date()
+        doc_date = timezone.localdate()
         if (doc_date.year, doc_date.month) != (year, month):
-            doc_date = last_day(year, month)
+            doc_date = date(year, month, monthrange(year, month)[1])
         Timesheet.generate(doc_date)
         return HttpResponseRedirect(reverse('timesheets'))
 

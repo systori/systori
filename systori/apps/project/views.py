@@ -135,7 +135,6 @@ class ProjectCreate(CreateView):
 
         JobCreateForm({
             'name': project.name,
-            'billing_method': Job.FIXED_PRICE,
         }, instance=Job(project=project)).save()
 
         if 'save_goto_project' in self.request.POST:

@@ -1,6 +1,6 @@
 import factory
 from factory import fuzzy
-from ..company.models import Worker
+from ..company.models import Worker, Contract
 from .models import User
 
 
@@ -22,4 +22,6 @@ class UserFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def company(self, create, extracted, **kwargs):
         if extracted is not None:
-            Worker.objects.create(company=extracted, user=self, is_staff=True)
+            worker = Worker.objects.create(company=extracted, user=self, is_staff=True)
+            worker.contract = Contract.objects.create(worker=worker, rate=0)
+            worker.save()

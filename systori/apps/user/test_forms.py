@@ -1,23 +1,16 @@
 from django.test import TestCase
 from django.utils.translation import activate
 
-from .models import User
+from .factories import UserFactory
 from .forms import UserForm
-from ..company.models import Company, Worker
+from ..company.factories import CompanyFactory
 
 
-class CreateUserDataMixin:
+class TestUserForm(TestCase):
 
     def setUp(self):
-        self.company = Company.objects.create(schema="test", name="Test")
-        self.company.activate()
-        self.password = 'pass'
-        self.username = 'test@damoti.com'
-        self.user = User.objects.create_superuser(self.username, self.password)
-        Worker.objects.create(user=self.user, company=self.company)
-
-
-class TestUserForm(CreateUserDataMixin, TestCase):
+        self.company = CompanyFactory()
+        self.user = UserFactory(company=self.company, language='en', password='foo')
 
     def test_clean(self):
         activate('en')

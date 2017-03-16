@@ -32,7 +32,7 @@ class JobCreateForm(forms.ModelForm):
 
     class Meta:
         model = Job
-        fields = ['name', 'description', 'billing_method', 'job_template']
+        fields = ['name', 'description', 'job_template']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

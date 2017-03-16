@@ -2,47 +2,40 @@ from datetime import date, datetime, timedelta
 from collections import OrderedDict
 
 from django.db.models.query import QuerySet
-from django.db.models import Q, Sum
+from django.db.models import Q
 from django.db.transaction import atomic
-from django.utils import timezone
+from django.utils.timezone import localtime, localdate, now, utc, make_aware
+from systori.lib.utils import GenOrderedDict, local_day_in_utc, local_month_range_in_utc
+from ..company.models import Company, Worker
 from .utils import get_timespans_split_by_breaks, get_dates_in_range
-from systori.lib import date_utils
-from systori.lib.utils import GenOrderedDict
-from ..company.models import Worker
-
-ABANDONED_CUTOFF = (16, 00)
 
 
 class TimerQuerySet(QuerySet):
 
-    def get_duration(self):
-        return self.aggregate(total_duration=Sum('duration'))['total_duration'] or 0
+    def current(self):
+        """ Running or stopped timers that apply to current time (now). """
+        utc_now = now()
+        return self.filter(Q(started__lte=utc_now), Q(stopped__gte=utc_now) | Q(stopped__isnull=True))
 
-    def filter_running(self):
-        return self.filter(stopped__isnull=True)
+    def running(self, **kwargs):
+        """ Running timers. """
+        return self.filter(stopped__isnull=True, **kwargs)
 
-    def get_running_timer(self, worker):
-        return self.filter_running().filter(worker=worker).first()
+    def day(self, day: date=None, **kwargs):
+        """ Timers that were started within the beginning and end of the day in local time. """
+        return self.filter(started__range=local_day_in_utc(day), **kwargs)
+
+    def month(self, year, month, **kwargs):
+        """ All timers for current month (localized). """
+        return self.filter(started__range=local_month_range_in_utc(year, month), **kwargs)
+
+    def get_running_timer(self, worker, **kwargs):
+        return self.running(worker=worker, **kwargs).first()
 
     def get_workers(self):
         return Worker.objects \
-            .filter(pk__in=self.values_list('worker')) \
+            .filter(pk__in=self.values_list('worker_id')) \
             .order_by('user__last_name')
-
-    def filter_now(self, now: datetime=None):
-        now = now or timezone.now()
-        return self.filter(Q(stopped__gte=now) | Q(stopped__isnull=True), started__lte=now)
-
-    def filter_today(self):
-        return self.filter(started__date=timezone.now().date())
-
-    def filter_month(self, year=None, month=None):
-        if year is not None:
-            assert month is not None
-        else:
-            now = timezone.now()
-            year, month = now.year, now.month
-        return self.filter(started__date__range=date_utils.month_range(year, month))
 
     def get_report(self, grouping='date'):
         assert grouping in ('date', 'worker')
@@ -57,11 +50,11 @@ class TimerQuerySet(QuerySet):
         )
 
         for timer in self:
-            date = timer.started.date()
+            dt = localdate(timer.started)
             if grouping == 'date':
-                worker_report = report.gen(date).gen(timer.worker)
+                worker_report = report.gen(dt).gen(timer.worker)
             else:
-                worker_report = report.gen(timer.worker).gen(date)
+                worker_report = report.gen(timer.worker).gen(dt)
             worker_report['timers'].append(timer)
             if timer.kind != timer.UNPAID_LEAVE:
                 worker_report['total'] += timer.running_duration
@@ -84,15 +77,14 @@ class TimerQuerySet(QuerySet):
 
         return report
 
-    def get_daily_workers_report(self, day: date, workers):
+    def get_daily_workers_report(self, day: date):
         assert isinstance(day, date)
         report = OrderedDict(
             (worker, {'timers': [], 'total': 0})
-            for worker in workers
+            for worker in Company.active().tracked_workers()
         )
-        report.update(self
-            .filter(worker__in=workers)
-            .filter(started__date=day)
+        report.update(
+            self.day(day)
             .select_related('worker__user')
             .order_by('started')
             .get_report('date')
@@ -102,33 +94,34 @@ class TimerQuerySet(QuerySet):
 
     def get_monthly_worker_report(self, month: date, worker):
         assert isinstance(month, date)
-        return self \
-            .filter(worker=worker) \
-            .filter_month(month.year, month.month) \
-            .order_by('started') \
-            .get_report('worker') \
+        return (
+            self.month(month.year, month.month, worker=worker)
+            .order_by('started')
+            .get_report('worker')
             .get(worker, {})
+        )
 
     def create_batch(self, worker, started: datetime, stopped: datetime, commit=True,
                      morning_break=True, lunch_break=True, **kwargs):
 
-        # Enforce timezone
+        # started and stopped should be in local company timzone
         tz = worker.company.timezone
         assert all(dt.tzinfo.zone == tz.zone for dt in (started, stopped))
 
+        # days contains local dates on which timers will be created
         days = []
         if (stopped - started).days == 0:  # explicit single day, skip weekend & .exists() checks
-            days.append(started)
+            days.append(started.date())
         else:
             for day in get_dates_in_range(started.date(), stopped.date()):
-                if not self.filter(worker=worker, started__date=day).exists():
+                if not self.day(day, worker=worker).exists():
                     days.append(day)
 
         breaks = []
         if morning_break:
-            breaks.append(worker.company.breaks[0])
+            breaks.append(worker.contract.morning_break)
         if lunch_break:
-            breaks.append(worker.company.breaks[1])
+            breaks.append(worker.contract.lunch_break)
 
         time_spans = list(get_timespans_split_by_breaks(started.time(), stopped.time(), breaks))
 
@@ -136,8 +129,8 @@ class TimerQuerySet(QuerySet):
         for day in days:
             for start_time, end_time in time_spans:
                 timer = self.model(worker=worker, **kwargs)
-                timer.started = tz.localize(datetime.combine(day, start_time))
-                timer.stopped = tz.localize(datetime.combine(day, end_time))
+                timer.started = make_aware(datetime.combine(day, start_time))
+                timer.stopped = make_aware(datetime.combine(day, end_time))
                 timers.append(timer)
                 if commit:
                     timer.save()
@@ -146,39 +139,41 @@ class TimerQuerySet(QuerySet):
 
     @atomic
     def stop_abandoned(self):
-        """
-        Stop timers still running at the end of the day
-        """
-        cutoff_params = dict(hour=ABANDONED_CUTOFF[0], minute=ABANDONED_CUTOFF[1], second=0, microsecond=0)
-        for timer in self.filter_running():
-            if (timer.started.hour, timer.started.minute) >= ABANDONED_CUTOFF:
-                timer.stop(stopped=timer.started + timedelta(minutes=5))
-            else:
-                timer.stop(stopped=timer.started.replace(**cutoff_params))
+        for worker in Company.active().tracked_workers():
+            timer = self.get_running_timer(worker, kind=self.model.WORK)
+            if timer:
+                work_end = worker.contract.work_end
+                penalty = timedelta(minutes=worker.contract.abandoned_timer_penalty)  # negative duration
+                cutoff = localtime().replace(hour=work_end.hour, minute=work_end.minute).astimezone(utc)
+                if timer.started >= cutoff:
+                    # timer was started after work day ended...
+                    # set it to 5 minutes at least so it doesn't get auto deleted...
+                    timer.stop(stopped=timer.started + timedelta(minutes=5), is_auto_stopped=True)
+                else:
+                    duration = cutoff - timer.started  # start of timer to end of work day
+                    duration_w_penalty = duration + penalty  # start of timer to work day + penalty
+                    if duration_w_penalty > timedelta(minutes=1):  # timer still valid after pently?
+                        timer.stop(stopped=timer.started + duration_w_penalty, is_auto_stopped=True)
+                    elif duration > timedelta(minutes=1):  # timer still valid after cutoff?
+                        timer.stop(stopped=timer.started + duration, is_auto_stopped=True)
+                    else:  # just stop timer with 1 minute duration
+                        timer.stop(stopped=timer.started + timedelta(minutes=1), is_auto_stopped=True)
 
-    def stop_for_break(self, stopped=None):
-        """
-        Stop currently running timers automatically.
-        Doesn't validate if it's time for break now or not.
-        """
-        stopped = stopped or timezone.now()
-        counter = 0
-        for timer in self.filter_running().filter(kind=self.model.WORK):
-            timer.stop(stopped=stopped, is_auto_stopped=True)
-            counter += 1
-        return counter
-
-    def launch_after_break(self, started=None):
-        """
-        Launch timers for workers that had timers automatically stopped.
-        """
-        started = started or timezone.now()
-        seen_workers = set()
-        auto_stopped_timers = self.filter_today().filter(
-            kind=self.model.WORK, is_auto_stopped=True).select_related('worker')
-        running_workers = self.filter_running().values_list('worker')
-        for timer in auto_stopped_timers.exclude(worker__in=running_workers):
-            if not timer.worker in seen_workers:
-                self.model.start(timer.worker, started=started, is_auto_started=True)
-                seen_workers.add(timer.worker)
-        return len(seen_workers)
+    def start_or_stop_work_breaks(self):
+        utc_now = now().replace(second=0, microsecond=0)
+        local = localtime(utc_now)
+        local_time = local.time()
+        for worker in Company.active().tracked_workers():
+            if local_time in [b.start for b in worker.contract.breaks]:
+                # Stop running timers to begin break
+                timer = self.get_running_timer(worker, kind=self.model.WORK)
+                if timer:
+                    timer.stop(stopped=utc_now, is_auto_stopped=True)
+            elif local_time in [b.end for b in worker.contract.breaks]:
+                # Start timers to end break
+                had_auto_stopped = self.day(
+                    local.date(), worker=worker, kind=self.model.WORK, is_auto_stopped=True
+                ).exists()
+                running = self.get_running_timer(worker)
+                if had_auto_stopped and not running:
+                    self.model.start(worker, started=utc_now, is_auto_started=True)

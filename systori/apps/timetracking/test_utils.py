@@ -1,5 +1,3 @@
-from unittest import skip
-from unittest.mock import patch
 from datetime import timedelta, datetime, time
 
 from freezegun import freeze_time
@@ -12,81 +10,8 @@ from .models import Timer
 from . import utils
 
 
-NOW = timezone.now().replace(hour=16)
-
-
-class UtilsTest(TestCase):
-
-    def test_get_timetracking_workers(self):
-        company = CompanyFactory()
-        worker1 = UserFactory(company=company).access.first()
-        worker2 = UserFactory(company=company).access.first()
-        worker1.is_timetracking_enabled = False
-        worker1.save()
-        timetracking_workers = utils.get_timetracking_workers(company)
-        self.assertNotIn(worker1, timetracking_workers)
-        self.assertIn(worker2, timetracking_workers)
-
-
-class ReportsTest(TestCase):
-
-    def setUp(self):
-        self.company = CompanyFactory()
-        self.worker1 = UserFactory(last_name='a', company=self.company).access.first()
-        self.worker2 = UserFactory(last_name='b', company=self.company).access.first()
-        self.worker3 = UserFactory(last_name='c', company=self.company).access.first()
-        self.worker4 = UserFactory(last_name='d', company=self.company).access.first()
-
-    @freeze_time(NOW)
-    def test_get_daily_workers_report(self):
-        today = NOW.replace(hour=9)
-        yesterday = today - timedelta(days=1)
-        Timer.objects.create(
-            worker=self.worker1, started=yesterday, stopped=yesterday + timedelta(hours=2)
-        )
-        Timer.objects.create(
-            worker=self.worker1, started=yesterday + timedelta(hours=3), stopped=yesterday + timedelta(hours=9)
-        )
-        worker1_timer1 = Timer.objects.create(
-            worker=self.worker1, started=today, stopped=today + timedelta(hours=2)
-        )
-        worker1_timer2 = Timer.objects.create(
-            worker=self.worker1, started=today + timedelta(hours=3), stopped=today + timedelta(hours=8)
-        )
-
-        Timer.objects.create(
-            worker=self.worker2, started=yesterday, stopped=yesterday + timedelta(hours=3)
-        )
-        Timer.objects.create(
-            worker=self.worker2, started=yesterday + timedelta(hours=4), stopped=yesterday + timedelta(hours=12)
-        )
-        worker2_timer1 = Timer.objects.create(
-            worker=self.worker2, started=today, stopped=today + timedelta(hours=3)
-        )
-        worker2_timer2 = Timer.objects.create(
-            worker=self.worker2, started=today + timedelta(hours=6), stopped=today + timedelta(hours=9)
-        )
-
-        worker3_timer1 = Timer.objects.create(
-            worker=self.worker3, started=today
-        )
-
-        report = Timer.objects.get_daily_workers_report(today.date(), self.company.workers.all())
-
-        self.assertEqual(report[self.worker1]['timers'][0].started, worker1_timer1.started)
-        self.assertEqual(report[self.worker1]['timers'][2].stopped, worker1_timer2.stopped)
-        self.assertEqual(report[self.worker1]['total'], worker1_timer1.duration + worker1_timer2.duration)
-
-        self.assertEqual(report[self.worker2]['timers'][0].started, worker2_timer1.started)
-        self.assertEqual(report[self.worker2]['timers'][2].stopped, worker2_timer2.stopped)
-        self.assertEqual(report[self.worker2]['total'], worker2_timer1.duration + worker2_timer2.duration)
-        self.assertEqual(report[self.worker2]['total'], worker2_timer1.duration + worker2_timer2.duration)
-
-        self.assertEqual(report[self.worker3]['timers'][0].started, worker3_timer1.started)
-        self.assertEqual(report[self.worker3]['timers'][0].stopped, None)
-        self.assertEqual(report[self.worker3]['total'], worker3_timer1.running_duration)
-        self.assertEqual(report[self.worker3]['total'], worker3_timer1.running_duration)
-        self.assertTrue(self.worker4 in report)
+EST = timezone.get_fixed_timezone(-5)
+NOW = datetime(2014, 12, 2, 17, 58, 28, 0, EST)  # birth of Systori
 
 
 class UserStatusesTest(TestCase):
@@ -178,38 +103,3 @@ class TimeSpanTest(TestCase):
             ((5, 00), (9, 00)),
             ((9, 30), (11, 30))
         ], time(5), time(11, 30))
-
-
-class AutoPilotTest(TestCase):
-
-    @skip
-    @patch.object(Timer, 'objects')
-    def test_perform_autopilot_duties(self, manager_mock):
-        company = CompanyFactory()
-        breaks, tz = company.breaks, company.timezone
-        round_now = lambda: datetime.now(tz).replace(second=0, microsecond=0)
-        offset = -tz.utcoffset(datetime.now()).total_seconds() / 60 / 60
-
-        with freeze_time('2016-08-16 08:55:59', tz_offset=offset):
-            utils.perform_autopilot_duties(breaks, tz)
-            self.assertFalse(manager_mock.stop_for_break.mock_calls)
-            self.assertFalse(manager_mock.launch_after_break.mock_calls)
-        manager_mock.stop_for_break.reset_mock()
-
-        with freeze_time('2016-08-16 09:00:45', tz_offset=offset):
-            utils.perform_autopilot_duties(breaks, tz)
-            manager_mock.stop_for_break.assert_called_once_with(round_now())
-            self.assertFalse(manager_mock.launch_after_break.mock_calls)
-        manager_mock.stop_for_break.reset_mock()
-
-        with freeze_time('2016-08-16 09:15:15', tz_offset=offset):
-            utils.perform_autopilot_duties(breaks, tz)
-            self.assertFalse(manager_mock.stop_for_break.mock_calls)
-            self.assertFalse(manager_mock.launch_after_break.mock_calls)
-        manager_mock.stop_for_break.reset_mock()
-
-        with freeze_time('2016-08-16 09:30:01', tz_offset=offset):
-            utils.perform_autopilot_duties(breaks, tz)
-            self.assertFalse(manager_mock.stop_for_break.mock_calls)
-            manager_mock.launch_after_break.assert_called_once_with(round_now())
-        manager_mock.stop_for_break.reset_mock()

@@ -60,10 +60,12 @@ INSTALLED_APPS = (
     'systori.apps.equipment',
     'systori.apps.accounting',
     'systori.apps.timetracking',
+    'systori.apps.inventory',
 )
 
 POSTGRES_SCHEMA_MODEL = 'company.Company'
 POSTGRES_SCHEMA_TENANTS = (
+    'company.Labor',
     'project',
     'directory',
     'task',
@@ -72,6 +74,7 @@ POSTGRES_SCHEMA_TENANTS = (
     'equipment',
     'accounting',
     'timetracking',
+    'inventory',
 )
 
 MIDDLEWARE = (
@@ -174,9 +177,13 @@ USE_I18N = True
 
 USE_TZ = True
 
-# having this on by default caused a lot of problems when outputing primary keys
-# and other data that needed to be machine readable
-USE_L10N = False
+# First and foremost, USE_L10N is dangerous business because it localizes everything.
+# Including primary keys or other output that is meant to be machine readable and should
+# not actually be formatted in anyway. We've gone back and forth on having this setting
+# on or off. Ultimately, because Django requires this for form handling, we decided to
+# enable it and then just be very careful about rendering any machine readable text by
+# wrapping it in {% localize off %} and thoroughly testing.
+USE_L10N = True
 USE_THOUSAND_SEPARATOR = True
 
 

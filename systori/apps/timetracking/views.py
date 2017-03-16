@@ -8,7 +8,6 @@ from django.views.generic.list import ListView
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from . import utils
 from . import forms
 from .models import Timer
 
@@ -17,7 +16,7 @@ class PeriodFilterMixin(TemplateView):
     period_form_class = None
 
     def get_context_data(self, **kwargs):
-        report_period = timezone.now().date()
+        report_period = timezone.localdate()
         period_form = self.period_form_class(self.request.GET)
         if period_form.is_valid():
             report_period = period_form.cleaned_data['period']
@@ -42,9 +41,7 @@ class HomeView(BaseCreateView, PeriodFilterMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        workers = utils.get_timetracking_workers(self.request.company)
-        context['report'] = Timer.objects\
-            .get_daily_workers_report(context['report_period'], workers)
+        context['report'] = Timer.objects.get_daily_workers_report(context['report_period'])
         return context
 
     def get_success_url(self):
@@ -58,8 +55,7 @@ class WorkerReportView(BaseCreateView, PeriodFilterMixin):
 
     @cached_property
     def worker(self):
-        return get_object_or_404(
-            utils.get_timetracking_workers(self.request.company), pk=self.kwargs['worker_id'])
+        return get_object_or_404(self.request.company.tracked_workers(), pk=self.kwargs['worker_id'])
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -74,8 +70,7 @@ class WorkerReportView(BaseCreateView, PeriodFilterMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['timesheet_worker'] = self.worker
-        context['report'] = Timer.objects\
-            .get_monthly_worker_report(context['report_period'], self.worker)
+        context['report'] = Timer.objects.get_monthly_worker_report(context['report_period'], self.worker)
         return context
 
     def get_success_url(self):

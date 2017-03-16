@@ -1,8 +1,4 @@
-from django.utils.translation import ugettext_lazy as _
 from django.db import models, IntegrityError
-from django.db.models.manager import BaseManager
-from datetime import date
-from decimal import Decimal
 from .constants import *
 
 from systori.lib.accounting.models import BaseAccount, BaseTransaction, BaseEntry

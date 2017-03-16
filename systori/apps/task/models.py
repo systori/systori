@@ -11,6 +11,10 @@ from django_fsm import FSMField, transition
 from django.utils.functional import cached_property
 from systori.lib.utils import nice_percent
 
+from systori.apps.company.models import LaborType
+from systori.apps.inventory.models import MaterialType
+from systori.apps.equipment.models import EquipmentType
+
 
 class SearchableModelQuerySet(models.QuerySet):
 
@@ -234,17 +238,6 @@ class Job(Group):
     root = models.OneToOneField('task.Group', parent_link=True, primary_key=True, related_name='+', on_delete=models.CASCADE)
     project = models.ForeignKey('project.Project', related_name="jobs", on_delete=models.CASCADE)
     order_with_respect_to = 'project'
-
-    ESTIMATE_INCREMENT = 0.05
-    ESTIMATE_INCREMENT_DISPLAY = '{:.0%}'.format(ESTIMATE_INCREMENT)
-
-    FIXED_PRICE = "fixed_price"
-    TIME_AND_MATERIALS = "time_and_materials"
-    BILLING_METHOD = (
-        (FIXED_PRICE, _("Fixed Price")),
-        (TIME_AND_MATERIALS, _("Time and Materials")),
-    )
-    billing_method = models.CharField(_('Billing Method'), max_length=128, choices=BILLING_METHOD, default=FIXED_PRICE)
     is_revenue_recognized = models.BooleanField(default=False)
 
     DRAFT = "draft"
@@ -465,7 +458,7 @@ class Task(OrderedModel):
         return self.name
 
     def clone_to(self, new_group, new_order):
-        lineitems = self.lineitems.exclude(is_correction=True).all()
+        lineitems = self.lineitems.all()
         self.pk = None
         self.group = new_group
         self.job = new_group.job
@@ -479,13 +472,37 @@ class Task(OrderedModel):
             lineitem.clone_to(self)
 
 
+class ProgressReport(models.Model):
+    # date and time when this progress report was filed
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    # description of what has been done
+    comment = models.TextField()
+
+    # how much of the project is complete in units of quantity
+    # this gets copied into task.complete with the latest progress report value
+    complete = models.DecimalField(_("Complete"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
+
+    task = models.ForeignKey(Task, related_name="progressreports", on_delete=models.CASCADE)
+    worker = models.ForeignKey('company.Worker', related_name="progressreports", on_delete=models.CASCADE)
+
+    @property
+    def complete_percent(self):
+        return round(self.complete / self.task.qty * 100) if self.task.qty else 0
+
+    class Meta:
+        verbose_name = _("Progress Report")
+        verbose_name_plural = _("Progress Reports")
+        ordering = ('-timestamp',)
+
+
 class LineItem(OrderedModel):
 
     name = models.CharField(_("Name"), max_length=512, blank=True)
 
     qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     qty_equation = models.CharField(max_length=512, blank=True)
-    complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
+    expended = models.DecimalField(_("Expended"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
 
     unit = models.CharField(_("Unit"), max_length=512, blank=True)
 
@@ -495,22 +512,30 @@ class LineItem(OrderedModel):
     total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     total_equation = models.CharField(max_length=512, blank=True)
 
-    # flagged items will appear in the project dashboard as needing attention
-    # could be set automatically by the system from temporal triggers (materials should have been delivered by now)
-    # or it could be set manual by a user
-    is_flagged = models.BooleanField(default=False)
+    LABOR = "labor"
+    MATERIAL = "material"
+    EQUIPMENT = "equipment"
+    OTHER = "other"
+    LINEITEM_TYPES = (
+        (LABOR, _("Labor")),
+        (MATERIAL, _("Material")),
+        (EQUIPMENT, _("Equipment")),
+        (OTHER, _("Other")),
+    )
+    lineitem_type = models.CharField(_('Line Item Type'), max_length=128, choices=LINEITEM_TYPES, default=OTHER)
 
-    # hidden lineitems are not included in the total
-    is_hidden = models.BooleanField(default=False)
-
-    # this line item is a price correction
-    is_correction = models.BooleanField(default=False)
+    labor = models.ForeignKey(LaborType, null=True, related_name="lineitems", on_delete=models.SET_NULL)
+    material = models.ForeignKey(MaterialType, null=True, related_name="lineitems", on_delete=models.SET_NULL)
+    equipment = models.ForeignKey(EquipmentType, null=True, related_name="lineitems", on_delete=models.SET_NULL)
 
     task = models.ForeignKey(Task, related_name="lineitems", on_delete=models.CASCADE)
     order_with_respect_to = 'task'
 
     job = models.ForeignKey(Job, related_name="all_lineitems", on_delete=models.CASCADE)
     token = models.BigIntegerField('api token', null=True)
+
+    # hidden lineitems are not included in the total
+    is_hidden = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Line Item")
@@ -528,43 +553,30 @@ class LineItem(OrderedModel):
 
     def clone_to(self, new_task):
         self.pk = None
-        self.complete = 0.0
-        self.is_flagged = False
+        self.expended = 0.0
         self.task = new_task
         self.job = new_task.job
         self.save()
 
 
-class ProgressReport(models.Model):
+class ExpendReport(models.Model):
     # date and time when this progress report was filed
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    # description of what has been done
     comment = models.TextField()
 
-    # how much of the project is complete in units of quantity
-    # this gets copied into task.complete with the latest progress report value
-    complete = models.DecimalField(_("Complete"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
+    # how much of the lineitem has been expended
+    # this gets copied into lineitem.expended with the value from latest report
+    expended = models.DecimalField(_("Expended"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
 
-    task = models.ForeignKey(Task, related_name="progressreports", on_delete=models.CASCADE)
-
-    worker = models.ForeignKey('company.Worker', related_name="filedreports", on_delete=models.CASCADE)
+    lineitem = models.ForeignKey(LineItem, related_name="expendreports", on_delete=models.CASCADE)
+    worker = models.ForeignKey('company.Worker', related_name="expendreports", on_delete=models.CASCADE)
 
     @property
-    def complete_percent(self):
-        return round(self.complete / self.task.qty * 100) if self.task.qty else 0
+    def expended_percent(self):
+        return round(self.expended / self.lineitem.qty * 100) if self.lineitem.qty else 0
 
     class Meta:
-        verbose_name = _("Progress Report")
-        verbose_name_plural = _("Progress Reports")
+        verbose_name = _("Expend Report")
+        verbose_name_plural = _("Expend Reports")
         ordering = ('-timestamp',)
-
-
-class ProgressAttachment(models.Model):
-    report = models.ForeignKey(ProgressReport, related_name="attachments", on_delete=models.CASCADE)
-    attachment = models.FileField()
-
-    class Meta:
-        verbose_name = _("Attachment")
-        verbose_name_plural = _("Attachments")
-        ordering = ('id',)

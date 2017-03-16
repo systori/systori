@@ -1,3 +1,4 @@
+from django.utils import timezone
 from .models import *
 from .constants import *
 
@@ -21,7 +22,7 @@ def debit_jobs(debits, transacted_on=None, recognize_revenue=False, debug=False)
     Credit the promised payments account with the same amount to balance the transaction.
     """
 
-    transacted_on = transacted_on or date.today()
+    transacted_on = transacted_on or timezone.now()
     transaction = Transaction(transacted_on=transacted_on,
                               transaction_type=Transaction.INVOICE,
                               is_revenue_recognized=recognize_revenue)
@@ -143,7 +144,7 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None, debug=False):
     assert payment == sum([p[1].gross for p in splits])
 
     bank = bank or Account.objects.get(code=SKR03_BANK_CODE)
-    transacted_on = transacted_on or date.today()
+    transacted_on = transacted_on or timezone.now()
 
     transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.PAYMENT)
 
@@ -226,7 +227,7 @@ def credit_jobs(splits, payment, transacted_on=None, bank=None, debug=False):
 
 def adjust_jobs(jobs, transacted_on=None, debug=False):
 
-    transacted_on = transacted_on or date.today()
+    transacted_on = transacted_on or timezone.now()
 
     transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.ADJUSTMENT)
 
@@ -258,7 +259,7 @@ def adjust_jobs(jobs, transacted_on=None, debug=False):
 def refund_jobs(jobs, transacted_on=None, bank=None, debug=False):
 
     bank = bank or Account.objects.get(code=SKR03_BANK_CODE)
-    transacted_on = transacted_on or date.today()
+    transacted_on = transacted_on or timezone.now()
 
     transaction = Transaction(transacted_on=transacted_on, transaction_type=Transaction.REFUND)
 

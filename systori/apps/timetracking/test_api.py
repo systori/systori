@@ -14,7 +14,7 @@ class TimerViewTest(ClientTestCase):
     def test_post(self):
         response = self.client.post(self.url, {'latitude': '52.5076', 'longitude': '131.39043904'})
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(Timer.objects.filter_running().filter(worker=self.worker).exists())
+        self.assertTrue(Timer.objects.running(worker=self.worker).exists())
 
     def test_post_with_already_running_timer(self):
         Timer.start(self.worker)

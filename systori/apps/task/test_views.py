@@ -15,7 +15,7 @@ class JobViewsTest(ClientTestCase):
         self.assertEqual(Job.objects.count(), 0)
         response = self.client.post(
             reverse('job.create', args=[project.pk]),
-            data={'name': 'New Job', 'billing_method': Job.FIXED_PRICE}
+            data={'name': 'New Job'}
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Job.objects.count(), 1)

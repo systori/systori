@@ -1,12 +1,11 @@
 from django import forms
-from systori.lib.fields import LocalizedDecimalField
 from ..project.models import DailyPlan
 from ..task.models import Task
 
 
 class CompletionForm(forms.ModelForm):
     comment = forms.CharField(required=False)
-    complete = LocalizedDecimalField(max_digits=14, decimal_places=4)
+    complete = forms.DecimalField(localize=True, max_digits=14, decimal_places=4)
 
     class Meta:
         model = Task
