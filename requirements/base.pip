@@ -10,6 +10,7 @@ git+https://github.com/eukreign/django-bootstrap-form.git@fix-context-boundfield
 django-datetime-widget==0.9.3
 djangorestframework==3.5.3
 django-dartium
+django-timezone-field==2.0
 
 geopy==1.11.0
 lxml==3.6.0

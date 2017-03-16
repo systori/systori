@@ -8,8 +8,18 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from django.template.defaultfilters import date as date_filter
 
+from systori.lib.models import RateType
+
+
+class EquipmentType(models.Model, RateType):
+    name = models.CharField(_("Name"), max_length=512)
+    rate = models.DecimalField(_("Rate"), max_digits=14, decimal_places=2)
+    rate_type = models.CharField(_("Rate Type"), max_length=128, choices=RateType.RATE_CHOICES, default=RateType.HOURLY)
+
 
 class Equipment(models.Model):
+    equipment_type = models.ForeignKey(EquipmentType, null=True, related_name="equipment", on_delete=models.SET_NULL)
+
     GASOLINE = 'gasoline'
     PREMIUM_GASOLINE = 'premium_gasoline'
     DIESEL = 'diesel'

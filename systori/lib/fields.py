@@ -1,53 +1,25 @@
-import unicodedata
-from decimal import Decimal, DecimalException
-from django.utils.encoding import smart_text
 from django import forms
-from django.conf import settings
-from django.forms import ValidationError
-from django.utils import formats, six
+from django.utils.functional import cached_property
 
 
-def sanitize_separators(value):
+class DecimalMinuteHoursField(forms.DecimalField):
     """
-    Sanitizes a value regardless the current decimal setting. 
-    Used with form field input.
+    This form field allows editing a minute based
+    model field using an hour decimal conversion.
+    Providing initial value of 60 will render
+    1.0 in the input box, if user enters 1.5
+    the cleaned value will be 90.
     """
-    if isinstance(value, six.string_types):
-        parts = []
-        decimal_separator = formats.get_format('DECIMAL_SEPARATOR', use_l10n=True)
-        if decimal_separator in value:
-            value, decimals = value.split(decimal_separator, 1)
-            parts.append(decimals)
-        if settings.USE_THOUSAND_SEPARATOR:
-            thousand_sep = formats.get_format('THOUSAND_SEPARATOR', use_l10n=True)
-            if thousand_sep == '.' and value.count('.') == 1 and len(value.split('.')[-1]) != 3:
-                # Special case where we suspect a dot meant decimal separator (see #22171)
-                pass
-            else:
-                for replacement in {
-                        thousand_sep, unicodedata.normalize('NFKD', thousand_sep)}:
-                    value = value.replace(replacement, '')
-        parts.append(value)
-        value = '.'.join(reversed(parts))
-    return value
 
+    class BoundField(forms.BoundField):
+        @cached_property
+        def initial(self):
+            data = self.form.get_initial_for_field(self.field, self.name)
+            return data / 60.0
 
-class LocalizedDecimalField(forms.DecimalField):
-    widget = forms.TextInput
+    def get_bound_field(self, form, field_name):
+        return DecimalMinuteHoursField.BoundField(form, self, field_name)
 
-    def to_python(self, value):
-        """
-        Validates that the input is a decimal number. Returns a Decimal
-        instance. Returns None for empty values. Ensures that there are no more
-        than max_digits in the number, and no more than decimal_places digits
-        after the decimal point.
-        """
-        if value in self.empty_values:
-            return None
-        value = sanitize_separators(value)
-        value = smart_text(value).strip()
-        try:
-            value = Decimal(value)
-        except DecimalException:
-            raise ValidationError(self.error_messages['invalid'], code='invalid')
-        return value
+    def clean(self, value):
+        decimal = super().clean(value)
+        return int(decimal * 60)

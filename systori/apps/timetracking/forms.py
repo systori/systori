@@ -2,7 +2,7 @@ import re
 
 from django import forms
 from django.forms import ModelForm
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import get_language, ugettext_lazy as _
 from datetimewidget.widgets import DateTimeWidget as OldDateTimeWidget
 
 from .models import Timer
@@ -12,8 +12,8 @@ class DateTimeWidget(OldDateTimeWidget):
 
     EXTRACT_INIT_JS = re.compile('(.*?)<script.*?>(.*?)</script>', re.DOTALL)
 
-    def __init__(self, name, options, required=False):
-        super().__init__(options=options, attrs={'id': 'timetracking-'+name}, bootstrap_version=3)
+    def __init__(self, name, options, usel10n=True, required=False):
+        super().__init__({'id': 'timetracking-'+name}, options, usel10n, bootstrap_version=3)
         self.required = required
         self.init_javascript = ''
 
@@ -35,12 +35,12 @@ class ManualTimerForm(ModelForm):
     def __init__(self, *args, company, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['started'].widget = DateTimeWidget(
-            'form-started', {'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'}, True
+            'form-started', {'pickerPosition': 'bottom-left'}, True
         )
         self.fields['stopped'].widget = DateTimeWidget(
-            'form-stopped', {'format': 'dd.mm.yyyy hh:ii', 'pickerPosition': 'bottom-left'}, True
+            'form-stopped', {'pickerPosition': 'bottom-left'}, True
         )
-        self.fields['worker'].queryset = company.active_workers(is_timetracking_enabled=True)
+        self.fields['worker'].queryset = company.tracked_workers()
 
     def clean(self):
         if self.cleaned_data['kind'] != self._meta.model.WORK and \
@@ -60,28 +60,39 @@ class WorkerManualTimerForm(ManualTimerForm):
 
 
 class MonthPickerForm(forms.Form):
+    period = forms.DateField()
 
-    period = forms.DateField(widget=DateTimeWidget(
-        'report-period',
-        options={
-            'format': 'mm.yyyy',
+    def __init__(self, *args, **kwargs):
+        """ Can't use default localization with this picker
+            because month and year without day doesn't
+            have localized formats.
+        """
+        super().__init__(*args, **kwargs)
+        if get_language() == 'en':
+            format = 'mm/yyyy'
+            input_formats = ['%m/%Y']
+        else:
+            format = 'mm.yyyy'
+            input_formats = ['%m.%Y']
+        self.fields['period'].input_formats = input_formats
+        self.fields['period'].widget = DateTimeWidget('report-period', {
+            'format':  format,
             'startView': 3,
             'pickerPosition': 'bottom-left',
             'minView': 3,
             'clearBtn': False
-        },
-    ), input_formats=['%m.%Y'])
+        }, usel10n=False)
 
 
 class DayPickerForm(forms.Form):
 
-    period = forms.DateField(widget=DateTimeWidget(
-        'report-period',
-        options={
-            'format': 'dd.mm.yyyy',
+    period = forms.DateField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['period'].widget = DateTimeWidget('report-period', {
             'startView': 2,
             'pickerPosition': 'bottom-left',
             'minView': 2,
             'clearBtn': False
-        },
-    ), input_formats=['%d.%m.%Y'])
+        })

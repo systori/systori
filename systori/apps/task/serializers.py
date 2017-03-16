@@ -66,7 +66,6 @@ class LineItemSerializer(serializers.ModelSerializer):
             'qty', 'qty_equation',
             'unit', 'price', 'price_equation',
             'total', 'total_equation',
-            'is_flagged',
             'is_hidden',
         ]
 

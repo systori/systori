@@ -1,12 +1,21 @@
+from decimal import Decimal
+
 from django import forms
 from django.forms import ModelForm
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm as BaseAuthenticationForm
+
+from systori.lib.fields import DecimalMinuteHoursField
+from ..company.models import Worker, Contract
 from .models import *
-from ..company.models import Worker
 
 
 class UserForm(ModelForm):
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'password1', 'password2']
+
     error_messages = {
         'password_mismatch': _("The two password fields didn't match."),
     }
@@ -15,11 +24,6 @@ class UserForm(ModelForm):
     password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput, required=False)
     password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput, required=False,
                                 help_text=_("Enter the same password as above, for verification."))
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if not self.instance.pk:
-            del self.fields['date_joined']
 
     def clean_email(self):
         if not self.cleaned_data['email']:
@@ -51,10 +55,6 @@ class UserForm(ModelForm):
             user.save()
         return user
 
-    class Meta:
-        model = User
-        fields = ['first_name', 'last_name', 'email', 'password1', 'password2', 'date_joined']
-
 
 class AuthenticationForm(BaseAuthenticationForm):
     username = forms.CharField(max_length=254, initial='')
@@ -64,7 +64,19 @@ class WorkerForm(ModelForm):
     
     class Meta:
         model = Worker
-        exclude = ['company', 'user']
+        exclude = ['company', 'user', 'contract']
+
+
+class ContractForm(ModelForm):
+
+    class Meta:
+        model = Contract
+        exclude = ['name', 'is_template', 'worker']
+        localized_fields = ['rate', 'vacation', 'abandoned_timer_penalty']
+        field_classes = {
+            'vacation': DecimalMinuteHoursField,
+            'abandoned_timer_penalty': DecimalMinuteHoursField,
+        }
 
 
 class LanguageForm(ModelForm):

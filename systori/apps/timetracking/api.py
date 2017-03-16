@@ -29,7 +29,7 @@ class TimerAPI(views.APIView):
     @staticmethod
     def put(request):
         """ Stop a timer """
-        timer = get_object_or_404(Timer.objects.filter_running(), worker=request.worker)
+        timer = get_object_or_404(Timer.objects.running(worker=request.worker))
         latlong = LatLongSerializer(data=request.data)
         latlong.is_valid(raise_exception=True)
         timer.ending_longitude = latlong.validated_data['longitude']

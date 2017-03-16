@@ -37,16 +37,18 @@ class UserFormRenderer:
     def get_form(self):
         return None
 
-    def render_forms(self, user_form, worker_form):
+    def render_forms(self, user_form, worker_form, contract_form):
         return self.render_to_response(self.get_context_data(
-            user_form=user_form, worker_form=worker_form))
+            user_form=user_form, worker_form=worker_form, contract_form=contract_form))
 
-    def get_cleaned_forms(self, user=None, worker=None):
+    def get_cleaned_forms(self, user=None, worker=None, contract=None):
         user_form = UserForm(self.request.POST, instance=user)
         user_form.full_clean()
         worker_form = WorkerForm(self.request.POST, instance=worker)
         worker_form.full_clean()
-        return user_form, worker_form
+        contract_form = ContractForm(self.request.POST, instance=contract)
+        contract_form.full_clean()
+        return user_form, worker_form, contract_form
 
 
 class UserAdd(UserFormRenderer, CreateView):
@@ -55,16 +57,16 @@ class UserAdd(UserFormRenderer, CreateView):
 
     def get(self, request, *args, **kwargs):
         self.object = None
-        return self.render_forms(UserForm(), WorkerForm())
+        return self.render_forms(UserForm(), WorkerForm(), ContractForm())
 
     def post(self, request, *args, **kwargs):
         self.object = None
 
-        user_form, worker_form = self.get_cleaned_forms()
+        user_form, worker_form, contract_form = self.get_cleaned_forms()
 
         # Before we do anything else make sure the forms are actually valid.
-        if not user_form.is_valid() or not worker_form.is_valid():
-            return self.render_forms(user_form, worker_form)
+        if not all([user_form.is_valid(), worker_form.is_valid(), contract_form.is_valid()]):
+            return self.render_forms(user_form, worker_form, contract_form)
 
         email = user_form.cleaned_data['email']
 
@@ -81,14 +83,23 @@ class UserAdd(UserFormRenderer, CreateView):
             user = user_form.save()
 
         elif Worker.objects.filter(user=user, company=request.company).exists():
-            # User exists and already has an worker object for this company.
+            # User exists and already has a worker object for this company.
             user_form.add_error('email', _('This user is already a member of this company.'))
-            return self.render_forms(user_form, worker_form)
+            return self.render_forms(user_form, worker_form, contract_form)
+
+        worker = worker_form.instance
+        contract = contract_form.instance
 
         # Finally create the worker object for this user and company combination.
-        worker_form.instance.company = request.company
-        worker_form.instance.user = user
+        worker.company = request.company
+        worker.user = user
         worker_form.save()
+
+        contract.worker = worker
+        contract_form.save()
+
+        worker.contract = contract
+        worker.save()
 
         return HttpResponseRedirect(self.success_url)
 
@@ -100,20 +111,25 @@ class UserUpdate(UserFormRenderer, UpdateView):
     def get(self, request, *args, **kwargs):
         user = self.object = self.get_object()
         worker = Worker.objects.get(user=user, company=request.company)
-        return self.render_forms(UserForm(instance=user), WorkerForm(instance=worker))
+        return self.render_forms(
+            UserForm(instance=user),
+            WorkerForm(instance=worker),
+            ContractForm(instance=worker.contract)
+        )
 
     def post(self, request, *args, **kwargs):
         user = self.object = self.get_object()
         worker = Worker.objects.get(user=user, company=request.company)
 
-        user_form, worker_form = self.get_cleaned_forms(user, worker)
+        user_form, worker_form, contract_form = self.get_cleaned_forms(user, worker, worker.contract)
 
-        if user_form.is_valid() and worker_form.is_valid():
+        if all([user_form.is_valid(), worker_form.is_valid(), contract_form.is_valid()]):
             user_form.save()
             worker_form.save()
+            contract_form.save()
             return HttpResponseRedirect(self.success_url)
         else:
-            return self.render_forms(user_form, worker_form)
+            return self.render_forms(user_form, worker_form, contract_form)
 
 
 class WorkerRemove(DeleteView):

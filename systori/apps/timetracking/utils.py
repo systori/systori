@@ -29,15 +29,11 @@ def to_current_timezone(date_time):
     return date_time.astimezone(timezone.get_current_timezone())
 
 
-def get_timetracking_workers(company):
-    return company.active_workers(is_timetracking_enabled=True)
-
-
 def get_workers_statuses():
     from .models import Timer
     return dict(
         (timer.worker_id, timer)
-        for timer in Timer.objects.filter_now()
+        for timer in Timer.objects.current()
     )
 
 
@@ -67,17 +63,3 @@ def get_timespans_split_by_breaks(start_time: time, end_time: time, breaks) -> I
     # Apply Remainder
     if next_start < end_time:
         yield next_start, end_time
-
-
-def perform_autopilot_duties(breaks, tz):
-    """
-    Issue timers stop or launch commands at certain times of day
-    """
-    from .models import Timer
-
-    now = datetime.now(tz).replace(second=0, microsecond=0)
-    time_now = now.time()
-    if time_now in [b.start for b in breaks]:
-        Timer.objects.stop_for_break(now)
-    elif time_now in [b.end for b in breaks]:
-        Timer.objects.launch_after_break(now)

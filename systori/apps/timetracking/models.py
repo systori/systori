@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from ..project.models import JobSite
 from .managers import TimerQuerySet
 from .utils import calculate_duration_minutes, calculate_duration_seconds
-from systori.lib.model_utils import apply_all_kwargs
+from systori.lib.models import apply_all_kwargs
 
 
 class Timer(models.Model):
@@ -71,8 +71,10 @@ class Timer(models.Model):
         ordering = ('started',)
 
     def __str__(self):
-        return 'Timer #{}: date={:%Y-%m-%d}, started={:%H:%M}, stopped={:%H:%M}, duration={}'.format(
-            self.id, self.started, self.started, self.stopped, self.running_duration
+        return 'Timer #{}: date={:%Y-%m-%d}, started={:%H:%M}, stopped={}, duration={}'.format(
+            self.id, self.started, self.started,
+            '{:%H:%M}'.format(self.stopped) if self.stopped else '--:--',
+            self.running_duration
         )
 
     @classmethod
@@ -117,7 +119,7 @@ class Timer(models.Model):
         if self.pk:
             return
         worker_timers = Timer.objects.filter(worker=self.worker)
-        if not (self.stopped or self.duration) and worker_timers.filter_running().exists():
+        if not (self.stopped or self.duration) and worker_timers.running().exists():
             raise ValidationError(_('Timer already running'))
         if self.started:
             overlapping_timer = worker_timers.filter(started__lte=self.started).filter(

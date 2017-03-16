@@ -30,7 +30,6 @@ class JobFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual({
             'name': ['This field is required.'],
-            'billing_method': ['This field is required.'],
         }, form.errors)
 
     def test_save(self):
@@ -51,7 +50,6 @@ class JobFormTest(TestCase):
         # Using Template
         form = forms.JobCreateForm(data={
             'name': 'new job',
-            'billing_method': Job.FIXED_PRICE,
             'job_template': template.pk
         }, instance=Job(project=self.project))
         self.assertTrue(form.is_valid())
@@ -61,7 +59,6 @@ class JobFormTest(TestCase):
         # Not Using Template
         form = forms.JobCreateForm(data={
             'name': 'new job 2',
-            'billing_method': Job.FIXED_PRICE,
         }, instance=Job(project=self.project))
         self.assertTrue(form.is_valid())
         new_job = form.save()

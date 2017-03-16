@@ -5,30 +5,7 @@
 
 {% block content %}
   <h1 class="page-header">{% trans 'Dashboard' %}</h1>
-
-  <h2 class="sub-header">{% trans "Projects" %}</h2>
   <div id="map-canvas" style="height: 400px;"></div>
-
-  <h2 class="sub-header">{% trans "Flagged Items" %}</h2>
-  <table class="table table-striped">
-    <thead>
-    <tr>
-      <th>{% trans "Job" %}</th>
-      <th>{% trans "Line Item" %}</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for lineitem in flagged_lineitems.all %}
-      <tr>
-        <td nowrap><a
-            href="{% url 'tasks' lineitem.project.id lineitem.job.id %}#lineitem-{{ lineitem.id }}">{{ lineitem.job }}</a>
-        </td>
-        <td width="100%">{{ lineitem.name }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-
 {% endblock %}
 
 {% block extra_js %}

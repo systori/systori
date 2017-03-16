@@ -8,8 +8,8 @@ from django.conf import settings
 from django.db import models, transaction
 from django.utils.translation import get_language, ugettext_lazy as _
 
-from systori.lib.fields import LocalizedDecimalField
 from systori.lib.accounting.tools import Amount
+from systori.lib.fields import DecimalMinuteHoursField
 
 from ..accounting.workflow import Account, credit_jobs, debit_jobs, adjust_jobs, refund_jobs
 from ..accounting.constants import TAX_RATE
@@ -286,8 +286,8 @@ class InvoiceRowForm(DocumentRowForm):
 
     is_invoiced = forms.BooleanField(initial=False, required=False)
 
-    debit_net = LocalizedDecimalField(label=_("Debit Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
-    debit_tax = LocalizedDecimalField(label=_("Debit Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    debit_net = forms.DecimalField(localize=True, label=_("Debit Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    debit_tax = forms.DecimalField(localize=True, label=_("Debit Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
 
     is_override = forms.BooleanField(initial=False, required=False, widget=forms.HiddenInput())
     override_comment = forms.CharField(widget=forms.Textarea, required=False)
@@ -425,11 +425,11 @@ class AdjustmentForm(DocumentForm):
 
 class AdjustmentRowForm(DocumentRowForm):
 
-    adjustment_net = LocalizedDecimalField(label=_("Adjustment Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
-    adjustment_tax = LocalizedDecimalField(label=_("Adjustment Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    adjustment_net = forms.DecimalField(localize=True, label=_("Adjustment Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    adjustment_tax = forms.DecimalField(localize=True, label=_("Adjustment Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
 
-    corrected_net = LocalizedDecimalField(label=_("Corrected Net"), max_digits=14, decimal_places=2, required=False)
-    corrected_tax = LocalizedDecimalField(label=_("Corrected Tax"), max_digits=14, decimal_places=2, required=False)
+    corrected_net = forms.DecimalField(localize=True, label=_("Corrected Net"), max_digits=14, decimal_places=2, required=False)
+    corrected_tax = forms.DecimalField(localize=True, label=_("Corrected Tax"), max_digits=14, decimal_places=2, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -482,7 +482,7 @@ AdjustmentFormSet = formset_factory(AdjustmentRowForm, formset=BaseDocumentFormS
 class PaymentForm(DocumentForm):
     document_date = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
     bank_account = forms.ModelChoiceField(label=_("Bank Account"), queryset=Account.objects.banks())
-    payment = LocalizedDecimalField(label=_("Payment"), max_digits=14, decimal_places=4)
+    payment = forms.DecimalField(localize=True, label=_("Payment"), max_digits=14, decimal_places=4)
     discount = forms.TypedChoiceField(
         label=_('Is discounted?'), coerce=D,
         choices=[
@@ -553,14 +553,14 @@ class PaymentForm(DocumentForm):
 
 class PaymentRowForm(DocumentRowForm):
 
-    split_net = LocalizedDecimalField(label=_("Split Net"), max_digits=14, decimal_places=2, required=False)
-    split_tax = LocalizedDecimalField(label=_("Split Tax"), max_digits=14, decimal_places=2, required=False)
+    split_net = forms.DecimalField(localize=True, label=_("Split Net"), max_digits=14, decimal_places=2, required=False)
+    split_tax = forms.DecimalField(localize=True, label=_("Split Tax"), max_digits=14, decimal_places=2, required=False)
 
-    discount_net = LocalizedDecimalField(label=_("Discount Net"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
-    discount_tax = LocalizedDecimalField(label=_("Discount Tax"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    discount_net = forms.DecimalField(localize=True, label=_("Discount Net"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    discount_tax = forms.DecimalField(localize=True, label=_("Discount Tax"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
 
-    adjustment_net = LocalizedDecimalField(label=_("Adjustment Net"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
-    adjustment_tax = LocalizedDecimalField(label=_("Adjustment Tax"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    adjustment_net = forms.DecimalField(localize=True, label=_("Adjustment Net"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
+    adjustment_tax = forms.DecimalField(localize=True, label=_("Adjustment Tax"), max_digits=14, decimal_places=2, required=False, widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -670,11 +670,11 @@ class RefundForm(DocumentForm):
 
 
 class RefundRowForm(DocumentRowForm):
-    refund_net = LocalizedDecimalField(label=_("Refund Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
-    refund_tax = LocalizedDecimalField(label=_("Refund Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    refund_net = forms.DecimalField(localize=True, label=_("Refund Net"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
+    refund_tax = forms.DecimalField(localize=True, label=_("Refund Tax"), initial=D('0.00'), max_digits=14, decimal_places=2, required=False)
 
-    credit_net = LocalizedDecimalField(label=_("Apply Net"), max_digits=14, decimal_places=2, required=False)
-    credit_tax = LocalizedDecimalField(label=_("Apply Tax"), max_digits=14, decimal_places=2, required=False)
+    credit_net = forms.DecimalField(localize=True, label=_("Apply Net"), max_digits=14, decimal_places=2, required=False)
+    credit_tax = forms.DecimalField(localize=True, label=_("Apply Tax"), max_digits=14, decimal_places=2, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -818,31 +818,18 @@ ProposalFormSet = formset_factory(ProposalRowForm, formset=BaseProposalFormSet, 
 
 class TimesheetForm(forms.ModelForm):
 
-    work_correction = forms.DecimalField(label=_('Work correction (hours)'))
+    work_correction = DecimalMinuteHoursField(label=_('Work correction (hours)'), localize=True)
     work_correction_notes = forms.CharField(label=_('Work correction notes'), required=False, widget=forms.Textarea())
 
-    vacation_correction = forms.DecimalField(label=_('Vacation correction (hours)'))
+    vacation_correction = DecimalMinuteHoursField(label=_('Vacation correction (hours)'), localize=True)
     vacation_correction_notes = forms.CharField(label=_('Vacation correction notes'), required=False, widget=forms.Textarea())
 
-    overtime_correction = forms.DecimalField(label=_('Overtime correction (hours)'))
+    overtime_correction = DecimalMinuteHoursField(label=_('Overtime correction (hours)'), localize=True)
     overtime_correction_notes = forms.CharField(label=_('Overtime correction notes'), required=False, widget=forms.Textarea())
 
     class Meta:
         model = Timesheet
         fields = []
-
-    def __init__(self, **kwargs):
-        kwargs.pop('initial')
-        super().__init__(
-            initial={
-               'work_correction': kwargs['instance'].json['work_correction']/60.0,
-               'work_correction_notes': kwargs['instance'].json['work_correction_notes'],
-               'vacation_correction': kwargs['instance'].json['vacation_correction']/60.0,
-               'vacation_correction_notes': kwargs['instance'].json['vacation_correction_notes'],
-               'overtime_correction': kwargs['instance'].json['overtime_correction']/60.0,
-               'overtime_correction_notes': kwargs['instance'].json['overtime_correction_notes'],
-            }, **kwargs
-        )
 
     def clean(self):
         cleaned = super().clean()
@@ -854,15 +841,8 @@ class TimesheetForm(forms.ModelForm):
                 )
 
     def save(self, commit=True):
-        work_correction = int(self.cleaned_data['work_correction']*60)
-        self.instance.json['work_correction'] = work_correction
-        self.instance.json['work_correction_notes'] = self.cleaned_data['work_correction_notes']
-        vacation_correction = int(self.cleaned_data['vacation_correction']*60)
-        self.instance.json['vacation_correction'] = vacation_correction
-        self.instance.json['vacation_correction_notes'] = self.cleaned_data['vacation_correction_notes']
-        overtime_correction = int(self.cleaned_data['overtime_correction']*60)
-        self.instance.json['overtime_correction'] = overtime_correction
-        self.instance.json['overtime_correction_notes'] = self.cleaned_data['overtime_correction_notes']
+        for field in Timesheet.initial.keys():
+            self.instance.json[field] = self.cleaned_data[field]
         self.instance.calculate()
         return super().save(commit)
 

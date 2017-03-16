@@ -13,13 +13,14 @@
         {% if user.password %}
           {{ user.password }}
         {% else %}
-          {% trans 'No password set.' %}</b>
+          <b>{% trans 'No password set.' %}</b>
         {% endif %}
       </div>
     </div>
     {% endif %}
     <br/>
     {{ worker_form|bootstrap }}
+    {{ contract_form|bootstrap }}
     <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
   </form>
 {% endblock %}
