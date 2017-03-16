@@ -505,6 +505,7 @@
 
   </style>
 
+  {% localize off %}
   <div id="editor-area">
 
   <sys-job id="task-editor" data-pk="{{ job.pk }}" data-code="{{ job.code }}"
@@ -531,6 +532,7 @@
   <template id="lineitem-template">
     {% include "task/editor/lineitem_editor.html" with lineitem=blank_lineitem %}
   </template>
+  {% endlocalize %}
 
 {% endblock %}
 
