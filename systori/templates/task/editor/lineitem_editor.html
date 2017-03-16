@@ -10,7 +10,6 @@
     <sys-cell  class="total" placeholder="{% trans 'total' %}" data-canonical="{{ lineitem.total_equation }}" {% if lineitem.total_equation|is_formula %}data-resolved="" {% endif %}contenteditable>{{ lineitem.total|ubrdecimal }}</sys-cell>
     <div class="actions">
       <sys-toggle class="is_hidden glyphicon glyphicon-eye-close {{ lineitem.is_hidden }}" title="{% trans 'exclude' %}"></sys-toggle>
-      <sys-toggle class="is_flagged glyphicon glyphicon-flag {{ lineitem.is_flagged }}" title="{% trans 'flag' %}"></sys-toggle>
     </div>
   </div>
 </div>

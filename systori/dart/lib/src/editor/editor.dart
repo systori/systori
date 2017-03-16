@@ -542,9 +542,7 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
     CodeInput dragHandle;
     TextInput name;
     Toggle is_hidden_toggle;
-    Toggle is_flagged_toggle;
     bool get is_hidden => is_hidden_toggle.value;
-    bool get is_flagged => is_flagged_toggle.value;
     bool get isBlank => hasNoPK && name.text.isEmpty;
     bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
 
@@ -561,7 +559,6 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
         /* add these inputs after we bind all TextInputs */
         dragHandle = getInput("sys-lineitem-handle");
         is_hidden_toggle = getInput("is_hidden")..addHandler(this);
-        is_flagged_toggle = getInput("is_flagged")..addHandler(this);
     }
 
     createSibling() {
