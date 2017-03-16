@@ -52,7 +52,7 @@ class ArrowNavigationHandler extends KeyboardHandler {
 
     @override
     bool onKeyDownEvent(KeyEvent e, Input input) {
-        if (e.shiftKey && mapping.containsKey(input.name)) {
+        if (e.ctrlKey && mapping.containsKey(input.name)) {
             var map = mapping[input.name];
             switch (e.keyCode) {
                 case KeyCode.UP:
