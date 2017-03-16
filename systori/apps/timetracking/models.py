@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from ..project.models import JobSite
 from .managers import TimerQuerySet
 from .utils import calculate_duration_minutes, calculate_duration_seconds
-from systori.lib.models import apply_all_kwargs
+from systori.lib.fields import apply_all_kwargs
 
 
 class Timer(models.Model):

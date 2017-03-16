@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from django.template.defaultfilters import date as date_filter
 
-from systori.lib.models import RateType
+from systori.lib.fields import RateType
 
 
 class EquipmentType(models.Model, RateType):

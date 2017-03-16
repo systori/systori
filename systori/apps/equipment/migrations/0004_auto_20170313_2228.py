@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import systori.lib.models
+import systori.lib.fields
 
 
 class Migration(migrations.Migration):
@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('rate', models.DecimalField(decimal_places=2, max_digits=14, verbose_name='Rate')),
                 ('rate_type', models.CharField(choices=[('hourly', 'Hourly'), ('daily', 'Daily'), ('weekly', 'Weekly'), ('flat', 'Flat Fee')], default='hourly', max_length=128, verbose_name='Rate Type')),
             ],
-            bases=(models.Model, systori.lib.models.RateType),
+            bases=(models.Model, systori.lib.fields.RateType),
         ),
         migrations.AddField(
             model_name='equipment',

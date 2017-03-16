@@ -8,7 +8,7 @@ from django.utils.functional import cached_property
 from postgres_schema.models import AbstractSchema
 from timezone_field import TimeZoneField
 
-from systori.lib.models import RateType
+from systori.lib.fields import RateType
 from ..timetracking.utils import BreakSpan
 
 

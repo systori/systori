@@ -3,7 +3,7 @@
 import datetime
 from django.db import migrations, models
 import django.db.models.deletion
-import systori.lib.models
+import systori.lib.fields
 import timezone_field.fields
 
 
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('work_end', models.TimeField(default=datetime.time(16, 0), help_text='Local time at which worker is expected to finish working.', verbose_name='Work End')),
                 ('abandoned_timer_penalty', models.IntegerField(default=-60, help_text='Penalty (in hours) applies to work day of a worker who manually starts and then fails to stop their timer at the end of the day.', verbose_name='Abandoned Timer Penalty')),
             ],
-            bases=(models.Model, systori.lib.models.RateType),
+            bases=(models.Model, systori.lib.fields.RateType),
         ),
         migrations.CreateModel(
             name='LaborType',
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 ('rate', models.DecimalField(decimal_places=2, max_digits=14, verbose_name='Rate')),
                 ('rate_type', models.CharField(choices=[('hourly', 'Hourly'), ('daily', 'Daily'), ('weekly', 'Weekly'), ('flat', 'Flat Fee')], default='hourly', max_length=128, verbose_name='Rate Type')),
             ],
-            bases=(models.Model, systori.lib.models.RateType),
+            bases=(models.Model, systori.lib.fields.RateType),
         ),
         migrations.AddField(
             model_name='worker',
