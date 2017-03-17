@@ -512,16 +512,22 @@ class LineItem(OrderedModel):
     total = models.DecimalField(_("Total"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     total_equation = models.CharField(max_length=512, blank=True)
 
-    LABOR = "labor"
     MATERIAL = "material"
+    LABOR = "labor"
     EQUIPMENT = "equipment"
     OTHER = "other"
     LINEITEM_TYPES = (
-        (LABOR, _("Labor")),
         (MATERIAL, _("Material")),
+        (LABOR, _("Labor")),
         (EQUIPMENT, _("Equipment")),
         (OTHER, _("Other")),
     )
+    ICONS = {  # glyphicons
+        MATERIAL: 'equalizer',
+        LABOR: 'user',
+        EQUIPMENT: 'wrench',
+        OTHER: 'tasks',
+    }
     lineitem_type = models.CharField(_('Line Item Type'), max_length=128, choices=LINEITEM_TYPES, default=OTHER)
 
     labor = models.ForeignKey(LaborType, null=True, related_name="lineitems", on_delete=models.SET_NULL)
@@ -546,6 +552,26 @@ class LineItem(OrderedModel):
         if 'task' in kwargs and 'job' not in kwargs:
             kwargs['job'] = kwargs['task'].job
         super().__init__(*args, **kwargs)
+
+    @property
+    def is_material(self):
+        return self.lineitem_type == self.MATERIAL
+
+    @property
+    def is_labor(self):
+        return self.lineitem_type == self.LABOR
+
+    @property
+    def is_equipment(self):
+        return self.lineitem_type == self.EQUIPMENT
+
+    @property
+    def is_other(self):
+        return self.lineitem_type == self.OTHER
+
+    @property
+    def icon(self):
+        return self.ICONS[self.lineitem_type]
 
     def refresh_pks(self):
         self.task = self.task

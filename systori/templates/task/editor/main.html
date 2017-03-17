@@ -21,11 +21,15 @@
     sys-job,
     sys-group,
     sys-task,
-    sys-lineitem,
     sys-task > div.price-difference {
       display: block;
       position: relative;
       margin-right: 15px;
+    }
+
+    sys-lineitem {
+      display: block;
+      position: relative;
     }
 
     sys-job,
@@ -289,7 +293,7 @@
       width: 1px;
       top: 0px;
       bottom: 0px;
-      right: 85px;
+      right: 100px;
       border-right: 1px solid #e9e9e9;
     }
 
@@ -392,19 +396,22 @@
 
     sys-lineitem > .editor > .editor-row > .actions {
       flex: 0 0 auto;
-      width: 85px;
+      width: 100px;
       padding-left: 20px;
     }
 
+    .actions > sys-toggle-lineitem:hover,
     .actions > sys-toggle:hover {
       cursor: pointer;
     }
 
+    .actions > sys-toggle-lineitem[data-value=other],
     .actions > sys-toggle.False {
       visibility: hidden;
       color: #e9e9e9;
     }
 
+    .editor:hover > .editor-row > .actions > sys-toggle-lineitem[data-value=other],
     .editor:hover > .editor-row > .actions > sys-toggle.False {
       visibility: visible;
     }
@@ -529,7 +536,15 @@
     {% include "task/editor/task_editor.html" with task=blank_task %}
   </template>
 
-  <template id="lineitem-template">
+  <template id="lineitem-template"
+    data-material="{% trans 'Material' %}"
+    data-material-icon="{{ blank_lineitem.ICONS.material }}"
+    data-labor="{% trans 'Labor' %}"
+    data-labor-icon="{{ blank_lineitem.ICONS.labor }}"
+    data-equipment="{% trans 'Equipment' %}"
+    data-equipment-icon="{{ blank_lineitem.ICONS.equipment }}"
+    data-other="{% trans 'Type' %}"
+    data-other-icon="{{ blank_lineitem.ICONS.other }}">
     {% include "task/editor/lineitem_editor.html" with lineitem=blank_lineitem %}
   </template>
   {% endlocalize %}
