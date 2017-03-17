@@ -1,5 +1,6 @@
 import 'dart:html';
 import 'dart:async';
+import 'dart:collection';
 import 'package:intl/intl.dart';
 import 'package:quiver/iterables.dart';
 import 'package:systori/numbers.dart';
@@ -537,11 +538,48 @@ class LineItemArrowKeyHandler extends ArrowNavigationHandler {
 }
 
 
+class ToggleLineItemType extends Input {
+
+    static const List<String> TYPE_NAMES = const ['material', 'labor', 'equipment', 'other'];
+    static Map<String,Map<String,String>> TYPES = new LinkedHashMap();
+    static initTypeConstants() {
+        TemplateElement template = document.querySelector('#lineitem-template');
+        for (var lit in TYPE_NAMES) {
+            TYPES[lit] = {
+                'title': template.dataset[lit],
+                'icon': template.dataset["$lit-icon"],
+            };
+        }
+    }
+
+    Map<String,dynamic> get values => {name: value};
+    String get value => dataset['value'];
+    set value(String value) {
+        dataset['value'] = value;
+        classes.clear();
+        classes.addAll(["lineitem_type", "glyphicon", "glyphicon-${TYPES[value]['icon']}"]);
+        title = TYPES[value]['title'];
+        dispatchInputEvent();
+    }
+
+    String cycle(String current) =>
+        TYPE_NAMES.last == current
+            ? TYPE_NAMES[0]
+            : TYPE_NAMES[TYPE_NAMES.indexOf(current)+1];
+
+    ToggleLineItemType.created(): super.created() {
+        onClick.listen((MouseEvent e) => value = cycle(value));
+    }
+
+}
+
+
 class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
 
     CodeInput dragHandle;
     TextInput name;
     Toggle is_hidden_toggle;
+    ToggleLineItemType lineitem_type;
     bool get is_hidden => is_hidden_toggle.value;
     bool get isBlank => hasNoPK && name.text.isEmpty;
     bool get canSave => name.text.isNotEmpty && autocomplete.input != name;
@@ -558,6 +596,7 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
         new LineItemArrowKeyHandler(this);
         /* add these inputs after we bind all TextInputs */
         dragHandle = getInput("sys-lineitem-handle");
+        lineitem_type = getInput("lineitem_type")..addHandler(this);
         is_hidden_toggle = getInput("is_hidden")..addHandler(this);
     }
 
@@ -575,6 +614,34 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
         LineItemSheet sheet_parent = parent as LineItemSheet;
         Task task_parent = sheet_parent.parent as Task;
         switch(e.keyCode) {
+            case KeyCode.M:
+                if (e.ctrlKey) {
+                    lineitem_type.value = 'material';
+                    e.preventDefault();
+                    return true;
+                }
+                break;
+            case KeyCode.L:
+                if (e.ctrlKey) {
+                    lineitem_type.value = 'labor';
+                    e.preventDefault();
+                    return true;
+                }
+                break;
+            case KeyCode.E:
+                if (e.ctrlKey) {
+                    lineitem_type.value = 'equipment';
+                    e.preventDefault();
+                    return true;
+                }
+                break;
+            case KeyCode.O:
+                if (e.ctrlKey) {
+                    lineitem_type.value = 'other';
+                    e.preventDefault();
+                    return true;
+                }
+                break;
             case KeyCode.ENTER:
                 e.preventDefault();
                 if (isBlank) {
@@ -712,6 +779,7 @@ registerElements() {
     document.registerElement('sys-decimal', DecimalElement);
     document.registerElement('sys-input', TextInput);
     document.registerElement('sys-toggle', Toggle);
+    document.registerElement('sys-toggle-lineitem', ToggleLineItemType);
     document.registerElement('sys-styled-input', StyledInput);
     document.registerElement('sys-code-input', CodeInput);
     document.registerElement('sys-variant-input', VariantInput);
@@ -722,4 +790,5 @@ registerElements() {
     document.registerElement('sys-job', Job);
     document.registerElement('sys-group', Group);
     document.registerElement('sys-autocomplete', Autocomplete);
+    ToggleLineItemType.initTypeConstants();
 }

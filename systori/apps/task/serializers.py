@@ -66,7 +66,7 @@ class LineItemSerializer(serializers.ModelSerializer):
             'qty', 'qty_equation',
             'unit', 'price', 'price_equation',
             'total', 'total_equation',
-            'is_hidden',
+            'is_hidden', 'lineitem_type'
         ]
 
     def create(self, validated_data):
