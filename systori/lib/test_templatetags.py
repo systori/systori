@@ -8,6 +8,9 @@ class CustomFormattingTest(TestCase):
     def test_ubrdecimal_en(self):
         activate('en')
 
+        self.assertEqual('', ubrdecimal(None))
+        self.assertEqual('', ubrdecimal(''))
+
         self.assertEqual('1.00', ubrdecimal(Decimal('1')))
         self.assertEqual('10.00', ubrdecimal(Decimal('10')))
 
@@ -35,6 +38,9 @@ class CustomFormattingTest(TestCase):
 
     def test_ubrdecimal_de(self):
         activate('de')
+
+        self.assertEqual('', ubrdecimal(None))
+        self.assertEqual('', ubrdecimal(''))
 
         self.assertEqual('1,00', ubrdecimal(Decimal('1')))
         self.assertEqual('10,00', ubrdecimal(Decimal('10')))

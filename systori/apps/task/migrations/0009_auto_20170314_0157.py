@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='lineitem',
             name='lineitem_type',
-            field=models.CharField(choices=[('labor', 'Labor'), ('material', 'Material'), ('equipment', 'Equipment'), ('other', 'Other')], default='other', max_length=128, verbose_name='Line Item Type'),
+            field=models.CharField(choices=[('material', 'Material'), ('labor', 'Labor'), ('equipment', 'Equipment'), ('other', 'Other')], default='other', max_length=128, verbose_name='Line Item Type'),
         ),
         migrations.AddField(
             model_name='lineitem',
@@ -91,5 +91,10 @@ class Migration(migrations.Migration):
             model_name='expendreport',
             name='worker',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='expendreports', to='company.Worker'),
+        ),
+        migrations.AlterField(
+            model_name='task',
+            name='qty',
+            field=models.DecimalField(blank=True, decimal_places=4, default=Decimal('0.00'), max_digits=14, null=True, verbose_name='Quantity'),
         ),
     ]

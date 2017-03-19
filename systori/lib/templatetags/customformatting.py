@@ -46,7 +46,7 @@ def company_url(company, request):
 @register.filter
 def ubrdecimal(number, max_significant=4, min_significant=2):
 
-    if number == '':
+    if number == '' or number is None:
         return ''
 
     if type(number) is str:

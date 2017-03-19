@@ -69,6 +69,10 @@ abstract class TotalRow implements Row {
 
         if (qty.value.isNonzero  && price.value.isNonzero  && total.isCanonicalBlank)
             total.setCalculated(_qty * price.value); else
+        if (qty.value.isNull     && price.value.isNonzero  && total.isCanonicalBlank)
+            total.setCalculated(new Decimal(1, 3) * price.value); else
+        if (qty.value.isNull     && price.value.isZero     && total.isCanonicalBlank)
+            total.setCalculated(price.value); else
         if (qty.value.isNonzero  && price.isCanonicalBlank && total.isCanonicalNotBlank)
             price.setCalculated(total.value / _qty); else
         if (qty.isCanonicalBlank && price.value.isNonzero  && total.isCanonicalNotBlank)

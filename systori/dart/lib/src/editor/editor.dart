@@ -235,7 +235,7 @@ class CodeInput extends Input {
 class HtmlCell extends TextInput with HighlightableInputMixin, Cell, KeyboardHandler {
 
     Map<String,dynamic> get values => {
-        className: value.canonical,
+        className: value.canonical.length > 0 ? value.canonical : null,
         '${className}_equation': canonical
     };
 
@@ -388,6 +388,37 @@ class VariantInput extends TextInput with KeyboardHandler {
 }
 
 
+class TimeAndMaterialsToggle extends Toggle {
+    Decimal _previous_value = new Decimal(1, 3);
+    Task get task => parent.parent.parent.parent;
+    TimeAndMaterialsToggle.created(): super.created();
+
+    @override
+    toggleOn() {
+        _previous_value = task.qty.value;
+        task.qty.clear();
+        task.onCalculate('changed', task.qty);
+        super.toggleOn();
+    }
+
+    @override
+    toggleOff() {
+        task.qty.setManual(_previous_value);
+        task.onCalculate('changed', task.qty);
+        super.toggleOff();
+    }
+
+    syncToggle() {
+        if (task.qty.isCanonicalBlank) {
+            super.toggleOn();
+        } else {
+            super.toggleOff();
+        }
+    }
+
+}
+
+
 class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 
     bool get isBlank => hasNoPK && name.text.isEmpty;
@@ -400,6 +431,7 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
     TextInput description;
     VariantInput variant;
     Toggle is_provisional_toggle;
+    TimeAndMaterialsToggle is_time_and_materials;
     bool get is_provisional => is_provisional_toggle.value;
     bool get exclude_from_total => is_provisional || variant.serial > 0;
     DivElement diffRow;
@@ -426,6 +458,7 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
         /* add these inputs after we bind all TextInputs */
         code = getInput("code");
         is_provisional_toggle = getInput("is_provisional")..addHandler(this);
+        is_time_and_materials = (getView("is_time_and_materials") as Input)..addHandler(this);
 
         diffRow = this.querySelector(":scope> div.price-difference");
         diffCell = diffRow.querySelector(":scope> .total");
@@ -520,7 +553,9 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
 
     @override
     bool onInputEvent(Input input) {
-        if (['is_provisional', 'variant'].contains(input.name)) {
+        if (input.name == 'qty') {
+            is_time_and_materials.syncToggle();
+        } else if (['is_provisional', 'variant'].contains(input.name)) {
             classes.toggle('excluded', exclude_from_total);
             parentGroup.calculationChanged();
         }
@@ -780,6 +815,7 @@ registerElements() {
     document.registerElement('sys-input', TextInput);
     document.registerElement('sys-toggle', Toggle);
     document.registerElement('sys-toggle-lineitem', ToggleLineItemType);
+    document.registerElement('sys-toggle-tm', TimeAndMaterialsToggle);
     document.registerElement('sys-styled-input', StyledInput);
     document.registerElement('sys-code-input', CodeInput);
     document.registerElement('sys-variant-input', VariantInput);
