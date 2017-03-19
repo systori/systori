@@ -104,15 +104,19 @@ class Toggle extends Input {
 
     Toggle.created(): super.created() {
         onClick.listen((MouseEvent e) {
-            if (value) {
-                classes.remove('True');
-                classes.add('False');
-            } else {
-                classes.remove('False');
-                classes.add('True');
-            }
+            value ? toggleOff() : toggleOn();
             dispatchInputEvent();
         });
+    }
+
+    toggleOff() {
+        classes.remove('True');
+        classes.add('False');
+    }
+
+    toggleOn() {
+        classes.remove('False');
+        classes.add('True');
     }
 
 }

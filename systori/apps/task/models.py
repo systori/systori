@@ -349,7 +349,7 @@ class Task(OrderedModel):
         tsvector_field.WeightedColumn('description', 'D'),
     ], settings.SEARCH_VECTOR_LANGUAGE)
 
-    qty = models.DecimalField(_("Quantity"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
+    qty = models.DecimalField(_("Quantity"), blank=True, null=True, max_digits=14, decimal_places=4, default=Decimal('0.00'))
     qty_equation = models.CharField(max_length=512, blank=True)
     complete = models.DecimalField(_("Completed"), max_digits=14, decimal_places=4, default=Decimal('0.00'))
     unit = models.CharField(_("Unit"), max_length=512, blank=True)
@@ -411,6 +411,10 @@ class Task(OrderedModel):
     @property
     def is_variant(self):
         return self.variant_group > 0
+
+    @property
+    def is_time_and_materials(self):
+        return self.qty is None
 
     @property
     def include_estimate(self):

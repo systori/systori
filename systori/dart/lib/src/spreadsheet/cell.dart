@@ -95,6 +95,15 @@ abstract class Cell {
         }
     }
 
+    clear() => setManual(new Decimal(null, 3));
+
+    setManual(Decimal decimal) {
+        value = decimal;
+        _previous_text = text = preview = decimal.isNonzero ? format(column, decimal) : "";
+        canonical = decimal.canonical;
+        local = resolved = preview = '';
+    }
+
     setCalculated(Decimal decimal) {
         value = decimal;
         preview = value.isNonzero ? format(column, decimal) : "";
