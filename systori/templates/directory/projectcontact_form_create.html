@@ -7,12 +7,14 @@
   <h2 class="sub-header">
     {% blocktrans with project_name=project.name %}Create and then add contact to {{ project_name }}{% endblocktrans %}
   </h2>
-  <form role="form" method="post">
+  <form class="form-horizontal" method="post">
       {% csrf_token %}
-      {{ project_contact_form|bootstrap }}
-      {{ form|bootstrap }}
+      {% bootstrap project_contact_form layout="horizontal" %}
+      {% bootstrap form layout="horizontal" %}
       <div class="form-group">
-        <button type="submit" class="btn btn-primary" value="{% trans "Create" %}">{% trans "Create" %}</button>
+        <div class="col-sm-offset-2 col-sm-10">
+          <button type="submit" class="btn btn-primary" value="{% trans "Create" %}">{% trans "Create" %}</button>
+        </div>
       </div>
   </form>
 {% endblock content %}

@@ -4,11 +4,13 @@
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='directory' %}{% endblock %}
 
 {% block content %}
-  <form role="form" method="post">
+  <form class="form-horizontal" method="post">
       {% csrf_token %}
-      {{ form|bootstrap_horizontal }}
+      {% bootstrap form layout='horizontal' %}
       <div class="form-group">
-        <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+        <div class="col-sm-offset-2 col-sm-10">
+          <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+        </div>
       </div>
   </form>
 {% endblock %}

@@ -136,7 +136,8 @@ class TimerQuerySetTest(TestCase):
         start = timezone.make_aware(datetime(2016, 10, 27, 7))
         end = timezone.make_aware(datetime(2016, 10, 31, 16))
         Timer.objects.create_batch(
-            worker=self.worker, started=start, stopped=end,
+            worker=self.worker, dates=(start.date(), end.date()),
+            start=start.time(), stop=end.time(),
             kind=Timer.WORK, comment='Test comment'
         )
         result = Timer.objects.order_by('id').all()

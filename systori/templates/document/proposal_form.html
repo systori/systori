@@ -7,7 +7,7 @@
   <form role="form" method="post">{% csrf_token %}
 
     <h2 class="sub-header">{% trans "Proposal" %}</h2>
-    {{ form|bootstrap }}
+    {% bootstrap form %}
 
     <div class="">
 

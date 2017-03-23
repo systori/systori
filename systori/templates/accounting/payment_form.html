@@ -6,8 +6,8 @@
 {% block content %}
   <form method="post" autocomplete="off">{% csrf_token %}
 
-    {{ form.bank_account|bootstrap }}
-    {{ form.document_date|bootstrap }}
+    {% bootstrap form.bank_account %}
+    {% bootstrap form.document_date %}
     {% if form.instance.invoice %}
       <div class="form-group">
         <label class="control-label">{% trans "Invoice" %}</label>

@@ -6,9 +6,9 @@
 {% block content %}
   <form role="form" method="post">
     {% csrf_token %}
-    {{ form|bootstrap }}
+    {% bootstrap form %}
     {% if jobsite_form %}
-      {{ jobsite_form|bootstrap }}
+      {% bootstrap jobsite_form %}
     {% endif %}
     <div class="form-group">
       <button type="submit" class="btn btn-primary" name="save_goto_project" value="{% trans 'Save &raquo; Project' %}">{% trans 'Save &raquo; Project' %}</button>

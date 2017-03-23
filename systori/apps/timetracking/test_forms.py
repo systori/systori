@@ -21,11 +21,12 @@ class ManualTimerFormTest(TestCase):
         start = datetime(2016, 9, 1, 7, tzinfo=timezone.utc)
         form = forms.ManualTimerForm(data={
             'worker': self.worker.pk,
-            'started': start.strftime('%m/%d/%Y %H:%M'),
-            'stopped': start.replace(hour=16).strftime('%m/%d/%Y %H:%M'),
+            'dates': start.strftime('%m/%d/%Y'),
+            'start': start.strftime('%H:%M'),
+            'stop': start.replace(hour=16).strftime('%H:%M'),
             'kind': Timer.VACATION
         }, company=self.company)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
         timer = form.save()[0]
         self.assertEqual(timer.duration, 60 * 9)
 
@@ -33,8 +34,9 @@ class ManualTimerFormTest(TestCase):
         start = datetime(2016, 9, 1, 7, tzinfo=timezone.utc)
         form = forms.ManualTimerForm(data={
             'worker': self.worker.pk,
-            'started': start.strftime('%m/%d/%Y %H:%M'),
-            'stopped': start.replace(hour=16).strftime('%m/%d/%Y %H:%M'),
+            'dates': start.strftime('%m/%d/%Y'),
+            'start': start.strftime('%H:%M'),
+            'stop': start.replace(hour=16).strftime('%H:%M'),
             'kind': Timer.WORK,
             'morning_break': True
         }, company=self.company)
@@ -47,8 +49,9 @@ class ManualTimerFormTest(TestCase):
         start = datetime(2016, 9, 1, 7, tzinfo=timezone.utc)
         form = forms.ManualTimerForm(data={
             'worker': self.worker.pk,
-            'started': start.strftime('%m/%d/%Y %H:%M'),
-            'stopped': start.replace(hour=16).strftime('%m/%d/%Y %H:%M'),
+            'dates': start.strftime('%m/%d/%Y'),
+            'start': start.strftime('%H:%M'),
+            'stop': start.replace(hour=16).strftime('%H:%M'),
             'kind': Timer.WORK,
             'lunch_break': True
         }, company=self.company)
@@ -61,8 +64,9 @@ class ManualTimerFormTest(TestCase):
         start = datetime(2016, 9, 1, 7, tzinfo=timezone.utc)
         form = forms.ManualTimerForm(data={
             'worker': self.worker.pk,
-            'started': start.strftime('%m/%d/%Y %H:%M'),
-            'stopped': start.replace(hour=16).strftime('%m/%d/%Y %H:%M'),
+            'dates': start.strftime('%m/%d/%Y'),
+            'start': start.strftime('%H:%M'),
+            'stop': start.replace(hour=16).strftime('%H:%M'),
             'kind': Timer.WORK,
             'morning_break': True,
             'lunch_break': True,
@@ -81,8 +85,9 @@ class ManualTimerFormTest(TestCase):
         end = start + timedelta(days=3, hours=9)
         form = forms.ManualTimerForm(data={
             'worker': self.worker.pk,
-            'started': start.strftime('%m/%d/%Y %H:%M'),
-            'stopped': end.strftime('%m/%d/%Y %H:%M'),
+            'dates': "{} to {}".format(start.strftime('%m/%d/%Y'), end.strftime('%m/%d/%Y')),
+            'start': start.strftime('%H:%M'),
+            'stop': end.strftime('%H:%M'),
             'kind': Timer.WORK,
             'morning_break': True,
             'lunch_break': True
@@ -96,8 +101,9 @@ class ManualTimerFormTest(TestCase):
         end = start + timedelta(days=5, hours=5)
         form = forms.ManualTimerForm(data={
             'worker': self.worker.pk,
-            'started': start.strftime('%m/%d/%Y %H:%M'),
-            'stopped': end.strftime('%m/%d/%Y %H:%M'),
+            'dates': "{} to {}".format(start.strftime('%m/%d/%Y'), end.strftime('%m/%d/%Y')),
+            'start': start.strftime('%H:%M'),
+            'stop': end.strftime('%H:%M'),
             'kind': Timer.VACATION,
             'morning_break': True,
             'lunch_break': True
@@ -112,8 +118,9 @@ class ManualTimerFormTest(TestCase):
         start = datetime(2017, 1, 13, 10, tzinfo=timezone.utc)
         form = forms.ManualTimerForm(data={
             'worker': self.worker.pk,
-            'started': start.strftime('%m/%d/%Y %H:%M'),
-            'stopped': start.replace(hour=7).strftime('%m/%d/%Y %H:%M'),
+            'dates': start.strftime('%m/%d/%Y'),
+            'start': start.strftime('%H:%M'),
+            'stop': start.replace(hour=7).strftime('%H:%M'),
             'kind': Timer.WORK,
         }, company=self.company)
         self.assertFalse(form.is_valid())
@@ -127,8 +134,9 @@ class ManualTimerFormTest(TestCase):
         Timer.start(self.worker, started=start, stopped=start.replace(hour=16))
         form = forms.ManualTimerForm(data={
             'worker': self.worker.pk,
-            'started': start.strftime('%m/%d/%Y %H:%M'),
-            'stopped': start.replace(hour=10).strftime('%m/%d/%Y %H:%M'),
+            'dates': start.strftime('%m/%d/%Y'),
+            'start': start.strftime('%H:%M'),
+            'stop': start.replace(hour=10).strftime('%H:%M'),
             'kind': Timer.WORK
         }, company=self.company)
         self.assertFalse(form.is_valid())
@@ -142,8 +150,9 @@ class ManualTimerFormTest(TestCase):
         Timer.start(self.worker, started=start, stopped=start.replace(hour=16))
         form = forms.ManualTimerForm(data={
             'worker': self.worker.pk,
-            'started': start.replace(hour=17).strftime('%m/%d/%Y %H:%M'),
-            'stopped': start.replace(hour=19).strftime('%m/%d/%Y %H:%M'),
+            'dates': start.strftime('%m/%d/%Y'),
+            'start': start.replace(hour=17).strftime('%H:%M'),
+            'stop': start.replace(hour=19).strftime('%H:%M'),
             'kind': Timer.WORK
         }, company=self.company)
         self.assertTrue(form.is_valid())

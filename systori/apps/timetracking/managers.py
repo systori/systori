@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, time, datetime, timedelta
 from collections import OrderedDict
 
 from django.db.models.query import QuerySet
@@ -101,19 +101,17 @@ class TimerQuerySet(QuerySet):
             .get(worker, {})
         )
 
-    def create_batch(self, worker, started: datetime, stopped: datetime, commit=True,
-                     morning_break=True, lunch_break=True, **kwargs):
+    def create_batch(self, worker, dates: datetime, start: time, stop: time,
+                     commit=True, morning_break=True, lunch_break=True, **kwargs):
 
-        # started and stopped should be in local company timzone
-        tz = worker.company.timezone
-        assert all(dt.tzinfo.zone == tz.zone for dt in (started, stopped))
+        begin, end = dates
 
         # days contains local dates on which timers will be created
         days = []
-        if (stopped - started).days == 0:  # explicit single day, skip weekend & .exists() checks
-            days.append(started.date())
+        if not end or begin == end:  # explicit single day, skip weekend & .exists() checks
+            days.append(begin)
         else:
-            for day in get_dates_in_range(started.date(), stopped.date()):
+            for day in get_dates_in_range(begin, end):
                 if not self.day(day, worker=worker).exists():
                     days.append(day)
 
@@ -123,7 +121,7 @@ class TimerQuerySet(QuerySet):
         if lunch_break:
             breaks.append(worker.contract.lunch_break)
 
-        time_spans = list(get_timespans_split_by_breaks(started.time(), stopped.time(), breaks))
+        time_spans = list(get_timespans_split_by_breaks(start, stop, breaks))
 
         timers = []
         for day in days:

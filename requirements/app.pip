@@ -1,10 +1,12 @@
 -r base.pip
 
-hg+https://eukreign@bitbucket.org/rptlab/reportlab
-hg+https://eukreign@bitbucket.org/rptlab/preppy
+hg+https://bitbucket.org/rptlab/reportlab
+hg+https://bitbucket.org/rptlab/preppy
 git+ssh://git@rlextra.github.com/systori/rlextra.git
 git+ssh://git@django-tuath.bitbucket.org/damoti/django-tuath.git#django-postgres-schema
 git+https://github.com/damoti/pyth.git@pyth-py3
 django-tsvector-field
+django-bootstrap-components
+django-dartium
 
 -e .

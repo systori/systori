@@ -92,11 +92,11 @@
     </div>
 
     <h2 class="sub-header">{% trans "Adjustment Document" %}</h2>
-    {{ form.document_date|bootstrap }}
-    {{ form.title|bootstrap }}
-    {{ form.header|bootstrap }}
-    {{ form.footer|bootstrap }}
-    {{ form.notes|bootstrap }}
+    {% bootstrap form.document_date %}
+    {% bootstrap form.title %}
+    {% bootstrap form.header %}
+    {% bootstrap form.footer %}
+    {% bootstrap form.notes %}
 
     <div class="form-group">
       <button name="save" type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>

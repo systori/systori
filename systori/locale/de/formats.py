@@ -1,0 +1,3 @@
+YEAR_MONTH_INPUT_FORMATS = [
+    '%m.%Y'
+]
