@@ -82,7 +82,7 @@
         <tr>{% amount_view "issue-refund" form "customer_refund" %}</tr>
       </table>
     </div>
-    {{ form|bootstrap }}
+    {% bootstrap form %}
 
     <div class="form-group">
       <button name="save" type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>

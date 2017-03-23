@@ -9,7 +9,7 @@
       {% if not form.fields.code %}
         <p><label for="id_code">Code:</label> {{ form.instance.code }}</p>
       {% endif %}
-      {{ form|bootstrap }}
+      {% bootstrap form %}
       <div class="form-group">
         <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
       </div>

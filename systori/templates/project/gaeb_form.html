@@ -5,7 +5,7 @@
 
 {% block content %}
   <form action="" method="post" enctype="multipart/form-data" data-ajax="false">{% csrf_token %}
-    {{ form|bootstrap }}
+    {% bootstrap form %}
     <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
   </form>
 {% endblock %}

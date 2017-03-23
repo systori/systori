@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n l10n dartium bootstrap customformatting %}
+{% load i18n dartium bootstrap customformatting %}
 
 {% block head %}
 {{ block.super }}
@@ -12,6 +12,7 @@
   }
 </style>
 {{ form.media.css }}
+{{ period_form.media.css }}
 {% endblock head %}
 
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='timetracking' %}{% endblock %}
@@ -25,7 +26,7 @@
   </div>
   <div class="panel-body">
     <form class="form-inline" method="GET">
-    <label for="timetracking-report-period">Period:</label>{{ period_form|bootstrap_inline }}
+    <label for="timetracking-report-period">Period:</label>{% bootstrap period_form layout='inline' %}
       <div class="form-group">
         <div class="col-sm-10">
           <button type="submit" class="btn btn-primary">{% trans "Show" %}</button>
@@ -38,7 +39,7 @@
   <div class="panel-body">
     <form is="timer-form" class="form-inline" method="POST">
     {% csrf_token %}
-    {{ form|bootstrap_inline }}
+    {% bootstrap form layout='inline' %}
       <div class="form-group">
         <div class="col-sm-10">
           <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
@@ -55,7 +56,7 @@
     </tr>
     {% for date, data in report.items %}
      <tr>
-         <td>{{ date|localize }}</td>
+         <td>{{ date }}</td>
          <td>
             <div class="progress">
              {% for timer in data.timers %}
@@ -78,12 +79,8 @@
 
 {% block extra_js %}
   {{ form.media.js }}
-  <script>
-  {% autoescape off %}
-  {{ period_form.fields.period.widget.init_javascript }}
-  {{ form.fields.started.widget.init_javascript }}
-  {{ form.fields.stopped.widget.init_javascript }}
-  {% endautoescape %}
-  </script>
+  {% fieldinit form %}
+  {{ period_form.media.js }}
+  {% fieldinit period_form %}
   {% dart "timetracking.dart" %}
 {% endblock %}

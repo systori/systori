@@ -46,8 +46,9 @@ class UserReportViewTest(ClientTestCase):
     def test_create_manual_timer_invalid_form(self):
         response = self.client.post(reverse('timetracking_worker', args=[self.worker.pk]), {
             'worker': self.worker.pk,
-            'start': '01/18/2017 09:00',
-            'end': '01/18/2017 8:00',
+            'dates': '01/18/2017',
+            'start': '9:00',
+            'stop': '8:00',
             'kind': 'work'
         }, HTTP_REFERER=reverse('timetracking'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -57,8 +58,9 @@ class UserReportViewTest(ClientTestCase):
         self.assertEqual(Timer.objects.count(), 0)
         response = self.client.post(reverse('timetracking_worker', args=[self.worker.pk]), {
             'worker': self.worker.pk,
-            'started': '01/18/2017 08:00',
-            'stopped': '01/18/2017 17:00',
+            'dates': '01/18/2017',
+            'start': '8:00',
+            'stop': '17:00',
             'lunch_break': 't',
             'morning_break': 't',
             'kind': 'work'
@@ -72,8 +74,9 @@ class UserReportViewTest(ClientTestCase):
         self.assertEqual(Timer.objects.count(), 0)
         response = self.client.post(reverse('timetracking_worker', args=[self.worker.pk]), {
             'worker': self.worker.pk,
-            'started': '18.01.2017 08:00',
-            'stopped': '18.01.2017 17:00',
+            'dates': '18.01.2017',
+            'start': '8:00',
+            'stop': '17:00',
             'lunch_break': 't',
             'morning_break': 't',
             'kind': 'work'
