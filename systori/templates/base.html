@@ -10,7 +10,6 @@
 
     <title>{% block title %}systori{% endblock %}</title>
 
-    <link rel="stylesheet" href="{% static "css/jquery-ui.css" %}">
     <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
     <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
     <link href="{% block custom_css %}{% static "css/main.css" %}{% endblock %}" rel="stylesheet">
@@ -109,7 +108,6 @@
 
 {% block base_js %}
 <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
-<script src="{% static "js/jquery-ui.min.js" %}"></script>
 <script src="{% static "js/bootstrap.min.js" %}"></script>
 {% webcomponents 'lite' %}
 <script type="text/javascript">
