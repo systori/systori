@@ -1,0 +1,30 @@
+{% extends "project.html" %}
+{% load i18n bootstrap %}
+
+{% block head %}
+  {{ block.super }}
+  {{ form.media.css }}
+{% endblock head %}
+
+{% block title %}{{ project.name }} > {{ job.name }}{% endblock %}
+
+{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
+{% block head_navbar %}
+  <li><a href="{% url 'project.view' project.pk %}">{{ project.name }}</a></li>
+  <li class="active"><a href="{% url 'job.progress' project.pk job.pk %}">{{ job.name }}</a></li>
+{% endblock %}
+
+{% block content %}
+  <form role="form" method="post">
+    {% csrf_token %}
+    {% bootstrap form %}
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block extra_js %}
+  {{ form.media.js }}
+  {% fieldinit form %}
+{% endblock %}

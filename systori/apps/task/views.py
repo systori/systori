@@ -1,11 +1,9 @@
-from django.http import HttpResponseRedirect
-from django.views.generic import View
-from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, DeleteView
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.db.models import Max
 
 from .models import *
-from .forms import JobCreateForm, JobTemplateCreateForm
+from .forms import *
 
 
 class JobCreate(CreateView):
@@ -31,7 +29,6 @@ class JobEditor(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['job'] = self.object
         context['blank_group'] = Group()
         context['blank_task'] = Task()
         context['blank_lineitem'] = LineItem()
@@ -41,24 +38,18 @@ class JobEditor(DetailView):
         return super().get_queryset().with_hierarchy(self.request.project)
 
 
-class JobTransition(SingleObjectMixin, View):
+class JobProgress(UpdateView):
     model = Job
+    template_name = "task/job_progress.html"
+    form_class = JobProgressForm
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
+    def get_queryset(self):
+        return super().get_queryset() \
+            .prefetch_related('all_tasks') \
+            .prefetch_related('all_lineitems')
 
-        transition = None
-        for t in self.object.get_available_status_transitions():
-            if t.name == kwargs['transition']:
-                transition = t
-                break
-
-        if transition:
-            getattr(self.object, transition.name)()
-            self.object.save()
-
-        return HttpResponseRedirect(self.object.project.get_absolute_url())
-
+    def get_success_url(self):
+        return self.object.project.get_absolute_url()
 
 class JobDelete(DeleteView):
     model = Job

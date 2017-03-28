@@ -267,6 +267,9 @@ class Job(Group):
         kwargs['depth'] = 0
         super().__init__(*args, **kwargs)
 
+    def __str__(self):
+        return self.name
+
     def refresh_pks(self):
         super().refresh_pks()
         self.project = self.project
@@ -295,21 +298,25 @@ class Job(Group):
     def start(self):
         pass
 
-    @property
-    def is_started(self):
-        return self.status == Job.STARTED
-
     @transition(field=status, source=STARTED, target=COMPLETED, custom={'label': _("Complete")})
     def complete(self):
         pass
 
     @property
     def can_propose(self):
-        return self.status in self.STATUS_FOR_PROPOSAL
+        return self.status in Job.STATUS_FOR_PROPOSAL
 
-    def clone_to(self, new_job, *args):
-        for group in self.groups.all():
-            group.clone_to(new_job.root, None)
+    @property
+    def can_complete(self):
+        return self.status != Job.COMPLETED
+
+    @property
+    def can_delete(self):
+        return self.status == Job.DRAFT
+
+    @property
+    def is_started(self):
+        return self.status == Job.STARTED
 
     @property
     def is_billable(self):
@@ -327,8 +334,9 @@ class Job(Group):
         else:
             return reverse('job.editor', args=[self.project.id, self.pk])
 
-    def __str__(self):
-        return self.name
+    def clone_to(self, new_job, *args):
+        for group in self.groups.all():
+            group.clone_to(new_job.root, None)
 
 
 class TaskQuerySet(SearchableModelQuerySet):

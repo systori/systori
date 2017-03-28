@@ -53,7 +53,6 @@
       <tr>
         <th>{% trans "Name" %}</th>
         <th>{% trans "Status" %}</th>
-        <th>{% trans "Billing Method" %}</th>
         <th style="text-align: right;">{% trans "Estimate" %}</th>
         <th style="text-align: right;">{% trans "Progress" %}</th>
         <th></th>
@@ -65,23 +64,19 @@
         <tr>
           <td><a href="{% url 'job.editor' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
           <td>{{ job.get_status_display }}</td>
-          <td>{{ job.get_billing_method_display }}</td>
           <td style="text-align: right; white-space: nowrap;">{{ job.estimate|money }}</td>
           <td style="text-align: right; white-space: nowrap;">{{ job.progress|money }}</td>
           <td><small>{{ job.progress_percent }}%</small></td>
-          <td style="text-align: right;">
-            {% for state in job.get_available_status_transitions %}
-              <a href="{% url 'job.transition' project.id job.id state.name %}">{{ state.custom.label }}</a>
-            {% endfor %}
-            {% if job.status == job.DRAFT %}
-              <a href="{% url 'job.delete' project.id job.id %}">{% trans "Delete" %}</a>
+          <td>
+            <a href="{% url 'job.progress' project.id job.id %}">{% trans 'Progress' %}</a>
+            {% if job.can_delete %}
+              <a href="{% url 'job.delete' project.id job.id %}">{% trans 'Delete' %}</a>
             {% endif %}
           </td>
         </tr>
       {% endfor %}
       {% if jobs.count > 1 %}
         <tr>
-          <td></td>
           <td></td>
           <td></td>
           <td style="text-align: right;"><b>{{ project.estimate|money }}</b></td>

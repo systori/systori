@@ -72,7 +72,6 @@ class MonthPickerForm(forms.Form):
         widget=DateWidget(
             input_formats=MONTH_INPUT,
             options={
-                'autoclose': True,
                 'minViewMode': 'months',
                 'maxViewMode': 'years',
             }
@@ -81,11 +80,5 @@ class MonthPickerForm(forms.Form):
 
 
 class DayPickerForm(forms.Form):
-    period = DateField(
-        widget=DateWidget(
-            options={
-                'autoclose': True,
-            }
-        ),
-    )
+    period = DateField()
 
