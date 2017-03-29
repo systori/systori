@@ -298,7 +298,7 @@ class Job(Group):
     def start(self):
         pass
 
-    @transition(field=status, source=STARTED, target=COMPLETED, custom={'label': _("Complete")})
+    @transition(field=status, source="*", target=COMPLETED, custom={'label': _("Complete")})
     def complete(self):
         pass
 

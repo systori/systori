@@ -1,18 +1,14 @@
-[![Build Status](https://magnum.travis-ci.com/systori/systori.svg?token=euxuNjuxx7RiAnuoQpWu&branch=dev)](https://magnum.travis-ci.com/systori/systori)
-[![Coverage Status](https://coveralls.io/repos/systori/systori/badge.svg?branch=dev&service=github&t=VAhuEl)](https://coveralls.io/github/systori/systori?branch=dev)  
+## Systori
 
-
-## About Systori
-
-Systori is a suite of tools for craftsmen to create project estimates, to manage those projects and generate invoices.
+Systori is a suite of tools for craftsmen to create project estimates, to manage those projects, and to generate invoices.
 
 Server side is written in [Python](https://www.python.org/) using the [Django framework](https://www.djangoproject.com/) with [PostgreSQL](http://www.postgresql.org/) as the backing database.
 
-Desktop client side is written using Django templates and [Dart](https://www.dartlang.org/).
+Client side is written using Django templates and [Dart](https://www.dartlang.org/).
 
 ## How do I get set up?
 
-### Workstation
+### Minimum
 
 This guide assumes you are on the most recent **Ubuntu LTS** linux system and that you already have git and SSH keys setup with github.com.
 
@@ -21,13 +17,12 @@ You will need PostgreSQL, Python3 and some other tools installed with apt-get:
 ```
 $ sudo apt-get install\
  postgresql postgresql-contrib postgresql-server-dev-all\
- python-pip python-dev python3-dev python3-lxml mercurial libjpeg-dev
+ python-pip python-dev python3-dev python3-lxml mercurial libjpeg-dev\
+ language-pack-de
 $ sudo apt-get build-dep python3-lxml
 $ sudo pip install --upgrade fabric virtualenvwrapper
 $ source /usr/local/bin/virtualenvwrapper.sh
 $ echo "source /usr/local/bin/virtualenvwrapper.sh" > ~/.bashrc
-
-$ sudo apt-get install language-pack-de
 ```
 
 Create a database user; when the databse user name matches your linux user name this allows `psql` and other tools to automatically authenticate you:
@@ -43,14 +38,9 @@ $ git clone git@github.com:systori/systori.git
 $ cd systori/
 $ mkvirtualenv -a `pwd` -p /usr/bin/python3 systori
 ```
-Set ssh to point to github with every subdomain
-```
-vi /etc/ssh/ssh_config
--> add the following:
-Host *github.com
- HostName github.com
-```
+
 Install requirements and init settings
+
 ```
 $ pip install -r requirements/dev.pip
 $ fab initsettings
@@ -59,19 +49,19 @@ $ fab initsettings
 Now run some tests to make sure everything is working:
 
 ```
-$ ./manage.py test
+$ ./manage.py test systori.apps
 ```
+
 To run dart tests go into dart directory and call:
+
 ```
 $ pub run test
-# or with specific tests
-$ pub run test test/spreadsheet/
 ```
+
 Finally setup a database for local development and start the app:
 
 ```
-$ createdb systori_local
-$ fab localdb_from_productiondb
+$ fab getdb
 ```
 
 When you are done working on systori, you can deactivate the virtual environment:
@@ -86,21 +76,6 @@ And the next time you want to activate it run (this will automatically place you
 $ workon systori
 ```
 
-
-## Development Environment
-
-For development of systori you can use either PyCharm or PyDev.
-
-
-### Install Oracle Java 7
-
-```
-$ sudo add-apt-repository ppa:webupd8team/java
-$ sudo apt-get update
-$ sudo apt-get install oracle-java7-installer
-```
-
-
 ### PyCharm
 
 1. Get PyCharm: https://www.jetbrains.com/pycharm/download/
@@ -109,7 +84,7 @@ $ sudo apt-get install oracle-java7-installer
 
 3. Install Dart plugin.
 
-#### Database Access
+### Database Access
 
 If you want to use the Database tool in PyCharm to access the local database it's easiest if you disable password authentication in postgresql.
 
@@ -121,31 +96,39 @@ Then restart postgres, `/etc/init.d/postgresql restart`.
 
 You should now be able to connect and browse the `systori_local` database.
 
-### Code guidelines ###
+## Best Practices
 
-Indentation [spaces]:
+### Testing
 
-Language : Tab size : Indent : Continuation indent
+#### Forms (systori/apps/*/test_forms.py)
 
-* Pyhton : 4 : 4 : 8
+- **DO** test any custom form and field validations
+- **DO** test dynamic/non-trivial default form values
+- **CONSIDER** testing `form.save()` side effects in the view tests.
 
-* Dart : 4 : 4 : 8
+#### Views (systori/apps/*/test_views.py)
 
-* HTML : 2 : 2 : 4
+- General:
 
-* CSS : 2 : 2 : 4
+    - **DO** use `ClientTestCase`
+    - **DO** test all the featured use cases (*happy path testing*)
+    - **DO** test at least one common failure case
 
-### Contribution guidelines ###
+- Form backed views:
 
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-* Writing tests
-* Code review
-* Other guidelines
+    - **DO** test initial blank form rendering with `.get()`
+    - **DO** test at least one error path re-displaying the form
+    - **DO** test successful form submission and redirect
+    - **AVOID** repeating extensive form validation tests already covered in `test_forms.py`
 
-### Who do I talk to? ###
+### Indentation
 
-* Repo owner or admin
-* Other community or team contact
+| Language | Tab size | Indent | Continuation
+|----------|---------:|-------:|------------:
+| Python   |        4 |      4 | 8
+| Dart     |        4 |      4 | 8
+| HTML     |        2 |      2 | 4
+| CSS      |        2 |      2 | 4
 
 ### Systori color palette ###
 
