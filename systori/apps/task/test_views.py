@@ -5,7 +5,7 @@ from systori.lib.testing import ClientTestCase
 from ..project.factories import ProjectFactory
 
 from .factories import JobFactory, TaskFactory, LineItemFactory
-from .models import Job
+from .models import Job, ProgressReport
 
 
 class JobViewsTest(ClientTestCase):
@@ -35,22 +35,6 @@ class JobViewsTest(ClientTestCase):
         self.assertIn(b'new job description', response.content)
         self.assertEqual(response.context['job'], job)
 
-    def test_transition(self):
-        job = JobFactory(
-            name='job name',
-            description='new job description',
-            project=ProjectFactory()
-        )  # type: Job
-
-        self.assertEqual(job.status, Job.DRAFT)
-        for action, phase in [('propose', Job.PROPOSED), ('approve', Job.APPROVED)]:
-            response = self.client.get(
-                reverse('job.transition', args=[job.project.pk, job.pk, action])
-            )
-            self.assertEqual(response.status_code, 302)
-            job.refresh_from_db()
-            self.assertEqual(job.status, phase)
-
     def test_delete(self):
         job = JobFactory(project=ProjectFactory())
         self.assertEqual(Job.objects.count(), 1)
@@ -59,3 +43,54 @@ class JobViewsTest(ClientTestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Job.objects.count(), 0)
+
+
+class JobProgressTest(ClientTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.job = JobFactory(
+            name='job name',
+            description='new job description',
+            project=ProjectFactory()
+        )  # type: Job
+
+    def test_get_form(self):
+        response = self.client.get(
+            reverse('job.progress', args=[self.job.project.pk, self.job.pk]),
+        )
+        form = response.context['form']
+        self.assertEqual(form.initial, {'progress_worker': self.worker.id})
+
+    def test_status_complete_happy_path(self):
+        self.assertEqual(self.job.status, Job.DRAFT)
+        response = self.client.post(
+            reverse('job.progress', args=[self.job.project.pk, self.job.pk]),
+            {'status_complete': 'true'}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.job.refresh_from_db()
+        self.assertEqual(self.job.status, Job.COMPLETED)
+
+    def test_progress_onehundred_happy_path(self):
+        task = TaskFactory(group=self.job, qty=10, price=5, total=50)
+
+        self.assertEqual(self.job.progress_percent, 0)
+        self.assertEqual(ProgressReport.objects.count(), 0)
+
+        response = self.client.post(
+            reverse('job.progress', args=[self.job.project.pk, self.job.pk]), {
+                'progress_onehundred': 'true',
+                'progress_date': '01/01/2001',
+                'progress_worker': self.worker.id,
+                'comment': 'the comment'
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        job = Job.objects.get()
+        self.assertEqual(job.status, Job.DRAFT)
+        self.assertEqual(job.progress_percent, 100)
+        progress = ProgressReport.objects.get()
+        self.assertEqual(progress.task, task)
+        self.assertEqual(progress.complete, 10)
+        self.assertEqual(progress.worker, self.worker)
