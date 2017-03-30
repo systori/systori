@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^api/', include('systori.apps.task.api')),
     url(r'^api/', include('systori.apps.document.api')),
     url(r'^api/', include('systori.apps.timetracking.api')),
+    url(r'^api/', include('systori.apps.project.api')),
 
     url(r'^i18n/', include('django.conf.urls.i18n')),
 

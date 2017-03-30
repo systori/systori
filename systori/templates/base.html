@@ -93,11 +93,11 @@
           </li>
 
         </ul>
-        <form class="navbar-form navbar-right">
+        <div class="navbar-form navbar-right">
             <div class="form-group form-group-sm">
-              <input type="text" id="goto_project" onkeyup="gotoProject(event)" style="width:60px; margin-top:3px;" class="form-control" placeholder="#">
+              <sys-goto-project type="text" style="width:60px; margin-top:3px;" class="form-control" placeholder="#" contenteditable/>
             </div>
-        </form>
+        </div>
         </div><!--/.nav-collapse -->
       </div>
     </nav>
@@ -109,14 +109,8 @@
 {% block base_js %}
 <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
 <script src="{% static "js/bootstrap.min.js" %}"></script>
-{% webcomponents 'lite' %}
-<script type="text/javascript">
-    function gotoProject(e) {
-        if(e.keyCode == 13) {
-            window.location.href = window.location.origin+"/project-" + document.querySelector("#goto_project").value;
-        }
-    }
-</script>
+    {% webcomponents 'lite' %}
+    {% dart "goto_project.dart" %}
 {% endblock base_js %}
 
 {% block lang_js %}<script src="{% static "js/language_picker.js" %}"></script>{% endblock lang_js %}
