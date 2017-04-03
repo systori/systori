@@ -7,7 +7,7 @@ class SystoriGotoProjectInput extends TextInput with KeyboardHandler {
 
     static final tag = 'sys-goto-project';
     static final project_url = window.location.origin+"/project-";
-    bool exists;
+    bool exists = false;
     int project_id;
 
     SystoriGotoProjectInput.created() : super.created() {
