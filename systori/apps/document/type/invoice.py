@@ -82,7 +82,7 @@ def collate_payments(invoice, font, available_width, show_payment_details):
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def collate_itemized_listing(invoice, font, available_width, include_lineitems):
+def collate_itemized_listing(invoice, font, available_width):
 
     # Itemized Listing Table
     items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
@@ -126,16 +126,16 @@ def collate_itemized_listing(invoice, font, available_width, include_lineitems):
         items.row(p(task['code'], font), p(task['name'], font))
         items.row_style('SPAN', 1, -2)
 
-        if include_lineitems:
+        if task['qty'] is not None:
+            items.row('', '', ubrdecimal(task['complete']), p(task['unit'], font), money(task['price']), money(task['progress']))
+            items.row_style('ALIGNMENT', 1, -1, "RIGHT")
+            items.keep_previous_n_rows_together(2)
+        else:
             items.row('', p(task['description'], font))
             items.row_style('SPAN', 1, -1)
             for li in task['lineitems']:
                 items.row('', p(li['name'], font), ubrdecimal(li['qty']), p(li['unit'], font), money(li['price']), money(li['estimate']))
                 items.row_style('ALIGNMENT', 2, -1, "RIGHT")
-        else:
-            items.row('', '', ubrdecimal(task['complete']), p(task['unit'], font), money(task['price']), money(task['progress']))
-            items.row_style('ALIGNMENT', 1, -1, "RIGHT")
-            items.keep_previous_n_rows_together(2)
 
     def traverse(parent, depth):
         items.row(b(parent['code'], font), b(parent['name'], font))
@@ -195,7 +195,7 @@ def collate_itemized_listing(invoice, font, available_width, include_lineitems):
     ]
 
 
-def render(invoice, letterhead, show_payment_details, show_lineitem_details, format):
+def render(invoice, letterhead, show_payment_details, format):
 
     with BytesIO() as buffer:
 
@@ -240,7 +240,7 @@ def render(invoice, letterhead, show_payment_details, show_lineitem_details, for
 
             Spacer(0, 4*mm),
 
-        ] + collate_itemized_listing(invoice, font, available_width, show_lineitem_details)
+        ] + collate_itemized_listing(invoice, font, available_width)
 
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)

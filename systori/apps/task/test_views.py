@@ -5,7 +5,7 @@ from systori.lib.testing import ClientTestCase
 from ..project.factories import ProjectFactory
 
 from .factories import JobFactory, TaskFactory, LineItemFactory
-from .models import Job, ProgressReport
+from .models import Job, ProgressReport, ExpendReport
 
 
 class JobViewsTest(ClientTestCase):
@@ -72,7 +72,7 @@ class JobProgressTest(ClientTestCase):
         self.job.refresh_from_db()
         self.assertEqual(self.job.status, Job.COMPLETED)
 
-    def test_progress_onehundred_happy_path(self):
+    def test_progress_onehundred_fixed_price_happy_path(self):
         task = TaskFactory(group=self.job, qty=10, price=5, total=50)
 
         self.assertEqual(self.job.progress_percent, 0)
@@ -94,3 +94,27 @@ class JobProgressTest(ClientTestCase):
         self.assertEqual(progress.task, task)
         self.assertEqual(progress.complete, 10)
         self.assertEqual(progress.worker, self.worker)
+
+    def test_progress_onehundred_time_and_materials_happy_path(self):
+        task = TaskFactory(group=self.job, qty=None, price=5, total=50)
+        lineitem = LineItemFactory(task=task, qty=10, price=5, total=50)
+
+        self.assertEqual(self.job.progress_percent, 0)
+        self.assertEqual(ProgressReport.objects.count(), 0)
+
+        response = self.client.post(
+            reverse('job.progress', args=[self.job.project.pk, self.job.pk]), {
+                'progress_onehundred': 'true',
+                'progress_date': '01/01/2001',
+                'progress_worker': self.worker.id,
+                'comment': 'the comment'
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        job = Job.objects.get()
+        self.assertEqual(job.status, Job.DRAFT)
+        self.assertEqual(job.progress_percent, 100)
+        expend = ExpendReport.objects.get()
+        self.assertEqual(expend.lineitem, lineitem)
+        self.assertEqual(expend.expended, 10)
+        self.assertEqual(expend.worker, self.worker)

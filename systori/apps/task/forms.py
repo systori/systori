@@ -5,7 +5,7 @@ from bootstrap import DateWidget
 
 from ..accounting.models import create_account_for_job
 from ..company.models import Company, Worker
-from .models import Job, ProgressReport
+from .models import Job, ProgressReport, ExpendReport
 
 
 class JobTemplateCreateForm(forms.ModelForm):
@@ -99,13 +99,29 @@ class JobProgressForm(forms.ModelForm):
             job.complete()
         if self.cleaned_data['progress_onehundred']:
             for task in job.all_tasks.all():
-                if task.complete < task.qty and task.include_estimate:
-                    task.complete = task.qty
-                    task.save()
-                    ProgressReport.objects.create(
-                        worker=self.cleaned_data['progress_worker'],
-                        task=task,
-                        complete=task.complete,
-                        comment=self.cleaned_data['comment']
-                    )
+
+                if not task.include_estimate:
+                    continue
+
+                if task.is_time_and_materials:
+                    for li in task.lineitems.all():
+                        if li.qty is not None and li.expended < li.qty:
+                            li.expended = li.qty
+                            li.save()
+                            ExpendReport.objects.create(
+                                worker=self.cleaned_data['progress_worker'],
+                                lineitem=li,
+                                expended=li.expended,
+                                comment=self.cleaned_data['comment']
+                            )
+                else:
+                    if task.complete < task.qty:
+                        task.complete = task.qty
+                        task.save()
+                        ProgressReport.objects.create(
+                            worker=self.cleaned_data['progress_worker'],
+                            task=task,
+                            complete=task.complete,
+                            comment=self.cleaned_data['comment']
+                        )
         return super().save(commit)

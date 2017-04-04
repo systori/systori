@@ -157,6 +157,10 @@ if TESTING:
             return None
     MIGRATION_MODULES = DisableMigrations()
 
+    PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
+
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 

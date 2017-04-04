@@ -52,9 +52,9 @@ class DocumentTestCase(ClientTestCase):
         self.job = JobFactory(name='Job One', project=self.project)
         self.job.account = create_account_for_job(self.job)
         self.job.save()
-        self.group = GroupFactory(parent=self.job)
-        self.task = TaskFactory(qty=10, complete=5, price=96, group=self.group)
-        self.lineitem = LineItemFactory(task=self.task)
+        self.group = GroupFactory(name='Main Group', parent=self.job)
+        self.task = TaskFactory(name='Task #1 Fixed Price', qty=10, complete=5, price=96, group=self.group)
+        self.lineitem = LineItemFactory(name='a lineitem', task=self.task)
 
         self.job2 = JobFactory(name='Job Two', project=self.project)
         self.job2.account = create_account_for_job(self.job2)
@@ -74,339 +74,6 @@ class DocumentTestCase(ClientTestCase):
     def form_data(self, data):
         data.update(self.make_management_form())
         return data
-
-
-class InvoiceViewTests(DocumentTestCase):
-    model = Invoice
-    form = InvoiceForm
-    form_set = InvoiceFormSet
-
-    def test_happy_path_create_update_and_render(self):
-
-        response = self.client.get(reverse('invoice.create', args=[self.project.id]))
-        self.assertEqual(200, response.status_code)
-
-        data = {
-            'title': 'Invoice #1',
-            'header': 'The Header',
-            'footer': 'The Footer',
-            'invoice_no': '2015/01/01',
-            'document_date': '2015-01-01',
-
-            'job-0-is_invoiced': 'True',
-            'job-0-job_id': self.job.id,
-            'job-0-debit_net': '1',
-            'job-0-debit_tax': '1',
-
-            'job-1-is_invoiced': 'True',
-            'job-1-job_id': self.job2.id,
-            'job-1-debit_net': '1',
-            'job-1-debit_tax': '1',
-        }
-        data.update(self.make_management_form())
-        response = self.client.post(reverse('invoice.create', args=[self.project.id]), data)
-        self.assertEqual(302, response.status_code)
-
-        response = self.client.get(reverse('invoice.pdf', args=[
-            self.project.id,
-            'print',
-            Invoice.objects.first().id
-        ]))
-        self.assertEqual(200, response.status_code)
-
-        data = {
-            'title': 'Invoice #1',
-            'header': 'new header',
-            'footer': 'new footer',
-            'invoice_no': '2015/01/01',
-            'document_date': '2015-07-28',
-
-            'job-0-is_invoiced': 'True',
-            'job-0-job_id': self.job.id,
-            'job-0-debit_net': '5',
-            'job-0-debit_tax': '5',
-
-            'job-1-is_invoiced': 'True',
-            'job-1-job_id': self.job2.id,
-            'job-1-debit_net': '5',
-            'job-1-debit_tax': '5',
-        }
-        data.update(self.make_management_form())
-        invoice = Invoice.objects.order_by('id').first()
-        response = self.client.post(reverse('invoice.update', args=[self.project.id, invoice.id]), data)
-        self.assertEqual(302, response.status_code)
-        self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
-
-        invoice.refresh_from_db()
-        self.assertEqual(invoice.document_date, date(2015, 7, 28))
-        self.assertEqual(invoice.json['header'], 'new header')
-        self.assertEqual(invoice.json['footer'], 'new footer')
-
-    def test_render_simple_invoice(self):
-        data = {
-            'title': 'Invoice #1',
-            'header': 'The Header',
-            'footer': 'The Footer',
-            'invoice_no': '2015/01/01',
-            'document_date': '2015-01-01',
-
-            'job-0-is_invoiced': 'True',
-            'job-0-job_id': self.job.id,
-            'job-0-debit_net': '1',
-            'job-0-debit_tax': '1',
-
-            'job-1-is_invoiced': 'True',
-            'job-1-job_id': self.job2.id,
-            'job-1-debit_net': '1',
-            'job-1-debit_tax': '1',
-        }
-        data.update(self.make_management_form())
-        response = self.client.post(reverse('invoice.create', args=[self.project.id]), data)
-        self.assertEqual(302, response.status_code)
-
-        response = self.client.get(reverse('invoice.pdf', args=[
-            self.project.id, 'print', Invoice.objects.first().id
-        ]))
-        self.assertEqual(200, response.status_code)
-
-        pdf = PdfFileReader(BytesIO(response.content))
-        extractedText = pdf.getPage(0).extractText()
-        self.assertEqual(extractedText, dedent(
-        """\
-        Professor Ludwig von Mises
-
-
-        Invoice #1
-        Jan. 1, 2015
-        Invoice No. 2015/01/01
-        Please indicate the correct invoice number on your payment.
-        The Header
-
-        consideration
-        19% tax
-        gross
-        Project progress
-        $2.00
-        $2.00
-        $4.00
-        This Invoice
-        $2.00
-        $2.00
-        $4.00
-        The Footer
-        Page 1 of 2
-        """))
-
-
-class PaymentViewTests(DocumentTestCase):
-    model = Payment
-    form = PaymentForm
-    form_set = PaymentFormSet
-
-    def test_happy_path_create_update_and_render(self):
-
-        response = self.client.get(reverse('payment.create', args=[self.project.id]))
-        self.assertEqual(200, response.status_code)
-
-        data = {
-            'bank_account': Account.objects.banks().first().id,
-            'payment': '4',
-            'discount': '0.00',
-            'document_date': '2015-01-01',
-
-            'job-0-job_id': self.job.id,
-            'job-0-split_net': '1',
-            'job-0-split_tax': '1',
-            'job-0-discount_net': '0',
-            'job-0-discount_tax': '0',
-
-            'job-1-job_id': self.job2.id,
-            'job-1-split_net': '1',
-            'job-1-split_tax': '1',
-            'job-1-discount_net': '0',
-            'job-1-discount_tax': '0',
-        }
-        data.update(self.make_management_form())
-        response = self.client.post(reverse('payment.create', args=[self.project.id]), data)
-        self.assertEqual(302, response.status_code)
-
-        response = self.client.get(reverse('payment.pdf', args=[
-            self.project.id,
-            'print',
-            Payment.objects.first().id
-        ]))
-        self.assertEqual(200, response.status_code)
-
-        payment = Payment.objects.order_by('id').first()
-        self.assertEqual(payment.document_date, date(2015, 1, 1))
-        self.assertEqual(payment.json['payment'], Decimal('4.0'))
-
-        data = {
-            'bank_account': Account.objects.banks().first().id,
-            'payment': '6',
-            'discount': '0.00',
-            'document_date': '2015-07-28',
-
-            'job-0-job_id': self.job.id,
-            'job-0-split_net': '2',
-            'job-0-split_tax': '1',
-            'job-0-discount_net': '0',
-            'job-0-discount_tax': '0',
-
-            'job-1-job_id': self.job2.id,
-            'job-1-split_net': '2',
-            'job-1-split_tax': '1',
-            'job-1-discount_net': '0',
-            'job-1-discount_tax': '0',
-        }
-        data.update(self.make_management_form())
-        response = self.client.post(reverse('payment.update', args=[self.project.id, payment.id]), data)
-        self.assertEqual(302, response.status_code)
-        self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
-
-        payment.refresh_from_db()
-        self.assertEqual(payment.document_date, date(2015, 7, 28))
-        self.assertEqual(payment.json['payment'], Decimal('6.0'))
-
-
-class AdjustmentViewTests(DocumentTestCase):
-    model = Adjustment
-    form = AdjustmentForm
-    form_set = AdjustmentFormSet
-
-    def test_happy_path_create_update_and_render(self):
-
-        response = self.client.get(reverse('adjustment.create', args=[self.project.id]))
-        self.assertEqual(200, response.status_code)
-
-        data = {
-            'title': 'Adjustment #1',
-            'header': 'The Header',
-            'footer': 'The Footer',
-            'document_date': '2015-01-01',
-
-            'job-0-job_id': self.job.id,
-            'job-0-adjustment_net': '1',
-            'job-0-adjustment_tax': '1',
-
-            'job-1-job_id': self.job2.id,
-            'job-1-adjustment_net': '1',
-            'job-1-adjustment_tax': '1',
-        }
-        data.update(self.make_management_form())
-        response = self.client.post(reverse('adjustment.create', args=[self.project.id]), data)
-        self.assertEqual(302, response.status_code)
-
-        response = self.client.get(reverse('adjustment.pdf', args=[
-            self.project.id,
-            'print',
-            Adjustment.objects.first().id
-        ]))
-        self.assertEqual(200, response.status_code)
-
-        data = {
-            'title': 'Adjustment #1',
-            'header': 'new header',
-            'footer': 'new footer',
-            'document_date': '2015-07-28',
-
-            'job-0-job_id': self.job.id,
-            'job-0-adjustment_net': '5',
-            'job-0-adjustment_tax': '5',
-
-            'job-1-job_id': self.job2.id,
-            'job-1-adjustment_net': '5',
-            'job-1-adjustment_tax': '5',
-        }
-        data.update(self.make_management_form())
-        adjustment = Adjustment.objects.order_by('id').first()
-        response = self.client.post(reverse('adjustment.update', args=[self.project.id, adjustment.id]), data)
-        self.assertEqual(302, response.status_code)
-        self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
-
-        adjustment.refresh_from_db()
-        self.assertEqual(adjustment.document_date, date(2015, 7, 28))
-        self.assertEqual(adjustment.json['header'], 'new header')
-        self.assertEqual(adjustment.json['footer'], 'new footer')
-
-
-class RefundViewTests(DocumentTestCase):
-    model = Refund
-    form = RefundForm
-    form_set = RefundFormSet
-
-    def test_happy_path_create_update_and_render(self):
-
-        response = self.client.get(reverse('refund.create', args=[self.project.id]))
-        self.assertEqual(200, response.status_code)
-
-        data = {
-            'title': 'Refund #1',
-            'header': 'new header',
-            'footer': 'new footer',
-            'document_date': '2015-01-01',
-
-            'job-0-job_id': self.job.id,
-            'job-0-refund_net': '1',
-            'job-0-refund_tax': '1',
-            'job-0-credit_net': '0',
-            'job-0-credit_tax': '0',
-
-            'job-1-job_id': self.job2.id,
-            'job-1-refund_net': '0',
-            'job-1-refund_tax': '0',
-            'job-1-credit_net': '1',
-            'job-1-credit_tax': '1',
-        }
-        data.update(self.make_management_form())
-        response = self.client.post(reverse('refund.create', args=[self.project.id]), data)
-        self.assertEqual(302, response.status_code)
-
-        response = self.client.get(reverse('refund.pdf', args=[
-            self.project.id,
-            'print',
-            Refund.objects.first().id
-        ]))
-        self.assertEqual(200, response.status_code)
-
-        refund = Refund.objects.order_by('id').first()
-        self.assertEqual(refund.document_date, date(2015, 1, 1))
-        self.assertEqual(refund.json['refund_total'], Amount(Decimal('1.0'), Decimal('1.0')))
-        self.assertEqual(refund.json['credit_total'], Amount(Decimal('1.0'), Decimal('1.0')))
-
-        data = {
-            'title': 'Refund #1',
-            'header': 'updated header',
-            'footer': 'updated footer',
-            'document_date': '2015-07-28',
-
-            'job-0-job_id': self.job.id,
-            'job-0-refund_net': '2',
-            'job-0-refund_tax': '2',
-            'job-0-credit_net': '0',
-            'job-0-credit_tax': '0',
-
-            'job-1-job_id': self.job2.id,
-            'job-1-refund_net': '0',
-            'job-1-refund_tax': '0',
-            'job-1-credit_net': '2',
-            'job-1-credit_tax': '2',
-        }
-        data.update(self.make_management_form())
-        response = self.client.post(reverse('refund.update', args=[self.project.id, refund.id]), data)
-        self.assertEqual(302, response.status_code)
-        self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
-
-        refund.refresh_from_db()
-        self.assertEqual(refund.document_date, date(2015, 7, 28))
-        self.assertEqual(refund.json['refund_total'], Amount(Decimal('2.0'), Decimal('2.0')))
-        self.assertEqual(refund.json['credit_total'], Amount(Decimal('2.0'), Decimal('2.0')))
-
-
-class AccountingViewTests(DocumentTestCase):
-    def test_accounts_list(self):
-        response = self.client.get(reverse('accounts'))
-        self.assertEqual(200, response.status_code)
 
 
 class ProposalViewTests(DocumentTestCase):
@@ -652,16 +319,481 @@ class ProposalViewTests(DocumentTestCase):
         response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
         self.assertEqual(302, response.status_code)
 
-        # render
+    def get_rendered_pdf(self):
+        data = self.form_data({
+            'title': 'Proposal',
+            'document_date': '2017-03-06',
+            'header': 'hello',
+            'footer': 'bye',
+            'add_terms': False,
+            'job-0-job_id': self.job.id,
+            'job-0-is_attached': 'True',
+            'job-1-job_id': self.job2.id,
+            'job-1-is_attached': 'True',
+        })
+        self.client.post(reverse('proposal.create', args=[self.project.id]), data)
+        response = self.client.get(reverse('proposal.pdf', args=[
+            self.project.id, 'print', Proposal.objects.first().id,
+        ]))
+        return PdfFileReader(BytesIO(response.content))
 
-        response = self.client.get(reverse('proposal.pdf', kwargs={
-            'project_pk':self.project.id,
-            'pk': Proposal.objects.first().id,
-            'format':'print',})+'?only_task_names=1')
-        extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
-        for text in [self.job.name, self.group.name, self.task.name]:
-            self.assertTrue(text in extractedText)
-        self.assertFalse(self.task.description in extractedText)
+    def test_render_time_and_materials_proposal(self):
+        tm_task = TaskFactory(name='Task #2 Time & Materials', qty=None, price=200, total=200, group=self.group)
+        LineItemFactory(name='TM Lineitem', qty=20, price=10, total=200, task=tm_task)
+        pdf = self.get_rendered_pdf()
+        self.assertEqual(
+            pdf.getPage(0).extractText(),
+            dedent("""\
+            Professor Ludwig von Mises
+
+
+            Proposal
+            March 6, 2017
+            hello
+            Pos.
+            Description
+            Amount
+            Price
+            Total
+            01
+            Job One
+            01.01
+            Main Group
+            01.01.001
+            Task #1 Fixed Price
+
+
+
+            10.00
+            $96.00
+            $0.00
+            01.01.002
+            Task #2 Time & Materials
+
+
+            TM Lineitem
+            20.00
+            $10.00
+            $200.00
+
+            Total 01.01 - Main Group
+            $200.00
+
+
+
+
+
+
+            02
+            Job Two
+
+
+            Total 01.01 - Main Group
+            $200.00
+            Total without VAT
+            $200.00
+            19,00% VAT
+            $38.00
+            Total including VAT
+            $238.00
+            bye
+            Page 1 of 1
+            """)
+        )
+
+
+class InvoiceViewTests(DocumentTestCase):
+    model = Invoice
+    form = InvoiceForm
+    form_set = InvoiceFormSet
+
+    def test_happy_path_create_update_and_render(self):
+
+        response = self.client.get(reverse('invoice.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'title': 'Invoice #1',
+            'header': 'The Header',
+            'footer': 'The Footer',
+            'invoice_no': '2015/01/01',
+            'document_date': '2015-01-01',
+
+            'job-0-is_invoiced': 'True',
+            'job-0-job_id': self.job.id,
+            'job-0-debit_net': '1',
+            'job-0-debit_tax': '1',
+
+            'job-1-is_invoiced': 'True',
+            'job-1-job_id': self.job2.id,
+            'job-1-debit_net': '1',
+            'job-1-debit_tax': '1',
+        }
+        data.update(self.make_management_form())
+        response = self.client.post(reverse('invoice.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        response = self.client.get(reverse('invoice.pdf', args=[
+            self.project.id,
+            'print',
+            Invoice.objects.first().id
+        ]))
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'title': 'Invoice #1',
+            'header': 'new header',
+            'footer': 'new footer',
+            'invoice_no': '2015/01/01',
+            'document_date': '2015-07-28',
+
+            'job-0-is_invoiced': 'True',
+            'job-0-job_id': self.job.id,
+            'job-0-debit_net': '5',
+            'job-0-debit_tax': '5',
+
+            'job-1-is_invoiced': 'True',
+            'job-1-job_id': self.job2.id,
+            'job-1-debit_net': '5',
+            'job-1-debit_tax': '5',
+        }
+        data.update(self.make_management_form())
+        invoice = Invoice.objects.order_by('id').first()
+        response = self.client.post(reverse('invoice.update', args=[self.project.id, invoice.id]), data)
+        self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
+
+        invoice.refresh_from_db()
+        self.assertEqual(invoice.document_date, date(2015, 7, 28))
+        self.assertEqual(invoice.json['header'], 'new header')
+        self.assertEqual(invoice.json['footer'], 'new footer')
+
+    def get_rendered_pdf(self, jobs):
+        data = {
+            'title': 'Invoice #1',
+            'header': 'The Header',
+            'footer': 'The Footer',
+            'invoice_no': '2015/01/01',
+            'document_date': '2015-01-01',
+            'job-0-is_invoiced': 'False',
+            'job-0-job_id': self.job.id,
+            'job-1-is_invoiced': 'False',
+            'job-1-job_id': self.job2.id,
+        }
+        data.update(jobs)
+        data.update(self.make_management_form())
+        self.client.post(reverse('invoice.create', args=[self.project.id]), data)
+        response = self.client.get(reverse('invoice.pdf', args=[
+            self.project.id, 'print', Invoice.objects.first().id
+        ]))
+        return PdfFileReader(BytesIO(response.content))
+
+    def test_render_simple_invoice(self):
+        pdf = self.get_rendered_pdf({
+            'job-0-is_invoiced': 'True',
+            'job-0-debit_net': '1',
+            'job-0-debit_tax': '1',
+            'job-1-is_invoiced': 'True',
+            'job-1-debit_net': '1',
+            'job-1-debit_tax': '1',
+        })
+        self.assertEqual(
+            pdf.getPage(0).extractText(),
+            dedent("""\
+            Professor Ludwig von Mises
+
+
+            Invoice #1
+            Jan. 1, 2015
+            Invoice No. 2015/01/01
+            Please indicate the correct invoice number on your payment.
+            The Header
+
+            consideration
+            19% tax
+            gross
+            Project progress
+            $2.00
+            $2.00
+            $4.00
+            This Invoice
+            $2.00
+            $2.00
+            $4.00
+            The Footer
+            Page 1 of 2
+            """)
+        )
+
+    def test_render_time_and_materials_invoice(self):
+        self.task.complete = 10
+        self.task.save()
+        tm_task = TaskFactory(name='Task #2 Time & Materials', qty=None, price=200, total=200, group=self.group)
+        LineItemFactory(name='TM Lineitem', qty=20, price=10, total=200, expended=20, task=tm_task)
+        pdf = self.get_rendered_pdf({
+            'job-0-is_invoiced': 'True',
+            'job-0-debit_net': '1160.00',
+            'job-0-debit_tax': '220.40',
+        })
+        self.assertEqual(
+            pdf.getPage(1).extractText(),
+            dedent("""\
+            Jan. 1, 2015
+            Itemized listing for Invoice No. 2015/01/01
+            Pos.
+            Description
+            Amount
+
+            Price
+            Total
+            01
+            Job One
+            01.01
+            Main Group
+            01.01.001
+            Task #1 Fixed Price
+
+
+
+            10.00
+            $96.00
+            $960.00
+            01.01.002
+            Task #2 Time & Materials
+
+
+
+            TM Lineitem
+            20.00
+            $10.00
+            $200.00
+
+            Total 01.01 - Main Group
+            $1,160.00
+
+
+
+
+
+
+            Total 01.01 - Main Group
+            $1,160.00
+            Total without VAT
+            $1,160.00
+            Page 2 of 2
+            """)
+        )
+
+
+class PaymentViewTests(DocumentTestCase):
+    model = Payment
+    form = PaymentForm
+    form_set = PaymentFormSet
+
+    def test_happy_path_create_update_and_render(self):
+
+        response = self.client.get(reverse('payment.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'bank_account': Account.objects.banks().first().id,
+            'payment': '4',
+            'discount': '0.00',
+            'document_date': '2015-01-01',
+
+            'job-0-job_id': self.job.id,
+            'job-0-split_net': '1',
+            'job-0-split_tax': '1',
+            'job-0-discount_net': '0',
+            'job-0-discount_tax': '0',
+
+            'job-1-job_id': self.job2.id,
+            'job-1-split_net': '1',
+            'job-1-split_tax': '1',
+            'job-1-discount_net': '0',
+            'job-1-discount_tax': '0',
+        }
+        data.update(self.make_management_form())
+        response = self.client.post(reverse('payment.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        response = self.client.get(reverse('payment.pdf', args=[
+            self.project.id,
+            'print',
+            Payment.objects.first().id
+        ]))
+        self.assertEqual(200, response.status_code)
+
+        payment = Payment.objects.order_by('id').first()
+        self.assertEqual(payment.document_date, date(2015, 1, 1))
+        self.assertEqual(payment.json['payment'], Decimal('4.0'))
+
+        data = {
+            'bank_account': Account.objects.banks().first().id,
+            'payment': '6',
+            'discount': '0.00',
+            'document_date': '2015-07-28',
+
+            'job-0-job_id': self.job.id,
+            'job-0-split_net': '2',
+            'job-0-split_tax': '1',
+            'job-0-discount_net': '0',
+            'job-0-discount_tax': '0',
+
+            'job-1-job_id': self.job2.id,
+            'job-1-split_net': '2',
+            'job-1-split_tax': '1',
+            'job-1-discount_net': '0',
+            'job-1-discount_tax': '0',
+        }
+        data.update(self.make_management_form())
+        response = self.client.post(reverse('payment.update', args=[self.project.id, payment.id]), data)
+        self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
+
+        payment.refresh_from_db()
+        self.assertEqual(payment.document_date, date(2015, 7, 28))
+        self.assertEqual(payment.json['payment'], Decimal('6.0'))
+
+
+class AdjustmentViewTests(DocumentTestCase):
+    model = Adjustment
+    form = AdjustmentForm
+    form_set = AdjustmentFormSet
+
+    def test_happy_path_create_update_and_render(self):
+
+        response = self.client.get(reverse('adjustment.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'title': 'Adjustment #1',
+            'header': 'The Header',
+            'footer': 'The Footer',
+            'document_date': '2015-01-01',
+
+            'job-0-job_id': self.job.id,
+            'job-0-adjustment_net': '1',
+            'job-0-adjustment_tax': '1',
+
+            'job-1-job_id': self.job2.id,
+            'job-1-adjustment_net': '1',
+            'job-1-adjustment_tax': '1',
+        }
+        data.update(self.make_management_form())
+        response = self.client.post(reverse('adjustment.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        response = self.client.get(reverse('adjustment.pdf', args=[
+            self.project.id,
+            'print',
+            Adjustment.objects.first().id
+        ]))
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'title': 'Adjustment #1',
+            'header': 'new header',
+            'footer': 'new footer',
+            'document_date': '2015-07-28',
+
+            'job-0-job_id': self.job.id,
+            'job-0-adjustment_net': '5',
+            'job-0-adjustment_tax': '5',
+
+            'job-1-job_id': self.job2.id,
+            'job-1-adjustment_net': '5',
+            'job-1-adjustment_tax': '5',
+        }
+        data.update(self.make_management_form())
+        adjustment = Adjustment.objects.order_by('id').first()
+        response = self.client.post(reverse('adjustment.update', args=[self.project.id, adjustment.id]), data)
+        self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
+
+        adjustment.refresh_from_db()
+        self.assertEqual(adjustment.document_date, date(2015, 7, 28))
+        self.assertEqual(adjustment.json['header'], 'new header')
+        self.assertEqual(adjustment.json['footer'], 'new footer')
+
+
+class RefundViewTests(DocumentTestCase):
+    model = Refund
+    form = RefundForm
+    form_set = RefundFormSet
+
+    def test_happy_path_create_update_and_render(self):
+
+        response = self.client.get(reverse('refund.create', args=[self.project.id]))
+        self.assertEqual(200, response.status_code)
+
+        data = {
+            'title': 'Refund #1',
+            'header': 'new header',
+            'footer': 'new footer',
+            'document_date': '2015-01-01',
+
+            'job-0-job_id': self.job.id,
+            'job-0-refund_net': '1',
+            'job-0-refund_tax': '1',
+            'job-0-credit_net': '0',
+            'job-0-credit_tax': '0',
+
+            'job-1-job_id': self.job2.id,
+            'job-1-refund_net': '0',
+            'job-1-refund_tax': '0',
+            'job-1-credit_net': '1',
+            'job-1-credit_tax': '1',
+        }
+        data.update(self.make_management_form())
+        response = self.client.post(reverse('refund.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        response = self.client.get(reverse('refund.pdf', args=[
+            self.project.id,
+            'print',
+            Refund.objects.first().id
+        ]))
+        self.assertEqual(200, response.status_code)
+
+        refund = Refund.objects.order_by('id').first()
+        self.assertEqual(refund.document_date, date(2015, 1, 1))
+        self.assertEqual(refund.json['refund_total'], Amount(Decimal('1.0'), Decimal('1.0')))
+        self.assertEqual(refund.json['credit_total'], Amount(Decimal('1.0'), Decimal('1.0')))
+
+        data = {
+            'title': 'Refund #1',
+            'header': 'updated header',
+            'footer': 'updated footer',
+            'document_date': '2015-07-28',
+
+            'job-0-job_id': self.job.id,
+            'job-0-refund_net': '2',
+            'job-0-refund_tax': '2',
+            'job-0-credit_net': '0',
+            'job-0-credit_tax': '0',
+
+            'job-1-job_id': self.job2.id,
+            'job-1-refund_net': '0',
+            'job-1-refund_tax': '0',
+            'job-1-credit_net': '2',
+            'job-1-credit_tax': '2',
+        }
+        data.update(self.make_management_form())
+        response = self.client.post(reverse('refund.update', args=[self.project.id, refund.id]), data)
+        self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, reverse('project.view', args=[self.project.id]))
+
+        refund.refresh_from_db()
+        self.assertEqual(refund.document_date, date(2015, 7, 28))
+        self.assertEqual(refund.json['refund_total'], Amount(Decimal('2.0'), Decimal('2.0')))
+        self.assertEqual(refund.json['credit_total'], Amount(Decimal('2.0'), Decimal('2.0')))
+
+
+class AccountingViewTests(DocumentTestCase):
+    def test_accounts_list(self):
+        response = self.client.get(reverse('accounts'))
+        self.assertEqual(200, response.status_code)
 
 
 class EvidenceViewTests(DocumentTestCase):
