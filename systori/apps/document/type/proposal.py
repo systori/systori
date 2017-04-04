@@ -42,7 +42,7 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
     totals.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
     totals.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
     totals.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
-    totals.row('','')
+    totals.row('', '')
     if DEBUG_DOCUMENT:
         items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
         totals.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
@@ -72,9 +72,15 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
                 items.row_style('SPAN', 1, -1)
                 items.row_style('TOPPADDING', 0, -1, 1)
 
-        items.row('', '', ubrdecimal(task['qty']), p(task['unit'], font), money(task['price']), task_total_column)
-        items.row_style('ALIGNMENT', 1, -1, "RIGHT")
-        items.row_style('BOTTOMPADDING', 0, -1, 10)
+        if task['qty'] is not None:
+            items.row('', '', ubrdecimal(task['qty']), p(task['unit'], font), money(task['price']), task_total_column)
+            items.row_style('ALIGNMENT', 1, -1, "RIGHT")
+            items.row_style('BOTTOMPADDING', 0, -1, 10)
+        else:
+            for li in task['lineitems']:
+                items.row('', p(li['name'], font), ubrdecimal(li['qty']), p(li['unit'], font), money(li['price']), money(li['estimate']))
+                items.row_style('ALIGNMENT', 1, -1, "RIGHT")
+                items.row_style('BOTTOMPADDING', 0, -1, 10)
 
     def traverse(parent, depth, only_groups, only_task_names):
         items.row(b(parent['code'], font), b(parent['name'], font))
@@ -173,6 +179,7 @@ def collate_lineitems(proposal, available_width, font):
             t.row(p(lineitem['name'], font),
                   ubrdecimal(lineitem['qty']),
                   p(lineitem['unit'], font),
+                  money(lineitem['price']),
                   money(lineitem['estimate'])
                   )
             task_price += lineitem['estimate']
@@ -183,7 +190,6 @@ def collate_lineitems(proposal, available_width, font):
         t.row_style('FONTNAME', 0, -1, font.bold)
 
         pages.append(t.get_table(ContinuationTable))
-
 
     def traverse(parent, depth):
         for group in parent.get('groups', []):
@@ -201,6 +207,7 @@ def collate_lineitems(proposal, available_width, font):
             add_task(task)
 
     return pages
+
 
 def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, format):
 

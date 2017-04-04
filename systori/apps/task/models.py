@@ -450,11 +450,26 @@ class Task(OrderedModel):
 
     @property
     def progress(self):
-        return round(self.price * self.complete, 2)
+        if self.is_time_and_materials:
+            progress = Decimal('0.00')
+            for li in self.lineitems.all():
+                progress += li.progress
+            return progress
+        else:
+            return round(self.price * self.complete, 2)
 
     @property
     def complete_percent(self):
-        return nice_percent(self.complete, self.qty)
+        if self.is_time_and_materials:
+            expended = Decimal('0.00')
+            qty = Decimal('0.00')
+            for li in self.lineitems.all():
+                if li.qty is not None:
+                    qty += li.qty
+                    expended += li.expended
+            return nice_percent(expended, qty)
+        else:
+            return nice_percent(self.complete, self.qty)
 
     @property
     def code(self):
@@ -564,6 +579,10 @@ class LineItem(OrderedModel):
         if 'task' in kwargs and 'job' not in kwargs:
             kwargs['job'] = kwargs['task'].job
         super().__init__(*args, **kwargs)
+
+    @property
+    def progress(self):
+        return round(self.price * self.expended, 2)
 
     @property
     def is_material(self):

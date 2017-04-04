@@ -87,7 +87,7 @@ class JobProgressFormTest(TestCase):
         }, form.errors)
 
     def test_status_complete_doesnt_require_progress_fields(self):
-        form = JobProgressForm(data={'status_complete': 'true',})
+        form = JobProgressForm(data={'status_complete': 'true'})
         self.assertTrue(form.is_valid(), form.errors)
 
     def test_progress_onehundred_requires_other_fields(self):
