@@ -6,10 +6,10 @@ dependencies:
   intl: any
   web_components: any
   parsers: any
-  quiver:
-    git:
-      url: git://github.com/google/quiver-dart.git
-      ref: master
+  quiver: any
+    #git:
+    #  url: git://github.com/google/quiver-dart.git
+    #  ref: master
     #path: ../../../quiver-dart
 dev_dependencies:
   test:

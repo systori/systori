@@ -1,6 +1,11 @@
 {% extends "project.html" %}
 {% load i18n bootstrap static dartium customformatting amount %}
 
+{% block head %}
+{{ block.super }}
+{{ form.media.css }}
+{% endblock %}
+
 {% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
 {% block content %}
@@ -113,6 +118,8 @@
 {% endblock %}
 
 {% block extra_js %}
+  {{ form.media.js }}
+  {% fieldinit form %}
   <script type="text/javascript">
     $('[name="doc_template"]').on('change', function () {
       var templateid = this.value;

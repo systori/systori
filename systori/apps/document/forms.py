@@ -7,6 +7,7 @@ from django.forms.formsets import formset_factory
 from django.conf import settings
 from django.db import models, transaction
 from django.utils.translation import get_language, ugettext_lazy as _
+from bootstrap import DateWidget
 
 from systori.lib.accounting.tools import Amount
 from systori.lib.fields import DecimalMinuteHoursField
@@ -221,9 +222,22 @@ class InvoiceForm(DocumentForm):
     header = forms.CharField(widget=forms.Textarea)
     footer = forms.CharField(widget=forms.Textarea)
 
+    vesting_start = forms.DateField(
+        label=_("Vesting Start"), required=False, widget=DateWidget,
+        help_text=_("Vesting period start date of the work completed in this invoice.")
+    )
+    vesting_end = forms.DateField(
+        label=_("Vesting Period End"), required=False, widget=DateWidget,
+        help_text=_("Vesting period end date of the work completed in this invoice.")
+    )
+
     class Meta(DocumentForm.Meta):
         model = Invoice
-        fields = ['doc_template', 'document_date', 'invoice_no', 'is_final', 'title', 'header', 'footer', 'add_terms', 'notes']
+        fields = [
+            'doc_template', 'document_date', 'vesting_start', 'vesting_end',
+            'invoice_no', 'is_final',
+            'title', 'header', 'footer', 'add_terms', 'notes'
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=InvoiceFormSet, **kwargs)

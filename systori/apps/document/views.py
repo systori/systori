@@ -88,7 +88,7 @@ class InvoiceCreate(InvoiceViewMixin, CreateView):
             previous = Invoice.objects.get(id=self.kwargs['previous_pk'])
             self.object.parent = previous.parent if previous.parent else previous
             # copy basic values from previous invoice
-            for field in ['title', 'header', 'footer', 'add_terms']:
+            for field in ['title', 'header', 'footer', 'add_terms', 'vesting_start', 'vesting_end']:
                 kwargs['initial'][field] = previous.json[field]
             # copy the list of jobs
             self.object.json['jobs'] = [{
