@@ -109,7 +109,7 @@ class ProjectCreate(CreateView):
             kwargs = {'initial': {'name': _('Main Site')}}
             if self.request.method == 'POST':
                 kwargs['data'] = self.request.POST
-            return JobSiteForm(**kwargs)
+            return JobSiteForm(prefix='jobsite', **kwargs)
 
     def get_context_data(self, **kwargs):
         if 'jobsite_form' not in kwargs:

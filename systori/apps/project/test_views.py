@@ -51,9 +51,10 @@ class TestProjectViews(ClientTestCase):
         self.data = {
             'name': 'new test project',
             'structure': '0.0',
-            'address': 'One Street',
-            'city': 'Town',
-            'postal_code': '12345',
+            'jobsite-name': 'Main',
+            'jobsite-address': 'One Street',
+            'jobsite-city': 'Town',
+            'jobsite-postal_code': '12345',
         }
 
     def test_create_project_initial(self):
@@ -74,10 +75,14 @@ class TestProjectViews(ClientTestCase):
         response = self.client.post(reverse('project.create'), self.data)
         self.assertEqual(302, response.status_code)
         self.assertRedirects(response, reverse('projects'))
-        self.assertTrue(Project.objects.filter(name='new test project').exists())
+        self.assertEqual(2, Project.objects.count())
         self.assertEqual(1, Job.objects.count())
         self.assertEqual(1, JobSite.objects.count())
-        self.assertEqual(self.data['address'], JobSite.objects.get().address)
+        project = Project.objects.without_template().get()
+        jobsite = JobSite.objects.get()
+        self.assertEqual(self.data['name'], project.name)
+        self.assertEqual(self.data['jobsite-name'], jobsite.name)
+        self.assertEqual(self.data['jobsite-address'], jobsite.address)
 
     def test_create_project_success_without_jobsite(self):
         self.company.is_jobsite_required = False
