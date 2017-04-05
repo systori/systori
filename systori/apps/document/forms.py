@@ -397,7 +397,7 @@ class AdjustmentForm(DocumentForm):
     header = forms.CharField(widget=forms.Textarea, initial='', required=False)
     footer = forms.CharField(widget=forms.Textarea, initial='', required=False)
 
-    class Meta:
+    class Meta(DocumentForm.Meta):
         model = Adjustment
         fields = ['document_date', 'title', 'header', 'footer', 'notes']
 

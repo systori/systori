@@ -1,5 +1,10 @@
 {% extends "project.html" %}
-{% load i18n bootstrap static dartium amount customformatting %}
+{% load i18n l10n bootstrap static dartium amount customformatting %}
+
+{% block head %}
+    {{ block.super }}
+    {{ form.media.css }}
+{% endblock %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='proposals' %}{% endblock %}
 
@@ -26,7 +31,7 @@
       <h2 class="sub-header">{% trans "Jobs" %}</h2>
       <div class="form-group {% if form.formset.non_form_errors %}has-error{% endif %} table-responsive">
       {{ form.formset.management_form }}
-      <table is="proposal-table" class="table table-striped" data-tax-rate="{{ TAX_RATE|ubrdecimal:2 }}">
+      <table is="proposal-table" class="table table-striped" data-tax-rate="{{ TAX_RATE|unlocalize }}">
         <thead>
         <tr>
           <th class="job-is-attached"></th>
@@ -67,6 +72,8 @@
 {% endblock %}
 
 {% block extra_js %}
+  {{ form.media.js }}
+  {% fieldinit form %}
   <script type="text/javascript">
     $('[name="doc_template"]').on('change', function () {
       var templateid = this.value;

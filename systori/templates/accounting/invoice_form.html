@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n bootstrap static dartium customformatting amount %}
+{% load i18n l10n bootstrap static dartium customformatting amount %}
 
 {% block head %}
   {{ block.super }}
@@ -64,7 +64,7 @@
 
       </style>
       <h2 class="sub-header">{% trans "Debits" %}</h2>
-      <table is="invoice-table" class="table" data-tax-rate="{{ TAX_RATE|ubrdecimal:2 }}">
+      <table is="invoice-table" class="table" data-tax-rate="{{ TAX_RATE|unlocalize }}">
         <thead>
         <tr>
           <th class="job-is-invoiced"></th>
