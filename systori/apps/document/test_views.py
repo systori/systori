@@ -873,6 +873,11 @@ class TimesheetViewTests(ClientTestCase):
         )
         return self.client.get(reverse('timesheets.generate', args=[2017, 1]))
 
+    def test_list(self):
+        self.create_january_timesheet()
+        response = self.client.get(reverse('timesheets'))
+        self.assertEqual(response.status_code, 200)
+
     def test_generate_timesheet(self):
         self.assertEqual(Timesheet.objects.count(), 0)
         response = self.create_january_timesheet()

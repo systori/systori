@@ -231,7 +231,7 @@ class TimesheetsList(TemplateView):
                     date(year, month, 1),
                     can_generate=(
                         (month == today.month or month == today.month-1) and
-                        Timer.objects.filter_month(year, month).exists()
+                        Timer.objects.month(year, month).exists()
                     ),
                     count=Timesheet.objects.period(year, month).count(),
                     timesheets=Timesheet.objects.period(year, month).all()
