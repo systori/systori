@@ -1,6 +1,11 @@
 {% extends "project.html" %}
 {% load i18n static dartium bootstrap customformatting ubrutils amount %}
 
+{% block head %}
+  {{ block.super }}
+  {{ form.media.css }}
+{% endblock %}
+
 {% block sidebar %}{% include "project/sidebar.html" with section='invoices' %}{% endblock %}
 
 {% block content %}
@@ -91,5 +96,7 @@
 {% endblock %}
 
 {% block extra_js %}
+  {{ form.media.js }}
+  {% fieldinit form %}
   {% dart "refund_editor.dart" %}
 {% endblock extra_js %}

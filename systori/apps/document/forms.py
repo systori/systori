@@ -39,7 +39,7 @@ class DocumentForm(forms.ModelForm):
 
     class Meta:
         widgets = {
-            'document_date': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'document_date': DateWidget,
         }
 
     def __init__(self, *args, formset_class, instance, jobs, **kwargs):
@@ -494,7 +494,6 @@ AdjustmentFormSet = formset_factory(AdjustmentRowForm, formset=BaseDocumentFormS
 
 
 class PaymentForm(DocumentForm):
-    document_date = forms.DateField(label=_("Received Date"), initial=date.today, localize=True)
     bank_account = forms.ModelChoiceField(label=_("Bank Account"), queryset=Account.objects.banks())
     payment = forms.DecimalField(localize=True, label=_("Payment"), max_digits=14, decimal_places=4)
     discount = forms.TypedChoiceField(
@@ -514,6 +513,9 @@ class PaymentForm(DocumentForm):
     class Meta(DocumentForm.Meta):
         model = Payment
         fields = ['document_date', 'bank_account', 'payment', 'discount']
+        labels = {
+            'document_date': _("Received Date")
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, formset_class=PaymentFormSet, **kwargs)
