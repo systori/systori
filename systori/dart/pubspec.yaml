@@ -30,4 +30,5 @@ transformers:
         - web/proposal_editor.dart
         - web/refund_editor.dart
         - web/timetracking.dart
+        - web/goto_project.dart
       commandLineOptions: [--show-package-warnings]
