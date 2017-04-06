@@ -54,7 +54,7 @@
             <td style="text-align:right;">{{ invoice.json.invoiced.gross|money }}</td>
             <td style="text-align:right;">{{ invoice.json.paid.negate.gross|money }}</td>
             <td>{{ invoice.document_date }}</td>
-            <td><a href="{% url "invoice.pdf" invoice.project.id "email" invoice.id %}">{{ invoice.invoice_no }}</a></td>
+            <td><a target="_blank" href="{% url "invoice.pdf" invoice.project.id "email" invoice.id %}">{{ invoice.invoice_no }}</a></td>
             <td>{{ invoice.get_status_display }}</td>
             <td style="text-align:right;"><b>{{ invoice.json.debit.gross|money }}</b></td>
             <td>{% if invoice.parent %}<span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{ invoice.parent.invoice_no }}{% else %}---{% endif %}</td>

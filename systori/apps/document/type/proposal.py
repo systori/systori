@@ -12,7 +12,7 @@ from django.utils.translation import ugettext as _
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 
 from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable
-from .style import chunk_text, force_break, p, b
+from .style import chunk_text, force_break, p, b, br
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import get_available_width_height_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer, simpleSplit
@@ -81,6 +81,9 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
                 items.row('', p(li['name'], font), ubrdecimal(li['qty']), p(li['unit'], font), money(li['price']), money(li['estimate']))
                 items.row_style('ALIGNMENT', 1, -1, "RIGHT")
                 items.row_style('BOTTOMPADDING', 0, -1, 10)
+            items.row('', '', '', '', '', task_total_column)
+            items.row_style('ALIGNMENT', 1, -1, "RIGHT")
+            items.row_style('BOTTOMPADDING', 0, -1, 10)
 
     def traverse(parent, depth, only_groups, only_task_names):
         items.row(b(parent['code'], font), b(parent['name'], font))
@@ -229,7 +232,12 @@ def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, f
 
             heading_and_date(proposal['title'], proposal_date, font,
                              available_width, debug=DEBUG_DOCUMENT),
+        ]
 
+        if proposal['show_project_id']:
+            flowables += [Paragraph(_("Project") + " #" + str(proposal['project_id']), font.normal), ]
+
+        flowables += [
             Spacer(0, 4*mm),
 
             Paragraph(force_break(proposal['header']), font.normal),

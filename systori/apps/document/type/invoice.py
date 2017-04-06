@@ -196,12 +196,16 @@ def collate_itemized_listing(invoice, font, available_width):
 
 
 def render(invoice, letterhead, show_payment_details, format):
-
     with BytesIO() as buffer:
 
         font = FontManager(letterhead.font)
         available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
         invoice_date = date_format(date(*map(int, invoice['document_date'].split('-'))), use_l10n=True)
+        vesting_start = date_format(date(*map(int, invoice['vesting_start'].split('-'))), use_l10n=True)\
+            if invoice['vesting_start'] else None
+        vesting_end = date_format(date(*map(int, invoice['vesting_end'].split('-'))), use_l10n=True)\
+            if invoice['vesting_end'] else None
+
         doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         flowables = [
@@ -212,13 +216,23 @@ def render(invoice, letterhead, show_payment_details, format):
 
             heading_and_date(invoice.get('title') or _("Invoice"), invoice_date, font, available_width,
                              debug=DEBUG_DOCUMENT),
-
-            Spacer(0, 6*mm),
-
             Paragraph(_("Invoice No.") + " " + invoice['invoice_no'], font.normal_right),
             Paragraph(_("Please indicate the correct invoice number on your payment."),
                       ParagraphStyle('', parent=fonts['OpenSans']['Small'], alignment=TA_RIGHT)),
+            ]
 
+        if invoice['show_project_id']:
+            flowables += [Paragraph(_("Project") + " #" + str(invoice['project_id']), font.normal), ]
+        if vesting_start and not vesting_end:
+            flowables += [Paragraph(_("Vesting Date") + " " + vesting_start, font.normal),]
+        if vesting_end and not vesting_start:
+            flowables += [Paragraph(_("Vesting Date") + " " + vesting_end, font.normal),]
+        if vesting_start and vesting_end:
+            flowables += [Paragraph(_("Vesting Period") + " " +
+                                    vesting_start + " " + _("to") + " " +
+                                    vesting_end, font.normal),]
+        flowables += [
+            Spacer(0, 6 * mm),
             Paragraph(force_break(invoice['header']), fonts['OpenSans']['Normal']),
 
             Spacer(0, 4*mm),
@@ -248,6 +262,7 @@ def render(invoice, letterhead, show_payment_details, format):
             doc.build(flowables, NumberedLetterheadCanvas.factory(letterhead), letterhead)
 
         return buffer.getvalue()
+
 
 
 def serialize(invoice):
