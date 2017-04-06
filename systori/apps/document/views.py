@@ -41,7 +41,8 @@ class BaseDocumentViewMixin:
         kwargs['initial'] = {}
         for field in self.form_class._meta.fields:
             if field in self.object.json:
-                kwargs['initial'][field] = self.object.json[field]
+                form_field = self.form_class.base_fields[field]
+                kwargs['initial'][field] = form_field.clean(self.object.json[field])
 
         if self.request.method == 'POST':
             kwargs['data'] = self.request.POST.copy()
