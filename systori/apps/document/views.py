@@ -10,6 +10,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import get_language
 from django.utils.translation import ugettext_lazy as _
+from django.forms.fields import DateField
 
 from systori.lib.accounting.tools import Amount
 from ..project.models import Project
@@ -42,7 +43,10 @@ class BaseDocumentViewMixin:
         for field in self.form_class._meta.fields:
             if field in self.object.json:
                 form_field = self.form_class.base_fields[field]
-                kwargs['initial'][field] = form_field.clean(self.object.json[field])
+                if isinstance(form_field, DateField):
+                    kwargs['initial'][field] = form_field.clean(self.object.json[field])
+                else:
+                    kwargs['initial'][field] = self.object.json[field]
 
         if self.request.method == 'POST':
             kwargs['data'] = self.request.POST.copy()
