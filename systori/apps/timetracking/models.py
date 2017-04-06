@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 from ..project.models import JobSite
 from .managers import TimerQuerySet
-from .utils import calculate_duration_minutes, calculate_duration_seconds
+from .utils import calculate_duration_minutes, calculate_duration_seconds, to_current_timezone
 from systori.lib.fields import apply_all_kwargs
 
 
@@ -129,7 +129,10 @@ class Timer(models.Model):
                 if overlapping_timer.stopped:
                     message = _(
                         'Overlapping timer ({:%d.%m.%Y %H:%M} — {:%d.%m.%Y %H:%M}) already exists'
-                    ).format(overlapping_timer.started, overlapping_timer.stopped)
+                    ).format(
+                        to_current_timezone(overlapping_timer.started),
+                        to_current_timezone(overlapping_timer.stopped)
+                    )
                 else:
                     message = _(
                         'A potentially overlapping timer (started on {:%d.%m.%Y %H:%M}) is already running'
