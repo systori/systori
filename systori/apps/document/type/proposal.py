@@ -81,9 +81,6 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
                 items.row('', p(li['name'], font), ubrdecimal(li['qty']), p(li['unit'], font), money(li['price']), money(li['estimate']))
                 items.row_style('ALIGNMENT', 1, -1, "RIGHT")
                 items.row_style('BOTTOMPADDING', 0, -1, 10)
-            items.row('', '', '', '', '', task_total_column)
-            items.row_style('ALIGNMENT', 1, -1, "RIGHT")
-            items.row_style('BOTTOMPADDING', 0, -1, 10)
 
     def traverse(parent, depth, only_groups, only_task_names):
         items.row(b(parent['code'], font), b(parent['name'], font))

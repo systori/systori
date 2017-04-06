@@ -319,6 +319,38 @@ class ProposalViewTests(DocumentTestCase):
         response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
         self.assertEqual(302, response.status_code)
 
+    def test_serialize_n_render_with_project_id(self):
+        self.project = ProjectFactory(structure="0.0.0")
+        self.job = JobFactory(project=self.project)
+        self.group = GroupFactory(parent=self.job, depth=1)
+        self.task = TaskFactory(qty=10, complete=0, price=100, group=self.group)
+        self.contact = ContactFactory(project=self.project, is_billable=True)
+
+        data = self.form_data({
+            'title': 'Proposal with only groups',
+            'document_date': '2017-03-06',
+            'header': 'hello',
+            'footer': 'bye',
+            'add_terms': False,
+            'job-0-job_id': self.job.id,
+            'job-0-is_attached': 'True',
+            'show_project_id': 'True'
+        })
+
+        response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        # render
+
+        response = self.client.get(reverse('proposal.pdf', kwargs={
+            'project_pk':self.project.id,
+            'pk': Proposal.objects.first().id,
+            'format':'print',})+'?only_groups=1')
+        extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
+        for text in ['Proposal with only groups', 'Project #3', 'hello', 'bye', self.job.name]:
+            self.assertTrue(text in extractedText)
+        self.assertFalse(self.task.name in extractedText)
+
     def get_rendered_pdf(self):
         data = self.form_data({
             'title': 'Proposal',
@@ -584,6 +616,84 @@ class InvoiceViewTests(DocumentTestCase):
             """)
         )
 
+    def test_render_vesting_period_invoice(self):
+        pdf = self.get_rendered_pdf({
+            'vesting_start': '2017-04-01',
+            'vesting_end': '2017-04-02',
+            'job-0-is_invoiced': 'True',
+            'job-0-debit_net': '1',
+            'job-0-debit_tax': '1',
+            'job-1-is_invoiced': 'True',
+            'job-1-debit_net': '1',
+            'job-1-debit_tax': '1',
+        })
+        self.assertEqual(
+            pdf.getPage(0).extractText(),
+            dedent("""\
+            Professor Ludwig von Mises
+
+
+            Invoice #1
+            Jan. 1, 2015
+            Invoice No. 2015/01/01
+            Please indicate the correct invoice number on your payment.
+            Vesting Period April 1, 2017 to April 2, 2017
+            The Header
+
+            consideration
+            19% tax
+            gross
+            Project progress
+            $2.00
+            $2.00
+            $4.00
+            This Invoice
+            $2.00
+            $2.00
+            $4.00
+            The Footer
+            Page 1 of 2
+            """)
+        )
+
+    def test_render_show_project_id_invoice(self):
+        pdf = self.get_rendered_pdf({
+            'show_project_id': 'True',
+            'job-0-is_invoiced': 'True',
+            'job-0-debit_net': '1',
+            'job-0-debit_tax': '1',
+            'job-1-is_invoiced': 'True',
+            'job-1-debit_net': '1',
+            'job-1-debit_tax': '1',
+        })
+        self.assertEqual(
+            pdf.getPage(0).extractText(),
+            dedent("""\
+            Professor Ludwig von Mises
+
+
+            Invoice #1
+            Jan. 1, 2015
+            Invoice No. 2015/01/01
+            Please indicate the correct invoice number on your payment.
+            Project #2
+            The Header
+
+            consideration
+            19% tax
+            gross
+            Project progress
+            $2.00
+            $2.00
+            $4.00
+            This Invoice
+            $2.00
+            $2.00
+            $4.00
+            The Footer
+            Page 1 of 2
+            """)
+        )
 
 class PaymentViewTests(DocumentTestCase):
     model = Payment
