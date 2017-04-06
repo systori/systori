@@ -44,7 +44,7 @@ class TimerTests(TestCase):
         Timer.start(self.worker, stopped=NOW+timedelta(hours=1))
         with self.assertRaisesMessage(
                 ValidationError,
-                "['Overlapping timer (02.12.2014 18:03 — 02.12.2014 19:03) already exists']"):
+                "['Overlapping timer (02.12.2014 19:03 — 02.12.2014 20:03) already exists']"):
             Timer.start(self.worker, NOW+timedelta(minutes=10))
 
     def test_negative_timer_validation(self):
