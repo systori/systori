@@ -141,7 +141,7 @@ class ManualTimerFormTest(TestCase):
         }, company=self.company)
         self.assertFalse(form.is_valid())
         self.assertEqual(
-            ["Overlapping timer (01.09.2016 05:00 — 01.09.2016 14:00) already exists"],
+            ["Overlapping timer (01.09.2016 07:00 — 01.09.2016 16:00) already exists"],
             form.non_field_errors()
         )
 
