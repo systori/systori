@@ -218,6 +218,7 @@ class TimeSheetCollector:
             # accounted for before we can determine overtime.
             total = self.work[day] + payable + self.unpaid_leave[day]
 
+            # Days with no timers at all are skipped.
             if (total + self.paid_leave[day]) == 0:
                 continue
 
@@ -227,7 +228,9 @@ class TimeSheetCollector:
                 else:
                     self.overtime[day] = min(self.work[day], total - Timer.WORK_HOURS)
 
-            self.paid_leave[day] = max(self.paid_leave[day], Timer.WORK_HOURS - total)
+            # paid leave calculated only for weekdays
+            if (day + self.first_weekday) % 7 < 5:  # 5: Sat, 6: Sun
+                self.paid_leave[day] = max(self.paid_leave[day], Timer.WORK_HOURS - total)
             self.payables[day] = self.work[day] + payable + self.paid_leave[day]
             self.compensation[day] = work + payable + self.paid_leave[day]
 
