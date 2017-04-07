@@ -21,6 +21,7 @@ from .models import DocumentTemplate, Letterhead, DocumentSettings
 from .forms import ProposalForm, InvoiceForm, AdjustmentForm, PaymentForm, RefundForm
 from .forms import LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
 from .forms import TimesheetForm
+from .utils import get_weekday_names_numbers_and_mondays
 from . import type as pdf_type
 
 
@@ -263,8 +264,11 @@ class TimesheetUpdate(UpdateView):
             'overtime': _('Overtime'),
             'compensation': _('Compensation'),
         })
+        json = self.object.json
+        context['daynames'], context['daynumbers'], context['mondays'] =\
+            get_weekday_names_numbers_and_mondays(json['first_weekday'], json['total_days'], False)
         context['rows'] = [
-            (t, lookup[t], self.object.json[t], self.object.json[t+'_total']) for t in [
+            (t, lookup[t], json[t], json[t+'_total']) for t in [
                 'work', 'vacation', 'sick', 'public_holiday',
                 'paid_leave', 'unpaid_leave', 'payables',
                 'overtime', 'compensation',

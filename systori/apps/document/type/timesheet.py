@@ -17,11 +17,11 @@ from .style import get_available_width_height_and_pagesize, b
 from .font import FontManager
 
 from systori.lib.templatetags.customformatting import zeroblank, hours, workdays
+from ..utils import get_weekday_names_numbers_and_mondays
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-WEEKDAYS = [_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun')]
 CATEGORIES = [p[0] for p in Timer.KIND_CHOICES if p[0] != Timer.WORK]
 
 
@@ -29,19 +29,7 @@ def create_timesheet_table(json, available_width, font):
 
     start = json['first_weekday']
     days = json['total_days']
-
-    names = []
-    numbers = []
-    mondays = []
-    for day in range(31):
-        if day < days:
-            names.append(WEEKDAYS[(day+start) % 7])
-            if ((day+start) % 7) == 0:
-                mondays.append(day)
-            numbers.append(str(day+1))
-        else:
-            names.append("")
-            numbers.append("")
+    names, numbers, mondays = get_weekday_names_numbers_and_mondays(start, days)
     names.append(_("Total"))
 
     ts = TableStyler(font, base_style=False)
