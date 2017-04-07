@@ -74,7 +74,9 @@ class DocumentForm(forms.ModelForm):
 
     @property
     def json(self):
-        json = {}
+        json = {
+            'project_id' : self.instance.project.id
+        }
 
         # Contact Details
         contact = self.instance.project.billable_contact.contact
@@ -217,6 +219,7 @@ class InvoiceForm(DocumentForm):
 
     add_terms = forms.BooleanField(label=_('Add Terms'), initial=True, required=False)
     is_final = forms.BooleanField(label=_('Is Final Invoice?'), initial=False, required=False)
+    show_project_id = forms.BooleanField(label=_('Show Project ID?'), initial=True, required=False)
 
     title = forms.CharField(label=_('Title'), initial=_("Invoice"))
     header = forms.CharField(widget=forms.Textarea)
@@ -235,7 +238,7 @@ class InvoiceForm(DocumentForm):
         model = Invoice
         fields = [
             'doc_template', 'document_date', 'vesting_start', 'vesting_end',
-            'invoice_no', 'is_final',
+            'invoice_no', 'is_final', 'show_project_id',
             'title', 'header', 'footer', 'add_terms', 'notes'
         ]
 
@@ -755,6 +758,7 @@ class ProposalForm(DocumentForm):
             document_type=DocumentTemplate.PROPOSAL), required=False)
 
     add_terms = forms.BooleanField(label=_('Add Terms'), initial=True, required=False)
+    show_project_id = forms.BooleanField(label=_('Show Project ID?'), initial=True, required=False)
 
     title = forms.CharField(label=_('Title'), initial=_("Proposal"))
     header = forms.CharField(widget=forms.Textarea)
@@ -762,7 +766,7 @@ class ProposalForm(DocumentForm):
 
     class Meta(DocumentForm.Meta):
         model = Proposal
-        fields = ['doc_template', 'document_date', 'title', 'header', 'footer', 'add_terms', 'notes']
+        fields = ['doc_template', 'document_date', 'title', 'show_project_id', 'header', 'footer', 'add_terms', 'notes']
 
     def __init__(self, *args, jobs, **kwargs):
         super().__init__(*args, formset_class=ProposalFormSet, jobs=jobs, **kwargs)

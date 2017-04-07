@@ -105,6 +105,7 @@ def heading_and_date(heading, date, font, available_width, debug=False):
     t.row(Paragraph(heading, font.h2), Paragraph(date, font.normal_right))
     t.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
     t.style.append(('RIGHTPADDING', (0, 0), (-1, -1), 0))
+    t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
 
     return t.get_table(Table)
 
