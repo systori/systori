@@ -228,11 +228,15 @@ class TimeSheetCollector:
                 else:
                     self.overtime[day] = min(self.work[day], total - Timer.WORK_HOURS)
 
-            # paid leave calculated only for weekdays
-            if (day + self.first_weekday) % 7 < 5:  # 5: Sat, 6: Sun
+            if (day + self.first_weekday) % 7 in (5, 6):  # 5: Sat, 6: Sun
+                # weekends go directly to overtime
+                self.payables[day] = self.work[day] + payable + self.paid_leave[day]
+                self.overtime[day] = self.payables[day]
+                self.compensation[day] = 0
+            else:
                 self.paid_leave[day] = max(self.paid_leave[day], Timer.WORK_HOURS - total)
-            self.payables[day] = self.work[day] + payable + self.paid_leave[day]
-            self.compensation[day] = work + payable + self.paid_leave[day]
+                self.payables[day] = self.work[day] + payable + self.paid_leave[day]
+                self.compensation[day] = work + payable + self.paid_leave[day]
 
         self.calculated = True
 
