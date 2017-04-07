@@ -1,11 +1,13 @@
-{% load i18n staticfiles field_app timetracking %}
+{% load i18n l10n staticfiles field_app timetracking %}
 
 {% with jobsite=dailyplan.jobsite %}
 {% load_user_statuses %}
 <daily-plan class="panel {% if is_selected_past %}panel-warning
                          {% elif is_selected_today %}panel-primary
                          {% elif is_selected_future %}panel-info
-                         {% else %}panel-primary{% endif %}" data-id="{{ dailyplan.id }}" data-paste-url="{% url 'field.dailyplan.paste' jobsite.id dailyplan.url_id %}">
+                         {% else %}panel-primary{% endif %}"
+            data-id="{{ dailyplan.id|unlocalize }}"
+            data-paste-url="{% url 'field.dailyplan.paste' jobsite.id dailyplan.url_id %}">
 
   <div class="panel-heading dailyplan-heading">
     <a name="plan-{{  dailyplan.id }}"></a>
@@ -36,7 +38,7 @@
     {% if member.worker.has_laborer %}
     <field-worker
         class="list-group-item"
-        data-id="{{ member.id }}">{% show_user_status member.worker.user %}{{ member.worker.get_full_name }}</field-worker>
+        data-id="{{ member.id|unlocalize }}">{% show_user_status member.worker.user %}{{ member.worker.get_full_name }}</field-worker>
     {% else %}
     <div class="list-group-item">{% show_user_status member.worker.user %}{{ member.worker.get_full_name }}</div>
     {% endif %}
@@ -62,7 +64,7 @@
     {% if worker.has_laborer %}
     <field-equipment
         class="list-group-item"
-        data-id="{{ assigned.id }}">{{ assigned.equipment|safe }}</field-equipment>
+        data-id="{{ assigned.id|unlocalize }}">{{ assigned.equipment|safe }}</field-equipment>
     {% else %}
         <div class="list-group-item">{{ assigned.equipment|safe }}</div>
     {% endif %}
