@@ -11,9 +11,9 @@ class Thing extends Model with KeyboardHandler {
 
     bool get canSave => name.text.isNotEmpty;
 
-    Input name;
-    Input description;
-    Input qty;
+    TextInput name;
+    TextInput description;
+    TextInput qty;
 
     List<String> childTypes = ['part'];
 
@@ -38,9 +38,9 @@ class Part extends Model {
 
     bool get canSave => name.text.isNotEmpty;
 
-    Input name;
-    Input description;
-    Input qty;
+    TextInput name;
+    TextInput description;
+    TextInput qty;
 
     Part.created(): super.created();
 
@@ -56,7 +56,7 @@ class Part extends Model {
 
 main() {
     tokenGenerator = new FakeToken();
-    document.registerElement('sys-input', Input);
+    document.registerElement('sys-input', TextInput);
     document.registerElement('sys-part', Part);
     document.registerElement('sys-thing', Thing);
 

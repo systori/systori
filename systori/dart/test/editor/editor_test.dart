@@ -123,62 +123,62 @@ void main() {
             expect(nav.activeModel is Job, isTrue);
             expect(nav.inputName, 'name');
 
-            nav.sendDown(shiftKey: true);
+            nav.sendDown(ctrlKey: true);
             expect(nav.activeModel is Job, isTrue);
             expect(nav.inputName, 'description');
 
-            nav.sendDown(shiftKey: true);
+            nav.sendDown(ctrlKey: true);
             expect(nav.activeModel is Group, isTrue);
             expect(nav.inputName, 'name');
 
-            nav.sendDown(shiftKey: true);
+            nav.sendDown(ctrlKey: true);
             expect(nav.activeModel is Group, isTrue);
             expect(nav.inputName, 'description');
 
-            nav.sendDown(shiftKey: true);
+            // sub-group
+            nav.sendDown(ctrlKey: true);
+            nav.sendDown(ctrlKey: true);
+
+            nav.sendDown(ctrlKey: true);
             expect(nav.activeModel is Task, isTrue);
             expect(nav.inputName, 'name');
 
-            nav.sendRight(shiftKey: true);
+            nav.sendRight(ctrlKey: true);
             expect(nav.activeModel is Task, isTrue);
             expect(nav.inputName, 'qty');
 
-            nav.sendRight(shiftKey: true);
+            nav.sendRight(ctrlKey: true);
             expect(nav.activeModel is Task, isTrue);
             expect(nav.inputName, 'unit');
 
-            nav.sendRight(shiftKey: true);
+            nav.sendRight(ctrlKey: true);
             expect(nav.activeModel is Task, isTrue);
             expect(nav.inputName, 'price');
 
-            nav.sendRight(shiftKey: true);
+            nav.sendRight(ctrlKey: true);
             expect(nav.activeModel is Task, isTrue);
             expect(nav.inputName, 'total');
 
-            nav.sendDown(shiftKey: true);
+            nav.sendDown(ctrlKey: true);
             expect(nav.activeModel is LineItem, isTrue);
             expect(nav.inputName, 'total');
 
-            nav.sendLeft(shiftKey: true);
+            nav.sendLeft(ctrlKey: true);
             expect(nav.activeModel is LineItem, isTrue);
             expect(nav.inputName, 'price');
 
-            nav.sendLeft(shiftKey: true); // unit
-            nav.sendLeft(shiftKey: true); // qty
+            nav.sendLeft(ctrlKey: true); // unit
+            nav.sendLeft(ctrlKey: true); // qty
 
-            nav.sendLeft(shiftKey: true);
+            nav.sendLeft(ctrlKey: true);
             expect(nav.activeModel is LineItem, isTrue);
             expect(nav.inputName, 'name');
 
-            nav.sendUp(shiftKey: true);
-            expect(nav.activeModel is Task, isTrue);
-            expect(nav.inputName, 'description');
-
-            nav.sendUp(shiftKey: true);
+            nav.sendUp(ctrlKey: true);
             expect(nav.activeModel is Task, isTrue);
             expect(nav.inputName, 'name');
 
-            nav.sendUp(shiftKey: true);
+            nav.sendUp(ctrlKey: true);
             expect(nav.activeModel is Group, isTrue);
             expect(nav.inputName, 'description');
         });
@@ -336,7 +336,7 @@ void main() {
                     'groups': [{
                         'pk': 3,
                         'tasks': [
-                            {'order': 1, 'name': 'new task', 'token': 101, 'qty': '0', 'price': '0', 'total': '0'},
+                            {'order': 1, 'name': 'new task', 'token': 101, 'qty': '0', 'price': '0', 'total': '0', 'variant_group': '0', 'variant_serial': '0', 'is_provisional': false},
                             {'order': 2, 'pk': 1} // previously first task moved to 'order': 2
                         ],
                     }],
@@ -457,8 +457,8 @@ void main() {
             nav.sendText('lineitem one');
             LineItem li = nav.activeModel;
 
-            expect(li.total.text, '0,00');
-            expect(task.price.text, '0,00');
+            expect(li.total.text, '');
+            expect(task.price.text, '');
             expect(task.total.text, '0,00');
             expect(group2.total.text, '0,00');
             expect(group1.total.text, '0,00');

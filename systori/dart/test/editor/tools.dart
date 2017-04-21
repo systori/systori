@@ -108,6 +108,16 @@ class FakeSearchRequest extends FakeRequest<List> {
 }
 
 
+class FakeInfoRequest extends FakeRequest<Map> {
+    FakeInfoRequest(Map data): super(data);
+    Map response(Map data) => {
+        'id': '42',
+        'name': 'a name',
+        'description': 'a description'
+    };
+}
+
+
 class FakeCloneRequest extends FakeRequest<String> {
     FakeCloneRequest(Map data): super(data);
     String response(Map data) {
@@ -152,6 +162,12 @@ class FakeRepository extends Repository {
 
     Future<Map> save(int jobId, Map data) {
         var request = new FakeSaveRequest(data);
+        _requests.add(request);
+        return request.completer.future;
+    }
+
+    Future<Map> info(String model, String id) {
+        var request = new FakeInfoRequest({'model': model, 'id': id});
         _requests.add(request);
         return request.completer.future;
     }

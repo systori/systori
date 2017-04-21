@@ -17,7 +17,7 @@ class Thing extends Model {
 
     attached() {
         name = getInput('name');
-        name.addHandler(new AutocompleteKeyboardHandler(
+        name.addKeyHandler(new AutocompleteKeyboardHandler(
             this, ()=>{}, (String id) => completedId = id
         ));
         super.attached();
@@ -28,7 +28,7 @@ class Thing extends Model {
 
 main() {
     tokenGenerator = new FakeToken();
-    document.registerElement('sys-input', Input);
+    document.registerElement('sys-input', TextInput);
     document.registerElement('sys-thing', Thing);
     document.registerElement('sys-autocomplete', Autocomplete);
 

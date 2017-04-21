@@ -88,12 +88,12 @@ main() {
 
     group("TotalRow.calculate()", () {
 
-        test("can't calculate", () {
+        test("null qty means t&m", () {
             var r = new TestTotalRow('', '', '');
             r.calculateTotal(new Decimal(5, 3));
             expect(r.qty.value.decimal, null);
             expect(r.price.value.decimal, 5);
-            expect(r.total.value.decimal, null);
+            expect(r.total.value.decimal, 5);
             expect(r.diff.decimal, 0);
         });
 

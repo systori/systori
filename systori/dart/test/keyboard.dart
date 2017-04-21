@@ -41,16 +41,16 @@ class Keyboard {
         sel.addRange(range);
     }
 
-    sendEnter({bool shiftKey: false}) => sendKey(KeyCode.ENTER, shiftKey: shiftKey);
-    sendUp({bool shiftKey: false}) => sendKey(KeyCode.UP, shiftKey: shiftKey);
-    sendLeft({bool shiftKey: false}) => sendKey(KeyCode.LEFT, shiftKey: shiftKey);
-    sendRight({bool shiftKey: false}) => sendKey(KeyCode.RIGHT, shiftKey: shiftKey);
-    sendDown({bool shiftKey: false}) => sendKey(KeyCode.DOWN, shiftKey: shiftKey);
-    sendDelete({bool shiftKey: false}) => sendKey(KeyCode.DELETE, shiftKey: shiftKey);
-    sendKey(int keyCode, {bool shiftKey: false}) {
+    sendEnter({bool shiftKey: false, bool ctrlKey: false}) => sendKey(KeyCode.ENTER, shiftKey: shiftKey, ctrlKey: ctrlKey);
+    sendUp({bool shiftKey: false, bool ctrlKey: false}) => sendKey(KeyCode.UP, shiftKey: shiftKey, ctrlKey: ctrlKey);
+    sendLeft({bool shiftKey: false, bool ctrlKey: false}) => sendKey(KeyCode.LEFT, shiftKey: shiftKey, ctrlKey: ctrlKey);
+    sendRight({bool shiftKey: false, bool ctrlKey: false}) => sendKey(KeyCode.RIGHT, shiftKey: shiftKey, ctrlKey: ctrlKey);
+    sendDown({bool shiftKey: false, bool ctrlKey: false}) => sendKey(KeyCode.DOWN, shiftKey: shiftKey, ctrlKey: ctrlKey);
+    sendDelete({bool shiftKey: false, bool ctrlKey: false}) => sendKey(KeyCode.DELETE, shiftKey: shiftKey, ctrlKey: ctrlKey);
+    sendKey(int keyCode, {bool shiftKey: false, bool ctrlKey: false}) {
         TextInput input = document.activeElement;
-        input.dispatchKeyDownEvent(new KeyEvent('keydown', keyCode: keyCode, shiftKey: shiftKey));
-        input.dispatchKeyUpEvent(new KeyEvent('keyup', keyCode: keyCode, shiftKey: shiftKey));
+        input.dispatchKeyDownEvent(new KeyEvent('keydown', keyCode: keyCode, shiftKey: shiftKey, ctrlKey: ctrlKey));
+        input.dispatchKeyUpEvent(new KeyEvent('keyup', keyCode: keyCode, shiftKey: shiftKey, ctrlKey: ctrlKey));
     }
 
     sendText(String text) {
