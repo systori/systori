@@ -29,7 +29,6 @@
 
     <title>Big Project > Big Job</title>
 
-    <link rel="stylesheet" href="/static/css/jquery-ui.css">
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
     <link href="/static/css/main.css" rel="stylesheet">
@@ -138,11 +137,11 @@
           </li>
 
         </ul>
-        <form class="navbar-form navbar-right">
+        <div class="navbar-form navbar-right">
             <div class="form-group form-group-sm">
-              <input type="text" id="goto_project" onkeyup="gotoProject(event)" style="width:60px; margin-top:3px;" class="form-control" placeholder="#">
+              <sys-goto-project type="text" style="width:60px; margin-top:3px;" class="form-control" placeholder="#" contenteditable/>
             </div>
-        </form>
+        </div>
         </div><!--/.nav-collapse -->
       </div>
     </nav>
@@ -154,20 +153,22 @@
 
     #editor-area {
       max-width: 1100px;
-      padding-top: 50px;
-      padding-left: 50px;
-      padding-bottom:100px;
+      padding: 50px 50px 100px 50px;
       margin: auto;
     }
 
     sys-job,
     sys-group,
     sys-task,
-    sys-lineitem,
     sys-task > div.price-difference {
       display: block;
       position: relative;
       margin-right: 15px;
+    }
+
+    sys-lineitem {
+      display: block;
+      position: relative;
     }
 
     sys-job,
@@ -260,7 +261,7 @@
       top: 0px;
       right: -12px;
 
-      color: #e9e9e9;
+      color: #848484;
       font-size: 9px;
       text-align: left;
 
@@ -303,10 +304,43 @@
       padding-bottom: 20px;
     }
 
+    sys-task > div.editor > div > sys-input.name {
+        font-weight: bold;
+    }
+
     .unit {
       flex: 0 0 auto;
       width: 70px;
       padding-left: 4px;
+    }
+
+    .variant {
+      flex: 0 0 auto;
+      padding-right: 5px;
+      min-width: 20px;
+    }
+    .variant:empty {
+      visibility: hidden;
+    }
+    .variant[data-serial="1"] { color: #0074D9 } /* BLUE */
+    .variant[data-serial="2"] { color: #3D9970 } /* OLIVE */
+    .variant[data-serial="3"] { color: #FF851B } /* ORANGE */
+    .variant[data-serial="4"] { color: #B10DC9 } /* PURPLE */
+    .variant[data-serial="5"] { color: #FF4136 } /* RED */
+    .variant[data-serial="6"] { color: #7FDBFF } /* AQUA */
+    .variant[data-serial="7"] { color: #01FF70 } /* LIME */
+    .variant[data-serial="8"] { color: #F012BE } /* FUCHSIA */
+    .variant[data-serial="9"] { color: #FFDC00 } /* YELLOW */
+    .editor:hover > .editor-row > .variant {
+      visibility: visible;
+    }
+    .editor:hover > .editor-row > .variant:empty:before {
+      color: #e9e9e9;
+      cursor: pointer;
+    }
+
+    sys-task > .editor .is_provisional {
+      color: #85144b;
     }
 
     sys-lineitem > .editor .total,
@@ -320,6 +354,11 @@
 
     sys-lineitem > .editor .total {
       border: 1px solid #e9e9e9;
+    }
+
+    sys-task.excluded > .editor .total:after {
+      color: white;
+      border-bottom: none;
     }
 
     sys-task > .editor .price {
@@ -393,7 +432,7 @@
       width: 1px;
       top: 0px;
       bottom: 0px;
-      right: 85px;
+      right: 100px;
       border-right: 1px solid #e9e9e9;
     }
 
@@ -489,28 +528,40 @@
 
     /* actions */
 
-    .actions {
+    sys-task > .editor > .editor-row > .actions {
+      flex: 0 1 auto;
+      padding-right: 5px;
+    }
+
+    sys-lineitem > .editor > .editor-row > .actions {
       flex: 0 0 auto;
-      width: 85px;
+      width: 100px;
       padding-left: 20px;
     }
 
-    .actions > span:hover {
+    .actions > sys-toggle-lineitem:hover,
+    .actions > sys-toggle-tm:hover,
+    .actions > sys-toggle:hover {
       cursor: pointer;
     }
 
-    .actions > span.False {
-      display: none;
-      color: #f0f0f0;
+    .actions > sys-toggle-lineitem[data-value=other],
+    .actions > sys-toggle-tm.False,
+    .actions > sys-toggle.False {
+      visibility: hidden;
+      color: #e9e9e9;
     }
 
-    .editor:hover > .editor-row > .actions > span.False {
-      display: inline;
+    .editor:hover > .editor-row > .actions > sys-toggle-lineitem[data-value=other],
+    .editor:hover > .editor-row > .actions > sys-toggle-tm.False,
+    .editor:hover > .editor-row > .actions > sys-toggle.False {
+      visibility: visible;
     }
 
     /* other */
 
     [contenteditable][placeholder]:empty:before {
+      font-family: 'Glyphicons Halflings';
       content: attr(placeholder);
       font-style: italic;
       color: #d9d9d9;
@@ -586,7 +637,7 @@
       left: -17px;
       font-family: 'Glyphicons Halflings';
       font-size: small;
-      content: "\e003";
+      content: "\e003"; /* magnifying glass */
       color: black;
     }
 
@@ -603,6 +654,7 @@
 
   </style>
 
+  
   <div id="editor-area">
 
   <sys-job id="task-editor" data-pk="5" data-code="1"
@@ -617,9 +669,8 @@
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
     
-      <sys-group
-    data-pk="6"
-    data-token="">
+      
+<sys-group data-pk="6">
   
 <div class="editor">
   <div class="editor-row">
@@ -630,9 +681,8 @@
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
   
-    <sys-group
-    data-pk="7"
-    data-token="">
+    
+<sys-group data-pk="7">
   
 <div class="editor">
   <div class="editor-row">
@@ -645,10 +695,10 @@
   
   
 </sys-group>
+
   
-    <sys-group
-    data-pk="8"
-    data-token="">
+    
+<sys-group data-pk="8">
   
 <div class="editor">
   <div class="editor-row">
@@ -659,9 +709,8 @@
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
   
-    <sys-group
-    data-pk="9"
-    data-token="">
+    
+<sys-group data-pk="9">
   
 <div class="editor">
   <div class="editor-row">
@@ -674,10 +723,10 @@
   
   
 </sys-group>
+
   
-    <sys-group
-    data-pk="10"
-    data-token="">
+    
+<sys-group data-pk="10">
   
 <div class="editor">
   <div class="editor-row">
@@ -688,9 +737,8 @@
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
   
-    <sys-group
-    data-pk="11"
-    data-token="">
+    
+<sys-group data-pk="11">
   
 <div class="editor">
   <div class="editor-row">
@@ -703,10 +751,10 @@
   
   
 </sys-group>
+
   
-    <sys-group
-    data-pk="12"
-    data-token="">
+    
+<sys-group data-pk="12">
   
 <div class="editor">
   <div class="editor-row">
@@ -720,28 +768,30 @@
   
     
 <sys-task
-    data-pk="2"
-    data-token="">
+    
+    data-pk="2">
   
 
 <div class="editor">
   <div class="editor-row">
     <sys-code-input class="code" data-order="1">1.01.02.02.02.001</sys-code-input>
     <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-variant-input class="variant" title="Variante Gruppennummer" placeholder="&#xe144;" tabindex="-1" data-group="0" data-serial="0" contenteditable></sys-variant-input>
+    <div class="actions">
+      <sys-toggle class="is_provisional glyphicon glyphicon-paperclip False" title="Bedarf"></sys-toggle>
+      <sys-toggle-tm class="is_time_and_materials glyphicon glyphicon-tasks False" title="Taglohn"></sys-toggle-tm>
+    </div>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
     <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
-    
   </div>
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
 
 <sys-lineitem-sheet>
   
-    <sys-lineitem
-        data-pk="4"
-        data-token="">
+    <sys-lineitem data-pk="4">
       
 <a name="lineitem-4"></a>
 <div class="editor">
@@ -753,16 +803,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="5"
-        data-token="">
+    <sys-lineitem data-pk="5">
       
 <a name="lineitem-5"></a>
 <div class="editor">
@@ -774,16 +822,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="6"
-        data-token="">
+    <sys-lineitem data-pk="6">
       
 <a name="lineitem-6"></a>
 <div class="editor">
@@ -795,8 +841,8 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
@@ -812,21 +858,25 @@
 </div>
 
 </sys-task>
+
   
 </sys-group>
-  
-  
-</sys-group>
-  
-  
-</sys-group>
+
   
   
 </sys-group>
+
+  
+  
+</sys-group>
+
+  
+  
+</sys-group>
+
     
-      <sys-group
-    data-pk="13"
-    data-token="">
+      
+<sys-group data-pk="13">
   
 <div class="editor">
   <div class="editor-row">
@@ -837,9 +887,8 @@
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
   
-    <sys-group
-    data-pk="14"
-    data-token="">
+    
+<sys-group data-pk="14">
   
 <div class="editor">
   <div class="editor-row">
@@ -852,10 +901,10 @@
   
   
 </sys-group>
+
   
-    <sys-group
-    data-pk="15"
-    data-token="">
+    
+<sys-group data-pk="15">
   
 <div class="editor">
   <div class="editor-row">
@@ -866,9 +915,8 @@
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
   
-    <sys-group
-    data-pk="16"
-    data-token="">
+    
+<sys-group data-pk="16">
   
 <div class="editor">
   <div class="editor-row">
@@ -881,10 +929,10 @@
   
   
 </sys-group>
+
   
-    <sys-group
-    data-pk="17"
-    data-token="">
+    
+<sys-group data-pk="17">
   
 <div class="editor">
   <div class="editor-row">
@@ -895,9 +943,8 @@
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
   
-    <sys-group
-    data-pk="18"
-    data-token="">
+    
+<sys-group data-pk="18">
   
 <div class="editor">
   <div class="editor-row">
@@ -911,28 +958,30 @@
   
     
 <sys-task
-    data-pk="3"
-    data-token="">
+    
+    data-pk="3">
   
 
 <div class="editor">
   <div class="editor-row">
     <sys-code-input class="code" data-order="1">1.02.02.02.01.001</sys-code-input>
     <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-variant-input class="variant" title="Variante Gruppennummer" placeholder="&#xe144;" tabindex="-1" data-group="0" data-serial="0" contenteditable></sys-variant-input>
+    <div class="actions">
+      <sys-toggle class="is_provisional glyphicon glyphicon-paperclip False" title="Bedarf"></sys-toggle>
+      <sys-toggle-tm class="is_time_and_materials glyphicon glyphicon-tasks False" title="Taglohn"></sys-toggle-tm>
+    </div>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
     <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
-    
   </div>
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
 
 <sys-lineitem-sheet>
   
-    <sys-lineitem
-        data-pk="7"
-        data-token="">
+    <sys-lineitem data-pk="7">
       
 <a name="lineitem-7"></a>
 <div class="editor">
@@ -944,16 +993,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="8"
-        data-token="">
+    <sys-lineitem data-pk="8">
       
 <a name="lineitem-8"></a>
 <div class="editor">
@@ -965,16 +1012,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="9"
-        data-token="">
+    <sys-lineitem data-pk="9">
       
 <a name="lineitem-9"></a>
 <div class="editor">
@@ -986,8 +1031,8 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
@@ -1003,31 +1048,34 @@
 </div>
 
 </sys-task>
+
   
     
 <sys-task
-    data-pk="4"
-    data-token="">
+    
+    data-pk="4">
   
 
 <div class="editor">
   <div class="editor-row">
     <sys-code-input class="code" data-order="2">1.02.02.02.01.002</sys-code-input>
     <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-variant-input class="variant" title="Variante Gruppennummer" placeholder="&#xe144;" tabindex="-1" data-group="0" data-serial="0" contenteditable></sys-variant-input>
+    <div class="actions">
+      <sys-toggle class="is_provisional glyphicon glyphicon-paperclip False" title="Bedarf"></sys-toggle>
+      <sys-toggle-tm class="is_time_and_materials glyphicon glyphicon-tasks False" title="Taglohn"></sys-toggle-tm>
+    </div>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
     <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
-    
   </div>
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
 
 <sys-lineitem-sheet>
   
-    <sys-lineitem
-        data-pk="10"
-        data-token="">
+    <sys-lineitem data-pk="10">
       
 <a name="lineitem-10"></a>
 <div class="editor">
@@ -1039,16 +1087,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="11"
-        data-token="">
+    <sys-lineitem data-pk="11">
       
 <a name="lineitem-11"></a>
 <div class="editor">
@@ -1060,16 +1106,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="12"
-        data-token="">
+    <sys-lineitem data-pk="12">
       
 <a name="lineitem-12"></a>
 <div class="editor">
@@ -1081,8 +1125,8 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
@@ -1098,12 +1142,13 @@
 </div>
 
 </sys-task>
+
   
 </sys-group>
+
   
-    <sys-group
-    data-pk="19"
-    data-token="">
+    
+<sys-group data-pk="19">
   
 <div class="editor">
   <div class="editor-row">
@@ -1117,28 +1162,30 @@
   
     
 <sys-task
-    data-pk="5"
-    data-token="">
+    
+    data-pk="5">
   
 
 <div class="editor">
   <div class="editor-row">
     <sys-code-input class="code" data-order="1">1.02.02.02.02.001</sys-code-input>
     <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-variant-input class="variant" title="Variante Gruppennummer" placeholder="&#xe144;" tabindex="-1" data-group="0" data-serial="0" contenteditable></sys-variant-input>
+    <div class="actions">
+      <sys-toggle class="is_provisional glyphicon glyphicon-paperclip False" title="Bedarf"></sys-toggle>
+      <sys-toggle-tm class="is_time_and_materials glyphicon glyphicon-tasks False" title="Taglohn"></sys-toggle-tm>
+    </div>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
     <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
-    
   </div>
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
 
 <sys-lineitem-sheet>
   
-    <sys-lineitem
-        data-pk="13"
-        data-token="">
+    <sys-lineitem data-pk="13">
       
 <a name="lineitem-13"></a>
 <div class="editor">
@@ -1150,16 +1197,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="14"
-        data-token="">
+    <sys-lineitem data-pk="14">
       
 <a name="lineitem-14"></a>
 <div class="editor">
@@ -1171,16 +1216,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="15"
-        data-token="">
+    <sys-lineitem data-pk="15">
       
 <a name="lineitem-15"></a>
 <div class="editor">
@@ -1192,8 +1235,8 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
@@ -1209,31 +1252,34 @@
 </div>
 
 </sys-task>
+
   
     
 <sys-task
-    data-pk="6"
-    data-token="">
+    
+    data-pk="6">
   
 
 <div class="editor">
   <div class="editor-row">
     <sys-code-input class="code" data-order="2">1.02.02.02.02.002</sys-code-input>
     <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-variant-input class="variant" title="Variante Gruppennummer" placeholder="&#xe144;" tabindex="-1" data-group="0" data-serial="0" contenteditable></sys-variant-input>
+    <div class="actions">
+      <sys-toggle class="is_provisional glyphicon glyphicon-paperclip False" title="Bedarf"></sys-toggle>
+      <sys-toggle-tm class="is_time_and_materials glyphicon glyphicon-tasks False" title="Taglohn"></sys-toggle-tm>
+    </div>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
     <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
-    
   </div>
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
 
 <sys-lineitem-sheet>
   
-    <sys-lineitem
-        data-pk="16"
-        data-token="">
+    <sys-lineitem data-pk="16">
       
 <a name="lineitem-16"></a>
 <div class="editor">
@@ -1245,16 +1291,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="17"
-        data-token="">
+    <sys-lineitem data-pk="17">
       
 <a name="lineitem-17"></a>
 <div class="editor">
@@ -1266,16 +1310,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="18"
-        data-token="">
+    <sys-lineitem data-pk="18">
       
 <a name="lineitem-18"></a>
 <div class="editor">
@@ -1287,8 +1329,8 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
@@ -1304,21 +1346,25 @@
 </div>
 
 </sys-task>
+
   
 </sys-group>
-  
-  
-</sys-group>
-  
-  
-</sys-group>
+
   
   
 </sys-group>
+
+  
+  
+</sys-group>
+
+  
+  
+</sys-group>
+
     
-      <sys-group
-    data-pk="20"
-    data-token="">
+      
+<sys-group data-pk="20">
   
 <div class="editor">
   <div class="editor-row">
@@ -1329,9 +1375,8 @@
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
   
-    <sys-group
-    data-pk="21"
-    data-token="">
+    
+<sys-group data-pk="21">
   
 <div class="editor">
   <div class="editor-row">
@@ -1344,10 +1389,10 @@
   
   
 </sys-group>
+
   
-    <sys-group
-    data-pk="22"
-    data-token="">
+    
+<sys-group data-pk="22">
   
 <div class="editor">
   <div class="editor-row">
@@ -1358,9 +1403,8 @@
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
   
-    <sys-group
-    data-pk="23"
-    data-token="">
+    
+<sys-group data-pk="23">
   
 <div class="editor">
   <div class="editor-row">
@@ -1373,10 +1417,10 @@
   
   
 </sys-group>
+
   
-    <sys-group
-    data-pk="24"
-    data-token="">
+    
+<sys-group data-pk="24">
   
 <div class="editor">
   <div class="editor-row">
@@ -1387,9 +1431,8 @@
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
   
-    <sys-group
-    data-pk="25"
-    data-token="">
+    
+<sys-group data-pk="25">
   
 <div class="editor">
   <div class="editor-row">
@@ -1402,10 +1445,10 @@
   
   
 </sys-group>
+
   
-    <sys-group
-    data-pk="26"
-    data-token="">
+    
+<sys-group data-pk="26">
   
 <div class="editor">
   <div class="editor-row">
@@ -1419,28 +1462,30 @@
   
     
 <sys-task
-    data-pk="7"
-    data-token="">
+    
+    data-pk="7">
   
 
 <div class="editor">
   <div class="editor-row">
     <sys-code-input class="code" data-order="1">1.03.02.02.02.001</sys-code-input>
     <sys-input class="name"  placeholder="Position"                                             contenteditable>Fence</sys-input>
+    <sys-variant-input class="variant" title="Variante Gruppennummer" placeholder="&#xe144;" tabindex="-1" data-group="0" data-serial="0" contenteditable></sys-variant-input>
+    <div class="actions">
+      <sys-toggle class="is_provisional glyphicon glyphicon-paperclip False" title="Bedarf"></sys-toggle>
+      <sys-toggle-tm class="is_time_and_materials glyphicon glyphicon-tasks False" title="Taglohn"></sys-toggle-tm>
+    </div>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical="200"   contenteditable>200</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                             contenteditable>m²</sys-input>
     <sys-cell  class="price"                                   data-canonical="" contenteditable>74,98</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>14.996,00</sys-cell>
-    
   </div>
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
 
 <sys-lineitem-sheet>
   
-    <sys-lineitem
-        data-pk="19"
-        data-token="">
+    <sys-lineitem data-pk="19">
       
 <a name="lineitem-19"></a>
 <div class="editor">
@@ -1452,16 +1497,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="18*1.1" data-resolved="" contenteditable>19,80</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>1,98</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="20"
-        data-token="">
+    <sys-lineitem data-pk="20">
       
 <a name="lineitem-20"></a>
 <div class="editor">
@@ -1473,16 +1516,14 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="50" contenteditable>50,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>5,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
     </sys-lineitem>
   
-    <sys-lineitem
-        data-pk="21"
-        data-token="">
+    <sys-lineitem data-pk="21">
       
 <a name="lineitem-21"></a>
 <div class="editor">
@@ -1494,8 +1535,8 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="17" contenteditable>17,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>68,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
@@ -1511,17 +1552,22 @@
 </div>
 
 </sys-task>
+
   
 </sys-group>
-  
-  
-</sys-group>
-  
-  
-</sys-group>
+
   
   
 </sys-group>
+
+  
+  
+</sys-group>
+
+  
+  
+</sys-group>
+
     
     
   </sys-job>
@@ -1547,11 +1593,15 @@
   <div class="editor-row">
     <sys-code-input class="code" data-order=""></sys-code-input>
     <sys-input class="name"  placeholder="Position"                                             contenteditable></sys-input>
+    <sys-variant-input class="variant" title="Variante Gruppennummer" placeholder="&#xe144;" tabindex="-1" data-group="0" data-serial="0" contenteditable></sys-variant-input>
+    <div class="actions">
+      <sys-toggle class="is_provisional glyphicon glyphicon-paperclip False" title="Bedarf"></sys-toggle>
+      <sys-toggle-tm class="is_time_and_materials glyphicon glyphicon-tasks False" title="Taglohn"></sys-toggle-tm>
+    </div>
     <sys-cell  class="qty"   placeholder="Menge"   data-canonical=""   contenteditable>0</sys-cell>
     <sys-input class="unit"  placeholder="Einheit"                                             contenteditable></sys-input>
     <sys-cell  class="price"                                   data-canonical="" contenteditable>0,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>0,00</sys-cell>
-    
   </div>
   <sys-styled-input class="description" placeholder="Beschreibung" contenteditable></sys-styled-input>
 </div>
@@ -1569,7 +1619,15 @@
 
   </template>
 
-  <template id="lineitem-template">
+  <template id="lineitem-template"
+    data-material="Material"
+    data-material-icon="equalizer"
+    data-labor="Lohn"
+    data-labor-icon="user"
+    data-equipment="Ausrüstung"
+    data-equipment-icon="wrench"
+    data-other="Typ"
+    data-other-icon="tasks">
     
 <a name="lineitem-None"></a>
 <div class="editor">
@@ -1581,27 +1639,21 @@
     <sys-cell  class="price" placeholder="Preis" data-canonical="" contenteditable>0,00</sys-cell>
     <sys-cell  class="total" placeholder="Summe" data-canonical="" contenteditable>0,00</sys-cell>
     <div class="actions">
-      <span class="is_hidden glyphicon glyphicon-eye-close False"></span>
-      <span class="is_flagged glyphicon glyphicon-flag False"></span>
+      <sys-toggle-lineitem class="lineitem_type glyphicon glyphicon-tasks" data-value="other" title="Typ"></sys-toggle-lineitem>
+      <sys-toggle class="is_hidden glyphicon glyphicon-eye-close False" title="ausschließen"></sys-toggle>
     </div>
   </div>
 </div>
   </template>
+  
 
 
 
 
 <script src="/static/js/jquery-1.11.2.min.js"></script>
-<script src="/static/js/jquery-ui.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
-<script src="/static/dart/build/packages/web_components/webcomponents-lite.min.js"></script>
-<script type="text/javascript">
-    function gotoProject(e) {
-        if(e.keyCode == 13) {
-            window.location.href = window.location.origin+"/project-" + document.querySelector("#goto_project").value;
-        }
-    }
-</script>
+    <script src="/static/dart/build/packages/web_components/webcomponents-lite.min.js"></script>
+    <script src="/static/dart/build/goto_project.dart.js"></script>
 
 
 <script src="/static/js/language_picker.js"></script>
