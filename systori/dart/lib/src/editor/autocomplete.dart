@@ -12,9 +12,9 @@ typedef Map<String,String> MakeCriteria();
 
 class AutocompleteKeyboardHandler extends KeyboardHandler {
 
-    Model model;
-    MakeCriteria makeCriteria;
-    AutocompleteSelectionCallback autocompleteSelection;
+    final Model model;
+    final MakeCriteria makeCriteria;
+    final AutocompleteSelectionCallback autocompleteSelection;
 
     AutocompleteKeyboardHandler(this.model, this.makeCriteria, this.autocompleteSelection);
 
