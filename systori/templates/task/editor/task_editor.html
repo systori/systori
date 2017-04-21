@@ -1,4 +1,4 @@
-{% load i18n customformatting task %}
+{% load i18n l10n customformatting task %}
 
 <div class="editor">
   <div class="editor-row">
@@ -19,7 +19,7 @@
 
 <sys-lineitem-sheet>
   {% for lineitem in task.lineitems.all %}
-    <sys-lineitem {% if lineitem.pk %}data-pk="{{ lineitem.pk }}"{% endif %}>
+    <sys-lineitem {% if lineitem.pk %}data-pk="{{ lineitem.pk|unlocalize }}"{% endif %}>
       {% include "task/editor/lineitem_editor.html" with lineitem=lineitem %}
     </sys-lineitem>
   {% endfor %}

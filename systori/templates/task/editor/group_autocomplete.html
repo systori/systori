@@ -1,6 +1,6 @@
-{% load i18n customformatting %}
+{% load i18n l10n customformatting %}
 {% for group in objects %}
-  <div data-pk="{{ group.id }}">
+  <div data-pk="{{ group.id|unlocalize }}">
     <b>{{ group.job.project }}</b> / <i>{{ group.job.name }}</i><br/>
     {{ group.name }}</br>
     <b>{{ group.estimate_total|money }}</b>

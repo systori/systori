@@ -1,6 +1,6 @@
-{% load i18n customformatting %}
+{% load i18n l10n customformatting %}
 {% for task in objects %}
-  <div data-pk="{{ task.id }}">
+  <div data-pk="{{ task.id|unlocalize }}">
     <b>{{ task.name }}</b><br/>
     <b>{{ task.unit_price|money }} / {{ task.unit }}</b><br/>
     {{ task.description }}<br/>

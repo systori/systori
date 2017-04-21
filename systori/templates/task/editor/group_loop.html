@@ -1,4 +1,5 @@
-<sys-group {% if group.pk %}data-pk="{{ group.pk }}"{% endif %}>
+{% load l10n %}
+<sys-group {% if group.pk %}data-pk="{{ group.pk|unlocalize }}"{% endif %}>
   {% include "task/editor/group_editor.html" with group=group %}
   {% for subgroup in group.groups.all %}
     {% include "task/editor/group_loop.html" with group=subgroup %}

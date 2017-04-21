@@ -518,7 +518,7 @@
   {% localize off %}
   <div id="editor-area">
 
-  <sys-job id="task-editor" data-pk="{{ job.pk }}" data-code="{{ job.code }}"
+  <sys-job id="task-editor" data-pk="{{ job.pk|unlocalize }}" data-code="{{ job.code }}"
            data-structure-format="{{ job.project.structure.pattern}}">
     {% include "task/editor/group_editor.html" with group=job %}
     {% for group in job.groups.all %}
