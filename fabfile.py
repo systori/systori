@@ -217,6 +217,13 @@ def linkfonts():
         'ttf-indic-fonts-core': {'fonts': ['lohit_hi', 'lohit_ta', 'MuktiNarrow']},
         'ttf-punjabi-fonts': {'fonts': ['lohit_pa']}
     }
+
+    if not os.path.exists(os.path.join(TRUETYPE, 'ttf-dejavu')):
+        local('sudo ln -s {} {}'.format(
+            os.path.join(TRUETYPE, 'dejavu'),
+            os.path.join(TRUETYPE, 'ttf-dejavu'),
+        ))
+
     for family, fonts in FONTS.items():
         family_path = os.path.join(TRUETYPE, family)
         if not os.path.exists(family_path):
