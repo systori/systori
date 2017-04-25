@@ -93,7 +93,7 @@ Cell cell([String txt='', String canonical='', _col=0, _row=0]) =>
 
 List<Cell> cells(List<String> values, [eq1=-1, eq2=-1]) =>
     enumerate<String>(values).
-    map((total) => cell(total.value, eq1==total.index||eq2==total.index ? '!' : '')..value=new Decimal.parse(total.value, 3)).
+    map((total) => cell(total.value, eq1==total.index||eq2==total.index ? '!' : '')..value=new Decimal.parse(total.value)).
     toList();
 
 ColumnGetter getColumnReturns(List<String> values, [eq1=-1, eq2=-1]) =>
@@ -145,15 +145,15 @@ main() {
         test("locale: de", () {
             Intl.withLocale("de", ()=> Decimal.updateFormats());
 
-            expect(canonical("2-1 000,001"), "2 - 1000.001");
-            expect(canonical("2-1.000,001"), "2 - 1000.001");
-            expect(canonical("2--1.000,001"), "2 - -1000.001");
-            expect(canonical("2--1.000,001+A!"), "(2 - -1000.001) + A!");
+            expect(canonical("2-1 000,01"), "2 - 1000.01");
+            expect(canonical("2-1.000,01"), "2 - 1000.01");
+            expect(canonical("2--1.000,01"), "2 - -1000.01");
+            expect(canonical("2--1.000,01+A!"), "(2 - -1000.01) + A!");
 
-            expect(local("2 - 1000.001"), "2 - 1.000,001");
-            expect(local("2 - -1000.001"), "2 - -1.000,001");
+            expect(local("2 - 1000.01"), "2 - 1.000,01");
+            expect(local("2 - -1000.01"), "2 - -1.000,01");
 
-            expect(resolve("2--1.000,001+A!", ['99']), "(2 - -1.000,001) + 99");
+            expect(resolve("2--1.000,01+A!", ['99']), "(2 - -1.000,01) + 99");
 
             // regression test from 01/12/2017
             // EvaluateEquation.parseDecimal was using localized parser on
@@ -164,16 +164,16 @@ main() {
         test("locale: en", () {
             Intl.withLocale("en", ()=> Decimal.updateFormats());
 
-            expect(canonical("2-1 000.001"), "2 - 1000.001");
-            expect(canonical("2-1,000.001"), "2 - 1000.001");
-            expect(canonical("2--1,000.001"), "2 - -1000.001");
-            expect(canonical("2--1,000.001+A@1:&"), "(2 - -1000.001) + A@1:&");
+            expect(canonical("2-1 000.01"), "2 - 1000.01");
+            expect(canonical("2-1,000.01"), "2 - 1000.01");
+            expect(canonical("2--1,000.01"), "2 - -1000.01");
+            expect(canonical("2--1,000.01+A@1:&"), "(2 - -1000.01) + A@1:&");
             expect(canonical("\u{00a0}A!\u{00a0}+\u{00a0}B!:\u{00a0}"), "A! + B!:");
 
-            expect(local("2 - 1000.001"), "2 - 1,000.001");
-            expect(local("2 - -1000.001"), "2 - -1,000.001");
+            expect(local("2 - 1000.01"), "2 - 1,000.01");
+            expect(local("2 - -1000.01"), "2 - -1,000.01");
 
-            expect(resolve("2--1,000.001+A@1:", ['99']), "(2 - -1,000.001) + 99");
+            expect(resolve("2--1,000.01+A@1:", ['99']), "(2 - -1,000.01) + 99");
         });
 
         tearDown(() {

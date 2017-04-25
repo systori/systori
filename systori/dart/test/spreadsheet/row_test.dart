@@ -90,7 +90,7 @@ main() {
 
         test("null qty means t&m", () {
             var r = new TestTotalRow('', '', '');
-            r.calculateTotal(new Decimal(5, 3));
+            r.calculateTotal(new Decimal(5));
             expect(r.qty.value.decimal, null);
             expect(r.price.value.decimal, 5);
             expect(r.total.value.decimal, 5);
@@ -99,7 +99,7 @@ main() {
 
         test("fully calculated", () {
             var r = new TestTotalRow('3', '', '');
-            r.calculateTotal(new Decimal(5, 3));
+            r.calculateTotal(new Decimal(5));
             expect(r.qty.value.decimal, 3);
             expect(r.price.value.decimal, 5);
             expect(r.total.value.decimal, 15);
@@ -108,7 +108,7 @@ main() {
 
         test("reverse calculating price", () {
             var r = new TestTotalRow('3', '2', '');
-            r.calculateTotal(new Decimal(5, 3));
+            r.calculateTotal(new Decimal(5));
             expect(r.qty.value.decimal, 3);
             expect(r.price.value.decimal, 2);
             expect(r.total.value.decimal, 6);
@@ -117,7 +117,7 @@ main() {
 
         test("reverse calculating total", () {
             var r = new TestTotalRow('3', '', '12');
-            r.calculateTotal(new Decimal(2, 3));
+            r.calculateTotal(new Decimal(2));
             expect(r.qty.value.decimal, 3);
             expect(r.price.value.decimal, 4);
             expect(r.total.value.decimal, 12);

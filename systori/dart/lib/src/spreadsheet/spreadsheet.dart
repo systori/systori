@@ -5,14 +5,14 @@ import 'cell.dart';
 
 abstract class Spreadsheet {
 
-    Decimal total = new Decimal(0, 3);
+    Decimal total = new Decimal(0);
     List<Row> get rows;
     List<Row> iterated;
     bool get hasNeverBeenCalculated => iterated == null;
 
     Decimal calculate(Cell changedCell, {focused: false, moved: false}) {
         iterated = [];
-        total = new Decimal(0, 3);
+        total = new Decimal(0);
         if (changedCell != null) {
             changedCell.row = -1;
             int rowNum = 0;
