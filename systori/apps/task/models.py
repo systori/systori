@@ -357,7 +357,7 @@ class Task(OrderedModel):
         tsvector_field.WeightedColumn('description', 'D'),
     ], settings.SEARCH_VECTOR_LANGUAGE)
 
-    qty = models.DecimalField(_("Quantity"), blank=True, null=True, max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    qty = models.DecimalField(_("Quantity"), blank=True, null=True, max_digits=13, decimal_places=3, default=Decimal('0.00'))
     qty_equation = models.CharField(max_length=512, blank=True)
     complete = models.DecimalField(_("Completed"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
     unit = models.CharField(_("Unit"), max_length=512, blank=True)
@@ -508,7 +508,7 @@ class ProgressReport(models.Model):
 
     # how much of the project is complete in units of quantity
     # this gets copied into task.complete with the latest progress report value
-    complete = models.DecimalField(_("Complete"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    complete = models.DecimalField(_("Complete"), max_digits=13, decimal_places=3, default=Decimal('0.00'))
 
     task = models.ForeignKey(Task, related_name="progressreports", on_delete=models.CASCADE)
     worker = models.ForeignKey('company.Worker', related_name="progressreports", on_delete=models.CASCADE)
@@ -527,7 +527,7 @@ class LineItem(OrderedModel):
 
     name = models.CharField(_("Name"), max_length=512, blank=True)
 
-    qty = models.DecimalField(_("Quantity"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    qty = models.DecimalField(_("Quantity"), max_digits=13, decimal_places=3, default=Decimal('0.00'))
     qty_equation = models.CharField(max_length=512, blank=True)
     expended = models.DecimalField(_("Expended"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
 
@@ -624,7 +624,7 @@ class ExpendReport(models.Model):
 
     # how much of the lineitem has been expended
     # this gets copied into lineitem.expended with the value from latest report
-    expended = models.DecimalField(_("Expended"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    expended = models.DecimalField(_("Expended"), max_digits=13, decimal_places=3, default=Decimal('0.00'))
 
     lineitem = models.ForeignKey(LineItem, related_name="expendreports", on_delete=models.CASCADE)
     worker = models.ForeignKey('company.Worker', related_name="expendreports", on_delete=models.CASCADE)
