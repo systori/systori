@@ -93,7 +93,7 @@ Cell cell([String txt='', String canonical='', _col=0, _row=0]) =>
 
 List<Cell> cells(List<String> values, [eq1=-1, eq2=-1]) =>
     enumerate<String>(values).
-    map((total) => cell(total.value, eq1==total.index||eq2==total.index ? '!' : '')..value=new Decimal.parse(total.value)).
+    map((total) => cell(total.value, eq1==total.index||eq2==total.index ? '!' : '')..value=new Decimal.parse(total.value, 3)).
     toList();
 
 ColumnGetter getColumnReturns(List<String> values, [eq1=-1, eq2=-1]) =>

@@ -6,10 +6,19 @@ typedef List<Cell> ColumnGetter(int columnIdx);
 
 
 format(int column, Decimal decimal) {
-    if (column == 1 || column == 2) {
-        return decimal.money;
-    } else { // column == 0
+    if (column == 0) { // qty
         return decimal.number;
+    } else {
+        return decimal.money;
+    }
+}
+
+
+Decimal round(int column, Decimal decimal) {
+    if (decimal == null || decimal.isNull || column == 0) {
+        return decimal;
+    } else { // column == 0
+        return decimal.round(2);
     }
 }
 
@@ -57,13 +66,13 @@ abstract class Cell {
     focused() {
 
         if (value == null) {
-            value = isTextNumber ? new Decimal.parse(text) : new Decimal(null);
+            value = isTextNumber ? new Decimal.parse(text, 3) : new Decimal(null, 3);
         }
 
         if (isCanonicalBlank) {
             if (isTextNumber) {
                 if (value == null) {
-                    value = new Decimal.parse(text);
+                    value = new Decimal.parse(text, 3);
                 }
                 preview = format(column, value);
             }
@@ -95,7 +104,7 @@ abstract class Cell {
         }
     }
 
-    clear() => setManual(new Decimal(null));
+    clear() => setManual(new Decimal(null, 3));
 
     setManual(Decimal decimal) {
         value = decimal;
@@ -105,8 +114,8 @@ abstract class Cell {
     }
 
     setCalculated(Decimal decimal) {
-        value = decimal;
-        preview = value.isNonzero ? format(column, decimal) : "";
+        value = round(column, decimal);
+        preview = value.isNonzero ? format(column, value) : "";
         if (!isFocused) {
             _previous_text = text = preview;
         }
@@ -118,7 +127,7 @@ abstract class Cell {
         resolver.getColumn = getColumn;
 
         if (value == null) {
-            value = isTextNumber ? new Decimal.parse(text) : new Decimal(null);
+            value = isTextNumber ? round(column, new Decimal.parse(text, 3)) : new Decimal(null, 3);
         }
 
         if (isFocused) {
@@ -135,20 +144,20 @@ abstract class Cell {
                         resolver.withCollectRanges(() {
                             resolved = localToResolved(text);
                         });
-                        value = eval(canonical);
+                        value = round(column, eval(canonical));
                         _set_preview();
                     } catch(e) {
                         canonical = _old_canonical;
                         resolver.withCollectRanges(() {
                             resolved = "";
                         });
-                        value = new Decimal(0);
+                        value = new Decimal(0, 3);
                         preview = e.substring(8);
                     }
 
                 } else {
 
-                    value = new Decimal.parse(text);
+                    value = round(column, new Decimal.parse(text, 3));
                     canonical = value.canonical;
                     resolved = "";
                     preview = "";
@@ -176,7 +185,7 @@ abstract class Cell {
             if (isCanonicalEquation) {
 
                 resolver.withCleanCache(() {
-                    value = eval(canonical);
+                    value = round(column, eval(canonical));
                 });
                 text = format(column, value);
 
@@ -247,7 +256,7 @@ class RangeResult {
     reset() {
         start = -1;
         end = -1;
-        value = new Decimal(0);
+        value = new Decimal(0, 3);
     }
 }
 
@@ -493,7 +502,7 @@ class EvaluateEquation extends ParseEquation<Decimal> {
 
     Decimal call(String eq) => parser.parse(eq.trim());
 
-    Decimal parseDecimal(sign, digits) => new Decimal(double.parse(sign+digits.join()));
+    Decimal parseDecimal(sign, digits) => new Decimal(double.parse(sign+digits.join()), 3);
 
     Decimal parseRange(_p.PointedValue<String> column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end) =>
         evalRange(column, direction, startEquation, start, startExclusive, colon, endExclusive, endEquation, end);
@@ -512,9 +521,9 @@ typedef String Converter(String decimal);
 class ConvertEquation extends ParseEquation<String> {
 
     // Converters
-    static String canonicalToLocal(String decimal)=>new Decimal(double.parse(decimal)).number;
-    static String localToCanonical(String decimal)=>new Decimal.parse(decimal).canonical;
-    static String localToLocal(String decimal)=>new Decimal.parse(decimal).number;
+    static String canonicalToLocal(String decimal)=>new Decimal(double.parse(decimal), 3).number;
+    static String localToCanonical(String decimal)=>new Decimal.parse(decimal, 3).canonical;
+    static String localToLocal(String decimal)=>new Decimal.parse(decimal, 3).number;
     static String passThrough(String decimal)=>decimal;
 
     Converter converter;

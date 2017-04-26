@@ -51,6 +51,11 @@ main() async {
             expect((d(1, 2)/d(3, 2)).money, '0.33');
         });
 
+        test("round", () {
+            expect(d(1.236, 3).round(2).number, '1.24');
+            expect((d(1.236, 3).round(2)+d(2.001, 3)).number, '3.241');
+        });
+
     });
 
     group("Amount", () {

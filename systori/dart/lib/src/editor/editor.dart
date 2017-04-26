@@ -52,7 +52,7 @@ class DecimalElement extends HtmlElement {
     Decimal _decimal;
     Decimal get value {
         if (_decimal == null)
-            _decimal = new Decimal.parse(text);
+            _decimal = new Decimal.parse(text, 3);
         return _decimal;
     }
     set value(Decimal d) {
@@ -118,7 +118,7 @@ class Group extends Model with KeyboardHandler {
     }
 
     updateTotal() {
-        var _total = new Decimal(0);
+        var _total = new Decimal(0, 3);
         for (Group g in this.querySelectorAll(':scope>sys-group')) {
             _total += g.total.value;
         }
@@ -268,7 +268,7 @@ class HtmlCell extends TextInput with HighlightableInputMixin, Cell, KeyboardHan
     HtmlCell.created(): super.created() {
         addKeyHandler(this);
         if (value == null) {
-            value = isTextNumber ? new Decimal.parse(text) : new Decimal(null);
+            value = isTextNumber ? new Decimal.parse(text, 3) : new Decimal(null, 3);
         }
     }
 
@@ -389,7 +389,7 @@ class VariantInput extends TextInput with KeyboardHandler {
 
 
 class TimeAndMaterialsToggle extends Toggle {
-    Decimal _previous_value = new Decimal(1);
+    Decimal _previous_value = new Decimal(1, 3);
     Task get task => parent.parent.parent.parent;
     TimeAndMaterialsToggle.created(): super.created();
 

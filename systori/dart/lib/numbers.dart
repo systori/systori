@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 Decimal sum(Iterable<Decimal> decimals) => decimals.reduce((i, j) => i + j);
 
 
-makeNumberFormat() => new NumberFormat("#,###,###,##0.##");
+makeNumberFormat() => new NumberFormat("#,###,###,##0.###");
 makeMoneyFormat() => new NumberFormat("#,###,###,##0.00");
 makeDifferenceFormat() => new NumberFormat("+#,###,###,##0.00;-#,###,###,##0.00");
 
@@ -15,7 +15,7 @@ class Decimal implements Comparable<Decimal> {
     static NumberFormat MONEY = makeMoneyFormat();
     static NumberFormat NUMBER = makeNumberFormat();
     static NumberFormat DIFFERENCE = makeDifferenceFormat();
-    static NumberFormat CANONICAL = new NumberFormat("0.##", "en");
+    static NumberFormat CANONICAL = new NumberFormat("0.###", "en");
     static updateFormats() {
         MONEY = makeMoneyFormat();
         NUMBER = makeNumberFormat();
@@ -48,6 +48,12 @@ class Decimal implements Comparable<Decimal> {
     int compareTo(Decimal other) => _decimal.compareTo(other._decimal);
 
     String toString() => isNull ? "null" : number;
+
+    Decimal round(int precision) =>
+        new Decimal._(
+                ((decimal * pow(10, precision)).round() / pow(10, precision) * _precision).round(),
+                _precision
+        );
 
     Decimal operator * (Decimal other) =>
         new Decimal._(((_decimal * other._decimal) / _precision).round(), _precision);
