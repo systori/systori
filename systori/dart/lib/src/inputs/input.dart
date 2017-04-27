@@ -83,6 +83,7 @@ class TextInput extends Input {
 
 
 class StyledInput extends TextInput {
+
     Map<String,dynamic> get values => {
         className: innerHtml
             .replaceAll('<div>', '<br />')
@@ -93,7 +94,42 @@ class StyledInput extends TextInput {
             .replaceAll(new RegExp(r'<\/?span.*?>'), '')
             .replaceAll('<br>', '<br />')
     };
-    StyledInput.created(): super.created();
+
+    StyledInput.created(): super.created() {
+
+        onPaste.listen((ClipboardEvent event) {
+
+                event.preventDefault();
+
+                var data = '';
+
+                if (event.clipboardData.types.contains('text/html')) {
+
+                    data = event.clipboardData.getData('text/html')
+
+                        // div's and p's usually start a new line so we'll convert them to a <br>
+                        .replaceAll(new RegExp(r'<div[^>]*>', caseSensitive: false), '<br>')
+                        .replaceAll(new RegExp(r'<p[^>]*>', caseSensitive: false), '<br>')
+
+                        // cleanup any <br /> or <BR> to <br> for consistency
+                        .replaceAll(new RegExp(r'<br[^>]*>', caseSensitive: false), '<br>')
+
+                        // remove everything else
+                        .replaceAll(new RegExp(r'<(?!br).*?>', caseSensitive: false), '');
+
+                } else {
+
+                    data = event.clipboardData.getData('text/plain');
+
+                }
+
+                // update the input with valid value
+                setInnerHtml(data,
+                    validator: new NodeValidatorBuilder.common()..allowElement('br')
+                );
+
+            });
+    }
 }
 
 
