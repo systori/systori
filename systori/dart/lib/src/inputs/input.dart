@@ -82,53 +82,94 @@ class TextInput extends Input {
 }
 
 
+Iterable<String> cleanNode(Node parent, [canBreak = true]) sync* {
+    if (parent.nodeType == Node.TEXT_NODE) {
+        yield parent.text;
+
+    } else if (parent.nodeType == Node.ELEMENT_NODE) {
+        Element element = parent;
+
+        if (element.tagName == "BR") {
+            if (canBreak) yield "<br />";
+            return;
+        }
+
+        var block = false;
+        if (['DIV', 'P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].contains(element.tagName) ||
+                element.style.display == "block") {
+            block = true;
+        }
+
+        if (canBreak && block) yield "<br />";
+
+        var tags = [];
+        if (['B', 'I', 'U'].contains(element.tagName)) {
+
+            tags = [element.tagName.toLowerCase()];
+            yield "<${tags[0]}>";
+
+        } else {
+
+            if (['bold', '600', '700', '800', '900'].contains(element.style.fontWeight)) {
+                yield "<b>"; tags.add('b');
+            }
+
+            if (element.style.fontStyle == 'italic') {
+                yield "<i>"; tags.add('i');
+            }
+
+            if (element.style.textDecorationLine == 'underline') {
+                yield "<u>"; tags.add('u');
+            }
+
+        }
+
+        for (var node in parent.childNodes) {
+            yield* cleanNode(node, tags.isEmpty && canBreak);
+        }
+
+        for (var tag in tags.reversed) {
+            yield "</$tag>";
+        }
+
+        if (canBreak && block) yield "<br />";
+    }
+}
+
+
+String cleanHtml(String html) {
+    var span = new SpanElement();
+    span.setInnerHtml(html, treeSanitizer: NodeTreeSanitizer.trusted);
+    return cleanNode(span).join();
+}
+
+
 class StyledInput extends TextInput {
 
     Map<String,dynamic> get values => {
-        className: innerHtml
-            .replaceAll('<div>', '<br />')
-            .replaceAll('</div>', '')
-            // can't support formatting yet
-            .replaceAll(new RegExp(r'<\/?i>'), '')
-            .replaceAll(new RegExp(r'<\/?b>'), '')
-            .replaceAll(new RegExp(r'<\/?span.*?>'), '')
-            .replaceAll('<br>', '<br />')
+        className: cleanNode(this).join()
     };
 
     StyledInput.created(): super.created() {
-
         onPaste.listen((ClipboardEvent event) {
+            event.preventDefault();
+            event.clipboardData.types.contains('text/html') ?
+                handlePaste(event.clipboardData.getData('text/html')) :
+                handlePaste('', event.clipboardData.getData('text/plain'));
+        });
+    }
 
-                event.preventDefault();
-
-                var data = '';
-
-                if (event.clipboardData.types.contains('text/html')) {
-
-                    data = event.clipboardData.getData('text/html')
-
-                        // div's and p's usually start a new line so we'll convert them to a <br>
-                        .replaceAll(new RegExp(r'<div[^>]*>', caseSensitive: false), '<br>')
-                        .replaceAll(new RegExp(r'<p[^>]*>', caseSensitive: false), '<br>')
-
-                        // cleanup any <br /> or <BR> to <br> for consistency
-                        .replaceAll(new RegExp(r'<br[^>]*>', caseSensitive: false), '<br>')
-
-                        // remove everything else
-                        .replaceAll(new RegExp(r'<(?!br).*?>', caseSensitive: false), '');
-
-                } else {
-
-                    data = event.clipboardData.getData('text/plain');
-
-                }
-
-                // update the input with valid value
-                setInnerHtml(data,
-                    validator: new NodeValidatorBuilder.common()..allowElement('br')
-                );
-
-            });
+    handlePaste(String html, [String plain=""]) {
+        var sel = window.getSelection();
+        var range = sel.getRangeAt(0);
+        range.deleteContents();
+        if (html.isNotEmpty) {
+            var frag = document.createDocumentFragment();
+            frag.setInnerHtml(cleanHtml(html), treeSanitizer: NodeTreeSanitizer.trusted);
+            range.insertNode(frag);
+        } else {
+            range.insertNode(new Text(plain));
+        }
     }
 }
 
