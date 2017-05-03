@@ -100,9 +100,6 @@ def br(txt, font):
 def nr(txt, font):
     return Paragraph(str(txt), font.normal_right)
 
-def subscript(txt, font):
-    return Paragraph(str(txt), font.normal)
-
 
 def heading_and_date(heading, date, font, available_width, debug=False):
 

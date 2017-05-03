@@ -19,7 +19,7 @@ from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .font import FontManager
 
 
-DEBUG_DOCUMENT = True  # Shows boxes in rendered output
+DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
 def collate_tasks(proposal, only_groups, only_task_names, font, available_width):
@@ -151,13 +151,13 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
         totals.row_style('SPAN', 1, 4)
 
     totals.row_style('LINEBELOW', 0, -1, 0.25, colors.black)
-    totals.row(_("Total without VAT"), '', '', '', '', money(proposal['estimate_total'].net))
-    totals.row_style('SPAN', 0, 4)
-    totals.row("19,00% "+_("VAT"), '', '', '', '', money(proposal['estimate_total'].tax))
-    totals.row_style('SPAN', 0, 4)
-    totals.row(_("Total including VAT"), '', '', '', '', money(proposal['estimate_total'].gross))
+    totals.row('', _("Total without VAT"), '', '', '', money(proposal['estimate_total'].net))
+    totals.row_style('SPAN', 1, 4)
+    totals.row('', "19,00% "+_("VAT"), '', '', '', money(proposal['estimate_total'].tax))
+    totals.row_style('SPAN', 1, 4)
+    totals.row('', _("Total including VAT"), '', '', '', money(proposal['estimate_total'].gross))
     totals.keep_previous_n_rows_together(4)
-    totals.row_style('SPAN', 0, 4)
+    totals.row_style('SPAN', 1, 4)
 
     return [
         items.get_table(ContinuationTable, repeatRows=1),
