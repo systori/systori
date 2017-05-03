@@ -183,18 +183,19 @@ def collate_itemized_listing(invoice, font, available_width):
     ]
 
 
-def render(invoice, letterhead, show_payment_details, format):
+def render(invoice, letterhead, show_payment_details, title, format):
     with BytesIO() as buffer:
 
         font = FontManager(letterhead.font)
         available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
         invoice_date = date_format(date(*map(int, invoice['document_date'].split('-'))), use_l10n=True)
-        vesting_start = date_format(date(*map(int, invoice['vesting_start'].split('-'))), use_l10n=True)\
+        vesting_start = date_format(date(*map(int, invoice['vesting_start'].split('-'))), use_l10n=True) \
             if invoice['vesting_start'] else None
-        vesting_end = date_format(date(*map(int, invoice['vesting_end'].split('-'))), use_l10n=True)\
+        vesting_end = date_format(date(*map(int, invoice['vesting_end'].split('-'))), use_l10n=True) \
             if invoice['vesting_end'] else None
 
         doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
+
 
         flowables = [
 
@@ -207,7 +208,7 @@ def render(invoice, letterhead, show_payment_details, format):
             Paragraph(_("Invoice No.") + " " + invoice['invoice_no'], font.normal_right),
             Paragraph(_("Please indicate the correct invoice number on your payment."),
                       ParagraphStyle('', parent=fonts['OpenSans']['Small'], alignment=TA_RIGHT)),
-            ]
+        ]
 
         if invoice['show_project_id']:
             flowables += [Paragraph(_("Project") + " #" + str(invoice['project_id']), font.normal), ]
@@ -220,30 +221,31 @@ def render(invoice, letterhead, show_payment_details, format):
                                     vesting_start + " " + _("to") + " " +
                                     vesting_end, font.normal),]
         flowables += [
-            Spacer(0, 6 * mm),
-            Paragraph(force_break(invoice['header']), fonts['OpenSans']['Normal']),
+                         Spacer(0, 6 * mm),
+                         Paragraph(force_break(invoice['header']), fonts['OpenSans']['Normal']),
 
-            Spacer(0, 4*mm),
+                         Spacer(0, 4*mm),
 
-            collate_payments(invoice, font, available_width, show_payment_details),
+                         collate_payments(invoice, font, available_width, show_payment_details),
 
-            Spacer(0, 4*mm),
+                         Spacer(0, 4*mm),
 
-            KeepTogether(Paragraph(force_break(invoice['footer']), fonts['OpenSans']['Normal'])),
+                         KeepTogether(Paragraph(force_break(invoice['footer']), fonts['OpenSans']['Normal'])),
 
-            # Itemized Listing
+                         # Itemized Listing
 
-            PageBreak(),
+                         PageBreak(),
 
-            Paragraph(invoice_date, fonts['OpenSans']['NormalRight']),
+                         Paragraph(invoice_date, fonts['OpenSans']['NormalRight']),
 
-            Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']),
-                      fonts['OpenSans']['h2']),
+                         Paragraph(_("Itemized listing for Invoice No. {}").format(invoice['invoice_no']),
+                                   fonts['OpenSans']['h2']),
 
-            Spacer(0, 4*mm),
+                         Spacer(0, 4*mm),
 
-        ] + collate_itemized_listing(invoice, font, available_width)
+                     ] + collate_itemized_listing(invoice, font, available_width)
 
+        doc.title = title
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)
         else:

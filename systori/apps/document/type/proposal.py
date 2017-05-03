@@ -19,7 +19,7 @@ from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .font import FontManager
 
 
-DEBUG_DOCUMENT = False  # Shows boxes in rendered output
+DEBUG_DOCUMENT = True  # Shows boxes in rendered output
 
 
 def collate_tasks(proposal, only_groups, only_task_names, font, available_width):
@@ -37,7 +37,7 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
     items.row_style('SPAN', 2, 3)
 
     # Totals Table
-    totals = TableFormatter([0, 1, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
+    totals = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     totals.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     totals.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
     totals.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
@@ -234,7 +234,7 @@ def collate_lineitems(proposal, available_width, font):
     return pages
 
 
-def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, format):
+def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, title, format):
 
     with BytesIO() as buffer:
 
@@ -274,6 +274,7 @@ def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, f
 
         ] + (collate_lineitems(proposal, available_width, font) if with_lineitems else [])
 
+        doc.title = title
         if format == 'print':
             doc.build(flowables, NumberedCanvas, letterhead)
         else:

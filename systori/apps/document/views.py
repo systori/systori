@@ -345,9 +345,25 @@ class InvoiceList(ListView):
 
 class DocumentRenderView(SingleObjectMixin, View):
     def get(self, request, *args, **kwargs):
-        return HttpResponse(self.pdf(), content_type='application/pdf')
+        try:
+            title = '{} #{} {}.pdf'.format(date.today().strftime("%Y-%m-%d"),
+                                           self.request.project.id,
+                                           _(self.model.__name__))
+        except:
+            title = "Systori PDF"
+        try:
+            json = self.get_object().json
+            title = '{} #{} {}.pdf'.format(date.today().strftime("%Y-%m-%d"),
+                                           self.request.project.id,
+                                           json.get('title'))
+        except:
+            title = "Systori PDF"
 
-    def pdf(self):
+        response = HttpResponse(self.pdf(title=title), content_type='application/pdf')
+        response['Content-Disposition'] = 'filename="{}"'.format(title)
+        return response
+
+    def pdf(self, title=None):
         raise NotImplementedError
 
 
@@ -370,11 +386,11 @@ class TimesheetPDF(DocumentRenderView):
 class InvoicePDF(DocumentRenderView):
     model = Invoice
 
-    def pdf(self):
+    def pdf(self, title):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
         payment_details = self.request.GET.get('payment_details', False)
-        return pdf_type.invoice.render(json, letterhead, payment_details, self.kwargs['format'])
+        return pdf_type.invoice.render(json, letterhead, payment_details, title, self.kwargs['format'])
 
 
 class AdjustmentPDF(DocumentRenderView):
@@ -407,14 +423,14 @@ class RefundPDF(DocumentRenderView):
 class ProposalPDF(DocumentRenderView):
     model = Proposal
 
-    def pdf(self):
+    def pdf(self, title):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
         with_lineitems = self.request.GET.get('with_lineitems', False)
         only_groups = self.request.GET.get('only_groups', False)
         only_task_names = self.request.GET.get('only_task_names', False)
         return pdf_type.proposal.render(
-            json, letterhead, with_lineitems, only_groups, only_task_names, self.kwargs['format'])
+            json, letterhead, with_lineitems, only_groups, only_task_names, title, self.kwargs['format'])
 
 
 class ProposalViewMixin(BaseDocumentViewMixin):
