@@ -19,7 +19,7 @@ from .font import FontManager
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-def render(project, letterhead):
+def render(project, letterhead, title):
 
     with BytesIO() as buffer:
 
@@ -73,6 +73,6 @@ def render(project, letterhead):
         if not pages:
             pages.append(b(_('There are no billable Tasks available.'), font))
 
-        doc.build(pages, LetterheadCanvas.factory(letterhead), letterhead)
+        doc.build(pages, title, LetterheadCanvas.factory(letterhead), letterhead)
 
         return buffer.getvalue()

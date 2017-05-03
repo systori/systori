@@ -221,8 +221,9 @@ class SystoriDocument(BaseDocTemplate):
         self._handle_pageBegin()
         self._handle_nextPageTemplate('Later')
 
-    def build(self, flowables, canvasmaker=NumberedCanvas, letterhead=None):
+    def build(self, flowables, title, canvasmaker=NumberedCanvas, letterhead=None):
         self._calc()
+        self.title = title
 
         if letterhead:
             document_unit = getattr(units, letterhead.document_unit)
@@ -273,8 +274,9 @@ class NumberedSystoriDocument(BaseDocTemplate):
         self._handle_pageBegin()
         self._handle_nextPageTemplate('Later')
 
-    def build(self, flowables, canvasmaker=NumberedCanvas, letterhead=None):
+    def build(self, flowables, title, canvasmaker=NumberedCanvas, letterhead=None):
         self._calc()
+        self.title = title
 
         if letterhead:
             document_unit = getattr(units, letterhead.document_unit)

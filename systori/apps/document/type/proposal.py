@@ -274,11 +274,10 @@ def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, t
 
         ] + (collate_lineitems(proposal, available_width, font) if with_lineitems else [])
 
-        doc.title = title
         if format == 'print':
-            doc.build(flowables, NumberedCanvas, letterhead)
+            doc.build(flowables, title, NumberedCanvas, letterhead)
         else:
-            doc.build(flowables, NumberedLetterheadCanvas.factory(letterhead), letterhead)
+            doc.build(flowables, title, NumberedLetterheadCanvas.factory(letterhead), letterhead)
 
         return buffer.getvalue()
 

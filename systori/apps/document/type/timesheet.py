@@ -166,13 +166,13 @@ def create_timesheets(timesheets, available_width, available_height, font):
         yield PageBreak()
 
 
-def render(timesheets, letterhead):
+def render(timesheets, letterhead, title):
     with BytesIO() as buffer:
         font = FontManager(letterhead.font)
         available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
         doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
         flowables = create_timesheets(timesheets, available_width, available_height, font)
-        doc.build(list(flowables), LetterheadCanvas.factory(letterhead), letterhead)
+        doc.build(list(flowables), title, LetterheadCanvas.factory(letterhead), letterhead)
         return buffer.getvalue()
 
 

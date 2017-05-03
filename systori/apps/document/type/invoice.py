@@ -245,11 +245,10 @@ def render(invoice, letterhead, show_payment_details, title, format):
 
                      ] + collate_itemized_listing(invoice, font, available_width)
 
-        doc.title = title
         if format == 'print':
-            doc.build(flowables, NumberedCanvas, letterhead)
+            doc.build(flowables, title, NumberedCanvas, letterhead)
         else:
-            doc.build(flowables, NumberedLetterheadCanvas.factory(letterhead), letterhead)
+            doc.build(flowables, title, NumberedLetterheadCanvas.factory(letterhead), letterhead)
 
         return buffer.getvalue()
 

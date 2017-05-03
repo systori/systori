@@ -345,50 +345,69 @@ class InvoiceList(ListView):
 
 class DocumentRenderView(SingleObjectMixin, View):
     def get(self, request, *args, **kwargs):
-        try:
-            title = '{} #{} {}.pdf'.format(date.today().strftime("%Y-%m-%d"),
-                                           self.request.project.id,
-                                           _(self.model.__name__))
-        except:
-            title = "Systori PDF"
-        try:
-            json = self.get_object().json
-            title = '{} #{} {}.pdf'.format(date.today().strftime("%Y-%m-%d"),
-                                           self.request.project.id,
-                                           json.get('title'))
-        except:
-            title = "Systori PDF"
-
+        self.object = self.get_object()
+        title = self.get_title()
         response = HttpResponse(self.pdf(title=title), content_type='application/pdf')
-        response['Content-Disposition'] = 'filename="{}"'.format(title)
+        response['Content-Disposition'] = 'filename="{}"'.format(title+".pdf")
         return response
 
     def pdf(self, title=None):
         raise NotImplementedError
 
+    def get_title(self):
+        raise NotImplementedError
+
+
+def make_title_with_project(date, project_id, title):
+    return '{} #{} {}'.format(date, project_id, title)
+
+def make_title(date, title):
+    return '{} {}'.format(date, title)
+
 
 class TimesheetsListPDF(DocumentRenderView):
-    def pdf(self):
+    model = Timesheet
+
+    def get(self, request, *args, **kwargs):
+        title = self.get_title()
+        response = HttpResponse(self.pdf(title=title), content_type='application/pdf')
+        response['Content-Disposition'] = 'filename="{}"'.format(title)
+        return response
+
+    def get_title(self):
+        date = '{}-{}'.format(int(self.kwargs['year']), int(self.kwargs['month']))
+        return make_title(date, _('Timesheet'))
+
+    def pdf(self, title):
         year, month = int(self.kwargs['year']), int(self.kwargs['month'])
         queryset = Timesheet.objects.period(year, month)
         letterhead = DocumentSettings.objects.first().timesheet_letterhead
-        return pdf_type.timesheet.render(queryset, letterhead)
+        return pdf_type.timesheet.render(queryset, letterhead, title)
 
 
 class TimesheetPDF(DocumentRenderView):
     model = Timesheet
 
-    def pdf(self):
+    def get_title(self):
+        date = self.object.document_date.strftime("%Y-%m")
+        worker = self.object.worker
+        return make_title(date, '{} {}'.format(_('Timesheet'), worker))
+
+    def pdf(self, title):
         letterhead = DocumentSettings.objects.first().timesheet_letterhead
-        return pdf_type.timesheet.render([self.get_object()], letterhead)
+        return pdf_type.timesheet.render([self.get_object()], letterhead, title)
 
 
 class InvoicePDF(DocumentRenderView):
     model = Invoice
 
+    def get_title(self):
+        json = self.object.json
+        return make_title_with_project(json.get('document_date'), self.request.project.id, json.get('title'))
+
     def pdf(self, title):
-        json = self.get_object().json
-        letterhead = self.get_object().letterhead
+        json = self.object.json
+        letterhead = self.object.letterhead
         payment_details = self.request.GET.get('payment_details', False)
         return pdf_type.invoice.render(json, letterhead, payment_details, title, self.kwargs['format'])
 
@@ -396,8 +415,12 @@ class InvoicePDF(DocumentRenderView):
 class AdjustmentPDF(DocumentRenderView):
     model = Adjustment
 
-    def pdf(self):
-        json = self.get_object().json
+    def get_title(self):
+        json = self.object.json
+        return make_title_with_project(json.get('document_date'), self.request.project.id, json.get('title'))
+
+    def pdf(self, title):
+        json = self.object.json
         letterhead = self.get_object().letterhead
         return pdf_type.adjustment.render(json, letterhead, self.kwargs['format'])
 
@@ -405,8 +428,12 @@ class AdjustmentPDF(DocumentRenderView):
 class PaymentPDF(DocumentRenderView):
     model = Payment
 
-    def pdf(self):
-        json = self.get_object().json
+    def get_title(self):
+        json = self.object.json
+        return make_title_with_project(json.get('document_date'), self.request.project.id, json.get('title'))
+
+    def pdf(self, title):
+        json = self.object.json
         letterhead = self.get_object().letterhead
         return pdf_type.payment.render(json, letterhead, self.kwargs['format'])
 
@@ -414,8 +441,12 @@ class PaymentPDF(DocumentRenderView):
 class RefundPDF(DocumentRenderView):
     model = Refund
 
-    def pdf(self):
-        json = self.get_object().json
+    def get_title(self):
+        json = self.object.json
+        return make_title_with_project(json.get('document_date'), self.request.project.id, json.get('title'))
+
+    def pdf(self, title):
+        json = self.object.json
         letterhead = self.get_object().letterhead
         return pdf_type.refund.render(json, letterhead, self.kwargs['format'])
 
@@ -423,14 +454,23 @@ class RefundPDF(DocumentRenderView):
 class ProposalPDF(DocumentRenderView):
     model = Proposal
 
+    def get_title(self):
+        json = self.object.json
+        return make_title_with_project(json.get('document_date'), self.request.project.id, json.get('title'))
+
     def pdf(self, title):
-        json = self.get_object().json
-        letterhead = self.get_object().letterhead
+        json = self.object.json
+        letterhead = self.object.letterhead
         with_lineitems = self.request.GET.get('with_lineitems', False)
         only_groups = self.request.GET.get('only_groups', False)
         only_task_names = self.request.GET.get('only_task_names', False)
-        return pdf_type.proposal.render(
-            json, letterhead, with_lineitems, only_groups, only_task_names, title, self.kwargs['format'])
+        return pdf_type.proposal.render(json,
+                                        letterhead,
+                                        with_lineitems,
+                                        only_groups,
+                                        only_task_names,
+                                        title,
+                                        self.kwargs['format'])
 
 
 class ProposalViewMixin(BaseDocumentViewMixin):
@@ -489,10 +529,19 @@ class ProposalDelete(DeleteView):
 class EvidencePDF(DocumentRenderView):
     model = Project
 
-    def pdf(self):
+    def get(self, request, *args, **kwargs):
+        title = self.get_title()
+        response = HttpResponse(self.pdf(title=title), content_type='application/pdf')
+        response['Content-Disposition'] = 'filename="{}"'.format(title)
+        return response
+
+    def get_title(self):
+        return make_title_with_project(date.today().strftime('%Y-%m-%d'), self.request.project.id, _('Evidence'))
+
+    def pdf(self, title):
         doc_settings = DocumentSettings.get_for_language(get_language())
         letterhead = doc_settings.evidence_letterhead
-        return pdf_type.evidence.render(self.request.project, letterhead)
+        return pdf_type.evidence.render(self.request.project, letterhead, title)
 
 
 # Itemized List
@@ -501,10 +550,21 @@ class EvidencePDF(DocumentRenderView):
 class ItemizedListingPDF(DocumentRenderView):
     model = Project
 
-    def pdf(self):
+    def get(self, request, *args, **kwargs):
+        title = self.get_title()
+        response = HttpResponse(self.pdf(title=title), content_type='application/pdf')
+        response['Content-Disposition'] = 'filename="{}"'.format(title)
+        return response
+
+    def get_title(self):
+        return make_title_with_project(date.today().strftime('%Y-%m-%d'),
+                                       self.request.project.id,
+                                       _('Itemized listing'))
+
+    def pdf(self, title):
         doc_settings = DocumentSettings.get_for_language(get_language())
         letterhead = doc_settings.itemized_letterhead
-        return pdf_type.itemized_listing.render(self.request.project, letterhead, self.kwargs['format'])
+        return pdf_type.itemized_listing.render(self.request.project, letterhead, title, self.kwargs['format'])
 
 
 # Document Template
@@ -556,7 +616,7 @@ class LetterheadDelete(DeleteView):
 
 
 class LetterheadPreview(DocumentRenderView):
-    def pdf(self):
+    def pdf(self, title):
         return pdf_type.letterhead.render(letterhead=Letterhead.objects.get(id=self.kwargs.get('pk')))
 
 

@@ -60,14 +60,14 @@ def collate_payments(invoice, available_width):
     return t.get_table(ContinuationTable, repeatRows=1)
 
 
-def render(project, letterhead, format):
+def render(project, letterhead, title, format):
 
     with BytesIO() as buffer:
         available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
 
         today = date_format(date.today(), use_l10n=True)
 
-        itemized_listing = serialize(project, {})
+        itemized_listing = serialize(project)
 
         doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
@@ -87,8 +87,8 @@ def render(project, letterhead, format):
         ] + collate_itemized_listing(itemized_listing, font, available_width)
 
         if format == 'print':
-            doc.build(flowables, NumberedCanvas, letterhead)
+            doc.build(flowables, title, NumberedCanvas, letterhead)
         else:
-            doc.build(flowables, NumberedLetterheadCanvasWithoutFirstPage.factory(letterhead), letterhead)
+            doc.build(flowables, title, NumberedLetterheadCanvasWithoutFirstPage.factory(letterhead), letterhead)
 
         return buffer.getvalue()
