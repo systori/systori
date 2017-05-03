@@ -85,6 +85,9 @@ def force_break(txt):
 def p(txt, font):
     return Paragraph(txt, font.normal)
 
+def pr(txt, font):
+    return Paragraph(txt, font.normal_right)
+
 
 def b(txt, font):
     return Paragraph(txt, font.bold)
@@ -96,6 +99,9 @@ def br(txt, font):
 
 def nr(txt, font):
     return Paragraph(str(txt), font.normal_right)
+
+def subscript(txt, font):
+    return Paragraph(str(txt), font.normal)
 
 
 def heading_and_date(heading, date, font, available_width, debug=False):
@@ -349,7 +355,7 @@ class ContinuationTable(Table):
 class TableStyler:
     font_size = 10
 
-    def __init__(self, font, base_style=True, debug=False):
+    def __init__(self, font, debug=False, base_style=True):
         self.font = font.normal
         self.lines = []
         self.style = []
@@ -361,8 +367,7 @@ class TableStyler:
             ]
         if debug:
             self.style += [
-                ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-                ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
             ]
 
     def get_table(self, table_class=Table, **kwargs):

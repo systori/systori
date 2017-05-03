@@ -15,7 +15,7 @@ from systori.apps.accounting.models import Entry
 from systori.apps.accounting.report import create_invoice_report, create_invoice_table
 from systori.apps.accounting.constants import TAX_RATE
 
-from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, fonts, force_break, p, b
+from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable, fonts, force_break, p, b, pr
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import get_available_width_height_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer
@@ -88,6 +88,7 @@ def collate_itemized_listing(invoice, font, available_width):
     items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
+    items.style.append(('RIGHTPADDING', (-2, 0), (-1, -2), 0))
     items.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
     items.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
 
@@ -95,32 +96,21 @@ def collate_itemized_listing(invoice, font, available_width):
     items.row_style('ALIGNMENT', 2, -1, "RIGHT")
 
     # Totals Table
-    totals = TableFormatter([0, 1], available_width, font, debug=DEBUG_DOCUMENT)
+    totals = TableFormatter([0, 1, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     totals.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     totals.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
     totals.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
     totals.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
 
-    if DEBUG_DOCUMENT:
-        items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
-        totals.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
-
-    group_subtotals_added = False
-
     def add_total(group):
-        global group_subtotals_added
-
         if not group.get('groups') and group.get('tasks'):
-            items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                      '', '', '', money(group['progress']))
+            items.row('','','','', '∑', money(group['progress']))
             items.row_style('FONTNAME', 0, -1, font.bold)
-            items.row_style('ALIGNMENT', -1, -1, "RIGHT")
-            items.row_style('SPAN', 1, 4)
-            items.row_style('VALIGN', 0, -1, "BOTTOM")
+            items.row_style('ALIGNMENT', 0, -2, "RIGHT")
+            items.row_style('ALIGNMENT', 0, -1, "RIGHT")
+            items.row_style('TOPPADDING', 0, -2, 1)
+            items.row_style('RIGHTPADDING', 0, -1, 0)
             items.row('')
-
-            totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font), money(group['progress']))
-            group_subtotals_added = True
 
     def add_task(task):
         items.row(p(task['code'], font), p(task['name'], font))
@@ -179,14 +169,12 @@ def collate_itemized_listing(invoice, font, available_width):
                 items.row_style('SPAN', 1, -2)
                 items.row_style('ALIGNMENT', -1, -1, "RIGHT")
 
-        global group_subtotals_added
-        if not group_subtotals_added:
-            # taskgroup subtotals are added if there is only 1 job *and* it is itemized
-            # in all other cases we're going to show the job total
-            totals.row(b('{} {} - {}'.format(_('Total'), job['code'], job['name']), font), money(job['invoiced'].net))
+        totals.row(b('{} {} - {}'.format(_('Total'), job['code'], job['name']), font), '','','','', money(job['invoiced'].net))
+        totals.row_style('SPAN', 0, 4)
 
-    totals.row(_("Total without VAT"), money(invoice['invoiced'].net))
-    totals.row_style('LINEABOVE', 0, 1, 0.25, colors.black)
+    totals.row(_("Total without VAT"), '','','','', money(invoice['invoiced'].net))
+    totals.row_style('SPAN', 0, 4)
+    totals.row_style('LINEABOVE', 0, -1, 0.25, colors.black)
 
     return [
         items.get_table(ContinuationTable, repeatRows=1),

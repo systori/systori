@@ -88,6 +88,14 @@ def ubrdecimal(number, max_significant=4, min_significant=2):
 
 
 @register.filter
+def ubrdecimal_with_unit(number, unit):
+    if unit in ('m³', 'm3', 'qm', 'ccm'):
+        return ubrdecimal(number, max_significant=3, min_significant=3)
+    else:
+        return ubrdecimal(number)
+
+
+@register.filter
 def ubrnumber(number):
     return ubrdecimal(number, min_significant=0)
 
