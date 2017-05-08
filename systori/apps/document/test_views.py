@@ -373,12 +373,13 @@ class ProposalViewTests(DocumentTestCase):
         tm_task = TaskFactory(name='Task #2 Time & Materials', qty=None, price=200, total=200, group=self.group)
         LineItemFactory(name='TM Lineitem', qty=20, price=10, total=200, task=tm_task)
         pdf = self.get_rendered_pdf()
+        # • symbol is actually the `sum` symbol (∑)
         self.assertEqual(
             pdf.getPage(0).extractText(),
             dedent("""\
             Professor Ludwig von Mises
-
-
+            
+            
             Proposal
             March 6, 2017
             hello
@@ -393,39 +394,68 @@ class ProposalViewTests(DocumentTestCase):
             Main Group
             01.01.001
             Task #1 Fixed Price
-
-
-
+            
+            
+            
             10.00
             $96.00
             $0.00
             01.01.002
             Task #2 Time & Materials
-
-
+            
+            
             TM Lineitem
             20.00
             $10.00
             $200.00
-
-            Total 01.01 - Main Group
+            
+            • 01.01
             $200.00
-
-
-
-
-
-
+            
+            
+            
+            
+            
+            
+            
+            • 01
+            $200.00
+            
+            
+            
+            
+            
+            
             02
             Job Two
-
-
-            Total 01.01 - Main Group
+            
+            • 02
+            $0.00
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            01
+            Job One
             $200.00
+            02
+            Job Two
+            $0.00
+            
             Total without VAT
             $200.00
+            
             19,00% VAT
             $38.00
+            
             Total including VAT
             $238.00
             bye
@@ -567,6 +597,7 @@ class InvoiceViewTests(DocumentTestCase):
             'job-0-debit_net': '1160.00',
             'job-0-debit_tax': '220.40',
         })
+        # • symbol is actually the `sum` symbol (∑)
         self.assertEqual(
             pdf.getPage(1).extractText(),
             dedent("""\
@@ -575,7 +606,7 @@ class InvoiceViewTests(DocumentTestCase):
             Pos.
             Description
             Amount
-
+            
             Price
             Total
             01
@@ -584,31 +615,34 @@ class InvoiceViewTests(DocumentTestCase):
             Main Group
             01.01.001
             Task #1 Fixed Price
-
-
-
+            
+            
+            
             10.00
             $96.00
             $960.00
             01.01.002
             Task #2 Time & Materials
-
-
-
+            
+            
+            
             TM Lineitem
             20.00
             $10.00
             $200.00
-
-            Total 01.01 - Main Group
+            
+            
+            
+            
+            •
             $1,160.00
-
-
-
-
-
-
-            Total 01.01 - Main Group
+            
+            
+            
+            
+            
+            
+            Total 01 - Job One
             $1,160.00
             Total without VAT
             $1,160.00

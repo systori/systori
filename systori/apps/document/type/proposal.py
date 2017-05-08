@@ -5,6 +5,7 @@ from decimal import Decimal
 from reportlab.lib.units import mm
 from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
 from reportlab.lib import colors
+from reportlab.pdfbase.pdfmetrics import stringWidth
 
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
@@ -16,40 +17,23 @@ from .style import chunk_text, force_break, p, b, br, pr
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import get_available_width_height_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer, simpleSplit
+from .style import get_items_table, get_totals_table
 from .font import FontManager
-
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-def collate_tasks(proposal, only_groups, only_task_names, font, available_width):
-    items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
-    items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
-    items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
-    items.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
-
-    items.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
-
-    items.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
-    items.row_style('FONTNAME', 0, -1, font.bold)
-    items.row_style('ALIGNMENT', 2, 3, "CENTER")
-    items.row_style('ALIGNMENT', 4, -1, "RIGHT")
-    items.row_style('SPAN', 2, 3)
-
-    # Totals Table
-    totals = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
-    totals.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
-    totals.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
-    totals.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
-    totals.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
-    totals.row()
-    totals.row_style('LINEBELOW', 0, -1, 0.25, colors.black)
+def collate_tasks(proposal, only_groups, only_task_names, available_width, font):
+    items = get_items_table(available_width, font, DEBUG_DOCUMENT)
+    totals = get_totals_table(available_width, font, DEBUG_DOCUMENT)
 
     description_width = 290.0
 
     def add_total_to_totals(group):
-        totals.row(p(group['code'], font), p(group['name'][:20] + ' ...', font), '', '', pr(money(group['estimate']), font), '')
+        totals.row(p(group['code'], font), p(group['name'][:30]+'...', font),
+                   '', '', pr(money(group['estimate']), font), '')
         totals.row_style('SPAN', 1, 3)
+        print("debug me")
 
     def add_total_to_items(group):
         try:
@@ -178,13 +162,10 @@ def collate_lineitems(proposal, available_width, font):
         t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
 
         t.row(b(job['code'], font), b(job['name'], font))
-        #t.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
         t.row(p(task['code'], font), p(task['name'], font))
 
         for chunk in chunk_text(task['description']):
             t.row('', p(chunk, font))
-
-        # t.row_style('BOTTOMPADDING', 0, -1, 10)  seems to have no effect @elmcrest 09/2015
 
         pages.append(t.get_table(ContinuationTable))
 
@@ -266,7 +247,7 @@ def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, t
 
             Spacer(0, 4*mm)
 
-        ] + collate_tasks(proposal, only_groups, only_task_names, font, available_width) + [
+        ] + collate_tasks(proposal, only_groups, only_task_names, available_width, font) + [
 
             Spacer(0, 10*mm),
 

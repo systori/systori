@@ -132,6 +132,13 @@ class StationaryCanvas(canvas.Canvas):
         super().showPage()
 
 
+class StationaryCanvasLetterheadPageTwo(StationaryCanvas):
+
+    def showPage(self):
+        self.doForm(self.page_info_page1[1])
+        canvas.Canvas.showPage(self)
+
+
 class NumberedCanvas(canvas.Canvas):
 
     def __init__(self, *args, page_number_x, page_number_y, page_number_y_next, font, **kwargs):
@@ -188,7 +195,7 @@ class NumberedLetterheadCanvas(StationaryCanvas, NumberedCanvas):
         return lambda *args, **kwargs: NumberedLetterheadCanvas(letterhead.letterhead_pdf, *args, **kwargs)
 
 
-class NumberedLetterheadCanvasWithoutFirstPage(StationaryCanvas, NumberedCanvas):
+class NumberedLetterheadCanvasLetterheadPageTwo(StationaryCanvasLetterheadPageTwo, NumberedCanvas):
 
     def __init__(self, letterhead_pdf, *args, **kwargs):
         self.stationary_pages = letterhead_pdf
@@ -196,8 +203,8 @@ class NumberedLetterheadCanvasWithoutFirstPage(StationaryCanvas, NumberedCanvas)
 
     @staticmethod
     def factory(letterhead):
-        return lambda *args, **kwargs: NumberedLetterheadCanvasWithoutFirstPage(letterhead.letterhead_pdf,
-                                                                                *args, **kwargs)
+        return lambda *args, **kwargs: NumberedLetterheadCanvasLetterheadPageTwo(letterhead.letterhead_pdf,
+                                                                                 *args, **kwargs)
 
 
 class SystoriDocument(BaseDocTemplate):
@@ -455,3 +462,30 @@ def get_address_label_spacer(document):
         return Spacer(0, 30*mm)
     else:
         return Spacer(0, 26*mm)
+
+
+def get_items_table(available_width, font, DEBUG_DOCUMENT):
+    items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
+    items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
+    items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
+    items.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
+
+    items.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
+
+    items.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
+    items.row_style('FONTNAME', 0, -1, font.bold)
+    items.row_style('ALIGNMENT', 2, 3, "CENTER")
+    items.row_style('ALIGNMENT', 4, -1, "RIGHT")
+    items.row_style('SPAN', 2, 3)
+    return items
+
+
+def get_totals_table(available_width, font, DEBUG_DOCUMENT):
+    totals = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
+    totals.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
+    totals.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
+    totals.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
+    totals.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
+    totals.row()
+    totals.row_style('LINEBELOW', 0, -1, 0.25, colors.black)
+    return totals

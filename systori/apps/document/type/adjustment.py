@@ -14,7 +14,7 @@ from .font import FontManager
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-def render(adjustment, letterhead, format):
+def render(adjustment, letterhead, title, format):
 
     with BytesIO() as buffer:
 
@@ -34,9 +34,9 @@ def render(adjustment, letterhead, format):
 
         ]
         if format == 'print':
-            doc.build(flowables, NumberedCanvas, letterhead)
+            doc.build(flowables, title, NumberedCanvas, letterhead)
         else:
-            doc.build(flowables, NumberedLetterheadCanvas.factory(letterhead), letterhead)
+            doc.build(flowables, title, NumberedLetterheadCanvas.factory(letterhead), letterhead)
 
         return buffer.getvalue()
 

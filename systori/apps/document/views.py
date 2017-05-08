@@ -422,7 +422,7 @@ class AdjustmentPDF(DocumentRenderView):
     def pdf(self, title):
         json = self.object.json
         letterhead = self.get_object().letterhead
-        return pdf_type.adjustment.render(json, letterhead, self.kwargs['format'])
+        return pdf_type.adjustment.render(json, letterhead, title, self.kwargs['format'])
 
 
 class PaymentPDF(DocumentRenderView):
@@ -435,7 +435,7 @@ class PaymentPDF(DocumentRenderView):
     def pdf(self, title):
         json = self.object.json
         letterhead = self.get_object().letterhead
-        return pdf_type.payment.render(json, letterhead, self.kwargs['format'])
+        return pdf_type.payment.render(json, letterhead, title, self.kwargs['format'])
 
 
 class RefundPDF(DocumentRenderView):
@@ -448,7 +448,7 @@ class RefundPDF(DocumentRenderView):
     def pdf(self, title):
         json = self.object.json
         letterhead = self.get_object().letterhead
-        return pdf_type.refund.render(json, letterhead, self.kwargs['format'])
+        return pdf_type.refund.render(json, letterhead, title, self.kwargs['format'])
 
 
 class ProposalPDF(DocumentRenderView):
