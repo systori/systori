@@ -112,9 +112,10 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
     for job in proposal['jobs']:
 
         items.row(b(job['code'], font), b(job['name'], font))
-        if job.get('description', False):
-            items.row('', b(job['description'], font))
         items.row_style('SPAN', 1, -1)
+        if job.get('description', False):
+            items.row('', p(job['description'], font))
+            items.row_style('SPAN', 1, -1)
 
         for group in job.get('groups', []):
             traverse(group, 1, only_groups, only_task_names)
