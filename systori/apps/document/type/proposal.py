@@ -187,7 +187,7 @@ def collate_lineitems(proposal, available_width, font):
 
         t.row_style('LINEBELOW', 0, -1, 0.25, colors.black)
 
-        t.row('', ubrdecimal(task['qty']/task['qty']), b(task['unit'], font), money(task_price), '')
+        t.row('', ubrdecimal(1.00), b(task['unit'], font), '', money(task_price))
         t.row_style('FONTNAME', 0, -1, font.bold)
 
         pages.append(t.get_table(ContinuationTable))
