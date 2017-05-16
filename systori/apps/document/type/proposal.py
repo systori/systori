@@ -29,7 +29,7 @@ DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 def collate_tasks(proposal, only_groups, only_task_names, font, available_width):
     style = Style.default()
-    tbl = TableBuilder(style)
+    tbl = TableBuilder([1, 0, 1, 1, 1], style)
     items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
@@ -82,8 +82,9 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
         tbl.row(
             Paragraph.from_string(task['code'], bold),
             Paragraph.from_string(task['name'], bold),
+            Span.col
         )
-        tbl.row('', parse_html('<p>'+task['description']+'</p>'))
+        #tbl.row('', parse_html('<p>'+task['description']+'</p>'))
 
         items.row(p(task['code'], font), p(task['name'], font))
         items.row_style('SPAN', 1, -2)
