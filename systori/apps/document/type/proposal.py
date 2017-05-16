@@ -28,8 +28,8 @@ DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
 def collate_tasks(proposal, only_groups, only_task_names, font, available_width):
-    style = Style.default()
-    tbl = TableBuilder([1, 0, 1, 1, 1], style)
+    style = Style.default().set(font_size=12)
+    tbl = TableBuilder([1, 0, 1, 1, 1, 1], style)
     items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
@@ -42,6 +42,7 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
         Paragraph.from_string(_("Pos."), bold),
         Paragraph.from_string(_("Description"), bold),
         Paragraph.from_string(_("Amount"), bold),
+        '',
         Paragraph.from_string(_("Price"), bold),
         Paragraph.from_string(_("Total"), bold.set(text_align=TextAlign.right))
     )
@@ -82,9 +83,9 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
         tbl.row(
             Paragraph.from_string(task['code'], bold),
             Paragraph.from_string(task['name'], bold),
-            Span.col
+            Span.col, Span.col, Span.col, Span.col
         )
-        #tbl.row('', parse_html('<p>'+task['description']+'</p>'))
+        tbl.row('', parse_html('<p>'+task['description']+'</p>'), Span.col, Span.col, Span.col, Span.col)
 
         items.row(p(task['code'], font), p(task['name'], font))
         items.row_style('SPAN', 1, -2)
@@ -111,11 +112,12 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
         tbl.row(
             Paragraph.from_string(parent['code'], bold),
             Paragraph.from_string(parent['name'], bold),
+            Span.col, Span.col, Span.col, Span.col
         )
         items.row(b(parent['code'], font), b(parent['name'], font))
         items.row_style('SPAN', 1, -1)
         if not only_task_names:
-            tbl.row('', parse_html('<p>'+parent['description']+'</p>'))
+            tbl.row('', parse_html('<p>'+parent['description']+'</p>'), Span.col, Span.col, Span.col, Span.col)
             lines = simpleSplit(parent['description'], font.normal.fontName, items.font_size, description_width)
             for line in lines:
                 items.row('', p(line, font))
@@ -144,8 +146,9 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
         tbl.row(
             Paragraph.from_string(job['code'], bold),
             Paragraph.from_string(job['name'], bold),
+            Span.col, Span.col, Span.col, Span.col
         )
-        tbl.row('', parse_html('<p>'+job['description']+'</p>'))
+        tbl.row('', parse_html('<p>'+job['description']+'</p>'), Span.col, Span.col, Span.col, Span.col)
 
         items.row(b(job['code'], font), b(job['name'], font))
         items.row_style('SPAN', 1, -1)
@@ -177,8 +180,8 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
 
     return [
         tbl.table,
-        items.get_table(ContinuationTable, repeatRows=1),
-        totals.get_table()
+        #items.get_table(ContinuationTable, repeatRows=1),
+        #totals.get_table()
     ]
 
 
