@@ -3,7 +3,7 @@ from datetime import date
 from decimal import Decimal
 
 from reportlab.lib.units import mm
-from reportlab.platypus import Paragraph, Spacer, KeepTogether, PageBreak
+from reportlab.platypus import Spacer, KeepTogether, PageBreak
 from reportlab.lib import colors
 
 from django.utils.formats import date_format
@@ -18,17 +18,33 @@ from .style import get_available_width_height_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer, simpleSplit
 from .font import FontManager
 
+from bericht.html import parse_html
+from bericht.text import Paragraph
+from bericht.table import TableBuilder, Cell, Span
+from bericht.style import Style, TextAlign
+
 
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
 def collate_tasks(proposal, only_groups, only_task_names, font, available_width):
+    style = Style.default()
+    tbl = TableBuilder(style)
     items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
     items.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
 
     items.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
+
+    bold = style.set(bold=True)
+    tbl.row(
+        Paragraph.from_string(_("Pos."), bold),
+        Paragraph.from_string(_("Description"), bold),
+        Paragraph.from_string(_("Amount"), bold),
+        Paragraph.from_string(_("Price"), bold),
+        Paragraph.from_string(_("Total"), bold.set(text_align=TextAlign.right))
+    )
 
     items.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
     items.row_style('FONTNAME', 0, -1, font.bold)
@@ -63,6 +79,12 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
                     task['variant_group'], task['variant_serial'], task['name'], task['variant_group'])
                 task_total_column = _('Alternative')
 
+        tbl.row(
+            Paragraph.from_string(task['code'], bold),
+            Paragraph.from_string(task['name'], bold),
+        )
+        tbl.row('', parse_html('<p>'+task['description']+'</p>'))
+
         items.row(p(task['code'], font), p(task['name'], font))
         items.row_style('SPAN', 1, -2)
         if not only_task_names:
@@ -73,19 +95,26 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
                 items.row_style('TOPPADDING', 0, -1, 1)
 
         if task['qty'] is not None:
+            tbl.row('', '', ubrdecimal(task['qty']), task['unit'], money(task['price']), task_total_column)
             items.row('', '', ubrdecimal(task['qty']), p(task['unit'], font), money(task['price']), task_total_column)
             items.row_style('ALIGNMENT', 1, -1, "RIGHT")
             items.row_style('BOTTOMPADDING', 0, -1, 10)
         else:
             for li in task['lineitems']:
+                tbl.row('', li['name'], ubrdecimal(li['qty']), li['unit'], money(li['price']), money(li['estimate']))
                 items.row('', p(li['name'], font), ubrdecimal(li['qty']), p(li['unit'], font), money(li['price']), money(li['estimate']))
                 items.row_style('ALIGNMENT', 1, -1, "RIGHT")
                 items.row_style('BOTTOMPADDING', 0, -1, 10)
 
     def traverse(parent, depth, only_groups, only_task_names):
+        tbl.row(
+            Paragraph.from_string(parent['code'], bold),
+            Paragraph.from_string(parent['name'], bold),
+        )
         items.row(b(parent['code'], font), b(parent['name'], font))
         items.row_style('SPAN', 1, -1)
         if not only_task_names:
+            tbl.row('', parse_html('<p>'+parent['description']+'</p>'))
             lines = simpleSplit(parent['description'], font.normal.fontName, items.font_size, description_width)
             for line in lines:
                 items.row('', p(line, font))
@@ -110,6 +139,12 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
                 add_task(task)
 
     for job in proposal['jobs']:
+
+        tbl.row(
+            Paragraph.from_string(job['code'], bold),
+            Paragraph.from_string(job['name'], bold),
+        )
+        tbl.row('', parse_html('<p>'+job['description']+'</p>'))
 
         items.row(b(job['code'], font), b(job['name'], font))
         items.row_style('SPAN', 1, -1)
@@ -140,6 +175,7 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
     totals.row(_("Total including VAT"), money(proposal['estimate_total'].gross))
 
     return [
+        tbl.table,
         items.get_table(ContinuationTable, repeatRows=1),
         totals.get_table()
     ]
@@ -233,21 +269,15 @@ def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, f
         ]
 
         if proposal['show_project_id']:
-            flowables += [Paragraph(_("Project") + " #" + str(proposal['project_id']), font.normal), ]
+            flowables += [Paragraph.from_string(_("Project") + " #" + str(proposal['project_id'])), ]
 
         flowables += [
             Spacer(0, 4*mm),
-
-            Paragraph(force_break(proposal['header']), font.normal),
-
+        ] + parse_html('<p>'+force_break(proposal['header'])+'</p>') + [
             Spacer(0, 4*mm)
-
         ] + collate_tasks(proposal, only_groups, only_task_names, font, available_width) + [
-
             Spacer(0, 10*mm),
-
-            KeepTogether(Paragraph(force_break(proposal['footer']), font.normal)),
-
+            KeepTogether(Paragraph.from_string(force_break(proposal['footer']))),
         ] + (collate_lineitems(proposal, available_width, font) if with_lineitems else [])
 
         if format == 'print':
