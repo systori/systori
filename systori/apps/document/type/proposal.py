@@ -27,9 +27,48 @@ from bericht.style import Style, TextAlign
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
+class ProposalBuilder(TableBuilder):
+    def __init__(self):
+        style = Style.default().set(font_size=12)
+        super().__init__([1, 0, 1, 1, 1, 1], style)
+        self.bold = style.set(bold=True)
+        self.padded_row = style.set(padding_bottom=10)
+        self.right = style.set(text_align=TextAlign.right)
+
+    def header(self, *cols):
+        self.row(*(
+            text if isinstance(text, Span)
+            else Paragraph.from_string(text, self.bold.set(text_align=alignment))
+            for text, alignment in cols
+        ))
+
+    def code_name(self, code, name, bold=False):
+        self.row(
+            Paragraph.from_string(code, self.bold if bold else self.style),
+            Paragraph.from_string(name, self.bold if bold else self.style),
+            Span.col, Span.col, Span.col, Span.col
+        )
+
+    def description(self, html):
+        self.row(
+            '', parse_html('<p>'+html+'</p>'),
+            Span.col, Span.col, Span.col, Span.col,
+            #row_style=self.padded_row
+        )
+
+    def detail(self, name, qty, unit, price, total):
+        self.row(
+            '', name,
+            Paragraph.from_string(ubrdecimal(qty), self.right),
+            unit,
+            Paragraph.from_string(money(price), self.right),
+            Paragraph.from_string(total, self.right),
+            #row_style=self.padded_row
+        )
+
+
 def collate_tasks(proposal, only_groups, only_task_names, font, available_width):
-    style = Style.default().set(font_size=12)
-    tbl = TableBuilder([1, 0, 1, 1, 1, 1], style)
+    tbl = ProposalBuilder()
     items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
     items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
     items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
@@ -37,21 +76,14 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
 
     items.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
 
-    bold = style.set(bold=True)
-    tbl.row(
-        Paragraph.from_string(_("Pos."), bold),
-        Paragraph.from_string(_("Description"), bold),
-        Paragraph.from_string(_("Amount"), bold),
-        '',
-        Paragraph.from_string(_("Price"), bold),
-        Paragraph.from_string(_("Total"), bold.set(text_align=TextAlign.right))
+    tbl.header(
+        (_("Pos."), TextAlign.left),
+        (_("Description"), TextAlign.left),
+        (_("Amount"), TextAlign.center),
+        (Span.col, None),
+        (_("Price"), TextAlign.right),
+        (_("Total"), TextAlign.right),
     )
-
-    items.row(_("Pos."), _("Description"), _("Amount"), '', _("Price"), _("Total"))
-    items.row_style('FONTNAME', 0, -1, font.bold)
-    items.row_style('ALIGNMENT', 2, 3, "CENTER")
-    items.row_style('ALIGNMENT', 4, -1, "RIGHT")
-    items.row_style('SPAN', 2, 3)
 
     # Totals Table
     totals = TableFormatter([0, 1], available_width, font, debug=DEBUG_DOCUMENT)
@@ -63,8 +95,6 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
     if DEBUG_DOCUMENT:
         items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
         totals.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
-
-    description_width = 290.0
 
     def add_task(task):
 
@@ -80,50 +110,20 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
                     task['variant_group'], task['variant_serial'], task['name'], task['variant_group'])
                 task_total_column = _('Alternative')
 
-        tbl.row(
-            Paragraph.from_string(task['code'], bold),
-            Paragraph.from_string(task['name'], bold),
-            Span.col, Span.col, Span.col, Span.col
-        )
-        tbl.row('', parse_html('<p>'+task['description']+'</p>'), Span.col, Span.col, Span.col, Span.col)
-
-        items.row(p(task['code'], font), p(task['name'], font))
-        items.row_style('SPAN', 1, -2)
+        tbl.code_name(task['code'], task['name'])
         if not only_task_names:
-            lines = simpleSplit(task['description'], font.normal.fontName, items.font_size, description_width)
-            for line in lines:
-                items.row('', p(line, font))
-                items.row_style('SPAN', 1, -1)
-                items.row_style('TOPPADDING', 0, -1, 1)
+            tbl.description(task['description'])
 
         if task['qty'] is not None:
-            tbl.row('', '', ubrdecimal(task['qty']), task['unit'], money(task['price']), task_total_column)
-            items.row('', '', ubrdecimal(task['qty']), p(task['unit'], font), money(task['price']), task_total_column)
-            items.row_style('ALIGNMENT', 1, -1, "RIGHT")
-            items.row_style('BOTTOMPADDING', 0, -1, 10)
+            tbl.detail('', task['qty'], task['unit'], task['price'], task_total_column)
         else:
             for li in task['lineitems']:
-                tbl.row('', li['name'], ubrdecimal(li['qty']), li['unit'], money(li['price']), money(li['estimate']))
-                items.row('', p(li['name'], font), ubrdecimal(li['qty']), p(li['unit'], font), money(li['price']), money(li['estimate']))
-                items.row_style('ALIGNMENT', 1, -1, "RIGHT")
-                items.row_style('BOTTOMPADDING', 0, -1, 10)
+                tbl.detail(li['name'], li['qty'], li['unit'], li['price'], money(li['estimate']))
 
     def traverse(parent, depth, only_groups, only_task_names):
-        tbl.row(
-            Paragraph.from_string(parent['code'], bold),
-            Paragraph.from_string(parent['name'], bold),
-            Span.col, Span.col, Span.col, Span.col
-        )
-        items.row(b(parent['code'], font), b(parent['name'], font))
-        items.row_style('SPAN', 1, -1)
+        tbl.code_name(parent['code'], parent['name'], bold=True)
         if not only_task_names:
-            tbl.row('', parse_html('<p>'+parent['description']+'</p>'), Span.col, Span.col, Span.col, Span.col)
-            lines = simpleSplit(parent['description'], font.normal.fontName, items.font_size, description_width)
-            for line in lines:
-                items.row('', p(line, font))
-                items.row_style('SPAN', 1, -1)
-                items.row_style('TOPPADDING', 0, -1, 1)
-            items.row_style('BOTTOMPADDING', 0, -1, 10)
+            tbl.description(parent['description'])
 
         for group in parent.get('groups', []):
             traverse(group, depth + 1, only_groups, only_task_names)
@@ -142,20 +142,8 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
                 add_task(task)
 
     for job in proposal['jobs']:
-
-        tbl.row(
-            Paragraph.from_string(job['code'], bold),
-            Paragraph.from_string(job['name'], bold),
-            Span.col, Span.col, Span.col, Span.col
-        )
-        tbl.row('', parse_html('<p>'+job['description']+'</p>'), Span.col, Span.col, Span.col, Span.col)
-
-        items.row(b(job['code'], font), b(job['name'], font))
-        items.row_style('SPAN', 1, -1)
-        if job.get('description', False):
-            items.row('', p(job['description'], font))
-            items.row_style('SPAN', 1, -1)
-
+        tbl.code_name(job['code'], job['name'], bold=True)
+        tbl.description(job['description'])
         for group in job.get('groups', []):
             traverse(group, 1, only_groups, only_task_names)
             if not group.get('groups', []) and group.get('tasks', []):
@@ -277,11 +265,11 @@ def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, f
 
         flowables += [
             Spacer(0, 4*mm),
-        ] + parse_html('<p>'+force_break(proposal['header'])+'</p>') + [
+            parse_html('<p>'+force_break(proposal['header'])+'</p>')[0],
             Spacer(0, 4*mm)
         ] + collate_tasks(proposal, only_groups, only_task_names, font, available_width) + [
             Spacer(0, 10*mm),
-            KeepTogether(Paragraph.from_string(force_break(proposal['footer']))),
+            KeepTogether(parse_html('<p>'+force_break(proposal['footer'])+'</p>')[0]),
         ] + (collate_lineitems(proposal, available_width, font) if with_lineitems else [])
 
         if format == 'print':
