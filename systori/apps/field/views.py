@@ -152,7 +152,7 @@ class FieldProjectList(ListView):
         return Project.objects \
             .without_template() \
             .filter(phase__in=[Project.PLANNING, Project.EXECUTING]) \
-            .order_by('id')
+            .order_by('-id')
 
 
 class FieldProjectView(DetailView):

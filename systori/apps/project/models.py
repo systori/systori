@@ -89,7 +89,7 @@ class Project(models.Model):
 
     phase = FSMField(default=PROSPECTIVE, choices=PHASE_CHOICES)
 
-    @transition(field=phase, source=FLOATING_PHASES, target=PROSPECTIVE)
+    @transition(field=phase, source="*", target=PROSPECTIVE)
     def begin_prospecting(self):
         pass
 
@@ -97,7 +97,7 @@ class Project(models.Model):
     def is_prospective(self):
         return self.phase == Project.PROSPECTIVE
 
-    @transition(field=phase, source=FLOATING_PHASES, target=TENDERING)
+    @transition(field=phase, source="*", target=TENDERING)
     def begin_tendering(self):
         pass
 
@@ -105,7 +105,7 @@ class Project(models.Model):
     def is_tendering(self):
         return self.phase == Project.TENDERING
 
-    @transition(field=phase, source=FLOATING_PHASES, target=PLANNING)
+    @transition(field=phase, source="*", target=PLANNING)
     def begin_planning(self):
         pass
 
@@ -113,7 +113,7 @@ class Project(models.Model):
     def is_planning(self):
         return self.phase == Project.PLANNING
 
-    @transition(field=phase, source=FLOATING_PHASES, target=EXECUTING)
+    @transition(field=phase, source="*", target=EXECUTING)
     def begin_executing(self):
         pass
 
@@ -121,7 +121,7 @@ class Project(models.Model):
     def is_executing(self):
         return self.phase == Project.EXECUTING
 
-    @transition(field=phase, source=FLOATING_PHASES, target=SETTLEMENT)
+    @transition(field=phase, source="*", target=SETTLEMENT)
     def begin_settlement(self):
         pass
 
@@ -129,7 +129,7 @@ class Project(models.Model):
     def is_settlement(self):
         return self.phase == Project.SETTLEMENT
 
-    @transition(field=phase, source=FLOATING_PHASES+[SETTLEMENT], target=WARRANTY)
+    @transition(field=phase, source="*", target=WARRANTY)
     def begin_warranty(self):
         pass
 

@@ -4,10 +4,13 @@
 {% block container %}
   <div class="container">
 
-    <div class="row back-buttons">
-      <div class="col-xs-12"><a href="{% url 'field.dashboard' %}"
-                                class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
-    </div>
+      <div class="row back-buttons">
+          <div class="col-xs-12"><a href="{% url 'field.dashboard' %}"
+              class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
+      </div>
+      <div class="input-group" style="margin-bottom: 5px;"> <span class="input-group-addon">Filter</span>
+          <input id="filter" type="text" class="form-control" placeholder={%  trans "Type here..." %}>
+      </div>
 
     <div class="panel panel-default">
 
@@ -15,7 +18,7 @@
         {% trans 'Projects' %}
       </div>
 
-      <ul class="list-group">
+      <ul class="list-group searchable">
         {% for project in project_list %}
           <a href="{% url 'field.project' project.id %}" class="list-group-item clearfix">
             <div class="col-xs-2 col-sm-1">{{ project.id }}</div><div class="col-xs-10 col-sm-11">{{ project.name }}</div></a>
@@ -26,3 +29,26 @@
 
   </div>
 {% endblock %}
+
+
+{% block extra_js %}
+  <script type="application/javascript">
+  $(document).ready(function () {
+
+      (function ($) {
+
+          $('#filter').keyup(function () {
+
+              var rex = new RegExp($(this).val(), 'i');
+              $('.searchable a').hide();
+              $('.searchable a').filter(function () {
+                  return rex.test($(this).text());
+              }).show();
+
+          })
+
+      }(jQuery));
+
+  });
+  </script>
+{% endblock extra_js %}
