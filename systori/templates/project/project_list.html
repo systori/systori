@@ -119,12 +119,12 @@
                             {% endfor %}
                             </div>
                             <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-sm">
-                                    <a href="{% url 'project.create' %}">{% trans "Create" %}</a>
-                                </button>
-                                <button type="button" class="btn btn-default btn-sm">
-                                    <a href="{% url 'project.import' %}">{% trans "GAEB-Import (experimental)" %}</a>
-                                </button>
+                                <a type="button" class="btn btn-default btn-sm" href="{% url 'project.create' %}">
+                                    {% trans "Create" %}
+                                </a>
+                                <a type="button" class="btn btn-default btn-sm" href="{% url 'project.import' %}">
+                                    {% trans "GAEB-Import (experimental)" %}
+                                </a>
                             </div>
                     </div>
             </div>

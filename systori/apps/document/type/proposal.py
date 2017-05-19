@@ -17,10 +17,10 @@ from .style import chunk_text, force_break, p, b, br, pr
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import get_available_width_height_and_pagesize
 from .style import heading_and_date, get_address_label, get_address_label_spacer, simpleSplit
-from .style import get_items_table, get_totals_table
+from .style import get_items_table, get_totals_table, shorten_name_if_needed
 from .font import FontManager
 
-DEBUG_DOCUMENT = False  # Shows boxes in rendered output
+DEBUG_DOCUMENT = True  # Shows boxes in rendered output
 
 
 def collate_tasks(proposal, only_groups, only_task_names, available_width, font):
@@ -29,11 +29,13 @@ def collate_tasks(proposal, only_groups, only_task_names, available_width, font)
 
     description_width = 290.0
 
-    def add_total_to_totals(group):
-        totals.row(p(group['code'], font), p(group['name'][:30]+'...', font),
-                   '', '', pr(money(group['estimate']), font), '')
-        totals.row_style('SPAN', 1, 3)
-        print("debug me")
+    def add_total_to_totals(group, depth):
+        cols = ['' for i in range(6)]
+        cols[0] = p(group['code'], font)
+        cols[1] = p(shorten_name_if_needed(group['name'], 15), font)
+        cols[5-depth] = pr(money(group['estimate']), font)
+        totals.row(*cols)
+        # totals.row_style('SPAN', 1, depth-2)
 
     def add_total_to_items(group):
         try:
@@ -102,11 +104,8 @@ def collate_tasks(proposal, only_groups, only_task_names, available_width, font)
 
         for group in parent.get('groups', []):
             traverse(group, depth + 1, only_groups, only_task_names)
-
-            if not group.get('groups', []) and group.get('tasks', []):
-                add_total_to_items(group)
-                if len_groups > 1:
-                    add_total_to_totals(group)
+            add_total_to_items(group)
+            add_total_to_totals(group, depth+1)
 
 
     for job in proposal['jobs']:
@@ -120,10 +119,9 @@ def collate_tasks(proposal, only_groups, only_task_names, available_width, font)
 
         for group in job.get('groups', []):
             traverse(group, 1, only_groups, only_task_names, len_groups)
-            if not group.get('groups', []) and group.get('tasks', []):
+            if len_groups > 1:
                 add_total_to_items(group)
-                if len_groups > 1:
-                    add_total_to_totals(group)
+                add_total_to_totals(group, 1)
 
         if not only_groups:
             for task in job.get('tasks', []):  # support old JSON

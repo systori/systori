@@ -489,3 +489,10 @@ def get_totals_table(available_width, font, DEBUG_DOCUMENT):
     totals.row()
     totals.row_style('LINEBELOW', 0, -1, 0.25, colors.black)
     return totals
+
+
+def shorten_name_if_needed(name, length):
+    if len(name) > length-5:
+        return name[:length-5]+'[...]'
+    else:
+        return name+'[..]'
