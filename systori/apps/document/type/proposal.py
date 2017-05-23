@@ -4,81 +4,111 @@ from decimal import Decimal
 
 from reportlab.lib.units import mm
 from reportlab.platypus import Spacer, KeepTogether, PageBreak
-from reportlab.lib import colors
 
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal, money
 
-from .style import NumberedSystoriDocument, TableFormatter, ContinuationTable
-from .style import chunk_text, force_break, p, b, br
+from .style import NumberedSystoriDocument
+from .style import force_break
 from .style import NumberedLetterheadCanvas, NumberedCanvas
 from .style import get_available_width_height_and_pagesize
-from .style import heading_and_date, get_address_label, get_address_label_spacer, simpleSplit
+from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .font import FontManager
 
 from bericht.html import parse_html
-from bericht.text import Paragraph
-from bericht.table import TableBuilder, Cell, Span
-from bericht.style import Style, TextAlign
-
-
-DEBUG_DOCUMENT = False  # Shows boxes in rendered output
+from bericht.text import para, static
+from bericht.table import TableBuilder, Span
+from bericht.style import Style, TextAlign, VerticalAlign
 
 
 class ProposalBuilder(TableBuilder):
     def __init__(self):
-        style = Style.default().set(font_size=12)
-        super().__init__([1, 0, 1, 1, 1, 1], style)
+        style = Style.default().set(
+            font_size=12,
+            border_spacing_horizontal=8,
+            border_spacing_vertical=8,
+        )
+        super().__init__([0, 1, 0, 0, 0, 0], style)
         self.bold = style.set(bold=True)
-        self.padded_row = style.set(padding_bottom=10)
         self.right = style.set(text_align=TextAlign.right)
+        self.bold_right = self.right.set(bold=True)
+        self.bottom = style.set(vertical_align=VerticalAlign.bottom)
 
     def header(self, *cols):
         self.row(*(
             text if isinstance(text, Span)
-            else Paragraph.from_string(text, self.bold.set(text_align=alignment))
+            else static(text, self.bold.set(text_align=alignment))
             for text, alignment in cols
         ))
 
     def code_name(self, code, name, bold=False):
+        bold = self.bold if bold else self.style
         self.row(
-            Paragraph.from_string(code, self.bold if bold else self.style),
-            Paragraph.from_string(name, self.bold if bold else self.style),
-            Span.col, Span.col, Span.col, Span.col
+            static(code, bold),
+            parse_html('<p>'+name+'</p>', bold)[0],
+            Span.col, Span.col, Span.col, Span.col,
         )
 
     def description(self, html):
         self.row(
             '', parse_html('<p>'+html+'</p>'),
             Span.col, Span.col, Span.col, Span.col,
-            #row_style=self.padded_row
         )
 
     def detail(self, name, qty, unit, price, total):
         self.row(
             '', name,
-            Paragraph.from_string(ubrdecimal(qty), self.right),
+            static(ubrdecimal(qty), self.right),
             unit,
-            Paragraph.from_string(money(price), self.right),
-            Paragraph.from_string(total, self.right),
-            #row_style=self.padded_row
+            static(money(price), self.right),
+            static(total, self.right),
+        )
+
+    def total(self, code, name, total):
+        self.row(
+            '',
+            static('{} {} - {}'.format(_('Total'), code, name), self.bold_right),
+            Span.col, Span.col, Span.col,
+            static(money(total), self.bold_right),
+            cell_style=self.bottom
+        )
+
+
+class TotalBuilder(TableBuilder):
+    def __init__(self):
+        style = Style.default().set(
+            font_size=12,
+            border_spacing_horizontal=8,
+            border_spacing_vertical=8,
+        )
+        super().__init__([1, 0], style)
+        self.bold = style.set(bold=True)
+        self.right = style.set(text_align=TextAlign.right)
+        self.bold_right = self.right.set(bold=True)
+        self.bottom = style.set(vertical_align=VerticalAlign.bottom)
+
+    def subtotal(self, name, total):
+        self.row(
+            static(name, self.bold),
+            static(money(total), self.bold_right),
+            cell_style=self.bottom
+        )
+
+    def grand_total(self, name, total):
+        self.row(
+            para(name, self.bold_right),
+            static(money(total), self.bold_right),
+            cell_style=self.bottom
         )
 
 
 def collate_tasks(proposal, only_groups, only_task_names, font, available_width):
     tbl = ProposalBuilder()
-    items = TableFormatter([1, 0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
-    items.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
-    items.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
-    items.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
-
-    items.style.append(('LINEABOVE', (0, 'splitfirst'), (-1, 'splitfirst'), 0.25, colors.black))
-
     tbl.header(
         (_("Pos."), TextAlign.left),
-        (_("Description"), TextAlign.left),
+        (_("Description"), TextAlign.center),
         (_("Amount"), TextAlign.center),
         (Span.col, None),
         (_("Price"), TextAlign.right),
@@ -86,31 +116,22 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
     )
 
     # Totals Table
-    totals = TableFormatter([0, 1], available_width, font, debug=DEBUG_DOCUMENT)
-    totals.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
-    totals.style.append(('LEFTPADDING', (0, 0), (0, -1), 0))
-    totals.style.append(('FONTNAME', (0, 0), (-1, -1), font.bold.fontName))
-    totals.style.append(('ALIGNMENT', (0, 0), (-1, -1), "RIGHT"))
-    totals.row('', '')
-    if DEBUG_DOCUMENT:
-        items.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
-        totals.style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
+    totals = TotalBuilder()
 
     def add_task(task):
-
+        task_name = task['name']
         task_total_column = money(task['estimate'])
         if task['is_provisional']:
             task_total_column = _('Optional')
-
         if task.get('variant_group'):
             if task['variant_serial'] == 0:
-                task['name'] = _('Variant {}.0: {}').format(task['variant_group'], task['name'])
+                task_name = _('Variant {}.0: {}').format(task['variant_group'], task_name)
             else:
-                task['name'] = _('Variant {}.{}: {} - Alternative for Variant {}.0').format(
-                    task['variant_group'], task['variant_serial'], task['name'], task['variant_group'])
+                task_name = _('Variant {}.{}: {} - Alternative for Variant {}.0').format(
+                    task['variant_group'], task['variant_serial'], task_name, task['variant_group'])
                 task_total_column = _('Alternative')
 
-        tbl.code_name(task['code'], task['name'])
+        tbl.code_name(task['code'], task_name)
         if not only_task_names:
             tbl.description(task['description'])
 
@@ -124,18 +145,10 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
         tbl.code_name(parent['code'], parent['name'], bold=True)
         if not only_task_names:
             tbl.description(parent['description'])
-
         for group in parent.get('groups', []):
             traverse(group, depth + 1, only_groups, only_task_names)
-
             if not group.get('groups', []) and group.get('tasks', []):
-                items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                          '', '', '', money(group['estimate']))
-                items.row_style('FONTNAME', 0, -1, font.bold)
-                items.row_style('ALIGNMENT', -1, -1, "RIGHT")
-                items.row_style('SPAN', 1, 4)
-                items.row_style('VALIGN', 0, -1, "BOTTOM")
-                items.row('')
+                tbl.total(group['code'], group['name'], group['estimate'])
 
         if not only_groups:
             for task in parent['tasks']:
@@ -147,78 +160,54 @@ def collate_tasks(proposal, only_groups, only_task_names, font, available_width)
         for group in job.get('groups', []):
             traverse(group, 1, only_groups, only_task_names)
             if not group.get('groups', []) and group.get('tasks', []):
-                items.row('', b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                          '', '', '', money(group['estimate']))
-                items.row_style('FONTNAME', 0, -1, font.bold)
-                items.row_style('ALIGNMENT', -1, -1, "RIGHT")
-                items.row_style('SPAN', 1, 4)
-                items.row_style('VALIGN', 0, -1, "BOTTOM")
-                items.row('')
-            totals.row(b('{} {} - {}'.format(_('Total'), group['code'], group['name']), font),
-                       money(group['estimate']))
+                tbl.total(group['code'], group['name'], group['estimate'])
+            totals.subtotal('{} {} - {}'.format(_('Total'), group['code'], group['name']), group['estimate'])
 
         if not only_groups:
             for task in job.get('tasks', []):  # support old JSON
                 add_task(task)
 
-    totals.row_style('LINEBELOW', 0, 1, 0.25, colors.black)
-    totals.row(_("Total without VAT"), money(proposal['estimate_total'].net))
-    totals.row("19,00% "+_("VAT"), money(proposal['estimate_total'].tax))
-    totals.row(_("Total including VAT"), money(proposal['estimate_total'].gross))
+    totals.grand_total(_("Total without VAT"), proposal['estimate_total'].net)
+    totals.grand_total("19,00% "+_("VAT"), proposal['estimate_total'].tax)
+    totals.grand_total(_("Total including VAT"), proposal['estimate_total'].gross)
 
-    return [
-        tbl.table,
-        #items.get_table(ContinuationTable, repeatRows=1),
-        #totals.get_table()
-    ]
+    return [tbl.table, totals.table]
 
 
 def collate_lineitems(proposal, available_width, font):
+
+    style = Style.default().set(
+        font_size=12,
+        border_spacing_horizontal=8,
+        border_spacing_vertical=8,
+    )
+    bold = style.set(bold=True)
 
     pages = []
 
     def add_task(task):
         pages.append(PageBreak())
+        t = TableBuilder([0, 1], style)
+        t.row(static(job['code'], bold), parse_html('<p>'+job['name']+'</p>', bold))
+        t.row(static(task['code'], style), parse_html('<p>'+task['name']+'</p>', style))
+        t.row('', parse_html('<p>'+task['description']+'</p>', style) if task['description'] else '')
+        pages.append(t.table)
 
-        t = TableFormatter([1, 0], available_width, font, debug=DEBUG_DOCUMENT)
-        t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
-        t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
-        t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
-
-        t.row(b(job['code'], font), b(job['name'], font))
-        #t.row(b(taskgroup['code'], font), b(taskgroup['name'], font))
-        t.row(p(task['code'], font), p(task['name'], font))
-
-        for chunk in chunk_text(task['description']):
-            t.row('', p(chunk, font))
-
-        # t.row_style('BOTTOMPADDING', 0, -1, 10)  seems to have no effect @elmcrest 09/2015
-
-        pages.append(t.get_table(ContinuationTable))
-
-        t = TableFormatter([0, 1, 1, 1, 1], available_width, font, debug=DEBUG_DOCUMENT)
-        t.style.append(('LEFTPADDING', (0, 0), (-1, -1), 0))
-        t.style.append(('RIGHTPADDING', (-1, 0), (-1, -1), 0))
-        t.style.append(('VALIGN', (0, 0), (-1, -1), 'TOP'))
-        t.style.append(('ALIGNMENT', (1, 0), (1, -1), 'RIGHT'))
-        t.style.append(('ALIGNMENT', (3, 0), (-1, -1), 'RIGHT'))
-
+        t = TableBuilder([1, 0, 0, 0, 0], style)
         task_price = Decimal('0')
         for lineitem in task['lineitems']:
-            t.row(p(lineitem['name'], font),
-                  ubrdecimal(lineitem['qty']),
-                  p(lineitem['unit'], font),
-                  money(lineitem['price']),
-                  money(lineitem['estimate'])
-                  )
+            t.row(
+                lineitem['name'],
+                ubrdecimal(lineitem['qty']),
+                lineitem['unit'],
+                money(lineitem['price']),
+                money(lineitem['estimate'])
+            )
             task_price += lineitem['estimate']
 
-        t.row_style('LINEBELOW', 0, -1, 0.25, colors.black)
+        t.row('', static(ubrdecimal(1.00), bold), static(task['unit'], bold), '', static(money(task_price), bold))
 
-        t.row('', ubrdecimal(1.00), b(task['unit'], font), '', money(task_price))
-        t.row_style('FONTNAME', 0, -1, font.bold)
-
-        pages.append(t.get_table(ContinuationTable))
+        pages.append(t.table)
 
     def traverse(parent, depth):
         for group in parent.get('groups', []):
@@ -248,20 +237,16 @@ def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, f
 
         proposal_date = date_format(date(*map(int, proposal['document_date'].split('-'))), use_l10n=True)
 
-        doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
+        doc = NumberedSystoriDocument(buffer, pagesize=pagesize)
 
         flowables = [
-
             get_address_label(proposal, font),
-
             get_address_label_spacer(proposal),
-
-            heading_and_date(proposal['title'], proposal_date, font,
-                             available_width, debug=DEBUG_DOCUMENT),
+            heading_and_date(proposal['title'], proposal_date, font, available_width),
         ]
 
         if proposal['show_project_id']:
-            flowables += [Paragraph.from_string(_("Project") + " #" + str(proposal['project_id'])), ]
+            flowables += [para(_("Project") + " #" + str(proposal['project_id']))]
 
         flowables += [
             Spacer(0, 4*mm),
