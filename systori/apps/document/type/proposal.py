@@ -27,21 +27,25 @@ class ProposalBuilder(TableBuilder):
     def __init__(self):
         style = Style.default().set(
             font_size=12,
-            border_spacing_horizontal=8,
-            border_spacing_vertical=8,
         )
         super().__init__([0, 1, 0, 0, 0, 0], style)
+        self.cell = style.set(
+            #padding_top=4,
+            padding_right=4,
+            #padding_bottom=4,
+            padding_left=4,
+        )
         self.bold = style.set(bold=True)
         self.right = style.set(text_align=TextAlign.right)
         self.bold_right = self.right.set(bold=True)
-        self.bottom = style.set(vertical_align=VerticalAlign.bottom)
+        self.bottom = self.cell.set(vertical_align=VerticalAlign.bottom)
 
     def header(self, *cols):
-        self.row(*(
+        super().header(*(
             text if isinstance(text, Span)
             else static(text, self.bold.set(text_align=alignment))
             for text, alignment in cols
-        ))
+        ), cell_style=self.cell)
 
     def code_name(self, code, name, bold=False):
         bold = self.bold if bold else self.style
@@ -49,12 +53,14 @@ class ProposalBuilder(TableBuilder):
             static(code, bold),
             parse_html('<p>'+name+'</p>', bold)[0],
             Span.col, Span.col, Span.col, Span.col,
+            cell_style=self.cell
         )
 
     def description(self, html):
         self.row(
             '', parse_html('<p>'+html+'</p>'),
             Span.col, Span.col, Span.col, Span.col,
+            cell_style=self.cell
         )
 
     def detail(self, name, qty, unit, price, total):
@@ -64,6 +70,7 @@ class ProposalBuilder(TableBuilder):
             unit,
             static(money(price), self.right),
             static(total, self.right),
+            cell_style=self.cell
         )
 
     def total(self, code, name, total):
