@@ -359,7 +359,7 @@ class Task(OrderedModel):
 
     qty = models.DecimalField(_("Quantity"), blank=True, null=True, max_digits=13, decimal_places=3, default=Decimal('0.00'))
     qty_equation = models.CharField(max_length=512, blank=True)
-    complete = models.DecimalField(_("Completed"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    complete = models.DecimalField(_("Completed"), max_digits=12, decimal_places=3, default=Decimal('0.00'))
     unit = models.CharField(_("Unit"), max_length=512, blank=True)
     price = models.DecimalField(_("Price"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
     price_equation = models.CharField(max_length=512, blank=True)
@@ -529,7 +529,7 @@ class LineItem(OrderedModel):
 
     qty = models.DecimalField(_("Quantity"), max_digits=13, decimal_places=3, default=Decimal('0.00'))
     qty_equation = models.CharField(max_length=512, blank=True)
-    expended = models.DecimalField(_("Expended"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    expended = models.DecimalField(_("Expended"), max_digits=12, decimal_places=3, default=Decimal('0.00'))
 
     unit = models.CharField(_("Unit"), max_length=512, blank=True)
 
