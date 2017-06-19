@@ -1,0 +1,15 @@
+{% extends "field/base.html" %}
+{% load i18n field_app %}
+
+{% block container %}
+    <div class="container">
+        <form method="post">{% csrf_token %}
+            {% if selected_day == today %}
+                <p>{% blocktrans with object=object %}Are you sure you want to delete <b>today</b> ({{ selected_day }})?{% endblocktrans %}</p>
+            {% else %}
+            <p>{% blocktrans with object=object %}Are you sure you want to delete {{ selected_day }}?{% endblocktrans %}</p>
+            {% endif %}
+            <input class="btn btn-danger" type="submit" value="{% trans 'Confirm' %}"/>
+        </form>
+    </div>
+{% endblock %}
