@@ -355,7 +355,7 @@ msgstr "Briefpapier {}"
 #: systori/templates/project/project_detail.html:279
 #: systori/templates/project/project_detail.html:335
 #: systori/templates/project/project_detail.html:372
-#: systori/templates/timetracking/user_report.html:53
+#: systori/templates/timetracking/user_report.html:54
 msgid "Date"
 msgstr "Datum"
 
@@ -619,7 +619,7 @@ msgstr "Aufmaßblatt"
 #: systori/apps/document/type/evidence.py:46
 #: systori/apps/document/type/invoice.py:225
 #: systori/apps/document/type/itemized_listing.py:78
-#: systori/apps/document/type/proposal.py:235 systori/apps/project/models.py:62
+#: systori/apps/document/type/proposal.py:236 systori/apps/project/models.py:62
 #: systori/templates/accounting/invoice_list.html:38
 #: systori/templates/directory/contact_detail.html:23
 #: systori/templates/task/editor/task_autocomplete.html:7
@@ -712,13 +712,13 @@ msgstr "Preis"
 #: systori/apps/document/type/invoice.py:186
 #: systori/apps/document/type/proposal.py:33
 #: systori/apps/document/type/proposal.py:100
-#: systori/apps/document/type/proposal.py:122
-#: systori/apps/document/type/proposal.py:129
+#: systori/apps/document/type/proposal.py:123
+#: systori/apps/document/type/proposal.py:130
 #: systori/apps/document/type/timesheet.py:33
 #: systori/apps/document/type/timesheet.py:74
 #: systori/apps/document/views.py:263 systori/apps/task/models.py:366
 #: systori/apps/task/models.py:539 systori/templates/field/timers.html:24
-#: systori/templates/timetracking/home.html:74
+#: systori/templates/timetracking/home.html:75
 msgid "Total"
 msgstr "Summe"
 
@@ -735,7 +735,7 @@ msgid "Adjustment on {date}"
 msgstr "Zahlung vom {date}"
 
 #: systori/apps/document/type/invoice.py:188
-#: systori/apps/document/type/proposal.py:137
+#: systori/apps/document/type/proposal.py:138
 msgid "Total without VAT"
 msgstr "Summe netto"
 
@@ -753,7 +753,7 @@ msgid "gross pay"
 msgstr "Bruttosumme"
 
 #: systori/apps/document/type/itemized_listing.py:38
-#: systori/apps/document/type/proposal.py:138
+#: systori/apps/document/type/proposal.py:139
 #: systori/templates/accounting/invoice_card.html:31
 msgid "VAT"
 msgstr "MWSt"
@@ -788,7 +788,7 @@ msgstr "Bedarf"
 msgid "Alternative"
 msgstr "Alternativ"
 
-#: systori/apps/document/type/proposal.py:139
+#: systori/apps/document/type/proposal.py:140
 msgid "Total including VAT"
 msgstr "Summe brutto"
 
@@ -871,9 +871,9 @@ msgstr "gestopt"
 
 #: systori/apps/project/models.py:63 systori/templates/field/dashboard.html:17
 #: systori/templates/field/dashboard.html:33
-#: systori/templates/field/planning.html:27
+#: systori/templates/field/planning.html:32
 #: systori/templates/field/project.html:21
-#: systori/templates/field/project_list.html:15
+#: systori/templates/field/project_list.html:18
 #: systori/templates/main/menu_dropdown.html:12
 msgid "Projects"
 msgstr "Projekte"
@@ -986,6 +986,7 @@ msgid "Timer already running"
 msgstr "Stoppuhr läuft bereits"
 
 #: systori/apps/timetracking/models.py:40
+#: systori/templates/timetracking/timer_progressbar_legend.html:5
 #, fuzzy
 msgid "Work"
 msgstr "Arbeit"
@@ -1006,7 +1007,7 @@ msgid "Overtime"
 msgstr "Überstunden"
 
 #: systori/templates/task/progressreport_list.html:12
-#: systori/templates/timetracking/home.html:72
+#: systori/templates/timetracking/home.html:73
 msgid "User"
 msgstr "Benutzer"
 
@@ -1207,6 +1208,7 @@ msgstr "Sind Sie sicher dass Sie das Objekt \"%(object)s\" löschen möchten?"
 #: systori/templates/document/letterhead_confirm_delete.html:9
 #: systori/templates/document/proposal_confirm_delete.html:9
 #: systori/templates/equipment/equipment_confirm_delete.html:9
+#: systori/templates/field/planning_confirm_delete.html:12
 #: systori/templates/project/jobsite_confirm_delete.html:9
 #: systori/templates/project/project_confirm_delete.html:9
 #: systori/templates/task/job_confirm_delete.html:9
@@ -1324,7 +1326,7 @@ msgstr "Löschen"
 
 #: systori/templates/accounting/account_list.html:33
 #: systori/templates/directory/projectcontact_form_add.html:38
-#: systori/templates/field/planning.html:60
+#: systori/templates/field/planning.html:65
 #: systori/templates/user/user_list.html:7
 msgid "Add"
 msgstr "Hinzufügen"
@@ -1599,7 +1601,6 @@ msgstr "Lohn"
 #: systori/templates/field/calendar.html:81
 #: systori/templates/field/group.html:9
 #: systori/templates/field/jobsite_list.html:9
-#: systori/templates/field/planning.html:25
 #: systori/templates/field/project.html:23
 #: systori/templates/field/project_list.html:9
 #: systori/templates/field/task.html:14 systori/templates/field/timers.html:9
@@ -1645,6 +1646,7 @@ msgstr "Suche"
 
 #: systori/templates/directory/contact_list.html:8
 #: systori/templates/field/group.html:17
+#: systori/templates/field/project_list.html:12
 msgid "Type here..."
 msgstr "Filter ..."
 
@@ -1653,7 +1655,7 @@ msgstr "Filter ..."
 msgid "Job Sites"
 msgstr "Einsatzorte"
 
-#: systori/templates/field/planning.html:76
+#: systori/templates/field/planning.html:81
 #: systori/templates/field/project.html:95
 msgid "Copy from %(otherday)s."
 msgstr "Von %(otherday)s kopieren."
@@ -1983,7 +1985,7 @@ msgstr "Administration"
 msgid "Generate Password"
 msgstr "Passwort generieren"
 
-#: systori/templates/timetracking/home.html:91
+#: systori/templates/timetracking/home.html:92
 #, fuzzy
 msgid "No users"
 msgstr "Benutzer"
@@ -2285,10 +2287,12 @@ msgid "Lunch break"
 msgstr "Mittagspause"
 
 #: systori/apps/timetracking/models.py:43
+#: systori/templates/timetracking/timer_progressbar_legend.html:14
 msgid "Public holiday"
 msgstr "Feiertag"
 
 #: systori/apps/timetracking/models.py:44
+#: systori/templates/timetracking/timer_progressbar_legend.html:17
 msgid "Paid leave"
 msgstr "Minderstunden"
 
@@ -2296,7 +2300,7 @@ msgstr "Minderstunden"
 msgid "Timers"
 msgstr "Stoppuhren"
 
-#: systori/templates/timetracking/home.html:73
+#: systori/templates/timetracking/home.html:74
 msgid "Timer"
 msgstr "Stoppuhr"
 
@@ -2305,7 +2309,7 @@ msgid "Are you sure you want to delete the time range \"%(timerange)s\"?"
 msgstr "Sicher alle Stoppuhren im Bereich von \"%(timerange)s\" löschen?"
 
 #: systori/templates/project/project_form.html:17
-#: systori/templates/timetracking/user_report.html:55
+#: systori/templates/timetracking/user_report.html:56
 msgid "delete"
 msgstr "Löschen"
 
@@ -2330,6 +2334,7 @@ msgid "$phaseFilteredProjects projects aren't displayed."
 msgstr "$phaseFilteredProjects Projekte sind ausgeblendet. "
 
 #: systori/apps/timetracking/models.py:45
+#: systori/templates/timetracking/timer_progressbar_legend.html:20
 msgid "Unpaid leave"
 msgstr "unbez. Urlaub"
 
@@ -2440,6 +2445,7 @@ msgstr "Vergütung"
 #: systori/apps/document/type/timesheet.py:103
 #: systori/apps/timetracking/models.py:41
 #: systori/templates/document/timesheet_summary.html:17
+#: systori/templates/timetracking/timer_progressbar_legend.html:8
 msgid "Vacation"
 msgstr "Urlaub"
 
@@ -2460,6 +2466,7 @@ msgid "Only work timers can have morning or lunch breaks."
 msgstr "Nur Timer vom Typ Arbeit können Pausen verwenden."
 
 #: systori/apps/timetracking/models.py:42
+#: systori/templates/timetracking/timer_progressbar_legend.html:11
 msgid "Sick"
 msgstr "Krankmeldung"
 
@@ -2778,4 +2785,20 @@ msgstr "Urkalk eMail"
 #: systori/templates/project/project_detail.html:133
 msgid "with Line Items Print"
 msgstr "Urkalk Druck"
+
+#: systori/templates/field/planning.html:87
+msgid "Delete today"
+msgstr "Heute löschen"
+
+#: systori/templates/field/planning.html:89
+msgid "Delete "
+msgstr "Lösche den"
+
+#: systori/templates/field/planning_confirm_delete.html:8
+msgid "Are you sure you want to delete <b>today</b> (%(selected_day)s)?"
+msgstr "Sind Sie sicher, dass Sie <b>heute</b> löschen möchten (%(selected_day)s)?"
+
+#: systori/templates/field/planning_confirm_delete.html:10
+msgid "Are you sure you want to delete %(selected_day)s?"
+msgstr "Sie Sie sicher, dass Sie den %(selected_day)s löschen möchten?"
 
