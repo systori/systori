@@ -2792,7 +2792,7 @@ msgstr "Heute löschen"
 
 #: systori/templates/field/planning.html:89
 msgid "Delete "
-msgstr "Lösche den"
+msgstr "Lösche den "
 
 #: systori/templates/field/planning_confirm_delete.html:8
 msgid "Are you sure you want to delete <b>today</b> (%(selected_day)s)?"
