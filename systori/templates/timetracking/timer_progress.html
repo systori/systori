@@ -1,21 +1,26 @@
 {% load customformatting %}
 <div class="progress-bar
-  {% if timer.kind == timer.WORK %} progress-bar-success
-  {% elif timer.kind == timer.BREAK %} progress-bar-info progress-bar-striped
+  {% if timer.kind == timer.WORK %} timer-bar-work
+  {% elif timer.kind == timer.VACATION %} timer-bar-vacation
+  {% elif timer.kind == timer.SICK %} timer-bar-sick
+  {% elif timer.kind == timer.PUBLIC_HOLIDAY %} timer-bar-public-holiday
+  {% elif timer.kind == timer.PAID_LEAVE %} timer-bar-paid-leave
+  {% elif timer.kind == timer.UNPAID_LEAVE %} timer-bar-unpaid-leave
+  {% elif timer.kind == timer.BREAK %} timer-bar-break
   {% else %} progress-bar-warning
   {% endif %}"
-  role="progressbar"
-  style="width: {{ timer.running_duration }}px">
-  {{ timer.started|time:"H:i" }}
-  {% if forloop.last %}
-    - {{ timer.stopped|time:"H:i" }}
-  {% endif %}
-  {% if timer.kind != timer.BREAK %}
-    ({{ timer.running_duration|hours }})
-  {% endif %}
-  {% if can_delete and timer.kind != timer.BREAK %}
-  <a href="{% url 'timer.delete' timer.pk %}">
-    <span class="glyphicon glyphicon-trash" aria-hidden="true" style="top:2px;"></span>
-  </a>
-  {% endif %}
+     role="progressbar"
+     style="width: {{ timer.running_duration }}px">
+    {{ timer.started|time:"H:i" }}
+    {% if forloop.last %}
+        - {{ timer.stopped|time:"H:i" }}
+    {% endif %}
+    {% if timer.kind != timer.BREAK %}
+        ({{ timer.running_duration|hours }})
+    {% endif %}
+    {% if can_delete and timer.kind != timer.BREAK %}
+        <a href="{% url 'timer.delete' timer.pk %}">
+            <span class="glyphicon glyphicon-trash" aria-hidden="true" style="top:2px;"></span>
+        </a>
+    {% endif %}
 </div>

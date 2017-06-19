@@ -258,3 +258,32 @@ td[is=amount-stateful].selected>div {
         display:block !important;
     }
 }
+
+.timer-bar-work {
+    background-image: linear-gradient(to bottom, #6CB7B3 0, #A6CFCC 100%);
+    color: #0f0f0f !important;
+}
+.timer-bar-vacation {
+    background-image: linear-gradient(to bottom, #8AACB8 0, #C6D4DA 100%);
+    color: #0f0f0f !important;
+}
+.timer-bar-sick {
+    background-image: linear-gradient(to bottom, #FCCB7E 0, #FEDDAB 100%);
+    color: #0f0f0f !important;
+}
+.timer-bar-public-holiday {
+    background-image: linear-gradient(to bottom, #F8BDAD 0, #FCE0D6 100%);
+    color: #0f0f0f !important;
+}
+.timer-bar-paid-leave {
+    background-image: linear-gradient(to bottom, #EA99A2 0, #F5CFD1 100%);
+    color: #0f0f0f !important;
+}
+.timer-bar-unpaid-leave {
+    background-image: linear-gradient(to bottom, #D41351 0, #E05E76 100%);
+    color: #0f0f0f !important;
+}
+.timer-bar-break {
+    background-image: linear-gradient(to bottom, #DDEDE1 0, #EEF6F1 100%);
+    color: #0f0f0f !important;
+}
