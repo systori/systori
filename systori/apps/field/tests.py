@@ -334,3 +334,23 @@ class TestCopyDailyPlans(ClientTestCase):
         self.client.get(reverse('field.planning.generate', kwargs={'selected_day':today,'source_day':yesterday}))
         self.assertEqual(2, DailyPlan.objects.count())
         self.assertEqual(1, DailyPlan.objects.filter(day=today).count())
+
+
+class TestDeleteDay(ClientTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.project = ProjectFactory()
+
+    def test_generate_and_delete(self):
+        today = date.today()
+        jobsite = JobSite.objects.create(project=self.project, name='a', address='a', city='a', postal_code='a')
+        dailyplan = DailyPlan.objects.create(jobsite=jobsite, day=today)
+        access, _ = Worker.objects.get_or_create(user=self.user, company=self.company)
+        TeamMember.objects.create(dailyplan=dailyplan, worker=access)
+        equipment = Equipment.objects.create(name='truck')
+        EquipmentAssignment.objects.create(dailyplan=dailyplan, equipment=equipment)
+        self.assertEqual(1, DailyPlan.objects.count())
+        self.client.get(reverse('field.planning.delete-day', kwargs={'selected_day': today}), follow=True)
+        self.client.post(reverse('field.planning.delete-day', kwargs={'selected_day': today}), follow=True)
+        self.assertEqual(0, DailyPlan.objects.count())

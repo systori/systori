@@ -47,4 +47,5 @@ urlpatterns = [
     url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})?$', field_auth(FieldPlanning.as_view()), name='field.planning'),
     url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})/generate/(?P<source_day>\d{4}-\d{2}-\d{2})$', field_auth(FieldGenerateAllDailyPlans.as_view()), name='field.planning.generate'),
     url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})/toggle/(?P<toggle>(tasks|notes))$', field_auth(FieldPlanningToggle.as_view()), name='field.planning.toggle'),
+    url(r'^planning/(?P<selected_day>\d{4}-\d{2}-\d{2})/delete$', field_auth(FieldDeleteDay.as_view()), name='field.planning.delete-day'),
 ]

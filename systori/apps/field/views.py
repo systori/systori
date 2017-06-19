@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q, Count, Prefetch
 from django.utils.http import urlquote
 from django.utils.formats import to_locale, get_language
-from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView
+from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
 from django.urls import reverse
 
@@ -136,9 +136,13 @@ class FieldPlanning(TemplateView):
         context['is_selected_today'] = selected_day == today
         context['is_selected_future'] = selected_day > today
 
-        context['latest_daily_plan'] = DailyPlan.objects.first()
+        context['latest_daily_plan'] = DailyPlan.objects.order_by('-id').first()
+        if context['latest_daily_plan'] is not None:
+            context['latest_daily_plan_url'] = reverse('field.planning',
+                                                       args=[context['latest_daily_plan'].day.isoformat()])
+        # initialize context with latest_days_with_plans because it's used in templates anyway
         context['latest_days_with_plans'] = []
-        if selected_day > date.today():
+        if selected_day >= date.today():
             context['latest_days_with_plans'] = DailyPlan.objects.values('day').distinct()[:5]
 
         return context
@@ -672,3 +676,19 @@ class FieldEquipmentList(ListView):
     model = Equipment
     template_name = "field/equipment_list.html"
     queryset = Equipment.objects.filter(active=True)
+
+
+class FieldDeleteDay(FieldPlanning):
+    template_name = "field/planning_confirm_delete.html"
+
+    def get_queryset(self):
+        return DailyPlan.objects.filter(day=self.request.selected_day)
+
+    def get_success_url(self):
+        return reverse('field.planning', args=[self.request.selected_day.isoformat()])
+
+    def post(self, request, *args, **kwargs):
+        qs = self.get_queryset()
+        qs.delete()
+        success_url = self.get_success_url()
+        return HttpResponseRedirect(success_url)
