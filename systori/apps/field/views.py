@@ -193,6 +193,10 @@ class FieldProjectView(DetailView):
         context['daily_plans'] = grouped_by_days
         context['latest_daily_plan'] = daily_plan_objects().filter(jobsite__in=project.jobsites.all()).first()
         context['today'] = date.today()
+        context['latest_daily_plan_global'] = DailyPlan.objects.order_by('-id').first()
+        if context['latest_daily_plan_global'] is not None:
+            context['latest_daily_plan_global_url'] = reverse('field.planning',
+                                                              args=[context['latest_daily_plan_global'].day.isoformat()])
 
         return context
 

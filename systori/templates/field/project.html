@@ -17,9 +17,13 @@
   <div class="container">
 
     <div class="row back-buttons">
-      <div class="col-xs-8"><a href="{% url 'field.projects' %}"
+      <div class="col-xs-4"><a href="{% url 'field.projects' %}"
                                class="btn btn-default btn-block btn-back">&laquo; {% trans 'Projects' %}</a></div>
-      <div class="col-xs-4"><a href="{% url 'field.dashboard' %}"
+      <div class="col-xs-2"><a href="{{ latest_daily_plan_global_url }}"
+                         class="btn btn-default btn-block"
+                         style="text-align: center;"><span class="glyphicon glyphicon-record"
+                                                           aria-hidden="true"></span></a></div>
+      <div class="col-xs-6"><a href="{% url 'field.dashboard' %}"
                                class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
     </div>
 
