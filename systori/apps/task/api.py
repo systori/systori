@@ -30,14 +30,14 @@ class SearchAPI(views.APIView):
                     .groups_with_remaining_depth(remaining_depth)
                     .search(terms)
                     .distinct('name', 'rank')
-                    .values('id', 'job__name', 'match_name', 'match_description', 'rank')[:10]
+                    .values('id', 'job__name', 'match_name', 'match_description', 'rank')[:30]
             ))
         elif model_type == 'task':
             return response.Response(list(
                 Task.objects
                     .search(terms)
                     .distinct('name', 'total', 'rank')
-                    .values('id', 'job__name', 'match_name', 'match_description', 'rank')[:10]
+                    .values('id', 'job__name', 'match_name', 'match_description', 'rank')[:30]
             ))
 
 
