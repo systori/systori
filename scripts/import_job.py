@@ -13,7 +13,7 @@ if not len(sys.argv) == 3:
 
 Company.objects.get(schema=sys.argv[1]).activate()
 
-with open(sys.argv[2], 'r') as f:
+with open(sys.argv[2], 'rb') as f:
     objs = serializers.deserialize("xml", f)
     next(objs).save()  # account
     root = next(objs)  # object for parent class of Job
