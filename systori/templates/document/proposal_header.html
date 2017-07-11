@@ -1,0 +1,50 @@
+{% load i18n %}
+
+{% if address_label %}
+  <p>{{ address_label|linebreaksbr|safe }}</p>
+{% else %}
+  <p>
+    {% if business %}{{business}}<br />{% endif %}
+    {{salutation}} {{first_name}} {{last_name}}<br />
+    {{address}}<br />
+    {{postal_code}} {{city}}
+  </p>
+{% endif %}
+
+<table>
+  <colgroup>
+    <col width="1*" />
+    <col width="0*">{{ doc_date }}
+  </colgroup>
+  <tr>
+    <td><p>{{ title }}</p></td>
+    <td><p>{{ doc_date }}</p></td>
+  </tr>
+</table>
+
+{% if show_project_id %}
+  <p>{% trans "Project" %} #{{ project_id }}</p>
+{% endif %}
+
+<p>{{ header|linebreaksbr|safe }}</p>
+
+<table>
+
+  <colgroup>
+    <col width="0*">{{ longest_code }}
+    <col width="1*">
+    <col width="0*">{{ longest_amount }}
+    <col width="0*">{{ longest_unit }}
+    <col width="0*">{{ longest_price }}
+    <col width="0*">{{ longest_total }}
+  </colgroup>
+
+  <thead>
+    <tr>
+      <td><p>{% trans "Pos." %}</td>
+      <td><p>{% trans "Description" %}</td>
+      <td colspan="2"><p>{% trans "Amount" %}</td>
+      <td><p>{% trans "Price" %}</td>
+      <td><p>{% trans "Total" %}</td>
+    </tr>
+  </thead>
