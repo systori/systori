@@ -1,0 +1,35 @@
+{% load i18n %}
+
+  <tr>
+    <td><p>{{ code }}</td>
+    <td colspan="5"><p>{{ task_name|safe }}</td>
+  </tr>
+
+  {% if show_description %}
+  <tr>
+    <td></td>
+    <td colspan="5"><p>{{ description|safe }}</td>
+  </tr>
+  {% endif %}
+
+  {% if qty != None %}
+    <tr>
+      <td></td>
+      <td></td>
+      <td><p>{{ qty }}</td>
+      <td><p>{{ unit }}</td>
+      <td><p>{{ price }}</td>
+      <td><p>{{ task_total }}</td>
+    </tr>
+  {% else %}
+    {% for li in lineitems %}
+    <tr>
+      <td></td>
+      <td><p>{{ li.name|safe }}</td>
+      <td><p>{{ li.qty }}</td>
+      <td><p>{{ li.unit }}</td>
+      <td><p>{{ li.price }}</td>
+      <td><p>{{ li.estimate }}</td>
+    </tr>
+    {% endfor %}
+  {% endif %}

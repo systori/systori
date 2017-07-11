@@ -2,7 +2,7 @@ from datetime import date
 from calendar import monthrange
 from collections import OrderedDict, namedtuple
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, StreamingHttpResponse
 from django.views.generic import View, ListView, TemplateView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -415,6 +415,20 @@ class ProposalPDF(DocumentRenderView):
         only_task_names = self.request.GET.get('only_task_names', False)
         return pdf_type.proposal.render(
             json, letterhead, with_lineitems, only_groups, only_task_names, self.kwargs['format'])
+
+
+class ProposalHTML(SingleObjectMixin, View):
+    model = Proposal
+
+    def get(self, request, *args, **kwargs):
+        json = self.get_object().json
+        letterhead = self.get_object().letterhead
+        with_lineitems = self.request.GET.get('with_lineitems', False)
+        only_groups = self.request.GET.get('only_groups', False)
+        only_task_names = self.request.GET.get('only_task_names', False)
+        return HttpResponse(''.join(list(pdf_type.proposal.html_gen(
+            json, letterhead, with_lineitems, only_groups, only_task_names)
+        )))
 
 
 class ProposalViewMixin(BaseDocumentViewMixin):

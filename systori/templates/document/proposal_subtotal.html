@@ -1,0 +1,10 @@
+{% load i18n %}
+
+  <tr>
+    {% if offset %}
+    <td></td>
+    {% endif %}
+    <td colspan="{% if offset %}4{% else %}5{% endif %}">
+      <p>{% trans 'Total' %} {{ code }} - {{ name }}</td>
+    <td><p>{{ estimate }}</td>
+  </tr>
