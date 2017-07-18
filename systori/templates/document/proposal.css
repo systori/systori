@@ -55,6 +55,14 @@ p {
   font-size: 14pt;
 }
 
+.header-date {
+  text-align: right;
+}
+
+.bottom {
+  vertical-align: bottom;
+}
+
 .vspace-50 {
   padding-top: 50px;
 }
