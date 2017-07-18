@@ -1,3 +1,5 @@
+import os
+
 from io import BytesIO
 from datetime import date
 from decimal import Decimal
@@ -5,6 +7,7 @@ from decimal import Decimal
 from reportlab.lib.units import mm
 from reportlab.platypus import Spacer, KeepTogether, PageBreak
 
+from django.conf import settings
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
@@ -18,7 +21,7 @@ from .style import heading_and_date, get_address_label, get_address_label_spacer
 from .font import FontManager
 
 from bericht.pdf import PDFStreamer
-from bericht.html import HTMLParser
+from bericht.html import HTMLParser, CSS
 from django.template.loader import render_to_string
 
 
@@ -70,9 +73,9 @@ def html_gen(proposal, letterhead, with_lineitems, only_groups, only_task_names)
 
     proposal['doc_date'] = proposal_date
     proposal['longest_code'] = '1.1.1.1'
-    proposal['longest_amount'] = '1.000.000,00'
-    proposal['longest_unit'] = 'unit'
-    proposal['longest_price'] = '1.000.000,00'
+    proposal['longest_amount'] = '1.000,00'
+    proposal['longest_unit'] = 'unit name'
+    proposal['longest_price'] = '1.000,00'
     proposal['longest_total'] = '1.000.000,00'
 
     yield render_to_string('document/proposal_header.html', proposal)
@@ -87,8 +90,17 @@ def html_gen(proposal, letterhead, with_lineitems, only_groups, only_task_names)
     yield render_to_string('document/proposal_footer.html', proposal)
 
 
+def css_gen(letterhead):
+    return render_to_string('document/proposal.css', {
+        'letterhead': letterhead
+    })
+
+
 def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, format):
-    return PDFStreamer(HTMLParser(html_gen(proposal, letterhead, with_lineitems, only_groups, only_task_names)))
+    return PDFStreamer(HTMLParser(
+        html_gen(proposal, letterhead, with_lineitems, only_groups, only_task_names),
+        CSS(css_gen(letterhead))
+    ), os.path.join(settings.MEDIA_ROOT, letterhead.letterhead_pdf.name))
 
 
 def collate_lineitems(proposal, available_width, font):

@@ -1,10 +1,14 @@
-{% load i18n %}
+{% load i18n customformatting %}
+
+{% autoescape off %}
 
   <tr>
     {% if offset %}
     <td></td>
     {% endif %}
     <td colspan="{% if offset %}4{% else %}5{% endif %}">
-      <p>{% trans 'Total' %} {{ code }} - {{ name }}</td>
-    <td><p>{{ estimate }}</td>
+      <p>{% trans 'Total' %} {{code}} - {{name}}</td>
+    <td class="total"><p>{{estimate.net|money}}</td>
   </tr>
+
+{% endautoescape %}

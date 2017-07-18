@@ -1,50 +1,57 @@
 {% load i18n %}
 
+{% autoescape off %}
+
+<p class="address">
 {% if address_label %}
-  <p>{{ address_label|linebreaksbr|safe }}</p>
+  {{address_label|linebreaksbr}}
 {% else %}
-  <p>
-    {% if business %}{{business}}<br />{% endif %}
-    {{salutation}} {{first_name}} {{last_name}}<br />
-    {{address}}<br />
-    {{postal_code}} {{city}}
-  </p>
+  {% if business %}{{business}}<br />{% endif %}
+  {{salutation}} {{first_name}} {{last_name}}<br />
+  {{address}}<br />
+  {{postal_code}} {{city}}
 {% endif %}
+</p>
+
+<p class="vspace-50"><br></p>
 
 <table>
-  <colgroup>
-    <col width="1*" />
-    <col width="0*">{{ doc_date }}
-  </colgroup>
+  <colgroup span="2"></colgroup>
   <tr>
-    <td><p>{{ title }}</p></td>
-    <td><p>{{ doc_date }}</p></td>
+    <td><p class="header-title">{{title}}</p></td>
+    <td><p class="header-date">{{doc_date}}</p></td>
   </tr>
 </table>
 
+<p><br></p>
+
 {% if show_project_id %}
-  <p>{% trans "Project" %} #{{ project_id }}</p>
+  <p>{% trans "Project" %} #{{project_id}}</p>
 {% endif %}
 
-<p>{{ header|linebreaksbr|safe }}</p>
+<p>{{header|linebreaksbr}}</p>
+
+<p><br></p>
 
 <table>
 
   <colgroup>
-    <col width="0*">{{ longest_code }}
-    <col width="1*">
-    <col width="0*">{{ longest_amount }}
-    <col width="0*">{{ longest_unit }}
-    <col width="0*">{{ longest_price }}
-    <col width="0*">{{ longest_total }}
+    <bericht-col width="0*">{{longest_code}}</bericht-col>
+    <bericht-col width="1*"></bericht-col>
+    <bericht-col width="0*">{{longest_amount}}</bericht-col>
+    <bericht-col width="0*">{{longest_unit}}</bericht-col>
+    <bericht-col width="0*">{{longest_price}}</bericht-col>
+    <bericht-col width="0*">{{longest_total}}</bericht-col>
   </colgroup>
 
   <thead>
     <tr>
-      <td><p>{% trans "Pos." %}</td>
+      <td><p class="left">{% trans "Pos." %}</td>
       <td><p>{% trans "Description" %}</td>
       <td colspan="2"><p>{% trans "Amount" %}</td>
       <td><p>{% trans "Price" %}</td>
       <td><p>{% trans "Total" %}</td>
     </tr>
   </thead>
+
+{% endautoescape %}
