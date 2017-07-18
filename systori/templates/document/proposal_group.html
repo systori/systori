@@ -1,13 +1,17 @@
 {% load i18n %}
 
+{% autoescape off %}
+
   <tr {% if bold_name %}class="bold"{% endif %}>
-    <td><p>{{ code }}</td>
-    <td colspan="5"><p>{{ name|safe }}</td>
+    <td><p>{{code}}</td>
+    <td colspan="5"><p>{{name}}</td>
   </tr>
 
   {% if show_description %}
   <tr>
     <td></td>
-    <td colspan="5"><p>{{ description|safe }}</td>
+    <td colspan="5"><p>{{description}}</td>
   </tr>
   {% endif %}
+
+{% endautoescape %}

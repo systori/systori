@@ -1,20 +1,26 @@
-{% load i18n %}
+{% load i18n customformatting %}
 
-  <tr>
+{% autoescape off %}
+
+  <tr class="bold total">
     <td colspan="5"><p>{% trans "Total without VAT" %}</td>
-    <td><p>{{ estimate_total.net }}</td>
+    <td class="total"><p>{{estimate_total.net|money}}</td>
   </tr>
 
-  <tr>
+  <tr class="bold total">
     <td colspan="5"><p>19,00% {% trans "VAT" %}</td>
-    <td><p>{{ estimate_total.tax }}</td>
+    <td><p>{{estimate_total.tax|money}}</td>
   </tr>
 
-  <tr>
+  <tr class="bold total">
     <td colspan="5"><p>{% trans "Total including VAT" %}</td>
-    <td><p>{{ estimate_total.gross }}</td>
+    <td><p>{{estimate_total.gross|money}}</td>
   </tr>
 
 </table>
 
-<p>{{ footer|linebreaksbr }}</p>
+<p><br></p>
+
+<p>{{footer|linebreaksbr}}</p>
+
+{% endautoescape %}
