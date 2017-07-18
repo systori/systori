@@ -9,7 +9,7 @@ td {
 
 /*
 uncomment this after fixing margin values in database
-@page:first {
+@page {
   margin-top: {{letterhead.top_margin}}px;
   margin-right: {{letterhead.right_margin}}px;
   margin-bottom: {{letterhead.bottom_margin}}px;
@@ -25,7 +25,7 @@ uncomment this after fixing margin values in database
 */
 
 /* hard coded values for now which result in better margin */
-@page:first {
+@page {
   margin-top: 152px;
   margin-right: 172px;
   margin-bottom: 72px;
