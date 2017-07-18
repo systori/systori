@@ -72,11 +72,11 @@ def html_gen(proposal, letterhead, with_lineitems, only_groups, only_task_names)
     proposal_date = date_format(date(*map(int, proposal['document_date'].split('-'))), use_l10n=True)
 
     proposal['doc_date'] = proposal_date
-    proposal['longest_code'] = '1.1.1.1'
+    proposal['longest_code'] = '01.01.01.01'
     proposal['longest_amount'] = '1.000,00'
-    proposal['longest_unit'] = 'unit name'
-    proposal['longest_price'] = '1.000,00'
-    proposal['longest_total'] = '1.000.000,00'
+    proposal['longest_unit'] = 'unit'
+    proposal['longest_price'] = '00.000,00'
+    proposal['longest_total'] = '000.000,00'
 
     yield render_to_string('document/proposal_header.html', proposal)
 
