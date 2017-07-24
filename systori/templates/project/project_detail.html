@@ -493,18 +493,18 @@
       </tr>
       </thead>
       <tbody>
-      {% for entry in jobsites %}
+      {% for site in jobsites %}
         <tr>
-          <td>{{ entry.site.id }}</td>
-          <td>{{ entry.site }}</td>
-          <td>{{ entry.site.address }}</td>
-          <td>{{ entry.site.city }}</td>
-          <td>{{ entry.site.latitude }}<br/>{{ entry.site.longitude }}</td>
-          <td>{{ entry.first_day.day }}<br />{{ entry.last_day.day }}</td>
+          <td>{{ site.id }}</td>
+          <td>{{ site }}</td>
+          <td>{{ site.address }}</td>
+          <td>{{ site.city }}</td>
+          <td>{{ site.latitude }}<br/>{{ site.longitude }}</td>
+          <td>{{ site.first_day }}<br />{{ site.last_day }}</td>
           <td>
-            <a href="{% url 'jobsite.edit' project.id entry.site.id %}">{% trans "Edit" %}</a>
+            <a href="{% url 'jobsite.edit' project.id site.id %}">{% trans "Edit" %}</a>
             {% if jobsites_count > 1 %}
-              <a href="{% url 'jobsite.delete' project.id entry.site.id %}">{% trans "Delete" %}</a>
+              <a href="{% url 'jobsite.delete' project.id site.id %}">{% trans "Delete" %}</a>
             {% endif %}
           </td>
         </tr>
