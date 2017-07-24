@@ -289,8 +289,8 @@ class TestJobSiteViews(ClientTestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(date(2015, 1, 1), response.context['activity_first_day'])
         self.assertEqual(date(2018, 2, 1), response.context['activity_last_day'])
-        self.assertEqual(date(2015, 1, 1), response.context['jobsites'][1].first_day)
-        self.assertEqual(date(2018, 2, 1), response.context['jobsites'][0].last_day)
+        self.assertEqual(date(2015, 1, 1), response.context['jobsites'][0].first_day)
+        self.assertEqual(date(2018, 2, 1), response.context['jobsites'][1].last_day)
 
     def test_no_activity_dailyplans_jobsite(self):
         jobsite1 = JobSiteFactory(project=self.project)

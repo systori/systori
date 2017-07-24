@@ -297,6 +297,9 @@ class JobSite(models.Model):
     travel_time = models.PositiveIntegerField(
         _("Travel time"), null=True, blank=True, help_text=_("in minutes"))
 
+    class Meta:
+        ordering = ('id',)
+
     def __str__(self):
         return self.name
 
