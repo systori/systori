@@ -1,6 +1,7 @@
 from collections import OrderedDict
+from datetime import date
 
-from django.db.models import Q
+from django.db.models import Q, Max, Min
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
@@ -81,12 +82,29 @@ class ProjectSearchApi(View):
 class ProjectView(DetailView):
     model = Project
 
+    def get_jobsites_and_activity(self):
+        first_day = date.today()
+        last_day = date(1970,1,1)
+        jobsites = self.object.jobsites.annotate(first_day=Min('dailyplans__day'), last_day=Max('dailyplans__day'))
+        for site in jobsites:
+            if site.first_day is not None:
+                first_day = min(first_day, site.first_day)
+                last_day = max(last_day, site.last_day)
+            else:
+                first_day, last_day = None, None
+
+        return jobsites, first_day, last_day
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['jobs'] = self.object.jobs.with_totals().all()
         context['proposals'] = self.object.proposals.prefetch_related('jobs__project').all()
         context['project_contacts'] = self.object.project_contacts.prefetch_related('contact').all()
-        context['jobsites'] = self.object.jobsites.all()
+
+        context['jobsites'],\
+        context['activity_first_day'],\
+        context['activity_last_day'] = self.get_jobsites_and_activity()
+
         context['jobsites_count'] = len(context['jobsites'])
         context['project_has_billable_contact'] = self.object.has_billable_contact
         context['payments'] = self.object.payments.all()
