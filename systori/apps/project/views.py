@@ -86,21 +86,26 @@ class ProjectView(DetailView):
         jobsites = []
         first_day = date.today()
         last_day = date(1970,1,1)
-        for idx, site in enumerate(self.object.jobsites.all()):
-            jobsites.append({})
-            jobsites[idx]['site'] = site
-            first_plan = site.dailyplans.order_by('day').first()
-            last_plan = site.dailyplans.order_by('day').last()
-            if first_plan and first_plan.day < first_day:
-                first_day = first_plan.day
-            if last_plan and last_plan.day > last_day:
-                last_day = last_plan.day
-            jobsites[idx]['first_day'] = first_plan
-            jobsites[idx]['last_day'] = last_plan
 
-            if site.dailyplans.count() is 0:
-                first_day = None
-                last_day = None
+        plans = True
+        if sum([site.dailyplans.count() for site in self.object.jobsites.all()]) is 0:
+            first_day = None
+            last_day = None
+            plans = False
+
+        if plans:
+            for idx, site in enumerate(self.object.jobsites.all()):
+                jobsites.append({})
+                jobsites[idx]['site'] = site
+                first_plan = site.dailyplans.order_by('day').first()
+                last_plan = site.dailyplans.order_by('day').last()
+                if first_plan and first_plan.day < first_day:
+                    first_day = first_plan.day
+                if last_plan and last_plan.day > last_day:
+                    last_day = last_plan.day
+                jobsites[idx]['first_day'] = first_plan
+                jobsites[idx]['last_day'] = last_plan
+
         return jobsites, first_day, last_day
 
     def get_context_data(self, **kwargs):
