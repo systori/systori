@@ -5,6 +5,18 @@
 
 
 {% block content %}
+  <style>
+  /* See .navbar .brand style in bootstrap.css for a reference */
+  .btn-toolbar .title {
+    display: block;
+    float: left;
+    margin-left: 6px;
+    font-size: 20px;
+    font-weight: 200;
+    color: #777777;
+    text-shadow: 0 1px 0 #ffffff;
+  }
+  </style>
   <div class="table-responsive">
     <table class="table table-striped">
     <tbody>
@@ -36,9 +48,24 @@
       </tr>
       <tr>
         <td>
-          <div class="btn-group pull-right" role="group">
-            <a type="button" class="btn btn-default" href="{% url 'project.progress' project.id %}">{% trans "Project Progress" %}</a>
-            <a target="_blank" type="button" class="btn btn-default" href="{% url 'evidence.pdf' project.id %}">{% trans "Evidence preprinted form" %}</a>
+          <div class="btn-toolbar" role="toolbar">
+            {% if activity_first_day %}
+              <div class="title">
+              {% trans "Date range:" %}
+              </div>
+              <div class="btn-group" role="group">
+                <a type="button" class="btn btn-default btn-sm" aria-describedby="btnGroupAddon" href="{% url 'day_based_overview' activity_first_day  %}">
+                  <span class="glyphicon glyphicon-log-out"></span> {{ activity_first_day }}
+                </a>
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'day_based_overview' activity_last_day  %}">
+                  {{ activity_last_day }} <span class="glyphicon glyphicon-log-in"></span>
+                </a>
+              </div>
+            {% endif %}
+            <div class="btn-group" role="group">
+              <a type="button" class="btn btn-default btn-sm" href="{% url 'project.progress' project.id %}">{% trans "Project Progress" %}</a>
+              <a target="_blank" type="button" class="btn btn-default btn-sm" href="{% url 'evidence.pdf' project.id %}">{% trans "Evidence preprinted form" %}</a>
+            </div>
           </div>
         </td>
       </tr>
@@ -461,21 +488,23 @@
         <th>{% trans 'Address' %}</th>
         <th>{% trans 'City' %}</th>
         <th>{% trans 'Latitude' %} / {% trans 'Longitude' %}</th>
+        <th>{% trans 'first Dailyplan' %} / {% trans 'last Dailyplan' %}</th>
         <th>{% trans 'Actions' %}</th>
       </tr>
       </thead>
       <tbody>
-      {% for site in jobsites %}
+      {% for entry in jobsites %}
         <tr>
-          <td>{{ site.id }}</td>
-          <td>{{ site }}</td>
-          <td>{{ site.address }}</td>
-          <td>{{ site.city }}</td>
-          <td>{{ site.latitude }}<br/>{{ site.longitude }}</td>
+          <td>{{ entry.site.id }}</td>
+          <td>{{ entry.site }}</td>
+          <td>{{ entry.site.address }}</td>
+          <td>{{ entry.site.city }}</td>
+          <td>{{ entry.site.latitude }}<br/>{{ entry.site.longitude }}</td>
+          <td>{{ entry.first_day.day }}<br />{{ entry.last_day.day }}</td>
           <td>
-            <a href="{% url 'jobsite.edit' project.id site.id %}">{% trans "Edit" %}</a>
+            <a href="{% url 'jobsite.edit' project.id entry.site.id %}">{% trans "Edit" %}</a>
             {% if jobsites_count > 1 %}
-              <a href="{% url 'jobsite.delete' project.id site.id %}">{% trans "Delete" %}</a>
+              <a href="{% url 'jobsite.delete' project.id entry.site.id %}">{% trans "Delete" %}</a>
             {% endif %}
           </td>
         </tr>

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from datetime import date
 
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
@@ -81,12 +82,37 @@ class ProjectSearchApi(View):
 class ProjectView(DetailView):
     model = Project
 
+    def get_jobsites_and_activity(self):
+        jobsites = []
+        first_day = date.today()
+        last_day = date(1970,1,1)
+        for idx, site in enumerate(self.object.jobsites.all()):
+            jobsites.append({})
+            jobsites[idx]['site'] = site
+            first_plan = site.dailyplans.order_by('day').first()
+            last_plan = site.dailyplans.order_by('day').last()
+            if first_plan and first_plan.day < first_day:
+                first_day = first_plan.day
+            if last_plan and last_plan.day > last_day:
+                last_day = last_plan.day
+            jobsites[idx]['first_day'] = first_plan
+            jobsites[idx]['last_day'] = last_plan
+
+            if site.dailyplans.count() is 0:
+                first_day = None
+                last_day = None
+        return jobsites, first_day, last_day
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['jobs'] = self.object.jobs.with_totals().all()
         context['proposals'] = self.object.proposals.prefetch_related('jobs__project').all()
         context['project_contacts'] = self.object.project_contacts.prefetch_related('contact').all()
-        context['jobsites'] = self.object.jobsites.all()
+
+        context['jobsites'],\
+        context['activity_first_day'],\
+        context['activity_last_day'] = self.get_jobsites_and_activity()
+
         context['jobsites_count'] = len(context['jobsites'])
         context['project_has_billable_contact'] = self.object.has_billable_contact
         context['payments'] = self.object.payments.all()

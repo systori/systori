@@ -1,4 +1,5 @@
 from django.urls import reverse
+from datetime import date
 
 from systori.lib.testing import ClientTestCase
 
@@ -6,7 +7,7 @@ from ..document.factories import ProposalFactory, LetterheadFactory
 from ..task.factories import JobFactory
 from ..task.models import Job
 
-from .factories import ProjectFactory, JobSiteFactory
+from .factories import ProjectFactory, JobSiteFactory, DailyPlanFactory
 from .models import Project, JobSite
 
 
@@ -272,3 +273,19 @@ class TestJobSiteViews(ClientTestCase):
         response = self.client.post(reverse('jobsite.delete', args=[self.project.pk, jobsite.pk]))
         self.assertEqual(302, response.status_code)
         self.assertEqual(0, JobSite.objects.count())
+
+    def test_activity_days_from_jobsite(self):
+        jobsite1 = JobSiteFactory(project=self.project)
+        DailyPlanFactory(jobsite=jobsite1, day=date(2015, 1, 1))
+        DailyPlanFactory(jobsite=jobsite1, day=date(2016, 1, 1))
+        DailyPlanFactory(jobsite=jobsite1, day=date(2017, 1, 1))
+        DailyPlanFactory(jobsite=jobsite1, day=date(2018, 1, 1))
+        jobsite2 = JobSiteFactory(project=self.project)
+        DailyPlanFactory(jobsite=jobsite2, day=date(2015, 2, 1))
+        DailyPlanFactory(jobsite=jobsite2, day=date(2016, 2, 1))
+        DailyPlanFactory(jobsite=jobsite2, day=date(2017, 2, 1))
+        DailyPlanFactory(jobsite=jobsite2, day=date(2018, 2, 1))
+        response = self.client.get(reverse('project.view', args=[self.project.pk]), {})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(date(2015, 1, 1), response.context['activity_first_day'])
+        self.assertEqual(date(2018, 2, 1), response.context['activity_last_day'])
