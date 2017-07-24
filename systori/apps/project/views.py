@@ -1,9 +1,10 @@
 from collections import OrderedDict
 from datetime import date
 
-from django.db.models import Q, Max, Min
+from django.db.models import Q, Max, Min, Count, Subquery
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
+from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import View, TemplateView, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
@@ -12,7 +13,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormVi
 from systori.lib.templatetags.customformatting import ubrdecimal
 from .forms import JobSiteForm, GAEBImportForm
 from .forms import ProjectCreateForm, ProjectUpdateForm
-from .models import Project, JobSite
+from .models import Project, JobSite, DailyPlan
 from ..accounting.constants import TAX_RATE
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
 from ..task.forms import JobCreateForm
@@ -269,6 +270,21 @@ class ProjectManualStateTransition(SingleObjectMixin, View):
             self.object.save()
 
         return HttpResponseRedirect(reverse('project.view', args=[self.object.id]))
+
+
+class ProjectDailyPlansView(ListView):
+    model = DailyPlan
+    template_name = "project/project_dailyplans.html"
+
+    def get_queryset(self):
+        self.project = get_object_or_404(Project, id=self.kwargs['project_pk'])
+        jobsites = self.project.jobsites
+        return DailyPlan.objects.annotate(worker_count=Count('workers')).filter(jobsite__in=jobsites)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        return context
 
 
 class TemplatesView(TemplateView):

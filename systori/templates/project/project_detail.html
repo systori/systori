@@ -7,7 +7,7 @@
 {% block content %}
   <style>
   /* See .navbar .brand style in bootstrap.css for a reference */
-  .btn-toolbar .title {
+  .btn-title {
     display: block;
     float: left;
     margin-left: 6px;
@@ -50,7 +50,7 @@
         <td>
           <div class="btn-toolbar" role="toolbar">
             {% if activity_first_day %}
-              <div class="title">
+              <div class="btn-title">
               {% trans "Date range:" %}
               </div>
               <div class="btn-group" role="group">
@@ -59,6 +59,11 @@
                 </a>
                 <a type="button" class="btn btn-default btn-sm" href="{% url 'day_based_overview' activity_last_day  %}">
                   {{ activity_last_day }} <span class="glyphicon glyphicon-log-in"></span>
+                </a>
+              </div>
+              <div class="btn-group" role="group">
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'project.dailyplans' project.id  %}">
+                  {% trans "DailyPlans" %}
                 </a>
               </div>
             {% endif %}
