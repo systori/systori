@@ -86,7 +86,9 @@ class ProjectView(DetailView):
     def get_jobsites_and_activity(self):
         first_day = date.today()
         last_day = date(1970,1,1)
-        jobsites = self.object.jobsites.annotate(first_day=Min('dailyplans__day'), last_day=Max('dailyplans__day'))
+        jobsites = self.object.jobsites\
+            .annotate(first_day=Min('dailyplans__day'), last_day=Max('dailyplans__day'))\
+            .order_by('first_day')
         for site in jobsites:
             if site.first_day is not None:
                 first_day = min(first_day, site.first_day)
@@ -272,19 +274,25 @@ class ProjectManualStateTransition(SingleObjectMixin, View):
         return HttpResponseRedirect(reverse('project.view', args=[self.object.id]))
 
 
-class ProjectDailyPlansView(ListView):
+class ProjectDailyPlansView(TemplateView):
     model = DailyPlan
     template_name = "project/project_dailyplans.html"
 
-    def get_queryset(self):
-        self.project = get_object_or_404(Project, id=self.kwargs['project_pk'])
-        jobsites = self.project.jobsites.all()
-        return DailyPlan.objects\
-            .filter(jobsite__in=jobsites)\
-            .annotate(worker_count=Count('workers'))
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        project = get_object_or_404(Project, id=kwargs['project_pk'])
+        jobsites = project.jobsites.prefetch_related('dailyplans__workers').all()
+        workers = {}
+        context['dailyplans'] = []
+        for jobsite in jobsites:
+            for dailyplan in jobsite.dailyplans.all():
+                context['dailyplans'].append(dailyplan)
+                dailyplan.worker_count = 0
+                for worker in dailyplan.workers.all():
+                  workers.setdefault(worker.get_full_name, 0)
+                  workers[worker.get_full_name] += 1
+                  dailyplan.worker_count += 1
+        context['workers_summary'] = sorted(workers.items(), key=lambda x: x[1], reverse=True)
         return context
 
 

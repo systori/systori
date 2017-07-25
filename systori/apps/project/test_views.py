@@ -6,9 +6,11 @@ from systori.lib.testing import ClientTestCase
 from ..document.factories import ProposalFactory, LetterheadFactory
 from ..task.factories import JobFactory
 from ..task.models import Job
+from ..company.factories import WorkerFactory
+from ..user.factories import UserFactory
 
 from .factories import ProjectFactory, JobSiteFactory, DailyPlanFactory
-from .models import Project, JobSite
+from .models import Project, JobSite, TeamMember
 
 
 class TestProjectListView(ClientTestCase):
@@ -297,3 +299,16 @@ class TestJobSiteViews(ClientTestCase):
         response = self.client.get(reverse('project.view', args=[self.project.pk]), {})
         self.assertEqual(None, response.context['activity_first_day'])
         self.assertEqual(None, response.context['activity_last_day'])
+
+    def test_project_dailyplans_view(self):
+        jobsite1 = JobSiteFactory(project=self.project)
+        worker1 = WorkerFactory(company=self.company, user=UserFactory())
+        worker2 = WorkerFactory(company=self.company, user=UserFactory())
+        for idx in range(1,5):
+            dp = DailyPlanFactory(jobsite=jobsite1, day=date(2017, 7, idx))
+            TeamMember.objects.create(dailyplan=dp, worker=worker1)
+            TeamMember.objects.create(dailyplan=dp, worker=worker2)
+        response = self.client.get(reverse('project.dailyplans', args=[self.project.pk]), {})
+        self.assertEqual(len(response.context['dailyplans']), 4) # 4 dailyplans existing
+        self.assertEqual(response.context['dailyplans'][0].worker_count, 2) # 2 workers on first dailyplan
+        self.assertEqual(response.context['workers_summary'][0][1], 4) # worker1 on 4 dailyplans
