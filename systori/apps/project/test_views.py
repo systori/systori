@@ -291,8 +291,8 @@ class TestJobSiteViews(ClientTestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(date(2015, 1, 1), response.context['activity_first_day'])
         self.assertEqual(date(2018, 2, 1), response.context['activity_last_day'])
-        self.assertEqual(date(2015, 1, 1), response.context['jobsites'][1].first_day)
-        self.assertEqual(date(2018, 2, 1), response.context['jobsites'][0].last_day)
+        self.assertEqual(date(2015, 1, 1), response.context['jobsites'][0].first_day) #check annotate
+        self.assertEqual(date(2018, 2, 1), response.context['jobsites'][1].last_day) #cehck annotate
 
     def test_no_activity_dailyplans_jobsite(self):
         jobsite1 = JobSiteFactory(project=self.project)
@@ -312,4 +312,4 @@ class TestJobSiteViews(ClientTestCase):
         self.assertEqual(response.context['dailyplans'][0].worker_count, 2) # 2 workers on first dailyplan
         self.assertEqual(response.context['workers_summary'][0][1], 4) # worker1 on 4 dailyplans
         self.assertEqual(response.context['total_dailyplans'], 4) # 4 dailyplans existing
-        self.assertEqual(response.context['total_man_days'], 8)
+        self.assertEqual(response.context['total_man_days'], 8) # 8 days of work worth 8 hrs (just the concept)
