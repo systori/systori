@@ -2,13 +2,13 @@
 
 {% autoescape off %}
 
-  <tr>
+  <tr class="bold">
     {% if offset %}
     <td></td>
     {% endif %}
     <td colspan="{% if offset %}4{% else %}5{% endif %}">
       <p>{% trans 'Total' %} {{code}} - {{name}}</td>
-    <td class="total"><p>{{estimate.net|money}}</td>
+    <td class="total"><p>{{estimate|money}}</td>
   </tr>
 
 {% endautoescape %}

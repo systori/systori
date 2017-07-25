@@ -87,3 +87,7 @@ thead:nth-child(n+2) {
 .bold {
   font-weight: bold;
 }
+
+.line-above {
+  border-top-width: 1px;
+}

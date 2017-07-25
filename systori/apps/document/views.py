@@ -375,7 +375,10 @@ class InvoicePDF(DocumentRenderView):
         json = self.get_object().json
         letterhead = self.get_object().letterhead
         payment_details = self.request.GET.get('payment_details', False)
-        return pdf_type.invoice.render(json, letterhead, payment_details, self.kwargs['format'])
+        renderer = pdf_type.invoice.InvoiceRenderer(
+            json, letterhead, payment_details, self.kwargs['format']
+        )
+        return renderer.pdf
 
 
 class AdjustmentPDF(DocumentRenderView):
@@ -414,8 +417,10 @@ class ProposalPDF(DocumentRenderView):
         with_lineitems = self.request.GET.get('with_lineitems', False)
         only_groups = self.request.GET.get('only_groups', False)
         only_task_names = self.request.GET.get('only_task_names', False)
-        return pdf_type.proposal.render(
-            json, letterhead, with_lineitems, only_groups, only_task_names, self.kwargs['format'])
+        renderer = pdf_type.proposal.ProposalRenderer(
+            json, letterhead, with_lineitems, only_groups, only_task_names, self.kwargs['format']
+        )
+        return renderer.pdf
 
 
 class ProposalHTML(SingleObjectMixin, View):
@@ -427,12 +432,10 @@ class ProposalHTML(SingleObjectMixin, View):
         with_lineitems = self.request.GET.get('with_lineitems', False)
         only_groups = self.request.GET.get('only_groups', False)
         only_task_names = self.request.GET.get('only_task_names', False)
-        return HttpResponse(''.join(chain(
-            ('<style>', pdf_type.proposal.css_gen(letterhead), '</style>'),
-            pdf_type.proposal.html_gen(
-                json, letterhead, with_lineitems, only_groups, only_task_names)
-            )
-        ))
+        renderer = pdf_type.proposal.ProposalRenderer(
+            json, letterhead, with_lineitems, only_groups, only_task_names, None
+        )
+        return HttpResponse(renderer.html)
 
 
 class ProposalViewMixin(BaseDocumentViewMixin):
