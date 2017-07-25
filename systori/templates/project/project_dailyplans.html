@@ -4,20 +4,20 @@
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
 
 {% block content %}
-  <div class="col-sm-6">
-    <h2 class="sub-header">{% trans "Workers Summary" %}</h2>
+  <div class="col-sm-4">
+    <h2 class="sub-header">{% trans "Workers Summary" %}</h2><h4>{% trans "man days" %}: {{ total_man_days }}</h4>
     <div class="table-responsive">
       <table class="table table-striped" id="jobs-table">
         <thead>
         <tr>
-          <th>{% trans "Worker" %}</th>
+          <th>{% trans "Workers" %}</th>
           <th>{% trans "Count" %}</th>
         </tr>
         </thead>
         <tbody>
         {% for entry in workers_summary %}
           <tr>
-            <td>{{ entry.0 }}</td>
+            <td><span class="label label-default">{{ entry.0 }}</span></td>
             <td>{{ entry.1 }}</td>
           </tr>
         {% endfor %}
@@ -25,14 +25,14 @@
       </table>
     </div>
   </div>
-  <div class="col-sm-6">
-    <h2 class="sub-header">{% trans "DailyPlans" %}</h2>
+  <div class="col-sm-8">
+    <h2 class="sub-header">{% trans "DailyPlans" %}</h2><h4>{% trans "dailyplans" %}: {{ total_dailyplans }}</h4>
     <div class="table-responsive">
       <table class="table table-striped" id="jobs-table">
         <thead>
         <tr>
           <th>{% trans "Date" %}</th>
-          <th>{% trans "Workers Count" %}</th>
+          <th>{% trans "Count" %}</th>
           <th>{% trans "Workers" %}</th>
         </tr>
         </thead>

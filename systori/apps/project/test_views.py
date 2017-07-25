@@ -291,8 +291,8 @@ class TestJobSiteViews(ClientTestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(date(2015, 1, 1), response.context['activity_first_day'])
         self.assertEqual(date(2018, 2, 1), response.context['activity_last_day'])
-        self.assertEqual(date(2015, 1, 1), response.context['jobsites'][0].first_day)
-        self.assertEqual(date(2018, 2, 1), response.context['jobsites'][1].last_day)
+        self.assertEqual(date(2015, 1, 1), response.context['jobsites'][1].first_day)
+        self.assertEqual(date(2018, 2, 1), response.context['jobsites'][0].last_day)
 
     def test_no_activity_dailyplans_jobsite(self):
         jobsite1 = JobSiteFactory(project=self.project)
@@ -309,6 +309,7 @@ class TestJobSiteViews(ClientTestCase):
             TeamMember.objects.create(dailyplan=dp, worker=worker1)
             TeamMember.objects.create(dailyplan=dp, worker=worker2)
         response = self.client.get(reverse('project.dailyplans', args=[self.project.pk]), {})
-        self.assertEqual(len(response.context['dailyplans']), 4) # 4 dailyplans existing
         self.assertEqual(response.context['dailyplans'][0].worker_count, 2) # 2 workers on first dailyplan
         self.assertEqual(response.context['workers_summary'][0][1], 4) # worker1 on 4 dailyplans
+        self.assertEqual(response.context['total_dailyplans'], 4) # 4 dailyplans existing
+        self.assertEqual(response.context['total_man_days'], 8)

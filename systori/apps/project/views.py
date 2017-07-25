@@ -86,14 +86,15 @@ class ProjectView(DetailView):
     def get_jobsites_and_activity(self):
         first_day = date.today()
         last_day = date(1970,1,1)
+        modified = False
         jobsites = self.object.jobsites.annotate(first_day=Min('dailyplans__day'), last_day=Max('dailyplans__day'))
         for site in jobsites:
             if site.first_day is not None:
                 first_day = min(first_day, site.first_day)
                 last_day = max(last_day, site.last_day)
-            else:
-                if site == jobsites.first():
-                    first_day, last_day = None, None
+                modified = True
+        if not modified:
+            first_day, last_day = None, None
 
         return jobsites, first_day, last_day
 
@@ -280,17 +281,21 @@ class ProjectDailyPlansView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         project = get_object_or_404(Project, id=kwargs['project_pk'])
-        jobsites = project.jobsites.prefetch_related('dailyplans__workers').all()
+        jobsites = project.jobsites.prefetch_related('dailyplans__workers__user').all()
         workers = {}
         context['dailyplans'] = []
+        context['total_dailyplans'] = 0
+        context['total_man_days'] = 0
         for jobsite in jobsites:
             for dailyplan in jobsite.dailyplans.all():
                 context['dailyplans'].append(dailyplan)
                 dailyplan.worker_count = 0
+                context['total_dailyplans'] += 1
                 for worker in dailyplan.workers.all():
-                  workers.setdefault(worker.get_full_name, 0)
-                  workers[worker.get_full_name] += 1
-                  dailyplan.worker_count += 1
+                    workers.setdefault(worker.get_full_name, 0)
+                    workers[worker.get_full_name] += 1
+                    dailyplan.worker_count += 1
+                    context['total_man_days'] += 1
         context['workers_summary'] = sorted(workers.items(), key=lambda x: x[1], reverse=True)
         return context
 
