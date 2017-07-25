@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from datetime import date
 
-from django.db.models import Q, Max, Min, Count, Subquery
+from django.db.models import Q, Max, Min, Count, Sum
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -278,12 +278,13 @@ class ProjectDailyPlansView(ListView):
 
     def get_queryset(self):
         self.project = get_object_or_404(Project, id=self.kwargs['project_pk'])
-        jobsites = self.project.jobsites
-        return DailyPlan.objects.annotate(worker_count=Count('workers')).filter(jobsite__in=jobsites)
+        jobsites = self.project.jobsites.all()
+        return DailyPlan.objects\
+            .filter(jobsite__in=jobsites)\
+            .annotate(worker_count=Count('workers'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         return context
 
 
