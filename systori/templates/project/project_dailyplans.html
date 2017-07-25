@@ -9,7 +9,8 @@
     <table class="table table-striped" id="jobs-table">
       <thead>
       <tr>
-        <th>{% trans "Day" %}</th>
+        <th>{% trans "Date" %}</th>
+        <th>{% trans "Workers Count" %}</th>
         <th>{% trans "Workers" %}</th>
       </tr>
       </thead>
@@ -18,10 +19,10 @@
         <tr>
           <td>{{ dailyplan.day }}</td>
           <td>{{ dailyplan.worker_count }}</td>
+          <td>{% for worker in dailyplan.workers.all %}{{ worker }} {% endfor %}</td>
         </tr>
       {% endfor %}
       </tbody>
     </table>
   </div>
-  <a href="">{% trans "Create Job" %}</a> - <a href="">{% trans "Import Job" %}</a>
 {% endblock %}
