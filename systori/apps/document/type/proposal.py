@@ -1,197 +1,121 @@
 import os
-
-from io import BytesIO
 from datetime import date
-from decimal import Decimal
-
-from reportlab.lib.units import mm
-from reportlab.platypus import Spacer, KeepTogether, PageBreak
+from itertools import chain
 
 from django.conf import settings
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
-
-from systori.lib.templatetags.customformatting import ubrdecimal, money
-
-from .style import NumberedSystoriDocument
-from .style import force_break
-from .style import NumberedLetterheadCanvas, NumberedCanvas
-from .style import get_available_width_height_and_pagesize
-from .style import heading_and_date, get_address_label, get_address_label_spacer
-from .font import FontManager
+from django.template.loader import get_template, render_to_string
 
 from bericht.pdf import PDFStreamer
 from bericht.html import HTMLParser, CSS
-from django.template.loader import render_to_string
+
+from systori.lib.templatetags.customformatting import money
 
 
-def render_task(task, only_task_names=False):
+class ProposalRenderer:
 
-    kwargs = {
-        'task_name': task['name'],
-        'task_total': money(task['estimate']),
-        'show_description': not only_task_names,
-    }
-    kwargs.update(task)
+    def __init__(self, proposal, letterhead, with_lineitems, only_groups, only_task_names, format):
+        self.proposal = proposal
+        self.letterhead = letterhead
+        self.with_lineitems = with_lineitems
+        self.only_groups = only_groups
+        self.only_task_names = only_task_names
+        self.format = format
 
-    if task['is_provisional']:
-        kwargs['task_total'] = _('Optional')
+        # cache template lookups
+        self.header_html = get_template('document/proposal/header.html')
+        self.task_html = get_template('document/proposal/task.html')
+        self.group_html = get_template('document/proposal/group.html')
+        self.subtotal_html = get_template('document/proposal/subtotal.html')
+        self.footer_html = get_template('document/proposal/footer.html')
 
-    if task.get('variant_group'):
-        if task['variant_serial'] == 0:
-            kwargs['task_name'] = _('Variant {}.0: {}').format(task['variant_group'], kwargs['task_name'])
-        else:
-            kwargs['task_name'] = _('Variant {}.{}: {} - Alternative for Variant {}.0').format(
-                task['variant_group'], task['variant_serial'], kwargs['task_name'], task['variant_group'])
-            kwargs['task_total'] = _('Alternative')
+    @property
+    def pdf(self):
+        return PDFStreamer(
+            HTMLParser(self.generate(), CSS(self.css)),
+            os.path.join(settings.MEDIA_ROOT, self.letterhead.letterhead_pdf.name)
+        )
 
-    return render_to_string('document/proposal_task.html', kwargs)
+    @property
+    def html(self):
+        return ''.join(chain(
+            ('<style>', self.css, '</style>'),
+            self.generate()
+        ))
 
+    @property
+    def css(self):
+        return render_to_string('document/proposal/proposal.css', {
+            'letterhead': self.letterhead
+        })
 
-def render_group(group, depth, only_task_names=False, only_groups=False):
-    kwargs = {
-        'bold_name': depth <= 2,
-        'show_description': depth <= 2 or not only_task_names,
-    }
-    kwargs.update(group)
-
-    yield render_to_string('document/proposal_group.html', kwargs)
-
-    if not only_groups:
-        for task in group.get('tasks', []):
-            yield render_task(task, only_task_names)
-
-    for subgroup in group.get('groups', []):
-        yield from render_group(subgroup, depth+1, only_groups, only_task_names)
-
-    if not group.get('groups', []) and group.get('tasks', []):
-        yield render_to_string('document/proposal_subtotal.html', kwargs)
-
-
-def html_gen(proposal, letterhead, with_lineitems, only_groups, only_task_names):
-    proposal_date = date_format(date(*map(int, proposal['document_date'].split('-'))), use_l10n=True)
-
-    proposal['doc_date'] = proposal_date
-    proposal['longest_code'] = '01.01.01.01'
-    proposal['longest_amount'] = '1.000,00'
-    proposal['longest_unit'] = 'unit'
-    proposal['longest_price'] = '00.000,00'
-    proposal['longest_total'] = '000.000,00'
-
-    yield render_to_string('document/proposal_header.html', proposal)
-
-    for job in proposal['jobs']:
-        yield from render_group(job, 0, only_groups, only_task_names)
-
-    for job in proposal['jobs']:
-        for group in job.get('groups', []):
-            yield render_to_string('document/proposal_subtotal.html', group)
-
-    yield render_to_string('document/proposal_footer.html', proposal)
-
-
-def css_gen(letterhead):
-    return render_to_string('document/proposal.css', {
-        'letterhead': letterhead
-    })
-
-
-def render(proposal, letterhead, with_lineitems, only_groups, only_task_names, format):
-    return PDFStreamer(HTMLParser(
-        html_gen(proposal, letterhead, with_lineitems, only_groups, only_task_names),
-        CSS(css_gen(letterhead))
-    ), os.path.join(settings.MEDIA_ROOT, letterhead.letterhead_pdf.name))
-
-
-def collate_lineitems(proposal, available_width, font):
-
-    style = Style.default().set(
-        font_size=12,
-        border_spacing_horizontal=8,
-        border_spacing_vertical=8,
-    )
-    bold = style.set(bold=True)
-
-    pages = []
-
-    def add_task(task):
-        pages.append(PageBreak())
-        t = TableBuilder([0, 1], style)
-        t.row(static(job['code'], bold), parse_html('<p>'+job['name']+'</p>', bold))
-        t.row(static(task['code'], style), parse_html('<p>'+task['name']+'</p>', style))
-        t.row('', parse_html('<p>'+task['description']+'</p>', style) if task['description'] else '')
-        pages.append(t.table)
-
-        t = TableBuilder([1, 0, 0, 0, 0], style)
-        task_price = Decimal('0')
-        for lineitem in task['lineitems']:
-            t.row(
-                lineitem['name'],
-                ubrdecimal(lineitem['qty']),
-                lineitem['unit'],
-                money(lineitem['price']),
-                money(lineitem['estimate'])
-            )
-            task_price += lineitem['estimate']
-
-        t.row('', static(ubrdecimal(1.00), bold), static(task['unit'], bold), '', static(money(task_price), bold))
-
-        pages.append(t.table)
-
-    def traverse(parent, depth):
-        for group in parent.get('groups', []):
-            traverse(group, depth + 1)
-
-        for task in parent['tasks']:
-            add_task(task)
-
-    for job in proposal['jobs']:
-
-        for group in job.get('groups', []):
-            traverse(group, 1)
-
-        for task in job.get('tasks', []):
-            add_task(task)
-
-    return pages
-
-
-def old_render(proposal, letterhead, with_lineitems, only_groups, only_task_names, format):
-
-    with BytesIO() as buffer:
-
-        font = FontManager(letterhead.font)
-
-        available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
+    def generate(self):
+        proposal = self.proposal
 
         proposal_date = date_format(date(*map(int, proposal['document_date'].split('-'))), use_l10n=True)
 
-        doc = NumberedSystoriDocument(buffer, pagesize=pagesize)
+        proposal['doc_date'] = proposal_date
+        proposal['longest_code'] = '01.01.01.01'
+        proposal['longest_amount'] = '1.000,00'
+        proposal['longest_unit'] = 'unit'
+        proposal['longest_price'] = '00.000,00'
+        proposal['longest_total'] = '000.000,00'
 
-        flowables = [
-            get_address_label(proposal, font),
-            get_address_label_spacer(proposal),
-            heading_and_date(proposal['title'], proposal_date, font, available_width),
-        ]
+        yield self.header_html.render(proposal)
 
-        if proposal['show_project_id']:
-            flowables += [para(_("Project") + " #" + str(proposal['project_id']))]
+        for job in proposal['jobs']:
+            yield from self.render_group(job, 0)
 
-        flowables += [
-            Spacer(0, 4*mm),
-            parse_html('<p>'+force_break(proposal['header'])+'</p>')[0],
-            Spacer(0, 4*mm)
-        ] + collate_tasks(proposal, only_groups, only_task_names, font, available_width) + [
-            Spacer(0, 10*mm),
-            KeepTogether(parse_html('<p>'+force_break(proposal['footer'])+'</p>')[0]),
-        ] + (collate_lineitems(proposal, available_width, font) if with_lineitems else [])
+        for job in proposal['jobs']:
+            for group in job.get('groups', []):
+                yield self.subtotal_html.render(group)
 
-        if format == 'print':
-            doc.build(flowables, NumberedCanvas, letterhead)
-        else:
-            doc.build(flowables, NumberedLetterheadCanvas.factory(letterhead), letterhead)
+        yield self.footer_html.render(proposal)
 
-        return buffer.getvalue()
+    def render_group(self, group, depth):
+
+        kwargs = {
+            'bold_name': depth <= 2,
+            'show_description': depth <= 2 or not self.only_task_names,
+        }
+        kwargs.update(group)
+
+        yield self.group_html.render(kwargs)
+
+        if not self.only_groups:
+            for task in group.get('tasks', []):
+                yield self.render_task(task)
+
+        for subgroup in group.get('groups', []):
+            yield from self.render_group(subgroup, depth+1)
+
+        if not group.get('groups', []) and group.get('tasks', []):
+            total_kwargs = {'offset': True}
+            total_kwargs.update(group)
+            yield self.subtotal_html.render(total_kwargs)
+
+    def render_task(self, task):
+
+        kwargs = {
+            'task_name': task['name'],
+            'task_total': money(task['estimate']),
+            'show_description': not self.only_task_names,
+        }
+        kwargs.update(task)
+
+        if task['is_provisional']:
+            kwargs['task_total'] = _('Optional')
+
+        if task.get('variant_group'):
+            if task['variant_serial'] == 0:
+                kwargs['task_name'] = _('Variant {}.0: {}').format(task['variant_group'], kwargs['task_name'])
+            else:
+                kwargs['task_name'] = _('Variant {}.{}: {} - Alternative for Variant {}.0').format(
+                    task['variant_group'], task['variant_serial'], kwargs['task_name'], task['variant_group'])
+                kwargs['task_total'] = _('Alternative')
+
+        return self.task_html.render(kwargs)
 
 
 def serialize(proposal):
