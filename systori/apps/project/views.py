@@ -86,15 +86,14 @@ class ProjectView(DetailView):
     def get_jobsites_and_activity(self):
         first_day = date.today()
         last_day = date(1970,1,1)
-        jobsites = self.object.jobsites\
-            .annotate(first_day=Min('dailyplans__day'), last_day=Max('dailyplans__day'))\
-            .order_by('first_day')
+        jobsites = self.object.jobsites.annotate(first_day=Min('dailyplans__day'), last_day=Max('dailyplans__day'))
         for site in jobsites:
             if site.first_day is not None:
                 first_day = min(first_day, site.first_day)
                 last_day = max(last_day, site.last_day)
             else:
-                first_day, last_day = None, None
+                if site == jobsites.first():
+                    first_day, last_day = None, None
 
         return jobsites, first_day, last_day
 
