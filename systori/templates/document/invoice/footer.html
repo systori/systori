@@ -1,0 +1,12 @@
+{% load i18n customformatting %}
+
+{% autoescape off %}
+
+  <tr class="bold total line-above">
+    <td colspan="5" class="right"><p>{% trans "Total without VAT" %}</td>
+    <td class="total"><p>{{invoice.invoiced.net|money}}</td>
+  </tr>
+
+</table>
+
+{% endautoescape %}

@@ -1,0 +1,8 @@
+{% load customformatting %}
+{% autoescape off %}
+    <tr>
+      <td></td>
+      <td colspan="4">{{ entry }}</td>
+      <td class="total"><p>{{ amount.net|money }}</td>
+    </tr>
+{% endautoescape %}

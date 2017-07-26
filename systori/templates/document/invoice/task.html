@@ -1,0 +1,36 @@
+{% load i18n customformatting %}
+
+{% autoescape off %}
+
+  <tr>
+    <td><p>{{task.code}}</td>
+    <td colspan="5"><p>{{task.name}}</td>
+  </tr>
+
+  {% if task.qty != None %}
+    <tr>
+      <td></td>
+      <td></td>
+      <td class="qty"><p>{{task.complete|ubrdecimal}}</td>
+      <td class="unit"><p>{{task.unit}}</td>
+      <td class="price"><p>{{task.price|money}}</td>
+      <td class="total"><p>{{task.progress|money}}</td>
+    </tr>
+  {% else %}
+    <tr>
+      <td></td>
+      <td colspan="5"><p>{{task.description}}</td>
+    </tr>
+    {% for li in task.lineitems %}
+    <tr>
+      <td></td>
+      <td><p>{{li.name}}</td>
+      <td class="qty"><p>{{li.qty|ubrdecimal}}</td>
+      <td class="unit"><p>{{li.unit}}</td>
+      <td class="price"><p>{{li.price|money}}</td>
+      <td class="total"><p>{{li.estimate|money}}</td>
+    </tr>
+    {% endfor %}
+  {% endif %}
+
+{% endautoescape %}

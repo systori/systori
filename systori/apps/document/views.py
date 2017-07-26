@@ -381,6 +381,19 @@ class InvoicePDF(DocumentRenderView):
         return renderer.pdf
 
 
+class InvoiceHTML(SingleObjectMixin, View):
+    model = Invoice
+
+    def get(self, request, *args, **kwargs):
+        json = self.get_object().json
+        letterhead = self.get_object().letterhead
+        payment_details = self.request.GET.get('payment_details', False)
+        renderer = pdf_type.invoice.InvoiceRenderer(
+            json, letterhead, payment_details, None
+        )
+        return HttpResponse(renderer.html)
+
+
 class AdjustmentPDF(DocumentRenderView):
     model = Adjustment
 

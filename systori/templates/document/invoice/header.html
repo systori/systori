@@ -1,0 +1,105 @@
+{% load i18n %}
+
+{% autoescape off %}
+
+<p class="address">
+{% if invoice.address_label %}
+  {{invoice.address_label|linebreaksbr}}
+{% else %}
+  {% if invoice.business %}{{invoice.business}}<br />{% endif %}
+  {{invoice.salutation}} {{invoice.first_name}} {{invoice.last_name}}<br />
+  {{invoice.address}}<br />
+  {{invoice.postal_code}} {{invoice.city}}
+{% endif %}
+</p>
+
+<p class="vspace-50"><br></p>
+
+<table>
+  <colgroup span="2"></colgroup>
+  <tr>
+    <td><p class="header-title">{% if invoice.title %}{{invoice.title}}{% else %}{% trans "Invoice" %}{% endif %}</p></td>
+    <td class="bottom"><p class="header-date">{{invoice_date}}</p></td>
+  </tr>
+</table>
+
+<p class="right">{% trans "Invoice No." %} {{invoice.invoice_no}}</p>
+<p class="right invoice-no-fine-print">{% trans "Please indicate the correct invoice number on your payment." %}</p>
+
+{% if invoice.show_project_id %}
+  <p>{% trans "Project" %} #{{invoice.project_id}}</p>
+{% endif %}
+
+{% if vesting_start and not vesting_end %}
+  <p>{% trans "Vesting Date" %} {{ vesting_start }}</p>
+{% elif vesting_end and not vesting_start %}
+  <p>{% trans "Vesting Date" %} {{ vesting_end }}</p>
+{% elif vesting_start and vesting_end %}
+  <p>{% trans "Vesting Period" %} {{ vesting_start }} {% trans "to" %} {{ vesting_end }}</p>
+{% endif %}
+
+<p>{{invoice.header|linebreaksbr}}</p>
+
+<p><br></p>
+
+<table>
+
+  <colgroup>
+    <bericht-col width="1*"></bericht-col>
+    <bericht-col width="0*">{{longest_net}}</bericht-col>
+    <bericht-col width="0*">{{longest_tax}}</bericht-col>
+    <bericht-col width="0*">{{longest_gross}}</bericht-col>
+  </colgroup>
+
+  <thead class="payments">
+  <tr>
+    <td></td>
+    <td class="right"><p>{% trans "consideration" %}</td>
+    <td class="right"><p>19% {% trans "tax" %}</td>
+    <td class="right"><p>{% trans "gross" %}</td>
+  </tr>
+  </thead>
+
+  {% for css, description, net, tax, gross in payments %}
+  <tr class="payments payment-{{ css }}">
+    <td><p>{{ description }}</td>
+    <td class="net"><p>{{ net }}</td>
+    <td class="tax"><p>{{ tax}}</td>
+    <td class="gross"><p>{{ gross }}</td>
+  </tr>
+  {% endfor %}
+
+</table>
+
+<p><br></p>
+
+<p class="footer-text">{{invoice.footer|linebreaksbr}}</p>
+
+<p class="right">{{invoice_date}}</p>
+
+<p class="bold">{% blocktrans with invoice_no=invoice.invoice_no %}Itemized listing for Invoice No. {{invoice_no}}{% endblocktrans %}</p>
+
+<p><br></p>
+
+<table>
+
+  <colgroup>
+    <bericht-col width="0*">{{longest_code}}</bericht-col>
+    <bericht-col width="1*"></bericht-col>
+    <bericht-col width="0*">{{longest_amount}}</bericht-col>
+    <bericht-col width="0*">{{longest_unit}}</bericht-col>
+    <bericht-col width="0*">{{longest_price}}</bericht-col>
+    <bericht-col width="0*">{{longest_total}}</bericht-col>
+  </colgroup>
+
+  <thead>
+  <tr>
+    <td class="left"><p>{% trans "Pos." %}</td>
+    <td class="left"><p>{% trans "Description" %}</td>
+    <td colspan="2" class="right"><p>{% trans "Amount" %}</td>
+    <td class="right"><p>{% trans "Price" %}</td>
+    <td class="right"><p>{% trans "Total" %}</td>
+  </tr>
+  </thead>
+
+{% endautoescape %}
