@@ -5,6 +5,7 @@ from bootstrap import DateWidget
 
 from ..accounting.models import create_account_for_job
 from ..company.models import Company, Worker
+from ..project.models import Project
 from .models import Job, ProgressReport, ExpendReport
 
 
@@ -125,3 +126,18 @@ class JobProgressForm(forms.ModelForm):
                             comment=self.cleaned_data['comment']
                         )
         return super().save(commit)
+
+
+class JobCopyForm(forms.Form):
+    project_id = forms.IntegerField(disabled=True, widget=forms.HiddenInput())
+    job_id = forms.IntegerField()
+
+    def clean_job_id(self):
+        job = Job.objects.get(id=self.cleaned_data.get("job_id"))
+        project = Project.objects.get(id=self.cleaned_data.get("project_id"))
+        if not project.can_receive_job(job):
+            raise forms.ValidationError(
+                "The Job you're trying to import has an incompatible depth with the current project.",
+                code='invalid',
+            )
+        return job.id

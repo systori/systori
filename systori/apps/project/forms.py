@@ -50,3 +50,4 @@ class GAEBImportForm(forms.Form):
 
     def save(self):
         return self.importer.save()
+
