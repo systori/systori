@@ -1,7 +1,8 @@
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.db.models import Max
 
+from ..project.models import Project
 from .models import *
 from .forms import *
 
@@ -62,3 +63,28 @@ class JobDelete(DeleteView):
 
     def get_success_url(self):
         return self.object.project.get_absolute_url()
+
+
+class JobCopy(FormView):
+    model = Job
+    template_name = 'task/job_form.html'
+    form_class = JobCopyForm
+
+    def get_initial(self):
+        initial = super(JobCopy, self).get_initial()
+        initial['project_id'] = self.kwargs['project_pk']
+        return initial
+
+
+    def clean_project_id(self):
+        raise forms.ValidationError(_("Error happened"))
+
+    def form_valid(self, form):
+        project_id = form.cleaned_data['project_id']
+        project = Project.objects.get(id=project_id)
+        job = Job.objects.get(id=form.cleaned_data['job_id'])
+        project.receive_job(job)
+        return super(JobCopy, self).form_valid(form)
+
+    def get_success_url(self):
+        return Project.objects.get(id=self.kwargs.get("project_pk")).get_absolute_url()

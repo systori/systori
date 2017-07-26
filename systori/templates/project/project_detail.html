@@ -83,6 +83,7 @@
     <table class="table table-striped" id="jobs-table">
       <thead>
       <tr>
+        <th>{% trans 'Id' %}</th>
         <th>{% trans "Name" %}</th>
         <th>{% trans "Status" %}</th>
         <th style="text-align: right;">{% trans "Estimate" %}</th>
@@ -94,6 +95,7 @@
       <tbody>
       {% for job in jobs %}
         <tr>
+          <td>{{ job.id|unlocalize }}</td>
           <td><a href="{% url 'job.editor' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
           <td>{{ job.get_status_display }}</td>
           <td style="text-align: right; white-space: nowrap;">{{ job.estimate|money }}</td>
@@ -111,6 +113,7 @@
         <tr>
           <td></td>
           <td></td>
+          <td></td>
           <td style="text-align: right;"><b>{{ project.estimate|money }}</b></td>
           <td style="text-align: right;"><b>{{ project.progress|money }}</b></td>
           <td><small>{{ project.progress_percent }}%</small></td>
@@ -120,7 +123,9 @@
       </tbody>
     </table>
   </div>
-  <a href="{% url 'job.create' project.id %}">{% trans "Create Job" %}</a> - <a href="{% url 'job.import' project.id %}">{% trans "Import Job" %}</a>
+  <a href="{% url 'job.create' project.id %}">{% trans "Create Job" %}</a> -
+  <a href="{% url 'job.import' project.id %}">{% trans "Import Job" %}</a> -
+  <a href="{% url 'job.copy' project.id %}">{% trans "Copy Job" %}</a>
 
 
   <h2 class="sub-header">{% trans "Proposals" %}</h2>

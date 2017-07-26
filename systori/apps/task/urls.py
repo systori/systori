@@ -7,4 +7,7 @@ urlpatterns = [
     url(r'^job-(?P<pk>\d+)/editor$', office_auth(JobEditor.as_view()), name='job.editor'),
     url(r'^job-(?P<pk>\d+)/progress$', office_auth(JobProgress.as_view()), name='job.progress'),
     url(r'^job-(?P<pk>\d+)/delete$', office_auth(JobDelete.as_view()), name='job.delete'),
+
+    # copy existing job into existing project
+    url(r'^project-(?P<project_pk>\d+)/job-copy$', office_auth(JobCopy.as_view()), name='job.copy'),
 ]

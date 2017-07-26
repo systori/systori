@@ -2,6 +2,7 @@ from datetime import date
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Max
 from django.db.models.expressions import RawSQL
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django.utils.functional import cached_property
@@ -279,6 +280,16 @@ class Project(models.Model):
     @property
     def has_billable_contact(self):
         return self.billable_contact is not None
+
+    def can_receive_job(self, other_job):
+        return self.structure_depth == other_job.project.structure_depth
+
+    def receive_job(self, other_job):
+        if self.can_receive_job(other_job):
+            new_job = Job.objects.create(project=self, name=other_job.name, order=None)
+            other_job.clone_to(new_job)
+            return True
+        return False
 
 
 class JobSite(models.Model):
