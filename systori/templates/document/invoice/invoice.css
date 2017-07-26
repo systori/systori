@@ -1,0 +1,126 @@
+/* for debugging tables
+td {
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+*/
+
+/*
+uncomment this after fixing margin values in database
+@page {
+  margin-top: {{letterhead.top_margin}}px;
+  margin-right: {{letterhead.right_margin}}px;
+  margin-bottom: {{letterhead.bottom_margin}}px;
+  margin-left: {{letterhead.left_margin}}px;
+  letterhead-page: 1;
+}
+
+@page:nth-child(n+2) {
+  margin-top: {{letterhead.top_margin_next}}px;
+  margin-bottom: {{letterhead.bottom_margin_next}}px;
+  letterhead-page: 2;
+}
+*/
+
+/* hard coded values for now which result in better margin */
+@page {
+  margin-top: 152px;
+  margin-right: 172px;
+  margin-bottom: 72px;
+  margin-left: 72px;
+  letterhead-page: 1;
+}
+
+@page:nth-child(n+2) {
+  margin-top: 120px;
+  margin-bottom: 72px;
+  letterhead-page: 2;
+}
+
+td {
+  padding-top: 2px;
+  padding-right: 2px;
+  padding-bottom: 2px;
+  padding-left: 2px;
+}
+
+p {
+  font-size: 10pt;
+}
+
+.header-title {
+  font-weight: bold;
+  font-size: 14pt;
+}
+
+.header-date {
+  text-align: right;
+}
+
+.bottom {
+  vertical-align: bottom;
+}
+
+.vspace-50 {
+  padding-top: 50px;
+}
+
+thead:nth-child(n+2) {
+  border-bottom-width: 1px;
+}
+
+.left {
+  text-align: left;
+}
+
+.right {
+  text-align: right;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.line-above {
+  border-top-width: 1px;
+}
+
+.invoice-no-fine-print {
+  font-size: 7pt;
+}
+
+.footer-text {
+  page-break-after: always;
+}
+
+/* Payments Table */
+
+thead.payments {
+  border-bottom-width: 1px;
+}
+
+.net, .tax, .gross {
+  text-align: right;
+  border-left-width: 1px;
+}
+
+tr.payments:last-child > td {
+  border-left-width: 0px;
+  font-weight: bold;
+}
+
+tr.payments:last-child {
+  border-top-width: 1px;
+}
+
+.payment-small {
+  font-size: 8pt;
+}
+
+/* Itemized Listing */
+
+.qty, .price, .total {
+  text-align: right;
+}
