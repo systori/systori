@@ -95,7 +95,7 @@
       <tbody>
       {% for job in jobs %}
         <tr>
-          <td>{{ job.id|unlocalize }}</td>
+          <td><span class="label label-default">{{ job.id|unlocalize }}</span></td>
           <td><a href="{% url 'job.editor' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
           <td>{{ job.get_status_display }}</td>
           <td style="text-align: right; white-space: nowrap;">{{ job.estimate|money }}</td>

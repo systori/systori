@@ -19,8 +19,8 @@ class JobCreate(CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         project = self.request.project
-        max_code = project.jobs.all().aggregate(order=Max('order'))['order'] or 0
-        kwargs['instance'] = Job(order=max_code+1, project=project)
+        #max_code = project.jobs.all().aggregate(order=Max('order'))['order'] or 0
+        kwargs['instance'] = Job(order=None, project=project)
         return kwargs
 
 
