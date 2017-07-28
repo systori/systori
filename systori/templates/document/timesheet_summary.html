@@ -1,61 +1,63 @@
 {% load i18n customformatting %}
 <table class="table table-bordered table-condensed {{ extra_css }}">
 
+  <colgroup span="5" />
+
   <thead>
   <tr>
-    <th></th>
+    <td></td>
     {% if full %}
-    <th>{% trans "Previous" context "timesheet" %}</th>
-    <th>{% trans "Correction" context "timesheet" %}</th>
-    <th>{{ timesheet.document_date|date:"F" }}</th>
+    <td><p>{% trans "Previous" context "timesheet" %}</td>
+    <td><p>{% trans "Correction" context "timesheet" %}</td>
+    <td><p>{{ timesheet.document_date|date:"F" }}</td>
     {% endif %}
-    <th>{% trans "Balance" context "timesheet" %}</th>
+    <td><p>{% trans "Balance" context "timesheet" %}</td>
   </tr>
   </thead>
 
   <tr>
-    <td>{% trans "Vacation" %}</td>
+    <td><p>{% trans "Vacation" %}</td>
     {% if full %}
-    <td>{{ timesheet.json.vacation_transferred|zeroblank|workdays }}</td>
-    <td>{{ timesheet.json.vacation_correction|zeroblank|workdays }}</td>
-    <td>
+    <td><p>{{ timesheet.json.vacation_transferred|zeroblank|workdays }}</td>
+    <td><p>{{ timesheet.json.vacation_correction|zeroblank|workdays }}</td>
+    <td><p>
       {{ timesheet.json.vacation_net|workdays }}
       {% if timesheet.json.vacation_total != 0 %}
         ({{ timesheet.json.vacation_added|workdays }} - {{ timesheet.json.vacation_total|workdays }})
       {% endif %}
     </td>
     {% endif %}
-    <td class="info">{{ timesheet.json.vacation_balance|workdays }}</td>
+    <td class="info"><p>{{ timesheet.json.vacation_balance|workdays }}</td>
   </tr>
 
   <tr>
-    <td>{% trans "Overtime" %}</td>
+    <td><p>{% trans "Overtime" %}</td>
     {% if full %}
-    <td>{{ timesheet.json.overtime_transferred|zeroblank|hours }}</td>
-    <td>{{ timesheet.json.overtime_correction|zeroblank|hours }}</td>
-    <td>
+    <td><p>{{ timesheet.json.overtime_transferred|zeroblank|hours }}</td>
+    <td><p>{{ timesheet.json.overtime_correction|zeroblank|hours }}</td>
+    <td><p>
       {{ timesheet.json.overtime_net|hours }}
       {% if timesheet.json.paid_leave_total != 0 %}
         ({{ timesheet.json.overtime_total|hours }} - {{ timesheet.json.paid_leave_total|hours }})
       {% endif %}
     </td>
     {% endif %}
-    <td class="info">{{ timesheet.json.overtime_balance|hours }} ({{ timesheet.json.overtime_balance|workdays }})</td>
+    <td class="info"><p>{{ timesheet.json.overtime_balance|hours }} ({{ timesheet.json.overtime_balance|workdays }})</td>
   </tr>
 
   <tr>
-    <td>{% trans "Compensation" context "timesheet" %}</td>
+    <td><p>{% trans "Compensation" context "timesheet" %}</td>
     {% if full %}
     <td></td>
-    <td>{{ timesheet.json.work_correction|zeroblank|hours }}</td>
-    <td>
+    <td><p>{{ timesheet.json.work_correction|zeroblank|hours }}</td>
+    <td><p>
       {{ timesheet.json.compensation_total|hours }}
       {% if timesheet.json.overtime_total != 0 %}
         ({{ timesheet.json.payables_total|hours }} - {{ timesheet.json.overtime_total|hours }})
       {% endif %}
     </td>
     {% endif %}
-    <td class="info">{{ timesheet.json.compensation_final|hours }}</td>
+    <td class="info"><p>{{ timesheet.json.compensation_final|hours }}</td>
   </tr>
 
 </table>

@@ -1,0 +1,57 @@
+@page {
+  margin-top: 50px;
+  margin-right: 35px;
+  margin-bottom: 75px;
+  margin-left: 35px;
+  letterhead-page: 1;
+}
+
+.table-striped>tbody>tr:nth-child(odd) {
+  background-color: rgb(204, 255, 255);
+}
+
+td {
+  border-top-width: .5px;
+  border-right-width: .5px;
+  border-bottom-width: .5px;
+  border-left-width: .5px;
+
+  padding-top: 2px;
+  padding-right: 2px;
+  padding-bottom: 2px;
+  padding-left: 2px;
+
+  font-size: 8pt;
+}
+
+tr.row-payables > td {
+  border-top-width: 2px;
+}
+
+tr.row-compensation > td {
+  border-top-width: 2px;
+  background-color: rgb(255, 255, 255);
+}
+
+table.month > thead > tr > td {
+  text-align: center;
+}
+
+td.info {
+  text-align: right;
+  padding-right: 6px;
+}
+
+td.monday {
+  border-left-width: 2px;
+}
+
+.h2 {
+  font-size: 16pt;
+  font-weight: bold;
+  padding-bottom: 20px;
+}
+
+.right {
+  text-align: right;
+}
