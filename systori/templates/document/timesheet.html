@@ -1,69 +1,50 @@
-{% extends "frame.html" %}
-{% load i18n bootstrap customformatting %}
+{% load i18n customformatting %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='timesheets' %}{% endblock %}
+<p class="h2">{{ last_name }}, {{ first_name }}, {{ document_date|date:"F Y" }}</p>
 
-{% block content %}
-  <style>
-  .table-nonfluid {
-     width: auto !important;
-  }
-  </style>
+<table class="month table table-bordered table-hover table-striped table-condensed">
 
-  {% if saved %}
-  <div class="alert alert-success" role="alert">
-    {% trans "Correction saved." %}
-    <a class="alert-link" href="{% url 'timesheets' %}">{% trans "Return to timesheets." %}</a>
-  </div>
-  {% endif %}
+  <colgroup>
+    {% for day in daynumbers %}
+      <bericht-col width="0*">8:0</bericht-col>
+    {% endfor %}
+    <bericht-col width="0*">999:00</bericht-col>
+    <bericht-col width="1*"></bericht-col>
+  </colgroup>
 
-  <form method="post" autocomplete="off">{% csrf_token %}
+  <thead>
+  <tr>
+    {% for day in daynumbers %}
+      <td width="3%"><p>{{ day }}</td>
+    {% endfor %}
+    <td width="3%"><p>&#931;</td>
+    <td></td>
+  </tr>
+  <tr>
+    {% for day in daynames %}
+      <td width="3%"><p>{{ day }}</td>
+    {% endfor %}
+    <td width="3%"><p>&#931;</td>
+    <td></td>
+  </tr>
+  </thead>
 
-    <h2>
-      {{ object.json.last_name }},
-      {{ object.json.first_name }},
-      {{ object.document_date|date:"F Y" }}
-      <a href="{% url 'timesheet.pdf' timesheet.pk %}">{% trans "PDF" %}</a>
-    </h2>
-
-    <table class="table table-bordered table-hover table-striped table-condensed">
-
-      <thead>
-        <tr>
-          {% for day in daynumbers %}
-            <th width="3%">{{ day }}</th>
-          {% endfor %}
-          <th width="3%">&#931;</th>
-          <th></th>
-        </tr>
-        <tr>
-            {% for day in daynames %}
-                <th width="3%">{{ day }}</th>
-            {% endfor %}
-            <th width="3%">&#931;</th>
-            <th></th>
-        </tr>
-      </thead>
-
-      {% for name, label, row, total in rows %}
-        <tr>
-          {% for day in row %}
-            <td>{{ day|zeroblank|hours }}</td>
-          {% endfor %}
-          <td class="info">{{ total|hours }}</td>
-          <td>{{ label }}</td>
-        </tr>
+  {% for name, label, row, total in rows %}
+    <tr class="row-{{ name }}">
+      {% for day in row %}
+        <td><p>{{ day|zeroblank|hours }}</td>
       {% endfor %}
+      <td class="info"><p>{{ total|hours }}</td>
+      <td><p>{{ label }}</td>
+    </tr>
+  {% endfor %}
 
-    </table>
+</table>
 
-    {% include "document/timesheet_summary.html" with timesheet=object full=True extra_css="table-nonfluid pull-right" %}
+<p><br></p>
 
-    <div class="clearfix"></div>
+{% include "document/timesheet_summary.html" with timesheet=timesheet full=True extra_css="table-nonfluid pull-right" %}
 
-    {% bootstrap form %}
-    <div class="form-group">
-      <button name="save" type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
-    </div>
-  </form>
-{% endblock %}
+<p><br></p>
+
+<p class="right">{% trans "Approved" context "timesheet "%}: _______________________________</p>

@@ -252,7 +252,7 @@ class TimesheetsList(TemplateView):
 class TimesheetUpdate(UpdateView):
     model = Timesheet
     form_class = TimesheetForm
-    template_name = 'document/timesheet.html'
+    template_name = 'document/timesheet_form.html'
 
     def get_initial(self):
         return {key: self.object.json[key] for key in Timesheet.initial.keys()}
@@ -365,7 +365,10 @@ class TimesheetPDF(DocumentRenderView):
 
     def pdf(self):
         letterhead = DocumentSettings.objects.first().timesheet_letterhead
-        return pdf_type.timesheet.render([self.get_object()], letterhead)
+        renderer = pdf_type.timesheet.TimesheetRenderer(
+            [self.get_object()], letterhead
+        )
+        return renderer.pdf
 
 
 class InvoicePDF(DocumentRenderView):
