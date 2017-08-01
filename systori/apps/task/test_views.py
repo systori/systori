@@ -151,7 +151,7 @@ class JobCopyTest(ClientTestCase):
             {'job_id': self.job.pk}
         ) # fails because of incompatible project.structure
         self.assertEqual(self.project2.jobs.count(), 0)
-        self.job2 = self.JobFactory(project=self.project2) #creates first job on project2
+        self.job2 = JobFactory(project=self.project2) #creates first job on project2
         response = self.client.post(
             reverse('job.copy', args=[self.project2.pk]),
             {'job_id': self.job2.pk}
