@@ -24,6 +24,20 @@ td {
   font-size: 8pt;
 }
 
+.summary-layout > tbody > tr > td {
+  border-top-width: 0px;
+  border-right-width: 0px;
+  border-bottom-width: 0px;
+  border-left-width: 0px;
+
+  padding-top: 2px;
+  padding-right: 2px;
+  padding-bottom: 2px;
+  padding-left: 2px;
+
+  font-size: 8pt;
+}
+
 tr.row-payables > td {
   border-top-width: 2px;
 }

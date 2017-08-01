@@ -43,7 +43,16 @@
 
 <p><br></p>
 
-{% include "document/timesheet_summary.html" with timesheet=timesheet full=True extra_css="table-nonfluid pull-right" %}
+<table class="summary-layout">
+  <colgroup>
+    <bericht-col width="5*"></bericht-col>
+    <bericht-col width="15*"></bericht-col>
+  </colgroup>
+  <tr>
+    <td></td>
+    <td>{% include "document/timesheet_summary.html" with timesheet=timesheet full=True extra_css="table-nonfluid pull-right" %}</td>
+  </tr>
+</table>
 
 <p><br></p>
 
