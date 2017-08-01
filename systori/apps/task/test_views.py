@@ -118,3 +118,43 @@ class JobProgressTest(ClientTestCase):
         self.assertEqual(expend.lineitem, lineitem)
         self.assertEqual(expend.expended, 10)
         self.assertEqual(expend.worker, self.worker)
+
+
+class JobCopyTest(ClientTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.project = ProjectFactory()
+        self.job = JobFactory(
+            name='job name',
+            description='new job description',
+            project=self.project
+        )  # type: Job
+
+    def test_copy_job_regular(self):
+        response = self.client.get(
+            reverse('job.copy', args=[self.project.pk])
+        )
+        form = response.context['form']
+        self.assertFalse(form.is_valid())
+        response = self.client.post(
+            reverse('job.copy', args=[self.project.pk]),
+            {'job_id':self.job.pk}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.project.jobs.count(), 2)
+
+    def test_error_on_incompatible_structure(self):
+        self.project2 = ProjectFactory(structure="01.001")
+        response = self.client.post(
+            reverse('job.copy', args=[self.project2.pk]),
+            {'job_id': self.job.pk}
+        ) # fails because of incompatible project.structure
+        self.assertEqual(self.project2.jobs.count(), 0)
+        self.job2 = self.JobFactory(project=self.project2) #creates first job on project2
+        response = self.client.post(
+            reverse('job.copy', args=[self.project2.pk]),
+            {'job_id': self.job2.pk}
+        ) # creates second job on project2
+        self.assertEqual(self.project2.jobs.count(), 2)
+
