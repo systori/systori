@@ -146,7 +146,7 @@
       <tbody>
       {% for doc in project.proposals.all %}
         <tr>
-          <td>{{ doc.id }}</td>
+          <td><span class="label label-default">{{ doc.id|unlocalize }}</span></td>
           <td>{{ doc.get_status_display }}</td>
           <td>
             {% for job in doc.jobs.all %}
@@ -505,7 +505,7 @@
       <tbody>
       {% for site in jobsites %}
         <tr>
-          <td>{{ site.id }}</td>
+          <td><span class="label label-default">{{ site.id|unlocalize }}</span></td>
           <td>{{ site }}</td>
           <td>{{ site.address }}</td>
           <td>{{ site.city }}</td>
