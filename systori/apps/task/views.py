@@ -80,8 +80,7 @@ class JobCopy(FormView):
         raise forms.ValidationError(_("Error happened"))
 
     def form_valid(self, form):
-        project_id = form.cleaned_data['project_id']
-        project = Project.objects.get(id=project_id)
+        project = Project.objects.get(id=form.cleaned_data['project_id'])
         job = Job.objects.get(id=form.cleaned_data['job_id'])
         project.receive_job(job)
         return super(JobCopy, self).form_valid(form)
