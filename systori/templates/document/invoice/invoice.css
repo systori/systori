@@ -32,7 +32,9 @@ uncomment this after fixing margin values in database
   margin-right: 172px;
   margin-bottom: 72px;
   margin-left: 72px;
+  {% if format == 'email' %}
   letterhead-page: 1;
+  {% endif %}
   @bottom-right {
     content: '{% trans "Page" %} ' counter(page);
   }
@@ -41,7 +43,9 @@ uncomment this after fixing margin values in database
 @page:nth-child(n+2) {
   margin-top: 120px;
   margin-bottom: 72px;
+  {% if format == 'email' %}
   letterhead-page: 2;
+  {% endif %}
 }
 
 td {

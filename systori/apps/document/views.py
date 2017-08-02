@@ -353,11 +353,15 @@ class DocumentRenderView(SingleObjectMixin, View):
 
 
 class TimesheetsListPDF(DocumentRenderView):
+
     def pdf(self):
         year, month = int(self.kwargs['year']), int(self.kwargs['month'])
         queryset = Timesheet.objects.period(year, month)
         letterhead = DocumentSettings.objects.first().timesheet_letterhead
-        return pdf_type.timesheet.render(queryset, letterhead)
+        renderer = pdf_type.timesheet.TimesheetRenderer(
+            queryset, letterhead
+        )
+        return renderer.pdf
 
 
 class TimesheetPDF(DocumentRenderView):
