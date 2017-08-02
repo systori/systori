@@ -34,7 +34,10 @@ class ProposalRenderer:
     def pdf(self):
         return PDFStreamer(
             HTMLParser(self.generate(), CSS(self.css)),
-            os.path.join(settings.MEDIA_ROOT, self.letterhead.letterhead_pdf.name)
+            os.path.join(
+                settings.MEDIA_ROOT,
+                self.letterhead.letterhead_pdf.name
+            ) if self.format == 'email' else None
         )
 
     @property
@@ -47,7 +50,8 @@ class ProposalRenderer:
     @property
     def css(self):
         return render_to_string('document/proposal/proposal.css', {
-            'letterhead': self.letterhead
+            'letterhead': self.letterhead,
+            'format': self.format,
         })
 
     def generate(self):
