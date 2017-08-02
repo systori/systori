@@ -8,5 +8,6 @@ git+https://github.com/damoti/pyth.git@pyth-py3
 django-tsvector-field
 django-bootstrap-components
 django-dartium
+bericht
 
 -e .
