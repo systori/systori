@@ -128,4 +128,5 @@ tr.payments:last-child {
 
 .qty, .price, .total {
   text-align: right;
+  vertical-align: bottom;
 }

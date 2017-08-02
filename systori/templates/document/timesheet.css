@@ -6,7 +6,17 @@
   letterhead-page: 1;
 }
 
-.table-striped>tbody>tr:nth-child(odd) {
+.h2 {
+  font-size: 16pt;
+  font-weight: bold;
+  padding-bottom: 20px;
+}
+
+table.month > thead > tr > td {
+  text-align: center;
+}
+
+.table-striped > tbody > tr:nth-child(odd) {
   background-color: rgb(204, 255, 255);
 }
 
@@ -17,21 +27,7 @@ td {
   border-left-width: .5px;
 
   padding-top: 2px;
-  padding-right: 2px;
-  padding-bottom: 2px;
-  padding-left: 2px;
-
-  font-size: 8pt;
-}
-
-.summary-layout > tbody > tr > td {
-  border-top-width: 0px;
-  border-right-width: 0px;
-  border-bottom-width: 0px;
-  border-left-width: 0px;
-
-  padding-top: 2px;
-  padding-right: 2px;
+  padding-right: 0px;
   padding-bottom: 2px;
   padding-left: 2px;
 
@@ -47,23 +43,26 @@ tr.row-compensation > td {
   background-color: rgb(255, 255, 255);
 }
 
-table.month > thead > tr > td {
-  text-align: center;
-}
-
 td.info {
   text-align: right;
-  padding-right: 6px;
 }
 
 td.monday {
   border-left-width: 2px;
 }
 
-.h2 {
-  font-size: 16pt;
-  font-weight: bold;
-  padding-bottom: 20px;
+.summary-layout > tbody > tr > td {
+  border-top-width: 0px;
+  border-right-width: 0px;
+  border-bottom-width: 0px;
+  border-left-width: 0px;
+
+  padding-top: 2px;
+  padding-right: 2px;
+  padding-bottom: 2px;
+  padding-left: 2px;
+
+  font-size: 8pt;
 }
 
 .right {

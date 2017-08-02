@@ -85,7 +85,12 @@ class InvoiceRenderer:
                 yield from self.render_group(job, 0)
 
             else:
-                yield self.group_html.render(job)
+                yield self.group_html.render({
+                    'bold_name': True,
+                    'code': job['code'],
+                    'name': job['name'],
+                    'description': job['description']
+                })
                 debits = invoice['job_debits'].get(str(job['job.id']), [])
                 for debit in debits:
                     entry_date = date_format(date(*map(int, debit['date'].split('-'))), use_l10n=True)
@@ -101,8 +106,15 @@ class InvoiceRenderer:
                     })
 
         for job in invoice['jobs']:
-            for group in job.get('groups', []):
-                yield self.subtotal_html.render(group)
+            if job['invoiced'].net == job['progress'].net:
+                for group in job.get('groups', []):
+                    yield self.subtotal_html.render(group)
+            else:
+                yield self.subtotal_html.render({
+                    'code': job['code'],
+                    'name': job['name'],
+                    'progress': job['invoiced'].net
+                })
 
         yield self.footer_html.render(context)
 
