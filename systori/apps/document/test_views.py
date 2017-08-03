@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from decimal import Decimal
 from PyPDF2 import PdfFileReader
 from io import BytesIO
@@ -295,7 +295,7 @@ class ProposalViewTests(DocumentTestCase):
             'pk': Proposal.objects.first().id,
             'format':'print',})+'?only_groups=1')
         extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
-        for text in ['Proposal with only groups', 'hello', 'bye', self.job.name]:
+        for text in ['Proposal with only\ngroups', 'hello', 'bye', self.job.name]:
             self.assertTrue(text in extractedText)
         self.assertFalse(self.task.name in extractedText)
 
@@ -347,7 +347,7 @@ class ProposalViewTests(DocumentTestCase):
             'pk': Proposal.objects.first().id,
             'format':'print',})+'?only_groups=1')
         extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
-        for text in ['Proposal with only groups', 'Project #3', 'hello', 'bye', self.job.name]:
+        for text in ['Proposal with only\ngroups', 'Project #3', 'hello', 'bye', self.job.name]:
             self.assertTrue(text in extractedText)
         self.assertFalse(self.task.name in extractedText)
 
@@ -376,12 +376,18 @@ class ProposalViewTests(DocumentTestCase):
         self.assertEqual(
             pdf.getPage(0).extractText(),
             dedent("""\
-            Professor Ludwig von Mises
+            Page 1Professor Ludwig von Mises
+
+
 
 
             Proposal
             March 6, 2017
+
+
             hello
+
+
             Pos.
             Description
             Amount
@@ -394,32 +400,22 @@ class ProposalViewTests(DocumentTestCase):
             01.01.001
             Task #1 Fixed Price
 
-
-
             10.00
+
             $96.00
             $0.00
             01.01.002
             Task #2 Time & Materials
 
-
             TM Lineitem
             20.00
+
             $10.00
             $200.00
-
             Total 01.01 - Main Group
             $200.00
-
-
-
-
-
-
             02
             Job Two
-
-
             Total 01.01 - Main Group
             $200.00
             Total without VAT
@@ -428,8 +424,9 @@ class ProposalViewTests(DocumentTestCase):
             $38.00
             Total including VAT
             $238.00
+
+
             bye
-            Page 1 of 1
             """)
         )
 
@@ -532,7 +529,9 @@ class InvoiceViewTests(DocumentTestCase):
         self.assertEqual(
             pdf.getPage(0).extractText(),
             dedent("""\
-            Professor Ludwig von Mises
+            Page 1Professor Ludwig von Mises
+
+
 
 
             Invoice #1
@@ -540,6 +539,7 @@ class InvoiceViewTests(DocumentTestCase):
             Invoice No. 2015/01/01
             Please indicate the correct invoice number on your payment.
             The Header
+
 
             consideration
             19% tax
@@ -552,8 +552,9 @@ class InvoiceViewTests(DocumentTestCase):
             $2.00
             $2.00
             $4.00
+
+
             The Footer
-            Page 1 of 2
             """)
         )
 
@@ -570,49 +571,41 @@ class InvoiceViewTests(DocumentTestCase):
         self.assertEqual(
             pdf.getPage(1).extractText(),
             dedent("""\
-            Jan. 1, 2015
+            Page 2Jan. 1, 2015
             Itemized listing for Invoice No. 2015/01/01
+
+
             Pos.
             Description
             Amount
-
             Price
             Total
             01
             Job One
+
             01.01
             Main Group
+
             01.01.001
             Task #1 Fixed Price
-
-
-
             10.00
+
             $96.00
             $960.00
             01.01.002
             Task #2 Time & Materials
 
-
-
             TM Lineitem
             20.00
+
             $10.00
             $200.00
-
             Total 01.01 - Main Group
             $1,160.00
-
-
-
-
-
-
             Total 01.01 - Main Group
             $1,160.00
             Total without VAT
             $1,160.00
-            Page 2 of 2
             """)
         )
 
@@ -630,7 +623,9 @@ class InvoiceViewTests(DocumentTestCase):
         self.assertEqual(
             pdf.getPage(0).extractText(),
             dedent("""\
-            Professor Ludwig von Mises
+            Page 1Professor Ludwig von Mises
+
+
 
 
             Invoice #1
@@ -639,6 +634,7 @@ class InvoiceViewTests(DocumentTestCase):
             Please indicate the correct invoice number on your payment.
             Vesting Period April 1, 2017 to April 2, 2017
             The Header
+
 
             consideration
             19% tax
@@ -651,8 +647,9 @@ class InvoiceViewTests(DocumentTestCase):
             $2.00
             $2.00
             $4.00
+
+
             The Footer
-            Page 1 of 2
             """)
         )
 
@@ -669,7 +666,9 @@ class InvoiceViewTests(DocumentTestCase):
         self.assertEqual(
             pdf.getPage(0).extractText(),
             dedent("""\
-            Professor Ludwig von Mises
+            Page 1Professor Ludwig von Mises
+
+
 
 
             Invoice #1
@@ -678,6 +677,7 @@ class InvoiceViewTests(DocumentTestCase):
             Please indicate the correct invoice number on your payment.
             Project #2
             The Header
+
 
             consideration
             19% tax
@@ -690,8 +690,9 @@ class InvoiceViewTests(DocumentTestCase):
             $2.00
             $2.00
             $4.00
+
+
             The Footer
-            Page 1 of 2
             """)
         )
 

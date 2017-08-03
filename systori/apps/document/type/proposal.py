@@ -10,6 +10,7 @@ from django.template.loader import get_template, render_to_string
 from bericht.pdf import PDFStreamer
 from bericht.html import HTMLParser, CSS
 
+from systori.lib.accounting.tools import Amount
 from systori.lib.templatetags.customformatting import money
 
 
@@ -28,6 +29,7 @@ class ProposalRenderer:
         self.task_html = get_template('document/proposal/task.html')
         self.group_html = get_template('document/proposal/group.html')
         self.subtotal_html = get_template('document/proposal/subtotal.html')
+        self.lineitems_html = get_template('document/proposal/lineitems.html')
         self.footer_html = get_template('document/proposal/footer.html')
 
     @property
@@ -77,6 +79,9 @@ class ProposalRenderer:
 
         yield self.footer_html.render(proposal)
 
+        if self.with_lineitems:
+            yield from self.render_lineitems(proposal)
+
     def render_group(self, group, depth):
 
         kwargs = {
@@ -97,6 +102,8 @@ class ProposalRenderer:
         if not group.get('groups', []) and group.get('tasks', []):
             total_kwargs = {'offset': True}
             total_kwargs.update(group)
+            if isinstance(group['estimate'], Amount):
+                total_kwargs['estimate'] = group['estimate'].net
             yield self.subtotal_html.render(total_kwargs)
 
     def render_task(self, task):
@@ -120,6 +127,33 @@ class ProposalRenderer:
                 kwargs['task_total'] = _('Alternative')
 
         return self.task_html.render(kwargs)
+
+    def render_lineitems(self, proposal):
+
+        def add_task(job, task):
+            yield self.lineitems_html.render({
+                'job': job,
+                'task': task,
+                'longest_amount': '1.000,00',
+                'longest_unit': 'unit',
+                'longest_price': '00.000,00',
+                'longest_total': '000.000,00'
+            })
+
+        def traverse(job, parent):
+            for group in parent.get('groups', []):
+                yield from traverse(job, group)
+
+            for task in parent['tasks']:
+                yield from add_task(job, task)
+
+        for job in proposal['jobs']:
+
+            for group in job.get('groups', []):
+                yield from traverse(job, group)
+
+            for task in job.get('tasks', []):
+                yield from add_task(job, task)
 
 
 def serialize(proposal):

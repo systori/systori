@@ -1,0 +1,35 @@
+{% load customformatting %}
+
+<p class="lineitems-job">{{ job.code }} {{ job.name }}</p>
+<p class="lineitems-task">{{ task.code }} {{ task.name }}</p>
+<p>{{ task.description }}</p>
+
+<table>
+
+  <colgroup>
+    <bericht-col width="1*"></bericht-col>
+    <bericht-col width="0*">{{longest_amount}}</bericht-col>
+    <bericht-col width="0*">{{longest_unit}}</bericht-col>
+    <bericht-col width="0*">{{longest_price}}</bericht-col>
+    <bericht-col width="0*">{{longest_total}}</bericht-col>
+  </colgroup>
+
+  {% for lineitem in task.lineitems %}
+  <tr>
+    <td class="left"><p>{{ lineitem.name }}</td>
+    <td class="right"><p>{{ lineitem.qty|ubrdecimal }}</td>
+    <td class="right"><p>{{ lineitem.unit }}</td>
+    <td class="right"><p>{{ lineitem.price|money }}</td>
+    <td class="right"><p>{{ lineitem.estimate|money }}</td>
+  </tr>
+  {% endfor %}
+
+  <tr class="lineitems-subtotal">
+    <td></td>
+    <td class="right"><p>{{ 1|ubrdecimal }}</td>
+    <td class="right"><p>{{ task.unit }}</td>
+    <td></td>
+    <td class="right"><p>{{ task.price|money }}</td>
+  </tr>
+
+</table>
