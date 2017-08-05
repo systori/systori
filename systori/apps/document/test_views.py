@@ -390,6 +390,7 @@ class ProposalViewTests(DocumentTestCase):
 
             Pos.
             Description
+
             Amount
             Price
             Total
@@ -406,7 +407,6 @@ class ProposalViewTests(DocumentTestCase):
             $0.00
             01.01.002
             Task #2 Time & Materials
-
             TM Lineitem
             20.00
 
