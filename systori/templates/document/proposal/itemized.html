@@ -8,10 +8,10 @@
 
   <colgroup>
     <bericht-col width="1*"></bericht-col>
-    <bericht-col width="0*">{{longest_amount}}</bericht-col>
-    <bericht-col width="0*">{{longest_unit}}</bericht-col>
-    <bericht-col width="0*">{{longest_price}}</bericht-col>
-    <bericht-col width="0*">{{longest_total}}</bericht-col>
+    <bericht-col width="0*">{{ longest_qty }}</bericht-col>
+    <bericht-col width="0*">{{ longest_unit }}</bericht-col>
+    <bericht-col width="0*">{{ longest_price }}</bericht-col>
+    <bericht-col width="0*">{{ longest_total }}</bericht-col>
   </colgroup>
 
   {% for lineitem in task.lineitems %}

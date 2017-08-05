@@ -11,7 +11,97 @@ from bericht.pdf import PDFStreamer
 from bericht.html import HTMLParser, CSS
 
 from systori.lib.accounting.tools import Amount
-from systori.lib.templatetags.customformatting import money
+from systori.lib.templatetags.customformatting import money, ubrdecimal
+
+
+class ProposalRowIterator:
+
+    def __init__(self, render):
+        self.render = render
+
+    def __iter__(self):
+        for job in self.render.proposal['jobs']:
+            yield from self.iterate_group(job, 0)
+
+        for job in self.render.proposal['jobs']:
+            for group in job.get('groups', []):
+                yield self.render.subtotal_html, {
+                    'offset': False,
+                    'code': group['code'],
+                    'name': group['name'],
+                    'total': money(group['estimate'])
+                }
+
+    def iterate_group(self, group, depth):
+
+        yield self.render.group_html, {
+            'code': group['code'],
+            'name': group['name'],
+            'bold_name': depth <= 2,
+            'description': group['description'],
+            'show_description': depth <= 2 or not self.render.only_task_names,
+        }
+
+        if not self.render.only_groups:
+            for task in group.get('tasks', []):
+                task_context = self.get_task_context(task)
+                yield self.render.group_html, task_context
+                if task['qty'] is not None:
+                    yield self.render.lineitem_html, {
+                        'name': '',
+                        'qty': ubrdecimal(task['qty']),
+                        'unit': task['unit'],
+                        'price': money(task['price']),
+                        'total': task_context['total'],
+                    }
+                else:
+                    for lineitem in task['lineitems']:
+                        yield self.render.lineitem_html, {
+                            'name': lineitem['name'],
+                            'qty': ubrdecimal(lineitem['qty']),
+                            'unit': lineitem['unit'],
+                            'price': money(lineitem['price']),
+                            'total': money(lineitem['estimate']),
+                        }
+
+        for subgroup in group.get('groups', []):
+            yield from self.iterate_group(subgroup, depth+1)
+
+        if not group.get('groups', []) and group.get('tasks', []):
+            total = group['estimate']
+            if isinstance(group['estimate'], Amount):
+                total = group['estimate'].net
+            yield self.render.subtotal_html, {
+                'offset': True,
+                'code': group['code'],
+                'name': group['name'],
+                'total': money(total)
+            }
+
+    def get_task_context(self, task):
+
+        kwargs = {
+            'code': task['code'],
+            'name': task['name'],
+            'bold_name': False,
+            'total': money(task['estimate']),
+            'description': task['description'],
+            'show_description': not self.render.only_task_names,
+        }
+
+        if task['is_provisional']:
+            kwargs['total'] = _('Optional')
+
+        if task.get('variant_group'):
+            if task['variant_serial'] == 0:
+                kwargs['name'] = _('Variant {}.0: {}').format(task['variant_group'], task['name'])
+            else:
+                kwargs['name'] = _('Variant {}.{}: {} - Alternative for Variant {}.0').format(
+                    task['variant_group'], task['variant_serial'], task['name'], task['variant_group']
+                )
+                kwargs['total'] = _('Alternative')
+
+        return kwargs
 
 
 class ProposalRenderer:
@@ -26,10 +116,10 @@ class ProposalRenderer:
 
         # cache template lookups
         self.header_html = get_template('document/proposal/header.html')
-        self.task_html = get_template('document/proposal/task.html')
         self.group_html = get_template('document/proposal/group.html')
         self.subtotal_html = get_template('document/proposal/subtotal.html')
-        self.lineitems_html = get_template('document/proposal/lineitems.html')
+        self.itemized_html = get_template('document/proposal/itemized.html')
+        self.lineitem_html = get_template('document/proposal/lineitem.html')
         self.footer_html = get_template('document/proposal/footer.html')
 
     @property
@@ -57,81 +147,45 @@ class ProposalRenderer:
         })
 
     def generate(self):
-        proposal = self.proposal
 
-        proposal_date = date_format(date(*map(int, proposal['document_date'].split('-'))), use_l10n=True)
+        maximums = {
+            'code': '',
+            'qty': '',
+            'unit': '',
+            'price': '',
+            'total': ''
+        }
 
-        proposal['doc_date'] = proposal_date
-        proposal['longest_code'] = '01.01.01.01'
-        proposal['longest_amount'] = '1.000,00'
-        proposal['longest_unit'] = 'unit'
-        proposal['longest_price'] = '00.000,00'
-        proposal['longest_total'] = '000.000,00'
+        rows = ProposalRowIterator(self)
+
+        for template, context in rows:
+            for key, value in maximums.items():
+                context_value = context.get(key, '')
+                if len(context_value) > len(value):
+                    maximums[key] = context_value
+
+        proposal = {
+            'doc_date': date_format(date(*map(int, self.proposal['document_date'].split('-'))), use_l10n=True)
+        }
+        proposal.update({
+            'longest_'+key: value for key, value in maximums.items()
+        })
+        proposal.update(self.proposal)
 
         yield self.header_html.render(proposal)
 
-        for job in proposal['jobs']:
-            yield from self.render_group(job, 0)
-
-        for job in proposal['jobs']:
-            for group in job.get('groups', []):
-                yield self.subtotal_html.render(group)
+        for template, context in rows:
+            yield template.render(context)
 
         yield self.footer_html.render(proposal)
 
         if self.with_lineitems:
             yield from self.render_lineitems(proposal)
 
-    def render_group(self, group, depth):
-
-        kwargs = {
-            'bold_name': depth <= 2,
-            'show_description': depth <= 2 or not self.only_task_names,
-        }
-        kwargs.update(group)
-
-        yield self.group_html.render(kwargs)
-
-        if not self.only_groups:
-            for task in group.get('tasks', []):
-                yield self.render_task(task)
-
-        for subgroup in group.get('groups', []):
-            yield from self.render_group(subgroup, depth+1)
-
-        if not group.get('groups', []) and group.get('tasks', []):
-            total_kwargs = {'offset': True}
-            total_kwargs.update(group)
-            if isinstance(group['estimate'], Amount):
-                total_kwargs['estimate'] = group['estimate'].net
-            yield self.subtotal_html.render(total_kwargs)
-
-    def render_task(self, task):
-
-        kwargs = {
-            'task_name': task['name'],
-            'task_total': money(task['estimate']),
-            'show_description': not self.only_task_names,
-        }
-        kwargs.update(task)
-
-        if task['is_provisional']:
-            kwargs['task_total'] = _('Optional')
-
-        if task.get('variant_group'):
-            if task['variant_serial'] == 0:
-                kwargs['task_name'] = _('Variant {}.0: {}').format(task['variant_group'], kwargs['task_name'])
-            else:
-                kwargs['task_name'] = _('Variant {}.{}: {} - Alternative for Variant {}.0').format(
-                    task['variant_group'], task['variant_serial'], kwargs['task_name'], task['variant_group'])
-                kwargs['task_total'] = _('Alternative')
-
-        return self.task_html.render(kwargs)
-
     def render_lineitems(self, proposal):
 
         def add_task(job, task):
-            yield self.lineitems_html.render({
+            yield self.itemized_html.render({
                 'job': job,
                 'task': task,
                 'longest_amount': '1.000,00',

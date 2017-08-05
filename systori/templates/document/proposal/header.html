@@ -4,12 +4,12 @@
 
 <p class="address">
 {% if address_label %}
-  {{address_label|linebreaksbr}}
+  {{ address_label|linebreaksbr }}
 {% else %}
-  {% if business %}{{business}}<br />{% endif %}
-  {{salutation}} {{first_name}} {{last_name}}<br />
-  {{address}}<br />
-  {{postal_code}} {{city}}
+  {% if business %}{{ business }}<br />{% endif %}
+  {{ salutation }} {{ first_name }} {{ last_name }}<br />
+  {{ address }}<br />
+  {{ postal_code }} {{ city }}
 {% endif %}
 </p>
 
@@ -18,30 +18,30 @@
 <table>
   <colgroup span="2"></colgroup>
   <tr>
-    <td><p class="header-title">{{title}}</p></td>
-    <td class="bottom"><p class="header-date">{{doc_date}}</p></td>
+    <td><p class="header-title">{{ title }}</p></td>
+    <td class="bottom"><p class="header-date">{{ doc_date }}</p></td>
   </tr>
 </table>
 
 <p><br></p>
 
 {% if show_project_id %}
-  <p>{% trans "Project" %} #{{project_id}}</p>
+  <p>{% trans "Project" %} #{{ project_id }}</p>
 {% endif %}
 
-<p>{{header|linebreaksbr}}</p>
+<p>{{ header|linebreaksbr }}</p>
 
 <p><br></p>
 
 <table>
 
   <colgroup>
-    <bericht-col width="0*">{{longest_code}}</bericht-col>
+    <bericht-col width="0*">{{ longest_code }}</bericht-col>
     <bericht-col width="1*"></bericht-col>
-    <bericht-col width="0*">{{longest_amount}}</bericht-col>
-    <bericht-col width="0*">{{longest_unit}}</bericht-col>
-    <bericht-col width="0*">{{longest_price}}</bericht-col>
-    <bericht-col width="0*">{{longest_total}}</bericht-col>
+    <bericht-col width="0*">{{ longest_qty }}</bericht-col>
+    <bericht-col width="0*">{{ longest_unit }}</bericht-col>
+    <bericht-col width="0*">{{ longest_price }}</bericht-col>
+    <bericht-col width="0*">{{ longest_total }}</bericht-col>
   </colgroup>
 
   <thead>
