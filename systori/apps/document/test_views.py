@@ -295,7 +295,7 @@ class ProposalViewTests(DocumentTestCase):
             'pk': Proposal.objects.first().id,
             'format':'print',})+'?only_groups=1')
         extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
-        for text in ['Proposal with only\ngroups', 'hello', 'bye', self.job.name]:
+        for text in ['Proposal with only groups', 'hello', 'bye', self.job.name]:
             self.assertTrue(text in extractedText)
         self.assertFalse(self.task.name in extractedText)
 
@@ -347,7 +347,7 @@ class ProposalViewTests(DocumentTestCase):
             'pk': Proposal.objects.first().id,
             'format':'print',})+'?only_groups=1')
         extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
-        for text in ['Proposal with only\ngroups', 'Project #3', 'hello', 'bye', self.job.name]:
+        for text in ['Proposal with only groups', 'Project #3', 'hello', 'bye', self.job.name]:
             self.assertTrue(text in extractedText)
         self.assertFalse(self.task.name in extractedText)
 
