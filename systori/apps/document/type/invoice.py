@@ -152,7 +152,7 @@ class InvoiceRenderer:
 
         maximums = {
             'net': str(_('consideration')),
-            'tax': '',
+            'tax': '19% '+str(_('tax')),
             'gross': str(_('gross'))
         }
 
