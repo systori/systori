@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-26 10:54+0200\n"
+"POT-Creation-Date: 2017-08-08 21:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -154,10 +154,8 @@ msgstr ""
 msgid "Rate Type"
 msgstr ""
 
-#: systori/apps/company/models.py:166
-#: systori/apps/document/type/timesheet.py:103
-#: systori/apps/timetracking/models.py:41
-#: systori/templates/document/timesheet_summary.html:17
+#: systori/apps/company/models.py:166 systori/apps/timetracking/models.py:41
+#: systori/templates/document/timesheet_summary.html:19
 #: systori/templates/timetracking/timer_progressbar_legend.html:8
 msgid "Vacation"
 msgstr ""
@@ -378,7 +376,6 @@ msgstr ""
 
 #: systori/apps/document/forms.py:224 systori/apps/document/models.py:194
 #: systori/apps/document/models.py:371
-#: systori/apps/document/type/invoice.py:217
 #: systori/apps/document/type/letterhead.py:39
 #: systori/lib/accounting/models.py:176
 #: systori/templates/accounting/adjustment_form.html:53
@@ -386,6 +383,7 @@ msgstr ""
 #: systori/templates/accounting/invoice_form.html:77
 #: systori/templates/accounting/payment_form.html:18
 #: systori/templates/accounting/refund_form.html:18
+#: systori/templates/document/invoice/header.html:21
 #: systori/templates/main/templates.html:66
 #: systori/templates/main/templates.html:68
 msgid "Invoice"
@@ -581,7 +579,7 @@ msgid "Letterhead {}"
 msgstr ""
 
 #: systori/apps/document/models.py:28
-#: systori/apps/document/type/itemized_listing.py:79
+#: systori/apps/document/type/itemized_listing.py:194
 #: systori/templates/accounting/account_detail.html:26
 #: systori/templates/accounting/invoice_list.html:41
 #: systori/templates/field/timers.html:22
@@ -658,9 +656,9 @@ msgid "Invoices"
 msgstr ""
 
 #: systori/apps/document/models.py:199
-#: systori/apps/document/type/invoice.py:219
 #: systori/apps/document/type/letterhead.py:42
 #: systori/templates/accounting/invoice_list.html:42
+#: systori/templates/document/invoice/header.html:26
 msgid "Invoice No."
 msgstr ""
 
@@ -849,16 +847,25 @@ msgstr ""
 msgid "language"
 msgstr ""
 
+#: systori/apps/document/type/base.py:76
+msgid "Variant {}.0: {}"
+msgstr ""
+
+#: systori/apps/document/type/base.py:78
+msgid "Variant {}.{}: {} - Alternative for Variant {}.0"
+msgstr ""
+
 #: systori/apps/document/type/evidence.py:43
 msgid "Evidence Sheet"
 msgstr ""
 
 #: systori/apps/document/type/evidence.py:46
-#: systori/apps/document/type/invoice.py:225
-#: systori/apps/document/type/itemized_listing.py:78
-#: systori/apps/document/type/proposal.py:236 systori/apps/project/models.py:62
+#: systori/apps/document/type/itemized_listing.py:193
+#: systori/apps/project/models.py:62
 #: systori/templates/accounting/invoice_list.html:38
 #: systori/templates/directory/contact_detail.html:23
+#: systori/templates/document/invoice/header.html:30
+#: systori/templates/document/proposal/header.html:29
 #: systori/templates/task/editor/task_autocomplete.html:7
 #: systori/templates/task/progressreport_list.html:11
 msgid "Project"
@@ -886,172 +893,143 @@ msgid "There are no billable Tasks available."
 msgstr ""
 
 #: systori/apps/document/type/invoice.py:40
-#: systori/apps/document/type/itemized_listing.py:38
-msgid "consideration"
+#: systori/apps/document/type/itemized_listing.py:115
+#, python-brace-format
+msgid "Work completed on {date}"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:40
-#: systori/templates/accounting/amount_input_cell.html:5
-msgid "tax"
+#: systori/apps/document/type/invoice.py:42
+#: systori/apps/document/type/itemized_listing.py:117
+#, python-brace-format
+msgid "Flat invoice on {date}"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:40
-msgid "gross"
+#: systori/apps/document/type/invoice.py:44
+#: systori/apps/document/type/itemized_listing.py:119
+#, python-brace-format
+msgid "Adjustment on {date}"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:49
+#: systori/apps/document/type/invoice.py:183
 msgid "Project progress"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:52
+#: systori/apps/document/type/invoice.py:186
 #, python-brace-format
 msgid "Payment on {date}"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:54
+#: systori/apps/document/type/invoice.py:188
 msgid "Discount applied"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:56
+#: systori/apps/document/type/invoice.py:190
 msgid "Open claim from prior invoices"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:58
+#: systori/apps/document/type/invoice.py:192
 msgid "This Invoice"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:94
-#: systori/apps/document/type/proposal.py:33
+#: systori/apps/document/type/itemized_listing.py:36
+#: systori/templates/document/invoice/header.html:97
+#: systori/templates/document/proposal/header.html:49
 msgid "Pos."
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:94
-#: systori/apps/document/type/proposal.py:33 systori/apps/task/models.py:80
+#: systori/apps/document/type/itemized_listing.py:36
+#: systori/apps/task/models.py:80
+#: systori/templates/document/invoice/header.html:98
+#: systori/templates/document/proposal/header.html:50
 msgid "Description"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:94
-#: systori/apps/document/type/proposal.py:33
+#: systori/apps/document/type/itemized_listing.py:36
 #: systori/templates/accounting/invoice_list.html:44
+#: systori/templates/document/invoice/header.html:99
+#: systori/templates/document/proposal/header.html:51
 #: systori/templates/project/project_detail.html:134
 #: systori/templates/task/progressreport_list.html:14
 msgid "Amount"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:94
-#: systori/apps/document/type/proposal.py:33 systori/apps/inventory/models.py:9
-#: systori/apps/task/models.py:364 systori/apps/task/models.py:536
+#: systori/apps/document/type/itemized_listing.py:36
+#: systori/apps/inventory/models.py:9 systori/apps/task/models.py:364
+#: systori/apps/task/models.py:536
+#: systori/templates/document/invoice/header.html:100
+#: systori/templates/document/proposal/header.html:52
 msgid "Price"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:94
-#: systori/apps/document/type/invoice.py:114
-#: systori/apps/document/type/invoice.py:122
-#: systori/apps/document/type/invoice.py:186
-#: systori/apps/document/type/proposal.py:33
-#: systori/apps/document/type/proposal.py:100
-#: systori/apps/document/type/proposal.py:123
-#: systori/apps/document/type/proposal.py:130
-#: systori/apps/document/type/timesheet.py:33
-#: systori/apps/document/type/timesheet.py:74
-#: systori/apps/document/views.py:263 systori/apps/task/models.py:366
-#: systori/apps/task/models.py:539 systori/templates/field/timers.html:24
+#: systori/apps/document/type/itemized_listing.py:36
+#: systori/apps/document/type/itemized_listing.py:56
+#: systori/apps/document/type/itemized_listing.py:64
+#: systori/apps/document/type/itemized_listing.py:128
+#: systori/apps/document/type/timesheet.py:49
+#: systori/apps/document/views.py:264 systori/apps/task/models.py:366
+#: systori/apps/task/models.py:539
+#: systori/templates/document/base/subtotal.html:9
+#: systori/templates/document/invoice/header.html:101
+#: systori/templates/document/proposal/header.html:53
+#: systori/templates/field/timers.html:24
 #: systori/templates/timetracking/home.html:75
 msgid "Total"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:173
-#, python-brace-format
-msgid "Work completed on {date}"
-msgstr ""
-
-#: systori/apps/document/type/invoice.py:175
-#, python-brace-format
-msgid "Flat invoice on {date}"
-msgstr ""
-
-#: systori/apps/document/type/invoice.py:177
-#, python-brace-format
-msgid "Adjustment on {date}"
-msgstr ""
-
-#: systori/apps/document/type/invoice.py:188
-#: systori/apps/document/type/proposal.py:138
+#: systori/apps/document/type/itemized_listing.py:130
+#: systori/templates/document/invoice/footer.html:6
+#: systori/templates/document/proposal/footer.html:6
 msgid "Total without VAT"
 msgstr ""
 
-#: systori/apps/document/type/invoice.py:220
-#: systori/apps/document/type/letterhead.py:43
-msgid "Please indicate the correct invoice number on your payment."
-msgstr ""
-
-#: systori/apps/document/type/invoice.py:227
-#: systori/apps/document/type/invoice.py:229
-msgid "Vesting Date"
-msgstr ""
-
-#: systori/apps/document/type/invoice.py:231
-msgid "Vesting Period"
-msgstr ""
-
-#: systori/apps/document/type/invoice.py:232
-msgid "to"
-msgstr ""
-
-#: systori/apps/document/type/invoice.py:252
-msgid "Itemized listing for Invoice No. {}"
-msgstr ""
-
-#: systori/apps/document/type/itemized_listing.py:38
+#: systori/apps/document/type/itemized_listing.py:153
 msgid "gross pay"
 msgstr ""
 
-#: systori/apps/document/type/itemized_listing.py:38
-#: systori/apps/document/type/proposal.py:139
+#: systori/apps/document/type/itemized_listing.py:153
+#: systori/templates/document/invoice/header.html:57
+msgid "consideration"
+msgstr ""
+
+#: systori/apps/document/type/itemized_listing.py:153
 #: systori/templates/accounting/invoice_card.html:31
+#: systori/templates/document/proposal/footer.html:11
 msgid "VAT"
 msgstr ""
 
-#: systori/apps/document/type/itemized_listing.py:42
+#: systori/apps/document/type/itemized_listing.py:157
 msgid "Job Performance"
 msgstr ""
 
-#: systori/apps/document/type/itemized_listing.py:50
+#: systori/apps/document/type/itemized_listing.py:165
 msgid "Your Payment on"
 msgstr ""
 
-#: systori/apps/document/type/itemized_listing.py:52
+#: systori/apps/document/type/itemized_listing.py:167
 msgid "Discount Applied"
 msgstr ""
 
-#: systori/apps/document/type/itemized_listing.py:56
+#: systori/apps/document/type/itemized_listing.py:171
 msgid "Billable Total"
 msgstr ""
 
-#: systori/apps/document/type/itemized_listing.py:76
+#: systori/apps/document/type/itemized_listing.py:191
 msgid "Itemized listing {}"
 msgstr ""
 
-#: systori/apps/document/type/proposal.py:56
+#: systori/apps/document/type/letterhead.py:43
+#: systori/templates/document/invoice/header.html:27
+msgid "Please indicate the correct invoice number on your payment."
+msgstr ""
+
+#: systori/apps/document/type/proposal.py:30
 #: systori/templates/field/group.html:48 systori/templates/field/group.html:71
 #: systori/templates/field/task.html:20
 msgid "Optional"
 msgstr ""
 
-#: systori/apps/document/type/proposal.py:60
-msgid "Variant {}.0: {}"
-msgstr ""
-
-#: systori/apps/document/type/proposal.py:62
-msgid "Variant {}.{}: {} - Alternative for Variant {}.0"
-msgstr ""
-
-#: systori/apps/document/type/proposal.py:64
+#: systori/apps/document/type/proposal.py:32
 msgid "Alternative"
-msgstr ""
-
-#: systori/apps/document/type/proposal.py:140
-msgid "Total including VAT"
 msgstr ""
 
 #: systori/apps/document/type/style.py:160
@@ -1063,40 +1041,15 @@ msgstr ""
 msgid "Continuation"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:75
-#: systori/apps/document/type/timesheet.py:116
-#: systori/apps/document/views.py:264
-#: systori/templates/document/timesheet_summary.html:32
+#: systori/apps/document/type/timesheet.py:50
+#: systori/apps/document/views.py:265
+#: systori/templates/document/timesheet_summary.html:34
 msgid "Overtime"
 msgstr ""
 
-#: systori/apps/document/type/timesheet.py:76
-#: systori/apps/document/type/timesheet.py:129
-#: systori/apps/document/views.py:265
+#: systori/apps/document/type/timesheet.py:51
+#: systori/apps/document/views.py:266
 msgid "Compensation"
-msgstr ""
-
-#: systori/apps/document/type/timesheet.py:100
-#: systori/templates/document/timesheet_summary.html:8
-msgctxt "timesheet"
-msgid "Previous"
-msgstr ""
-
-#: systori/apps/document/type/timesheet.py:100
-#: systori/templates/document/timesheet_summary.html:9
-msgctxt "timesheet"
-msgid "Correction"
-msgstr ""
-
-#: systori/apps/document/type/timesheet.py:101
-#: systori/templates/document/timesheet_summary.html:12
-msgctxt "timesheet"
-msgid "Balance"
-msgstr ""
-
-#: systori/apps/document/type/timesheet.py:146
-msgctxt "timesheet"
-msgid "Approved"
 msgstr ""
 
 #: systori/apps/document/utils.py:3
@@ -1865,7 +1818,7 @@ msgstr ""
 #: systori/templates/document/evidence_form.html:11
 #: systori/templates/document/letterhead_form.html:14
 #: systori/templates/document/proposal_form.html:69
-#: systori/templates/document/timesheet.html:66
+#: systori/templates/document/timesheet_form.html:66
 #: systori/templates/equipment/equipment_form.html:11
 #: systori/templates/field/dailyplan.html:120
 #: systori/templates/project/gaeb_form.html:9
@@ -2010,12 +1963,17 @@ msgstr ""
 msgid "net"
 msgstr ""
 
+#: systori/templates/accounting/amount_input_cell.html:5
+#: systori/templates/document/invoice/header.html:58
+msgid "tax"
+msgstr ""
+
 #: systori/templates/accounting/invoice_card.html:59
 msgid "Adjust"
 msgstr ""
 
 #: systori/templates/accounting/invoice_card.html:77
-#: systori/templates/document/timesheet.html:26
+#: systori/templates/document/timesheet_form.html:26
 #: systori/templates/project/project_detail.html:156
 msgid "PDF"
 msgstr ""
@@ -2197,27 +2155,77 @@ msgstr ""
 msgid "Create and then add contact to %(project_name)s"
 msgstr ""
 
+#: systori/templates/document/base/base.css:21
+msgid "Page"
+msgstr ""
+
 #: systori/templates/document/evidence_detail.html:8
 msgid "Evidence Details"
+msgstr ""
+
+#: systori/templates/document/invoice/header.html:34
+#: systori/templates/document/invoice/header.html:36
+msgid "Vesting Date"
+msgstr ""
+
+#: systori/templates/document/invoice/header.html:38
+msgid "Vesting Period"
+msgstr ""
+
+#: systori/templates/document/invoice/header.html:38
+msgid "to"
+msgstr ""
+
+#: systori/templates/document/invoice/header.html:59
+msgid "gross"
+msgstr ""
+
+#: systori/templates/document/invoice/header.html:80
+#, python-format
+msgid "Itemized listing for Invoice No. %(invoice_no)s"
 msgstr ""
 
 #: systori/templates/document/letterhead_form.html:28
 msgid "No Letterhead available."
 msgstr ""
 
+#: systori/templates/document/proposal/footer.html:16
+msgid "Total including VAT"
+msgstr ""
+
 #: systori/templates/document/proposal_detail.html:8
 msgid "Proposal Details"
 msgstr ""
 
-#: systori/templates/document/timesheet.html:15
+#: systori/templates/document/timesheet.html:59
+msgctxt "timesheet "
+msgid "Approved"
+msgstr ""
+
+#: systori/templates/document/timesheet_form.html:15
 msgid "Correction saved."
 msgstr ""
 
-#: systori/templates/document/timesheet.html:16
+#: systori/templates/document/timesheet_form.html:16
 msgid "Return to timesheets."
 msgstr ""
 
-#: systori/templates/document/timesheet_summary.html:47
+#: systori/templates/document/timesheet_summary.html:10
+msgctxt "timesheet"
+msgid "Previous"
+msgstr ""
+
+#: systori/templates/document/timesheet_summary.html:11
+msgctxt "timesheet"
+msgid "Correction"
+msgstr ""
+
+#: systori/templates/document/timesheet_summary.html:14
+msgctxt "timesheet"
+msgid "Balance"
+msgstr ""
+
+#: systori/templates/document/timesheet_summary.html:49
 msgctxt "timesheet"
 msgid "Compensation"
 msgstr ""
