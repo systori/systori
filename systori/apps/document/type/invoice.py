@@ -66,6 +66,7 @@ class InvoiceRowIterator(BaseRowIterator):
             task,
             qty=ubrdecimal(task['complete']),
             total=money(task['progress']),
+            show_description=True,
             **kwargs
         )
 
