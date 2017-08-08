@@ -151,9 +151,9 @@ class InvoiceRenderer:
         }
 
         maximums = {
-            'net': str(_('consideration')),
-            'tax': '19% '+str(_('tax')),
-            'gross': str(_('gross'))
+            'net': ' '+_('consideration'),
+            'tax': '19% '+_('tax'),
+            'gross': ' '+_('gross')
         }
 
         payments = list(self.get_payments())
