@@ -11,7 +11,6 @@ from bericht.html import HTMLParser, CSS
 from systori.apps.accounting.models import Entry
 from systori.apps.accounting.report import create_invoice_report, create_invoice_table
 
-from systori.lib.accounting.tools import Amount
 from systori.lib.templatetags.customformatting import money, ubrdecimal
 from .base import BaseRowIterator, parse_date
 
@@ -147,23 +146,37 @@ class InvoiceRenderer:
                 if len(context_value) > len(value):
                     maximums[key] = context_value
 
-        invoice = self.invoice
-
         context = {
-            'invoice_date': parse_date(invoice['document_date']),
-            'vesting_start':  parse_date(invoice['vesting_start']),
-            'vesting_end':  parse_date(invoice['vesting_end']),
-
-            'longest_net': 'consideration',
-            'longest_tax': '$999,999.99',
-            'longest_gross': '$999,999.99',
-            'payments': self.get_payments(),
-
-            'invoice': invoice,
+            'longest_'+key: value for key, value in maximums.items()
         }
+
+        maximums = {
+            'net': str(_('consideration')),
+            'tax': '',
+            'gross': str(_('gross'))
+        }
+
+        payments = list(self.get_payments())
+
+        for __, __, net, tax, gross in payments:
+            payment = {'net': net, 'tax': tax, 'gross': gross}
+            for key, value in maximums.items():
+                context_value = payment[key]
+                if len(context_value) > len(value):
+                    maximums[key] = context_value
 
         context.update({
             'longest_'+key: value for key, value in maximums.items()
+        })
+
+        invoice = self.invoice
+
+        context.update({
+            'invoice_date': parse_date(invoice['document_date']),
+            'vesting_start':  parse_date(invoice['vesting_start']),
+            'vesting_end':  parse_date(invoice['vesting_end']),
+            'payments': payments,
+            'invoice': invoice,
         })
 
         yield self.header_html.render(context)
