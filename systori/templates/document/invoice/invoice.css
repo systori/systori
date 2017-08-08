@@ -1,4 +1,4 @@
-thead:nth-child(n+2) {
+thead:nth-child(n+1) {
   border-bottom-width: 1px;
 }
 

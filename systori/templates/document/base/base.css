@@ -69,3 +69,12 @@ p {
 .line-above {
   border-top-width: 1px;
 }
+
+.code {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.total {
+  padding-right: 0px;
+}
