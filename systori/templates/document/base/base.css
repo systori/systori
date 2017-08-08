@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n l10n %}
 
 /* for debugging tables
 td {
@@ -10,10 +10,12 @@ td {
 */
 
 @page {
+  {% localize off %}
   margin-top: {{letterhead.top_margin}}mm;
   margin-right: {{letterhead.right_margin}}mm;
   margin-bottom: {{letterhead.bottom_margin}}mm;
   margin-left: {{letterhead.left_margin}}mm;
+  {% endlocalize %}
   letterhead-page: 1;
   @bottom-right {
     content: '{% trans "Page" %} ' counter(page);
@@ -21,8 +23,10 @@ td {
 }
 
 @page:nth-child(n+2) {
+  {% localize off %}
   margin-top: {{letterhead.top_margin_next}}mm;
   margin-bottom: {{letterhead.bottom_margin_next}}mm;
+  {% endlocalize %}
   letterhead-page: 2;
 }
 
