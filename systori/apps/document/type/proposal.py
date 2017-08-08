@@ -1,107 +1,53 @@
 import os
-from datetime import date
 from itertools import chain
 
 from django.conf import settings
-from django.utils.formats import date_format
-from django.utils.translation import ugettext as _
 from django.template.loader import get_template, render_to_string
+from django.utils.translation import ugettext as _
 
 from bericht.pdf import PDFStreamer
 from bericht.html import HTMLParser, CSS
 
 from systori.lib.accounting.tools import Amount
 from systori.lib.templatetags.customformatting import money, ubrdecimal
+from .base import BaseRowIterator, parse_date
 
 
-class ProposalRowIterator:
+class ProposalRowIterator(BaseRowIterator):
 
-    def __init__(self, render):
-        self.render = render
-
-    def __iter__(self):
-        for job in self.render.proposal['jobs']:
-            yield from self.iterate_group(job, 0)
-
-        for job in self.render.proposal['jobs']:
-            for group in job.get('groups', []):
-                yield self.render.subtotal_html, {
-                    'offset': False,
-                    'code': group['code'],
-                    'name': group['name'],
-                    'total': money(group['estimate'])
-                }
-
-    def iterate_group(self, group, depth):
-
-        yield self.render.group_html, {
-            'code': group['code'],
-            'name': group['name'],
-            'bold_name': depth <= 2,
-            'description': group['description'],
-            'show_description': depth <= 2 or not self.render.only_task_names,
-        }
-
+    def iterate_tasks(self, group):
         if not self.render.only_groups:
-            for task in group.get('tasks', []):
-                task_context = self.get_task_context(task)
-                yield self.render.group_html, task_context
-                if task['qty'] is not None:
-                    yield self.render.lineitem_html, {
-                        'name': '',
-                        'qty': ubrdecimal(task['qty']),
-                        'unit': task['unit'],
-                        'price': money(task['price']),
-                        'total': task_context['total'],
-                    }
-                else:
-                    for lineitem in task['lineitems']:
-                        yield self.render.lineitem_html, {
-                            'name': lineitem['name'],
-                            'qty': ubrdecimal(lineitem['qty']),
-                            'unit': lineitem['unit'],
-                            'price': money(lineitem['price']),
-                            'total': money(lineitem['estimate']),
-                        }
+            yield from super().iterate_tasks(group)
 
-        for subgroup in group.get('groups', []):
-            yield from self.iterate_group(subgroup, depth+1)
+    def get_group_context(self, group, depth, **kwargs):
+        return super().get_group_context(
+            group, depth, show_description=depth <= 2, **kwargs
+        )
 
-        if not group.get('groups', []) and group.get('tasks', []):
-            total = group['estimate']
-            if isinstance(group['estimate'], Amount):
-                total = group['estimate'].net
-            yield self.render.subtotal_html, {
-                'offset': True,
-                'code': group['code'],
-                'name': group['name'],
-                'total': money(total)
-            }
-
-    def get_task_context(self, task):
-
-        kwargs = {
-            'code': task['code'],
-            'name': task['name'],
-            'bold_name': False,
-            'total': money(task['estimate']),
-            'description': task['description'],
-            'show_description': not self.render.only_task_names,
-        }
-
+    def get_task_context(self, task, **kwargs):
+        total = money(task['estimate'])
         if task['is_provisional']:
-            kwargs['total'] = _('Optional')
+            total = _('Optional')
+        elif task.get('variant_group') and task['variant_serial'] != 0:
+            total = _('Alternative')
+        return super().get_task_context(
+            task, qty=ubrdecimal(task['qty']), total=total,
+            show_description=not self.render.only_task_names,
+            **kwargs
+        )
 
-        if task.get('variant_group'):
-            if task['variant_serial'] == 0:
-                kwargs['name'] = _('Variant {}.0: {}').format(task['variant_group'], task['name'])
-            else:
-                kwargs['name'] = _('Variant {}.{}: {} - Alternative for Variant {}.0').format(
-                    task['variant_group'], task['variant_serial'], task['name'], task['variant_group']
-                )
-                kwargs['total'] = _('Alternative')
+    def get_lineitem_context(self, lineitem, **kwargs):
+        return super().get_lineitem_context(
+            lineitem, qty=ubrdecimal(lineitem['qty']), total=money(lineitem['estimate']), **kwargs
+        )
 
-        return kwargs
+    def get_subtotal_context(self, group, **kwargs):
+        total = group['estimate']
+        if isinstance(group['estimate'], Amount):
+            total = group['estimate'].net
+        return super().get_subtotal_context(
+            group, total=money(total), **kwargs
+        )
 
 
 class ProposalRenderer:
@@ -116,10 +62,10 @@ class ProposalRenderer:
 
         # cache template lookups
         self.header_html = get_template('document/proposal/header.html')
-        self.group_html = get_template('document/proposal/group.html')
-        self.subtotal_html = get_template('document/proposal/subtotal.html')
+        self.group_html = get_template('document/base/group.html')
+        self.lineitem_html = get_template('document/base/lineitem.html')
+        self.subtotal_html = get_template('document/base/subtotal.html')
         self.itemized_html = get_template('document/proposal/itemized.html')
-        self.lineitem_html = get_template('document/proposal/lineitem.html')
         self.footer_html = get_template('document/proposal/footer.html')
 
     @property
@@ -156,7 +102,7 @@ class ProposalRenderer:
             'total': ''
         }
 
-        rows = ProposalRowIterator(self)
+        rows = ProposalRowIterator(self, self.proposal)
 
         for template, context in rows:
             for key, value in maximums.items():
@@ -165,7 +111,7 @@ class ProposalRenderer:
                     maximums[key] = context_value
 
         proposal = {
-            'doc_date': date_format(date(*map(int, self.proposal['document_date'].split('-'))), use_l10n=True)
+            'doc_date': parse_date(self.proposal['document_date'])
         }
         proposal.update({
             'longest_'+key: value for key, value in maximums.items()

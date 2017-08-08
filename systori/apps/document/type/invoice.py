@@ -1,18 +1,86 @@
 import os
-from datetime import date
 from itertools import chain
 
 from django.conf import settings
-from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 from django.template.loader import get_template, render_to_string
 
 from bericht.pdf import PDFStreamer
 from bericht.html import HTMLParser, CSS
 
-from systori.lib.templatetags.customformatting import money
 from systori.apps.accounting.models import Entry
 from systori.apps.accounting.report import create_invoice_report, create_invoice_table
+
+from systori.lib.accounting.tools import Amount
+from systori.lib.templatetags.customformatting import money, ubrdecimal
+from .base import BaseRowIterator, parse_date
+
+
+class InvoiceRowIterator(BaseRowIterator):
+
+    def iterate_job(self, job):
+
+        if job['invoiced'].net == job['progress'].net:
+            yield from super().iterate_job(job)
+
+        else:
+
+            yield self.render.group_html, {
+                'code': job['code'],
+                'name': job['name'],
+                'bold_name': True,
+                'description': job['description'],
+                'show_description': True,
+            }
+
+            debits = self.document['job_debits'].get(str(job['job.id']), [])
+            for debit in debits:
+                entry_date = parse_date(debit['date'])
+                if debit['entry_type'] == Entry.WORK_DEBIT:
+                    title = _('Work completed on {date}').format(date=entry_date)
+                elif debit['entry_type'] == Entry.FLAT_DEBIT:
+                    title = _('Flat invoice on {date}').format(date=entry_date)
+                else:  # adjustment, etc
+                    title = _('Adjustment on {date}').format(date=entry_date)
+                yield self.render.debit_html, {
+                    'title': title,
+                    'total': money(debit['amount'].net)
+                }
+
+    def subtotal_job(self, job):
+        if job['invoiced'].net == job['progress'].net:
+            yield from super().subtotal_job(job)
+        else:
+            yield self.render.subtotal_html,\
+                  self.get_subtotal_context(job, total=money(job['invoiced'].net), offset=False)
+
+    def get_group_context(self, group, depth, **kwargs):
+        return super().get_group_context(
+            group, depth,
+            show_description=depth <= 2,
+            **kwargs
+        )
+
+    def get_task_context(self, task, **kwargs):
+        return super().get_task_context(
+            task,
+            qty=ubrdecimal(task['complete']),
+            total=money(task['progress']),
+            **kwargs
+        )
+
+    def get_lineitem_context(self, lineitem, **kwargs):
+        return super().get_lineitem_context(
+            lineitem,
+            qty=ubrdecimal(lineitem['qty']),
+            total=money(lineitem['estimate']),
+            **kwargs
+        )
+
+    def get_subtotal_context(self, group, **kwargs):
+        if 'total' not in kwargs:
+            kwargs['total'] = money(group['progress'])
+        return super().get_subtotal_context(group, **kwargs)
 
 
 class InvoiceRenderer:
@@ -26,10 +94,10 @@ class InvoiceRenderer:
 
         # cache template lookups
         self.header_html = get_template('document/invoice/header.html')
-        self.group_html = get_template('document/invoice/group.html')
-        self.task_html = get_template('document/invoice/task.html')
+        self.group_html = get_template('document/base/group.html')
+        self.lineitem_html = get_template('document/base/lineitem.html')
         self.debit_html = get_template('document/invoice/debit.html')
-        self.subtotal_html = get_template('document/invoice/subtotal.html')
+        self.subtotal_html = get_template('document/base/subtotal.html')
         self.footer_html = get_template('document/invoice/footer.html')
 
     @property
@@ -57,68 +125,46 @@ class InvoiceRenderer:
         })
 
     def generate(self):
+
+        maximums = {
+            'code': '',
+            'qty': '',
+            'unit': '',
+            'price': '',
+            'total': ''
+        }
+
+        rows = InvoiceRowIterator(self, self.invoice)
+
+        for template, context in rows:
+            for key, value in maximums.items():
+                context_value = context.get(key, '')
+                if len(context_value) > len(value):
+                    maximums[key] = context_value
+
         invoice = self.invoice
 
-        def get_date(str_date):
-            return date_format(date(*map(int, str_date.split('-'))), use_l10n=True) if str_date else None
-
         context = {
-            'invoice_date': get_date(invoice['document_date']),
-            'vesting_start':  get_date(invoice['vesting_start']),
-            'vesting_end':  get_date(invoice['vesting_end']),
+            'invoice_date': parse_date(invoice['document_date']),
+            'vesting_start':  parse_date(invoice['vesting_start']),
+            'vesting_end':  parse_date(invoice['vesting_end']),
 
             'longest_net': '$999,999.99',
             'longest_tax': '$999,999.99',
             'longest_gross': '$999,999.99',
             'payments': self.get_payments(),
 
-            'longest_code': '01.01.01.01',
-            'longest_amount': '1.000,00',
-            'longest_unit': 'unit',
-            'longest_price': '00.000,00',
-            'longest_total': '000.000,00',
-
             'invoice': invoice,
         }
 
+        context.update({
+            'longest_'+key: value for key, value in maximums.items()
+        })
+
         yield self.header_html.render(context)
 
-        for job in invoice['jobs']:
-
-            if job['invoiced'].net == job['progress'].net:
-                yield from self.render_group(job, 0)
-
-            else:
-                yield self.group_html.render({
-                    'bold_name': True,
-                    'code': job['code'],
-                    'name': job['name'],
-                    'description': job['description']
-                })
-                debits = invoice['job_debits'].get(str(job['job.id']), [])
-                for debit in debits:
-                    entry_date = date_format(date(*map(int, debit['date'].split('-'))), use_l10n=True)
-                    if debit['entry_type'] == Entry.WORK_DEBIT:
-                        title = _('Work completed on {date}').format(date=entry_date)
-                    elif debit['entry_type'] == Entry.FLAT_DEBIT:
-                        title = _('Flat invoice on {date}').format(date=entry_date)
-                    else:  # adjustment, etc
-                        title = _('Adjustment on {date}').format(date=entry_date)
-                    yield self.debit_html.render({
-                        'title': title,
-                        'amount': debit['amount']
-                    })
-
-        for job in invoice['jobs']:
-            if job['invoiced'].net == job['progress'].net:
-                for group in job.get('groups', []):
-                    yield self.subtotal_html.render(group)
-            else:
-                yield self.subtotal_html.render({
-                    'code': job['code'],
-                    'name': job['name'],
-                    'progress': job['invoiced'].net
-                })
+        for template, row_context in rows:
+            yield template.render(row_context)
 
         yield self.footer_html.render(context)
 
@@ -131,7 +177,7 @@ class InvoiceRenderer:
             if row[0] == 'progress':
                 title = _('Project progress')
             elif row[0] == 'payment':
-                pay_day = date_format(date(*map(int, txn['date'].split('-'))), use_l10n=True)
+                pay_day = parse_date(txn['date'])
                 title = _('Payment on {date}').format(date=pay_day)
             elif row[0] == 'discount':
                 title = _('Discount applied')
@@ -151,27 +197,6 @@ class InvoiceRenderer:
             if self.payment_details and row[0] == 'discount':
                 for job in txn['jobs'].values():
                     yield 'small', job['name'], money(job['discount_applied_net']), money(job['discount_applied_tax']), money(job['discount_applied_gross'])
-
-    def render_group(self, group, depth):
-
-        kwargs = {
-            'bold_name': depth <= 2,
-        }
-        kwargs.update(group)
-
-        yield self.group_html.render(kwargs)
-
-        for task in group.get('tasks', []):
-            yield self.task_html.render({'task': task})
-
-        for subgroup in group.get('groups', []):
-            yield from self.render_group(subgroup, depth+1)
-
-        if not group.get('groups', []) and group.get('tasks', []):
-            total_kwargs = {'offset': True}
-            total_kwargs.update(group)
-            yield self.subtotal_html.render(total_kwargs)
-            self.group_subtotals_added = True
 
 
 def serialize(invoice):
