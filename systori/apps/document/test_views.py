@@ -577,24 +577,23 @@ class InvoiceViewTests(DocumentTestCase):
 
             Pos.
             Description
+
             Amount
             Price
             Total
             01
             Job One
-
             01.01
             Main Group
-
             01.01.001
             Task #1 Fixed Price
+
             10.00
 
             $96.00
             $960.00
             01.01.002
             Task #2 Time & Materials
-
             TM Lineitem
             20.00
 
