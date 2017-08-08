@@ -542,7 +542,8 @@ class InvoiceViewTests(DocumentTestCase):
 
 
             consideration
-            19% tax
+            19%
+            tax
             gross
             Project progress
             $2.00
@@ -636,7 +637,8 @@ class InvoiceViewTests(DocumentTestCase):
 
 
             consideration
-            19% tax
+            19%
+            tax
             gross
             Project progress
             $2.00
@@ -679,7 +681,8 @@ class InvoiceViewTests(DocumentTestCase):
 
 
             consideration
-            19% tax
+            19%
+            tax
             gross
             Project progress
             $2.00
