@@ -154,7 +154,7 @@ class InvoiceRenderer:
             'vesting_start':  parse_date(invoice['vesting_start']),
             'vesting_end':  parse_date(invoice['vesting_end']),
 
-            'longest_net': '$999,999.99',
+            'longest_net': 'consideration',
             'longest_tax': '$999,999.99',
             'longest_gross': '$999,999.99',
             'payments': self.get_payments(),
