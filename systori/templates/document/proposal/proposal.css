@@ -1,81 +1,3 @@
-{% load i18n %}
-
-/* for debugging tables
-td {
-  border-top-width: 1px;
-  border-right-width: 1px;
-  border-bottom-width: 1px;
-  border-left-width: 1px;
-}
-*/
-
-/*
-uncomment this after fixing margin values in database
-@page {
-  margin-top: {{letterhead.top_margin}}px;
-  margin-right: {{letterhead.right_margin}}px;
-  margin-bottom: {{letterhead.bottom_margin}}px;
-  margin-left: {{letterhead.left_margin}}px;
-  letterhead-page: 1;
-}
-
-@page:nth-child(n+2) {
-  margin-top: {{letterhead.top_margin_next}}px;
-  margin-bottom: {{letterhead.bottom_margin_next}}px;
-  letterhead-page: 2;
-}
-*/
-
-/* hard coded values for now which result in better margin */
-@page {
-  margin-top: 152px;
-  margin-right: 172px;
-  margin-bottom: 72px;
-  margin-left: 72px;
-  {% if format == 'email' %}
-  letterhead-page: 1;
-  {% endif %}
-  @bottom-right {
-    content: '{% trans "Page" %} ' counter(page);
-  }
-}
-
-@page:nth-child(n+2) {
-  margin-top: 120px;
-  margin-bottom: 72px;
-  {% if format == 'email' %}
-  letterhead-page: 2;
-  {% endif %}
-}
-
-td {
-  padding-top: 2px;
-  padding-right: 2px;
-  padding-bottom: 2px;
-  padding-left: 2px;
-}
-
-p {
-  font-size: 10pt;
-}
-
-.header-title {
-  font-weight: bold;
-  font-size: 14pt;
-}
-
-.header-date {
-  text-align: right;
-}
-
-.bottom {
-  vertical-align: bottom;
-}
-
-.vspace-50 {
-  padding-top: 50px;
-}
-
 thead {
   font-weight: bold;
   text-align: center;
@@ -85,20 +7,8 @@ thead:nth-child(n+2) {
   border-bottom-width: 1px;
 }
 
-.left {
-  text-align: left;
-}
-
 .qty, .price, .total {
   text-align: right;
-}
-
-.bold {
-  font-weight: bold;
-}
-
-.line-above {
-  border-top-width: 1px;
 }
 
 .lineitems-job {

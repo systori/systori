@@ -71,7 +71,7 @@ class ProposalRenderer:
     @property
     def pdf(self):
         return PDFStreamer(
-            HTMLParser(self.generate(), CSS(self.css)),
+            HTMLParser(self.generate(), CSS(''.join(self.css))),
             os.path.join(
                 settings.MEDIA_ROOT,
                 self.letterhead.letterhead_pdf.name
@@ -81,16 +81,20 @@ class ProposalRenderer:
     @property
     def html(self):
         return ''.join(chain(
-            ('<style>', self.css, '</style>'),
+            ('<style>',),
+            self.css,
+            ('</style>',),
             self.generate()
         ))
 
     @property
     def css(self):
-        return render_to_string('document/proposal/proposal.css', {
+        context = {
             'letterhead': self.letterhead,
             'format': self.format,
-        })
+        }
+        yield render_to_string('document/base/base.css', context)
+        yield render_to_string('document/proposal/proposal.css', context)
 
     def generate(self):
 

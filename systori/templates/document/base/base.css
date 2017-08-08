@@ -1,0 +1,67 @@
+{% load i18n %}
+
+/* for debugging tables
+td {
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+*/
+
+@page {
+  margin-top: {{letterhead.top_margin}}mm;
+  margin-right: {{letterhead.right_margin}}mm;
+  margin-bottom: {{letterhead.bottom_margin}}mm;
+  margin-left: {{letterhead.left_margin}}mm;
+  letterhead-page: 1;
+  @bottom-right {
+    content: '{% trans "Page" %} ' counter(page);
+  }
+}
+
+@page:nth-child(n+2) {
+  margin-top: {{letterhead.top_margin_next}}mm;
+  margin-bottom: {{letterhead.bottom_margin_next}}mm;
+  letterhead-page: 2;
+}
+
+td {
+  padding-top: 2px;
+  padding-right: 2px;
+  padding-bottom: 2px;
+  padding-left: 2px;
+}
+
+p {
+  font-size: 10pt;
+}
+
+.header-title {
+  font-weight: bold;
+  font-size: 14pt;
+}
+
+.header-date {
+  text-align: right;
+}
+
+.vspace-50 {
+  padding-top: 50px;
+}
+
+.left {
+  text-align: left;
+}
+
+.right {
+  text-align: right;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.line-above {
+  border-top-width: 1px;
+}
