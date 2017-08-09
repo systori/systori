@@ -103,12 +103,16 @@ class ProposalRenderer:
             'qty': str(_('Amount')),
             'unit': '',
             'price': str(_('Price')),
-            'total': money(self.proposal['estimate_total'].gross)
+            'total': str(_('Total'))
         }
+
+        footer = (None, {
+            'total': money(self.proposal['estimate_total'].gross)
+        })
 
         rows = ProposalRowIterator(self, self.proposal)
 
-        for template, context in rows:
+        for template, context in chain((footer,), rows):
             for key, value in maximums.items():
                 context_value = context.get(key, '')
                 if len(context_value) > len(value):

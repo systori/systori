@@ -577,7 +577,6 @@ class InvoiceViewTests(DocumentTestCase):
 
             Pos.
             Description
-
             Amount
             Price
             Total

@@ -137,12 +137,16 @@ class InvoiceRenderer:
             'qty': str(_('Amount')),
             'unit': '',
             'price': str(_('Price')),
-            'total': money(invoice['invoiced'].net)
+            'total': str(_('Total'))
         }
+
+        footer = (None, {
+            'total': money(invoice['invoiced'].net)
+        })
 
         rows = InvoiceRowIterator(self, self.invoice)
 
-        for template, context in rows:
+        for template, context in chain((footer,), rows):
             for key, value in maximums.items():
                 context_value = context.get(key, '')
                 if len(context_value) > len(value):
