@@ -130,12 +130,14 @@ class InvoiceRenderer:
 
     def generate(self):
 
+        invoice = self.invoice
+
         maximums = {
-            'code': '',
-            'qty': '',
+            'code': str(_('Pos.')),
+            'qty': str(_('Amount')),
             'unit': '',
-            'price': '',
-            'total': ''
+            'price': str(_('Price')),
+            'total': money(invoice['invoiced'].net)
         }
 
         rows = InvoiceRowIterator(self, self.invoice)
@@ -168,8 +170,6 @@ class InvoiceRenderer:
         context.update({
             'longest_'+key: value for key, value in maximums.items()
         })
-
-        invoice = self.invoice
 
         context.update({
             'invoice_date': parse_date(invoice['document_date']),

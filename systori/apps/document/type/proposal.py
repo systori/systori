@@ -99,11 +99,11 @@ class ProposalRenderer:
     def generate(self):
 
         maximums = {
-            'code': '',
-            'qty': '',
+            'code': str(_('Pos.')),
+            'qty': str(_('Amount')),
             'unit': '',
-            'price': '',
-            'total': ''
+            'price': str(_('Price')),
+            'total': money(self.proposal['estimate_total'].gross)
         }
 
         rows = ProposalRowIterator(self, self.proposal)
