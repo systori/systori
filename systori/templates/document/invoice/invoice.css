@@ -19,14 +19,8 @@ thead.payments {
 .net, .tax, .gross {
   text-align: right;
   border-left-width: 1px;
-}
-
-.payment-description {
-  padding-left: 0px;
-}
-
-.gross {
-  padding-right: 0px;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 tr.payments:last-child > td {

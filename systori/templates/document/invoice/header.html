@@ -46,9 +46,9 @@
 
   <colgroup>
     <bericht-col width="1*"></bericht-col>
-    <bericht-col width="0*">{{longest_net}}</bericht-col>
-    <bericht-col width="0*">{{longest_tax}}</bericht-col>
-    <bericht-col width="0*">{{longest_gross}}</bericht-col>
+    <bericht-col class="net" width="0*">{{longest_net}}</bericht-col>
+    <bericht-col class="tax" width="0*">{{longest_tax}}</bericht-col>
+    <bericht-col class="gross" width="0*">{{longest_gross}}</bericht-col>
   </colgroup>
 
   <thead class="payments">
@@ -56,7 +56,7 @@
     <td class="payment-description"></td>
     <td class="right"><p>{% trans "consideration" %}</td>
     <td class="right"><p>19% {% trans "tax" %}</td>
-    <td class="right gross"><p>{% trans "gross" %}</td>
+    <td class="right"><p>{% trans "gross" %}</td>
   </tr>
   </thead>
 
