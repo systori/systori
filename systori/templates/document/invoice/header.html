@@ -53,16 +53,16 @@
 
   <thead class="payments">
   <tr>
-    <td></td>
+    <td class="payment-description"></td>
     <td class="right"><p>{% trans "consideration" %}</td>
     <td class="right"><p>19% {% trans "tax" %}</td>
-    <td class="right"><p>{% trans "gross" %}</td>
+    <td class="right gross"><p>{% trans "gross" %}</td>
   </tr>
   </thead>
 
   {% for css, description, net, tax, gross in payments %}
   <tr class="payments payment-{{ css }}">
-    <td><p>{{ description }}</td>
+    <td class="payment-description"><p>{{ description }}</td>
     <td class="net"><p>{{ net }}</td>
     <td class="tax"><p>{{ tax}}</td>
     <td class="gross"><p>{{ gross }}</td>
