@@ -35,10 +35,3 @@ tr.payments:last-child {
 .payment-small {
   font-size: 8pt;
 }
-
-/* Itemized Listing */
-
-.qty, .price, .total {
-  text-align: right;
-  vertical-align: bottom;
-}

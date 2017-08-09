@@ -7,10 +7,6 @@ thead:nth-child(n+1) {
   border-bottom-width: 1px;
 }
 
-.qty, .price, .total {
-  text-align: right;
-}
-
 .lineitems-job {
   font-weight: bold;
   page-break-before: always;

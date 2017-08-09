@@ -79,6 +79,16 @@ p {
   padding-right: 0px;
 }
 
+.qty, .price, .total {
+  text-align: right;
+  vertical-align: bottom;
+}
+
+.unit {
+  text-align: right;
+  vertical-align: bottom;
+}
+
 bericht-col {
   font-size: 10pt;
   padding-top: 2px;
