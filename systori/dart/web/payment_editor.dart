@@ -83,15 +83,15 @@ class PaymentSplit extends TableRowElement {
 
     amount_changed(AmountChangeEvent e) {
 
-        if (e.isGross) {
-            // gross changes affect the discount
-            var split_payment = split_cell.amount.gross;
-            var tax_rate = split_cell.amount.tax_rate;
-            var total = (split_payment / (new Decimal(1) - table.discount_percent));
-            var discount = new Amount.fromGross(total - split_payment, tax_rate);
-            discount_cell.update(discount);
-        }
+        var split_payment = split_cell.amount.gross;
+        var tax_rate = split_cell.amount.tax_rate;
+        var total = (split_payment / (new Decimal(1) - table.discount_percent));
+        var discount = new Amount.fromGross(
+                total - split_payment,
+                split_cell.amount.tax.isZero ? new Decimal(0) : tax_rate
+        );
 
+        discount_cell.update(discount);
         credit_cell.update(split_cell.amount + discount_cell.amount);
 
         table.recalculate();
@@ -113,7 +113,10 @@ class PaymentSplit extends TableRowElement {
             // available payment is less than expected
             // figure out a new total
             var total = (payment / (new Decimal(1) - table.discount_percent));
-            var tax_rate = split_cell.amount.tax_rate;
+            var tax_rate =
+                balance_cell.amount.gross.isNonzero && balance_cell.amount.tax.isZero
+                        ? new Decimal()
+                        : split_cell.amount.tax_rate;
             apply = new Amount.fromGross(payment, tax_rate);
             discount = new Amount.fromGross(total - payment, tax_rate);
         }

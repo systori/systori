@@ -192,6 +192,7 @@ class AmountInputCell extends AmountCell with AmountInputs {
 
     taxChanged([Event _]) {
         Decimal value = new Decimal.parse(_tax_input.value);
+        value = value.isNotNull ? value : new Decimal();
         var event = new AmountChangeEvent(AmountChangeType.TAX, amount.tax, value);
         amount = amount.adjustTax(value);
         _net_input.value = amount.net.money;
