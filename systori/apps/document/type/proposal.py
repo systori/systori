@@ -71,7 +71,7 @@ class ProposalRenderer:
     @property
     def pdf(self):
         return PDFStreamer(
-            HTMLParser(self.generate(), CSS(''.join(self.css))),
+            HTMLParser(self.generate, CSS(''.join(self.css))),
             os.path.join(
                 settings.MEDIA_ROOT,
                 self.letterhead.letterhead_pdf.name
@@ -98,37 +98,14 @@ class ProposalRenderer:
 
     def generate(self):
 
-        maximums = {
-            'code': str(_('Pos.')),
-            'qty': str(_('Amount')),
-            'unit': '',
-            'price': str(_('Price')),
-            'total': str(_('Total'))
-        }
-
-        footer = (None, {
-            'total': money(self.proposal['estimate_total'].gross)
-        })
-
-        rows = ProposalRowIterator(self, self.proposal)
-
-        for template, context in chain((footer,), rows):
-            for key, value in maximums.items():
-                context_value = context.get(key, '')
-                if len(context_value) > len(value):
-                    maximums[key] = context_value
-
         proposal = {
             'doc_date': parse_date(self.proposal['document_date'])
         }
-        proposal.update({
-            'longest_'+key: value for key, value in maximums.items()
-        })
         proposal.update(self.proposal)
 
         yield self.header_html.render(proposal)
 
-        for template, context in rows:
+        for template, context in ProposalRowIterator(self, self.proposal):
             yield template.render(context)
 
         yield self.footer_html.render(proposal)

@@ -103,7 +103,7 @@ class InvoiceRenderer:
     @property
     def pdf(self):
         return PDFStreamer(
-            HTMLParser(self.generate(), CSS(''.join(self.css))),
+            HTMLParser(self.generate, CSS(''.join(self.css))),
             os.path.join(
                 settings.MEDIA_ROOT,
                 self.letterhead.letterhead_pdf.name
@@ -130,62 +130,17 @@ class InvoiceRenderer:
 
     def generate(self):
 
-        invoice = self.invoice
-
-        maximums = {
-            'code': str(_('Pos.')),
-            'qty': str(_('Amount')),
-            'unit': '',
-            'price': str(_('Price')),
-            'total': str(_('Total'))
-        }
-
-        footer = (None, {
-            'total': money(invoice['invoiced'].net)
-        })
-
-        rows = InvoiceRowIterator(self, self.invoice)
-
-        for template, context in chain((footer,), rows):
-            for key, value in maximums.items():
-                context_value = context.get(key, '')
-                if len(context_value) > len(value):
-                    maximums[key] = context_value
-
         context = {
-            'longest_'+key: value for key, value in maximums.items()
+            'invoice_date': parse_date(self.invoice['document_date']),
+            'vesting_start':  parse_date(self.invoice['vesting_start']),
+            'vesting_end':  parse_date(self.invoice['vesting_end']),
+            'payments': list(self.get_payments()),
+            'invoice': self.invoice,
         }
-
-        maximums = {
-            'net': ' '+_('consideration'),
-            'tax': '19% '+_('tax'),
-            'gross': ' '+_('gross')
-        }
-
-        payments = list(self.get_payments())
-
-        for __, __, net, tax, gross in payments:
-            payment = {'net': net, 'tax': tax, 'gross': gross}
-            for key, value in maximums.items():
-                context_value = payment[key]
-                if len(context_value) > len(value):
-                    maximums[key] = context_value
-
-        context.update({
-            'longest_'+key: value for key, value in maximums.items()
-        })
-
-        context.update({
-            'invoice_date': parse_date(invoice['document_date']),
-            'vesting_start':  parse_date(invoice['vesting_start']),
-            'vesting_end':  parse_date(invoice['vesting_end']),
-            'payments': payments,
-            'invoice': invoice,
-        })
 
         yield self.header_html.render(context)
 
-        for template, row_context in rows:
+        for template, row_context in InvoiceRowIterator(self, self.invoice):
             yield template.render(row_context)
 
         yield self.footer_html.render(context)
