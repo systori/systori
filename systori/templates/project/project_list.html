@@ -6,41 +6,37 @@
 <style>
 
     body {
-        padding-top: 90px;
+        padding-top: 100px;
     }
     #filter-bar {
         position:fixed;
         left: 0px;
-        margin-top: -38px;
+        margin-top: -48px;
         height: 38px;
         width: 100%;
         padding-top: 4px;
         background-color: #fff;
     }
     #tile-container{
-        display: flex;
-        flex-wrap: wrap;
-        align-items: stretch;
-        padding-bottom: 60px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+      grid-gap: 5px;
+      word-wrap: break-word;
     }
     .tile{
-        flex: 1 0 250px;
-        max-width: 100%;
-        margin: 2px;
-        padding: 5px;
-        background: #c0c0c0;
-        border-radius: 3px;
-        word-wrap: break-word;
-        font-size: 15px;
-        cursor: pointer;
+      padding: 5px;
+      border-radius: 3px;
+      font-size: 15px;
+      word-break: break-all;
+      word-wrap: break-word;
     }
     .tile span {
-        color: rgba(0,0,0,0.85);
-        font-weight:bold;
+      color: rgba(0,0,0,0.85);
+      font-weight: bold;
     }
     .tile a {
-        color: rgba(0,0,0,0.85);
-        text-decoration: none;
+      color: rgba(0,0,0,0.85);
+      text-decoration: none;
     }
 
     .btn {
@@ -81,7 +77,8 @@
         left: 20px;
         height: 40px;
         padding: 10px;
-        background: rgb(255, 255, 255);
+        background: rgb(205, 0, 0);
+        color: whitesmoke;
     }
 
 </style>
