@@ -6,10 +6,58 @@
 {% block head %}
   {{ block.super }}
 <style type="text/css">
-#progress {
-  -webkit-transition: none !important;
-  transition: none !important;
-}
+  #progress {
+    -webkit-transition: none !important;
+    transition: none !important;
+  }
+  grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+    grid-auto-rows: min-content;
+    grid-gap: 5px;
+  }
+  grid-child {
+    display:flex;
+    flex-direction:column;
+  }
+  project-id {
+    align-self: center;
+    font-weight: bold;
+    width: 100%;
+    text-align: center;
+  }
+  .project-id-info {
+    background-color: #bce8f1;
+  }
+  .project-id-warning {
+    background-color: #faebcc;
+  }
+  .project-id-primary {
+    background-color: #bba892;
+  }
+  project-title {
+    font-size: large;
+    align-self: stretch;
+    text-align: center;
+    border-top: 1px solid #e3e3e3;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  jobsite-address {
+  }
+  jobsite {
+  }
+  workers {
+    display: flex;
+    flex-direction: column;
+  }
+  equipment {
+    display:flex;
+    flex-direction: column;
+  }
+  notes {
+  }
+
 </style>
 {% endblock %}
 
@@ -47,53 +95,46 @@
 {% block container %}
 {% load_user_statuses %}
 <div class="container-fluid">
-  <div class="row equal-height-panels">
+  <grid>
     {% for plan in selected_plans %}
+      <grid-child>
+        <project-id class="{% if is_selected_past %}project-id-warning{% endif %}
+        {% if is_selected_today %}project-id-primary{% endif %}
+        {% if is_selected_future %}project-id-info{% endif %}" data-id="{{ plan.id|unlocalize }}">
+        # {{ plan.jobsite.project.id }}</project-id>
 
-      <div class="col-xs-12 col-sm-6 col-md-4 col-lg-2">
-        <div class="panel {% if is_selected_past %}panel-warning{% endif %}
-                         {% if is_selected_today %}panel-primary{% endif %}
-                         {% if is_selected_future %}panel-info{% endif %}" data-id="{{ plan.id|unlocalize }}">
+        <project-title class="{% if is_selected_past %}project-id-warning{% endif %}
+        {% if is_selected_today %}project-id-primary{% endif %}
+        {% if is_selected_future %}project-id-info{% endif %}" data-id="{{ plan.id|unlocalize }}">
+        {{ plan.jobsite.project.name }}</project-title>
 
-          <div class="panel-heading fit-text">{{ plan.jobsite.project.id }} - {{ plan.jobsite.project.name }}</div>
-          <div class="panel-body">
-            <h4><small>{{ plan.jobsite.name }}</small></h4>
-            <h4 class="fit-text">{{ plan.jobsite.address }}</h4>
-            <h4>{{ plan.jobsite.city }}</h4>
-            <hr>
+        <jobsite>{{ plan.jobsite.name }}</jobsite>
+        <jobsite-address>{{ plan.jobsite.address }} {{ plan.jobsite.city }}</jobsite-address>
 
-          {% for plan_worker in plan.workers.all %}
-            <h5 class="fit-text text-info">{% show_user_status plan_worker.user %}{{ plan_worker.get_full_name }}</h5>
-          {% endfor %}
-            
-          {% if plan.equipment.count > 0 %}
-          <hr>
-            {% for equipment in plan.equipment.all %}
-              <h5 class="fit-text text-warning">{{ equipment|safe }}</h5>
+        <workers>
+            {% for plan_worker in plan.workers.all %}
+              <span>{{ plan_worker.get_full_name }}</span>
             {% endfor %}
-          {% endif %}
-
-          {% if plan.notes %}
-            <hr>
-            <h4 class="fit-text text-danger">{{ plan.notes }}</h4>
-          {% endif %}
-          </div>
-        </div>
-      </div>
-      {% if forloop.counter|divisibleby:6 %}
-      </div> <div class="row equal-height-panels">
-      {% endif %}
-
+        </workers>
+        <equipment>
+        <span class="glyphicon glyphicon-wrench"></span>
+              {% for equipment in plan.equipment.all %}
+                <span>{{ equipment|safe }}</span>
+              {% endfor %}
+        </equipment>
+        <notes>
+          <span class="glyphicon glyphicon-paperclip"></span>
+            {% if plan.notes %}
+              {{ plan.notes }}
+            {% endif %}
+        </notes>
+      </grid-child>
     {% endfor %}
-  </div>
+  </grid>
 </div>
 
 {% endblock %}
 {% block extra_js %}
-
-  {% include "main/match-height_js.html" %}
-  {% include "main/fittext_js.html" %}
-
   <script type="text/javascript">
   
   $(document).ready(function(){
@@ -104,7 +145,7 @@
     $("#progress").animate({
        width: "0%"
     }, 15000, function() {
-      page_reload();
+      //page_reload();
       }
     );
   
