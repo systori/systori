@@ -541,10 +541,8 @@ class InvoiceViewTests(DocumentTestCase):
             The Header
 
 
-
             consideration
-            19%
-            tax
+            19% tax
             gross
             Project progress
             $2.00
@@ -637,10 +635,8 @@ class InvoiceViewTests(DocumentTestCase):
             The Header
 
 
-
             consideration
-            19%
-            tax
+            19% tax
             gross
             Project progress
             $2.00
@@ -682,10 +678,8 @@ class InvoiceViewTests(DocumentTestCase):
             The Header
 
 
-
             consideration
-            19%
-            tax
+            19% tax
             gross
             Project progress
             $2.00
