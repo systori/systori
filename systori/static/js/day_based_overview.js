@@ -35,9 +35,7 @@
         if (el.offsetHeight > max)
             max = el.offsetHeight
     }
-    console.log("breakpoint");
     for (const el of elements){
-        console.log(el);
         el.style.height = `${max}px`;
     }
   }
