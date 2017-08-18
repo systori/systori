@@ -94,7 +94,7 @@
 {% load_user_statuses %}
 <div class="container-fluid">
   <grid>
-    {% for plan in selected_plans %}
+    {% for plan, workers in selected_plans %}
       <grid-child class="border-day-indicator panel-primary">
         <project-id class="bg-day-indicator" data-id="{{ plan.id|unlocalize }}">
         # {{ plan.jobsite.project.id }}</project-id>
@@ -107,7 +107,7 @@
 
         <workers class="bg-day-indicator">{% trans "Workers" %}</workers>
         <worker>
-            {% for plan_worker in plan.workers.all %}
+            {% for plan_worker in workers %}
               <span>{{ plan_worker.get_full_name }}</span>
             {% endfor %}
         </worker>

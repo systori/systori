@@ -55,7 +55,11 @@ class DayBasedOverviewView(TemplateView):
         context['next_day_url'] = reverse('day_based_overview', args=[context['next_day'].isoformat()])
 
         context['selected_day'] = selected_day
-        context['selected_plans'] = DailyPlan.objects.filter(day=selected_day).order_by('jobsite__project_id').all()
+        context['selected_plans'] = []
+        for plan in DailyPlan.objects.prefetch_related('jobsite__project').prefetch_related('equipment').filter(day=selected_day).order_by('jobsite__project_id').all():
+            context['selected_plans'].append(
+                (plan, plan.workers.order_by('user__first_name').all())
+            )
         context['is_selected_past'] = selected_day < date.today()
         context['is_selected_today'] = selected_day == date.today()
         context['is_selected_future'] = selected_day > date.today()
