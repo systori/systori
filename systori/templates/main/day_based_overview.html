@@ -19,43 +19,40 @@
   grid-child {
     display:flex;
     flex-direction:column;
+    background-color: #EEF6F1;
   }
-  project-id {
-    align-self: center;
-    font-weight: bold;
-    width: 100%;
-    text-align: center;
+  .bg-day-indicator {
+    background-color:
+      {% if is_selected_past %}#faebcc;
+      {% elif is_selected_today %}#bba892;
+      {% elif is_selected_future %}#bce8f1;
+      {% else %}#eeeeee;{% endif %}
   }
-  .project-id-info {
-    background-color: #bce8f1;
-  }
-  .project-id-warning {
-    background-color: #faebcc;
-  }
-  .project-id-primary {
-    background-color: #bba892;
+  .border-day-indicator {
+    border: 2px solid
+      {% if is_selected_past %}#faebcc;
+      {% elif is_selected_today %}#bba892;
+      {% elif is_selected_future %}#bce8f1;
+      {% else %}#eeeeee;{% endif %}
+    border-radius: 3px;
   }
   project-title {
     font-size: large;
     align-self: stretch;
     text-align: center;
-    border-top: 1px solid #e3e3e3;
     padding-top: 5px;
     padding-bottom: 5px;
   }
-  jobsite-address {
+  project-id, jobsite, workers, equipments, notes {
+    font-size: small;
+    text-align: center;
+    font-weight: bold;
   }
-  jobsite {
-  }
-  workers {
+  jobsite-address, worker, equipment, note {
     display: flex;
     flex-direction: column;
-  }
-  equipment {
-    display:flex;
-    flex-direction: column;
-  }
-  notes {
+    padding: 5px;
+    font-size: 14px;
   }
 
 </style>
@@ -89,6 +86,7 @@
       </div>
     </div>
   </nav>
+  </div>
 {% endblock %}
 
 
@@ -97,37 +95,32 @@
 <div class="container-fluid">
   <grid>
     {% for plan in selected_plans %}
-      <grid-child>
-        <project-id class="{% if is_selected_past %}project-id-warning{% endif %}
-        {% if is_selected_today %}project-id-primary{% endif %}
-        {% if is_selected_future %}project-id-info{% endif %}" data-id="{{ plan.id|unlocalize }}">
+      <grid-child class="border-day-indicator panel-primary">
+        <project-id class="bg-day-indicator" data-id="{{ plan.id|unlocalize }}">
         # {{ plan.jobsite.project.id }}</project-id>
 
-        <project-title class="{% if is_selected_past %}project-id-warning{% endif %}
-        {% if is_selected_today %}project-id-primary{% endif %}
-        {% if is_selected_future %}project-id-info{% endif %}" data-id="{{ plan.id|unlocalize }}">
+        <project-title data-id="{{ plan.id|unlocalize }}">
         {{ plan.jobsite.project.name }}</project-title>
 
-        <jobsite>{{ plan.jobsite.name }}</jobsite>
+        <jobsite class="bg-day-indicator">{{ plan.jobsite.name }}</jobsite>
         <jobsite-address>{{ plan.jobsite.address }} {{ plan.jobsite.city }}</jobsite-address>
 
-        <workers>
+        <workers class="bg-day-indicator">{% trans "Workers" %}</workers>
+        <worker>
             {% for plan_worker in plan.workers.all %}
               <span>{{ plan_worker.get_full_name }}</span>
             {% endfor %}
-        </workers>
+        </worker>
+        <equipments class="bg-day-indicator">{% trans "equipment" %}</equipments>
         <equipment>
-        <span class="glyphicon glyphicon-wrench"></span>
               {% for equipment in plan.equipment.all %}
                 <span>{{ equipment|safe }}</span>
               {% endfor %}
         </equipment>
-        <notes>
-          <span class="glyphicon glyphicon-paperclip"></span>
-            {% if plan.notes %}
+        <notes class="bg-day-indicator">{% trans "Notes" %}</notes>
+        <note>
               {{ plan.notes }}
-            {% endif %}
-        </notes>
+        </note>
       </grid-child>
     {% endfor %}
   </grid>
@@ -135,43 +128,5 @@
 
 {% endblock %}
 {% block extra_js %}
-  <script type="text/javascript">
-  
-  $(document).ready(function(){
-    $('.equal-height-panels .panel').matchHeight();
-
-    jQuery(".fit-text").fitText(1.3);
-
-    $("#progress").animate({
-       width: "0%"
-    }, 15000, function() {
-      //page_reload();
-      }
-    );
-  
-  });
-
-  function page_reload()
-  {
-    $.ajax({
-      type: "HEAD",
-      url: window.location,
-      success: function() {
-        window.location.reload();
-      },
-      error: function() {
-        console.log("error reloading page.");
-        setTimeout(page_reload, 60000);
-      },
-      statusCode: {
-        404: function() { console.log("404"); },
-        501: function() { console.log("501"); },
-        502: function() { console.log("502"); }
-      }
-    });
-  };
-
-  
-
-  </script>
+  <script src="{% static "js/day_based_overview.js" %}"></script>
 {% endblock %}
