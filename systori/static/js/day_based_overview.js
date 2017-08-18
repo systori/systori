@@ -2,7 +2,7 @@
     $("#progress").animate({
        width: "0%"
     }, 15000, function() {
-      //page_reload();
+      page_reload();
       }
     );
 
