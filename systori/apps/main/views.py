@@ -38,6 +38,17 @@ class IndexView(View):
             return HttpResponseRedirect(reverse('login'))
 
 
+def get_temporal_location(selected_day):
+    if selected_day < date.today():
+        return "past"
+    elif selected_day == date.today():
+        return "today"
+    elif selected_day > date.today():
+        return "future"
+    else:
+        raise ValueError("selected_day has to be of type date.")
+
+
 class DayBasedOverviewView(TemplateView):
     template_name = "main/day_based_overview.html"
 
@@ -56,12 +67,15 @@ class DayBasedOverviewView(TemplateView):
 
         context['selected_day'] = selected_day
         context['selected_plans'] = []
-        for plan in DailyPlan.objects.prefetch_related('jobsite__project').prefetch_related('equipment').filter(day=selected_day).order_by('jobsite__project_id').all():
+        plans = DailyPlan.objects.\
+            prefetch_related('jobsite__project').\
+            prefetch_related('equipment').\
+            filter(day=selected_day).\
+            order_by('jobsite__project_id')
+        for plan in plans:
             context['selected_plans'].append(
                 (plan, plan.workers.order_by('user__first_name').all())
             )
-        context['is_selected_past'] = selected_day < date.today()
-        context['is_selected_today'] = selected_day == date.today()
-        context['is_selected_future'] = selected_day > date.today()
+        context['temporal_location'] = get_temporal_location(selected_day)
 
         return context
