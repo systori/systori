@@ -4,4 +4,4 @@ before_script:
 
 dart:
   script:
-		- cd systori/dart && pub get && pub build
+    - cd systori/dart && pub get && pub build
