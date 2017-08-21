@@ -21,19 +21,25 @@
     flex-direction:column;
     background-color: #EEF6F1;
   }
-  .bg-day-indicator {
-    background-color:
-      {% if is_selected_past %}#faebcc;
-      {% elif is_selected_today %}#bba892;
-      {% elif is_selected_future %}#bce8f1;
-      {% else %}#eeeeee;{% endif %}
+  .bg-day-indicator-past {
+    background-color: #faebcc;
   }
-  .border-day-indicator {
-    border: 2px solid
-      {% if is_selected_past %}#faebcc;
-      {% elif is_selected_today %}#bba892;
-      {% elif is_selected_future %}#bce8f1;
-      {% else %}#eeeeee;{% endif %}
+  .bg-day-indicator-today {
+    background-color: #bba892;
+  }
+  .bg-day-indicator-future {
+    background-color: #bce8f1;
+  }
+  .border-day-indicator-past {
+    border: 2px solid #faebcc;
+    border-radius: 3px;
+  }
+  .border-day-indicator-today {
+    border: 2px solid #bba892;
+    border-radius: 3px;
+  }
+  .border-day-indicator-future {
+    border: 2px solid #bce8f1;
     border-radius: 3px;
   }
   project-title {
@@ -95,29 +101,29 @@
 <div class="container-fluid">
   <grid>
     {% for plan, workers in selected_plans %}
-      <grid-child class="border-day-indicator panel-primary">
-        <project-id class="bg-day-indicator" data-id="{{ plan.id|unlocalize }}">
+      <grid-child class="border-day-indicator-{{ temporal_location }} panel-primary">
+        <project-id class="bg-day-indicator-{{ temporal_location }}" data-id="{{ plan.id|unlocalize }}">
         # {{ plan.jobsite.project.id }}</project-id>
 
         <project-title data-id="{{ plan.id|unlocalize }}">
         {{ plan.jobsite.project.name }}</project-title>
 
-        <jobsite class="bg-day-indicator">{{ plan.jobsite.name }}</jobsite>
+        <jobsite class="bg-day-indicator-{{ temporal_location }}">{{ plan.jobsite.name }}</jobsite>
         <jobsite-address>{{ plan.jobsite.address }} {{ plan.jobsite.city }}</jobsite-address>
 
-        <workers class="bg-day-indicator">{% trans "Workers" %}</workers>
+        <workers class="bg-day-indicator-{{ temporal_location }}">{% trans "Workers" %}</workers>
         <worker>
             {% for plan_worker in workers %}
               <span>{{ plan_worker.get_full_name }}</span>
             {% endfor %}
         </worker>
-        <equipments class="bg-day-indicator">{% trans "equipment" %}</equipments>
+        <equipments class="bg-day-indicator-{{ temporal_location }}">{% trans "equipment" %}</equipments>
         <equipment>
               {% for equipment in plan.equipment.all %}
                 <span>{{ equipment|safe }}</span>
               {% endfor %}
         </equipment>
-        <notes class="bg-day-indicator">{% trans "Notes" %}</notes>
+        <notes class="bg-day-indicator-{{ temporal_location }}">{% trans "Notes" %}</notes>
         <note>
               {{ plan.notes }}
         </note>
