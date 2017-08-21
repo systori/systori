@@ -19,7 +19,6 @@ class JobCreate(CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         project = self.request.project
-        #max_code = project.jobs.all().aggregate(order=Max('order'))['order'] or 0
         kwargs['instance'] = Job(order=None, project=project)
         return kwargs
 
@@ -74,7 +73,6 @@ class JobCopy(FormView):
         initial = super(JobCopy, self).get_initial()
         initial['project_id'] = self.kwargs['project_pk']
         return initial
-
 
     def clean_project_id(self):
         raise forms.ValidationError(_("Error happened"))
