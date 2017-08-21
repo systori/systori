@@ -1,0 +1,7 @@
+before_script:
+  - apt-get update -qq && apt-get install -y -qq language-pack-de
+  - pip3 install -r requirements/base.pip
+
+dart:
+  script:
+		- cd systori/dart && pub get && pub build
