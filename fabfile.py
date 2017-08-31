@@ -10,7 +10,7 @@ from version import VERSION
 
 version = _V(VERSION)
 
-env.hosts = ['systori.com']
+env.hosts = ['systori.io']
 
 PROD_MEDIA_PATH = '/var/lib/systori/production'
 PROD_MEDIA_FILE = 'systori.media.tgz'
