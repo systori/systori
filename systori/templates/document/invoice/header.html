@@ -16,10 +16,9 @@
 <p class="vspace-50"><br></p>
 
 <table>
-  <colgroup span="2"></colgroup>
   <tr>
-    <td><p class="header-title">{% if invoice.title %}{{invoice.title}}{% else %}{% trans "Invoice" %}{% endif %}</p></td>
-    <td class="bottom"><p class="header-date">{{invoice_date}}</p></td>
+    <td class="header-title">{% if invoice.title %}{{invoice.title}}{% else %}{% trans "Invoice" %}{% endif %}</td>
+    <td class="bottom header-date">{{invoice_date}}</td>
   </tr>
 </table>
 
@@ -54,18 +53,18 @@
   <thead class="payments">
   <tr>
     <td class="payment-description"></td>
-    <td class="right"><p>{% trans "consideration" %}</td>
-    <td class="right"><p>19% {% trans "tax" %}</td>
-    <td class="right"><p>{% trans "gross" %}</td>
+    <td class="right">{% trans "consideration" %}</td>
+    <td class="right">19% {% trans "tax" %}</td>
+    <td class="right">{% trans "gross" %}</td>
   </tr>
   </thead>
 
   {% for css, description, net, tax, gross in payments %}
   <tr class="payments payment-{{ css }}">
-    <td class="payment-description"><p>{{ description }}</td>
-    <td class="net"><p>{{ net }}</td>
-    <td class="tax"><p>{{ tax}}</td>
-    <td class="gross"><p>{{ gross }}</td>
+    <td class="payment-description">{{ description }}</td>
+    <td class="net">{{ net }}</td>
+    <td class="tax">{{ tax}}</td>
+    <td class="gross">{{ gross }}</td>
   </tr>
   {% endfor %}
 
@@ -94,11 +93,11 @@
 
   <thead>
   <tr>
-    <td class="left code"><p>{% trans "Pos." %}</td>
-    <td class="left"><p>{% trans "Description" %}</td>
-    <td colspan="2" class="right"><p>{% trans "Amount" %}</td>
-    <td class="right"><p>{% trans "Price" %}</td>
-    <td class="total"><p>{% trans "Total" %}</td>
+    <td class="left code">{% trans "Pos." %}</td>
+    <td class="left">{% trans "Description" %}</td>
+    <td colspan="2" class="right">{% trans "Amount" %}</td>
+    <td class="right">{% trans "Price" %}</td>
+    <td class="total">{% trans "Total" %}</td>
   </tr>
   </thead>
 

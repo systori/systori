@@ -6,9 +6,9 @@
 {% if address_label %}
   {{ address_label|linebreaksbr }}
 {% else %}
-  {% if business %}{{ business }}<br />{% endif %}
-  {{ salutation }} {{ first_name }} {{ last_name }}<br />
-  {{ address }}<br />
+  {% if business %}{{ business }}<br>{% endif %}
+  {{ salutation }} {{ first_name }} {{ last_name }}<br>
+  {{ address }}<br>
   {{ postal_code }} {{ city }}
 {% endif %}
 </p>
@@ -16,14 +16,13 @@
 <p class="vspace-50"><br></p>
 
 <table>
-  <colgroup span="2"></colgroup>
   <tr>
-    <td><p class="header-title">{{ title }}</p></td>
-    <td class="bottom"><p class="header-date">{{ doc_date }}</p></td>
+    <td class="header-title">{{ title }}</td>
+    <td class="header-date bottom">{{ doc_date }}</td>
   </tr>
 </table>
 
-<p><br></p>
+<br>
 
 {% if show_project_id %}
   <p>{% trans "Project" %} #{{ project_id }}</p>
@@ -31,7 +30,7 @@
 
 <p>{{ header|linebreaksbr }}</p>
 
-<p><br></p>
+<br>
 
 <table>
 
@@ -46,11 +45,11 @@
 
   <thead>
     <tr>
-      <td class="left code"><p>{% trans "Pos." %}</td>
-      <td class="left"><p>{% trans "Description" %}</td>
-      <td colspan="2" class="right"><p>{% trans "Amount" %}</td>
-      <td class="right"><p>{% trans "Price" %}</td>
-      <td class="right"><p>{% trans "Total" %}</td>
+      <td class="left code">{% trans "Pos." %}</td>
+      <td class="left">{% trans "Description" %}</td>
+      <td colspan="2" class="right">{% trans "Amount" %}</td>
+      <td class="right">{% trans "Price" %}</td>
+      <td class="right">{% trans "Total" %}</td>
     </tr>
   </thead>
 

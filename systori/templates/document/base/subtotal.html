@@ -6,9 +6,9 @@
     <td></td>
     {% endif %}
     <td colspan="{% if offset %}4{% else %}5{% endif %}">
-      <p>{% trans 'Total' %} {{ code }} - {{ name }}
+      {% trans 'Total' %} {{ code }} - {{ name }}
     </td>
-    <td class="total"><p>{{ total }}</td>
+    <td class="total">{{ total }}</td>
   </tr>
 
 {% endautoescape %}

@@ -16,20 +16,20 @@
 
   {% for lineitem in task.lineitems %}
   <tr>
-    <td class="left"><p>{{ lineitem.name }}</td>
-    <td class="right"><p>{{ lineitem.qty|ubrdecimal }}</td>
-    <td class="right"><p>{{ lineitem.unit }}</td>
-    <td class="right"><p>{{ lineitem.price|money }}</td>
-    <td class="right"><p>{{ lineitem.estimate|money }}</td>
+    <td class="left">{{ lineitem.name }}</td>
+    <td class="right">{{ lineitem.qty|ubrdecimal }}</td>
+    <td class="right">{{ lineitem.unit }}</td>
+    <td class="right">{{ lineitem.price|money }}</td>
+    <td class="right">{{ lineitem.estimate|money }}</td>
   </tr>
   {% endfor %}
 
   <tr class="lineitems-subtotal">
     <td></td>
-    <td class="right"><p>{{ 1|ubrdecimal }}</td>
-    <td class="right"><p>{{ task.unit }}</td>
+    <td class="right">{{ 1|ubrdecimal }}</td>
+    <td class="right">{{ task.unit }}</td>
     <td></td>
-    <td class="right"><p>{{ task.price|money }}</td>
+    <td class="right">{{ task.price|money }}</td>
   </tr>
 
 </table>

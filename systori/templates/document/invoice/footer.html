@@ -3,8 +3,8 @@
 {% autoescape off %}
 
   <tr class="bold total line-above">
-    <td colspan="5" class="right"><p>{% trans "Total without VAT" %}</td>
-    <td class="total"><p>{{invoice.invoiced.net|money}}</td>
+    <td colspan="5" class="right">{% trans "Total without VAT" %}</td>
+    <td class="total">{{invoice.invoiced.net|money}}</td>
   </tr>
 
 </table>
