@@ -379,18 +379,11 @@ class ProposalViewTests(DocumentTestCase):
             Page 1Professor Ludwig von Mises
 
 
-
-
             Proposal
             March 6, 2017
-
-
             hello
-
-
             Pos.
             Description
-
             Amount
             Price
             Total
@@ -400,16 +393,13 @@ class ProposalViewTests(DocumentTestCase):
             Main Group
             01.01.001
             Task #1 Fixed Price
-
             10.00
-
             $96.00
             $0.00
             01.01.002
             Task #2 Time & Materials
             TM Lineitem
             20.00
-
             $10.00
             $200.00
             Total 01.01 - Main Group
@@ -424,8 +414,6 @@ class ProposalViewTests(DocumentTestCase):
             $38.00
             Total including VAT
             $238.00
-
-
             bye
             """)
         )
@@ -532,14 +520,11 @@ class InvoiceViewTests(DocumentTestCase):
             Page 1Professor Ludwig von Mises
 
 
-
-
             Invoice #1
             Jan. 1, 2015
             Invoice No. 2015/01/01
             Please indicate the correct invoice number on your payment.
             The Header
-
 
             consideration
             19% tax
@@ -552,7 +537,6 @@ class InvoiceViewTests(DocumentTestCase):
             $2.00
             $2.00
             $4.00
-
 
             The Footer
             """)
@@ -574,10 +558,8 @@ class InvoiceViewTests(DocumentTestCase):
             Page 2Jan. 1, 2015
             Itemized listing for Invoice No. 2015/01/01
 
-
             Pos.
             Description
-
             Amount
             Price
             Total
@@ -587,16 +569,13 @@ class InvoiceViewTests(DocumentTestCase):
             Main Group
             01.01.001
             Task #1 Fixed Price
-
             10.00
-
             $96.00
             $960.00
             01.01.002
             Task #2 Time & Materials
             TM Lineitem
             20.00
-
             $10.00
             $200.00
             Total 01.01 - Main Group
@@ -625,15 +604,12 @@ class InvoiceViewTests(DocumentTestCase):
             Page 1Professor Ludwig von Mises
 
 
-
-
             Invoice #1
             Jan. 1, 2015
             Invoice No. 2015/01/01
             Please indicate the correct invoice number on your payment.
             Vesting Period April 1, 2017 to April 2, 2017
             The Header
-
 
             consideration
             19% tax
@@ -646,7 +622,6 @@ class InvoiceViewTests(DocumentTestCase):
             $2.00
             $2.00
             $4.00
-
 
             The Footer
             """)
@@ -668,15 +643,12 @@ class InvoiceViewTests(DocumentTestCase):
             Page 1Professor Ludwig von Mises
 
 
-
-
             Invoice #1
             Jan. 1, 2015
             Invoice No. 2015/01/01
             Please indicate the correct invoice number on your payment.
             Project #2
             The Header
-
 
             consideration
             19% tax
@@ -689,7 +661,6 @@ class InvoiceViewTests(DocumentTestCase):
             $2.00
             $2.00
             $4.00
-
 
             The Footer
             """)
