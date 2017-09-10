@@ -37,11 +37,13 @@
   <p>{% trans "Vesting Period" %} {{ vesting_start }} {% trans "to" %} {{ vesting_end }}</p>
 {% endif %}
 
+<br>
+
 <p>{{invoice.header|linebreaksbr}}</p>
 
-<p><br></p>
+<br>
 
-<table>
+<table class="payments-table">
 
   <colgroup>
     <col width="1*">
@@ -59,6 +61,7 @@
   </tr>
   </thead>
 
+  <tbody>
   {% for css, description, net, tax, gross in payments %}
   <tr class="payments payment-{{ css }}">
     <td class="payment-description">{{ description }}</td>
@@ -67,10 +70,11 @@
     <td class="gross">{{ gross }}</td>
   </tr>
   {% endfor %}
+  </tbody>
 
 </table>
 
-<p><br></p>
+<br>
 
 <p class="footer-text">{{ invoice.footer|linebreaksbr }}</p>
 
@@ -78,7 +82,7 @@
 
 <p class="bold">{% blocktrans with invoice_no=invoice.invoice_no %}Itemized listing for Invoice No. {{invoice_no}}{% endblocktrans %}</p>
 
-<p><br></p>
+<br>
 
 <table>
 

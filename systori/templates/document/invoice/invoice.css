@@ -12,8 +12,14 @@ thead:nth-child(n+1) {
 
 /* Payments Table */
 
-thead.payments {
+.payments-table {
+  border-collapse: collapse;
+}
+
+thead.payments > tr {
+  border-bottom-style: solid;
   border-bottom-width: 1px;
+  border-bottom-color: black;
 }
 
 .net, .tax, .gross {
@@ -23,13 +29,15 @@ thead.payments {
   padding-right: 4px;
 }
 
-tr.payments:last-child > td {
-  border-left-width: 0px;
-  font-weight: bold;
+tr.payments:last-child {
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: black;
 }
 
-tr.payments:last-child {
-  border-top-width: 1px;
+tr.payments:last-child > td {
+  border-left-width: 0;
+  font-weight: bold;
 }
 
 .payment-small {
