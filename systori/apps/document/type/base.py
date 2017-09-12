@@ -37,7 +37,7 @@ class BaseRowIterator:
         for task in group.get('tasks', []):
             task_context = self.get_task_context(task)
             yield self.render.group_html, task_context
-            if task['qty'] is not None:
+            if task_context['qty'] is not None:
                 yield self.render.lineitem_html, {
                     'name': '',
                     'qty': task_context['qty'],
