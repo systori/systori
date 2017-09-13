@@ -46,10 +46,14 @@ td, p {
 .header-title {
   font-weight: bold;
   font-size: 14pt;
+  padding-right: 0;
+  padding-left: 0;
 }
 
 .header-date {
   text-align: right;
+  padding-right: 0;
+  padding-left: 0;
 }
 
 .vspace-50 {
