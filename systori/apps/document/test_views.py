@@ -613,8 +613,9 @@ class InvoiceViewTests(DocumentTestCase):
             $960.00
             01.01.002
             Task #2 Time & Materials
-            0.00
-            $200.00
+            TM Lineitem
+            20.00
+            $10.00
             $200.00
             Total 01.01 - Main Group
             $1,160.00
