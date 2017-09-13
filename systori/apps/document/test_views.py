@@ -1,4 +1,4 @@
-from unittest import skip
+import re
 from datetime import date, datetime
 from decimal import Decimal
 from PyPDF2 import PdfFileReader
@@ -30,6 +30,19 @@ from .models import Proposal, Letterhead, Timesheet
 from .factories import InvoiceFactory, LetterheadFactory
 
 
+RE_STYLE = re.compile(rb'<style>.*?</style>', re.DOTALL)
+RE_TAG = re.compile(rb'</?.*?>', re.DOTALL)
+
+
+def clean_doc(html):
+    html = RE_STYLE.sub(b'', html)
+    html = RE_TAG.sub(b'', html)
+    html = re.sub(b' +', b' ', html)
+    html = re.sub(b'(\n )+', b'\n', html)
+    html = re.sub(b'\n+', b'\n', html)
+    return html.decode().strip() + '\n'
+
+
 class DocumentTestCase(ClientTestCase):
     model = None
     form = None
@@ -37,6 +50,7 @@ class DocumentTestCase(ClientTestCase):
 
     def setUp(self):
         super().setUp()
+        self.maxDiff = None
 
         self.project = ProjectFactory()
 
@@ -352,7 +366,7 @@ class ProposalViewTests(DocumentTestCase):
             self.assertTrue(text in extractedText)
         self.assertFalse(self.task.name in extractedText)
 
-    def get_rendered_pdf(self):
+    def get_rendered_doc(self):
         data = self.form_data({
             'title': 'Proposal',
             'document_date': '2017-03-06',
@@ -365,22 +379,17 @@ class ProposalViewTests(DocumentTestCase):
             'job-1-is_attached': 'True',
         })
         self.client.post(reverse('proposal.create', args=[self.project.id]), data)
-        response = self.client.get(reverse('proposal.pdf', args=[
-            self.project.id, 'print', Proposal.objects.first().id,
+        response = self.client.get(reverse('proposal.html', args=[
+            self.project.id, Proposal.objects.first().id,
         ]))
-        return PdfFileReader(BytesIO(response.content))
+        return clean_doc(response.content)
 
-    @skip
     def test_render_time_and_materials_proposal(self):
         tm_task = TaskFactory(name='Task #2 Time & Materials', qty=None, price=200, total=200, group=self.group)
         LineItemFactory(name='TM Lineitem', qty=20, price=10, total=200, task=tm_task)
-        pdf = self.get_rendered_pdf()
-        self.assertEqual(
-            pdf.getPage(0).extractText(),
-            dedent("""\
-            Page 1Professor Ludwig von Mises
-
-
+        text = self.get_rendered_doc()
+        self.assertEqual(text, dedent("""\
+            Professor Ludwig von Mises
             Proposal
             March 6, 2017
             hello
@@ -400,9 +409,7 @@ class ProposalViewTests(DocumentTestCase):
             $0.00
             01.01.002
             Task #2 Time & Materials
-            TM Lineitem
-            20.00
-            $10.00
+            $200.00
             $200.00
             Total 01.01 - Main Group
             $200.00
@@ -487,7 +494,7 @@ class InvoiceViewTests(DocumentTestCase):
         self.assertEqual(invoice.json['header'], 'new header')
         self.assertEqual(invoice.json['footer'], 'new footer')
 
-    def get_rendered_pdf(self, jobs):
+    def get_rendered_doc(self, jobs):
         data = {
             'title': 'Invoice #1',
             'header': 'The Header',
@@ -502,14 +509,13 @@ class InvoiceViewTests(DocumentTestCase):
         data.update(jobs)
         data.update(self.make_management_form())
         self.client.post(reverse('invoice.create', args=[self.project.id]), data)
-        response = self.client.get(reverse('invoice.pdf', args=[
-            self.project.id, 'print', Invoice.objects.first().id
+        response = self.client.get(reverse('invoice.html', args=[
+            self.project.id, Invoice.objects.first().id
         ]))
-        return PdfFileReader(BytesIO(response.content))
+        return clean_doc(response.content)
 
-    @skip
     def test_render_simple_invoice(self):
-        pdf = self.get_rendered_pdf({
+        text = self.get_rendered_doc({
             'job-0-is_invoiced': 'True',
             'job-0-debit_net': '1',
             'job-0-debit_tax': '1',
@@ -517,18 +523,13 @@ class InvoiceViewTests(DocumentTestCase):
             'job-1-debit_net': '1',
             'job-1-debit_tax': '1',
         })
-        self.assertEqual(
-            pdf.getPage(0).extractText(),
-            dedent("""\
-            Page 1Professor Ludwig von Mises
-
-
+        self.assertEqual(text, dedent("""\
+            Professor Ludwig von Mises
             Invoice #1
             Jan. 1, 2015
             Invoice No. 2015/01/01
             Please indicate the correct invoice number on your payment.
             The Header
-
             consideration
             19% tax
             gross
@@ -540,28 +541,62 @@ class InvoiceViewTests(DocumentTestCase):
             $2.00
             $2.00
             $4.00
-
             The Footer
+            Jan. 1, 2015
+            Itemized listing for Invoice No. 2015/01/01
+            Pos.
+            Description
+            Amount
+            Price
+            Total
+            01
+            Job One
+            Work completed on Sept. 13, 2017
+            $1.00
+            02
+            Job Two
+            Work completed on Sept. 13, 2017
+            $1.00
+            Total 01 - Job One
+            $1.00
+            Total 02 - Job Two
+            $1.00
+            Total without VAT
+            $2.00
             """)
         )
 
-    @skip
     def test_render_time_and_materials_invoice(self):
         self.task.complete = 10
         self.task.save()
         tm_task = TaskFactory(name='Task #2 Time & Materials', qty=None, price=200, total=200, group=self.group)
         LineItemFactory(name='TM Lineitem', qty=20, price=10, total=200, expended=20, task=tm_task)
-        pdf = self.get_rendered_pdf({
+        text = self.get_rendered_doc({
             'job-0-is_invoiced': 'True',
             'job-0-debit_net': '1160.00',
             'job-0-debit_tax': '220.40',
         })
-        self.assertEqual(
-            pdf.getPage(1).extractText(),
-            dedent("""\
-            Page 2Jan. 1, 2015
+        self.assertEqual(text, dedent("""\
+            Professor Ludwig von Mises
+            Invoice #1
+            Jan. 1, 2015
+            Invoice No. 2015/01/01
+            Please indicate the correct invoice number on your payment.
+            The Header
+            consideration
+            19% tax
+            gross
+            Project progress
+            $1,160.00
+            $220.40
+            $1,380.40
+            This Invoice
+            $1,160.00
+            $220.40
+            $1,380.40
+            The Footer
+            Jan. 1, 2015
             Itemized listing for Invoice No. 2015/01/01
-
             Pos.
             Description
             Amount
@@ -578,9 +613,8 @@ class InvoiceViewTests(DocumentTestCase):
             $960.00
             01.01.002
             Task #2 Time & Materials
-            TM Lineitem
-            20.00
-            $10.00
+            0.00
+            $200.00
             $200.00
             Total 01.01 - Main Group
             $1,160.00
@@ -591,9 +625,8 @@ class InvoiceViewTests(DocumentTestCase):
             """)
         )
 
-    @skip
     def test_render_vesting_period_invoice(self):
-        pdf = self.get_rendered_pdf({
+        text = self.get_rendered_doc({
             'vesting_start': '2017-04-01',
             'vesting_end': '2017-04-02',
             'job-0-is_invoiced': 'True',
@@ -603,19 +636,14 @@ class InvoiceViewTests(DocumentTestCase):
             'job-1-debit_net': '1',
             'job-1-debit_tax': '1',
         })
-        self.assertEqual(
-            pdf.getPage(0).extractText(),
-            dedent("""\
-            Page 1Professor Ludwig von Mises
-
-
+        self.assertEqual( text, dedent("""\
+            Professor Ludwig von Mises
             Invoice #1
             Jan. 1, 2015
             Invoice No. 2015/01/01
             Please indicate the correct invoice number on your payment.
             Vesting Period April 1, 2017 to April 2, 2017
             The Header
-
             consideration
             19% tax
             gross
@@ -627,14 +655,33 @@ class InvoiceViewTests(DocumentTestCase):
             $2.00
             $2.00
             $4.00
-
             The Footer
+            Jan. 1, 2015
+            Itemized listing for Invoice No. 2015/01/01
+            Pos.
+            Description
+            Amount
+            Price
+            Total
+            01
+            Job One
+            Work completed on Sept. 13, 2017
+            $1.00
+            02
+            Job Two
+            Work completed on Sept. 13, 2017
+            $1.00
+            Total 01 - Job One
+            $1.00
+            Total 02 - Job Two
+            $1.00
+            Total without VAT
+            $2.00
             """)
         )
 
-    @skip
     def test_render_show_project_id_invoice(self):
-        pdf = self.get_rendered_pdf({
+        text = self.get_rendered_doc({
             'show_project_id': 'True',
             'job-0-is_invoiced': 'True',
             'job-0-debit_net': '1',
@@ -643,19 +690,14 @@ class InvoiceViewTests(DocumentTestCase):
             'job-1-debit_net': '1',
             'job-1-debit_tax': '1',
         })
-        self.assertEqual(
-            pdf.getPage(0).extractText(),
-            dedent("""\
-            Page 1Professor Ludwig von Mises
-
-
+        self.assertEqual(text, dedent("""\
+            Professor Ludwig von Mises
             Invoice #1
             Jan. 1, 2015
             Invoice No. 2015/01/01
             Please indicate the correct invoice number on your payment.
             Project #2
             The Header
-
             consideration
             19% tax
             gross
@@ -667,8 +709,28 @@ class InvoiceViewTests(DocumentTestCase):
             $2.00
             $2.00
             $4.00
-
             The Footer
+            Jan. 1, 2015
+            Itemized listing for Invoice No. 2015/01/01
+            Pos.
+            Description
+            Amount
+            Price
+            Total
+            01
+            Job One
+            Work completed on Sept. 13, 2017
+            $1.00
+            02
+            Job Two
+            Work completed on Sept. 13, 2017
+            $1.00
+            Total 01 - Job One
+            $1.00
+            Total 02 - Job Two
+            $1.00
+            Total without VAT
+            $2.00
             """)
         )
 
