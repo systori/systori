@@ -61,13 +61,22 @@ class InvoiceRowIterator(BaseRowIterator):
         )
 
     def get_task_context(self, task, **kwargs):
-        return super().get_task_context(
-            task,
-            qty=ubrdecimal(task['complete']),
-            total=money(task['progress']),
-            show_description=False,
-            **kwargs
-        )
+        if task['qty'] is None:
+            return super().get_task_context(
+                task,
+                qty=None,
+                total=money(task['progress']),
+                show_description=True,
+                **kwargs
+            )
+        else:
+            return super().get_task_context(
+                task,
+                qty=ubrdecimal(task['complete']),
+                total=money(task['progress']),
+                show_description=False,
+                **kwargs
+            )
 
     def get_lineitem_context(self, lineitem, **kwargs):
         return super().get_lineitem_context(
