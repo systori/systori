@@ -6,7 +6,7 @@ from io import BytesIO
 from textwrap import dedent
 from freezegun import freeze_time
 
-from django.utils import timezone
+from django.utils import timezone, formats
 from django.urls import reverse
 
 from systori.lib.testing import ClientTestCase
@@ -551,11 +551,11 @@ class InvoiceViewTests(DocumentTestCase):
             Total
             01
             Job One
-            Work completed on Sept. 13, 2017
+            Work completed on {date}
             $1.00
             02
             Job Two
-            Work completed on Sept. 13, 2017
+            Work completed on {date}
             $1.00
             Total 01 - Job One
             $1.00
@@ -563,7 +563,7 @@ class InvoiceViewTests(DocumentTestCase):
             $1.00
             Total without VAT
             $2.00
-            """)
+            """.format(date=formats.date_format(timezone.now().date(), use_l10n=True)))
         )
 
     def test_render_time_and_materials_invoice(self):
@@ -666,11 +666,11 @@ class InvoiceViewTests(DocumentTestCase):
             Total
             01
             Job One
-            Work completed on Sept. 13, 2017
+            Work completed on {date}
             $1.00
             02
             Job Two
-            Work completed on Sept. 13, 2017
+            Work completed on {date}
             $1.00
             Total 01 - Job One
             $1.00
@@ -678,7 +678,7 @@ class InvoiceViewTests(DocumentTestCase):
             $1.00
             Total without VAT
             $2.00
-            """)
+            """.format(date=formats.date_format(timezone.now().date(), use_l10n=True)))
         )
 
     def test_render_show_project_id_invoice(self):
@@ -720,11 +720,11 @@ class InvoiceViewTests(DocumentTestCase):
             Total
             01
             Job One
-            Work completed on Sept. 13, 2017
+            Work completed on {date}
             $1.00
             02
             Job Two
-            Work completed on Sept. 13, 2017
+            Work completed on {date}
             $1.00
             Total 01 - Job One
             $1.00
@@ -732,7 +732,7 @@ class InvoiceViewTests(DocumentTestCase):
             $1.00
             Total without VAT
             $2.00
-            """)
+            """.format(date=formats.date_format(timezone.now().date(), use_l10n=True)))
         )
 
 
