@@ -36,6 +36,7 @@ td {
   padding-right: 2px;
   padding-bottom: 2px;
   padding-left: 2px;
+  vertical-align: top;
 }
 
 td, p {
@@ -92,5 +93,9 @@ td, p {
 
 .unit {
   text-align: right;
+  vertical-align: bottom;
+}
+
+.bottom {
   vertical-align: bottom;
 }
