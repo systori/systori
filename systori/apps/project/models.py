@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from django.utils.timezone import now
+from django.utils.timezone import localdate
 from django.db.models.expressions import RawSQL
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
@@ -334,7 +334,7 @@ class JobSite(models.Model):
 
 class DailyPlanQuerySet(models.QuerySet):
     def today(self):
-        return self.filter(day=now().date())
+        return self.filter(day=localdate())
 
 
 class DailyPlan(models.Model):
@@ -343,7 +343,7 @@ class DailyPlan(models.Model):
         will perform the tasks. All on a particular day.
     """
     jobsite = models.ForeignKey(JobSite, related_name="dailyplans", on_delete=models.CASCADE)
-    day = models.DateField(_("Day"), default=now)
+    day = models.DateField(_("Day"), default=localdate)
     workers = models.ManyToManyField('company.Worker', through='TeamMember', related_name="dailyplans")
     tasks = models.ManyToManyField('task.Task', related_name="dailyplans")
     equipment = models.ManyToManyField('equipment.Equipment', through='EquipmentAssignment', related_name="dailyplans")
@@ -354,7 +354,7 @@ class DailyPlan(models.Model):
 
     @property
     def is_today(self):
-        return self.day == now().date()
+        return self.day == localdate()
 
     @property
     def url_id(self):
