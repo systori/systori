@@ -19,7 +19,7 @@ git+ssh://git@bitbucket.org/damoti/rlextra.git
 
 git+ssh://git@bitbucket.org/damoti/django-tuath.git
 
-git+https://github.com/damoti/pyth.git@pyth-py3
+git+https://github.com/eukreign/pyth.git@pyth-py3
 django-debug-toolbar==1.5
 coveralls
 selenium==2.53.6

@@ -5,12 +5,6 @@ layers:
     from: damoti/base:latest
     apt-get:
       - language-pack-de
-      - libpq-dev
-      - postgresql-client
-      - libjpeg-dev
-      - libxml2-dev
-      - libxslt-dev
-      - libffi-dev
     context:
       - requirements/base.pip
     build:
