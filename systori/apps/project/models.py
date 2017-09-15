@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.timezone import now
 from django.db.models.expressions import RawSQL
+from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django.utils.functional import cached_property
 from django.utils.encoding import smart_str
@@ -54,6 +55,8 @@ class Project(models.Model):
     is_template = models.BooleanField(default=False)
     account = models.OneToOneField('accounting.Account', related_name="project", null=True, on_delete=models.SET_NULL)
     structure = GAEBStructureField(_('Numbering Structure'), default="01.01.001")
+
+    notes = GenericRelation('main.Note')
 
     objects = ProjectQuerySet.as_manager()
 
@@ -379,8 +382,3 @@ class TeamMember(models.Model):
 class EquipmentAssignment(models.Model):
     dailyplan = models.ForeignKey(DailyPlan, related_name="assigned_equipment", on_delete=models.CASCADE)
     equipment = models.ForeignKey('equipment.Equipment', related_name="assignments", on_delete=models.CASCADE)
-
-
-class Note(models.Model):
-    worker = models.ForeignKey('company.Worker', related_name="notes", on_delete=models.SET_NULL)
-    description = models.TextField(_('Project Description'), blank=True, null=True)

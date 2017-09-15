@@ -18,6 +18,8 @@ from ..accounting.constants import TAX_RATE
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
 from ..task.forms import JobCreateForm
 from ..task.models import Job, ProgressReport
+from ..main.forms import NoteForm
+from ..main.models import Note
 
 
 class ProjectList(ListView):
@@ -115,10 +117,25 @@ class ProjectView(DetailView):
         context['refunds'] = self.object.refunds.all()
         context['parent_invoices'] = self.object.invoices.filter(parent=None).prefetch_related('invoices').all()
         context['TAX_RATE_DISPLAY'] = '{}%'.format(ubrdecimal(TAX_RATE*100, 2))
+
+        context['note'] = NoteForm()
+
         return context
 
     def get_queryset(self):
         return super().get_queryset().with_totals()
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        note = Note(
+            project=self.object,
+            content_object=self.object,
+            worker=request.worker
+        )
+        form = NoteForm(request.POST, instance=note)
+        if form.is_valid():
+            form.save()
+        return self.get(request, *args, **kwargs)
 
 
 class ProjectCreate(CreateView):

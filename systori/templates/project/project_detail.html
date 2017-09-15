@@ -127,6 +127,38 @@
   <a href="{% url 'job.import' project.id %}">{% trans "Import Job" %}</a> -
   <a href="{% url 'job.copy' project.id %}">{% trans "Copy Job" %}</a>
 
+  <h2 class="sub-header">{% trans "Notes" %}</h2>
+  <div class="table-responsive" style="padding-bottom:110px;">
+    <table class="table table-striped" id="notes-table">
+      <thead>
+        <tr>
+          <th>{% trans 'Date' %}</th>
+          <th>{% trans 'User' %}</th>
+          <th>{% trans 'Note' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for note in project.notes.all %}
+        <tr>
+          <td>{{ note.created }}</td>
+          <td>{{ note.worker }}</td>
+          <td>{{ note.text }}</td>
+        </tr>
+      {% endfor %}
+        <tr>
+          <td></td>
+          <td></td>
+          <td>
+            <form method="post">
+              {% csrf_token %}
+              {{ note.text }}<br>
+              <button>Save</button>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <h2 class="sub-header">{% trans "Proposals" %}</h2>
   <div class="table-responsive" style="padding-bottom:110px;">

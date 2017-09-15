@@ -65,6 +65,7 @@ INSTALLED_APPS = (
 POSTGRES_SCHEMA_MODEL = 'company.Company'
 POSTGRES_SCHEMA_TENANTS = (
     'company.Labor',
+    'main',
     'project',
     'directory',
     'task',
