@@ -6,7 +6,7 @@ from .models import Equipment, RefuelingStop, Maintenance
 
 
 class EquipmentForm(forms.ModelForm):
-    last_refueling_stop = forms.DateField(_('last_refueling_stop'), disabled=True, required=False)
+    last_refueling_stop = forms.DateField(label=_('last_refueling_stop'), disabled=True, required=False)
 
     class Meta:
         model = Equipment
@@ -14,8 +14,8 @@ class EquipmentForm(forms.ModelForm):
 
 
 class RefuelingStopForm(forms.ModelForm):
-    distance = forms.DecimalField(_('distance'), disabled=True, required=False)
-    average_consumption = forms.DecimalField(_('average_consumption'), disabled=True, required=False)
+    distance = forms.DecimalField(label=_('distance'), disabled=True, required=False)
+    average_consumption = forms.DecimalField(label=_('average_consumption'), disabled=True, required=False)
 
     # explicite order of fields to have them called accordingly in clean()
     class Meta:
