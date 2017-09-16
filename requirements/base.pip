@@ -1,12 +1,4 @@
 psycopg2==2.7.1
 celery==4.0.2
 fabric3==1.13.1.post1
-
-git+https://github.com/django/django.git@cb362a6
-django-timezone-field==2.0
-djangorestframework==3.6.2
-django-fsm==2.5.0
-
-geopy==1.11.0
 lxml==3.6.0
-jsonfield==2.0.1

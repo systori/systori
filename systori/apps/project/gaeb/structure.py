@@ -114,7 +114,7 @@ class GAEBStructureField(models.Field):
         return "CharField"
 
     @staticmethod
-    def from_db_value(value, expression, connection, context):
+    def from_db_value(value, expression, connection):
         if value is None:
             return value
         return GAEBStructure(value)
