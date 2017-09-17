@@ -574,8 +574,8 @@
     let noteForm = document.querySelector('#note-form');
     let textarea = document.querySelector('#note-input');
     textarea.addEventListener('keypress', (e) => {
-        console.log(e);
-        if (e.ctrlKey && e.keyCode == 13) {
+        if (e.shiftKey && e.keyCode === 13) {
+            e.preventDefault();
             noteForm.submit();
         }
     });
