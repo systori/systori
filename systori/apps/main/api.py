@@ -44,20 +44,25 @@ class NoteDetail(views.APIView):
         except Note.DoesNotExist:
             raise Http404
 
+    @property
+    def is_owner(self):
+        return self.request.user == self.get_object(self.kwargs['pk']).worker.user
+
     def get(self, request, pk, format=None):
         note = self.get_object(pk=pk)
         return Response(note.text)
 
     def put(self, request, pk, format=None):
         note = self.get_object(pk=pk)
-        note.created = now()
-        note.text = request.data.decode("utf-8")
-        note.save()
+        if self.is_owner:
+            note.created = now()
+            note.text = request.data.decode("utf-8")
+            note.save()
         return Response(note.text)
 
     def delete(self, request, pk, format=None):
         note = self.get_object(pk=pk)
-        if note.created > now() - timedelta(hours=2) and request.user == note.worker.user:
+        if note.created > now() - timedelta(hours=2) and self.is_owner:
             note.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
