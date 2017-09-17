@@ -18,5 +18,6 @@ django-bootstrap-components
 django-dartium
 git+https://github.com/pmaupin/pdfrw.git
 bericht
+mistune==0.7.4
 
 -e .
