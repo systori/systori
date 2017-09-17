@@ -135,6 +135,7 @@ class ProjectView(DetailView):
         form = NoteForm(request.POST, instance=note)
         if form.is_valid():
             form.save()
+            return HttpResponseRedirect(reverse('project.view', kwargs={'pk':self.object.id}))
         return self.get(request, *args, **kwargs)
 
 

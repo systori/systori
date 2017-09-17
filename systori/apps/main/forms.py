@@ -11,6 +11,7 @@ class NoteForm(ModelForm):
         widgets = {
             'text': Textarea(attrs={
                 'id': 'note-input',
+                'rows': '3',
                 'style': 'width: 100%; resize: none; border: 1px dotted grey;'
             }),
         }
