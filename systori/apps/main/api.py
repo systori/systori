@@ -14,7 +14,10 @@ class PlainTextRenderer(renderers.BaseRenderer):
     format = 'txt'
 
     def render(self, data, media_type=None, renderer_context=None):
-        return data.encode(self.charset)
+        if data:
+            return data.encode(self.charset)
+        else:
+            pass
 
 
 class PlainTextParser(parsers.BaseParser):

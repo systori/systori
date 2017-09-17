@@ -17,7 +17,6 @@ var editarea = """
 class NoteDeleteButton extends HtmlElement {
     static final tag = 'note-delete-button';
     var note_url = window.location.origin+"/api/note/";
-    var note_id;
 
     NoteDeleteButton.created() : super.created() {
         this.checkAge();
