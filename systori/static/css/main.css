@@ -288,3 +288,16 @@ td[is=amount-stateful].selected>div {
     background-image: linear-gradient(to bottom, #DDEDE1 0, #EEF6F1 100%);
     color: #0f0f0f !important;
 }
+
+.notes-table-responsive {
+    max-height: 300px;
+    padding-bottom: 10px !important;
+    overflow-y: auto;
+}
+
+.notes-table th:nth-child(2) {
+    width: 100%;
+}
+.note-created {
+    font-size: smaller;
+}
