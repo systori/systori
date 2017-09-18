@@ -1,41 +1,46 @@
 import 'dart:html';
+import 'dart:convert';
 import 'dart:async';
 import 'dart:io' as io;
 import 'package:intl/intl.dart';
 
 
 var CSRFToken;
-var rawNote;
+var note;
 var note_id;
+var note_url = window.location.origin+"/api/note/";
 var editarea = """
     <td>
-    <textarea class="note-textarea">$rawNote</textarea>
+    <textarea class="note-textarea">${note["text"]}</textarea>
     <note-save-button data-note-id='$note_id' class="btn btn-xs btn-primary">Save</note-save-button>
     </td>
     """;
 
+class NoteBtnGroup extends HtmlElement {
+    static final tag = 'note-btn-group';
+
+    NoteBtnGroup.created() : super.created() {
+        var created = DateTime.parse(this.closest("tr").dataset['noteCreated']);
+        Duration age = created.difference(new DateTime.now());
+        var isOwner = this.closest("tr").dataset['workerPk'] == document.querySelector("#currentUser").dataset['workerPk'];
+        if (age.inHours > -2 && isOwner)
+            this.classes.remove('hidden');
+    }
+}
+
 class NoteDeleteButton extends HtmlElement {
     static final tag = 'note-delete-button';
-    var note_url = window.location.origin+"/api/note/";
 
     NoteDeleteButton.created() : super.created() {
-        this.checkAge();
         this.onClick.listen((_) {
-            note_id = int.parse(this.dataset['note-id']);
+            note_id = int.parse(this.closest("tr").dataset['note-id']);
             noteDelete(note_id);
         });
     }
 
     void noteDelete(note_id) {
-        String url = note_url + note_id.toString() + "/delete";
+        String url = note_url + note_id.toString();
         HttpRequest.request(url, method: 'delete', requestHeaders: {"X-CSRFToken": CSRFToken}).then(removeFromDom);
-    }
-
-    void checkAge() {
-        var created = DateTime.parse(this.dataset['noteCreated']);
-        Duration age = created.difference(new DateTime.now());
-        if (age.inHours > -2)
-            this.classes.remove('hidden');
     }
 
     void removeFromDom(var response) {
@@ -50,12 +55,10 @@ class NoteDeleteButton extends HtmlElement {
 
 class NoteEditButton extends HtmlElement {
     static final tag = 'note-edit-button';
-    var note_url = window.location.origin+"/api/note/";
 
     NoteEditButton.created() : super.created() {
-        this.checkAge();
         this.onClick.listen((_) {
-            note_id = int.parse(this.dataset['note-id']);
+            note_id = int.parse(this.closest("tr").dataset['note-id']);
             noteEdit(note_id);
         });
     }
@@ -66,16 +69,9 @@ class NoteEditButton extends HtmlElement {
                 method: 'get').then(createEditArea);
     }
 
-    void checkAge() {
-        var created = DateTime.parse(this.dataset['noteCreated']);
-        Duration age = created.difference(new DateTime.now());
-        if (age.inHours > -2)
-            this.classes.remove('hidden');
-    }
-
     void createEditArea(var response) {
         if (response.status == 200) {
-            rawNote = response.response;
+            note = JSON.decode(response.response);
             document.querySelectorAll("note-edit-button").forEach((e) {e.classes.add('hidden');});
             document.
                 querySelector("tr[data-note-id='$note_id'] td:nth-child(2)").
@@ -89,24 +85,27 @@ class NoteEditButton extends HtmlElement {
 
 class NoteSaveButton extends HtmlElement {
     static final tag = 'note-save-button';
-    var note_url = window.location.origin+"/api/note/";
     var note_id;
 
     NoteSaveButton.created() : super.created() {
-        print("askjdask");
         this.onClick.listen((_) {
-            note_id = int.parse(this.dataset['note-id']);
+            note_id = int.parse(this.closest("tr").dataset['note-id']);
             noteSave(note_id);
         });
     }
 
     void noteSave(note_id) {
-        String url = note_url + note_id.toString() + "/update";
+        String url = note_url + note_id.toString();
         TextAreaElement textarea = this.parent.querySelector("textarea");
+        note["text"] = textarea.value;
         HttpRequest.request(url,
                 method: 'put',
-                sendData: textarea.value,
-                requestHeaders: {"X-CSRFToken": CSRFToken})
+                sendData: JSON.encode(note),
+                requestHeaders: {
+                    "X-CSRFToken": CSRFToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                    })
                 .then(reload);
     }
 
@@ -122,4 +121,5 @@ void main() {
     document.registerElement('note-delete-button', NoteDeleteButton);
     document.registerElement('note-edit-button', NoteEditButton);
     document.registerElement('note-save-button', NoteSaveButton);
+    document.registerElement('note-btn-group', NoteBtnGroup);
 }

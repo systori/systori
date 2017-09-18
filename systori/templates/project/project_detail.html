@@ -89,7 +89,9 @@
       </thead>
       <tbody>
       {% for note in project.notes.all %}
-        <tr data-note-id="{{ note.pk }}">
+        <tr data-note-pk="{{ note.pk }}"
+            data-worker-pk="{{ note.worker.pk }}"
+            data-note-created="{{ note.created|unlocalize }}">
           <td>
             <nobr><b>{{ note.worker }}</b></nobr>
             <br>
@@ -98,16 +100,10 @@
             </span>
           </td>
           <td>{{ note.text|markdown|safe }}
-            <div class="btn-group btn-group-sm btn-group-note" role="group">
-            <note-edit-button
-                class="btn btn-sm btn-default hidden"
-                data-note-created="{{ note.created|unlocalize }}"
-                data-note-id="{{ note.pk }}"><span class="glyphicon glyphicon-edit"></span></note-edit-button>
-            <note-delete-button
-                class="btn btn-sm btn-danger hidden"
-                data-note-created="{{ note.created|unlocalize }}"
-                data-note-id="{{ note.pk }}"><span class="glyphicon glyphicon-trash"></span></note-delete-button>
-            </div>
+            <note-btn-group class="btn-group btn-group-sm btn-group-note hidden" role="group">
+            <note-edit-button class="btn btn-sm btn-default"><span class="glyphicon glyphicon-edit"></span></note-edit-button>
+            <note-delete-button class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></note-delete-button>
+            </note-btn-group>
           </td>
         </tr>
       {% endfor %}
