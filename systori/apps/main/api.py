@@ -16,7 +16,7 @@ class NoteDetail(RetrieveUpdateDestroyAPIView):
 
 
 urlpatterns = [
-    url(r'^note/(?P<pk>\d+)$', NoteDetail.as_view()),
+    url(r'^note/(?P<pk>\d+)$', NoteDetail.as_view(), name='note.api'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
