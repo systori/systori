@@ -14,7 +14,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
     grid-auto-rows: min-content;
-    grid-gap: 5px;
+    grid-gap: 20px;
   }
   grid-child {
     display:flex;
@@ -54,6 +54,10 @@
     font-size: small;
     text-align: center;
     font-weight: bold;
+    color: white;
+  }
+  project-id {
+    font-size: 20px;
   }
   jobsite-address, worker, equipment, note {
     display: flex;
@@ -61,8 +65,15 @@
     padding: 5px;
     font-size: 14px;
   }
+  worker {
+    font-size: 18px;
+  }
+  equipment {
+    background-color: white;
+  }
   note {
     color: #ff4d4a;
+    background-color: white;
   }
 
 </style>
@@ -110,7 +121,7 @@
         # {{ plan.jobsite.project.id }}</project-id>
 
         <project-title data-id="{{ plan.id|unlocalize }}">
-        {{ plan.jobsite.project.name }}</project-title>
+        {{ plan.jobsite.project.name|truncatechars:40 }}</project-title>
 
         <jobsite class="bg-day-indicator-{{ temporal_location }}">{{ plan.jobsite.name }}</jobsite>
         <jobsite-address>{{ plan.jobsite.address }} {{ plan.jobsite.city }}</jobsite-address>
