@@ -1,4 +1,3 @@
-from django.utils.timezone import now
 from rest_framework import serializers
 from .models import Note
 
@@ -10,4 +9,5 @@ class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
         fields = ('pk', 'project',
-                  'worker', 'text', 'created')
+                  'worker', 'text', 'created'
+                  )
