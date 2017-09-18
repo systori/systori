@@ -122,4 +122,7 @@ void main() {
     document.registerElement('note-edit-button', NoteEditButton);
     document.registerElement('note-save-button', NoteSaveButton);
     document.registerElement('note-btn-group', NoteBtnGroup);
+
+    HtmlElement notes_container = document.querySelector(".notes-table-responsive");
+    notes_container.scrollTop = notes_container.scrollHeight - notes_container.clientHeight;
 }

@@ -14,3 +14,6 @@ class Note(models.Model):
     worker = models.ForeignKey('company.Worker', related_name="notes", on_delete=models.PROTECT)
     text = models.TextField(_('Text'))
     created = models.DateTimeField(_('Created'), auto_now_add=True)
+
+    class Meta:
+        ordering = ('created', )
