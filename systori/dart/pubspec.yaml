@@ -31,4 +31,5 @@ transformers:
         - web/refund_editor.dart
         - web/timetracking.dart
         - web/goto_project.dart
+        - web/notes.dart
       commandLineOptions: [--show-package-warnings]

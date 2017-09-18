@@ -5,7 +5,6 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from systori.middleware.mobile import get_flavour
 from ..project.models import Project, JobSite, DailyPlan
-from ..task.models import LineItem
 from ..field.views import FieldDashboard
 
 

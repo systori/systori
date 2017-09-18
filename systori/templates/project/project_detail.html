@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n l10n customformatting project %}
+{% load i18n l10n customformatting project main dartium %}
 
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
 
@@ -84,12 +84,14 @@
       <thead>
         <tr>
           <th></th>
-          <th>{% trans 'Note' %}</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
       {% for note in project.notes.all %}
-        <tr>
+        <tr data-note-pk="{{ note.pk }}"
+            data-worker-pk="{{ note.worker.pk }}"
+            data-note-created="{{ note.created|unlocalize }}">
           <td>
             <nobr><b>{{ note.worker }}</b></nobr>
             <br>
@@ -97,7 +99,12 @@
               {{ note.created }}
             </span>
           </td>
-          <td>{{ note.text }}</td>
+          <td>{{ note.text|markdown|safe }}
+            <note-btn-group class="btn-group btn-group-sm btn-group-note hidden" role="group">
+            <note-edit-button class="btn btn-sm btn-default"><span class="glyphicon glyphicon-edit"></span></note-edit-button>
+            <note-delete-button class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></note-delete-button>
+            </note-btn-group>
+          </td>
         </tr>
       {% endfor %}
         <tr>
@@ -580,4 +587,5 @@
         }
     });
   </script>
+  {% dart "notes.dart" %}
 {% endblock %}

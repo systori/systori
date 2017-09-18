@@ -298,6 +298,19 @@ td[is=amount-stateful].selected>div {
 .notes-table th:nth-child(2) {
     width: 100%;
 }
+.notes-table td {
+    position: relative;
+}
 .note-created {
     font-size: smaller;
+}
+.btn-group-note {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+.note-textarea {
+    width: 100%;
+    resize: none;
+    border: 1px dotted grey
 }
