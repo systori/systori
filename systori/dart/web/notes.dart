@@ -12,7 +12,7 @@ var note_url = window.location.origin+"/api/note/";
 var editarea = """
     <td>
     <textarea class="note-textarea">${note["text"]}</textarea>
-    <note-save-button data-note-id='$note_id' class="btn btn-xs btn-primary">Save</note-save-button>
+    <note-save-button data-note-pk='$note_id' class="btn btn-xs btn-primary">Save</note-save-button>
     </td>
     """;
 
@@ -33,7 +33,7 @@ class NoteDeleteButton extends HtmlElement {
 
     NoteDeleteButton.created() : super.created() {
         this.onClick.listen((_) {
-            note_id = int.parse(this.closest("tr").dataset['note-id']);
+            note_id = int.parse(this.closest("tr").dataset['notePk']);
             noteDelete(note_id);
         });
     }
@@ -45,7 +45,7 @@ class NoteDeleteButton extends HtmlElement {
 
     void removeFromDom(var response) {
         if (response.status == 204) {
-            document.querySelector("tr[data-note-id='$note_id']").remove();
+            document.querySelector("tr[data-note-pk='$note_id']").remove();
         } else {
             print('false');
         }
@@ -58,7 +58,7 @@ class NoteEditButton extends HtmlElement {
 
     NoteEditButton.created() : super.created() {
         this.onClick.listen((_) {
-            note_id = int.parse(this.closest("tr").dataset['note-id']);
+            note_id = int.parse(this.closest("tr").dataset['notePk']);
             noteEdit(note_id);
         });
     }
@@ -74,7 +74,7 @@ class NoteEditButton extends HtmlElement {
             note = JSON.decode(response.response);
             document.querySelectorAll("note-edit-button").forEach((e) {e.classes.add('hidden');});
             document.
-                querySelector("tr[data-note-id='$note_id'] td:nth-child(2)").
+                querySelector("tr[data-note-pk='$note_id'] td:nth-child(2)").
                 setInnerHtml(editarea, treeSanitizer: NodeTreeSanitizer.trusted);
         } else {
             print('false');
@@ -89,7 +89,7 @@ class NoteSaveButton extends HtmlElement {
 
     NoteSaveButton.created() : super.created() {
         this.onClick.listen((_) {
-            note_id = int.parse(this.closest("tr").dataset['note-id']);
+            note_id = int.parse(this.closest("tr").dataset['notePk']);
             noteSave(note_id);
         });
     }
