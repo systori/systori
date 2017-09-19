@@ -1,0 +1,56 @@
+{% extends "field/base.html" %}
+{% load i18n l10n staticfiles field_app main %}
+
+{% block container %}
+  <style>
+    .panel-heading {
+      position: relative;
+    }
+    .panel-heading > a[name] {
+      position: absolute;
+      top: -50px;
+    }
+    daily-plan {
+      display: block;
+    }
+  </style>
+  <div class="container">
+
+    <div class="row back-buttons">
+      <div class="col-xs-4"><a href="{% url 'field.projects' %}"
+                               class="btn btn-default btn-block btn-back">&laquo; {% trans 'Projects' %}</a></div>
+      <div class="col-xs-2"><a href="{{ latest_daily_plan_global_url }}"
+                         class="btn btn-default btn-block"
+                         style="text-align: center;"><span class="glyphicon glyphicon-record"
+                                                           aria-hidden="true"></span></a></div>
+      <div class="col-xs-6"><a href="{% url 'field.dashboard' %}"
+                               class="btn btn-default btn-block">&laquo; {% trans 'Dashboard' %}</a></div>
+    </div>
+
+      <table class="table table-striped notes-table">
+        <tbody>
+        {% for note in object_list %}
+          <tr style="font-size:smaller;"><td>
+            <a href="{% url 'field.project' note.project.id %}">#{{ note.project.id }}</a> {{ note.worker }}
+            <span class="note-created" datetime="{{ note.created|unlocalize }}" style="color: grey;">
+              {{ note.created }}
+            </span>
+          </td></tr>
+          <tr><td>{{ note.text|markdown|safe }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+  </div>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/3.0.2/timeago.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/3.0.2/timeago.locales.min.js"></script>
+  <script type="text/javascript">
+    let timeagoInstance = timeago();
+    let nodes = document.querySelectorAll('.note-created');
+    timeagoInstance.render(nodes, document.documentElement.lang);
+  </script>
+{% endblock %}
