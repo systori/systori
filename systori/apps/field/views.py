@@ -17,6 +17,8 @@ from ..task.models import Group, Task, ProgressReport
 from ..equipment.models import Equipment
 from ..timetracking.models import Timer
 from ..document.models import Timesheet
+from ..main.models import Note
+from ..main.forms import NoteForm
 from .forms import CompletionForm, DailyPlanNoteForm
 from .utils import find_next_workday, days_ago
 
@@ -190,6 +192,7 @@ class FieldProjectView(DetailView):
         if not grouped_by_days or grouped_by_days[0][0] != selected_day:
             grouped_by_days.insert(0, (selected_day, []))
 
+        context['notes'] = Note.objects.filter(project=project).order_by('-created')[:5][::-1]
         context['daily_plans'] = grouped_by_days
         context['latest_daily_plan'] = daily_plan_objects().filter(jobsite__in=project.jobsites.all()).first()
         context['today'] = date.today()
@@ -199,6 +202,45 @@ class FieldProjectView(DetailView):
                                                               args=[context['latest_daily_plan_global'].day.isoformat()])
 
         return context
+
+
+class FieldNoteList(ListView):
+    model = Note
+
+    def get_queryset(self):
+        project = None
+        if self.kwargs.get('project_pk', None):
+            project = Project.objects.get(id=self.kwargs['project_pk'])
+        if project:
+            return Note.objects.filter(project=project)
+        else:
+            return Note.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_filtered'] = self.kwargs.get('project_pk', None)
+        context['noteform'] = NoteForm()
+        return context
+
+    def get_template_names(self):
+        if self.kwargs.get('project_pk', False):
+            return 'field/note_list_filtered.html'
+        else:
+            return 'field/note_list.html'
+
+    def post(self, request, *args, **kwargs):
+        if self.kwargs.get('project_pk', None):
+            project = Project.objects.get(id=self.kwargs['project_pk'])
+            note = Note(
+                project=project,
+                content_object=project,
+                worker=request.worker
+            )
+            form = NoteForm(request.POST, instance=note)
+            if form.is_valid():
+                form.save()
+                return HttpResponseRedirect(reverse('field.project', kwargs={'project_pk': project.pk}))
+        return self.get(request, *args, **kwargs)
 
 
 class FieldHTMLCalendar(LocaleHTMLCalendar):

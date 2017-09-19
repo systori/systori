@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n staticfiles field_app %}
+{% load i18n l10n staticfiles field_app main %}
 
 {% block container %}
   <style>
@@ -28,15 +28,31 @@
     </div>
 
     <div class="panel panel-default">
-
       <div class="panel-heading">
-        {{ project.name }}
+        #{{ project.pk }} {{ project.name }}
       </div>
-
+      {% if project.description %}
       <div class="panel-body">
         {{ project.description }}
       </div>
+      {% endif %}
+    </div>
 
+    <div class="table-responsive">
+      <table class="table table-striped notes-table">
+        <tbody>
+        {% for note in notes %}
+          <tr style="font-size:smaller;"><td>
+            {{ note.worker }}
+            <span class="note-created" datetime="{{ note.created|unlocalize }}" style="color: grey;">
+              {{ note.created }}
+            </span>
+          </td></trs>
+          <tr><td>{{ note.text|markdown|safe }}</td></tr>
+        {% endfor %}
+        <tr><td><a href="{% url 'field.notes' project.pk %}" class="btn btn-primary">{% trans "more" %}</a></td></tr>
+        </tbody>
+      </table>
     </div>
 
     {% for day, plans in daily_plans %}
@@ -108,4 +124,14 @@
     {% endfor %}
 
   </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/3.0.2/timeago.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/3.0.2/timeago.locales.min.js"></script>
+  <script type="text/javascript">
+    let timeagoInstance = timeago();
+    let nodes = document.querySelectorAll('.note-created');
+    timeagoInstance.render(nodes, document.documentElement.lang);
+  </script>
 {% endblock %}
