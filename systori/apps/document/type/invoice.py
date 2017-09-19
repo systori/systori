@@ -11,6 +11,7 @@ from bericht.html import HTMLParser, CSS
 from systori.apps.accounting.models import Entry
 from systori.apps.accounting.report import create_invoice_report, create_invoice_table
 
+from systori.lib.accounting.tools import Amount
 from systori.lib.templatetags.customformatting import money, ubrdecimal
 from .base import BaseRowIterator, parse_date
 
@@ -88,7 +89,10 @@ class InvoiceRowIterator(BaseRowIterator):
 
     def get_subtotal_context(self, group, **kwargs):
         if 'total' not in kwargs:
-            kwargs['total'] = money(group['progress'])
+            if isinstance(group['progress'], Amount):
+                kwargs['total'] = money(group['progress'].net)
+            else:
+                kwargs['total'] = money(group['progress'])
         return super().get_subtotal_context(group, **kwargs)
 
 
