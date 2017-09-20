@@ -1,5 +1,8 @@
-from systori.lib.testing import ClientTestCase
+from factory.django import mute_signals
 from django.urls import reverse
+from django.db.models.signals import post_save
+
+from systori.lib.testing import ClientTestCase
 
 from ..project.factories import ProjectFactory
 from ..user.factories import UserFactory
@@ -14,11 +17,13 @@ class NoteApiTest(ClientTestCase):
         self.project = ProjectFactory()
         self.project2 = ProjectFactory()
 
+    @mute_signals(post_save)
     def test_create_note(self):
         note = NoteFactory(project=self.project, content_object=self.project, worker=self.worker)
         response = self.client.get(reverse('note.api', kwargs={'pk': note.pk}))
         self.assertEqual(response.status_code, 200)
 
+    @mute_signals(post_save)
     def test_update_note(self):
         # test edit a note and make sure only this note was edited
         note = NoteFactory(project=self.project, content_object=self.project, worker=self.worker)
@@ -35,11 +40,13 @@ class NoteApiTest(ClientTestCase):
         self.assertEqual(self.client.get(reverse('note.api', kwargs={'pk': note3.pk})).data.get('text'),
                          note3.text)
 
+    @mute_signals(post_save)
     def test_delete_note(self):
         note = NoteFactory(project=self.project, content_object=self.project, worker=self.worker)
         response = self.client.delete(reverse('note.api', kwargs={'pk': note.pk}))
         self.assertEqual(response.status_code, 204)
 
+    @mute_signals(post_save)
     def test_generic_relation(self):
         note = NoteFactory(project=self.project, content_object=self.project, worker=self.worker)
         self.assertEqual(self.project.notes.first(), note)
