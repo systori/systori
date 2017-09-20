@@ -1,22 +1,27 @@
 import 'dart:html';
 import 'dart:convert';
 
-main() {
-    DivElement notes = querySelector('#notes');
+socket() {
     var protocol = (window.location.protocol == 'https:') ? 'wss:' : 'ws:';
-    var ws = new WebSocket("${protocol}//${window.location.host}/notes");
-    ws.onMessage.listen((event) {
+    return new WebSocket("${protocol}//${window.location.host}/notes");
+}
+
+main() {
+    BodyElement body = querySelector('body');
+    TableSectionElement notes = querySelector('#notes');
+    socket().onMessage.listen((event) {
         Map data = JSON.decode(event.data);
-        Element tr = new TableRowElement();
-        tr.setInnerHtml("""
-        <td>
-          <nobr><b>${data['user']}</b></nobr>
-          <br>
-          <span class="note-created" style="color: grey;">${data['created']}</span>
-        </td>
-        <td>${data['text']}</td>
-        """, treeSanitizer: NodeTreeSanitizer.trusted);
-        notes.insertBefore(tr, notes.firstChild);
-        notes.children.skip(10).toList().forEach((e)=>e.remove());
+        TableRowElement tr = notes.addRow();
+        TableCellElement td = tr.addCell();
+        if (data.containsKey('project-id')) {
+            td.append(new AnchorElement()
+                ..href=data['project-url']
+                ..text="#${data['project-id']}"
+            );
+        }
+        td.appendHtml(" ${data['user']}<br><span>${data['created']}</span>", treeSanitizer: NodeTreeSanitizer.trusted);
+        tr.addCell().appendHtml(data['html'], treeSanitizer: NodeTreeSanitizer.trusted);
+        notes.children.reversed.skip(30).toList().forEach((e)=>e.remove());
+        body.scrollTop = body.scrollHeight;
     });
 }
