@@ -1,8 +1,0 @@
-Host systori.io
-  ForwardAgent yes
-
-Host *github.com
-  HostName github.com
-
-Host *bitbucket.org
-  HostName bitbucket.org
