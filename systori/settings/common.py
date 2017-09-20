@@ -10,6 +10,16 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_ipc.IPCChannelLayer",
+        "ROUTING": "systori.routing.channel_routing",
+        "CONFIG": {
+            "prefix": "systori",
+        },
+    },
+}
+
 # Django Settings
 
 AUTH_USER_MODEL = 'user.User'
@@ -45,6 +55,7 @@ INSTALLED_APPS = (
     'django.contrib.postgres',
     'django_dartium',
     'rest_framework',
+    'channels',
     'bootstrap',
     'postgres_schema',
     'systori.lib',

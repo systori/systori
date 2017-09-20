@@ -4,6 +4,8 @@ git+https://github.com/django/django.git@cb362a6
 djangorestframework==3.6.2
 django-fsm==2.5.0
 jsonfield==2.0.1
+channels
+asgi_ipc
 
 geopy==1.11.0
 

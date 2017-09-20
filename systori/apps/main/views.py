@@ -6,13 +6,14 @@ from django.http import HttpResponseRedirect
 from systori.middleware.mobile import get_flavour
 from ..project.models import Project, JobSite, DailyPlan
 from ..field.views import FieldDashboard
+from .models import Note
 
 
 class OfficeDashboard(TemplateView):
     template_name = "main/dashboard.html"
 
     def get_context_data(self, **kwargs):
-        context = super(OfficeDashboard, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['job_sites'] = JobSite.objects \
             .select_related('project') \
             .exclude(project__phase=Project.WARRANTY) \
@@ -77,4 +78,13 @@ class DayBasedOverviewView(TemplateView):
             )
         context['temporal_location'] = get_temporal_location(selected_day)
 
+        return context
+
+
+class NotesDashboard(TemplateView):
+    template_name = "main/notes.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['notes'] = Note.objects.all()[:10]
         return context
