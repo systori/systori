@@ -51,6 +51,7 @@ class NoteApiTest(ClientTestCase):
         note = NoteFactory(project=self.project, content_object=self.project, worker=self.worker)
         self.assertEqual(self.project.notes.first(), note)
 
+    @mute_signals(post_save)
     def test_owner_permission(self):
         user2 = UserFactory(company=self.company)
         note = NoteFactory(project=self.project, content_object=self.project, worker=user2.access.first())
@@ -71,6 +72,7 @@ class NoteFieldTest(ClientTestCase):
         self.project = ProjectFactory()
         self.project2 = ProjectFactory()
 
+    @mute_signals(post_save)
     def test_note_project_relation(self):
         note1 = NoteFactory(project=self.project, content_object=self.project, worker=self.worker)
         note2 = NoteFactory(project=self.project2, content_object=self.project2, worker=self.worker)
