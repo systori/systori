@@ -1,9 +1,17 @@
 {% extends "frame.html" %}
-{% load i18n l10n static dartium customformatting %}
+{% load i18n l10n static staticfiles field_app main dartium customformatting %}
 
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" %}{% endblock %}
 
 {% block content %}
+  <style>
+  #notes > tr {
+    font-size: smaller;
+  }
+  #notes > tr > span {
+    color: grey;
+  }
+  </style>
   <h1 class="page-header">{% trans 'Notes' %}</h1>
   <table class="table table-striped notes-table">
     <thead>
@@ -14,16 +22,14 @@
     </thead>
     <tbody id="notes">
     {% for note in notes %}
-      <tr>
-        <td>
-          <nobr><b>{{ note.worker }}</b></nobr>
-          <br>
-          <span class="note-created" datetime="{{ note.created|unlocalize }}" style="color: grey;">
-            {{ note.created }}
-          </span>
-        </td>
-        <td>{{ note.text }}</td>
-      </tr>
+    <tr>
+      <td>
+        {% if note.project %}<a href="{% url 'field.project' note.project.id %}">#{{ note.project.id }}</a>{% endif %}
+        {{ note.worker }}
+        <span class="note-created">{{ note.created }}</span>
+      </td>
+      <td>{{ note.text|markdown|safe }}</td>
+    </tr>
     {% endfor %}
     </tbody>
   </table>
