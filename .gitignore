@@ -22,3 +22,4 @@ systori/dart/pub-cache
 systori.sublime-project
 systori.sublime-workspace
 celerybeat-schedule.db
+local_docker_db/db_data/

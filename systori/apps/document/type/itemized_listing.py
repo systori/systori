@@ -121,7 +121,6 @@ def collate_itemized_listing(invoice, font, available_width):
                 items.row_style('SPAN', 1, -2)
                 items.row_style('ALIGNMENT', -1, -1, "RIGHT")
 
-        global group_subtotals_added
         if not group_subtotals_added:
             # taskgroup subtotals are added if there is only 1 job *and* it is itemized
             # in all other cases we're going to show the job total

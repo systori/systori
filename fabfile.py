@@ -97,55 +97,21 @@ def getmedia():
     run('rm /tmp/' + PROD_MEDIA_FILE)
 
 
-def dockergetdb(container='app', envname='production'):
+def dockergetdb(container='postgres', envname='production'):
     ":container=app,envname=production -- fetch and load remote database"
     dump_file = 'systori.'+envname+'.dump'
     settings = {
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'HOST': 'db'
-    }
-    fetchdb(envname)
-    local('docker-compose stop app')
-    local('docker-compose run {0} dropdb -h {HOST} -U {USER} {NAME}'.format(
-        container, **settings))
-    local('docker-compose run {0} createdb -h {HOST} -U {USER} {NAME}'.format(
-        container, **settings))
-    local('docker-compose run {0} pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(
-        container, dump_file, **settings))
-    local('rm ' + dump_file)
-
-
-def localdockergetdb(container='app', envname='production'):
-    """\
-    :container=app,envname=production -- fetch and load remote database
-    Useful for setups where the app is run locally and postgresql is dockerized
-    """
-    dump_file = 'systori.'+envname+'.dump'
-    settings = {
-        'NAME': 'postgres',
+        'NAME': 'systori_local',
         'USER': 'postgres',
         'HOST': 'localhost'
     }
     fetchdb(envname)
-    local('dropdb -h {HOST} -U {USER} {NAME}'.format(
-        container, **settings))
-    local('createdb -h {HOST} -U {USER} {NAME}'.format(
-        container, **settings))
-    local('pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(
+    local('docker cp {} {}:/{}'.format(dump_file, container, dump_file))
+    local('docker exec {0} dropdb -h {HOST} -U {USER} {NAME}'.format(container, **settings))
+    local('docker exec {0} createdb -h {HOST} -U {USER} {NAME}'.format(container, **settings))
+    local('docker exec {0} pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(
         container, dump_file, **settings))
     local('rm ' + dump_file)
-
-
-def initsettings(envname='local'):
-    ":envname=local -- creates __init__.py in settings folder"
-    assert envname in ['dev', 'production', 'local', 'jenkins']
-    if os.path.exists('systori/settings/__init__.py'):
-        print('Settings have already been initialized.')
-    else:
-        with open('systori/settings/__init__.py', 'w') as s:
-            print('Initializing settings for {}'.format(envname))
-            s.write('from .{} import *\n'.format(envname))
 
 
 def getdartium(version='1.22.0-dev.7.0', channel='dev'):

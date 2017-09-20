@@ -1,0 +1,13 @@
+version: '3'
+services:
+  psql:
+    image: postgres:9.6.4-alpine
+    volumes:
+      - ./db_data/data:/var/lib/postgresql/data    
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    ports:
+      - "5432:5432"
+    container_name:
+      postgres
