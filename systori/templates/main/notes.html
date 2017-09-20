@@ -1,0 +1,34 @@
+{% extends "frame.html" %}
+{% load i18n l10n static dartium customformatting %}
+
+{% block menu_dropdown %}{% include "main/menu_dropdown.html" %}{% endblock %}
+
+{% block content %}
+  <h1 class="page-header">{% trans 'Notes' %}</h1>
+  <table class="table table-striped notes-table">
+    <thead>
+    <tr>
+      <th></th>
+      <th>{% trans 'Note' %}</th>
+    </tr>
+    </thead>
+    <tbody id="notes">
+    {% for note in notes %}
+      <tr>
+        <td>
+          <nobr><b>{{ note.worker }}</b></nobr>
+          <br>
+          <span class="note-created" datetime="{{ note.created|unlocalize }}" style="color: grey;">
+            {{ note.created }}
+          </span>
+        </td>
+        <td>{{ note.text }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block extra_js %}
+  {% dart "notes_dashboard.dart" %}
+{% endblock extra_js %}

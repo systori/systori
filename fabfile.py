@@ -33,17 +33,6 @@ def prepare(service, branch):
     local('psql -c "VACUUM ANALYZE" -h {HOST} -U {USER} {NAME}'.format(**settings))
 
 
-def uwsgi():
-    "start uwsgi service"
-    local("uwsgi"
-          " --module=systori.wsgi"
-          " --socket=0.0.0.0:8000"
-          " --static-map /static=/static"
-          " --attach-daemon=\"celery -A systori worker -B\""
-          " --env DJANGO_SETTINGS_MODULE={}".format(
-              os.environ['DJANGO_SETTINGS_MODULE']))
-
-
 def test():
     "django continuous integration test"
     with shell_env(DJANGO_SETTINGS_MODULE='systori.settings.test'):

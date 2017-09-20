@@ -32,4 +32,5 @@ transformers:
         - web/timetracking.dart
         - web/goto_project.dart
         - web/notes.dart
+        - web/notes_dashboard.dart
       commandLineOptions: [--show-package-warnings]

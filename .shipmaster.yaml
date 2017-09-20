@@ -5,6 +5,7 @@ layers:
     from: damoti/base:latest
     apt-get:
       - language-pack-de
+      - supervisor
     context:
       - requirements/base.pip
     build:
@@ -13,6 +14,7 @@ layers:
     context:
       - .
     build:
+      - cp conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
       - cp systori/dart/sdk/html_dart2js.dart /usr/lib/dart/lib/html/dart2js
       - cd systori/dart && pub get && pub build
       - cd /app
@@ -20,7 +22,7 @@ layers:
       - export DJANGO_SETTINGS_MODULE=systori.settings.common
       - python3 manage.py collectstatic --noinput
     prepare: fab prepare:service={service},branch={git-branch}
-    start: fab uwsgi
+    start: /usr/bin/supervisord
     wait-for: db:5432
   test:
     build:
