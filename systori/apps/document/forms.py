@@ -871,13 +871,13 @@ class LetterheadCreateForm(forms.ModelForm):
 
     class Meta:
         model = Letterhead
-        fields = ['letterhead_pdf']
+        fields = ['file']
 
     def clean(self):
-        clean_letterhead_pdf(self.cleaned_data.get('letterhead_pdf'))
+        clean_letterhead_pdf(self.cleaned_data.get('file'))
 
     def save(self, commit=True):
-        return clean_letterhead_pdf(self.cleaned_data.get('letterhead_pdf'), save=True)
+        return clean_letterhead_pdf(self.cleaned_data.get('file'), save=True)
 
 
 class LetterheadUpdateForm(forms.ModelForm):

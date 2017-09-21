@@ -7,6 +7,8 @@ from decimal import Decimal
 from django.db import models
 from django.db.models.query import QuerySet
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import localtime, now
 from django.utils.formats import date_format
@@ -415,14 +417,9 @@ class DocumentTemplate(models.Model):
 
 
 class Letterhead(models.Model):
-    """
-    This Class is responsible for letting the User Upload letterheads/stationaries for his company. In best case it's a
-    real PDF with vector based graphics. Can affect printable documents like 'Invoice' or 'Proposal'.
-    """
     name = models.CharField(_('Name'), max_length=512)
-
-    # todo: Delete not needed PDF Binaries from FS. Make sure that they are not needed (Use Count?)
-    letterhead_pdf = models.FileField(_('Letterhead PDF'), upload_to='letterhead', max_length=100)
+    pdf = models.FileField(_('Letterhead PDF'), upload_to='letterhead', max_length=100)
+    file = models.ForeignKey('document.FileAttachment', null=True, on_delete=models.SET_NULL)
 
     mm = "mm"
     cm = "cm"
@@ -432,8 +429,7 @@ class Letterhead(models.Model):
         (cm, "cm"),
         (inch, "inch")
     )
-    document_unit = models.CharField(_('Document Unit'), max_length=5,
-                                     choices=DOCUMENT_UNIT, default=mm)
+    document_unit = models.CharField(_('Document Unit'), max_length=5, choices=DOCUMENT_UNIT, default=mm)
 
     top_margin = models.DecimalField(_('Top Margin'), max_digits=5, decimal_places=2, default=Decimal("25"))
     right_margin = models.DecimalField(_('Right Margin'), max_digits=5, decimal_places=2, default=Decimal("25"))
@@ -470,8 +466,7 @@ class Letterhead(models.Model):
         (PORTRAIT, _("Portrait")),
         (LANDSCAPE, _("Landscape"))
     )
-    orientation = models.CharField(_('Orientation'), max_length=15,
-                                   choices=ORIENTATION, default=PORTRAIT)
+    orientation = models.CharField(_('Orientation'), max_length=15, choices=ORIENTATION, default=PORTRAIT)
 
     debug = models.BooleanField(_("Debug Mode"), default=True)
 
@@ -512,3 +507,24 @@ class DocumentSettings(models.Model):
                 return DocumentSettings.objects.first()
             except DocumentSettings.DoesNotExist:
                 return None
+
+
+class Attachment(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    project = models.ForeignKey('project.Project', null=True, related_name="+", on_delete=models.CASCADE)
+    file = models.ForeignKey('document.FileAttachment', null=True, related_name="+", on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = 'head__uploaded',
+
+
+class FileAttachment(models.Model):
+    attachment = models.ForeignKey(Attachment, on_delete=models.CASCADE)
+    file = models.FileField(_('File'), upload_to='attachments', max_length=512)
+    worker = models.ForeignKey('company.Worker', related_name="+", on_delete=models.PROTECT)
+    uploaded = models.DateTimeField(_('Created'), auto_now_add=True)
+
+    class Meta:
+        ordering = 'uploaded',
