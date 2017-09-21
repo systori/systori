@@ -494,6 +494,7 @@ class InvoiceViewTests(DocumentTestCase):
         self.assertEqual(invoice.json['header'], 'new header')
         self.assertEqual(invoice.json['footer'], 'new footer')
 
+    @freeze_time(date(2015, 1, 1))
     def get_rendered_doc(self, jobs):
         data = {
             'title': 'Invoice #1',
@@ -524,47 +525,46 @@ class InvoiceViewTests(DocumentTestCase):
             'job-1-debit_tax': '1',
         })
         self.assertEqual(text, dedent("""\
-            Professor Ludwig von Mises
-            Invoice #1
-            Jan. 1, 2015
-            Invoice No. 2015/01/01
-            Please indicate the correct invoice number on your payment.
-            The Header
-            consideration
-            19% tax
-            gross
-            Project progress
-            $2.00
-            $2.00
-            $4.00
-            This Invoice
-            $2.00
-            $2.00
-            $4.00
-            The Footer
-            Jan. 1, 2015
-            Itemized listing for Invoice No. 2015/01/01
-            Pos.
-            Description
-            Amount
-            Price
-            Total
-            01
-            Job One
-            Work completed on {date}
-            $1.00
-            02
-            Job Two
-            Work completed on {date}
-            $1.00
-            Total 01 - Job One
-            $1.00
-            Total 02 - Job Two
-            $1.00
-            Total without VAT
-            $2.00
-            """.format(date=formats.date_format(timezone.now().date(), use_l10n=True)))
-        )
+        Professor Ludwig von Mises
+        Invoice #1
+        Jan. 1, 2015
+        Invoice No. 2015/01/01
+        Please indicate the correct invoice number on your payment.
+        The Header
+        consideration
+        19% tax
+        gross
+        Project progress
+        $2.00
+        $2.00
+        $4.00
+        This Invoice
+        $2.00
+        $2.00
+        $4.00
+        The Footer
+        Jan. 1, 2015
+        Itemized listing for Invoice No. 2015/01/01
+        Pos.
+        Description
+        Amount
+        Price
+        Total
+        01
+        Job One
+        Work completed on Jan. 1, 2015
+        $1.00
+        02
+        Job Two
+        Work completed on Jan. 1, 2015
+        $1.00
+        Total 01 - Job One
+        $1.00
+        Total 02 - Job Two
+        $1.00
+        Total without VAT
+        $2.00
+        """))
 
     def test_render_time_and_materials_invoice(self):
         self.task.complete = 10
@@ -577,54 +577,53 @@ class InvoiceViewTests(DocumentTestCase):
             'job-0-debit_tax': '220.40',
         })
         self.assertEqual(text, dedent("""\
-            Professor Ludwig von Mises
-            Invoice #1
-            Jan. 1, 2015
-            Invoice No. 2015/01/01
-            Please indicate the correct invoice number on your payment.
-            The Header
-            consideration
-            19% tax
-            gross
-            Project progress
-            $1,160.00
-            $220.40
-            $1,380.40
-            This Invoice
-            $1,160.00
-            $220.40
-            $1,380.40
-            The Footer
-            Jan. 1, 2015
-            Itemized listing for Invoice No. 2015/01/01
-            Pos.
-            Description
-            Amount
-            Price
-            Total
-            01
-            Job One
-            01.01
-            Main Group
-            01.01.001
-            Task #1 Fixed Price
-            10.00
-            $96.00
-            $960.00
-            01.01.002
-            Task #2 Time & Materials
-            TM Lineitem
-            20.00
-            $10.00
-            $200.00
-            Total 01.01 - Main Group
-            $1,160.00
-            Total 01.01 - Main Group
-            $1,160.00
-            Total without VAT
-            $1,160.00
-            """)
-        )
+        Professor Ludwig von Mises
+        Invoice #1
+        Jan. 1, 2015
+        Invoice No. 2015/01/01
+        Please indicate the correct invoice number on your payment.
+        The Header
+        consideration
+        19% tax
+        gross
+        Project progress
+        $1,160.00
+        $220.40
+        $1,380.40
+        This Invoice
+        $1,160.00
+        $220.40
+        $1,380.40
+        The Footer
+        Jan. 1, 2015
+        Itemized listing for Invoice No. 2015/01/01
+        Pos.
+        Description
+        Amount
+        Price
+        Total
+        01
+        Job One
+        01.01
+        Main Group
+        01.01.001
+        Task #1 Fixed Price
+        10.00
+        $96.00
+        $960.00
+        01.01.002
+        Task #2 Time & Materials
+        TM Lineitem
+        20.00
+        $10.00
+        $200.00
+        Total 01.01 - Main Group
+        $1,160.00
+        Total 01.01 - Main Group
+        $1,160.00
+        Total without VAT
+        $1,160.00
+        """))
 
     def test_render_vesting_period_invoice(self):
         text = self.get_rendered_doc({
@@ -638,48 +637,47 @@ class InvoiceViewTests(DocumentTestCase):
             'job-1-debit_tax': '1',
         })
         self.assertEqual( text, dedent("""\
-            Professor Ludwig von Mises
-            Invoice #1
-            Jan. 1, 2015
-            Invoice No. 2015/01/01
-            Please indicate the correct invoice number on your payment.
-            Vesting Period April 1, 2017 to April 2, 2017
-            The Header
-            consideration
-            19% tax
-            gross
-            Project progress
-            $2.00
-            $2.00
-            $4.00
-            This Invoice
-            $2.00
-            $2.00
-            $4.00
-            The Footer
-            Jan. 1, 2015
-            Itemized listing for Invoice No. 2015/01/01
-            Pos.
-            Description
-            Amount
-            Price
-            Total
-            01
-            Job One
-            Work completed on {date}
-            $1.00
-            02
-            Job Two
-            Work completed on {date}
-            $1.00
-            Total 01 - Job One
-            $1.00
-            Total 02 - Job Two
-            $1.00
-            Total without VAT
-            $2.00
-            """.format(date=formats.date_format(timezone.now().date(), use_l10n=True)))
-        )
+        Professor Ludwig von Mises
+        Invoice #1
+        Jan. 1, 2015
+        Invoice No. 2015/01/01
+        Please indicate the correct invoice number on your payment.
+        Vesting Period April 1, 2017 to April 2, 2017
+        The Header
+        consideration
+        19% tax
+        gross
+        Project progress
+        $2.00
+        $2.00
+        $4.00
+        This Invoice
+        $2.00
+        $2.00
+        $4.00
+        The Footer
+        Jan. 1, 2015
+        Itemized listing for Invoice No. 2015/01/01
+        Pos.
+        Description
+        Amount
+        Price
+        Total
+        01
+        Job One
+        Work completed on Jan. 1, 2015
+        $1.00
+        02
+        Job Two
+        Work completed on Jan. 1, 2015
+        $1.00
+        Total 01 - Job One
+        $1.00
+        Total 02 - Job Two
+        $1.00
+        Total without VAT
+        $2.00
+        """))
 
     def test_render_show_project_id_invoice(self):
         text = self.get_rendered_doc({
@@ -692,48 +690,47 @@ class InvoiceViewTests(DocumentTestCase):
             'job-1-debit_tax': '1',
         })
         self.assertEqual(text, dedent("""\
-            Professor Ludwig von Mises
-            Invoice #1
-            Jan. 1, 2015
-            Invoice No. 2015/01/01
-            Please indicate the correct invoice number on your payment.
-            Project #2
-            The Header
-            consideration
-            19% tax
-            gross
-            Project progress
-            $2.00
-            $2.00
-            $4.00
-            This Invoice
-            $2.00
-            $2.00
-            $4.00
-            The Footer
-            Jan. 1, 2015
-            Itemized listing for Invoice No. 2015/01/01
-            Pos.
-            Description
-            Amount
-            Price
-            Total
-            01
-            Job One
-            Work completed on {date}
-            $1.00
-            02
-            Job Two
-            Work completed on {date}
-            $1.00
-            Total 01 - Job One
-            $1.00
-            Total 02 - Job Two
-            $1.00
-            Total without VAT
-            $2.00
-            """.format(date=formats.date_format(timezone.now().date(), use_l10n=True)))
-        )
+        Professor Ludwig von Mises
+        Invoice #1
+        Jan. 1, 2015
+        Invoice No. 2015/01/01
+        Please indicate the correct invoice number on your payment.
+        Project #2
+        The Header
+        consideration
+        19% tax
+        gross
+        Project progress
+        $2.00
+        $2.00
+        $4.00
+        This Invoice
+        $2.00
+        $2.00
+        $4.00
+        The Footer
+        Jan. 1, 2015
+        Itemized listing for Invoice No. 2015/01/01
+        Pos.
+        Description
+        Amount
+        Price
+        Total
+        01
+        Job One
+        Work completed on Jan. 1, 2015
+        $1.00
+        02
+        Job Two
+        Work completed on Jan. 1, 2015
+        $1.00
+        Total 01 - Job One
+        $1.00
+        Total 02 - Job Two
+        $1.00
+        Total without VAT
+        $2.00
+        """))
 
 
 class PaymentViewTests(DocumentTestCase):
