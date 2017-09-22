@@ -1,8 +1,5 @@
 import 'dart:html';
 import 'dart:convert';
-import 'dart:async';
-import 'dart:io' as io;
-import 'package:intl/intl.dart';
 
 
 var CSRFToken;
@@ -16,17 +13,29 @@ var editarea = """
     </td>
     """;
 
+
+void checkBtnGroupDisplay({bool forceHide}) {
+    document.querySelectorAll('note-btn-group').forEach((e) {
+        DateTime created = DateTime.parse(e.closest("tr").dataset['noteCreated']);
+        Duration age = created.difference(new DateTime.now());
+        bool isOwner = e.closest("tr").dataset['workerPk'] == document.querySelector("#currentUser").dataset['workerPk'];
+
+        if (age.inHours > -2 && isOwner)
+            e.classes.toggle('hidden');
+        if (forceHide)
+           e.classes.add('hidden');
+    });
+}
+
+
 class NoteBtnGroup extends HtmlElement {
     static final tag = 'note-btn-group';
 
     NoteBtnGroup.created() : super.created() {
-        var created = DateTime.parse(this.closest("tr").dataset['noteCreated']);
-        Duration age = created.difference(new DateTime.now());
-        var isOwner = this.closest("tr").dataset['workerPk'] == document.querySelector("#currentUser").dataset['workerPk'];
-        if (age.inHours > -2 && isOwner)
-            this.classes.remove('hidden');
+
     }
 }
+
 
 class NoteDeleteButton extends HtmlElement {
     static final tag = 'note-delete-button';
@@ -71,8 +80,8 @@ class NoteEditButton extends HtmlElement {
 
     void createEditArea(var response) {
         if (response.status == 200) {
+            checkBtnGroupDisplay(forceHide: true);
             note = JSON.decode(response.response);
-            document.querySelectorAll("note-edit-button").forEach((e) {e.classes.add('hidden');});
             document.
                 querySelector("tr[data-note-pk='$note_pk'] td:nth-child(2)").
                 setInnerHtml(editarea, treeSanitizer: NodeTreeSanitizer.trusted);
@@ -112,15 +121,17 @@ class NoteSaveButton extends HtmlElement {
                     "X-CSRFToken": CSRFToken,
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                    })
-                .then(reload);
+                    }).then((_) => HttpRequest.request(url, method: 'get').then((response) => noteUpdate(response)));
     }
 
-    void reload(var reponse) {
-        window.location.reload();
+    void noteUpdate(var response) {
+        if (response.status == 200) {
+            var data = JSON.decode(response.responseText);
+            this.closest("td").innerHtml = data['html'];
+            print("received");
+        }
     }
 }
-
 
 
 void main() {
@@ -130,6 +141,7 @@ void main() {
     document.registerElement('note-save-button', NoteSaveButton);
     document.registerElement('note-btn-group', NoteBtnGroup);
 
+    checkBtnGroupDisplay();
     HtmlElement notes_container = document.querySelector(".notes-table-responsive");
     notes_container.scrollTop = notes_container.scrollHeight - notes_container.clientHeight;
 }

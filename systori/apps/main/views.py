@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from django.views.generic import View, TemplateView
+from django.views.generic import View, TemplateView, ListView
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -81,10 +81,13 @@ class DayBasedOverviewView(TemplateView):
         return context
 
 
-class NotesDashboard(TemplateView):
+class NotesDashboard(ListView):
     template_name = "main/notes.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['notes'] = Note.objects.all()[:10]
-        return context
+    def get_queryset(self):
+        return Note.objects.all()
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['notes'] = self.get_queryset()[:25]
+    #     return context

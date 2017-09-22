@@ -8,6 +8,6 @@ class NoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Note
-        fields = ('pk', 'project',
-                  'worker', 'text', 'created'
+        fields = ('pk', 'project', 'created',
+                  'worker', 'text', 'html'
                   )
