@@ -1,5 +1,6 @@
 import os
 from itertools import chain
+from decimal import Decimal
 
 from django.conf import settings
 from django.utils.translation import ugettext as _
@@ -34,7 +35,11 @@ class InvoiceRowIterator(BaseRowIterator):
             }
 
             debits = self.document['job_debits'].get(str(job['job.id']), [])
+            last_debit = None
+            total = Decimal()
             for debit in debits:
+                last_debit = debit
+                total += debit['amount'].net
                 entry_date = parse_date(debit['date'])
                 if debit['entry_type'] == Entry.WORK_DEBIT:
                     title = _('Work completed on {date}').format(date=entry_date)
@@ -42,9 +47,15 @@ class InvoiceRowIterator(BaseRowIterator):
                     title = _('Flat invoice on {date}').format(date=entry_date)
                 else:  # adjustment, etc
                     title = _('Adjustment on {date}').format(date=entry_date)
+                #yield self.render.debit_html, {
+                #    'title': title,
+                #    'total': money(debit['amount'].net)
+                #}
+            if last_debit:
+                entry_date = parse_date(last_debit['date'])
                 yield self.render.debit_html, {
-                    'title': title,
-                    'total': money(debit['amount'].net)
+                    'title': _('Performance until {date}').format(date=entry_date),
+                    'total': money(total)
                 }
 
     def subtotal_job(self, job):
