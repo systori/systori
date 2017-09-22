@@ -1,3 +1,4 @@
+from mistune import markdown
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -17,3 +18,7 @@ class Note(models.Model):
 
     class Meta:
         ordering = ('created', )
+
+    @property
+    def html(self):
+        return markdown(self.text)

@@ -5,8 +5,8 @@
 
 {% block content %}
   <style>
-  #notes > tr {
-    font-size: smaller;
+  #notes {
+{#    font-size: smaller;#}
   }
   #notes > tr > span {
     color: grey;
@@ -14,19 +14,15 @@
   </style>
   <h1 class="page-header">{% trans 'Notes' %}</h1>
   <table class="table table-striped notes-table">
-    <thead>
-    <tr>
-      <th></th>
-      <th>{% trans 'Note' %}</th>
-    </tr>
-    </thead>
     <tbody id="notes">
-    {% for note in notes %}
-    <tr>
+    {% for note in object_list %}
+    <tr data-note-pk="{{ note.pk }}">
       <td>
-        {% if note.project %}<a href="{% url 'field.project' note.project.id %}">#{{ note.project.id }}</a>{% endif %}
-        {{ note.worker }}
-        <span class="note-created">{{ note.created }}</span>
+        <nobr>
+          {% if note.project %}<a href="{% url 'field.project' note.project.id %}">#{{ note.project.id }}</a>{% endif %}
+          {{ note.worker }}
+        </nobr>
+          <span class="note-created" datetime="{{ note.created|unlocalize }}">{{ note.created }}</span>
       </td>
       <td>{{ note.text|markdown|safe }}</td>
     </tr>
@@ -36,5 +32,12 @@
 {% endblock %}
 
 {% block extra_js %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/3.0.2/timeago.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/3.0.2/timeago.locales.min.js"></script>
+  <script type="text/javascript">
+    let timeagoInstance = timeago();
+    let nodes = document.querySelectorAll('.note-created');
+    timeagoInstance.render(nodes, document.documentElement.lang);
+  </script>
   {% dart "notes_dashboard.dart" %}
 {% endblock extra_js %}
