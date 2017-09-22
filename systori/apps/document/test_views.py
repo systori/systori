@@ -552,11 +552,11 @@ class InvoiceViewTests(DocumentTestCase):
         Total
         01
         Job One
-        Work completed on Jan. 1, 2015
+        Performance until Jan. 1, 2015
         $1.00
         02
         Job Two
-        Work completed on Jan. 1, 2015
+        Performance until Jan. 1, 2015
         $1.00
         Total 01 - Job One
         $1.00
@@ -665,11 +665,11 @@ class InvoiceViewTests(DocumentTestCase):
         Total
         01
         Job One
-        Work completed on Jan. 1, 2015
+        Performance until Jan. 1, 2015
         $1.00
         02
         Job Two
-        Work completed on Jan. 1, 2015
+        Performance until Jan. 1, 2015
         $1.00
         Total 01 - Job One
         $1.00
@@ -718,11 +718,11 @@ class InvoiceViewTests(DocumentTestCase):
         Total
         01
         Job One
-        Work completed on Jan. 1, 2015
+        Performance until Jan. 1, 2015
         $1.00
         02
         Job Two
-        Work completed on Jan. 1, 2015
+        Performance until Jan. 1, 2015
         $1.00
         Total 01 - Job One
         $1.00
