@@ -418,8 +418,7 @@ class DocumentTemplate(models.Model):
 
 class Letterhead(models.Model):
     name = models.CharField(_('Name'), max_length=512)
-    pdf = models.FileField(_('Letterhead PDF'), upload_to='letterhead', max_length=100)
-    file = models.ForeignKey('document.FileAttachment', null=True, on_delete=models.SET_NULL)
+    letterhead_pdf = models.FileField(_('Letterhead PDF'), upload_to='letterhead', max_length=100)
 
     mm = "mm"
     cm = "cm"
