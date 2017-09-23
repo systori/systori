@@ -112,6 +112,36 @@
 
     </div>
 
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        {% trans 'Attachments' %}
+      </div>
+
+      <div class="panel-body">
+        <form method="post" enctype="multipart/form-data"
+              action="{% url 'field.dailyplan.task.upload' jobsite.id dailyplan.url_id task.id %}">{% csrf_token %}
+          <div class="input-group">
+            <input type="hidden" name="redirect" value="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}">
+            <input type="file" class="form-control" name="attachment">
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="submit">Upload</button>
+            </span>
+          </div>
+        </form>
+      </div>
+
+      <ul class="list-group">
+        {% for attachment in task.attachments.all %}
+          <li class="list-group-item clearfix">
+            {{ attachment.current.uploaded }}<br/>{{ attachment.current.worker.get_full_name }}<br/>
+            <a href="{% url 'attachment.download' attachment.id %}">open</a>
+          </li>
+        {% endfor %}
+      </ul>
+
+    </div>
+
   </div>
 {% endblock %}
 
