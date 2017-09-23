@@ -1,3 +1,4 @@
+import os
 from datetime import date
 from calendar import monthrange
 from collections import OrderedDict, namedtuple
@@ -19,6 +20,7 @@ from ..timetracking.models import Timer
 from ..accounting.constants import TAX_RATE
 from .models import Proposal, Invoice, Adjustment, Payment, Refund, Timesheet
 from .models import DocumentTemplate, Letterhead, DocumentSettings
+from .models import Attachment, FileAttachment
 from .forms import ProposalForm, InvoiceForm, AdjustmentForm, PaymentForm, RefundForm
 from .forms import LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
 from .forms import TimesheetForm
@@ -603,3 +605,37 @@ class DocumentSettingsUpdate(UpdateView):
 class DocumentSettingsDelete(DeleteView):
     model = DocumentSettings
     success_url = reverse_lazy('templates')
+
+
+# Attachments
+
+
+class UploadAttachment(SingleObjectMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        task = self.get_object()
+        if request.FILES:
+            attachment = Attachment.objects.create(
+                project=request.project,
+                content_object=task
+            )
+            file = FileAttachment.objects.create(
+                attachment=attachment,
+                file=request.FILES['attachment'],
+                worker=self.request.worker
+            )
+            attachment.current = file
+            attachment.save()
+        return HttpResponseRedirect(self.request.POST['redirect'])
+
+
+class DownloadAttachment(SingleObjectMixin, View):
+    model = Attachment
+
+    def get(self, request, *args, **kwargs):
+        attachment = self.get_object()
+        file_attachment = attachment.current
+        filename = os.path.basename(file_attachment.file.name)
+        response = HttpResponse(file_attachment.file)
+        response['Content-Disposition'] = 'attachment; filename=%s' % filename
+        return response

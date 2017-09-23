@@ -513,10 +513,10 @@ class Attachment(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     project = models.ForeignKey('project.Project', null=True, related_name="+", on_delete=models.CASCADE)
-    file = models.ForeignKey('document.FileAttachment', null=True, related_name="+", on_delete=models.SET_NULL)
+    current = models.ForeignKey('document.FileAttachment', null=True, related_name="+", on_delete=models.SET_NULL)
 
     class Meta:
-        ordering = 'head__uploaded',
+        ordering = 'current__uploaded',
 
 
 class FileAttachment(models.Model):

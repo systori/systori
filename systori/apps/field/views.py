@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q, Count, Prefetch
 from django.utils.http import urlquote
 from django.utils.formats import to_locale, get_language
-from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView, DeleteView
+from django.views.generic import View, DetailView, ListView, UpdateView, TemplateView
 from django.views.generic.detail import SingleObjectMixin
 from django.urls import reverse
 
@@ -17,6 +17,7 @@ from ..task.models import Group, Task, ProgressReport
 from ..equipment.models import Equipment
 from ..timetracking.models import Timer
 from ..document.models import Timesheet
+from ..document.views import UploadAttachment
 from ..main.models import Note
 from ..main.forms import NoteForm
 from .forms import CompletionForm, DailyPlanNoteForm
@@ -458,6 +459,11 @@ class FieldTaskView(UpdateView):
 
     def get_success_url(self):
         return task_success_url(self.request, self.object)
+
+
+class FieldTaskUploadAttachment(UploadAttachment):
+    model = Task
+    pk_url_kwarg = 'task_pk'
 
 
 class FieldAddTask(SingleObjectMixin, View):

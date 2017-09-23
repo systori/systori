@@ -1,6 +1,7 @@
 import tsvector_field
 from decimal import Decimal
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.search import SearchRank, SearchQuery
 from django.db import models
 from django.db.models.expressions import F, Q, RawSQL
@@ -395,6 +396,8 @@ class Task(OrderedModel):
     status = FSMField(blank=True, choices=STATE_CHOICES)
 
     token = models.BigIntegerField('api token', null=True)
+
+    attachments = GenericRelation('document.Attachment')
 
     objects = TaskManager()
 

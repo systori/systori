@@ -13,6 +13,7 @@ dailyplan_urls = [
     url(r'^jobs$', field_auth(FieldGroupView.as_view()), name='field.dailyplan.group'),
     url(r'^group-(?P<group_pk>\d+)$', field_auth(FieldGroupView.as_view()), name='field.dailyplan.group'),
     url(r'^task-(?P<task_pk>\d+)$', field_auth(FieldTaskView.as_view()), name='field.dailyplan.task'),
+    url(r'^task-(?P<task_pk>\d+)/upload$', field_auth(FieldTaskUploadAttachment.as_view()), name='field.dailyplan.task.upload'),
     url(r'^task-(?P<task_pk>\d+)/add$', field_auth(FieldAddTask.as_view()), name='field.dailyplan.task.add'),
     url(r'^task-(?P<task_pk>\d+)/remove$', field_auth(FieldRemoveTask.as_view()), name='field.dailyplan.task.remove'),
 
