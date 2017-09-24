@@ -18,8 +18,8 @@ void createNote(BodyElement body, TableSectionElement notes, Map data) {
     }
     td.appendHtml(" ${data['user']}<br><span>${data['created']}</span>", treeSanitizer: NodeTreeSanitizer.trusted);
     tr.addCell().appendHtml(data['html'], treeSanitizer: NodeTreeSanitizer.trusted);
-    notes.children.reversed.skip(30).toList().forEach((e)=>e.remove());
-    body.scrollTop = body.scrollHeight;
+//    notes.children.reversed.skip(30).toList().forEach((e)=>e.remove());
+    tr.scrollIntoView();
 }
 
 void modifyNote(BodyElement body, TableSectionElement notes, Map data, {bool delete}) {
@@ -48,4 +48,5 @@ main() {
             print("error, no known signal came from server.");
         }
     });
+    body.scrollTop = body.clientHeight;
 }

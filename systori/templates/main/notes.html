@@ -13,31 +13,26 @@
   }
   </style>
   <h1 class="page-header">{% trans 'Notes' %}</h1>
-  <table class="table table-striped notes-table">
-    <tbody id="notes">
-    {% for note in object_list %}
-    <tr data-note-pk="{{ note.pk }}">
-      <td>
-        <nobr>
-          {% if note.project %}<a href="{% url 'field.project' note.project.id %}">#{{ note.project.id }}</a>{% endif %}
-          {{ note.worker }}
-        </nobr>
-          <span class="note-created" datetime="{{ note.created|unlocalize }}">{{ note.created }}</span>
-      </td>
-      <td>{{ note.text|markdown|safe }}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-responsive notes-dashboard">
+    <table class="table table-striped notes-table">
+      <tbody id="notes">
+      {% for note in object_list %}
+      <tr data-note-pk="{{ note.pk }}">
+        <td>
+          <nobr>
+            {% if note.project %}<a href="{% url 'field.project' note.project.id %}">#{{ note.project.id }}</a>{% endif %}
+            {{ note.worker }}
+          </nobr><br>
+            <span class="note-created" datetime="{{ note.created|unlocalize }}">{{ note.created }}</span>
+        </td>
+        <td>{{ note.text|markdown|safe }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {% endblock %}
 
 {% block extra_js %}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/3.0.2/timeago.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/3.0.2/timeago.locales.min.js"></script>
-  <script type="text/javascript">
-    let timeagoInstance = timeago();
-    let nodes = document.querySelectorAll('.note-created');
-    timeagoInstance.render(nodes, document.documentElement.lang);
-  </script>
   {% dart "notes_dashboard.dart" %}
 {% endblock extra_js %}
