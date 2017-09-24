@@ -1,6 +1,7 @@
 from factory.django import mute_signals
 from django.urls import reverse
 from django.db.models.signals import post_save
+from channels.test import ChannelTestCase
 
 from systori.lib.testing import ClientTestCase
 
@@ -10,7 +11,7 @@ from .models import Note
 from .factories import NoteFactory
 
 
-class NoteApiTest(ClientTestCase):
+class NoteApiTest(ClientTestCase, ChannelTestCase):
 
     def setUp(self):
         super().setUp()
