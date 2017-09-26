@@ -135,7 +135,7 @@
         {% for attachment in task.attachments.all %}
           <li class="list-group-item clearfix">
             {{ attachment.current.uploaded }}<br/>{{ attachment.current.worker.get_full_name }}<br/>
-            <a href="{% url 'attachment.download' attachment.id %}">open</a>
+            <a href="{% url 'attachment.download' attachment.id %}/{{ attachment.current.file.url }}">open</a>
           </li>
         {% endfor %}
       </ul>

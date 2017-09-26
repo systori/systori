@@ -4,7 +4,7 @@ from .views import *
 
 urlpatterns = [
 
-    url(r'^attachment-(?P<pk>\d+)$', office_auth(DownloadAttachment.as_view()), name='attachment.download'),
+    url(r'^attachment-(?P<pk>\d+)/.*$', office_auth(DownloadAttachment.as_view()), name='attachment.download'),
 
     url(r'^project-(?P<project_pk>\d+)/create-proposal$', office_auth(ProposalCreate.as_view()), name='proposal.create'),
     url(r'^project-(?P<project_pk>\d+)/proposal-(?P<format>(email|print))-(?P<pk>\d+).pdf$', office_auth(ProposalPDF.as_view()), name='proposal.pdf'),

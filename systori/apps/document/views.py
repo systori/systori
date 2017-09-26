@@ -1,4 +1,5 @@
 import os
+import mimetypes
 from datetime import date
 from calendar import monthrange
 from collections import OrderedDict, namedtuple
@@ -636,6 +637,6 @@ class DownloadAttachment(SingleObjectMixin, View):
         attachment = self.get_object()
         file_attachment = attachment.current
         filename = os.path.basename(file_attachment.file.name)
-        response = HttpResponse(file_attachment.file)
-        response['Content-Disposition'] = 'attachment; filename=%s' % filename
+        response = HttpResponse(file_attachment.file, content_type=mimetypes.guess_type(filename)[0])
+        #response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
