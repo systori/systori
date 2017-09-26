@@ -1,4 +1,3 @@
-from mistune import markdown
 from django.conf.urls import url
 
 from rest_framework.generics import RetrieveUpdateDestroyAPIView

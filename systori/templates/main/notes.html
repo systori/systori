@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n l10n static staticfiles field_app main dartium customformatting %}
+{% load i18n l10n static staticfiles field_app dartium customformatting %}
 
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" %}{% endblock %}
 
@@ -26,7 +26,7 @@
           </nobr><br>
             <span class="note-created" datetime="{{ note.created|unlocalize }}">{{ note.created }}</span>
         </td>
-        <td>{{ note.text|markdown|safe }}</td>
+        <td>{{ note.html|safe }}</td>
       </tr>
       {% endfor %}
       </tbody>
