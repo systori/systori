@@ -45,6 +45,7 @@
 
 <p><br></p>
 
+<!--
 <table class="summary-layout">
   <colgroup>
     <col width="5*">
@@ -55,7 +56,10 @@
     <td>{% include "document/timesheet_summary.html" with timesheet=timesheet full=True extra_css="table-nonfluid pull-right" %}</td>
   </tr>
 </table>
+-->
+
+{% include "document/timesheet_summary.html" with timesheet=timesheet full=True extra_css="table-nonfluid pull-right summary-table" %}
 
 <p><br></p>
 
-<p class="right">{% trans "Approved" context "timesheet "%}: _______________________________</p>
+<p class="signature">{% trans "Approved" context "timesheet "%}: _______________________________</p>

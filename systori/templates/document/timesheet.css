@@ -68,3 +68,8 @@ td.monday {
 .right {
   text-align: right;
 }
+
+.signature {
+  page-break-after: always;
+  text-align: right;
+}
