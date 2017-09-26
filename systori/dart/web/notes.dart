@@ -92,12 +92,14 @@ class NoteSaveButton extends ButtonElement {
 
 class NoteTableRow extends TableRowElement {
     int get pk => int.parse(dataset['pk']);
-    set pk (int pk) {
-        dataset['pk'] = pk.toString();
-    }
     int get worker_pk => int.parse(dataset['workerPk']);
     int get current_worker => int.parse(document.querySelector("#currentWorker").dataset['pk']);
     DateTime get note_created => DateTime.parse(dataset['noteCreated']);
+    ButtonElement edit_button;
+    ButtonElement delete_button;
+    ButtonElement save_button;
+    SpanElement html_container;
+    TextAreaElement textarea;
 
     NoteTableRow.created() : super.created(){
         if (children.isEmpty) {
@@ -105,10 +107,49 @@ class NoteTableRow extends TableRowElement {
             var clone = document.importNode(template.content, true);
             append(clone);
         }
+        edit_button = this.querySelector("#note-edit-button");
+        delete_button = this.querySelector("#note-delete-button");
+        save_button = this.querySelector("#note-save-button");
+        html_container = this.querySelector(".html_container");
+        textarea = this.querySelector("textarea");
+    }
+
+    @override
+    attached() {
         Duration age = note_created.difference(new DateTime.now());
         bool is_owner = worker_pk == current_worker;
         if (age.inHours > -2 && is_owner)
-            this.querySelector('.btn-group').classes.toggle('hidden');
+            [edit_button, delete_button].forEach((el) {el.classes.toggle("hidden");});
+        edit_button.onClick.listen(noteEdit);
+        delete_button.onClick.listen(noteDelete);
+        save_button.onClick.listen(noteSave);
+        textarea.onKeyPress.listen(noteSave);
+    }
+
+    toggleDisplay() {
+        [html_container, textarea, save_button, edit_button, delete_button]
+                .forEach((el) {el.classes.toggle("hidden");});
+    }
+
+    noteEdit(MouseEvent e) {
+        toggleDisplay();
+    }
+
+    noteDelete(MouseEvent e) {
+        String url = note_url + pk.toString();
+        HttpRequest.request(url, method: 'delete',
+                requestHeaders: {"X-CSRFToken": CSRFToken})
+                .then((response) {
+            if (response.status == 204) {
+                this.remove();
+            }
+            else {print("error while trying to delte note $pk");}
+        });
+    }
+
+    noteSave(Event e) {
+        print("hallo save");
+        toggleDisplay();
     }
 }
 
@@ -127,10 +168,8 @@ class NoteTextArea extends TextAreaElement {
 void main() {
     CSRFToken = (querySelector('input[name=csrfmiddlewaretoken]') as InputElement).value;
     translated_save = querySelector('#translated_save').text;
-    document.registerElement('note-delete-button', NoteDeleteButton, extendsTag: 'button');
-    document.registerElement('note-edit-button', NoteEditButton, extendsTag: 'button');
-    document.registerElement('note-save-button', NoteSaveButton, extendsTag: 'button');
     document.registerElement('note-tr', NoteTableRow, extendsTag: 'tr');
+
     HtmlElement notes_container = document.querySelector(".notes-table-responsive");
     notes_container.scrollTop = notes_container.scrollHeight - notes_container.clientHeight;
 }
