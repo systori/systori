@@ -25,7 +25,7 @@ class TimesheetRenderer:
     @property
     def pdf(self):
         return PDFStreamer(
-            HTMLParser(self.generate(), CSS(self.css)),
+            HTMLParser(self.generate, CSS(self.css)),
             os.path.join(settings.MEDIA_ROOT, self.letterhead.letterhead_pdf.name),
             'landscape'
         )

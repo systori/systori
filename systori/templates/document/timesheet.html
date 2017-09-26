@@ -6,38 +6,40 @@
 
   <colgroup>
     {% for day in daynumbers %}
-      <bericht-col width="0*">8:0</bericht-col>
+    <col width="0*">
     {% endfor %}
-    <bericht-col width="0*">999:00</bericht-col>
-    <bericht-col width="1*"></bericht-col>
+    <col width="0*">
+    <col width="1*">
   </colgroup>
 
   <thead>
   <tr>
     {% for day in daynumbers %}
-      <td width="3%"><p>{{ day }}</td>
+      <td width="3%">{{ day }}</td>
     {% endfor %}
-    <td width="3%"><p>&#931;</td>
+    <td width="3%"><!--&#931;--></td>
     <td></td>
   </tr>
   <tr>
     {% for day in daynames %}
-      <td width="3%"><p>{{ day }}</td>
+      <td width="3%">{{ day }}</td>
     {% endfor %}
-    <td width="3%"><p>&#931;</td>
+    <td width="3%"><!--&#931;--></td>
     <td></td>
   </tr>
   </thead>
 
+  <tbody>
   {% for name, label, row, total in rows %}
     <tr class="row-{{ name }}">
       {% for day in row %}
-        <td><p>{{ day|zeroblank|hours }}</td>
+        <td>{{ day|zeroblank|hours }}</td>
       {% endfor %}
-      <td class="info"><p>{{ total|hours }}</td>
-      <td><p>{{ label }}</td>
+      <td class="info">{{ total|hours }}</td>
+      <td>{{ label }}</td>
     </tr>
   {% endfor %}
+  </tbody>
 
 </table>
 
@@ -45,8 +47,8 @@
 
 <table class="summary-layout">
   <colgroup>
-    <bericht-col width="5*"></bericht-col>
-    <bericht-col width="15*"></bericht-col>
+    <col width="5*">
+    <col width="15*">
   </colgroup>
   <tr>
     <td></td>
