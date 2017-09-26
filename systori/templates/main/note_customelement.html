@@ -12,15 +12,15 @@
     </span>
   </td>
   <td>
-    <span>
+    <div class="html_container">
       {{ note.html|safe }}
-    </span>
+    </div>
     <textarea class="hidden">
       {{ note.text }}
     </textarea>
-    <div class="btn-group btn-group-sm btn-group-note hidden" role="group">
-      <button id="note-edit-button" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-edit"></span></button>
-      <button id="note-delete-button" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></button>
+    <div class="btn-group btn-group-sm btn-group-note" role="group">
+      <button id="note-edit-button" class="btn btn-sm btn-default hidden"><span class="glyphicon glyphicon-edit"></span></button>
+      <button id="note-delete-button" class="btn btn-sm btn-danger hidden"><span class="glyphicon glyphicon-trash"></span></button>
     </div>
     <button id="note-save-button" class="btn btn-xs btn-primary hidden">{% trans "Save" %}</button>
   </td>
