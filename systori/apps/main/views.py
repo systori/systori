@@ -83,11 +83,4 @@ class DayBasedOverviewView(TemplateView):
 
 class NotesDashboard(ListView):
     template_name = "main/notes.html"
-
-    def get_queryset(self):
-        return Note.objects.all()
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['notes'] = self.get_queryset()[:25]
-    #     return context
+    model = Note

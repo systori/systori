@@ -309,7 +309,7 @@ td[is=amount-stateful].selected>div {
     top: 8px;
     right: 8px;
 }
-.note-textarea {
+tr > td > textarea {
     width: 100%;
     resize: none;
     border: 1px dotted grey

@@ -1,0 +1,27 @@
+{% load i18n l10n %}
+
+<tr is="note-tr"
+    data-pk="{{ note.pk|unlocalize }}"
+    data-worker-pk="{{ note.worker.pk|unlocalize }}"
+    data-note-created="{{ note.created|unlocalize }}">
+  <td>
+    <nobr><b>{{ note.worker }}</b></nobr>
+    <br>
+    <span style="color: grey;">
+      {{ note.created }}
+    </span>
+  </td>
+  <td>
+    <span>
+      {{ note.html|safe }}
+    </span>
+    <textarea class="hidden">
+      {{ note.text }}
+    </textarea>
+    <div class="btn-group btn-group-sm btn-group-note hidden" role="group">
+      <button id="note-edit-button" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-edit"></span></button>
+      <button id="note-delete-button" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></button>
+    </div>
+    <button id="note-save-button" class="btn btn-xs btn-primary hidden">{% trans "Save" %}</button>
+  </td>
+</tr>

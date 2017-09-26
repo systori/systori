@@ -76,8 +76,8 @@
             <a href="#"
                class="dropdown-toggle"
                data-toggle="dropdown"
-               id="currentUser"
-               data-worker-pk="{{ request.worker.pk }}">{{ request.user.get_short_name }} <b class="caret"></b></a>
+               id="currentWorker"
+               data-pk="{{ request.worker.pk }}">{{ request.user.get_short_name }} <b class="caret"></b></a>
             <ul class="dropdown-menu">
               <li><a href="{% url 'settings' %}">{% trans 'Settings' %}</a></li>
               <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>

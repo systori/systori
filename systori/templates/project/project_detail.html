@@ -87,7 +87,6 @@
     margin-top: 0;
   }
   </style>
-
   <h2 class="sub-header">{% trans "Notes" %}</h2>
   <div class="table-responsive notes-table-responsive" style="padding-bottom:110px;">
     <table class="table table-striped notes-table">
@@ -99,23 +98,7 @@
       </thead>
       <tbody>
       {% for note in project.notes.all %}
-        <tr data-note-pk="{{ note.pk }}"
-            data-worker-pk="{{ note.worker.pk }}"
-            data-note-created="{{ note.created|unlocalize }}">
-          <td>
-            <nobr><b>{{ note.worker }}</b></nobr>
-            <br>
-            <span class="note-created" datetime="{{ note.created|unlocalize }}" style="color: grey;">
-              {{ note.created }}
-            </span>
-          </td>
-          <td>{{ note.text|markdown|safe }}
-            <note-btn-group class="btn-group btn-group-sm btn-group-note hidden" role="group">
-              <note-edit-button class="btn btn-sm btn-default"><span class="glyphicon glyphicon-edit"></span></note-edit-button>
-              <note-delete-button class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></note-delete-button>
-            </note-btn-group>
-          </td>
-        </tr>
+        {% include "main/note_customelement.html" with note=note %}
       {% endfor %}
         <tr>
           <td>{% trans "add a note:" %}</td>
@@ -577,6 +560,8 @@
   </div>
   <a href="{% url 'jobsite.create' project.id %}">{% trans "Create Job Site" %}</a>
 
+  {% include "main/note_template.html" %}
+  {% include "main/note_textarea_template.html" %}
 {% endblock %}
 
 
@@ -599,3 +584,4 @@
   </script>
   {% dart "notes.dart" %}
 {% endblock %}
+
