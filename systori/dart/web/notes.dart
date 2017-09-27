@@ -148,20 +148,23 @@ class NoteTableRow extends TableRowElement {
     }
 
     noteSave(Event e) {
-        print("hallo save");
+        if (e is MouseEvent || (e is KeyboardEvent && e.keyCode == 13 && e.shiftKey)) {
+            HttpRequest.request(note_url + pk.toString(),
+                    method: 'put',
+                    sendData: JSON.encode({'text': textarea.value}),
+                    requestHeaders: {
+                        "X-CSRFToken": CSRFToken,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }).then((_) =>
+                    HttpRequest.request(note_url + pk.toString(), method: 'get')
+                            .then((response) =>
+                            html_container.setInnerHtml(
+                                    JSON.decode(response.responseText)['html'],
+                                    treeSanitizer: NodeTreeSanitizer.trusted)));
         toggleDisplay();
-    }
-}
-
-class NoteTextArea extends TextAreaElement {
-    NoteTextArea.created(): super.created(){
-        if (children.isEmpty) {
-            TemplateElement template = document.querySelector('#note-textarea-template');
-            var clone = document.importNode(template.content, true);
-            append(clone);
         }
     }
-
 }
 
 
@@ -170,6 +173,14 @@ void main() {
     translated_save = querySelector('#translated_save').text;
     document.registerElement('note-tr', NoteTableRow, extendsTag: 'tr');
 
+    document.querySelector('#note-input').onKeyPress.listen((e) {
+       if (e.keyCode == 13 && e.shiftKey) {
+           e.preventDefault();
+           (document.querySelector('#note-form') as FormElement).submit();
+       }
+    });
+
     HtmlElement notes_container = document.querySelector(".notes-table-responsive");
+
     notes_container.scrollTop = notes_container.scrollHeight - notes_container.clientHeight;
 }

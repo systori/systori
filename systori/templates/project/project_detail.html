@@ -566,22 +566,6 @@
 
 
 {% block extra_js %}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/3.0.2/timeago.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/3.0.2/timeago.locales.min.js"></script>
-  <script type="text/javascript">
-    let timeagoInstance = timeago();
-    let nodes = document.querySelectorAll('.note-created');
-    timeagoInstance.render(nodes, document.documentElement.lang);
-
-    let noteForm = document.querySelector('#note-form');
-    let textarea = document.querySelector('#note-input');
-    textarea.addEventListener('keypress', (e) => {
-        if (e.shiftKey && e.keyCode === 13) {
-            e.preventDefault();
-            noteForm.submit();
-        }
-    });
-  </script>
   {% dart "notes.dart" %}
 {% endblock %}
 

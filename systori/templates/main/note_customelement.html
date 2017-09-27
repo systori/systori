@@ -15,9 +15,8 @@
     <div class="html_container">
       {{ note.html|safe }}
     </div>
-    <textarea class="hidden">
-      {{ note.text }}
-    </textarea>
+    {# textarea for note.text has to be in a single line (prevents whitespaces) #}
+    <textarea class="hidden">{{ note.text }}</textarea>
     <div class="btn-group btn-group-sm btn-group-note" role="group">
       <button id="note-edit-button" class="btn btn-sm btn-default hidden"><span class="glyphicon glyphicon-edit"></span></button>
       <button id="note-delete-button" class="btn btn-sm btn-danger hidden"><span class="glyphicon glyphicon-trash"></span></button>
