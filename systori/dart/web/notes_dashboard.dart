@@ -24,7 +24,7 @@ void createNote(BodyElement body, TableSectionElement notes, Map data) {
 
 void modifyNote(BodyElement body, TableSectionElement notes, Map data, {bool delete}) {
     var note = document.querySelector('tr[data-note-pk="${data['note-pk']}"]');
-    note.querySelector('td:nth-child(2)').innerHtml = data['html'];
+    note.querySelector('#note_html').setInnerHtml(data['html'], treeSanitizer: NodeTreeSanitizer.trusted);
     if (delete)
         note.remove();
 }
