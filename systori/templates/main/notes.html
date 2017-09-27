@@ -24,9 +24,9 @@
             {% if note.project %}<a href="{% url 'field.project' note.project.id %}">#{{ note.project.id }}</a>{% endif %}
             {{ note.worker }}
           </nobr><br>
-            <span class="note-created" datetime="{{ note.created|unlocalize }}">{{ note.created }}</span>
+            <span class="note-created">{{ note.created }}</span>
         </td>
-        <td>{{ note.html|safe }}</td>
+        <td id="note_html">{{ note.html|safe }}</td>
       </tr>
       {% endfor %}
       </tbody>
