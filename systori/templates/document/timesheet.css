@@ -16,7 +16,7 @@ table.month > thead > tr > td {
   text-align: center;
 }
 
-.table-striped > tbody > tr:nth-child(odd) {
+table.table-striped > tbody > tr:nth-child(even) > td {
   background-color: rgb(204, 255, 255);
 }
 

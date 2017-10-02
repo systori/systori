@@ -1097,3 +1097,7 @@ class TimesheetViewTests(ClientTestCase):
         self.assertEqual(sheet2.json['vacation_correction_notes'], 'added 6.5')
         self.assertEqual(sheet2.json['work_correction'], 7.5*60)
         self.assertEqual(sheet2.json['work_correction_notes'], 'added 7.5')
+
+    def test_pdf_generates_without_error(self):
+        self.create_january_timesheet()
+        self.client.get(reverse('timesheets.pdf', args=[2017, 1]))
