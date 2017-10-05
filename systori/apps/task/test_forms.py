@@ -77,15 +77,6 @@ class JobProgressFormTest(TestCase):
         self.user = UserFactory(company=self.company, language='en')
         self.worker = self.user.access.first()
 
-    def test_at_least_one_option_checked(self):
-        form = JobProgressForm(data={
-            'progress_worker': self.worker.id
-        })
-        self.assertFalse(form.is_valid())
-        self.assertEqual({
-            '__all__': ['At least one option is required.'],
-        }, form.errors)
-
     def test_status_complete_doesnt_require_progress_fields(self):
         form = JobProgressForm(data={'status_complete': 'true'})
         self.assertTrue(form.is_valid(), form.errors)
