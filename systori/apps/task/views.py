@@ -43,15 +43,10 @@ class JobProgress(UpdateView):
     template_name = "task/job_progress.html"
     form_class = JobProgressForm
 
-    def get_initial(self):
-        return {
-            'progress_worker': self.request.worker.id
-        }
-
-    def get_queryset(self):
-        return super().get_queryset() \
-            .prefetch_related('all_tasks') \
-            .prefetch_related('all_lineitems')
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **kwargs, workers=Company.active().active_workers()
+        )
 
     def get_success_url(self):
         return self.object.project.get_absolute_url()

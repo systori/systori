@@ -1,5 +1,7 @@
+from decimal import Decimal
 from django import forms
 from django.utils import timezone
+from django.utils import formats
 from django.utils.translation import ugettext_lazy as _
 from bootstrap import DateWidget
 
@@ -87,17 +89,42 @@ class JobProgressForm(forms.ModelForm):
         self.fields['progress_worker'].queryset = Company.active().active_workers()
 
     def clean(self):
-        if not any([self.cleaned_data['status_complete'], self.cleaned_data['progress_onehundred']]):
-            self.add_error(None, _('At least one option is required.'))
         if self.cleaned_data['progress_onehundred']:
             for field in ['progress_date', 'progress_worker', 'comment']:
                 if not self.cleaned_data[field]:
                     self.add_error(field, _('Required when setting progress to 100%.'))
+        else:
+            for task in self.instance.all_tasks.all():
+                if task.is_time_and_materials:
+                    for li in task.lineitems.all():
+                        expended = self.data.get('li-{}-expended'.format(li.id), None)
+                        if expended is None:
+                            self.add_error(None, _('Inconsistent state.'))
+                            return
+                        expended = formats.sanitize_separators(expended)
+                        value = str(expended).strip()
+                        try:
+                            Decimal(value)
+                        except:
+                            self.add_error(None, _('Invalid decimal.'))
+                else:
+                    complete = self.data.get('task-{}-complete'.format(task.id), None)
+                    if complete is None:
+                        self.add_error(None, _('Inconsistent state.'))
+                        return
+                    complete = formats.sanitize_separators(complete)
+                    value = str(complete).strip()
+                    try:
+                        Decimal(value)
+                    except:
+                        self.add_error(None, _('Invalid decimal.'))
 
     def save(self, commit=True):
         job = self.instance
+
         if self.cleaned_data['status_complete']:
             job.complete()
+
         if self.cleaned_data['progress_onehundred']:
             for task in job.all_tasks.all():
 
@@ -125,6 +152,38 @@ class JobProgressForm(forms.ModelForm):
                             complete=task.complete,
                             comment=self.cleaned_data['comment']
                         )
+
+        else:
+
+            for task in job.all_tasks.all():
+                if task.is_time_and_materials:
+                    for li in task.lineitems.all():
+                        expended_local = self.data['li-{}-expended'.format(li.id)]
+                        expended_canonical = formats.sanitize_separators(expended_local)
+                        new_expended = Decimal(expended_canonical.strip())
+                        if li.expended != new_expended:
+                            li.expended = new_expended
+                            li.save()
+                            ExpendReport.objects.create(
+                                worker=Worker.objects.get(pk=self.data['li-{}-worker'.format(li.id)]),
+                                lineitem=li,
+                                expended=li.expended,
+                                comment=self.data['li-{}-comment'.format(li.id)] or self.cleaned_data['comment']
+                            )
+                else:
+                    complete_local = self.data['task-{}-complete'.format(task.id)]
+                    complete_canonical = formats.sanitize_separators(complete_local)
+                    new_complete = Decimal(complete_canonical.strip())
+                    if task.complete != new_complete:
+                        task.complete = new_complete
+                        task.save()
+                        ProgressReport.objects.create(
+                            worker=Worker.objects.get(pk=self.data['task-{}-worker'.format(task.id)]),
+                            task=task,
+                            complete=task.complete,
+                            comment=self.data['task-{}-comment'.format(task.id)] or self.cleaned_data['comment']
+                        )
+
         return super().save(commit)
 
 

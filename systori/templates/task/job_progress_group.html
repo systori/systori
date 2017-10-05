@@ -1,0 +1,11 @@
+{% load i18n customformatting %}
+<tr style="background-color:#5da79d; color:white;">
+  <td>{{ group.code }}</td>
+  <td colspan="6">{{ group.name }}</td>
+</tr>
+{% for subgroup in group.groups.all %}
+  {% include "task/job_progress_group.html" with group=subgroup %}
+{% endfor %}
+{% for task in group.tasks.all %}
+  {% include "task/job_progress_task.html" with task=task %}
+{% endfor %}

@@ -75,7 +75,7 @@ class DocumentForm(forms.ModelForm):
     @property
     def json(self):
         json = {
-            'project_id' : self.instance.project.id
+            'project_id': self.instance.project.id
         }
 
         # Contact Details
