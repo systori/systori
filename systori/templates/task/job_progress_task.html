@@ -1,0 +1,39 @@
+{% load customformatting i18n l10n %}
+<tr>
+  <td>{{ task.code }}</td>
+  <td>{{ task.name|truncatechars:40 }}</td>
+  <td>{{ task.qty|ubrdecimal }}</td>
+  <td>{{ task.unit }}</td>
+  {% if task.is_time_and_materials %}
+  <td colspan="3"></td>
+  {% else %}
+  <td><input name="task-{{ task.id|unlocalize }}-complete" value="{{ task.complete|ubrdecimal }}"></td>
+  <td>
+    <select name="task-{{ task.id|unlocalize }}-worker">
+      {% for worker in workers %}
+      <option value="{{ worker.id }}">{{ worker }}</option>
+      {% endfor %}
+    </select>
+  </td>
+  <td><input name="task-{{ task.id|unlocalize }}-comment"></td>
+  {% endif %}
+</tr>
+{% if task.is_time_and_materials %}
+{% for li in task.lineitems.all %}
+  <tr>
+    <td>{{ li.code }}</td>
+    <td>{{ li.name|truncatechars:40 }}</td>
+    <td>{{ li.qty|ubrdecimal }}</td>
+    <td>{{ li.unit }}</td>
+    <td><input name="li-{{ li.id|unlocalize }}-expended" value="{{ li.expended|ubrdecimal }}"></td>
+    <td>
+      <select name="li-{{ li.id|unlocalize }}-worker">
+        {% for worker in workers %}
+          <option value="{{ worker.id }}">{{ worker }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td><input name="li-{{ li.id|unlocalize }}-comment"></td>
+  </tr>
+{% endfor %}
+{% endif %}

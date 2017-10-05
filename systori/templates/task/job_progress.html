@@ -18,6 +18,22 @@
   <form role="form" method="post">
     {% csrf_token %}
     {% bootstrap form %}
+    <table class="table table-condensed">
+      <thead>
+        <tr>
+          <th>{% trans 'code' %}</th>
+          <th>{% trans 'name' %}</th>
+          <th>{% trans 'offered' %}</th>
+          <th>{% trans 'unit' %}</th>
+          <th>{% trans 'completed' %}</th>
+          <th>{% trans 'worker' %}</th>
+          <th>{% trans 'comment' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% include "task/job_progress_group.html" with group=job %}
+      </tbody>
+    </table>
     <div class="form-group">
       <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
     </div>

@@ -103,7 +103,7 @@ def dockergetdb(container='postgres', envname='production'):
     local('rm ' + dump_file)
 
 
-def getdartium(version='1.22.0-dev.7.0', channel='dev'):
+def getdartium(version='1.24.2', channel='stable'):
     "get dartium and content-shell for linux, on Mac use homebrew"
 
     BIN = os.path.expanduser('~/bin')
