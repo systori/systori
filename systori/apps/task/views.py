@@ -43,6 +43,11 @@ class JobProgress(UpdateView):
     template_name = "task/job_progress.html"
     form_class = JobProgressForm
 
+    def get_initial(self):
+        return {
+            'progress_worker': self.request.worker.id
+        }
+
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             **kwargs, workers=Company.active().active_workers()
