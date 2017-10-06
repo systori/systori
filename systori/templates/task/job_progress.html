@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n bootstrap %}
+{% load i18n bootstrap dartium %}
 
 {% block head %}
   {{ block.super }}
@@ -18,15 +18,22 @@
   <form role="form" method="post">
     {% csrf_token %}
     {% bootstrap form %}
-    <table class="table table-condensed">
+    <table is="progress-table" class="table table-condensed">
       <thead>
         <tr>
           <th>{% trans 'code' %}</th>
           <th>{% trans 'name' %}</th>
           <th>{% trans 'offered' %}</th>
           <th>{% trans 'unit' %}</th>
-          <th>{% trans 'completed' %}</th>
-          <th>{% trans 'worker' %}</th>
+          <th>{% trans 'completed' %} <input type="checkbox" name="mark-complete"></th>
+          <th>
+            <select name="worker">
+            {% for worker in workers %}
+              <option value="{{ worker.id }}">{{ worker }}</option>
+            {% endfor %}
+            </select><br>
+            {% trans 'worker' %}
+          </th>
           <th>{% trans 'comment' %}</th>
         </tr>
       </thead>
@@ -43,4 +50,5 @@
 {% block extra_js %}
   {{ form.media.js }}
   {% fieldinit form %}
+  {% dart "progress_editor.dart" %}
 {% endblock %}
