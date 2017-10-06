@@ -28,6 +28,7 @@ transformers:
         - web/payment_editor.dart
         - web/project_list.dart
         - web/proposal_editor.dart
+        - web/progress_editor.dart
         - web/refund_editor.dart
         - web/timetracking.dart
         - web/goto_project.dart
