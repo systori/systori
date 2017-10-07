@@ -56,11 +56,9 @@ class JobProgressTest(ClientTestCase):
         )  # type: Job
 
     def test_get_form(self):
-        response = self.client.get(
+        self.client.get(
             reverse('job.progress', args=[self.job.project.pk, self.job.pk]),
         )
-        form = response.context['form']
-        self.assertEqual(form.initial, {'progress_worker': self.worker.id})
 
     def test_status_complete_happy_path(self):
         self.assertEqual(self.job.status, Job.DRAFT)
@@ -72,18 +70,21 @@ class JobProgressTest(ClientTestCase):
         self.job.refresh_from_db()
         self.assertEqual(self.job.status, Job.COMPLETED)
 
-    def test_progress_onehundred_fixed_price_happy_path(self):
+    def test_change_task_progress(self):
         task = TaskFactory(group=self.job, qty=10, price=5, total=50)
 
-        self.assertEqual(self.job.progress_percent, 0)
+        job = Job.objects.get()
+        self.assertEqual(job.progress_percent, 0)
         self.assertEqual(ProgressReport.objects.count(), 0)
 
         response = self.client.post(
             reverse('job.progress', args=[self.job.project.pk, self.job.pk]), {
                 'progress_onehundred': 'true',
                 'progress_date': '01/01/2001',
-                'progress_worker': self.worker.id,
-                'comment': 'the comment'
+                'comment': 'default comment',
+                'task-{}-complete'.format(task.id): 10,
+                'task-{}-worker'.format(task.id): self.worker.id,
+                'task-{}-comment'.format(task.id): 'specific comment'
             }
         )
         self.assertEqual(response.status_code, 302)
@@ -93,21 +94,38 @@ class JobProgressTest(ClientTestCase):
         progress = ProgressReport.objects.get()
         self.assertEqual(progress.task, task)
         self.assertEqual(progress.complete, 10)
+        self.assertEqual(progress.comment, 'specific comment')
         self.assertEqual(progress.worker, self.worker)
 
-    def test_progress_onehundred_time_and_materials_happy_path(self):
+    def test_change_task_progress_default_comment(self):
+        task = TaskFactory(group=self.job, qty=10, price=5, total=50)
+        self.client.post(
+            reverse('job.progress', args=[self.job.project.pk, self.job.pk]), {
+                'progress_date': '01/01/2001',
+                'comment': 'default comment',
+                'task-{}-complete'.format(task.id): 10,
+                'task-{}-worker'.format(task.id): self.worker.id,
+                'task-{}-comment'.format(task.id): ''
+            }
+        )
+        progress = ProgressReport.objects.get()
+        self.assertEqual(progress.comment, 'default comment')
+
+    def test_change_lineitem_progress(self):
         task = TaskFactory(group=self.job, qty=None, price=5, total=50)
         lineitem = LineItemFactory(task=task, qty=10, price=5, total=50)
 
-        self.assertEqual(self.job.progress_percent, 0)
-        self.assertEqual(ProgressReport.objects.count(), 0)
+        job = Job.objects.get()
+        self.assertEqual(job.progress_percent, 0)
+        self.assertEqual(ExpendReport.objects.count(), 0)
 
         response = self.client.post(
             reverse('job.progress', args=[self.job.project.pk, self.job.pk]), {
-                'progress_onehundred': 'true',
                 'progress_date': '01/01/2001',
-                'progress_worker': self.worker.id,
-                'comment': 'the comment'
+                'comment': 'default comment',
+                'li-{}-expended'.format(lineitem.id): 10,
+                'li-{}-worker'.format(lineitem.id): self.worker.id,
+                'li-{}-comment'.format(lineitem.id): 'specific comment',
             }
         )
         self.assertEqual(response.status_code, 302)
@@ -117,6 +135,7 @@ class JobProgressTest(ClientTestCase):
         expend = ExpendReport.objects.get()
         self.assertEqual(expend.lineitem, lineitem)
         self.assertEqual(expend.expended, 10)
+        self.assertEqual(expend.comment, 'specific comment')
         self.assertEqual(expend.worker, self.worker)
 
 
