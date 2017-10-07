@@ -40,7 +40,7 @@ class JobEditor(DetailView):
 
 class JobProgress(UpdateView):
     model = Job
-    template_name = "task/job_progress.html"
+    template_name = "task/progress/main.html"
     form_class = JobProgressForm
 
     def get_initial(self):

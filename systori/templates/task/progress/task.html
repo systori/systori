@@ -1,0 +1,11 @@
+{% load customformatting i18n l10n %}
+<tr {% if not task.is_time_and_materials %}is="progress-row"{% endif %}>
+  {% include "task/progress/row.html" with obj_type='task' obj=task complete=task.complete %}
+</tr>
+{% if task.is_time_and_materials %}
+{% for li in task.lineitems.all %}
+  <tr is="progress-row">
+    {% include "task/progress/row.html" with obj_type='li' obj=li complete=li.expended %}
+  </tr>
+{% endfor %}
+{% endif %}

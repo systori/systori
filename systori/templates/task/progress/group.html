@@ -4,8 +4,8 @@
   <td colspan="6">{{ group.name }}</td>
 </tr>
 {% for subgroup in group.groups.all %}
-  {% include "task/job_progress_group.html" with group=subgroup %}
+  {% include "task/progress/group.html" with group=subgroup %}
 {% endfor %}
 {% for task in group.tasks.all %}
-  {% include "task/job_progress_task.html" with task=task %}
+  {% include "task/progress/task.html" with task=task %}
 {% endfor %}
