@@ -25,7 +25,10 @@
           <th>{% trans 'name' %}</th>
           <th>{% trans 'offered' %}</th>
           <th>{% trans 'unit' %}</th>
-          <th><input type="checkbox"> {% trans 'completed' %}</th>
+          <th>
+            <input type="checkbox">
+            {% trans 'completed' %}
+          </th>
           <th>
             <select name="worker">
             {% for worker in workers %}
@@ -38,7 +41,7 @@
         </tr>
       </thead>
       <tbody>
-        {% include "task/job_progress_group.html" with group=job %}
+        {% include "task/progress/group.html" with group=job %}
       </tbody>
     </table>
     <div class="form-group">

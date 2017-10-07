@@ -1,0 +1,30 @@
+{% load customformatting i18n l10n %}
+
+  <td>{{ obj.code }}</td>
+  <td>{{ obj.name|truncatechars:40 }}</td>
+  <td>{{ obj.qty|ubrdecimal }}</td>
+  <td>{{ obj.unit }}</td>
+  {% if obj_type == "task" and obj.is_time_and_materials %}
+    <td colspan="3"></td>
+  {% else %}
+    <td>
+      <nobr>
+      <input type="checkbox" {% if complete >= obj.qty %}checked disabled{% endif %}>
+      <input class="complete" name="{{ obj_type }}-{{ obj.id|unlocalize }}-complete"
+             data-qty="{{ obj.qty|ubrdecimal }}"
+             data-original="{{ complete|ubrdecimal }}"
+             value="{{ complete|ubrdecimal }}">
+      <button type="button" class="btn btn-default btn-sm" style="visibility: hidden;" aria-label="Reset">
+        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+      </button>
+      </nobr>
+    </td>
+    <td>
+      <select name="{{ obj_type }}-{{ obj.id|unlocalize }}-worker">
+        {% for worker in workers %}
+          <option value="{{ worker.id }}">{{ worker }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td><input name="{{ obj_type }}-{{ obj.id|unlocalize }}-comment"></td>
+  {% endif %}
