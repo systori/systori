@@ -67,27 +67,3 @@ class JobFormTest(TestCase):
 
         job = Job.objects.get(id=new_job.id)
         self.assertEquals('02', job.code)
-
-
-class JobProgressFormTest(TestCase):
-
-    def setUp(self):
-        self.company = CompanyFactory()  # type: Company
-        self.project = ProjectFactory()  # type: Project
-        self.user = UserFactory(company=self.company, language='en')
-        self.worker = self.user.access.first()
-
-    def test_status_complete_doesnt_require_progress_fields(self):
-        form = JobProgressForm(data={'status_complete': 'true'})
-        self.assertTrue(form.is_valid(), form.errors)
-
-    def test_progress_onehundred_requires_other_fields(self):
-        form = JobProgressForm(data={
-            'progress_onehundred': 'true',
-        })
-        self.assertFalse(form.is_valid(), form.errors)
-        self.assertEqual({
-            'progress_date': ['Required when setting progress to 100%.'],
-            'progress_worker': ['Required when setting progress to 100%.'],
-            'comment': ['Required when setting progress to 100%.'],
-        }, form.errors)
