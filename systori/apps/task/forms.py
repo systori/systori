@@ -79,7 +79,7 @@ class JobProgressForm(forms.ModelForm):
         for task in self.instance.all_tasks.all():
             if task.is_time_and_materials:
                 for li in task.lineitems.all():
-                    expended = self.data.get('li-{}-expended'.format(li.id), None)
+                    expended = self.data.get('li-{}-complete'.format(li.id), None)
                     if expended is None:
                         self.add_error(None, _('Inconsistent state.'))
                         return
@@ -110,7 +110,7 @@ class JobProgressForm(forms.ModelForm):
         for task in job.all_tasks.all():
             if task.is_time_and_materials:
                 for li in task.lineitems.all():
-                    expended_local = self.data['li-{}-expended'.format(li.id)]
+                    expended_local = self.data['li-{}-complete'.format(li.id)]
                     expended_canonical = formats.sanitize_separators(expended_local)
                     new_expended = Decimal(expended_canonical.strip())
                     if li.expended != new_expended:

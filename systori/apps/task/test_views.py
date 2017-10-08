@@ -123,7 +123,7 @@ class JobProgressTest(ClientTestCase):
             reverse('job.progress', args=[self.job.project.pk, self.job.pk]), {
                 'progress_date': '01/01/2001',
                 'comment': 'default comment',
-                'li-{}-expended'.format(lineitem.id): 10,
+                'li-{}-complete'.format(lineitem.id): 10,
                 'li-{}-worker'.format(lineitem.id): self.worker.id,
                 'li-{}-comment'.format(lineitem.id): 'specific comment',
             }
