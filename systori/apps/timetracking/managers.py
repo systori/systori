@@ -2,7 +2,7 @@ from datetime import date, time, datetime, timedelta
 from collections import OrderedDict
 
 from django.db.models.query import QuerySet
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.db.transaction import atomic
 from django.utils.timezone import localtime, localdate, now, utc, make_aware
 from systori.lib.utils import GenOrderedDict, local_day_in_utc, local_month_range_in_utc
@@ -105,14 +105,14 @@ class TimerQuerySet(QuerySet):
         if not year:
             year = localdate().year
         schedule = {}
-        workers = [worker for worker in Company.active().tracked_workers()]
+        workers = list(Company.active().tracked_workers())
         for worker in workers:
             schedule[worker] = {}
             for month in range(1,13):
                 schedule[worker][month] = 0
             schedule[worker]['total'] = 0
             schedule[worker]['available'] = 0
-        for timer in self.filter(worker__in=workers, started__year=year, kind='vacation').order_by('started'):
+        for timer in self.filter(worker__in=workers, started__year=year, kind='vacation').order_by('started').select_related('worker'):
             schedule[timer.worker][timer.started.month] += timer.duration
             schedule[timer.worker]['total'] += timer.duration
         for worker in schedule:
@@ -120,14 +120,13 @@ class TimerQuerySet(QuerySet):
         return schedule
 
     def get_available_vacation(self, worker, year=None):
-        if not year:
-            year = localdate().year
-
-        holidays_used = 0
-        for timer in self.filter(worker=worker, started__year=year, kind='vacation'):
-            holidays_used += timer.duration
-
-        return worker.contract.vacation * 12 - holidays_used
+        year = year or localdate().year
+        allowed = worker.contract.vacation * 12
+        used = (
+            self.filter(worker=worker, started__year=year, kind='vacation')
+            .aggregate(holidays_used=Sum('duration'))['holidays_used']
+        )
+        return allowed - used
 
     def create_batch(self, worker, dates: datetime, start: time, stop: time,
                      commit=True, morning_break=True, lunch_break=True, **kwargs):

@@ -27,20 +27,8 @@ if True:
         'debug_toolbar.panels.logging.LoggingPanel',
         'debug_toolbar.panels.redirects.RedirectsPanel',
     )
-    DEBUG_TOOLBAR_CONFIG = {
-        'HIDE_IN_STACKTRACES': (
-            'socketserver',
-            'threading',
-            'wsgiref',
-            'debug_toolbar',
-            #'django.contrib.staticfiles',
-            #'django.core.servers',
-            #'django.core.handlers',
-            #'django.db.models.query',
-            #'django.db.models.sql'
-        )
-    }
-    INTERNAL_IPS = ('172.16.140.1')
+    INTERNAL_IPS = ('172.16.140.1','127.0.0.1')
+
 
 STATICFILES_DIRS += (
     ('dart/src', 'systori/dart/web'),
