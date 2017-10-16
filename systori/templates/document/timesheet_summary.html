@@ -60,4 +60,8 @@
     <td class="info">{{ timesheet.json.compensation_final|hours }}</td>
   </tr>
 
+  <tr>
+    <td>{% trans "Avail. Holidays"|safe %}<br><small>{% trans "(until end of year)" %}</small></td>
+    <td class="info">{{ available_holidays|workdays }}</td>
+  </tr>
 </table>

@@ -91,7 +91,8 @@ class FieldDashboard(TemplateView):
             'todays_plans': todays_plans,
             'previous_plans': previous_plans,
             'timesheet': Timesheet.objects.get_previous_or_current(worker),
-            'timer': Timer.objects.get_running_timer(worker)
+            'timer': Timer.objects.get_running_timer(worker),
+            'available_holidays': Timer.objects.get_available_vacation(worker=worker)
         })
 
         return context
