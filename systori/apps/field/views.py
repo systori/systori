@@ -82,8 +82,8 @@ class FieldDashboard(TemplateView):
         if worker.is_fake:
             todays_plans = previous_plans = []
         else:
-            todays_plans = self.request.worker.todays_plans.all()
-            previous_plans = self.request.worker.dailyplans \
+            todays_plans = worker.todays_plans.select_related('jobsite').all()
+            previous_plans = worker.dailyplans \
                 .filter(day__gt=days_ago(5)) \
                 .exclude(day=today).all()
 
