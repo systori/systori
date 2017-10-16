@@ -3,11 +3,15 @@ from datetime import datetime, timedelta
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
+from freezegun import freeze_time
 
 from systori.lib.testing import ClientTestCase
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
 from .models import Timer
+
+EST = timezone.get_fixed_timezone(-5)
+NOW = datetime(2014, 1, 1, 7, 0, 0, 0, EST)  # year of birth of Systori
 
 
 class UserReportViewTest(ClientTestCase):
@@ -128,3 +132,20 @@ class TimerDeleteViewTest(ClientTestCase):
             'timetracking_worker', args=[self.worker.id]
         ), status_code=302)
         self.assertFalse(Timer.objects.exists())
+
+
+@freeze_time(NOW)
+class TimerVacationScheduleTest(ClientTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.timer0 = Timer.objects.create(worker=self.worker, started=NOW+timedelta(days=1),
+                                           stopped=NOW+timedelta(days=1,hours=8), kind='vacation')
+        self.timer1 = Timer.objects.create(worker=self.worker, started=NOW+timedelta(days=2),
+                                           stopped=NOW+timedelta(days=2,hours=8), kind='vacation')
+
+    def test_get_vacation_schedule(self):
+        response = self.client.get(reverse('timetracking.vacation.schedule')) # renders?
+        schedule = Timer.objects.get_vacation_schedule(NOW)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(schedule[self.worker]['available'], 13440) # 2 days vacation, 28 days expected to be available

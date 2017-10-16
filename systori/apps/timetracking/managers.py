@@ -101,6 +101,23 @@ class TimerQuerySet(QuerySet):
             .get(worker, {})
         )
 
+    def get_vacation_schedule(self, year: date):
+        assert isinstance(year, date)
+        schedule = {}
+        workers = [worker for worker in Company.active().tracked_workers()]
+        for worker in workers:
+            schedule[worker] = {}
+            for month in range(1,13):
+                schedule[worker][month] = 0
+            schedule[worker]['total'] = 0
+            schedule[worker]['available'] = 0
+        for timer in self.filter(worker__in=workers, started__year=year.year, kind='vacation').order_by('started'):
+            schedule[timer.worker][timer.started.month] += timer.duration
+            schedule[timer.worker]['total'] += timer.duration
+        for worker in schedule:
+            schedule[worker]['available'] = worker.contract.vacation * 12 - schedule[worker]['total']
+        return schedule
+
     def create_batch(self, worker, dates: datetime, start: time, stop: time,
                      commit=True, morning_break=True, lunch_break=True, **kwargs):
 
