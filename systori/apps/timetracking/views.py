@@ -48,6 +48,17 @@ class HomeView(BaseCreateView, PeriodFilterMixin):
         return self.request.META['HTTP_REFERER']
 
 
+class VacationScheduleView(ListView):
+    template_name = 'timetracking/vacation.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def get_queryset(self):
+        return Timer.objects.get_vacation_schedule(timezone.localdate())
+
+
 class WorkerReportView(BaseCreateView, PeriodFilterMixin):
     template_name = 'timetracking/user_report.html'
     form_class = forms.WorkerManualTimerForm
