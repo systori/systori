@@ -56,7 +56,7 @@ class VacationScheduleView(ListView):
         return context
 
     def get_queryset(self):
-        return Timer.objects.get_vacation_schedule(timezone.localdate())
+        return Timer.objects.get_vacation_schedule(timezone.localdate().year)
 
 
 class WorkerReportView(BaseCreateView, PeriodFilterMixin):

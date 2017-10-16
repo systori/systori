@@ -96,7 +96,7 @@
 
       {% if timesheet %}
 
-        {% include "document/timesheet_summary.html" with timesheet=timesheet extra_css="table-striped"%}
+        {% include "document/timesheet_summary.html" with timesheet=timesheet available_holidays=available_holidays extra_css="table-striped"%}
 
       {% else %}
 

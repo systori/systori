@@ -6,11 +6,11 @@ ALLOWED_HOSTS = ['.'+SERVER_NAME]
 
 DEBUG = True
 
-if False:
+if True:
     INSTALLED_APPS += (
         'debug_toolbar',
     )
-    MIDDLEWARE_CLASSES += (
+    MIDDLEWARE += (
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     )
     DEBUG_TOOLBAR_PANELS = (
@@ -40,6 +40,7 @@ if False:
             #'django.db.models.sql'
         )
     }
+    INTERNAL_IPS = ('172.16.140.1')
 
 STATICFILES_DIRS += (
     ('dart/src', 'systori/dart/web'),
