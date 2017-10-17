@@ -1,5 +1,5 @@
 coverage
-selenium==2.53.6
+selenium
 factory-boy
-freezegun==0.3.7
+freezegun
 pypdf2

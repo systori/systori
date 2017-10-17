@@ -273,6 +273,23 @@ class CloningTests(TestCase):
         #       structure or pad a smaller structure to make it fit.
         # TODO: Test that correction lineitems don't get copied.
 
+    def test_clone_without_group(self):
+        job = JobFactory(project=ProjectFactory(structure='01.01'))
+        task = TaskFactory(
+            group=job,
+            name="running task",
+            qty=7, complete=7, status=Task.RUNNING,
+            started_on=datetime.date.today(),
+            completed_on=datetime.date.today()
+        )
+        LineItemFactory(task=task)
+
+        new_job = JobFactory(project=ProjectFactory(structure='01.01'))
+        self.assertEqual(new_job.tasks.count(), 0)
+
+        job.clone_to(new_job)
+        self.assertEqual(new_job.tasks.count(), 1)
+
 
 class GroupTests(TestCase):
 

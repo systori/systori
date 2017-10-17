@@ -1,11 +1,12 @@
+import datetime
 from django.urls import reverse
 
 from systori.lib.testing import ClientTestCase
 
 from ..project.factories import ProjectFactory
 
-from .factories import JobFactory, TaskFactory, LineItemFactory
-from .models import Job, ProgressReport, ExpendReport
+from .factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
+from .models import Task, Job, ProgressReport, ExpendReport
 
 
 class JobViewsTest(ClientTestCase):
@@ -141,16 +142,22 @@ class JobProgressTest(ClientTestCase):
 
 class JobCopyTest(ClientTestCase):
 
-    def setUp(self):
-        super().setUp()
+    def test_copy_job_010101(self):
         self.project = ProjectFactory()
         self.job = JobFactory(
             name='job name',
             description='new job description',
-            project=self.project
+            project=self.project,
         )  # type: Job
-
-    def test_copy_job_regular(self):
+        self.group = GroupFactory(name="my group", parent=self.job)
+        self.task = TaskFactory(
+            group = self.group,
+            name = "some task",
+            qty=7, complete=7, status=Task.RUNNING,
+            started_on = datetime.date.today(),
+            completed_on = datetime.date.today(),
+        )
+        LineItemFactory(task=self.task)
         response = self.client.get(
             reverse('job.copy', args=[self.project.pk])
         )
@@ -162,18 +169,63 @@ class JobCopyTest(ClientTestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.project.jobs.count(), 2)
+        self.assertEqual(
+            self.project.jobs.first().groups.first().tasks.first().name,
+            self.project.jobs.last().groups.first().tasks.first().name
+        )
+        self.assertEqual(
+            self.project.jobs.first().name,
+            self.project.jobs.last().name
+        )
+        self.assertEqual(
+            self.project.jobs.first().groups.first().tasks.first().lineitems.first().name,
+            self.project.jobs.last().groups.first().tasks.first().lineitems.first().name,
+        )
+
+    def test_copy_job_0101(self):
+        self.project = ProjectFactory(structure='01.01')
+        self.job = JobFactory(
+            name='job name',
+            description='new job description',
+            project=self.project,
+        )  # type: Job
+        self.task = TaskFactory(
+            group = self.job,
+            name = "some task",
+            qty=7, complete=7, status=Task.RUNNING,
+            started_on = datetime.date.today(),
+            completed_on = datetime.date.today(),
+        )
+        LineItemFactory(task=self.task)
+        response = self.client.get(
+            reverse('job.copy', args=[self.project.pk])
+        )
+        form = response.context['form']
+        self.assertFalse(form.is_valid())
+        response = self.client.post(
+            reverse('job.copy', args=[self.project.pk]),
+            {'job_id':self.job.pk}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.project.jobs.count(), 2)
+        self.assertEqual(
+            self.project.jobs.first().tasks.first().name,
+            self.project.jobs.last().tasks.first().name
+        )
 
     def test_error_on_incompatible_structure(self):
-        self.project2 = ProjectFactory(structure="01.001")
-        response = self.client.post(
-            reverse('job.copy', args=[self.project2.pk]),
-            {'job_id': self.job.pk}
+        project = ProjectFactory()
+        job = JobFactory(project=project)
+        project2 = ProjectFactory(structure="01.001")
+        self.client.post(
+            reverse('job.copy', args=[project2.pk]),
+            {'job_id': job.pk}
         ) # fails because of incompatible project.structure
-        self.assertEqual(self.project2.jobs.count(), 0)
-        self.job2 = JobFactory(project=self.project2) #creates first job on project2
-        response = self.client.post(
-            reverse('job.copy', args=[self.project2.pk]),
-            {'job_id': self.job2.pk}
+        self.assertEqual(project2.jobs.count(), 0)
+        job2 = JobFactory(project=project2) #creates first job on project2
+        self.client.post(
+            reverse('job.copy', args=[project2.pk]),
+            {'job_id': job2.pk}
         ) # creates second job on project2
-        self.assertEqual(self.project2.jobs.count(), 2)
+        self.assertEqual(project2.jobs.count(), 2)
 

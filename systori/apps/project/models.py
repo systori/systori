@@ -282,13 +282,13 @@ class Project(models.Model):
     def has_billable_contact(self):
         return self.billable_contact is not None
 
-    def can_receive_job(self, other_job):
-        return self.structure_depth == other_job.project.structure_depth
+    def can_receive_job(self, source_job):
+        return self.structure_depth == source_job.project.structure_depth
 
-    def receive_job(self, other_job):
-        if self.can_receive_job(other_job):
-            new_job = Job.objects.create(project=self, name=other_job.name, order=None)
-            other_job.clone_to(new_job)
+    def receive_job(self, source_job):
+        if self.can_receive_job(source_job):
+            new_job = Job.objects.create(project=self, name=source_job.name, order=None)
+            source_job.clone_to(new_job)
             return True
         return False
 

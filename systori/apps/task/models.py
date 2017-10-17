@@ -338,6 +338,8 @@ class Job(Group):
     def clone_to(self, new_job, *args):
         for group in self.groups.all():
             group.clone_to(new_job.root, None)
+        for task in self.tasks.all():
+            task.clone_to(new_job.root, task.order)
 
 
 class TaskQuerySet(SearchableModelQuerySet):
