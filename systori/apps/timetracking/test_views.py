@@ -146,6 +146,12 @@ class TimerVacationScheduleTest(ClientTestCase):
 
     def test_get_vacation_schedule(self):
         response = self.client.get(reverse('timetracking.vacation.schedule')) # renders?
-        schedule = Timer.objects.get_vacation_schedule(NOW)
+        schedule = Timer.objects.get_vacation_schedule(year=NOW.year)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(schedule[self.worker]['available'], 13440) # 2 days vacation, 28 days expected to be available
+
+    def test_get_available_vacation(self):
+        self.assertEqual(
+            Timer.objects.get_available_vacation(worker=self.worker, year=NOW.year),
+            13440
+        )

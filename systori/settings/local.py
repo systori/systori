@@ -27,7 +27,6 @@ if True:
         'debug_toolbar.panels.logging.LoggingPanel',
         'debug_toolbar.panels.redirects.RedirectsPanel',
     )
-    INTERNAL_IPS = ('172.16.140.1','127.0.0.1')
 
 
 STATICFILES_DIRS += (

@@ -51,10 +51,6 @@ class HomeView(BaseCreateView, PeriodFilterMixin):
 class VacationScheduleView(ListView):
     template_name = 'timetracking/vacation.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
     def get_queryset(self):
         return Timer.objects.get_vacation_schedule(timezone.localdate().year)
 
