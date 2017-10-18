@@ -67,12 +67,12 @@
       <tbody>
       {% for worker, durations in object_list.items %}
       <tr>
-        <td><nobr>{{ worker }}</nobr></td>
-        {% for month, duration in durations.items %}
+        <td><nobr><a href="{% url 'timetracking_worker' worker.pk %}">{{ worker }}</a></nobr></td>
+        {% for period, duration in durations.items %}
           {% if forloop.last %}
             <td><b>{{ duration|workdays }}</b></td>
           {% else %}
-            <td>{{ duration|workdays:False }}</td>
+            <td><a href="{% url 'timetracking_worker' worker.pk %}?period={{ period }}">{{ duration|workdays:False }}</a></td>
           {% endif %}
         {% endfor %}
       </tr>

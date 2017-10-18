@@ -6,7 +6,7 @@ ALLOWED_HOSTS = ['.'+SERVER_NAME]
 
 DEBUG = True
 
-if False:
+if True:
     INSTALLED_APPS += (
         'debug_toolbar',
     )

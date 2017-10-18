@@ -2956,5 +2956,5 @@ msgstr "Verfügbar"
 
 #: systori/templates/timetracking/vacation.html:45
 msgid "Already used as well as forecast for future holidays (in Days)."
-msgstr "Bereits verbrauchte sowie Prognose für zukünftige Urlaubstage (in Tagen)."
+msgstr "Bereits verbrauchte, sowie Prognose für zukünftige, Urlaubstage (in Tagen)."
 

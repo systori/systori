@@ -204,6 +204,15 @@ class Contract(models.Model, RateType):
     )
 
     @property
+    def yearly_vacation_claim(self):
+        if not self.effective:
+            return 0
+        elif self.effective.year == timezone.now().year:
+            return (13 - self.effective.month) * self.vacation
+        else:
+            return 12 * self.vacation
+
+    @property
     def morning_break(self) -> BreakSpan:
         if self.morning_break_start and self.morning_break_end:
             return BreakSpan(self.morning_break_start, self.morning_break_end)

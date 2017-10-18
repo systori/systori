@@ -96,6 +96,7 @@ class TimerQuerySet(QuerySet):
         assert isinstance(month, date)
         return (
             self.month(month.year, month.month, worker=worker)
+            .select_related('worker')
             .order_by('started')
             .get_report('worker')
             .get(worker, {})
@@ -109,24 +110,24 @@ class TimerQuerySet(QuerySet):
         for worker in workers:
             schedule[worker] = {}
             for month in range(1,13):
-                schedule[worker][month] = 0
+                schedule[worker]['{}.{}'.format(month,year)] = 0
             schedule[worker]['total'] = 0
             schedule[worker]['available'] = 0
         for timer in self.filter(worker__in=workers, started__year=year, kind='vacation').order_by('started').select_related('worker'):
-            schedule[timer.worker][timer.started.month] += timer.duration
+            schedule[timer.worker]['{}.{}'.format(timer.started.month, year)] += timer.duration
             schedule[timer.worker]['total'] += timer.duration
         for worker in schedule:
-            schedule[worker]['available'] = worker.contract.vacation * 12 - schedule[worker]['total']
+            schedule[worker]['available'] = worker.contract.yearly_vacation_claim - schedule[worker]['total']
+
         return schedule
 
     def get_available_vacation(self, worker, year=None):
         year = year or localdate().year
-        allowed = worker.contract.vacation * 12
         used = (
             self.filter(worker=worker, started__year=year, kind='vacation')
             .aggregate(holidays_used=Sum('duration'))['holidays_used']
         )
-        return allowed - used
+        return worker.contract.yearly_vacation_claim - used
 
     def create_batch(self, worker, dates: datetime, start: time, stop: time,
                      commit=True, morning_break=True, lunch_break=True, **kwargs):
