@@ -1,7 +1,6 @@
 -r base.pip
 
-#git+https://github.com/django/django.git@cb362a6
-django==2.0a1
+django==2.0b1
 djangorestframework
 django-fsm
 jsonfield
