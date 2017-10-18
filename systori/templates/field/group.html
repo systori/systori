@@ -28,14 +28,14 @@
 
           <a href="{% url 'field.dailyplan.group' jobsite.id dailyplan.url_id group.pk %}"
             class="list-group-item sub-header clearfix searchable">
-            {{ group.code }} {{ group.name }}
+            {{ group.code }} {{ group.name|safe }}
           </a>
 
           {% if subgroups_have_subgroups %}
             {% for subgroup in group.groups.all %}
               <a href="{% url 'field.dailyplan.group' jobsite.id dailyplan.url_id subgroup.pk %}"
                 class="list-group-item clearfix searchable">
-                {{ subgroup.code }} {{ subgroup.name }}
+                {{ subgroup.code }} {{ subgroup.name|safe }}
               </a>
             {% endfor %}
           {% endif %}
@@ -45,15 +45,11 @@
               {% task_dailyplans_count task dailyplan.day as is_assigned %}
               <a name="{{ task.id }}" id="task_{{forloop.parentloop.counter0}}_{{ forloop.counter0 }}" href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={% url 'field.dailyplan.group' jobsite.id dailyplan.url_id %}#{{ task.id }}"
                  class="list-group-item clearfix{% if is_assigned %} list-group-item-success{% endif %} searchable">
-                {{ task.code }} <b>{{ task.name }}</b> {% if task.is_optional %} <span class="label label-warning">{% trans 'Optional' %}</span> {% endif %}<br>
-                {{ task.description }}<br>
+                {{ task.code }} <b>{{ task.name|safe }}</b> {% if task.is_optional %} <span class="label label-warning">{% trans 'Optional' %}</span> {% endif %}<br>
+                {{ task.description|safe }}<br>
                 {{ task.qty|ubrdecimal }} {{ task.unit }}
-                {% if task.complete_percent > 0 %}
                   <span class="badge">{{ task.complete_percent }}%</span>
                   <span class="badge">{{ task.complete|ubrdecimal }} {{ task.unit }}</span>
-                {% else %}
-                  <span class="pull-right">&raquo;</span>
-                {% endif %}
               </a>
             {% endfor %}
           {% endif %}

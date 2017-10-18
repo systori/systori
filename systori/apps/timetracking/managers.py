@@ -126,6 +126,7 @@ class TimerQuerySet(QuerySet):
         used = (
             self.filter(worker=worker, started__year=year, kind='vacation')
             .aggregate(holidays_used=Sum('duration'))['holidays_used']
+            or 0
         )
         return worker.contract.yearly_vacation_claim - used
 
