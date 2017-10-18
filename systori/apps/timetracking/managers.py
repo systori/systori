@@ -105,10 +105,10 @@ class TimerQuerySet(QuerySet):
     def get_vacation_schedule(self, year=None):
         if not year:
             year = localdate().year
-        schedule = {}
+        schedule = OrderedDict()
         workers = list(Company.active().tracked_workers().order_by('user__last_name'))
         for worker in workers:
-            schedule[worker] = {}
+            schedule[worker] = OrderedDict()
             for month in range(1,13):
                 schedule[worker]['{}.{}'.format(month,year)] = 0
             schedule[worker]['total'] = 0
