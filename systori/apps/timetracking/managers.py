@@ -106,7 +106,7 @@ class TimerQuerySet(QuerySet):
         if not year:
             year = localdate().year
         schedule = {}
-        workers = list(Company.active().tracked_workers())
+        workers = list(Company.active().tracked_workers().order_by('user__last_name'))
         for worker in workers:
             schedule[worker] = {}
             for month in range(1,13):

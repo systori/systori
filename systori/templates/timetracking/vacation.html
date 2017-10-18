@@ -72,7 +72,11 @@
           {% if forloop.last %}
             <td><b>{{ duration|workdays }}</b></td>
           {% else %}
-            <td><a href="{% url 'timetracking_worker' worker.pk %}?period={{ period }}">{{ duration|workdays:False }}</a></td>
+            {% if forloop.counter < 13 %}
+              <td><a href="{% url 'timetracking_worker' worker.pk %}?period={{ period }}">{{ duration|workdays:False }}</a></td>
+            {% else %}
+              <td>{{ duration|workdays:False }}</td>
+            {% endif %}
           {% endif %}
         {% endfor %}
       </tr>
