@@ -319,7 +319,7 @@ msgstr "Lieferant"
 msgid "Architect"
 msgstr "Architekt"
 
-#: systori/apps/directory/models.py:49 systori/apps/task/models.py:553
+#: systori/apps/directory/models.py:49 systori/apps/task/models.py:555
 #: systori/lib/accounting/models.py:324
 msgid "Other"
 msgstr "Andere"
@@ -388,7 +388,7 @@ msgid "Sent"
 msgstr "Gesendet"
 
 #: systori/apps/document/models.py:170 systori/apps/task/models.py:253
-#: systori/apps/task/models.py:390
+#: systori/apps/task/models.py:392
 msgid "Approved"
 msgstr "beauftragt"
 
@@ -469,8 +469,8 @@ msgstr "Mustermann"
 #: systori/apps/document/models.py:365 systori/apps/document/models.py:420
 #: systori/apps/equipment/models.py:15 systori/apps/equipment/models.py:38
 #: systori/apps/inventory/models.py:8 systori/apps/inventory/models.py:14
-#: systori/apps/task/models.py:80 systori/apps/task/models.py:354
-#: systori/apps/task/models.py:531 systori/lib/accounting/models.py:60
+#: systori/apps/task/models.py:80 systori/apps/task/models.py:356
+#: systori/apps/task/models.py:533 systori/lib/accounting/models.py:60
 #: systori/templates/accounting/account_list.html:12
 #: systori/templates/accounting/account_list.html:41
 #: systori/templates/company/company_list.html:12
@@ -641,8 +641,8 @@ msgstr "Projekt"
 msgid "Code"
 msgstr "Nummer"
 
-#: systori/apps/document/type/evidence.py:56 systori/apps/task/models.py:405
-#: systori/apps/task/models.py:406
+#: systori/apps/document/type/evidence.py:56 systori/apps/task/models.py:407
+#: systori/apps/task/models.py:408
 #: systori/templates/task/progressreport_list.html:13
 msgid "Task"
 msgstr "Position"
@@ -712,8 +712,8 @@ msgid "Amount"
 msgstr "Menge"
 
 #: systori/apps/document/type/itemized_listing.py:36
-#: systori/apps/inventory/models.py:9 systori/apps/task/models.py:365
-#: systori/apps/task/models.py:539
+#: systori/apps/inventory/models.py:9 systori/apps/task/models.py:367
+#: systori/apps/task/models.py:541
 #: systori/templates/document/invoice/header.html:107
 #: systori/templates/document/proposal/header.html:55
 msgid "Price"
@@ -724,13 +724,14 @@ msgstr "Preis"
 #: systori/apps/document/type/itemized_listing.py:64
 #: systori/apps/document/type/itemized_listing.py:127
 #: systori/apps/document/type/timesheet.py:49
-#: systori/apps/document/views.py:267 systori/apps/task/models.py:367
-#: systori/apps/task/models.py:542
+#: systori/apps/document/views.py:267 systori/apps/task/models.py:369
+#: systori/apps/task/models.py:544
 #: systori/templates/document/base/subtotal.html:9
 #: systori/templates/document/invoice/header.html:108
 #: systori/templates/document/proposal/header.html:56
 #: systori/templates/field/timers.html:24
-#: systori/templates/timetracking/home.html:75
+#: systori/templates/timetracking/home.html:92
+#: systori/templates/timetracking/vacation.html:63
 msgid "Total"
 msgstr "Summe"
 
@@ -926,7 +927,7 @@ msgstr "angeboten"
 msgid "Started"
 msgstr "gestarted"
 
-#: systori/apps/task/models.py:255 systori/apps/task/models.py:363
+#: systori/apps/task/models.py:255 systori/apps/task/models.py:365
 msgid "Completed"
 msgstr "fertiggestellt"
 
@@ -945,7 +946,7 @@ msgstr "Los"
 msgid "Start"
 msgstr "Start"
 
-#: systori/apps/task/models.py:302 systori/apps/task/models.py:514
+#: systori/apps/task/models.py:302 systori/apps/task/models.py:516
 msgid "Complete"
 msgstr "fertigstellen"
 
@@ -953,24 +954,24 @@ msgstr "fertigstellen"
 msgid "Task Groups"
 msgstr "Gruppen"
 
-#: systori/apps/task/models.py:361 systori/apps/task/models.py:533
+#: systori/apps/task/models.py:363 systori/apps/task/models.py:535
 msgid "Quantity"
 msgstr "Menge"
 
-#: systori/apps/task/models.py:364 systori/apps/task/models.py:537
+#: systori/apps/task/models.py:366 systori/apps/task/models.py:539
 msgid "Unit"
 msgstr "Einheit"
 
-#: systori/apps/task/models.py:391
+#: systori/apps/task/models.py:393
 msgid "Ready"
 msgstr "bereit"
 
-#: systori/apps/task/models.py:392 systori/templates/field/dashboard.html:73
+#: systori/apps/task/models.py:394 systori/templates/field/dashboard.html:73
 #: systori/templates/field/dashboard.html:80
 msgid "Running"
 msgstr "läuft"
 
-#: systori/apps/task/models.py:393
+#: systori/apps/task/models.py:395
 msgid "Done"
 msgstr "fertig"
 
@@ -978,19 +979,19 @@ msgstr "fertig"
 msgid "Billable"
 msgstr "Abrechenbar"
 
-#: systori/apps/task/models.py:577
+#: systori/apps/task/models.py:579
 msgid "Line Item"
 msgstr "Kalkulation"
 
-#: systori/apps/task/models.py:578 systori/templates/field/task.html:87
+#: systori/apps/task/models.py:580 systori/templates/field/task.html:87
 msgid "Line Items"
 msgstr "Kalkulationen"
 
-#: systori/apps/task/models.py:524
+#: systori/apps/task/models.py:526
 msgid "Progress Report"
 msgstr "Stundenzettel"
 
-#: systori/apps/task/models.py:525 systori/templates/field/task.html:102
+#: systori/apps/task/models.py:527 systori/templates/field/task.html:102
 #: systori/templates/main/menu_dropdown.html:20
 msgid "Progress Reports"
 msgstr "Aufmaß Meldungen"
@@ -1020,11 +1021,11 @@ msgid "Overtime"
 msgstr "Überstunden"
 
 #: systori/templates/task/progressreport_list.html:12
-#: systori/templates/timetracking/home.html:73
+#: systori/templates/timetracking/home.html:90
 msgid "User"
 msgstr "Benutzer"
 
-#: systori/templates/timetracking/home.html:44
+#: systori/templates/timetracking/home.html:46
 #: systori/templates/timetracking/user_report.html:24
 msgid "Time Report for"
 msgstr "Stundenübersicht für"
@@ -1269,7 +1270,7 @@ msgstr "Haben"
 #: systori/templates/project/project_detail.html:109
 #: systori/templates/task/job_form.html:11
 #: systori/templates/task/progress/main.html:48
-#: systori/templates/timetracking/home.html:65
+#: systori/templates/timetracking/home.html:82
 #: systori/templates/timetracking/user_report.html:45
 #: systori/templates/user/user_form.html:24
 msgid "Save"
@@ -1585,7 +1586,7 @@ msgstr "Angebotsdetails"
 msgid "Equipment Details"
 msgstr "Ausrüstungsdetails"
 
-#: systori/apps/task/models.py:552
+#: systori/apps/task/models.py:554
 #: systori/templates/equipment/equipment_list.html:27
 #: systori/templates/field/assign_equipment.html:27
 #: systori/templates/field/dailyplan.html:56
@@ -1609,7 +1610,7 @@ msgstr "Planung"
 msgid "Assign"
 msgstr "verknüpfen"
 
-#: systori/apps/task/models.py:551 systori/templates/field/assign_labor.html:27
+#: systori/apps/task/models.py:553 systori/templates/field/assign_labor.html:27
 #: systori/templates/project/project_planning.html:205
 #: systori/templates/task/editor/main.html:545
 msgid "Labor"
@@ -2012,7 +2013,7 @@ msgstr "Administration"
 msgid "Generate Password"
 msgstr "Passwort generieren"
 
-#: systori/templates/timetracking/home.html:92
+#: systori/templates/timetracking/home.html:109
 #, fuzzy
 msgid "No users"
 msgstr "Benutzer"
@@ -2148,7 +2149,8 @@ msgstr "in Minuten"
 msgid "Geolocating..."
 msgstr "finde Position..."
 
-#: systori/templates/timetracking/home.html:52
+#: systori/templates/timetracking/home.html:54
+#: systori/templates/timetracking/home.html:69
 #: systori/templates/timetracking/user_report.html:32
 msgid "Show"
 msgstr "Zeige"
@@ -2328,7 +2330,7 @@ msgstr "Minderstunden"
 msgid "Timers"
 msgstr "Stoppuhren"
 
-#: systori/templates/timetracking/home.html:74
+#: systori/templates/timetracking/home.html:91
 msgid "Timer"
 msgstr "Stoppuhr"
 
@@ -2707,23 +2709,23 @@ msgstr "Los auf \"fertiggestellt\" setzen."
 msgid "Progress Date"
 msgstr "Fortschrittsdatum."
 
-#: systori/apps/task/models.py:535 systori/apps/task/models.py:630
+#: systori/apps/task/models.py:537 systori/apps/task/models.py:632
 msgid "Expended"
 msgstr "Verbrauch"
 
-#: systori/apps/task/models.py:550 systori/templates/task/editor/main.html:543
+#: systori/apps/task/models.py:552 systori/templates/task/editor/main.html:543
 msgid "Material"
 msgstr "Material"
 
-#: systori/apps/task/models.py:561
+#: systori/apps/task/models.py:563
 msgid "Line Item Type"
 msgstr "Typ des Kalkulationselements"
 
-#: systori/apps/task/models.py:640
+#: systori/apps/task/models.py:642
 msgid "Expend Report"
 msgstr "Verbrauchsmeldung"
 
-#: systori/apps/task/models.py:641
+#: systori/apps/task/models.py:643
 msgid "Expend Reports"
 msgstr "Verbrauchsmeldungen"
 
@@ -2882,4 +2884,77 @@ msgstr "Anhänge"
 #: systori/templates/task/progress/main.html:38
 msgid "worker"
 msgstr "Arbeiter"
+
+#: systori/templates/document/timesheet_summary.html:65
+msgid "Avail. Holidays"
+msgstr "Freie Urlaubstage"
+
+#: systori/templates/document/timesheet_summary.html:66
+msgid "(Estimate until the end of year)"
+msgstr "(Schätzung bis Ende des Jahres)"
+
+#: systori/templates/timetracking/home.html:65
+#: systori/templates/timetracking/vacation.html:44
+msgid "Vacation Schedule"
+msgstr "Urlaubsplan"
+
+#: systori/templates/timetracking/vacation.html:50
+msgid "Worker"
+msgstr "Arbeiter"
+
+#: systori/templates/timetracking/vacation.html:51
+msgid "Jan"
+msgstr "Jan"
+
+#: systori/templates/timetracking/vacation.html:52
+msgid "Feb"
+msgstr "Feb"
+
+#: systori/templates/timetracking/vacation.html:53
+msgid "Mar"
+msgstr "Mär"
+
+#: systori/templates/timetracking/vacation.html:54
+msgid "Apr"
+msgstr "Apr"
+
+#: systori/templates/timetracking/vacation.html:55
+msgid "May"
+msgstr "Mai"
+
+#: systori/templates/timetracking/vacation.html:56
+msgid "Jun"
+msgstr "Jun"
+
+#: systori/templates/timetracking/vacation.html:57
+msgid "Jul"
+msgstr "Jul"
+
+#: systori/templates/timetracking/vacation.html:58
+msgid "Aug"
+msgstr "Aug"
+
+#: systori/templates/timetracking/vacation.html:59
+msgid "Sep"
+msgstr "Sept"
+
+#: systori/templates/timetracking/vacation.html:60
+msgid "Oct"
+msgstr "Okt"
+
+#: systori/templates/timetracking/vacation.html:61
+msgid "Nov"
+msgstr "Nov"
+
+#: systori/templates/timetracking/vacation.html:62
+msgid "Dec"
+msgstr "Dez"
+
+#: systori/templates/timetracking/vacation.html:64
+msgid "Available"
+msgstr "Verfügbar"
+
+#: systori/templates/timetracking/vacation.html:45
+msgid "Already used as well as forecast for future holidays (in Days)."
+msgstr "Bereits verbrauchte sowie Prognose für zukünftige Urlaubstage (in Tagen)."
 
