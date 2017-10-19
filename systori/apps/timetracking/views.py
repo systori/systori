@@ -71,7 +71,7 @@ class WorkerReportView(BaseCreateView, PeriodFilterMixin):
 
     def get_initial(self):
         initial = super().get_initial()
-        initial['worker'] = self.worker
+        initial['workers'] = [self.worker]
         return initial
 
     def get_context_data(self, **kwargs):
