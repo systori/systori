@@ -49,7 +49,7 @@ class UserReportViewTest(ClientTestCase):
 
     def test_create_manual_timer_invalid_form(self):
         response = self.client.post(reverse('timetracking_worker', args=[self.worker.pk]), {
-            'worker': self.worker.pk,
+            'workers': [self.worker.pk],
             'dates': '01/18/2017',
             'start': '9:00',
             'stop': '8:00',
@@ -61,7 +61,7 @@ class UserReportViewTest(ClientTestCase):
     def test_create_manual_timer_happy_path_w_breaks_en(self):
         self.assertEqual(Timer.objects.count(), 0)
         response = self.client.post(reverse('timetracking_worker', args=[self.worker.pk]), {
-            'worker': self.worker.pk,
+            'workers': [self.worker.pk],
             'dates': '01/18/2017',
             'start': '8:00',
             'stop': '17:00',
@@ -77,7 +77,7 @@ class UserReportViewTest(ClientTestCase):
         self.user.save()
         self.assertEqual(Timer.objects.count(), 0)
         response = self.client.post(reverse('timetracking_worker', args=[self.worker.pk]), {
-            'worker': self.worker.pk,
+            'workers': [self.worker.pk],
             'dates': '18.01.2017',
             'start': '8:00',
             'stop': '17:00',

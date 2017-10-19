@@ -21,11 +21,11 @@ class ManualTimerForm(ModelForm):
     stop = TimeField()
     morning_break = forms.BooleanField(label=_("Morning break"), initial=True, required=False)
     lunch_break = forms.BooleanField(label=_("Lunch break"), initial=True, required=False)
+    workers = forms.ModelMultipleChoiceField(queryset=None)
 
     class Meta:
         model = Timer
         fields = [
-            'worker',
             'dates',
             'start',
             'stop',
@@ -36,7 +36,12 @@ class ManualTimerForm(ModelForm):
 
     def __init__(self, *args, company, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['worker'].queryset = company.tracked_workers()
+        self.fields['workers'].queryset = company.tracked_workers().order_by('user__last_name')
+
+    def _post_clean(self):
+        for worker in self.cleaned_data['workers']:
+            self.instance.worker = worker
+            super()._post_clean()
 
     def clean(self):
         if self.cleaned_data['kind'] != Timer.WORK and \
@@ -54,15 +59,21 @@ class ManualTimerForm(ModelForm):
             self.instance.stopped = make_aware(datetime.combine(stop_date, stop_time))
 
     def save(self, commit=True):
-        return Timer.objects.create_batch(commit=commit, **self.cleaned_data)
+        timers = []
+        for worker in self.cleaned_data.pop('workers'):
+            timers.extend(Timer.objects.create_batch(commit=commit, worker=worker, **self.cleaned_data))
+        return timers
 
 
 class WorkerManualTimerForm(ManualTimerForm):
 
-    class Meta(ManualTimerForm.Meta):
-        widgets = {
-            'worker': forms.HiddenInput()
-        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        del self.fields['workers']
+
+    def _post_clean(self):
+        self.cleaned_data['workers'] = self.initial['workers']
+        super()._post_clean()
 
 
 class MonthPickerForm(forms.Form):
