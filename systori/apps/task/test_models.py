@@ -255,6 +255,7 @@ class CloningTests(TestCase):
         self.assertEqual(new_job.all_groups.count(), 3)
         self.assertEqual(new_job.all_tasks.count(), 3)
         self.assertEqual(new_job.all_lineitems.count(), 1)
+        self.assertTrue(new_job.account)
 
         new_group = new_job.groups.first().groups.first()
         self.assertEqual(new_group.tasks.count(), 3)
