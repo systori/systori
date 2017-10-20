@@ -1,6 +1,6 @@
 ## Systori
 
-Systori is a suite of tools for craftsmen to create project estimates, to manage those projects, and to generate invoices.
+Systori is a relly useful suite of tools for craftsmen to create project estimates, to manage those projects, and to generate invoices.
 
 Server side is written in [Python](https://www.python.org/) using the [Django framework](https://www.djangoproject.com/) with [PostgreSQL](http://www.postgresql.org/) as the backing database.
 
