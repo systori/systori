@@ -1,13 +1,13 @@
 from django.test import TestCase
 from django.utils.translation import activate
+from django.core.files.uploadedfile import File
 
 from ..company.models import Company
 from ..project.models import Project
-from ..task.models import Job
 
 from ..company.factories import CompanyFactory
 from ..project.factories import ProjectFactory
-from ..user.factories import UserFactory
+from .gaeb.tests import get_test_data_path
 from .factories import GroupFactory
 from .forms import *
 
@@ -67,3 +67,25 @@ class JobFormTest(TestCase):
 
         job = Job.objects.get(id=new_job.id)
         self.assertEquals('02', job.code)
+
+
+class JobImportTest(TestCase):
+
+    def setUp(self):
+        CompanyFactory()
+
+    def test_import_add_jobs(self):
+        project = ProjectFactory(with_job=True)
+        job = project.jobs.get()
+        path = get_test_data_path('25144280.x83')
+        form = JobImportForm(
+            project=project,
+            data={},
+            files={'file': File(path.open())}
+        )
+        self.assertTrue(form.is_valid())
+        self.assertEqual(project.jobs.count(), 1)
+        form.save()
+        self.assertEqual(project.jobs.count(), 2)
+        new_job = project.jobs.exclude(pk=job.pk).get()
+        self.assertEqual("Dachdecker- und Klempnerarbeiten", new_job.name)

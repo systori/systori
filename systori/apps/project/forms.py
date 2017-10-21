@@ -1,7 +1,8 @@
-from django.forms import ModelForm
 from django import forms
+from django.forms import ModelForm
+from django.utils.translation import ugettext_lazy as _
 
-from .gaeb.convert import Import
+from systori.apps.task.gaeb.convert import Import
 from .models import Project, JobSite
 
 
@@ -12,11 +13,7 @@ class ProjectCreateForm(ModelForm):
         fields = ['name', 'description', 'structure']
 
 
-class ProjectUpdateForm(ModelForm):
-
-    class Meta:
-        model = Project
-        fields = ['name', 'description', 'structure']
+class ProjectUpdateForm(ProjectCreateForm):
 
     def clean_structure(self):
         structure = self.cleaned_data.get("structure")
@@ -28,6 +25,27 @@ class ProjectUpdateForm(ModelForm):
         return structure
 
 
+class ProjectImportForm(ModelForm):
+    file = forms.FileField(label=_('GAEB File'))
+
+    class Meta:
+        model = Project
+        fields = ['file', 'description']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.importer = Import(self.instance, self)
+
+    def clean(self):
+        super().clean()
+        self.importer.parse(self.files['file'])
+
+    def save(self, commit=True):
+        project = super().save(commit)
+        self.importer.save()
+        return project
+
+
 class JobSiteForm(ModelForm):
     class Meta:
         model = JobSite
@@ -36,18 +54,3 @@ class JobSiteForm(ModelForm):
     def save(self, commit=True):
         self.instance.geocode_address()
         return super().save(commit)
-
-
-class GAEBImportForm(forms.Form):
-    file = forms.FileField()
-
-    def __init__(self, project=None, **kwargs):
-        super().__init__(**kwargs)
-        self.importer = Import(self, project)
-
-    def clean(self):
-        self.importer.parse(self.files['file'])
-
-    def save(self):
-        return self.importer.save()
-

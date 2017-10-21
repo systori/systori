@@ -6,12 +6,12 @@ from django.utils.translation import ugettext_lazy as _
 from bootstrap import DateWidget
 
 from ..accounting.models import create_account_for_job
-from ..company.models import Company, Worker
-from ..project.models import Project
+from ..company.models import Worker
 from .models import Job, ProgressReport, ExpendReport
+from .gaeb.convert import Import
 
 
-class JobTemplateCreateForm(forms.ModelForm):
+class JobBaseForm(forms.ModelForm):
 
     class Meta:
         model = Job
@@ -29,7 +29,11 @@ class JobTemplateCreateForm(forms.ModelForm):
         return job
 
 
-class JobCreateForm(forms.ModelForm):
+class JobTemplateCreateForm(JobBaseForm):
+    pass
+
+
+class JobCreateForm(JobBaseForm):
 
     job_template = forms.ModelChoiceField(
         label=_('Job Template'),
@@ -37,23 +41,50 @@ class JobCreateForm(forms.ModelForm):
         required=False
     )
 
-    class Meta:
-        model = Job
-        fields = ['name', 'description', 'job_template']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['name'].required = True
+    def clean_job_template(self):
+        if self.cleaned_data['job_template']:
+            job = self.cleaned_data['job_template']
+            project = self.instance.project
+            if not project.can_receive_job(job):
+                raise forms.ValidationError(
+                    _("The Job you're trying to import has an incompatible depth with the current project."),
+                    code='invalid',
+                )
+            return job
 
     def save(self, commit=True):
         job = super().save(commit)
-        job.job = job
-        job.account = create_account_for_job(job)
         if self.cleaned_data['job_template']:
             tmpl = self.cleaned_data['job_template']
             tmpl.clone_to(job)
-        job.save()
         return job
+
+
+class JobPasteForm(JobCreateForm):
+
+    def __init__(self, other_job=None, **kwargs):
+        kwargs['initial'] = {
+            'name': other_job.name,
+            'description': other_job.description,
+            'job_template': other_job.id
+        }
+        super().__init__(**kwargs)
+        self.fields['job_template'].widget = forms.HiddenInput()
+        self.fields['job_template'].queryset = Job.objects.all()
+
+
+class JobImportForm(forms.Form):
+    file = forms.FileField(label=_('GAEB File'))
+
+    def __init__(self, project, **kwargs):
+        super().__init__(**kwargs)
+        self.importer = Import(project, self)
+
+    def clean(self):
+        self.importer.parse(self.files['file'])
+
+    def save(self):
+        return self.importer.save()
 
 
 class JobProgressForm(forms.ModelForm):
@@ -137,18 +168,3 @@ class JobProgressForm(forms.ModelForm):
                     )
 
         return super().save(commit)
-
-
-class JobCopyForm(forms.Form):
-    project_id = forms.IntegerField(disabled=True, widget=forms.HiddenInput())
-    job_id = forms.IntegerField()
-
-    def clean_job_id(self):
-        job = Job.objects.get(id=self.cleaned_data.get("job_id"))
-        project = Project.objects.get(id=self.cleaned_data.get("project_id"))
-        if not project.can_receive_job(job):
-            raise forms.ValidationError(
-                "The Job you're trying to import has an incompatible depth with the current project.",
-                code='invalid',
-            )
-        return job.id

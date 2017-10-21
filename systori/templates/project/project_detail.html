@@ -143,6 +143,7 @@
             {% if job.can_delete %}
               <a href="{% url 'job.delete' project.id job.id %}">{% trans 'Delete' %}</a>
             {% endif %}
+            <a href="{% url 'job.copy' project.id job.id %}">{% trans 'Copy' %}</a>
           </td>
         </tr>
       {% endfor %}
@@ -162,7 +163,7 @@
   </div>
   <a href="{% url 'job.create' project.id %}">{% trans "Create Job" %}</a> -
   <a href="{% url 'job.import' project.id %}">{% trans "Import Job" %}</a> -
-  <a href="{% url 'job.copy' project.id %}">{% trans "Copy Job" %}</a>
+  <a href="{% url 'job.paste' project.id %}">{% trans "Paste Job" %} #{{ request.session.job_copy|unlocalize }}</a>
 
   <h2 class="sub-header">{% trans "Proposals" %}</h2>
   <div class="table-responsive" style="padding-bottom:110px;">
