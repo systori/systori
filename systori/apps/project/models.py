@@ -1,20 +1,18 @@
 from django.conf import settings
-from django.db import models
-from django.utils.timezone import localdate
-from django.db.models.expressions import RawSQL
 from django.contrib.contenttypes.fields import GenericRelation
-from django.utils.translation import pgettext_lazy, ugettext_lazy as _
-from django.utils.functional import cached_property
-from django.utils.encoding import smart_str
+from django.db import models
+from django.db.models.expressions import RawSQL
 from django.urls import reverse
+from django.utils.encoding import smart_str
+from django.utils.functional import cached_property
+from django.utils.timezone import localdate
+from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django_fsm import FSMField, transition
-
-from systori.lib.utils import nice_percent
-
-from ..task.models import Job, JobQuerySet
-
 from geopy import geocoders
-from .gaeb.structure import GAEBStructureField
+
+from systori.apps.task.gaeb.structure import GAEBStructureField
+from systori.lib.utils import nice_percent
+from ..task.models import Job, JobQuerySet
 
 
 def _job_annotation(type, inner):
@@ -53,7 +51,6 @@ class Project(models.Model):
     name = models.CharField(_('Project Name'), max_length=512)
     description = models.TextField(_('Project Description'), blank=True, null=True)
     is_template = models.BooleanField(default=False)
-    account = models.OneToOneField('accounting.Account', related_name="project", null=True, on_delete=models.SET_NULL)
     structure = GAEBStructureField(_('Numbering Structure'), default="01.01.001")
 
     notes = GenericRelation('main.Note')

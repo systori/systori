@@ -140,92 +140,97 @@ class JobProgressTest(ClientTestCase):
         self.assertEqual(expend.worker, self.worker)
 
 
-class JobCopyTest(ClientTestCase):
+class JobCopyPasteTest(ClientTestCase):
 
-    def test_copy_job_010101(self):
-        self.project = ProjectFactory()
-        self.job = JobFactory(
+    def copy(self, job):
+        self.client.get(reverse('job.copy', args=[job.project.pk, job.pk]))
+
+    def test_paste_job_010101(self):
+        project = ProjectFactory()
+        job = JobFactory(
             name='job name',
             description='new job description',
-            project=self.project,
+            project=project,
         )  # type: Job
-        self.group = GroupFactory(name="my group", parent=self.job)
-        self.task = TaskFactory(
-            group = self.group,
-            name = "some task",
+        group = GroupFactory(name="my group", parent=job)
+        task = TaskFactory(
+            group=group,
+            name="some task",
             qty=7, complete=7, status=Task.RUNNING,
-            started_on = datetime.date.today(),
-            completed_on = datetime.date.today(),
+            started_on=datetime.date.today(),
+            completed_on=datetime.date.today(),
         )
-        LineItemFactory(task=self.task)
+        LineItemFactory(task=task)
+        self.copy(job)
+
         response = self.client.get(
-            reverse('job.copy', args=[self.project.pk])
+            reverse('job.paste', args=[project.pk])
         )
         form = response.context['form']
-        self.assertFalse(form.is_valid())
+        self.assertEqual(form['name'].value(), job.name)
+        self.assertEqual(form['job_template'].value(), job.pk)
+
         response = self.client.post(
-            reverse('job.copy', args=[self.project.pk]),
-            {'job_id':self.job.pk}
+            reverse('job.paste', args=[project.pk]), {
+                'name': 'job name changed',
+                'description': 'job description',
+                'job_template': job.pk
+            }
         )
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(self.project.jobs.count(), 2)
+        self.assertEqual(project.jobs.count(), 2)
+        new_job = project.jobs.exclude(pk=job.pk).get()
+        self.assertIsNotNone(new_job.account)
+        self.assertEqual(new_job.name, 'job name changed')
         self.assertEqual(
-            self.project.jobs.first().groups.first().tasks.first().name,
-            self.project.jobs.last().groups.first().tasks.first().name
+            job.groups.first().tasks.first().name,
+            new_job.groups.first().tasks.first().name
         )
         self.assertEqual(
-            self.project.jobs.first().name,
-            self.project.jobs.last().name
-        )
-        self.assertEqual(
-            self.project.jobs.first().groups.first().tasks.first().lineitems.first().name,
-            self.project.jobs.last().groups.first().tasks.first().lineitems.first().name,
+            job.groups.first().tasks.first().lineitems.first().name,
+            new_job.groups.first().tasks.first().lineitems.first().name,
         )
 
     def test_copy_job_0101(self):
-        self.project = ProjectFactory(structure='01.01')
-        self.job = JobFactory(
+        project = ProjectFactory(structure='01.01')
+        job = JobFactory(
             name='job name',
             description='new job description',
-            project=self.project,
+            project=project,
         )  # type: Job
-        self.task = TaskFactory(
-            group = self.job,
-            name = "some task",
+        task = TaskFactory(
+            group=job,
+            name="some task",
             qty=7, complete=7, status=Task.RUNNING,
-            started_on = datetime.date.today(),
-            completed_on = datetime.date.today(),
+            started_on=datetime.date.today(),
+            completed_on=datetime.date.today(),
         )
-        LineItemFactory(task=self.task)
-        response = self.client.get(
-            reverse('job.copy', args=[self.project.pk])
+        LineItemFactory(task=task)
+        self.copy(job)
+        self.client.post(
+            reverse('job.paste', args=[project.pk]), {
+                'name': 'job name changed',
+                'description': 'job description',
+                'job_template': job.pk
+            }
         )
-        form = response.context['form']
-        self.assertFalse(form.is_valid())
-        response = self.client.post(
-            reverse('job.copy', args=[self.project.pk]),
-            {'job_id':self.job.pk}
-        )
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(self.project.jobs.count(), 2)
+        new_job = project.jobs.exclude(pk=job.pk).get()
+        self.assertEqual(project.jobs.count(), 2)
         self.assertEqual(
-            self.project.jobs.first().tasks.first().name,
-            self.project.jobs.last().tasks.first().name
+            job.tasks.first().name,
+            new_job.tasks.first().name
         )
 
     def test_error_on_incompatible_structure(self):
         project = ProjectFactory()
         job = JobFactory(project=project)
+        self.copy(job)
         project2 = ProjectFactory(structure="01.001")
         self.client.post(
-            reverse('job.copy', args=[project2.pk]),
-            {'job_id': job.pk}
-        ) # fails because of incompatible project.structure
+            reverse('job.paste', args=[project2.pk]), {
+                'name': 'job name changed',
+                'description': 'job description',
+                'job_template': job.pk
+            }
+        )  # fails because of incompatible project.structure
         self.assertEqual(project2.jobs.count(), 0)
-        job2 = JobFactory(project=project2) #creates first job on project2
-        self.client.post(
-            reverse('job.copy', args=[project2.pk]),
-            {'job_id': job2.pk}
-        ) # creates second job on project2
-        self.assertEqual(project2.jobs.count(), 2)
-

@@ -2,18 +2,17 @@ import io
 import textwrap
 from pathlib import Path
 
-from lxml import etree
-
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
 from django.utils.translation import activate
+from lxml import etree
+from .convert import Import, Export
 
-from systori.apps.project.gaeb.convert import Import, Export
-from systori.apps.project.gaeb.structure import GAEBStructure, GAEBStructureField
-from systori.apps.project.models import Project
 from systori.apps.project.factories import ProjectFactory
-from systori.apps.task.models import Job, Group, Task, LineItem
-from systori.apps.task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
+from systori.apps.project.models import Project
+from systori.apps.task.factories import JobFactory, GroupFactory, TaskFactory
+from systori.apps.task.gaeb.structure import GAEBStructure, GAEBStructureField
+from systori.apps.task.models import Job, Group, Task
 
 
 class GAEBExportTests(SimpleTestCase):
@@ -216,7 +215,7 @@ class GAEBImportTests(SimpleTestCase):
             .format(xml)
         )
         stream.name = 'test-file.x83'
-        return Import().parse(stream)
+        return Import(Project()).parse(stream)
 
     def test_bad_file(self):
         activate('en')
@@ -239,7 +238,7 @@ class GAEBImportTests(SimpleTestCase):
 
     def test_gaeb_file(self):
         path = get_test_data_path('gaeb.x83')
-        parser = Import().parse(path.open())
+        parser = Import(Project()).parse(path.open())
         self.assertEqual(parser.project.name, '7030 Herschelbad')
         self.assertEqual(len(parser.objects), 19)
         job, group, task = parser.objects[:3]
@@ -252,7 +251,7 @@ class GAEBImportTests(SimpleTestCase):
 
     def test_lv_zimmermann_file(self):
         path = get_test_data_path('lv_zimmermann.x83')
-        parser = Import().parse(path.open())
+        parser = Import(Project()).parse(path.open())
         self.assertEqual(len(parser.objects), 135)
 
 
@@ -270,8 +269,8 @@ class GAEBImportExportTests(SimpleTestCase):
         root = Export().project(project, [job])
         xml = etree.tostring(root, pretty_print=True).decode()
 
-        parser = Import().parse(io.StringIO(xml))
-        project2 = parser.project
+        project2 = Project()
+        parser = Import(project2).parse(io.StringIO(xml))
         job2, group2, task2 = parser.objects
 
         self.assertEqual(project.name, project2.name)

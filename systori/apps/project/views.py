@@ -1,17 +1,17 @@
 from collections import OrderedDict
 from datetime import date
 
-from django.db.models import Q, Max, Min, Count, Sum
+from django.db.models import Q, Max, Min
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import View, TemplateView, ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from systori.lib.templatetags.customformatting import ubrdecimal
-from .forms import JobSiteForm, GAEBImportForm
+from .forms import JobSiteForm, ProjectImportForm
 from .forms import ProjectCreateForm, ProjectUpdateForm
 from .models import Project, JobSite, DailyPlan
 from ..accounting.constants import TAX_RATE
@@ -184,22 +184,8 @@ class ProjectCreate(CreateView):
         return HttpResponseRedirect(redirect)
 
 
-class GAEBImportView(FormView):
-    form_class = GAEBImportForm
-    template_name = "project/gaeb_form.html"
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        if 'project_pk' in self.kwargs:
-            kwargs['project'] = self.request.project
-        return kwargs
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        if form.is_valid():
-            project = form.save()
-            return HttpResponseRedirect(project.get_absolute_url())
-        return self.form_invalid(form)
+class ProjectImport(ProjectCreate):
+    form_class = ProjectImportForm
 
 
 class ProjectUpdate(UpdateView):

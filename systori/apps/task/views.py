@@ -1,8 +1,9 @@
-from django.views.generic.detail import DetailView
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.views.generic.detail import DetailView, SingleObjectMixin, View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
-from django.db.models import Max
 
-from ..project.models import Project
+from ..company.models import Company
 from .models import *
 from .forms import *
 
@@ -18,9 +19,48 @@ class JobCreate(CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        project = self.request.project
-        kwargs['instance'] = Job(order=None, project=project)
+        kwargs['instance'] = Job(
+            order=None, project=self.request.project
+        )
         return kwargs
+
+
+class JobPaste(JobCreate):
+
+    def get_form_class(self):
+        return JobPasteForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['other_job'] = get_object_or_404(Job, pk=self.request.session[JobCopy.SESSION_KEY])
+        return kwargs
+
+
+class JobImport(FormView):
+    form_class = JobImportForm
+    template_name = 'task/job_import_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['project'] = self.request.project
+        return kwargs
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(self.request.project.get_absolute_url())
+        return self.form_invalid(form)
+
+
+class JobCopy(SingleObjectMixin, View):
+    model = Job
+    SESSION_KEY = 'job_copy'
+
+    def get(self, request, *args, **kwargs):
+        object = self.get_object()
+        request.session[self.SESSION_KEY] = object.pk
+        return HttpResponseRedirect(object.project.get_absolute_url())
 
 
 class JobEditor(DetailView):
@@ -62,26 +102,3 @@ class JobDelete(DeleteView):
 
     def get_success_url(self):
         return self.object.project.get_absolute_url()
-
-
-class JobCopy(FormView):
-    model = Job
-    template_name = 'task/job_form.html'
-    form_class = JobCopyForm
-
-    def get_initial(self):
-        initial = super(JobCopy, self).get_initial()
-        initial['project_id'] = self.kwargs['project_pk']
-        return initial
-
-    def clean_project_id(self):
-        raise forms.ValidationError(_("Error happened"))
-
-    def form_valid(self, form):
-        project = Project.objects.get(id=form.cleaned_data['project_id'])
-        job = Job.objects.get(id=form.cleaned_data['job_id'])
-        project.receive_job(job)
-        return super(JobCopy, self).form_valid(form)
-
-    def get_success_url(self):
-        return Project.objects.get(id=self.kwargs.get("project_pk")).get_absolute_url()

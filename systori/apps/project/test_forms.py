@@ -1,12 +1,12 @@
+from django.core.files.uploadedfile import File
 from django.test import TestCase
 from django.utils.translation import activate
-from django.core.files.uploadedfile import File
 
-from ..company.factories import CompanyFactory
-from .factories import ProjectFactory, JobSiteFactory
+from systori.apps.task.gaeb.tests import get_test_data_path
 from . import forms
+from .factories import ProjectFactory, JobSiteFactory
 from .models import JobSite
-from .gaeb.tests import get_test_data_path
+from ..company.factories import CompanyFactory
 
 
 class ProjectFormTest(TestCase):
@@ -113,30 +113,16 @@ class JobSiteFormTest(TestCase):
         self.assertEqual(jobsite.name, 'updated jobsite')
 
 
-class GAEBImportTests(TestCase):
+class ProjectImportTests(TestCase):
 
     def setUp(self):
         CompanyFactory()
 
     def test_import(self):
         path = get_test_data_path('gaeb.x83')
-        form = forms.GAEBImportForm(
-            data={},
-            files={'file': File(path.open())}
+        form = forms.ProjectImportForm(
+            data={}, files={'file': File(path.open())}
         )
         self.assertTrue(form.is_valid())
         project = form.save()
         self.assertEqual("7030 Herschelbad", project.name)
-
-    def test_import_add_jobs(self):
-        project = ProjectFactory(with_job=True)
-        path = get_test_data_path('25144280.x83')
-        form = forms.GAEBImportForm(
-            project=project,
-            data={},
-            files={'file': File(path.open())}
-        )
-        self.assertTrue(form.is_valid())
-        project = form.save()
-        self.assertEqual(project.jobs.count(), 2)
-        self.assertEqual("Dachdecker- und Klempnerarbeiten", project.jobs.last().name)

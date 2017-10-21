@@ -1,10 +1,9 @@
-from lxml import etree, objectify
+from lxml import objectify
 
 from django.forms import Form
 from django.utils.translation import ugettext_lazy as _
 
 from systori.apps.task.models import Job, Group, Task
-from systori.apps.accounting.models import Account
 from systori.apps.project.models import Project, JobSite
 
 
@@ -92,26 +91,17 @@ def get(el, path, default=None, required=False, element_only=False):
 
 class Import:
 
-    def __init__(self, form=None, project=None):
-        self.form = form if form is not None else Form({})
+    def __init__(self, project, form=None):
         self.project = project
+        self.form = form if form is not None else Form({})
         self.objects = []
         self.ns = None
 
     def save(self):
-        project = self.project
-        if not project.pk:
-            project.save()
-            project.account = Account.objects.create(account_type=Account.ASSET, code=str(10000 + project.id))
-            JobSite.objects.create(
-                project=project, name=_('Main Site'),
-                #address="", city="",
-                #postal_code=""
-            )
         for object in self.objects:
             object.refresh_pks()
             object.save()
-        return project
+        return self.objects
 
     def error(self, msg, line=None):
         if not self.form:
@@ -126,8 +116,8 @@ class Import:
             tree = objectify.parse(file)
             self.ns = '{' + tree.xpath('namespace-uri(.)') + '}'
             root = tree.getroot()
-            if self.project is None:
-                self.project = Project(name=root.PrjInfo.LblPrj)
+            if not self.project.name:
+                self.project.name = root.PrjInfo.LblPrj
             for job_element in root.Award.BoQ.BoQBody.iterchildren(self.ns+'BoQCtgy'):
                 self.group(self.project, job_element)
         except:

@@ -1,9 +1,8 @@
-from django.db.models.signals import pre_delete, m2m_changed, post_save
+from django.db.models.signals import pre_delete, m2m_changed
 from django_fsm.signals import post_transition
 from django.dispatch import receiver
 from ..document.models import Proposal
 from .models import Job
-from systori.apps.accounting.models import create_account_for_job
 
 
 def update_job_status(proposal, job):
@@ -44,9 +43,3 @@ def proposal_transition_handler(sender, instance, name, source, target, **kwargs
 def proposal_delete_handler(sender, instance, **kwargs):
     for job in instance.jobs.all():
         update_job_status(instance, job)
-
-
-@receiver(post_save, sender=Job, dispatch_uid='job_save_receiver')
-def post_save_job(sender, instance, created, **kwargs):
-    if created:
-        instance.account = create_account_for_job(instance)
