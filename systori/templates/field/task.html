@@ -17,11 +17,11 @@
     <div class="panel panel-default">
 
       <div class="panel-heading">
-        {{ task.code }} {{ task.name }} {% if task.is_optional %} <span class="label label-warning">{% trans 'Optional' %}</span> {% endif %}
+        {{ task.code }} {{ task.name|safe }} {% if task.is_optional %} <span class="label label-warning">{% trans 'Optional' %}</span> {% endif %}
       </div>
 
       <div class="panel-body">
-        {{ task.description }}
+        {{ task.description|safe }}
       </div>
 
       <div class="panel-footer clearfix">
