@@ -1,1 +1,1 @@
-default_app_config = 'systori.apps.accounting.config.AccountingConfig'
+default_app_config = 'systori.apps.accounting.app.AccountingConfig'
