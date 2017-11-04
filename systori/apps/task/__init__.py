@@ -1,1 +1,1 @@
-default_app_config = 'systori.apps.task.config.TaskConfig'
+default_app_config = 'systori.apps.task.app.TaskConfig'
