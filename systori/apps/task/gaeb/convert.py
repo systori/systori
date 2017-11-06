@@ -32,6 +32,18 @@ class Export:
             ),
             self.e.Award(
                 self.e.BoQ(
+                    self.e.BoQInfo(*(
+                        self.e.BoQBkdn(
+                            self.e.Type('BoQLevel'),
+                            self.e.Length(fill),
+                            self.e.Num('Yes'),
+                        ) for fill in project.structure.zfill[:-1]),
+                        self.e.BoQBkdn(
+                            self.e.Type('Item'),
+                            self.e.Length(project.structure.zfill[-1]),
+                            self.e.Num('Yes'),
+                        )
+                    ),
                     self.e.BoQBody(
                         *(self.group(job) for job in jobs)
                     )

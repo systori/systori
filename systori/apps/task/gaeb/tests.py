@@ -31,6 +31,23 @@ class GAEBExportTests(SimpleTestCase):
               </PrjInfo>
               <Award>
                 <BoQ>
+                  <BoQInfo>
+                    <BoQBkdn>
+                      <Type>BoQLevel</Type>
+                      <Length>2</Length>
+                      <Num>Yes</Num>
+                    </BoQBkdn>
+                    <BoQBkdn>
+                      <Type>BoQLevel</Type>
+                      <Length>2</Length>
+                      <Num>Yes</Num>
+                    </BoQBkdn>
+                    <BoQBkdn>
+                      <Type>Item</Type>
+                      <Length>3</Length>
+                      <Num>Yes</Num>
+                    </BoQBkdn>
+                  </BoQInfo>
                   <BoQBody/>
                 </BoQ>
               </Award>
@@ -55,6 +72,23 @@ class GAEBExportTests(SimpleTestCase):
               </PrjInfo>
               <Award>
                 <BoQ>
+                  <BoQInfo>
+                    <BoQBkdn>
+                      <Type>BoQLevel</Type>
+                      <Length>2</Length>
+                      <Num>Yes</Num>
+                    </BoQBkdn>
+                    <BoQBkdn>
+                      <Type>BoQLevel</Type>
+                      <Length>2</Length>
+                      <Num>Yes</Num>
+                    </BoQBkdn>
+                    <BoQBkdn>
+                      <Type>Item</Type>
+                      <Length>3</Length>
+                      <Num>Yes</Num>
+                    </BoQBkdn>
+                  </BoQInfo>
                   <BoQBody>
                     <BoQCtgy>
                       <LblTx>job</LblTx>
