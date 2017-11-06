@@ -240,6 +240,8 @@ class GAEBImportTests(SimpleTestCase):
         path = get_test_data_path('gaeb.x83')
         parser = Import(Project()).parse(path.open())
         self.assertEqual(parser.project.name, '7030 Herschelbad')
+        self.assertEqual(parser.project.structure.pattern, '01.01.0001')
+        self.assertEqual(parser.project.structure_depth, 1)
         self.assertEqual(len(parser.objects), 19)
         job, group, task = parser.objects[:3]
         self.assertTrue(job, Job)

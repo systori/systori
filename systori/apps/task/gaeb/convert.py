@@ -95,6 +95,7 @@ class Import:
         self.project = project
         self.form = form if form is not None else Form({})
         self.objects = []
+        self.max_group_depth = 0
         self.ns = None
 
     def save(self):
@@ -118,11 +119,23 @@ class Import:
             root = tree.getroot()
             if not self.project.name:
                 self.project.name = root.PrjInfo.LblPrj
+                self.parse_structure(root)
             for job_element in root.Award.BoQ.BoQBody.iterchildren(self.ns+'BoQCtgy'):
                 self.group(self.project, job_element)
+            if self.project.structure.maximum_depth != self.max_group_depth:
+                self.error(_("Project and imported jobs do not have compatible structure."))
         except:
             self.error(_("File '%s' can't be imported. Please contact support.") % file.name)
         return self
+
+    def parse_structure(self, root):
+        parts = []
+        for part in root.Award.BoQ.BoQInfo.iterchildren(self.ns+'BoQBkdn'):
+            pad = int(part.Length)
+            is_number = part.Num == 'Yes'
+            if part.Type in ('BoQLevel', 'Item'):
+                parts.append('1'.zfill(pad))
+        self.project.structure = '.'.join(parts)
 
     def group(self, parent, group_element):
         try:
@@ -131,6 +144,7 @@ class Import:
                 group.job = group
             else:
                 group = Group(name=" ".join(group_element.LblTx.xpath(".//text()")), parent=parent)
+            self.max_group_depth = max(self.max_group_depth, group.depth)
             self.objects.append(group)
             for sub_group_element in group_element.BoQBody.iterchildren(self.ns+'BoQCtgy'):
                 self.group(group, sub_group_element)
