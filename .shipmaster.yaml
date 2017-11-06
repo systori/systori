@@ -18,7 +18,7 @@ layers:
     build:
       - cp conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
       - cp systori/dart/sdk/html_dart2js.dart /usr/lib/dart/lib/html/dart2js
-      - cd systori/dart && pub get && pub build
+      - cd systori/dart && pub --trace get && pub build
       - cd /app
       - pip3 install --src=/src -r requirements/app.pip
       - export DJANGO_SETTINGS_MODULE=systori.settings.common
@@ -76,7 +76,7 @@ images:
     build:
       - cp conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
       - cp systori/dart/sdk/html_dart2js.dart /usr/lib/dart/lib/html/dart2js
-      - cd systori/dart && pub --trace get && pub build
+      - cd systori/dart && pub get && pub build
       - cd /app
       - pip3 install --src=/src -r requirements/app.pip
       - export DJANGO_SETTINGS_MODULE=systori.settings.common
