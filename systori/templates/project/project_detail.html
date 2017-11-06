@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n l10n customformatting project main dartium %}
+{% load i18n l10n customformatting project task main dartium %}
 
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
 
@@ -162,8 +162,8 @@
     </table>
   </div>
   <a href="{% url 'job.create' project.id %}">{% trans "Create Job" %}</a> -
-  <a href="{% url 'job.import' project.id %}">{% trans "Import Job" %}</a> -
-  <a href="{% url 'job.paste' project.id %}">{% trans "Paste Job" %} #{{ request.session.job_copy|unlocalize }}</a>
+  <a href="{% url 'job.import' project.id %}">{% trans "Import Job" %}</a>
+  {% paste_job %}
 
   <h2 class="sub-header">{% trans "Proposals" %}</h2>
   <div class="table-responsive" style="padding-bottom:110px;">
