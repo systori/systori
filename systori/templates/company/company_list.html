@@ -16,9 +16,9 @@
           </tr>
           </thead>
           <tbody class="searchable">
-          {% for company in company_list %}
+          {% for company in available_companies %}
             <tr>
-              <td><a href="{% company_url company request %}">{{ company.name }}</a></td>
+              <td><a href="{{ company.url }}">{{ company.name }}</a></td>
               <td>{{ company.owner.user.first_name }}</td>
               <td>
                 <div class="checkbox">
@@ -35,7 +35,7 @@
           {% endfor %}
           </tbody>
         </table>
-        <a href="{% url 'company.create' %}">{% trans "Create" %}</a>
+        <a href="{% url 'company.create' %}">{% trans "Create" %} {% trans "Company" %}</a>
       </div>
     </div>
   </div>
