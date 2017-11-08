@@ -1,8 +1,9 @@
 from decimal import Decimal
 from datetime import date, time
 from django.urls import reverse
+from allauth.account.models import EmailConfirmationHMAC
 
-from systori.lib.testing import ClientTestCase
+from systori.lib.testing import SystoriTestCase, ClientTestCase
 from .models import User
 
 
@@ -115,3 +116,46 @@ class TestEditWorker(ClientTestCase):
         self.assertEqual(contract.rate, Decimal('16.0'))
         self.assertEqual(contract.vacation, 21 * 60)
         self.assertEqual(contract.abandoned_timer_penalty, 0)
+
+
+class TestRegistration(SystoriTestCase):
+
+    def test_onboarding_workflow(self):
+
+        # main page has registration link
+        self.assertContains(self.client.get('', follow=True), reverse('account_signup'))
+
+        # user fills out registration form
+        self.assertContains(self.client.get(reverse('account_signup')), 'Vorname')
+        response = self.client.post(reverse('account_signup'), {
+            'first_name': 'Bob',
+            'last_name': 'Jones',
+            'email': 'bob@systori.com',
+            'password1': 'the password open sesame',
+            'password2': 'the password open sesame',
+        })
+        self.assertRedirects(response, reverse('account_email_verification_sent'))
+        user = User.objects.get(first_name='Bob')
+        self.assertEqual(user.last_name, 'Jones')
+        self.assertEqual(user.email, 'bob@systori.com')
+        self.assertEqual(user.access.count(), 0)
+
+        # user clicks on link in their email verification link
+        confirmation = EmailConfirmationHMAC(user.emailaddress_set.get())
+        self.client.post(reverse('account_confirm_email', args=[confirmation.key]))
+
+        response = self.client.post(reverse('account_login'), {
+            'login': 'bob@systori.com',
+            'password': 'the password open sesame',
+        }, follow=True)
+        self.assertRedirects(response, reverse('companies'))
+        self.assertContains(response, reverse('company.create'))
+
+        self.assertContains(self.client.get(reverse('company.create')), 'Sub-Domain')
+        response = self.client.post(reverse('company.create'), {
+            'name': 'Widgets LLC',
+            'schema': 'widgets',
+            'timezone': 'Europe/Berlin'
+        }, follow=True, HTTP_HOST='widgets.systori.localhost')
+        self.assertRedirects(response, reverse('companies'))
+        self.assertContains(response, 'Widgets LLC')

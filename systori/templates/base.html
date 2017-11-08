@@ -37,22 +37,22 @@
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="dropdown">
-              {% if available_companies|length > 1 %}
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                   {% if selected_company %}{{ selected_company.name }}{% else %}{% trans "Select company..." %}{% endif %}
                   <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                  <li class="dropdown-header">{% trans 'available Companies' %}</li>
-                  {% for company in available_companies %}
-                    {% if not company.current %}
-                      <li><a href="{{ company.url }}">{{ company.name }}</a></li>
-                    {% endif %}
-                  {% endfor %}
+                  {% if available_companies|length > 1 %}
+                    <li class="dropdown-header">{% trans 'available Companies' %}</li>
+                    {% for company in available_companies %}
+                      {% if not company.current %}
+                        <li><a href="{{ company.url }}">{{ company.name }}</a></li>
+                      {% endif %}
+                    {% endfor %}
+                    <li role="separator" class="divider"></li>
+                  {% endif %}
+                  <li><a href="{% url 'company.create' %}">{% trans "Create" %} {% trans "Company" %}</a></li>
                 </ul>
-              {% else %}
-                <a class="navbar-brand" href="#">{{ selected_company.name }}</a>
-              {% endif %}
             </li>
             {% block menu_dropdown %}{% endblock %}
             {% block head_navbar %}{% endblock %}
@@ -80,7 +80,7 @@
                data-pk="{{ request.worker.pk }}">{{ request.user.get_short_name }} <b class="caret"></b></a>
             <ul class="dropdown-menu">
               <li><a href="{% url 'settings' %}">{% trans 'Settings' %}</a></li>
-              <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>
+              <li><a href="{% url 'account_logout' %}">{% trans 'Logout' %}</a></li>
             </ul>
           </li>
 

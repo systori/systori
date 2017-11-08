@@ -1,13 +1,20 @@
-from decimal import Decimal
-
 from django import forms
 from django.forms import ModelForm
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.forms import AuthenticationForm as BaseAuthenticationForm
 
 from systori.lib.fields import DecimalMinuteHoursField
 from ..company.models import Worker, Contract
 from .models import *
+
+
+class SignupForm(ModelForm):
+
+    class Meta:
+        model = User
+        fields = 'first_name', 'last_name'
+
+    def signup(self, request, user):
+        pass
 
 
 class UserForm(ModelForm):
@@ -54,10 +61,6 @@ class UserForm(ModelForm):
         if commit:
             user.save()
         return user
-
-
-class AuthenticationForm(BaseAuthenticationForm):
-    username = forms.CharField(max_length=254, initial='')
 
 
 class WorkerForm(ModelForm):

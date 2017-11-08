@@ -4,6 +4,9 @@ SERVER_NAME = 'systori.localhost'
 SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
 ALLOWED_HOSTS = ['.'+SERVER_NAME]
 
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 DEBUG = True
 
 if True:

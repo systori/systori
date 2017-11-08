@@ -1,8 +1,9 @@
 -r base.pip
 
-django==2.0b1
+django>=2.0b1
 djangorestframework
 django-fsm
+django-allauth
 jsonfield
 channels
 asgi_ipc
