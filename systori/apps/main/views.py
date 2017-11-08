@@ -35,7 +35,7 @@ class IndexView(View):
                 view = FieldDashboard.as_view()
             return view(request, *args, **kwargs)
         else:
-            return HttpResponseRedirect(reverse('login'))
+            return HttpResponseRedirect(reverse('account_login'))
 
 
 def get_temporal_location(selected_day):

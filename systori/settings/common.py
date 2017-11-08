@@ -23,12 +23,17 @@ CHANNEL_LAYERS = {
 # Django Settings
 
 AUTH_USER_MODEL = 'user.User'
-LOGIN_URL = '/login'
+LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 
 BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, '../'))
 PROJECTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, '../'))
+
+SITE_ID = 1
+
+EMAIL_HOST = 'mail'
+DEFAULT_FROM_EMAIL = 'Systori <support@systori.com>'
 
 
 # Quick-start development settings - unsuitable for production
@@ -47,6 +52,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = (
     'django.contrib.auth',
+    'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -58,6 +64,9 @@ INSTALLED_APPS = (
     'channels',
     'bootstrap',
     'postgres_schema',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     'systori.lib',
     'systori.apps.user',
     'systori.apps.main',
@@ -152,6 +161,30 @@ DATABASES = {
         'ENGINE': 'systori.db',
     }
 }
+
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+
+# Django Allauth Configuration
+# http://django-allauth.readthedocs.io/en/latest/configuration.html
+ACCOUNT_ADAPTER = "systori.apps.user.account.AccountAdapter"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
+ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_SIGNUP_FORM_CLASS = "systori.apps.user.forms.SignupForm"
+SOCIALACCOUNT_ADAPTER = "systori.apps.user.account.SocialAccountAdapter"
+
 
 GEOCODE_ADDRESSES = True
 

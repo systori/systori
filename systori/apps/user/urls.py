@@ -1,14 +1,12 @@
 from ..user.authorization import office_auth
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import views as auth_views
-from django.conf.urls import url
-from .forms import AuthenticationForm
+from django.conf.urls import url, include
 from . import views
 
 urlpatterns = [
 
-    url(r'^login$', auth_views.login, {'template_name': 'user/login.html', 'authentication_form': AuthenticationForm}, name="login"),
-    url(r'^logout$', auth_views.logout, {'next_page': '/'}, name="logout"),
+    url(r'^accounts/', include('allauth.urls')),
+
     url(r'^settings$', login_required(views.SettingsView.as_view()), name='settings'),
     url(r'^set_language$', views.SetLanguageView.as_view(), name='set_language'),
 
