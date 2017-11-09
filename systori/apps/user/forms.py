@@ -32,6 +32,10 @@ class UserForm(ModelForm):
     password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput, required=False,
                                 help_text=_("Enter the same password as above, for verification."))
 
+    def __init__(self, *args, unique_email=True, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.unique_email = unique_email
+
     def clean_email(self):
         if not self.cleaned_data['email']:
             return None
@@ -48,7 +52,10 @@ class UserForm(ModelForm):
         return password2
 
     def clean(self):
-        cleaned_data = super().clean()
+        if self.unique_email:
+            cleaned_data = super().clean()
+        else:
+            cleaned_data = self.cleaned_data
         if not cleaned_data.get('first_name') and\
            not cleaned_data.get('last_name') and\
            not cleaned_data.get('email'):

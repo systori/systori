@@ -41,8 +41,8 @@ class UserFormRenderer:
         return self.render_to_response(self.get_context_data(
             user_form=user_form, worker_form=worker_form, contract_form=contract_form))
 
-    def get_cleaned_forms(self, user=None, worker=None, contract=None):
-        user_form = UserForm(self.request.POST, instance=user)
+    def get_cleaned_forms(self, user=None, worker=None, contract=None, unique_email=True):
+        user_form = UserForm(self.request.POST, instance=user, unique_email=unique_email)
         user_form.full_clean()
         worker_form = WorkerForm(self.request.POST, instance=worker)
         worker_form.full_clean()
@@ -62,7 +62,7 @@ class UserAdd(UserFormRenderer, CreateView):
     def post(self, request, *args, **kwargs):
         self.object = None
 
-        user_form, worker_form, contract_form = self.get_cleaned_forms()
+        user_form, worker_form, contract_form = self.get_cleaned_forms(unique_email=False)
 
         # Before we do anything else make sure the forms are actually valid.
         if not all([user_form.is_valid(), worker_form.is_valid(), contract_form.is_valid()]):

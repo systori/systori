@@ -5,6 +5,7 @@ from allauth.account.models import EmailConfirmationHMAC
 
 from systori.lib.testing import SystoriTestCase, ClientTestCase
 from .models import User
+from .factories import UserFactory
 
 
 class TestWorkersList(ClientTestCase):
@@ -47,18 +48,46 @@ class TestCreateWorker(ClientTestCase):
             'abandoned_timer_penalty': ['This field is required.'],
         })
 
-    def test_worker_exists(self):
+    def test_user_already_member(self):
         response = self.client.post(reverse('user.add'), {
-            'email': self.user.email
+            'email': self.user.email,
+            'rate': '15.35',
+            'rate_type': 'hourly',
+            'vacation': '20',
+            'effective': '2014-12-2',
+            'work_start': '9:00',
+            'work_end': '17:00',
+            'abandoned_timer_penalty': '-1',
         })
         self.assertEqual(200, response.status_code)
         user_form = response.context['user_form']
         self.assertFalse(user_form.is_valid())
         self.assertEqual(user_form.errors, {
-            'email': ['User with this Email address already exists.']
+            'email': ['This user is already a member of this company.']
         })
 
-    def test_successful_create(self):
+    def test_successful_add_existing_user(self):
+        user2 = UserFactory(language='en', password=self.password)
+        self.assertEqual(User.objects.count(), 2)
+        self.assertEqual(self.company.workers.count(), 1)
+        response = self.client.post(reverse('user.add'), {
+            'email': user2.email,
+            'rate': '15.35',
+            'rate_type': 'hourly',
+            'vacation': '20',
+            'effective': '2014-12-2',
+            'work_start': '9:00',
+            'work_end': '17:00',
+            'abandoned_timer_penalty': '-1',
+        })
+        self.assertRedirects(response, reverse('users'))
+        # same number of total users but one extra worker in company
+        self.assertEqual(User.objects.count(), 2)
+        self.assertEqual(self.company.workers.count(), 2)
+
+    def test_successful_create_and_add(self):
+        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(self.company.workers.count(), 1)
         response = self.client.post(reverse('user.add'), {
             'email': 'user@test.com',
             'rate': '15.35',
@@ -70,6 +99,8 @@ class TestCreateWorker(ClientTestCase):
             'abandoned_timer_penalty': '-1',
         })
         self.assertRedirects(response, reverse('users'))
+        self.assertEqual(User.objects.count(), 2)
+        self.assertEqual(self.company.workers.count(), 2)
 
         user = User.objects.get(email='user@test.com')
         worker = user.access.first()
