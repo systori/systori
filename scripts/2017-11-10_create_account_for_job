@@ -1,0 +1,26 @@
+import os
+import unicodedata
+import json
+import django
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
+django.setup()
+
+from systori.lib.accounting.tools import JSONEncoder
+from systori.apps.accounting.models import create_account_for_job
+from systori.apps.company.models import Company
+from systori.apps.project.models import Project
+from systori.apps.task.models import Task, Group, Job, LineItem
+
+
+for company in Company.objects.all():
+    company.activate()
+    print(company.name)
+
+    for job in Job.objects.all():
+        if job.account is None:
+            if not job.project.is_template:
+                print("found a job in {} without account.\n".format(job.project))
+                job.account = create_account_for_job(job)
+                job.save()
+                print("account for job with id {} created.".format(job.account))
+
