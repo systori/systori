@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from .forms import UserForm, WorkerForm, ContractForm
+from .forms import UserForm, WorkerForm, ContractForm, LanguageForm
 from .models import *
 from ..company.models import Worker
 
