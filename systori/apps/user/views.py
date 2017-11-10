@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from .forms import *
+from .forms import UserForm, WorkerForm, ContractForm
 from .models import *
 from ..company.models import Worker
 
@@ -84,7 +84,7 @@ class UserAdd(UserFormRenderer, CreateView):
 
         elif Worker.objects.filter(user=user, company=request.company).exists():
             # User exists and already has a worker object for this company.
-            user_form.add_error('email', _('This user is already a member of this company.'))
+            user_form.add_error('email', _('User with this email is already a member of this company.'))
             return self.render_forms(user_form, worker_form, contract_form)
 
         worker = worker_form.instance
@@ -108,6 +108,12 @@ class UserUpdate(UserFormRenderer, UpdateView):
     model = User
     success_url = reverse_lazy('users')
 
+    def render_forms(self, user_form, worker_form, contract_form):
+        return super().render_forms(
+            None if user_form.instance.is_verified else user_form,
+            worker_form, contract_form
+        )
+
     def get(self, request, *args, **kwargs):
         user = self.object = self.get_object()
         worker = Worker.objects.get(user=user, company=request.company)
@@ -123,10 +129,13 @@ class UserUpdate(UserFormRenderer, UpdateView):
 
         user_form, worker_form, contract_form = self.get_cleaned_forms(user, worker, worker.contract)
 
-        if all([user_form.is_valid(), worker_form.is_valid(), contract_form.is_valid()]):
-            user_form.save()
-            worker_form.save()
-            contract_form.save()
+        forms = [user_form, worker_form, contract_form]
+        if user.is_verified:
+            forms.remove(user_form)
+
+        if all(form.is_valid() for form in forms):
+            for form in forms:
+                form.save()
             return HttpResponseRedirect(self.success_url)
         else:
             return self.render_forms(user_form, worker_form, contract_form)

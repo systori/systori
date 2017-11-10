@@ -5,20 +5,34 @@
 
 {% block content %}
   <form method="post">{% csrf_token %}
+  {% if user_form %}
     {% bootstrap user_form %}
     {% if user.id %}
-    <div class="form-group">
-      <label class="control-label" for="id_password">{% trans 'Current Password Hash' %} - <a href="{% url 'user.generate.password' user.id %}">{% trans "Generate New Password" %}</a></label>
-      <div>
-        {% if user.password %}
-          {{ user.password }}
-        {% else %}
-          <b>{% trans 'No password set.' %}</b>
-        {% endif %}
+      <div class="form-group">
+        <label class="control-label" for="id_password">{% trans 'Current Password Hash' %} - <a href="{% url 'user.generate.password' user.id %}">{% trans "Generate New Password" %}</a></label>
+        <div>
+          {% if user.password %}
+            {{ user.password }}
+          {% else %}
+            <b>{% trans 'No password set.' %}</b>
+          {% endif %}
+        </div>
       </div>
-    </div>
     {% endif %}
     <br/>
+  {% else %}
+    <p>{% trans "Verified users control their own name and email details." %}</p>
+    <div class="form-group">
+      <label class="control-label">{% trans 'First name' %}</label>
+      <div>{{ user.first_name }}</div>
+      <br/>
+      <label class="control-label">{% trans 'Last name' %}</label>
+      <div>{{ user.last_name }}</div>
+      <br/>
+      <label class="control-label">{% trans 'Email address' %}</label>
+      <div>{{ user.email }}</div>
+    </div>
+  {% endif %}
     {% bootstrap worker_form %}
     {% bootstrap contract_form %}
     <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>

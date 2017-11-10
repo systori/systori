@@ -7,6 +7,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from django.conf import settings
 
+from allauth.account.models import EmailAddress
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -28,7 +30,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
 
-    first_name = models.CharField(_('first name'), max_length=30, blank=True)
+    first_name = models.CharField(_('first name'), max_length=30, blank=False)
     last_name = models.CharField(_('last name'), max_length=30, blank=True)
     email = models.EmailField(_('email address'), unique=True, null=True, blank=True)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
@@ -43,6 +45,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = _('user')
         verbose_name_plural = _('users')
         ordering = ('first_name',)
+
+    @property
+    def is_verified(self):
+        return EmailAddress.objects.filter(user=self, verified=True).exists()
 
     def get_full_name(self):
         full_name = '%s %s' % (self.first_name, self.last_name)

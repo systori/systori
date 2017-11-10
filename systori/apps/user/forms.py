@@ -27,7 +27,6 @@ class UserForm(ModelForm):
         'password_mismatch': _("The two password fields didn't match."),
     }
 
-    email = forms.EmailField(required=False)
     password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput, required=False)
     password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput, required=False,
                                 help_text=_("Enter the same password as above, for verification."))
@@ -36,7 +35,16 @@ class UserForm(ModelForm):
         super().__init__(*args, **kwargs)
         self.unique_email = unique_email
 
+    def clean(self):
+        if self.unique_email:
+            self._validate_unique = True
+        return self.cleaned_data
+
     def clean_email(self):
+        """ Return None if email is blank because emails must be unique and thus
+            two or more empty strings fail unique validation; multiple None (NULL)
+            are allowed in unique columns.
+        """
         if not self.cleaned_data['email']:
             return None
         return self.cleaned_data['email']
@@ -50,16 +58,6 @@ class UserForm(ModelForm):
                 code='password_mismatch',
             )
         return password2
-
-    def clean(self):
-        if self.unique_email:
-            cleaned_data = super().clean()
-        else:
-            cleaned_data = self.cleaned_data
-        if not cleaned_data.get('first_name') and\
-           not cleaned_data.get('last_name') and\
-           not cleaned_data.get('email'):
-            raise forms.ValidationError(_('A name or email is required.'))
 
     def save(self, commit=True):
         user = super().save(commit=False)
