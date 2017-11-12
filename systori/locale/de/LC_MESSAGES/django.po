@@ -614,7 +614,7 @@ msgstr "Debug Modus"
 msgid "Font"
 msgstr "Schriftart"
 
-#: systori/apps/document/models.py:481 systori/apps/user/models.py:35
+#: systori/apps/document/models.py:481 systori/apps/user/models.py:37
 msgid "language"
 msgstr "Sprache"
 
@@ -1034,49 +1034,41 @@ msgstr "Stundenübersicht für"
 msgid "The two password fields didn't match."
 msgstr "Die eingegebenen Passwörter stimmen nicht überein."
 
-#: systori/apps/user/forms.py:31
+#: systori/apps/user/forms.py:30
 msgid "Password"
 msgstr "Passwort"
 
-#: systori/apps/user/forms.py:32
+#: systori/apps/user/forms.py:31
 msgid "Password confirmation"
 msgstr "Passwort bestätigen"
 
-#: systori/apps/user/forms.py:33
+#: systori/apps/user/forms.py:32
 msgid "Enter the same password as above, for verification."
 msgstr "Geben Sie das gleiche Passwort wie oben ein."
 
-#: systori/apps/user/forms.py:62
-msgid "A name or email is required."
-msgstr "Ein Name oder eine eMail Adresse ist erforderlich."
-
-#: systori/apps/user/models.py:31
+#: systori/apps/user/models.py:33
 msgid "first name"
 msgstr "Vorname"
 
-#: systori/apps/user/models.py:32
+#: systori/apps/user/models.py:34
 msgid "last name"
 msgstr "Nachname"
 
-#: systori/apps/user/models.py:33
+#: systori/apps/user/models.py:35
 msgid "email address"
 msgstr "eMail"
 
-#: systori/apps/user/models.py:34
+#: systori/apps/user/models.py:36
 msgid "date joined"
 msgstr "Eintrittsdatum"
 
-#: systori/apps/user/models.py:43
+#: systori/apps/user/models.py:45
 msgid "user"
 msgstr "Benutzer"
 
-#: systori/apps/user/models.py:44
+#: systori/apps/user/models.py:46
 msgid "users"
 msgstr "Benutzer"
-
-#: systori/apps/user/views.py:87
-msgid "This user is already a member of this company."
-msgstr "Dieser Benutzer ist schon teil dieser Firma."
 
 #: systori/lib/accounting/models.py:41
 msgid "Asset"
@@ -1272,7 +1264,7 @@ msgstr "Haben"
 #: systori/templates/task/progress/main.html:48
 #: systori/templates/timetracking/home.html:82
 #: systori/templates/timetracking/user_report.html:45
-#: systori/templates/user/user_form.html:24
+#: systori/templates/user/user_form.html:38
 msgid "Save"
 msgstr "Speichern"
 
@@ -1990,15 +1982,15 @@ msgstr "Anmelden"
 msgid "New Password"
 msgstr "Neues Passwort"
 
-#: systori/templates/user/user_form.html:11
+#: systori/templates/user/user_form.html:12
 msgid "Current Password Hash"
 msgstr "Aktueller Passwort Hash"
 
-#: systori/templates/user/user_form.html:11
+#: systori/templates/user/user_form.html:12
 msgid "Generate New Password"
 msgstr "Neues Passort generieren"
 
-#: systori/templates/user/user_form.html:16
+#: systori/templates/user/user_form.html:17
 msgid "No password set."
 msgstr "Kein Passwort gesetzt."
 
@@ -3013,4 +3005,69 @@ msgstr "kopieren"
 #: systori/templates/task/job_import_form.html:11
 msgid "Upload"
 msgstr "hochladen"
+
+#: systori/apps/user/views.py:87
+msgid "User with this email is already a member of this company."
+msgstr "Ein Benutzer mit dieser eMail ist bereits ein Mitglied dieser Firma."
+
+#: systori/templates/account/email/email_confirmation_message.txt:1
+msgid "Hello from %(site_name)s!\n"
+"\n"
+"You're receiving this e-mail because user %(user_display)s has given yours as an e-mail address to connect their account.\n"
+"\n"
+"To confirm this is correct, go to %(activate_url)s\n"
+""
+msgstr "Hallo von dem Systori Server,\n"
+"\n"
+"Du erhältst diese eMail da der Benutzer %(user_display)s diese eMail Adresse als zu diesem Benutzer zugehörig angegeben hat.\n"
+"\n"
+"Um dies zu bestätigen bitte auf %(activate_url)s klicken."
+
+#: systori/templates/account/email/email_confirmation_message.txt:7
+msgid "Thank you from %(site_name)s!\n"
+"%(site_domain)s"
+msgstr "Vielen Dank! Ihr Systori-Team."
+
+#: systori/templates/account/email/email_confirmation_subject.txt:3
+msgid "Please Confirm Your E-mail Address"
+msgstr "Bitte bestätigen Sie ihre eMail Adresse"
+
+#: systori/templates/account/email/password_reset_key_message.txt:1
+msgid "Hello from %(site_name)s!\n"
+"\n"
+"You're receiving this e-mail because you or someone else has requested a password for your user account.\n"
+"It can be safely ignored if you did not request a password reset. Click the link below to reset your password."
+msgstr "Hallo von dem Systori Server,\n"
+"\n"
+"Du erhältst diese eMail da Du oder jemand anderes ein Passwort-Reset für diesen Account beantragt hat.\n"
+"Du kannst diese eMail einfach ignorieren, falls dieser Vorgang nicht von Dir angestoßen wurde. Klicke auf den nachfolgenden Link um das Passwort zurückzusetzen."
+
+#: systori/templates/account/email/password_reset_key_message.txt:8
+msgid "In case you forgot, your username is %(username)s."
+msgstr "Für den Fall der Fälle: Dein Benutzername ist %(username)s."
+
+#: systori/templates/account/email/password_reset_key_message.txt:10
+msgid "Thank you for using %(site_name)s!\n"
+"%(site_domain)s"
+msgstr "Vielen Dank, dass Du Systori benutzt!"
+
+#: systori/templates/account/email/password_reset_key_subject.txt:3
+msgid "Password Reset E-mail"
+msgstr "Passwort-Reset eMail"
+
+#: systori/templates/user/user_form.html:24
+msgid "Verified users control their own name and email details."
+msgstr "Bestätigte Benutzer verwalten selbst ihren Namen oder eMail Details."
+
+#: systori/templates/user/user_form.html:26
+msgid "First name"
+msgstr "Vorname"
+
+#: systori/templates/user/user_form.html:29
+msgid "Last name"
+msgstr "Nachname"
+
+#: systori/templates/user/user_form.html:32
+msgid "Email address"
+msgstr "eMail"
 
