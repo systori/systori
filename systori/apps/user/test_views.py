@@ -238,7 +238,7 @@ class TestRegistration(SystoriTestCase):
         self.assertRedirects(response, reverse('companies'))
         self.assertContains(response, reverse('company.create'))
 
-        self.assertContains(self.client.get(reverse('company.create')), 'Sub-Domain')
+        self.assertContains(self.client.get(reverse('company.create')), 'Subdomain')
         response = self.client.post(reverse('company.create'), {
             'name': 'Widgets LLC',
             'schema': 'widgets',
