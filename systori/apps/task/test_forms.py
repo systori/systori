@@ -89,3 +89,4 @@ class JobImportTest(TestCase):
         self.assertEqual(project.jobs.count(), 2)
         new_job = project.jobs.exclude(pk=job.pk).get()
         self.assertEqual("Dachdecker- und Klempnerarbeiten", new_job.name)
+        self.assertTrue(new_job.account)

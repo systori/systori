@@ -4,7 +4,8 @@ from django.forms import Form
 from django.utils.translation import ugettext_lazy as _
 
 from systori.apps.task.models import Job, Group, Task
-from systori.apps.project.models import Project, JobSite
+from systori.apps.project.models import Project
+from systori.apps.accounting.models import create_account_for_job
 
 
 """
@@ -107,6 +108,7 @@ class Import:
         self.project = project
         self.form = form if form is not None else Form({})
         self.objects = []
+        self.jobs = []
         self.max_group_depth = 0
         self.ns = None
 
@@ -114,7 +116,10 @@ class Import:
         for object in self.objects:
             object.refresh_pks()
             object.save()
-        return self.objects
+        for job in self.jobs:
+            job.account = create_account_for_job(job)
+            job.save()
+        return self.jobs
 
     def error(self, msg, line=None):
         if not self.form:
@@ -154,6 +159,7 @@ class Import:
             if isinstance(parent, Project):
                 group = Job(name=" ".join(group_element.LblTx.xpath(".//text()")), project=parent)
                 group.job = group
+                self.jobs.append(group)
             else:
                 group = Group(name=" ".join(group_element.LblTx.xpath(".//text()")), parent=parent)
             self.max_group_depth = max(self.max_group_depth, group.depth)
