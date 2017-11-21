@@ -17,7 +17,8 @@ systori/dart/test/packages
 systori/dart/build/
 systori/dart/.pub/
 systori/dart/.packages
-media/
+media/letterhead/
+media/attachments/
 systori/dart/pub-cache
 systori.sublime-project
 systori.sublime-workspace

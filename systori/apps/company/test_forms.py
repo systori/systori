@@ -4,6 +4,7 @@ from django.utils.translation import activate
 from ..user.factories import UserFactory
 from ..project.models import Project
 from ..accounting.models import Account
+from ..document.models import Letterhead, DocumentSettings
 
 from .factories import CompanyFactory
 from .models import Company
@@ -50,6 +51,8 @@ class CompanyFormTest(TestCase):
         self.assertTrue(company.workers.get().is_owner)
         self.assertGreater(Account.objects.count(), 1)
         Project.objects.template().get()
+        DocumentSettings.objects.get()
+        Letterhead.objects.get()
 
     def test_update_save(self):
         company = CompanyFactory(name='new company')

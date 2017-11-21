@@ -11,6 +11,8 @@ STATICFILES_DIRS += (
     ('dart', 'systori/dart/build/web'),
 )
 
+MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, 'media'))
+
 DATABASES['default'].update({
     'HOST': 'db',
     'NAME': 'systori_test',

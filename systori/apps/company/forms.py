@@ -1,9 +1,14 @@
+import os.path
+from django.forms import ModelForm
+from django.conf import settings
+from django.core.files.uploadedfile import File
 from django.utils.translation import ugettext_lazy as _
 
 from systori.apps.project.models import Project
 from systori.apps.accounting.workflow import create_chart_of_accounts
+from systori.apps.document.models import DocumentSettings
+from systori.apps.document.letterhead_utils import clean_letterhead_pdf
 
-from django.forms import ModelForm
 from .models import Company, Worker
 
 
@@ -43,4 +48,13 @@ class CompanyForm(ModelForm):
                 is_template=True
             )
             create_chart_of_accounts()
+            demo_letterhead = os.path.join(settings.MEDIA_ROOT, 'demo_letterhead.pdf')
+            letterhead = clean_letterhead_pdf(File(open(demo_letterhead, 'rb')), save=True)
+            DocumentSettings.objects.create(
+                proposal_letterhead=letterhead,
+                invoice_letterhead=letterhead,
+                evidence_letterhead=letterhead,
+                itemized_letterhead=letterhead,
+                timesheet_letterhead=letterhead
+            )
         return company
