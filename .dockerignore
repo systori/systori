@@ -1,7 +1,8 @@
 .git
 .idea
 src
-media
+media/letterhead
+media/attachments
 server
 systori/dart/build
 **/__pycache__
