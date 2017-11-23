@@ -15,19 +15,19 @@
     <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
     <link href="{% block custom_css %}{% static "css/main.css" %}{% endblock %}" rel="stylesheet">
   {% endblock %}
-  <script type="text/javascript">
-    var _paq = _paq || [];
-    _paq.push(['setCookieDomain', "*.systori.com"]);
-    _paq.push(['trackPageView']);
-    _paq.push(['enableLinkTracking']);
-    (function() {
-      var u="//events.systori.io/";
-      _paq.push(['setTrackerUrl', u+'piwik.php']);
-      _paq.push(['setSiteId', '1']);
-      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-      g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
-    })();
-  </script>
+    <script type="text/javascript">
+      var _paq = _paq || [];
+      _paq.push(['setCookieDomain', "*.systori.com"]);
+      _paq.push(['trackPageView']);
+      _paq.push(['enableLinkTracking']);
+      (function() {
+        var u="//events.systori.io/";
+        _paq.push(['setTrackerUrl', u+'piwik.php']);
+        _paq.push(['setSiteId', '1']);
+        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+      })();
+    </script>
 </head>
 
 {% block body_start %}
@@ -125,12 +125,12 @@
 {% block container %}{% endblock container %}
 
 {% block base_js %}
+<script src="https://cdn.ravenjs.com/3.19.1/raven.min.js" crossorigin="anonymous"></script>
+<script>Raven.config('https://11c0341ce6d74de7968932986090227d@sentry.systori.io/1').install();</script>
 <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
 <script src="{% static "js/bootstrap.min.js" %}"></script>
-    {% webcomponents 'lite' %}
-    {% dart "goto_project.dart" %}
-
-
+{% webcomponents 'lite' %}
+{% dart "goto_project.dart" %}
 <script>
   window.intercomSettings = {
     app_id: "b1xxxl10",
@@ -140,7 +140,6 @@
   };
 </script>
 <script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',intercomSettings);}else{var d=document;var i=function(){i.c(arguments)};i.q=[];i.c=function(args){i.q.push(args)};w.Intercom=i;function l(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/b1xxxl10';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})()</script>
-
 {% endblock base_js %}
 
 {% block lang_js %}<script src="{% static "js/language_picker.js" %}"></script>{% endblock lang_js %}
