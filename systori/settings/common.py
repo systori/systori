@@ -1,6 +1,10 @@
 import os
 import sys
 
+RAVEN_CONFIG = {
+    'dsn': 'https://11c0341ce6d74de7968932986090227d:406344d994aa4524818e99d45cf8d44b@sentry.systori.io/1',
+}
+
 DEFAULT_COUNTRY = "Deutschland"
 
 GOOGLE_MAPS_API_KEY = "AIzaSyAEhGj7BuZtHzx8lHow-cm6lTCja1txOX4"

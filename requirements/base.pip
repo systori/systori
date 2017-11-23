@@ -2,3 +2,4 @@ psycopg2==2.7.1
 celery==4.0.2
 fabric3==1.13.1.post1
 lxml==3.6.0
+raven
