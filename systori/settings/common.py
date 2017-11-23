@@ -63,6 +63,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'django.contrib.postgres',
+    'raven.contrib.django.raven_compat',
     'django_dartium',
     'rest_framework',
     'channels',
