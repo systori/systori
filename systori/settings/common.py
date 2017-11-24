@@ -45,6 +45,7 @@ DEFAULT_FROM_EMAIL = 'Systori <support@systori.com>'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '8)-+y0f@(mb=!o9ov_g!+35s4ritax6jzmc*c04jo=6*5t_74&'
+INTERCOM_ACCESS_TOKEN = 'dG9rOjk4YTJjYmNmXzBlNjhfNDFjOV84ZDllX2E0NjY5MGY4MGQzYjoxOjA='
 
 DEBUG = False
 

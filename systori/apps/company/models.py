@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 
+import requests
 from postgres_schema.models import AbstractSchema
 from timezone_field import TimeZoneField
 
@@ -19,6 +20,7 @@ class Company(AbstractSchema):
         _('Jobsite Required'), default=True,
         help_text=_('Require that all projects have a jobsite.')
     )
+    created = models.DateTimeField(_("Created"), auto_now_add=True)
 
     def url(self, request):
         port = ''
@@ -38,6 +40,23 @@ class Company(AbstractSchema):
     def activate(self):
         super().activate()
         timezone.activate(self.timezone)
+
+    def save(self, *args, **kwargs):
+        company = super().save(*args, **kwargs)
+        if not settings.DEBUG and not settings.TESTING:
+            requests.post(
+                'https://api.intercom.io/events',
+                headers={
+                    'Authorization': 'Bearer '+settings.INTERCOM_ACCESS_TOKEN,
+                },
+                json={
+                    "event_name": "company-created",
+                    "date_time": company.created,
+                    "company_id": company.id,
+                    "company_name": company.name
+                }
+            )
+        return company
 
 
 class Worker(models.Model):
