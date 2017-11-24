@@ -52,7 +52,7 @@ class Company(AbstractSchema):
                 json={
                     "event_name": "company-created",
                     "date_time": self.created,
-                    "company_id": self.id,
+                    "company_schema": self.schema,
                     "company_name": self.name
                 }
             )
