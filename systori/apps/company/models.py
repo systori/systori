@@ -51,9 +51,9 @@ class Company(AbstractSchema):
                 },
                 json={
                     "event_name": "company-created",
-                    "date_time": company.created,
-                    "company_id": company.id,
-                    "company_name": company.name
+                    "date_time": self.created,
+                    "company_id": self.id,
+                    "company_name": self.name
                 }
             )
         return company
