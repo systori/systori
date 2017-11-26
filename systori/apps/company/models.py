@@ -5,7 +5,6 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 
-import requests
 from postgres_schema.models import AbstractSchema
 from timezone_field import TimeZoneField
 
@@ -40,31 +39,6 @@ class Company(AbstractSchema):
     def activate(self):
         super().activate()
         timezone.activate(self.timezone)
-
-    def save(self, *args, **kwargs):
-        is_adding = self._state.adding
-        company = super().save(*args, **kwargs)
-        if is_adding and not settings.DEBUG and not settings.TESTING:
-            #try:
-                owner = self.workers.filter(is_owner=True).get().user
-                requests.post(
-                    'https://api.intercom.io/events',
-                    headers={
-                        'Authorization': 'Bearer '+settings.INTERCOM_ACCESS_TOKEN,
-                    },
-                    json={
-                        "event_name": "company-created",
-                        "date_time": self.created.timestamp(),
-                        "company_schema": self.schema,
-                        "company_name": self.name,
-                        "owner_id": owner.id,
-                        "owner_name": owner.username,
-                        "owner_email": owner.email
-                    }
-                )
-            #except:
-            #    pass  # oh, well
-        return company
 
 
 class Worker(models.Model):
