@@ -1,6 +1,7 @@
 from raven.contrib.django.raven_compat.models import client
 
 from django.conf import settings
+from django.shortcuts import redirect
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
@@ -16,7 +17,6 @@ class CompanyList(TemplateView):
 class CompanyCreate(CreateView):
     model = Company
     form_class = CompanyForm
-    success_url = reverse_lazy('companies')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -40,6 +40,9 @@ class CompanyCreate(CreateView):
             except:
                 client.captureException()
         return response
+
+    def get_success_url(self):
+        return redirect(self.object.url(self.request))
 
 
 class CompanyUpdate(UpdateView):

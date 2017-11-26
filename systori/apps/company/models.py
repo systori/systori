@@ -40,6 +40,9 @@ class Company(AbstractSchema):
         super().activate()
         timezone.activate(self.timezone)
 
+    def __str__(self):
+        return _('Company') + ' {} ({}.systori.com)'.format(self.name, self.schema)
+
 
 class Worker(models.Model):
     company = models.ForeignKey('Company', related_name="workers", on_delete=models.CASCADE)
