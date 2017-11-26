@@ -1,4 +1,4 @@
-import requests
+from raven.contrib.django.raven_compat.models import client
 
 from django.conf import settings
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
@@ -38,7 +38,7 @@ class CompanyCreate(CreateView):
                           'support@systori.com',
                           ['lex@damoti.com', 'marius@systori.com'])
             except:
-                pass  # oh, well
+                client.captureException()
         return response
 
 
