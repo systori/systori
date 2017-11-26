@@ -27,9 +27,8 @@ class CompanyCreate(CreateView):
         event = {
             "event_name": "company-created",
             "created_at": company.created.timestamp(),
-            "company_schema": company.schema,
-            "company_name": company.name,
-            "username": user.username,
+            "schema": company.schema,
+            "company": company.name,
             "email": user.email
         }
         headers = {
