@@ -3,6 +3,8 @@ import requests
 from django.conf import settings
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.core.mail import send_mail
+
 from .models import Company
 from .forms import CompanyForm
 
@@ -25,18 +27,16 @@ class CompanyCreate(CreateView):
         response = super().form_valid(form)
         company, user = self.object, self.request.user
         event = {
-            "event_name": "company-created",
-            "created_at": company.created.timestamp(),
+            "email": user.email,
             "schema": company.schema,
-            "company": company.name,
-            "email": user.email
+            "name": company.name
         }
-        headers = {
-            'Authorization': 'Bearer '+settings.INTERCOM_ACCESS_TOKEN
-        }
-        if not settings.DEBUG and not settings.TESTING:
+        if not settings.TESTING:
             try:
-                requests.post('https://api.intercom.io/events', json=event, headers=headers)
+                send_mail('new Company created',
+                          'User {email} just created company {name} with schema {schema}'.format(**event),
+                          'support@systori.com',
+                          ['lex@damoti.com', 'marius@systori.com'])
             except:
                 pass  # oh, well
         return response
