@@ -1773,7 +1773,7 @@ msgstr "Aufmaß Vordruck"
 
 #: systori/templates/project/project_detail.html:164
 msgid "Create Job"
-msgstr "Los Erstellen"
+msgstr "Los erstellen"
 
 #: systori/templates/project/project_detail.html:177
 msgid "Created On"
@@ -1862,11 +1862,11 @@ msgstr "Entfernen"
 
 #: systori/templates/project/project_detail.html:526
 msgid "Add Contact"
-msgstr "Kontakt"
+msgstr "Kontakt hinzufügen"
 
 #: systori/templates/project/project_detail.html:562
 msgid "Create Job Site"
-msgstr "Einsatzorte"
+msgstr "Einsatzort erstellen"
 
 #: systori/templates/project/project_form.html:14
 msgid "Save &raquo; Project"
@@ -1976,7 +1976,7 @@ msgstr "Die eingegebenen Daten funktionieren nicht, bitte versuchen Sie es noch 
 
 #: systori/templates/account/login.html:71
 msgid "Sign in"
-msgstr "Anmelden"
+msgstr "anmelden"
 
 #: systori/templates/user/password_generator.html:8
 msgid "New Password"
