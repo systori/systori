@@ -41,7 +41,7 @@ class CompanyMiddleware(MiddlewareMixin):
 
         if request.user.is_authenticated:
 
-            companies = request.user.companies.all()
+            companies = request.user.companies.active()
             if len(companies) == 1:
                 company_url = companies[0].url(request)
                 return HttpResponseRedirect(company_url)
@@ -55,7 +55,7 @@ class CompanyMiddleware(MiddlewareMixin):
             if request.user.is_authenticated:
                 response.context_data['available_companies'] = [
                     {'name': c.name, 'schema': c.schema, 'url': c.url(request), 'current': c.schema == current}
-                    for c in request.user.companies.all()
+                    for c in request.user.companies.active()
                 ]
         return response
 

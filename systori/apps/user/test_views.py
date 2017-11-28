@@ -207,7 +207,7 @@ class TestEditWorker(ClientTestCase):
 
 class TestRegistration(SystoriTestCase):
 
-    def test_onboarding_workflow(self):
+    def test_on_boarding_workflow(self):
 
         # main page has registration link
         self.assertContains(self.client.get('', follow=True), reverse('account_signup'))
@@ -244,5 +244,5 @@ class TestRegistration(SystoriTestCase):
             'schema': 'widgets',
             'timezone': 'Europe/Berlin'
         }, follow=True, HTTP_HOST='widgets.systori.localhost')
-        self.assertRedirects(response, reverse('companies'))
+        self.assertRedirects(response, 'http://widgets.systori.localhost')
         self.assertContains(response, 'Widgets LLC')

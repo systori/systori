@@ -41,7 +41,7 @@ class Company(AbstractSchema):
         timezone.activate(self.timezone)
 
     def __str__(self):
-        return _('Company') + ' {} ({}.systori.com)'.format(self.name, self.schema)
+        return '{} {} ({}.systori.com)'.format(_('Company'), self.name, self.schema)
 
 
 class Worker(models.Model):
