@@ -109,7 +109,7 @@ class Import:
         self.form = form if form is not None else Form({})
         self.objects = []
         self.jobs = []
-        self.max_group_depth = 0
+        self.max_group_depth = 1
         self.ns = None
 
     def save(self):
