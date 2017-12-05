@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'django.contrib.postgres',
     'django_dartium',
     'rest_framework',
+    'rest_framework.authtoken',
     'channels',
     'bootstrap',
     'postgres_schema',
@@ -166,6 +167,15 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
+
+# DRF Authentication settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}
 
 
 # Django Allauth Configuration
