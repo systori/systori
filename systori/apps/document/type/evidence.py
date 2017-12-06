@@ -4,6 +4,8 @@ from datetime import date
 from reportlab.lib.units import mm
 from reportlab.platypus import Table, TableStyle, PageBreak
 from reportlab.lib import colors
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.barcode.qr import QrCodeWidget
 
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
@@ -19,7 +21,7 @@ from .font import FontManager
 DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 
 
-def render(project, letterhead):
+def render(company, project, letterhead):
 
     with BytesIO() as buffer:
 
@@ -32,7 +34,7 @@ def render(project, letterhead):
         doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         COLS = 55
-        ROWS = 23
+        ROWS = 18
 
         pages = []
 
@@ -67,6 +69,26 @@ def render(project, letterhead):
                         ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey)
                     ]))
                     pages.append(t)
+
+                    qrw = QrCodeWidget('systori:{}/{}/{}/{}/'.format(
+                        company.schema, project.pk, job.pk, task.pk
+                    ), barHeight=64*mm, barWidth=64*mm)
+                    bounds = qrw.getBounds()
+
+                    w = bounds[2] - bounds[0]
+                    h = bounds[3] - bounds[1]
+
+                    d = Drawing(64, 64, transform=[64. / w, 0, 0, 64. / h, 0, 0])
+                    d.add(qrw)
+                    pages.append(Table([
+                        ['', d, '']
+                    ], style=TableStyle([
+                        ('TOPPADDING', (0, 0), (-1, -1), 0),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+                        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
+                        ('BOX', (2, 0), (-1, -1), 0.25, colors.black),
+                    ])))
 
                     pages.append(PageBreak())
 

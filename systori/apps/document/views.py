@@ -520,7 +520,7 @@ class EvidencePDF(DocumentRenderView):
     def pdf(self):
         doc_settings = DocumentSettings.get_for_language(get_language())
         letterhead = doc_settings.evidence_letterhead
-        return pdf_type.evidence.render(self.request.project, letterhead)
+        return pdf_type.evidence.render(self.request.company, self.request.project, letterhead)
 
 
 # Itemized List
