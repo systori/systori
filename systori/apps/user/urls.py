@@ -1,11 +1,13 @@
 from ..user.authorization import office_auth
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url, include
+from rest_framework.authtoken import views as drf_views
 from . import views
 
 urlpatterns = [
 
     url(r'^accounts/', include('allauth.urls')),
+    url(r'api/token/', drf_views.obtain_auth_token),
 
     url(r'^settings$', login_required(views.SettingsView.as_view()), name='settings'),
     url(r'^set_language$', views.SetLanguageView.as_view(), name='set_language'),
