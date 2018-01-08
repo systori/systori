@@ -52,7 +52,14 @@ class VacationScheduleView(ListView):
     template_name = 'timetracking/vacation.html'
 
     def get_queryset(self):
-        return Timer.objects.get_vacation_schedule(timezone.localdate().year)
+        self.selected_year = int(self.kwargs.get('selected_year', timezone.localdate().year))
+        return Timer.objects.get_vacation_schedule(self.selected_year)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['years'] = range(2016, timezone.localdate().year+1, 1)
+        context['selected_year'] = self.selected_year
+        return context
 
 
 class WorkerReportView(BaseCreateView, PeriodFilterMixin):
