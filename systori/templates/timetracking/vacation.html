@@ -1,5 +1,5 @@
 {% extends "frame.html" %}
-{% load i18n dartium bootstrap customformatting %}
+{% load i18n l10n dartium bootstrap customformatting %}
 
 {% block head %}
 {{ block.super }}
@@ -41,8 +41,37 @@
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='timetracking' %}{% endblock %}
 
 {% block content %}
-  <h2 class="sub-header">{% trans "Vacation Schedule" %}</h2>
-  <p>{% trans "Already used as well as forecast for future holidays (in Days)." %}</p>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            {% trans "Vacation Schedule" %} {{ selected_year|unlocalize }}
+          </h3>
+        </div>
+        <div class="panel-body">
+          <p>{% trans "Already used as well as forecast for future holidays (in Days)." %}</p>
+
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        {{ selected_year|unlocalize }} <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        {% for year in years %}
+          {% if year == selected_year %}
+            <li><a href="#" style="font-weight: bold;">{{ year|unlocalize }}</a></li>
+          {% else %}
+            <li><a href="{% url 'timetracking.vacation.schedule' year %}">{{ year|unlocalize }}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+
   <div class="table-responsive">
     <table class="table table-striped table-bordered">
       <thead>
