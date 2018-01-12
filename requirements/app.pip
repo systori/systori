@@ -9,6 +9,7 @@ channels
 asgi_ipc
 
 geopy
+python-dateutil==2.6.1
 
 hg+https://bitbucket.org/rptlab/reportlab
 hg+https://bitbucket.org/rptlab/preppy
