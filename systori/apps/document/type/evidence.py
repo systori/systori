@@ -37,38 +37,37 @@ def render(project, letterhead):
         pages = []
 
         for job in project.jobs.all():
-            for taskgroup in job.groups.all():
-                for task in taskgroup.tasks.all():
+            for task in job.all_tasks.all():
 
-                    pages.append(Table([[b(_('Evidence Sheet'), font), nr(proposal_date, font)]]))
+                pages.append(Table([[b(_('Evidence Sheet'), font), nr(proposal_date, font)]]))
 
-                    pages.append(Table([
-                        [b(_('Project'), font), p('%s / %s / %s' % (job.project, job.name, taskgroup.name), font)]
-                    ],
-                        colWidths=[30*mm, None],
-                        style=[
-                            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                        ]
-                    ))
+                pages.append(Table([
+                    [b(_('Project'), font), p('%s / %s / %s' % (job.project, job.name, task.group.name), font)]
+                ],
+                    colWidths=[30*mm, None],
+                    style=[
+                        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ]
+                ))
 
-                    pages.append(Table([
-                        [b(_('Code'), font), p(task.code.strip(), font),
-                         br(_('Task'), font), p(task.name[:60].strip(), font)],
-                        [b(_('P-Amount'), font), p('%s %s' % (ubrdecimal(task.qty).strip(), task.unit.strip()), font)]
-                    ],
-                        colWidths=[30*mm, 70*mm, 30*mm, None],
-                        style=TableStyle([
-                            ('SPAN', (3, 0), (-1, 0)),
-                        ])
-                    ))
+                pages.append(Table([
+                    [b(_('Code'), font), p(task.code.strip(), font),
+                     br(_('Task'), font), p(task.name[:60].strip(), font)],
+                    [b(_('P-Amount'), font), p('%s %s' % (ubrdecimal(task.qty).strip(), task.unit.strip()), font)]
+                ],
+                    colWidths=[30*mm, 70*mm, 30*mm, None],
+                    style=TableStyle([
+                        ('SPAN', (3, 0), (-1, 0)),
+                    ])
+                ))
 
-                    t = Table([['']*COLS]*ROWS, colWidths=[5*mm]*COLS, rowHeights=[5*mm]*ROWS)
-                    t.setStyle(TableStyle([
-                        ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey)
-                    ]))
-                    pages.append(t)
+                t = Table([['']*COLS]*ROWS, colWidths=[5*mm]*COLS, rowHeights=[5*mm]*ROWS)
+                t.setStyle(TableStyle([
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey)
+                ]))
+                pages.append(t)
 
-                    pages.append(PageBreak())
+                pages.append(PageBreak())
 
         if not pages:
             pages.append(b(_('There are no billable Tasks available.'), font))

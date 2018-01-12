@@ -1,9 +1,9 @@
 import os
 import mimetypes
 from datetime import date
+from dateutil.rrule import rrule, MONTHLY
 from calendar import monthrange
 from collections import OrderedDict, namedtuple
-from itertools import chain
 
 from django.http import HttpResponse, HttpResponseRedirect, StreamingHttpResponse
 from django.views.generic import View, ListView, TemplateView
@@ -233,21 +233,22 @@ class TimesheetsList(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         today = date.today()
-        year, month = today.year, today.month
+        first_year, first_month = Timesheet.objects.first().document_date.year, Timesheet.objects.first().document_date.month
+        start_date = date(first_year, first_month, 1)
+        selected_months = [dt for dt in rrule(MONTHLY, dtstart=start_date, until=today)]
         months = []
-        while month > 0:
+        for dt in reversed(selected_months):
             months.append(
                 TimesheetMonth(
-                    date(year, month, 1),
+                    date(dt.year, dt.month, 1),
                     can_generate=(
-                        (month == today.month or month == today.month-1) and
-                        Timer.objects.month(year, month).exists()
+                        (dt.month == today.month or dt.month == today.month-1) and
+                        Timer.objects.month(dt.year, dt.month).exists()
                     ),
-                    count=Timesheet.objects.period(year, month).count(),
-                    timesheets=Timesheet.objects.period(year, month).all()
+                    count=Timesheet.objects.period(dt.year, dt.month).count(),
+                    timesheets=Timesheet.objects.period(dt.year, dt.month).all()
                 )
             )
-            month -= 1
         context['months'] = months
         return context
 
