@@ -1,9 +1,11 @@
 import os
 import sys
 
-DEFAULT_COUNTRY = "Deutschland"
+SECRET_KEY = os.environ.get('SECRET_KEY', 'abc123')
+INTERCOM_ACCESS_TOKEN = os.environ.get('INTERCOM_ACCESS_TOKEN', '')
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_API_KEY', '')
 
-GOOGLE_MAPS_API_KEY = "AIzaSyAEhGj7BuZtHzx8lHow-cm6lTCja1txOX4"
+DEFAULT_COUNTRY = "Deutschland"
 
 BROKER_URL = 'amqp://guest:guest@192.168.0.99:5672//'
 CELERY_TASK_SERIALIZER = "json"
@@ -38,10 +40,6 @@ DEFAULT_FROM_EMAIL = 'Systori <support@systori.com>'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '8)-+y0f@(mb=!o9ov_g!+35s4ritax6jzmc*c04jo=6*5t_74&'
-INTERCOM_ACCESS_TOKEN = 'dG9rOjk4YTJjYmNmXzBlNjhfNDFjOV84ZDllX2E0NjY5MGY4MGQzYjoxOjA='
 
 DEBUG = False
 
