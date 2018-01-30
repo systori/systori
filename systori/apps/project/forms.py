@@ -49,7 +49,7 @@ class ProjectImportForm(ModelForm):
 class JobSiteForm(ModelForm):
     class Meta:
         model = JobSite
-        fields = ['name', 'address', 'postal_code', 'city', 'travel_time']
+        fields = ['name', 'address', 'postal_code', 'city']
 
     def save(self, commit=True):
         self.instance.geocode_address()

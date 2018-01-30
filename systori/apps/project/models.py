@@ -303,8 +303,6 @@ class JobSite(models.Model):
 
     latitude = models.FloatField(_("Latitude"), null=True, blank=True)
     longitude = models.FloatField(_("Longitude"), null=True, blank=True)
-    travel_time = models.PositiveIntegerField(
-        _("Travel time"), null=True, blank=True, help_text=_("in minutes"))
 
     class Meta:
         ordering = ('id',)
