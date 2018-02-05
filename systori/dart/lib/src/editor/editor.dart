@@ -429,7 +429,7 @@ class Task extends Model with Row, TotalRow, HtmlRow, KeyboardHandler {
     TextInput name;
     TextInput description;
     VariantInput variant;
-    ProvisionalToggle is_provisional_toggle;
+    Toggle is_provisional_toggle;
     TimeAndMaterialsToggle is_time_and_materials;
     bool get is_provisional => is_provisional_toggle.value;
     bool get exclude_from_total => is_provisional || variant.serial > 0;

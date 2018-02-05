@@ -1,5 +1,4 @@
 from django.conf.urls import url
-from django.db.models import Count
 from rest_framework import views, viewsets, mixins
 from rest_framework import response, renderers
 from systori.lib.templatetags.customformatting import ubrdecimal
@@ -37,8 +36,6 @@ class SearchAPI(views.APIView):
             qs = Task.objects.raw("""
                     SELECT
                     task_task.id,
-                    task_task.name,
-                    task_task.description,
                     COUNT(task_lineitem.id) AS lineItemCount,
                     ts_headline('german', task_task.description, plainto_tsquery('german'::regconfig, '{terms}')) AS match_description,
                     ts_headline('german', task_task.name, plainto_tsquery('german'::regconfig, '{terms}')) AS match_name
