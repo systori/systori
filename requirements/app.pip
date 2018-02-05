@@ -1,18 +1,19 @@
 -r base.pip
 
-django>=2.0.1
+django>=2.0rc1
 djangorestframework
 django-fsm
-django-allauth
+django-allauth==0.34.0
 jsonfield
 channels==1.1.8
 asgi_ipc==1.4.2
 asgiref==1.1.2
+msgpack-python==0.5.1
 
 geopy
 python-dateutil==2.6.1
 
-hg+https://bitbucket.org/rptlab/reportlab
+hg+https://bitbucket.org/rptlab/reportlab==3.4.24
 hg+https://bitbucket.org/rptlab/preppy
 git+ssh://git@rlextra.github.com/systori/rlextra.git
 django-postgres-schema
