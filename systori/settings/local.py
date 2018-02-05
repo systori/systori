@@ -9,7 +9,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEBUG = True
 
-if True:
+if False:
     INSTALLED_APPS += (
         'debug_toolbar',
     )

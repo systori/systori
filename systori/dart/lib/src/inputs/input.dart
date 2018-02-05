@@ -1,5 +1,5 @@
 import 'dart:html';
-
+import 'package:systori/editor.dart' show HtmlCell;
 
 abstract class EventHandler {
     onInputEvent(Input input) {}

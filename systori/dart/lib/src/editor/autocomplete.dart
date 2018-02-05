@@ -94,7 +94,8 @@ class Autocomplete extends HtmlElement {
         input.insertAdjacentElement('afterEnd', this);
         offsetFromTop = input.offsetHeight;
         style.top = '${offsetFromTop}px';
-        style.left = '${input.offsetLeft}px';
+        style.left = '0px';
+        //style.left = '${input.offsetLeft}px';
     }
 
     hide() {
@@ -136,24 +137,28 @@ class Autocomplete extends HtmlElement {
     }
 
     handleUp() {
-        var current = this.querySelector('.active');
-        if (current == null) return;
-        var previous = current.previousElementSibling;
-        if (previous != null) {
-            select(current, previous);
-        }
+        try {
+            var current = this.querySelector('.active');
+            if (current == null) return;
+            var previous = current.previousElementSibling;
+            if (previous != null) {
+                select(current, previous);
+            }
+        } catch(exception, stackTrace) { print("exception appeared editor handleUp()."); }
     }
 
     handleDown() {
-        var current = this.querySelector('.active');
-        if (current == null) {
-            select(current, children.first);
-        } else {
-            var next = current.nextElementSibling;
-            if (next != null) {
+        try {
+            var current = this.querySelector('.active');
+            if (current == null) {
+                select(current, children.first);
+            } else {
+                var next = current.nextElementSibling;
+                if (next != null) {
                 select(current, next);
+                }
             }
-        }
+        } catch(exception, stackTrace) { print("exception appeared editor handleDown()."); }
     }
 
     select(DivElement previous, DivElement current) {
@@ -204,20 +209,26 @@ class Autocomplete extends HtmlElement {
     String createTaskInfo(Map data) {
         var html = new StringBuffer();
         html.write("<table>");
-        html.write("<tr><td colspan='5'>${data['name']}</td></tr>");
-        html.write("<tr><td colspan='2'></td>");
-        html.write("<td class='info-decimal info-qty'>${data['qty']} ${data['unit']}</td>");
+        html.write("<tr style='border-bottom: 1px solid gray;'><td colspan='2'>Project #${data['project_id']}</td>");
+        html.write("<td class='info-decimal info-qty' nowrap>${data['qty']} ${data['unit']}</td>");
         html.write("<td class='info-decimal info-price'>${data['price']}</td>");
         html.write("<td class='info-decimal info-total'>${data['total']}</td>");
         html.write("</tr>");
+        html.write("<tr><td colspan='5'><b>${data['name']}</b></td></tr>");
         html.write("<tr><td colspan='5'>${data['description']}</td></tr>");
+        html.write("<tr style='border-bottom: 1px solid gray;'><td colspan='5'>&nbsp;</td></tr>");
+        html.write("<tr><td colspan='4'></td></tr>");
         for (Map li in data['lineitems']) {
             html.write("<tr>");
-            html.write("<td>${li['name']}</td>");
-            html.write("<td class='info-decimal info-qty'>${li['qty']} ${li['unit']}</td>");
+            if (li['name'].length > 47) {
+                html.write("<td colspan='5'>${li['name']}</td>");
+                html.write("</tr><tr><td colspan='2'>&nbsp;</td>");
+            } else {
+                html.write("<td colspan='2'>${li['name']}</td>");
+            }
+            html.write("<td class='info-decimal info-qty' nowrap>${li['qty']} ${li['unit']}</td>");
             html.write("<td class='info-decimal info-price'>${li['price']}</td>");
             html.write("<td class='info-decimal info-total'>${li['total']}</td>");
-            html.write("<td></td>");
             html.write("</tr>");
         }
         html.write("</table>");
