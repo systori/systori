@@ -3,10 +3,12 @@
 django>=2.0rc1
 djangorestframework
 django-fsm
-django-allauth
+django-allauth==0.34.0
 jsonfield
-channels
-asgi_ipc
+channels==1.1.8
+asgi_ipc==1.4.2
+asgiref==1.1.2
+msgpack-python==0.5.1
 
 geopy
 python-dateutil==2.6.1

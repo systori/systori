@@ -1,6 +1,5 @@
 import 'dart:html';
 
-
 abstract class EventHandler {
     onInputEvent(Input input) {}
 }

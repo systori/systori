@@ -201,7 +201,7 @@
     }
 
     sys-task > .editor .is_provisional {
-      color: #85144b;
+      color: rgba(133, 20, 75, 1);
     }
 
     sys-lineitem > .editor .total,
@@ -220,6 +220,11 @@
     sys-task.excluded > .editor .total:after {
       color: white;
       border-bottom: none;
+    }
+
+    sys-task.excluded > .editor .total {
+      color: rgba(133, 20, 75, 0.3);;
+      border: 1px solid rgba(133, 20, 75, 0.3);
     }
 
     sys-task > .editor .price {
@@ -438,7 +443,7 @@
       visibility: hidden;
       position: absolute;
       background: white;
-      width: 480px;
+      width: 450px;
       border: 1px solid lightgrey;
       -webkit-transition: top 0.1s;
       -moz-transition: top 0.1s;
@@ -463,10 +468,11 @@
 
     sys-autocomplete > div > div {
       position: absolute;
-      left: 480px;
+      left: 450px;
       top: 0px;
-      width: 360px;
-      background: #FFE0A6;
+      width: 516px;
+      background: #DDEDE1;
+      padding: 5px;
     }
 
     sys-autocomplete > div > div > table {
@@ -482,8 +488,16 @@
       font-weight: bold;
     }
 
+    sys-autocomplete > div > div > table tr:nth-child(even) {
+      background: #EEF6F1;
+    }
+
+    sys-autocomplete > div > div > table tr:nth-child(-n+4) {
+      background: #DDEDE1;
+    }
+
     sys-autocomplete > div.active {
-      background: orange;
+      background: #B7DBC1;
     }
 
     sys-group[data-pk=""] > .editor sys-input.name,

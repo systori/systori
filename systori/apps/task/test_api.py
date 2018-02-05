@@ -308,10 +308,8 @@ class AutocompleteApiTest(ClientTestCase):
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(response.data, [{
             'id': 1,
-            'job__name': 'The Job',
             'match_name': 'Voranstrich aus <b>Bitumenlösung</b>',
             'match_description': '',
-            'rank': 0.607927,
         }])
 
     def test_task_info(self):
@@ -326,6 +324,7 @@ class AutocompleteApiTest(ClientTestCase):
         self.assertDictEqual(response.data, {
             'name': 'Voranstrich aus Bitumenlösung',
             'description': '',
+            'project_id': 2,
             'qty': '3',
             'unit': 'm',
             'price': '19,99',

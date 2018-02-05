@@ -125,34 +125,40 @@
 {% block container %}{% endblock container %}
 
 {% block base_js %}
-<script src="https://cdn.ravenjs.com/3.19.1/raven.min.js" crossorigin="anonymous"></script>
-<script>
-  Raven.config('https://11c0341ce6d74de7968932986090227d@sentry.systori.io/1').install();
-  Raven.setUserContext({
-      id: "{{ request.user.pk }}",
-      username: "{{ request.user.get_full_name }}",
-      email: "{{ request.user.email }}"
-  });
-</script>
+  {% if debug %}
+    <!-- sentry and intercom disabled for local dev -->
+  {% else %}
+    <script src="https://cdn.ravenjs.com/3.19.1/raven.min.js" crossorigin="anonymous"></script>
+    <script>
+      Raven.config('https://11c0341ce6d74de7968932986090227d@sentry.systori.io/1').install();
+      Raven.setUserContext({
+          id: "{{ request.user.pk }}",
+          username: "{{ request.user.get_full_name }}",
+          email: "{{ request.user.email }}"
+      });
+    </script>
+    <script>
+      window.intercomSettings = {
+        app_id: "b1xxxl10",
+        name: "{{ request.user.get_full_name }}",
+        email: "{{ request.user.email }}",
+        created_at: "{{ request.user.date_joined|date:"U" }}",
+        user_id: "{{ request.user.pk }}",
+        url: "{{ request.build_absolute_uri }}",
+        company: {
+            id: "{{ request.company.pk }}",
+            name: "{{ request.company.name }}",
+        },
+      };
+    </script>
+    <script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',intercomSettings);}else{var d=document;var i=function(){i.c(arguments)};i.q=[];i.c=function(args){i.q.push(args)};w.Intercom=i;function l(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/b1xxxl10';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})()</script>
+  {% endif %}
 <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
 <script src="{% static "js/bootstrap.min.js" %}"></script>
 {% webcomponents 'lite' %}
+
 {% dart "goto_project.dart" %}
-<script>
-  window.intercomSettings = {
-    app_id: "b1xxxl10",
-    name: "{{ request.user.get_full_name }}",
-    email: "{{ request.user.email }}",
-    created_at: "{{ request.user.date_joined|date:"U" }}",
-    user_id: "{{ request.user.pk }}",
-    url: "{{ request.build_absolute_uri }}",
-    company: {
-        id: "{{ request.company.pk }}",
-        name: "{{ request.company.name }}",
-    },
-  };
-</script>
-<script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',intercomSettings);}else{var d=document;var i=function(){i.c(arguments)};i.q=[];i.c=function(args){i.q.push(args)};w.Intercom=i;function l(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/b1xxxl10';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})()</script>
+
 {% endblock base_js %}
 
 {% block lang_js %}<script src="{% static "js/language_picker.js" %}"></script>{% endblock lang_js %}

@@ -415,7 +415,6 @@ class TimeAndMaterialsToggle extends Toggle {
             super.toggleOff();
         }
     }
-
 }
 
 
