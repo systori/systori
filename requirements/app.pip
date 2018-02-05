@@ -13,7 +13,7 @@ msgpack-python==0.5.1
 geopy
 python-dateutil==2.6.1
 
-hg+https://bitbucket.org/rptlab/reportlab==3.4.24
+hg+https://bitbucket.org/rptlab/reportlab
 hg+https://bitbucket.org/rptlab/preppy
 git+ssh://git@rlextra.github.com/systori/rlextra.git
 django-postgres-schema
