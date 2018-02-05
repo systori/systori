@@ -5,8 +5,9 @@ djangorestframework
 django-fsm
 django-allauth
 jsonfield
-channels
+channels==1.1.8
 asgi_ipc==1.4.2
+asgiref==1.1.2
 
 geopy
 python-dateutil==2.6.1
