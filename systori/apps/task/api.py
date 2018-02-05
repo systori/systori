@@ -57,11 +57,6 @@ class SearchAPI(views.APIView):
                 } for task in qs]
             )
 
-                # Task.objects
-                #     .search(terms)
-                #     .distinct('name', 'total', 'rank')
-                #     .values('id', 'job__name', 'match_name', 'match_description', 'rank')[:30]
-
 
 class InfoAPI(views.APIView):
 

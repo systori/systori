@@ -95,7 +95,6 @@ class Autocomplete extends HtmlElement {
         offsetFromTop = input.offsetHeight;
         style.top = '${offsetFromTop}px';
         style.left = '0px';
-        //style.left = '${input.offsetLeft}px';
     }
 
     hide() {
