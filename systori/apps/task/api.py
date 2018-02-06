@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import views, viewsets, mixins
 from rest_framework import response, renderers
 from systori.lib.templatetags.customformatting import ubrdecimal
@@ -77,6 +78,7 @@ class InfoAPI(views.APIView):
             return response.Response({
                 'name': task.name,
                 'description': task.description,
+                'project_string': _('Project'),
                 'project_id': task.group.job.project.id,
                 'qty': ubrdecimal(task.qty, min_significant=0),
                 'unit': task.unit,

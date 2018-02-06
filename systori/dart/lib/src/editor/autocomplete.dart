@@ -208,7 +208,7 @@ class Autocomplete extends HtmlElement {
     String createTaskInfo(Map data) {
         var html = new StringBuffer();
         html.write("<table>");
-        html.write("<tr style='border-bottom: 1px solid gray;'><td colspan='2'>Project #${data['project_id']}</td>");
+        html.write("<tr style='border-bottom: 1px solid gray;'><td colspan='2'>${data['project_string']} #${data['project_id']}</td>");
         html.write("<td class='info-decimal info-qty' nowrap>${data['qty']} ${data['unit']}</td>");
         html.write("<td class='info-decimal info-price'>${data['price']}</td>");
         html.write("<td class='info-decimal info-total'>${data['total']}</td>");

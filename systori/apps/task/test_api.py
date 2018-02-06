@@ -325,6 +325,7 @@ class AutocompleteApiTest(ClientTestCase):
             'name': 'Voranstrich aus Bitumenlösung',
             'description': '',
             'project_id': 2,
+            'project_string': 'Projekt',
             'qty': '3',
             'unit': 'm',
             'price': '19,99',
