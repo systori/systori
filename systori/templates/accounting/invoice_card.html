@@ -70,7 +70,7 @@
 
       {% endif %}
     {% endfor %}
-    {% if invoice.status == invoice.DRAFT or invoice.status == invoice.SENT %}
+    {% if invoice.status == invoice.DRAFT %}
     <a class="btn btn-sm btn-default" href="{% url 'invoice.update' project.id invoice.id %}">{% trans "Edit" %}</a>
     {% endif %}
     <div class="btn-group">
