@@ -53,9 +53,8 @@ msgid "Debit Tax"
 msgstr "Soll"
 
 #: systori/apps/document/forms.py:362
-#, fuzzy
 msgid "An explanation is required for non-itemized invoice."
-msgstr "Eine Anmerkung wird bei einer Pauschalrechnung benötigt."
+msgstr "Ein Pauschalbetrag benötigt ein Kommentar."
 
 #: systori/apps/document/forms.py:399 systori/apps/document/models.py:290
 #: systori/apps/document/models.py:291
@@ -616,40 +615,40 @@ msgstr "Schriftart"
 msgid "language"
 msgstr "Sprache"
 
-#: systori/apps/document/type/evidence.py:43
+#: systori/apps/document/type/evidence.py:42
 msgid "Evidence Sheet"
 msgstr "Aufmaßblatt"
 
-#: systori/apps/document/type/evidence.py:46
+#: systori/apps/document/type/evidence.py:45
 #: systori/apps/document/type/itemized_listing.py:192
-#: systori/apps/project/models.py:61
+#: systori/apps/project/models.py:61 systori/apps/task/api.py:81
 #: systori/templates/accounting/invoice_list.html:38
 #: systori/templates/directory/contact_detail.html:23
 #: systori/templates/document/invoice/header.html:33
 #: systori/templates/document/proposal/header.html:32
-#: systori/templates/task/editor/task_autocomplete.html:7
+#: systori/templates/task/editor/task_autocomplete.html:9
 #: systori/templates/task/progressreport_list.html:11
 msgid "Project"
 msgstr "Projekt"
 
-#: systori/apps/document/type/evidence.py:55
+#: systori/apps/document/type/evidence.py:54
 #: systori/lib/accounting/models.py:59
 #: systori/templates/accounting/account_list.html:11
 #: systori/templates/accounting/account_list.html:40
 msgid "Code"
 msgstr "Nummer"
 
-#: systori/apps/document/type/evidence.py:56 systori/apps/task/models.py:407
+#: systori/apps/document/type/evidence.py:55 systori/apps/task/models.py:407
 #: systori/apps/task/models.py:408
 #: systori/templates/task/progressreport_list.html:13
 msgid "Task"
 msgstr "Position"
 
-#: systori/apps/document/type/evidence.py:57
+#: systori/apps/document/type/evidence.py:56
 msgid "P-Amount"
 msgstr "LV-Menge"
 
-#: systori/apps/document/type/evidence.py:74
+#: systori/apps/document/type/evidence.py:73
 msgid "There are no billable Tasks available."
 msgstr "Es sind keine abrechenbare Positionen verfügbar."
 
@@ -722,14 +721,14 @@ msgstr "Preis"
 #: systori/apps/document/type/itemized_listing.py:64
 #: systori/apps/document/type/itemized_listing.py:127
 #: systori/apps/document/type/timesheet.py:49
-#: systori/apps/document/views.py:267 systori/apps/task/models.py:369
+#: systori/apps/document/views.py:268 systori/apps/task/models.py:369
 #: systori/apps/task/models.py:544
 #: systori/templates/document/base/subtotal.html:9
 #: systori/templates/document/invoice/header.html:108
 #: systori/templates/document/proposal/header.html:56
 #: systori/templates/field/timers.html:24
 #: systori/templates/timetracking/home.html:92
-#: systori/templates/timetracking/vacation.html:63
+#: systori/templates/timetracking/vacation.html:92
 msgid "Total"
 msgstr "Summe"
 
@@ -905,7 +904,7 @@ msgstr "Breitengrad"
 msgid "Longitude"
 msgstr "Längengrad"
 
-#: systori/apps/project/models.py:343
+#: systori/apps/project/models.py:341
 msgid "Day"
 msgstr "Tag"
 
@@ -936,7 +935,7 @@ msgstr "fertiggestellt"
 #: systori/templates/accounting/refund_form.html:44
 #: systori/templates/document/proposal_form.html:39
 #: systori/templates/project/project_detail.html:467
-#: systori/templates/task/editor/task_autocomplete.html:8
+#: systori/templates/task/editor/task_autocomplete.html:10
 msgid "Job"
 msgstr "Los"
 
@@ -1013,7 +1012,7 @@ msgid "timers"
 msgstr "Stoppuhren"
 
 #: systori/apps/document/type/timesheet.py:50
-#: systori/apps/document/views.py:268
+#: systori/apps/document/views.py:269
 #: systori/templates/document/timesheet_summary.html:34
 msgid "Overtime"
 msgstr "Überstunden"
@@ -1173,11 +1172,11 @@ msgstr "Abgeglichen"
 msgid "Reconciled"
 msgstr "Abgeglichen"
 
-#: systori/settings/common.py:217
+#: systori/settings/common.py:215
 msgid "Deutsch"
 msgstr "Deutsch"
 
-#: systori/settings/common.py:218
+#: systori/settings/common.py:216
 msgid "English"
 msgstr "Englisch"
 
@@ -1347,7 +1346,7 @@ msgstr "Andere Konten"
 #: systori/templates/accounting/account_list.html:39
 #: systori/templates/main/templates.html:34
 #: systori/templates/task/editor/lineitem_editor.html:12
-#: systori/templates/task/editor/main.html:549
+#: systori/templates/task/editor/main.html:563
 msgid "Type"
 msgstr "Typ"
 
@@ -1526,7 +1525,7 @@ msgstr "Firmen"
 #: systori/templates/main/templates.html:51
 #: systori/templates/main/templates.html:88
 #: systori/templates/main/templates.html:111
-#: systori/templates/project/project_list.html:126
+#: systori/templates/project/project_list.html:125
 msgid "Create"
 msgstr "Erstellen"
 
@@ -1537,7 +1536,6 @@ msgstr "Kontaktdetails"
 #: systori/templates/directory/contact_detail.html:7
 #: systori/templates/field/dailyplan.html:30
 #: systori/templates/field/dailyplan.html:56
-#: systori/templates/field/dailyplan.html:83
 #: systori/templates/project/project_detail.html:40
 msgid "edit"
 msgstr "bearbeiten"
@@ -1586,7 +1584,7 @@ msgstr "Ausrüstungsdetails"
 #: systori/templates/field/dailyplan.html:59
 #: systori/templates/field/dashboard.html:21
 #: systori/templates/main/menu_dropdown.html:16
-#: systori/templates/task/editor/main.html:547
+#: systori/templates/task/editor/main.html:561
 msgid "Equipment"
 msgstr "Ausrüstung"
 
@@ -1605,7 +1603,7 @@ msgstr "verknüpfen"
 
 #: systori/apps/task/models.py:553 systori/templates/field/assign_labor.html:27
 #: systori/templates/project/project_planning.html:205
-#: systori/templates/task/editor/main.html:545
+#: systori/templates/task/editor/main.html:559
 msgid "Labor"
 msgstr "Lohn"
 
@@ -1876,7 +1874,7 @@ msgstr "Speichern &raquo; Projekt"
 msgid "Save &uarr; List"
 msgstr "Speichern &uarr; Liste"
 
-#: systori/templates/project/project_list.html:129
+#: systori/templates/project/project_list.html:126
 msgid "GAEB-Import (experimental)"
 msgstr "GAEB-Import (experimentell)"
 
@@ -2130,11 +2128,7 @@ msgstr "Werkstatt"
 msgid "cost"
 msgstr "Kosten"
 
-#: systori/apps/project/models.py:307
-msgid "Travel time"
-msgstr "Fahrtzeit"
-
-#: systori/apps/project/models.py:307 systori/apps/timetracking/models.py:55
+#: systori/apps/timetracking/models.py:55
 msgid "in minutes"
 msgstr "in Minuten"
 
@@ -2352,7 +2346,7 @@ msgstr "Name ↓↑"
 msgid "phase ↓↑"
 msgstr "Phase ↓↑"
 
-#: systori/templates/project/project_list.html:156
+#: systori/templates/project/project_list.html:152
 msgid "$phaseFilteredProjects projects aren't displayed."
 msgstr "$phaseFilteredProjects Projekte sind ausgeblendet. "
 
@@ -2451,7 +2445,7 @@ msgid "Overtime correction (hours)"
 msgstr "Korrektur Überstunden (Stunden)"
 
 #: systori/apps/document/type/timesheet.py:51
-#: systori/apps/document/views.py:269
+#: systori/apps/document/views.py:270
 msgid "Compensation"
 msgstr "Vergütung"
 
@@ -2706,7 +2700,7 @@ msgstr "Fortschrittsdatum."
 msgid "Expended"
 msgstr "Verbrauch"
 
-#: systori/apps/task/models.py:552 systori/templates/task/editor/main.html:543
+#: systori/apps/task/models.py:552 systori/templates/task/editor/main.html:557
 msgid "Material"
 msgstr "Material"
 
@@ -2879,67 +2873,67 @@ msgid "(Estimate until the end of year)"
 msgstr "(Schätzung bis Ende des Jahres)"
 
 #: systori/templates/timetracking/home.html:65
-#: systori/templates/timetracking/vacation.html:44
+#: systori/templates/timetracking/vacation.html:49
 msgid "Vacation Schedule"
 msgstr "Urlaubsplan"
 
-#: systori/templates/timetracking/vacation.html:50
+#: systori/templates/timetracking/vacation.html:79
 msgid "Worker"
 msgstr "Arbeiter"
 
-#: systori/templates/timetracking/vacation.html:51
+#: systori/templates/timetracking/vacation.html:80
 msgid "Jan"
 msgstr "Jan"
 
-#: systori/templates/timetracking/vacation.html:52
+#: systori/templates/timetracking/vacation.html:81
 msgid "Feb"
 msgstr "Feb"
 
-#: systori/templates/timetracking/vacation.html:53
+#: systori/templates/timetracking/vacation.html:82
 msgid "Mar"
 msgstr "Mär"
 
-#: systori/templates/timetracking/vacation.html:54
+#: systori/templates/timetracking/vacation.html:83
 msgid "Apr"
 msgstr "Apr"
 
-#: systori/templates/timetracking/vacation.html:55
+#: systori/templates/timetracking/vacation.html:84
 msgid "May"
 msgstr "Mai"
 
-#: systori/templates/timetracking/vacation.html:56
+#: systori/templates/timetracking/vacation.html:85
 msgid "Jun"
 msgstr "Jun"
 
-#: systori/templates/timetracking/vacation.html:57
+#: systori/templates/timetracking/vacation.html:86
 msgid "Jul"
 msgstr "Jul"
 
-#: systori/templates/timetracking/vacation.html:58
+#: systori/templates/timetracking/vacation.html:87
 msgid "Aug"
 msgstr "Aug"
 
-#: systori/templates/timetracking/vacation.html:59
+#: systori/templates/timetracking/vacation.html:88
 msgid "Sep"
 msgstr "Sept"
 
-#: systori/templates/timetracking/vacation.html:60
+#: systori/templates/timetracking/vacation.html:89
 msgid "Oct"
 msgstr "Okt"
 
-#: systori/templates/timetracking/vacation.html:61
+#: systori/templates/timetracking/vacation.html:90
 msgid "Nov"
 msgstr "Nov"
 
-#: systori/templates/timetracking/vacation.html:62
+#: systori/templates/timetracking/vacation.html:91
 msgid "Dec"
 msgstr "Dez"
 
-#: systori/templates/timetracking/vacation.html:64
+#: systori/templates/timetracking/vacation.html:93
 msgid "Available"
 msgstr "Verfügbar"
 
-#: systori/templates/timetracking/vacation.html:45
+#: systori/templates/timetracking/vacation.html:53
 msgid "Already used as well as forecast for future holidays (in Days)."
 msgstr "Bereits verbrauchte, sowie Prognose für zukünftige, Urlaubstage (in Tagen)."
 
@@ -3075,4 +3069,8 @@ msgstr "eMail"
 #: systori/templates/company/company_list.html:30
 msgid "Create Company"
 msgstr "Firma erstellen"
+
+#: systori/templates/field/dailyplan.html:83
+msgid "show"
+msgstr "anzeigen"
 
