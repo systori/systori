@@ -49,12 +49,14 @@ def render(project, letterhead):
 def render_evidence_pages(project, pages, font, proposal_date):
 
     project_data = {
+        'code': "",
         'name': project.name,
         'id': project.id,
         'jobs': [],
     }
     for job in project.jobs.all():
         job_instance = {
+            'code': job.code,
             'name': job.name,
             'groups': [],
             'tasks': [],
@@ -70,6 +72,8 @@ def _serialize(project_data, data, parent, pages, font, proposal_date):
 
     for group in parent.groups.all():
         group_dict = {
+            'code': group.code,
+            'name': group.name,
             'tasks': [],
             'groups': [],
         }
@@ -78,6 +82,8 @@ def _serialize(project_data, data, parent, pages, font, proposal_date):
         _serialize(project_data, group_dict, group, pages, font, proposal_date)
 
     for task in parent.tasks.all():
+        task_description = " / ".join([project_data['code'] +" "+ project_data['name'],
+                                       data['code'] +" "+ data['name']])[:110]
 
         pages.append(Table([
             [b(_('Evidence Sheet'), font), br(_('Sheet-No')+':', font), nr('...............', font)]
@@ -88,7 +94,7 @@ def _serialize(project_data, data, parent, pages, font, proposal_date):
         ))
 
         pages.append(Table([
-            [p('%s / %s / %s' % (project_data['name'], data['name'], task.group.name), font), br(' #%s' % project_data['id'], font), nr(proposal_date, font)],
+            [p(task_description, font), br(' #%s' % project_data['id'], font), nr(proposal_date, font)],
         ],
             colWidths=[None, 20 * mm, 35* mm],
             style=[
