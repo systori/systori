@@ -615,11 +615,10 @@ msgstr "Schriftart"
 msgid "language"
 msgstr "Sprache"
 
-#: systori/apps/document/type/evidence.py:42
+#: systori/apps/document/type/evidence.py:83
 msgid "Evidence Sheet"
 msgstr "Aufmaßblatt"
 
-#: systori/apps/document/type/evidence.py:45
 #: systori/apps/document/type/itemized_listing.py:192
 #: systori/apps/project/models.py:61 systori/apps/task/api.py:81
 #: systori/templates/accounting/invoice_list.html:38
@@ -631,24 +630,23 @@ msgstr "Aufmaßblatt"
 msgid "Project"
 msgstr "Projekt"
 
-#: systori/apps/document/type/evidence.py:54
 #: systori/lib/accounting/models.py:59
 #: systori/templates/accounting/account_list.html:11
 #: systori/templates/accounting/account_list.html:40
 msgid "Code"
 msgstr "Nummer"
 
-#: systori/apps/document/type/evidence.py:55 systori/apps/task/models.py:407
+#: systori/apps/document/type/evidence.py:100 systori/apps/task/models.py:407
 #: systori/apps/task/models.py:408
 #: systori/templates/task/progressreport_list.html:13
 msgid "Task"
 msgstr "Position"
 
-#: systori/apps/document/type/evidence.py:56
+#: systori/apps/document/type/evidence.py:101
 msgid "P-Amount"
-msgstr "LV-Menge"
+msgstr "Angebotsmenge"
 
-#: systori/apps/document/type/evidence.py:73
+#: systori/apps/document/type/evidence.py:41
 msgid "There are no billable Tasks available."
 msgstr "Es sind keine abrechenbare Positionen verfügbar."
 
@@ -3073,4 +3071,8 @@ msgstr "Firma erstellen"
 #: systori/templates/field/dailyplan.html:83
 msgid "show"
 msgstr "anzeigen"
+
+#: systori/apps/document/type/evidence.py:83
+msgid "Sheet-No"
+msgstr "Blatt-Nr."
 

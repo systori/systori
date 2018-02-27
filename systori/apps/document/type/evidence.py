@@ -100,7 +100,7 @@ def _serialize(project_data, data, parent, pages, font, proposal_date):
             [b(_('Task'), font), p(task.code.strip() +' '+ task.name[:60].strip(), font),
              br(_('P-Amount'), font), nr('%s %s' % (ubrdecimal(task.qty).strip(), task.unit.strip()), font)]
         ],
-            colWidths=[20 * mm, None, 30 * mm, 35 * mm],
+            colWidths=[20 * mm, None, 35 * mm, 35 * mm],
             style=[
             ]
         ))
