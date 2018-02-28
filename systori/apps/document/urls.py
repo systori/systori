@@ -38,7 +38,8 @@ urlpatterns = [
     url(r'^project-(?P<project_pk>\d+)/refund-(?P<pk>\d+)/update$', office_auth(RefundUpdate.as_view()), name='refund.update'),
     url(r'^project-(?P<project_pk>\d+)/refund-(?P<pk>\d+)/delete$', office_auth(RefundDelete.as_view()), name='refund.delete'),
 
-    url(r'^project-(?P<project_pk>\d+)/evidence.pdf$', office_auth(EvidencePDF.as_view()), name='evidence.pdf'),
+    url(r'^project-(?P<project_pk>\d+)/evidence.pdf$', office_auth(ProjectEvidencePDF.as_view()), name='project.evidence.pdf'),
+    url(r'^project-(?P<project_pk>\d+)/job-(?P<job_pk>\d+)/evidence.pdf$', office_auth(JobEvidencePDF.as_view()), name='job.evidence.pdf'),
 
     url(r'^project-(?P<project_pk>\d+)/itemized_listing-(?P<format>(email|print)).pdf$', office_auth(ItemizedListingPDF.as_view()), name='itemized_listing.pdf'),
 

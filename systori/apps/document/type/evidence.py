@@ -9,6 +9,7 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal
+from systori.apps.project.models import Job, Project
 
 from .style import p, b, br, nr
 from .style import get_available_width_height_and_pagesize
@@ -21,7 +22,7 @@ DEBUG_DOCUMENT = False  # Shows boxes in rendered output
 COLS = 55
 ROWS = 25
 
-def render(project, letterhead):
+def render(instance, letterhead):
 
     with BytesIO() as buffer:
 
@@ -35,7 +36,7 @@ def render(project, letterhead):
 
         pages = []
 
-        render_evidence_pages(project, pages, font, proposal_date)
+        render_evidence_pages(instance, pages, font, proposal_date)
 
         if not pages:
             pages.append(b(_('There are no billable Tasks available.'), font))
@@ -46,29 +47,43 @@ def render(project, letterhead):
 
 
 
-def render_evidence_pages(project, pages, font, proposal_date):
+def render_evidence_pages(instance, pages, font, proposal_date):
 
     project_data = {
+        'project_pk': str(instance.id),
         'code': "",
-        'name': project.name,
-        'id': project.id,
+        'name': instance.name,
+        'id': instance.id,
         'jobs': [],
     }
-    for job in project.jobs.all():
+    if isinstance(instance, Project):
+        for job in instance.jobs.all():
+            job_instance = {
+                'code': job.code,
+                'name': job.name,
+                'groups': [],
+                'tasks': [],
+            }
+            project_data['jobs'].append(job_instance)
+
+            _serialize_project(project_data, job_instance, job, pages, font, proposal_date)
+
+    if isinstance(instance, Job):
+        project_data["project_pk"] = str(instance.project.id)
         job_instance = {
-            'code': job.code,
-            'name': job.name,
+            'code': instance.code,
+            'name': instance.name,
             'groups': [],
             'tasks': [],
         }
         project_data['jobs'].append(job_instance)
 
-        _serialize(project_data, job_instance, job, pages, font, proposal_date)
+        _serialize_project(project_data, job_instance, instance, pages, font, proposal_date)
 
-    return project_data
+    return None
 
 
-def _serialize(project_data, data, parent, pages, font, proposal_date):
+def _serialize_project(project_data, data, parent, pages, font, proposal_date):
 
     for group in parent.groups.all():
         group_dict = {
@@ -79,7 +94,7 @@ def _serialize(project_data, data, parent, pages, font, proposal_date):
         }
         data['groups'].append(group_dict)
 
-        _serialize(project_data, group_dict, group, pages, font, proposal_date)
+        _serialize_project(project_data, group_dict, group, pages, font, proposal_date)
 
     for task in parent.tasks.all():
         task_description = " / ".join([project_data['code'] +" "+ project_data['name'],
@@ -88,13 +103,10 @@ def _serialize(project_data, data, parent, pages, font, proposal_date):
         pages.append(Table([
             [b(_('Evidence Sheet'), font), br(_('Sheet-No')+':', font), nr('...............', font)]
         ],
-            colWidths=[None, 50 * mm, 35* mm],
-            style=[
-            ]
-        ))
+            colWidths=[None, 50 * mm, 35* mm]))
 
         pages.append(Table([
-            [p(task_description, font), br(' #%s' % project_data['id'], font), nr(proposal_date, font)],
+            [p(task_description, font), br(' #%s' % project_data['project_pk'], font), nr(proposal_date, font)],
         ],
             colWidths=[None, 20 * mm, 35* mm],
             style=[

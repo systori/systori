@@ -946,9 +946,15 @@ class AccountingViewTests(DocumentTestCase):
 
 class EvidenceViewTests(DocumentTestCase):
 
-    def test_generate_evidence(self):
-        response = self.client.get(reverse('evidence.pdf', args=[
+    def test_generate_project_evidence(self):
+        response = self.client.get(reverse('project.evidence.pdf', args=[
             self.project.id
+        ]))
+        self.assertEqual(200, response.status_code)
+
+    def test_generate_job_evidence(self):
+        response = self.client.get(reverse('job.evidence.pdf', args=[
+            self.project.id, self.job.id
         ]))
         self.assertEqual(200, response.status_code)
 

@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.forms.fields import DateField
 
 from systori.lib.accounting.tools import Amount
-from ..project.models import Project
+from ..project.models import Project, Job
 from ..timetracking.models import Timer
 from ..accounting.constants import TAX_RATE
 from .models import Proposal, Invoice, Adjustment, Payment, Refund, Timesheet
@@ -515,7 +515,7 @@ class ProposalDelete(DeleteView):
 # Evidence
 
 
-class EvidencePDF(DocumentRenderView):
+class ProjectEvidencePDF(DocumentRenderView):
     model = Project
 
     def pdf(self):
@@ -523,6 +523,14 @@ class EvidencePDF(DocumentRenderView):
         letterhead = doc_settings.evidence_letterhead
         return pdf_type.evidence.render(self.request.project, letterhead)
 
+
+class JobEvidencePDF(DocumentRenderView):
+    model = Job
+
+    def pdf(self):
+        doc_settings = DocumentSettings.get_for_language(get_language())
+        letterhead = doc_settings.evidence_letterhead
+        return pdf_type.evidence.render(self.model.objects.get(id=self.kwargs.get('job_pk')), letterhead)
 
 # Itemized List
 

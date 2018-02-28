@@ -79,7 +79,7 @@
               {% endif %}
               <div class="btn-group" role="group">
                 <a type="button" class="btn btn-default btn-sm" href="{% url 'project.progress' project.id %}">{% trans "Project Progress" %}</a>
-                <a target="_blank" type="button" class="btn btn-default btn-sm" href="{% url 'evidence.pdf' project.id %}">{% trans "Evidence preprinted form" %}</a>
+                <a target="_blank" type="button" class="btn btn-default btn-sm" href="{% url 'project.evidence.pdf' project.id %}">{% trans "Evidence preprinted form" %}</a>
               </div>
             </div>
           </td>
@@ -152,11 +152,14 @@
             <td style="text-align: right; white-space: nowrap;">{{ job.progress|money }}</td>
             <td><small>{{ job.progress_percent }}%</small></td>
             <td>
-              <a href="{% url 'job.progress' project.id job.id %}">{% trans 'Progress' %}</a>
-              {% if job.can_delete %}
-                <a href="{% url 'job.delete' project.id job.id %}">{% trans 'Delete' %}</a>
-              {% endif %}
-              <a href="{% url 'job.copy' project.id job.id %}">{% trans 'Copy' %}</a>
+              <div class="btn-group" role="group">
+                <a type="button" class="btn btn-default btn-xs" href="{% url 'job.progress' project.id job.id %}">{% trans 'Progress' %}</a>
+                {% if job.can_delete %}
+                  <a type="button" class="btn btn-default btn-xs"  href="{% url 'job.delete' project.id job.id %}">{% trans 'Delete' %}</a>
+                {% endif %}
+                <a type="button" class="btn btn-default btn-xs" href="{% url 'job.copy' project.id job.id %}">{% trans 'Copy' %}</a>
+                <a type="button" class="btn btn-default btn-xs" target="_blank" href="{% url 'job.evidence.pdf' project.id job.id %}">{% trans "Evidence preprinted form" %}</a>
+              </div>
             </td>
           </tr>
         {% endfor %}
