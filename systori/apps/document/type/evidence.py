@@ -9,7 +9,8 @@ from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from systori.lib.templatetags.customformatting import ubrdecimal
-from systori.apps.project.models import Job, Project
+from systori.apps.project.models import Project
+from systori.apps.task.models import Job
 
 from .style import p, b, br, nr
 from .style import get_available_width_height_and_pagesize
