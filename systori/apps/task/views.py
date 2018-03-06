@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.views.generic.base import RedirectView
 from django.views.generic.detail import DetailView, SingleObjectMixin, View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 
@@ -102,3 +103,12 @@ class JobDelete(DeleteView):
 
     def get_success_url(self):
         return self.object.project.get_absolute_url()
+
+
+class JobLock(RedirectView):
+
+    def get_redirect_url(self, *args, **kwargs):
+        job = get_object_or_404(Job, pk=kwargs['pk'])
+        job.toggle_is_locked()
+        job.save()
+        return job.project.get_absolute_url()

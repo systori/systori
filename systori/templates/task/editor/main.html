@@ -569,5 +569,7 @@
 {% endblock %}
 
 {% block extra_js %}
-  {% dart "job_editor.dart" %}
+  {% if not job.is_locked %}
+    {% dart "job_editor.dart" %}
+  {% endif %}
 {% endblock extra_js %}
