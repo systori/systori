@@ -3,18 +3,18 @@
 <div class="editor">
   <div class="editor-row">
     <sys-code-input class="code" data-order="{% if task.order %}{{ task.order }}{% endif %}">{{ task.code }}</sys-code-input>
-    <sys-input class="name"  placeholder="{% trans 'task' %}"                                             contenteditable>{{ task.name|safe }}</sys-input>
-    <sys-variant-input class="variant" title="{% trans 'variant allocation number' %}" placeholder="&#xe144;" tabindex="-1" data-group="{{ task.variant_group }}" data-serial="{{ task.variant_serial }}" contenteditable>{{ task.variant_allocation }}</sys-variant-input>
+    <sys-input class="name"  placeholder="{% trans 'task' %}"                                             contenteditable="{{ job.is_editable }}">{{ task.name|safe }}</sys-input>
+    <sys-variant-input class="variant" title="{% trans 'variant allocation number' %}" placeholder="&#xe144;" tabindex="-1" data-group="{{ task.variant_group }}" data-serial="{{ task.variant_serial }}" contenteditable="{{ job.is_editable }}">{{ task.variant_allocation }}</sys-variant-input>
     <div class="actions">
       <sys-toggle class="is_provisional glyphicon glyphicon-paperclip {{ task.is_provisional }}" title="{% trans 'provisional' %}"></sys-toggle>
       <sys-toggle-tm class="is_time_and_materials glyphicon glyphicon-tasks {{ task.is_time_and_materials }}" title="{% trans 'time & materials' %}"></sys-toggle-tm>
     </div>
-    <sys-cell  class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ task.qty_equation }}"   {% if task.qty_equation|is_formula %}data-resolved="" {% endif %}contenteditable>{{ task.qty|ubrnumber }}</sys-cell>
-    <sys-input class="unit"  placeholder="{% trans 'unit' %}"                                             contenteditable>{{ task.unit }}</sys-input>
-    <sys-cell  class="price"                                   data-canonical="{{ task.price_equation }}" {% if task.price_equation|is_formula %}data-resolved="" {% endif %}contenteditable>{{ task.price|ubrdecimal }}</sys-cell>
-    <sys-cell  class="total" placeholder="{% trans 'total' %}" data-canonical="{{ task.total_equation }}" {% if task.total_equation|is_formula %}data-resolved="" {% endif %}contenteditable>{{ task.total|ubrdecimal }}</sys-cell>
+    <sys-cell  class="qty"   placeholder="{% trans 'qty' %}"   data-canonical="{{ task.qty_equation }}"   {% if task.qty_equation|is_formula %}data-resolved="" {% endif %}contenteditable="{{ job.is_editable }}">{{ task.qty|ubrnumber }}</sys-cell>
+    <sys-input class="unit"  placeholder="{% trans 'unit' %}"                                             contenteditable="{{ job.is_editable }}">{{ task.unit }}</sys-input>
+    <sys-cell  class="price"                                   data-canonical="{{ task.price_equation }}" {% if task.price_equation|is_formula %}data-resolved="" {% endif %}contenteditable="{{ job.is_editable }}">{{ task.price|ubrdecimal }}</sys-cell>
+    <sys-cell  class="total" placeholder="{% trans 'total' %}" data-canonical="{{ task.total_equation }}" {% if task.total_equation|is_formula %}data-resolved="" {% endif %}contenteditable="{{ job.is_editable }}">{{ task.total|ubrdecimal }}</sys-cell>
   </div>
-  <sys-styled-input class="description" placeholder="{% trans 'description' %}" contenteditable>{{ task.description|safe }}</sys-styled-input>
+  <sys-styled-input class="description" placeholder="{% trans 'description' %}" contenteditable="{{ job.is_editable }}">{{ task.description|safe }}</sys-styled-input>
 </div>
 
 <sys-lineitem-sheet>

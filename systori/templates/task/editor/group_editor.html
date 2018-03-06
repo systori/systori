@@ -2,8 +2,8 @@
 <div class="editor">
   <div class="editor-row">
     <sys-code-input class="code" data-order="{% if group.order %}{{ group.order }}{% endif %}">{{ group.code }}</sys-code-input>
-    <sys-input class="name" placeholder="{% trans 'group' %}" contenteditable>{{ group.name|safe }}</sys-input>
+    <sys-input class="name" placeholder="{% trans 'group' %}" contenteditable="{{ job.is_editable }}">{{ group.name|safe }}</sys-input>
     <sys-decimal class="total">{{ group.estimate|ubrdecimal:2 }}</sys-decimal>
   </div>
-  <sys-styled-input class="description" placeholder="{% trans 'description' %}" contenteditable>{{ group.description|safe }}</sys-styled-input>
+  <sys-styled-input class="description" placeholder="{% trans 'description' %}" contenteditable="{{ job.is_editable }}">{{ group.description|safe }}</sys-styled-input>
 </div>

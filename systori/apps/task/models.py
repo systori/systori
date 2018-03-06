@@ -240,6 +240,7 @@ class Job(Group):
     project = models.ForeignKey('project.Project', related_name="jobs", on_delete=models.CASCADE)
     order_with_respect_to = 'project'
     is_revenue_recognized = models.BooleanField(default=False)
+    is_locked = models.BooleanField(default=False)
 
     DRAFT = "draft"
     PROPOSED = "proposed"
@@ -328,6 +329,13 @@ class Job(Group):
     @is_billable.setter
     def is_billable(self, value):
         self._is_billable = value
+
+    def toggle_lock(self):
+        self.is_locked ^= True  # XOR Operator
+
+    @property
+    def is_editable(self):
+        return not self.is_locked
 
     def get_absolute_url(self):
         if self.project.is_template:

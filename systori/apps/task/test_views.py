@@ -234,3 +234,36 @@ class JobCopyPasteTest(ClientTestCase):
             }
         )  # fails because of incompatible project.structure
         self.assertEqual(project2.jobs.count(), 0)
+
+
+class JobLockTest(ClientTestCase):
+
+    def test_job_lock(self):
+        project = ProjectFactory()
+        job = JobFactory(project=project)
+        self.assertFalse(job.is_locked)
+        self.client.get(
+            reverse('job.toggle_lock', args=[job.pk])
+        )
+        job = Job.objects.get(id=job.pk)
+        self.assertTrue(job.is_locked)
+
+    def test_disabled_editor(self):
+        project = ProjectFactory()
+        job = JobFactory(project=project)
+        self.client.get(
+            reverse('job.toggle_lock', args=[job.pk])
+        )
+        response = self.client.get(
+            reverse('job.editor', args=[job.pk])
+        )
+        self.assertContains(response, 'contenteditable="False"')
+        self.assertNotContains(response, '<script src="/static/dart/build/job_editor.dart.js"></script>')
+
+    def test_render_project_detail_job_btn(self):
+        project = ProjectFactory()
+        JobFactory(project=project)
+        response = self.client.get(
+            reverse('project.view', args=[project.pk])
+        )
+        self.assertEqual(response.status_code, 200)
