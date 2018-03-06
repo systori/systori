@@ -330,7 +330,7 @@ class Job(Group):
     def is_billable(self, value):
         self._is_billable = value
 
-    def toggle_is_locked(self):
+    def toggle_lock(self):
         self.is_locked ^= True  # XOR Operator
 
     @property

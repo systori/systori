@@ -10,5 +10,5 @@ urlpatterns = [
     url(r'^job-(?P<pk>\d+)/progress$', office_auth(JobProgress.as_view()), name='job.progress'),
     url(r'^job-(?P<pk>\d+)/delete$', office_auth(JobDelete.as_view()), name='job.delete'),
     url(r'^job-(?P<pk>\d+)/copy$', office_auth(JobCopy.as_view()), name='job.copy'),
-    url(r'^job-(?P<pk>\d+)/toggle-lock$', office_auth(JobLock.as_view()), name='job.lock'),
+    url(r'^job-(?P<pk>\d+)/toggle-lock$', office_auth(JobLock.as_view()), name='job.toggle_lock'),
 ]

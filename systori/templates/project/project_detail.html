@@ -153,7 +153,7 @@
             <td><small>{{ job.progress_percent }}%</small></td>
             <td>
               <div class="btn-group" role="group">
-                <a type="button" class="btn btn-default btn-xs" href="{% url 'job.lock' project.id job.id %}">
+                <a type="button" class="btn btn-default btn-xs" href="{% url 'job.toggle_lock' project.id job.id %}">
                   {% if job.is_locked %}
                     {% trans 'Unlock' %}
                   {% else %}

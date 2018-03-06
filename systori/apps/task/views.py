@@ -109,6 +109,6 @@ class JobLock(RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         job = get_object_or_404(Job, pk=kwargs['pk'])
-        job.toggle_is_locked()
+        job.toggle_lock()
         job.save()
         return job.project.get_absolute_url()
