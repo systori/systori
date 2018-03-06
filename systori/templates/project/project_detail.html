@@ -146,7 +146,13 @@
         {% for job in jobs %}
           <tr>
             <td><span class="label label-default">{{ job.id|unlocalize }}</span></td>
-            <td><a href="{% url 'job.editor' project.id job.id %}">{{ job.code }} {{ job }}</a></td>
+            <td>
+              <a href="{% url 'job.editor' project.id job.id %}">
+                {% if job.is_locked %}
+                  <span class="glyphicon glyphicon-lock"></span>
+                {% endif %}
+                {{ job.code }} {{ job }}</a>
+            </td>
             <td>{{ job.get_status_display }}</td>
             <td style="text-align: right; white-space: nowrap;">{{ job.estimate|money }}</td>
             <td style="text-align: right; white-space: nowrap;">{{ job.progress|money }}</td>
