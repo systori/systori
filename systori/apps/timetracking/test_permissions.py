@@ -21,7 +21,7 @@ class CanTrackTimeTest(TestCase):
         request = RequestFactory().get('/')
         view_instance = CanTrackTimeView()
         response = view_instance.dispatch(request)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_canot_get_for_worker_who_cannot_track_time(self):
         user = UserFactory(company=CompanyFactory())
