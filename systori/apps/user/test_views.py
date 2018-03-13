@@ -246,3 +246,20 @@ class TestRegistration(SystoriTestCase):
         }, follow=True, HTTP_HOST='widgets.systori.localhost')
         self.assertRedirects(response, 'http://widgets.systori.localhost')
         self.assertContains(response, 'Widgets LLC')
+
+
+class TestTokenAuth(ClientTestCase):
+
+    def test_obtain_and_check_token(self):
+        user = UserFactory(first_name='FirstName', language='en', password="pass", company=self.company)
+        response = self.client.post(reverse('drf.tokenauth'), {
+            'username': user.email,
+            'password': "pass"
+        }, headers={
+            'Content-Type': 'application/json'
+        })
+        self.assertEqual(response.status_code, 200)
+        token = response.data['token']
+        response = self.client.get(reverse('api.project.available', args=[1]),
+                                   HTTP_AUTHORIZATION = 'Token {}'.format(token))
+        self.assertEqual(response.status_code, 200)
