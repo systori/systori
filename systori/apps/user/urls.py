@@ -7,7 +7,7 @@ from . import views
 urlpatterns = [
 
     url(r'^accounts/', include('allauth.urls')),
-    url(r'api/token/', drf_views.obtain_auth_token),
+    url(r'api/token/', drf_views.obtain_auth_token, name='drf.tokenauth'),
 
     url(r'^settings$', login_required(views.SettingsView.as_view()), name='settings'),
     url(r'^set_language$', views.SetLanguageView.as_view(), name='set_language'),
