@@ -55,6 +55,17 @@
           {% endif %}
 
         {% endfor %}
+        {% for task in parent.tasks.all %}
+          {% task_dailyplans_count task dailyplan.day as is_assigned %}
+              <a name="{{ task.id }}" id="task_{{forloop.parentloop.counter0}}_{{ forloop.counter0 }}" href="{% url 'field.dailyplan.task' jobsite.id dailyplan.url_id task.id %}?origin={% url 'field.dailyplan.group' jobsite.id dailyplan.url_id %}#{{ task.id }}"
+                 class="list-group-item clearfix{% if is_assigned %} list-group-item-success{% endif %} searchable">
+                {{ task.code }} <b>{{ task.name|safe }}</b> {% if task.is_optional %} <span class="label label-warning">{% trans 'Optional' %}</span> {% endif %}<br>
+                {{ task.description|safe }}<br>
+                {{ task.qty|ubrdecimal }} {{ task.unit }}
+                  <span class="badge">{{ task.complete_percent }}%</span>
+                  <span class="badge">{{ task.complete|ubrdecimal }} {{ task.unit }}</span>
+              </a>
+        {% endfor %}
       </ul>
       {% endif %}
 
