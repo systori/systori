@@ -17,6 +17,7 @@
       <button type="button" class="btn btn-default btn-sm" style="visibility: hidden;" aria-label="Reset">
         <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
       </button>
+      <span class="badge {% if obj.complete_percent > 100 %}badge-warning{% endif %}">{{ obj.complete_percent }}%</span>
       </nobr>
     </td>
     <td>

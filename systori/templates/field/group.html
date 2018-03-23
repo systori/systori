@@ -48,7 +48,7 @@
                 {{ task.code }} <b>{{ task.name|safe }}</b> {% if task.is_optional %} <span class="label label-warning">{% trans 'Optional' %}</span> {% endif %}<br>
                 {{ task.description|safe }}<br>
                 {{ task.qty|ubrdecimal }} {{ task.unit }}
-                  <span class="badge">{{ task.complete_percent }}%</span>
+                  <span class="badge {% if task.complete_percent > 100 %} badge-warning{% endif %}">{{ task.complete_percent }}%</span>
                   <span class="badge">{{ task.complete|ubrdecimal }} {{ task.unit }}</span>
               </a>
             {% endfor %}
@@ -62,7 +62,7 @@
                 {{ task.code }} <b>{{ task.name|safe }}</b> {% if task.is_optional %} <span class="label label-warning">{% trans 'Optional' %}</span> {% endif %}<br>
                 {{ task.description|safe }}<br>
                 {{ task.qty|ubrdecimal }} {{ task.unit }}
-                  <span class="badge">{{ task.complete_percent }}%</span>
+                  <span class="badge {% if task.complete_percent > 100 %} badge-warning{% endif %}">{{ task.complete_percent }}%</span>
                   <span class="badge">{{ task.complete|ubrdecimal }} {{ task.unit }}</span>
               </a>
         {% endfor %}
@@ -79,7 +79,7 @@
             {{ task.description|safe }}<br>
             {{ task.qty|ubrdecimal }} {{ task.unit }}
             {% if task.complete_percent > 0 %}
-              <span class="badge">{{ task.complete_percent }}%</span>
+              <span class="badge {% if task.complete_percent > 100 %} badge-warning{% endif %}">{{ task.complete_percent }}%</span>
               <span class="badge">{{ task.complete|ubrdecimal }} {{ task.unit }}</span>
             {% else %}
               <span class="pull-right">&raquo;</span>

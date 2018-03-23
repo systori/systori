@@ -314,3 +314,10 @@ tr > td > textarea {
     resize: none;
     border: 1px dotted grey
 }
+
+.badge-warning {
+  background-image: -webkit-linear-gradient(top, #d1725e 0%, #bc4d36 100%);
+  background-image: -o-linear-gradient(top, #d1725e 0%, #bc4d36 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#d1725e), to(#bc4d36));
+  background-image: linear-gradient(to bottom, #d1725e 0%, #bc4d36 100%);
+}

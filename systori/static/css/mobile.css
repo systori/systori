@@ -194,3 +194,10 @@ input[type=range]::-webkit-slider-thumb:focus {
   background-color: #bc4d36;
   background-position: 0 -15px;
 }
+
+.badge-warning {
+  background-image: -webkit-linear-gradient(top, #d1725e 0%, #bc4d36 100%);
+  background-image: -o-linear-gradient(top, #d1725e 0%, #bc4d36 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#d1725e), to(#bc4d36));
+  background-image: linear-gradient(to bottom, #d1725e 0%, #bc4d36 100%);
+}
