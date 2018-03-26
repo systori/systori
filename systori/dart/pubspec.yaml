@@ -5,7 +5,7 @@ description: >
 dependencies:
   intl: any
   web_components: any
-  parsers: any
+  parsers: "0.14.5"
   quiver: any
     #git:
     #  url: git://github.com/google/quiver-dart.git
