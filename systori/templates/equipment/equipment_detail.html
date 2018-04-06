@@ -63,7 +63,7 @@
                     {% for refuel_stop in refueling_stops %}
                     <tr>
                         <td>{{ refuel_stop.average_consumption }}</td>
-                        <td>{{ refuel_stop.datetime|localize }}</td>
+                        <td>{{ refuel_stop.datetime }}</td>
                         <td>{{ refuel_stop.mileage|localize }} km</td>
                         <td>{{ refuel_stop.distance|localize }}</td>
                         <td>{{ refuel_stop.liters|localize }}</td>
