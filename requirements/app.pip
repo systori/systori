@@ -1,7 +1,7 @@
 -r base.pip
 
 django>=2.0rc1
-djangorestframework
+djangorestframework==3.7.7
 django-fsm
 django-allauth==0.34.0
 jsonfield
