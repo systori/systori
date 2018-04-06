@@ -1,4 +1,4 @@
-## Systori
+# Systori
 
 Systori is a suite of tools for craftsmen to create project estimates, to manage those projects, and to generate invoices.
 
