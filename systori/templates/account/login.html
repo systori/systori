@@ -69,7 +69,6 @@
              name="{{ form.password.html_name }}" required>
       {{ form.remember.label_tag }} {{ form.remember }}
       <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans 'Sign in' %}</button>
-      <a class="btn btn-lg btn-primary btn-block" href="{% url 'account_signup' %}">{% trans 'Register' %}</a>
       <a class="btn" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
       {% if redirect_field_value %}
         <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
