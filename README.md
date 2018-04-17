@@ -1,3 +1,6 @@
+
+[![Discord](https://img.shields.io/badge/Discord-chat-green.svg)](https://discord.gg/yTBgB)
+
 # Systori
 
 Systori is a suite of tools for craftsmen to create project estimates, to manage those projects, and to generate invoices.
