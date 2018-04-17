@@ -1,6 +1,7 @@
 from decimal import Decimal
 from datetime import date, time
 from django.urls import reverse
+from unittest import skip
 from allauth.account.models import EmailAddress, EmailConfirmationHMAC
 
 from systori.lib.testing import SystoriTestCase, ClientTestCase
@@ -207,6 +208,7 @@ class TestEditWorker(ClientTestCase):
 
 class TestRegistration(SystoriTestCase):
 
+    @skip("registration temporary disabled")
     def test_on_boarding_workflow(self):
 
         # main page has registration link
