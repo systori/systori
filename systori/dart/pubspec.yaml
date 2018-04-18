@@ -15,7 +15,7 @@ dev_dependencies:
   test:
     git:
       url: git://github.com/dart-lang/test.git
-      ref: master
+      ref: "0.12.33"
     #path: ../../../test
 transformers:
   - $dart2js:
