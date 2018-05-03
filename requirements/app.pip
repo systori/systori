@@ -5,9 +5,10 @@ djangorestframework==3.7.7
 django-fsm
 django-allauth==0.34.0
 jsonfield
-asgi_ipc==1.4.2
-asgiref==1.1.2
-msgpack-python==0.5.1
+channels
+#asgi_ipc==1.4.2
+#asgiref==1.1.2
+#msgpack-python==0.5.1
 
 geopy
 python-dateutil==2.6.1
