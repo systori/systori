@@ -61,7 +61,7 @@ INSTALLED_APPS = (
     'django_dartium',
     'rest_framework',
     'rest_framework.authtoken',
-    'channels',
+    #'channels',
     'bootstrap',
     'postgres_schema',
     'allauth',
