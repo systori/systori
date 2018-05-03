@@ -12,15 +12,14 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "asgi_ipc.IPCChannelLayer",
-#         "ROUTING": "systori.routing.channel_routing",
-#         "CONFIG": {
-#             "prefix": "systori",
-#         },
-#     },
-# }
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}
 
 # Django Settings
 
@@ -140,7 +139,7 @@ TEMPLATES = [
 ROOT_URLCONF = 'systori.urls'
 
 WSGI_APPLICATION = 'systori.wsgi.application'
-ASGI_APPLICATION = 'systori.apps.main.routing.application'
+ASGI_APPLICATION = 'systori.routing.application'
 
 FIXTURE_DIRS = (
     os.path.join(ROOT_DIR, 'fixtures'),

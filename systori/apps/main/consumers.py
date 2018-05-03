@@ -1,7 +1,25 @@
-from channels.generic.websockets import JsonWebsocketConsumer
+# from channels.generic.websockets import JsonWebsocketConsumer
+#
+#
+# class NotesConsumer(JsonWebsocketConsumer):
+#     http_user = True
+#     strict_ordering = True
+#     groups = ['notes']
+
+from channels.generic.websocket import WebsocketConsumer
+import json
 
 
-class NotesConsumer(JsonWebsocketConsumer):
-    http_user = True
-    strict_ordering = True
-    groups = ['notes']
+class NotesConsumer(WebsocketConsumer):
+    def connect(self):
+        self.accept()
+
+    def disconnect(self, close_code):
+        pass
+
+    def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        message = text_data_json['message']
+        self.send(text_data=json.dumps({
+            'message': message
+        }))
