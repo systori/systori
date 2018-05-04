@@ -4,7 +4,7 @@ import 'dart:convert';
 
 String CSRFToken;
 String translated_save;
-String note_url = window.location.origin+"/api/note/";
+String note_url = window.location.origin+"/ws/notes/";
 
 
 class NoteTableRow extends TableRowElement {

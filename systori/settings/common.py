@@ -2,7 +2,6 @@ import os
 import sys
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'abc123')
-INTERCOM_ACCESS_TOKEN = os.environ.get('INTERCOM_ACCESS_TOKEN', '')
 GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_API_KEY', '')
 
 DEFAULT_COUNTRY = "Deutschland"
@@ -11,16 +10,6 @@ BROKER_URL = 'amqp://guest:guest@192.168.0.99:5672//'
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "asgi_ipc.IPCChannelLayer",
-        "ROUTING": "systori.routing.channel_routing",
-        "CONFIG": {
-            "prefix": "systori",
-        },
-    },
-}
 
 # Django Settings
 
@@ -61,7 +50,6 @@ INSTALLED_APPS = (
     'django_dartium',
     'rest_framework',
     'rest_framework.authtoken',
-    'channels',
     'bootstrap',
     'postgres_schema',
     'allauth',
@@ -113,7 +101,7 @@ MIDDLEWARE = (
     'systori.apps.company.middleware.CompanyMiddleware',
     'systori.apps.company.middleware.WorkerMiddleware',
     'systori.apps.project.middleware.ProjectMiddleware',
-    'systori.apps.field.middleware.FieldMiddleware'
+    'systori.apps.field.middleware.FieldMiddleware',
 )
 
 TEMPLATES = [
