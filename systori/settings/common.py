@@ -2,7 +2,6 @@ import os
 import sys
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'abc123')
-INTERCOM_ACCESS_TOKEN = os.environ.get('INTERCOM_ACCESS_TOKEN', '')
 GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_API_KEY', '')
 
 DEFAULT_COUNTRY = "Deutschland"
@@ -51,7 +50,6 @@ INSTALLED_APPS = (
     'django_dartium',
     'rest_framework',
     'rest_framework.authtoken',
-    'channels',
     'bootstrap',
     'postgres_schema',
     'allauth',
@@ -104,7 +102,6 @@ MIDDLEWARE = (
     'systori.apps.company.middleware.WorkerMiddleware',
     'systori.apps.project.middleware.ProjectMiddleware',
     'systori.apps.field.middleware.FieldMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # added WhiteNoise for fast and easy static files serving
 )
 
 TEMPLATES = [
@@ -131,7 +128,6 @@ TEMPLATES = [
 ROOT_URLCONF = 'systori.urls'
 
 WSGI_APPLICATION = 'systori.wsgi.application'
-ASGI_APPLICATION = 'systori.routing.application'
 
 FIXTURE_DIRS = (
     os.path.join(ROOT_DIR, 'fixtures'),

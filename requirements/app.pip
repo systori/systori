@@ -1,12 +1,10 @@
 -r base.pip
 
-django>=2.0rc1
+django
 djangorestframework==3.7.7
 django-fsm
 django-allauth==0.34.0
 jsonfield
-channels
-whitenoise  # WhiteNoise lets you easily serve static files from the python app, activated via middleware in settings
 
 geopy
 python-dateutil==2.6.1

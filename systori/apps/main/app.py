@@ -5,4 +5,4 @@ class MainConfig(AppConfig):
     name = 'systori.apps.main'
 
     def ready(self):
-        from . import receivers
+        pass

@@ -84,3 +84,4 @@ class DayBasedOverviewView(TemplateView):
 class NotesDashboard(ListView):
     template_name = "main/notes.html"
     model = Note
+    ordering = ['-created']
