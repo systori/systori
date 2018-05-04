@@ -103,7 +103,8 @@ MIDDLEWARE = (
     'systori.apps.company.middleware.CompanyMiddleware',
     'systori.apps.company.middleware.WorkerMiddleware',
     'systori.apps.project.middleware.ProjectMiddleware',
-    'systori.apps.field.middleware.FieldMiddleware'
+    'systori.apps.field.middleware.FieldMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # added WhiteNoise for fast and easy static files serving
 )
 
 TEMPLATES = [
