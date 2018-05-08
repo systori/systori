@@ -16,7 +16,7 @@ services:
     tty: true
     environment:
       DJANGO_SETTINGS_MODULE: systori.settings.local_docker
-      GITHUB_ACCESS_TOKEN: 7553569fbb52d89d1a51d8495496c987b3006fbb
+      GITHUB_ACCESS_TOKEN: $GITHUB_ACCESS_TOKEN
       WORKON_HOME: /venv
       SHELL: /bin/bash
       LANG: C.UTF-8
