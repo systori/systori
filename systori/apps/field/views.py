@@ -214,9 +214,9 @@ class FieldNoteList(ListView):
         if self.kwargs.get('project_pk', None):
             project = Project.objects.get(id=self.kwargs['project_pk'])
         if project:
-            return Note.objects.filter(project=project)
+            return Note.objects.filter(project=project).order_by('-created')
         else:
-            return Note.objects.all()
+            return Note.objects.order_by('-created').all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -1,0 +1,36 @@
+version: '3'
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: docker_related/Dockerfile-app
+      args:
+        WORKON_HOME: /venv
+        SHELL: /bin/bash
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    links:
+      - postgres
+    tty: true
+    environment:
+      DJANGO_SETTINGS_MODULE: systori.settings.local_docker
+      GITHUB_ACCESS_TOKEN: 7553569fbb52d89d1a51d8495496c987b3006fbb
+      WORKON_HOME: /venv
+      SHELL: /bin/bash
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      LC_CTYPE: C.UTF-8
+    entrypoint: /app/docker_related/startup_systori.sh
+    # entrypoint: /app/docker_related/idle.sh
+
+  postgres:
+    image: "postgres"
+    volumes:
+      - ./docker_related:/startup
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: dfguio22
+    # entrypoint: /startup/startup_postgres.sh

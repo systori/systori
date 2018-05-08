@@ -95,11 +95,14 @@ def dockergetdb(container='postgres', envname='production'):
         'HOST': 'localhost'
     }
     fetchdb(envname)
-    local('docker cp {} {}:/{}'.format(dump_file, container, dump_file))
-    local('docker exec {0} dropdb -h {HOST} -U {USER} {NAME}'.format(container, **settings))
-    local('docker exec {0} createdb -h {HOST} -U {USER} {NAME}'.format(container, **settings))
-    local('docker exec {0} pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(
-        container, dump_file, **settings))
+    # local('docker cp {} {}:/{}'.format(dump_file, container, dump_file))
+    local('docker cp {0} "$(docker-compose -f docker-compose.dev.yml ps -q {1})":/{0}'.format(dump_file, container))
+    local('docker exec "$(docker-compose -f docker-compose.dev.yml ps -q {0})" '
+          'dropdb -h {HOST} -U {USER} {NAME} --if-exists'.format(container, **settings))
+    local('docker exec "$(docker-compose -f docker-compose.dev.yml ps -q {0})" createdb -h {HOST} -U {USER} {NAME}'
+          .format(container, **settings))
+    local('docker exec "$(docker-compose -f docker-compose.dev.yml ps -q {0})" '
+          'pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(container, dump_file, **settings))
     local('rm ' + dump_file)
 
 
