@@ -31,6 +31,9 @@ if False:
         'debug_toolbar.panels.redirects.RedirectsPanel',
     )
 
+idx = INSTALLED_APPS.index('django.contrib.staticfiles')
+INSTALLED_APPS = INSTALLED_APPS[:idx]+('whitenoise.runserver_nostatic',)+INSTALLED_APPS[idx:]
+
 
 STATICFILES_DIRS += (
     ('dart/src', 'systori/dart/web'),

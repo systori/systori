@@ -22,5 +22,7 @@ django-dartium
 git+https://github.com/pmaupin/pdfrw.git
 bericht
 mistune
+whitenoise # nice and easy staticfiles serving
+brotlipy # add infinity caching and brotli compression to whitenoise
 
 -e .
