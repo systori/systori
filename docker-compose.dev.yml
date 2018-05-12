@@ -26,7 +26,7 @@ services:
     # entrypoint: /app/docker_related/idle.sh
 
   postgres:
-    image: "postgres"
+    image: "postgres:9.5"
     volumes:
       - ./docker_related:/startup
     ports:
@@ -34,3 +34,13 @@ services:
     environment:
       POSTGRES_PASSWORD: dfguio22
     # entrypoint: /startup/startup_postgres.sh
+
+  dart:
+    build:
+      context: ./
+      dockerfile: docker_related/Dockerfile-dart
+#    image: "google/dart-runtime:1.24.3"
+    volumes:
+      - ./systori/dart/:/app
+      - ./docker_related:/startup
+    entrypoint: /startup/idle.sh

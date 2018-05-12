@@ -1,0 +1,3 @@
+FROM google/dart-runtime:1.24.3
+
+RUN useradd -p "sopasswd" elmcrest

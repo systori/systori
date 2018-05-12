@@ -38,6 +38,9 @@ STATICFILES_DIRS += (
 
 DATABASES['default'].update({
     'NAME': 'systori_local',
+    'HOST': 'localhost',
+    'USER': 'postgres',
+    'PASSWORD': 'dfguio22',
     'TEST': {
         'SERIALIZE': False
     }
