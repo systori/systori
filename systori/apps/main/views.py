@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from django.views.generic import View, TemplateView, ListView
+from django.views.generic import View, TemplateView, ListView, UpdateView, DeleteView
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -84,3 +84,26 @@ class DayBasedOverviewView(TemplateView):
 class NotesDashboard(ListView):
     template_name = "main/notes.html"
     model = Note
+    ordering = ['-created']
+
+
+class NoteUpdateView(UpdateView):
+    template_name = 'main/note_detail.html'
+    model = Note
+    fields = ['text']
+
+    def get_success_url(self):
+        if 'success_url' in self.kwargs:
+            return self.kwargs['success_url']
+        else:
+            return reverse('note', kwargs={'pk': self.object.pk})
+
+
+class NoteDeleteView(DeleteView):
+    model = Note
+
+    def get_success_url(self):
+        if 'success_url' in self.kwargs:
+            return self.kwargs['success_url']
+        else:
+            return reverse('notes')

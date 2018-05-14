@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n l10n customformatting project task main dartium %}
+{% load i18n l10n customformatting project task main static %}
 
 {% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
 
@@ -641,6 +641,5 @@
 
 
 {% block extra_js %}
-  {% dart "notes.dart" %}
 {% endblock %}
 
