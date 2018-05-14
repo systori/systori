@@ -35,6 +35,8 @@
               <a href="{% url 'timetracking' %}">{% trans 'Timetracking' %}</a></li>
           <li {% if section == 'timesheets' %}class="active"{% endif %}>
               <a href="{% url 'timesheets' %}">{% trans 'Timesheets' %}</a></li>
+          <li {% if section == 'notes' %}class="active"{% endif %}>
+              <a href="{% url 'notes' %}"> {% trans 'Notes' %}</a></li>
         {% endif %}
     </ul>
 </li>

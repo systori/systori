@@ -1,4 +1,4 @@
-{% load i18n l10n %}
+{% load i18n l10n main %}
 
 <tr is="note-tr"
     data-pk="{{ note.pk|unlocalize }}"
@@ -16,11 +16,11 @@
       {{ note.html|safe }}
     </div>
     {# textarea for note.text has to be in a single line (prevents whitespaces) #}
-    <textarea class="hidden">{{ note.text }}</textarea>
+    {% if request.worker == note.worker %}
     <div class="btn-group btn-group-sm btn-group-note" role="group">
-      <button id="note-edit-button" class="btn btn-sm btn-default hidden"><span class="glyphicon glyphicon-edit"></span></button>
-      <button id="note-delete-button" class="btn btn-sm btn-danger hidden"><span class="glyphicon glyphicon-trash"></span></button>
+      <a id="note-edit-button" class="btn btn-sm btn-default" href="{% url 'note' note.pk request.path %}"><span class="glyphicon glyphicon-edit"></span></a>
+      <a id="note-delete-button" class="btn btn-sm btn-danger" href="{% url 'note.delete' note.pk request.path %}"><span class="glyphicon glyphicon-trash"></span></a>
     </div>
-    <button id="note-save-button" class="btn btn-xs btn-primary hidden">{% trans "Save" %}</button>
+    {% endif %}
   </td>
 </tr>

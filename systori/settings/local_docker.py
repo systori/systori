@@ -1,15 +1,15 @@
 from .common import *
 
 SERVER_NAME = 'systori.localhost'
-SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
-ALLOWED_HOSTS = ['.'+SERVER_NAME]
+SESSION_COOKIE_DOMAIN = '.' + SERVER_NAME
+ALLOWED_HOSTS = ['.' + SERVER_NAME]
 
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEBUG = True
 
-if False:
+if DEBUG:
     INSTALLED_APPS += (
         'debug_toolbar',
     )
@@ -31,17 +31,13 @@ if False:
         'debug_toolbar.panels.redirects.RedirectsPanel',
     )
 
-idx = INSTALLED_APPS.index('django.contrib.staticfiles')
-INSTALLED_APPS = INSTALLED_APPS[:idx]+('whitenoise.runserver_nostatic',)+INSTALLED_APPS[idx:]
-
-
 STATICFILES_DIRS += (
     ('dart/src', 'systori/dart/web'),
 )
 
 DATABASES['default'].update({
     'NAME': 'systori_local',
-    'HOST': 'localhost',
+    'HOST': 'postgres',
     'USER': 'postgres',
     'PASSWORD': 'dfguio22',
     'TEST': {
@@ -50,4 +46,3 @@ DATABASES['default'].update({
 })
 
 MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, 'media'))
-

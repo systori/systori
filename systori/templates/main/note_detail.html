@@ -17,7 +17,6 @@
   <div class="table-responsive notes-dashboard">
     <table class="table table-striped notes-table">
       <tbody id="notes">
-      {% for note in object_list %}
       <tr data-note-pk="{{ note.pk }}">
         <td>
           <nobr>
@@ -28,9 +27,12 @@
         </td>
         <td id="note_html">{{ note.html|safe }}</td>
       </tr>
-      {% endfor %}
       </tbody>
     </table>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Update" />
+</form>
   </div>
 {% endblock %}
 
