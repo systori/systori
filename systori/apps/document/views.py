@@ -441,8 +441,10 @@ class ProposalPDF(DocumentRenderView):
         with_lineitems = self.request.GET.get('with_lineitems', False)
         only_groups = self.request.GET.get('only_groups', False)
         only_task_names = self.request.GET.get('only_task_names', False)
+        technical_listing = self.request.GET.get('technical_listing', False)
         renderer = pdf_type.proposal.ProposalRenderer(
-            json, letterhead, with_lineitems, only_groups, only_task_names, self.kwargs['format']
+            json, letterhead, with_lineitems, only_groups,
+            only_task_names, technical_listing, self.kwargs['format']
         )
         return renderer.pdf
 
@@ -456,8 +458,10 @@ class ProposalHTML(SingleObjectMixin, View):
         with_lineitems = self.request.GET.get('with_lineitems', False)
         only_groups = self.request.GET.get('only_groups', False)
         only_task_names = self.request.GET.get('only_task_names', False)
+        technical_listing = self.request.GET.get('technical_listing', False)
         renderer = pdf_type.proposal.ProposalRenderer(
-            json, letterhead, with_lineitems, only_groups, only_task_names, None
+            json, letterhead, with_lineitems, only_groups,
+            only_task_names, technical_listing, None
         )
         return HttpResponse(renderer.html)
 
