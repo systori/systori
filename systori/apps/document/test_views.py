@@ -358,13 +358,46 @@ class ProposalViewTests(DocumentTestCase):
         # render
 
         response = self.client.get(reverse('proposal.pdf', kwargs={
-            'project_pk':self.project.id,
+            'project_pk': self.project.id,
             'pk': Proposal.objects.first().id,
-            'format':'print',})+'?only_groups=1')
+            'format': 'print', })+'?only_groups=1')
         extractedText = PdfFileReader(BytesIO(response.content)).getPage(0).extractText()
         for text in ['Proposal with only groups', 'Project #3', 'hello', 'bye', self.job.name]:
             self.assertTrue(text in extractedText)
         self.assertFalse(self.task.name in extractedText)
+
+    def test_serialize_n_render_technical_listing(self):
+        self.project = ProjectFactory(structure="0.0.0")
+        self.job = JobFactory(project=self.project)
+        self.group = GroupFactory(parent=self.job, depth=1)
+        self.task = TaskFactory(qty=10, complete=0, price=100, group=self.group)
+        self.contact = ContactFactory(project=self.project, is_billable=True)
+
+        data = self.form_data({
+            'title': 'Proposal with only groups',
+            'document_date': '2017-03-06',
+            'header': 'hello',
+            'footer': 'bye',
+            'add_terms': False,
+            'job-0-job_id': self.job.id,
+            'job-0-is_attached': 'True',
+            'show_project_id': 'True'
+        })
+
+        response = self.client.post(reverse('proposal.create', args=[self.project.id]), data)
+        self.assertEqual(302, response.status_code)
+
+        # render
+
+        response = self.client.get(reverse('proposal.pdf', kwargs={
+            'project_pk': self.project.id,
+            'pk': Proposal.objects.first().id,
+            'format': 'print', })+'?technical_listing=1')
+        self.assertEqual(200, response.status_code)
+        response = self.client.get(reverse('proposal.html', kwargs={
+            'project_pk': self.project.id,
+            'pk': Proposal.objects.first().id, }) + '?technical_listing=1')
+        self.assertEqual(200, response.status_code)
 
     def get_rendered_doc(self):
         data = self.form_data({

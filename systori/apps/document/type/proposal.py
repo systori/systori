@@ -52,21 +52,32 @@ class ProposalRowIterator(BaseRowIterator):
 
 class ProposalRenderer:
 
-    def __init__(self, proposal, letterhead, with_lineitems, only_groups, only_task_names, format):
+    def __init__(self, proposal, letterhead, with_lineitems, only_groups,
+                 only_task_names, technical_listing, format):
         self.proposal = proposal
         self.letterhead = letterhead
         self.with_lineitems = with_lineitems
         self.only_groups = only_groups
         self.only_task_names = only_task_names
+        self.technical_listing = technical_listing
         self.format = format
 
         # cache template lookups
-        self.header_html = get_template('document/proposal/header.html')
-        self.group_html = get_template('document/base/group.html')
-        self.lineitem_html = get_template('document/base/lineitem.html')
-        self.subtotal_html = get_template('document/base/subtotal.html')
-        self.itemized_html = get_template('document/proposal/itemized.html')
-        self.footer_html = get_template('document/proposal/footer.html')
+        if not self.technical_listing:
+            self.header_html = get_template('document/proposal/header.html')
+            self.group_html = get_template('document/base/group.html')
+            self.lineitem_html = get_template('document/base/lineitem.html')
+            self.subtotal_html = get_template('document/base/subtotal.html')
+            self.itemized_html = get_template('document/proposal/itemized.html')
+            self.footer_html = get_template('document/proposal/footer.html')
+        else:
+            self.header_html = get_template('document/technical_listing/header.html')
+            # ToDo: Check if there's a better way than loading an empty template
+            self.group_html = get_template('document/technical_listing/group.html')
+            self.lineitem_html = get_template('document/technical_listing/lineitem.html')
+            self.subtotal_html = get_template('document/technical_listing/subtotal.html')
+            self.itemized_html = get_template('document/technical_listing/itemized.html')
+            self.footer_html = get_template('document/technical_listing/footer.html')
 
     @property
     def pdf(self):
@@ -93,8 +104,11 @@ class ProposalRenderer:
             'letterhead': self.letterhead,
             'format': self.format,
         }
-        yield render_to_string('document/base/base.css', context)
-        yield render_to_string('document/proposal/proposal.css', context)
+        if not self.technical_listing:
+            yield render_to_string('document/base/base.css', context)
+            yield render_to_string('document/proposal/proposal.css', context)
+        else:
+            yield render_to_string('document/technical_listing/style.css', context)
 
     def generate(self):
 

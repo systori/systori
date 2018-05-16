@@ -101,6 +101,10 @@ You should now be able to connect and browse the `systori_local` database.
 
 ## Best Practices
 
+### Snippets to remember
+#### Makemessages
+`django-admin makemessages --locale=de --extension=html,txt,css,py`
+
 ### Testing
 
 #### Forms (systori/apps/*/test_forms.py)

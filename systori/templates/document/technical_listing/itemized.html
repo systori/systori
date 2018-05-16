@@ -1,0 +1,35 @@
+{% load customformatting %}
+
+<p class="lineitems-job">{{ job.code }} {{ job.name }}</p>
+<p class="lineitems-task">{{ task.code }} {{ task.name }}</p>
+<p>{{ task.description }}</p>
+
+<table>
+
+  <colgroup>
+    <col width="1*">
+    <col width="0*">
+    <col width="0*">
+    <col width="0*">
+    <col width="0*">
+  </colgroup>
+
+  {% for lineitem in task.lineitems %}
+  <tr>
+    <td class="left">{{ lineitem.name }}</td>
+    <td class="right">{{ lineitem.qty|ubrdecimal }}</td>
+    <td class="right">{{ lineitem.unit }}</td>
+    <td class="right">{{ lineitem.price|money }}</td>
+    <td class="right">{{ lineitem.estimate|money }}</td>
+  </tr>
+  {% endfor %}
+
+  <tr class="lineitems-subtotal">
+    <td></td>
+    <td class="right">{{ 1|ubrdecimal }}</td>
+    <td class="right">{{ task.unit }}</td>
+    <td></td>
+    <td class="right">{{ task.price|money }}</td>
+  </tr>
+
+</table>
