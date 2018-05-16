@@ -1,0 +1,120 @@
+{% load i18n l10n %}
+
+/* for debugging tables
+td {
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+*/
+
+@page {
+  font-family: OpenSans;
+  {% localize off %}
+  margin-top: 15mm;
+  margin-right: 15mm;
+  margin-bottom: 15mm;
+  margin-left: 15mm;
+  {% endlocalize %}
+  letterhead-page: 1;
+  @bottom-right {
+    content: '{% trans "Page" %} ' counter(page);
+  }
+}
+
+@page:nth-child(n+2) {
+  letterhead-page: 2;
+}
+
+td {
+  padding-top: 2px;
+  padding-right: 2px;
+  padding-bottom: 2px;
+  padding-left: 2px;
+  vertical-align: top;
+}
+
+td, p {
+  font-family: OpenSans;
+  font-size: 10pt;
+}
+
+.header-title {
+  font-weight: bold;
+  font-size: 14pt;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.header-date {
+  text-align: right;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.vspace-50 {
+  padding-top: 50px;
+}
+
+.left {
+  text-align: left;
+}
+
+.right {
+  text-align: right;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.line-above {
+  border-top-width: 1px;
+}
+
+.code {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.total {
+  padding-right: 0px;
+}
+
+.qty, .price, .total {
+  text-align: right;
+  vertical-align: bottom;
+}
+
+.unit {
+  text-align: right;
+  vertical-align: bottom;
+}
+
+.bottom {
+  vertical-align: bottom;
+}
+
+thead {
+  font-weight: bold;
+  text-align: center;
+}
+
+thead:nth-child(n+1) {
+  border-bottom-width: 1px;
+}
+
+.lineitems-job {
+  font-weight: bold;
+  page-break-before: always;
+}
+
+.lineitems-subtotal {
+  border-top-width: 1px;
+}
+
+.lineitems-subtotal > td {
+  text-align: left;
+  font-weight: bold;
+}

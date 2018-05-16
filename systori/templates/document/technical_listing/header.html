@@ -1,0 +1,29 @@
+{% load i18n %}
+
+{% autoescape off %}
+
+<table>
+  <colgroup>
+    <col width="1*">
+    <col width="0*">
+  </colgroup>
+  <tr>
+    <td class="header-title">#{{ project_id }} - {% trans 'technical listing' %}</td>
+    <td class="header-date bottom">{{ doc_date }}</td>
+  </tr>
+</table>
+
+<br>
+
+<table>
+
+  <colgroup>
+    <col width="0*">
+    <col width="1*">
+    <col width="0*">
+    <col width="0*">
+    <col width="0*">
+    <col width="0*">
+  </colgroup>
+
+{% endautoescape %}

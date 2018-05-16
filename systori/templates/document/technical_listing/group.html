@@ -1,0 +1,15 @@
+{% autoescape off %}
+
+  <tr {% if bold_name %}class="bold"{% endif %}>
+    <td class="code">{{ code }}</td>
+    <td colspan="5">{{ name }}</td>
+  </tr>
+
+  {% if show_description and description %}
+  <tr>
+    <td></td>
+    <td colspan="5">{{ description }}</td>
+  </tr>
+  {% endif %}
+
+{% endautoescape %}
