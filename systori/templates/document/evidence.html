@@ -1,0 +1,86 @@
+{% load i18n customformatting %}
+
+<table class="meta-table">
+    <colgroup>
+        <col width="1*">
+        <col width="0*">
+        <col width="0*">
+    </colgroup>
+    <tbody>
+        <tr>
+            <td>
+                <h2>{% trans 'Evidence Sheet' %}:</h2>
+            </td>
+            <td class="right">
+                <b>{% trans 'Sheet-No' %}</b>
+            </td>
+            <td class="right">
+                .....................
+            </td>
+        </tr>
+        <tr>
+            <td>#{{ project.pk }} {{ project.name }} {{ group.code }} {{ group.name }}</td>
+            <td></td>
+            <td class="right">{{ document.date }}</td>
+        </tr>
+        <tr>
+            <td>{% trans 'Task' %} {{ task.code }}</td>
+            <td class="right">{% trans 'P-Amount' %}</td>
+            <td class="right">{{ task.qty|ubrdecimal }} {{ task.unit }}</td>
+        </tr>
+    </tbody>
+</table>
+<br>
+<table class="sketch-area table table-bordered">
+    <tbody>
+    {% for row in document.row_range %}
+        <tr>
+        {% for col in document.col_range %}<td></td>{% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{#<table class="month table table-bordered table-hover table-striped table-condensed">#}
+{##}
+{#  <colgroup>#}
+{#    {% for day in daynumbers %}#}
+{#    <col width="0*">#}
+{#    {% endfor %}#}
+{#    <col width="0*">#}
+{#    <col width="1*">#}
+{#  </colgroup>#}
+{##}
+{#  <thead>#}
+{#  <tr>#}
+{#    {% for day in daynumbers %}#}
+{#      <td width="3%">{{ day }}</td>#}
+{#    {% endfor %}#}
+{#    <td width="3%">&#931;</td>#}
+{#    <td></td>#}
+{#  </tr>#}
+{#  <tr>#}
+{#    {% for day in daynames %}#}
+{#      <td width="3%">{{ day }}</td>#}
+{#    {% endfor %}#}
+{#    <td width="3%">&#931;</td>#}
+{#    <td></td>#}
+{#  </tr>#}
+{#  </thead>#}
+{##}
+{#  <tbody>#}
+{#  {% for name, label, row, total in rows %}#}
+{#    <tr class="row-{{ name }}">#}
+{#      {% for day in row %}#}
+{#        <td>{{ day|zeroblank|hours }}</td>#}
+{#      {% endfor %}#}
+{#      <td class="info">{{ total|hours }}</td>#}
+{#      <td>{{ label }}</td>#}
+{#    </tr>#}
+{#  {% endfor %}#}
+{#  </tbody>#}
+{##}
+{#</table>#}
+
+<p class="signature">{% trans "Approved" context "timesheet "%}: _______________________________</p>
+

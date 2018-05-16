@@ -1,0 +1,38 @@
+@page {
+  margin-top: 50px;
+  margin-right: 35px;
+  margin-bottom: 75px;
+  margin-left: 35px;
+  letterhead-page: 1;
+}
+
+table.meta-table > tbody > tr > td > h2 {
+  font-size: 12pt;
+  font-weight: bold;
+}
+
+table.meta-table > tbody > tr > td {
+  padding-left: 2px;
+}
+
+.right {
+  text-align: right;
+}
+
+.signature {
+  page-break-after: always;
+  text-align: right;
+}
+
+table.sketch-area > tbody > tr > td {
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+
+  padding-top: 12px;
+
+  border-color: rgb(190,190,190);
+
+}
+
