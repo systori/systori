@@ -64,28 +64,6 @@ class EvidenceRenderer:
             yield self.evidence_html.render(context)
 
 
-def render(project, letterhead):
-    with BytesIO() as buffer:
-        font = FontManager(letterhead.font)
-
-        available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
-
-        proposal_date = date_format(date.today(), use_l10n=True)
-
-        doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
-
-        pages = []
-
-        render_evidence_pages(project, pages, font, proposal_date)
-
-        if not pages:
-            pages.append(b(_('There are no billable Tasks available.'), font))
-
-        doc.build(pages, LetterheadCanvas.factory(letterhead), letterhead)
-
-        return buffer.getvalue()
-
-
 def get_evidence_context(project):
     depth = project.structure_depth
     context = {
@@ -128,6 +106,32 @@ def get_evidence_context(project):
         pass
     else:
         pass  # render error context
+
+###
+# old code
+###
+
+
+def render(project, letterhead):
+    with BytesIO() as buffer:
+        font = FontManager(letterhead.font)
+
+        available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
+
+        proposal_date = date_format(date.today(), use_l10n=True)
+
+        doc = SystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
+
+        pages = []
+
+        render_evidence_pages(project, pages, font, proposal_date)
+
+        if not pages:
+            pages.append(b(_('There are no billable Tasks available.'), font))
+
+        doc.build(pages, LetterheadCanvas.factory(letterhead), letterhead)
+
+        return buffer.getvalue()
 
 
 def render_evidence_pages(project, pages, font, proposal_date):
