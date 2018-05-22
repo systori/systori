@@ -36,7 +36,7 @@ def prepare(service, branch):
 def test():
     "django continuous integration test"
     with shell_env(DJANGO_SETTINGS_MODULE='systori.settings.test'):
-        local('coverage run -p manage.py test -v 2 systori.apps systori.lib')
+        local('coverage run -p manage.py test --verbosity 3 systori.apps systori.lib')
         local('coverage combine')
         local('coverage html -d reports')
 
