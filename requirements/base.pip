@@ -1,5 +1,5 @@
-pip
-psycopg2==2.7.4
+# psycopg2==2.7.1
+psycopg2-binary
 celery==4.0.2
 fabric3==1.13.1.post1
 lxml==3.6.0
