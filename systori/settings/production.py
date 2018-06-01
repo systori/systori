@@ -1,9 +1,10 @@
 from .common import *
+import os
 
 SESSION_COOKIE_SECURE = True                                                    
 CSRF_COOKIE_SECURE = True
 
-SERVER_NAME = 'systori.com'
+SERVER_NAME = 'systori.localhost'
 SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
 ALLOWED_HOSTS = ['.'+SERVER_NAME]
 
@@ -12,9 +13,10 @@ STATICFILES_DIRS += (
 )
 
 DATABASES['default'].update({
-    'HOST': 'db',
+    'HOST': 'postgres',
     'NAME': 'systori_production',
-    'USER': 'postgres'
+    'USER': 'postgres',
+    'PASSWORD': os.getenv('POSTGRES_PASSWORD', None),
 })
 
 INSTALLED_APPS += (
