@@ -1,4 +1,5 @@
 from .common import *
+import os
 
 SERVER_NAME = 'systori.localhost'
 SESSION_COOKIE_DOMAIN = '.'+SERVER_NAME
@@ -43,7 +44,7 @@ DATABASES['default'].update({
     'NAME': 'systori_local',
     'HOST': 'localhost',
     'USER': 'postgres',
-    'PASSWORD': 'dfguio22',
+    'PASSWORD': os.environ.get('POSTGRES_PASSWORD', None),
     'TEST': {
         'SERIALIZE': False
     }

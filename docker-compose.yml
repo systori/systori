@@ -1,27 +1,32 @@
-version: '2'
+version: "3.6"
 services:
   app:
-    environment:
-      DJANGO_SETTINGS_MODULE: systori.settings.docker
-      SSH_AUTH_SOCK: /tmp/agent.sock
-      PYTHONPATH: /python
-    build: .
-    tty: true
-    command: python3 manage.py runserver 0.0.0.0:8100
-    image: systori/local
-    volumes:
-      - $SSH_AUTH_SOCK:/tmp/agent.sock
-      - .:/systori
+    build:
+      context: ./
+      dockerfile: docker/app/Dockerfile
+      args:
+        RLEXTRA_ACCESS_TOKEN: $RLEXTRA_ACCESS_TOKEN
     ports:
-      - "8100:8100"
-    depends_on:
-      - db
-  test:
-    build: .
-    depends_on:
-      - db
-      - rabbitmq
-  db:
-    image: postgres
-  rabbitmq:
-    image: rabbitmq
+      - "8000:8000"
+    environment:
+      PYTHONUNBUFFERED: 1
+      DJANGO_SETTINGS_MODULE: 'systori.settings.production'
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    links:
+      - postgres
+    entrypoint: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+    # entrypoint: ["/app/_docker_related/idle.sh"]
+  
+  postgres:
+    image: "postgres:9.5"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+
+  # dart:
+  #   image: google/dart:1.24.3
+  #   volumes:
+  #     - ./systori/dart/:/app:z
+  #     - ./_docker_related:/startup:z
+  #   entrypoint: /startup/idle.sh

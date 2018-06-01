@@ -1,33 +1,30 @@
-psycopg2==2.6.1
-
-django==1.9
-django-tastypie==0.13.3
-django-ordered-model==1.2.1
-django-fsm==2.4.0
-django-mobile==0.7.0
-django-bootstrap-form==3.2.1
-djangorestframework==3.3.2
-
-geopy==1.11.0
+psycopg2
+celery==4.0.2
+fabric3==1.13.1.post1
 lxml==3.6.0
-jsonfield==1.0.3
+raven
+
+django
+djangorestframework==3.7.7
+django-fsm
+django-allauth==0.34.0
+jsonfield
+
+geopy
+python-dateutil==2.6.1
 
 hg+https://bitbucket.org/rptlab/reportlab
 hg+https://bitbucket.org/rptlab/preppy
-# rlextra doesn't work if installed in-place (-e)
-git+ssh://git@bitbucket.org/damoti/rlextra.git
-
-git+ssh://git@bitbucket.org/damoti/django-tuath.git
-
-git+https://github.com/eukreign/pyth.git@pyth-py3
-django-debug-toolbar==1.5
-coveralls
-selenium==2.53.6
-git+https://github.com/cgoldberg/sauceclient.git#egg=sauceclient
-django-extensions==1.7.2
-
-factory-boy==2.6.1
-freezegun==0.3.7
-django-datetime-widget==0.9.3
-
-ipython==5.1.0
+# git+ssh://git@rlextra.github.com/systori/rlextra.git
+git+file:///rlextra
+django-postgres-schema
+git+https://github.com/systori/pyth.git@pyth-py3
+git+https://github.com/eukreign/django-timezone-field.git@django2
+django-tsvector-field
+django-bootstrap-components
+django-dartium
+git+https://github.com/pmaupin/pdfrw.git
+bericht
+mistune
+whitenoise # nice and easy staticfiles serving
+brotlipy # add infinity caching and brotli compression to whitenoise
