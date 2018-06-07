@@ -103,6 +103,7 @@ MIDDLEWARE = (
     'systori.apps.company.middleware.WorkerMiddleware',
     'systori.apps.project.middleware.ProjectMiddleware',
     'systori.apps.field.middleware.FieldMiddleware',
+    'systori.lib.middleware.StatsMiddleware',
 )
 
 TEMPLATES = [

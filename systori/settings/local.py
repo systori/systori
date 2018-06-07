@@ -10,7 +10,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEBUG = True
 
-if False:
+if DEBUG:
     INSTALLED_APPS += (
         'debug_toolbar',
     )
@@ -31,6 +31,10 @@ if False:
         'debug_toolbar.panels.logging.LoggingPanel',
         'debug_toolbar.panels.redirects.RedirectsPanel',
     )
+
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda _request: DEBUG
+    }
 
 idx = INSTALLED_APPS.index('django.contrib.staticfiles')
 INSTALLED_APPS = INSTALLED_APPS[:idx]+('whitenoise.runserver_nostatic',)+INSTALLED_APPS[idx:]

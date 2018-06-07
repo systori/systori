@@ -37,6 +37,7 @@ class EvidenceRenderer:
         self.letterhead = letterhead
 
         self.evidence_html = get_template('document/evidence.html')
+        self.evidence_html_static = get_template('document/evidence_static_test.html')
 
     @property
     def pdf(self):
@@ -60,11 +61,109 @@ class EvidenceRenderer:
         })
 
     def generate(self):
-        for context in get_evidence_context(self.project):
-            yield self.evidence_html.render(context)
+        context = dict()
+        yield self.evidence_html_static.render(context)
+
+    # def generate(self):
+    #     context = {
+    #         'document': {
+    #             'date': date_format(date.today(), use_l10n=True),
+    #             'row_range': range(ROWS),
+    #             'col_range': range(COLS),
+    #         },
+    #         'project': {
+    #             'name': self.project.name,
+    #             'pk': self.project.pk,
+    #         }
+    #     }
+    #
+    #     def _serialize(job):
+    #         for group in job.groups.all():
+    #             context['group'] = {
+    #                 'name': group.name,
+    #                 'code': group.code,
+    #             }
+    #             for task in group.tasks.all():
+    #                 context['task'] = {
+    #                     'code': task.code,
+    #                     'name': task.name,
+    #                     'description': task.description,
+    #                     'qty': task.qty,
+    #                     'unit': task.unit,
+    #                 }
+    #                 yield context
+    #             yield from _serialize(group)
+    #
+    #     print(self.project.jobs.count())
+    #     for job in self.project.jobs.with_hierarchy(project=self.project):
+    #         context['job'] = {
+    #            'name': job.name
+    #         }
+    #         print("hello from job loop")
+    #         for _context in _serialize(job):
+    #             yield self.evidence_html.render(_context)
+    #             print("hello from context loop")
+
+#     def generate(self):
+#         for context in get_evidence_context(self.project):
+#             yield self.evidence_html.render(context)
+#
+#
+# def get_evidence_context(project):
+#
+#     context = {
+#         'document': {
+#             'date': date_format(date.today(), use_l10n=True),
+#             'row_range': range(ROWS),
+#             'col_range': range(COLS),
+#         },
+#         'project': {
+#             'name': project.name,
+#             'pk': project.pk,
+#         }
+#     }
+#     for job in project.jobs.all():
+#         context['job'] =  {
+#             'name': job.name
+#         }
+#         yield from _serialize(context, job)
+#
+#
+# def _serialize(data, parent):
+#
+#     for group in parent.groups.all():
+#         data['group'] = {
+#             'name': group.name,
+#             'code': group.code,
+#         }
+#         yield from _serialize(group_dict, group)
+#
+#     for task in parent.tasks.all():
+#
+#         context = {
+#             'task': {
+#                 'code': task.code,
+#                 'name': task.name,
+#                 'description': task.description,
+#                 'qty': task.qty,
+#                 'unit': task.unit,
+#             }
+#         }
+#         yield context
+
+#        for lineitem in task.lineitems.all():
+#            lineitem_dict = {
+#                'lineitem.id': lineitem.id,
+#                'name': lineitem.name,
+#                'qty': lineitem.qty,
+#                'unit': lineitem.unit,
+#                'price': lineitem.price,
+#                'estimate': lineitem.total,
+#            }
+#            task_dict['lineitems'].append(lineitem_dict)
 
 
-def get_evidence_context(project):
+def bla_get_evidence_context(project):
     depth = project.structure_depth
     context = {
         'document': {
@@ -80,6 +179,7 @@ def get_evidence_context(project):
     if depth == 0:
         pass
     elif depth == 1:
+        from django.db import connection
         for job in project.jobs.all():
             context['job'] = {
                 'name': job.name,
@@ -89,7 +189,7 @@ def get_evidence_context(project):
                     'code': group.code,
                     'name': group.name,
                 }
-                for task in job.all_tasks.all():
+                for task in group.tasks.all():
                     context['task'] = {
                         'code': task.code,
                         'name': task.name,
@@ -97,6 +197,7 @@ def get_evidence_context(project):
                         'qty': task.qty,
                         'unit': task.unit,
                     }
+                    print(f'query count: {len(connection.queries)}')
                     yield context
     elif depth == 2:
         pass

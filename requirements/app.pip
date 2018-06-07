@@ -20,7 +20,8 @@ django-tsvector-field
 django-bootstrap-components
 django-dartium
 git+https://github.com/pmaupin/pdfrw.git
-bericht
+# bericht
+-e ../bericht
 mistune
 whitenoise # nice and easy staticfiles serving
 brotlipy # add infinity caching and brotli compression to whitenoise
