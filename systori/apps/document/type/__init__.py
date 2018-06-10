@@ -6,5 +6,4 @@ from . import \
     payment, \
     proposal, \
     refund, \
-    letterhead, \
     timesheet

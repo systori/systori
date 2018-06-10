@@ -1,5 +1,5 @@
 @page {
-  margin-top: 50px;
+  margin-top: 20px;
   margin-right: 35px;
   margin-bottom: 75px;
   margin-left: 35px;
@@ -13,19 +13,13 @@ table.meta-table > tbody > tr > td > h2 {
 
 table.meta-table > tbody > tr > td {
   padding-left: 2px;
-  border-color: rgb(190,190,190);
-  border-top-width: 1px;
-  border-right-width: 1px;
-  border-bottom-width: 1px;
-  border-left-width: 1px;
 }
 
-.right {
-  text-align: right;
+.margin_top {
+  margin-top: 5px;
 }
 
-.signature {
+.pagebreak {
   page-break-after: always;
-  text-align: right;
 }
 

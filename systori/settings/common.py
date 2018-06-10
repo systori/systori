@@ -103,7 +103,7 @@ MIDDLEWARE = (
     'systori.apps.company.middleware.WorkerMiddleware',
     'systori.apps.project.middleware.ProjectMiddleware',
     'systori.apps.field.middleware.FieldMiddleware',
-    'systori.lib.middleware.StatsMiddleware',
+    # 'systori.lib.middleware.StatsMiddleware', #  enable to get timings for a request cycle
 )
 
 TEMPLATES = [

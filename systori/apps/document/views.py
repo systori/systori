@@ -617,11 +617,6 @@ class LetterheadDelete(DeleteView):
     success_url = reverse_lazy('templates')
 
 
-class LetterheadPreview(DocumentRenderView):
-    def pdf(self):
-        return pdf_type.letterhead.render(letterhead=Letterhead.objects.get(id=self.kwargs.get('pk')))
-
-
 # Document Settings
 
 

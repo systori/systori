@@ -5,7 +5,7 @@
 
 {% block container %}
 <div class="container-fluid">
-  <div class="col-md-3">
+  <div class="col-md-12">
 
           <form role="form" enctype="multipart/form-data"  method="post">
               {% csrf_token %}
@@ -19,14 +19,6 @@
             <b>[{{ key }}]</b> &nbsp; {{ val }}<br/>
           {% endfor %}
 
-  </div>
-
-  <div class="col-md-9" style="height:1000px;">
-    {% if object %}
-    <embed src="{% url 'letterhead.preview' object.id %}" width="100%" height="100%" type='application/pdf'>
-    {% else %}
-    <p>{% trans 'No Letterhead available.' %}</p>
-    {% endif %}
   </div>
 </div>
 {% endblock %}

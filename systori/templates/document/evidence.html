@@ -1,5 +1,5 @@
 {% load i18n customformatting %}
-<table class="meta-table table table-bordered table-hover table-striped table-condensed">
+<table class="meta-table table table-hover table-striped table-condensed">
     <colgroup>
         <col width="1*">
         <col width="0*">
@@ -8,7 +8,7 @@
     <tbody>
         <tr>
             <td>
-                <h2>{% trans 'Evidence Sheet' %}:</h2>
+                <h2>{% trans 'Evidence Sheet' %}</h2>
             </td>
             <td class="right">
                 <b>{% trans 'Sheet-No' %}</b>
@@ -20,7 +20,7 @@
         <tr>
             <td>#{{ project.pk }} {{ project.name }} {{ group.code }} {{ group.name }}</td>
             <td></td>
-            <td class="right">{{ document.date }}</td>
+            <td class="right">{{document.date}}</td>
         </tr>
         <tr>
             <td>{% trans 'Task' %} {{ task.code }}</td>
@@ -29,5 +29,4 @@
         </tr>
     </tbody>
 </table>
-
-<p class="signature">"Unterschrift": _______________________________</p>
+<br class="pagebreak">
