@@ -27,7 +27,7 @@ install:
 before_script:
   - fab initsettings:envname=common
   - which dart
-  - cd systori/dart/web && pub get && pub build && cd ../../..
+  - cd systori/dart/web && /usr/bin/pub get && /usr/bin/pub build && cd ../../..
 
 script:
   - coverage run -p manage.py test systori
