@@ -35,7 +35,7 @@ def prepare(service, branch):
 
 def initsettings(envname='local'):
     ":envname=local -- creates __init__.py in settings folder"
-    assert envname in ['dev', 'production', 'local', 'jenkins']
+    assert envname in ['dev', 'production', 'local', 'common']
     if os.path.exists('systori/settings/__init__.py'):
         print('Settings have already been initialized.')
     else:
