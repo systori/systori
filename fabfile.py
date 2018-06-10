@@ -33,6 +33,17 @@ def prepare(service, branch):
     local('psql -c "VACUUM ANALYZE" -h {HOST} -U {USER} {NAME}'.format(**settings))
 
 
+def initsettings(envname='local'):
+    ":envname=local -- creates __init__.py in settings folder"
+    assert envname in ['dev', 'production', 'local', 'jenkins']
+    if os.path.exists('systori/settings/__init__.py'):
+        print('Settings have already been initialized.')
+    else:
+        with open('systori/settings/__init__.py', 'w') as s:
+            print('Initializing settings for {}'.format(envname))
+            s.write('from .{} import *\n'.format(envname))
+
+
 def test():
     "django continuous integration test"
     with shell_env(DJANGO_SETTINGS_MODULE='systori.settings.test'):
