@@ -4,7 +4,7 @@ import os.path
 from django.conf import settings
 from django.utils.translation import ugettext as _
 
-from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
+#from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory, open_and_read
 
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.styles import ParagraphStyle
@@ -13,6 +13,7 @@ from reportlab.platypus import Frame, Paragraph, Table, Spacer
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
 from reportlab.lib import colors, pagesizes, units
+from PyPDF2 import PdfFileMerger
 
 
 def _simpleSplit(txt,mW,SW):
@@ -117,9 +118,9 @@ class StationaryCanvas(canvas.Canvas):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         cover_pdf = os.path.join(settings.MEDIA_ROOT, self.stationary_pages.name)
-        cover_pdf = open_and_read(cover_pdf)
-        self.page_info_page1, self.page_content = storeFormsInMemory(cover_pdf, all=True)
-        restoreFormsInMemory(self.page_content, self)
+        #cover_pdf = open_and_read(cover_pdf)
+        #self.page_info_page1, self.page_content = storeFormsInMemory(cover_pdf, all=True)
+        #restoreFormsInMemory(self.page_content, self)
 
     def showPage(self):
         if self._pageNumber > 1 and len(self.page_info_page1) > 1:

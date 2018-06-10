@@ -519,13 +519,30 @@ class ProposalDelete(DeleteView):
 # Evidence
 
 
+class ProjectEvidenceHTML(SingleObjectMixin, View):
+    model = Project
+
+    def get(self, request, *args, **kwargs):
+        doc_settings = DocumentSettings.get_for_language(get_language())
+        letterhead = doc_settings.evidence_letterhead
+        renderer = pdf_type.evidence.EvidenceRenderer(
+            self.request.project,
+            letterhead
+        )
+        return HttpResponse(renderer.html)
+
+
 class ProjectEvidencePDF(DocumentRenderView):
     model = Project
 
     def pdf(self):
         doc_settings = DocumentSettings.get_for_language(get_language())
         letterhead = doc_settings.evidence_letterhead
-        return pdf_type.evidence.render(self.request.project, letterhead)
+        renderer = pdf_type.evidence.EvidenceRenderer(
+            self.request.project,
+            letterhead
+        )
+        return renderer.pdf
 
 
 class JobEvidencePDF(DocumentRenderView):
@@ -534,7 +551,11 @@ class JobEvidencePDF(DocumentRenderView):
     def pdf(self):
         doc_settings = DocumentSettings.get_for_language(get_language())
         letterhead = doc_settings.evidence_letterhead
-        return pdf_type.evidence.render(self.model.objects.get(id=self.kwargs.get('job_pk')), letterhead)
+        renderer = pdf_type.evidence.EvidenceRenderer(
+            self.model.objects.get(id=self.kwargs.get('job_pk')),
+            letterhead
+        )
+        return renderer.pdf
 
 # Itemized List
 
@@ -594,11 +615,6 @@ class LetterheadUpdate(UpdateView):
 class LetterheadDelete(DeleteView):
     model = Letterhead
     success_url = reverse_lazy('templates')
-
-
-class LetterheadPreview(DocumentRenderView):
-    def pdf(self):
-        return pdf_type.letterhead.render(letterhead=Letterhead.objects.get(id=self.kwargs.get('pk')))
 
 
 # Document Settings

@@ -1,4 +1,4 @@
-from .common import *
+from systori.settings.common import *
 import os
 
 SERVER_NAME = 'systori.localhost'
@@ -31,6 +31,10 @@ if False:
         'debug_toolbar.panels.logging.LoggingPanel',
         'debug_toolbar.panels.redirects.RedirectsPanel',
     )
+
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda _request: DEBUG
+    }
 
 idx = INSTALLED_APPS.index('django.contrib.staticfiles')
 INSTALLED_APPS = INSTALLED_APPS[:idx]+('whitenoise.runserver_nostatic',)+INSTALLED_APPS[idx:]

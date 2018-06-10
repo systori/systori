@@ -15,8 +15,6 @@ python-dateutil==2.6.1
 
 hg+https://bitbucket.org/rptlab/reportlab
 hg+https://bitbucket.org/rptlab/preppy
-# git+ssh://git@rlextra.github.com/systori/rlextra.git
-git+file:///rlextra
 django-postgres-schema
 git+https://github.com/systori/pyth.git@pyth-py3
 git+https://github.com/eukreign/django-timezone-field.git@django2
@@ -26,5 +24,7 @@ django-dartium
 git+https://github.com/pmaupin/pdfrw.git
 bericht
 mistune
+
 whitenoise # nice and easy staticfiles serving
 brotlipy # add infinity caching and brotli compression to whitenoise
+

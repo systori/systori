@@ -39,6 +39,7 @@ urlpatterns = [
     url(r'^project-(?P<project_pk>\d+)/refund-(?P<pk>\d+)/delete$', office_auth(RefundDelete.as_view()), name='refund.delete'),
 
     url(r'^project-(?P<project_pk>\d+)/evidence.pdf$', office_auth(ProjectEvidencePDF.as_view()), name='project.evidence.pdf'),
+    url(r'^project-(?P<project_pk>\d+)/evidence.html$', office_auth(ProjectEvidenceHTML.as_view()), name='project.evidence.html'),
     url(r'^project-(?P<project_pk>\d+)/job-(?P<job_pk>\d+)/evidence.pdf$', office_auth(JobEvidencePDF.as_view()), name='job.evidence.pdf'),
 
     url(r'^project-(?P<project_pk>\d+)/itemized_listing-(?P<format>(email|print)).pdf$', office_auth(ItemizedListingPDF.as_view()), name='itemized_listing.pdf'),
@@ -55,7 +56,6 @@ urlpatterns = [
     url(r'^templates/create-letterhead$', office_auth(LetterheadCreate.as_view()), name='letterhead.create'),
     url(r'^templates/letterhead-(?P<pk>\d+)/update$', office_auth(LetterheadUpdate.as_view()), name='letterhead.update'),
     url(r'^templates/letterhead-(?P<pk>\d+)/delete$', office_auth(LetterheadDelete.as_view()), name='letterhead.delete'),
-    url(r'^templates/letterhead-(?P<pk>\d+)/preview$', office_auth(LetterheadPreview.as_view()), name='letterhead.preview'),
 
     url(r'^templates/create-document-settings$', office_auth(DocumentSettingsCreate.as_view()), name='document-settings.create'),
     url(r'^templates/document-settings-(?P<pk>\d+)/edit$', office_auth(DocumentSettingsUpdate.as_view()), name='document-settings.edit'),

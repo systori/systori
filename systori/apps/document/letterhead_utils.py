@@ -1,4 +1,4 @@
-from rlextra.thirdparty.PyPDF2 import PdfFileReader
+from PyPDF2 import PdfFileReader
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from reportlab.lib.units import cm, inch
