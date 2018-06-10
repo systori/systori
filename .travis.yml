@@ -26,8 +26,8 @@ install:
 
 before_script:
   - fab initsettings:envname=common
-  - which dart
-  - cd dart/web && /usr/lib/dart/bin/pub get && /usr/lib/dart/bin/pub build && cd ../..
+  - echo $TRAVIS_BUILD_DIR
+  - cd systori/dart/web && /usr/lib/dart/bin/pub get && /usr/lib/dart/bin/pub build && cd ../..
 
 script:
   - coverage run -p manage.py test systori
