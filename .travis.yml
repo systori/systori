@@ -11,7 +11,7 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq fabric language-pack-de
   - sudo dpkg-reconfigure locales
-  - fab get_dart
+  - fab getdartium
   - export DART_SDK="$HOME/bin/dart-sdk"
   - export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
 
