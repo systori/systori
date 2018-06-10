@@ -1,4 +1,4 @@
-from .common import *
+from systori.settings.common import *
 import os
 
 SERVER_NAME = 'systori.localhost'
