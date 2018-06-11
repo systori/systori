@@ -1,1 +1,1 @@
-default_app_config = 'systori.apps.field.app.FieldConfig'
+default_app_config = "systori.apps.field.app.FieldConfig"

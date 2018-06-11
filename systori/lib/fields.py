@@ -10,16 +10,17 @@ def apply_all_kwargs(obj, **kwargs):
             setattr(obj, field.attname, value)
     if kwargs:
         raise TypeError(
-            "'{}' is not a valid field of {}"
-            .format(list(kwargs)[0], obj.__class__.__name__)
+            "'{}' is not a valid field of {}".format(
+                list(kwargs)[0], obj.__class__.__name__
+            )
         )
 
 
 class RateType:
-    HOURLY = 'hourly'
-    DAILY = 'daily'
-    WEEKLY = 'weekly'
-    FLAT = 'flat'
+    HOURLY = "hourly"
+    DAILY = "daily"
+    WEEKLY = "weekly"
+    FLAT = "flat"
     RATE_CHOICES = [
         (HOURLY, _("Hourly")),
         (DAILY, _("Daily")),

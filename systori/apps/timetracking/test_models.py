@@ -19,18 +19,19 @@ NOW = datetime(2014, 12, 2, 17, 58, 28, 0, EST)  # birth of Systori
 
 @freeze_time(NOW)
 class TimerTests(TestCase):
-
     def setUp(self):
         self.company = CompanyFactory()
         self.worker = UserFactory(company=self.company).access.first()
 
     def test_start(self):
-        timer = Timer.start(self.worker, starting_latitude=52.5076, starting_longitude=13.3904)
+        timer = Timer.start(
+            self.worker, starting_latitude=52.5076, starting_longitude=13.3904
+        )
         timer.refresh_from_db()
         self.assertTrue(timer.pk)
         self.assertEqual(timer.worker, self.worker)
-        self.assertEqual(timer.starting_latitude, Decimal('52.5076'))
-        self.assertEqual(timer.starting_longitude, Decimal('13.3904'))
+        self.assertEqual(timer.starting_latitude, Decimal("52.5076"))
+        self.assertEqual(timer.starting_longitude, Decimal("13.3904"))
         self.assertEqual(timer.started.date(), NOW.date())
 
     def test_start_and_stop(self):
@@ -40,22 +41,25 @@ class TimerTests(TestCase):
         self.assertEqual(timer.duration, 120)
 
     def test_overlapping_timer_validation(self):
-        activate('en')
-        Timer.start(self.worker, stopped=NOW+timedelta(hours=1))
+        activate("en")
+        Timer.start(self.worker, stopped=NOW + timedelta(hours=1))
         with self.assertRaisesMessage(
-                ValidationError,
-                "['Overlapping timer (02.12.2014 19:03 — 02.12.2014 20:03) already exists']"):
-            Timer.start(self.worker, NOW+timedelta(minutes=10))
+            ValidationError,
+            "['Overlapping timer (02.12.2014 19:03 — 02.12.2014 20:03) already exists']",
+        ):
+            Timer.start(self.worker, NOW + timedelta(minutes=10))
 
     def test_negative_timer_validation(self):
-        activate('en')
+        activate("en")
         with self.assertRaisesMessage(ValidationError, "['Timer cannot be negative']"):
-            Timer.start(worker=self.worker, started=NOW, stopped=NOW - timedelta(days=2))
+            Timer.start(
+                worker=self.worker, started=NOW, stopped=NOW - timedelta(days=2)
+            )
 
     def test_running_duration(self):
         timer = Timer.start(self.worker)
         self.assertEqual(timer.running_duration, 0)
-        with freeze_time(NOW+timedelta(hours=1, minutes=4)):
+        with freeze_time(NOW + timedelta(hours=1, minutes=4)):
             self.assertEqual(timer.running_duration, 64)
 
     def test_stop(self):
@@ -64,12 +68,12 @@ class TimerTests(TestCase):
         self.assertTrue(timer.is_running)
         self.assertEqual(timer.duration, 0)
         with freeze_time(add_hour):
-            timer.stop(comment='test comment')
+            timer.stop(comment="test comment")
         timer.refresh_from_db()
         self.assertFalse(timer.is_running)
         self.assertEqual(timer.duration, 64)
         self.assertEqual(timer.stopped, add_hour)
-        self.assertEqual(timer.comment, 'test comment')
+        self.assertEqual(timer.comment, "test comment")
 
     def test_stop_with_supplied_timestamp(self):
         timer = Timer.start(self.worker)
@@ -81,12 +85,12 @@ class TimerTests(TestCase):
     def test_stop_removes_less_than_minute_timer(self):
         timer = Timer.start(self.worker)
         self.assertTrue(Timer.objects.filter(pk=timer.pk).exists())
-        with freeze_time(NOW+timedelta(seconds=30)):
+        with freeze_time(NOW + timedelta(seconds=30)):
             timer.stop()
         self.assertFalse(Timer.objects.filter(pk=timer.pk).exists())
 
     def test_stop_with_bad_kwargs(self):
-        activate('en')
+        activate("en")
         timer = Timer.start(worker=self.worker)
         with self.assertRaisesMessage(TypeError, "'wtf' is not a valid field of Timer"):
             timer.stop(wtf=99)
@@ -94,7 +98,6 @@ class TimerTests(TestCase):
 
 @freeze_time(NOW)
 class TimerQuerySetTest(TestCase):
-
     def setUp(self):
         self.company = CompanyFactory()  # type: Company
         self.worker = UserFactory(company=self.company).access.first()
@@ -105,7 +108,7 @@ class TimerQuerySetTest(TestCase):
         Timer.objects.create(
             worker=self.worker,
             started=yesterday.replace(hour=9),
-            stopped=yesterday.replace(hour=17)
+            stopped=yesterday.replace(hour=17),
         )
         self.assertFalse(Timer.objects.day().exists())
         timer = Timer.start(worker=self.worker)
@@ -116,7 +119,7 @@ class TimerQuerySetTest(TestCase):
         Timer.objects.create(
             worker=self.worker,
             started=NOW.replace(hour=9),
-            stopped=NOW.replace(hour=13)
+            stopped=NOW.replace(hour=13),
         )
         self.assertFalse(Timer.objects.running().exists())
         timer = Timer.start(self.worker)
@@ -136,22 +139,35 @@ class TimerQuerySetTest(TestCase):
         start = timezone.make_aware(datetime(2016, 10, 27, 7))
         end = timezone.make_aware(datetime(2016, 10, 31, 16))
         Timer.objects.create_batch(
-            worker=self.worker, dates=(start.date(), end.date()),
-            start=start.time(), stop=end.time(),
-            kind=Timer.WORK, comment='Test comment'
+            worker=self.worker,
+            dates=(start.date(), end.date()),
+            start=start.time(),
+            stop=end.time(),
+            kind=Timer.WORK,
+            comment="Test comment",
         )
-        result = Timer.objects.order_by('id').all()
+        result = Timer.objects.order_by("id").all()
         self.assertEqual(len(result), 9)  # 3 per day, two days skipped
         self.assertEqual(result[0].kind, Timer.WORK)
-        self.assertEqual(result[0].comment, 'Test comment')
-        self.assertEqual(result[0].started, start)  # left is UTC, right is CEST, automatically normalized for '=='
-        self.assertEqual(result[0].started.hour, 5)  # different UTC from a CEST datetime
+        self.assertEqual(result[0].comment, "Test comment")
+        self.assertEqual(
+            result[0].started, start
+        )  # left is UTC, right is CEST, automatically normalized for '=='
+        self.assertEqual(
+            result[0].started.hour, 5
+        )  # different UTC from a CEST datetime
         self.assertEqual(result[6].started.hour, 6)  # different UTC from a CET datetime
-        self.assertEqual(timezone.localtime(result[0].started).hour, 7)  # same local time
-        self.assertEqual(timezone.localtime(result[6].started).hour, 7)  # same local time
+        self.assertEqual(
+            timezone.localtime(result[0].started).hour, 7
+        )  # same local time
+        self.assertEqual(
+            timezone.localtime(result[6].started).hour, 7
+        )  # same local time
 
     def test_stop_for_break(self):
-        local = NOW.astimezone(timezone.get_current_timezone()).replace(minute=0, second=0)
+        local = NOW.astimezone(timezone.get_current_timezone()).replace(
+            minute=0, second=0
+        )
         with freeze_time(local.replace(hour=7)):
             timer1 = Timer.start(worker=self.worker)
             timer2 = Timer.start(worker=self.worker2)
@@ -185,10 +201,10 @@ class TimerQuerySetTest(TestCase):
         with freeze_time(local.replace(hour=9, minute=30)):
             Timer.objects.start_or_stop_work_breaks()
             now = timezone.now()
-            timer1 = self.worker.timers.latest('started')
-            timer2 = self.worker2.timers.latest('started')
-            running_timer = running_worker.timers.latest('started')
-            stopped_timer = manually_stopped_worker.timers.latest('started')
+            timer1 = self.worker.timers.latest("started")
+            timer2 = self.worker2.timers.latest("started")
+            running_timer = running_worker.timers.latest("started")
+            stopped_timer = manually_stopped_worker.timers.latest("started")
             self.assertEqual(timer1.started, now)
             self.assertEqual(timer2.started, now)
             self.assertTrue(timer1.is_auto_started)
@@ -199,61 +215,89 @@ class TimerQuerySetTest(TestCase):
 
 
 class ReportsTest(TestCase):
-
     def setUp(self):
         self.company = CompanyFactory()
-        self.worker1 = UserFactory(last_name='a', company=self.company).access.first()
-        self.worker2 = UserFactory(last_name='b', company=self.company).access.first()
-        self.worker3 = UserFactory(last_name='c', company=self.company).access.first()
-        self.worker4 = UserFactory(last_name='d', company=self.company).access.first()
+        self.worker1 = UserFactory(last_name="a", company=self.company).access.first()
+        self.worker2 = UserFactory(last_name="b", company=self.company).access.first()
+        self.worker3 = UserFactory(last_name="c", company=self.company).access.first()
+        self.worker4 = UserFactory(last_name="d", company=self.company).access.first()
 
     @freeze_time(NOW)
     def test_get_daily_workers_report(self):
         today = NOW.replace(hour=9)
         yesterday = today - timedelta(days=1)
         Timer.objects.create(
-            worker=self.worker1, started=yesterday, stopped=yesterday + timedelta(hours=2)
+            worker=self.worker1,
+            started=yesterday,
+            stopped=yesterday + timedelta(hours=2),
         )
         Timer.objects.create(
-            worker=self.worker1, started=yesterday + timedelta(hours=3), stopped=yesterday + timedelta(hours=9)
+            worker=self.worker1,
+            started=yesterday + timedelta(hours=3),
+            stopped=yesterday + timedelta(hours=9),
         )
         worker1_timer1 = Timer.objects.create(
             worker=self.worker1, started=today, stopped=today + timedelta(hours=2)
         )
         worker1_timer2 = Timer.objects.create(
-            worker=self.worker1, started=today + timedelta(hours=3), stopped=today + timedelta(hours=8)
+            worker=self.worker1,
+            started=today + timedelta(hours=3),
+            stopped=today + timedelta(hours=8),
         )
 
         Timer.objects.create(
-            worker=self.worker2, started=yesterday, stopped=yesterday + timedelta(hours=3)
+            worker=self.worker2,
+            started=yesterday,
+            stopped=yesterday + timedelta(hours=3),
         )
         Timer.objects.create(
-            worker=self.worker2, started=yesterday + timedelta(hours=4), stopped=yesterday + timedelta(hours=12)
+            worker=self.worker2,
+            started=yesterday + timedelta(hours=4),
+            stopped=yesterday + timedelta(hours=12),
         )
         worker2_timer1 = Timer.objects.create(
             worker=self.worker2, started=today, stopped=today + timedelta(hours=3)
         )
         worker2_timer2 = Timer.objects.create(
-            worker=self.worker2, started=today + timedelta(hours=6), stopped=today + timedelta(hours=9)
+            worker=self.worker2,
+            started=today + timedelta(hours=6),
+            stopped=today + timedelta(hours=9),
         )
 
-        worker3_timer1 = Timer.objects.create(
-            worker=self.worker3, started=today
-        )
+        worker3_timer1 = Timer.objects.create(worker=self.worker3, started=today)
 
         report = Timer.objects.get_daily_workers_report(timezone.localdate())
 
-        self.assertEqual(report[self.worker1]['timers'][0].started, worker1_timer1.started)
-        self.assertEqual(report[self.worker1]['timers'][2].stopped, worker1_timer2.stopped)
-        self.assertEqual(report[self.worker1]['total'], worker1_timer1.duration + worker1_timer2.duration)
+        self.assertEqual(
+            report[self.worker1]["timers"][0].started, worker1_timer1.started
+        )
+        self.assertEqual(
+            report[self.worker1]["timers"][2].stopped, worker1_timer2.stopped
+        )
+        self.assertEqual(
+            report[self.worker1]["total"],
+            worker1_timer1.duration + worker1_timer2.duration,
+        )
 
-        self.assertEqual(report[self.worker2]['timers'][0].started, worker2_timer1.started)
-        self.assertEqual(report[self.worker2]['timers'][2].stopped, worker2_timer2.stopped)
-        self.assertEqual(report[self.worker2]['total'], worker2_timer1.duration + worker2_timer2.duration)
-        self.assertEqual(report[self.worker2]['total'], worker2_timer1.duration + worker2_timer2.duration)
+        self.assertEqual(
+            report[self.worker2]["timers"][0].started, worker2_timer1.started
+        )
+        self.assertEqual(
+            report[self.worker2]["timers"][2].stopped, worker2_timer2.stopped
+        )
+        self.assertEqual(
+            report[self.worker2]["total"],
+            worker2_timer1.duration + worker2_timer2.duration,
+        )
+        self.assertEqual(
+            report[self.worker2]["total"],
+            worker2_timer1.duration + worker2_timer2.duration,
+        )
 
-        self.assertEqual(report[self.worker3]['timers'][0].started, worker3_timer1.started)
-        self.assertEqual(report[self.worker3]['timers'][0].stopped, None)
-        self.assertEqual(report[self.worker3]['total'], worker3_timer1.running_duration)
-        self.assertEqual(report[self.worker3]['total'], worker3_timer1.running_duration)
+        self.assertEqual(
+            report[self.worker3]["timers"][0].started, worker3_timer1.started
+        )
+        self.assertEqual(report[self.worker3]["timers"][0].stopped, None)
+        self.assertEqual(report[self.worker3]["total"], worker3_timer1.running_duration)
+        self.assertEqual(report[self.worker3]["total"], worker3_timer1.running_duration)
         self.assertTrue(self.worker4 in report)

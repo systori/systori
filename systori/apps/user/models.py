@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import (
-    BaseUserManager, AbstractBaseUser, PermissionsMixin
+    BaseUserManager,
+    AbstractBaseUser,
+    PermissionsMixin,
 )
 from django.core.mail import send_mail
 from django.utils.translation import ugettext_lazy as _
@@ -16,7 +18,9 @@ class UserManager(BaseUserManager):
     def _create_user(self, email, password, is_superuser, **extra_fields):
         now = timezone.now()
         email = self.normalize_email(email)
-        user = self.model(email=email, is_superuser=is_superuser, date_joined=now, **extra_fields)
+        user = self.model(
+            email=email, is_superuser=is_superuser, date_joined=now, **extra_fields
+        )
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -30,28 +34,30 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
 
-    first_name = models.CharField(_('first name'), max_length=30, blank=False)
-    last_name = models.CharField(_('last name'), max_length=30, blank=True)
-    email = models.EmailField(_('email address'), unique=True, null=True, blank=True)
-    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-    language = models.CharField(_('language'), choices=settings.LANGUAGES, max_length=2, blank=True)
+    first_name = models.CharField(_("first name"), max_length=30, blank=False)
+    last_name = models.CharField(_("last name"), max_length=30, blank=True)
+    email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
+    date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
+    language = models.CharField(
+        _("language"), choices=settings.LANGUAGES, max_length=2, blank=True
+    )
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     class Meta:
-        verbose_name = _('user')
-        verbose_name_plural = _('users')
-        ordering = ('first_name',)
+        verbose_name = _("user")
+        verbose_name_plural = _("users")
+        ordering = ("first_name",)
 
     @property
     def is_verified(self):
         return EmailAddress.objects.filter(user=self, verified=True).exists()
 
     def get_full_name(self):
-        full_name = '%s %s' % (self.first_name, self.last_name)
+        full_name = "%s %s" % (self.first_name, self.last_name)
         return full_name.strip()
 
     def get_short_name(self):
@@ -61,4 +67,4 @@ class User(AbstractBaseUser, PermissionsMixin):
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
     def __str__(self):
-        return '{} <{}>'.format(self.get_full_name(), self.email)
+        return "{} <{}>".format(self.get_full_name(), self.email)

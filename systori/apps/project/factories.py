@@ -8,7 +8,6 @@ from ..task.factories import JobFactory
 
 
 class ProjectFactory(factory.django.DjangoModelFactory):
-
     class Meta:
         model = Project
 
@@ -21,7 +20,6 @@ class ProjectFactory(factory.django.DjangoModelFactory):
 
 
 class JobSiteFactory(factory.django.DjangoModelFactory):
-
     class Meta:
         model = JobSite
 
@@ -32,6 +30,5 @@ class JobSiteFactory(factory.django.DjangoModelFactory):
 
 
 class DailyPlanFactory(factory.django.DjangoModelFactory):
-
     class Meta:
         model = DailyPlan

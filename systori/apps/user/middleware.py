@@ -16,8 +16,8 @@ class SetLanguageMiddleware(MiddlewareMixin):
     """
 
     def process_request(self, request):
-        if request.META.get('HTTP_ACCEPT_LANGUAGE', '').startswith('en'):
-            del request.META['HTTP_ACCEPT_LANGUAGE']
+        if request.META.get("HTTP_ACCEPT_LANGUAGE", "").startswith("en"):
+            del request.META["HTTP_ACCEPT_LANGUAGE"]
 
         if request.user.is_authenticated:
             user = request.user

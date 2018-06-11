@@ -8,23 +8,20 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('timetracking', '0010_convert_user_to_access'),
-    ]
+    dependencies = [("timetracking", "0010_convert_user_to_access")]
 
     operations = [
-
         # Make 'user_access' not null now that it's been set.
-
         migrations.AlterField(
-            model_name='timer',
-            name='worker',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='timers', to='company.Worker'),
+            model_name="timer",
+            name="worker",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="timers",
+                to="company.Worker",
+            ),
         ),
-
         # Remove the 'user' based fields.
-
-        migrations.RemoveField('timer', 'user'),
-        migrations.RemoveField('timer', 'altered_by'),
-
+        migrations.RemoveField("timer", "user"),
+        migrations.RemoveField("timer", "altered_by"),
     ]

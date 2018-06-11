@@ -22,7 +22,10 @@ class TimerAPI(views.APIView):
         """ Start a timer """
         latlong = LatLongSerializer(data=request.data)
         latlong.is_valid(raise_exception=True)
-        lat, long = latlong.validated_data['latitude'], latlong.validated_data['longitude']
+        lat, long = (
+            latlong.validated_data["latitude"],
+            latlong.validated_data["longitude"],
+        )
         Timer.start(request.worker, starting_latitude=lat, starting_longitude=long)
         return Response()
 
@@ -32,12 +35,10 @@ class TimerAPI(views.APIView):
         timer = get_object_or_404(Timer.objects.running(worker=request.worker))
         latlong = LatLongSerializer(data=request.data)
         latlong.is_valid(raise_exception=True)
-        timer.ending_longitude = latlong.validated_data['longitude']
-        timer.ending_latitude = latlong.validated_data['latitude']
+        timer.ending_longitude = latlong.validated_data["longitude"]
+        timer.ending_latitude = latlong.validated_data["latitude"]
         timer.stop()
         return Response()
 
 
-urlpatterns = [
-    url(r'^timer/$', login_required(TimerAPI.as_view()), name='api.timer'),
-]
+urlpatterns = [url(r"^timer/$", login_required(TimerAPI.as_view()), name="api.timer")]

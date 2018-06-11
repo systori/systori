@@ -10,26 +10,40 @@ import tsvector_field
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('task', '0005_task_refactor'),
-    ]
+    dependencies = [("task", "0005_task_refactor")]
 
     operations = [
         migrations.AddField(
-            model_name='group',
-            name='search',
-            field=tsvector_field.SearchVectorField(columns=[tsvector_field.WeightedColumn('name', 'A'), tsvector_field.WeightedColumn('description', 'D')], language='german'),
+            model_name="group",
+            name="search",
+            field=tsvector_field.SearchVectorField(
+                columns=[
+                    tsvector_field.WeightedColumn("name", "A"),
+                    tsvector_field.WeightedColumn("description", "D"),
+                ],
+                language="german",
+            ),
         ),
-        RunInSchemas(tsvector_field.IndexSearchVector('group', 'search')),
+        RunInSchemas(tsvector_field.IndexSearchVector("group", "search")),
         migrations.AddField(
-            model_name='task',
-            name='search',
-            field=tsvector_field.SearchVectorField(columns=[tsvector_field.WeightedColumn('name', 'A'), tsvector_field.WeightedColumn('description', 'D')], language='german'),
+            model_name="task",
+            name="search",
+            field=tsvector_field.SearchVectorField(
+                columns=[
+                    tsvector_field.WeightedColumn("name", "A"),
+                    tsvector_field.WeightedColumn("description", "D"),
+                ],
+                language="german",
+            ),
         ),
-        RunInSchemas(tsvector_field.IndexSearchVector('task', 'search')),
+        RunInSchemas(tsvector_field.IndexSearchVector("task", "search")),
         migrations.AlterField(
-            model_name='job',
-            name='project',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='jobs', to='project.Project'),
+            model_name="job",
+            name="project",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="jobs",
+                to="project.Project",
+            ),
         ),
     ]

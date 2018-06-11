@@ -5,13 +5,8 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('company', '0010_auto_20170314_0153'),
-    ]
+    dependencies = [("company", "0010_auto_20170314_0153")]
 
     operations = [
-        migrations.RemoveField(
-            model_name='worker',
-            name='is_timetracking_enabled',
-        ),
+        migrations.RemoveField(model_name="worker", name="is_timetracking_enabled")
     ]

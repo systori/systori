@@ -4,14 +4,15 @@ from .models import Note
 
 
 class NoteForm(ModelForm):
-
     class Meta:
         model = Note
-        fields = 'text',
+        fields = ("text",)
         widgets = {
-            'text': Textarea(attrs={
-                'id': 'note-input',
-                'rows': '5',
-                'style': 'width: 100%; resize: none; border: 1px dotted grey;'
-            }),
+            "text": Textarea(
+                attrs={
+                    "id": "note-input",
+                    "rows": "5",
+                    "style": "width: 100%; resize: none; border: 1px dotted grey;",
+                }
+            )
         }

@@ -19,24 +19,31 @@ def render(refund, letterhead, format):
     with BytesIO() as buffer:
 
         font = FontManager(letterhead.font)
-        available_width, available_height, pagesize = get_available_width_height_and_pagesize(letterhead)
-        document_date = date_format(date(*map(int, refund['document_date'].split('-'))), use_l10n=True)
+        available_width, available_height, pagesize = get_available_width_height_and_pagesize(
+            letterhead
+        )
+        document_date = date_format(
+            date(*map(int, refund["document_date"].split("-"))), use_l10n=True
+        )
         doc = NumberedSystoriDocument(buffer, pagesize=pagesize, debug=DEBUG_DOCUMENT)
 
         flowables = [
-
             get_address_label(refund, font),
-
             get_address_label_spacer(refund),
-
-            heading_and_date(refund.get('title') or _("Refund"), document_date, font, available_width,
-                             debug=DEBUG_DOCUMENT),
-
+            heading_and_date(
+                refund.get("title") or _("Refund"),
+                document_date,
+                font,
+                available_width,
+                debug=DEBUG_DOCUMENT,
+            ),
         ]
-        if format == 'print':
+        if format == "print":
             doc.build(flowables, NumberedCanvas, letterhead)
         else:
-            doc.build(flowables, NumberedLetterheadCanvas.factory(letterhead), letterhead)
+            doc.build(
+                flowables, NumberedLetterheadCanvas.factory(letterhead), letterhead
+            )
 
         return buffer.getvalue()
 

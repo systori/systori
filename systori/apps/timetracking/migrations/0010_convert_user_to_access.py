@@ -8,6 +8,7 @@ import django.db.models.deletion
 
 def convert_user_to_worker(apps, schema_editor):
     from systori.apps.company.models import Company as Company
+
     Timer = apps.get_model("timetracking", "Timer")
     Worker = apps.get_model("company", "Worker")
     for company in Company.objects.all():
@@ -21,22 +22,22 @@ def convert_user_to_worker(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('company', '0004_worker'),
-        ('timetracking', '0009_auto_20160823_1929'),
+        ("company", "0004_worker"),
+        ("timetracking", "0009_auto_20160823_1929"),
     ]
 
     operations = [
-
         # Create the 'access' based fields.
-
         migrations.AddField(
-            model_name='timer',
-            name='worker',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='timers', to='company.Worker'),
+            model_name="timer",
+            name="worker",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="timers",
+                to="company.Worker",
+            ),
         ),
-
         # Lookup and set the 'access' fields.
-
         migrations.RunPython(convert_user_to_worker),
-
     ]

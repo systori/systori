@@ -13,9 +13,9 @@ def _transaction_sort_key(txn):
     :return: sort key
     """
     txn_date = txn.transacted_on.isoformat()[:10]
-    type_weight = '0' if txn.transaction_type == txn.PAYMENT else '1'
+    type_weight = "0" if txn.transaction_type == txn.PAYMENT else "1"
     txn_id = str(txn.id)  # sort multiple invoices on same day by primary key id
-    return txn_date+type_weight+txn_id
+    return txn_date + type_weight + txn_id
 
 
 def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
@@ -26,11 +26,12 @@ def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
     :return: serializable data structure
     """
 
-    txns_query = Transaction.objects \
-        .filter(entries__job__in=jobs) \
-        .prefetch_related('entries__job__project') \
-        .prefetch_related('entries__account') \
+    txns_query = (
+        Transaction.objects.filter(entries__job__in=jobs)
+        .prefetch_related("entries__job__project")
+        .prefetch_related("entries__account")
         .distinct()
+    )
 
     if transacted_on_or_before:
         txns_query = txns_query.filter(transacted_on__lte=transacted_on_or_before)
@@ -39,24 +40,24 @@ def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
     transactions.sort(key=_transaction_sort_key)
 
     report = {
-        'invoiced': Amount.zero(),
-        'paid': Amount.zero(),
-        'payments': [],
-        'job_debits': {},
-        'unpaid': Amount.zero(),
-        'debit': Amount.zero()
+        "invoiced": Amount.zero(),
+        "paid": Amount.zero(),
+        "payments": [],
+        "job_debits": {},
+        "unpaid": Amount.zero(),
+        "debit": Amount.zero(),
     }
 
     for txn in transactions:
 
         txn_dict = {
-            'id': txn.id,
-            'type': txn.transaction_type,
-            'date': txn.transacted_on,
-            'payment': Amount.zero(),
-            'discount': Amount.zero(),
-            'total': Amount.zero(),
-            'jobs': {}
+            "id": txn.id,
+            "type": txn.transaction_type,
+            "date": txn.transacted_on,
+            "payment": Amount.zero(),
+            "discount": Amount.zero(),
+            "total": Amount.zero(),
+            "jobs": {},
         }
 
         job_debits = {}
@@ -71,88 +72,116 @@ def create_invoice_report(invoice_txn, jobs, transacted_on_or_before=None):
                 # skip jobs we're not interested in
                 continue
 
-            job_dict = txn_dict['jobs'].setdefault(entry.job.id, {
-                'job.id': entry.job.id,
-                'code': entry.job.code,
-                'name': entry.job.name,
-                'payment': Amount.zero(),
-                'discount': Amount.zero(),
-                'total': Amount.zero()
-            })
+            job_dict = txn_dict["jobs"].setdefault(
+                entry.job.id,
+                {
+                    "job.id": entry.job.id,
+                    "code": entry.job.code,
+                    "name": entry.job.name,
+                    "payment": Amount.zero(),
+                    "discount": Amount.zero(),
+                    "total": Amount.zero(),
+                },
+            )
 
-            job_debit = job_debits.setdefault(entry.job.id, {
-                'transaction_type': txn.transaction_type,
-                'entry_type': None,
-                'date': txn.transacted_on,
-                'amount': Amount.zero()
-            })
+            job_debit = job_debits.setdefault(
+                entry.job.id,
+                {
+                    "transaction_type": txn.transaction_type,
+                    "entry_type": None,
+                    "date": txn.transacted_on,
+                    "amount": Amount.zero(),
+                },
+            )
 
             if entry.entry_type == entry.PAYMENT:
-                txn_dict['payment'] += entry.amount
-                job_dict['payment'] += entry.amount
+                txn_dict["payment"] += entry.amount
+                job_dict["payment"] += entry.amount
 
             elif entry.entry_type == entry.DISCOUNT:
-                txn_dict['discount'] += entry.amount
-                job_dict['discount'] += entry.amount
+                txn_dict["discount"] += entry.amount
+                job_dict["discount"] += entry.amount
 
             if entry.entry_type in (entry.PAYMENT, entry.DISCOUNT):
-                txn_dict['total'] += entry.amount
-                job_dict['total'] += entry.amount
+                txn_dict["total"] += entry.amount
+                job_dict["total"] += entry.amount
 
             if entry.entry_type in entry.TYPES_FOR_INVOICED_SUM:
-                report['invoiced'] += entry.amount
+                report["invoiced"] += entry.amount
                 if txn.id == invoice_txn.id:
-                    report['debit'] += entry.amount
-                assert job_debit['entry_type'] in (None, entry.entry_type, entry.ADJUSTMENT)
-                job_debit['entry_type'] = entry.entry_type
-                job_debit['amount'] += entry.amount
+                    report["debit"] += entry.amount
+                assert job_debit["entry_type"] in (
+                    None,
+                    entry.entry_type,
+                    entry.ADJUSTMENT,
+                )
+                job_debit["entry_type"] = entry.entry_type
+                job_debit["amount"] += entry.amount
 
             if entry.entry_type in entry.TYPES_FOR_PAID_SUM:
-                report['paid'] += entry.amount
+                report["paid"] += entry.amount
 
         if txn.transaction_type == txn.PAYMENT:
-            report['payments'].append(txn_dict)
+            report["payments"].append(txn_dict)
 
         for job_id, debit_dict in job_debits.items():
-            if debit_dict['amount'].gross != 0:
-                debits = report['job_debits'].setdefault(job_id, [])
+            if debit_dict["amount"].gross != 0:
+                debits = report["job_debits"].setdefault(job_id, [])
                 debits.append(debit_dict)
 
-    total_unpaid_balance = report['invoiced'] + report['paid']  # report['paid'] is a negative number
+    total_unpaid_balance = (
+        report["invoiced"] + report["paid"]
+    )  # report['paid'] is a negative number
 
-    report['unpaid'] = Amount.zero()
-    if total_unpaid_balance.gross > report['debit'].gross:
+    report["unpaid"] = Amount.zero()
+    if total_unpaid_balance.gross > report["debit"].gross:
         # There is more owed on the account than this invoice is trying to solicit.
         # This means we need to show the difference between what is being sought and what is owed
         # as unpaid amount above the debit line on invoice.
-        report['unpaid'] = report['debit'] - total_unpaid_balance  # big from small to get negative number
+        report["unpaid"] = (
+            report["debit"] - total_unpaid_balance
+        )  # big from small to get negative number
 
     return report
 
 
-def create_invoice_table(report, cols=('net', 'tax', 'gross')):
+def create_invoice_table(report, cols=("net", "tax", "gross")):
     t = []
-    t += [('',)+cols+(None,)]
-    t += [('progress',)+tuple(getattr(report['invoiced'], col) for col in cols)+(None,)]
+    t += [("",) + cols + (None,)]
+    t += [
+        ("progress",)
+        + tuple(getattr(report["invoiced"], col) for col in cols)
+        + (None,)
+    ]
 
-    for txn in report['payments']:
-        t += [(txn['type'],)+tuple(getattr(txn['payment'], col) for col in cols)+(txn,)]
-        if txn['discount'].gross != 0:
-            t += [('discount',)+tuple(getattr(txn['discount'], col) for col in cols)+(txn,)]
+    for txn in report["payments"]:
+        t += [
+            (txn["type"],)
+            + tuple(getattr(txn["payment"], col) for col in cols)
+            + (txn,)
+        ]
+        if txn["discount"].gross != 0:
+            t += [
+                ("discount",)
+                + tuple(getattr(txn["discount"], col) for col in cols)
+                + (txn,)
+            ]
 
-    if report['unpaid'].gross != 0:
-        t += [('unpaid',)+tuple(getattr(report['unpaid'], col) for col in cols)+(None,)]
+    if report["unpaid"].gross != 0:
+        t += [
+            ("unpaid",)
+            + tuple(getattr(report["unpaid"], col) for col in cols)
+            + (None,)
+        ]
 
-    t += [('debit',)+tuple(getattr(report['debit'], col) for col in cols)+(None,)]
+    t += [("debit",) + tuple(getattr(report["debit"], col) for col in cols) + (None,)]
 
     return t
 
 
 def create_adjustment_report(txn):
 
-    adjustment = {
-        'txn': txn
-    }
+    adjustment = {"txn": txn}
 
     jobs = {}
 
@@ -161,14 +190,17 @@ def create_adjustment_report(txn):
         if not entry.account.is_receivable:
             continue
 
-        job = jobs.setdefault(entry.job.id, {
-            'job.id': entry.job.id,
-            'code': entry.job.code,
-            'name': entry.job.name,
-            'amount': Amount.zero()
-        })
+        job = jobs.setdefault(
+            entry.job.id,
+            {
+                "job.id": entry.job.id,
+                "code": entry.job.code,
+                "name": entry.job.name,
+                "amount": Amount.zero(),
+            },
+        )
 
-        job['amount'] += entry.amount
+        job["amount"] += entry.amount
 
     return adjustment
 
@@ -179,9 +211,7 @@ def create_adjustment_table(report):
 
 def create_refund_report(txn):
 
-    refund = {
-        'txn': txn
-    }
+    refund = {"txn": txn}
 
     jobs = {}
 
@@ -190,13 +220,16 @@ def create_refund_report(txn):
         if not entry.account.is_receivable:
             continue
 
-        job = jobs.setdefault(entry.job.id, {
-            'job.id': entry.job.id,
-            'code': entry.job.code,
-            'name': entry.job.name,
-            'amount': Amount.zero()
-        })
+        job = jobs.setdefault(
+            entry.job.id,
+            {
+                "job.id": entry.job.id,
+                "code": entry.job.code,
+                "name": entry.job.name,
+                "amount": Amount.zero(),
+            },
+        )
 
-        job['amount'] += entry.amount
+        job["amount"] += entry.amount
 
     return refund

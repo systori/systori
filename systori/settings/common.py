@@ -1,30 +1,30 @@
 import os
 import sys
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'abc123')
-GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_API_KEY', '')
+SECRET_KEY = os.environ.get("SECRET_KEY", "abc123")
+GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
 
 DEFAULT_COUNTRY = "Deutschland"
 
-BROKER_URL = 'amqp://guest:guest@192.168.0.99:5672//'
+BROKER_URL = "amqp://guest:guest@192.168.0.99:5672//"
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 
 # Django Settings
 
-AUTH_USER_MODEL = 'user.User'
-LOGOUT_REDIRECT_URL = '/'
-LOGIN_REDIRECT_URL = '/'
+AUTH_USER_MODEL = "user.User"
+LOGOUT_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/"
 
 BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, '../'))
-PROJECTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, '../'))
+ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, "../"))
+PROJECTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, "../"))
 
 SITE_ID = 1
 
-EMAIL_HOST = 'mail'
-DEFAULT_FROM_EMAIL = 'Systori <support@systori.com>'
+EMAIL_HOST = "mail"
+DEFAULT_FROM_EMAIL = "Systori <support@systori.com>"
 
 
 # Quick-start development settings - unsuitable for production
@@ -32,137 +32,125 @@ DEFAULT_FROM_EMAIL = 'Systori <support@systori.com>'
 
 DEBUG = False
 
-TESTING = 'test' in sys.argv
+TESTING = "test" in sys.argv
 
 ALLOWED_HOSTS = []
 
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.sites',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.humanize',
-    'django.contrib.postgres',
-    'django_dartium',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'bootstrap',
-    'postgres_schema',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'systori.lib',
-    'systori.apps.user',
-    'systori.apps.main',
-    'systori.apps.company',
-    'systori.apps.project',
-    'systori.apps.directory',
-    'systori.apps.task',
-    'systori.apps.document',
-    'systori.apps.field',
-    'systori.apps.equipment',
-    'systori.apps.accounting',
-    'systori.apps.timetracking',
-    'systori.apps.inventory',
+    "django.contrib.auth",
+    "django.contrib.sites",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.humanize",
+    "django.contrib.postgres",
+    "django_dartium",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "bootstrap",
+    "postgres_schema",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "systori.lib",
+    "systori.apps.user",
+    "systori.apps.main",
+    "systori.apps.company",
+    "systori.apps.project",
+    "systori.apps.directory",
+    "systori.apps.task",
+    "systori.apps.document",
+    "systori.apps.field",
+    "systori.apps.equipment",
+    "systori.apps.accounting",
+    "systori.apps.timetracking",
+    "systori.apps.inventory",
 )
 
-POSTGRES_SCHEMA_MODEL = 'company.Company'
+POSTGRES_SCHEMA_MODEL = "company.Company"
 POSTGRES_SCHEMA_TENANTS = (
-    'company.Labor',
-    'main',
-    'project',
-    'directory',
-    'task',
-    'document',
-    'field',
-    'equipment',
-    'accounting',
-    'timetracking',
-    'inventory',
+    "company.Labor",
+    "main",
+    "project",
+    "directory",
+    "task",
+    "document",
+    "field",
+    "equipment",
+    "accounting",
+    "timetracking",
+    "inventory",
 )
 
 MIDDLEWARE = (
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'systori.middleware.mobile.MobileDetectionMiddleware',
-    'django_dartium.middleware.DartiumDetectionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'systori.apps.user.middleware.SetLanguageMiddleware',
-    'systori.middleware.mobile.SetFlavourMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'systori.apps.company.middleware.CompanyMiddleware',
-    'systori.apps.company.middleware.WorkerMiddleware',
-    'systori.apps.project.middleware.ProjectMiddleware',
-    'systori.apps.field.middleware.FieldMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "systori.middleware.mobile.MobileDetectionMiddleware",
+    "django_dartium.middleware.DartiumDetectionMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "systori.apps.user.middleware.SetLanguageMiddleware",
+    "systori.middleware.mobile.SetFlavourMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "systori.apps.company.middleware.CompanyMiddleware",
+    "systori.apps.company.middleware.WorkerMiddleware",
+    "systori.apps.project.middleware.ProjectMiddleware",
+    "systori.apps.field.middleware.FieldMiddleware",
     # 'systori.lib.middleware.StatsMiddleware', #  enable to get timings for a request cycle
 )
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),
-        ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.i18n',
-                'django.template.context_processors.media',
-                'django.template.context_processors.static',
-                'django.template.context_processors.tz',
-                'django.template.context_processors.request',
-                'django.contrib.messages.context_processors.messages',
-            ],
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
+                "django.template.context_processors.static",
+                "django.template.context_processors.tz",
+                "django.template.context_processors.request",
+                "django.contrib.messages.context_processors.messages",
+            ]
         },
-    },
+    }
 ]
 
-ROOT_URLCONF = 'systori.urls'
+ROOT_URLCONF = "systori.urls"
 
-WSGI_APPLICATION = 'systori.wsgi.application'
+WSGI_APPLICATION = "systori.wsgi.application"
 
-FIXTURE_DIRS = (
-    os.path.join(ROOT_DIR, 'fixtures'),
-)
+FIXTURE_DIRS = (os.path.join(ROOT_DIR, "fixtures"),)
 
-LOCALE_PATHS = (
-    os.path.join(BASE_DIR, 'locale'),
-)
+LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
 
-FORMAT_MODULE_PATH = (
-    'systori.locale',
-)
+FORMAT_MODULE_PATH = ("systori.locale",)
 
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'systori.db',
-    }
-}
+DATABASES = {"default": {"ENGINE": "systori.db"}}
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 )
 
 # DRF Authentication settings
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     )
 }
 
@@ -179,7 +167,7 @@ ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_SIGNUP_FORM_CLASS = "systori.apps.user.forms.SignupForm"
 SOCIALACCOUNT_ADAPTER = "systori.apps.user.account.SocialAccountAdapter"
 
@@ -191,37 +179,37 @@ if TESTING:
     GEOCODE_ADDRESSES = False
 
     # in Django 2.1 this will be the default:
-    TEMPLATES[0]['OPTIONS']['debug'] = True
+    TEMPLATES[0]["OPTIONS"]["debug"] = True
 
     class DisableMigrations:
         def __contains__(self, item):
             return True
+
         def __getitem__(self, item):
             return None
+
     MIGRATION_MODULES = DisableMigrations()
 
-    PASSWORD_HASHERS = [
-        'django.contrib.auth.hashers.MD5PasswordHasher',
-    ]
+    PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 
-LANGUAGE_CODE = 'de'
+LANGUAGE_CODE = "de"
 
 gettext_noop = lambda s: s
 LANGUAGES = (
-    ('de', gettext_noop('Deutsch')),
-    ('en', gettext_noop('English')),
+    ("de", gettext_noop("Deutsch")),
+    ("en", gettext_noop("English")),
     #    ('uk', gettext_noop('Українською')),
     #    ('ru', gettext_noop('По-русски')),
 )
 
 # used by postgresql full text indexing
 # TODO: refactor to use be configurable per-Company schema
-SEARCH_VECTOR_LANGUAGE = 'german'
+SEARCH_VECTOR_LANGUAGE = "german"
 
-TIME_ZONE = 'Europe/Berlin'
+TIME_ZONE = "Europe/Berlin"
 
 USE_I18N = True
 
@@ -241,24 +229,24 @@ USE_THOUSAND_SEPARATOR = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 # this is where files are copied when running ./manage.py collectstatic
-STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, '..', 'static'))
-STATIC_URL = '/static/'
+STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, "..", "static"))
+STATIC_URL = "/static/"
 
-MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, '..', 'media'))
-MEDIA_URL = ''
+MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, "..", "media"))
+MEDIA_URL = ""
 
 STATICFILES_DIRS = (
-    ('js', 'systori/static/js'),
-    ('css', 'systori/static/css'),
-    ('img', 'systori/static/img'),
-    ('fonts', 'systori/static/fonts'),
-    ('dart/build', 'systori/dart/build/web'),
+    ("js", "systori/static/js"),
+    ("css", "systori/static/css"),
+    ("img", "systori/static/img"),
+    ("fonts", "systori/static/fonts"),
+    ("dart/build", "systori/dart/build/web"),
 )
 
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
 
 # whitenoise with brotlipy staticfiles compression and caching
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

@@ -4,7 +4,8 @@ from tsvector_field import schema as tsvector_schema
 
 
 class DatabaseWrapper(base.DatabaseWrapper):
-    SchemaEditorClass = type('DatabaseSchemaEditor', (
-        postgres_schema.DatabaseSchemaEditor,
-        tsvector_schema.DatabaseSchemaEditor,
-    ), {})
+    SchemaEditorClass = type(
+        "DatabaseSchemaEditor",
+        (postgres_schema.DatabaseSchemaEditor, tsvector_schema.DatabaseSchemaEditor),
+        {},
+    )

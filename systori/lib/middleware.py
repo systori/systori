@@ -8,5 +8,5 @@ class StatsMiddleware(MiddlewareMixin):
 
     def process_response(self, request, response):
         total = time.time() - request.start_time
-        print(f'cycle took {total}')
+        print(f"cycle took {total}")
         return response

@@ -13,28 +13,26 @@ def delete_orphan_payments(apps, schema_editor):
     for company in Company.objects.all():
         company.activate()
 
-        txns = Transaction.objects.\
-                filter(transaction_type=Transaction.PAYMENT).\
-                prefetch_related('payment')
+        txns = Transaction.objects.filter(
+            transaction_type=Transaction.PAYMENT
+        ).prefetch_related("payment")
 
         for txn in txns.all():
             try:
                 txn.payment
             except Payment.DoesNotExist:
                 print(company.schema, txn.recorded_on)
-                print('\t', 'entry count:', txn.entries.count())
+                print("\t", "entry count:", txn.entries.count())
                 for entry in txn.entries.all():
                     if entry.account.is_receivable:
-                        print('\t', entry.account.job.project.name, entry.account.job.name)
+                        print(
+                            "\t", entry.account.job.project.name, entry.account.job.name
+                        )
                 txn.delete()
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('accounting', '0003_added_value_fields'),
-    ]
+    dependencies = [("accounting", "0003_added_value_fields")]
 
-    operations = [
-        migrations.RunPython(delete_orphan_payments)
-    ]
+    operations = [migrations.RunPython(delete_orphan_payments)]

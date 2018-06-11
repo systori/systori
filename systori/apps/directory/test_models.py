@@ -22,7 +22,11 @@ class ContactProjectTests(TestCase):
         self.assertEquals(0, len(self.project.project_contacts.all()))
 
     def test_customer_association(self):
-        ProjectContact.objects.create(project=self.project, contact=self.contact, association=ProjectContact.CUSTOMER)
+        ProjectContact.objects.create(
+            project=self.project,
+            contact=self.contact,
+            association=ProjectContact.CUSTOMER,
+        )
         self.assertEquals(1, len(self.contact.projects.all()))
         self.assertEquals(1, len(self.project.contacts.all()))
         pc = ProjectContact.objects.get(project=self.project)
@@ -34,26 +38,42 @@ class BillableContactTests(TestCase):
         self.company = Company.objects.create(schema="test", name="Test")
         self.company.activate()
         self.project = Project.objects.create(name="my project")
-        self.pc1 = ProjectContact.objects.create(project=self.project, contact=
-        Contact.objects.create(first_name="A 1", last_name="B 1"))
-        self.pc2 = ProjectContact.objects.create(project=self.project, contact=
-        Contact.objects.create(first_name="A 2", last_name="B 2"))
+        self.pc1 = ProjectContact.objects.create(
+            project=self.project,
+            contact=Contact.objects.create(first_name="A 1", last_name="B 1"),
+        )
+        self.pc2 = ProjectContact.objects.create(
+            project=self.project,
+            contact=Contact.objects.create(first_name="A 2", last_name="B 2"),
+        )
 
     def test_no_billable_set(self):
-        self.assertEqual(0, self.project.project_contacts.filter(is_billable=True).count())
+        self.assertEqual(
+            0, self.project.project_contacts.filter(is_billable=True).count()
+        )
 
     def test_billable_set(self):
         self.pc1.is_billable = True
         self.pc1.save()
-        self.assertEqual(1, self.project.project_contacts.filter(is_billable=True).count())
+        self.assertEqual(
+            1, self.project.project_contacts.filter(is_billable=True).count()
+        )
 
     def test_only_one_contact_can_be_billable(self):
         self.pc1.is_billable = True
         self.pc1.save()
-        self.assertEqual(1, self.project.project_contacts.filter(is_billable=True).count())
-        self.assertEqual(self.pc1, self.project.project_contacts.filter(is_billable=True).get())
+        self.assertEqual(
+            1, self.project.project_contacts.filter(is_billable=True).count()
+        )
+        self.assertEqual(
+            self.pc1, self.project.project_contacts.filter(is_billable=True).get()
+        )
 
         self.pc2.is_billable = True
         self.pc2.save()
-        self.assertEqual(1, self.project.project_contacts.filter(is_billable=True).count())
-        self.assertEqual(self.pc2, self.project.project_contacts.filter(is_billable=True).get())
+        self.assertEqual(
+            1, self.project.project_contacts.filter(is_billable=True).count()
+        )
+        self.assertEqual(
+            self.pc2, self.project.project_contacts.filter(is_billable=True).get()
+        )

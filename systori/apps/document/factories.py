@@ -18,21 +18,19 @@ class DocumentTemplateFactory(factory.django.DjangoModelFactory):
 
 
 class ProposalFactory(factory.django.DjangoModelFactory):
-
     class Meta:
         model = Proposal
 
 
 class InvoiceFactory(factory.django.DjangoModelFactory):
 
-    json = {'debit': Amount.zero()}
+    json = {"debit": Amount.zero()}
 
     class Meta:
         model = Invoice
 
 
 class DocumentSettingsFactory(factory.django.DjangoModelFactory):
-
     class Meta:
         model = DocumentSettings
 
@@ -40,7 +38,9 @@ class DocumentSettingsFactory(factory.django.DjangoModelFactory):
 class LetterheadFactory(factory.django.DjangoModelFactory):
 
     name = fuzzy.FuzzyText(length=15)
-    letterhead_pdf = os.path.join(settings.BASE_DIR, 'apps/document/test_data/letterhead.pdf')
+    letterhead_pdf = os.path.join(
+        settings.BASE_DIR, "apps/document/test_data/letterhead.pdf"
+    )
 
     class Meta:
         model = Letterhead
@@ -49,7 +49,7 @@ class LetterheadFactory(factory.django.DjangoModelFactory):
     def with_settings(self: Letterhead, create, extracted, **kwargs):
         if create and extracted:
             DocumentSettingsFactory(
-                language='de',
+                language="de",
                 evidence_letterhead=self,
                 proposal_letterhead=self,
                 invoice_letterhead=self,

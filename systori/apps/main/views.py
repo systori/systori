@@ -14,13 +14,15 @@ class OfficeDashboard(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['job_sites'] = JobSite.objects \
-            .select_related('project') \
-            .exclude(project__phase=Project.WARRANTY) \
-            .exclude(project__phase=Project.FINISHED) \
-            .exclude(latitude=None).exclude(longitude=None) \
+        context["job_sites"] = (
+            JobSite.objects.select_related("project")
+            .exclude(project__phase=Project.WARRANTY)
+            .exclude(project__phase=Project.FINISHED)
+            .exclude(latitude=None)
+            .exclude(longitude=None)
             .all()
-        context['GOOGLE_MAPS_API_KEY'] = settings.GOOGLE_MAPS_API_KEY
+        )
+        context["GOOGLE_MAPS_API_KEY"] = settings.GOOGLE_MAPS_API_KEY
         return context
 
 
@@ -28,14 +30,14 @@ class IndexView(View):
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             if not request.company:
-                return HttpResponseRedirect(reverse('companies'))
-            if get_flavour() == 'full' and request.worker.has_staff:
+                return HttpResponseRedirect(reverse("companies"))
+            if get_flavour() == "full" and request.worker.has_staff:
                 view = OfficeDashboard.as_view()
             else:
                 view = FieldDashboard.as_view()
             return view(request, *args, **kwargs)
         else:
-            return HttpResponseRedirect(reverse('account_login'))
+            return HttpResponseRedirect(reverse("account_login"))
 
 
 def get_temporal_location(selected_day):
@@ -55,28 +57,39 @@ class DayBasedOverviewView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DayBasedOverviewView, self).get_context_data(**kwargs)
 
-        selected_day = date(*map(int, kwargs['selected_day'].split('-'))) if kwargs['selected_day'] else date.today()
+        selected_day = (
+            date(*map(int, kwargs["selected_day"].split("-")))
+            if kwargs["selected_day"]
+            else date.today()
+        )
 
-        context['today'] = date.today()
-        context['previous_day'] = selected_day - timedelta(days=1)
-        context['next_day'] = selected_day + timedelta(days=1)
+        context["today"] = date.today()
+        context["previous_day"] = selected_day - timedelta(days=1)
+        context["next_day"] = selected_day + timedelta(days=1)
 
-        context['previous_day_url'] = reverse('day_based_overview', args=[context['previous_day'].isoformat()])
-        context['today_url'] = reverse('day_based_overview', args=[date.today().isoformat()])
-        context['next_day_url'] = reverse('day_based_overview', args=[context['next_day'].isoformat()])
+        context["previous_day_url"] = reverse(
+            "day_based_overview", args=[context["previous_day"].isoformat()]
+        )
+        context["today_url"] = reverse(
+            "day_based_overview", args=[date.today().isoformat()]
+        )
+        context["next_day_url"] = reverse(
+            "day_based_overview", args=[context["next_day"].isoformat()]
+        )
 
-        context['selected_day'] = selected_day
-        context['selected_plans'] = []
-        plans = DailyPlan.objects.\
-            prefetch_related('jobsite__project').\
-            prefetch_related('equipment').\
-            filter(day=selected_day).\
-            order_by('jobsite__project_id')
+        context["selected_day"] = selected_day
+        context["selected_plans"] = []
+        plans = (
+            DailyPlan.objects.prefetch_related("jobsite__project")
+            .prefetch_related("equipment")
+            .filter(day=selected_day)
+            .order_by("jobsite__project_id")
+        )
         for plan in plans:
-            context['selected_plans'].append(
-                (plan, plan.workers.order_by('user__first_name').all())
+            context["selected_plans"].append(
+                (plan, plan.workers.order_by("user__first_name").all())
             )
-        context['temporal_location'] = get_temporal_location(selected_day)
+        context["temporal_location"] = get_temporal_location(selected_day)
 
         return context
 
@@ -84,26 +97,26 @@ class DayBasedOverviewView(TemplateView):
 class NotesDashboard(ListView):
     template_name = "main/notes.html"
     model = Note
-    ordering = ['-created']
+    ordering = ["-created"]
 
 
 class NoteUpdateView(UpdateView):
-    template_name = 'main/note_detail.html'
+    template_name = "main/note_detail.html"
     model = Note
-    fields = ['text']
+    fields = ["text"]
 
     def get_success_url(self):
-        if 'success_url' in self.kwargs:
-            return self.kwargs['success_url']
+        if "success_url" in self.kwargs:
+            return self.kwargs["success_url"]
         else:
-            return reverse('note', kwargs={'pk': self.object.pk})
+            return reverse("note", kwargs={"pk": self.object.pk})
 
 
 class NoteDeleteView(DeleteView):
     model = Note
 
     def get_success_url(self):
-        if 'success_url' in self.kwargs:
-            return self.kwargs['success_url']
+        if "success_url" in self.kwargs:
+            return self.kwargs["success_url"]
         else:
-            return reverse('notes')
+            return reverse("notes")

@@ -8,4 +8,3 @@ class NoteFactory(factory.django.DjangoModelFactory):
         model = Note
 
     text = fuzzy.FuzzyText(length=15)
-

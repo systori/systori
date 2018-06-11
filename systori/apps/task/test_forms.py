@@ -13,75 +13,67 @@ from .forms import *
 
 
 class JobFormTest(TestCase):
-
     def setUp(self):
         self.company = CompanyFactory()  # type: Company
         self.project = ProjectFactory()  # type: Project
 
     def test_required_field_validation(self):
-        activate('en')
+        activate("en")
 
         form = JobTemplateCreateForm(data={})
         self.assertFalse(form.is_valid())
-        self.assertEqual({
-            'name': ['This field is required.'],
-        }, form.errors)
+        self.assertEqual({"name": ["This field is required."]}, form.errors)
 
         form = JobCreateForm(data={})
         self.assertFalse(form.is_valid())
-        self.assertEqual({
-            'name': ['This field is required.'],
-        }, form.errors)
+        self.assertEqual({"name": ["This field is required."]}, form.errors)
 
     def test_save(self):
 
-        form = JobTemplateCreateForm(data={
-            'name': 'job tpl',
-            'description': 'sample job description'
-        }, instance=Job(project=Project.objects.template().get()))
+        form = JobTemplateCreateForm(
+            data={"name": "job tpl", "description": "sample job description"},
+            instance=Job(project=Project.objects.template().get()),
+        )
         self.assertTrue(form.is_valid())
         template = form.save()
 
-        GroupFactory(parent=template, name='group template')
+        GroupFactory(parent=template, name="group template")
 
         self.assertEqual(
-            template.name,
-            list(JobCreateForm().fields['job_template'].choices)[1][1])
+            template.name, list(JobCreateForm().fields["job_template"].choices)[1][1]
+        )
 
         # Using Template
-        form = JobCreateForm(data={
-            'name': 'new job',
-            'job_template': template.pk
-        }, instance=Job(project=self.project))
+        form = JobCreateForm(
+            data={"name": "new job", "job_template": template.pk},
+            instance=Job(project=self.project),
+        )
         self.assertTrue(form.is_valid())
         new_job = form.save()
-        self.assertEquals('group template', new_job.groups.first().name)
+        self.assertEquals("group template", new_job.groups.first().name)
 
         # Not Using Template
-        form = JobCreateForm(data={
-            'name': 'new job 2',
-        }, instance=Job(project=self.project))
+        form = JobCreateForm(
+            data={"name": "new job 2"}, instance=Job(project=self.project)
+        )
         self.assertTrue(form.is_valid())
         new_job = form.save()
         self.assertEquals(0, new_job.groups.count())
 
         job = Job.objects.get(id=new_job.id)
-        self.assertEquals('02', job.code)
+        self.assertEquals("02", job.code)
 
 
 class JobImportTest(TestCase):
-
     def setUp(self):
         CompanyFactory()
 
     def test_import_add_jobs(self):
         project = ProjectFactory(with_job=True)
         job = project.jobs.get()
-        path = get_test_data_path('25144280.x83')
+        path = get_test_data_path("25144280.x83")
         form = JobImportForm(
-            project=project,
-            data={},
-            files={'file': File(path.open())}
+            project=project, data={}, files={"file": File(path.open())}
         )
         self.assertTrue(form.is_valid())
         self.assertEqual(project.jobs.count(), 1)

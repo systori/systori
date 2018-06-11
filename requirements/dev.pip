@@ -1,4 +1,6 @@
 -r app.pip
 -r test.pip
+black
 django-debug-toolbar
 django-extensions
+

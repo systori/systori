@@ -7,46 +7,43 @@ from systori.apps.user.factories import UserFactory
 
 
 class LanguageTestCase(SystoriTestCase):
-
     def setUp(self):
         super().setUp()
         self.user = UserFactory(company=CompanyFactory())
-        self.client.login(username=self.user.email, password='open sesame')
+        self.client.login(username=self.user.email, password="open sesame")
 
 
 class SetLanguageViewTest(LanguageTestCase):
-
     def test_post(self):
-        set_language_url = reverse('set_language')
+        set_language_url = reverse("set_language")
 
-        self.client.post(set_language_url, {'language': 'de'})
-        response = self.client.get('/')
-        self.assertEqual(response['Content-Language'], 'de')
+        self.client.post(set_language_url, {"language": "de"})
+        response = self.client.get("/")
+        self.assertEqual(response["Content-Language"], "de")
         user = type(self.user).objects.get(pk=self.user.pk)
-        self.assertEqual(user.language, 'de')
+        self.assertEqual(user.language, "de")
 
-        self.client.post(set_language_url, {'language': 'en'})
-        response = self.client.get('/')
-        self.assertEqual(response['Content-Language'], 'en')
+        self.client.post(set_language_url, {"language": "en"})
+        response = self.client.get("/")
+        self.assertEqual(response["Content-Language"], "en")
         user = type(self.user).objects.get(pk=self.user.pk)
-        self.assertEqual(user.language, 'en')
+        self.assertEqual(user.language, "en")
 
-        self.client.post(set_language_url, {'language': 'WRONG'})
-        response = self.client.get('/')
-        self.assertEqual(response['Content-Language'], 'en')
+        self.client.post(set_language_url, {"language": "WRONG"})
+        response = self.client.get("/")
+        self.assertEqual(response["Content-Language"], "en")
         user = type(self.user).objects.get(pk=self.user.pk)
-        self.assertEqual(user.language, 'en')
+        self.assertEqual(user.language, "en")
 
 
 class SetLanguageMiddlewareTest(LanguageTestCase):
-
     def test_process_request(self):
-        self.user.language = 'en'
+        self.user.language = "en"
         self.user.save()
-        response = self.client.get('/')
-        self.assertEqual(response['Content-Language'], 'en')
+        response = self.client.get("/")
+        self.assertEqual(response["Content-Language"], "en")
 
-        self.user.language = 'de'
+        self.user.language = "de"
         self.user.save()
-        response = self.client.get('/')
-        self.assertEqual(response['Content-Language'], 'de')
+        response = self.client.get("/")
+        self.assertEqual(response["Content-Language"], "de")

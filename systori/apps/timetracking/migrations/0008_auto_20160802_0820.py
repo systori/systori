@@ -7,29 +7,35 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('timetracking', '0007_auto_20160729_2200'),
-    ]
+    dependencies = [("timetracking", "0007_auto_20160729_2200")]
 
     operations = [
         migrations.AlterField(
-            model_name='timer',
-            name='end_latitude',
-            field=models.DecimalField(blank=True, decimal_places=8, max_digits=11, null=True),
+            model_name="timer",
+            name="end_latitude",
+            field=models.DecimalField(
+                blank=True, decimal_places=8, max_digits=11, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='timer',
-            name='end_longitude',
-            field=models.DecimalField(blank=True, decimal_places=8, max_digits=11, null=True),
+            model_name="timer",
+            name="end_longitude",
+            field=models.DecimalField(
+                blank=True, decimal_places=8, max_digits=11, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='timer',
-            name='start_latitude',
-            field=models.DecimalField(blank=True, decimal_places=8, max_digits=11, null=True),
+            model_name="timer",
+            name="start_latitude",
+            field=models.DecimalField(
+                blank=True, decimal_places=8, max_digits=11, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='timer',
-            name='start_longitude',
-            field=models.DecimalField(blank=True, decimal_places=8, max_digits=11, null=True),
+            model_name="timer",
+            name="start_longitude",
+            field=models.DecimalField(
+                blank=True, decimal_places=8, max_digits=11, null=True
+            ),
         ),
     ]

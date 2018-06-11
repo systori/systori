@@ -16,17 +16,19 @@ from ..task.models import Job, JobQuerySet
 
 
 def _job_annotation(type, inner):
-    return "SELECT {} FROM task_job WHERE task_job.project_id=project_project.id".format({
-        'bool': "COALESCE(BOOL_OR(({})), false)".format(inner),
-        'sum': "COALESCE(SUM(({})), 0)".format(inner),
-    }[type])
+    return "SELECT {} FROM task_job WHERE task_job.project_id=project_project.id".format(
+        {
+            "bool": "COALESCE(BOOL_OR(({})), false)".format(inner),
+            "sum": "COALESCE(SUM(({})), 0)".format(inner),
+        }[type]
+    )
 
 
 class ProjectQuerySet(models.QuerySet):
 
-    IS_BILLABLE_SQL = _job_annotation('bool', JobQuerySet.IS_BILLABLE_SQL)
-    ESTIMATE_SQL = _job_annotation('sum', JobQuerySet.ESTIMATE_SQL)
-    PROGRESS_SQL = _job_annotation('sum', JobQuerySet.PROGRESS_SQL)
+    IS_BILLABLE_SQL = _job_annotation("bool", JobQuerySet.IS_BILLABLE_SQL)
+    ESTIMATE_SQL = _job_annotation("sum", JobQuerySet.ESTIMATE_SQL)
+    PROGRESS_SQL = _job_annotation("sum", JobQuerySet.PROGRESS_SQL)
 
     def with_is_billable(self):
         return self.annotate(is_billable=RawSQL(self.IS_BILLABLE_SQL, []))
@@ -48,19 +50,19 @@ class ProjectQuerySet(models.QuerySet):
 
 
 class Project(models.Model):
-    name = models.CharField(_('Project Name'), max_length=512)
-    description = models.TextField(_('Project Description'), blank=True, null=True)
+    name = models.CharField(_("Project Name"), max_length=512)
+    description = models.TextField(_("Project Description"), blank=True, null=True)
     is_template = models.BooleanField(default=False)
-    structure = GAEBStructureField(_('Numbering Structure'), default="01.01.001")
+    structure = GAEBStructureField(_("Numbering Structure"), default="01.01.001")
 
-    notes = GenericRelation('main.Note')
+    notes = GenericRelation("main.Note")
 
     objects = ProjectQuerySet.as_manager()
 
     class Meta:
         verbose_name = _("Project")
         verbose_name_plural = _("Projects")
-        ordering = ['name']
+        ordering = ["name"]
 
     PROSPECTIVE = "prospective"
     TENDERING = "tendering"
@@ -71,13 +73,13 @@ class Project(models.Model):
     FINISHED = "finished"
 
     PHASE_CHOICES = (
-        (PROSPECTIVE, pgettext_lazy('phase', "Prospective")),
-        (TENDERING, pgettext_lazy('phase', "Tendering")),
-        (PLANNING, pgettext_lazy('phase', "Planning")),
-        (EXECUTING, pgettext_lazy('phase', "Executing")),
-        (SETTLEMENT, pgettext_lazy('phase', "Settlement")),
-        (WARRANTY, pgettext_lazy('phase', "Warranty")),
-        (FINISHED, pgettext_lazy('phase', "Finished"))
+        (PROSPECTIVE, pgettext_lazy("phase", "Prospective")),
+        (TENDERING, pgettext_lazy("phase", "Tendering")),
+        (PLANNING, pgettext_lazy("phase", "Planning")),
+        (EXECUTING, pgettext_lazy("phase", "Executing")),
+        (SETTLEMENT, pgettext_lazy("phase", "Settlement")),
+        (WARRANTY, pgettext_lazy("phase", "Warranty")),
+        (FINISHED, pgettext_lazy("phase", "Finished")),
     )
 
     # Floating phases support moving between each other relatively
@@ -172,7 +174,7 @@ class Project(models.Model):
         (ACTIVE, _("Active")),
         (PAUSED, _("Paused")),
         (DISPUTED, _("Disputed")),
-        (STOPPED, _("Stopped"))
+        (STOPPED, _("Stopped")),
     )
 
     state = FSMField(default=ACTIVE, choices=STATE_CHOICES)
@@ -213,16 +215,16 @@ class Project(models.Model):
 
     def get_absolute_url(self):
         if self.is_template:
-            return reverse('templates')
+            return reverse("templates")
         else:
-            return reverse('project.view', args=[self.id])
+            return reverse("project.view", args=[self.id])
 
     @property
     def is_billable(self):
-        if not hasattr(self, '_is_billable'):
+        if not hasattr(self, "_is_billable"):
             raise ValueError(
-                'Project instance created without using with_is_billable() annotation.'
-                'Hint: Project.objects.with_is_billable()'
+                "Project instance created without using with_is_billable() annotation."
+                "Hint: Project.objects.with_is_billable()"
             )
         return self._is_billable
 
@@ -232,10 +234,10 @@ class Project(models.Model):
 
     @property
     def estimate(self):
-        if not hasattr(self, '_estimate'):
+        if not hasattr(self, "_estimate"):
             raise ValueError(
-                'Project instance created without using with_estimate() annotation.'
-                'Hint: Project.objects.with_estimate() or Project.objects.with_totals()'
+                "Project instance created without using with_estimate() annotation."
+                "Hint: Project.objects.with_estimate() or Project.objects.with_totals()"
             )
         return self._estimate
 
@@ -245,10 +247,10 @@ class Project(models.Model):
 
     @property
     def progress(self):
-        if not hasattr(self, '_progress'):
+        if not hasattr(self, "_progress"):
             raise ValueError(
-                'Project instance created without using with_progress() annotation.'
-                'Hint: Project.objects.with_progress() or Project.objects.with_totals()'
+                "Project instance created without using with_progress() annotation."
+                "Hint: Project.objects.with_progress() or Project.objects.with_totals()"
             )
         return self._progress
 
@@ -293,19 +295,23 @@ class Project(models.Model):
 class JobSite(models.Model):
     """ A project can have one or more job sites. """
 
-    project = models.ForeignKey(Project, related_name="jobsites", on_delete=models.CASCADE)
-    name = models.CharField(_('Site Name'), max_length=512)
+    project = models.ForeignKey(
+        Project, related_name="jobsites", on_delete=models.CASCADE
+    )
+    name = models.CharField(_("Site Name"), max_length=512)
 
     address = models.CharField(_("Address"), max_length=512)
     city = models.CharField(_("City"), max_length=512)
     postal_code = models.CharField(_("Postal Code"), max_length=512)
-    country = models.CharField(_("Country"), max_length=512, default=settings.DEFAULT_COUNTRY)
+    country = models.CharField(
+        _("Country"), max_length=512, default=settings.DEFAULT_COUNTRY
+    )
 
     latitude = models.FloatField(_("Latitude"), null=True, blank=True)
     longitude = models.FloatField(_("Longitude"), null=True, blank=True)
 
     class Meta:
-        ordering = ('id',)
+        ordering = ("id",)
 
     def __str__(self):
         return self.name
@@ -314,11 +320,11 @@ class JobSite(models.Model):
         if settings.GEOCODE_ADDRESSES:
             try:
                 g = geocoders.GoogleV3()
-                address = smart_str("{}, {}, {}, {}".format(
-                    self.address,
-                    self.city, self.postal_code,
-                    self.country
-                ))
+                address = smart_str(
+                    "{}, {}, {}, {}".format(
+                        self.address, self.city, self.postal_code, self.country
+                    )
+                )
                 location = g.geocode(address)
                 self.latitude = location.latitude
                 self.longitude = location.longitude
@@ -337,11 +343,18 @@ class DailyPlan(models.Model):
         a list of workers performing the tasks and a job site at which they
         will perform the tasks. All on a particular day.
     """
-    jobsite = models.ForeignKey(JobSite, related_name="dailyplans", on_delete=models.CASCADE)
+
+    jobsite = models.ForeignKey(
+        JobSite, related_name="dailyplans", on_delete=models.CASCADE
+    )
     day = models.DateField(_("Day"), default=localdate)
-    workers = models.ManyToManyField('company.Worker', through='TeamMember', related_name="dailyplans")
-    tasks = models.ManyToManyField('task.Task', related_name="dailyplans")
-    equipment = models.ManyToManyField('equipment.Equipment', through='EquipmentAssignment', related_name="dailyplans")
+    workers = models.ManyToManyField(
+        "company.Worker", through="TeamMember", related_name="dailyplans"
+    )
+    tasks = models.ManyToManyField("task.Task", related_name="dailyplans")
+    equipment = models.ManyToManyField(
+        "equipment.Equipment", through="EquipmentAssignment", related_name="dailyplans"
+    )
 
     notes = models.TextField(blank=True)
 
@@ -353,27 +366,36 @@ class DailyPlan(models.Model):
 
     @property
     def url_id(self):
-        return '{}-{}'.format(self.day.isoformat(), self.id or 0)
+        return "{}-{}".format(self.day.isoformat(), self.id or 0)
 
     def is_worker_assigned(self, worker):
         return self.members.filter(worker=worker).exists()
 
     class Meta:
-        ordering = ['-day']
+        ordering = ["-day"]
 
 
 class TeamMember(models.Model):
     """ When a worker is assigned to a DailyPlan we need to record
         if they are a foreman or a regular worker.
     """
-    dailyplan = models.ForeignKey(DailyPlan, related_name="members", on_delete=models.CASCADE)
-    worker = models.ForeignKey('company.Worker', related_name="assignments", on_delete=models.CASCADE)
+
+    dailyplan = models.ForeignKey(
+        DailyPlan, related_name="members", on_delete=models.CASCADE
+    )
+    worker = models.ForeignKey(
+        "company.Worker", related_name="assignments", on_delete=models.CASCADE
+    )
     is_foreman = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ['-is_foreman', 'worker__user__first_name']
+        ordering = ["-is_foreman", "worker__user__first_name"]
 
 
 class EquipmentAssignment(models.Model):
-    dailyplan = models.ForeignKey(DailyPlan, related_name="assigned_equipment", on_delete=models.CASCADE)
-    equipment = models.ForeignKey('equipment.Equipment', related_name="assignments", on_delete=models.CASCADE)
+    dailyplan = models.ForeignKey(
+        DailyPlan, related_name="assigned_equipment", on_delete=models.CASCADE
+    )
+    equipment = models.ForeignKey(
+        "equipment.Equipment", related_name="assignments", on_delete=models.CASCADE
+    )

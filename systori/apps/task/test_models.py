@@ -13,7 +13,6 @@ from .models import Job, Group, Task
 
 
 class CalculationTests(TestCase):
-
     def setUp(self):
         self.company = CompanyFactory()
         self.project = ProjectFactory()
@@ -107,12 +106,20 @@ class CalculationTests(TestCase):
 
     def test_complete_percent(self):
         # Division by zero
-        self.assertEqual(TaskFactory(group=self.job, complete=10, qty=0).complete_percent, 0)
+        self.assertEqual(
+            TaskFactory(group=self.job, complete=10, qty=0).complete_percent, 0
+        )
         # Complete greater than qty
-        self.assertEqual(TaskFactory(group=self.job, complete=10, qty=5).complete_percent, 200)
+        self.assertEqual(
+            TaskFactory(group=self.job, complete=10, qty=5).complete_percent, 200
+        )
         # 100% rounding
-        self.assertEqual(TaskFactory(group=self.job, complete=99.99, qty=100).complete_percent, 100)
-        self.assertEqual(TaskFactory(group=self.job, complete=100.01, qty=100).complete_percent, 100)
+        self.assertEqual(
+            TaskFactory(group=self.job, complete=99.99, qty=100).complete_percent, 100
+        )
+        self.assertEqual(
+            TaskFactory(group=self.job, complete=100.01, qty=100).complete_percent, 100
+        )
 
     def test_group_with_tasks(self):
         TaskFactory(group=self.group, total=7)
@@ -130,22 +137,21 @@ class CalculationTests(TestCase):
 
 
 class TestJobTransitions(TestCase):
-
     def setUp(self):
-        activate('en')
+        activate("en")
         self.company = CompanyFactory()
         self.project = ProjectFactory()
         self.job = JobFactory(project=self.project)
         self.letterhead = LetterheadFactory()
 
     def test_job_draft(self):
-        self.assertEquals('Draft', self.job.get_status_display())
+        self.assertEquals("Draft", self.job.get_status_display())
 
     def test_job_proposed(self):
         proposal = ProposalFactory(project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
-        self.assertEquals('Proposed', self.job.get_status_display())
+        self.assertEquals("Proposed", self.job.get_status_display())
 
     def test_job_approved(self):
         proposal = ProposalFactory(project=self.project, letterhead=self.letterhead)
@@ -153,63 +159,62 @@ class TestJobTransitions(TestCase):
         proposal.send()
         proposal.approve()
         self.job.refresh_from_db()
-        self.assertEquals('Approved', self.job.get_status_display())
+        self.assertEquals("Approved", self.job.get_status_display())
 
     def test_job_declined(self):
         proposal = ProposalFactory(project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
-        self.assertEquals('Proposed', self.job.get_status_display())
+        self.assertEquals("Proposed", self.job.get_status_display())
         proposal.send()
         proposal.decline()
         self.job.refresh_from_db()
-        self.assertEquals('Draft', self.job.get_status_display())
+        self.assertEquals("Draft", self.job.get_status_display())
 
     def test_job_after_proposal_deleted(self):
         proposal = ProposalFactory(project=self.project, letterhead=self.letterhead)
         proposal.jobs.add(self.job)
         self.job.refresh_from_db()
-        self.assertEquals('Proposed', self.job.get_status_display())
+        self.assertEquals("Proposed", self.job.get_status_display())
         proposal.delete()
         self.job.refresh_from_db()
-        self.assertEquals('Draft', self.job.get_status_display())
+        self.assertEquals("Draft", self.job.get_status_display())
 
 
 class CodeFormattingTests(TestCase):
-
     def setUp(self):
         CompanyFactory()
 
     def test_job_code(self):
         project = ProjectFactory(structure="0.0")
-        self.assertEqual(JobFactory(project=project).code, '1')
-        self.assertEqual(JobFactory(project=project).code, '2')
+        self.assertEqual(JobFactory(project=project).code, "1")
+        self.assertEqual(JobFactory(project=project).code, "2")
         project = ProjectFactory(structure="000.0")
-        self.assertEqual(JobFactory(project=project).code, '001')
-        self.assertEqual(JobFactory(project=project).code, '002')
+        self.assertEqual(JobFactory(project=project).code, "001")
+        self.assertEqual(JobFactory(project=project).code, "002")
 
     def test_group_code(self):
         job = JobFactory(project=ProjectFactory(structure="0.000.00.0"))
         group = GroupFactory(parent=job)
-        self.assertEqual(group.code, '1.001')
-        self.assertEqual(GroupFactory(parent=group).code, '1.001.01')
-        self.assertEqual(GroupFactory(parent=group).code, '1.001.02')
+        self.assertEqual(group.code, "1.001")
+        self.assertEqual(GroupFactory(parent=group).code, "1.001.01")
+        self.assertEqual(GroupFactory(parent=group).code, "1.001.02")
         group = GroupFactory(parent=job)
-        self.assertEqual(GroupFactory(parent=group).code, '1.002.01')
-        self.assertEqual(GroupFactory(parent=group).code, '1.002.02')
+        self.assertEqual(GroupFactory(parent=group).code, "1.002.01")
+        self.assertEqual(GroupFactory(parent=group).code, "1.002.02")
 
     def test_job_direct_tasks_code(self):
         """ Tasks are attached directly to the job. """
         job = JobFactory(project=ProjectFactory(structure="00.000"))
         task = TaskFactory(group=job)
-        self.assertEqual(task.code, '01.001')
+        self.assertEqual(task.code, "01.001")
 
     def test_blank_group_task_code(self):
         """ One of the groups in the hierarchy is blank. """
         job = JobFactory(project=ProjectFactory(structure="00.00.000"))
-        group = GroupFactory(name='', parent=job)
+        group = GroupFactory(name="", parent=job)
         task = TaskFactory(group=group)
-        self.assertEqual(task.code, '01._.001')
+        self.assertEqual(task.code, "01._.001")
 
     def test_complex_groups_task_code(self):
         """ A more comprehensive test case. """
@@ -224,7 +229,6 @@ class CodeFormattingTests(TestCase):
 
 
 class CloningTests(TestCase):
-
     def setUp(self):
         CompanyFactory()
 
@@ -235,9 +239,11 @@ class CloningTests(TestCase):
         task = TaskFactory(
             group=group,
             name="running task",
-            qty=7, complete=7, status=Task.RUNNING,
+            qty=7,
+            complete=7,
+            status=Task.RUNNING,
             started_on=datetime.date.today(),
-            completed_on=datetime.date.today()
+            completed_on=datetime.date.today(),
         )
         LineItemFactory(task=task)
         TaskFactory(group=group)
@@ -264,7 +270,7 @@ class CloningTests(TestCase):
         new_task = new_group.tasks.first()
         self.assertEqual(new_task.name, "running task")
         self.assertEqual(new_task.complete, 0)
-        self.assertEqual(new_task.status, '')
+        self.assertEqual(new_task.status, "")
         self.assertIsNone(new_task.started_on)
         self.assertIsNone(new_task.completed_on)
 
@@ -274,17 +280,19 @@ class CloningTests(TestCase):
         # TODO: Test that correction lineitems don't get copied.
 
     def test_clone_without_group(self):
-        job = JobFactory(project=ProjectFactory(structure='01.01'))
+        job = JobFactory(project=ProjectFactory(structure="01.01"))
         task = TaskFactory(
             group=job,
             name="running task",
-            qty=7, complete=7, status=Task.RUNNING,
+            qty=7,
+            complete=7,
+            status=Task.RUNNING,
             started_on=datetime.date.today(),
-            completed_on=datetime.date.today()
+            completed_on=datetime.date.today(),
         )
         LineItemFactory(task=task)
 
-        new_job = JobFactory(project=ProjectFactory(structure='01.01'))
+        new_job = JobFactory(project=ProjectFactory(structure="01.01"))
         self.assertEqual(new_job.tasks.count(), 0)
 
         job.clone_to(new_job)
@@ -292,7 +300,6 @@ class CloningTests(TestCase):
 
 
 class GroupTests(TestCase):
-
     def setUp(self):
         CompanyFactory()
 
@@ -317,9 +324,9 @@ class GroupTests(TestCase):
         project = ProjectFactory(structure="0.00.00.00.00.0000")
         job = JobFactory(project=project, generate_groups=True)  # type: Job
         leaf = job.groups.first().groups.first().groups.first().groups.first()
-        LineItemFactory(name='first lineitem', task=TaskFactory(group=leaf))
-        LineItemFactory(name='second lineitem', task=TaskFactory(group=leaf))
-        LineItemFactory(name='third lineitem', task=TaskFactory(group=leaf))
+        LineItemFactory(name="first lineitem", task=TaskFactory(group=leaf))
+        LineItemFactory(name="second lineitem", task=TaskFactory(group=leaf))
+        LineItemFactory(name="third lineitem", task=TaskFactory(group=leaf))
         job.groups.first().clone_to(job, 2)
         job.groups.first().clone_to(job, 3)
 
@@ -332,100 +339,119 @@ class GroupTests(TestCase):
 
             result = None
             for subgroup in group.groups.all():
-                result = traverse_children(subgroup, depth+1)
+                result = traverse_children(subgroup, depth + 1)
 
             return result
 
         # no prefetch
         with self.assertNumQueries(17):
-            self.assertIsNotNone(traverse_children(
-                Job.objects.get(pk=job.pk)
-            ))
+            self.assertIsNotNone(traverse_children(Job.objects.get(pk=job.pk)))
 
         # with prefetch
         with self.assertNumQueries(7):
-            self.assertIsNotNone(traverse_children(
-                Job.objects.with_hierarchy(project).get(pk=job.pk)
-            ))
+            self.assertIsNotNone(
+                traverse_children(Job.objects.with_hierarchy(project).get(pk=job.pk))
+            )
 
 
 class AutoCompleteSearchTest(TestCase):
-
     def setUp(self):
 
         CompanyFactory()
 
-        en_names = ['one',  'two',  'three', 'four']
-        de_names = ['eins', 'zwei', 'drei',  'vier']
-        uk_names = ['один', 'два',  'три',   'чотири']
-        ro_names = ['unu',  'doi',  'trei',  'patru']
+        en_names = ["one", "two", "three", "four"]
+        de_names = ["eins", "zwei", "drei", "vier"]
+        uk_names = ["один", "два", "три", "чотири"]
+        ro_names = ["unu", "doi", "trei", "patru"]
 
         def add_names(group, names, depth=0):
             for subgroup in group.groups.all():
                 subgroup.name = names[depth]
                 subgroup.save()
-                add_names(subgroup, names, depth+1)
+                add_names(subgroup, names, depth + 1)
 
-        project1 = ProjectFactory(structure='01.001', with_job=True)
+        project1 = ProjectFactory(structure="01.001", with_job=True)
         self.job = job = project1.jobs.first()
         [TaskFactory(total=i, name=en_names[i], group=job) for i in range(4)]
-        [TaskFactory(total=i+10, name=' '.join([en_names[i], de_names[i]]), group=job) for i in range(4)]
-        [TaskFactory(total=i+20, name=' '.join([en_names[i], de_names[i], uk_names[i]]), group=job) for i in range(4)]
+        [
+            TaskFactory(
+                total=i + 10, name=" ".join([en_names[i], de_names[i]]), group=job
+            )
+            for i in range(4)
+        ]
+        [
+            TaskFactory(
+                total=i + 20,
+                name=" ".join([en_names[i], de_names[i], uk_names[i]]),
+                group=job,
+            )
+            for i in range(4)
+        ]
 
-        project2 = ProjectFactory(structure='01.01.001', with_job=True)
+        project2 = ProjectFactory(structure="01.01.001", with_job=True)
         add_names(project2.jobs.first(), ro_names)
-        project3 = ProjectFactory(structure='01.01.01.001', with_job=True)
+        project3 = ProjectFactory(structure="01.01.01.001", with_job=True)
         add_names(project3.jobs.first(), uk_names)
-        project4 = ProjectFactory(structure='01.01.01.01.001', with_job=True)
+        project4 = ProjectFactory(structure="01.01.01.01.001", with_job=True)
         add_names(project4.jobs.first(), de_names)
-        project5 = ProjectFactory(structure='01.01.01.01.01.001', with_job=True)
+        project5 = ProjectFactory(structure="01.01.01.01.01.001", with_job=True)
         add_names(project5.jobs.first(), en_names)
 
-        long_text = 'Voranstrich aus Bitumenlösung, Untergrund Beton, einschl. ' \
-                    'Aufkantungen, wie Attika, Schächte und Fundamente.'
-        TaskFactory(group=self.job, total=31, name='aus Bitumenlösung', description=long_text)
-        TaskFactory(group=self.job, total=32, name='Schächte und', description=long_text)
+        long_text = "Voranstrich aus Bitumenlösung, Untergrund Beton, einschl. " "Aufkantungen, wie Attika, Schächte und Fundamente."
+        TaskFactory(
+            group=self.job, total=31, name="aus Bitumenlösung", description=long_text
+        )
+        TaskFactory(
+            group=self.job, total=32, name="Schächte und", description=long_text
+        )
 
     def test_available_groups(self):
-
         def available(depth):
-            return list(Group.objects
-                        .groups_with_remaining_depth(depth)
-                        .values_list('name', flat=True))
+            return list(
+                Group.objects.groups_with_remaining_depth(depth).values_list(
+                    "name", flat=True
+                )
+            )
 
-        self.assertEqual(available(0), ['unu', 'два', 'drei', 'four'])
-        self.assertEqual(available(1), ['один', 'zwei', 'three'])
-        self.assertEqual(available(2), ['eins', 'two'])
-        self.assertEqual(available(3), ['one'])
+        self.assertEqual(available(0), ["unu", "два", "drei", "four"])
+        self.assertEqual(available(1), ["один", "zwei", "three"])
+        self.assertEqual(available(2), ["eins", "two"])
+        self.assertEqual(available(3), ["one"])
 
     def test_group_text_search(self):
-
         def search(depth, terms):
-            return list(Group.objects
-                        .groups_with_remaining_depth(depth)
-                        .search(terms)
-                        .values_list('match_name', flat=True))
+            return list(
+                Group.objects.groups_with_remaining_depth(depth)
+                .search(terms)
+                .values_list("match_name", flat=True)
+            )
 
-        self.assertEqual(search(0, 'unu'), ['<b>unu</b>'])
-        self.assertEqual(search(0, 'doi'), [])
-        self.assertEqual(search(1, 'один'), ['<b>один</b>'])
-        self.assertEqual(search(1, 'два'), [])
-        self.assertEqual(search(2, 'eins'), ['<b>eins</b>'])
-        self.assertEqual(search(3, 'one'), ['<b>one</b>'])
-        self.assertEqual(search(3, 'two'), [])
+        self.assertEqual(search(0, "unu"), ["<b>unu</b>"])
+        self.assertEqual(search(0, "doi"), [])
+        self.assertEqual(search(1, "один"), ["<b>один</b>"])
+        self.assertEqual(search(1, "два"), [])
+        self.assertEqual(search(2, "eins"), ["<b>eins</b>"])
+        self.assertEqual(search(3, "one"), ["<b>one</b>"])
+        self.assertEqual(search(3, "two"), [])
 
     def test_task_text_search(self):
 
-        schacht = Task.objects.search('schacht').values_list('name', 'match_name')
+        schacht = Task.objects.search("schacht").values_list("name", "match_name")
         self.assertEqual(schacht.count(), 2)
-        self.assertEqual(list(schacht), [
-            ('Schächte und', '<b>Schächte</b> und'),
-            ('aus Bitumenlösung', 'aus Bitumenlösung'),
-        ])
+        self.assertEqual(
+            list(schacht),
+            [
+                ("Schächte und", "<b>Schächte</b> und"),
+                ("aus Bitumenlösung", "aus Bitumenlösung"),
+            ],
+        )
 
-        bitumenlos = Task.objects.search('bitumenlos').values_list('name', 'match_name')
+        bitumenlos = Task.objects.search("bitumenlos").values_list("name", "match_name")
         self.assertEqual(bitumenlos.count(), 2)
-        self.assertEqual(list(bitumenlos), [
-            ('aus Bitumenlösung', 'aus <b>Bitumenlösung</b>'),
-            ('Schächte und', 'Schächte und'),
-        ])
+        self.assertEqual(
+            list(bitumenlos),
+            [
+                ("aus Bitumenlösung", "aus <b>Bitumenlösung</b>"),
+                ("Schächte und", "Schächte und"),
+            ],
+        )

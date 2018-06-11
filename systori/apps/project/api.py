@@ -10,10 +10,14 @@ class ProjectAvailableAPI(views.APIView):
     permission_classes = (HasStaffAccess,)
 
     def get(self, request, *args, **kwargs):
-        pk = int(kwargs['pk'])
+        pk = int(kwargs["pk"])
         return response.Response(Project.objects.filter(pk=pk).exists())
 
 
 urlpatterns = [
-    url(r'^project-available/(?P<pk>\d+)$', ProjectAvailableAPI.as_view(), name='api.project.available'),
+    url(
+        r"^project-available/(?P<pk>\d+)$",
+        ProjectAvailableAPI.as_view(),
+        name="api.project.available",
+    )
 ]

@@ -19,40 +19,33 @@ ROWS = 25
 
 
 class EvidenceRenderer:
-
     def __init__(self, project, letterhead):
         self.project = project
         self.letterhead = letterhead
 
-        self.evidence_html = get_template('document/evidence.html')
+        self.evidence_html = get_template("document/evidence.html")
 
     @property
     def pdf(self):
         return PDFStreamer(
             HTMLParser(self.generate, CSS(self.css)),
             os.path.join(settings.MEDIA_ROOT, self.letterhead.letterhead_pdf.name),
-            'landscape'
+            "landscape",
         )
 
     @property
     def html(self):
-        return ''.join(chain(
-            ('<style>', self.css, '</style>'),
-            self.generate()
-        ))
+        return "".join(chain(("<style>", self.css, "</style>"), self.generate()))
 
     @property
     def css(self):
-        return render_to_string('document/evidence.css', {
-            'letterhead': self.letterhead
-        })
+        return render_to_string(
+            "document/evidence.css", {"letterhead": self.letterhead}
+        )
 
     def generate(self):
-        project_data = {
-            'pk': str(self.project.id),
-            'name': self.project.name,
-        }
-        document_date = date_format(date.today(), use_l10n=True) 
+        project_data = {"pk": str(self.project.id), "name": self.project.name}
+        document_date = date_format(date.today(), use_l10n=True)
 
         def get_task_recursive(parent):
             if isinstance(parent, Project):
@@ -61,31 +54,24 @@ class EvidenceRenderer:
             else:
                 for group in parent.groups.all():
                     yield from get_task_recursive(group)
-                for task in parent.tasks.\
-                    prefetch_related('group').\
-                    prefetch_related('job').\
-                    all():
+                for task in (
+                    parent.tasks.prefetch_related("group").prefetch_related("job").all()
+                ):
                     yield {
-                        'document': {
-                            'date': document_date,
+                        "document": {"date": document_date},
+                        "project": {
+                            "pk": project_data["pk"],
+                            "name": project_data["name"],
                         },
-                        'project': {
-                            'pk': project_data['pk'],
-                            'name': project_data['name'],
+                        "job": {"name": task.job.name},
+                        "group": {"name": task.group.name},
+                        "task": {
+                            "name": task.name,
+                            "code": task.code,
+                            "qty": task.qty,
+                            "unit": task.unit,
                         },
-                        'job': {
-                            'name': task.job.name,
-                        },
-                        'group': {
-                            'name': task.group.name,
-                        },
-                        'task': {
-                            'name': task.name,
-                            'code': task.code,
-                            'qty': task.qty,
-                            'unit': task.unit,
-                        }
                     }
-        
+
         for task in get_task_recursive(self.project):
             yield self.evidence_html.render(task)

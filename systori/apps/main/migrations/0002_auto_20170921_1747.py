@@ -5,13 +5,8 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('main', '0001_initial'),
-    ]
+    dependencies = [("main", "0001_initial")]
 
     operations = [
-        migrations.AlterModelOptions(
-            name='note',
-            options={'ordering': ('created',)},
-        ),
+        migrations.AlterModelOptions(name="note", options={"ordering": ("created",)})
     ]

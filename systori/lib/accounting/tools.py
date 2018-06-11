@@ -9,7 +9,7 @@ DEFAULT_ROUNDING = ROUND_HALF_UP
 
 
 def round(num, rounding=DEFAULT_ROUNDING):
-    return num.quantize(Decimal('0.01'), rounding=rounding)
+    return num.quantize(Decimal("0.01"), rounding=rounding)
 
 
 def compute_gross_tax(net, tax_rate):
@@ -27,7 +27,7 @@ def extract_net_tax(gross, tax_rate):
     assert isinstance(gross, Decimal)
     assert isinstance(tax_rate, Decimal)
 
-    inverse_rate = Decimal('1.0') + (Decimal('1.0') / tax_rate)
+    inverse_rate = Decimal("1.0") + (Decimal("1.0") / tax_rate)
 
     tax = round(gross / inverse_rate)
 
@@ -37,10 +37,9 @@ def extract_net_tax(gross, tax_rate):
 
 
 class Amount:
-
     @staticmethod
     def zero():
-        return Amount(Decimal('0.00'), Decimal('0.00'), Decimal('0.00'))
+        return Amount(Decimal("0.00"), Decimal("0.00"), Decimal("0.00"))
 
     @staticmethod
     def from_gross(gross, tax_rate):
@@ -55,9 +54,9 @@ class Amount:
     @staticmethod
     def from_entry(entry):
         return Amount(
-            net=entry.value if entry.is_net else Decimal('0.00'),
-            tax=entry.value if entry.is_tax else Decimal('0.00'),
-            gross=entry.value if entry.is_gross else None
+            net=entry.value if entry.is_net else Decimal("0.00"),
+            tax=entry.value if entry.is_tax else Decimal("0.00"),
+            gross=entry.value if entry.is_gross else None,
         )
 
     def __init__(self, net, tax, gross=None):
@@ -74,48 +73,40 @@ class Amount:
 
     @property
     def negate(self):
-        return Amount(
-            net=self.net*-1,
-            tax=self.tax*-1,
-            gross=self.gross*-1
-        )
+        return Amount(net=self.net * -1, tax=self.tax * -1, gross=self.gross * -1)
 
     @property
     def net_amount(self):
-        return Amount(
-            net=self.net,
-            tax=Decimal(0),
-            gross=self.net
-        )
+        return Amount(net=self.net, tax=Decimal(0), gross=self.net)
 
     @property
     def tax_amount(self):
-        return Amount(
-            net=Decimal(0),
-            tax=self.tax,
-            gross=self.tax
-        )
+        return Amount(net=Decimal(0), tax=self.tax, gross=self.tax)
 
     def __sub__(self, other):
         assert isinstance(other, Amount)
         return Amount(
-                net=self.net-other.net,
-                tax=self.tax-other.tax,
-                gross=self.gross-other.gross
+            net=self.net - other.net,
+            tax=self.tax - other.tax,
+            gross=self.gross - other.gross,
         )
 
     def __add__(self, other):
         assert isinstance(other, Amount)
         return Amount(
-                net=self.net+other.net,
-                tax=self.tax+other.tax,
-                gross=self.gross+other.gross
+            net=self.net + other.net,
+            tax=self.tax + other.tax,
+            gross=self.gross + other.gross,
         )
 
     def __eq__(self, other):
         if other is None:
             return False
-        return self.net == other.net and self.tax == other.tax and self.gross == other.gross
+        return (
+            self.net == other.net
+            and self.tax == other.tax
+            and self.gross == other.gross
+        )
 
     def __repr__(self):
         return "Amount(net=%s, tax=%s, gross=%s)" % (self.net, self.tax, self.gross)
@@ -124,12 +115,12 @@ class Amount:
 
     @property
     def to_json(self):
-        return {'_amount_': {'net': self.net, 'tax': self.tax, 'gross': self.gross}}
+        return {"_amount_": {"net": self.net, "tax": self.tax, "gross": self.gross}}
 
     @staticmethod
     def object_hook(value):
-        if '_amount_' in value:
-            return Amount(**value['_amount_'])
+        if "_amount_" in value:
+            return Amount(**value["_amount_"])
         return value
 
 

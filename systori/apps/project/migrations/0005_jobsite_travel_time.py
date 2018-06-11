@@ -7,14 +7,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('project', '0004_auto_20160707_1831'),
-    ]
+    dependencies = [("project", "0004_auto_20160707_1831")]
 
     operations = [
         migrations.AddField(
-            model_name='jobsite',
-            name='travel_time',
-            field=models.PositiveIntegerField(blank=True, help_text='in minutes', null=True, verbose_name='Travel time'),
-        ),
+            model_name="jobsite",
+            name="travel_time",
+            field=models.PositiveIntegerField(
+                blank=True,
+                help_text="in minutes",
+                null=True,
+                verbose_name="Travel time",
+            ),
+        )
     ]

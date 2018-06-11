@@ -43,28 +43,29 @@ class BaseAccount(models.Model):
         (INCOME, _("Income")),
         (EXPENSE, _("Expense")),
     )
-    account_type = models.CharField(_('Account Type'), max_length=32, choices=ACCOUNT_TYPE)
+    account_type = models.CharField(
+        _("Account Type"), max_length=32, choices=ACCOUNT_TYPE
+    )
 
     # Asset Type (when account.account_type=ASSET)
 
     BANK = "bank"
     RECEIVABLE = "receivable"
 
-    ASSET_TYPE = (
-        (BANK, _("Bank")),
-        (RECEIVABLE, _("Accounts Receivable")),
+    ASSET_TYPE = ((BANK, _("Bank")), (RECEIVABLE, _("Accounts Receivable")))
+    asset_type = models.CharField(
+        _("Asset Type"), null=True, max_length=32, choices=ASSET_TYPE
     )
-    asset_type = models.CharField(_('Asset Type'), null=True, max_length=32, choices=ASSET_TYPE)
 
-    code = models.CharField(_('Code'), max_length=32)
-    name = models.CharField(_('Name'), max_length=512, blank=True)
+    code = models.CharField(_("Code"), max_length=32)
+    name = models.CharField(_("Name"), max_length=512, blank=True)
 
     class Meta:
         abstract = True
-        ordering = ['code']
+        ordering = ["code"]
 
     def __str__(self):
-        return '{} - {}'.format(self.code, self.name)
+        return "{} - {}".format(self.code, self.name)
 
     @property
     def is_bank(self):
@@ -124,8 +125,9 @@ class BaseAccount(models.Model):
             return value * -1
 
     def is_debit_value(self, value):
-        if (self.is_debit_account and value > 0) or \
-                (self.is_credit_account and value < 0):
+        if (self.is_debit_account and value > 0) or (
+            self.is_credit_account and value < 0
+        ):
             return True
         else:
             return False
@@ -138,8 +140,9 @@ class BaseAccount(models.Model):
             return value * -1
 
     def is_credit_value(self, value):
-        if (self.is_debit_account and value < 0) or \
-                (self.is_credit_account and value > 0):
+        if (self.is_debit_account and value < 0) or (
+            self.is_credit_account and value > 0
+        ):
             return True
         else:
             return False
@@ -149,6 +152,7 @@ class BaseTransaction(models.Model):
     """ A transaction is a collection of accounting entries (usually
         at least two entries to two different accounts).
     """
+
     entry_class = None  # Must be defined in subclass.
     account_class = None  # Must be defined in subclass.
 
@@ -178,7 +182,9 @@ class BaseTransaction(models.Model):
         (ADJUSTMENT, _("Adjustment")),
         (REFUND, _("Refund")),
     )
-    transaction_type = models.CharField(_('Transaction Type'), null=True, max_length=32, choices=TRANSACTION_TYPE)
+    transaction_type = models.CharField(
+        _("Transaction Type"), null=True, max_length=32, choices=TRANSACTION_TYPE
+    )
 
     class Meta:
         abstract = True
@@ -193,7 +199,7 @@ class BaseTransaction(models.Model):
             account = self.account_class.objects.get(code=account)
         debit_value = account.as_debit(round(value, 2))
         entry = self.entry_class(account=account, value=debit_value, **kwargs)
-        self._entries.append(('debit', entry))
+        self._entries.append(("debit", entry))
         return entry
 
     def credit(self, account, value, **kwargs):
@@ -202,15 +208,17 @@ class BaseTransaction(models.Model):
             account = self.account_class.objects.get(code=account)
         credit_value = account.as_credit(round(value, 2))
         entry = self.entry_class(account=account, value=credit_value, **kwargs)
-        self._entries.append(('credit', entry))
+        self._entries.append(("credit", entry))
         return entry
 
     def signed(self, account, signed_value, **kwargs):
         assert signed_value != 0
         if type(account) is str:
             account = self.account_class.objects.get(code=account)
-        entry = self.entry_class(account=account, value=round(signed_value, 2), **kwargs)
-        entry_type = 'credit' if account.is_credit_value(signed_value) else 'debit'
+        entry = self.entry_class(
+            account=account, value=round(signed_value, 2), **kwargs
+        )
+        entry_type = "credit" if account.is_credit_value(signed_value) else "debit"
         self._entries.append((entry_type, entry))
         return entry
 
@@ -219,21 +227,26 @@ class BaseTransaction(models.Model):
 
     def _show_table(self):
         from systori.lib.templatetags.customformatting import money
+
         for entry in self._entries:
             acct, value = entry[1].account, entry[1].value
             try:
-                acct_name = acct.code + ' ' + acct.job.name
+                acct_name = acct.code + " " + acct.job.name
             except ObjectDoesNotExist:
-                acct_name = acct.code + ' ' + acct.name
-            if entry[0] == 'debit':
-                print(' {:<25} {:>10} {:>10}'.format(acct_name, money(value), ''))
+                acct_name = acct.code + " " + acct.name
+            if entry[0] == "debit":
+                print(" {:<25} {:>10} {:>10}".format(acct_name, money(value), ""))
             else:
-                print(' {:<25} {:>10} {:>10}'.format(acct_name, '', money(value)))
-        print(' {:>25} {:>10} {:>10}'.format('total:', money(self._total('debit')), money(self._total('credit'))))
+                print(" {:<25} {:>10} {:>10}".format(acct_name, "", money(value)))
+        print(
+            " {:>25} {:>10} {:>10}".format(
+                "total:", money(self._total("debit")), money(self._total("credit"))
+            )
+        )
 
     @property
     def is_balanced(self):
-        return self._total('debit') == self._total('credit')
+        return self._total("debit") == self._total("credit")
 
     @property
     def is_reconciled(self):
@@ -244,8 +257,11 @@ class BaseTransaction(models.Model):
 
     def save(self, debug=False, **kwargs):
         assert len(self._entries) == 0 or len(self._entries) >= 2
-        if debug: self._show_table()
-        assert self.is_balanced, "{} != {}".format(self._total('debit'), self._total('credit'))
+        if debug:
+            self._show_table()
+        assert self.is_balanced, "{} != {}".format(
+            self._total("debit"), self._total("credit")
+        )
         super().save(**kwargs)
         for item in self._entries:
             item[1].transaction = self
@@ -258,7 +274,6 @@ class BaseTransaction(models.Model):
 
 
 class EntryQuerySet(models.QuerySet):
-
     @property
     def invoice(self):
         """ Queryset of all debit entries - adjustments, sum of which is the total invoiced. """
@@ -285,8 +300,12 @@ class BaseEntry(models.Model):
     """ Represents the tax, net or gross portion of a debit or credit to an account.
     """
 
-    transaction = models.ForeignKey('Transaction', related_name="entries", on_delete=models.CASCADE)
-    account = models.ForeignKey('Account', related_name="entries", on_delete=models.CASCADE)
+    transaction = models.ForeignKey(
+        "Transaction", related_name="entries", on_delete=models.CASCADE
+    )
+    account = models.ForeignKey(
+        "Account", related_name="entries", on_delete=models.CASCADE
+    )
 
     value = models.DecimalField(_("Value"), max_digits=14, decimal_places=2)
 
@@ -297,13 +316,17 @@ class BaseEntry(models.Model):
     DISCOUNT = "discount"
     REFUND_CREDIT = "refund-credit"  # apply a refund from another job to this job
     PAYMENT_TYPES = (PAYMENT, DISCOUNT, REFUND_CREDIT)
-    ADJUSTMENT = "adjustment"  # if customer is over-invoiced, this brings account back to billable
+    ADJUSTMENT = (
+        "adjustment"
+    )  # if customer is over-invoiced, this brings account back to billable
 
     # debits: increase the customers debt
     WORK_DEBIT = "work-debit"  # debit value calculated from completed tasks
     FLAT_DEBIT = "flat-debit"  # flat fee debit, not based on tasks
     DEBIT_TYPES = (WORK_DEBIT, FLAT_DEBIT)
-    REFUND = "refund"  # if customer over-pays, this brings account back to what was invoiced or could be billed
+    REFUND = (
+        "refund"
+    )  # if customer over-pays, this brings account back to what was invoiced or could be billed
 
     # If you take a sum of all TYPES_FOR_INVOICED_SUM entries you'll end up with the actual invoiced amount.
     TYPES_FOR_INVOICED_SUM = DEBIT_TYPES + (ADJUSTMENT,)
@@ -325,7 +348,9 @@ class BaseEntry(models.Model):
     )
     # entry_type is only useful in the context of a customer account
     # entries in all other accounts will just be of type 'other'
-    entry_type = models.CharField(_('Entry Type'), max_length=32, choices=ENTRY_TYPE, default=OTHER)
+    entry_type = models.CharField(
+        _("Entry Type"), max_length=32, choices=ENTRY_TYPE, default=OTHER
+    )
 
     # Value Type
 
@@ -333,11 +358,7 @@ class BaseEntry(models.Model):
     TAX = "tax"
     GROSS = "gross"
 
-    VALUE_TYPE = (
-        (NET, _("Net")),
-        (TAX, _("Tax")),
-        (GROSS, _("Gross")),
-    )
+    VALUE_TYPE = ((NET, _("Net")), (TAX, _("Tax")), (GROSS, _("Gross")))
     value_type = models.CharField(_("Value Type"), max_length=32, choices=VALUE_TYPE)
 
     # for bank entries
@@ -348,7 +369,7 @@ class BaseEntry(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['transaction__transacted_on', 'id']
+        ordering = ["transaction__transacted_on", "id"]
 
     @property
     def is_credit(self):

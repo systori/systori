@@ -12,11 +12,11 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 import systori.apps.main.routing
 
 
-application = ProtocolTypeRouter({
-    # (http->django views are added by default)
-    'websocket': AuthMiddlewareStack(
-        URLRouter(
-            systori.apps.main.routing.websocket_urlpatterns
+application = ProtocolTypeRouter(
+    {
+        # (http->django views are added by default)
+        "websocket": AuthMiddlewareStack(
+            URLRouter(systori.apps.main.routing.websocket_urlpatterns)
         )
-    ),
-})
+    }
+)

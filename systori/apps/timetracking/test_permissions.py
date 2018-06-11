@@ -16,9 +16,8 @@ class CanTrackTimeView(APIView):
 
 
 class CanTrackTimeTest(TestCase):
-
     def test_anonymous_user_cannot_get(self):
-        request = RequestFactory().get('/')
+        request = RequestFactory().get("/")
         view_instance = CanTrackTimeView()
         response = view_instance.dispatch(request)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -28,7 +27,7 @@ class CanTrackTimeTest(TestCase):
         worker = user.access.first()
         worker.can_track_time = False
         worker.save()
-        request = RequestFactory().get('/')
+        request = RequestFactory().get("/")
         request.user = user
         request.worker = worker
         view_instance = CanTrackTimeView()
@@ -40,7 +39,7 @@ class CanTrackTimeTest(TestCase):
         worker = user.access.first()
         worker.can_track_time = True
         worker.save()
-        request = RequestFactory().get('/')
+        request = RequestFactory().get("/")
         request.user = user
         request.worker = worker
         view_instance = CanTrackTimeView()

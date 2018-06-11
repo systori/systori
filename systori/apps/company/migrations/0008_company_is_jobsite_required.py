@@ -5,14 +5,16 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('company', '0007_auto_20170209_1811'),
-    ]
+    dependencies = [("company", "0007_auto_20170209_1811")]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='is_jobsite_required',
-            field=models.BooleanField(default=True, help_text='Require that all projects have a jobsite.', verbose_name='Jobsite Required'),
-        ),
+            model_name="company",
+            name="is_jobsite_required",
+            field=models.BooleanField(
+                default=True,
+                help_text="Require that all projects have a jobsite.",
+                verbose_name="Jobsite Required",
+            ),
+        )
     ]

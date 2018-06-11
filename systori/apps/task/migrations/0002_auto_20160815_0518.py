@@ -8,14 +8,10 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('task', '0001_initial'),
-    ]
+    dependencies = [("task", "0001_initial")]
 
     operations = [
         migrations.RenameField(
-            model_name='progressreport',
-            old_name='access',
-            new_name='worker',
-        ),
+            model_name="progressreport", old_name="access", new_name="worker"
+        )
     ]

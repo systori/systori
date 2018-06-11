@@ -6,19 +6,27 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('task', '0011_auto_20170425_1737'),
-    ]
+    dependencies = [("task", "0011_auto_20170425_1737")]
 
     operations = [
         migrations.AlterField(
-            model_name='lineitem',
-            name='expended',
-            field=models.DecimalField(decimal_places=3, default=Decimal('0.00'), max_digits=12, verbose_name='Expended'),
+            model_name="lineitem",
+            name="expended",
+            field=models.DecimalField(
+                decimal_places=3,
+                default=Decimal("0.00"),
+                max_digits=12,
+                verbose_name="Expended",
+            ),
         ),
         migrations.AlterField(
-            model_name='task',
-            name='complete',
-            field=models.DecimalField(decimal_places=3, default=Decimal('0.00'), max_digits=12, verbose_name='Completed'),
+            model_name="task",
+            name="complete",
+            field=models.DecimalField(
+                decimal_places=3,
+                default=Decimal("0.00"),
+                max_digits=12,
+                verbose_name="Completed",
+            ),
         ),
     ]

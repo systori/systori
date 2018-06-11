@@ -1,4 +1,5 @@
 import os
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
 import django
 import pytz
@@ -14,7 +15,7 @@ from systori.apps.timetracking.models import Timer
 company = Company.objects.get(schema="mehr-handwerk")
 company.activate()
 today = timezone.now().date()
-tz = pytz.timezone('Europe/Berlin')
+tz = pytz.timezone("Europe/Berlin")
 
 location1 = [49.516043, 8.454014]
 location_oleg = [49.507978, 8.529639]
@@ -41,10 +42,14 @@ user_timers = [
 ]
 
 
-
 for data in user_timers:
     user = User.objects.get(id=data[1])
-    Timer.objects.create(user=user, date=today,
-                         start=datetime.datetime(data[2], data[3], data[4], data[5], data[6], data[7], data[8],tzinfo=tz),
-                         start_latitude=data[9][0],
-                         start_longitude=data[9][1])
+    Timer.objects.create(
+        user=user,
+        date=today,
+        start=datetime.datetime(
+            data[2], data[3], data[4], data[5], data[6], data[7], data[8], tzinfo=tz
+        ),
+        start_latitude=data[9][0],
+        start_longitude=data[9][1],
+    )

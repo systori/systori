@@ -8,11 +8,11 @@ from .models import Company, Worker
 class CompanyFactory(factory.django.DjangoModelFactory):
     name = fuzzy.FuzzyText(length=15)
     # This should be left static to avoid conflicts
-    schema = 'testcompany'
+    schema = "testcompany"
 
     class Meta:
         model = Company
-        django_get_or_create = ('schema', 'name',)
+        django_get_or_create = ("schema", "name")
 
     @classmethod
     def _create(cls, *args, **kwargs):

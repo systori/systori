@@ -7,6 +7,7 @@ from django.db import migrations
 
 def set_date(apps, schema_editor):
     from systori.apps.company.models import Company
+
     Timer = apps.get_model("timetracking", "Timer")
     for company in Company.objects.all():
         company.activate()
@@ -17,10 +18,8 @@ def set_date(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('timetracking', '0004_auto_20160630_1339'),
-    ]
+    dependencies = [("timetracking", "0004_auto_20160630_1339")]
 
     operations = [
-        migrations.RunPython(set_date, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(set_date, reverse_code=migrations.RunPython.noop)
     ]

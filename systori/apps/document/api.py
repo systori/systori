@@ -18,6 +18,9 @@ class DocumentTemplateView(views.APIView):
 
 
 urlpatterns = [
-    url(r'^document-template/project-(?P<project_pk>\d+)/template-(?P<template_pk>\d+)?$',
-        DocumentTemplateView.as_view(), name='api.document.template'),
+    url(
+        r"^document-template/project-(?P<project_pk>\d+)/template-(?P<template_pk>\d+)?$",
+        DocumentTemplateView.as_view(),
+        name="api.document.template",
+    )
 ]

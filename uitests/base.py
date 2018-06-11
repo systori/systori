@@ -3,23 +3,21 @@ from selenium.webdriver.support.select import Select
 
 
 class BaseTestCase(SimpleTestCase):
-
     def setUp(self):
         self.do_logout()
         self.do_login()
 
     def do_logout(self):
-        self.driver.get(self.live_server_url+'/logout')
+        self.driver.get(self.live_server_url + "/logout")
 
-    def do_login(self, username='test@systori.com', password='pass'):
-        self.find_id('input_username').send_keys(username)
-        self.find_id('input_password').send_keys(password)
-        self.find_tag('button').click()
+    def do_login(self, username="test@systori.com", password="pass"):
+        self.find_id("input_username").send_keys(username)
+        self.find_id("input_password").send_keys(password)
+        self.find_tag("button").click()
 
     @property
     def live_server_url(self):
-        return 'http://%s:%s' % (
-            self.server.host, self.server.port)
+        return "http://%s:%s" % (self.server.host, self.server.port)
 
     def clear(self):
         self.driver.switch_to.active_element.clear()
@@ -46,7 +44,9 @@ class BaseTestCase(SimpleTestCase):
         return self.driver.find_element_by_link_text(link_text)
 
     def find_button(self, button_text):
-        return self.find_xpath('//button[normalize-space(text())="' + button_text + '"]')
+        return self.find_xpath(
+            '//button[normalize-space(text())="' + button_text + '"]'
+        )
 
     def find_xpath(self, xpath):
         return self.driver.find_element_by_xpath(xpath)

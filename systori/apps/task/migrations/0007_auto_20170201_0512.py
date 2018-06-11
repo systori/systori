@@ -5,24 +5,22 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('task', '0006_auto_20161216_0056'),
-    ]
+    dependencies = [("task", "0006_auto_20161216_0056")]
 
     operations = [
         migrations.AlterField(
-            model_name='group',
-            name='order',
+            model_name="group",
+            name="order",
             field=models.PositiveIntegerField(db_index=True),
         ),
         migrations.AlterField(
-            model_name='lineitem',
-            name='order',
+            model_name="lineitem",
+            name="order",
             field=models.PositiveIntegerField(db_index=True),
         ),
         migrations.AlterField(
-            model_name='task',
-            name='order',
+            model_name="task",
+            name="order",
             field=models.PositiveIntegerField(db_index=True),
         ),
     ]

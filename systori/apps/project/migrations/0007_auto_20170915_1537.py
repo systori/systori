@@ -6,18 +6,15 @@ import django.utils.timezone
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('project', '0006_auto_20160720_1643'),
-    ]
+    dependencies = [("project", "0006_auto_20160720_1643")]
 
     operations = [
-        migrations.AlterModelOptions(
-            name='jobsite',
-            options={'ordering': ('id',)},
-        ),
+        migrations.AlterModelOptions(name="jobsite", options={"ordering": ("id",)}),
         migrations.AlterField(
-            model_name='dailyplan',
-            name='day',
-            field=models.DateField(default=django.utils.timezone.localdate, verbose_name='Day'),
+            model_name="dailyplan",
+            name="day",
+            field=models.DateField(
+                default=django.utils.timezone.localdate, verbose_name="Day"
+            ),
         ),
     ]

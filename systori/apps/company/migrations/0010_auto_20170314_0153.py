@@ -12,17 +12,13 @@ def add_contracts(apps, schema_editor):
         worker.contract = Contract.objects.create(
             worker=worker,
             requires_time_tracking=worker.is_timetracking_enabled,
-            rate=Decimal('0.00'),
+            rate=Decimal("0.00"),
         )
         worker.save()
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('company', '0009_auto_20170313_2228'),
-    ]
+    dependencies = [("company", "0009_auto_20170313_2228")]
 
-    operations = [
-        RunInSchemas(migrations.RunPython(add_contracts)),
-    ]
+    operations = [RunInSchemas(migrations.RunPython(add_contracts))]

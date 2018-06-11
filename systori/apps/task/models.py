@@ -18,18 +18,22 @@ from systori.apps.equipment.models import EquipmentType
 
 
 class SearchableModelQuerySet(models.QuerySet):
-
     def search(self, terms, lang=settings.SEARCH_VECTOR_LANGUAGE):
         query = SearchQuery(terms, config=lang)
-        field = self.model._meta.get_field('search')
+        field = self.model._meta.get_field("search")
         return (
             self.filter(search=query)
-            .annotate(**{
-                'match_'+column.name: tsvector_field.Headline(F(column.name), query, config=lang)
-                for column in field.columns
-            })
-            .annotate(rank=SearchRank(F('search'), query))
-            .order_by('-rank')
+            .annotate(
+                **{
+                    "match_"
+                    + column.name: tsvector_field.Headline(
+                        F(column.name), query, config=lang
+                    )
+                    for column in field.columns
+                }
+            )
+            .annotate(rank=SearchRank(F("search"), query))
+            .order_by("-rank")
         )
 
 
@@ -42,18 +46,25 @@ class OrderedModel(models.Model):
         abstract = True
 
     def get_ordering_queryset(self):
-        assert self.order_with_respect_to is not None, "Subclasses of OrderbleModel must set order_with_respect_to."
-        return self.__class__.objects.filter((self.order_with_respect_to, getattr(self, self.order_with_respect_to)))
+        assert (
+            self.order_with_respect_to is not None
+        ), "Subclasses of OrderbleModel must set order_with_respect_to."
+        return self.__class__.objects.filter(
+            (self.order_with_respect_to, getattr(self, self.order_with_respect_to))
+        )
 
     def save(self, *args, **kwargs):
         if self.order is None:
-            c = self.get_ordering_queryset().aggregate(models.Max('order')).get('order__max')
+            c = (
+                self.get_ordering_queryset()
+                .aggregate(models.Max("order"))
+                .get("order__max")
+            )
             self.order = 1 if c is None else c + 1
         super().save(*args, **kwargs)
 
 
 class GroupQuerySet(SearchableModelQuerySet):
-
     def groups_with_remaining_depth(self, remaining):
         """ Return all groups that have a specific depth to the right.
             When 'remaining' is,
@@ -66,7 +77,7 @@ class GroupQuerySet(SearchableModelQuerySet):
         q = Q()
         depth = remaining + 1
         while depth < 5:
-            q |= Q(job__project__structure_depth=depth) & Q(depth=depth-remaining)
+            q |= Q(job__project__structure_depth=depth) & Q(depth=depth - remaining)
             depth += 1
         return self.filter(q)
 
@@ -80,28 +91,35 @@ class Group(OrderedModel):
     name = models.CharField(_("Name"), default="", blank=True, max_length=512)
     description = models.TextField(_("Description"), default="", blank=True)
     depth = models.PositiveIntegerField(editable=False, db_index=True)
-    parent = models.ForeignKey('self', related_name='groups', null=True, on_delete=models.CASCADE)
-    token = models.BigIntegerField('api token', null=True)
-    job = models.ForeignKey('Job', null=True, related_name='all_groups', on_delete=models.CASCADE)
-    search = tsvector_field.SearchVectorField([
-        tsvector_field.WeightedColumn('name', 'A'),
-        tsvector_field.WeightedColumn('description', 'D'),
-    ], settings.SEARCH_VECTOR_LANGUAGE)
-    order_with_respect_to = 'parent'
+    parent = models.ForeignKey(
+        "self", related_name="groups", null=True, on_delete=models.CASCADE
+    )
+    token = models.BigIntegerField("api token", null=True)
+    job = models.ForeignKey(
+        "Job", null=True, related_name="all_groups", on_delete=models.CASCADE
+    )
+    search = tsvector_field.SearchVectorField(
+        [
+            tsvector_field.WeightedColumn("name", "A"),
+            tsvector_field.WeightedColumn("description", "D"),
+        ],
+        settings.SEARCH_VECTOR_LANGUAGE,
+    )
+    order_with_respect_to = "parent"
 
     objects = GroupManager()
 
     class Meta:
         verbose_name = _("Group")
         verbose_name_plural = _("Groups")
-        ordering = ('order',)
+        ordering = ("order",)
 
     def __init__(self, *args, **kwargs):
-        if 'parent' in kwargs:
-            if 'job' not in kwargs:
-                kwargs['job'] = kwargs['parent'].job
-            if 'depth' not in kwargs:
-                kwargs['depth'] = kwargs['parent'].depth+1
+        if "parent" in kwargs:
+            if "job" not in kwargs:
+                kwargs["job"] = kwargs["parent"].job
+            if "depth" not in kwargs:
+                kwargs["depth"] = kwargs["parent"].depth + 1
         super().__init__(*args, **kwargs)
 
     def refresh_pks(self):
@@ -121,7 +139,7 @@ class Group(OrderedModel):
         if self.name:
             code = self._structure.format_group(self.order, self.depth)
         else:
-            code = '_'
+            code = "_"
         return code if self.is_root else "{}.{}".format(self.parent.code, code)
 
     def clone_to(self, new_parent, new_order):
@@ -142,16 +160,16 @@ class Group(OrderedModel):
         for group in self.groups.all():
             total += getattr(group, field)
         for task in self.tasks.all():
-            if field == 'estimate' and task.include_estimate:
+            if field == "estimate" and task.include_estimate:
                 total += task.total
-            elif field == 'progress':
+            elif field == "progress":
                 total += task.progress
         return total
 
     @property
     def estimate(self):
-        if not hasattr(self, '_estimate'):
-            self._estimate = self._calc('estimate')
+        if not hasattr(self, "_estimate"):
+            self._estimate = self._calc("estimate")
         return self._estimate
 
     @estimate.setter
@@ -160,8 +178,8 @@ class Group(OrderedModel):
 
     @property
     def progress(self):
-        if not hasattr(self, '_progress'):
-            self._progress = self._calc('progress')
+        if not hasattr(self, "_progress"):
+            self._progress = self._calc("progress")
         return self._progress
 
     @progress.setter
@@ -224,10 +242,10 @@ class JobQuerySet(models.QuerySet):
         depth = project.structure.maximum_depth
         prefetch = []
         while depth > 0:
-            prefetch.append('groups')
+            prefetch.append("groups")
             depth -= 1
-        prefetch += ['tasks', 'lineitems']
-        return self.prefetch_related('__'.join(prefetch))
+        prefetch += ["tasks", "lineitems"]
+        return self.prefetch_related("__".join(prefetch))
 
 
 class JobManager(BaseManager.from_queryset(JobQuerySet)):
@@ -235,10 +253,20 @@ class JobManager(BaseManager.from_queryset(JobQuerySet)):
 
 
 class Job(Group):
-    account = models.OneToOneField('accounting.Account', related_name="job", null=True, on_delete=models.SET_NULL)
-    root = models.OneToOneField('task.Group', parent_link=True, primary_key=True, related_name='+', on_delete=models.CASCADE)
-    project = models.ForeignKey('project.Project', related_name="jobs", on_delete=models.CASCADE)
-    order_with_respect_to = 'project'
+    account = models.OneToOneField(
+        "accounting.Account", related_name="job", null=True, on_delete=models.SET_NULL
+    )
+    root = models.OneToOneField(
+        "task.Group",
+        parent_link=True,
+        primary_key=True,
+        related_name="+",
+        on_delete=models.CASCADE,
+    )
+    project = models.ForeignKey(
+        "project.Project", related_name="jobs", on_delete=models.CASCADE
+    )
+    order_with_respect_to = "project"
     is_revenue_recognized = models.BooleanField(default=False)
     is_locked = models.BooleanField(default=False)
 
@@ -253,7 +281,7 @@ class Job(Group):
         (PROPOSED, _("Proposed")),
         (APPROVED, _("Approved")),
         (STARTED, _("Started")),
-        (COMPLETED, _("Completed"))
+        (COMPLETED, _("Completed")),
     )
     status = FSMField(default=DRAFT, choices=STATE_CHOICES)
 
@@ -266,7 +294,7 @@ class Job(Group):
         verbose_name_plural = _("Job")
 
     def __init__(self, *args, **kwargs):
-        kwargs['depth'] = 0
+        kwargs["depth"] = 0
         super().__init__(*args, **kwargs)
 
     def __str__(self):
@@ -296,11 +324,18 @@ class Job(Group):
     def approve(self):
         pass
 
-    @transition(field=status, source=[APPROVED, COMPLETED], target=STARTED, custom={'label': _("Start")})
+    @transition(
+        field=status,
+        source=[APPROVED, COMPLETED],
+        target=STARTED,
+        custom={"label": _("Start")},
+    )
     def start(self):
         pass
 
-    @transition(field=status, source="*", target=COMPLETED, custom={'label': _("Complete")})
+    @transition(
+        field=status, source="*", target=COMPLETED, custom={"label": _("Complete")}
+    )
     def complete(self):
         pass
 
@@ -322,7 +357,7 @@ class Job(Group):
 
     @property
     def is_billable(self):
-        if not hasattr(self, '_is_billable'):
+        if not hasattr(self, "_is_billable"):
             self._is_billable = self.all_tasks.billable().exists()
         return self._is_billable
 
@@ -339,9 +374,9 @@ class Job(Group):
 
     def get_absolute_url(self):
         if self.project.is_template:
-            return reverse('job.editor', args=[self.pk])
+            return reverse("job.editor", args=[self.pk])
         else:
-            return reverse('job.editor', args=[self.project.id, self.pk])
+            return reverse("job.editor", args=[self.project.id, self.pk])
 
     def clone_to(self, new_job, *args):
         for group in self.groups.all():
@@ -351,7 +386,6 @@ class Job(Group):
 
 
 class TaskQuerySet(SearchableModelQuerySet):
-
     def billable(self):
         return self.filter(complete__gt=0)
 
@@ -363,18 +397,34 @@ class TaskManager(BaseManager.from_queryset(TaskQuerySet)):
 class Task(OrderedModel):
     name = models.CharField(_("Name"), max_length=512)
     description = models.TextField(blank=True)
-    search = tsvector_field.SearchVectorField([
-        tsvector_field.WeightedColumn('name', 'A'),
-        tsvector_field.WeightedColumn('description', 'D'),
-    ], settings.SEARCH_VECTOR_LANGUAGE)
+    search = tsvector_field.SearchVectorField(
+        [
+            tsvector_field.WeightedColumn("name", "A"),
+            tsvector_field.WeightedColumn("description", "D"),
+        ],
+        settings.SEARCH_VECTOR_LANGUAGE,
+    )
 
-    qty = models.DecimalField(_("Quantity"), blank=True, null=True, max_digits=13, decimal_places=3, default=Decimal('0.00'))
+    qty = models.DecimalField(
+        _("Quantity"),
+        blank=True,
+        null=True,
+        max_digits=13,
+        decimal_places=3,
+        default=Decimal("0.00"),
+    )
     qty_equation = models.CharField(max_length=512, blank=True)
-    complete = models.DecimalField(_("Completed"), max_digits=12, decimal_places=3, default=Decimal('0.00'))
+    complete = models.DecimalField(
+        _("Completed"), max_digits=12, decimal_places=3, default=Decimal("0.00")
+    )
     unit = models.CharField(_("Unit"), max_length=512, blank=True)
-    price = models.DecimalField(_("Price"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    price = models.DecimalField(
+        _("Price"), max_digits=12, decimal_places=2, default=Decimal("0.00")
+    )
     price_equation = models.CharField(max_length=512, blank=True)
-    total = models.DecimalField(_("Total"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    total = models.DecimalField(
+        _("Total"), max_digits=12, decimal_places=2, default=Decimal("0.00")
+    )
     total_equation = models.CharField(max_length=512, blank=True)
 
     started_on = models.DateField(blank=True, null=True)
@@ -382,7 +432,7 @@ class Task(OrderedModel):
 
     job = models.ForeignKey(Job, related_name="all_tasks", on_delete=models.CASCADE)
     group = models.ForeignKey(Group, related_name="tasks", on_delete=models.CASCADE)
-    order_with_respect_to = 'group'
+    order_with_respect_to = "group"
 
     # GAEB Spec 2.7.5.2
     variant_group = models.PositiveIntegerField(default=0)
@@ -400,25 +450,25 @@ class Task(OrderedModel):
         (APPROVED, _("Approved")),
         (READY, _("Ready")),
         (RUNNING, _("Running")),
-        (DONE, _("Done"))
+        (DONE, _("Done")),
     )
 
     status = FSMField(blank=True, choices=STATE_CHOICES)
 
-    token = models.BigIntegerField('api token', null=True)
+    token = models.BigIntegerField("api token", null=True)
 
-    attachments = GenericRelation('document.Attachment')
+    attachments = GenericRelation("document.Attachment")
 
     objects = TaskManager()
 
     class Meta:
         verbose_name = _("Task")
         verbose_name_plural = _("Task")
-        ordering = ('order',)
+        ordering = ("order",)
 
     def __init__(self, *args, **kwargs):
-        if 'group' in kwargs and 'job' not in kwargs:
-            kwargs['job'] = kwargs['group'].job
+        if "group" in kwargs and "job" not in kwargs:
+            kwargs["job"] = kwargs["group"].job
         super().__init__(*args, **kwargs)
 
     def refresh_pks(self):
@@ -439,15 +489,14 @@ class Task(OrderedModel):
 
     @property
     def include_estimate(self):
-        return not self.is_provisional and\
-               self.variant_serial == 0
+        return not self.is_provisional and self.variant_serial == 0
 
     @property
     def lineitem_price(self):
         """ The task price as defined by lineitems.
             For most cases, use the Task.price instead of this.
         """
-        price = Decimal('0.00')
+        price = Decimal("0.00")
         for li in self.lineitems.all():
             price += li.total
         return price
@@ -464,7 +513,7 @@ class Task(OrderedModel):
     @property
     def progress(self):
         if self.is_time_and_materials:
-            progress = Decimal('0.00')
+            progress = Decimal("0.00")
             for li in self.lineitems.all():
                 progress += li.progress
             return progress
@@ -474,8 +523,8 @@ class Task(OrderedModel):
     @property
     def complete_percent(self):
         if self.is_time_and_materials:
-            expended = Decimal('0.00')
-            qty = Decimal('0.00')
+            expended = Decimal("0.00")
+            qty = Decimal("0.00")
             for li in self.lineitems.all():
                 if li.qty is not None:
                     qty += li.qty
@@ -487,12 +536,15 @@ class Task(OrderedModel):
     @property
     def code(self):
         code = self.group._structure.format_task(self.order)
-        return '{}.{}'.format(self.group.code, code)
+        return "{}.{}".format(self.group.code, code)
 
     @property
     def variant_allocation(self):
-        return '{}.{}'.format(self.variant_group, self.variant_serial) \
-                if self.is_variant else ''
+        return (
+            "{}.{}".format(self.variant_group, self.variant_serial)
+            if self.is_variant
+            else ""
+        )
 
     def __str__(self):
         return self.name
@@ -506,7 +558,7 @@ class Task(OrderedModel):
         self.complete = 0.0
         self.started_on = None
         self.completed_on = None
-        self.status = ''
+        self.status = ""
         self.save()
         for lineitem in lineitems:
             lineitem.clone_to(self)
@@ -521,10 +573,16 @@ class ProgressReport(models.Model):
 
     # how much of the project is complete in units of quantity
     # this gets copied into task.complete with the latest progress report value
-    complete = models.DecimalField(_("Complete"), max_digits=13, decimal_places=3, default=Decimal('0.00'))
+    complete = models.DecimalField(
+        _("Complete"), max_digits=13, decimal_places=3, default=Decimal("0.00")
+    )
 
-    task = models.ForeignKey(Task, related_name="progressreports", on_delete=models.CASCADE)
-    worker = models.ForeignKey('company.Worker', related_name="progressreports", on_delete=models.CASCADE)
+    task = models.ForeignKey(
+        Task, related_name="progressreports", on_delete=models.CASCADE
+    )
+    worker = models.ForeignKey(
+        "company.Worker", related_name="progressreports", on_delete=models.CASCADE
+    )
 
     @property
     def complete_percent(self):
@@ -533,23 +591,31 @@ class ProgressReport(models.Model):
     class Meta:
         verbose_name = _("Progress Report")
         verbose_name_plural = _("Progress Reports")
-        ordering = ('-timestamp',)
+        ordering = ("-timestamp",)
 
 
 class LineItem(OrderedModel):
 
     name = models.CharField(_("Name"), max_length=512, blank=True)
 
-    qty = models.DecimalField(_("Quantity"), max_digits=13, decimal_places=3, default=Decimal('0.00'))
+    qty = models.DecimalField(
+        _("Quantity"), max_digits=13, decimal_places=3, default=Decimal("0.00")
+    )
     qty_equation = models.CharField(max_length=512, blank=True)
-    expended = models.DecimalField(_("Expended"), max_digits=12, decimal_places=3, default=Decimal('0.00'))
+    expended = models.DecimalField(
+        _("Expended"), max_digits=12, decimal_places=3, default=Decimal("0.00")
+    )
 
     unit = models.CharField(_("Unit"), max_length=512, blank=True)
 
-    price = models.DecimalField(_("Price"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    price = models.DecimalField(
+        _("Price"), max_digits=12, decimal_places=2, default=Decimal("0.00")
+    )
     price_equation = models.CharField(max_length=512, blank=True)
 
-    total = models.DecimalField(_("Total"), max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    total = models.DecimalField(
+        _("Total"), max_digits=12, decimal_places=2, default=Decimal("0.00")
+    )
     total_equation = models.CharField(max_length=512, blank=True)
 
     MATERIAL = "material"
@@ -563,22 +629,30 @@ class LineItem(OrderedModel):
         (OTHER, _("Other")),
     )
     ICONS = {  # glyphicons
-        MATERIAL: 'equalizer',
-        LABOR: 'user',
-        EQUIPMENT: 'wrench',
-        OTHER: 'tasks',
+        MATERIAL: "equalizer",
+        LABOR: "user",
+        EQUIPMENT: "wrench",
+        OTHER: "tasks",
     }
-    lineitem_type = models.CharField(_('Line Item Type'), max_length=128, choices=LINEITEM_TYPES, default=OTHER)
+    lineitem_type = models.CharField(
+        _("Line Item Type"), max_length=128, choices=LINEITEM_TYPES, default=OTHER
+    )
 
-    labor = models.ForeignKey(LaborType, null=True, related_name="lineitems", on_delete=models.SET_NULL)
-    material = models.ForeignKey(MaterialType, null=True, related_name="lineitems", on_delete=models.SET_NULL)
-    equipment = models.ForeignKey(EquipmentType, null=True, related_name="lineitems", on_delete=models.SET_NULL)
+    labor = models.ForeignKey(
+        LaborType, null=True, related_name="lineitems", on_delete=models.SET_NULL
+    )
+    material = models.ForeignKey(
+        MaterialType, null=True, related_name="lineitems", on_delete=models.SET_NULL
+    )
+    equipment = models.ForeignKey(
+        EquipmentType, null=True, related_name="lineitems", on_delete=models.SET_NULL
+    )
 
     task = models.ForeignKey(Task, related_name="lineitems", on_delete=models.CASCADE)
-    order_with_respect_to = 'task'
+    order_with_respect_to = "task"
 
     job = models.ForeignKey(Job, related_name="all_lineitems", on_delete=models.CASCADE)
-    token = models.BigIntegerField('api token', null=True)
+    token = models.BigIntegerField("api token", null=True)
 
     # hidden lineitems are not included in the total
     is_hidden = models.BooleanField(default=False)
@@ -586,11 +660,11 @@ class LineItem(OrderedModel):
     class Meta:
         verbose_name = _("Line Item")
         verbose_name_plural = _("Line Items")
-        ordering = ('order',)
+        ordering = ("order",)
 
     def __init__(self, *args, **kwargs):
-        if 'task' in kwargs and 'job' not in kwargs:
-            kwargs['job'] = kwargs['task'].job
+        if "task" in kwargs and "job" not in kwargs:
+            kwargs["job"] = kwargs["task"].job
         super().__init__(*args, **kwargs)
 
     @property
@@ -637,16 +711,24 @@ class ExpendReport(models.Model):
 
     # how much of the lineitem has been expended
     # this gets copied into lineitem.expended with the value from latest report
-    expended = models.DecimalField(_("Expended"), max_digits=13, decimal_places=3, default=Decimal('0.00'))
+    expended = models.DecimalField(
+        _("Expended"), max_digits=13, decimal_places=3, default=Decimal("0.00")
+    )
 
-    lineitem = models.ForeignKey(LineItem, related_name="expendreports", on_delete=models.CASCADE)
-    worker = models.ForeignKey('company.Worker', related_name="expendreports", on_delete=models.CASCADE)
+    lineitem = models.ForeignKey(
+        LineItem, related_name="expendreports", on_delete=models.CASCADE
+    )
+    worker = models.ForeignKey(
+        "company.Worker", related_name="expendreports", on_delete=models.CASCADE
+    )
 
     @property
     def expended_percent(self):
-        return round(self.expended / self.lineitem.qty * 100) if self.lineitem.qty else 0
+        return (
+            round(self.expended / self.lineitem.qty * 100) if self.lineitem.qty else 0
+        )
 
     class Meta:
         verbose_name = _("Expend Report")
         verbose_name_plural = _("Expend Reports")
-        ordering = ('-timestamp',)
+        ordering = ("-timestamp",)

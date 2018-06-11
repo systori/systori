@@ -23,5 +23,14 @@ def days_ago(ago):
 
 def delete_me_dailyplan_flow_next_url(dailyplan, current):
     next_step = next_dailyplan_step(current)
-    return reverse('field.dailyplan.' + next_step, args=[dailyplan.jobsite.id, dailyplan.url_id]) + \
-           '?origin=' + reverse('field.project', args=[dailyplan.jobsite.project.id, dailyplan.day.isoformat()])
+    return (
+        reverse(
+            "field.dailyplan." + next_step,
+            args=[dailyplan.jobsite.id, dailyplan.url_id],
+        )
+        + "?origin="
+        + reverse(
+            "field.project",
+            args=[dailyplan.jobsite.project.id, dailyplan.day.isoformat()],
+        )
+    )

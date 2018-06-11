@@ -2,6 +2,7 @@ import os
 import unicodedata
 import json
 import django
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "systori.settings")
 django.setup()
 
@@ -12,18 +13,20 @@ from systori.apps.task.models import Task, Group, Job, LineItem
 
 
 def has_n(thing):
-    return '\n' in thing
+    return "\n" in thing
+
 
 def normalize(thing):
-    return unicodedata.normalize('NFC', thing)
+    return unicodedata.normalize("NFC", thing)
+
 
 def check_obj(thing):
-    for attr in ['name', 'description']:
-        value = getattr(thing, attr, '')
+    for attr in ["name", "description"]:
+        value = getattr(thing, attr, "")
         setattr(thing, attr, normalize(value))
-        value = getattr(thing, attr, '')
-        setattr(thing, attr, value.replace('\n', '<br />'))
-        value = getattr(thing, attr, '')
+        value = getattr(thing, attr, "")
+        setattr(thing, attr, value.replace("\n", "<br />"))
+        value = getattr(thing, attr, "")
         setattr(thing, attr, value.strip())
     thing.save()
 

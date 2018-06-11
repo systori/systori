@@ -7,29 +7,27 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('timetracking', '0006_auto_20160707_1831'),
-    ]
+    dependencies = [("timetracking", "0006_auto_20160707_1831")]
 
     operations = [
         migrations.RenameField(
-            model_name='timer',
-            old_name='latitude',
-            new_name='start_latitude',
+            model_name="timer", old_name="latitude", new_name="start_latitude"
         ),
         migrations.RenameField(
-            model_name='timer',
-            old_name='longitude',
-            new_name='start_longitude',
+            model_name="timer", old_name="longitude", new_name="start_longitude"
         ),
         migrations.AddField(
-            model_name='timer',
-            name='end_latitude',
-            field=models.DecimalField(blank=True, decimal_places=8, max_digits=10, null=True),
+            model_name="timer",
+            name="end_latitude",
+            field=models.DecimalField(
+                blank=True, decimal_places=8, max_digits=10, null=True
+            ),
         ),
         migrations.AddField(
-            model_name='timer',
-            name='end_longitude',
-            field=models.DecimalField(blank=True, decimal_places=8, max_digits=10, null=True),
+            model_name="timer",
+            name="end_longitude",
+            field=models.DecimalField(
+                blank=True, decimal_places=8, max_digits=10, null=True
+            ),
         ),
     ]

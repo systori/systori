@@ -8,6 +8,7 @@ import django.db.models.deletion
 
 def move_equipment(apps, schema_editor):
     from systori.apps.company.models import Company
+
     DailyPlan = apps.get_model("project", "DailyPlan")
     EquipmentAssignment = apps.get_model("project", "EquipmentAssignment")
     for company in Company.objects.all():
@@ -21,33 +22,51 @@ def move_equipment(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('equipment', '0001_initial'),
-        ('project', '0002_dailyplan_tasks'),
-    ]
+    dependencies = [("equipment", "0001_initial"), ("project", "0002_dailyplan_tasks")]
 
     operations = [
         migrations.CreateModel(
-            name='EquipmentAssignment',
+            name="EquipmentAssignment",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('dailyplan', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assigned_equipment', to='project.DailyPlan')),
-                ('equipment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assignments', to='equipment.Equipment')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "dailyplan",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="assigned_equipment",
+                        to="project.DailyPlan",
+                    ),
+                ),
+                (
+                    "equipment",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="assignments",
+                        to="equipment.Equipment",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='dailyplan',
-            name='equipment2',
-            field=models.ManyToManyField(related_name='dailyplans2', through='project.EquipmentAssignment', to='equipment.Equipment'),
+            model_name="dailyplan",
+            name="equipment2",
+            field=models.ManyToManyField(
+                related_name="dailyplans2",
+                through="project.EquipmentAssignment",
+                to="equipment.Equipment",
+            ),
         ),
         migrations.RunPython(move_equipment),
-        migrations.RemoveField(
-            model_name='dailyplan',
-            name='equipment',
-        ),
+        migrations.RemoveField(model_name="dailyplan", name="equipment"),
         migrations.RenameField(
-            model_name='dailyplan',
-            old_name='equipment2',
-            new_name='equipment'
+            model_name="dailyplan", old_name="equipment2", new_name="equipment"
         ),
     ]

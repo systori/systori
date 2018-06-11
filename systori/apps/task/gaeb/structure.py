@@ -15,17 +15,15 @@ class GAEBStructure:
 
         if not pattern:
             raise exceptions.ValidationError(
-                "GAEB hierarchy cannot be blank.",
-                code='invalid',
+                "GAEB hierarchy cannot be blank.", code="invalid"
             )
 
         self.pattern = pattern
-        self.zfill = [len(p) for p in pattern.split('.')]
+        self.zfill = [len(p) for p in pattern.split(".")]
 
         if not (2 <= len(self.zfill) <= self.MAXLEVELS):
             raise exceptions.ValidationError(
-                "GAEB hierarchy is outside the allowed hierarchy depth.",
-                code='invalid',
+                "GAEB hierarchy is outside the allowed hierarchy depth.", code="invalid"
             )
 
     def __str__(self):
@@ -33,7 +31,7 @@ class GAEBStructure:
 
     @property
     def maximum_depth(self):
-        return len(self.zfill)-2
+        return len(self.zfill) - 2
 
     @staticmethod
     def _format(position, zfill):
@@ -43,7 +41,9 @@ class GAEBStructure:
         return self._format(position, self.zfill[-1])
 
     def format_group(self, position, depth):
-        assert self.is_valid_depth(depth), "Group depth is beyond the allowed structure depth."
+        assert self.is_valid_depth(
+            depth
+        ), "Group depth is beyond the allowed structure depth."
         return self._format(position, self.zfill[depth])
 
     def is_valid_depth(self, depth):
@@ -51,7 +51,6 @@ class GAEBStructure:
 
 
 class GAEBStructureFormField(forms.Field):
-
     def __init__(self, max_length=None, *args, **kwargs):
         self.max_length = max_length
         super().__init__(*args, **kwargs)
@@ -63,12 +62,11 @@ class GAEBStructureFormField(forms.Field):
 
     def widget_attrs(self, widget):
         attrs = super().widget_attrs(widget)
-        attrs['maxlength'] = self.max_length
+        attrs["maxlength"] = self.max_length
         return attrs
 
 
 class GAEBStructureProperty:
-
     def __init__(self, name):
         self.name = name
 
@@ -80,16 +78,19 @@ class GAEBStructureProperty:
             value = GAEBStructure(value)
         if isinstance(value, GAEBStructure):
             instance.__dict__[self.name] = value
-            instance.__dict__[self.name+'_depth'] = value.maximum_depth
+            instance.__dict__[self.name + "_depth"] = value.maximum_depth
         else:
-            raise TypeError("%s value must be a GAEBStructure instance, not '%r'" % (self.name, value))
+            raise TypeError(
+                "%s value must be a GAEBStructure instance, not '%r'"
+                % (self.name, value)
+            )
 
 
 class GAEBStructureField(models.Field):
     description = _("Pattern for the GAEB hierarchy code structure.")
 
     def __init__(self, *args, **kwargs):
-        kwargs['max_length'] = 64
+        kwargs["max_length"] = 64
         super().__init__(*args, **kwargs)
 
     def deconstruct(self):
@@ -102,13 +103,16 @@ class GAEBStructureField(models.Field):
 
         setattr(cls, name, GAEBStructureProperty(name))
 
-        depth_name = name+'_depth'
+        depth_name = name + "_depth"
         depth_field = models.PositiveIntegerField(editable=False, db_index=True)
         cls.add_to_class(depth_name, depth_field)
-        setattr(cls, depth_name, property(
-            fget=lambda obj: obj.__dict__[depth_name],
-            fset=lambda obj, val: None,
-        ))
+        setattr(
+            cls,
+            depth_name,
+            property(
+                fget=lambda obj: obj.__dict__[depth_name], fset=lambda obj, val: None
+            ),
+        )
 
     def get_internal_type(self):
         return "CharField"
@@ -130,9 +134,6 @@ class GAEBStructureField(models.Field):
         return value.pattern
 
     def formfield(self, **kwargs):
-        defaults = {
-            'form_class': GAEBStructureFormField,
-            'max_length': self.max_length
-        }
+        defaults = {"form_class": GAEBStructureFormField, "max_length": self.max_length}
         defaults.update(kwargs)
         return super().formfield(**defaults)

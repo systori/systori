@@ -8,18 +8,18 @@ from .models import Account, Transaction
 
 
 class AccountList(TemplateView):
-    template_name = 'accounting/account_list.html'
+    template_name = "accounting/account_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['banks'] = Account.objects.banks()
-        context['other'] = Account.objects.exclude(account_type=Account.ASSET)
+        context["banks"] = Account.objects.banks()
+        context["other"] = Account.objects.exclude(account_type=Account.ASSET)
         return context
 
 
 class AccountView(SingleObjectMixin, ListView):
     paginate_by = 10
-    template_name = 'accounting/account_detail.html'
+    template_name = "accounting/account_detail.html"
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(queryset=Account.objects.all())
@@ -27,16 +27,17 @@ class AccountView(SingleObjectMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['account'] = self.object
+        context["account"] = self.object
         return context
 
     def get_queryset(self):
-        return Transaction.objects \
-            .prefetch_related('entries__account') \
-            .prefetch_related('entries__job__project') \
-            .filter(entries__account=self.object) \
-            .order_by('-transacted_on') \
+        return (
+            Transaction.objects.prefetch_related("entries__account")
+            .prefetch_related("entries__job__project")
+            .filter(entries__account=self.object)
+            .order_by("-transacted_on")
             .distinct()
+        )
 
 
 class AccountUpdate(UpdateView):
@@ -44,7 +45,7 @@ class AccountUpdate(UpdateView):
     form_class = AccountForm
 
     def get_success_url(self):
-        return reverse('accounts')
+        return reverse("accounts")
 
 
 class BankAccountCreate(CreateView):
@@ -52,7 +53,7 @@ class BankAccountCreate(CreateView):
     form_class = BankAccountForm
 
     def get_success_url(self):
-        return reverse('accounts')
+        return reverse("accounts")
 
 
 class BankAccountUpdate(UpdateView):
@@ -60,9 +61,9 @@ class BankAccountUpdate(UpdateView):
     form_class = BankAccountForm
 
     def get_success_url(self):
-        return reverse('accounts')
+        return reverse("accounts")
 
 
 class BankAccountDelete(DeleteView):
     model = Account
-    success_url = reverse_lazy('accounts')
+    success_url = reverse_lazy("accounts")

@@ -5,34 +5,32 @@ from django.db import migrations
 
 def update_tasks(group):
     from systori.apps.task.models import Task
-    for group in group['groups']:
+
+    for group in group["groups"]:
         update_tasks(group)
-    for task in group['tasks']:
+    for task in group["tasks"]:
         try:
-            t = Task.objects.get(id=task['task.id'])
-            if task['qty'] is None:
-                task['qty'] = t.qty
-                task['estimate'] = t.total
+            t = Task.objects.get(id=task["task.id"])
+            if task["qty"] is None:
+                task["qty"] = t.qty
+                task["estimate"] = t.total
         except Task.DoesNotExist:
-            print(task['task.id'])
+            print(task["task.id"])
 
 
 def update_invoices(apps, schema_editor):
     from systori.apps.company.models import Company
     from systori.apps.document.models import Invoice
-    Company.objects.get(schema='mehr-handwerk').activate()
+
+    Company.objects.get(schema="mehr-handwerk").activate()
     for invoice in Invoice.objects.all():
-        for job in invoice.json.get('jobs', []):
+        for job in invoice.json.get("jobs", []):
             update_tasks(job)
         invoice.save()
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('document', '0012_fix_migrations_20170407'),
-    ]
+    dependencies = [("document", "0012_fix_migrations_20170407")]
 
-    operations = [
-        migrations.RunPython(update_invoices),
-    ]
+    operations = [migrations.RunPython(update_invoices)]

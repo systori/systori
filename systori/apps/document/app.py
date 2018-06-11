@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class DocumentConfig(AppConfig):
-    name = 'systori.apps.document'
+    name = "systori.apps.document"

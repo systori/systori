@@ -26,11 +26,8 @@ user = User.objects.create(first_name=first_name, last_name=last_name, email=ema
 user.set_password(password)
 user.save()
 
-for email in ['lex@damoti.com', 'mr@mehr-handwerk.de']:
-    Worker.objects.create(
-        company=company,
-        user=User.objects.get(email=email)
-    )
+for email in ["lex@damoti.com", "mr@mehr-handwerk.de"]:
+    Worker.objects.create(company=company, user=User.objects.get(email=email))
 
 worker = Worker.objects.create(company=company, user=user, is_owner=True)
 

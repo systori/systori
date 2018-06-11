@@ -5,18 +5,17 @@ from .models import User
 
 
 class UserFactory(factory.django.DjangoModelFactory):
-
     class Meta:
         model = User
-        django_get_or_create = ('email',)
+        django_get_or_create = ("email",)
 
-    email = factory.Sequence(lambda n: 'test_user_{}@systori.com'.format(n))
+    email = factory.Sequence(lambda n: "test_user_{}@systori.com".format(n))
     first_name = fuzzy.FuzzyText(length=15)
     last_name = fuzzy.FuzzyText(length=15)
 
     @factory.post_generation
     def password(self, create, extracted, **kwargs):
-        password = extracted or 'open sesame'
+        password = extracted or "open sesame"
         self.set_password(password)
 
     @factory.post_generation

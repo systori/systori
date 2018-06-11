@@ -1,1 +1,1 @@
-default_app_config = 'systori.apps.user.app.UserConfig'
+default_app_config = "systori.apps.user.app.UserConfig"

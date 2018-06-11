@@ -5,7 +5,7 @@ from systori.apps.company.models import Company
 from .models import Timer
 
 
-@task.periodic_task(run_every=crontab(minute='*'), bind=True)
+@task.periodic_task(run_every=crontab(minute="*"), bind=True)
 def start_or_stop_work_breaks(self):
     for company in Company.objects.all():
         company.activate()

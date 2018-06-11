@@ -19,91 +19,103 @@ class PeriodFilterMixin(TemplateView):
         report_period = timezone.localdate()
         period_form = self.period_form_class(self.request.GET)
         if period_form.is_valid():
-            report_period = period_form.cleaned_data['period']
+            report_period = period_form.cleaned_data["period"]
         else:
-            period_form = self.period_form_class(initial={'period': report_period})
+            period_form = self.period_form_class(initial={"period": report_period})
         return super().get_context_data(
-            report_period=report_period,
-            period_form=period_form,
-            **kwargs
+            report_period=report_period, period_form=period_form, **kwargs
         )
 
 
 class HomeView(BaseCreateView, PeriodFilterMixin):
-    template_name = 'timetracking/home.html'
+    template_name = "timetracking/home.html"
     form_class = forms.ManualTimerForm
     period_form_class = forms.DayPickerForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['company'] = self.request.company
+        kwargs["company"] = self.request.company
         return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['report'] = Timer.objects.get_daily_workers_report(context['report_period'])
+        context["report"] = Timer.objects.get_daily_workers_report(
+            context["report_period"]
+        )
         return context
 
     def get_success_url(self):
-        return self.request.META['HTTP_REFERER']
+        return self.request.META["HTTP_REFERER"]
 
 
 class VacationScheduleView(ListView):
-    template_name = 'timetracking/vacation.html'
+    template_name = "timetracking/vacation.html"
 
     def get_queryset(self):
-        self.selected_year = int(self.kwargs.get('selected_year', timezone.localdate().year))
+        self.selected_year = int(
+            self.kwargs.get("selected_year", timezone.localdate().year)
+        )
         return Timer.objects.get_vacation_schedule(self.selected_year)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['years'] = range(2016, timezone.localdate().year+1, 1)
-        context['selected_year'] = self.selected_year
+        context["years"] = range(2016, timezone.localdate().year + 1, 1)
+        context["selected_year"] = self.selected_year
         return context
 
 
 class WorkerReportView(BaseCreateView, PeriodFilterMixin):
-    template_name = 'timetracking/user_report.html'
+    template_name = "timetracking/user_report.html"
     form_class = forms.WorkerManualTimerForm
     period_form_class = forms.MonthPickerForm
 
     @cached_property
     def worker(self):
-        return get_object_or_404(self.request.company.tracked_workers(), pk=self.kwargs['worker_id'])
+        return get_object_or_404(
+            self.request.company.tracked_workers(), pk=self.kwargs["worker_id"]
+        )
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['company'] = self.request.company
+        kwargs["company"] = self.request.company
         return kwargs
 
     def get_initial(self):
         initial = super().get_initial()
-        initial['workers'] = [self.worker]
+        initial["workers"] = [self.worker]
         return initial
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['timesheet_worker'] = self.worker
-        context['report'] = Timer.objects.get_monthly_worker_report(context['report_period'], self.worker)
+        context["timesheet_worker"] = self.worker
+        context["report"] = Timer.objects.get_monthly_worker_report(
+            context["report_period"], self.worker
+        )
         return context
 
     def get_success_url(self):
-        return self.request.META['HTTP_REFERER']
+        return self.request.META["HTTP_REFERER"]
 
 
 class TimerDeleteView(DeleteView):
     model = Timer
 
     def get_success_url(self):
-        return reverse_lazy('timetracking_worker', kwargs={'worker_id': self.object.worker.id})
+        return reverse_lazy(
+            "timetracking_worker", kwargs={"worker_id": self.object.worker.id}
+        )
 
 
 class TimerDeleteSelectedDayView(ListView):
-    template_name = 'timetracking/timers_confirm_delete.html'
+    template_name = "timetracking/timers_confirm_delete.html"
 
     def get_queryset(self):
-        selected_day = datetime.datetime.strptime(self.kwargs['selected_day'], '%Y-%m-%d').date()
-        timers = Timer.objects.filter(started__date=selected_day).filter(worker_id=self.kwargs['worker_id'])
+        selected_day = datetime.datetime.strptime(
+            self.kwargs["selected_day"], "%Y-%m-%d"
+        ).date()
+        timers = Timer.objects.filter(started__date=selected_day).filter(
+            worker_id=self.kwargs["worker_id"]
+        )
         return timers
 
     def get_context_data(self, **kwargs):
@@ -117,7 +129,7 @@ class TimerDeleteSelectedDayView(ListView):
         timerange = "{:%Y-%m-%d} {:%H:%M} -> {:%H:%M}".format(
             timezone.localtime(current_timer.started).date(),
             timezone.localtime(current_timer.started),
-            timezone.localtime(current_timer.stopped)
+            timezone.localtime(current_timer.stopped),
         )
         return super().get_context_data(timerange=timerange)
 
@@ -127,4 +139,6 @@ class TimerDeleteSelectedDayView(ListView):
         return redirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse_lazy('timetracking_worker', kwargs={'worker_id': self.kwargs['worker_id']})
+        return reverse_lazy(
+            "timetracking_worker", kwargs={"worker_id": self.kwargs["worker_id"]}
+        )

@@ -15,8 +15,6 @@ class NoteDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = NoteSerializer
 
 
-urlpatterns = [
-    url(r'^note/(?P<pk>\d+)$', NoteDetail.as_view(), name='note.api'),
-]
+urlpatterns = [url(r"^note/(?P<pk>\d+)$", NoteDetail.as_view(), name="note.api")]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

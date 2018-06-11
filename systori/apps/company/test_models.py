@@ -13,7 +13,6 @@ NOW = datetime(2014, 12, 2, 17, 58, 28, 0, EST)  # birth of Systori
 
 @freeze_time(NOW)
 class CompanyTest(TestCase):
-
     def test_active_workers(self):
         company = CompanyFactory()
         user = UserFactory(company=company)
@@ -38,7 +37,7 @@ class CompanyTest(TestCase):
         worker1.contract.effective = NOW.date()
         worker1.contract.save()
         self.assertEqual(worker1.contract.yearly_vacation_claim, 1200)
-        worker1.contract.effective = date(2014,1,1)
+        worker1.contract.effective = date(2014, 1, 1)
         worker1.contract.save()
         self.assertEqual(worker1.contract.yearly_vacation_claim, 14400)
         worker1.contract.effective = None

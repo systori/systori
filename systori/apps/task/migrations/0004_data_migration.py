@@ -29,7 +29,7 @@ def copy_old_job_to_new_job(apps, schema_editor):
             is_revenue_recognized=old_job.is_revenue_recognized,
             status=old_job.status,
             account=old_job.account,
-            project=old_job.project
+            project=old_job.project,
         )
         job.job = job
         job.save()
@@ -43,7 +43,7 @@ def copy_old_job_to_new_job(apps, schema_editor):
                 name=taskgroup.name,
                 description=taskgroup.description,
                 order=taskgroup.order + 1 + old_job.taskgroup_offset,
-                depth=1
+                depth=1,
             )
             for task in taskgroup.tasks.all():
                 TOKEN += 1
@@ -55,10 +55,6 @@ def copy_old_job_to_new_job(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('task', '0003_group_refactor'),
-    ]
+    dependencies = [("task", "0003_group_refactor")]
 
-    operations = [
-        RunInSchemas(migrations.RunPython(copy_old_job_to_new_job)),
-    ]
+    operations = [RunInSchemas(migrations.RunPython(copy_old_job_to_new_job))]

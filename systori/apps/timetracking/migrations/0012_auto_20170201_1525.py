@@ -6,19 +6,36 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('timetracking', '0011_convert_user_to_access_cleanup'),
-    ]
+    dependencies = [("timetracking", "0011_convert_user_to_access_cleanup")]
 
     operations = [
         migrations.AlterField(
-            model_name='timer',
-            name='job_site',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='project.JobSite'),
+            model_name="timer",
+            name="job_site",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="project.JobSite",
+            ),
         ),
         migrations.AlterField(
-            model_name='timer',
-            name='kind',
-            field=models.CharField(choices=[('work', 'Work'), ('holiday', 'Holiday'), ('illness', 'Illness'), ('correction', 'Correction'), ('training', 'Training'), ('public_holiday', 'Public holiday'), ('paid_leave', 'Paid leave'), ('unpaid_leave', 'Unpaid leave')], db_index=True, default='work', max_length=32),
+            model_name="timer",
+            name="kind",
+            field=models.CharField(
+                choices=[
+                    ("work", "Work"),
+                    ("holiday", "Holiday"),
+                    ("illness", "Illness"),
+                    ("correction", "Correction"),
+                    ("training", "Training"),
+                    ("public_holiday", "Public holiday"),
+                    ("paid_leave", "Paid leave"),
+                    ("unpaid_leave", "Unpaid leave"),
+                ],
+                db_index=True,
+                default="work",
+                max_length=32,
+            ),
         ),
     ]

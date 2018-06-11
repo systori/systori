@@ -10,134 +10,153 @@ from version import VERSION
 
 version = _V(VERSION)
 
-env.hosts = ['systori.io']
+env.hosts = ["systori.io"]
 
-PROD_MEDIA_PATH = '/var/lib/systori/production'
-PROD_MEDIA_FILE = 'systori.media.tgz'
+PROD_MEDIA_PATH = "/var/lib/systori/production"
+PROD_MEDIA_FILE = "systori.media.tgz"
 
 
 def prepare(service, branch):
     "copy database and migrate"
 
-    settings = {
-        'HOST': 'db',
-        'NAME': 'systori_{}'.format(service),
-        'USER': 'postgres'
-    }
+    settings = {"HOST": "db", "NAME": "systori_{}".format(service), "USER": "postgres"}
 
-    if service != 'production':
-        local('dropdb -h {HOST} -U {USER} {NAME}'.format(**settings))
-        local('createdb -T systori_production -h {HOST} -U {USER} {NAME}'.format(**settings))
+    if service != "production":
+        local("dropdb -h {HOST} -U {USER} {NAME}".format(**settings))
+        local(
+            "createdb -T systori_production -h {HOST} -U {USER} {NAME}".format(
+                **settings
+            )
+        )
 
-    local('./manage.py migrate --noinput')
+    local("./manage.py migrate --noinput")
     local('psql -c "VACUUM ANALYZE" -h {HOST} -U {USER} {NAME}'.format(**settings))
 
 
-def initsettings(envname='local'):
+def initsettings(envname="local"):
     ":envname=local -- creates __init__.py in settings folder"
-    assert envname in ['dev', 'production', 'local', 'common']
-    if os.path.exists('systori/settings/__init__.py'):
-        print('Settings have already been initialized.')
+    assert envname in ["dev", "production", "local", "common"]
+    if os.path.exists("systori/settings/__init__.py"):
+        print("Settings have already been initialized.")
     else:
-        with open('systori/settings/__init__.py', 'w') as s:
-            print('Initializing settings for {}'.format(envname))
-            s.write('from .{} import *\n'.format(envname))
+        with open("systori/settings/__init__.py", "w") as s:
+            print("Initializing settings for {}".format(envname))
+            s.write("from .{} import *\n".format(envname))
 
 
 def test():
     "django continuous integration test"
-    with shell_env(DJANGO_SETTINGS_MODULE='systori.settings.test'):
-        local('coverage run -p manage.py test --verbosity 3 systori.apps systori.lib')
-        local('coverage combine')
-        local('coverage html -d reports')
+    with shell_env(DJANGO_SETTINGS_MODULE="systori.settings.test"):
+        local("coverage run -p manage.py test --verbosity 3 systori.apps systori.lib")
+        local("coverage combine")
+        local("coverage html -d reports")
 
 
 def makemessages():
     "django makemessages"
-    local('./manage.py makemessages -l de -e tex,html,py')
+    local("./manage.py makemessages -l de -e tex,html,py")
 
 
-def fetchdb(envname='production'):
+def fetchdb(envname="production"):
     ":envname=production -- fetch remote database, see getdb"
-    container = 'systori_db_1'
-    dbname = 'systori_'+envname
-    dump_file = 'systori.'+envname+'.dump'
-    dump_folder = '/var/lib/postgresql/dumps'
+    container = "systori_db_1"
+    dbname = "systori_" + envname
+    dump_file = "systori." + envname + ".dump"
+    dump_folder = "/var/lib/postgresql/dumps"
     dump_path = os.path.join(dump_folder, dump_file)
     # -Fc : custom postgresql compressed format
-    run('docker exec {container} pg_dump -U postgres -Fc -x -f {dump_path} {dbname}'
-        .format(**locals()))
+    run(
+        "docker exec {container} pg_dump -U postgres -Fc -x -f {dump_path} {dbname}".format(
+            **locals()
+        )
+    )
     get(dump_path, dump_file)
-    sudo('rm {}'.format(dump_path))
+    sudo("rm {}".format(dump_path))
 
 
 def dbexists(name):
-    dbs = local('psql -lqt | cut -d \| -f 1', capture=True).split()
+    dbs = local("psql -lqt | cut -d \| -f 1", capture=True).split()
     return name in dbs
 
 
-def getdb(envname='production'):
+def getdb(envname="production"):
     ":envname=production -- fetch and load remote database"
     fetchdb(envname)
-    if dbexists('systori_local'):
-        local('dropdb systori_local')
-    local('createdb systori_local')
-    local('pg_restore -d systori_local -O systori.'+envname+'.dump')
+    if dbexists("systori_local"):
+        local("dropdb systori_local")
+    local("createdb systori_local")
+    local("pg_restore -d systori_local -O systori." + envname + ".dump")
     local('psql -c "ANALYZE" systori_local')
-    local('rm systori.'+envname+'.dump')
+    local("rm systori." + envname + ".dump")
 
 
 def getmedia():
     "download production media files"
     with cd(PROD_MEDIA_PATH):
-        run('tar -cz media -f /tmp/' + PROD_MEDIA_FILE)
-    get('/tmp/' + PROD_MEDIA_FILE, PROD_MEDIA_FILE)
-    local('tar xfz ' + PROD_MEDIA_FILE)
-    local('rm ' + PROD_MEDIA_FILE)
-    run('rm /tmp/' + PROD_MEDIA_FILE)
+        run("tar -cz media -f /tmp/" + PROD_MEDIA_FILE)
+    get("/tmp/" + PROD_MEDIA_FILE, PROD_MEDIA_FILE)
+    local("tar xfz " + PROD_MEDIA_FILE)
+    local("rm " + PROD_MEDIA_FILE)
+    run("rm /tmp/" + PROD_MEDIA_FILE)
 
 
-def dockergetdb(container='postgres', envname='production'):
+def dockergetdb(container="postgres", envname="production"):
     ":container=app,envname=production -- fetch and load remote database"
-    dump_file = 'systori.'+envname+'.dump'
-    settings = {
-        'NAME': 'systori_local',
-        'USER': 'postgres',
-        'HOST': 'localhost'
-    }
+    dump_file = "systori." + envname + ".dump"
+    settings = {"NAME": "systori_local", "USER": "postgres", "HOST": "localhost"}
     fetchdb(envname)
-    local('docker cp {} {}:/{}'.format(dump_file, container, dump_file))
-    local('docker exec {0} dropdb -h {HOST} -U {USER} {NAME}'.format(container, **settings))
-    local('docker exec {0} createdb -h {HOST} -U {USER} {NAME}'.format(container, **settings))
-    local('docker exec {0} pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(
-        container, dump_file, **settings))
-    local('rm ' + dump_file)
+    local("docker cp {} {}:/{}".format(dump_file, container, dump_file))
+    local(
+        "docker exec {0} dropdb -h {HOST} -U {USER} {NAME}".format(
+            container, **settings
+        )
+    )
+    local(
+        "docker exec {0} createdb -h {HOST} -U {USER} {NAME}".format(
+            container, **settings
+        )
+    )
+    local(
+        "docker exec {0} pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}".format(
+            container, dump_file, **settings
+        )
+    )
+    local("rm " + dump_file)
 
 
-def localdockergetdb(container='postgres', envname='production', targetname='systori_local'):
+def localdockergetdb(
+    container="postgres", envname="production", targetname="systori_local"
+):
     ":container=app,envname=production -- fetch and load remote database"
-    dump_file = 'systori.'+envname+'.dump'
-    settings = {
-        'NAME': targetname,
-        'USER': 'postgres',
-        'HOST': 'localhost'
-    }
+    dump_file = "systori." + envname + ".dump"
+    settings = {"NAME": targetname, "USER": "postgres", "HOST": "localhost"}
     fetchdb(envname)
-    local('docker cp {0} "$(docker-compose ps -q {1})":/{0}'.format(dump_file, container))
-    local('docker exec "$(docker-compose ps -q {0})" '
-          'dropdb -h {HOST} -U {USER} {NAME} --if-exists'.format(container, **settings))
-    local('docker exec "$(docker-compose ps -q {0})" createdb -h {HOST} -U {USER} {NAME}'
-          .format(container, **settings))
-    local('docker exec "$(docker-compose ps -q {0})" '
-          'pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}'.format(container, dump_file, **settings))
-    local('rm ' + dump_file)
+    local(
+        'docker cp {0} "$(docker-compose ps -q {1})":/{0}'.format(dump_file, container)
+    )
+    local(
+        'docker exec "$(docker-compose ps -q {0})" '
+        "dropdb -h {HOST} -U {USER} {NAME} --if-exists".format(container, **settings)
+    )
+    local(
+        'docker exec "$(docker-compose ps -q {0})" createdb -h {HOST} -U {USER} {NAME}'.format(
+            container, **settings
+        )
+    )
+    local(
+        'docker exec "$(docker-compose ps -q {0})" '
+        "pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}".format(
+            container, dump_file, **settings
+        )
+    )
+    local("rm " + dump_file)
 
 
-def getdartium(version='1.24.3', channel='stable'):
+def getdartium(version="1.24.3", channel="stable"):
     "get dartium and content-shell for linux, on Mac use homebrew"
 
-    BIN = os.path.expanduser('~/bin')
-    DOWNLOAD = os.path.join(BIN, 'downloads')
+    BIN = os.path.expanduser("~/bin")
+    DOWNLOAD = os.path.join(BIN, "downloads")
     if not os.path.exists(BIN):
         os.mkdir(BIN)
     if not os.path.exists(DOWNLOAD):
@@ -146,35 +165,37 @@ def getdartium(version='1.24.3', channel='stable'):
     paths = []
     with lcd(BIN):
 
-        for app in ('content_shell', 'dartium',):
+        for app in ("content_shell", "dartium"):
 
-            zipfile = os.path.join(DOWNLOAD, '{}-{}-{}.zip'.format(app, version, channel))
+            zipfile = os.path.join(
+                DOWNLOAD, "{}-{}-{}.zip".format(app, version, channel)
+            )
 
             if not os.path.exists(zipfile):
                 url = (
-                    'https://storage.googleapis.com/dart-archive/channels/{}/release/'
-                    '{}/dartium/{}-linux-x64-release.zip'.format(channel, version, app)
+                    "https://storage.googleapis.com/dart-archive/channels/{}/release/"
+                    "{}/dartium/{}-linux-x64-release.zip".format(channel, version, app)
                 )
                 local("curl {} > {}".format(url, zipfile))
 
-            outdir = local('unzip -l {} | head -n 4 | tail -n 1'.format(zipfile), capture=True)
-            outdir = outdir.split(' ')[-1]
+            outdir = local(
+                "unzip -l {} | head -n 4 | tail -n 1".format(zipfile), capture=True
+            )
+            outdir = outdir.split(" ")[-1]
 
             if not os.path.exists(os.path.join(BIN, outdir)):
                 local("unzip -qo {}".format(zipfile))
-                if app == 'dartium':
+                if app == "dartium":
                     with lcd(outdir):
                         local("ln -s chrome dartium")
 
             local("ln -sfn {} {}".format(outdir, app))
             paths.append(os.path.join(BIN, app))
 
-        lib = 'libfontconfig1_2.11.0-0ubuntu4.2_amd64.deb'
+        lib = "libfontconfig1_2.11.0-0ubuntu4.2_amd64.deb"
         libfile = os.path.join(DOWNLOAD, lib)
         if not os.path.exists(libfile):
-            liburl = (
-                'http://security.ubuntu.com/ubuntu/pool/main/f/fontconfig/'+lib
-            )
+            liburl = "http://security.ubuntu.com/ubuntu/pool/main/f/fontconfig/" + lib
             local("curl {} > {}".format(liburl, libfile))
 
         local(
@@ -182,69 +203,82 @@ def getdartium(version='1.24.3', channel='stable'):
             " > content_shell/lib/libfontconfig.so.1".format(libfile)
         )
 
-    not_present = [path for path in paths if path not in os.environ['PATH']]
+    not_present = [path for path in paths if path not in os.environ["PATH"]]
     if not_present:
         print("Add to your environment:")
-        print('export PATH="%s:$PATH"' % ':'.join(not_present))
+        print('export PATH="%s:$PATH"' % ":".join(not_present))
 
 
 def linkfonts():
-    TRUETYPE = '/usr/share/fonts/truetype'
+    TRUETYPE = "/usr/share/fonts/truetype"
     FONTS = {
-        'msttcorefonts': {
-            'fonts': [
-                'Arial', 'Comic_Sans_MS', 'Courier_New', 'Georgia', 'Impact',
-                'Trebuchet_MS', 'Times_New_Roman', 'Verdana',
+        "msttcorefonts": {
+            "fonts": [
+                "Arial",
+                "Comic_Sans_MS",
+                "Courier_New",
+                "Georgia",
+                "Impact",
+                "Trebuchet_MS",
+                "Times_New_Roman",
+                "Verdana",
             ],
-            'variants': ['', '_Bold', '_Italic', '_Bold_Italic']
+            "variants": ["", "_Bold", "_Italic", "_Bold_Italic"],
         },
-        'kochi': {'fonts': ['kochi-gothic', 'kochi-mincho']},
-        'ttf-indic-fonts-core': {'fonts': ['lohit_hi', 'lohit_ta', 'MuktiNarrow']},
-        'ttf-punjabi-fonts': {'fonts': ['lohit_pa']}
+        "kochi": {"fonts": ["kochi-gothic", "kochi-mincho"]},
+        "ttf-indic-fonts-core": {"fonts": ["lohit_hi", "lohit_ta", "MuktiNarrow"]},
+        "ttf-punjabi-fonts": {"fonts": ["lohit_pa"]},
     }
 
-    if not os.path.exists(os.path.join(TRUETYPE, 'ttf-dejavu')):
-        local('sudo ln -s {} {}'.format(
-            os.path.join(TRUETYPE, 'dejavu'),
-            os.path.join(TRUETYPE, 'ttf-dejavu'),
-        ))
+    if not os.path.exists(os.path.join(TRUETYPE, "ttf-dejavu")):
+        local(
+            "sudo ln -s {} {}".format(
+                os.path.join(TRUETYPE, "dejavu"), os.path.join(TRUETYPE, "ttf-dejavu")
+            )
+        )
 
     for family, fonts in FONTS.items():
         family_path = os.path.join(TRUETYPE, family)
         if not os.path.exists(family_path):
-            local('sudo mkdir {}'.format(family_path))
+            local("sudo mkdir {}".format(family_path))
         with lcd(family_path):
-            for font in fonts['fonts']:
-                for variant in fonts.get('variants', ['']):
-                    font_file = font+variant+'.ttf'
+            for font in fonts["fonts"]:
+                for variant in fonts.get("variants", [""]):
+                    font_file = font + variant + ".ttf"
                     font_path = os.path.join(family_path, font_file)
                     if not os.path.exists(font_path):
-                        local('sudo ln -s ../dejavu/DejaVuSans-Bold.ttf {}'.format(font_file))
+                        local(
+                            "sudo ln -s ../dejavu/DejaVuSans-Bold.ttf {}".format(
+                                font_file
+                            )
+                        )
 
 
 def linkdart():
     "create .packages file"
-    with open('systori/dart/.packages', 'r') as packages:
+    with open("systori/dart/.packages", "r") as packages:
         for package in packages:
-            if package.startswith('#'):
+            if package.startswith("#"):
                 continue
-            package_name, location = package.strip().split(':', 1)
-            location = '/' + location.lstrip('file:///')
+            package_name, location = package.strip().split(":", 1)
+            location = "/" + location.lstrip("file:///")
             try:
-                os.symlink(location, os.path.join('systori/dart/web/packages', package_name))
+                os.symlink(
+                    location, os.path.join("systori/dart/web/packages", package_name)
+                )
             except OSError as exc:
                 print(exc)
 
 
 def makedart():
     "build dart packages in debug mode"
-    with lcd('systori/dart'):
-        local('pub build --mode=debug')
+    with lcd("systori/dart"):
+        local("pub build --mode=debug")
 
 
 def testdart(test_file=None):
     "run dart tests"
-    with lcd('systori/dart'):
+    with lcd("systori/dart"):
         docker = "docker run --rm -v `pwd`:`pwd` --workdir=`pwd` damoti/content-shell"
         if test_file:
             local(docker + " '-r expanded {}'".format(test_file))
@@ -252,44 +286,49 @@ def testdart(test_file=None):
             local(docker)
 
 
-SLACK = 'https://hooks.slack.com/services/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'
+SLACK = "https://hooks.slack.com/services/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"
 
 
-def slack(msg, envname='dev'):
+def slack(msg, envname="dev"):
     import requests
-    middomain = '' if envname=='production' else '.'+envname
-    systori_url = 'https://mehr-handwerk'+middomain+'.systori.com'
-    requests.post(SLACK, json.dumps({'text':
-        msg % {'systori-url': systori_url, 'envname': envname}
-    }))
+
+    middomain = "" if envname == "production" else "." + envname
+    systori_url = "https://mehr-handwerk" + middomain + ".systori.com"
+    requests.post(
+        SLACK,
+        json.dumps({"text": msg % {"systori-url": systori_url, "envname": envname}}),
+    )
 
 
 def mail():
     "start mail debugging server"
-    local('python -m smtpd -n -c DebuggingServer localhost:1025')
+    local("python -m smtpd -n -c DebuggingServer localhost:1025")
 
 
 def dockercontextsize():
     "shows size of 'context' uploaded to docker when building docker image"
-    local('du -X .dockerignore -h -d 2 | sort -h')
+    local("du -X .dockerignore -h -d 2 | sort -h")
 
 
 def jenkins():
 
-    local('pip install --upgrade -r requirements/dev.pip')
+    local("pip install --upgrade -r requirements/dev.pip")
 
-    initsettings('jenkins')
+    initsettings("jenkins")
 
-    with lcd('systori/dart'):
-        local('pub get')
-        #local('pub build') we'll need this later when doing selenium tests
-        local("xvfb-run -s '-screen 0 1024x768x24' pub run test -r expanded -p content-shell test")
+    with lcd("systori/dart"):
+        local("pub get")
+        # local('pub build') we'll need this later when doing selenium tests
+        local(
+            "xvfb-run -s '-screen 0 1024x768x24' pub run test -r expanded -p content-shell test"
+        )
 
-    local('coverage run -p manage.py test systori')
-    local('coverage combine')
-    local('coverage html')
+    local("coverage run -p manage.py test systori")
+    local("coverage combine")
+    local("coverage html")
 
-    slack('build finished')
+    slack("build finished")
+
 
 def git():
     "git usage help and cheatsheet"

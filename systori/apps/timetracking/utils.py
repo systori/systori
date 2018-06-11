@@ -31,13 +31,13 @@ def to_current_timezone(date_time):
 
 def get_workers_statuses():
     from .models import Timer
-    return dict(
-        (timer.worker_id, timer)
-        for timer in Timer.objects.current()
-    )
+
+    return dict((timer.worker_id, timer) for timer in Timer.objects.current())
 
 
-def get_dates_in_range(start: date, end: date, include_weekends=False) -> Iterator[date]:
+def get_dates_in_range(
+    start: date, end: date, include_weekends=False
+) -> Iterator[date]:
     current = start
     while end >= current:
         if include_weekends or current.weekday() not in (5, 6):
@@ -45,10 +45,12 @@ def get_dates_in_range(start: date, end: date, include_weekends=False) -> Iterat
         current += timedelta(days=1)
 
 
-BreakSpan = namedtuple('BreakSpan', ('start', 'end'))
+BreakSpan = namedtuple("BreakSpan", ("start", "end"))
 
 
-def get_timespans_split_by_breaks(start_time: time, end_time: time, breaks) -> Iterator[Tuple[time, time]]:
+def get_timespans_split_by_breaks(
+    start_time: time, end_time: time, breaks
+) -> Iterator[Tuple[time, time]]:
     """ This function is timezone unaware. Time range and breaks must
         be in the same local timezone. Breaks must be in chronological order.
     """

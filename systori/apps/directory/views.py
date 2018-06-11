@@ -14,7 +14,7 @@ class DirectoryList(ListView):
     model = Contact
 
     def get_queryset(self):
-        return self.model.objects.order_by('last_name').all()
+        return self.model.objects.order_by("last_name").all()
 
 
 class ProjectContactSetBillable(SingleObjectMixin, View):
@@ -24,36 +24,38 @@ class ProjectContactSetBillable(SingleObjectMixin, View):
         self.object = self.get_object()
         self.object.is_billable = True
         self.object.save()
-        return HttpResponseRedirect(reverse('project.view', args=[self.object.project.id]))
+        return HttpResponseRedirect(
+            reverse("project.view", args=[self.object.project.id])
+        )
 
 
 class ProjectContactAdd(CreateView):
     model = ProjectContact
-    template_name = 'directory/projectcontact_form_add.html'
-    fields = '__all__'
+    template_name = "directory/projectcontact_form_add.html"
+    fields = "__all__"
 
     def get_context_data(self, **kwargs):
         context = super(ProjectContactAdd, self).get_context_data(**kwargs)
-        context['contact_list'] = Contact.objects.all()
+        context["contact_list"] = Contact.objects.all()
         return context
 
     def get_form_kwargs(self):
         kwargs = super(ProjectContactAdd, self).get_form_kwargs()
-        kwargs['instance'] = ProjectContact(project=self.request.project)
+        kwargs["instance"] = ProjectContact(project=self.request.project)
         return kwargs
 
     def get_success_url(self):
-        return reverse('project.view', args=[self.request.project.id])
+        return reverse("project.view", args=[self.request.project.id])
 
 
 class ProjectContactCreate(CreateView):
     model = Contact
     form_class = ContactForm
-    template_name = 'directory/projectcontact_form_create.html'
+    template_name = "directory/projectcontact_form_create.html"
 
     def get_context_data(self, **kwargs):
         context = super(ProjectContactCreate, self).get_context_data(**kwargs)
-        context['project_contact_form'] = ProjectContactForm
+        context["project_contact_form"] = ProjectContactForm
         return context
 
     def form_valid(self, form):
@@ -66,14 +68,14 @@ class ProjectContactCreate(CreateView):
         return response
 
     def get_success_url(self):
-        return reverse('project.view', args=[self.request.project.id])
+        return reverse("project.view", args=[self.request.project.id])
 
 
 class ProjectContactRemove(DeleteView):
     model = ProjectContact
 
     def get_success_url(self):
-        return reverse('project.view', args=[self.request.project.id])
+        return reverse("project.view", args=[self.request.project.id])
 
 
 class ContactView(DetailView):
@@ -81,22 +83,22 @@ class ContactView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ContactView, self).get_context_data(**kwargs)
-        context['form'] = ContactForm(instance=self.object)
+        context["form"] = ContactForm(instance=self.object)
         return context
 
 
 class ContactCreate(CreateView):
     model = Contact
     form_class = ContactForm
-    success_url = reverse_lazy('directory')
+    success_url = reverse_lazy("directory")
 
 
 class ContactUpdate(UpdateView):
     model = Contact
     form_class = ContactForm
-    success_url = reverse_lazy('directory')
+    success_url = reverse_lazy("directory")
 
 
 class ContactDelete(DeleteView):
     model = Contact
-    success_url = reverse_lazy('directory')
+    success_url = reverse_lazy("directory")

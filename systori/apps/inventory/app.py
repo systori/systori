@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class InventoryConfig(AppConfig):
-    name = 'systori.apps.inventory'
+    name = "systori.apps.inventory"

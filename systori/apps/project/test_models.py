@@ -10,7 +10,6 @@ from .models import Project
 
 
 class ProjectTotalTests(TestCase):
-
     def setUp(self):
         CompanyFactory()
         self.project = ProjectFactory()
@@ -48,22 +47,21 @@ class ProjectTotalTests(TestCase):
 
 
 class ProjectPhaseTests(TestCase):
-
     def setUp(self):
-        activate('en')
+        activate("en")
         CompanyFactory()
         self.project = ProjectFactory()
         self.letterhead = LetterheadFactory()
 
     def test_project_new(self):
-        self.assertEquals('Prospective', self.project.get_phase_display())
-        self.assertEquals('Active', self.project.get_state_display())
+        self.assertEquals("Prospective", self.project.get_phase_display())
+        self.assertEquals("Active", self.project.get_state_display())
 
     def test_project_with_proposal(self):
         ProposalFactory(project=self.project, letterhead=self.letterhead)
         self.project.refresh_from_db()
-        self.assertEquals('Tendering', self.project.get_phase_display())
-        self.assertEquals('Active', self.project.get_state_display())
+        self.assertEquals("Tendering", self.project.get_phase_display())
+        self.assertEquals("Active", self.project.get_state_display())
 
     def test_project_with_approved_proposal(self):
         proposal = ProposalFactory(project=self.project, letterhead=self.letterhead)
@@ -72,8 +70,8 @@ class ProjectPhaseTests(TestCase):
         proposal.approve()
         proposal.save()
         self.project.refresh_from_db()
-        self.assertEquals('Planning', self.project.get_phase_display())
-        self.assertEquals('Active', self.project.get_state_display())
+        self.assertEquals("Planning", self.project.get_phase_display())
+        self.assertEquals("Active", self.project.get_state_display())
 
     def test_project_with_started_job(self):
         # first get to planning
@@ -89,6 +87,5 @@ class ProjectPhaseTests(TestCase):
         job.save()
 
         self.project.refresh_from_db()
-        self.assertEquals('Executing', self.project.get_phase_display())
-        self.assertEquals('Active', self.project.get_state_display())
-
+        self.assertEquals("Executing", self.project.get_phase_display())
+        self.assertEquals("Active", self.project.get_state_display())

@@ -6,14 +6,24 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('company', '0012_company_created'),
-    ]
+    dependencies = [("company", "0012_company_created")]
 
     operations = [
         migrations.AlterField(
-            model_name='company',
-            name='schema',
-            field=models.CharField(help_text='The internal name of the schema.<br>May only contain lowercase letters, digits, underscores and dashes. Must start with a letter.<br>May not be changed after creation.', max_length=36, primary_key=True, serialize=False, unique=True, validators=[django.core.validators.RegexValidator(message='May only contain lowercase letters, digits, underscores and dashes. Must start with a letter.', regex='^[a-z][a-z0-9_\\-]*$')]),
-        ),
+            model_name="company",
+            name="schema",
+            field=models.CharField(
+                help_text="The internal name of the schema.<br>May only contain lowercase letters, digits, underscores and dashes. Must start with a letter.<br>May not be changed after creation.",
+                max_length=36,
+                primary_key=True,
+                serialize=False,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        message="May only contain lowercase letters, digits, underscores and dashes. Must start with a letter.",
+                        regex="^[a-z][a-z0-9_\\-]*$",
+                    )
+                ],
+            ),
+        )
     ]

@@ -20,9 +20,9 @@ for project in Project.objects.all():
     for proposal in project.proposals.all():
         if len(proposal.json) == 0:
             proposal.delete()
-            #print("found some propsals")
+            # print("found some propsals")
     for invoice in project.invoices.all():
         if len(invoice.json) == 0:
-            #print("projekt: {}".format(project.id))
+            # print("projekt: {}".format(project.id))
             invoice.delete()
-            #print("found some invoices")
+            # print("found some invoices")

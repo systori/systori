@@ -7,24 +7,26 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('directory', '0002_auto_20160221_0254'),
-    ]
+    dependencies = [("directory", "0002_auto_20160221_0254")]
 
     operations = [
         migrations.AlterField(
-            model_name='contact',
-            name='first_name',
-            field=models.CharField(blank=True, max_length=512, verbose_name='First Name'),
+            model_name="contact",
+            name="first_name",
+            field=models.CharField(
+                blank=True, max_length=512, verbose_name="First Name"
+            ),
         ),
         migrations.AlterField(
-            model_name='contact',
-            name='last_name',
-            field=models.CharField(blank=True, max_length=512, verbose_name='Last Name'),
+            model_name="contact",
+            name="last_name",
+            field=models.CharField(
+                blank=True, max_length=512, verbose_name="Last Name"
+            ),
         ),
         migrations.AlterField(
-            model_name='contact',
-            name='phone',
-            field=models.CharField(blank=True, max_length=512, verbose_name='Phone'),
+            model_name="contact",
+            name="phone",
+            field=models.CharField(blank=True, max_length=512, verbose_name="Phone"),
         ),
     ]

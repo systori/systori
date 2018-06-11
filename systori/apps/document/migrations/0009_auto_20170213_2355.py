@@ -5,14 +5,22 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('document', '0008_rename_json_fields_invoice'),
-    ]
+    dependencies = [("document", "0008_rename_json_fields_invoice")]
 
     operations = [
         migrations.AlterField(
-            model_name='letterhead',
-            name='font',
-            field=models.CharField(choices=[('OpenSans', 'OpenSans'), ('DroidSerif', 'DroidSerif'), ('Tinos', 'Tinos'), ('Ubuntu', 'Ubuntu')], default=('OpenSans', 'OpenSans'), max_length=15, verbose_name='Font'),
-        ),
+            model_name="letterhead",
+            name="font",
+            field=models.CharField(
+                choices=[
+                    ("OpenSans", "OpenSans"),
+                    ("DroidSerif", "DroidSerif"),
+                    ("Tinos", "Tinos"),
+                    ("Ubuntu", "Ubuntu"),
+                ],
+                default=("OpenSans", "OpenSans"),
+                max_length=15,
+                verbose_name="Font",
+            ),
+        )
     ]

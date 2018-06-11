@@ -7,17 +7,9 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('equipment', '0002_auto_20160818_1218'),
-    ]
+    dependencies = [("equipment", "0002_auto_20160818_1218")]
 
     operations = [
-        migrations.AlterModelOptions(
-            name='maintenance',
-            options={},
-        ),
-        migrations.AlterModelOptions(
-            name='refuelingstop',
-            options={},
-        ),
+        migrations.AlterModelOptions(name="maintenance", options={}),
+        migrations.AlterModelOptions(name="refuelingstop", options={}),
     ]

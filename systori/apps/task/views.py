@@ -20,30 +20,29 @@ class JobCreate(CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['instance'] = Job(
-            order=None, project=self.request.project
-        )
+        kwargs["instance"] = Job(order=None, project=self.request.project)
         return kwargs
 
 
 class JobPaste(JobCreate):
-
     def get_form_class(self):
         return JobPasteForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['other_job'] = get_object_or_404(Job, pk=self.request.session[JobCopy.SESSION_KEY])
+        kwargs["other_job"] = get_object_or_404(
+            Job, pk=self.request.session[JobCopy.SESSION_KEY]
+        )
         return kwargs
 
 
 class JobImport(FormView):
     form_class = JobImportForm
-    template_name = 'task/job_import_form.html'
+    template_name = "task/job_import_form.html"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['project'] = self.request.project
+        kwargs["project"] = self.request.project
         return kwargs
 
     def post(self, request, *args, **kwargs):
@@ -56,7 +55,7 @@ class JobImport(FormView):
 
 class JobCopy(SingleObjectMixin, View):
     model = Job
-    SESSION_KEY = 'job_copy'
+    SESSION_KEY = "job_copy"
 
     def get(self, request, *args, **kwargs):
         object = self.get_object()
@@ -70,9 +69,9 @@ class JobEditor(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['blank_group'] = Group()
-        context['blank_task'] = Task()
-        context['blank_lineitem'] = LineItem()
+        context["blank_group"] = Group()
+        context["blank_task"] = Task()
+        context["blank_lineitem"] = LineItem()
         return context
 
     def get_queryset(self):
@@ -85,9 +84,7 @@ class JobProgress(UpdateView):
     form_class = JobProgressForm
 
     def get_initial(self):
-        return {
-            'progress_worker': self.request.worker.id
-        }
+        return {"progress_worker": self.request.worker.id}
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
@@ -106,9 +103,8 @@ class JobDelete(DeleteView):
 
 
 class JobLock(RedirectView):
-
     def get_redirect_url(self, *args, **kwargs):
-        job = get_object_or_404(Job, pk=kwargs['pk'])
+        job = get_object_or_404(Job, pk=kwargs["pk"])
         job.toggle_lock()
         job.save()
         return job.project.get_absolute_url()

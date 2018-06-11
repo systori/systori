@@ -32,54 +32,63 @@ class ProjectList(ListView):
         "executing",
         "settlement",
         "warranty",
-        "finished"
+        "finished",
     ]
 
     def get(self, request, *args, **kwargs):
         project_groups = OrderedDict([(phase, []) for phase in self.phase_order])
         self.object_list = self.get_queryset().exclude(is_template=True)
 
-        for project in self.object_list.order_by('id'):
+        for project in self.object_list.order_by("id"):
             project_groups[project.phase].append(project)
 
         context = super().get_context_data(**kwargs)
-        context['project_groups'] = project_groups
-        context['phases'] = [phase for phase in Project.PHASE_CHOICES]
+        context["project_groups"] = project_groups
+        context["phases"] = [phase for phase in Project.PHASE_CHOICES]
 
         return self.render_to_response(context)
 
 
 class ProjectSearchApi(View):
-
     def get(self, request):
-        query = Project.objects.without_template().prefetch_related('jobsites') \
-                .prefetch_related('project_contacts__contact').prefetch_related('jobs').prefetch_related('invoices')
+        query = (
+            Project.objects.without_template()
+            .prefetch_related("jobsites")
+            .prefetch_related("project_contacts__contact")
+            .prefetch_related("jobs")
+            .prefetch_related("invoices")
+        )
 
         project_filter = Q()
         searchable_paths = {}
 
-        search_terms = [term for term in request.GET.get('search').split(' ')]
+        search_terms = [term for term in request.GET.get("search").split(" ")]
         for term in search_terms:
-            searchable_paths[term] = Q(id__icontains=term) | Q(name__icontains=term) | Q(description__icontains=term) |\
-                                     Q(jobsites__name__icontains=term) | \
-                                     Q(jobsites__address__icontains=term) | \
-                                     Q(jobsites__city__icontains=term) | \
-                                     Q(jobs__name__icontains=term) | Q(jobs__description__icontains=term) | \
-                                     Q(contacts__business__icontains=term) | \
-                                     Q(contacts__first_name__icontains=term) | \
-                                     Q(contacts__last_name__icontains=term) | \
-                                     Q(contacts__address__icontains=term) | \
-                                     Q(contacts__notes__icontains=term) | \
-                                     Q(project_contacts__association__icontains=term) | \
-                                     Q(invoices__invoice_no__icontains=term) | \
-                                     Q(contacts__email__icontains=term)
+            searchable_paths[term] = (
+                Q(id__icontains=term)
+                | Q(name__icontains=term)
+                | Q(description__icontains=term)
+                | Q(jobsites__name__icontains=term)
+                | Q(jobsites__address__icontains=term)
+                | Q(jobsites__city__icontains=term)
+                | Q(jobs__name__icontains=term)
+                | Q(jobs__description__icontains=term)
+                | Q(contacts__business__icontains=term)
+                | Q(contacts__first_name__icontains=term)
+                | Q(contacts__last_name__icontains=term)
+                | Q(contacts__address__icontains=term)
+                | Q(contacts__notes__icontains=term)
+                | Q(project_contacts__association__icontains=term)
+                | Q(invoices__invoice_no__icontains=term)
+                | Q(contacts__email__icontains=term)
+            )
         for key in searchable_paths.keys():
             project_filter &= searchable_paths[key]
 
         query = query.without_template().filter(project_filter).distinct()
         projects = [p.id for p in query]
 
-        return JsonResponse({'projects': projects})
+        return JsonResponse({"projects": projects})
 
 
 class ProjectView(DetailView):
@@ -87,9 +96,11 @@ class ProjectView(DetailView):
 
     def get_jobsites_and_activity(self):
         first_day = date.today()
-        last_day = date(1970,1,1)
+        last_day = date(1970, 1, 1)
         modified = False
-        jobsites = self.object.jobsites.annotate(first_day=Min('dailyplans__day'), last_day=Max('dailyplans__day'))
+        jobsites = self.object.jobsites.annotate(
+            first_day=Min("dailyplans__day"), last_day=Max("dailyplans__day")
+        )
         for site in jobsites:
             if site.first_day is not None:
                 first_day = min(first_day, site.first_day)
@@ -102,23 +113,29 @@ class ProjectView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['jobs'] = self.object.jobs.with_totals().all()
-        context['proposals'] = self.object.proposals.prefetch_related('jobs__project').all()
-        context['project_contacts'] = self.object.project_contacts.prefetch_related('contact').all()
+        context["jobs"] = self.object.jobs.with_totals().all()
+        context["proposals"] = self.object.proposals.prefetch_related(
+            "jobs__project"
+        ).all()
+        context["project_contacts"] = self.object.project_contacts.prefetch_related(
+            "contact"
+        ).all()
 
-        context['jobsites'],\
-        context['activity_first_day'],\
-        context['activity_last_day'] = self.get_jobsites_and_activity()
+        context["jobsites"], context["activity_first_day"], context[
+            "activity_last_day"
+        ] = self.get_jobsites_and_activity()
 
-        context['jobsites_count'] = len(context['jobsites'])
-        context['project_has_billable_contact'] = self.object.has_billable_contact
-        context['payments'] = self.object.payments.all()
-        context['adjustments'] = self.object.adjustments.all()
-        context['refunds'] = self.object.refunds.all()
-        context['parent_invoices'] = self.object.invoices.filter(parent=None).prefetch_related('invoices').all()
-        context['TAX_RATE_DISPLAY'] = '{}%'.format(ubrdecimal(TAX_RATE*100, 2))
+        context["jobsites_count"] = len(context["jobsites"])
+        context["project_has_billable_contact"] = self.object.has_billable_contact
+        context["payments"] = self.object.payments.all()
+        context["adjustments"] = self.object.adjustments.all()
+        context["refunds"] = self.object.refunds.all()
+        context["parent_invoices"] = (
+            self.object.invoices.filter(parent=None).prefetch_related("invoices").all()
+        )
+        context["TAX_RATE_DISPLAY"] = "{}%".format(ubrdecimal(TAX_RATE * 100, 2))
 
-        context['note'] = NoteForm()
+        context["note"] = NoteForm()
 
         return context
 
@@ -128,14 +145,14 @@ class ProjectView(DetailView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         note = Note(
-            project=self.object,
-            content_object=self.object,
-            worker=request.worker
+            project=self.object, content_object=self.object, worker=request.worker
         )
         form = NoteForm(request.POST, instance=note)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('project.view', kwargs={'pk':self.object.id}))
+            return HttpResponseRedirect(
+                reverse("project.view", kwargs={"pk": self.object.id})
+            )
         return self.get(request, *args, **kwargs)
 
 
@@ -145,14 +162,14 @@ class ProjectCreate(CreateView):
 
     def get_jobsite_form(self):
         if self.request.company.is_jobsite_required:
-            kwargs = {'initial': {'name': _('Main Site')}}
-            if self.request.method == 'POST':
-                kwargs['data'] = self.request.POST
-            return JobSiteForm(prefix='jobsite', **kwargs)
+            kwargs = {"initial": {"name": _("Main Site")}}
+            if self.request.method == "POST":
+                kwargs["data"] = self.request.POST
+            return JobSiteForm(prefix="jobsite", **kwargs)
 
     def get_context_data(self, **kwargs):
-        if 'jobsite_form' not in kwargs:
-            kwargs['jobsite_form'] = self.get_jobsite_form()
+        if "jobsite_form" not in kwargs:
+            kwargs["jobsite_form"] = self.get_jobsite_form()
         return super().get_context_data(**kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -161,9 +178,9 @@ class ProjectCreate(CreateView):
         if form.is_valid() and (not jobsite_form or jobsite_form.is_valid()):
             return self.forms_valid(form, jobsite_form)
         self.object = None
-        return self.render_to_response(self.get_context_data(
-            form=form, jobsite_form=jobsite_form
-        ))
+        return self.render_to_response(
+            self.get_context_data(form=form, jobsite_form=jobsite_form)
+        )
 
     def forms_valid(self, form, jobsite_form):
         project = form.save()
@@ -172,14 +189,12 @@ class ProjectCreate(CreateView):
             jobsite_form.instance.project = project
             jobsite_form.save()
 
-        JobCreateForm({
-            'name': project.name,
-        }, instance=Job(project=project)).save()
+        JobCreateForm({"name": project.name}, instance=Job(project=project)).save()
 
-        if 'save_goto_project' in self.request.POST:
-            redirect = reverse('project.view', args=[project.id])
+        if "save_goto_project" in self.request.POST:
+            redirect = reverse("project.view", args=[project.id])
         else:
-            redirect = reverse('projects')
+            redirect = reverse("projects")
 
         return HttpResponseRedirect(redirect)
 
@@ -193,33 +208,33 @@ class ProjectUpdate(UpdateView):
     form_class = ProjectUpdateForm
 
     def get_success_url(self):
-        if 'save_goto_project' in self.request.POST:
-            return reverse('project.view', args=[self.object.id])
+        if "save_goto_project" in self.request.POST:
+            return reverse("project.view", args=[self.object.id])
         else:
-            return reverse('projects')
+            return reverse("projects")
 
 
 class ProjectDelete(DeleteView):
     model = Project
-    success_url = reverse_lazy('projects')
+    success_url = reverse_lazy("projects")
 
 
 class ProjectProgress(DetailView):
     model = Project
-    template_name = 'project/project_progress.html'
+    template_name = "project/project_progress.html"
 
     def get_summary(self, jobs):
         summary = {}
-        summary['estimate'] = []
-        summary['progress'] = []
-        summary['percent'] = []
-        summary['estimate'].append(self.object.estimate)
-        summary['progress'].append(self.object.progress)
-        summary['percent'].append(self.object.progress_percent)
+        summary["estimate"] = []
+        summary["progress"] = []
+        summary["percent"] = []
+        summary["estimate"].append(self.object.estimate)
+        summary["progress"].append(self.object.progress)
+        summary["percent"].append(self.object.progress_percent)
         for job in jobs:
-            summary['estimate'].append(job.estimate)
-            summary['progress'].append(job.progress)
-            summary['percent'].append(job.progress_percent)
+            summary["estimate"].append(job.estimate)
+            summary["progress"].append(job.progress)
+            summary["percent"].append(job.progress_percent)
         return summary
 
     def get_names(self, jobs):
@@ -234,9 +249,9 @@ class ProjectProgress(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         jobs = self.object.jobs.with_hierarchy(self.object).with_totals()
-        context['jobs'] = jobs
-        context['summary'] = self.get_summary(jobs)
-        context['names'] = self.get_names(jobs)
+        context["jobs"] = jobs
+        context["summary"] = self.get_summary(jobs)
+        context["names"] = self.get_names(jobs)
         return context
 
 
@@ -248,7 +263,7 @@ class ProjectManualPhaseTransition(SingleObjectMixin, View):
 
         transition = None
         for t in self.object.get_available_user_phase_transitions(request.user):
-            if t.name == kwargs['transition']:
+            if t.name == kwargs["transition"]:
                 transition = t
                 break
 
@@ -256,7 +271,7 @@ class ProjectManualPhaseTransition(SingleObjectMixin, View):
             getattr(self.object, transition.name)()
             self.object.save()
 
-        return HttpResponseRedirect(reverse('project.view', args=[self.object.id]))
+        return HttpResponseRedirect(reverse("project.view", args=[self.object.id]))
 
 
 class ProjectManualStateTransition(SingleObjectMixin, View):
@@ -267,7 +282,7 @@ class ProjectManualStateTransition(SingleObjectMixin, View):
 
         transition = None
         for t in self.object.get_available_user_state_transitions(request.user):
-            if t.name == kwargs['transition']:
+            if t.name == kwargs["transition"]:
                 transition = t
                 break
 
@@ -275,7 +290,7 @@ class ProjectManualStateTransition(SingleObjectMixin, View):
             getattr(self.object, transition.name)()
             self.object.save()
 
-        return HttpResponseRedirect(reverse('project.view', args=[self.object.id]))
+        return HttpResponseRedirect(reverse("project.view", args=[self.object.id]))
 
 
 class ProjectDailyPlansView(TemplateView):
@@ -284,35 +299,37 @@ class ProjectDailyPlansView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        project = get_object_or_404(Project, id=kwargs['project_pk'])
-        jobsites = project.jobsites.prefetch_related('dailyplans__workers__user').all()
+        project = get_object_or_404(Project, id=kwargs["project_pk"])
+        jobsites = project.jobsites.prefetch_related("dailyplans__workers__user").all()
         workers = {}
-        context['dailyplans'] = []
-        context['total_dailyplans'] = 0
-        context['total_man_days'] = 0
+        context["dailyplans"] = []
+        context["total_dailyplans"] = 0
+        context["total_man_days"] = 0
         for jobsite in jobsites:
             for dailyplan in jobsite.dailyplans.all():
-                context['dailyplans'].append(dailyplan)
+                context["dailyplans"].append(dailyplan)
                 dailyplan.worker_count = 0
-                context['total_dailyplans'] += 1
+                context["total_dailyplans"] += 1
                 for worker in dailyplan.workers.all():
                     workers.setdefault(worker.get_full_name, 0)
                     workers[worker.get_full_name] += 1
                     dailyplan.worker_count += 1
-                    context['total_man_days'] += 1
-        context['workers_summary'] = sorted(workers.items(), key=lambda x: x[1], reverse=True)
+                    context["total_man_days"] += 1
+        context["workers_summary"] = sorted(
+            workers.items(), key=lambda x: x[1], reverse=True
+        )
         return context
 
 
 class TemplatesView(TemplateView):
-    template_name = 'main/templates.html'
+    template_name = "main/templates.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['jobs'] = Project.objects.template().get().jobs.all()
-        context['documents'] = DocumentTemplate.objects.all()
-        context['document_settings'] = DocumentSettings.objects.all()
-        context['letterheads'] = Letterhead.objects.all()
+        context["jobs"] = Project.objects.template().get().jobs.all()
+        context["documents"] = DocumentTemplate.objects.all()
+        context["document_settings"] = DocumentSettings.objects.all()
+        context["letterheads"] = Letterhead.objects.all()
         return context
 
 
@@ -326,10 +343,10 @@ class JobSiteCreate(CreateView):
         previous = project.jobsites.first()
         if previous:
             previous.id = None
-            previous.name = ''
-            kwargs['instance'] = previous
+            previous.name = ""
+            kwargs["instance"] = previous
         else:
-            kwargs['instance'] = self.model(project=project)
+            kwargs["instance"] = self.model(project=project)
         return kwargs
 
     def get_success_url(self):
@@ -353,6 +370,6 @@ class JobSiteDelete(DeleteView):
 
 class AllProjectsProgress(ListView):
     model = ProgressReport
-    queryset = model.objects.prefetch_related('worker__user')
-    context_object_name = 'progressreport_list'
+    queryset = model.objects.prefetch_related("worker__user")
+    context_object_name = "progressreport_list"
     paginate_by = 30

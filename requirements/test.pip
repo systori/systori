@@ -3,4 +3,3 @@ codecov
 selenium
 factory-boy
 freezegun
-pypdf2

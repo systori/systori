@@ -5,13 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('project', '0008_remove_project_account'),
-    ]
+    dependencies = [("project", "0008_remove_project_account")]
 
-    operations = [
-        migrations.RemoveField(
-            model_name='jobsite',
-            name='travel_time',
-        ),
-    ]
+    operations = [migrations.RemoveField(model_name="jobsite", name="travel_time")]

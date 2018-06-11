@@ -1,1 +1,1 @@
-default_app_config = 'systori.apps.inventory.app.InventoryConfig'
+default_app_config = "systori.apps.inventory.app.InventoryConfig"

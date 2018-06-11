@@ -4,7 +4,9 @@ from django.conf import settings
 
 
 class Contact(models.Model):
-    projects = models.ManyToManyField('project.Project', through='ProjectContact', related_name="contacts")
+    projects = models.ManyToManyField(
+        "project.Project", through="ProjectContact", related_name="contacts"
+    )
 
     business = models.CharField(_("Business"), max_length=512, blank=True)
 
@@ -19,9 +21,13 @@ class Contact(models.Model):
     address = models.CharField(_("Address"), max_length=512, blank=True)
     postal_code = models.CharField(_("Postal Code"), max_length=512, blank=True)
     city = models.CharField(_("City"), max_length=512, blank=True)
-    country = models.CharField(_("Country"), max_length=512, default=settings.DEFAULT_COUNTRY)
+    country = models.CharField(
+        _("Country"), max_length=512, default=settings.DEFAULT_COUNTRY
+    )
 
-    is_address_label_generated = models.BooleanField(_("auto-generate address label"), default=True)
+    is_address_label_generated = models.BooleanField(
+        _("auto-generate address label"), default=True
+    )
     address_label = models.TextField(_("Address Label"), blank=True)
 
     notes = models.TextField(_("Notes"), blank=True)
@@ -29,10 +35,10 @@ class Contact(models.Model):
     class Meta:
         verbose_name = _("Contact")
         verbose_name_plural = _("Contacts")
-        ordering = ['first_name', 'last_name']
+        ordering = ["first_name", "last_name"]
 
     def __str__(self):
-        return '{} {}'.format(self.first_name, self.last_name)
+        return "{} {}".format(self.first_name, self.last_name)
 
 
 class ProjectContact(models.Model):
@@ -48,18 +54,24 @@ class ProjectContact(models.Model):
         (ARCHITECT, _("Architect")),
         (OTHER, _("Other")),
     )
-    association = models.CharField(_('Association'), max_length=128, choices=ASSOCIATION_TYPE, default=CUSTOMER)
-    is_billable = models.BooleanField(_('Is Billable?'), default=False)
+    association = models.CharField(
+        _("Association"), max_length=128, choices=ASSOCIATION_TYPE, default=CUSTOMER
+    )
+    is_billable = models.BooleanField(_("Is Billable?"), default=False)
 
-    project = models.ForeignKey("project.Project", related_name="project_contacts", on_delete=models.CASCADE)
-    contact = models.ForeignKey(Contact, related_name="project_contacts", on_delete=models.CASCADE)
+    project = models.ForeignKey(
+        "project.Project", related_name="project_contacts", on_delete=models.CASCADE
+    )
+    contact = models.ForeignKey(
+        Contact, related_name="project_contacts", on_delete=models.CASCADE
+    )
 
     notes = models.TextField(_("Notes"), blank=True)
 
     class Meta:
         verbose_name = _("Project Contact")
         verbose_name_plural = _("Project Contacts")
-        ordering = ['association', 'id']
+        ordering = ["association", "id"]
 
     def save(self, **kwargs):
         if self.is_billable:

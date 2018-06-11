@@ -6,39 +6,61 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('document', '0013_auto_20170913_1741'),
-    ]
+    dependencies = [("document", "0013_auto_20170913_1741")]
 
     operations = [
         migrations.AlterField(
-            model_name='adjustment',
-            name='letterhead',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='adjustment_documents', to='document.Letterhead'),
+            model_name="adjustment",
+            name="letterhead",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="adjustment_documents",
+                to="document.Letterhead",
+            ),
         ),
         migrations.AlterField(
-            model_name='invoice',
-            name='letterhead',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='invoice_documents', to='document.Letterhead'),
+            model_name="invoice",
+            name="letterhead",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="invoice_documents",
+                to="document.Letterhead",
+            ),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='letterhead',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='payment_documents', to='document.Letterhead'),
+            model_name="payment",
+            name="letterhead",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="payment_documents",
+                to="document.Letterhead",
+            ),
         ),
         migrations.AlterField(
-            model_name='proposal',
-            name='letterhead',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='proposal_documents', to='document.Letterhead'),
+            model_name="proposal",
+            name="letterhead",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="proposal_documents",
+                to="document.Letterhead",
+            ),
         ),
         migrations.AlterField(
-            model_name='refund',
-            name='letterhead',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='refund_documents', to='document.Letterhead'),
+            model_name="refund",
+            name="letterhead",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="refund_documents",
+                to="document.Letterhead",
+            ),
         ),
         migrations.AlterField(
-            model_name='timesheet',
-            name='letterhead',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='timesheet_documents', to='document.Letterhead'),
+            model_name="timesheet",
+            name="letterhead",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="timesheet_documents",
+                to="document.Letterhead",
+            ),
         ),
     ]

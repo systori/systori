@@ -7,9 +7,7 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('company', '0002_auto_20160221_0254'),
-    ]
+    dependencies = [("company", "0002_auto_20160221_0254")]
 
     operations = [
         # production has been migrated, we don't need this anymore

@@ -7,14 +7,14 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('company', '0004_worker'),
-    ]
+    dependencies = [("company", "0004_worker")]
 
     operations = [
         migrations.AlterField(
-            model_name='company',
-            name='is_active',
-            field=models.BooleanField(default=True, help_text='Use this instead of deleting schema.'),
-        ),
+            model_name="company",
+            name="is_active",
+            field=models.BooleanField(
+                default=True, help_text="Use this instead of deleting schema."
+            ),
+        )
     ]
