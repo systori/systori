@@ -29,7 +29,7 @@ before_script:
   - cd systori/dart && /usr/lib/dart/bin/pub get && /usr/lib/dart/bin/pub build && cd ../..
 
 script:
-  - coverage run -p manage.py test systori
+  - coverage run -p manage.py test systori.apps systori.lib
 
 after_script:
   - coverage combine
