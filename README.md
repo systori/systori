@@ -1,5 +1,5 @@
 
-[![Discord](https://img.shields.io/badge/Discord-chat-green.svg)](https://discord.gg/yTBgB)
+[![Travis branch](https://img.shields.io/travis/systori/systori/dev.svg)](https://travis-ci.org/systori/systori) [![codecov](https://img.shields.io/codecov/c/github/systori/systori/dev.svg)](https://codecov.io/gh/systori/systori)
 
 # Systori
 
@@ -10,6 +10,10 @@ Server side is written in [Python](https://www.python.org/) using the [Django fr
 Client side is written using Django templates and [Dart](https://www.dartlang.org/).
 
 ## How do I get set up?
+
+### Transition to OpenSource
+Since Systori is now fully open sourced we will add a simple way to start and try it soon. the goal ist that you'll just have to run git clone and docker-compose up and you're ready to go.
+
 
 ### Minimum
 
