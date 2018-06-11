@@ -34,7 +34,6 @@ Language : Tab size : Indent : Continuation indent
 Contribution guidelines
 -----------------------
 
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 * Writing tests
 * Code review
 * Other guidelines
