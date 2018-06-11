@@ -1,5 +1,6 @@
 .. image:: systori_logo.svg
-   :width: 25%
+   :width: 15%
+   :align: center
 
 ======================================================
 |codecov| |travis| |python| |codestyle| |chat|
