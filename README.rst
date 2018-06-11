@@ -1,3 +1,4 @@
+.. class:: center
 .. image:: systori_logo.svg
    :width: 15%
    :align: center
