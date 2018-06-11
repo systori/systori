@@ -30,6 +30,7 @@ before_script:
   - psql -c 'create database travisci;' -U postgres
 
 script:
+  - python manage.py collectstatic --noinput
   - coverage run -p manage.py test systori.apps systori.lib
 
 after_script:
