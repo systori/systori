@@ -16,6 +16,61 @@ Installation and usage
 This readme is currently under construction since we're going to setup a convenient way to use Systori.
 It will be something like ``git clone`` and ``docker-compose up``. (11th June 2018)
 
+Code guidelines
+---------------
+
+Indentation [spaces]:
+
+Language : Tab size : Indent : Continuation indent
+
+* Pyhton : 4 : 4 : 8
+
+* Dart : 4 : 4 : 8
+
+* HTML : 2 : 2 : 4
+
+* CSS : 2 : 2 : 4
+
+Contribution guidelines
+-----------------------
+
+* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* Writing tests
+* Code review
+* Other guidelines
+
+Systori color palette
+---------------------
++-----------+---------+---------+---------+--------+
+|Color      | 100%    | 75%     | 50%     | 25%    |
++===========+=========+=========+=========+========+
+|Brown      | #BBA892 | #CCBEAD | #DDD3C8 | #EEE9E3|
++-----------+---------+---------+---------+--------+
+|Red        | #D41351 | #E05E76 | #EA99A2 | #F5CFD1|
++-----------+---------+---------+---------+--------+
+|Orange     | #EE725F | #F39985 | #F8BDAD | #FCE0D6|
++-----------+---------+---------+---------+--------+
+|Yellow     | #FAB94B | #FCCB7E | #FEDDAB | #FFEED6|
++-----------+---------+---------+---------+--------+
+|BlueGreen  | #006C7C | #478A98 | #8AACB8 | #C6D4DA|
++-----------+---------+---------+---------+--------+
+|Green      | #00A19A | #6CB7B3 | #A6CFCC | #D5E7E6|
++-----------+---------+---------+---------+--------+
+|Mint       | #B7DBC1 | #CBE4D2 | #DDEDE1 | #EEF6F1|
++-----------+---------+---------+---------+--------+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .. _Python: https://www.python.org
 .. _Django Framework: https://www.djangoproject.com/
 .. _PostgreSQL: https://www.postgresql.org/
