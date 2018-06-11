@@ -1,5 +1,5 @@
 
-[![Travis branch](https://img.shields.io/travis/systori/systori/dev.svg)](https://travis-ci.org/systori/systori) [![codecov](https://img.shields.io/codecov/c/github/systori/systori/dev.svg)](https://codecov.io/gh/systori/systori) [![black](https://img.shields.io/badge/codestyle-black-000000.svg)](https://github.com/ambv/black)
+[![Travis branch](https://img.shields.io/travis/systori/systori/dev.svg)](https://travis-ci.org/systori/systori) [![codecov](https://img.shields.io/codecov/c/github/systori/systori/dev.svg)](https://codecov.io/gh/systori/systori) [![black](https://img.shields.io/badge/codestyle-black-000000.svg)](https://github.com/ambv/black) [![python](https://img.shields.io/badge/python-3.6-blue.svg)]
 
 # Systori
 
