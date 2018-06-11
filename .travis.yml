@@ -22,18 +22,19 @@ before_install:
 
 install:
   - pip install --upgrade pip
-  - pip install --upgrade -r requirements/dev.pip
+  - pip install --upgrade -r requirements/test.pip
 
 before_script:
   - export DJANGO_SETTINGS_MODULE=systori.settings.common
   - cd systori/dart && /usr/lib/dart/bin/pub get && /usr/lib/dart/bin/pub build && cd ../..
+  - psql -c 'create database travisci;' -U postgres
 
 script:
   - coverage run -p manage.py test systori.apps systori.lib
 
 after_script:
   - coverage combine
-  - coveralls
+  # - coveralls
 
 branches:
   only:
