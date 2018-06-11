@@ -1,5 +1,5 @@
 .. image:: systori_logo.svg
-   :scale: 25%
+   :width: 25%
 
 ======================================================
 |codecov| |travis| |python| |codestyle| |chat|
