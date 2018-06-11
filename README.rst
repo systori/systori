@@ -1,7 +1,4 @@
-.. class:: center
-.. image:: systori_logo.svg
-   :width: 15%
-   :align: center
+|systori-logo|
 
 ======================================================
 |codecov| |travis| |python| |codestyle| |chat|
@@ -36,3 +33,8 @@ It will be something like ``git clone`` and ``docker-compose up``. (11th June 20
 .. |chat| image:: https://img.shields.io/badge/chat-telegram-BBA892.svg
    :target: https://t.me/systori
    :alt: Chat
+
+.. |systori-logo| image:: systori_logo.svg
+   :width: 15%
+   :align: center
+   :alt: Systori logo
