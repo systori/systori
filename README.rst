@@ -1,5 +1,7 @@
+.. image:: systori_logo.svg
+
 ======================================================
-Systori |codecov| |travis| |python| |codestyle| |chat|
+|codecov| |travis| |python| |codestyle| |chat|
 ======================================================
 
 Systori is a suite of tools for craftsmen to create project estimates, to manage those projects, and to generate invoices.
