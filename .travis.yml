@@ -15,7 +15,7 @@ before_install:
   - sudo sh -c 'curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -'
   - sudo sh -c 'curl https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list'
   - sudo apt-get update
-  - sudo apt-get install dart
+  - sudo apt-get install dart=1.24.3-1
   #- fab getdartium
   #- export DART_SDK="$HOME/bin/dart-sdk"
   #- export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
@@ -35,7 +35,7 @@ script:
 
 after_script:
   - coverage combine
-  # - coveralls
+  - codecov
 
 branches:
   only:

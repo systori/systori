@@ -1,4 +1,4 @@
-from .common import *
+from systori.settings.common import *
 
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
