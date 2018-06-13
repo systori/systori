@@ -35,13 +35,12 @@ INSTALLED_APPS = (
     INSTALLED_APPS[:idx] + ("whitenoise.runserver_nostatic",) + INSTALLED_APPS[idx:]
 )
 
-
 STATICFILES_DIRS += (("dart/src", "systori/dart/web"),)
 
 DATABASES["default"].update(
     {
         "NAME": "systori_local",
-        "HOST": "localhost",
+        "HOST": "postgres",
         "USER": "postgres",
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD", None),
         "TEST": {"SERIALIZE": False},

@@ -1,0 +1,50 @@
+version: "3.6"
+services:
+  app_local:
+    build:
+      context: ./
+      dockerfile: docker/app/Dockerfile
+      args:
+        - REQUIREMENTS_FILE=dev.pip
+        - DJANGO_SETTINGS_MODULE=systori.settings.local
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONUNBUFFERED: 1
+      DJANGO_SETTINGS_MODULE: 'systori.settings.local'
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    links:
+      - postgres
+    entrypoint: ["dumb-init", "docker/app/startup.sh"]
+
+  app_sandbox:
+    build:
+      context: ./
+      dockerfile: docker/app/Dockerfile
+      args:
+        - REQUIREMENTS_FILE=dev.pip
+        - DJANGO_SETTINGS_MODULE=systori.settings.sandbox
+    image: elmcrest/systori:sandbox
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONUNBUFFERED: 1
+      DJANGO_SETTINGS_MODULE: 'systori.settings.sandbox'
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    links:
+      - postgres
+    entrypoint: ["dumb-init", "docker/app/startup.sh"]
+
+  postgres:
+    image: "postgres:9.5"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+
+  dart:
+    image: google/dart:1.24.3
+    volumes:
+      - ./systori/dart/:/app:z
+      - ./docker:/startup
+    entrypoint: /startup/idle.sh

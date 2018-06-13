@@ -22,5 +22,6 @@ bericht # pdf rendering library see https://github.com/systori/bericht
 mistune # markdown parser
 whitenoise # nice and easy staticfiles serving
 brotlipy # add infinity caching and brotli compression to whitenoise
+PyPDF2 # ToDo: change PDFFileMerger to pdfrw maybe
 
 -e .
