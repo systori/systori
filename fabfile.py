@@ -100,10 +100,11 @@ def getmedia():
     run("rm /tmp/" + PROD_MEDIA_FILE)
 
 
-def dockergetdb(container="postgres", envname="production"):
+def dockergetdb(container="postgres", envname="production", settings=None):
     ":container=app,envname=production -- fetch and load remote database"
     dump_file = "systori." + envname + ".dump"
-    settings = {"NAME": "systori_local", "USER": "postgres", "HOST": "localhost"}
+    if not settings:
+        settings = {"NAME": "systori_local", "USER": "postgres", "HOST": "localhost"}
     fetchdb(envname)
     local("docker cp {} {}:/{}".format(dump_file, container, dump_file))
     local(
@@ -176,6 +177,7 @@ def getdartium(version="1.24.3", channel="stable"):
                     "https://storage.googleapis.com/dart-archive/channels/{}/release/"
                     "{}/dartium/{}-linux-x64-release.zip".format(channel, version, app)
                 )
+                print(url)
                 local("curl {} > {}".format(url, zipfile))
 
             outdir = local(
@@ -279,7 +281,7 @@ def makedart():
 def testdart(test_file=None):
     "run dart tests"
     with lcd("systori/dart"):
-        docker = "docker run --rm -v `pwd`:`pwd` --workdir=`pwd` damoti/content-shell"
+        docker = "docker run --rm -v `pwd`:`pwd` --workdir=`pwd` instrumentisto/dart-content-shell"
         if test_file:
             local(docker + " '-r expanded {}'".format(test_file))
         else:
@@ -334,3 +336,38 @@ def git():
     "git usage help and cheatsheet"
     print("Start a new branch (based on dev)...")
     print("git checkout -b <new_branch> dev")
+
+
+def refresh_sandbox_db():
+    db_container = "systori_db_1"
+    db_source = "systori_production"
+    db_target = "systori_sandbox"
+    dump_file = f"{db_source}.dump"
+
+    user = "postgres"
+    # just cloning production db doesn't work without disconnecting all users
+    run(f"docker exec {db_container} dropdb -U {user} {db_target} --if-exists")
+    run(f"docker exec {db_container} createdb -U {user} -O {user} {db_target}")
+    # -Fc compressed binary format to be used with pg_restore
+    run(
+        f"docker exec {db_container} pg_dump -U {user} -Fc -x -f {dump_file} {db_source}"
+    )
+    run(
+        f"docker exec {db_container} pg_restore -U {user} -d {db_target} -O {dump_file}"
+    )
+    run(f"docker exec {db_container} rm {dump_file}")
+
+
+def deploy_sandbox(build="yes", db="yes"):
+    ":build=true and deploy sandbox image"
+    if "yes" in build:
+        local("docker-compose build app_sandbox")
+        local("docker push elmcrest/systori:sandbox")
+    # switch to metal
+    with cd("infrastructure"):
+        run("docker-compose stop sandbox")
+        if "yes" in db:
+            refresh_sandbox_db()
+        if "yes" in build:
+            run("docker-compose pull sandbox")
+        run("docker-compose up -d sandbox")

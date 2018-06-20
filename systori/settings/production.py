@@ -1,22 +1,22 @@
-from .common import *
+from systor.settings.common import *
 import os
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-SERVER_NAME = "systori.localhost"
+SERVER_NAME = "systori.com"
 SESSION_COOKIE_DOMAIN = "." + SERVER_NAME
 ALLOWED_HOSTS = ["." + SERVER_NAME]
 
-STATICFILES_DIRS += (("dart", "systori/dart/build/web"),)
+STATICFILES_DIRS += (("dart/src", "systori/dart/web"),)
 
 DATABASES["default"].update(
-    {
-        "HOST": "postgres",
-        "NAME": "systori_production",
-        "USER": "postgres",
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", None),
-    }
+    {"HOST": "db", "NAME": "systori_production", "USER": "postgres"}
+)
+
+idx = INSTALLED_APPS.index("django.contrib.staticfiles")
+INSTALLED_APPS = (
+    INSTALLED_APPS[:idx] + ("whitenoise.runserver_nostatic",) + INSTALLED_APPS[idx:]
 )
 
 INSTALLED_APPS += ("raven.contrib.django.raven_compat",)
