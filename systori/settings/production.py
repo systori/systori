@@ -1,4 +1,4 @@
-from systor.settings.common import *
+from systori.settings.common import *
 import os
 
 SESSION_COOKIE_SECURE = True
