@@ -1,12 +1,12 @@
+import json
 import os
 import sys
-import json
 from distutils.version import LooseVersion as _V
-from fabric.api import env, run, cd, local, lcd, get, prefix, sudo
+
+from fabric.api import cd, env, get, lcd, local, prefix, run, sudo
 from fabric.context_managers import shell_env
 
 from version import VERSION
-
 
 version = _V(VERSION)
 
@@ -371,3 +371,11 @@ def deploy_sandbox(build="yes", db="yes"):
         if "yes" in build:
             run("docker-compose pull sandbox")
         run("docker-compose up -d sandbox")
+
+
+def deploy_production():
+    with cd("infrastructure"):
+        run("docker tag elmcrest/systori:sandbox elmcrest/systori:production")
+        run("docker-compose stop production")
+        run("docker-compose up -d production")
+
