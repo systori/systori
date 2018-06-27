@@ -3,15 +3,27 @@
 
 {% block title %}#{{ project.id }} {{ project.name|truncatechars:10 }} > {{ job.name }}{% endblock %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
+{% block mainmenu %}{% include "main/mainmenu.html" with section='projects' %}{% endblock %}
 {% block head_navbar %}
-  <li><a href="{% url 'project.view' project.pk %}">{{ project.name|truncatechars:10 }}</a></li>
-  <li class="active"><a href="{% url 'job.editor' project.pk job.pk %}">{{ job.name }}</a></li>
+  <span>
+    <a href="{% url 'project.view' project.pk %}">{{ project.name }}</a> >> 
+    <a href="{% url 'job.editor' project.pk job.pk %}">{{ job.name }}</a>
+  </span>
 {% endblock %}
 
-{% block container %}
+{% block body_start %}
   <style>
-
+    navbar {
+      justify-content: space-between;
+    }
+    navbar > span {
+      color: white;
+    }
+    navbar > span > a {
+      background-color: transparent;
+      color: white;
+      text-decoration: none;
+    }
     #editor-area {
       max-width: 1100px;
       padding: 50px 50px 100px 50px;
@@ -528,7 +540,9 @@
     }
 
   </style>
-
+  {{ super }}
+  {% endblock body_start %}
+  {% block content %}
   {% localize off %}
   <div id="editor-area">
 

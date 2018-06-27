@@ -1,7 +1,7 @@
-{% extends "frame.html" %}
+{% extends "base.html" %}
 {% load i18n bootstrap %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
+{% block mainmenu %}{% include "main/mainmenu.html" with section='projects' %}{% endblock %}
 
 {% block content %}
   <form role="form" method="post" enctype="multipart/form-data">

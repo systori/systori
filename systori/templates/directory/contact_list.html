@@ -1,12 +1,16 @@
-{% extends "frame.html" %}
+{% extends "base.html" %}
 {% load i18n %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='directory' %}{% endblock %}
+{% block mainmenu %}{% include "main/mainmenu.html" with section='directory' %}{% endblock %}
+
+{% block head_navbar %}
+<div class="input-group"> <span class="input-group-addon">Filter</span>
+  <input id="filter" type="text" class="form-control" placeholder={%  trans "Type here..." %}>
+</div>
+{% endblock %}
 
 {% block content %}
-  <div class="input-group"> <span class="input-group-addon">Filter</span>
-    <input id="filter" type="text" class="form-control" placeholder={%  trans "Type here..." %}>
-  </div>
+
   <h2 class="sub-header">{% trans 'Directory' %}</h2>
   <table class="table table-striped table-condensed">
     <thead>

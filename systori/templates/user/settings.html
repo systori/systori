@@ -1,9 +1,9 @@
-{% extends "frame.html" %}
+{% extends "base.html" %}
 {% load i18n %}
 
 {% block title %}{{ request.user.username }}{% endblock %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section="settings" %}{% endblock %}
+{% block mainmenu %}{% include "main/mainmenu.html" with section="settings" %}{% endblock %}
 
 {% block content %}
   <h1>{% trans 'Settings' %}</h1>

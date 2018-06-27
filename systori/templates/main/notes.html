@@ -1,7 +1,7 @@
-{% extends "frame.html" %}
+{% extends "base.html" %}
 {% load i18n l10n static staticfiles field_app dartium customformatting %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" %}{% endblock %}
+{% block mainmenu %}{% include "main/mainmenu.html" with section="notes" %}{% endblock %}
 
 {% block content %}
   <style>
@@ -13,7 +13,7 @@
     margin-top: 0;
   }
   </style>
-  <h1 class="page-header">{% trans 'Notes' %}</h1>
+  <h1>{% trans 'Notes' %}</h1>
   <div class="table-responsive notes-dashboard">
     <table class="table table-striped notes-table">
       <tbody id="notes">

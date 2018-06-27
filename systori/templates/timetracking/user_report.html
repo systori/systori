@@ -1,4 +1,4 @@
-{% extends "frame.html" %}
+{% extends "base.html" %}
 {% load i18n dartium bootstrap customformatting %}
 
 {% block head %}
@@ -15,7 +15,7 @@
 {{ period_form.media.css }}
 {% endblock head %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='timetracking' %}{% endblock %}
+{% block mainmenu %}{% include "main/mainmenu.html" with section='timetracking' %}{% endblock %}
 
 {% block content %}
 <div class="panel panel-default">

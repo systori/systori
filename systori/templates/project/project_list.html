@@ -1,25 +1,15 @@
-{% extends "frame.html" %}
+{% extends "base.html" %}
 {% load l10n i18n bootstrap dartium %}
 
 
 {% block body_start %}
 <style>
-
-    body {
-        padding-top: 100px;
+    navbar {
+        justify-content: space-between;
+        overflow: hidden;
     }
     #filter-bar {
-      position: fixed;
-      left: 0px;
-      margin-top: -48px;
-      height: 38px;
-      width: 100%;
-      padding-top: 4px;
-      background-color: #fff;
-      overflow-x: hidden;
-      overflow-y: hidden;
-      -ms-overflow-style: none;
-      overflow: -moz-scrollbars-none;
+      grid-area: navextra;
     }
     #tile-container{
       display: grid;
@@ -78,58 +68,54 @@
 
     sys-warning-message {
         position: fixed;
-        bottom: 10px;
-        left: 15px;
-        height: 40px;
-        padding: 10px;
+        bottom: 1.2em;
+        left: 1.2em;
+        height: 2.8em;
+        padding: 0.7em;
         background: rgb(205, 0, 0);
         color: whitesmoke;
         border-radius: 3px;
     }
-
+    #phase-btn-group {
+        background-color: white;
+        border-radius: 5px;
+    }
 </style>
 
 {{ super }}
 {% endblock body_start %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
-
-{% block container %}
+{% block mainmenu %}{% include "main/mainmenu.html" with section='projects' %}{% endblock %}
+{% block head_navbar %}
 <div id="filter-bar" class="hidden">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-xs-12" style="overflow:scroll;">
-                    <div class="form-inline" style="width:1210px;">
-
-                            <div class="input-group input-group-sm">
-                                <input type="text" class="form-control" id="search_input" placeholder="Filter">
-                                <button class="glyphicon glyphicon-remove" id="search_clear" class="hidden"></button>
-                            </div>
-
-                            <div class="btn-group">
-                                <sys-sort-button type="button" data-type="id" data-reversed=true class="btn btn-sm btn-default">
-                                    {% trans "ID ↓↑" %}</sys-sort-button>
-                                <sys-sort-button type="button" data-type="name" data-reversed=false class="btn btn-sm btn-default">
-                                    {% trans "name ↓↑" %}</sys-sort-button>
-                                <sys-sort-button type="button" data-type="phase" data-reversed=true class="btn btn-sm btn-default active">
-                                    {% trans "phase ↓↑" %}</sys-sort-button>
-                            </div>
-                            <div class="btn-group" data-toggle="buttons">
-                            {% for phase, phase_display in phases %}
-                                <sys-phase-button type="button" class="btn btn-default btn-sm active {{ phase }}" data-phase="{{ phase }}" data-hide-phase="false">
-                                    {{ phase_display }}
-                                </sys-phase-button>
-                            {% endfor %}
-                            </div>
-                            <div class="btn-group">
-                                <a role="button" class="btn btn-default btn-sm" href="{% url 'project.create' %}">{% trans "Create" %}</a>
-                                <a role="button" class="btn btn-default btn-sm" href="{% url 'project.import' %}">{% trans "GAEB-Import (experimental)" %}</a>
-                            </div>
-                    </div>
+    <div class="form-inline">
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control" id="search_input" placeholder="Filter">
+                <button class="glyphicon glyphicon-remove" id="search_clear" class="hidden"></button>
             </div>
-        </div>
+            <div class="btn-group">
+                <sys-sort-button type="button" data-type="id" data-reversed=true class="btn btn-sm btn-default">
+                    {% trans "ID ↓↑" %}</sys-sort-button>
+                <sys-sort-button type="button" data-type="name" data-reversed=false class="btn btn-sm btn-default">
+                    {% trans "name ↓↑" %}</sys-sort-button>
+                <sys-sort-button type="button" data-type="phase" data-reversed=true class="btn btn-sm btn-default active">
+                    {% trans "phase ↓↑" %}</sys-sort-button>
+            </div>
+            <div class="btn-group" id="phase-btn-group" data-toggle="buttons">
+            {% for phase, phase_display in phases %}
+                <sys-phase-button type="button" class="btn btn-default btn-sm active {{ phase }}" data-phase="{{ phase }}" data-hide-phase="false">
+                    {{ phase_display }}
+                </sys-phase-button>
+            {% endfor %}
+            </div>
+            <div class="btn-group">
+                <a role="button" class="btn btn-default btn-sm" href="{% url 'project.create' %}">{% trans "Create" %}</a>
+                <a role="button" class="btn btn-default btn-sm" href="{% url 'project.import' %}">{% trans "GAEB-Import (experimental)" %}</a>
+            </div>
     </div>
 </div>
+{% endblock %}
+{% block content %}
 <div class="container-fluid">
     <div id="tile-container" class="hidden">
           {% for phase, projects in project_groups.items %}
@@ -151,7 +137,7 @@
 
 <div id="sys-phaseFilteredProjects-translated" class="hidden">{% trans "$phaseFilteredProjects projects aren't displayed." %}</div>
 
-{% endblock container %}
+{% endblock content %}
 
 {% block extra_js %}
   {% dart "project_list.dart" %}

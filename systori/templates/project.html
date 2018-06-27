@@ -1,6 +1,25 @@
-{% extends "frame.html" %}
+{% extends "base.html" %}
 {% load i18n %}
-
+{% block body_start %}
+{{ super }}
+<style>
+  navbar {
+    justify-content: space-between;
+  }
+  navbar > a {
+    background-color: transparent;
+    color:white;
+    text-decoration: none;
+  }
+  navbar > a:hover {
+    color: #B7DBC1;
+    text-decoration: none;
+  }
+  navbar > span {
+    color: white;
+  }
+</style>
+{% endblock body_start %}
 {% block open_field_app %}
   <li>
       <a href="javascript:window.open('{% url 'field.project' project.id %}', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">
@@ -17,15 +36,11 @@
     {% endif %}
 {% endblock title %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
+{% block mainmenu %}{% include "main/mainmenu.html" with section='projects' %}{% endblock %}
 
 {% block head_navbar %}
-  <li class="active"><a href="{% url 'project.view' project.id %}">{{ project.name }}
-    <small>({{ project.get_phase_display }})</small>
-  </a></li>
+  <span><big>{{ project.name }}</big><small> ({{ project.get_phase_display }})</small></span>
 {% endblock %}
-
-{% block sidebar %}{% include "project/sidebar.html" with section="dashboard" %}{% endblock %}
 
 {% block content %}
 {% endblock %}
