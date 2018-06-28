@@ -27,4 +27,5 @@ class TestCompanyViews(ClientTestCase):
             follow=True,
         )
         self.assertRedirects(response, "http://widgets.systori.localhost")
+        response = self.client.get(reverse("companies"))
         self.assertContains(response, "Widgets LLC")
