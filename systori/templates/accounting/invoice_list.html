@@ -1,35 +1,37 @@
-{% extends "project.html" %}
+{% extends "base.html" %}
 {% load i18n l10n customformatting %}
 
 {% block title %}{% trans "Invoices" %}{% endblock %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='invoices' %}{% endblock %}
+{% block mainmenu %}{% include "main/mainmenu.html" with section='invoices' %}{% endblock %}
+
+{% block head_navbar %}
+<div class="btn-toolbar" style="margin-right: auto;">
+    <div class="btn-group">
+        <span class="btn" style="color:white;">{% trans "Filter Invoices" %}</span>
+    </div>
+    <div class="btn-group btn-group-sm" role="group" aria-label="Invoice filter">
+        <a href="{% url "invoice.list" %}" type="button"
+           class="btn btn-sm btn-default {% if "all" in status_filter %}active{% endif %}">
+            {% trans "all" %}
+        </a>
+        <a href="{% url "invoice.list" "draft" %}"
+           type="button" class="btn btn-sm btn-default {% if "draft" in status_filter %}active{% endif %}">
+            {% trans "draft" %}
+        </a>
+        <a href="{% url "invoice.list" "sent" %}" type="button"
+           class="btn btn-sm btn-default {% if "sent" in status_filter %}active{% endif %}">
+            {% trans "sent" %}
+        </a>
+        <a href="{% url "invoice.list" "paid" %}" type="button"
+           class="btn btn-sm btn-default {% if "paid" in status_filter %}active{% endif %}">
+            {% trans "paid" %}
+        </a>
+    </div>
+</div>
+{% endblock %}
 
 {% block content %}
-    <div class="btn-toolbar">
-        <div class="btn-group">
-            <span class="btn">{% trans "Filter Invoices" %}</span>
-        </div>
-        <div class="btn-group btn-group-sm" role="group" aria-label="Invoice filter">
-            <a href="{% url "invoice.list" %}" type="button"
-               class="btn btn-sm btn-default {% if "all" in status_filter %}active{% endif %}">
-                {% trans "all" %}
-            </a>
-            <a href="{% url "invoice.list" "draft" %}"
-               type="button" class="btn btn-sm btn-default {% if "draft" in status_filter %}active{% endif %}">
-                {% trans "draft" %}
-            </a>
-            <a href="{% url "invoice.list" "sent" %}" type="button"
-               class="btn btn-sm btn-default {% if "sent" in status_filter %}active{% endif %}">
-                {% trans "sent" %}
-            </a>
-            <a href="{% url "invoice.list" "paid" %}" type="button"
-               class="btn btn-sm btn-default {% if "paid" in status_filter %}active{% endif %}">
-                {% trans "paid" %}
-            </a>
-        </div>
-    </div>
-
   <h2>{% trans 'Invoices' %}</h2>
   <div class="table-responsive">
     <table class="table table-striped">

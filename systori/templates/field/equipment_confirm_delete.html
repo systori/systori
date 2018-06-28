@@ -3,9 +3,9 @@
 
 {% block mainmenu %}{% include "main/mainmenu.html" with section='equipment' %}{% endblock %}
 
-{% block content %}
+{% block container %}
   <form method="post">{% csrf_token %}
-    <p>{% blocktrans with timerange=timerange %}Are you sure you want to delete the time range "{{ timerange }}"?{% endblocktrans %}</p>
+    <p>{% blocktrans with object=object %}Are you sure you want to delete "{{ object }}"?{% endblocktrans %}</p>
     <input type="submit" value="{% trans 'Confirm' %}"/>
   </form>
 {% endblock %}

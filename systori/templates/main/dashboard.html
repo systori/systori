@@ -1,10 +1,10 @@
-{% extends "frame.html" %}
+{% extends "base.html" %}
 {% load i18n l10n customformatting staticfiles %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" %}{% endblock %}
+{% block mainmenu %}{% include "main/mainmenu.html" %}{% endblock %}
 
 {% block content %}
-  <h1 class="page-header">{% trans 'Dashboard' %}</h1>
+  <h1>{% trans 'Dashboard' %}</h1>
   <div id="map-canvas" style="height: 400px;"></div>
 {% endblock %}
 

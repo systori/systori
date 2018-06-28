@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 {% load i18n bootstrap %}
 
-{% block container %}
+{% block mainmenu %}{% include "main/mainmenu.html" with section='company' %}{% endblock %}
+
+{% block content %}
   <div class="container-fluid" style="padding-bottom:100px;">
     <div class="row">
       <div class="col-sm-12">
-      <h2 class="sub-header">{% if object.pk %}{% trans "Update" %}{% else %}{% trans "Create" %}{% endif %} {% trans "Company" %}</h2>
+      <h2 class="sub-header">{% if object.pk %}{% trans "Update Company" %}{% else %}{% trans "Create Company" %}{% endif %}</h2>
       <form role="form" method="post">
         {% csrf_token %}
         {% bootstrap form %}

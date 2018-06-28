@@ -93,7 +93,44 @@ urlpatterns = [
     url(r"^$", field_auth(FieldDashboard.as_view()), name="field.dashboard"),
     # equipment
     url(
-        r"^equipment$", field_auth(FieldEquipmentList.as_view()), name="field.equipment"
+        r"^equipment/$",
+        field_auth(FieldEquipmentList.as_view()),
+        name="field.equipment",
+    ),
+    url(
+        r"^equipment-(?P<pk>\d+)$",
+        field_auth(FieldEquipmentView.as_view()),
+        name="field.equipment.view",
+    ),
+    url(
+        r"^equipment-(?P<pk>\d+)/create-refueling-stop$",
+        field_auth(FieldRefuelingStopCreate.as_view()),
+        name="field.refueling_stop.create",
+    ),
+    url(
+        r"^equipment-(?P<equipment_pk>\d+)/refueling-stop-(?P<pk>\d+)/update$",
+        field_auth(FieldRefuelingStopUpdate.as_view()),
+        name="field.refueling_stop.update",
+    ),
+    url(
+        r"^equipment-(?P<equipment_pk>\d+)/refueling-stop-(?P<pk>\d+)/delete$",
+        field_auth(FieldRefuelingStopDelete.as_view()),
+        name="field.refueling_stop.delete",
+    ),
+    url(
+        r"^equipment-(?P<pk>\d+)/create-maintenance$",
+        field_auth(FieldMaintenanceCreate.as_view()),
+        name="field.maintenance.create",
+    ),
+    url(
+        r"^equipment-(?P<equipment_pk>\d+)/maintenance-(?P<pk>\d+)/update$",
+        field_auth(FieldMaintenanceUpdate.as_view()),
+        name="field.maintenance.update",
+    ),
+    url(
+        r"^equipment-(?P<equipment_pk>\d+)/maintenance-(?P<pk>\d+)/delete$",
+        field_auth(FieldMaintenanceDelete.as_view()),
+        name="field.maintenance.delete",
     ),
     url(r"^projects$", field_auth(FieldProjectList.as_view()), name="field.projects"),
     url(r"^timers$", field_auth(FieldTimersList.as_view()), name="field.timers"),

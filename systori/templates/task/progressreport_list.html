@@ -1,7 +1,23 @@
-{% extends "frame.html" %}
+{% extends "base.html" %}
 {% load l10n i18n bootstrap customformatting %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='progressreports' %}{% endblock %}
+{% block mainmenu %}{% include "main/mainmenu.html" with section='progressreports' %}{% endblock %}
+
+{% block head_navbar %}
+<ul class="pagination" style="margin-right: auto;">
+        {% if page_obj.has_previous %}
+          <li><a href="{% url 'project.progress.all'%}?page={{ page_obj.previous_page_number }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+        {% else %}
+          <li class="disabled"><a href="" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+        {% endif %}
+          <li><a href="">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a></li>
+        {% if page_obj.has_next %}
+          <li><a href="{% url 'project.progress.all'%}?page={{ page_obj.next_page_number }}" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
+        {% else %}
+          <li class="disabled"><a href="" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
+        {% endif %}
+</ul>
+{% endblock %}
 
 {% block content %}
   <div class="table-responsive">
@@ -30,21 +46,6 @@
               <tr><td style="text-align:right;">{% trans 'comment' %}</td><td colspan="5">{{ report.comment }}</td></tr>
             {% endif %}
         {% endfor %}
-        {% if is_paginated %}
-          <ul class="pagination">
-                  {% if page_obj.has_previous %}
-                    <li><a href="{% url 'project.progress.all'%}?page={{ page_obj.previous_page_number }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-                  {% else %}
-                    <li class="disabled"><a href="" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-                  {% endif %}
-                    <li><a href="">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a></li>
-                  {% if page_obj.has_next %}
-                    <li><a href="{% url 'project.progress.all'%}?page={{ page_obj.next_page_number }}" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
-                  {% else %}
-                    <li class="disabled"><a href="" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
-                  {% endif %}
-          </ul>
-        {% endif %}
       {% else %}
         <tr><td colspan="all"> nix da </td></tr>
       {% endif %}

@@ -22,6 +22,14 @@ from ..main.models import Note
 from ..main.forms import NoteForm
 from .forms import CompletionForm, DailyPlanNoteForm
 from .utils import find_next_workday, days_ago
+from systori.apps.equipment.views import (
+    RefuelingStopCreate,
+    RefuelingStopDelete,
+    RefuelingStopUpdate,
+    MaintenanceCreate,
+    MaintenanceDelete,
+    MaintenanceUpdate,
+)
 
 
 def _origin_success_url(request, alternate):
@@ -804,6 +812,58 @@ class FieldEquipmentList(ListView):
     model = Equipment
     template_name = "field/equipment_list.html"
     queryset = Equipment.objects.filter(active=True)
+
+
+class FieldEquipmentView(DetailView):
+    model = Equipment
+    template_name = "field/equipment_view.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(FieldEquipmentView, self).get_context_data(**kwargs)
+        context["refueling_stops"] = self.object.refuelingstop_set.order_by("-mileage")
+        context["maintenances"] = self.object.maintenance_set.order_by("-mileage")
+        return context
+
+
+class FieldRefuelingStopCreate(RefuelingStopCreate):
+    template_name = "field/equipment_form.html"
+
+
+class FieldRefuelingStopUpdate(RefuelingStopUpdate):
+    template_name = "field/equipment_form.html"
+
+    def get_initial(self):
+        return {"equipment": self.kwargs["equipment_pk"]}
+
+    def get_success_url(self):
+        return reverse("field.equipment.view", args=(self.object.equipment.id,))
+
+
+class FieldRefuelingStopDelete(RefuelingStopDelete):
+    template_name = "field/equipment_confirm_delete.html"
+    
+    def get_success_url(self):
+        return reverse("field.equipment.view", args=(self.object.equipment.id,))
+
+class FieldMaintenanceCreate(MaintenanceCreate):
+    template_name = "field/equipment_form.html"
+
+
+class FieldMaintenanceUpdate(MaintenanceUpdate):
+    template_name = "field/equipment_form.html"
+
+    def get_initial(self):
+        return {"equipment": self.kwargs["equipment_pk"]}
+
+    def get_success_url(self):
+        return reverse("field.equipment.view", args=(self.object.equipment.id,))
+
+
+class FieldMaintenanceDelete(MaintenanceDelete):
+    template_name = "field/equipment_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse("field.equipment.view", args=(self.object.equipment.id,))
 
 
 class FieldDeleteDay(FieldPlanning):

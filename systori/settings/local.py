@@ -40,7 +40,7 @@ STATICFILES_DIRS += (("dart/src", "systori/dart/web"),)
 DATABASES["default"].update(
     {
         "NAME": "systori_local",
-        "HOST": "postgres",
+        "HOST": "localhost",
         "USER": "postgres",
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD", None),
         "TEST": {"SERIALIZE": False},

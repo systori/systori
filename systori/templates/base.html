@@ -29,100 +29,165 @@
       })();
     </script>
 </head>
+<style>
+  body {
+        padding:0;
+        margin:0;
+    }
+    container {
+        display: grid;
+        height: 100vh;
+        grid-template-columns: 3em auto;
+        grid-template-rows: 3em auto;
+        grid-column-gap: 0.5em;
+        grid-row-gap: 0.4em;
+        grid-template-areas:
+          "mainmenu navbar"
+          "mainmenu content";
+    }
+    container.menu-open {
+        grid-template-columns: 13em auto;
+    }
+    mainmenu {
+        grid-area: mainmenu;
+        background-color: #333;
+        display: flex;
+        flex-direction: column;
+        font-size: 1.03em;
+    }
+    mainmenu > .logo {
+        height: 6em;
+        width: 2em;
+        margin-left: 0.45em;
+        margin-top: 0.2em;
+    }
+    mainmenu.menu-open > .logo {
+        margin-left: 5.5em;
+    }
+    /* display grid to have both elements inside of <a> align horizontally in a nice way */
+    mainmenu > a.nav-button {
+        padding-left: 0.9em;
+        padding-top: 0.5em;
+        width: 100%;
+        display: grid;
+        grid-template-columns: auto auto;
+        color: white;
+        height: 2em;
+        text-decoration: none;
+    }
+    /* padding to the right if the menu is open */
+    mainmenu.menu-open > a.nav-button {
+        justify-content: space-between;
+        padding-right: 0.9em;
+    }
 
+    /* hide second span with text description of the link inside of <a> tag, show if .menu-open is attached to mainmenu */
+    mainmenu > a.nav-button > span:nth-child(2) {
+        display: none;
+    }
+    mainmenu.menu-open > a.nav-button > span:nth-child(2) {
+        display: block;
+    }
+
+    /* add hover effect to link elements */
+    a.nav-button:hover {
+        color: #333;
+        background-color: white;
+    }
+    a.nav-button.active {
+        color: #333;
+        background-color: white;
+    }
+    a#menu-handle {
+        color: #BBA892;
+    }
+    /* change hover effect for special button to open/close menu */
+    a#menu-handle:hover {
+        color: #B7DBC1;
+        background-color: #333;
+    }
+    navbar {
+        grid-area: navbar;
+        background-color: #333;
+        border-bottom-left-radius: 5px;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 0.3em;
+    }
+    navbar > h1 {
+      color: white;
+      margin-right: auto;
+      margin-bottom: 0.5em;
+    }
+    navbar > a {
+        background-color: white;
+        padding: 0.3em;
+        text-decoration: none;
+    }
+    content {
+        grid-area: content;
+        overflow: auto;
+    }
+    sys-goto-project:empty:before {
+        content: attr(placeholder);
+        display: block; /* For Firefox */
+    }
+</style>
 {% block body_start %}
 <body>
-{% endblock %}
-
-{% block header %}
-<!-- Fixed navbar -->
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="/"><img alt="Systori" src="{% static 'img/systori_logo_nav.svg' %}" style="margin-top:-10px;"></a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                  {% if selected_company %}{{ selected_company.name }}{% else %}{% trans "Select company..." %}{% endif %}
+  {% endblock body_start %}
+  {% block container %}
+    <container>
+      <mainmenu>
+        {% block mainmenu %}{% endblock %}
+        </mainmenu>
+    <navbar>
+      {% block head_navbar %}{% endblock %}
+      <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+      
+      <div class="input-group" style="width: 6em;">
+          <sys-goto-project type="text" class="form-control" contenteditable placeholder="#"></sys-goto-project>
+          <div class="input-group-btn">
+              <button tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
                   <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                  {% if available_companies|length > 1 %}
-                    <li class="dropdown-header">{% trans 'available Companies' %}</li>
-                    {% for company in available_companies %}
-                      {% if not company.current %}
-                        <li><a href="{{ company.url }}">{{ company.name }}</a></li>
-                      {% endif %}
-                    {% endfor %}
-                    <li role="separator" class="divider"></li>
+                  <span class="sr-only">Toggle Dropdown</span>
+              </button>
+              <ul class="dropdown-menu pull-right">
+                  {% if selected_company %}
+                    <li>
+                      <a href="javascript:window.open('{% url 'field.dashboard' %}', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">
+                            {% trans 'open field app' %}
+                      </a>
+                    </li>
                   {% endif %}
-                  <li><a href="{% url 'company.create' %}">{% trans "Create Company" %}</a></li>
-                </ul>
-            </li>
-            {% block menu_dropdown %}{% endblock %}
-            {% block head_navbar %}{% endblock %}
-          </ul>
 
-            <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
-          <input type="hidden" name="language" value=""/>
-        </form>
-
-        <ul class="nav navbar-nav navbar-right">
-
-          {% block open_field_app %}
-          {% if selected_company %}
-          <li><a
-              href="javascript:window.open('{% url 'field.dashboard' %}', 'field-app', 'height=700,width=400,location=no,menubar=no,toolbar=no');">{% trans 'open field app' %}</a>
-          </li>
-          {% endif %}
-          {% endblock %}
-
-          <li class="dropdown">
-            <a href="#"
-               class="dropdown-toggle"
-               data-toggle="dropdown"
-               id="currentWorker"
-               data-pk="{{ request.worker.pk }}">{{ request.user.get_short_name }} <b class="caret"></b></a>
-            <ul class="dropdown-menu">
-              <li><a href="{% url 'settings' %}">{% trans 'Settings' %}</a></li>
-              <li><a href="{% url 'account_logout' %}">{% trans 'Logout' %}</a></li>
-            </ul>
-          </li>
-
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ LANGUAGE_CODE }}<b class="caret"></b></a>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
-              {% get_language_info_list for LANGUAGES as languages %}
-              {% for language in languages %}
-                {% if language.code != LANGUAGE_CODE %}
-                  <li><a class="language-link" href="#"
-                         data-language="{{ language.code }}">{{ language.name_local }}</a></li>
-                {% endif %}
-              {% endfor %}
-            </ul>
-          </li>
-
-        </ul>
-        <div class="navbar-form navbar-right">
-            <div class="form-group form-group-sm">
-              <sys-goto-project type="text" style="width:60px; margin-top:3px;" class="form-control" placeholder="#" contenteditable/>
-            </div>
-        </div>
-        </div><!--/.nav-collapse -->
+                  {% get_language_info_list for LANGUAGES as languages %}
+                  {% for language in languages %}
+                    {% if language.code != LANGUAGE_CODE %}
+                      <li><a class="language-link" href="#"
+                            data-language="{{ language.code }}">{{ language.name_local }}</a></li>
+                    {% endif %}
+                  {% endfor %}
+                  <li class="divider"></li>
+                  <li><a href="{% url 'account_logout' %}">{% trans 'Logout' %}</a></li>
+                  <!-- <li><a href="{% url 'settings' %}">{% trans 'Settings' %}</a></li> -->
+              </ul>
+          </div>
       </div>
-    </nav>
-
+        <input type="hidden" name="language" value=""/>
+      </form>
+    </navbar>
+    <content>
+{% block header %}
 {% endblock %}
 
-{% block container %}{% endblock container %}
+{% block content %}{% endblock content %}
+
+  </content>
+
+{% endblock %} <!-- endblock container -->
 
 {% block base_js %}
   {% if debug %}
@@ -149,6 +214,20 @@
 {% block lang_js %}<script src="{% static "js/language_picker.js" %}"></script>{% endblock lang_js %}
 
 {% block extra_js %}{% endblock extra_js %}
-
+  </container>
+  <script type="text/javascript">
+    function toggleMenu() {
+      var container = document.querySelector("container");
+      container.classList.toggle("menu-open");
+      container.classList.toggle("robot");
+      var mainmenu = document.querySelector("mainmenu").classList.toggle("menu-open");
+    };
+    function navigateToCompanyList() {
+      host = window.location.host
+      url = window.location.protocol + '//app.' + host.split(".")[1] + '.' + host.split(".")[2];
+      console.log(url);
+      window.location.href = url;
+    };
+  </script> 
 </body>
 </html>

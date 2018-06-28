@@ -1,14 +1,45 @@
 {% extends "base.html" %}
 {% load static i18n l10n customformatting timetracking %}
 
-{% debug %}
+{% block container %}
 
-{% block head %}
-  {{ block.super }}
 <style type="text/css">
+  dailyplans-container {
+    display: grid;
+    grid-template-rows: 3.3em auto;
+    grid-gap: 10px;
+    grid-template-areas:
+      "header"
+      "dailyplans";
+  }
+  header {
+    grid-area: header;
+    background-color: #333;
+    padding: 0.3em 0.9em 0.3em 0.9em;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  header > span > a {
+    color: white;
+    text-decoration: none;
+  }
+  header > span > a:hover {
+    color: #B7DBC1;
+    text-decoration: none;
+  }
+  header > .nav-group {
+    font-size: 14pt;
+  }
+  dailyplans {
+    grid-area: dailyplans;
+    padding: 0 0.3em 0 0.3em;
+  }
   #progress {
     -webkit-transition: none !important;
     transition: none !important;
+    width: 300px;
   }
   grid {
     display: grid;
@@ -77,77 +108,54 @@
   }
 
 </style>
-{% endblock %}
-
-{% block header %}
-  <div style="font-size:20px; height:100%; position:relative;">
-  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="margin:0px;">
-    <div class="container-fluid">
-
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                aria-expanded="false" aria-controls="navbar">
-          <span class="sr-only">{% trans 'Toggle navigation' %}</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="/">Systori</a>
-      </div>
-      <div id="navbar" class="navbar-collapse collapse">
-
-        <ul class="nav navbar-nav">
-          <li><a href="{{ previous_day_url }}">{% trans 'back' %}</a></li>
-          <li><a>{{ selected_day|date:"l" }} {{ selected_day|localize }}</a></li>
-          <li><a href="{{ next_day_url }}">{% trans 'next' %}</a></li>
-        </ul>
-        <div class="nav navbar-text progress pull-right" style="width: 300px;">
-            <div id="progress" role="progressbar" style="background-color: #d1725e; height:100%;"></div>
-        </div>
-      </div>
+<dailyplans-container>
+  <header>
+    <a href="/"><img class="logo" src="{% static 'img/systori_logo_nav.svg' %}"></a>
+    <span class="nav-group">
+    <a href="{{ previous_day_url }}">{% trans 'back' %}</a>
+    {{ selected_day|date:"l" }} {{ selected_day|localize }}
+    <a href="{{ next_day_url }}">{% trans 'next' %}</a>
+    </span>
+    <div class="nav navbar-text progress pull-right" style="margin:0;">
+        <div id="progress" role="progressbar" style="background-color: #d1725e; height:100%;"></div>
     </div>
-  </nav>
-  </div>
-{% endblock %}
-
-
-{% block container %}
-{% load_user_statuses %}
-<div class="container-fluid">
-  <grid>
-    {% for plan, workers in selected_plans %}
-      <grid-child class="border-day-indicator-{{ temporal_location }} panel-primary">
-        <project-id class="bg-day-indicator-{{ temporal_location }}" data-id="{{ plan.id|unlocalize }}">
-        # {{ plan.jobsite.project.id }}</project-id>
-
-        <project-title data-id="{{ plan.id|unlocalize }}">
-        {{ plan.jobsite.project.name|truncatechars:40 }}</project-title>
-
-        <jobsite class="bg-day-indicator-{{ temporal_location }}">{{ plan.jobsite.name }}</jobsite>
-        <jobsite-address>{{ plan.jobsite.address }} {{ plan.jobsite.city }}</jobsite-address>
-
-        <workers class="bg-day-indicator-{{ temporal_location }}">{% trans "Workers" %}</workers>
-        <worker>
-            {% for plan_worker in workers %}
-              <span>{{ plan_worker.get_full_name }}</span>
-            {% endfor %}
-        </worker>
-        <equipments class="bg-day-indicator-{{ temporal_location }}">{% trans "equipment" %}</equipments>
-        <equipment>
-              {% for equipment in plan.equipment.all %}
-                <span>{{ equipment|safe }}</span>
-              {% endfor %}
-        </equipment>
-        <notes class="bg-day-indicator-{{ temporal_location }}">{% trans "Notes" %}</notes>
-        <note>
-              {{ plan.notes }}
-        </note>
-      </grid-child>
-    {% endfor %}
-  </grid>
-</div>
-
+  </header>
+  <dailyplans>
+    {% load_user_statuses %}
+      <grid>
+        {% for plan, workers in selected_plans %}
+          <grid-child class="border-day-indicator-{{ temporal_location }} panel-primary">
+            <project-id class="bg-day-indicator-{{ temporal_location }}" data-id="{{ plan.id|unlocalize }}">
+            # {{ plan.jobsite.project.id }}</project-id>
+    
+            <project-title data-id="{{ plan.id|unlocalize }}">
+            {{ plan.jobsite.project.name|truncatechars:40 }}</project-title>
+    
+            <jobsite class="bg-day-indicator-{{ temporal_location }}">{{ plan.jobsite.name }}</jobsite>
+            <jobsite-address>{{ plan.jobsite.address }} {{ plan.jobsite.city }}</jobsite-address>
+    
+            <workers class="bg-day-indicator-{{ temporal_location }}">{% trans "Workers" %}</workers>
+            <worker>
+                {% for plan_worker in workers %}
+                  <span>{{ plan_worker.get_full_name }}</span>
+                {% endfor %}
+            </worker>
+            <equipments class="bg-day-indicator-{{ temporal_location }}">{% trans "equipment" %}</equipments>
+            <equipment>
+                  {% for equipment in plan.equipment.all %}
+                    <span>{{ equipment|safe }}</span>
+                  {% endfor %}
+            </equipment>
+            <notes class="bg-day-indicator-{{ temporal_location }}">{% trans "Notes" %}</notes>
+            <note>
+                  {{ plan.notes }}
+            </note>
+          </grid-child>
+        {% endfor %}
+      </grid>
+  </dailyplans>
+</dailyplans-container>
 {% endblock %}
 {% block extra_js %}
-  <script src="{% static "js/day_based_overview.js" %}"></script>
+  <!-- <script src="{% static "js/day_based_overview.js" %}"></script> -->
 {% endblock %}

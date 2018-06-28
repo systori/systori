@@ -1,0 +1,24 @@
+{% load i18n static %}
+
+<img class="logo" src="{% static 'img/systori_logo_nav.svg' %}">
+<a class="nav-button {% if section == 'company' %}active{% endif %}" onclick="navigateToCompanyList()"><span class="glyphicon glyphicon-globe" aria-hidden="true"></span><span> Mehr Handwerk</span></a>
+{% if not section == 'company' %}
+<a class="nav-button {% if not section %}active{% endif %}" href="/"><span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span><span> Pinnwand</span></a>
+<a class="nav-button {% if section == 'projects' %}active{% endif %}" href="{% url 'projects' %}"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span><span> {% trans 'Projects' %}</span></a>
+<a class="nav-button {% if section == 'directory' %}active{% endif %}" href="{% url 'directory' %}"><span class="glyphicon glyphicon-phone" aria-hidden="true"></span><span> {% trans 'Directory' %}</span></a>
+<a class="nav-button {% if section == 'equipment' %}active{% endif %}" href="{% url 'equipment.list' %}"><span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span><span> {% trans 'Equipment' %}</span></a>
+<a class="nav-button {% if section == 'dailyplans' %}active{% endif %}" href="{% url 'day_based_overview' %}"><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span><span> {% trans 'Daily Plans' %}</span></a>
+<a class="nav-button {% if section == 'progressreports' %}active{% endif %}" href="{% url 'project.progress.all' %}"><span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span><span> {% trans 'Progress Reports' %}</span></a>
+{% if worker.has_staff %}
+<a class="nav-button {% if section == 'templates' %}active{% endif %}" href="{% url 'templates' %}"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span><span> {% trans 'Templates' %}</span></a>
+<a class="nav-button {% if section == 'users' %}active{% endif %}" href="{% url 'users' %}"><span class="glyphicon glyphicon-user" aria-hidden="true"></span><span> {% trans 'Users' %}</span></a>
+<a class="nav-button {% if section == 'timetracking' %}active{% endif %}" href="{% url 'timetracking' %}"><span class="glyphicon glyphicon-hourglass" aria-hidden="true"></span><span> {% trans 'Timetracking' %}</span></a>
+<a class="nav-button {% if section == 'timesheets' %}active{% endif %}" href="{% url 'timesheets' %}"><span class="glyphicon glyphicon-file" aria-hidden="true"></span><span> {% trans 'Timesheets' %}</span></a>
+<a class="nav-button {% if section == 'notes' %}active{% endif %}" href="{% url 'notes' %}"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span><span> {% trans 'Notes' %}</span></a>
+{% endif %}
+{% if worker.has_accountant or worker.has_owner %}
+<a class="nav-button {% if section == 'invoices' %}active{% endif %}" href="{% url 'invoice.list' %}"><span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span><span> {% trans 'Invoices' %}</span></a>
+<a class="nav-button {% if section == 'accounts' %}active{% endif %}" href="{% url 'accounts' %}"><span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span><span> {% trans 'Accounts' %}</span></a>
+<a class="nav-button" id="menu-handle" onclick="toggleMenu()"><span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span></a>
+{% endif %}
+{% endif %}

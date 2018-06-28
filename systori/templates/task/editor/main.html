@@ -3,15 +3,19 @@
 
 {% block title %}#{{ project.id }} {{ project.name|truncatechars:10 }} > {{ job.name }}{% endblock %}
 
-{% block menu_dropdown %}{% include "main/menu_dropdown.html" with section='projects' %}{% endblock %}
-{% block head_navbar %}
-  <li><a href="{% url 'project.view' project.pk %}">{{ project.name|truncatechars:10 }}</a></li>
-  <li class="active"><a href="{% url 'job.editor' project.pk job.pk %}">{{ job.name }}</a></li>
-{% endblock %}
-
 {% block container %}
   <style>
-
+    navbar {
+      justify-content: space-between;
+    }
+    navbar > span {
+      color: white;
+    }
+    navbar > span > a {
+      background-color: transparent;
+      color: white;
+      text-decoration: none;
+    }
     #editor-area {
       max-width: 1100px;
       padding: 50px 50px 100px 50px;
@@ -526,8 +530,54 @@
       color: lightgray;
       z-index: 99;
     }
-
+    
+    .navbar-nav {
+      color:white;
+      margin-top: 25px;
+    }
+    a {
+      color: white;
+      text-decoration: none;
+    }
+    a:hover {
+        color: #B7DBC1;
+        text-decoration: none;
+    }
   </style>
+
+<!-- Fixed navbar -->
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/"><img alt="Systori" src="{% static 'img/systori_logo_nav.svg' %}" style="margin-top:-10px;"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <span>
+          <a href="{% url 'project.view' project.pk %}"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> {{ project.name }}</a> :  
+          {{ job.name }}
+        </span>
+      </ul>
+
+        <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+      <input type="hidden" name="language" value=""/>
+    </form>
+
+    <div class="navbar-form navbar-right">
+        <div class="form-group form-group-sm">
+          <sys-goto-project type="text" style="width:60px; margin-top:3px;" class="form-control" placeholder="#" contenteditable/>
+        </div>
+    </div>
+    </div><!--/.nav-collapse -->
+  </div>
+</nav>
+
 
   {% localize off %}
   <div id="editor-area">
