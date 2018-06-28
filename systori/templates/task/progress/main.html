@@ -32,7 +32,10 @@
           <th>
             <select name="worker">
             {% for worker in workers %}
-              <option value="{{ worker.id }}">{{ worker }}</option>
+              <option value="{{ worker.id }}"
+                {% if worker == request.worker %}selected{% endif %}>
+                {{ worker }}
+              </option>
             {% endfor %}
             </select><br>
             {% trans 'worker' %}
