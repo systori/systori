@@ -1,0 +1,25 @@
+{% extends "field/base.html" %}
+{% load i18n bootstrap %}
+
+{% block container %}
+<div class="container">
+    <div class="row back-buttons">
+        <div class="col-xs-4"><a onclick="history.back()" class="btn btn-default btn-block">&laquo;
+            {% trans 'back' %}</a></div>
+        <div class="col-xs-4"><a href="{% url 'field.equipment' %}" class="btn btn-default btn-block">&laquo;
+            {% trans 'Equipment' %}</a></div>
+      <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo;
+        {% trans 'Dashboard' %}</a></div>
+    </div>
+
+      <form role="form" method="post">
+          {% csrf_token %}
+          {% bootstrap form %}
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary" value="{% trans 'Save' %}">{% trans 'Save' %}</button>
+          </div>
+      </form>
+  </div>
+</div>
+
+{% endblock %}

@@ -39,8 +39,8 @@
         height: 100vh;
         grid-template-columns: 3em auto;
         grid-template-rows: 3em auto;
-        grid-column-gap:0.3em;
-        grid-row-gap:0.4em;
+        grid-column-gap: 0.5em;
+        grid-row-gap: 0.4em;
         grid-template-areas:
           "mainmenu navbar"
           "mainmenu content";
@@ -138,7 +138,7 @@
 {% block body_start %}
 <body>
   {% endblock body_start %}
-  {% block body_inner %}
+  {% block container %}
     <container>
       <mainmenu>
         {% block mainmenu %}{% endblock %}
@@ -187,7 +187,7 @@
 
   </content>
 
-{% endblock %} <!-- endblock body_inner -->
+{% endblock %} <!-- endblock container -->
 
 {% block base_js %}
   {% if debug %}

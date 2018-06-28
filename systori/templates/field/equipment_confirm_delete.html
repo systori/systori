@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block mainmenu %}{% include "main/mainmenu.html" with section='equipment' %}{% endblock %}
+
+{% block container %}
+  <form method="post">{% csrf_token %}
+    <p>{% blocktrans with object=object %}Are you sure you want to delete "{{ object }}"?{% endblocktrans %}</p>
+    <input type="submit" value="{% trans 'Confirm' %}"/>
+  </form>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "field/base.html" %}
+{% load i18n l10n staticfiles customformatting field_app %}
+
+{% block container %}
+<div class="container">
+    <div class="row back-buttons">
+        <div class="col-xs-4"><a href="{% url 'field.equipment' %}" class="btn btn-default btn-block">&laquo;
+            {% trans 'Equipment' %}</a></div>
+      <div class="col-xs-4"><a href="{% url 'field.dashboard' %}" class="btn btn-default btn-block">&laquo;
+        {% trans 'Dashboard' %}</a></div>
+      <div class="col-xs-4"><a href="{% url 'field.planning' request.dailyplan.day.isoformat %}#project-{{ project.id }}"
+                               class="btn btn-default btn-block btn-back">&laquo; {% trans 'Planning' %}</a></div>
+    </div>
+
+  <div class="panel panel-default">
+
+      <div class="panel-heading">
+          {% trans 'Equipment Details' %}
+      </div>
+
+      <ul class="list-group">
+          <!-- <li class="list-group-item"><a href="{% url 'field.equipment.view' equipment.id %}">{{equipment}}</a></li> -->
+          <li class="list-group-item"><i>{% trans "name" %}</i> <b>{{equipment.name}}</b></li>
+          <li class="list-group-item"><i>{% trans "manufacturer" %}</i> <b>{{equipment.manufacturer}}</b></li>
+          <li class="list-group-item"><i>{% trans "mileage" %}</i> <b>{{equipment.mileage}}</b></li>
+          <li class="list-group-item"><i>{% trans "AFC" %}</i> <b>{{equipment.average_consumption}}</b></li>
+          <li class="list-group-item"><i>{% trans "license plate" %}</i> <b>{{equipment.license_plate}}</b></li>
+          <li class="list-group-item"><i>{% trans "number of seats" %}</i> <b>{{equipment.number_of_seats}}</b></li>
+          <li class="list-group-item"><i>{% trans "icon" %}</i> <b>{{equipment.icon}}</b></li>
+          <li class="list-group-item"><i>{% trans "fuel" %}</i> <b>{{equipment.fuel}}</b></li>
+          <li class="list-group-item"><i>{% trans "last refueling stop" %}</i> <b>{{equipment.last_refueling_stop|localize}}</b></li>
+      </ul>
+
+  </div>
+  
+<div class="row">
+    <div class="col-xs-12 col-md-6">
+        <a class="btn btn-default" href="{% url 'field.refueling_stop.create' equipment.id %}">{% trans "Add refuel stop" %}</a>
+
+        <h3 class="sub-header">{% trans "Refueling Stops" %}</h3>
+        <div class="table-responsive">
+        <table class="table table-striped" id="jobs-table">
+            <thead>
+                <tr>
+                    <th>{% trans "AFC" %}</th>
+                    <th>{% trans "date" %}</th>
+                    <th>{% trans "mileage" %}</th>
+                    <th>{% trans "distance" %}</th>
+                    <th>{% trans "liters" %}</th>
+                    <th>{% trans "price" %}</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for refuel_stop in refueling_stops %}
+                <tr>
+                    <td>{{ refuel_stop.average_consumption }}</td>
+                    <td>{{ refuel_stop.datetime }}</td>
+                    <td>{{ refuel_stop.mileage|localize }} km</td>
+                    <td>{{ refuel_stop.distance|localize }}</td>
+                    <td>{{ refuel_stop.liters|localize }}</td>
+                    <td>{{ refuel_stop.price_per_liter|money }}</td>
+                    <td>
+                        <a class="btn btn-default btn-sm" href="{% url 'field.refueling_stop.update' equipment.id refuel_stop.id %}">
+                            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                        </a>
+                        <a class="btn btn-default btn-sm" href="{% url 'field.refueling_stop.delete' equipment.id refuel_stop.id %}">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    <div class="col-xs-12 col-md-6">
+        <a class="btn btn-default" href="{% url 'field.maintenance.create' equipment.id %}">{% trans "Add maintenance" %}</a>
+
+        <h3 class="sub-header">{% trans "Maintenance" %}</h3>
+        <div class="table-responsive">
+        <table class="table table-striped" id="jobs-table">
+            <thead>
+                <tr>
+                    <th>{% trans "date" %}</th>
+                    <th>{% trans "mileage" %}</th>
+                    <th>{% trans "description" %}</th>
+                    <th>{% trans "contractor" %}</th>
+                    <th>{% trans "cost" %}</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for maintenance in maintenances %}
+                <tr>
+                    <td>{{ maintenance.date|localize }}</td>
+                    <td>{{ maintenance.mileage|localize }} km</td>
+                    <td>{{ maintenance.description }}</td>
+                    <td>{{ maintenance.contractor }}</td>
+                    <td>{{ maintenance.cost|money }}</td>
+                    <td>
+                        <a class="btn btn-default btn-sm" href="{% url 'field.maintenance.update' equipment.id maintenance.id %}">
+                            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                        </a>
+                        <a class="btn btn-default btn-sm" href="{% url 'field.maintenance.delete' equipment.id maintenance.id %}">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
