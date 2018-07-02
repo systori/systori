@@ -18,6 +18,7 @@ from ..accounting.constants import TAX_RATE
 from ..document.models import Letterhead, DocumentTemplate, DocumentSettings
 from ..task.forms import JobCreateForm
 from ..task.models import Job, ProgressReport
+from ..task.views import JobCopy, JobPaste
 from ..main.forms import NoteForm
 from ..main.models import Note
 
@@ -93,6 +94,14 @@ class ProjectSearchApi(View):
 
 class ProjectView(DetailView):
     model = Project
+
+    def get(self, request, *args, **kwargs):
+        # if a job was pasted from a copy and paste operation the session key
+        # is deleted to end the operation. if the copy wasn't pasted yet, the key stays.
+        if request.session.get(JobPaste.SESSION_KEY, False):
+            del request.session[JobPaste.SESSION_KEY]
+            del request.session[JobCopy.SESSION_KEY]
+        return super().get(self, request, *args, **kwargs)
 
     def get_jobsites_and_activity(self):
         first_day = date.today()

@@ -24,16 +24,38 @@ class JobCreate(CreateView):
         return kwargs
 
 
+class JobCopy(SingleObjectMixin, View):
+    model = Job
+    SESSION_KEY = "job_copy"
+
+    def get(self, request, *args, **kwargs):
+        object = self.get_object()
+        request.session[self.SESSION_KEY] = object.pk
+        return HttpResponseRedirect(object.project.get_absolute_url())
+
+
 class JobPaste(JobCreate):
+    SESSION_KEY = "job_pasted"
+
     def get_form_class(self):
         return JobPasteForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        self.request.session[self.SESSION_KEY] = True
         kwargs["other_job"] = get_object_or_404(
             Job, pk=self.request.session[JobCopy.SESSION_KEY]
         )
         return kwargs
+
+
+class JobCancelPaste(SingleObjectMixin, View):
+    model = Job
+
+    def get(self, request, *args, **kwargs):
+        job = get_object_or_404(Job, pk=self.request.session[JobCopy.SESSION_KEY])
+        del request.session[JobCopy.SESSION_KEY]
+        return HttpResponseRedirect(job.project.get_absolute_url())
 
 
 class JobImport(FormView):
@@ -51,16 +73,6 @@ class JobImport(FormView):
             form.save()
             return HttpResponseRedirect(self.request.project.get_absolute_url())
         return self.form_invalid(form)
-
-
-class JobCopy(SingleObjectMixin, View):
-    model = Job
-    SESSION_KEY = "job_copy"
-
-    def get(self, request, *args, **kwargs):
-        object = self.get_object()
-        request.session[self.SESSION_KEY] = object.pk
-        return HttpResponseRedirect(object.project.get_absolute_url())
 
 
 class JobEditor(DetailView):

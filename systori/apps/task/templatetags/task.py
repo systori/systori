@@ -27,9 +27,13 @@ def is_formula(equation):
 def paste_job(context):
     if JobCopy.SESSION_KEY in context["request"].session:
         return format_html(
-            '<a href="{}" class="btn btn-success">{} #{}</a>',
+            '<a href="{}" class="btn btn-success">{}</a>',
             reverse("job.paste", args=[context["project"].id]),
-            _("Paste Job"),
-            context["request"].session[JobCopy.SESSION_KEY],
+            _("Paste Job #%(job_id)s")
+            % {"job_id": context["request"].session[JobCopy.SESSION_KEY]},
+        ) + format_html(
+            '<a href="{}" class="btn btn-warning">{}</a>',
+            reverse("job.cancel-paste", args=[context["project"].id]),
+            _("Cancel Paste Job"),
         )
     return ""
