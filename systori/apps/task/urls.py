@@ -7,6 +7,11 @@ urlpatterns = [
     url(r"^import-job$", office_auth(JobImport.as_view()), name="job.import"),
     url(r"^paste-job$", office_auth(JobPaste.as_view()), name="job.paste"),
     url(
+        r"^cancel-paste-job$",
+        office_auth(JobCancelPaste.as_view()),
+        name="job.cancel-paste",
+    ),
+    url(
         r"^job-(?P<pk>\d+)/editor$", office_auth(JobEditor.as_view()), name="job.editor"
     ),
     url(
