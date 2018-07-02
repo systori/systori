@@ -6,12 +6,14 @@
   {{ form.media.css }}
 {% endblock head %}
 
-{% block title %}{{ project.name }} > {{ job.name }}{% endblock %}
+{% block title %}#{{ project.id }} {{ project.name }} > {{ job.name }}{% endblock %}
 
 {% block mainmenu %}{% include "main/mainmenu.html" with section='projects' %}{% endblock %}
+
 {% block head_navbar %}
-  <li><a href="{% url 'project.view' project.pk %}">{{ project.name }}</a></li>
-  <li class="active"><a href="{% url 'job.progress' project.pk job.pk %}">{{ job.name }}</a></li>
+  <!-- <li><a href="{% url 'project.view' project.pk %}">{{ project.name }}</a></li>
+  <li class="active"><a href="{% url 'job.progress' project.pk job.pk %}">{{ job.name }}</a></li> -->
+  <span><big>{{ project.name }}</big><small> ({{ project.get_phase_display }})</small> > {{ job.name }}</span>
 {% endblock %}
 
 {% block content %}
