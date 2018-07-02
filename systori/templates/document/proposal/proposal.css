@@ -8,15 +8,17 @@ thead:nth-child(n+1) {
 }
 
 .lineitems-job {
-  font-weight: bold;
   page-break-before: always;
 }
 
+.lineitems-task {
+  font-weight: bold;
+}
+
 .lineitems-subtotal {
-  border-top-width: 1px;
+  border-top-width: 1px solid black;
 }
 
 .lineitems-subtotal > td {
-  text-align: left;
   font-weight: bold;
 }

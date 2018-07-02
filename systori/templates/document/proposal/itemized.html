@@ -1,8 +1,8 @@
 {% load customformatting %}
 
-<p class="lineitems-job">{{ job.code }} {{ job.name }}</p>
-<p class="lineitems-task">{{ task.code }} {{ task.name }}</p>
-<p>{{ task.description }}</p>
+<p class="lineitems-job">{{ job.code }} {{ job.name }}</p><br>
+<p class="lineitems-task">{{ task.code }} {{ task.name }}</p><br>
+<p>{{ task.description|safe }}</p><br>
 
 <table>
 
