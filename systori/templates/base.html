@@ -28,113 +28,124 @@
         g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
       })();
     </script>
-</head>
-<style>
-  body {
-        padding:0;
-        margin:0;
-    }
-    container {
-        display: grid;
-        height: 100vh;
-        grid-template-columns: 3em auto;
-        grid-template-rows: 3em auto;
-        grid-column-gap: 0.5em;
-        grid-row-gap: 0.4em;
-        grid-template-areas:
-          "mainmenu navbar"
-          "mainmenu content";
-    }
-    container.menu-open {
-        grid-template-columns: 13em auto;
-    }
-    mainmenu {
-        grid-area: mainmenu;
-        background-color: #333;
-        display: flex;
-        flex-direction: column;
-        font-size: 1.03em;
-    }
-    mainmenu > .logo {
-        height: 6em;
-        width: 2em;
-        margin-left: 0.45em;
-        margin-top: 0.2em;
-    }
-    mainmenu.menu-open > .logo {
-        margin-left: 5.5em;
-    }
-    /* display grid to have both elements inside of <a> align horizontally in a nice way */
-    mainmenu > a.nav-button {
-        padding-left: 0.9em;
-        padding-top: 0.5em;
-        width: 100%;
-        display: grid;
-        grid-template-columns: auto auto;
+    <style type="text/css">
+        body {
+            padding:0;
+            margin:0;
+        }
+        container {
+            display: grid;
+            height: 100vh;
+            grid-template-columns: 3em auto;
+            grid-template-rows: 3em auto;
+            grid-column-gap: 0.5em;
+            grid-row-gap: 0.4em;
+            grid-template-areas:
+            "mainmenu navbar"
+            "mainmenu content";
+        }
+        container.menu-open {
+            grid-template-columns: 13em auto;
+        }
+        mainmenu {
+            grid-area: mainmenu;
+            background-color: #333;
+            display: flex;
+            flex-direction: column;
+            font-size: 1.03em;
+        }
+        mainmenu > .logo {
+            height: 6em;
+            width: 2em;
+            margin-left: 0.45em;
+            margin-top: 0.2em;
+        }
+        mainmenu.menu-open > .logo {
+            margin-left: 5.5em;
+        }
+        /* display grid to have both elements inside of <a> align horizontally in a nice way */
+        mainmenu > a.nav-button {
+            padding-left: 0.9em;
+            padding-top: 0.5em;
+            width: 100%;
+            display: grid;
+            grid-template-columns: auto auto;
+            color: white;
+            height: 2em;
+            text-decoration: none;
+        }
+        /* padding to the right if the menu is open */
+        mainmenu.menu-open > a.nav-button {
+            justify-content: space-between;
+            padding-right: 0.9em;
+        }
+    
+        /* hide second span with text description of the link inside of <a> tag, show if .menu-open is attached to mainmenu */
+        mainmenu > a.nav-button > span:nth-child(2) {
+            display: none;
+        }
+        mainmenu.menu-open > a.nav-button > span:nth-child(2) {
+            display: block;
+        }
+    
+        /* add hover effect to link elements */
+        a.nav-button:hover {
+            color: #333;
+            background-color: white;
+        }
+        a.nav-button.active {
+            color: #333;
+            background-color: white;
+        }
+        a#menu-handle {
+            color: #BBA892;
+        }
+        /* change hover effect for special button to open/close menu */
+        a#menu-handle:hover {
+            color: #B7DBC1;
+            background-color: #333;
+        }
+        navbar {
+            grid-area: navbar;
+            background-color: #333;
+            border-bottom-left-radius: 5px;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0.3em;
+        }
+        navbar > h1 {
         color: white;
-        height: 2em;
-        text-decoration: none;
-    }
-    /* padding to the right if the menu is open */
-    mainmenu.menu-open > a.nav-button {
-        justify-content: space-between;
-        padding-right: 0.9em;
-    }
+        margin-right: auto;
+        margin-bottom: 0.5em;
+        }
+        navbar > a {
+            background-color: white;
+            padding: 0.3em;
+            text-decoration: none;
+        }
+        content {
+            grid-area: content;
+            overflow: auto;
+        }
+        sys-goto-project:empty:before {
+            content: attr(placeholder);
+            display: block; /* For Firefox */
+        }
+    </style>
+    {% if request.META.DJANGO_SETTINGS_MODULE == 'systori.settings.sandbox' %}
+        <style type="text/css">
+        mainmenu {
+            background-color: #EA99A2;
+        }
+        navbar {
+            background-color: #EA99A2;
+        }
+        </style>
+    {% endif %}
+</head>
 
-    /* hide second span with text description of the link inside of <a> tag, show if .menu-open is attached to mainmenu */
-    mainmenu > a.nav-button > span:nth-child(2) {
-        display: none;
-    }
-    mainmenu.menu-open > a.nav-button > span:nth-child(2) {
-        display: block;
-    }
-
-    /* add hover effect to link elements */
-    a.nav-button:hover {
-        color: #333;
-        background-color: white;
-    }
-    a.nav-button.active {
-        color: #333;
-        background-color: white;
-    }
-    a#menu-handle {
-        color: #BBA892;
-    }
-    /* change hover effect for special button to open/close menu */
-    a#menu-handle:hover {
-        color: #B7DBC1;
-        background-color: #333;
-    }
-    navbar {
-        grid-area: navbar;
-        background-color: #333;
-        border-bottom-left-radius: 5px;
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-        align-items: center;
-        padding: 0.3em;
-    }
-    navbar > h1 {
-      color: white;
-      margin-right: auto;
-      margin-bottom: 0.5em;
-    }
-    navbar > a {
-        background-color: white;
-        padding: 0.3em;
-        text-decoration: none;
-    }
-    content {
-        grid-area: content;
-        overflow: auto;
-    }
-    sys-goto-project:empty:before {
-        content: attr(placeholder);
-        display: block; /* For Firefox */
-    }
-</style>
 {% block body_start %}
 <body>
   {% endblock body_start %}
