@@ -7,6 +7,7 @@ from ..project.factories import ProjectFactory
 
 from .factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from .models import Task, Job, ProgressReport, ExpendReport
+from .views import JobCopy, JobPaste
 
 
 class JobViewsTest(ClientTestCase):
@@ -224,6 +225,31 @@ class JobCopyPasteTest(ClientTestCase):
             },
         )  # fails because of incompatible project.structure
         self.assertEqual(project2.jobs.count(), 0)
+
+    def test_finish_and_cancel_job_copy(self):
+        project = ProjectFactory()
+        job = JobFactory(project=project)
+        # first check is to finish a copy paste operation
+        self.copy(job)
+        self.assertTrue(JobCopy.SESSION_KEY in self.client.session)
+        self.client.post(
+            reverse("job.paste", args=[project.pk]),
+            {
+                "name": "job name changed",
+                "description": "job description",
+                "job_template": job.pk,
+            },
+        )
+        self.assertTrue(JobPaste.SESSION_KEY in self.client.session)
+        self.client.get(reverse("project.view", args=[project.pk]))
+        self.assertFalse(
+            JobCopy.SESSION_KEY in self.client.session
+            and JobPaste.SESSION_KEY in self.client.session
+        )
+        # second check is to sucessfully cancel an paste operatio
+        self.copy(job)
+        self.client.get(reverse("job.cancel-paste"))
+        self.assertFalse(JobCopy.SESSION_KEY in self.client.session)
 
 
 class JobLockTest(ClientTestCase):
