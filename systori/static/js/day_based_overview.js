@@ -1,12 +1,7 @@
 $(document).ready(function () {
-    resizeRows();
+    // resizeRows();
 
-    $("#progress").animate({
-            width: "0%"
-        }, 15000, function () {
-            page_reload();
-        }
-    );
+    setTimeout(page_reload, 15000);
 });
 
 function page_reload() {

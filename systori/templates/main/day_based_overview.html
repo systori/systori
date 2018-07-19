@@ -116,9 +116,7 @@
     {{ selected_day|date:"l" }} {{ selected_day|localize }}
     <a href="{{ next_day_url }}">{% trans 'next' %}</a>
     </span>
-    <div class="nav navbar-text progress pull-right" style="margin:0;">
-        <div id="progress" role="progressbar" style="background-color: #d1725e; height:100%;"></div>
-    </div>
+    <span></span> <!-- emtpy element for flexbox positioning -->
   </header>
   <dailyplans>
     {% load_user_statuses %}
@@ -157,5 +155,5 @@
 </dailyplans-container>
 {% endblock %}
 {% block extra_js %}
-  <!-- <script src="{% static "js/day_based_overview.js" %}"></script> -->
+  <script src="{% static "js/day_based_overview.js" %}"></script>
 {% endblock %}
