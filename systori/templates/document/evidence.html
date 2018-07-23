@@ -23,7 +23,7 @@
             <td class="right">{{document.date}}</td>
         </tr>
         <tr>
-            <td>{% trans 'Task' %} {{ task.code }}</td>
+            <td>{% trans 'Task' %} {{ task.code }} - {{task.name}}</td>
             <td class="right">{% trans 'P-Amount' %}</td>
             <td class="right">{{ task.qty|ubrdecimal }} {{ task.unit }}</td>
         </tr>
