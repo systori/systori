@@ -1,5 +1,5 @@
 from rest_framework import permissions
-
+from systori.apps.company.models import Worker
 
 class HasStaffAccess(permissions.IsAuthenticated):
     """
@@ -8,7 +8,8 @@ class HasStaffAccess(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
-        return is_authenticated and request.worker.has_staff
+        worker = Worker.objects.get(user=request.user)
+        return is_authenticated and worker.has_staff
 
 
 class HasLaborerAccess(permissions.IsAuthenticated):
@@ -18,4 +19,5 @@ class HasLaborerAccess(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
-        return is_authenticated and request.worker.has_laborer
+        worker = Worker.objects.get(user=request.user)
+        return is_authenticated and worker.has_laborer

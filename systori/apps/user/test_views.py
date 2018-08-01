@@ -228,7 +228,6 @@ class TestEditWorker(ClientTestCase):
 class TestRegistration(SystoriTestCase):
     @skip("registration temporary disabled")
     def test_on_boarding_workflow(self):
-
         # main page has registration link
         self.assertContains(self.client.get("", follow=True), reverse("account_signup"))
 
@@ -285,8 +284,15 @@ class TestTokenAuth(ClientTestCase):
         )
         self.assertEqual(response.status_code, 200)
         token = response.data["token"]
+        self.client.logout()
+
         response = self.client.get(
-            reverse("api.project.available", args=[1]),
-            HTTP_AUTHORIZATION="Token {}".format(token),
+            "/api/v1/projects/", HTTP_AUTHORIZATION="Token " + token
         )
         self.assertEqual(response.status_code, 200)
+
+        token = "I_am_groot."
+        response = self.client.get(
+            "/api/v1/projects/", HTTP_AUTHORIZATION="Token " + token
+        )
+        self.assertEqual(response.status_code, 401)
