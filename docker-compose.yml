@@ -48,5 +48,6 @@ services:
       - ./systori/dart/:/app:z
       - ./docker:/startup
       - ./systori/dart/sdk/html_dart2js.dart:/usr/lib/dart/lib/html/dart2js/html_dart2js.dart
+      - /root/.pub-cache:/root/.pub-cache
 
     entrypoint: /startup/idle.sh
