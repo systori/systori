@@ -7,7 +7,8 @@ class SystoriGotoProjectInput extends TextInput with KeyboardHandler {
     factory SystoriGotoProjectInput() => new Element.tag(tag);
 
     static final tag = 'sys-goto-project';
-    static final project_url = window.location.origin+"/project-";
+    static final project_base_url = "${window.location.origin}/project-";
+    static final project_api_base_url = "${window.location.origin}/api/v1/projects";
     bool exists = false;
     int project_id;
     String errorResponse;
@@ -17,8 +18,9 @@ class SystoriGotoProjectInput extends TextInput with KeyboardHandler {
     }
 
     void checkProjectExists(project_id) {
-        String url = window.location.origin+"/api/project-available/"+project_id.toString();
-        HttpRequest.getString(url).then(parseResponse).catchError((Error error) {
+        HttpRequest.request("${project_api_base_url}/${project_id.toString()}/")
+          .then(parseResponse)
+          .catchError((Error error) {
             errorResponse = JSON.decode(error.target.responseText)["detail"];
             showError(errorResponse);
         });
@@ -27,17 +29,19 @@ class SystoriGotoProjectInput extends TextInput with KeyboardHandler {
     void showError(String errorResponse) {
         DivElement errorTooltip = document.createElement('div');
         errorTooltip.style.position = "absolute";
-        errorTooltip.style.top = "${this.parent.offsetTop + 30} px";
-        errorTooltip.style.left = "${this.parent.offsetLeft} px";
+        errorTooltip.style.top = "${this.getClientRects()[0].top + 36}px";
+        errorTooltip.style.left = "${this.getClientRects()[0].left}px";
         errorTooltip.style.background = "#D41351";
         errorTooltip.style.width = "150px";
         errorTooltip.style.padding = "5px";
+        errorTooltip.style.borderRadius = "5px";
         errorTooltip.text = "${errorResponse}";
-        this.parent.children.add(errorTooltip);
+        document.body.append(errorTooltip);
     }
 
     void parseResponse(String responseText) {
-        if (responseText == 'true') {
+      print("hallo dartium");
+        if (responseText["pk"] != null) {
             exists = true;
         } else {
             exists = false;
@@ -65,8 +69,8 @@ class SystoriGotoProjectInput extends TextInput with KeyboardHandler {
     onKeyDownEvent(KeyEvent e, TextInput input) {
         if (e.keyCode == KeyCode.ENTER) {
             e.preventDefault();
-            if (project_id != 0 && exists) {
-                window.location.href = project_url + project_id.toString();
+            if (exists) {
+                window.location.href = project_base_url + project_id.toString();
             }
         }
     }

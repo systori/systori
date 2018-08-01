@@ -1,0 +1,16 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2015",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "strict": true,
+        "sourceMap": true,
+        "outDir": "js/"
+    },
+    "include": [
+        "src/**/*"
+    ],
+}

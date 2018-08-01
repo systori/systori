@@ -1,8 +1,14 @@
-from rest_framework import serializers
-from .models import Project
+from rest_framework.serializers import ModelSerializer
+from .models import Project, DailyPlan
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class ProjectSerializer(ModelSerializer):
     class Meta:
         model = Project
-        fields = ("name",)
+        fields = ("pk", "name")
+
+
+class DailyPlanSerializer(ModelSerializer):
+    class Meta:
+        model = DailyPlan
+        fields = ("pk",)

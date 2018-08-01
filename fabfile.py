@@ -125,28 +125,24 @@ def dockergetdb(container="postgres", envname="production", settings=None):
     local("rm " + dump_file)
 
 
-def localdockergetdb(
-    container="postgres", envname="production", targetname="systori_local"
-):
+def localdockergetdb(container="db", envname="production", targetname="systori_local"):
     ":container=app,envname=production -- fetch and load remote database"
     dump_file = "systori." + envname + ".dump"
     settings = {"NAME": targetname, "USER": "postgres", "HOST": "localhost"}
     fetchdb(envname)
+    local("docker cp {0} systori_db_1:/{0}".format(dump_file))
     local(
-        'docker cp {0} "$(docker-compose ps -q {1})":/{0}'.format(dump_file, container)
-    )
-    local(
-        'docker exec "$(docker-compose ps -q {0})" '
-        "dropdb -h {HOST} -U {USER} {NAME} --if-exists".format(container, **settings)
-    )
-    local(
-        'docker exec "$(docker-compose ps -q {0})" createdb -h {HOST} -U {USER} {NAME}'.format(
+        "docker exec systori_db_1 dropdb -h {HOST} -U {USER} {NAME} --if-exists".format(
             container, **settings
         )
     )
     local(
-        'docker exec "$(docker-compose ps -q {0})" '
-        "pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}".format(
+        "docker exec systori_db_1 createdb -h {HOST} -U {USER} {NAME}".format(
+            container, **settings
+        )
+    )
+    local(
+        "docker exec systori_db_1 pg_restore -d {NAME} -O {1} -h {HOST} -U {USER}".format(
             container, dump_file, **settings
         )
     )

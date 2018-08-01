@@ -35,7 +35,11 @@ INSTALLED_APPS = (
     INSTALLED_APPS[:idx] + ("whitenoise.runserver_nostatic",) + INSTALLED_APPS[idx:]
 )
 
-STATICFILES_DIRS += (("dart/src", "systori/dart/web"),)
+STATICFILES_DIRS += (
+    ("dart/src", "systori/dart/web"),
+    ("ts/js", "systori/static/ts/js"),
+    ("ts/src", "systori/static/ts/src"),
+)
 
 DATABASES["default"].update(
     {

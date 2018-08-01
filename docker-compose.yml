@@ -14,7 +14,7 @@ services:
       DJANGO_SETTINGS_MODULE: 'systori.settings.local'
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     links:
-      - postgres
+      - db
     entrypoint: ["dumb-init", "docker/app/startup.sh"]
 
   app_sandbox:
@@ -32,10 +32,10 @@ services:
       DJANGO_SETTINGS_MODULE: 'systori.settings.sandbox'
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     links:
-      - postgres
+      - db
     entrypoint: ["dumb-init", "docker/app/startup.sh"]
 
-  postgres:
+  db:
     image: "postgres:9.5"
     ports:
       - "5432:5432"
@@ -47,4 +47,6 @@ services:
     volumes:
       - ./systori/dart/:/app:z
       - ./docker:/startup
+      - ./systori/dart/sdk/html_dart2js.dart:/usr/lib/dart/lib/html/dart2js/html_dart2js.dart
+
     entrypoint: /startup/idle.sh

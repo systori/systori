@@ -158,8 +158,9 @@
       {% block head_navbar %}{% endblock %}
       <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
       
-      <div class="input-group" style="width: 6em;">
-          <sys-goto-project type="text" class="form-control" contenteditable placeholder="#"></sys-goto-project>
+      <div class="input-group" style="width: 8em;">
+          <span class="input-group-addon" id="infoBox">#</span>
+          <sys-goto-project type="text" class="form-control" contenteditable></sys-goto-project>
           <div class="input-group-btn">
               <button tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
                   <span class="caret"></span>
@@ -218,7 +219,7 @@
 <script src="{% static "js/bootstrap.min.js" %}"></script>
 {% webcomponents 'lite' %}
 
-{% dart "goto_project.dart" %}
+<script src="{% static "ts/js/goto_project.js" %}"></script>
 
 {% endblock base_js %}
 
