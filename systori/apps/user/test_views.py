@@ -277,6 +277,7 @@ class TestTokenAuth(ClientTestCase):
         user = UserFactory(
             first_name="FirstName", language="en", password="pass", company=self.company
         )
+        self.client.logout()
         response = self.client.post(
             reverse("drf.tokenauth"),
             {"username": user.email, "password": "pass"},
@@ -285,7 +286,6 @@ class TestTokenAuth(ClientTestCase):
         self.assertEqual(response.status_code, 200)
         token = response.data["token"]
         self.client.logout()
-
         response = self.client.get(
             "/api/v1/projects/", HTTP_AUTHORIZATION="Token " + token
         )

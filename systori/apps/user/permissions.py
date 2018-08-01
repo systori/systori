@@ -1,23 +1,38 @@
 from rest_framework import permissions
 from systori.apps.company.models import Worker
 
-class HasStaffAccess(permissions.IsAuthenticated):
+
+class WorkerIsAuthenticated(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        is_authenticated = super().has_permission(request, view)
+        if not request.worker:
+            try:
+                request.worker = Worker.objects.select_related("user").get(
+                    user=request.user, company=request.company
+                )
+            except Worker.DoesNotExist:
+                if request.user.is_superuser:
+                    request.worker = Worker.grant_superuser_access(
+                        request.user, request.company
+                    )
+        return is_authenticated
+
+
+class HasStaffAccess(WorkerIsAuthenticated):
     """
     Allows access only users that have staff access
     """
 
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
-        worker = Worker.objects.get(user=request.user)
-        return is_authenticated and worker.has_staff
+        return is_authenticated and request.worker.has_staff
 
 
-class HasLaborerAccess(permissions.IsAuthenticated):
+class HasLaborerAccess(WorkerIsAuthenticated):
     """
     Allows access only users that have laborer access
     """
 
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
-        worker = Worker.objects.get(user=request.user)
-        return is_authenticated and worker.has_laborer
+        return is_authenticated and request.worker.has_laborer
