@@ -241,6 +241,8 @@ STATICFILES_DIRS = (
     ("img", "systori/static/img"),
     ("fonts", "systori/static/fonts"),
     ("dart/build", "systori/dart/build/web"),
+    ("ts/js", "systori/static/ts/js"),
+    ("ts/src", "systori/static/ts/src"),
 )
 
 STATICFILES_FINDERS = (
