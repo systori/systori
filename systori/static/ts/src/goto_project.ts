@@ -1,11 +1,14 @@
-const infoBox = document.querySelector("#infoBox") as HTMLSpanElement;
-let queryPk: number = 0;
-let projectFound: boolean = false;
-
 class SystoriGotoProject extends HTMLElement {
+    infoBox: HTMLSpanElement;
+    queryPk: number;
+    projectFound: boolean;
     
     constructor() {
         super();
+        this.infoBox = document.querySelector("#infoBox") as HTMLSpanElement;
+        this.queryPk = 0;
+        this.projectFound = false;
+
         this.addEventListener('keyup', e => {
             this.handleKeyup(e);
         });
@@ -15,41 +18,44 @@ class SystoriGotoProject extends HTMLElement {
     }
 
     showInfo(response: any, type: string) {
-        infoBox.className = "input-group-addon";
+        this.infoBox.className = "input-group-addon";
         if (type == "success") {
-            infoBox.classList.add("label-success");
-            infoBox.innerText = `${response.name}`;
+            this.infoBox.classList.add("label-success");
+            this.infoBox.innerText = `${response.name}`;
         } else if (type == "warning") {
-            infoBox.classList.add("label-warning");
-            infoBox.innerText = `${response.name}`;
+            this.infoBox.classList.add("label-warning");
+            this.infoBox.innerText = `${response.name}`;
         } else if (type == "reset") {
-            infoBox.innerText = '#';
+            this.infoBox.innerText = '#';
         }
     }
 
-    async fetchProject(queryPk: number) {
-        let response = await fetch(`${window.location.origin}/api/v1/projects/${queryPk}/exists/`);
+    async fetchProject() {
+        let response = await fetch(
+            `${window.location.origin}/api/v1/projects/${this.queryPk}/exists/`,
+            { credentials: 'include' }
+        );
         if (response.status == 200) {
             this.showInfo(await response.json(), "success");
-            projectFound = true;
+            this.projectFound = true;
         } else if (response.status == 206) {
             this.showInfo(await response.json(), "warning");
-            projectFound = false;
+            this.projectFound = false;
         }
     }
 
     async handleKeyup(event:KeyboardEvent) {
-        queryPk = parseInt((event.target as HTMLElement).innerText)
-        if (isNaN(queryPk)) {
+        this.queryPk = parseInt((event.target as HTMLElement).innerText)
+        if (isNaN(this.queryPk)) {
             this.showInfo("", "reset");
         } else {
-            await this.fetchProject(queryPk);
+            await this.fetchProject();
         }
     }
     handleKeydown(event: KeyboardEvent) {
-        if (event.key == "Enter" && projectFound == true) {
+        if (event.key == "Enter" && this.projectFound == true) {
             event.preventDefault();
-            window.location.href = `${window.location.origin}/project-${queryPk}`;
+            window.location.href = `${window.location.origin}/project-${this.queryPk}`;
         } else if (event.key == "Enter") {
             event.preventDefault();
         }

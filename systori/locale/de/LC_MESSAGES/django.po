@@ -280,7 +280,7 @@ msgstr "Adressfeld"
 #: systori/templates/document/proposal_detail.html:11
 #: systori/templates/field/dailyplan.html:113
 #: systori/templates/field/dashboard.html:23
-#: systori/templates/main/day_based_overview.html:149
+#: systori/templates/main/day_based_overview.html:147
 #: systori/templates/main/mainmenu.html:17
 #: systori/templates/main/note_detail.html:16
 #: systori/templates/main/notes.html:16
@@ -1165,11 +1165,11 @@ msgstr "Abgeglichen"
 msgid "Reconciled"
 msgstr "Abgeglichen"
 
-#: systori/settings/common.py:202
+#: systori/settings/common.py:203
 msgid "Deutsch"
 msgstr "Deutsch"
 
-#: systori/settings/common.py:203
+#: systori/settings/common.py:204
 msgid "English"
 msgstr "Englisch"
 
@@ -1487,15 +1487,15 @@ msgstr "Gutschrift"
 msgid "Customer Refund"
 msgstr "Kundengutschrift"
 
-#: systori/templates/base.html:172 systori/templates/project.html:26
+#: systori/templates/base.html:160 systori/templates/project.html:26
 msgid "open field app"
 msgstr "öffne Field App"
 
-#: systori/templates/base.html:186 systori/templates/user/settings.html:9
+#: systori/templates/base.html:174 systori/templates/user/settings.html:9
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: systori/templates/base.html:185
+#: systori/templates/base.html:173
 msgid "Logout"
 msgstr "Abmelden"
 
@@ -1613,7 +1613,7 @@ msgstr "Pinnwand"
 
 #: systori/templates/field/dailyplan.html:30
 #: systori/templates/field/dailyplan.html:33
-#: systori/templates/main/day_based_overview.html:137
+#: systori/templates/main/day_based_overview.html:135
 #: systori/templates/project/project_dailyplans.html:13
 #: systori/templates/project/project_dailyplans.html:36
 msgid "Workers"
@@ -2076,7 +2076,7 @@ msgid "unknown"
 msgstr "unbekannt"
 
 #: systori/apps/equipment/models.py:93 systori/apps/equipment/models.py:197
-#: systori/templates/main/day_based_overview.html:143
+#: systori/templates/main/day_based_overview.html:141
 msgid "equipment"
 msgstr "Ausrüstung"
 
@@ -3055,4 +3055,58 @@ msgstr "Einfügen abbrechen"
 #: systori/templates/company/company_form.html:10
 msgid "Update Company"
 msgstr "Firma bearbeiten"
+
+#: systori/apps/project/api.py:29 systori/apps/project/test_api.py:21
+msgid "Project not found."
+msgstr "Projekt nicht gefunden."
+
+#: systori/templates/account/email/email_confirmation_message.txt:1
+msgid "Hello from %(site_name)s!\n"
+"\n"
+"You're receiving this e-mail because user %(user_display)s has given yours as an e-mail address to connect their account.\n"
+"\n"
+"To confirm this is correct, go to %(activate_url)s\n"
+""
+msgstr "Hallo von dem Systori Server,\n"
+"\n"
+"Du erhältst diese eMail da der Benutzer %(user_display)s diese eMail Adresse als zu diesem Benutzer zugehörig angegeben hat.\n"
+"\n"
+"Um dies zu bestätigen bitte auf %(activate_url)s klicken."
+
+#: systori/templates/account/email/email_confirmation_message.txt:7
+msgid "Thank you from %(site_name)s!\n"
+"%(site_domain)s"
+msgstr "Vielen Dank! Ihr Systori-Team."
+
+#: systori/templates/account/email/email_confirmation_subject.txt:3
+msgid "Please Confirm Your E-mail Address"
+msgstr "Bitte bestätigen Sie ihre eMail Adresse"
+
+#: systori/templates/account/email/password_reset_key_message.txt:1
+msgid "Hello from %(site_name)s!\n"
+"\n"
+"You're receiving this e-mail because you or someone else has requested a password for your user account.\n"
+"It can be safely ignored if you did not request a password reset. Click the link below to reset your password."
+msgstr "Hallo von dem Systori Server,\n"
+"\n"
+"Du erhältst diese eMail da Du oder jemand anderes ein Passwort-Reset für diesen Account beantragt hat.\n"
+"Du kannst diese eMail einfach ignorieren, falls dieser Vorgang nicht von Dir angestoßen wurde. Klicke auf den nachfolgenden Link um das Passwort zurückzusetzen."
+
+#: systori/templates/account/email/password_reset_key_message.txt:8
+msgid "In case you forgot, your username is %(username)s."
+msgstr "Für den Fall der Fälle: Dein Benutzername ist %(username)s."
+
+#: systori/templates/account/email/password_reset_key_message.txt:10
+msgid "Thank you for using %(site_name)s!\n"
+"%(site_domain)s"
+msgstr "Vielen Dank, dass Du Systori benutzt!"
+
+#: systori/templates/account/email/password_reset_key_subject.txt:3
+msgid "Password Reset E-mail"
+msgstr "Passwort-Reset eMail"
+
+#: systori/templates/document/base/base.css:22
+#: systori/templates/document/technical_listing/style.css:22
+msgid "Page"
+msgstr "Seite"
 

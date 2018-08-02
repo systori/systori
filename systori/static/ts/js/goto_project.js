@@ -7,12 +7,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const infoBox = document.querySelector("#infoBox");
-let queryPk = 0;
-let projectFound = false;
 class SystoriGotoProject extends HTMLElement {
     constructor() {
         super();
+        this.infoBox = document.querySelector("#infoBox");
+        this.queryPk = 0;
+        this.projectFound = false;
         this.addEventListener('keyup', e => {
             this.handleKeyup(e);
         });
@@ -21,47 +21,47 @@ class SystoriGotoProject extends HTMLElement {
         });
     }
     showInfo(response, type) {
-        infoBox.className = "input-group-addon";
+        this.infoBox.className = "input-group-addon";
         if (type == "success") {
-            infoBox.classList.add("label-success");
-            infoBox.innerText = `${response.name}`;
+            this.infoBox.classList.add("label-success");
+            this.infoBox.innerText = `${response.name}`;
         }
         else if (type == "warning") {
-            infoBox.classList.add("label-warning");
-            infoBox.innerText = `${response.name}`;
+            this.infoBox.classList.add("label-warning");
+            this.infoBox.innerText = `${response.name}`;
         }
         else if (type == "reset") {
-            infoBox.innerText = '#';
+            this.infoBox.innerText = '#';
         }
     }
-    fetchProject(queryPk) {
+    fetchProject() {
         return __awaiter(this, void 0, void 0, function* () {
-            let response = yield fetch(`${window.location.origin}/api/v1/projects/${queryPk}/exists/`);
+            let response = yield fetch(`${window.location.origin}/api/v1/projects/${this.queryPk}/exists/`, { credentials: 'include' });
             if (response.status == 200) {
                 this.showInfo(yield response.json(), "success");
-                projectFound = true;
+                this.projectFound = true;
             }
             else if (response.status == 206) {
                 this.showInfo(yield response.json(), "warning");
-                projectFound = false;
+                this.projectFound = false;
             }
         });
     }
     handleKeyup(event) {
         return __awaiter(this, void 0, void 0, function* () {
-            queryPk = parseInt(event.target.innerText);
-            if (isNaN(queryPk)) {
+            this.queryPk = parseInt(event.target.innerText);
+            if (isNaN(this.queryPk)) {
                 this.showInfo("", "reset");
             }
             else {
-                yield this.fetchProject(queryPk);
+                yield this.fetchProject();
             }
         });
     }
     handleKeydown(event) {
-        if (event.key == "Enter" && projectFound == true) {
+        if (event.key == "Enter" && this.projectFound == true) {
             event.preventDefault();
-            window.location.href = `${window.location.origin}/project-${queryPk}`;
+            window.location.href = `${window.location.origin}/project-${this.queryPk}`;
         }
         else if (event.key == "Enter") {
             event.preventDefault();

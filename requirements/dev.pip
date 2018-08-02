@@ -1,6 +1,8 @@
 -r app.pip
 -r test.pip
 black
+pylint
+pylint-django
 django-debug-toolbar
 django-extensions
 

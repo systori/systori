@@ -4,13 +4,15 @@ import os
 SERVER_NAME = "systori.localhost"
 SESSION_COOKIE_DOMAIN = "." + SERVER_NAME
 ALLOWED_HOSTS = ["." + SERVER_NAME]
+INTERNAL_IPS = ("10.0.1.233", "127.0.0.1")
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 DEBUG = True
+ENABLE_DEBUGTOOLBAR = False
 
-if False:
+if ENABLE_DEBUGTOOLBAR:
     INSTALLED_APPS += ("debug_toolbar",)
     MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
     DEBUG_TOOLBAR_PANELS = (

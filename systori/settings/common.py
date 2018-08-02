@@ -31,6 +31,7 @@ DEFAULT_FROM_EMAIL = "Systori <support@systori.com>"
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
 
 DEBUG = False
+ENABLE_DEBUGTOOLBAR = False
 
 TESTING = "test" in sys.argv
 
