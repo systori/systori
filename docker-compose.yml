@@ -43,11 +43,11 @@ services:
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
 
   dart:
-    image: google/dart:1.24.3
+    build:
+      context: ./
+      dockerfile: docker/dart/Dockerfile
     volumes:
       - ./systori/dart/:/app:z
+      - /root/.pub-cache/:/root/.pub-cache/:z
       - ./docker:/startup
-      - ./systori/dart/sdk/html_dart2js.dart:/usr/lib/dart/lib/html/dart2js/html_dart2js.dart
-      - /root/.pub-cache:/root/.pub-cache
-
     entrypoint: /startup/idle.sh

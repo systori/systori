@@ -8,8 +8,6 @@ SERVER_NAME = "systori.com"
 SESSION_COOKIE_DOMAIN = "." + SERVER_NAME
 ALLOWED_HOSTS = ["." + SERVER_NAME]
 
-STATICFILES_DIRS += (("dart/src", "systori/dart/web"),)
-
 DATABASES["default"].update(
     {"HOST": "db", "NAME": "systori_production", "USER": "postgres"}
 )

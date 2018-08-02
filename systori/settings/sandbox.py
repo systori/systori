@@ -12,8 +12,6 @@ INSTALLED_APPS = (
     INSTALLED_APPS[:idx] + ("whitenoise.runserver_nostatic",) + INSTALLED_APPS[idx:]
 )
 
-STATICFILES_DIRS += (("dart/src", "systori/dart/web"),)
-
 DATABASES["default"].update(
     {"HOST": "db", "NAME": "systori_sandbox", "USER": "postgres"}
 )

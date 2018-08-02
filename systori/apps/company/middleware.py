@@ -1,8 +1,8 @@
+import string
 from django.utils.deprecation import MiddlewareMixin
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from .models import Company, Worker
-import string
 
 SCHEMA_ALLOWED_CHARS = set(string.ascii_lowercase + string.digits + "-")
 

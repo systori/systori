@@ -52,6 +52,7 @@ class SystoriGotoProject extends HTMLElement {
             await this.fetchProject();
         }
     }
+
     handleKeydown(event: KeyboardEvent) {
         if (event.key == "Enter" && this.projectFound == true) {
             event.preventDefault();
