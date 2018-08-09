@@ -141,6 +141,7 @@
       <mainmenu>
         {% block mainmenu %}{% endblock %}
         </mainmenu>
+    {% block navbar %}
     <navbar>
       {% block head_navbar %}{% endblock %}
       <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
@@ -178,6 +179,7 @@
         <input type="hidden" name="language" value=""/>
       </form>
     </navbar>
+    {% endblock navbar %}
     <content>
 {% block header %}
 {% endblock %}

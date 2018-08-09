@@ -2,7 +2,7 @@
 {% load i18n customformatting %}
 
 {% block mainmenu %}{% include "main/mainmenu.html" with section='company' %}{% endblock %}
-
+{% block navbar %}{% endblock navbar %}
 
 {% block content %}
         <h2 class="sub-header">{% trans 'Companies' %}</h2>
@@ -28,4 +28,5 @@
           </table>
         </div>
         <a href="{% url 'company.create' %}">{% trans "Create Company" %}</a>
+
 {% endblock content %}
