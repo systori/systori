@@ -13,8 +13,7 @@ Client side is written using Django templates and Dart_.
 
 Installation and usage
 ----------------------
-This readme is currently under construction since we're going to setup a convenient way to use Systori.
-It will be something like ``git clone`` and ``docker-compose up``. (11th June 2018)
+This is a standard Django app with, currently, some Dart for the Client. If you have questions how to get started please get in touch.
 
 Code guidelines
 ---------------
