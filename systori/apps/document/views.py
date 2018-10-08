@@ -569,6 +569,18 @@ class JobEvidencePDF(DocumentRenderView):
         return renderer.pdf
 
 
+class JobEvidenceHTML(SingleObjectMixin, View):
+    model = Job
+
+    def get(self, request, *args, **kwargs):
+        doc_settings = DocumentSettings.get_for_language(get_language())
+        letterhead = doc_settings.evidence_letterhead
+        renderer = pdf_type.evidence.EvidenceRenderer(
+            self.model.objects.get(id=self.kwargs.get("job_pk")), letterhead
+        )
+        return HttpResponse(renderer.html)
+
+
 # Itemized List
 
 

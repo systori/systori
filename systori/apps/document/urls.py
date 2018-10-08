@@ -159,6 +159,11 @@ urlpatterns = [
         name="job.evidence.pdf",
     ),
     url(
+        r"^project-(?P<project_pk>\d+)/job-(?P<job_pk>\d+)/evidence.html$",
+        office_auth(JobEvidenceHTML.as_view()),
+        name="job.evidence.html",
+    ),
+    url(
         r"^project-(?P<project_pk>\d+)/itemized_listing-(?P<format>(email|print)).pdf$",
         office_auth(ItemizedListingPDF.as_view()),
         name="itemized_listing.pdf",
