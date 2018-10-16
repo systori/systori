@@ -4,7 +4,7 @@ import os
 SERVER_NAME = "systori.localhost"
 SESSION_COOKIE_DOMAIN = "." + SERVER_NAME
 ALLOWED_HOSTS = ["." + SERVER_NAME]
-INTERNAL_IPS = ("10.0.1.233", "127.0.0.1")
+INTERNAL_IPS = ("10.0.1.59", "127.0.0.1")
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -42,7 +42,7 @@ STATICFILES_DIRS += (("dart/src", "systori/dart/web"),)
 DATABASES["default"].update(
     {
         "NAME": "systori_local",
-        "HOST": "localhost",
+        "HOST": "db",
         "USER": "postgres",
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
         "TEST": {"SERIALIZE": False},

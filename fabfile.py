@@ -375,3 +375,7 @@ def deploy_production():
         run("docker-compose stop production")
         run("docker-compose up -d production")
 
+
+def run_tests(parallel=2):
+    local("python manage.py collectstatic --noinput")
+    local(f"python manage.py test --parallel={parallel} systori.apps systori.lib")

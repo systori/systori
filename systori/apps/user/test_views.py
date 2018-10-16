@@ -224,6 +224,18 @@ class TestEditWorker(ClientTestCase):
         contract = user.access.first().contract
         self.assertEqual(contract.rate, Decimal("77.0"))
 
+    @skip("test not working yet")
+    def test_inactive_user_cant_login(self):
+        EmailAddress.objects.create(user=self.user, verified=True)
+        self.client.logout()
+        self.user.is_active = False
+        response = self.client.post(
+            reverse("account_login"),
+            {"login": self.user.email, "password": "pass"},
+            follow=True,
+        )
+        self.assertRedirects(response, reverse("account_login"))
+
 
 class TestRegistration(SystoriTestCase):
     @skip("registration temporary disabled")

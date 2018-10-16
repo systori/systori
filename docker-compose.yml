@@ -6,12 +6,12 @@ services:
       dockerfile: docker/app/Dockerfile
       args:
         - REQUIREMENTS_FILE=dev.pip
-        - DJANGO_SETTINGS_MODULE=systori.settings.local
+        - DJANGO_SETTINGS_MODULE=systori.settings.docker_local
     ports:
       - "8000:8000"
     environment:
       PYTHONUNBUFFERED: 1
-      DJANGO_SETTINGS_MODULE: 'systori.settings.local'
+      DJANGO_SETTINGS_MODULE: 'systori.settings.docker_local'
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     links:
       - db
