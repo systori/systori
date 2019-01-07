@@ -6,7 +6,7 @@ from calendar import monthrange
 from collections import OrderedDict, namedtuple
 
 from django.http import HttpResponse, HttpResponseRedirect, StreamingHttpResponse
-from django.views.generic import View, ListView, TemplateView
+from django.views.generic import View, ListView, FormView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
@@ -24,9 +24,17 @@ from .models import DocumentTemplate, Letterhead, DocumentSettings
 from .models import Attachment, FileAttachment
 from .forms import ProposalForm, InvoiceForm, AdjustmentForm, PaymentForm, RefundForm
 from .forms import LetterheadCreateForm, LetterheadUpdateForm, DocumentSettingsForm
-from .forms import TimesheetForm
+from .forms import TimesheetForm, TimesheetListFilterForm
 from .utils import get_weekday_names_numbers_and_mondays
 from . import type as pdf_type
+
+
+
+def monthdelta(date, delta):
+    m, y = (date.month + delta) % 12, date.year + (date.month + delta - 1) // 12
+    if not m: m = 12
+    d = min(date.day, monthrange(y, m)[1])
+    return date.replace(day=d, month=m, year=y)
 
 
 class BaseDocumentViewMixin:
@@ -227,29 +235,42 @@ TimesheetMonth = namedtuple(
 )
 
 
-class TimesheetsList(TemplateView):
+class TimesheetsList(FormView):
     template_name = "document/timesheets_list.html"
+    form_class = TimesheetListFilterForm
+    success_url = '.'
 
-    def get_context_data(self, **kwargs):
+    def form_valid(self, form, **kwargs):
+        start_date = form.cleaned_data["start_date"]
+        end_date = form.cleaned_data["end_date"]
+        context = self.get_context_data(start_date, end_date, **kwargs)
+        return self.render_to_response(context)
+
+    def get_context_data(self, start_date=None, end_date=None, **kwargs):
         context = super().get_context_data(**kwargs)
         today = date.today()
-        first_year, first_month = (
-            Timesheet.objects.first().document_date.year,
-            Timesheet.objects.first().document_date.month,
-        )
-        start_date = date(first_year, first_month, 1)
-        selected_months = [dt for dt in rrule(MONTHLY, dtstart=start_date, until=today)]
+        if not start_date:
+            first_year, first_month = (
+                Timesheet.objects.first().document_date.year,
+                Timesheet.objects.first().document_date.month,
+            )
+            start_date = date(first_year, first_month, 1)
+            start_date = monthdelta(today, -2)
+            start_date.replace(day=1)
+        if not end_date:
+            end_date = today
+        selected_months = [dt for dt in rrule(MONTHLY, dtstart=start_date, until=end_date)]
         months = []
         for dt in reversed(selected_months):
             months.append(
                 TimesheetMonth(
                     date(dt.year, dt.month, 1),
                     can_generate=(
-                        (dt.month == today.month or dt.month == today.month - 1)
-                        and Timer.objects.month(dt.year, dt.month).exists()
+                            (dt.month == today.month or dt.month == today.month - 1)
+                            and Timer.objects.month(dt.year, dt.month).exists()
                     ),
                     count=Timesheet.objects.period(dt.year, dt.month).count(),
-                    timesheets=Timesheet.objects.period(dt.year, dt.month).all(),
+                    timesheets=Timesheet.objects.select_related("worker__user").period(dt.year, dt.month).all(),
                 )
             )
         context["months"] = months

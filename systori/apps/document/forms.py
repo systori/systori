@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db import models, transaction
 from django.utils.translation import get_language, ugettext_lazy as _
 from bootstrap import DateWidget
+from dateutil.rrule import rrule, MONTHLY
 
 from systori.lib.accounting.tools import Amount
 from systori.lib.fields import DecimalMinuteHoursField
@@ -1087,6 +1088,23 @@ class TimesheetForm(forms.ModelForm):
         self.instance.calculate()
         return super().save(commit)
 
+
+class TimesheetListFilterForm(forms.Form):
+    start_date = forms.DateField(label=_("Start date"))
+    end_date = forms.DateField(label=_("End date"))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get("start_date")
+        end_date = cleaned_data.get("end_date")
+        if start_date >= end_date:
+            raise forms.ValidationError(_("Start date needs to be before end date."))
+
+    class Meta:
+        widgets = {
+            "start_date": DateWidget,
+            "end_date": DateWidget,
+        }
 
 class LetterheadCreateForm(forms.ModelForm):
     class Meta:
