@@ -84,16 +84,15 @@ class WeekOfPlannedWorkersApiView(APIView):
             .prefetch_related("workers__user") \
             .filter(day__range=(beginning_of_week, end_of_week))
 
-        response = defaultdict()
-        counter = 0
+        # first setdefault key is to get and reuse a worker
+        # second setdefault to have a reusable projects list
+        response = dict()
         for plan in queryset:
             for worker in plan.workers.all():
-                response[f"{worker.pk}"] = WorkerSerializer(worker).data
-                response[f"{worker.pk}"].setdefault("projects", []).append(
+                response.setdefault(worker.pk, WorkerSerializer(worker).data)
+                response[worker.pk].setdefault("projects", []).append(
                     ProjectSerializer(plan.jobsite.project).data
                 )
-                if "Albin" in worker.first_name:
-                    counter += 1
-                    print(f"{counter}: {ProjectSerializer(plan.jobsite.project).data}")
 
-        return Response(response)
+        # return a list of values to get rid of the (temporary) worker PKs
+        return Response(list(response.values()))
