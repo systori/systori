@@ -16,14 +16,20 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class JobSiteSerializer(serializers.ModelSerializer):
-    project = ProjectSerializer(
-        many=False,
-        read_only=True
-    )
+    project = ProjectSerializer(many=False, read_only=True)
 
     class Meta:
         model = JobSite
-        fields = ("name", "project", "address", "city", "postal_code", "country", "latitude", "longitude")
+        fields = (
+            "name",
+            "project",
+            "address",
+            "city",
+            "postal_code",
+            "country",
+            "latitude",
+            "longitude",
+        )
 
 
 class DailyPlanSerializer(serializers.ModelSerializer):

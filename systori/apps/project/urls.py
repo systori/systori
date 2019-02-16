@@ -75,5 +75,5 @@ urlpatterns = [
         r"^project-search$",
         office_auth(ProjectSearchApi.as_view()),
         name="project.search",
-    )
+    ),
 ]

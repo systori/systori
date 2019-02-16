@@ -1101,10 +1101,8 @@ class TimesheetListFilterForm(forms.Form):
             raise forms.ValidationError(_("Start date needs to be before end date."))
 
     class Meta:
-        widgets = {
-            "start_date": DateWidget,
-            "end_date": DateWidget,
-        }
+        widgets = {"start_date": DateWidget, "end_date": DateWidget}
+
 
 class LetterheadCreateForm(forms.ModelForm):
     class Meta:

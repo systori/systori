@@ -53,36 +53,38 @@ class DailyPlansApiView(ModelViewSet):
     serializer_class = DailyPlanSerializer
     permission_classes = (HasLaborerAccess,)
     filter_backends = (SearchFilter,)
-    search_fields = ('day',)
+    search_fields = ("day",)
 
 
 class WeekOfDailyPlansApiView(ListAPIView):
     model = DailyPlan
     serializer_class = DailyPlanSerializer
-    permission_classes = (HasLaborerAccess, )
+    permission_classes = (HasLaborerAccess,)
 
     def get_queryset(self):
         day_of_week = parse_date(self.kwargs["day_of_week"])
         beginning_of_week, end_of_week = get_week_by_day(day_of_week)
 
-        return DailyPlan.objects\
-            .select_related("jobsite__project") \
-            .prefetch_related("workers__user") \
-            .prefetch_related("equipment") \
+        return (
+            DailyPlan.objects.select_related("jobsite__project")
+            .prefetch_related("workers__user")
+            .prefetch_related("equipment")
             .filter(day__range=(beginning_of_week, end_of_week))
+        )
 
 
 class WeekOfPlannedWorkersApiView(APIView):
-    permission_classes = (HasLaborerAccess, )
+    permission_classes = (HasLaborerAccess,)
 
     def get(self, request, *args, **kwargs):
         day_of_week = parse_date(kwargs["day_of_week"])
         beginning_of_week, end_of_week = get_week_by_day(day_of_week)
 
-        queryset = DailyPlan.objects\
-            .select_related("jobsite__project") \
-            .prefetch_related("workers__user") \
+        queryset = (
+            DailyPlan.objects.select_related("jobsite__project")
+            .prefetch_related("workers__user")
             .filter(day__range=(beginning_of_week, end_of_week))
+        )
 
         # first setdefault key is to get and reuse a worker
         # second setdefault to have a reusable projects list

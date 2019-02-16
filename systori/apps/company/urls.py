@@ -4,7 +4,11 @@ from . import views, api
 
 urlpatterns = [
     url(r"^companies$", login_required(views.CompanyList.as_view()), name="companies"),
-    url(r"^api/companies/$", api.CompanyApiView.as_view({'get': 'retrieve'}), name="api.companies"),
+    url(
+        r"^api/companies/$",
+        api.CompanyApiView.as_view({"get": "retrieve"}),
+        name="api.companies",
+    ),
     url(
         r"^create-company$",
         login_required(views.CompanyCreate.as_view()),

@@ -5,6 +5,7 @@ from systori.lib.testing import ClientTestCase
 from .models import Equipment, RefuelingStop, Maintenance
 from .factories import EquipmentFactory
 
+
 class EquipmentTestCase(ClientTestCase):
     def setUp(self):
         # ToDo: use EquipmentFactory

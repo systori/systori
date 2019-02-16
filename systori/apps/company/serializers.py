@@ -6,7 +6,7 @@ from .models import Worker, Company
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ("schema", )
+        fields = ("schema",)
 
 
 class WorkerSerializer(serializers.ModelSerializer):

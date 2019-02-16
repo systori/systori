@@ -32,7 +32,9 @@ class ProjectApiTest(ClientTestCase):
         # required format, apple TV client dependency
         beginning_of_week, end_of_week = get_week_by_day(date.today())
         for day in range(5):
-            dp = DailyPlanFactory(jobsite=self.jobsite, day=beginning_of_week + timedelta(day))
+            dp = DailyPlanFactory(
+                jobsite=self.jobsite, day=beginning_of_week + timedelta(day)
+            )
             TeamMember.objects.create(dailyplan=dp, worker=self.worker)
             e = EquipmentFactory()
             EquipmentAssignment.objects.create(dailyplan=dp, equipment=e)
@@ -41,18 +43,28 @@ class ProjectApiTest(ClientTestCase):
         json = response.json()
         self.assertIsInstance(json, list)
         self.assertEqual(
-            ['pk', 'day', 'jobsite', 'workers', 'equipment', 'notes'], list(json[0].keys())
+            ["pk", "day", "jobsite", "workers", "equipment", "notes"],
+            list(json[0].keys()),
         )
         self.assertEqual(
-            ['first_name', 'last_name'], list(json[0]["workers"][0].keys())
+            ["first_name", "last_name"], list(json[0]["workers"][0].keys())
         )
         self.assertEqual(
-            ['name', 'project', 'address', 'city', 'postal_code', 'country', 'latitude', 'longitude'],
-            list(response.json()[0]["jobsite"].keys())
+            [
+                "name",
+                "project",
+                "address",
+                "city",
+                "postal_code",
+                "country",
+                "latitude",
+                "longitude",
+            ],
+            list(response.json()[0]["jobsite"].keys()),
         )
         self.assertEqual(
-            ['name', 'manufacturer', 'number_of_seats', 'license_plate'],
-            list(response.json()[0]["equipment"][0].keys())
+            ["name", "manufacturer", "number_of_seats", "license_plate"],
+            list(response.json()[0]["equipment"][0].keys()),
         )
 
     def test_WeekOfPlannedWorkersApiView(self):
@@ -62,11 +74,5 @@ class ProjectApiTest(ClientTestCase):
         response = self.client.get(f"/api/v1/weekofplannedworkers/{date.today()}/")
         json = response.json()
         self.assertIsInstance(json, list)
-        self.assertEqual(
-            ["first_name", "last_name", "projects"],
-            list(json[0].keys())
-        )
-        self.assertEqual(
-            ['pk', 'name', 'day'],
-            list(json[0]["projects"][0].keys())
-        )
+        self.assertEqual(["first_name", "last_name", "projects"], list(json[0].keys()))
+        self.assertEqual(["pk", "name", "day"], list(json[0]["projects"][0].keys()))

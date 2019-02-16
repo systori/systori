@@ -85,8 +85,7 @@ def delete_when_empty(dailyplan):
 
 def daily_plan_objects():
     return (
-        DailyPlan.objects
-        .prefetch_related("jobsite__project__jobsites")
+        DailyPlan.objects.prefetch_related("jobsite__project__jobsites")
         .prefetch_related("members__worker__user")
         .prefetch_related("workers__company")
         .prefetch_related(
@@ -845,9 +844,10 @@ class FieldRefuelingStopUpdate(RefuelingStopUpdate):
 
 class FieldRefuelingStopDelete(RefuelingStopDelete):
     template_name = "field/equipment_confirm_delete.html"
-    
+
     def get_success_url(self):
         return reverse("field.equipment.view", args=(self.object.equipment.id,))
+
 
 class FieldMaintenanceCreate(MaintenanceCreate):
     template_name = "field/equipment_form.html"
