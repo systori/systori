@@ -85,7 +85,10 @@ def delete_when_empty(dailyplan):
 
 def daily_plan_objects():
     return (
-        DailyPlan.objects.prefetch_related("jobsite__project__jobsites")
+        DailyPlan.objects
+        .prefetch_related("jobsite__project__jobsites")
+        .prefetch_related("members__worker__user")
+        .prefetch_related("workers__company")
         .prefetch_related(
             Prefetch(
                 "assigned_equipment",
@@ -93,6 +96,7 @@ def daily_plan_objects():
             )
         )
         .prefetch_related("tasks")
+        .select_related("jobsite__project")
     )
 
 

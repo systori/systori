@@ -90,9 +90,8 @@ class WeekOfPlannedWorkersApiView(APIView):
         for plan in queryset:
             for worker in plan.workers.all():
                 response.setdefault(worker.pk, WorkerSerializer(worker).data)
-                response[worker.pk].setdefault("projects", []).append(
-                    ProjectSerializer(plan.jobsite.project).data
-                )
-
+                project = ProjectSerializer(plan.jobsite.project).data
+                project["day"] = plan.day.isoformat()
+                response[worker.pk].setdefault("projects", []).append(project)
         # return a list of values to get rid of the (temporary) worker PKs
         return Response(list(response.values()))

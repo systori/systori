@@ -32,7 +32,7 @@ class ProjectApiTest(ClientTestCase):
         # required format, apple TV client dependency
         beginning_of_week, end_of_week = get_week_by_day(date.today())
         for day in range(5):
-            dp = DailyPlanFactory(jobsite=self.jobsite, day=beginning_of_week+timedelta(day))
+            dp = DailyPlanFactory(jobsite=self.jobsite, day=beginning_of_week + timedelta(day))
             TeamMember.objects.create(dailyplan=dp, worker=self.worker)
             e = EquipmentFactory()
             EquipmentAssignment.objects.create(dailyplan=dp, equipment=e)
@@ -41,7 +41,7 @@ class ProjectApiTest(ClientTestCase):
         json = response.json()
         self.assertIsInstance(json, list)
         self.assertEqual(
-            ['pk', 'day', 'jobsite', 'workers', 'equipment'], list(json[0].keys())
+            ['pk', 'day', 'jobsite', 'workers', 'equipment', 'notes'], list(json[0].keys())
         )
         self.assertEqual(
             ['first_name', 'last_name'], list(json[0]["workers"][0].keys())
@@ -57,7 +57,6 @@ class ProjectApiTest(ClientTestCase):
 
     def test_WeekOfPlannedWorkersApiView(self):
         # required format, apple TV client dependency
-        # [{'first_name': 'KLYtMBUxjfDtMZN', 'last_name': 'SBRvJQOQLgioENG', 'projects': [{'pk': 2, 'name': 'rcOQtmelFQFIlmj'}]}]
         dp = DailyPlanFactory(jobsite=self.jobsite)
         TeamMember.objects.create(dailyplan=dp, worker=self.worker)
         response = self.client.get(f"/api/v1/weekofplannedworkers/{date.today()}/")
@@ -68,6 +67,6 @@ class ProjectApiTest(ClientTestCase):
             list(json[0].keys())
         )
         self.assertEqual(
-            ["pk", "name"],
+            ['pk', 'name', 'day'],
             list(json[0]["projects"][0].keys())
         )

@@ -1,7 +1,7 @@
-{% load i18n l10n staticfiles field_app timetracking %}
+{% load i18n l10n staticfiles timetracking %}
 
 {% with jobsite=dailyplan.jobsite %}
-{% load_user_statuses %}
+
 <daily-plan class="panel {% if is_selected_past %}panel-warning
                          {% elif is_selected_today %}panel-primary
                          {% elif is_selected_future %}panel-info
@@ -38,9 +38,9 @@
     {% if member.worker.has_laborer %}
     <field-worker
         class="list-group-item"
-        data-id="{{ member.id|unlocalize }}">{% show_user_status member.worker.user %}{{ member.worker.get_full_name }}</field-worker>
+        data-id="{{ member.id|unlocalize }}">{{ member.worker.get_full_name }}</field-worker>
     {% else %}
-    <div class="list-group-item">{% show_user_status member.worker.user %}{{ member.worker.get_full_name }}</div>
+    <div class="list-group-item">{{ member.worker.get_full_name }}</div>
     {% endif %}
 
   {% endfor %}

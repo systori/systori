@@ -34,4 +34,4 @@ class DailyPlanSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DailyPlan
-        fields = ("pk", "day", "jobsite", "workers", "equipment")
+        fields = ("pk", "day", "jobsite", "workers", "equipment", "notes")
