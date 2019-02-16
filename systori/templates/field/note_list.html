@@ -32,7 +32,7 @@
         {% for note in object_list %}
           <tr style="font-size:smaller;"><td>
             <a href="{% url 'field.project' note.project.id %}">#{{ note.project.id }}</a> {{ note.worker }}
-            <span class="note-created" datetime="{{ note.created|unlocalize }}" style="color: grey;">
+            <span class="note-created" datetime="{{ note.created|date:"c" }}" style="color: grey;">
               {{ note.created }}
             </span>
           </td></tr>
