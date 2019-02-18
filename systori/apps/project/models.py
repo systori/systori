@@ -414,4 +414,6 @@ class EquipmentAssignment(models.Model):
 @receiver(post_delete, sender=EquipmentAssignment)
 @receiver(m2m_changed, sender=EquipmentAssignment)
 def notify_client(**kwargs):
-    pusher_client.trigger('dailyplan-channel', 'data-changed-event', {'message': 'refresh'})
+    pusher_client.trigger(
+        "dailyplan-channel", "data-changed-event", {"message": "refresh"}
+    )

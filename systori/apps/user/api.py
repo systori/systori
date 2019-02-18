@@ -19,6 +19,6 @@ class SystoriAuthToken(ObtainAuthToken):
                 "email": user.email,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
-                "pusher_key": os.environ.get("PUSHER_KEY", "")
+                "pusher_key": os.environ.get("PUSHER_KEY", ""),
             }
         )

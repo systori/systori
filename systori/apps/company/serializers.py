@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from ..user.serializers import UserSerializer
 from .models import Worker, Company
 
 
@@ -10,8 +9,6 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class WorkerSerializer(serializers.ModelSerializer):
-    # worker = UserSerializer(many=False, read_only=True)
-
     class Meta:
         model = Worker
         fields = ("first_name", "last_name")

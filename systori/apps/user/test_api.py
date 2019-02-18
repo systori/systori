@@ -12,9 +12,11 @@ class ProjectApiTest(ClientTestCase):
         """
         Expect retrieval of auth token and additional information
         """
-        response = self.client.post("/api/token/", data={"username": self.user.email, "password": "password"})
+        response = self.client.post(
+            "/api/token/", data={"username": self.user.email, "password": "password"}
+        )
         json = response.json()
         self.assertEqual(
-            ['token', 'id', 'email', 'first_name', 'last_name', 'pusher_key'],
-            list(json.keys())
+            ["token", "id", "email", "first_name", "last_name", "pusher_key"],
+            list(json.keys()),
         )
