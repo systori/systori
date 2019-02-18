@@ -1,7 +1,8 @@
+dist: xenial
 language: python
 
 python:
-  - "3.6.5"
+  - "3.6"
 
 cache:
   directories:
@@ -42,7 +43,7 @@ branches:
     - dev
 
 notifications:
-  email: m.raesener@gmail.com
+  email: marius@raesener.de
 
 addons:
   ssh_known_hosts: bitbucket.org
