@@ -86,6 +86,8 @@ def delete_when_empty(dailyplan):
 def daily_plan_objects():
     return (
         DailyPlan.objects.prefetch_related("jobsite__project__jobsites")
+        .prefetch_related("members__worker__user")
+        .prefetch_related("workers__company")
         .prefetch_related(
             Prefetch(
                 "assigned_equipment",
@@ -93,6 +95,7 @@ def daily_plan_objects():
             )
         )
         .prefetch_related("tasks")
+        .select_related("jobsite__project")
     )
 
 
@@ -264,9 +267,19 @@ class FieldNoteList(ListView):
         if self.kwargs.get("project_pk", None):
             project = Project.objects.get(id=self.kwargs["project_pk"])
         if project:
-            return Note.objects.filter(project=project).order_by("-created")
+            return (
+                Note.objects.prefetch_related("project")
+                .prefetch_related("worker__user")
+                .filter(project=project)
+                .order_by("-created")
+            )
         else:
-            return Note.objects.order_by("-created").all()
+            return (
+                Note.objects.prefetch_related("project")
+                .prefetch_related("worker__user")
+                .order_by("-created")
+                .all()
+            )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -841,9 +854,10 @@ class FieldRefuelingStopUpdate(RefuelingStopUpdate):
 
 class FieldRefuelingStopDelete(RefuelingStopDelete):
     template_name = "field/equipment_confirm_delete.html"
-    
+
     def get_success_url(self):
         return reverse("field.equipment.view", args=(self.object.equipment.id,))
+
 
 class FieldMaintenanceCreate(MaintenanceCreate):
     template_name = "field/equipment_form.html"

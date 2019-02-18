@@ -320,7 +320,7 @@ def migrate_accounts(company):
             if invoice and invoice.amount >= (
                 bank_entry.amount
                 + (-discount_entry.amount if discount_entry else 0)
-                - Decimal(.01)
+                - Decimal(0.01)
             ):
 
                 print(

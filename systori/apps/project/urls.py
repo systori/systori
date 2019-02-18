@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from ..user.authorization import office_auth
 from .views import *
+from .api import WeekOfDailyPlansApiView
 
 urlpatterns = [
     url(
@@ -71,7 +72,7 @@ urlpatterns = [
         name="project.progress.all",
     ),
     url(
-        r"project-search$",
+        r"^project-search$",
         office_auth(ProjectSearchApi.as_view()),
         name="project.search",
     ),

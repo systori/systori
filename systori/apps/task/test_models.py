@@ -397,7 +397,10 @@ class AutoCompleteSearchTest(TestCase):
         project5 = ProjectFactory(structure="01.01.01.01.01.001", with_job=True)
         add_names(project5.jobs.first(), en_names)
 
-        long_text = "Voranstrich aus Bitumenlösung, Untergrund Beton, einschl. " "Aufkantungen, wie Attika, Schächte und Fundamente."
+        long_text = (
+            "Voranstrich aus Bitumenlösung, Untergrund Beton, einschl. "
+            "Aufkantungen, wie Attika, Schächte und Fundamente."
+        )
         TaskFactory(
             group=self.job, total=31, name="aus Bitumenlösung", description=long_text
         )

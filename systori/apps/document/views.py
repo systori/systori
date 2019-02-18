@@ -29,10 +29,10 @@ from .utils import get_weekday_names_numbers_and_mondays
 from . import type as pdf_type
 
 
-
 def monthdelta(date, delta):
     m, y = (date.month + delta) % 12, date.year + (date.month + delta - 1) // 12
-    if not m: m = 12
+    if not m:
+        m = 12
     d = min(date.day, monthrange(y, m)[1])
     return date.replace(day=d, month=m, year=y)
 
@@ -238,7 +238,7 @@ TimesheetMonth = namedtuple(
 class TimesheetsList(FormView):
     template_name = "document/timesheets_list.html"
     form_class = TimesheetListFilterForm
-    success_url = '.'
+    success_url = "."
 
     def form_valid(self, form, **kwargs):
         start_date = form.cleaned_data["start_date"]
@@ -259,18 +259,22 @@ class TimesheetsList(FormView):
             start_date.replace(day=1)
         if not end_date:
             end_date = today
-        selected_months = [dt for dt in rrule(MONTHLY, dtstart=start_date, until=end_date)]
+        selected_months = [
+            dt for dt in rrule(MONTHLY, dtstart=start_date, until=end_date)
+        ]
         months = []
         for dt in reversed(selected_months):
             months.append(
                 TimesheetMonth(
                     date(dt.year, dt.month, 1),
                     can_generate=(
-                            (dt.month == today.month or dt.month == today.month - 1)
-                            and Timer.objects.month(dt.year, dt.month).exists()
+                        (dt.month == today.month or dt.month == today.month - 1)
+                        and Timer.objects.month(dt.year, dt.month).exists()
                     ),
                     count=Timesheet.objects.period(dt.year, dt.month).count(),
-                    timesheets=Timesheet.objects.select_related("worker__user").period(dt.year, dt.month).all(),
+                    timesheets=Timesheet.objects.select_related("worker__user")
+                    .period(dt.year, dt.month)
+                    .all(),
                 )
             )
         context["months"] = months

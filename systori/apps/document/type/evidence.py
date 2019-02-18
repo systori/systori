@@ -50,7 +50,10 @@ class EvidenceRenderer:
             elif isinstance(self.project, Job):
                 return (str(self.project.project.id), self.project.project.name)
 
-        project_data = {"pk": get_project_meta_from_model()[0], "name": get_project_meta_from_model()[1]}
+        project_data = {
+            "pk": get_project_meta_from_model()[0],
+            "name": get_project_meta_from_model()[1],
+        }
         document_date = date_format(date.today(), use_l10n=True)
 
         def get_task_recursive(parent):

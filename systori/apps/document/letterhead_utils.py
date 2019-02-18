@@ -31,8 +31,8 @@ def clean_letterhead_pdf(file, save=False):
         (612, 1008): "LEGAL",
         (792, 1224): "ELEVENSEVENTEEN",
         # 8.5inch 612pt 11inch 792pt 14inch 1008pt 17inch 1224pt
-        (_BW * .5, _BH * .5): "B6",
-        (_BH * .5, _BW): "B5",
+        (_BW * 0.5, _BH * 0.5): "B6",
+        (_BH * 0.5, _BW): "B5",
         (_BW, _BH): "B4",
         (_BH * 2, _BW): "B3",
         (_BW * 2, _BH * 2): "B2",

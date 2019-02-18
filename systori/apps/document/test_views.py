@@ -1186,7 +1186,7 @@ class EvidenceViewTests(DocumentTestCase):
         response = self.client.get(
             reverse("project.evidence.html", args=[self.project.id])
         )
-        self.assertIn(f'#{self.project.id}', response.content.decode())
+        self.assertIn(f"#{self.project.id}", response.content.decode())
         self.assertEqual(200, response.status_code)
 
     def test_generate_job_evidence(self):
@@ -1197,7 +1197,7 @@ class EvidenceViewTests(DocumentTestCase):
         response = self.client.get(
             reverse("job.evidence.html", args=[self.project.id, self.job.id])
         )
-        self.assertIn(f'#{self.project.id}', response.content.decode())
+        self.assertIn(f"#{self.project.id}", response.content.decode())
         self.assertEqual(200, response.status_code)
 
 
