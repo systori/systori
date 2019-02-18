@@ -1,3 +1,4 @@
+import os
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -18,8 +19,6 @@ class SystoriAuthToken(ObtainAuthToken):
                 "email": user.email,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
+                "pusher_key": os.environ.get("PUSHER_KEY", "")
             }
         )
-
-
-# "companies": [{"schema": company.schema} for company in user.companies.all()]

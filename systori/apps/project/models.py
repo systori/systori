@@ -2,6 +2,8 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models.expressions import RawSQL
+from django.db.models.signals import post_delete, post_save, m2m_changed
+from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
@@ -12,6 +14,7 @@ from geopy import geocoders
 
 from systori.apps.task.gaeb.structure import GAEBStructureField
 from systori.lib.utils import nice_percent
+from systori.lib.pusher import pusher_client
 from ..task.models import Job, JobQuerySet
 
 
@@ -399,3 +402,16 @@ class EquipmentAssignment(models.Model):
     equipment = models.ForeignKey(
         "equipment.Equipment", related_name="assignments", on_delete=models.CASCADE
     )
+
+
+@receiver(post_save, sender=TeamMember)
+@receiver(post_delete, sender=TeamMember)
+@receiver(m2m_changed, sender=TeamMember)
+@receiver(post_save, sender=DailyPlan)
+@receiver(post_delete, sender=DailyPlan)
+@receiver(m2m_changed, sender=DailyPlan)
+@receiver(post_save, sender=EquipmentAssignment)
+@receiver(post_delete, sender=EquipmentAssignment)
+@receiver(m2m_changed, sender=EquipmentAssignment)
+def notify_client(**kwargs):
+    pusher_client.trigger('dailyplan-channel', 'data-changed-event', {'message': 'refresh'})

@@ -5,6 +5,7 @@ djangorestframework==3.9.1
 django-fsm==2.6.0
 django-allauth==0.36.0
 jsonfield==2.0.2
+pusher==2.1.2
 
 geopy
 python-dateutil==2.6.1
