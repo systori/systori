@@ -7,12 +7,18 @@ services:
       args:
         - REQUIREMENTS_FILE=dev.pip
         - DJANGO_SETTINGS_MODULE=systori.settings.docker_local
+        - PUSHER_APP_ID=$PUSHER_APP_ID
+        - PUSHER_KEY=$PUSHER_KEY
+        - PUSHER_SECRET=$PUSHER_SECRET
     ports:
       - "8000:8000"
     environment:
       PYTHONUNBUFFERED: 1
       DJANGO_SETTINGS_MODULE: 'systori.settings.docker_local'
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      PUSHER_APP_ID: $PUSHER_APP_ID
+      PUSHER_KEY: $PUSHER_KEY
+      PUSHER_SECRET: $PUSHER_SECRET
     links:
       - db
     entrypoint: ["dumb-init", "docker/app/startup.sh"]
@@ -24,6 +30,9 @@ services:
       args:
         - REQUIREMENTS_FILE=dev.pip
         - DJANGO_SETTINGS_MODULE=systori.settings.sandbox
+        - PUSHER_APP_ID=$PUSHER_APP_ID
+        - PUSHER_KEY=$PUSHER_KEY
+        - PUSHER_SECRET=$PUSHER_SECRET
     image: elmcrest/systori:sandbox
     ports:
       - "8000:8000"
@@ -31,6 +40,9 @@ services:
       PYTHONUNBUFFERED: 1
       DJANGO_SETTINGS_MODULE: 'systori.settings.sandbox'
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      PUSHER_APP_ID: $PUSHER_APP_ID
+      PUSHER_KEY: $PUSHER_KEY
+      PUSHER_SECRET: $PUSHER_SECRET
     links:
       - db
     entrypoint: ["dumb-init", "docker/app/startup.sh"]
