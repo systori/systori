@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n l10n customformatting timetracking %}
+{% load static i18n l10n customformatting timetracking pusher %}
 
 {% block container %}
 
@@ -119,7 +119,6 @@
     <span></span> <!-- emtpy element for flexbox positioning -->
   </header>
   <dailyplans>
-    {% load_user_statuses %}
       <grid>
         {% for plan, workers in selected_plans %}
           <grid-child class="border-day-indicator-{{ temporal_location }} panel-primary">
@@ -135,7 +134,7 @@
             <workers class="bg-day-indicator-{{ temporal_location }}">{% trans "Workers" %}</workers>
             <worker>
                 {% for plan_worker in workers %}
-                  <span>{{ plan_worker.get_full_name }}</span>
+                  <span draggable="true">{{ plan_worker.get_full_name }}</span>
                 {% endfor %}
             </worker>
             <equipments class="bg-day-indicator-{{ temporal_location }}">{% trans "equipment" %}</equipments>
@@ -155,5 +154,68 @@
 </dailyplans-container>
 {% endblock %}
 {% block extra_js %}
-  <script src="{% static "js/day_based_overview.js" %}"></script>
+    <script src="https://js.pusher.com/4.4/pusher.min.js"></script>
+    <script>
+        var pusher = new Pusher("{% pusher_key %}", {
+          cluster: 'eu',
+          forceTLS: true
+        });
+
+        var channel = pusher.subscribe('dailyplan-channel');
+        channel.bind('data-changed-event', function(data) {
+            console.log(data);
+            page_reload();
+        });
+
+        function page_reload() {
+            $.ajax({
+                type: "HEAD",
+                url: window.location,
+                success: function () {
+                    window.location.reload();
+                },
+                error: function () {
+                    console.log("error reloading page.");
+                    setTimeout(page_reload, 60000);
+                },
+                statusCode: {
+                    404: function () {
+                        console.log("404");
+                    },
+                    501: function () {
+                        console.log("501");
+                    },
+                    502: function () {
+                        console.log("502");
+                    }
+                }
+            });
+        }
+
+        function getAndSetMaxCellHeight(tag) {
+            let max = 0;
+            const elements = document.querySelectorAll(tag);
+            for (const el of elements) {
+                if (el.offsetHeight > max)
+                    max = el.offsetHeight
+            }
+            for (const el of elements) {
+                el.style.height = `${max}px`;
+            }
+        }
+
+        function resizeRows() {
+            for (const child of document.querySelector("grid-child").children) {
+                getAndSetMaxCellHeight(child.tagName);
+            }
+        }
+
+        // function handleDragStart(e) {
+        //     this.style.opacity = '0.4';
+        // }
+        // let workers = document.querySelectorAll("worker > span");
+        // workers.forEach(function(worker) {
+        //     worker.addEventListener("dragstart", handleDragStart, false);
+        // })
+    </script>
 {% endblock %}

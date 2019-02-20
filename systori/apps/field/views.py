@@ -11,6 +11,8 @@ from django.views.generic import View, DetailView, ListView, UpdateView, Templat
 from django.views.generic.detail import SingleObjectMixin
 from django.urls import reverse
 
+from systori.lib.pusher import pusher_client
+
 from ..company.models import Worker
 from ..project.models import Project, DailyPlan, EquipmentAssignment, TeamMember
 from ..task.models import Group, Task, ProgressReport
@@ -818,6 +820,9 @@ class FieldPaste(View):
         plans = clipboard.get("empty-plans", [])
         for plan in daily_plan_objects().filter(id__in=plans):
             delete_when_empty(plan)
+        pusher_client.trigger(
+            "dailyplan-channel", "data-changed-event", {"message": "refresh"}
+        )
         return HttpResponse("OK")
 
 

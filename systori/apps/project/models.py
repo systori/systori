@@ -404,15 +404,9 @@ class EquipmentAssignment(models.Model):
     )
 
 
-@receiver(post_save, sender=TeamMember)
-@receiver(post_delete, sender=TeamMember)
-@receiver(m2m_changed, sender=TeamMember)
-@receiver(post_save, sender=DailyPlan)
-@receiver(post_delete, sender=DailyPlan)
-@receiver(m2m_changed, sender=DailyPlan)
-@receiver(post_save, sender=EquipmentAssignment)
-@receiver(post_delete, sender=EquipmentAssignment)
-@receiver(m2m_changed, sender=EquipmentAssignment)
+@receiver([post_save, post_delete, m2m_changed], sender=TeamMember)
+@receiver([post_save, post_delete, m2m_changed], sender=DailyPlan)
+@receiver([post_save, post_delete, m2m_changed], sender=EquipmentAssignment)
 def notify_client(**kwargs):
     pusher_client.trigger(
         "dailyplan-channel", "data-changed-event", {"message": "refresh"}
