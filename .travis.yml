@@ -4,6 +4,9 @@ language: python
 python:
   - "3.6"
 
+services:
+  - postgresql
+
 cache:
   directories:
     - $HOME/virtualenv
@@ -17,9 +20,9 @@ before_install:
   - sudo sh -c 'curl https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list'
   - sudo apt-get update
   - sudo apt-get install dart=1.24.3-1
-  #- fab getdartium
-  #- export DART_SDK="$HOME/bin/dart-sdk"
-  #- export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
+#  - fab getdartium
+#  - export DART_SDK="$HOME/bin/dart-sdk"
+#  - export PATH="$HOME/.pub-cache/bin:$DART_SDK/bin:$PATH"
 
 install:
   - pip install --upgrade pip
@@ -27,8 +30,8 @@ install:
 
 before_script:
   - export DJANGO_SETTINGS_MODULE=systori.settings.travis
-  - cd systori/dart && /usr/lib/dart/bin/pub get && /usr/lib/dart/bin/pub build && cd ../..
-  - psql -c 'create database travisci;' -U postgres
+#  - cd systori/dart && /usr/lib/dart/bin/pub get && /usr/lib/dart/bin/pub build && cd ../..
+  - psql -c 'create database travis_ci_test;' -U postgres
 
 script:
   - python manage.py collectstatic --noinput
