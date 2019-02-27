@@ -13,7 +13,8 @@ MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, "media"))
 
 DATABASES["default"].update(
     {
-        "HOST": "db",
+        "HOST": "localhost",
+        "PORT": 5433,
         "NAME": "systori_test",
         "USER": "postgres",
         "TEST": {"SERIALIZE": False},

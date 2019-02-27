@@ -54,6 +54,14 @@ services:
     environment:
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
 
+  db_test:
+    image: "postgres:9.5"
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    command: -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c random_page_cost=1.0
+
   dart:
     build:
       context: ./

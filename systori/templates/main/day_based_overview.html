@@ -163,7 +163,6 @@
 
         var channel = pusher.subscribe('dailyplan-channel');
         channel.bind('data-changed-event', function(data) {
-            console.log(data);
             page_reload();
         });
 
@@ -209,13 +208,5 @@
                 getAndSetMaxCellHeight(child.tagName);
             }
         }
-
-        // function handleDragStart(e) {
-        //     this.style.opacity = '0.4';
-        // }
-        // let workers = document.querySelectorAll("worker > span");
-        // workers.forEach(function(worker) {
-        //     worker.addEventListener("dragstart", handleDragStart, false);
-        // })
     </script>
 {% endblock %}

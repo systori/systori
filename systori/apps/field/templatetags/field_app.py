@@ -8,19 +8,16 @@ from systori.apps.project.models import DailyPlan
 
 @register.simple_tag
 def task_dailyplans_count(task, date):
-    print("task_dailyplans_count")
     return task.dailyplans.filter(day=date).count()
 
 
 @register.simple_tag
 def equipment_dailyplans_count(equipment, date):
-    print("equipment_dailyplans_count")
     return equipment.dailyplans.filter(day=date).count()
 
 
 @register.simple_tag
 def add_daily_plan_url(project, date, jobsite=None):
-    print("add_daily_plan_url")
     if jobsite or len(project.jobsites.all()) == 1:
         jobsite = jobsite or project.jobsites.all()[0]
         return reverse(
