@@ -11,6 +11,7 @@ from django.utils.timezone import localdate
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from django_fsm import FSMField, transition
 from geopy import geocoders
+from datetime import time
 
 from systori.apps.task.gaeb.structure import GAEBStructureField
 from systori.lib.utils import nice_percent
@@ -351,6 +352,8 @@ class DailyPlan(models.Model):
         JobSite, related_name="dailyplans", on_delete=models.CASCADE
     )
     day = models.DateField(_("Day"), default=localdate)
+    start = models.TimeField(_("Start"), default=time(7, 0))
+    end = models.TimeField(_("End"), default=time(16, 0))
     workers = models.ManyToManyField(
         "company.Worker", through="TeamMember", related_name="dailyplans"
     )
