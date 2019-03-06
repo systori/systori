@@ -134,7 +134,7 @@ class InvoiceTests(TestCase):
                                 "name": self.group.name,
                                 "description": "",
                                 "progress": Decimal("0.00"),
-                                "estimate": Decimal("0.0000"),
+                                "estimate": Decimal("0.00"),
                                 "tasks": [
                                     {
                                         "task.id": 1,
@@ -145,19 +145,21 @@ class InvoiceTests(TestCase):
                                         "variant_group": 0,
                                         "variant_serial": 0,
                                         "qty": Decimal("0.0000"),
-                                        "complete": Decimal("0.0000"),
+                                        "complete": Decimal("0.000"),
                                         "unit": "",
                                         "price": Decimal("0.0000"),
                                         "progress": Decimal("0.00"),
-                                        "estimate": Decimal("0.0000"),
+                                        "estimate": Decimal("0.00"),
                                         "lineitems": [
                                             {
                                                 "lineitem.id": 1,
                                                 "name": self.lineitem.name,
-                                                "qty": Decimal("0.0000"),
+                                                "qty": Decimal("0.000"),
                                                 "unit": "",
-                                                "price": Decimal("0.0000"),
-                                                "estimate": Decimal("0.0000"),
+                                                "price": Decimal("0.00"),
+                                                "estimate": Decimal("0.00"),
+                                                "expended": Decimal("0.00"),
+                                                "progress": Decimal("0.00"),
                                             }
                                         ],
                                     }
