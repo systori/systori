@@ -89,10 +89,11 @@ class InvoiceRowIterator(BaseRowIterator):
             )
 
     def get_lineitem_context(self, lineitem, **kwargs):
+        # lineitem.get("new_key", lineitem["old_key"]) is a workaround to support old JSON and fixed JSON
         return super().get_lineitem_context(
             lineitem,
-            qty=ubrdecimal(lineitem["qty"]),
-            total=money(lineitem["estimate"]),
+            qty=ubrdecimal(lineitem.get("expended", lineitem["qty"])),
+            total=money(lineitem.get("progress", lineitem["estimate"])),
             **kwargs
         )
 
@@ -252,8 +253,10 @@ def _serialize(data, parent):
                 "lineitem.id": lineitem.id,
                 "name": lineitem.name,
                 "qty": lineitem.qty,
+                "expended": lineitem.expended,
                 "unit": lineitem.unit,
                 "price": lineitem.price,
                 "estimate": lineitem.total,
+                "progress": lineitem.progress,
             }
             task_dict["lineitems"].append(lineitem_dict)
