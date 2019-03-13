@@ -19,5 +19,5 @@ DATABASES["default"].update(
 INSTALLED_APPS += ("raven.contrib.django.raven_compat",)
 
 RAVEN_CONFIG = {
-    "dsn": "https://11c0341ce6d74de7968932986090227d:406344d994aa4524818e99d45cf8d44b@sentry.systori.io/1"
+    "dsn": "https://11c0341ce6d74de7968932986090227d:406344d994aa4524818e99d45cf8d44b@sentry.systorigin.de/1"
 }

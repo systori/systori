@@ -196,7 +196,7 @@
   {% else %}
     <script src="https://cdn.ravenjs.com/3.19.1/raven.min.js" crossorigin="anonymous"></script>
     <script>
-      Raven.config('https://11c0341ce6d74de7968932986090227d@sentry.systori.io/1').install();
+      Raven.config('https://11c0341ce6d74de7968932986090227d@sentry.systorigin.de/1').install();
       Raven.setUserContext({
           id: "{{ request.user.pk }}",
           username: "{{ request.user.get_full_name }}",
