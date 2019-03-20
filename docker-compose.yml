@@ -71,3 +71,7 @@ services:
       - /root/.pub-cache/:/root/.pub-cache/:z
       - ./docker:/startup
     entrypoint: /startup/idle.sh
+    # create if needed and share /root/.pub-cache and fix permissions (777 works but maybe there's a better way)
+    # `pwd`/docker-compose up -d dart
+    # docker exec -it `container id` /bin/bash
+    # cd app && pub get && pub build
