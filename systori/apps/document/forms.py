@@ -287,7 +287,7 @@ class InvoiceForm(DocumentForm):
     def __init__(self, *args, **kwargs):
 
         try:
-            next_invoice_no_partial = int(re.match(r"\d*", Invoice.objects.last().invoice_no)[0])+1
+            next_invoice_no_partial = int(re.match(r"(\d*)/(\d*)/(\d*)", Invoice.objects.last().invoice_no)[1])+1
             now = date.today()
             initial_invoice_no = f"{next_invoice_no_partial}/{now.month:02}/{now.year}"
         except:
