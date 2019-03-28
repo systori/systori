@@ -1,6 +1,7 @@
 from datetime import date
 from decimal import Decimal as D
 from types import SimpleNamespace
+import re
 
 from django import forms
 from django.forms.formsets import formset_factory
@@ -261,6 +262,11 @@ class InvoiceForm(DocumentForm):
         help_text=_("Vesting period end date of the work completed in this invoice."),
     )
 
+    @staticmethod
+    def get_invoice_no():
+        last_invoice_no = Invoice.objects.last().invoice_no
+        return last_invoice_no
+
     class Meta(DocumentForm.Meta):
         model = Invoice
         fields = [
@@ -279,10 +285,19 @@ class InvoiceForm(DocumentForm):
         ]
 
     def __init__(self, *args, **kwargs):
+
+        try:
+            next_invoice_no_partial = int(re.match(r"\d*", Invoice.objects.last().invoice_no)[0])+1
+            now = date.today()
+            initial_invoice_no = f"{next_invoice_no_partial}/{now.month:02}/{now.year}"
+        except:
+            initial_invoice_no = ""
+
         super().__init__(*args, formset_class=InvoiceFormSet, **kwargs)
 
         if "header" not in self.initial or "footer" not in self.initial:
             default_text = DocumentSettings.get_for_language(settings.LANGUAGE_CODE)
+            self.initial["invoice_no"] = initial_invoice_no
             if default_text and default_text.invoice_text:
                 rendered = default_text.invoice_text.render(self.instance.project)
                 self.initial["header"] = rendered["header"]
