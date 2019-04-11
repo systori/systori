@@ -2,7 +2,11 @@ import os
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from systori.apps.company.models import Company
+from rest_framework.viewsets import ModelViewSet
+
+from systori.apps.user.permissions import HasStaffAccess
+from systori.apps.user.models import User
+from systori.apps.user.serializers import UserSerializer
 
 
 class SystoriAuthToken(ObtainAuthToken):
@@ -27,3 +31,9 @@ class SystoriAuthToken(ObtainAuthToken):
                 ],
             }
         )
+
+
+class UserModelViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (HasStaffAccess,)

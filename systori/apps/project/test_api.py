@@ -20,11 +20,11 @@ class ProjectApiTest(ClientTestCase):
         """
         Expect only Project which are is_template==False, so first object has pk==2 
         """
-        response = self.client.get("/api/v1/projects/")
+        response = self.client.get("/api/projects/")
         self.assertEqual(response.json()[0]["pk"], 2)
 
     def test_custom_action_exists(self):
-        response = self.client.get("/api/v1/projects/3/exists/")
+        response = self.client.get("/api/projects/3/exists/")
         self.assertEqual(response.json()["name"], _("Project not found."))
         self.assertEqual(response.status_code, 206)
 
@@ -39,7 +39,7 @@ class ProjectApiTest(ClientTestCase):
             e = EquipmentFactory()
             EquipmentAssignment.objects.create(dailyplan=dp, equipment=e)
 
-        response = self.client.get(f"/api/v1/weekofdailyplans/{date.today()}/")
+        response = self.client.get(f"/api/weekofdailyplans/{date.today()}/")
         json = response.json()
         self.assertIsInstance(json, list)
         self.assertEqual(
@@ -71,7 +71,7 @@ class ProjectApiTest(ClientTestCase):
         # required format, apple TV client dependency
         dp = DailyPlanFactory(jobsite=self.jobsite)
         TeamMember.objects.create(dailyplan=dp, worker=self.worker)
-        response = self.client.get(f"/api/v1/weekofplannedworkers/{date.today()}/")
+        response = self.client.get(f"/api/weekofplannedworkers/{date.today()}/")
         json = response.json()
         self.assertIsInstance(json, list)
         self.assertEqual(["first_name", "last_name", "projects"], list(json[0].keys()))

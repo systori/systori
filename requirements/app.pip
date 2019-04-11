@@ -1,6 +1,6 @@
 -r base.pip
 
-django==2.2
+django==2.1.8
 djangorestframework==3.9.2
 django-fsm==2.6.0
 django-allauth==0.36.0
@@ -24,5 +24,6 @@ mistune # markdown parser
 whitenoise # nice and easy staticfiles serving
 brotlipy # add infinity caching and brotli compression to whitenoise
 PyPDF2 # ToDo: change PDFFileMerger to pdfrw maybe
+coreapi==2.3.3
 
 -e .

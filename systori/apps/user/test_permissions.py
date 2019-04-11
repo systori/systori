@@ -3,9 +3,9 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from ..company.factories import CompanyFactory
-from ..user.factories import UserFactory
-from .permissions import CanTrackTime
+from systori.apps.company.factories import CompanyFactory
+from systori.apps.user.factories import UserFactory
+from systori.apps.user.permissions import CanTrackTime
 
 
 class CanTrackTimeView(APIView):

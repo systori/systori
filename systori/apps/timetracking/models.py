@@ -4,9 +4,9 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 
-from ..project.models import JobSite
-from .managers import TimerQuerySet
-from .utils import (
+from systori.apps.project.models import JobSite
+from systori.apps.timetracking.managers import TimerQuerySet
+from systori.apps.timetracking.utils import (
     calculate_duration_minutes,
     calculate_duration_seconds,
     to_current_timezone,

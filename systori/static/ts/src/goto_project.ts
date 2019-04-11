@@ -32,7 +32,7 @@ class SystoriGotoProject extends HTMLElement {
 
     async fetchProject() {
         let response = await fetch(
-            `${window.location.origin}/api/v1/projects/${this.queryPk}/exists/`,
+            `${window.location.origin}/api/projects/${this.queryPk}/exists/`,
             { credentials: 'include' }
         );
         if (response.status == 200) {

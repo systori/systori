@@ -1,14 +1,9 @@
 from django.conf.urls import url
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
 
-from ..user.authorization import office_auth
-from .views import *
-from .api import EquipmentListApi, EquipmentViewSet, RefuelingStopViewSet
+from systori.apps.user.authorization import office_auth
+from systori.apps.equipment.views import EquipmentListView, EquipmentView, EquipmentCreate, EquipmentDelete, EquipmentUpdate, RefuelingStopCreate, RefuelingStopDelete, RefuelingStopUpdate, MaintenanceCreate, MaintenanceDelete, MaintenanceUpdate
 
-router = DefaultRouter()
-router.register(r'equipments', EquipmentViewSet)
-router.register(r'refuelingstops', RefuelingStopViewSet)
 
 urlpatterns = [
     # two url rules to make the active_filter keyword optional
@@ -70,6 +65,4 @@ urlpatterns = [
         office_auth(MaintenanceDelete.as_view()),
         name="maintenance.delete",
     ),
-    url(r"^api/equipment/$", EquipmentListApi.as_view(), name="equipment.list.api"),
-    path('api/', include(router.urls)),
 ]

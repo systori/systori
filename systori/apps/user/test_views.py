@@ -299,12 +299,12 @@ class TestTokenAuth(ClientTestCase):
         token = response.data["token"]
         self.client.logout()
         response = self.client.get(
-            "/api/v1/projects/", HTTP_AUTHORIZATION="Token " + token
+            "/api/projects/", HTTP_AUTHORIZATION="Token " + token
         )
         self.assertEqual(response.status_code, 200)
 
         token = "I_am_groot."
         response = self.client.get(
-            "/api/v1/projects/", HTTP_AUTHORIZATION="Token " + token
+            "/api/projects/", HTTP_AUTHORIZATION="Token " + token
         )
         self.assertEqual(response.status_code, 401)

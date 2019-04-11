@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from rest_framework.fields import DateTimeField
-from .models import Equipment, RefuelingStop, EquipmentType
+from .models import Equipment, EquipmentType, RefuelingStop, Maintenance
 
 
 class EquipmentListingField(serializers.RelatedField):
@@ -20,11 +19,17 @@ class RefuelingStopSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class MaintenanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Maintenance
+        fields = "__all__"
+
+
 class EquipmentSerializer(serializers.ModelSerializer):
     equipment_type = EquipmentTypeSerializer(read_only=True)
+
     # refuelingstop_set = RefuelingStopSerializer(read_only=True, many=True)
 
     class Meta:
         model = Equipment
         exclude = ("last_refueling_stop", "icon")
-
