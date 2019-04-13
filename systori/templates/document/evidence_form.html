@@ -22,7 +22,8 @@
           type: 'GET',
           headers: {'X-CSRFToken': '{{ csrf_token }}'},
           dataType: 'json',
-          url: "{% url 'api.document.template' project.id %}"+templateid,
+            // DocumentTemplateModelViewSet action for_project
+          url: "/api/document/documenttemplate/"+templateid+"/project-{{ project.pk }}/",
           async: false
         }).done(function (template) {
           $('[name="header"]').val(template['header']);

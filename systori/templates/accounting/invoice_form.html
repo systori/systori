@@ -128,7 +128,13 @@
           type: 'GET',
           headers: {'X-CSRFToken': '{{ csrf_token }}'},
           dataType: 'json',
-          url: "{% url 'api.document.template' project.id %}"+templateid,
+            // DocumentTemplateModelViewSet action for_project
+            // here mixed usage with JS, in python use:
+            // reverse(
+            //    "documenttemplate-for-project",
+            //    kwargs={"pk": doc.pk, "project_pk": self.project.pk},
+            // )
+          url: "/api/document/documenttemplate/"+templateid+"/project-{{ project.pk }}/",
           async: false
         }).done(function (template) {
           $('[name="header"]').val(template['header']);

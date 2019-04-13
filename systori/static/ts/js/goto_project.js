@@ -36,7 +36,7 @@ class SystoriGotoProject extends HTMLElement {
     }
     fetchProject() {
         return __awaiter(this, void 0, void 0, function* () {
-            let response = yield fetch(`${window.location.origin}/api/projects/${this.queryPk}/exists/`, { credentials: 'include' });
+            let response = yield fetch(`${window.location.origin}/api/project/${this.queryPk}/exists/`, { credentials: 'include' });
             if (response.status == 200) {
                 this.showInfo(yield response.json(), "success");
                 this.projectFound = true;

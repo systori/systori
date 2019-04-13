@@ -4,8 +4,6 @@ from django.views.static import serve
 from django.conf import settings
 from rest_framework.documentation import include_docs_urls
 
-from systori.apps.user.authorization import field_auth
-
 urlpatterns = [
     url(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
     url(r"^api/accounting/", include("systori.apps.accounting.routers")),
@@ -13,7 +11,6 @@ urlpatterns = [
     url(r"^api/directory/", include("systori.apps.directory.routers")),
     url(r"^api/document/", include("systori.apps.document.routers")),
     url(r"^api/", include("systori.apps.task.api")),
-    url(r"^api/", include("systori.apps.document.api")),
     url(r"^api/", include("systori.apps.timetracking.api")),
     url(r"^api/", include("systori.apps.project.routers")),
     url(r"^api/equipment/", include("systori.apps.equipment.routers")),

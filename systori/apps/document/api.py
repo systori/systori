@@ -1,7 +1,6 @@
-from django.conf.urls import url
-from rest_framework import views
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from systori.apps.project.models import Project
 from systori.apps.user.permissions import HasStaffAccess
@@ -30,25 +29,14 @@ class DocumentTemplateModelViewSet(ModelViewSet):
     queryset = DocumentTemplate.objects.all()
     serializer_class = DocumentTemplateSerializer
     permission_classes = (HasStaffAccess,)
+    basename = "documenttemplate"
 
-
-class DocumentTemplateView(views.APIView):
-    permissions = (HasStaffAccess,)
-
-    def get(self, request, project_pk=None, template_pk=None, **kwargs):
+    @action(methods=["get"], detail=True, url_path="project-(?P<project_pk>\d+)")
+    def for_project(self, request, pk, project_pk):
         project = Project.objects.get(id=project_pk)
-        template = DocumentTemplate.objects.get(id=template_pk)
+        template = self.get_object()
         rendered = template.render(project)
         return Response(rendered)
-
-
-urlpatterns = [
-    url(
-        r"^document-template/project-(?P<project_pk>\d+)/template-(?P<template_pk>\d+)?$",
-        DocumentTemplateView.as_view(),
-        name="api.document.template",
-    )
-]
 
 
 class TimesheetModelViewSet(ModelViewSet):

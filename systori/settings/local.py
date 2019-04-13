@@ -37,7 +37,10 @@ INSTALLED_APPS = (
     INSTALLED_APPS[:idx] + ("whitenoise.runserver_nostatic",) + INSTALLED_APPS[idx:]
 )
 
-STATICFILES_DIRS += (("dart/src", "systori/dart/web"),)
+# STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, "..", "systori-static"))
+# STATICFILES_DIRS += (("dart/src", "systori/dart/web"),)
+# STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+
 
 DATABASES["default"].update(
     {

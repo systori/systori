@@ -30,7 +30,10 @@ class DocumentTemplateApiTest(ClientTestCase):
             footer="thx and goodbye [today +14]",
         )
         response = self.client.get(
-            reverse("api.document.template", args=[self.project.pk, doc.pk]),
+            reverse(
+                "documenttemplate-for-project",
+                kwargs={"pk": doc.pk, "project_pk": self.project.pk},
+            ),
             format="json",
         )
         date_now = localtime(now()).date()
@@ -54,7 +57,10 @@ class DocumentTemplateApiTest(ClientTestCase):
             footer="thx and goodbye [heute +14] and [heute +21]",
         )
         response = self.client.get(
-            reverse("api.document.template", args=[self.project.pk, doc.pk]),
+            reverse(
+                "documenttemplate-for-project",
+                kwargs={"pk": doc.pk, "project_pk": self.project.pk},
+            ),
             format="json",
         )
         date_now = localtime(now()).date()

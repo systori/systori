@@ -1,7 +1,7 @@
 from rest_framework.routers import SimpleRouter
 from systori.apps.user.authorization import office_auth
 from .api import (
-    DailyPlansModelViewSet,
+    DailyPlanModelViewSet,
     ProjectModelViewSet,
     ProjectSearchApi,
     WeekOfDailyPlansListAPIView,
@@ -10,8 +10,8 @@ from .api import (
 from django.conf.urls import url
 
 router = SimpleRouter()
-router.register(r"dailyplans", DailyPlansModelViewSet)
-router.register(r"projects", ProjectModelViewSet)
+router.register(r"dailyplan", DailyPlanModelViewSet)
+router.register(r"project", ProjectModelViewSet)
 
 urlpatterns = router.urls
 
