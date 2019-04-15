@@ -20,13 +20,19 @@ class ProjectApiTest(ClientTestCase):
         """
         Expect only Project which are is_template==False, so first object has pk==2 
         """
-        response = self.client.get("/api/projects/")
-        self.assertEqual(response.json()[0]["pk"], 2)
+        response = self.client.get("/api/project/")
+        self.assertEqual(response.json()["results"][0]["pk"], 2)
 
-    def test_custom_action_exists(self):
-        response = self.client.get("/api/projects/3/exists/")
+    def test_exists(self):
+        response = self.client.get("/api/project/3/exists/")
         self.assertEqual(response.json()["name"], _("Project not found."))
         self.assertEqual(response.status_code, 206)
+
+    def test_search(self):
+        response = self.client.put(
+            "/api/project/search/", data={"query": self.project.name}
+        )
+        self.assertEqual(response.json()["projects"][0], self.project.pk)
 
     def test_WeekOfDailyPlansApiView(self):
         # required format, apple TV client dependency
@@ -41,13 +47,13 @@ class ProjectApiTest(ClientTestCase):
 
         response = self.client.get(f"/api/weekofdailyplans/{date.today()}/")
         json = response.json()
-        self.assertIsInstance(json, list)
+        self.assertIsInstance(json, dict)
         self.assertEqual(
             ["pk", "day", "jobsite", "workers", "equipment", "notes"],
-            list(json[0].keys()),
+            list(json["results"][0].keys()),
         )
         self.assertEqual(
-            ["first_name", "last_name"], list(json[0]["workers"][0].keys())
+            ["first_name", "last_name"], list(json["results"][0]["workers"][0].keys())
         )
         self.assertEqual(
             [
@@ -60,11 +66,20 @@ class ProjectApiTest(ClientTestCase):
                 "latitude",
                 "longitude",
             ],
-            list(response.json()[0]["jobsite"].keys()),
+            list(response.json()["results"][0]["jobsite"].keys()),
         )
         self.assertEqual(
-            ["name", "manufacturer", "number_of_seats", "license_plate"],
-            list(response.json()[0]["equipment"][0].keys()),
+            [
+                "id",
+                "equipment_type",
+                "active",
+                "name",
+                "manufacturer",
+                "license_plate",
+                "number_of_seats",
+                "fuel",
+            ],
+            list(response.json()["results"][0]["equipment"][0].keys()),
         )
 
     def test_WeekOfPlannedWorkersApiView(self):

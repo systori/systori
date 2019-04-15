@@ -5,7 +5,11 @@ from systori.apps.company.models import Worker
 class WorkerIsAuthenticated(permissions.IsAuthenticated):
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
-        if not request.worker and is_authenticated:
+        try:
+            worker = request.worker
+        except AttributeError:
+            worker = None
+        if not worker and is_authenticated:
             try:
                 request.worker = Worker.objects.select_related("user").get(
                     user=request.user, company=request.company

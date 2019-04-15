@@ -17,6 +17,14 @@ class ProjectApiTest(ClientTestCase):
         )
         json = response.json()
         self.assertEqual(
-            ["token", "id", "email", "first_name", "last_name", "pusher_key"],
+            [
+                "token",
+                "id",
+                "email",
+                "first_name",
+                "last_name",
+                "pusher_key",
+                "companies",
+            ],
             list(json.keys()),
         )
