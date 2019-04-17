@@ -10,11 +10,11 @@ from ..equipment.serializers import EquipmentSerializer
 from .models import Project, DailyPlan, JobSite
 
 
-class ProjectSearchSerializer(Serializer):
+class QuerySerializer(Serializer):
     query = CharField()
 
 
-class WeekOfDailyPlansByDaySerializer(Serializer):
+class SelectedDaySerializer(Serializer):
     selected_day = DateField()
 
 

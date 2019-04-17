@@ -20,8 +20,8 @@ from .serializers import DailyPlanSerializer
 from systori.apps.project.serializers import (
     WorkerSerializer,
     ProjectSerializer,
-    ProjectSearchSerializer,
-    WeekOfDailyPlansByDaySerializer,
+    QuerySerializer,
+    SelectedDaySerializer,
 )
 
 
@@ -43,7 +43,7 @@ class ProjectModelViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     search_fields = None
 
-    action_serializers = {"search": ProjectSearchSerializer}
+    action_serializers = {"search": QuerySerializer}
 
     def get_queryset(self):
         return self.queryset.without_template()
@@ -107,13 +107,21 @@ class ProjectModelViewSet(ModelViewSet):
 
 
 class DailyPlanModelViewSet(ModelViewSet):
-    queryset = DailyPlan.objects.all()
+    queryset = (
+        DailyPlan.objects.select_related("jobsite__project")
+        .prefetch_related("workers__user")
+        .prefetch_related("equipment")
+        .all()
+    )
     serializer_class = DailyPlanSerializer
     permission_classes = (HasLaborerAccess,)
     filter_backends = (SearchFilter,)
     search_fields = ("day",)
 
-    action_serializers = {"full_week_by_day": WeekOfDailyPlansByDaySerializer}
+    action_serializers = {
+        "week_by_day": SelectedDaySerializer,
+        "week_by_day_pivot_workers": SelectedDaySerializer,
+    }
 
     def get_serializer_class(self):
         if hasattr(self, "action_serializers"):
@@ -122,46 +130,29 @@ class DailyPlanModelViewSet(ModelViewSet):
         return super(DailyPlanModelViewSet, self).get_serializer_class()
 
     @action(methods=["put"], detail=False)
-    def full_week_by_day(self, request):
+    def week_by_day(self, request):
         selected_day = parse_date(request.data["selected_day"])
         beginning_of_week, end_of_week = get_week_by_day(selected_day)
 
-        return DailyPlanSerializer(
-            DailyPlan.objects.select_related("jobsite__project")
-            .prefetch_related("workers__user")
-            .prefetch_related("equipment")
-            .filter(day__range=(beginning_of_week, end_of_week)),
-            many=True,
-        ).data
-
-
-class WeekOfDailyPlansListAPIView(ListAPIView):
-    model = DailyPlan
-    serializer_class = DailyPlanSerializer
-    permission_classes = (HasLaborerAccess,)
-
-    def get_queryset(self):
-        day_of_week = parse_date(self.kwargs["day_of_week"])
-        beginning_of_week, end_of_week = get_week_by_day(day_of_week)
-
-        return (
-            DailyPlan.objects.select_related("jobsite__project")
-            .prefetch_related("workers__user")
-            .prefetch_related("equipment")
-            .filter(day__range=(beginning_of_week, end_of_week))
+        return Response(
+            DailyPlanSerializer(
+                DailyPlan.objects.select_related("jobsite__project")
+                .prefetch_related("workers__user")
+                .prefetch_related("equipment")
+                .filter(day__range=(beginning_of_week, end_of_week)),
+                many=True,
+            ).data
         )
 
-
-class WeekOfPlannedWorkersAPIView(APIView):
-    permission_classes = (HasLaborerAccess,)
-
-    def get(self, request, *args, **kwargs):
-        day_of_week = parse_date(kwargs["day_of_week"])
-        beginning_of_week, end_of_week = get_week_by_day(day_of_week)
+    @action(methods=["put"], detail=False)
+    def week_by_day_pivot_workers(self, request):
+        selected_day = parse_date(request.data["selected_day"])
+        beginning_of_week, end_of_week = get_week_by_day(selected_day)
 
         queryset = (
             DailyPlan.objects.select_related("jobsite__project")
             .prefetch_related("workers__user")
+            .prefetch_related("equipment")
             .filter(day__range=(beginning_of_week, end_of_week))
         )
 
