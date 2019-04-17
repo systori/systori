@@ -1,8 +1,8 @@
 from collections import OrderedDict
 from datetime import date
 
-from django.db.models import Q, Max, Min
-from django.http import HttpResponseRedirect, JsonResponse
+from django.db.models import Max, Min
+from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
@@ -48,48 +48,6 @@ class ProjectList(ListView):
         context["phases"] = [phase for phase in Project.PHASE_CHOICES]
 
         return self.render_to_response(context)
-
-
-class ProjectSearchApi(View):
-    def get(self, request):
-        query = (
-            Project.objects.without_template()
-            .prefetch_related("jobsites")
-            .prefetch_related("project_contacts__contact")
-            .prefetch_related("jobs")
-            .prefetch_related("invoices")
-        )
-
-        project_filter = Q()
-        searchable_paths = {}
-
-        search_terms = [term for term in request.GET.get("search").split(" ")]
-        for term in search_terms:
-            searchable_paths[term] = (
-                Q(id__icontains=term)
-                | Q(name__icontains=term)
-                | Q(description__icontains=term)
-                | Q(jobsites__name__icontains=term)
-                | Q(jobsites__address__icontains=term)
-                | Q(jobsites__city__icontains=term)
-                | Q(jobs__name__icontains=term)
-                | Q(jobs__description__icontains=term)
-                | Q(contacts__business__icontains=term)
-                | Q(contacts__first_name__icontains=term)
-                | Q(contacts__last_name__icontains=term)
-                | Q(contacts__address__icontains=term)
-                | Q(contacts__notes__icontains=term)
-                | Q(project_contacts__association__icontains=term)
-                | Q(invoices__invoice_no__icontains=term)
-                | Q(contacts__email__icontains=term)
-            )
-        for key in searchable_paths.keys():
-            project_filter &= searchable_paths[key]
-
-        query = query.without_template().filter(project_filter).distinct()
-        projects = [p.id for p in query]
-
-        return JsonResponse({"projects": projects})
 
 
 class ProjectView(DetailView):

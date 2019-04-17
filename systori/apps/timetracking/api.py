@@ -1,17 +1,14 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import views, serializers
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url
 
-from .models import Timer
-from .permissions import CanTrackTime
-
-
-class LatLongSerializer(serializers.Serializer):
-    latitude = serializers.DecimalField(max_digits=11, decimal_places=8, required=True)
-    longitude = serializers.DecimalField(max_digits=11, decimal_places=8, required=True)
+from systori.apps.timetracking.serializers import TimerSerializer, LatLongSerializer
+from systori.apps.timetracking.models import Timer
+from systori.apps.user.permissions import CanTrackTime
 
 
 class TimerAPI(views.APIView):
@@ -42,3 +39,9 @@ class TimerAPI(views.APIView):
 
 
 urlpatterns = [url(r"^timer/$", login_required(TimerAPI.as_view()), name="api.timer")]
+
+
+class TimerModelViewSet(ModelViewSet):
+    queryset = Timer.objects.all()
+    serializer_class = TimerSerializer
+    permission_classes = (CanTrackTime,)

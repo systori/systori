@@ -1,6 +1,9 @@
 from django.conf.urls import url
-from ..user.authorization import office_auth
-from .views import *
+from django.urls import path, include
+
+from systori.apps.user.authorization import office_auth
+from systori.apps.equipment.views import EquipmentListView, EquipmentView, EquipmentCreate, EquipmentDelete, EquipmentUpdate, RefuelingStopCreate, RefuelingStopDelete, RefuelingStopUpdate, MaintenanceCreate, MaintenanceDelete, MaintenanceUpdate
+
 
 urlpatterns = [
     # two url rules to make the active_filter keyword optional

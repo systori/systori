@@ -2,6 +2,11 @@ import os
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+
+from systori.apps.user.permissions import HasStaffAccess
+from systori.apps.user.models import User
+from systori.apps.user.serializers import UserSerializer
 
 
 class SystoriAuthToken(ObtainAuthToken):
@@ -20,5 +25,15 @@ class SystoriAuthToken(ObtainAuthToken):
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "pusher_key": os.environ.get("PUSHER_KEY", ""),
+                "companies": [
+                    {"schema": company.schema, "name": company.name}
+                    for company in user.companies.all()
+                ],
             }
         )
+
+
+class UserModelViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (HasStaffAccess,)

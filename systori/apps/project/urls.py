@@ -1,7 +1,23 @@
 from django.conf.urls import url
-from ..user.authorization import office_auth
-from .views import *
-from .api import WeekOfDailyPlansApiView
+from systori.apps.user.authorization import office_auth
+from systori.apps.project.views import (
+    ProjectList,
+    ProjectCreate,
+    ProjectUpdate,
+    ProjectDelete,
+    ProjectView,
+    ProjectImport,
+    ProjectManualPhaseTransition,
+    ProjectManualStateTransition,
+    TemplatesView,
+    JobSiteCreate,
+    JobSiteDelete,
+    JobSiteUpdate,
+    ProjectDailyPlansView,
+    ProjectProgress,
+    AllProjectsProgress,
+)
+
 
 urlpatterns = [
     url(
@@ -70,10 +86,5 @@ urlpatterns = [
         r"^progress$",
         office_auth(AllProjectsProgress.as_view()),
         name="project.progress.all",
-    ),
-    url(
-        r"^project-search$",
-        office_auth(ProjectSearchApi.as_view()),
-        name="project.search",
     ),
 ]
