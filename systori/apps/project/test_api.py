@@ -34,7 +34,16 @@ class ProjectApiTest(ClientTestCase):
         )
         self.assertEqual(response.json()["projects"][0], self.project.pk)
 
-    def test_WeekOfDailyPlansApiView(self):
+
+class DailyPlanApiTest(ClientTestCase):
+    def setUp(self):
+        super().setUp()
+        self.project = ProjectFactory()
+        self.jobsite = JobSiteFactory(project=self.project)
+        self.user = UserFactory(company=self.company)
+        self.worker = self.user.access.first()
+
+    def test_week_by_day(self):
         # required format, apple TV client dependency
         beginning_of_week, end_of_week = get_week_by_day(date.today())
         for day in range(5):
@@ -45,15 +54,17 @@ class ProjectApiTest(ClientTestCase):
             e = EquipmentFactory()
             EquipmentAssignment.objects.create(dailyplan=dp, equipment=e)
 
-        response = self.client.get(f"/api/weekofdailyplans/{date.today()}/")
+        response = self.client.put(
+            f"/api/dailyplan/week_by_day/", data={"selected_day": date.today()}
+        )
         json = response.json()
-        self.assertIsInstance(json, dict)
+        self.assertIsInstance(json, list)
         self.assertEqual(
             ["pk", "day", "jobsite", "workers", "equipment", "notes"],
-            list(json["results"][0].keys()),
+            list(json[0].keys()),
         )
         self.assertEqual(
-            ["first_name", "last_name"], list(json["results"][0]["workers"][0].keys())
+            ["first_name", "last_name"], list(json[0]["workers"][0].keys())
         )
         self.assertEqual(
             [
@@ -66,7 +77,7 @@ class ProjectApiTest(ClientTestCase):
                 "latitude",
                 "longitude",
             ],
-            list(response.json()["results"][0]["jobsite"].keys()),
+            list(response.json()[0]["jobsite"].keys()),
         )
         self.assertEqual(
             [
@@ -79,14 +90,17 @@ class ProjectApiTest(ClientTestCase):
                 "number_of_seats",
                 "fuel",
             ],
-            list(response.json()["results"][0]["equipment"][0].keys()),
+            list(response.json()[0]["equipment"][0].keys()),
         )
 
-    def test_WeekOfPlannedWorkersApiView(self):
+    def test_week_by_day_pivot_workers(self):
         # required format, apple TV client dependency
         dp = DailyPlanFactory(jobsite=self.jobsite)
         TeamMember.objects.create(dailyplan=dp, worker=self.worker)
-        response = self.client.get(f"/api/weekofplannedworkers/{date.today()}/")
+        response = self.client.put(
+            f"/api/dailyplan/week_by_day_pivot_workers/",
+            data={"selected_day": date.today()},
+        )
         json = response.json()
         self.assertIsInstance(json, list)
         self.assertEqual(["first_name", "last_name", "projects"], list(json[0].keys()))

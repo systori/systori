@@ -2,6 +2,10 @@ from rest_framework import serializers
 from .models import Worker, Company
 
 
+class UserPkSerializer(serializers.Serializer):
+    user_pk = serializers.IntegerField()
+
+
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
