@@ -230,7 +230,7 @@ USE_THOUSAND_SEPARATOR = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 # this is where files are copied when running ./manage.py collectstatic
-STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, "..", "static"))
+STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, "..", "systori_static"))
 STATIC_URL = "/static/"
 
 MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, "..", "media"))
@@ -241,7 +241,7 @@ STATICFILES_DIRS = (
     ("css", "systori/static/css"),
     ("img", "systori/static/img"),
     ("fonts", "systori/static/fonts"),
-    ("dart/build", "systori/dart/build/web"),
+    ("dart", "systori/dart/build/web"),
     ("ts/js", "systori/static/ts/js"),
     ("ts/src", "systori/static/ts/src"),
 )
