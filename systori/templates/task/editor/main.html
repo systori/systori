@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n l10n static dartium customformatting %}
+{% load i18n l10n static customformatting %}
 
 {% block title %}#{{ project.id }} {{ project.name|truncatechars:10 }} > {{ job.name }}{% endblock %}
 
@@ -647,6 +647,7 @@
 
 {% block extra_js %}
   {% if not job.is_locked %}
-    {% dart "job_editor.dart" %}
+    <script src="{% static "/dart/build/job_editor.dart.js" %}"></script>
   {% endif %}
+  
 {% endblock extra_js %}

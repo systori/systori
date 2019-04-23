@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n static dartium field_app %}
+{% load i18n static field_app %}
 
 {% block container %}
 
@@ -108,5 +108,5 @@
 
 {% block extra_js %}
   {% csrf_token %}
-  {% dart "field_planning.dart" %}
+  <script src="{% static "/dart/build/field_planning.dart.js" %}"></script>
 {% endblock extra_js %}

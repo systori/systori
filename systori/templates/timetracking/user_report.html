@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n dartium bootstrap customformatting %}
+{% load static i18n bootstrap customformatting %}
 
 {% block head %}
 {{ block.super }}
@@ -83,5 +83,5 @@
   {% fieldinit form %}
   {{ period_form.media.js }}
   {% fieldinit period_form %}
-  {% dart "timetracking.dart" %}
+  <script src="{% static "/dart/build/timetracking.dart.js" %}"></script>
 {% endblock %}

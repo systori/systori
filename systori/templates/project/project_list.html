@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load l10n i18n bootstrap dartium %}
+{% load static l10n i18n bootstrap %}
 
 
 {% block body_start %}
@@ -140,7 +140,9 @@
 {% endblock content %}
 
 {% block extra_js %}
-  {% dart "project_list.dart" %}
+
+  <script src="{% static "dart/build/project_list.dart.js" %}"></script>
+  
   <script type="application/javascript">
     //fix menu overflow under the responsive table
     // hide menu on click... (This is a must because when we open a menu )

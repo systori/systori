@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n dartium customformatting %}
+{% load static i18n customformatting %}
 
 {% block container %}
   {% csrf_token %}
@@ -120,6 +120,6 @@
 
 {% if worker.can_track_time %}
 {% block extra_js %}
-  {% dart "timetracking.dart" %}
+  <script src="{% static "/dart/build/timetracking.dart.js" %}"></script>
 {% endblock extra_js %}
 {% endif %}

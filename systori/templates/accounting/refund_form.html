@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n static dartium bootstrap customformatting ubrutils amount %}
+{% load i18n static bootstrap customformatting ubrutils amount %}
 
 {% block head %}
   {{ block.super }}
@@ -98,5 +98,5 @@
 {% block extra_js %}
   {{ form.media.js }}
   {% fieldinit form %}
-  {% dart "refund_editor.dart" %}
+  <script src="{% static "/dart/build/refund_editor.dart.js" %}"></script>
 {% endblock extra_js %}

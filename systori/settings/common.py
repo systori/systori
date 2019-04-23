@@ -48,7 +48,6 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "django.contrib.postgres",
-    "django_dartium",
     "rest_framework",
     "rest_framework.authtoken",
     "bootstrap",
@@ -93,7 +92,6 @@ MIDDLEWARE = (
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "systori.middleware.mobile.MobileDetectionMiddleware",
-    "django_dartium.middleware.DartiumDetectionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "systori.apps.user.middleware.SetLanguageMiddleware",
     "systori.middleware.mobile.SetFlavourMiddleware",
@@ -154,7 +152,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
-    )
+    ),
 }
 
 

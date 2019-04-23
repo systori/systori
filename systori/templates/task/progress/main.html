@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n bootstrap dartium %}
+{% load static i18n bootstrap %}
 
 {% block head %}
   {{ block.super }}
@@ -58,5 +58,5 @@
 {% block extra_js %}
   {{ form.media.js }}
   {% fieldinit form %}
-  {% dart "progress_editor.dart" %}
+  <script src="{% static "/dart/build/progress_editor.dart.js" %}"></script>
 {% endblock %}

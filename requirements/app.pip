@@ -17,7 +17,6 @@ git+https://github.com/systori/pyth.git@pyth-py3
 git+https://github.com/eukreign/django-timezone-field.git@django2
 django-tsvector-field
 django-bootstrap-components
-django-dartium
 git+https://github.com/pmaupin/pdfrw.git
 bericht # pdf rendering library see https://github.com/systori/bericht
 mistune # markdown parser

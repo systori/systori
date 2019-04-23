@@ -1,5 +1,5 @@
 {% extends "field/base.html" %}
-{% load i18n l10n static dartium customformatting field_app %}
+{% load i18n l10n static customformatting field_app %}
 
 {% block container %}
   <div class="container">
@@ -147,5 +147,5 @@
 
 
 {% block extra_js %}
-  {% dart "field.dart" %}
+  <script src="{% static "/dart/build/field.dart.js" %}"></script>
 {% endblock extra_js %}

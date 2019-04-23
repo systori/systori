@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n l10n bootstrap static dartium amount customformatting %}
+{% load i18n l10n bootstrap static amount customformatting %}
 
 {% block head %}
     {{ block.super }}
@@ -92,5 +92,5 @@
       }
     });
   </script>
-  {% dart "proposal_editor.dart" %}
+  <script src="{% static "/dart/build/proposal_editor.dart.js" %}"></script>
 {% endblock extra_js %}

@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n l10n bootstrap static dartium customformatting amount %}
+{% load i18n l10n bootstrap static customformatting amount %}
 
 {% block head %}
   {{ block.super }}
@@ -143,5 +143,5 @@
       }
     });
   </script>
-  {% dart "invoice_editor.dart" %}
+  <script src="{% static "/dart/build/invoice_editor.dart.js" %}"></script>
 {% endblock extra_js %}

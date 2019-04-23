@@ -1,4 +1,4 @@
-{% load i18n static dartium %}
+{% load i18n static %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 
@@ -206,7 +206,7 @@
   {% endif %}
 <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
 <script src="{% static "js/bootstrap.min.js" %}"></script>
-{% webcomponents "lite" %}
+<script src="{% static "dart/build/packages/web_components/webcomponents.js" %}"></script>
 
 <script src="{% static "ts/js/goto_project.js" %}"></script>
 
