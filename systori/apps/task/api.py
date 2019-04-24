@@ -134,7 +134,7 @@ class CloneAPI(views.APIView):
 
 urlpatterns = [
     url(
-        r"^job/(?P<pk>\d+)/editor/save$",
+        r"^editor/save/job/(?P<pk>\d+)/$",
         EditorAPI.as_view({"post": "update"}),
         name="api.editor.save",
     ),

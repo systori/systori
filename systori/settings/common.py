@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     "django.contrib.postgres",
     "rest_framework",
     "rest_framework.authtoken",
+    "drf_yasg",
     "bootstrap",
     "postgres_schema",
     "allauth",
