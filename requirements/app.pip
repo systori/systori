@@ -1,6 +1,6 @@
 -r base.pip
 
-django==2.1.8
+django==2.1.7
 djangorestframework==3.9.2
 drf-yasg==1.15.0
 django-fsm==2.6.0

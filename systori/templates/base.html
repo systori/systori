@@ -206,7 +206,9 @@
   {% endif %}
 <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
 <script src="{% static "js/bootstrap.min.js" %}"></script>
-<script src="{% static "dart/packages/web_components/webcomponents.js" %}"></script>
+{% block webcomponents_js %}
+    <script src="{% static "dart/packages/web_components/webcomponents.js" %}"></script>
+{% endblock webcomponents_js %}
 
 <script src="{% static "ts/js/goto_project.js" %}"></script>
 
