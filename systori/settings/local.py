@@ -32,11 +32,6 @@ if ENABLE_DEBUGTOOLBAR:
 
     DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda _request: DEBUG}
 
-idx = INSTALLED_APPS.index("django.contrib.staticfiles")
-INSTALLED_APPS = (
-    INSTALLED_APPS[:idx] + ("whitenoise.runserver_nostatic",) + INSTALLED_APPS[idx:]
-)
-
 DATABASES["default"].update(
     {
         "NAME": "systori_local",

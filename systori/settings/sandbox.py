@@ -7,11 +7,6 @@ SERVER_NAME = "sandbox.systori.com"
 SESSION_COOKIE_DOMAIN = "." + SERVER_NAME
 ALLOWED_HOSTS = ["." + SERVER_NAME]
 
-idx = INSTALLED_APPS.index("django.contrib.staticfiles")
-INSTALLED_APPS = (
-    INSTALLED_APPS[:idx] + ("whitenoise.runserver_nostatic",) + INSTALLED_APPS[idx:]
-)
-
 DATABASES["default"].update(
     {"HOST": "db", "NAME": "systori_sandbox", "USER": "postgres"}
 )

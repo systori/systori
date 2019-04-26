@@ -12,10 +12,6 @@ DATABASES["default"].update(
     {"HOST": "db", "NAME": "systori_production", "USER": "postgres"}
 )
 
-idx = INSTALLED_APPS.index("django.contrib.staticfiles")
-INSTALLED_APPS = (
-    INSTALLED_APPS[:idx] + ("whitenoise.runserver_nostatic",) + INSTALLED_APPS[idx:]
-)
 
 INSTALLED_APPS += ("raven.contrib.django.raven_compat",)
 
