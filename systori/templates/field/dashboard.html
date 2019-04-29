@@ -118,8 +118,10 @@
   </div>
 {% endblock %}
 
-{% if worker.can_track_time %}
-{% block extra_js %}
-  <script src="{% static "dart/timetracking.dart.js" %}"></script>
-{% endblock extra_js %}
-{% endif %}
+{# skipped, not supported currently  
+  {% if worker.can_track_time %}
+    {% block extra_js %}
+      <script src="{% static "dart/timetracking.dart.js" %}"></script>
+    {% endblock extra_js %}
+  {% endif %}
+#}
