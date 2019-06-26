@@ -1,6 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.openapi import Response as OpenApiResponse
 
 from ..user.permissions import HasLaborerAccess
 from .models import Equipment, RefuelingStop, Maintenance
@@ -15,7 +17,11 @@ class EquipmentModelViewSet(viewsets.ModelViewSet):
     queryset = Equipment.objects.prefetch_related("equipment_type").all()
     serializer_class = EquipmentSerializer
     permission_classes = (HasLaborerAccess,)
+    refuelingstops_response = OpenApiResponse(
+        "Refueling Stops", RefuelingStopSerializer(many=True)
+    )
 
+    @swagger_auto_schema(responses={200: refuelingstops_response})
     @action(detail=True)
     def refuelingstops(self, request, pk=None):
         equipment = self.get_object()
