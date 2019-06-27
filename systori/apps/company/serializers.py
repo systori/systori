@@ -9,7 +9,7 @@ class UserPkSerializer(serializers.Serializer):
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ("schema",)
+        fields = ("schema", "name")
 
 
 class WorkerSerializer(serializers.ModelSerializer):
