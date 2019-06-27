@@ -68,3 +68,28 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return "{} <{}>".format(self.get_full_name(), self.email)
+
+
+class AuthToken(models.Model):
+    """
+    Systori Auth Token
+    """
+
+    token = models.CharField(_("token"), max_length=40, primary_key=True)
+    id = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        related_name="uid",
+        on_delete=models.CASCADE,
+        verbose_name=_("User"),
+    )
+    created = models.DateTimeField(_("Created"), auto_now_add=True)
+    first_name = models.CharField(_("first name"), max_length=30, blank=False)
+    last_name = models.CharField(_("last name"), max_length=30, blank=True)
+    email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
+    pusher_key = models.CharField(
+        "Pusher Api key", max_length=256, null=True, blank=True
+    )
+
+    class Meta:
+        verbose_name = _("AuthToken")
+        verbose_name_plural = _("AuthTokens")
