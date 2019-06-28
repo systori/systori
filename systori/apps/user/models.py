@@ -93,3 +93,16 @@ class AuthToken(models.Model):
     class Meta:
         verbose_name = _("AuthToken")
         verbose_name_plural = _("AuthTokens")
+
+
+class AuthCredential(models.Model):
+    """
+    Credentials to get AuthToken
+    """
+
+    username = models.CharField("username", max_length=200, blank=False, null=False)
+    password = models.CharField("password", max_length=200, blank=False, null=False)
+
+    class Meta:
+        verbose_name = _("AuthCredential")
+        verbose_name_plural = _("AuthCredentials")

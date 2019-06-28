@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User, AuthToken
+from .models import User, AuthToken, AuthCredential
 from ..company.serializers import CompanySerializer
 
 
@@ -24,3 +24,9 @@ class AuthTokenSerializer(serializers.ModelSerializer):
             "pusher_key",
             "companies",
         )
+
+
+class AuthCredentialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AuthCredential
+        fields = ("username", "password")

@@ -1,23 +1,30 @@
 import os
 
-# from drf_yasg.openapi import Parameter as OpenApiParameter
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.decorators import action, api_view
-
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
 from rest_framework.viewsets import ModelViewSet
 
-from systori.apps.user.models import AuthToken, User
+from systori.apps.user.models import User
 from systori.apps.user.permissions import HasStaffAccess
-from systori.apps.user.serializers import AuthTokenSerializer, UserSerializer
+from systori.apps.user.serializers import (
+    AuthTokenSerializer,
+    UserSerializer,
+    AuthCredentialSerializer,
+)
 
 
 class SystoriAuthToken(ObtainAuthToken):
-    @swagger_auto_schema(deprecated=True)
+    @swagger_auto_schema(
+        deprecated=True,
+        request_body=AuthCredentialSerializer,
+        responses={
+            HTTP_201_CREATED: openapi.Response("AuthToken", AuthTokenSerializer)
+        },
+    )
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(
             data=request.data, context={"request": request}
