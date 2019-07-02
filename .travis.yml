@@ -20,8 +20,8 @@ before_install:
   - sudo sh -c 'curl https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list'
   - sudo apt-get update
 #  - sudo apt-get install dart=1.24.3-1
-  - sudo wget https://storage.googleapis.com/dart-archive/channels/stable/release/1.24.3/sdk/dartsdk-linux-x64-release.zip
-  - sudo unzip dartsdk-linux-x64-release.zip
+  - wget https://storage.googleapis.com/dart-archive/channels/stable/release/1.24.3/sdk/dartsdk-linux-x64-release.zip
+  - unzip dartsdk-linux-x64-release.zip
 
 install:
   - pip install --upgrade pip
