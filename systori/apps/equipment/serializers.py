@@ -32,4 +32,4 @@ class EquipmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Equipment
-        exclude = ("last_refueling_stop", "icon")
+        fields = "__all__"
