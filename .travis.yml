@@ -32,7 +32,7 @@ before_script:
   - export PUSHER_APP_ID=123456
   - export PUSHER_KEY=123456789123456789ab
   - export PUSHER_SECRET=123456789123456789ab
-  - cd systori/dart && /dart-sdk/bin/pub get && /dart-sdk/bin/pub build && cd ../..
+  - cd systori/dart && $TRAVIS_BUILD_DIR/dart-sdk/bin/pub get && $TRAVIS_BUILD_DIR/dart-sdk/bin/pub build && cd ../..
   - psql -c 'create database travis_ci_test;' -U postgres
 
 script:
