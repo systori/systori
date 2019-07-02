@@ -8,6 +8,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
     HTTP_404_NOT_FOUND,
     HTTP_405_METHOD_NOT_ALLOWED,
     HTTP_417_EXPECTATION_FAILED,
@@ -66,7 +67,9 @@ class EquipmentModelViewSet(viewsets.ModelViewSet):
         auto_schema=SwaggerSchema,
         auto_include_parameters=False,
     )
-    @action(methods=["GET", "POST"], detail=True, parser_classes=[MultiPartParser])
+    @action(
+        methods=["GET", "POST", "DELETE"], detail=True, parser_classes=[MultiPartParser]
+    )
     def icon(self, request, pk=None):
         equipment = self.get_object()
 
@@ -88,6 +91,11 @@ class EquipmentModelViewSet(viewsets.ModelViewSet):
             if equipment.icon and equipment.icon.url:
                 return Response(self.get_serializer(equipment).data["icon"])
             return Response(status=HTTP_404_NOT_FOUND)
+
+        if request.method.lower() == "delete":
+            if equipment.icon and equipment.icon.url:
+                equipment.icon.delete()
+            return Response(status=HTTP_204_NO_CONTENT)
 
         return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
 
