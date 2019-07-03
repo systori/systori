@@ -255,3 +255,6 @@ STATICFILES_FINDERS = (
 
 # whitenoise with brotlipy staticfiles compression and caching
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+SWAGGER_SETTINGS = {"DEFAULT_INFO": "systori.urls.systori_info"}
