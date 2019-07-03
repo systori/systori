@@ -1,0 +1,362 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "",
+        "title": "",
+        "description": ""
+    },
+    "servers": [
+        {
+            "url": ""
+        }
+    ],
+    "paths": {
+        "/api/dailyplan/": {
+            "get": {
+                "operationId": "dailyplan_list",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "title": "Page",
+                            "description": "A page number within the paginated result set."
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "title": "Suche",
+                            "description": "A search term."
+                        }
+                    }
+                ],
+                "tags": [
+                    "dailyplan"
+                ]
+            },
+            "post": {
+                "operationId": "dailyplan_create",
+                "tags": [
+                    "dailyplan"
+                ]
+            }
+        },
+        "/api/dailyplan/week_by_day/": {
+            "put": {
+                "operationId": "dailyplan_week_by_day",
+                "tags": [
+                    "dailyplan"
+                ]
+            }
+        },
+        "/api/dailyplan/week_by_day_pivot_workers/": {
+            "put": {
+                "operationId": "dailyplan_week_by_day_pivot_workers",
+                "tags": [
+                    "dailyplan"
+                ]
+            }
+        },
+        "/api/dailyplan/{id}/": {
+            "get": {
+                "operationId": "dailyplan_read",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "ID",
+                            "description": "A unique integer value identifying this daily plan."
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "title": "Suche",
+                            "description": "A search term."
+                        }
+                    }
+                ],
+                "tags": [
+                    "dailyplan"
+                ]
+            },
+            "put": {
+                "operationId": "dailyplan_update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "ID",
+                            "description": "A unique integer value identifying this daily plan."
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "title": "Suche",
+                            "description": "A search term."
+                        }
+                    }
+                ],
+                "tags": [
+                    "dailyplan"
+                ]
+            },
+            "patch": {
+                "operationId": "dailyplan_partial_update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "ID",
+                            "description": "A unique integer value identifying this daily plan."
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "title": "Suche",
+                            "description": "A search term."
+                        }
+                    }
+                ],
+                "tags": [
+                    "dailyplan"
+                ]
+            },
+            "delete": {
+                "operationId": "dailyplan_delete",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "ID",
+                            "description": "A unique integer value identifying this daily plan."
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "title": "Suche",
+                            "description": "A search term."
+                        }
+                    }
+                ],
+                "tags": [
+                    "dailyplan"
+                ]
+            }
+        },
+        "/api/document/documenttemplate/{id}/project-{project_pk}/": {
+            "get": {
+                "operationId": "document_for_project",
+                "parameters": [
+                    {
+                        "name": "project_pk",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "",
+                            "description": ""
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "ID",
+                            "description": "A unique integer value identifying this Dokumentenvorlage."
+                        }
+                    }
+                ],
+                "tags": [
+                    "document"
+                ]
+            }
+        },
+        "/api/project/": {
+            "get": {
+                "operationId": "project_list",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "title": "Page",
+                            "description": "A page number within the paginated result set."
+                        }
+                    }
+                ],
+                "tags": [
+                    "project"
+                ]
+            },
+            "post": {
+                "operationId": "project_create",
+                "tags": [
+                    "project"
+                ]
+            }
+        },
+        "/api/project/search/": {
+            "put": {
+                "operationId": "project_search",
+                "tags": [
+                    "project"
+                ]
+            }
+        },
+        "/api/project/{id}/": {
+            "get": {
+                "operationId": "project_read",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "ID",
+                            "description": "A unique integer value identifying this Projekt."
+                        }
+                    }
+                ],
+                "tags": [
+                    "project"
+                ]
+            },
+            "put": {
+                "operationId": "project_update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "ID",
+                            "description": "A unique integer value identifying this Projekt."
+                        }
+                    }
+                ],
+                "tags": [
+                    "project"
+                ]
+            },
+            "patch": {
+                "operationId": "project_partial_update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "ID",
+                            "description": "A unique integer value identifying this Projekt."
+                        }
+                    }
+                ],
+                "tags": [
+                    "project"
+                ]
+            },
+            "delete": {
+                "operationId": "project_delete",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "ID",
+                            "description": "A unique integer value identifying this Projekt."
+                        }
+                    }
+                ],
+                "tags": [
+                    "project"
+                ]
+            }
+        },
+        "/api/project/{id}/exists/": {
+            "get": {
+                "operationId": "project_exists",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "ID",
+                            "description": "A unique integer value identifying this Projekt."
+                        }
+                    }
+                ],
+                "tags": [
+                    "project"
+                ]
+            }
+        },
+        "/api/timer/": {
+            "post": {
+                "operationId": "timer_create",
+                "description": "Start a timer",
+                "tags": [
+                    "timer"
+                ]
+            },
+            "put": {
+                "operationId": "timer_update",
+                "description": "Stop a timer",
+                "tags": [
+                    "timer"
+                ]
+            }
+        },
+        "/api/token/": {
+            "get": {
+                "operationId": "token_list",
+                "tags": [
+                    "token"
+                ]
+            },
+            "post": {
+                "operationId": "token_create",
+                "tags": [
+                    "token"
+                ]
+            }
+        }
+    }
+}
