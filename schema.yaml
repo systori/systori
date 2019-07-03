@@ -1,0 +1,3817 @@
+swagger: '2.0'
+info:
+  title: Systori API
+  description: API Endpoints for Systori
+  contact:
+    email: support@systori.com
+  license:
+    name: MIT License
+  version: v0.1
+basePath: /api
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  Basic:
+    type: basic
+security:
+  - Basic: []
+paths:
+  /accounting/account/:
+    get:
+      operationId: accounting_account_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Account'
+      tags:
+        - accounting
+    post:
+      operationId: accounting_account_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Account'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Account'
+      tags:
+        - accounting
+    parameters: []
+  /accounting/account/{id}/:
+    get:
+      operationId: accounting_account_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Account'
+      tags:
+        - accounting
+    put:
+      operationId: accounting_account_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Account'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Account'
+      tags:
+        - accounting
+    patch:
+      operationId: accounting_account_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Account'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Account'
+      tags:
+        - accounting
+    delete:
+      operationId: accounting_account_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - accounting
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this account.
+        required: true
+        type: integer
+  /accounting/entry/:
+    get:
+      operationId: accounting_entry_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Entry'
+      tags:
+        - accounting
+    post:
+      operationId: accounting_entry_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Entry'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Entry'
+      tags:
+        - accounting
+    parameters: []
+  /accounting/entry/{id}/:
+    get:
+      operationId: accounting_entry_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Entry'
+      tags:
+        - accounting
+    put:
+      operationId: accounting_entry_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Entry'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Entry'
+      tags:
+        - accounting
+    patch:
+      operationId: accounting_entry_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Entry'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Entry'
+      tags:
+        - accounting
+    delete:
+      operationId: accounting_entry_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - accounting
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this entry.
+        required: true
+        type: integer
+  /accounting/transaction/:
+    get:
+      operationId: accounting_transaction_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Transaction'
+      tags:
+        - accounting
+    post:
+      operationId: accounting_transaction_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Transaction'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Transaction'
+      tags:
+        - accounting
+    parameters: []
+  /accounting/transaction/{id}/:
+    get:
+      operationId: accounting_transaction_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Transaction'
+      tags:
+        - accounting
+    put:
+      operationId: accounting_transaction_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Transaction'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Transaction'
+      tags:
+        - accounting
+    patch:
+      operationId: accounting_transaction_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Transaction'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Transaction'
+      tags:
+        - accounting
+    delete:
+      operationId: accounting_transaction_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - accounting
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this transaction.
+        required: true
+        type: integer
+  /company/company/:
+    get:
+      operationId: company_company_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Company'
+      tags:
+        - company
+    post:
+      operationId: company_company_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Company'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Company'
+      tags:
+        - company
+    parameters: []
+  /company/company/{schema}/:
+    get:
+      operationId: company_company_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Company'
+      tags:
+        - company
+    put:
+      operationId: company_company_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Company'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Company'
+      tags:
+        - company
+    patch:
+      operationId: company_company_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Company'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Company'
+      tags:
+        - company
+    delete:
+      operationId: company_company_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - company
+    parameters:
+      - name: schema
+        in: path
+        description: The internal name of the schema.<br>May only contain lowercase
+          letters, digits, underscores and dashes. Must start with a letter.<br>May
+          not be changed after creation.
+        required: true
+        type: string
+        pattern: ^[a-z][a-z0-9_\-]*$
+  /dailyplan/:
+    get:
+      operationId: dailyplan_list
+      description: ''
+      parameters:
+        - name: search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/DailyPlan'
+      tags:
+        - dailyplan
+    post:
+      operationId: dailyplan_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DailyPlan'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/DailyPlan'
+      tags:
+        - dailyplan
+    parameters: []
+  /dailyplan/week_by_day/:
+    put:
+      operationId: dailyplan_week_by_day
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SelectedDay'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/SelectedDay'
+      tags:
+        - dailyplan
+    parameters: []
+  /dailyplan/week_by_day_pivot_workers/:
+    put:
+      operationId: dailyplan_week_by_day_pivot_workers
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SelectedDay'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/SelectedDay'
+      tags:
+        - dailyplan
+    parameters: []
+  /dailyplan/{id}/:
+    get:
+      operationId: dailyplan_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/DailyPlan'
+      tags:
+        - dailyplan
+    put:
+      operationId: dailyplan_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DailyPlan'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/DailyPlan'
+      tags:
+        - dailyplan
+    patch:
+      operationId: dailyplan_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DailyPlan'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/DailyPlan'
+      tags:
+        - dailyplan
+    delete:
+      operationId: dailyplan_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - dailyplan
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this daily plan.
+        required: true
+        type: integer
+  /directory/contact/:
+    get:
+      operationId: directory_contact_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Contact'
+      tags:
+        - directory
+    post:
+      operationId: directory_contact_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Contact'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Contact'
+      tags:
+        - directory
+    parameters: []
+  /directory/contact/{id}/:
+    get:
+      operationId: directory_contact_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Contact'
+      tags:
+        - directory
+    put:
+      operationId: directory_contact_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Contact'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Contact'
+      tags:
+        - directory
+    patch:
+      operationId: directory_contact_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Contact'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Contact'
+      tags:
+        - directory
+    delete:
+      operationId: directory_contact_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - directory
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Kontakt.
+        required: true
+        type: integer
+  /directory/projectcontact/:
+    get:
+      operationId: directory_projectcontact_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/ProjectContact'
+      tags:
+        - directory
+    post:
+      operationId: directory_projectcontact_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectContact'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/ProjectContact'
+      tags:
+        - directory
+    parameters: []
+  /directory/projectcontact/{id}/:
+    get:
+      operationId: directory_projectcontact_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ProjectContact'
+      tags:
+        - directory
+    put:
+      operationId: directory_projectcontact_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectContact'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ProjectContact'
+      tags:
+        - directory
+    patch:
+      operationId: directory_projectcontact_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectContact'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ProjectContact'
+      tags:
+        - directory
+    delete:
+      operationId: directory_projectcontact_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - directory
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Projektkontakt.
+        required: true
+        type: integer
+  /document/adjustment/:
+    get:
+      operationId: document_adjustment_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Adjustment'
+      tags:
+        - document
+    post:
+      operationId: document_adjustment_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Adjustment'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Adjustment'
+      tags:
+        - document
+    parameters: []
+  /document/adjustment/{id}/:
+    get:
+      operationId: document_adjustment_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Adjustment'
+      tags:
+        - document
+    put:
+      operationId: document_adjustment_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Adjustment'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Adjustment'
+      tags:
+        - document
+    patch:
+      operationId: document_adjustment_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Adjustment'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Adjustment'
+      tags:
+        - document
+    delete:
+      operationId: document_adjustment_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - document
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Korrektur.
+        required: true
+        type: integer
+  /document/documenttemplate/:
+    get:
+      operationId: document_documenttemplate_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/DocumentTemplate'
+      tags:
+        - document
+    post:
+      operationId: document_documenttemplate_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DocumentTemplate'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/DocumentTemplate'
+      tags:
+        - document
+    parameters: []
+  /document/documenttemplate/{id}/:
+    get:
+      operationId: document_documenttemplate_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/DocumentTemplate'
+      tags:
+        - document
+    put:
+      operationId: document_documenttemplate_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DocumentTemplate'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/DocumentTemplate'
+      tags:
+        - document
+    patch:
+      operationId: document_documenttemplate_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DocumentTemplate'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/DocumentTemplate'
+      tags:
+        - document
+    delete:
+      operationId: document_documenttemplate_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - document
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Dokumentenvorlage.
+        required: true
+        type: integer
+  /document/documenttemplate/{id}/project-{project_pk}/:
+    get:
+      operationId: document_for_project
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/DocumentTemplate'
+      tags:
+        - document
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Dokumentenvorlage.
+        required: true
+        type: integer
+      - name: project_pk
+        in: path
+        required: true
+        type: string
+  /document/invoice/:
+    get:
+      operationId: document_invoice_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Invoice'
+      tags:
+        - document
+    post:
+      operationId: document_invoice_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Invoice'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Invoice'
+      tags:
+        - document
+    parameters: []
+  /document/invoice/{id}/:
+    get:
+      operationId: document_invoice_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Invoice'
+      tags:
+        - document
+    put:
+      operationId: document_invoice_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Invoice'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Invoice'
+      tags:
+        - document
+    patch:
+      operationId: document_invoice_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Invoice'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Invoice'
+      tags:
+        - document
+    delete:
+      operationId: document_invoice_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - document
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Rechnung.
+        required: true
+        type: integer
+  /document/payment/:
+    get:
+      operationId: document_payment_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Payment'
+      tags:
+        - document
+    post:
+      operationId: document_payment_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Payment'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Payment'
+      tags:
+        - document
+    parameters: []
+  /document/payment/{id}/:
+    get:
+      operationId: document_payment_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Payment'
+      tags:
+        - document
+    put:
+      operationId: document_payment_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Payment'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Payment'
+      tags:
+        - document
+    patch:
+      operationId: document_payment_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Payment'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Payment'
+      tags:
+        - document
+    delete:
+      operationId: document_payment_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - document
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Zahlung.
+        required: true
+        type: integer
+  /document/proposal/:
+    get:
+      operationId: document_proposal_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Proposal'
+      tags:
+        - document
+    post:
+      operationId: document_proposal_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Proposal'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Proposal'
+      tags:
+        - document
+    parameters: []
+  /document/proposal/{id}/:
+    get:
+      operationId: document_proposal_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Proposal'
+      tags:
+        - document
+    put:
+      operationId: document_proposal_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Proposal'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Proposal'
+      tags:
+        - document
+    patch:
+      operationId: document_proposal_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Proposal'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Proposal'
+      tags:
+        - document
+    delete:
+      operationId: document_proposal_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - document
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Angebot.
+        required: true
+        type: integer
+  /document/refund/:
+    get:
+      operationId: document_refund_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Refund'
+      tags:
+        - document
+    post:
+      operationId: document_refund_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Refund'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Refund'
+      tags:
+        - document
+    parameters: []
+  /document/refund/{id}/:
+    get:
+      operationId: document_refund_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Refund'
+      tags:
+        - document
+    put:
+      operationId: document_refund_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Refund'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Refund'
+      tags:
+        - document
+    patch:
+      operationId: document_refund_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Refund'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Refund'
+      tags:
+        - document
+    delete:
+      operationId: document_refund_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - document
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Gutschrift.
+        required: true
+        type: integer
+  /document/timesheet/:
+    get:
+      operationId: document_timesheet_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Timesheet'
+      tags:
+        - document
+    post:
+      operationId: document_timesheet_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Timesheet'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Timesheet'
+      tags:
+        - document
+    parameters: []
+  /document/timesheet/{id}/:
+    get:
+      operationId: document_timesheet_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Timesheet'
+      tags:
+        - document
+    put:
+      operationId: document_timesheet_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Timesheet'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Timesheet'
+      tags:
+        - document
+    patch:
+      operationId: document_timesheet_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Timesheet'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Timesheet'
+      tags:
+        - document
+    delete:
+      operationId: document_timesheet_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - document
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Stundenzettel.
+        required: true
+        type: integer
+  /editor/clone:
+    post:
+      operationId: editor_clone_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      produces: []
+      tags:
+        - editor
+    parameters: []
+  /editor/info/{model_type}/{id}:
+    get:
+      operationId: editor_info_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - editor
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: model_type
+        in: path
+        required: true
+        type: string
+  /editor/save/job/{id}/:
+    post:
+      operationId: editor_save_job_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Job'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Job'
+      tags:
+        - editor
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Los.
+        required: true
+        type: integer
+  /editor/search:
+    post:
+      operationId: editor_search_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+        - editor
+    parameters: []
+  /equipment/equipment/:
+    get:
+      operationId: equipment_equipment_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Equipment'
+      tags:
+        - equipment
+    post:
+      operationId: equipment_equipment_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Equipment'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Equipment'
+      tags:
+        - equipment
+    parameters: []
+  /equipment/equipment/{id}/:
+    get:
+      operationId: equipment_equipment_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Equipment'
+      tags:
+        - equipment
+    put:
+      operationId: equipment_equipment_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Equipment'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Equipment'
+      tags:
+        - equipment
+    patch:
+      operationId: equipment_equipment_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Equipment'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Equipment'
+      tags:
+        - equipment
+    delete:
+      operationId: equipment_equipment_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - equipment
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this equipment.
+        required: true
+        type: integer
+  /equipment/equipment/{id}/icon/:
+    get:
+      operationId: equipment_equipment_icon_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: Icon
+          schema:
+            title: url
+            type: string
+            format: uri
+      consumes:
+        - multipart/form-data
+      tags:
+        - equipment
+    post:
+      operationId: equipment_equipment_icon_create
+      description: ''
+      parameters:
+        - name: file
+          in: formData
+          required: true
+          type: file
+      responses:
+        '201':
+          description: Icon
+          schema:
+            title: url
+            type: string
+            format: uri
+      consumes:
+        - multipart/form-data
+      tags:
+        - equipment
+    delete:
+      operationId: equipment_equipment_icon_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      consumes:
+        - multipart/form-data
+      tags:
+        - equipment
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this equipment.
+        required: true
+        type: integer
+  /equipment/equipment/{id}/refuelingstops/:
+    get:
+      operationId: equipment_equipment_refuelingstops
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: Refueling Stops
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/RefuelingStop'
+      tags:
+        - equipment
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this equipment.
+        required: true
+        type: integer
+  /equipment/maintenance/:
+    get:
+      operationId: equipment_maintenance_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Maintenance'
+      tags:
+        - equipment
+    post:
+      operationId: equipment_maintenance_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Maintenance'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Maintenance'
+      tags:
+        - equipment
+    parameters: []
+  /equipment/maintenance/{id}/:
+    get:
+      operationId: equipment_maintenance_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Maintenance'
+      tags:
+        - equipment
+    put:
+      operationId: equipment_maintenance_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Maintenance'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Maintenance'
+      tags:
+        - equipment
+    patch:
+      operationId: equipment_maintenance_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Maintenance'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Maintenance'
+      tags:
+        - equipment
+    delete:
+      operationId: equipment_maintenance_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - equipment
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this maintenance.
+        required: true
+        type: integer
+  /equipment/refuelingstop/:
+    get:
+      operationId: equipment_refuelingstop_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/RefuelingStop'
+      tags:
+        - equipment
+    post:
+      operationId: equipment_refuelingstop_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/RefuelingStop'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/RefuelingStop'
+      tags:
+        - equipment
+    parameters: []
+  /equipment/refuelingstop/{id}/:
+    get:
+      operationId: equipment_refuelingstop_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/RefuelingStop'
+      tags:
+        - equipment
+    put:
+      operationId: equipment_refuelingstop_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/RefuelingStop'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/RefuelingStop'
+      tags:
+        - equipment
+    patch:
+      operationId: equipment_refuelingstop_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/RefuelingStop'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/RefuelingStop'
+      tags:
+        - equipment
+    delete:
+      operationId: equipment_refuelingstop_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - equipment
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this refueling stop.
+        required: true
+        type: integer
+  /equipment/type/:
+    get:
+      operationId: equipment_type_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/EquipmentType'
+      tags:
+        - equipment
+    post:
+      operationId: equipment_type_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EquipmentType'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/EquipmentType'
+      tags:
+        - equipment
+    parameters: []
+  /equipment/type/{id}/:
+    get:
+      operationId: equipment_type_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/EquipmentType'
+      tags:
+        - equipment
+    put:
+      operationId: equipment_type_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EquipmentType'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/EquipmentType'
+      tags:
+        - equipment
+    patch:
+      operationId: equipment_type_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EquipmentType'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/EquipmentType'
+      tags:
+        - equipment
+    delete:
+      operationId: equipment_type_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - equipment
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this equipment type.
+        required: true
+        type: integer
+  /main/note/:
+    get:
+      operationId: main_note_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Note'
+      tags:
+        - main
+    post:
+      operationId: main_note_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Note'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Note'
+      tags:
+        - main
+    parameters: []
+  /main/note/{id}/:
+    get:
+      operationId: main_note_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Note'
+      tags:
+        - main
+    put:
+      operationId: main_note_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Note'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Note'
+      tags:
+        - main
+    patch:
+      operationId: main_note_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Note'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Note'
+      tags:
+        - main
+    delete:
+      operationId: main_note_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - main
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this note.
+        required: true
+        type: integer
+  /project/:
+    get:
+      operationId: project_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Project'
+      tags:
+        - project
+    post:
+      operationId: project_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Project'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Project'
+      tags:
+        - project
+    parameters: []
+  /project/search/:
+    put:
+      operationId: project_search
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Query'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Query'
+      tags:
+        - project
+    parameters: []
+  /project/{id}/:
+    get:
+      operationId: project_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Project'
+      tags:
+        - project
+    put:
+      operationId: project_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Project'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Project'
+      tags:
+        - project
+    patch:
+      operationId: project_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Project'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Project'
+      tags:
+        - project
+    delete:
+      operationId: project_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - project
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Projekt.
+        required: true
+        type: integer
+  /project/{id}/exists/:
+    get:
+      operationId: project_exists
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Project'
+      tags:
+        - project
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Projekt.
+        required: true
+        type: integer
+  /timer/:
+    post:
+      operationId: timer_create
+      description: Start a timer
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+        - timer
+    put:
+      operationId: timer_update
+      description: Stop a timer
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - timer
+    parameters: []
+  /timetracking/timer/:
+    get:
+      operationId: timetracking_timer_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Timer'
+      tags:
+        - timetracking
+    post:
+      operationId: timetracking_timer_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Timer'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Timer'
+      tags:
+        - timetracking
+    parameters: []
+  /timetracking/timer/{id}/:
+    get:
+      operationId: timetracking_timer_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Timer'
+      tags:
+        - timetracking
+    put:
+      operationId: timetracking_timer_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Timer'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Timer'
+      tags:
+        - timetracking
+    patch:
+      operationId: timetracking_timer_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Timer'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Timer'
+      tags:
+        - timetracking
+    delete:
+      operationId: timetracking_timer_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - timetracking
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Stoppuhr.
+        required: true
+        type: integer
+  /token/:
+    get:
+      operationId: token_login
+      summary: Login using username and password
+      description: Login with username and password, and get auth token for subsequent
+        operations
+      parameters:
+        - name: username
+          in: query
+          description: Username
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: Password
+          required: true
+          type: string
+      responses:
+        '200':
+          description: AuthToken
+          schema:
+            $ref: '#/definitions/AuthToken'
+      tags:
+        - token
+    post:
+      operationId: token_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AuthCredential'
+      responses:
+        '201':
+          description: AuthToken
+          schema:
+            $ref: '#/definitions/AuthToken'
+      tags:
+        - token
+      deprecated: true
+    parameters: []
+definitions:
+  Account:
+    required:
+      - account_type
+      - code
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      account_type:
+        title: Dokumententyp
+        type: string
+        enum:
+          - asset
+          - liability
+          - income
+          - expense
+      asset_type:
+        title: Aktiva
+        type: string
+        enum:
+          - bank
+          - receivable
+        x-nullable: true
+      code:
+        title: Nummer
+        type: string
+        maxLength: 32
+        minLength: 1
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+  Entry:
+    required:
+      - value
+      - value_type
+      - transaction
+      - account
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      value:
+        title: Betrag
+        type: string
+        format: decimal
+      entry_type:
+        title: Buchungstyp
+        type: string
+        enum:
+          - payment
+          - refund-credit
+          - discount
+          - work-debit
+          - flat-debit
+          - refund
+          - adjustment
+          - other
+      value_type:
+        title: Dokumententyp
+        type: string
+        enum:
+          - net
+          - tax
+          - gross
+      reconciled_on:
+        title: Abgeglichen
+        type: string
+        format: date
+        x-nullable: true
+      is_reconciled:
+        title: Abgeglichen
+        type: boolean
+      transaction:
+        title: Transaction
+        type: integer
+      account:
+        title: Account
+        type: integer
+      job:
+        title: Job
+        type: string
+        x-nullable: true
+  Transaction:
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      notes:
+        title: Notes
+        type: string
+      transacted_on:
+        title: Buchung
+        type: string
+        format: date
+      finalized_on:
+        title: Eintrittsdatum
+        type: string
+        format: date
+        x-nullable: true
+      is_finalized:
+        title: Finalisieren
+        type: boolean
+      is_revenue_recognized:
+        title: Is revenue recognized
+        type: boolean
+      recorded_on:
+        title: Belegdatum
+        type: string
+        format: date-time
+        readOnly: true
+      transaction_type:
+        title: Buchungssatz
+        type: string
+        enum:
+          - invoice
+          - payment
+          - adjustment
+          - refund
+        x-nullable: true
+  Company:
+    required:
+      - schema
+      - name
+    type: object
+    properties:
+      schema:
+        title: Schema
+        description: The internal name of the schema.<br>May only contain lowercase
+          letters, digits, underscores and dashes. Must start with a letter.<br>May
+          not be changed after creation.
+        type: string
+        pattern: ^[a-z][a-z0-9_\-]*$
+        maxLength: 36
+        minLength: 1
+      name:
+        title: Name
+        description: The display name of the schema.
+        type: string
+        maxLength: 128
+        minLength: 1
+  Project:
+    title: Project
+    required:
+      - name
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Projektbezeichnung
+        type: string
+        maxLength: 512
+        minLength: 1
+  JobSite:
+    title: Jobsite
+    required:
+      - name
+      - address
+      - city
+      - postal_code
+    type: object
+    properties:
+      name:
+        title: Einsatzort
+        type: string
+        maxLength: 512
+        minLength: 1
+      project:
+        $ref: '#/definitions/Project'
+      address:
+        title: Adresse
+        type: string
+        maxLength: 512
+        minLength: 1
+      city:
+        title: Stadt
+        type: string
+        maxLength: 512
+        minLength: 1
+      postal_code:
+        title: PLZ
+        type: string
+        maxLength: 512
+        minLength: 1
+      country:
+        title: Land
+        type: string
+        maxLength: 512
+        minLength: 1
+      latitude:
+        title: Breitengrad
+        type: number
+        x-nullable: true
+      longitude:
+        title: "L\xE4ngengrad"
+        type: number
+        x-nullable: true
+  Worker:
+    type: object
+    properties:
+      first_name:
+        title: First name
+        type: string
+        readOnly: true
+      last_name:
+        title: Last name
+        type: string
+        readOnly: true
+  EquipmentType:
+    title: Equipment type
+    required:
+      - name
+      - rate
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      rate:
+        title: Stundensatz
+        type: string
+        format: decimal
+      rate_type:
+        title: Lohntyp
+        type: string
+        enum:
+          - hourly
+          - daily
+          - weekly
+          - flat
+  Equipment:
+    required:
+      - name
+      - manufacturer
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      equipment_type:
+        $ref: '#/definitions/EquipmentType'
+      active:
+        title: Aktiv
+        type: boolean
+      name:
+        title: Name
+        type: string
+        maxLength: 255
+        minLength: 1
+      manufacturer:
+        title: Hersteller
+        type: string
+        maxLength: 255
+        minLength: 1
+      license_plate:
+        title: Nummernschild
+        type: string
+        maxLength: 10
+      number_of_seats:
+        title: "Anzahl Sitzpl\xE4tze"
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      icon:
+        title: Icon
+        type: string
+        readOnly: true
+        format: uri
+      fuel:
+        title: Kraftstoff
+        type: string
+        enum:
+          - gasoline
+          - premium_gasoline
+          - diesel
+          - premium_diesel
+          - electric
+      last_refueling_stop:
+        title: Letzter Tankstop
+        type: string
+        format: date-time
+        x-nullable: true
+  DailyPlan:
+    required:
+      - day
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      day:
+        title: Day
+        type: string
+        format: date
+      jobsite:
+        $ref: '#/definitions/JobSite'
+      workers:
+        type: array
+        items:
+          $ref: '#/definitions/Worker'
+        readOnly: true
+      equipment:
+        type: array
+        items:
+          $ref: '#/definitions/Equipment'
+        readOnly: true
+      notes:
+        title: Notes
+        type: string
+  SelectedDay:
+    required:
+      - selected_day
+    type: object
+    properties:
+      selected_day:
+        title: Selected day
+        type: string
+        format: date
+  Contact:
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      business:
+        title: Firma
+        type: string
+        maxLength: 512
+      salutation:
+        title: Anrede
+        type: string
+        maxLength: 512
+      first_name:
+        title: Vorname
+        type: string
+        maxLength: 512
+      last_name:
+        title: Nachname
+        type: string
+        maxLength: 512
+      phone:
+        title: Telefon
+        type: string
+        maxLength: 512
+      email:
+        title: EMail
+        type: string
+        format: email
+        maxLength: 254
+      website:
+        title: Webseite
+        type: string
+        format: uri
+        maxLength: 200
+      address:
+        title: Adresse
+        type: string
+        maxLength: 512
+      postal_code:
+        title: PLZ
+        type: string
+        maxLength: 512
+      city:
+        title: Stadt
+        type: string
+        maxLength: 512
+      country:
+        title: Land
+        type: string
+        maxLength: 512
+        minLength: 1
+      is_address_label_generated:
+        title: Adressfeld automatisch generieren.
+        type: boolean
+      address_label:
+        title: Adressfeld
+        type: string
+      notes:
+        title: Notizen
+        type: string
+      projects:
+        type: array
+        items:
+          type: integer
+        readOnly: true
+        uniqueItems: true
+  ProjectContact:
+    required:
+      - project
+      - contact
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      association:
+        title: "Verkn\xFCpfung"
+        type: string
+        enum:
+          - customer
+          - contractor
+          - supplier
+          - architect
+          - other
+      is_billable:
+        title: Abrechenbar
+        type: boolean
+      notes:
+        title: Notizen
+        type: string
+      project:
+        title: Project
+        type: integer
+      contact:
+        title: Contact
+        type: integer
+  Adjustment:
+    required:
+      - letterhead
+      - project
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      json:
+        title: Json
+        type: string
+        minLength: 1
+      created_on:
+        title: Created on
+        type: string
+        format: date-time
+        readOnly: true
+      document_date:
+        title: Datum
+        type: string
+        format: date
+      notes:
+        title: Notizen
+        type: string
+        x-nullable: true
+      letterhead:
+        title: Letterhead
+        type: integer
+      project:
+        title: Project
+        type: integer
+      invoice:
+        title: Invoice
+        type: integer
+        x-nullable: true
+      transaction:
+        title: Transaction
+        type: integer
+        x-nullable: true
+  DocumentTemplate:
+    required:
+      - name
+      - header
+      - footer
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      header:
+        title: Vortext
+        type: string
+        minLength: 1
+      footer:
+        title: Nachtext
+        type: string
+        minLength: 1
+      document_type:
+        title: Dokumententyp
+        type: string
+        enum:
+          - proposal
+          - invoice
+  Invoice:
+    required:
+      - invoice_no
+      - letterhead
+      - project
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      json:
+        title: Json
+        type: string
+        minLength: 1
+      created_on:
+        title: Created on
+        type: string
+        format: date-time
+        readOnly: true
+      document_date:
+        title: Datum
+        type: string
+        format: date
+      notes:
+        title: Notizen
+        type: string
+        x-nullable: true
+      invoice_no:
+        title: Re-Nr.
+        type: string
+        maxLength: 30
+        minLength: 1
+      status:
+        title: Status
+        type: string
+        enum:
+          - draft
+          - sent
+          - paid
+      letterhead:
+        title: Letterhead
+        type: integer
+      project:
+        title: Project
+        type: integer
+      parent:
+        title: Parent
+        type: integer
+        x-nullable: true
+      transaction:
+        title: Transaction
+        type: integer
+        x-nullable: true
+  Payment:
+    required:
+      - letterhead
+      - project
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      json:
+        title: Json
+        type: string
+        minLength: 1
+      created_on:
+        title: Created on
+        type: string
+        format: date-time
+        readOnly: true
+      document_date:
+        title: Datum
+        type: string
+        format: date
+      notes:
+        title: Notizen
+        type: string
+        x-nullable: true
+      letterhead:
+        title: Letterhead
+        type: integer
+      project:
+        title: Project
+        type: integer
+      invoice:
+        title: Invoice
+        type: integer
+        x-nullable: true
+      transaction:
+        title: Transaction
+        type: integer
+        x-nullable: true
+  Proposal:
+    required:
+      - letterhead
+      - project
+      - jobs
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      json:
+        title: Json
+        type: string
+        minLength: 1
+      created_on:
+        title: Created on
+        type: string
+        format: date-time
+        readOnly: true
+      document_date:
+        title: Datum
+        type: string
+        format: date
+      notes:
+        title: Notizen
+        type: string
+        x-nullable: true
+      status:
+        title: Status
+        type: string
+        enum:
+          - new
+          - sent
+          - approved
+          - declined
+      letterhead:
+        title: Letterhead
+        type: integer
+      project:
+        title: Project
+        type: integer
+      jobs:
+        type: array
+        items:
+          title: Lose
+          type: string
+        uniqueItems: true
+  Refund:
+    required:
+      - letterhead
+      - project
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      json:
+        title: Json
+        type: string
+        minLength: 1
+      created_on:
+        title: Created on
+        type: string
+        format: date-time
+        readOnly: true
+      document_date:
+        title: Datum
+        type: string
+        format: date
+      notes:
+        title: Notizen
+        type: string
+        x-nullable: true
+      letterhead:
+        title: Letterhead
+        type: integer
+      project:
+        title: Project
+        type: integer
+      transaction:
+        title: Transaction
+        type: integer
+        x-nullable: true
+  Timesheet:
+    required:
+      - letterhead
+      - worker
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      json:
+        title: Json
+        type: string
+        minLength: 1
+      created_on:
+        title: Created on
+        type: string
+        format: date-time
+        readOnly: true
+      document_date:
+        title: Datum
+        type: string
+        format: date
+      notes:
+        title: Notizen
+        type: string
+        x-nullable: true
+      letterhead:
+        title: Letterhead
+        type: integer
+      worker:
+        title: Worker
+        type: integer
+  LineItem:
+    required:
+      - order
+    type: object
+    properties:
+      pk:
+        title: Pk
+        type: integer
+      token:
+        title: Api token
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+        x-nullable: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+      order:
+        title: Order
+        type: integer
+        maximum: 2147483647
+        minimum: 0
+      qty:
+        title: Menge
+        type: string
+        format: decimal
+      qty_equation:
+        title: Qty equation
+        type: string
+        maxLength: 512
+      unit:
+        title: Einheit
+        type: string
+        maxLength: 512
+      price:
+        title: Preis
+        type: string
+        format: decimal
+      price_equation:
+        title: Price equation
+        type: string
+        maxLength: 512
+      total:
+        title: Summe
+        type: string
+        format: decimal
+      total_equation:
+        title: Total equation
+        type: string
+        maxLength: 512
+      is_hidden:
+        title: Is hidden
+        type: boolean
+      lineitem_type:
+        title: Typ des Kalkulationselements
+        type: string
+        enum:
+          - material
+          - labor
+          - equipment
+          - other
+  Task:
+    required:
+      - name
+      - order
+      - lineitems
+    type: object
+    properties:
+      pk:
+        title: Pk
+        type: integer
+      token:
+        title: Api token
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+        x-nullable: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      description:
+        title: Description
+        type: string
+      order:
+        title: Order
+        type: integer
+        maximum: 2147483647
+        minimum: 0
+      qty:
+        title: Menge
+        type: string
+        format: decimal
+        x-nullable: true
+      qty_equation:
+        title: Qty equation
+        type: string
+        maxLength: 512
+      unit:
+        title: Einheit
+        type: string
+        maxLength: 512
+      price:
+        title: Preis
+        type: string
+        format: decimal
+      price_equation:
+        title: Price equation
+        type: string
+        maxLength: 512
+      total:
+        title: Summe
+        type: string
+        format: decimal
+      total_equation:
+        title: Total equation
+        type: string
+        maxLength: 512
+      variant_group:
+        title: Variant group
+        type: integer
+        maximum: 2147483647
+        minimum: 0
+      variant_serial:
+        title: Variant serial
+        type: integer
+        maximum: 2147483647
+        minimum: 0
+      is_provisional:
+        title: Is provisional
+        type: boolean
+      lineitems:
+        type: array
+        items:
+          $ref: '#/definitions/LineItem'
+  Group:
+    required:
+      - order
+    type: object
+    properties:
+      pk:
+        title: Pk
+        type: integer
+      token:
+        title: Api token
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+        x-nullable: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+      description:
+        title: Beschreibung
+        type: string
+      order:
+        title: Order
+        type: integer
+        maximum: 2147483647
+        minimum: 0
+      groups:
+        type: string
+      tasks:
+        type: array
+        items:
+          $ref: '#/definitions/Task'
+  Delete:
+    title: Delete
+    type: object
+    properties:
+      groups:
+        type: array
+        items:
+          type: integer
+      tasks:
+        type: array
+        items:
+          type: integer
+      lineitems:
+        type: array
+        items:
+          type: integer
+  Job:
+    type: object
+    properties:
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+      description:
+        title: Beschreibung
+        type: string
+      groups:
+        type: array
+        items:
+          $ref: '#/definitions/Group'
+      tasks:
+        type: array
+        items:
+          $ref: '#/definitions/Task'
+      delete:
+        $ref: '#/definitions/Delete'
+  RefuelingStop:
+    required:
+      - mileage
+      - price_per_liter
+      - equipment
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      datetime:
+        title: Datetime
+        type: string
+        format: date-time
+      mileage:
+        title: Kilometerstand
+        type: string
+        format: decimal
+      distance:
+        title: Strecke
+        type: string
+        format: decimal
+        x-nullable: true
+      liters:
+        title: Getankte Liter
+        type: string
+        format: decimal
+      price_per_liter:
+        title: Preis pro Liter
+        type: string
+        format: decimal
+      average_consumption:
+        title: Durchschnittsverbrauch
+        type: string
+        format: decimal
+        x-nullable: true
+      equipment:
+        title: "Ausr\xFCstung"
+        type: integer
+  Maintenance:
+    required:
+      - mileage
+      - description
+      - equipment
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      date:
+        title: Datum
+        type: string
+        format: date
+      mileage:
+        title: Kilometerstand
+        type: string
+        format: decimal
+      description:
+        title: Beschreibung
+        type: string
+        minLength: 1
+      contractor:
+        title: Werkstatt
+        type: string
+        maxLength: 100
+      cost:
+        title: Kosten
+        type: string
+        format: decimal
+      equipment:
+        title: "Ausr\xFCstung"
+        type: integer
+  Note:
+    required:
+      - text
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      project:
+        title: Project
+        type: integer
+        readOnly: true
+      created:
+        title: Erstellet
+        type: string
+        format: date-time
+        readOnly: true
+      worker:
+        title: Worker
+        type: integer
+        readOnly: true
+      text:
+        title: Text
+        type: string
+        minLength: 1
+      html:
+        title: Html
+        type: string
+        readOnly: true
+  Query:
+    required:
+      - query
+    type: object
+    properties:
+      query:
+        title: Query
+        type: string
+        minLength: 1
+  Timer:
+    required:
+      - started
+      - worker
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      started:
+        title: Started
+        type: string
+        format: date-time
+      stopped:
+        title: Stopped
+        type: string
+        format: date-time
+        x-nullable: true
+      duration:
+        title: Duration
+        description: in Minuten
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      kind:
+        title: Kind
+        type: string
+        enum:
+          - work
+          - vacation
+          - sick
+          - public_holiday
+          - paid_leave
+          - unpaid_leave
+      comment:
+        title: Comment
+        type: string
+        maxLength: 1000
+      starting_latitude:
+        title: Starting latitude
+        type: string
+        format: decimal
+        x-nullable: true
+      starting_longitude:
+        title: Starting longitude
+        type: string
+        format: decimal
+        x-nullable: true
+      ending_latitude:
+        title: Ending latitude
+        type: string
+        format: decimal
+        x-nullable: true
+      ending_longitude:
+        title: Ending longitude
+        type: string
+        format: decimal
+        x-nullable: true
+      is_auto_started:
+        title: Is auto started
+        type: boolean
+      is_auto_stopped:
+        title: Is auto stopped
+        type: boolean
+      worker:
+        title: Worker
+        type: integer
+      job_site:
+        title: Job site
+        type: integer
+        x-nullable: true
+  AuthToken:
+    required:
+      - token
+      - id
+      - first_name
+      - companies
+    type: object
+    properties:
+      token:
+        title: Token
+        type: string
+        maxLength: 40
+        minLength: 1
+      id:
+        title: User
+        type: integer
+      email:
+        title: Email address
+        type: string
+        format: email
+        minLength: 5
+      first_name:
+        title: First name
+        type: string
+        maxLength: 30
+        minLength: 1
+      last_name:
+        title: Last name
+        type: string
+        maxLength: 30
+      pusher_key:
+        title: Pusher Api key
+        type: string
+        maxLength: 256
+        x-nullable: true
+      companies:
+        type: array
+        items:
+          $ref: '#/definitions/Company'
+  AuthCredential:
+    required:
+      - username
+      - password
+    type: object
+    properties:
+      username:
+        title: Username
+        type: string
+        maxLength: 200
+        minLength: 1
+      password:
+        title: Password
+        type: string
+        maxLength: 200
+        minLength: 1
