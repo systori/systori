@@ -88,7 +88,9 @@ class DailyPlanApiTest(ClientTestCase):
                 "manufacturer",
                 "license_plate",
                 "number_of_seats",
+                "icon",
                 "fuel",
+                "last_refueling_stop",
             ],
             list(response.json()[0]["equipment"][0].keys()),
         )
