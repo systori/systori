@@ -7,6 +7,9 @@ info:
   license:
     name: MIT License
   version: v0.1
+host: demo.sandbox.systori.com
+schemes:
+  - http
 basePath: /api
 consumes:
   - application/json
@@ -725,7 +728,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Kontakt.
+        description: A unique integer value identifying this Contact.
         required: true
         type: integer
   /directory/projectcontact/:
@@ -836,7 +839,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Projektkontakt.
+        description: A unique integer value identifying this Project Contact.
         required: true
         type: integer
   /document/adjustment/:
@@ -947,7 +950,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Korrektur.
+        description: A unique integer value identifying this Adjustment.
         required: true
         type: integer
   /document/documenttemplate/:
@@ -1058,7 +1061,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Dokumentenvorlage.
+        description: A unique integer value identifying this Document Template.
         required: true
         type: integer
   /document/documenttemplate/{id}/project-{project_pk}/:
@@ -1076,7 +1079,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Dokumentenvorlage.
+        description: A unique integer value identifying this Document Template.
         required: true
         type: integer
       - name: project_pk
@@ -1191,7 +1194,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Rechnung.
+        description: A unique integer value identifying this Invoice.
         required: true
         type: integer
   /document/payment/:
@@ -1302,7 +1305,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Zahlung.
+        description: A unique integer value identifying this Payment.
         required: true
         type: integer
   /document/proposal/:
@@ -1413,7 +1416,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Angebot.
+        description: A unique integer value identifying this Proposal.
         required: true
         type: integer
   /document/refund/:
@@ -1524,7 +1527,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Gutschrift.
+        description: A unique integer value identifying this Refund.
         required: true
         type: integer
   /document/timesheet/:
@@ -1635,7 +1638,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Stundenzettel.
+        description: A unique integer value identifying this Timesheet.
         required: true
         type: integer
   /editor/clone:
@@ -1689,7 +1692,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Los.
+        description: A unique integer value identifying this Job.
         required: true
         type: integer
   /editor/search:
@@ -2456,7 +2459,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Projekt.
+        description: A unique integer value identifying this Project.
         required: true
         type: integer
   /project/{id}/exists/:
@@ -2474,7 +2477,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Projekt.
+        description: A unique integer value identifying this Project.
         required: true
         type: integer
   /timer/:
@@ -2605,7 +2608,7 @@ paths:
     parameters:
       - name: id
         in: path
-        description: A unique integer value identifying this Stoppuhr.
+        description: A unique integer value identifying this timer.
         required: true
         type: integer
   /token/:
@@ -2662,7 +2665,7 @@ definitions:
         type: integer
         readOnly: true
       account_type:
-        title: Dokumententyp
+        title: Account Type
         type: string
         enum:
           - asset
@@ -2670,14 +2673,14 @@ definitions:
           - income
           - expense
       asset_type:
-        title: Aktiva
+        title: Asset Type
         type: string
         enum:
           - bank
           - receivable
         x-nullable: true
       code:
-        title: Nummer
+        title: Code
         type: string
         maxLength: 32
         minLength: 1
@@ -2698,11 +2701,11 @@ definitions:
         type: integer
         readOnly: true
       value:
-        title: Betrag
+        title: Value
         type: string
         format: decimal
       entry_type:
-        title: Buchungstyp
+        title: Entry Type
         type: string
         enum:
           - payment
@@ -2714,19 +2717,19 @@ definitions:
           - adjustment
           - other
       value_type:
-        title: Dokumententyp
+        title: Value Type
         type: string
         enum:
           - net
           - tax
           - gross
       reconciled_on:
-        title: Abgeglichen
+        title: Date Reconciled
         type: string
         format: date
         x-nullable: true
       is_reconciled:
-        title: Abgeglichen
+        title: Reconciled
         type: boolean
       transaction:
         title: Transaction
@@ -2749,27 +2752,27 @@ definitions:
         title: Notes
         type: string
       transacted_on:
-        title: Buchung
+        title: Date Transacted
         type: string
         format: date
       finalized_on:
-        title: Eintrittsdatum
+        title: Date Finalized
         type: string
         format: date
         x-nullable: true
       is_finalized:
-        title: Finalisieren
+        title: Finalized
         type: boolean
       is_revenue_recognized:
         title: Is revenue recognized
         type: boolean
       recorded_on:
-        title: Belegdatum
+        title: Date Recorded
         type: string
         format: date-time
         readOnly: true
       transaction_type:
-        title: Buchungssatz
+        title: Transaction Type
         type: string
         enum:
           - invoice
@@ -2809,7 +2812,7 @@ definitions:
         type: integer
         readOnly: true
       name:
-        title: Projektbezeichnung
+        title: Project Name
         type: string
         maxLength: 512
         minLength: 1
@@ -2823,38 +2826,38 @@ definitions:
     type: object
     properties:
       name:
-        title: Einsatzort
+        title: Site Name
         type: string
         maxLength: 512
         minLength: 1
       project:
         $ref: '#/definitions/Project'
       address:
-        title: Adresse
+        title: Address
         type: string
         maxLength: 512
         minLength: 1
       city:
-        title: Stadt
+        title: City
         type: string
         maxLength: 512
         minLength: 1
       postal_code:
-        title: PLZ
+        title: Postal Code
         type: string
         maxLength: 512
         minLength: 1
       country:
-        title: Land
+        title: Country
         type: string
         maxLength: 512
         minLength: 1
       latitude:
-        title: Breitengrad
+        title: Latitude
         type: number
         x-nullable: true
       longitude:
-        title: "L\xE4ngengrad"
+        title: Longitude
         type: number
         x-nullable: true
   Worker:
@@ -2885,11 +2888,11 @@ definitions:
         maxLength: 512
         minLength: 1
       rate:
-        title: Stundensatz
+        title: Rate
         type: string
         format: decimal
       rate_type:
-        title: Lohntyp
+        title: Rate Type
         type: string
         enum:
           - hourly
@@ -2909,7 +2912,7 @@ definitions:
       equipment_type:
         $ref: '#/definitions/EquipmentType'
       active:
-        title: Aktiv
+        title: Active
         type: boolean
       name:
         title: Name
@@ -2917,16 +2920,16 @@ definitions:
         maxLength: 255
         minLength: 1
       manufacturer:
-        title: Hersteller
+        title: Manufacturer
         type: string
         maxLength: 255
         minLength: 1
       license_plate:
-        title: Nummernschild
+        title: License plate
         type: string
         maxLength: 10
       number_of_seats:
-        title: "Anzahl Sitzpl\xE4tze"
+        title: Number of seats
         type: integer
         maximum: 2147483647
         minimum: -2147483648
@@ -2936,7 +2939,7 @@ definitions:
         readOnly: true
         format: uri
       fuel:
-        title: Kraftstoff
+        title: Fuel
         type: string
         enum:
           - gasoline
@@ -2945,7 +2948,7 @@ definitions:
           - premium_diesel
           - electric
       last_refueling_stop:
-        title: Letzter Tankstop
+        title: Last refueling stop
         type: string
         format: date-time
         x-nullable: true
@@ -2994,60 +2997,60 @@ definitions:
         type: integer
         readOnly: true
       business:
-        title: Firma
+        title: Business
         type: string
         maxLength: 512
       salutation:
-        title: Anrede
+        title: Salutation
         type: string
         maxLength: 512
       first_name:
-        title: Vorname
+        title: First Name
         type: string
         maxLength: 512
       last_name:
-        title: Nachname
+        title: Last Name
         type: string
         maxLength: 512
       phone:
-        title: Telefon
+        title: Phone
         type: string
         maxLength: 512
       email:
-        title: EMail
+        title: Email
         type: string
         format: email
         maxLength: 254
       website:
-        title: Webseite
+        title: Website
         type: string
         format: uri
         maxLength: 200
       address:
-        title: Adresse
+        title: Address
         type: string
         maxLength: 512
       postal_code:
-        title: PLZ
+        title: Postal Code
         type: string
         maxLength: 512
       city:
-        title: Stadt
+        title: City
         type: string
         maxLength: 512
       country:
-        title: Land
+        title: Country
         type: string
         maxLength: 512
         minLength: 1
       is_address_label_generated:
-        title: Adressfeld automatisch generieren.
+        title: Auto-generate address label
         type: boolean
       address_label:
-        title: Adressfeld
+        title: Address Label
         type: string
       notes:
-        title: Notizen
+        title: Notes
         type: string
       projects:
         type: array
@@ -3066,7 +3069,7 @@ definitions:
         type: integer
         readOnly: true
       association:
-        title: "Verkn\xFCpfung"
+        title: Association
         type: string
         enum:
           - customer
@@ -3075,10 +3078,10 @@ definitions:
           - architect
           - other
       is_billable:
-        title: Abrechenbar
+        title: Is Billable?
         type: boolean
       notes:
-        title: Notizen
+        title: Notes
         type: string
       project:
         title: Project
@@ -3106,11 +3109,11 @@ definitions:
         format: date-time
         readOnly: true
       document_date:
-        title: Datum
+        title: Date
         type: string
         format: date
       notes:
-        title: Notizen
+        title: Notes
         type: string
         x-nullable: true
       letterhead:
@@ -3144,15 +3147,15 @@ definitions:
         maxLength: 512
         minLength: 1
       header:
-        title: Vortext
+        title: Header
         type: string
         minLength: 1
       footer:
-        title: Nachtext
+        title: Footer
         type: string
         minLength: 1
       document_type:
-        title: Dokumententyp
+        title: Document Type
         type: string
         enum:
           - proposal
@@ -3178,15 +3181,15 @@ definitions:
         format: date-time
         readOnly: true
       document_date:
-        title: Datum
+        title: Date
         type: string
         format: date
       notes:
-        title: Notizen
+        title: Notes
         type: string
         x-nullable: true
       invoice_no:
-        title: Re-Nr.
+        title: Invoice No.
         type: string
         maxLength: 30
         minLength: 1
@@ -3231,11 +3234,11 @@ definitions:
         format: date-time
         readOnly: true
       document_date:
-        title: Datum
+        title: Date
         type: string
         format: date
       notes:
-        title: Notizen
+        title: Notes
         type: string
         x-nullable: true
       letterhead:
@@ -3273,11 +3276,11 @@ definitions:
         format: date-time
         readOnly: true
       document_date:
-        title: Datum
+        title: Date
         type: string
         format: date
       notes:
-        title: Notizen
+        title: Notes
         type: string
         x-nullable: true
       status:
@@ -3297,7 +3300,6 @@ definitions:
       jobs:
         type: array
         items:
-          title: Lose
           type: string
         uniqueItems: true
   Refund:
@@ -3320,11 +3322,11 @@ definitions:
         format: date-time
         readOnly: true
       document_date:
-        title: Datum
+        title: Date
         type: string
         format: date
       notes:
-        title: Notizen
+        title: Notes
         type: string
         x-nullable: true
       letterhead:
@@ -3357,11 +3359,11 @@ definitions:
         format: date-time
         readOnly: true
       document_date:
-        title: Datum
+        title: Date
         type: string
         format: date
       notes:
-        title: Notizen
+        title: Notes
         type: string
         x-nullable: true
       letterhead:
@@ -3394,7 +3396,7 @@ definitions:
         maximum: 2147483647
         minimum: 0
       qty:
-        title: Menge
+        title: Quantity
         type: string
         format: decimal
       qty_equation:
@@ -3402,11 +3404,11 @@ definitions:
         type: string
         maxLength: 512
       unit:
-        title: Einheit
+        title: Unit
         type: string
         maxLength: 512
       price:
-        title: Preis
+        title: Price
         type: string
         format: decimal
       price_equation:
@@ -3414,7 +3416,7 @@ definitions:
         type: string
         maxLength: 512
       total:
-        title: Summe
+        title: Total
         type: string
         format: decimal
       total_equation:
@@ -3425,7 +3427,7 @@ definitions:
         title: Is hidden
         type: boolean
       lineitem_type:
-        title: Typ des Kalkulationselements
+        title: Line Item Type
         type: string
         enum:
           - material
@@ -3462,7 +3464,7 @@ definitions:
         maximum: 2147483647
         minimum: 0
       qty:
-        title: Menge
+        title: Quantity
         type: string
         format: decimal
         x-nullable: true
@@ -3471,11 +3473,11 @@ definitions:
         type: string
         maxLength: 512
       unit:
-        title: Einheit
+        title: Unit
         type: string
         maxLength: 512
       price:
-        title: Preis
+        title: Price
         type: string
         format: decimal
       price_equation:
@@ -3483,7 +3485,7 @@ definitions:
         type: string
         maxLength: 512
       total:
-        title: Summe
+        title: Total
         type: string
         format: decimal
       total_equation:
@@ -3526,7 +3528,7 @@ definitions:
         type: string
         maxLength: 512
       description:
-        title: Beschreibung
+        title: Description
         type: string
       order:
         title: Order
@@ -3563,7 +3565,7 @@ definitions:
         type: string
         maxLength: 512
       description:
-        title: Beschreibung
+        title: Description
         type: string
       groups:
         type: array
@@ -3591,29 +3593,29 @@ definitions:
         type: string
         format: date-time
       mileage:
-        title: Kilometerstand
+        title: Mileage
         type: string
         format: decimal
       distance:
-        title: Strecke
+        title: Distance
         type: string
         format: decimal
         x-nullable: true
       liters:
-        title: Getankte Liter
+        title: Refueled liters
         type: string
         format: decimal
       price_per_liter:
-        title: Preis pro Liter
+        title: Price per liter
         type: string
         format: decimal
       average_consumption:
-        title: Durchschnittsverbrauch
+        title: Average consumption
         type: string
         format: decimal
         x-nullable: true
       equipment:
-        title: "Ausr\xFCstung"
+        title: Equipment
         type: integer
   Maintenance:
     required:
@@ -3627,27 +3629,27 @@ definitions:
         type: integer
         readOnly: true
       date:
-        title: Datum
+        title: Date
         type: string
         format: date
       mileage:
-        title: Kilometerstand
+        title: Mileage
         type: string
         format: decimal
       description:
-        title: Beschreibung
+        title: Description
         type: string
         minLength: 1
       contractor:
-        title: Werkstatt
+        title: Contractor
         type: string
         maxLength: 100
       cost:
-        title: Kosten
+        title: Cost
         type: string
         format: decimal
       equipment:
-        title: "Ausr\xFCstung"
+        title: Equipment
         type: integer
   Note:
     required:
@@ -3663,7 +3665,7 @@ definitions:
         type: integer
         readOnly: true
       created:
-        title: Erstellet
+        title: Created
         type: string
         format: date-time
         readOnly: true
@@ -3709,7 +3711,7 @@ definitions:
         x-nullable: true
       duration:
         title: Duration
-        description: in Minuten
+        description: in minutes
         type: integer
         maximum: 2147483647
         minimum: -2147483648
