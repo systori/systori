@@ -15,9 +15,7 @@ systori_info = openapi.Info(
     license=openapi.License(name="MIT License"),
 )
 
-schema_view = get_schema_view(
-    systori_info, public=True, permission_classes=(permissions.IsAuthenticated,)
-)
+schema_view = get_schema_view(systori_info, public=True)
 
 
 urlpatterns = [
