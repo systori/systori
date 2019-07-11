@@ -26,4 +26,7 @@ brotlipy # add infinity caching and brotli compression to whitenoise
 PyPDF2 # ToDo: change PDFFileMerger to pdfrw maybe
 coreapi==2.3.3
 
+# Spreadsheet calculator
+parsec==3.4
+
 -e .

@@ -25,3 +25,5 @@ systori.sublime-workspace
 celerybeat-schedule.db
 .vscode
 .environment
+
+**/*venv*/**
