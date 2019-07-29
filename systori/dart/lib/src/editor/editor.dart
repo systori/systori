@@ -704,6 +704,19 @@ class LineItem extends Model with Orderable, Row, HtmlRow, KeyboardHandler {
     }
 
     @override
+    bool onKeyUpEvent(event, input) {
+      final isTandM = (parent.parent as Task).is_time_and_materials.value;
+      final trigger = new String.fromCharCode(event.keyCode);
+      final isUnit = input.name == 'unit';
+
+      if (isUnit && trigger == '%' && isTandM) {
+        input.text.replaceAll('%', '');
+        return true;
+      }
+      return false;
+    }
+
+    @override
     bool onInputEvent(Input input) {
         if (input.name == 'is_hidden') {
             onCalculate('hidden', total);
