@@ -11,6 +11,7 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 DEBUG = True
 ENABLE_DEBUGTOOLBAR = True
+DISBALE_PUSHER = True
 
 if ENABLE_DEBUGTOOLBAR:
     INSTALLED_APPS += ("debug_toolbar",)

@@ -33,6 +33,7 @@ DEFAULT_FROM_EMAIL = "Systori <support@systori.com>"
 DEBUG = False
 ENABLE_DEBUGTOOLBAR = False
 
+DISABLE_PUSHER = False
 TESTING = "test" in sys.argv
 
 ALLOWED_HOSTS = []
