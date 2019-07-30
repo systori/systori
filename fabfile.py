@@ -378,4 +378,6 @@ def deploy_production():
 
 def run_tests(parallel=2):
     local("python manage.py collectstatic --noinput")
-    local(f"python manage.py test --parallel={parallel} systori.apps systori.lib")
+    local(
+        f"DJANGO_SETTINGS_MODULE='systori.settings.test' python manage.py test --parallel={parallel} systori.apps systori.lib"
+    )

@@ -13,7 +13,7 @@ python-dateutil==2.6.1
 
 hg+https://bitbucket.org/rptlab/reportlab
 hg+https://bitbucket.org/rptlab/preppy
-django-postgres-schema
+git+https://github.com/elmcrest/django-postgres-schema
 git+https://github.com/systori/pyth.git@pyth-py3
 git+https://github.com/eukreign/django-timezone-field.git@django2
 django-tsvector-field
