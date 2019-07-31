@@ -91,28 +91,32 @@ class GAEBStructureField(models.Field):
 
     def __init__(self, *args, **kwargs):
         kwargs["max_length"] = 64
+        self.dept_field = not kwargs.pop("depth_field", False)
         super().__init__(*args, **kwargs)
 
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
         del kwargs["max_length"]
+        kwargs["depth_field"] = True
         return name, path, args, kwargs
 
     def contribute_to_class(self, cls, name, **kwargs):
         super().contribute_to_class(cls, name)
-
-        setattr(cls, name, GAEBStructureProperty(name))
-
         depth_name = name + "_depth"
-        depth_field = models.PositiveIntegerField(editable=False, db_index=True)
-        cls.add_to_class(depth_name, depth_field)
+
+        setattr(cls, name, GAEBStructureProperty(name))  # maybe not needed?
+
+        if self.dept_field and not cls._meta.abstract:
+            depth_field = models.PositiveIntegerField(editable=False, db_index=True)
+            cls.add_to_class(depth_name, depth_field)
+
         setattr(
             cls,
             depth_name,
             property(
                 fget=lambda obj: obj.__dict__[depth_name], fset=lambda obj, val: None
             ),
-        )
+        )  # maybe not needed?
 
     def get_internal_type(self):
         return "CharField"
