@@ -6,75 +6,338 @@ from django.db import migrations, models
 import django.db.models.deletion
 import systori.lib.fields
 import timezone_field.fields
+from postgres_schema.operations import RunInPublic
 
 
 class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
-        migrations.CreateModel(
-            name='Company',
-            fields=[
-                ('schema', models.CharField(help_text='The internal name of the schema.<br>May only contain lowercase letters, digits, underscores and dashes. Must start with a letter.<br>May not be changed after creation.', max_length=36, primary_key=True, serialize=False, unique=True, validators=[django.core.validators.RegexValidator(message='May only contain lowercase letters, digits, underscores and dashes. Must start with a letter.', regex='^[a-z][a-z0-9_\\-]*$')])),
-                ('name', models.CharField(help_text='The display name of the schema.', max_length=128, unique=True)),
-                ('is_active', models.BooleanField(default=True, help_text='Use this instead of deleting schema.')),
-                ('timezone', timezone_field.fields.TimeZoneField(default='Europe/Berlin')),
-                ('is_jobsite_required', models.BooleanField(default=True, help_text='Require that all projects have a jobsite.', verbose_name='Jobsite Required')),
-                ('created', models.DateTimeField(auto_now_add=True, verbose_name='Created')),
-            ],
-            options={
-                'abstract': False,
-            },
+        RunInPublic(
+            migrations.CreateModel(
+                name="Company",
+                fields=[
+                    (
+                        "schema",
+                        models.CharField(
+                            help_text="The internal name of the schema.<br>May only contain lowercase letters, digits, underscores and dashes. Must start with a letter.<br>May not be changed after creation.",
+                            max_length=36,
+                            primary_key=True,
+                            serialize=False,
+                            unique=True,
+                            validators=[
+                                django.core.validators.RegexValidator(
+                                    message="May only contain lowercase letters, digits, underscores and dashes. Must start with a letter.",
+                                    regex="^[a-z][a-z0-9_\\-]*$",
+                                )
+                            ],
+                        ),
+                    ),
+                    (
+                        "name",
+                        models.CharField(
+                            help_text="The display name of the schema.",
+                            max_length=128,
+                            unique=True,
+                        ),
+                    ),
+                    (
+                        "is_active",
+                        models.BooleanField(
+                            default=True,
+                            help_text="Use this instead of deleting schema.",
+                        ),
+                    ),
+                    (
+                        "timezone",
+                        timezone_field.fields.TimeZoneField(default="Europe/Berlin"),
+                    ),
+                    (
+                        "is_jobsite_required",
+                        models.BooleanField(
+                            default=True,
+                            help_text="Require that all projects have a jobsite.",
+                            verbose_name="Jobsite Required",
+                        ),
+                    ),
+                    (
+                        "created",
+                        models.DateTimeField(auto_now_add=True, verbose_name="Created"),
+                    ),
+                ],
+                options={"abstract": False},
+            )
         ),
-        migrations.CreateModel(
-            name='Contract',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=512, null=True, verbose_name='Name')),
-                ('is_template', models.BooleanField(default=False)),
-                ('requires_time_tracking', models.BooleanField(default=True, help_text='Enable this to allow workers time to be tracked and for timesheets to be generated.', verbose_name='Time Tracking & Timesheets')),
-                ('effective', models.DateField(default=datetime.date.today, help_text='Date on which worker officially started working.', null=True, verbose_name='Effective Date')),
-                ('rate', models.DecimalField(decimal_places=2, help_text="Workers' compensation amount in local currency", max_digits=14, verbose_name='Rate')),
-                ('rate_type', models.CharField(choices=[('hourly', 'Hourly'), ('daily', 'Daily'), ('weekly', 'Weekly'), ('flat', 'Flat Fee')], default='hourly', max_length=128, verbose_name='Rate Type')),
-                ('vacation', models.IntegerField(default=1200, help_text='Vacation time (in hours) accumulated every month.', verbose_name='Vacation')),
-                ('work_start', models.TimeField(default=datetime.time(7, 0), help_text='Local time at which worker is expected to start working.', verbose_name='Work Start')),
-                ('morning_break_start', models.TimeField(blank=True, default=datetime.time(9, 0), help_text='Start of morning break in local time.', null=True, verbose_name='Morning Break Start')),
-                ('morning_break_end', models.TimeField(blank=True, default=datetime.time(9, 30), help_text='End of morning break in local time.', null=True, verbose_name='Morning Break End')),
-                ('lunch_break_start', models.TimeField(blank=True, default=datetime.time(12, 30), help_text='Start of lunch break in local time.', null=True, verbose_name='Lunch Break Start')),
-                ('lunch_break_end', models.TimeField(blank=True, default=datetime.time(13, 0), help_text='End of lunch break in local time.', null=True, verbose_name='Lunch Break End')),
-                ('work_end', models.TimeField(default=datetime.time(16, 0), help_text='Local time at which worker is expected to finish working.', verbose_name='Work End')),
-                ('abandoned_timer_penalty', models.IntegerField(default=-60, help_text='Penalty (in hours) applies to work day of a worker who manually starts and then fails to stop their timer at the end of the day.', verbose_name='Abandoned Timer Penalty')),
-            ],
-            bases=(models.Model, systori.lib.fields.RateType),
+        RunInPublic(
+            migrations.CreateModel(
+                name="Contract",
+                fields=[
+                    (
+                        "id",
+                        models.AutoField(
+                            auto_created=True,
+                            primary_key=True,
+                            serialize=False,
+                            verbose_name="ID",
+                        ),
+                    ),
+                    (
+                        "name",
+                        models.CharField(
+                            blank=True, max_length=512, null=True, verbose_name="Name"
+                        ),
+                    ),
+                    ("is_template", models.BooleanField(default=False)),
+                    (
+                        "requires_time_tracking",
+                        models.BooleanField(
+                            default=True,
+                            help_text="Enable this to allow workers time to be tracked and for timesheets to be generated.",
+                            verbose_name="Time Tracking & Timesheets",
+                        ),
+                    ),
+                    (
+                        "effective",
+                        models.DateField(
+                            default=datetime.date.today,
+                            help_text="Date on which worker officially started working.",
+                            null=True,
+                            verbose_name="Effective Date",
+                        ),
+                    ),
+                    (
+                        "rate",
+                        models.DecimalField(
+                            decimal_places=2,
+                            help_text="Workers' compensation amount in local currency",
+                            max_digits=14,
+                            verbose_name="Rate",
+                        ),
+                    ),
+                    (
+                        "rate_type",
+                        models.CharField(
+                            choices=[
+                                ("hourly", "Hourly"),
+                                ("daily", "Daily"),
+                                ("weekly", "Weekly"),
+                                ("flat", "Flat Fee"),
+                            ],
+                            default="hourly",
+                            max_length=128,
+                            verbose_name="Rate Type",
+                        ),
+                    ),
+                    (
+                        "vacation",
+                        models.IntegerField(
+                            default=1200,
+                            help_text="Vacation time (in hours) accumulated every month.",
+                            verbose_name="Vacation",
+                        ),
+                    ),
+                    (
+                        "work_start",
+                        models.TimeField(
+                            default=datetime.time(7, 0),
+                            help_text="Local time at which worker is expected to start working.",
+                            verbose_name="Work Start",
+                        ),
+                    ),
+                    (
+                        "morning_break_start",
+                        models.TimeField(
+                            blank=True,
+                            default=datetime.time(9, 0),
+                            help_text="Start of morning break in local time.",
+                            null=True,
+                            verbose_name="Morning Break Start",
+                        ),
+                    ),
+                    (
+                        "morning_break_end",
+                        models.TimeField(
+                            blank=True,
+                            default=datetime.time(9, 30),
+                            help_text="End of morning break in local time.",
+                            null=True,
+                            verbose_name="Morning Break End",
+                        ),
+                    ),
+                    (
+                        "lunch_break_start",
+                        models.TimeField(
+                            blank=True,
+                            default=datetime.time(12, 30),
+                            help_text="Start of lunch break in local time.",
+                            null=True,
+                            verbose_name="Lunch Break Start",
+                        ),
+                    ),
+                    (
+                        "lunch_break_end",
+                        models.TimeField(
+                            blank=True,
+                            default=datetime.time(13, 0),
+                            help_text="End of lunch break in local time.",
+                            null=True,
+                            verbose_name="Lunch Break End",
+                        ),
+                    ),
+                    (
+                        "work_end",
+                        models.TimeField(
+                            default=datetime.time(16, 0),
+                            help_text="Local time at which worker is expected to finish working.",
+                            verbose_name="Work End",
+                        ),
+                    ),
+                    (
+                        "abandoned_timer_penalty",
+                        models.IntegerField(
+                            default=-60,
+                            help_text="Penalty (in hours) applies to work day of a worker who manually starts and then fails to stop their timer at the end of the day.",
+                            verbose_name="Abandoned Timer Penalty",
+                        ),
+                    ),
+                ],
+                bases=(models.Model, systori.lib.fields.RateType),
+            )
         ),
-        migrations.CreateModel(
-            name='LaborType',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=512, verbose_name='Name')),
-                ('rate', models.DecimalField(decimal_places=2, max_digits=14, verbose_name='Rate')),
-                ('rate_type', models.CharField(choices=[('hourly', 'Hourly'), ('daily', 'Daily'), ('weekly', 'Weekly'), ('flat', 'Flat Fee')], default='hourly', max_length=128, verbose_name='Rate Type')),
-            ],
-            bases=(models.Model, systori.lib.fields.RateType),
+        RunInPublic(
+            migrations.CreateModel(
+                name="LaborType",
+                fields=[
+                    (
+                        "id",
+                        models.AutoField(
+                            auto_created=True,
+                            primary_key=True,
+                            serialize=False,
+                            verbose_name="ID",
+                        ),
+                    ),
+                    ("name", models.CharField(max_length=512, verbose_name="Name")),
+                    (
+                        "rate",
+                        models.DecimalField(
+                            decimal_places=2, max_digits=14, verbose_name="Rate"
+                        ),
+                    ),
+                    (
+                        "rate_type",
+                        models.CharField(
+                            choices=[
+                                ("hourly", "Hourly"),
+                                ("daily", "Daily"),
+                                ("weekly", "Weekly"),
+                                ("flat", "Flat Fee"),
+                            ],
+                            default="hourly",
+                            max_length=128,
+                            verbose_name="Rate Type",
+                        ),
+                    ),
+                ],
+                bases=(models.Model, systori.lib.fields.RateType),
+            )
         ),
-        migrations.CreateModel(
-            name='Worker',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('is_owner', models.BooleanField(default=False, help_text='Has full and unlimited access.', verbose_name='Owner')),
-                ('is_staff', models.BooleanField(default=False, help_text='Manage projects and perform administrative tasks.', verbose_name='Staff')),
-                ('is_foreman', models.BooleanField(default=False, help_text='Manage workers in the field.', verbose_name='Foreman')),
-                ('is_laborer', models.BooleanField(default=True, help_text='Limited access in the field.', verbose_name='Laborer')),
-                ('is_accountant', models.BooleanField(default=False, help_text='Access to financial information.', verbose_name='Accountant')),
-                ('is_active', models.BooleanField(default=True, help_text='Must be enabled to allow worker access to the company. Unchecking this will completely disable access for the worker and you will not be able to assign tasks to them in the daily planner.', verbose_name='Active')),
-                ('can_track_time', models.BooleanField(default=False, help_text='Worker will be able to start and stop their own work timer. Requires that "Time Tracking & Timesheets" is also enabled.', verbose_name='Allowed to track their own time?')),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='workers', to='company.Company')),
-                ('contract', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='company.Contract')),
-                ('labor_types', models.ManyToManyField(blank=True, related_name='workers', to='company.LaborType')),
-            ],
+        RunInPublic(
+            migrations.CreateModel(
+                name="Worker",
+                fields=[
+                    (
+                        "id",
+                        models.AutoField(
+                            auto_created=True,
+                            primary_key=True,
+                            serialize=False,
+                            verbose_name="ID",
+                        ),
+                    ),
+                    (
+                        "is_owner",
+                        models.BooleanField(
+                            default=False,
+                            help_text="Has full and unlimited access.",
+                            verbose_name="Owner",
+                        ),
+                    ),
+                    (
+                        "is_staff",
+                        models.BooleanField(
+                            default=False,
+                            help_text="Manage projects and perform administrative tasks.",
+                            verbose_name="Staff",
+                        ),
+                    ),
+                    (
+                        "is_foreman",
+                        models.BooleanField(
+                            default=False,
+                            help_text="Manage workers in the field.",
+                            verbose_name="Foreman",
+                        ),
+                    ),
+                    (
+                        "is_laborer",
+                        models.BooleanField(
+                            default=True,
+                            help_text="Limited access in the field.",
+                            verbose_name="Laborer",
+                        ),
+                    ),
+                    (
+                        "is_accountant",
+                        models.BooleanField(
+                            default=False,
+                            help_text="Access to financial information.",
+                            verbose_name="Accountant",
+                        ),
+                    ),
+                    (
+                        "is_active",
+                        models.BooleanField(
+                            default=True,
+                            help_text="Must be enabled to allow worker access to the company. Unchecking this will completely disable access for the worker and you will not be able to assign tasks to them in the daily planner.",
+                            verbose_name="Active",
+                        ),
+                    ),
+                    (
+                        "can_track_time",
+                        models.BooleanField(
+                            default=False,
+                            help_text='Worker will be able to start and stop their own work timer. Requires that "Time Tracking & Timesheets" is also enabled.',
+                            verbose_name="Allowed to track their own time?",
+                        ),
+                    ),
+                    (
+                        "company",
+                        models.ForeignKey(
+                            on_delete=django.db.models.deletion.CASCADE,
+                            related_name="workers",
+                            to="company.Company",
+                        ),
+                    ),
+                    (
+                        "contract",
+                        models.ForeignKey(
+                            null=True,
+                            on_delete=django.db.models.deletion.SET_NULL,
+                            related_name="+",
+                            to="company.Contract",
+                        ),
+                    ),
+                    (
+                        "labor_types",
+                        models.ManyToManyField(
+                            blank=True, related_name="workers", to="company.LaborType"
+                        ),
+                    ),
+                ],
+            )
         ),
     ]

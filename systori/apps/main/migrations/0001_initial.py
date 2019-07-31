@@ -2,28 +2,44 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+from postgres_schema.operations import RunInTemplate
 
 
 class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
-    ]
+    dependencies = [("contenttypes", "0002_remove_content_type_name")]
 
     operations = [
-        migrations.CreateModel(
-            name='Note',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('object_id', models.PositiveIntegerField()),
-                ('text', models.TextField(verbose_name='Text')),
-                ('created', models.DateTimeField(auto_now_add=True, verbose_name='Created')),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.ContentType')),
-            ],
-            options={
-                'ordering': ('created',),
-            },
-        ),
+        RunInTemplate(
+            migrations.CreateModel(
+                name="Note",
+                fields=[
+                    (
+                        "id",
+                        models.AutoField(
+                            auto_created=True,
+                            primary_key=True,
+                            serialize=False,
+                            verbose_name="ID",
+                        ),
+                    ),
+                    ("object_id", models.PositiveIntegerField()),
+                    ("text", models.TextField(verbose_name="Text")),
+                    (
+                        "created",
+                        models.DateTimeField(auto_now_add=True, verbose_name="Created"),
+                    ),
+                    (
+                        "content_type",
+                        models.ForeignKey(
+                            on_delete=django.db.models.deletion.CASCADE,
+                            to="contenttypes.ContentType",
+                        ),
+                    ),
+                ],
+                options={"ordering": ("created",)},
+            )
+        )
     ]

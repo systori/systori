@@ -3,6 +3,7 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
+from postgres_schema.operations import RunInPublic
 
 
 class Migration(migrations.Migration):
@@ -10,28 +11,49 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('company', '0001_initial'),
+        ("company", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='worker',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='access', to=settings.AUTH_USER_MODEL),
+        RunInPublic(
+            migrations.AddField(
+                model_name="worker",
+                name="user",
+                field=models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name="access",
+                    to=settings.AUTH_USER_MODEL,
+                ),
+            )
         ),
-        migrations.AddField(
-            model_name='contract',
-            name='worker',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='contracts', to='company.Worker'),
+        RunInPublic(
+            migrations.AddField(
+                model_name="contract",
+                name="worker",
+                field=models.ForeignKey(
+                    null=True,
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name="contracts",
+                    to="company.Worker",
+                ),
+            )
         ),
-        migrations.AddField(
-            model_name='company',
-            name='users',
-            field=models.ManyToManyField(blank=True, related_name='companies', through='company.Worker', to=settings.AUTH_USER_MODEL),
+        RunInPublic(
+            migrations.AddField(
+                model_name="company",
+                name="users",
+                field=models.ManyToManyField(
+                    blank=True,
+                    related_name="companies",
+                    through="company.Worker",
+                    to=settings.AUTH_USER_MODEL,
+                ),
+            )
         ),
-        migrations.AlterUniqueTogether(
-            name='worker',
-            unique_together={('company', 'user')},
+        RunInPublic(
+            migrations.AlterUniqueTogether(
+                name="worker", unique_together={("company", "user")}
+            )
         ),
     ]

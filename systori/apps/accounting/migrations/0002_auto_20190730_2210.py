@@ -2,26 +2,37 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+from postgres_schema.operations import RunInTemplate
 
 
 class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ('accounting', '0001_initial'),
-        ('task', '0001_initial'),
-    ]
+    dependencies = [("accounting", "0001_initial"), ("task", "0001_initial")]
 
     operations = [
-        migrations.AddField(
-            model_name='entry',
-            name='job',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='task.Job'),
+        RunInTemplate(
+            migrations.AddField(
+                model_name="entry",
+                name="job",
+                field=models.ForeignKey(
+                    null=True,
+                    on_delete=django.db.models.deletion.SET_NULL,
+                    related_name="+",
+                    to="task.Job",
+                ),
+            )
         ),
-        migrations.AddField(
-            model_name='entry',
-            name='transaction',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='entries', to='accounting.Transaction'),
+        RunInTemplate(
+            migrations.AddField(
+                model_name="entry",
+                name="transaction",
+                field=models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name="entries",
+                    to="accounting.Transaction",
+                ),
+            )
         ),
     ]

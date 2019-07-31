@@ -2,26 +2,36 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+from postgres_schema.operations import RunInTemplate
 
 
 class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ('directory', '0001_initial'),
-        ('project', '0001_initial'),
-    ]
+    dependencies = [("directory", "0001_initial"), ("project", "0001_initial")]
 
     operations = [
-        migrations.AddField(
-            model_name='projectcontact',
-            name='project',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='project_contacts', to='project.Project'),
+        RunInTemplate(
+            migrations.AddField(
+                model_name="projectcontact",
+                name="project",
+                field=models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name="project_contacts",
+                    to="project.Project",
+                ),
+            )
         ),
-        migrations.AddField(
-            model_name='contact',
-            name='projects',
-            field=models.ManyToManyField(related_name='contacts', through='directory.ProjectContact', to='project.Project'),
+        RunInTemplate(
+            migrations.AddField(
+                model_name="contact",
+                name="projects",
+                field=models.ManyToManyField(
+                    related_name="contacts",
+                    through="directory.ProjectContact",
+                    to="project.Project",
+                ),
+            )
         ),
     ]

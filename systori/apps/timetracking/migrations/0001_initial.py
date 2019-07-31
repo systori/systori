@@ -2,40 +2,104 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+from postgres_schema.operations import RunInTemplate
 
 
 class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ('company', '0001_initial'),
-        ('project', '0001_initial'),
-    ]
+    dependencies = [("company", "0001_initial"), ("project", "0001_initial")]
 
     operations = [
-        migrations.CreateModel(
-            name='Timer',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('started', models.DateTimeField(db_index=True)),
-                ('stopped', models.DateTimeField(blank=True, db_index=True, null=True)),
-                ('duration', models.IntegerField(default=0, help_text='in minutes')),
-                ('kind', models.CharField(choices=[('work', 'Work'), ('vacation', 'Vacation'), ('sick', 'Sick'), ('public_holiday', 'Public holiday'), ('paid_leave', 'Paid leave'), ('unpaid_leave', 'Unpaid leave')], db_index=True, default='work', max_length=32)),
-                ('comment', models.CharField(blank=True, max_length=1000)),
-                ('starting_latitude', models.DecimalField(blank=True, decimal_places=8, max_digits=11, null=True)),
-                ('starting_longitude', models.DecimalField(blank=True, decimal_places=8, max_digits=11, null=True)),
-                ('ending_latitude', models.DecimalField(blank=True, decimal_places=8, max_digits=11, null=True)),
-                ('ending_longitude', models.DecimalField(blank=True, decimal_places=8, max_digits=11, null=True)),
-                ('is_auto_started', models.BooleanField(default=False)),
-                ('is_auto_stopped', models.BooleanField(default=False)),
-                ('job_site', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='project.JobSite')),
-                ('worker', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='timers', to='company.Worker')),
-            ],
-            options={
-                'verbose_name': 'timer',
-                'verbose_name_plural': 'timers',
-                'ordering': ('started',),
-            },
-        ),
+        RunInTemplate(
+            migrations.CreateModel(
+                name="Timer",
+                fields=[
+                    (
+                        "id",
+                        models.AutoField(
+                            auto_created=True,
+                            primary_key=True,
+                            serialize=False,
+                            verbose_name="ID",
+                        ),
+                    ),
+                    ("started", models.DateTimeField(db_index=True)),
+                    (
+                        "stopped",
+                        models.DateTimeField(blank=True, db_index=True, null=True),
+                    ),
+                    (
+                        "duration",
+                        models.IntegerField(default=0, help_text="in minutes"),
+                    ),
+                    (
+                        "kind",
+                        models.CharField(
+                            choices=[
+                                ("work", "Work"),
+                                ("vacation", "Vacation"),
+                                ("sick", "Sick"),
+                                ("public_holiday", "Public holiday"),
+                                ("paid_leave", "Paid leave"),
+                                ("unpaid_leave", "Unpaid leave"),
+                            ],
+                            db_index=True,
+                            default="work",
+                            max_length=32,
+                        ),
+                    ),
+                    ("comment", models.CharField(blank=True, max_length=1000)),
+                    (
+                        "starting_latitude",
+                        models.DecimalField(
+                            blank=True, decimal_places=8, max_digits=11, null=True
+                        ),
+                    ),
+                    (
+                        "starting_longitude",
+                        models.DecimalField(
+                            blank=True, decimal_places=8, max_digits=11, null=True
+                        ),
+                    ),
+                    (
+                        "ending_latitude",
+                        models.DecimalField(
+                            blank=True, decimal_places=8, max_digits=11, null=True
+                        ),
+                    ),
+                    (
+                        "ending_longitude",
+                        models.DecimalField(
+                            blank=True, decimal_places=8, max_digits=11, null=True
+                        ),
+                    ),
+                    ("is_auto_started", models.BooleanField(default=False)),
+                    ("is_auto_stopped", models.BooleanField(default=False)),
+                    (
+                        "job_site",
+                        models.ForeignKey(
+                            blank=True,
+                            null=True,
+                            on_delete=django.db.models.deletion.SET_NULL,
+                            to="project.JobSite",
+                        ),
+                    ),
+                    (
+                        "worker",
+                        models.ForeignKey(
+                            on_delete=django.db.models.deletion.CASCADE,
+                            related_name="timers",
+                            to="company.Worker",
+                        ),
+                    ),
+                ],
+                options={
+                    "verbose_name": "timer",
+                    "verbose_name_plural": "timers",
+                    "ordering": ("started",),
+                },
+            )
+        )
     ]
