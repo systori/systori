@@ -1,5 +1,5 @@
--r app.pip
 -r test.pip
+
 black
 pylint
 pylint-django

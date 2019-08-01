@@ -15,7 +15,7 @@ systori_info = openapi.Info(
     license=openapi.License(name="MIT License"),
 )
 
-schema_view = get_schema_view(systori_info, public=True)
+SchemaView = get_schema_view(systori_info, public=True)
 
 
 urlpatterns = [
@@ -45,17 +45,15 @@ urlpatterns = [
     url(r"^field/", include("systori.apps.field.urls")),
     url(
         r"^swagger(?P<format>\.json|\.yaml)$",
-        schema_view.without_ui(cache_timeout=0),
+        SchemaView.without_ui(cache_timeout=0),
         name="schema-json",
     ),
     url(
         r"^swagger/$",
-        schema_view.with_ui("swagger", cache_timeout=0),
+        SchemaView.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
-    url(
-        r"^redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"
-    ),
+    url(r"^redoc/$", SchemaView.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
