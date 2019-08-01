@@ -11,7 +11,7 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 DEBUG = True
 ENABLE_DEBUGTOOLBAR = True
-DISBALE_PUSHER = True
+DISABLE_PUSHER = True
 
 if ENABLE_DEBUGTOOLBAR:
     INSTALLED_APPS += ("debug_toolbar",)
@@ -32,11 +32,6 @@ if ENABLE_DEBUGTOOLBAR:
     )
 
     DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda _request: DEBUG}
-
-idx = INSTALLED_APPS.index("django.contrib.staticfiles")
-INSTALLED_APPS = (
-    INSTALLED_APPS[:idx] + ("whitenoise.runserver_nostatic",) + INSTALLED_APPS[idx:]
-)
 
 STATICFILES_DIRS += (("dart/src", "systori/dart/web"),)
 

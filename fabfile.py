@@ -381,3 +381,11 @@ def run_tests(parallel=2):
     local(
         f"DJANGO_SETTINGS_MODULE='systori.settings.test' python manage.py test --parallel={parallel} systori.apps systori.lib"
     )
+    local(f"python manage.py test --parallel={parallel} systori.apps systori.lib")
+
+
+# def setup_dev_environment():
+#     dart up and so forth
+#     docker exec -w /app/ -it {ContainerID} /usr/lib/dart/bin/pub get
+#     docker exec -w /app/ -it {ContainerID} /usr/lib/dart/bin/pub build
+#     docker exec -it {ContainerID} createdb -U postgres -O postgres systori_local

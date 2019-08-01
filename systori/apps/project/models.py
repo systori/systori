@@ -57,7 +57,9 @@ class Project(models.Model):
     name = models.CharField(_("Project Name"), max_length=512)
     description = models.TextField(_("Project Description"), blank=True, null=True)
     is_template = models.BooleanField(default=False)
-    structure = GAEBStructureField(_("Numbering Structure"), default="01.01.001")
+    structure = GAEBStructureField(
+        _("Numbering Structure"), default="01.01.001"
+    )  # GAEBStructureField adds structure_depth
 
     notes = GenericRelation("main.Note")
 
