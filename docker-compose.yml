@@ -28,7 +28,7 @@ services:
       context: ./
       dockerfile: docker/app/Dockerfile
       args:
-        - REQUIREMENTS_FILE=dev.pip
+        - REQUIREMENTS_FILE=app.pip
         - DJANGO_SETTINGS_MODULE=systori.settings.sandbox
         - PUSHER_APP_ID=$PUSHER_APP_ID
         - PUSHER_KEY=$PUSHER_KEY
