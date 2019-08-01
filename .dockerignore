@@ -6,3 +6,4 @@ media/attachments
 server
 # systori/dart/build
 **/__pycache__
+**/*venv*/**
