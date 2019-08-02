@@ -35,7 +35,7 @@ services:
         - PUSHER_SECRET=$PUSHER_SECRET
     image: elmcrest/systori:sandbox
     ports:
-      - "8000:8000"
+      - '$DOCKER_SANDBOX_PORT_HOST:$DOCKER_SANDBOX_PORT_CONTAINER'
     environment:
       PYTHONUNBUFFERED: 1
       DJANGO_SETTINGS_MODULE: 'systori.settings.sandbox'
