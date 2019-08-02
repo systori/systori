@@ -26,4 +26,5 @@ celerybeat-schedule.db
 .vscode
 !.vscode/extensions.json
 !.vscode/settings.json
+!.vscode/launch.json
 .environment
