@@ -1,0 +1,32 @@
+// See https://aka.ms/vscode-remote/devcontainer.json for format details.
+{
+    "service": "app_local",
+    "dockerComposeFile": [
+        "../docker-compose.yml", "docker-compose.devcontainer.yml",
+    ],
+    /// If SSH is used for git, copy ssh config and keys to the container
+    // "postCreateCommand": "mkdir -p ~/.ssh && cp -r ~/.ssh-localhost/* ~/.ssh && chmod 700 ~/.ssh && chmod 600 ~/.ssh/*",
+    "workspaceFolder": "/app",
+    /// Containers must be manually stopped `docker-compose stop`
+    "shutdownAction": "none",
+    "name": "Systori",
+    "extensions": [
+        /// --- Git extensions ---
+        "eamodio.gitlens",
+
+        /// --- Python Extensions ---
+        "donjayamanne.python-extension-pack",
+        // "brainfit.vscode-importmagic", // Not working in remote-containers
+        "njpwerner.autodocstring",
+        "filwaline.vscode-postfix-python",
+        "pachwenko.django-test-runner",
+
+        /// --- Postgres Extensions ---
+        "ms-ossdata.vscode-postgresql",
+    ],
+    "settings": {
+        /// Default settings for the docker container
+        /// NOTE: .vscode/settings.json has precedence over this
+        "python.pythonPath": "python3"
+    }
+}
