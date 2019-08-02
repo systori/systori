@@ -11,7 +11,7 @@ services:
         - PUSHER_KEY=$PUSHER_KEY
         - PUSHER_SECRET=$PUSHER_SECRET
     ports:
-      - "8000:8000"
+      - '$DOCKER_PORT_HOST:$DOCKER_PORT_CONTAINER'
     environment:
       PYTHONUNBUFFERED: 1
       DJANGO_SETTINGS_MODULE: 'systori.settings.docker_local'
