@@ -25,4 +25,5 @@ systori.sublime-workspace
 celerybeat-schedule.db
 .vscode
 !.vscode/extensions.json
+!.vscode/settings.json
 .environment
