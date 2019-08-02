@@ -53,4 +53,13 @@
     "python.testing.unittestEnabled": true,
     "pgsql.format.keywordCasing": "uppercase",
     "pgsql.format.datatypeCasing": "uppercase",
+    "pgsql.connections": [{
+        "host": "db",
+        "dbname": "",
+        "user": "postgres",
+        "password": "postgres",
+        "emptyPasswordInput": false,
+        "port": "5432",
+        "profileName": "Systori (db)"
+    }]
 }
