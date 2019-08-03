@@ -51,15 +51,25 @@
     "python.testing.pytestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "python.testing.unittestEnabled": true,
-    "pgsql.format.keywordCasing": "uppercase",
-    "pgsql.format.datatypeCasing": "uppercase",
-    "pgsql.connections": [{
-        "host": "db",
-        "dbname": "",
-        "user": "postgres",
-        "password": "postgres",
-        "emptyPasswordInput": false,
-        "port": "5432",
-        "profileName": "Systori (db)"
-    }]
+    "sqltools.connections": [
+        {
+            "askForPassword": false,
+            "connectionTimeout": 30,
+            "database": "systori_local",
+            "dialect": "PostgreSQL",
+            "name": "Systori (db)",
+            "password": "postgres",
+            "port": 5432,
+            "server": "db",
+            "username": "postgres"
+        }
+    ],
+    "sqltools.autoConnectTo": ["Systori (db)"],
+    "sqltools.format": {
+        "reservedWordCase": "uppercase"
+    },
+    "sqltools.telemetry": false,
+    "sqltools.results": {
+        "location": "end",
+    },
 }

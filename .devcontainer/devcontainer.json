@@ -22,11 +22,11 @@
         "pachwenko.django-test-runner",
 
         /// --- Postgres Extensions ---
-        "ms-ossdata.vscode-postgresql",
+        "mtxr.sqltools",
     ],
     "settings": {
         /// Default settings for the docker container
         /// NOTE: .vscode/settings.json has precedence over this
-        "python.pythonPath": "python3"
-    }
+        "python.pythonPath": "python3",
+    },
 }
