@@ -1,6 +1,7 @@
 from systori.settings.common import *
 import os
 
+LANGUAGE_CODE = "en"
 SERVER_NAME = "systori.localhost"
 SESSION_COOKIE_DOMAIN = "." + SERVER_NAME
 ALLOWED_HOSTS = ["." + SERVER_NAME]
