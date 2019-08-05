@@ -1,0 +1,16 @@
+version: "3"
+services:
+  dart:
+    build:
+      context: ../
+      dockerfile: .devcontainer/docker_local.DockerFile
+    volumes:
+      - ../:/app:z
+      - pub_cache:/root/.pub-cache/:z
+      - ../.devcontainer:/startup
+    entrypoint: /startup/idle.sh
+    command: cd /app && pub get && pub build
+
+# To cache pub dependencies, this might break `pub get`, `pub activate` commands in Dockerfile
+volumes:
+  pub_cache:
