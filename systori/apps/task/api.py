@@ -4,7 +4,7 @@ from rest_framework import views, viewsets, mixins
 from rest_framework import response, renderers
 from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Job, Group, Task
-from .serializers import JobSerializer, GroupSerializer
+from .serializers import JobSerializer, GroupSerializer, TaskSerializer
 from ..user.permissions import HasStaffAccess
 
 
@@ -141,6 +141,12 @@ class JobModelViewSet(viewsets.ModelViewSet):
 class GroupModelViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+    permission_classes = (HasStaffAccess,)
+
+
+class TaskModelViewSet(viewsets.ModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
     permission_classes = (HasStaffAccess,)
 
 
