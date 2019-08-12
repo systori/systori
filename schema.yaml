@@ -2480,6 +2480,117 @@ paths:
         description: A unique integer value identifying this Project.
         required: true
         type: integer
+  /task/group/:
+    get:
+      operationId: task_group_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Group'
+      tags:
+        - task
+    post:
+      operationId: task_group_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Group'
+      tags:
+        - task
+    parameters: []
+  /task/group/{id}/:
+    get:
+      operationId: task_group_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Group'
+      tags:
+        - task
+    put:
+      operationId: task_group_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Group'
+      tags:
+        - task
+    patch:
+      operationId: task_group_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Group'
+      tags:
+        - task
+    delete:
+      operationId: task_group_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - task
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Group.
+        required: true
+        type: integer
   /task/job/:
     get:
       operationId: task_job_list

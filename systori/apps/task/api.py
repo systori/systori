@@ -4,7 +4,7 @@ from rest_framework import views, viewsets, mixins
 from rest_framework import response, renderers
 from systori.lib.templatetags.customformatting import ubrdecimal
 from .models import Job, Group, Task
-from .serializers import JobSerializer
+from .serializers import JobSerializer, GroupSerializer
 from ..user.permissions import HasStaffAccess
 
 
@@ -135,6 +135,12 @@ class CloneAPI(views.APIView):
 class JobModelViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
+    permission_classes = (HasStaffAccess,)
+
+
+class GroupModelViewSet(viewsets.ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
     permission_classes = (HasStaffAccess,)
 
 
