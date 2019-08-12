@@ -132,6 +132,12 @@ class CloneAPI(views.APIView):
         )
 
 
+class JobModelViewSet(viewsets.ModelViewSet):
+    queryset = Job.objects.all()
+    serializer_class = JobSerializer
+    permission_classes = (HasStaffAccess,)
+
+
 urlpatterns = [
     url(
         r"^editor/save/job/(?P<pk>\d+)/$",

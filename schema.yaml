@@ -2480,6 +2480,117 @@ paths:
         description: A unique integer value identifying this Project.
         required: true
         type: integer
+  /task/job/:
+    get:
+      operationId: task_job_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Job'
+      tags:
+        - task
+    post:
+      operationId: task_job_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Job'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Job'
+      tags:
+        - task
+    parameters: []
+  /task/job/{id}/:
+    get:
+      operationId: task_job_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Job'
+      tags:
+        - task
+    put:
+      operationId: task_job_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Job'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Job'
+      tags:
+        - task
+    patch:
+      operationId: task_job_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Job'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Job'
+      tags:
+        - task
+    delete:
+      operationId: task_job_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - task
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Job.
+        required: true
+        type: integer
   /timer/:
     post:
       operationId: timer_create
