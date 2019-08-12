@@ -1,0 +1,75 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "systori/dart": true,
+        "**/__pycache__": true,
+    },
+    "files.associations": {
+        "**/systori/templates/**/*.html": "django-html",
+        "**/systori/templates/**/*": "django-txt",
+        "**/requirements{/**,*}.{txt,in}": "pip-requirements",
+        "*.pip": "pip-requirements",
+        "*.pgsql": "sql"
+    },
+    "emmet.includeLanguages": {
+        "django-html": "html"
+    },
+    "python.linting.enabled": true,
+    "python.linting.pep8Enabled": false,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintArgs": ["--load-plugins", "pylint_django"],
+    "python.pythonPath": "/usr/bin/python3",
+    "shellformat.effectLanguages": [
+        "shellscript",
+        "dockerfile",
+        "dotenv",
+        "hosts",
+        "jvmoptions",
+        "ignore",
+        "gitignore",
+        "properties",
+        "spring-boot-properties",
+        "azcli"
+    ],
+    "yaml.format.singleQuote": false,
+    "python.formatting.provider": "black",
+    "python.envFile": "${workspaceFolder}/.env",
+    // If IntelliSense is too slow or not showing correct completions enable jedi
+    // Disable jedi to use Microsoft Python Analysis Engine
+    "python.jediEnabled": true,
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./",
+        "-p",
+        "test*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "sqltools.connections": [
+        {
+            "askForPassword": false,
+            "connectionTimeout": 30,
+            "database": "systori_local",
+            "dialect": "PostgreSQL",
+            "name": "Systori (db)",
+            "password": "postgres",
+            "port": 5432,
+            "server": "db",
+            "username": "postgres"
+        }
+    ],
+    "sqltools.autoConnectTo": ["Systori (db)"],
+    "sqltools.format": {
+        "reservedWordCase": "uppercase"
+    },
+    "sqltools.telemetry": false,
+    "sqltools.results": {
+        "location": "end",
+    },
+}

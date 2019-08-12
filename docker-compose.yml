@@ -11,10 +11,10 @@ services:
         - PUSHER_KEY=$PUSHER_KEY
         - PUSHER_SECRET=$PUSHER_SECRET
     ports:
-      - "8000:8000"
+      - "$DOCKER_PORT_HOST:$DOCKER_PORT_CONTAINER"
     environment:
       PYTHONUNBUFFERED: 1
-      DJANGO_SETTINGS_MODULE: 'systori.settings.docker_local'
+      DJANGO_SETTINGS_MODULE: "systori.settings.docker_local"
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
       PUSHER_APP_ID: $PUSHER_APP_ID
       PUSHER_KEY: $PUSHER_KEY
@@ -35,10 +35,10 @@ services:
         - PUSHER_SECRET=$PUSHER_SECRET
     image: elmcrest/systori:sandbox
     ports:
-      - "8000:8000"
+      - "$DOCKER_SANDBOX_PORT_HOST:$DOCKER_SANDBOX_PORT_CONTAINER"
     environment:
       PYTHONUNBUFFERED: 1
-      DJANGO_SETTINGS_MODULE: 'systori.settings.sandbox'
+      DJANGO_SETTINGS_MODULE: "systori.settings.sandbox"
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
       PUSHER_APP_ID: $PUSHER_APP_ID
       PUSHER_KEY: $PUSHER_KEY
@@ -70,9 +70,10 @@ services:
       dockerfile: docker/dart/Dockerfile
     volumes:
       - ./systori/dart/:/app:z
-#      - /root/.pub-cache/:/root/.pub-cache/:z
+      # - /root/.pub-cache/:/root/.pub-cache/:z
       - ./docker:/startup
     entrypoint: /startup/idle.sh
+    command: cd /app && pub get && pub build
     # create if needed /root/.pub-cache and change owner to current user, add in docker settings
     # `pwd`/docker-compose up -d dart
     # docker exec -it `container id` /bin/bash

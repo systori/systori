@@ -1,0 +1,24 @@
+// See https://aka.ms/vscode-remote/devcontainer.json for format details.
+{
+    "service": "dart",
+    "dockerComposeFile": ["docker-compose.devcontainer.yml"],
+    /// If SSH is used for git, copy ssh config and keys to the container
+    // "postCreateCommand": "mkdir -p ~/.ssh && cp -r ~/.ssh-localhost/* ~/.ssh && chmod 700 ~/.ssh && chmod 600 ~/.ssh/*",
+    "workspaceFolder": "/app",
+    /// Containers must be manually stopped `docker-compose stop`
+    "shutdownAction": "none",
+    "name": "Systori (Dart)",
+    "extensions": [
+        /// --- Git extensions ---
+        "eamodio.gitlens",
+
+        /// --- Dart Extensions ---
+        "dart-code.dart-code",
+
+    ],
+    "settings": {
+        /// Default settings for the docker container
+        /// NOTE: .vscode/settings.json has precedence over this
+
+    },
+}
