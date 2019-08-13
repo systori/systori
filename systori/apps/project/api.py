@@ -56,6 +56,28 @@ class ProjectModelViewSet(ModelViewSet):
                 return self.action_serializers[self.action]
         return super(ProjectModelViewSet, self).get_serializer_class()
 
+    project_not_found_response = openapi.Response(
+        "Project not found",
+        openapi.Schema(
+            "Project not found",
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "name": {
+                    "title": "Project Name",
+                    "description": "This is requried by the client. It will return 'Project not found.'",
+                    "type": "string",
+                    "maxLength": 512,
+                    "minLength": 1,
+                    "required": True,
+                }
+            },
+        ),
+    )
+
+    @swagger_auto_schema(
+        method="GET",
+        responses={200: ProjectSerializer(), 206: project_not_found_response},
+    )
     @action(methods=["get"], detail=True)
     def exists(self, request, pk=None):
         try:

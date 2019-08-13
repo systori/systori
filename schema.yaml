@@ -2472,6 +2472,20 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/Project'
+        '206':
+          description: Project not found
+          schema:
+            title: Project not found
+            type: object
+            properties:
+              name:
+                description: This is requried by the client. It will return 'Project
+                  not found.'
+                maxLength: 512
+                minLength: 1
+                required: true
+                title: Project Name
+                type: string
       tags:
         - project
     parameters:
