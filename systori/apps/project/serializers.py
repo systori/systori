@@ -26,7 +26,16 @@ class JobSiteField(RelatedField):
 class ProjectSerializer(ModelSerializer):
     class Meta:
         model = Project
-        fields = ("pk", "name")
+        fields = (
+            "pk",
+            "name",
+            "description",
+            "is_template",
+            "structure",
+            "notes",
+            "phase",
+            "state",
+        )
 
 
 class JobSiteSerializer(ModelSerializer):

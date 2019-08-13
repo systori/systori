@@ -3149,6 +3149,39 @@ definitions:
         type: string
         maxLength: 512
         minLength: 1
+      description:
+        title: Project Description
+        type: string
+        x-nullable: true
+      is_template:
+        title: Is template
+        type: boolean
+      structure:
+        title: Numbering Structure
+        type: string
+      notes:
+        title: Notes
+        type: string
+        readOnly: true
+      phase:
+        title: Phase
+        type: string
+        enum:
+          - prospective
+          - tendering
+          - planning
+          - executing
+          - settlement
+          - warranty
+          - finished
+      state:
+        title: State
+        type: string
+        enum:
+          - active
+          - paused
+          - disputed
+          - stopped
   JobSite:
     title: Jobsite
     required:
