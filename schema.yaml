@@ -2397,9 +2397,9 @@ paths:
             $ref: '#/definitions/Query'
       responses:
         '200':
-          description: ''
+          description: List of projects found
           schema:
-            $ref: '#/definitions/Query'
+            $ref: '#/definitions/ProjectSearchResult'
       tags:
         - project
     parameters: []
@@ -4056,6 +4056,13 @@ definitions:
         title: Query
         type: string
         minLength: 1
+  ProjectSearchResult:
+    type: object
+    properties:
+      projects:
+        type: array
+        items:
+          type: integer
   Timer:
     required:
       - started

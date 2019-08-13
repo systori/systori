@@ -4,6 +4,8 @@ from rest_framework.serializers import (
     CharField,
     DateField,
     RelatedField,
+    IntegerField,
+    ListField,
 )
 from ..company.serializers import WorkerSerializer
 from ..equipment.serializers import EquipmentSerializer
@@ -36,6 +38,22 @@ class ProjectSerializer(ModelSerializer):
             "phase",
             "state",
         )
+
+
+class ProjectSearchResultSerializer(Serializer):
+    projects = ListField(child=IntegerField(), required=False)
+
+    def create(self, validated_data):
+        """
+        Not actually using this serializer, Always returns `None`
+        """
+        return None
+
+    def update(self, instance, validated_data):
+        """
+        Not actually using this serializer, Always returns `None`
+        """
+        return None
 
 
 class JobSiteSerializer(ModelSerializer):

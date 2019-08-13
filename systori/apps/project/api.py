@@ -5,6 +5,8 @@ from django.utils.translation import ugettext as _
 from dateutil.parser import parse as parse_date
 import datetime
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
@@ -16,7 +18,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from ..user.permissions import HasLaborerAccess
 from .models import Project, DailyPlan
-from .serializers import DailyPlanSerializer
+from .serializers import DailyPlanSerializer, ProjectSearchResultSerializer
 from systori.apps.project.serializers import (
     WorkerSerializer,
     ProjectSerializer,
@@ -63,6 +65,11 @@ class ProjectModelViewSet(ModelViewSet):
                 {"name": _("Project not found.")}, status=HTTP_206_PARTIAL_CONTENT
             )  # name is expected by the JS Client
 
+    project_search_response = openapi.Response(
+        "List of projects found", ProjectSearchResultSerializer
+    )
+
+    @swagger_auto_schema(method="PUT", responses={200: project_search_response})
     @action(methods=["put"], detail=False)
     def search(self, request):
         queryset = (
