@@ -148,7 +148,6 @@ class DailyPlanModelViewSet(ModelViewSet):
     search_fields = ("day",)
 
     action_serializers = {
-        "week_by_day": SelectedDaySerializer,
         "week_by_day_pivot_workers": SelectedDaySerializer,
     }
 
@@ -158,6 +157,11 @@ class DailyPlanModelViewSet(ModelViewSet):
                 return self.action_serializers[self.action]
         return super(DailyPlanModelViewSet, self).get_serializer_class()
 
+    @swagger_auto_schema(
+        method="PUT",
+        request_body=SelectedDaySerializer,
+        responses={200: DailyPlanSerializer(many=True)},
+    )
     @action(methods=["put"], detail=False)
     def week_by_day(self, request):
         selected_day = parse_date(request.data["selected_day"])

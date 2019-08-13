@@ -539,7 +539,9 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/SelectedDay'
+            type: array
+            items:
+              $ref: '#/definitions/DailyPlan'
       tags:
         - dailyplan
     parameters: []
