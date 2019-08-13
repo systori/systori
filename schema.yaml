@@ -559,7 +559,9 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/SelectedDay'
+            type: array
+            items:
+              $ref: '#/definitions/WrokerWithProjects'
       tags:
         - dailyplan
     parameters: []
@@ -3371,6 +3373,75 @@ definitions:
         title: Selected day
         type: string
         format: date
+  ProjectWithDay:
+    required:
+      - name
+      - day
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Project Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      description:
+        title: Project Description
+        type: string
+        x-nullable: true
+      is_template:
+        title: Is template
+        type: boolean
+      structure:
+        title: Numbering Structure
+        type: string
+      notes:
+        title: Notes
+        type: string
+        readOnly: true
+      phase:
+        title: Phase
+        type: string
+        enum:
+          - prospective
+          - tendering
+          - planning
+          - executing
+          - settlement
+          - warranty
+          - finished
+      state:
+        title: State
+        type: string
+        enum:
+          - active
+          - paused
+          - disputed
+          - stopped
+      day:
+        title: Day
+        type: string
+        format: date
+  WrokerWithProjects:
+    required:
+      - projects
+    type: object
+    properties:
+      first_name:
+        title: First name
+        type: string
+        readOnly: true
+      last_name:
+        title: Last name
+        type: string
+        readOnly: true
+      projects:
+        type: array
+        items:
+          $ref: '#/definitions/ProjectWithDay'
   Contact:
     type: object
     properties:

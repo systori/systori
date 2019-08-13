@@ -21,6 +21,7 @@ from .models import Project, DailyPlan
 from .serializers import DailyPlanSerializer, ProjectSearchResultSerializer
 from systori.apps.project.serializers import (
     WorkerSerializer,
+    WrokerWithProjectsSerializer,
     ProjectSerializer,
     QuerySerializer,
     SelectedDaySerializer,
@@ -147,9 +148,6 @@ class DailyPlanModelViewSet(ModelViewSet):
     filter_backends = (SearchFilter,)
     search_fields = ("day",)
 
-    action_serializers = {
-        "week_by_day_pivot_workers": SelectedDaySerializer,
-    }
 
     def get_serializer_class(self):
         if hasattr(self, "action_serializers"):
@@ -177,6 +175,11 @@ class DailyPlanModelViewSet(ModelViewSet):
             ).data
         )
 
+    @swagger_auto_schema(
+        method="PUT",
+        request_body=SelectedDaySerializer,
+        responses={200: WrokerWithProjectsSerializer(many=True)},
+    )
     @action(methods=["put"], detail=False)
     def week_by_day_pivot_workers(self, request):
         selected_day = parse_date(request.data["selected_day"])

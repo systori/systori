@@ -7,6 +7,7 @@ from rest_framework.serializers import (
     IntegerField,
     ListField,
 )
+from ..company.models import Worker
 from ..company.serializers import WorkerSerializer
 from ..equipment.serializers import EquipmentSerializer
 from .models import Project, DailyPlan, JobSite
@@ -42,6 +43,33 @@ class ProjectSerializer(ModelSerializer):
 
 class ProjectSearchResultSerializer(Serializer):
     projects = ListField(child=IntegerField(), required=False)
+
+    def create(self, validated_data):
+        """
+        Not actually using this serializer, Always returns `None`
+        """
+        return None
+
+    def update(self, instance, validated_data):
+        """
+        Not actually using this serializer, Always returns `None`
+        """
+        return None
+
+
+class WrokerWithProjectsSerializer(WorkerSerializer):
+    class ProjectWithDay(ProjectSerializer):
+        day = DateField(input_formats=["iso-8601"])
+
+        class Meta:
+            model = ProjectSerializer.Meta.model
+            fields = ProjectSerializer.Meta.fields + ("day",)
+
+    projects = ProjectWithDay(many=True)
+
+    class Meta:
+        model = WorkerSerializer.Meta.model
+        fields = WorkerSerializer.Meta.fields + ("projects",)
 
     def create(self, validated_data):
         """
