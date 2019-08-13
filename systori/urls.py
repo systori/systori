@@ -29,6 +29,7 @@ urlpatterns = [
     url(r"^api/", include("systori.apps.project.routers")),
     url(r"^api/equipment/", include("systori.apps.equipment.routers")),
     url(r"^api/main/", include("systori.apps.main.routers")),
+    url(r"^api/task/", include("systori.apps.task.routers")),
     url(r"^api/timetracking/", include("systori.apps.timetracking.routers")),
     url(r"^i18n/", include("django.conf.urls.i18n")),
     url(r"", include("systori.apps.company.urls")),
