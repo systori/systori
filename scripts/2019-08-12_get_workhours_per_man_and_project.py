@@ -19,7 +19,7 @@ if __name__ == "__main__":
     c.activate()
     print(f"ATTENTION - SPECIAL SCRIPT ONLY FOR SOFTRONIC (mehr-handwerk).\n")
 
-    PROJECTS = [446, 383, 429, 502, 489, 362, 481, 515, 516, 474, 451, 510]
+    PROJECTS = [446, 383, 429, 502, 459, 489, 362, 481, 515, 516, 474, 451, 510]
     wb = Workbook()
     rohdaten = wb.create_sheet("rohdaten")
     workersWithDailyPlans = dict()
