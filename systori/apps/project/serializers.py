@@ -7,6 +7,8 @@ from rest_framework.serializers import (
     IntegerField,
     ListField,
 )
+
+from systori.apps.main.serializers import NoteSerializer
 from ..company.models import Worker
 from ..company.serializers import WorkerSerializer
 from ..equipment.serializers import EquipmentSerializer
@@ -27,6 +29,8 @@ class JobSiteField(RelatedField):
 
 
 class ProjectSerializer(ModelSerializer):
+    notes = NoteSerializer(many=True, required=False)
+
     class Meta:
         model = Project
         fields = (
