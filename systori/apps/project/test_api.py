@@ -13,8 +13,6 @@ class ProjectApiTest(ClientTestCase):
         super().setUp()
         self.project = ProjectFactory()
         self.jobsite = JobSiteFactory(project=self.project)
-        self.user = UserFactory(company=self.company)
-        self.worker = self.user.access.first()
 
     def test_projects_are_filtered(self):
         """
