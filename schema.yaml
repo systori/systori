@@ -3189,6 +3189,36 @@ definitions:
         type: string
         maxLength: 128
         minLength: 1
+  Note:
+    required:
+      - text
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      project:
+        title: Project
+        type: integer
+        readOnly: true
+      created:
+        title: Created
+        type: string
+        format: date-time
+        readOnly: true
+      worker:
+        title: Worker
+        type: integer
+        readOnly: true
+      text:
+        title: Text
+        type: string
+        minLength: 1
+      html:
+        title: Html
+        type: string
+        readOnly: true
   Project:
     title: Project
     required:
@@ -4141,36 +4171,6 @@ definitions:
       equipment:
         title: Equipment
         type: integer
-  Note:
-    required:
-      - text
-    type: object
-    properties:
-      pk:
-        title: ID
-        type: integer
-        readOnly: true
-      project:
-        title: Project
-        type: integer
-        readOnly: true
-      created:
-        title: Created
-        type: string
-        format: date-time
-        readOnly: true
-      worker:
-        title: Worker
-        type: integer
-        readOnly: true
-      text:
-        title: Text
-        type: string
-        minLength: 1
-      html:
-        title: Html
-        type: string
-        readOnly: true
   Query:
     required:
       - query
