@@ -3172,6 +3172,7 @@ definitions:
     required:
       - schema
       - name
+      - timezone
     type: object
     properties:
       schema:
@@ -3189,6 +3190,13 @@ definitions:
         type: string
         maxLength: 128
         minLength: 1
+      timezone:
+        title: Timezone
+        type: string
+      is_jobsite_required:
+        title: Jobsite Required
+        description: Require that all projects have a jobsite.
+        type: boolean
   Note:
     required:
       - text

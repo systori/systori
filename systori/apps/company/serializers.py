@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.fields import Field
+
 from .models import Worker, Company
 
 
@@ -6,10 +8,23 @@ class UserPkSerializer(serializers.Serializer):
     user_pk = serializers.IntegerField()
 
 
+class TimezoneSerializerField(Field):
+    "Take the timezone object and make it JSON serializable"
+
+    def to_representation(self, value):
+        return value.zone
+
+    def to_internal_value(self, data):
+        return data
+
+
 class CompanySerializer(serializers.ModelSerializer):
+
+    timezone = TimezoneSerializerField()
+
     class Meta:
         model = Company
-        fields = ("schema", "name")
+        fields = ("schema", "name", "timezone", "is_jobsite_required")
 
 
 class WorkerSerializer(serializers.ModelSerializer):
