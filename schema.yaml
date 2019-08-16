@@ -3312,6 +3312,9 @@ definitions:
         type: number
         x-nullable: true
   Worker:
+    required:
+      - company
+      - user
     type: object
     properties:
       first_name:
@@ -3320,6 +3323,80 @@ definitions:
         readOnly: true
       last_name:
         title: Last name
+        type: string
+        readOnly: true
+      email:
+        title: Email
+        type: string
+        readOnly: true
+      language:
+        title: Language
+        type: string
+        readOnly: true
+      is_verified:
+        title: Is verified
+        type: string
+        readOnly: true
+      get_full_name:
+        title: Get full name
+        type: string
+        readOnly: true
+      company:
+        title: Company
+        type: string
+        pattern: ^[a-z][a-z0-9_\-]*$
+      user:
+        title: User
+        type: integer
+      is_owner:
+        title: Owner
+        description: Has full and unlimited access.
+        type: boolean
+      has_owner:
+        title: Has owner
+        type: string
+        readOnly: true
+      is_staff:
+        title: Staff
+        description: Manage projects and perform administrative tasks.
+        type: boolean
+      has_staff:
+        title: Has staff
+        type: string
+        readOnly: true
+      is_foreman:
+        title: Foreman
+        description: Manage workers in the field.
+        type: boolean
+      has_foreman:
+        title: Has foreman
+        type: string
+        readOnly: true
+      is_laborer:
+        title: Laborer
+        description: Limited access in the field.
+        type: boolean
+      has_laborer:
+        title: Has laborer
+        type: string
+        readOnly: true
+      is_accountant:
+        title: Accountant
+        description: Access to financial information.
+        type: boolean
+      is_active:
+        title: Active
+        description: Must be enabled to allow worker access to the company. Unchecking
+          this will completely disable access for the worker and you will not be able
+          to assign tasks to them in the daily planner.
+        type: boolean
+      can_track_time:
+        title: Allowed to track their own time?
+        description: Worker will be able to start and stop their own work timer. Requires
+          that "Time Tracking & Timesheets" is also enabled.
+        type: boolean
+      is_fake:
+        title: Is fake
         type: string
         readOnly: true
   EquipmentType:
@@ -3494,6 +3571,8 @@ definitions:
         format: date
   WrokerWithProjects:
     required:
+      - company
+      - user
       - projects
     type: object
     properties:
@@ -3503,6 +3582,80 @@ definitions:
         readOnly: true
       last_name:
         title: Last name
+        type: string
+        readOnly: true
+      email:
+        title: Email
+        type: string
+        readOnly: true
+      language:
+        title: Language
+        type: string
+        readOnly: true
+      is_verified:
+        title: Is verified
+        type: string
+        readOnly: true
+      get_full_name:
+        title: Get full name
+        type: string
+        readOnly: true
+      company:
+        title: Company
+        type: string
+        pattern: ^[a-z][a-z0-9_\-]*$
+      user:
+        title: User
+        type: integer
+      is_owner:
+        title: Owner
+        description: Has full and unlimited access.
+        type: boolean
+      has_owner:
+        title: Has owner
+        type: string
+        readOnly: true
+      is_staff:
+        title: Staff
+        description: Manage projects and perform administrative tasks.
+        type: boolean
+      has_staff:
+        title: Has staff
+        type: string
+        readOnly: true
+      is_foreman:
+        title: Foreman
+        description: Manage workers in the field.
+        type: boolean
+      has_foreman:
+        title: Has foreman
+        type: string
+        readOnly: true
+      is_laborer:
+        title: Laborer
+        description: Limited access in the field.
+        type: boolean
+      has_laborer:
+        title: Has laborer
+        type: string
+        readOnly: true
+      is_accountant:
+        title: Accountant
+        description: Access to financial information.
+        type: boolean
+      is_active:
+        title: Active
+        description: Must be enabled to allow worker access to the company. Unchecking
+          this will completely disable access for the worker and you will not be able
+          to assign tasks to them in the daily planner.
+        type: boolean
+      can_track_time:
+        title: Allowed to track their own time?
+        description: Worker will be able to start and stop their own work timer. Requires
+          that "Time Tracking & Timesheets" is also enabled.
+        type: boolean
+      is_fake:
+        title: Is fake
         type: string
         readOnly: true
       projects:

@@ -155,6 +155,14 @@ class Worker(models.Model):
     def email(self):
         return self.user.email
 
+    @property
+    def is_verified(self):
+        return self.user.is_verified
+
+    @property
+    def language(self):
+        return self.user.language
+
     def __str__(self):
         return self.user.get_full_name()
 

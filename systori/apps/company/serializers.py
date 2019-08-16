@@ -15,7 +15,28 @@ class CompanySerializer(serializers.ModelSerializer):
 class WorkerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Worker
-        fields = ("first_name", "last_name")
+        fields = (
+            "first_name",
+            "last_name",
+            "email",
+            "language",
+            "is_verified",
+            "get_full_name",
+            "company",
+            "user",
+            "is_owner",
+            "has_owner",
+            "is_staff",
+            "has_staff",
+            "is_foreman",
+            "has_foreman",
+            "is_laborer",
+            "has_laborer",
+            "is_accountant",
+            "is_active",
+            "can_track_time",
+            "is_fake",
+        )
 
 
 class WorkerListingField(serializers.RelatedField):
