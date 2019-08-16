@@ -74,6 +74,10 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 
 class CanTrackTime(WorkerIsAuthenticated):
+    """
+    Allowed to track their own time
+    """
+
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
         return is_authenticated and request.worker.can_track_time
