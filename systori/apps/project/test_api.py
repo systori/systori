@@ -1,7 +1,7 @@
 from systori.lib.testing import ClientTestCase
 from django.utils.translation import ugettext as _
 from datetime import date, timedelta
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
 
 from systori.apps.main.factories import NoteFactory
 from systori.apps.main.serializers import NoteSerializer
@@ -65,6 +65,17 @@ class ProjectApiTest(ClientTestCase):
                 "html": note2["html"],
             },
         )
+
+    def test_create_note(self):
+        response = self.client.post(
+            f"/api/project/{self.project.pk}/notes/", {"text": "This is a test note"}
+        )
+
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        json = response.json()
+        self.assertEqual(json["project"], self.project.pk)
+        self.assertEqual(json["worker"], self.worker.pk)
+        self.assertEqual(json["text"], "This is a test note")
 
     def test_search(self):
         response = self.client.put(

@@ -14,11 +14,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework.status import (
+    HTTP_201_CREATED,
     HTTP_206_PARTIAL_CONTENT,
     HTTP_405_METHOD_NOT_ALLOWED,
 )
 from rest_framework.permissions import IsAuthenticated
 
+from systori.apps.company.models import Worker
 from systori.apps.main.models import Note
 from systori.apps.main.serializers import NoteSerializer
 
@@ -142,12 +144,27 @@ class ProjectModelViewSet(ModelViewSet):
         return JsonResponse({"projects": projects})
 
     @swagger_auto_schema(method="GET", responses={200: NoteSerializer(many=True)})
-    @action(methods=["GET"], detail=True)
+    @swagger_auto_schema(method="POST", request_body=NoteSerializer, responses={201: NoteSerializer()})
+    @action(methods=["GET", "POST"], detail=True)
     def notes(self, request, pk=None):
         project = self.get_object()
         if request.method.lower() == "get":
             notes = Note.objects.filter(project=project)
             return Response(data=NoteSerializer(notes, many=True).data)
+
+        if request.method.lower() == "post" and pk:
+            serializer = NoteSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            # Get logged in worker
+            worker = Worker.objects.filter(user=request.user)[0]
+            note = Note(
+                text=serializer.validated_data["text"],
+                content_object=project,
+                project=project,
+                worker=worker,
+            )
+            note.save()
+            return Response(NoteSerializer(note).data, status=HTTP_201_CREATED)
 
         return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
 

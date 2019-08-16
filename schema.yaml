@@ -2500,7 +2500,7 @@ paths:
         type: integer
   /project/{id}/notes/:
     get:
-      operationId: project_notes
+      operationId: project_notes_read
       description: ''
       parameters: []
       responses:
@@ -2510,6 +2510,22 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Note'
+      tags:
+        - project
+    post:
+      operationId: project_notes_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Note'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Note'
       tags:
         - project
     parameters:
