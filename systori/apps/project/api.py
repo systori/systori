@@ -13,8 +13,14 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
-from rest_framework.status import HTTP_206_PARTIAL_CONTENT
+from rest_framework.status import (
+    HTTP_206_PARTIAL_CONTENT,
+    HTTP_405_METHOD_NOT_ALLOWED,
+)
 from rest_framework.permissions import IsAuthenticated
+
+from systori.apps.main.models import Note
+from systori.apps.main.serializers import NoteSerializer
 
 from ..user.permissions import HasLaborerAccess
 from .models import Project, DailyPlan
@@ -134,6 +140,16 @@ class ProjectModelViewSet(ModelViewSet):
         projects = [p.id for p in queryset]
 
         return JsonResponse({"projects": projects})
+
+    @swagger_auto_schema(method="GET", responses={200: NoteSerializer(many=True)})
+    @action(methods=["GET"], detail=True)
+    def notes(self, request, pk=None):
+        project = self.get_object()
+        if request.method.lower() == "get":
+            notes = Note.objects.filter(project=project)
+            return Response(data=NoteSerializer(notes, many=True).data)
+
+        return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class DailyPlanModelViewSet(ModelViewSet):

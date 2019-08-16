@@ -2498,6 +2498,26 @@ paths:
         description: A unique integer value identifying this Project.
         required: true
         type: integer
+  /project/{id}/notes/:
+    get:
+      operationId: project_notes
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Note'
+      tags:
+        - project
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Project.
+        required: true
+        type: integer
   /task/group/:
     get:
       operationId: task_group_list

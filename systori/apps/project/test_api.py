@@ -1,6 +1,11 @@
 from systori.lib.testing import ClientTestCase
 from django.utils.translation import ugettext as _
 from datetime import date, timedelta
+from rest_framework.status import HTTP_200_OK
+
+from systori.apps.main.factories import NoteFactory
+from systori.apps.main.serializers import NoteSerializer
+
 from .api import get_week_by_day
 from .models import TeamMember, EquipmentAssignment
 from .factories import ProjectFactory, JobSiteFactory, DailyPlanFactory
@@ -25,6 +30,41 @@ class ProjectApiTest(ClientTestCase):
         response = self.client.get("/api/project/3/exists/")
         self.assertEqual(response.json()["name"], _("Project not found."))
         self.assertEqual(response.status_code, 206)
+
+    def test_list_notes(self):
+        note1 = NoteSerializer(
+            NoteFactory(
+                project=self.project, content_object=self.project, worker=self.worker
+            )
+        ).data
+        note2 = NoteSerializer(NoteFactory(
+            project=self.project, content_object=self.project, worker=self.worker
+        )).data
+        response = self.client.get(f"/api/project/{self.project.pk}/notes/")
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertDictContainsSubset(
+            json[0],
+            {
+                "text": note1["text"],
+                "created": note1["created"],
+                "project": note1["project"],
+                "worker": note1["worker"],
+                "pk": note1["pk"],
+                "html": note1["html"],
+            },
+        )
+        self.assertDictContainsSubset(
+            json[1],
+            {
+                "text": note2["text"],
+                "created": note2["created"],
+                "project": note2["project"],
+                "worker": note2["worker"],
+                "pk": note2["pk"],
+                "html": note2["html"],
+            },
+        )
 
     def test_search(self):
         response = self.client.put(
