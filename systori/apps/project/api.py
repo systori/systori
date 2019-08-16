@@ -70,6 +70,7 @@ class ProjectModelViewSet(ModelViewSet):
         openapi.Schema(
             "Project not found",
             type=openapi.TYPE_OBJECT,
+            required=["name"],
             properties={
                 "name": {
                     "title": "Project Name",
@@ -77,7 +78,6 @@ class ProjectModelViewSet(ModelViewSet):
                     "type": "string",
                     "maxLength": 512,
                     "minLength": 1,
-                    "required": True,
                 }
             },
         ),

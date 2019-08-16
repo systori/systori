@@ -2480,6 +2480,8 @@ paths:
           description: Project not found
           schema:
             title: Project not found
+            required:
+              - name
             type: object
             properties:
               name:
@@ -2487,7 +2489,6 @@ paths:
                   not found.'
                 maxLength: 512
                 minLength: 1
-                required: true
                 title: Project Name
                 type: string
       tags:
