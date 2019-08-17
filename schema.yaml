@@ -406,117 +406,6 @@ paths:
       tags:
         - company
     parameters: []
-  /company/company/worker/:
-    get:
-      operationId: company_company_worker_list
-      description: ''
-      parameters:
-        - name: page
-          in: query
-          description: A page number within the paginated result set.
-          required: false
-          type: integer
-      responses:
-        '200':
-          description: ''
-          schema:
-            required:
-              - count
-              - results
-            type: object
-            properties:
-              count:
-                type: integer
-              next:
-                type: string
-                format: uri
-                x-nullable: true
-              previous:
-                type: string
-                format: uri
-                x-nullable: true
-              results:
-                type: array
-                items:
-                  $ref: '#/definitions/Worker'
-      tags:
-        - company
-    post:
-      operationId: company_company_worker_create
-      description: ''
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/Worker'
-      responses:
-        '201':
-          description: ''
-          schema:
-            $ref: '#/definitions/Worker'
-      tags:
-        - company
-    parameters: []
-  /company/company/worker/{id}/:
-    get:
-      operationId: company_company_worker_read
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/Worker'
-      tags:
-        - company
-    put:
-      operationId: company_company_worker_update
-      description: ''
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/Worker'
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/Worker'
-      tags:
-        - company
-    patch:
-      operationId: company_company_worker_partial_update
-      description: ''
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/Worker'
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/Worker'
-      tags:
-        - company
-    delete:
-      operationId: company_company_worker_delete
-      description: ''
-      parameters: []
-      responses:
-        '204':
-          description: ''
-      tags:
-        - company
-    parameters:
-      - name: id
-        in: path
-        description: A unique integer value identifying this worker.
-        required: true
-        type: integer
   /company/company/{schema}/:
     get:
       operationId: company_company_read
@@ -579,6 +468,117 @@ paths:
         required: true
         type: string
         pattern: ^[a-z][a-z0-9_\-]*$
+  /company/worker/:
+    get:
+      operationId: company_worker_list
+      description: ''
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Worker'
+      tags:
+        - company
+    post:
+      operationId: company_worker_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Worker'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Worker'
+      tags:
+        - company
+    parameters: []
+  /company/worker/{id}/:
+    get:
+      operationId: company_worker_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Worker'
+      tags:
+        - company
+    put:
+      operationId: company_worker_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Worker'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Worker'
+      tags:
+        - company
+    patch:
+      operationId: company_worker_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Worker'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Worker'
+      tags:
+        - company
+    delete:
+      operationId: company_worker_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+        - company
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this worker.
+        required: true
+        type: integer
   /dailyplan/:
     get:
       operationId: dailyplan_list
