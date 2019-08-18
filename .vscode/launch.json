@@ -65,7 +65,7 @@
             "console": "internalConsole",
             "args": [
                 "test",
-                "--settings", "systori.settings.test",
+                "--settings", "${input:django_settings_module}",
                 "${input:python_module_name}"
             ],
             "django": true
