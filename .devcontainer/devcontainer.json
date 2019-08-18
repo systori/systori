@@ -23,6 +23,9 @@
 
         /// --- Postgres Extensions ---
         "mtxr.sqltools",
+
+        /// --- Other utilities ---
+        "42crunch.vscode-openapi" // schema.yaml
     ],
     "settings": {
         /// Default settings for the docker container
