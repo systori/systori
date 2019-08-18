@@ -67,7 +67,8 @@
     ],
     "sqltools.autoConnectTo": ["Systori (db)"],
     "sqltools.format": {
-        "reservedWordCase": "uppercase"
+        "reservedWordCase": "upper",
+        "indentSize": 2
     },
     "sqltools.telemetry": false,
     "sqltools.results": {
