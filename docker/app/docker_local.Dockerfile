@@ -37,3 +37,8 @@ COPY ./requirements/docker.pip /app/requirements/docker.pip
 COPY ./requirements/test.pip /app/requirements/test.pip
 RUN pip3 install -r /app/requirements/dev.pip
 RUN python3 manage.py collectstatic --noinput
+
+# Run migrations in order
+RUN python3 manage.py migrate postgres_schema
+RUN python3 manage.py migrate company
+RUN python3 manage.py migrate
