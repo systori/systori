@@ -7,7 +7,7 @@ class Command(generate_swagger.Command):
     help = "Generate swagger schema in schema.yaml"
 
     def handle(self, *args, **options):
-        options["output_file"] = "schema.yaml"
+        options["output_file"] = "/app/schema.yaml"
         options["overwrite"] = True
         options["api_url"] = "http://demo.sandbox.systori.com"
         super().handle(*args, **options)
