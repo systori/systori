@@ -157,7 +157,7 @@ class ProjectModelViewSet(ModelViewSet):
             serializer = NoteSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             # Get logged in worker
-            worker = Worker.objects.filter(user=request.user)[0]
+            worker = Worker.objects.get(user=request.user)
             note = Note(
                 text=serializer.validated_data["text"],
                 content_object=project,
