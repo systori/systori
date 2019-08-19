@@ -2610,6 +2610,49 @@ paths:
         description: A unique integer value identifying this Project.
         required: true
         type: integer
+  /project/{id}/note/{note_id}/:
+    put:
+      operationId: project_note_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Note'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Note'
+      tags:
+        - project
+    patch:
+      operationId: project_note_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Note'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Note'
+      tags:
+        - project
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Project.
+        required: true
+        type: integer
+      - name: note_id
+        in: path
+        required: true
+        type: string
   /project/{id}/notes/:
     get:
       operationId: project_notes_read

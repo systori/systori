@@ -16,6 +16,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_206_PARTIAL_CONTENT,
+    HTTP_400_BAD_REQUEST,
     HTTP_405_METHOD_NOT_ALLOWED,
 )
 from rest_framework.permissions import IsAuthenticated
@@ -167,6 +168,24 @@ class ProjectModelViewSet(ModelViewSet):
             return Response(NoteSerializer(note).data, status=HTTP_201_CREATED)
 
         return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
+
+    @swagger_auto_schema(
+        methods=["PUT", "PATCH"], request_body=NoteSerializer, responses={200: NoteSerializer()}
+    )
+    @action(methods=["PUT", "PATCH"], detail=True, url_path=r"note/(?P<note_id>\d+)")
+    def note(self, request, pk=None, note_id=None):
+        if not (pk or note_id):
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        project = self.get_object()
+        # Get logged in worker
+        worker = Worker.objects.get(user=request.user)
+        note = Note.objects.get(pk=note_id, project=project, worker=worker)
+        is_partial = request.method.lower() == "patch"
+        serializer = NoteSerializer(note, data=request.data, partial=is_partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data)
 
 
 class DailyPlanModelViewSet(ModelViewSet):
