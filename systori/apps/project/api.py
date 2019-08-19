@@ -5,20 +5,33 @@ from django.utils.translation import ugettext as _
 from dateutil.parser import parse as parse_date
 import datetime
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
-from rest_framework.status import HTTP_206_PARTIAL_CONTENT
+from rest_framework.status import (
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_206_PARTIAL_CONTENT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_405_METHOD_NOT_ALLOWED,
+)
 from rest_framework.permissions import IsAuthenticated
+
+from systori.apps.company.models import Worker
+from systori.apps.main.models import Note
+from systori.apps.main.serializers import NoteSerializer
 
 from ..user.permissions import HasLaborerAccess
 from .models import Project, DailyPlan
-from .serializers import DailyPlanSerializer
+from .serializers import DailyPlanSerializer, ProjectSearchResultSerializer
 from systori.apps.project.serializers import (
     WorkerSerializer,
+    WorkerWithProjectsSerializer,
     ProjectSerializer,
     QuerySerializer,
     SelectedDaySerializer,
@@ -54,6 +67,28 @@ class ProjectModelViewSet(ModelViewSet):
                 return self.action_serializers[self.action]
         return super(ProjectModelViewSet, self).get_serializer_class()
 
+    project_not_found_response = openapi.Response(
+        "Project not found",
+        openapi.Schema(
+            "Project not found",
+            type=openapi.TYPE_OBJECT,
+            required=["name"],
+            properties={
+                "name": {
+                    "title": "Project Name",
+                    "description": "This is requried by the client. It will return 'Project not found.'",
+                    "type": "string",
+                    "maxLength": 512,
+                    "minLength": 1,
+                }
+            },
+        ),
+    )
+
+    @swagger_auto_schema(
+        method="GET",
+        responses={200: ProjectSerializer(), 206: project_not_found_response},
+    )
     @action(methods=["get"], detail=True)
     def exists(self, request, pk=None):
         try:
@@ -63,6 +98,11 @@ class ProjectModelViewSet(ModelViewSet):
                 {"name": _("Project not found.")}, status=HTTP_206_PARTIAL_CONTENT
             )  # name is expected by the JS Client
 
+    project_search_response = openapi.Response(
+        "List of projects found", ProjectSearchResultSerializer
+    )
+
+    @swagger_auto_schema(method="PUT", responses={200: project_search_response})
     @action(methods=["put"], detail=False)
     def search(self, request):
         queryset = (
@@ -105,6 +145,58 @@ class ProjectModelViewSet(ModelViewSet):
 
         return JsonResponse({"projects": projects})
 
+    @swagger_auto_schema(method="GET", responses={200: NoteSerializer(many=True)})
+    @swagger_auto_schema(method="POST", request_body=NoteSerializer, responses={201: NoteSerializer()})
+    @action(methods=["GET", "POST"], detail=True)
+    def notes(self, request, pk=None):
+        project = self.get_object()
+        if request.method.lower() == "get":
+            notes = Note.objects.filter(project=project)
+            return Response(data=NoteSerializer(notes, many=True).data)
+
+        if request.method.lower() == "post" and pk:
+            serializer = NoteSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            # Get logged in worker
+            worker = Worker.objects.get(user=request.user)
+            note = Note(
+                text=serializer.validated_data["text"],
+                content_object=project,
+                project=project,
+                worker=worker,
+            )
+            note.save()
+            return Response(NoteSerializer(note).data, status=HTTP_201_CREATED)
+
+        return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
+
+    @swagger_auto_schema(
+        methods=["PUT", "PATCH"], request_body=NoteSerializer, responses={200: NoteSerializer()}
+    )
+    @swagger_auto_schema(
+        method="DELETE", responses={204: "Note deleted successfully"}
+    )
+    @action(methods=["PUT", "PATCH", "DELETE"], detail=True, url_path=r"note/(?P<note_id>\d+)")
+    def note(self, request, pk=None, note_id=None):
+        if not (pk or note_id):
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        project = self.get_object()
+        # Get logged in worker
+        worker = Worker.objects.get(user=request.user)
+        note = Note.objects.get(pk=note_id, project=project, worker=worker)
+
+        if request.method.lower() == "delete":
+            note.delete()
+            return Response(status=HTTP_204_NO_CONTENT)
+
+        # This is an update request
+        is_partial = request.method.lower() == "patch"
+        serializer = NoteSerializer(note, data=request.data, partial=is_partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data)
+
 
 class DailyPlanModelViewSet(ModelViewSet):
     queryset = (
@@ -118,10 +210,6 @@ class DailyPlanModelViewSet(ModelViewSet):
     filter_backends = (SearchFilter,)
     search_fields = ("day",)
 
-    action_serializers = {
-        "week_by_day": SelectedDaySerializer,
-        "week_by_day_pivot_workers": SelectedDaySerializer,
-    }
 
     def get_serializer_class(self):
         if hasattr(self, "action_serializers"):
@@ -129,6 +217,11 @@ class DailyPlanModelViewSet(ModelViewSet):
                 return self.action_serializers[self.action]
         return super(DailyPlanModelViewSet, self).get_serializer_class()
 
+    @swagger_auto_schema(
+        method="PUT",
+        request_body=SelectedDaySerializer,
+        responses={200: DailyPlanSerializer(many=True)},
+    )
     @action(methods=["put"], detail=False)
     def week_by_day(self, request):
         selected_day = parse_date(request.data["selected_day"])
@@ -144,6 +237,11 @@ class DailyPlanModelViewSet(ModelViewSet):
             ).data
         )
 
+    @swagger_auto_schema(
+        method="PUT",
+        request_body=SelectedDaySerializer,
+        responses={200: WorkerWithProjectsSerializer(many=True)},
+    )
     @action(methods=["put"], detail=False)
     def week_by_day_pivot_workers(self, request):
         selected_day = parse_date(request.data["selected_day"])

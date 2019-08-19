@@ -18,5 +18,5 @@ indent_size = 4
 [*.{css,html}]
 indent_size = 2
 
-[*.md]
+[*.{md,py}]
 trim_trailing_whitespace = false

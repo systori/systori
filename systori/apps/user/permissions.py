@@ -23,24 +23,40 @@ class WorkerIsAuthenticated(permissions.IsAuthenticated):
 
 
 class HasStaffAccess(WorkerIsAuthenticated):
+    """
+    Manage projects and perform administrative tasks.
+    """
+
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
         return is_authenticated and request.worker.has_staff
 
 
 class HasLaborerAccess(WorkerIsAuthenticated):
+    """
+    Limited access in the field.
+    """
+
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
         return is_authenticated and request.worker.has_laborer
 
 
 class HasForemanAccess(WorkerIsAuthenticated):
+    """
+    Manage workers in the field.
+    """
+
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
         return is_authenticated and request.worker.has_foreman
 
 
 class HasOwnerAccess(WorkerIsAuthenticated):
+    """
+    Has full and unlimited access.
+    """
+
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
         return is_authenticated and request.worker.has_owner
@@ -58,6 +74,10 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 
 class CanTrackTime(WorkerIsAuthenticated):
+    """
+    Allowed to track their own time
+    """
+
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
         return is_authenticated and request.worker.can_track_time

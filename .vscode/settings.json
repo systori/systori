@@ -13,10 +13,15 @@
         "**/systori/templates/**/*": "django-txt",
         "**/requirements{/**,*}.{txt,in}": "pip-requirements",
         "*.pip": "pip-requirements",
-        "*.pgsql": "sql"
+        "*.pgsql": "sql",
     },
     "emmet.includeLanguages": {
-        "django-html": "html"
+        "django-html": "html",
+    },
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.defaultFormatter": "ms-python.python",
     },
     "python.linting.enabled": true,
     "python.linting.pep8Enabled": false,
@@ -33,7 +38,7 @@
         "gitignore",
         "properties",
         "spring-boot-properties",
-        "azcli"
+        "azcli",
     ],
     "yaml.format.singleQuote": false,
     "python.formatting.provider": "black",
@@ -46,12 +51,14 @@
         "-s",
         "./",
         "-p",
-        "test*.py"
+        "test*.py",
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "python.testing.unittestEnabled": true,
+    "python.djangoTestRunner.prefixCommand": "clear && cd /app &&",
     "sqltools.connections": [
+
         {
             "askForPassword": false,
             "connectionTimeout": 30,
@@ -61,12 +68,14 @@
             "password": "postgres",
             "port": 5432,
             "server": "db",
-            "username": "postgres"
-        }
+            "username": "postgres",
+        },
+
     ],
     "sqltools.autoConnectTo": ["Systori (db)"],
     "sqltools.format": {
-        "reservedWordCase": "uppercase"
+        "reservedWordCase": "upper",
+        "indentSize": 2,
     },
     "sqltools.telemetry": false,
     "sqltools.results": {

@@ -4,7 +4,12 @@ from rest_framework.serializers import (
     CharField,
     DateField,
     RelatedField,
+    IntegerField,
+    ListField,
 )
+
+from systori.apps.main.serializers import NoteSerializer
+from ..company.models import Worker
 from ..company.serializers import WorkerSerializer
 from ..equipment.serializers import EquipmentSerializer
 from .models import Project, DailyPlan, JobSite
@@ -24,9 +29,63 @@ class JobSiteField(RelatedField):
 
 
 class ProjectSerializer(ModelSerializer):
+    notes = NoteSerializer(many=True, required=False)
+
     class Meta:
         model = Project
-        fields = ("pk", "name")
+        fields = (
+            "pk",
+            "name",
+            "description",
+            "is_template",
+            "structure",
+            "notes",
+            "phase",
+            "state",
+        )
+
+
+class ProjectSearchResultSerializer(Serializer):
+    projects = ListField(child=IntegerField(), required=False)
+
+    def create(self, validated_data):
+        """
+        Not actually using this serializer, Always returns `None`
+        """
+        return None
+
+    def update(self, instance, validated_data):
+        """
+        Not actually using this serializer, Always returns `None`
+        """
+        return None
+
+
+class WorkerWithProjectsSerializer(WorkerSerializer):
+    class ProjectWithDay(ProjectSerializer):
+        day = DateField(input_formats=["iso-8601"])
+
+        class Meta:
+            model = ProjectSerializer.Meta.model
+            fields = ProjectSerializer.Meta.fields + ("day",)
+
+    projects = ProjectWithDay(many=True)
+
+    class Meta:
+        model = WorkerSerializer.Meta.model
+        fields = WorkerSerializer.Meta.fields + ("projects",)
+
+    def create(self, validated_data):
+        """
+        Not actually using this serializer, Always returns `None`
+        """
+        return None
+
+    def update(self, instance, validated_data):
+        """
+        Not actually using this serializer, Always returns `None`
+        """
+        return None
 
 
 class JobSiteSerializer(ModelSerializer):
