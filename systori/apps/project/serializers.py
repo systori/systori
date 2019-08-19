@@ -61,7 +61,7 @@ class ProjectSearchResultSerializer(Serializer):
         return None
 
 
-class WrokerWithProjectsSerializer(WorkerSerializer):
+class WorkerWithProjectsSerializer(WorkerSerializer):
     class ProjectWithDay(ProjectSerializer):
         day = DateField(input_formats=["iso-8601"])
 
