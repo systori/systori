@@ -18,6 +18,11 @@
     "emmet.includeLanguages": {
         "django-html": "html",
     },
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.defaultFormatter": "ms-python.python",
+    },
     "python.linting.enabled": true,
     "python.linting.pep8Enabled": false,
     "python.linting.pylintEnabled": true,
