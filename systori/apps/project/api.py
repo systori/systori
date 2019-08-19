@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework.status import (
     HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
     HTTP_206_PARTIAL_CONTENT,
     HTTP_400_BAD_REQUEST,
     HTTP_405_METHOD_NOT_ALLOWED,
@@ -172,7 +173,10 @@ class ProjectModelViewSet(ModelViewSet):
     @swagger_auto_schema(
         methods=["PUT", "PATCH"], request_body=NoteSerializer, responses={200: NoteSerializer()}
     )
-    @action(methods=["PUT", "PATCH"], detail=True, url_path=r"note/(?P<note_id>\d+)")
+    @swagger_auto_schema(
+        method="DELETE", responses={204: "Note deleted successfully"}
+    )
+    @action(methods=["PUT", "PATCH", "DELETE"], detail=True, url_path=r"note/(?P<note_id>\d+)")
     def note(self, request, pk=None, note_id=None):
         if not (pk or note_id):
             return Response(status=HTTP_400_BAD_REQUEST)
@@ -181,6 +185,12 @@ class ProjectModelViewSet(ModelViewSet):
         # Get logged in worker
         worker = Worker.objects.get(user=request.user)
         note = Note.objects.get(pk=note_id, project=project, worker=worker)
+
+        if request.method.lower() == "delete":
+            note.delete()
+            return Response(status=HTTP_204_NO_CONTENT)
+
+        # This is an update request
         is_partial = request.method.lower() == "patch"
         serializer = NoteSerializer(note, data=request.data, partial=is_partial)
         serializer.is_valid(raise_exception=True)

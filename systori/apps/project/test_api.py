@@ -1,10 +1,11 @@
 from systori.lib.testing import ClientTestCase
 from django.utils.translation import ugettext as _
 from datetime import date, timedelta
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from systori.apps.main.factories import NoteFactory
 from systori.apps.main.serializers import NoteSerializer
+from systori.apps.main.models import Note
 
 from .api import get_week_by_day
 from .models import TeamMember, EquipmentAssignment
@@ -112,6 +113,18 @@ class ProjectApiTest(ClientTestCase):
         self.assertEqual(json["project"], self.project.pk)
         self.assertEqual(json["worker"], self.worker.pk)
         self.assertEqual(json["text"], "This is a test note")
+
+    def test_delete_note(self):
+        note1 = NoteFactory(
+            project=self.project, content_object=self.project, worker=self.worker
+        )
+        self.assertIsNotNone(Note.objects.get(pk=note1.pk))
+
+        response = self.client.delete(f"/api/project/{self.project.pk}/note/{note1.pk}/")
+
+        self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
+        with self.assertRaises(Note.DoesNotExist):
+            Note.objects.get(pk=note1.pk)
 
     def test_search(self):
         response = self.client.put(

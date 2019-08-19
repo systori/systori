@@ -2643,6 +2643,15 @@ paths:
             $ref: '#/definitions/Note'
       tags:
         - project
+    delete:
+      operationId: project_note_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: Note deleted successfully
+      tags:
+        - project
     parameters:
       - name: id
         in: path
