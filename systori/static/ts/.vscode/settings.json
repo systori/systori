@@ -20,7 +20,19 @@
         "enable": true,
         "location": "separateLine"
     },
-
+    "eslint.autoFixOnSave": true,
+    "eslint.lintTask.enable": true,
+    "eslint.run": "onSave",
+    "eslint.workingDirectories": [
+        {
+            "changeProcessCWD": true,
+            "directory": "./test"
+        },
+        {
+            "changeProcessCWD": true,
+            "directory": "./"
+        }
+    ],
     "eslint.validate": ["typescript", "javascript"],
     "eslint.codeAction.showDocumentation": {
         "enable": true
