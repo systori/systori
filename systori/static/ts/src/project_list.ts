@@ -15,7 +15,6 @@ let phaseOrder: Array<string> = [
 function sortProjects(e: Event) {
     if (e == null) return;
     let lookup: Map<any, HTMLElement> = new Map();
-    let multimap: Map<string, any> = new Map();
     let i: number = 0;
 
     let btn = e.target as SystoriSortButton;
@@ -28,7 +27,9 @@ function sortProjects(e: Event) {
         Array.from(document.querySelectorAll<HTMLElement>(".tile"))
             .map(e => lookup.set(e.dataset["name"] || "", e))
     } else if (btn.type == "phase") {
-        console.log("phase")
+        let lookup2: Map<any, HTMLElement> = new Map();
+        Array.from(document.querySelectorAll<HTMLElement>(".tile"))
+            .map(e => lookup2.set(e.dataset["phase"] || "", e))
     }
 
     let sortedKeys: Array<number> = Array.from(lookup.keys()).sort();

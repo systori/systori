@@ -16,7 +16,6 @@ function sortProjects(e) {
     if (e == null)
         return;
     let lookup = new Map();
-    let multimap = new Map();
     let i = 0;
     let btn = e.target;
     btn.activateExclusive();
@@ -29,7 +28,9 @@ function sortProjects(e) {
             .map(e => lookup.set(e.dataset["name"] || "", e));
     }
     else if (btn.type == "phase") {
-        console.log("phase");
+        let lookup2 = new Map();
+        Array.from(document.querySelectorAll(".tile"))
+            .map(e => lookup2.set(e.dataset["phase"] || "", e));
     }
     let sortedKeys = Array.from(lookup.keys()).sort();
     if (btn.reversed == true) {
