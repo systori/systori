@@ -1,5 +1,9 @@
 {
     "editor.formatOnSave": true,
+    "typescript.format.enable": false,
+    "typescript.validate.enable": true,
+    "javascript.format.enable": false,
+    "javascript.validate.enable": false,
     "[typescript]": {
         "editor.formatOnPaste": true,
         "editor.formatOnSave": true,
