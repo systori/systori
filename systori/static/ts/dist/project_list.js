@@ -1,4 +1,4 @@
-"use strict";
+import { ArrayListMultimap } from "./lib/multimap";
 let searchRequestFired = false;
 let attemptMade = false;
 let searchMatches;
@@ -15,7 +15,7 @@ let phaseOrder = [
 function sortProjects(e) {
     if (e == null)
         return;
-    let lookup = new Map();
+    var lookup = new Map();
     let i = 0;
     let btn = e.target;
     btn.activateExclusive();
@@ -28,11 +28,19 @@ function sortProjects(e) {
             .map(e => lookup.set(e.dataset["name"] || "", e));
     }
     else if (btn.type == "phase") {
-        let lookup2 = new Map();
+        let lookup2 = new ArrayListMultimap();
+        lookup = new Map();
         Array.from(document.querySelectorAll(".tile"))
-            .map(e => lookup2.set(e.dataset["phase"] || "", e));
+            .map(e => lookup2.put(e.dataset["phase"] || "", e));
+        for (let key of phaseOrder) {
+            // for (let element of lookup2[key]) {
+            //     console.log(element);
+            // }
+            console.log(key);
+        }
     }
-    let sortedKeys = Array.from(lookup.keys()).sort();
+    let sortedKeys = Array.from(lookup.keys()).ns.naturalSort();
+    console.log(sortedKeys);
     if (btn.reversed == true) {
         sortedKeys = sortedKeys.reverse();
         btn.reversed = false;
@@ -48,6 +56,22 @@ function sortProjects(e) {
         }
         //lastMoved.insertAdjacentElement("afterend", lookup[key]);
         //last_moved = lookup[key];
+    }
+}
+function updatePhaseFilter(e) {
+    if (e == undefined)
+        return;
+    let btn = e.target;
+    btn.updatePhaseFilter();
+    localStorage["phaseFilter"] = JSON.stringify({ phaseFilter });
+    filterProjects();
+}
+function filterProjects() {
+    let warning = document.querySelector("sys-warning-message");
+    warning.hideWarningMessage = true;
+    let projects = document.querySelectorAll(".tile");
+    for (let project of projects) {
+        project.classList.add("hidden");
     }
 }
 class SystoriPhaseButton extends HTMLElement {
@@ -82,7 +106,7 @@ class SystoriPhaseButton extends HTMLElement {
         phaseFilter.push(this.phase);
         this.classList.remove("line_through");
     }
-    updatePhaseFilter(e) {
+    updatePhaseFilter() {
         (phaseFilter.indexOf(this.phase) > -1)
             ? this.hide()
             : this.show();
@@ -90,7 +114,6 @@ class SystoriPhaseButton extends HTMLElement {
     connectedCallback() {
         if (this.dataset["phase"])
             this.phase = this.dataset["phase"];
-        console.log("connected phase button");
     }
 }
 class SystoriSortButton extends HTMLElement {
@@ -108,13 +131,17 @@ class SystoriSortButton extends HTMLElement {
         return this.dataset["reversed"] == "true";
     }
     set reversed(reversed) {
-        reversed ? this.dataset["reversed"] = "true" : this.dataset["reversed"] = "false";
+        reversed
+            ? this.dataset["reversed"] = "true"
+            : this.dataset["reversed"] = "false";
     }
     get active() {
         return this.classList.contains("active");
     }
     set active(active) {
-        active ? this.classList.add("active") : this.classList.remove('active');
+        active
+            ? this.classList.add("active")
+            : this.classList.remove('active');
     }
     activateExclusive() {
         let btns = Array.from(this.parentElement.querySelectorAll("sys-sort-button"));
@@ -130,7 +157,6 @@ class SystoriSortButton extends HTMLElement {
             this.type = this.dataset["type"];
         if (this.dataset["reversed"] != null)
             this.reversed = this.dataset["reversed"] == "true";
-        console.log("connected sort button");
     }
 }
 class SystoriProjectTile extends HTMLElement {
@@ -138,8 +164,13 @@ class SystoriProjectTile extends HTMLElement {
         super(...arguments);
         this.tag = "sys-project-tile";
     }
-    connectedCallback() {
-        console.log("connected project tile");
+    get hideProjectTile() {
+        return this.classList.contains("hidden");
+    }
+    set hideProjectTile(hideProjectTile) {
+        hideProjectTile
+            ? this.classList.add("hidden")
+            : this.classList.remove("hidden");
     }
 }
 class SystoriWarningMessage extends HTMLElement {
@@ -147,12 +178,37 @@ class SystoriWarningMessage extends HTMLElement {
         super(...arguments);
         this.tag = "sys-warning-message";
     }
-    connectedCallback() {
-        console.log("connected warning message");
+    warnPhaseFilteredProjects(phaseFilteredProjects) {
+        if (phaseFilteredProjects > 0) {
+            this.children[0].innerHTML =
+                document.querySelector("#sys-phaseFilteredProjects-translated")
+                    .innerText;
+            this.classList.remove("hidden");
+        }
     }
+    get hideWarningMessage() {
+        return this.classList.contains("hidden");
+    }
+    set hideWarningMessage(hideWarningMessage) {
+        hideWarningMessage
+            ? this.classList.add("hidden")
+            : this.classList.remove("hidden");
+    }
+}
+function loadLocalStorage() {
+    document.querySelector("#filter-bar").classList.remove("hidden");
+    document.querySelector("#tile-container").classList.remove("hidden");
 }
 window.customElements.define("sys-phase-button", SystoriPhaseButton);
 window.customElements.define("sys-sort-button", SystoriSortButton);
 window.customElements.define("sys-project-tile", SystoriProjectTile);
 window.customElements.define("sys-warning-message", SystoriWarningMessage);
-//# sourceMappingURL=project_list.js.map
+// add Event Listeners
+for (let btn of document.querySelectorAll("sys-sort-button")) {
+    btn.addEventListener("click", sortProjects);
+}
+for (let btn of document.querySelectorAll("sys-phase-button")) {
+    btn.addEventListener("click", updatePhaseFilter);
+}
+// Load user (browser) data
+loadLocalStorage();

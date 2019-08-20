@@ -1,4 +1,3 @@
-"use strict";
 class SystoriGotoProject extends HTMLElement {
     constructor() {
         super();
@@ -57,4 +56,3 @@ class SystoriGotoProject extends HTMLElement {
     }
 }
 window.customElements.define("sys-goto-project", SystoriGotoProject);
-//# sourceMappingURL=goto_project.js.map
