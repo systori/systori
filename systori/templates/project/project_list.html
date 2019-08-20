@@ -141,8 +141,9 @@
 
 {% block extra_js %}
 
-  <script src="{% static "dart/project_list.dart.js" %}"></script>
-  
+  {# <script src="{% static "dart/project_list.dart.js" %}"></script>  #}
+    <script src="{% static "ts/js/project_list.js" %}"></script>
+
   <script type="application/javascript">
     //fix menu overflow under the responsive table
     // hide menu on click... (This is a must because when we open a menu )

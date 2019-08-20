@@ -1,12 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 class SystoriGotoProject extends HTMLElement {
     constructor() {
         super();
@@ -34,29 +26,25 @@ class SystoriGotoProject extends HTMLElement {
             this.infoBox.innerText = '#';
         }
     }
-    fetchProject() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let response = yield fetch(`${window.location.origin}/api/project/${this.queryPk}/exists/`, { credentials: 'include' });
-            if (response.status == 200) {
-                this.showInfo(yield response.json(), "success");
-                this.projectFound = true;
-            }
-            else if (response.status == 206) {
-                this.showInfo(yield response.json(), "warning");
-                this.projectFound = false;
-            }
-        });
+    async fetchProject() {
+        let response = await fetch(`${window.location.origin}/api/project/${this.queryPk}/exists/`, { credentials: 'include' });
+        if (response.status == 200) {
+            this.showInfo(await response.json(), "success");
+            this.projectFound = true;
+        }
+        else if (response.status == 206) {
+            this.showInfo(await response.json(), "warning");
+            this.projectFound = false;
+        }
     }
-    handleKeyup(event) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.queryPk = parseInt(event.target.innerText);
-            if (isNaN(this.queryPk)) {
-                this.showInfo("", "reset");
-            }
-            else {
-                yield this.fetchProject();
-            }
-        });
+    async handleKeyup(event) {
+        this.queryPk = parseInt(event.target.innerText);
+        if (isNaN(this.queryPk)) {
+            this.showInfo("", "reset");
+        }
+        else {
+            await this.fetchProject();
+        }
     }
     handleKeydown(event) {
         if (event.key == "Enter" && this.projectFound == true) {
