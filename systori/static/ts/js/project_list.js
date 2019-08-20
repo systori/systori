@@ -21,13 +21,32 @@ function sortProjects(e) {
     let btn = e.target;
     btn.activateExclusive();
     if (btn.type == "id") {
-        console.log("id");
+        Array.from(document.querySelectorAll(".tile"))
+            .map(e => lookup.set(parseInt(e.dataset["pk"] || "0"), e));
     }
     else if (btn.type == "name") {
-        console.log("name");
+        Array.from(document.querySelectorAll(".tile"))
+            .map(e => lookup.set(e.dataset["name"] || "", e));
     }
     else if (btn.type == "phase") {
         console.log("phase");
+    }
+    let sortedKeys = Array.from(lookup.keys()).sort();
+    if (btn.reversed == true) {
+        sortedKeys = sortedKeys.reverse();
+        btn.reversed = false;
+    }
+    else if (btn.reversed == false) {
+        btn.reversed = true;
+    }
+    let lastMoved = undefined;
+    for (let key of sortedKeys) {
+        if (lastMoved == undefined) {
+            //lastMoved = lookup[key];
+            continue;
+        }
+        //lastMoved.insertAdjacentElement("afterend", lookup[key]);
+        //last_moved = lookup[key];
     }
 }
 class SystoriPhaseButton extends HTMLElement {

@@ -14,7 +14,7 @@ let phaseOrder: Array<string> = [
 
 function sortProjects(e: Event) {
     if (e == null) return;
-    let lookup: Map<number, any> = new Map();
+    let lookup: Map<any, HTMLElement> = new Map();
     let multimap: Map<string, any> = new Map();
     let i: number = 0;
 
@@ -22,11 +22,32 @@ function sortProjects(e: Event) {
     btn.activateExclusive()
 
     if (btn.type == "id") {
-        console.log("id")
+        Array.from(document.querySelectorAll<HTMLElement>(".tile"))
+            .map(e => lookup.set(parseInt(e.dataset["pk"] || "0"), e))
     } else if (btn.type == "name") {
-        console.log("name")
+        Array.from(document.querySelectorAll<HTMLElement>(".tile"))
+            .map(e => lookup.set(e.dataset["name"] || "", e))
     } else if (btn.type == "phase") {
         console.log("phase")
+    }
+
+    let sortedKeys: Array<number> = Array.from(lookup.keys()).sort();
+    if (btn.reversed == true) {
+        sortedKeys = sortedKeys.reverse();
+        btn.reversed = false;
+    } else if (btn.reversed == false) {
+        btn.reversed = true;
+    }
+
+    let lastMoved: any = undefined;
+
+    for (let key of sortedKeys) {
+        if (lastMoved == undefined) {
+            //lastMoved = lookup[key];
+            continue;
+        }
+        //lastMoved.insertAdjacentElement("afterend", lookup[key]);
+        //last_moved = lookup[key];
     }
 }
 
