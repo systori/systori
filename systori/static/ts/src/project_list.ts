@@ -1,3 +1,6 @@
+import * as ns from "natural-sort";
+import { Multimap, ArrayListMultimap } from "./lib/multimap";
+
 let searchRequestFired: boolean = false;
 let attemptMade: boolean = false;
 let searchMatches: Array<number>;
@@ -14,25 +17,33 @@ let phaseOrder: Array<string> = [
 
 function sortProjects(e: Event) {
     if (e == null) return;
-    let lookup: Map<any, HTMLElement> = new Map();
+    var lookup: Map<any, SystoriProjectTile> = new Map();
     let i: number = 0;
 
     let btn = e.target as SystoriSortButton;
     btn.activateExclusive()
 
     if (btn.type == "id") {
-        Array.from(document.querySelectorAll<HTMLElement>(".tile"))
+        Array.from(document.querySelectorAll<SystoriProjectTile>(".tile"))
             .map(e => lookup.set(parseInt(e.dataset["pk"] || "0"), e))
     } else if (btn.type == "name") {
-        Array.from(document.querySelectorAll<HTMLElement>(".tile"))
+        Array.from(document.querySelectorAll<SystoriProjectTile>(".tile"))
             .map(e => lookup.set(e.dataset["name"] || "", e))
     } else if (btn.type == "phase") {
-        let lookup2: Map<any, HTMLElement> = new Map();
-        Array.from(document.querySelectorAll<HTMLElement>(".tile"))
-            .map(e => lookup2.set(e.dataset["phase"] || "", e))
+        let lookup2: Multimap<string, HTMLElement> = new ArrayListMultimap();
+        lookup = new Map();
+        Array.from(document.querySelectorAll<SystoriProjectTile>(".tile"))
+            .map(e => lookup2.put(e.dataset["phase"] || "", e))
+        for (let key of phaseOrder) {
+            // for (let element of lookup2[key]) {
+            //     console.log(element);
+            // }
+            console.log(key);
+        }
     }
 
-    let sortedKeys: Array<number> = Array.from(lookup.keys()).sort();
+    let sortedKeys: Array<number> = Array.from(lookup.keys()).ns.naturalSort();
+    console.log(sortedKeys);
     if (btn.reversed == true) {
         sortedKeys = sortedKeys.reverse();
         btn.reversed = false;
@@ -49,6 +60,24 @@ function sortProjects(e: Event) {
         }
         //lastMoved.insertAdjacentElement("afterend", lookup[key]);
         //last_moved = lookup[key];
+    }
+}
+
+function updatePhaseFilter(e: Event) {
+    if (e == undefined) return;
+    let btn = e.target as SystoriPhaseButton;
+    btn.updatePhaseFilter();
+    localStorage["phaseFilter"] = JSON.stringify({ phaseFilter });
+    filterProjects();
+}
+
+function filterProjects() {
+    let warning = document.querySelector("sys-warning-message") as SystoriWarningMessage;
+    warning.hideWarningMessage = true;
+
+    let projects = document.querySelectorAll<SystoriProjectTile>(".tile")
+    for (let project of projects) {
+        project.classList.add("hidden");
     }
 }
 
@@ -86,7 +115,7 @@ class SystoriPhaseButton extends HTMLElement {
         this.classList.remove("line_through");
     }
 
-    updatePhaseFilter(e: Event) {
+    updatePhaseFilter() {
         (phaseFilter.indexOf(this.phase) > -1)
             ? this.hide()
             : this.show()
@@ -94,7 +123,6 @@ class SystoriPhaseButton extends HTMLElement {
 
     connectedCallback() {
         if (this.dataset["phase"]) this.phase = this.dataset["phase"] as string;
-        console.log("connected phase button");
     }
 }
 
@@ -112,14 +140,18 @@ class SystoriSortButton extends HTMLElement {
         return this.dataset["reversed"] == "true";
     }
     set reversed(reversed: boolean) {
-        reversed ? this.dataset["reversed"] = "true" : this.dataset["reversed"] = "false";
+        reversed
+            ? this.dataset["reversed"] = "true"
+            : this.dataset["reversed"] = "false";
     }
 
     get active(): boolean {
         return this.classList.contains("active");
     }
     set active(active: boolean) {
-        active ? this.classList.add("active") : this.classList.remove('active');
+        active
+            ? this.classList.add("active")
+            : this.classList.remove('active');
     }
 
     activateExclusive() {
@@ -137,22 +169,47 @@ class SystoriSortButton extends HTMLElement {
     connectedCallback() {
         if (this.dataset["type"] != null) this.type = this.dataset["type"] as string;
         if (this.dataset["reversed"] != null) this.reversed = this.dataset["reversed"] == "true";
-        console.log("connected sort button");
     }
 }
 
 class SystoriProjectTile extends HTMLElement {
     tag: string = "sys-project-tile";
-    connectedCallback() {
-        console.log("connected project tile");
+
+    get hideProjectTile(): boolean {
+        return this.classList.contains("hidden");
+    }
+    set hideProjectTile(hideProjectTile: boolean) {
+        hideProjectTile
+            ? this.classList.add("hidden")
+            : this.classList.remove("hidden");
     }
 }
 
 class SystoriWarningMessage extends HTMLElement {
     tag: string = "sys-warning-message";
-    connectedCallback() {
-        console.log("connected warning message");
+
+    warnPhaseFilteredProjects(phaseFilteredProjects: number) {
+        if (phaseFilteredProjects > 0) {
+            this.children[0].innerHTML =
+                (document.querySelector("#sys-phaseFilteredProjects-translated") as HTMLElement)
+                    .innerText
+            this.classList.remove("hidden");
+        }
     }
+
+    get hideWarningMessage(): boolean {
+        return this.classList.contains("hidden");
+    }
+    set hideWarningMessage(hideWarningMessage: boolean) {
+        hideWarningMessage
+            ? this.classList.add("hidden")
+            : this.classList.remove("hidden");
+    }
+}
+
+function loadLocalStorage() {
+    (document.querySelector("#filter-bar") as HTMLElement).classList.remove("hidden");
+    (document.querySelector("#tile-container") as HTMLElement).classList.remove("hidden");
 }
 
 
@@ -160,3 +217,15 @@ window.customElements.define("sys-phase-button", SystoriPhaseButton);
 window.customElements.define("sys-sort-button", SystoriSortButton);
 window.customElements.define("sys-project-tile", SystoriProjectTile);
 window.customElements.define("sys-warning-message", SystoriWarningMessage);
+
+// add Event Listeners
+for (let btn of document.querySelectorAll<SystoriSortButton>("sys-sort-button")) {
+    btn.addEventListener("click", sortProjects);
+}
+
+for (let btn of document.querySelectorAll<SystoriPhaseButton>("sys-phase-button")) {
+    btn.addEventListener("click", updatePhaseFilter);
+}
+
+// Load user (browser) data
+loadLocalStorage();
