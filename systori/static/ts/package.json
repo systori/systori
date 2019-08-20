@@ -1,0 +1,54 @@
+{
+    "name": "systori-web",
+    "version": "1.0.0",
+    "description": "Systori",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/systori/systori.git"
+    },
+    "bugs": {
+        "url": "https://github.com/systori/systori/issues"
+    },
+    "homepage": "https://github.com/systori/systori#readme",
+    "license": "BSD-3-Clause",
+    "dependencies": {
+        "tslib": "^1.10.0"
+    },
+    "devDependencies": {
+        "@types/jest": "^24.0.18",
+        "@typescript-eslint/eslint-plugin": "^2.0.0",
+        "@typescript-eslint/parser": "^2.0.0",
+        "eslint": "^6.2.1",
+        "eslint-config-prettier": "^6.1.0",
+        "eslint-plugin-prettier": "^3.1.0",
+        "jest": "^24.9.0",
+        "prettier": "1.18.2",
+        "ts-jest": "^24.0.2",
+        "typescript": "^3.5.3"
+    },
+    "scripts": {
+        "tsc": "./node_modules/.bin/tsc",
+        "eslint": "./node_modules/.bin/eslint",
+        "prettier": "./node_modules/.bin/prettier",
+        "build": "./node_modules/.bin/tsc -w",
+        "lint": "./node_modules/.bin/tsc --pretty -p ./tsconfig.json",
+        "test": "jest"
+    },
+    "jest": {
+        "transform": {
+            "^.+\\.tsx?$": "ts-jest"
+        },
+        "moduleNameMapper": {
+            "^@systori/(.*)$": "<rootDir>/src/$1"
+        },
+        "testMatch": [
+            "**/?(*.)+(spec|test).[jt]s?(x)"
+        ],
+        "collectCoverage": true,
+        "collectCoverageFrom": [
+            "**/*.{ts}",
+            "!**/node_modules/**"
+        ],
+        "coverageDirectory": "coverage"
+    }
+}
