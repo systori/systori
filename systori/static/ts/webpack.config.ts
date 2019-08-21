@@ -1,9 +1,23 @@
+import glob from "glob";
 import path from "path";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 import webpack from "webpack";
 
 const config: webpack.Configuration = {
-    entry: ["./src/project_list.ts", "./src/goto_project.ts"],
+    entry: () => {
+        const entries: webpack.Entry = {};
+        glob.sync("./src/**/*.ts").forEach(filePath => {
+            entries[
+                path
+                    .relative("./src", filePath)
+                    .replace(path.extname(filePath), "")
+            ] = filePath;
+        });
+        console.debug(
+            `Entries created:\n${JSON.stringify(entries, undefined, 4)}`,
+        );
+        return entries;
+    },
     devtool: "inline-source-map",
     mode: "development",
     module: {
