@@ -3,6 +3,9 @@ import path from "path";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 import webpack from "webpack";
 
+// This will make sure we use the correct `tsconfig.json`
+delete process.env.TS_NODE_PROJECT;
+
 const config: webpack.Configuration = {
     entry: () => {
         const entries: webpack.Entry = {};
@@ -31,7 +34,14 @@ const config: webpack.Configuration = {
     },
     resolve: {
         extensions: [".tsx", ".ts", ".js"],
-        plugins: [new TsconfigPathsPlugin()],
+        plugins: [
+            new TsconfigPathsPlugin({
+                baseUrl: ".",
+                configFile: "./tsconfig.json",
+                logInfoToStdOut: true,
+                silent: false,
+            }),
+        ],
     },
     output: {
         filename: "[name].js",
