@@ -2,9 +2,6 @@
     "semi": true,
     "trailingComma": "all",
     "endOfLine": "lf",
-"plugins": [
-
-],
     "singleQuote": false,
     "tabWidth": 4,
     "useTabs": false
