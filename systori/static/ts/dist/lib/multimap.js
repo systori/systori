@@ -9,24 +9,17 @@ export class ArrayListMultimap {
         this._entries = [];
     }
     containsKey(key) {
-        return this._entries
-            .filter(entry => entry.key == key)
-            .length > 0;
+        return this._entries.filter(entry => entry.key == key).length > 0;
     }
     containsValue(value) {
-        return this._entries
-            .filter(entry => entry.value == value)
-            .length > 0;
+        return this._entries.filter(entry => entry.value == value).length > 0;
     }
     containsEntry(key, value) {
-        return this._entries
-            .filter(entry => entry.key == key && entry.value == value)
-            .length > 0;
+        return (this._entries.filter(entry => entry.key == key && entry.value == value).length > 0);
     }
     delete(key, value) {
-        let temp = this._entries;
-        this._entries = this._entries
-            .filter(entry => {
+        const temp = this._entries;
+        this._entries = this._entries.filter(entry => {
             if (value)
                 return entry.key != key || entry.value != value;
             return entry.key != key;
@@ -55,3 +48,4 @@ class MultimapEntry {
         this.value = value;
     }
 }
+//# sourceMappingURL=multimap.js.map
