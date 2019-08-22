@@ -1,0 +1,9 @@
+// This is used to compile webpack.config.ts, not the actual project
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "module": "commonjs",
+        "target": "es5",
+        "esModuleInterop": true
+    }
+}

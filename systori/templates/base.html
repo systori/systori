@@ -66,7 +66,7 @@
             justify-content: space-between;
             padding-right: 0.9em;
         }
-    
+
         /* hide second span with text description of the link inside of <a> tag, show if .menu-open is attached to mainmenu */
         mainmenu > a.nav-button > span:nth-child(2) {
             display: none;
@@ -74,7 +74,7 @@
         mainmenu.menu-open > a.nav-button > span:nth-child(2) {
             display: block;
         }
-    
+
         /* add hover effect to link elements */
         a.nav-button:hover {
             color: #333;
@@ -145,7 +145,7 @@
     <navbar>
       {% block head_navbar %}{% endblock %}
       <form id="set-language" action="{% url 'set_language' %}" method="post">{% csrf_token %}
-      
+
       <div class="input-group" style="width: 8em;">
           <span class="input-group-addon" id="infoBox">#</span>
           <sys-goto-project type="text" class="form-control" contenteditable></sys-goto-project>
@@ -206,7 +206,7 @@
   {% endif %}
 <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
 <script src="{% static "js/bootstrap.min.js" %}"></script>
-<script src="{% static "ts/js/goto_project.js" %}"></script>
+<script src="{% static "ts/dist/goto_project.js" %}"></script>
 
 {% endblock base_js %}
 
@@ -227,6 +227,6 @@
       console.log(url);
       window.location.href = url;
     };
-  </script> 
+  </script>
 </body>
 </html>
