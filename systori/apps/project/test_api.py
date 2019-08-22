@@ -38,9 +38,11 @@ class ProjectApiTest(ClientTestCase):
                 project=self.project, content_object=self.project, worker=self.worker
             )
         ).data
-        note2 = NoteSerializer(NoteFactory(
-            project=self.project, content_object=self.project, worker=self.worker
-        )).data
+        note2 = NoteSerializer(
+            NoteFactory(
+                project=self.project, content_object=self.project, worker=self.worker
+            )
+        ).data
         response = self.client.get(f"/api/project/{self.project.pk}/notes/")
         self.assertEqual(response.status_code, HTTP_200_OK)
         json = response.json()
@@ -120,7 +122,9 @@ class ProjectApiTest(ClientTestCase):
         )
         self.assertIsNotNone(Note.objects.get(pk=note1.pk))
 
-        response = self.client.delete(f"/api/project/{self.project.pk}/note/{note1.pk}/")
+        response = self.client.delete(
+            f"/api/project/{self.project.pk}/note/{note1.pk}/"
+        )
 
         self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
         with self.assertRaises(Note.DoesNotExist):
@@ -162,7 +166,29 @@ class DailyPlanApiTest(ClientTestCase):
             list(json[0].keys()),
         )
         self.assertEqual(
-            ["first_name", "last_name"], list(json[0]["workers"][0].keys())
+            [
+                "first_name",
+                "last_name",
+                "email",
+                "language",
+                "is_verified",
+                "get_full_name",
+                "company",
+                "user",
+                "is_owner",
+                "has_owner",
+                "is_staff",
+                "has_staff",
+                "is_foreman",
+                "has_foreman",
+                "is_laborer",
+                "has_laborer",
+                "is_accountant",
+                "is_active",
+                "can_track_time",
+                "is_fake",
+            ],
+            list(json[0]["workers"][0].keys()),
         )
         self.assertEqual(
             [
@@ -203,5 +229,43 @@ class DailyPlanApiTest(ClientTestCase):
         )
         json = response.json()
         self.assertIsInstance(json, list)
-        self.assertEqual(["first_name", "last_name", "projects"], list(json[0].keys()))
-        self.assertEqual(["pk", "name", "day"], list(json[0]["projects"][0].keys()))
+        self.assertEqual(
+            [
+                "first_name",
+                "last_name",
+                "email",
+                "language",
+                "is_verified",
+                "get_full_name",
+                "company",
+                "user",
+                "is_owner",
+                "has_owner",
+                "is_staff",
+                "has_staff",
+                "is_foreman",
+                "has_foreman",
+                "is_laborer",
+                "has_laborer",
+                "is_accountant",
+                "is_active",
+                "can_track_time",
+                "is_fake",
+                "projects",
+            ],
+            list(json[0].keys()),
+        )
+        self.assertEqual(
+            [
+                "pk",
+                "name",
+                "description",
+                "is_template",
+                "structure",
+                "notes",
+                "phase",
+                "state",
+                "day",
+            ],
+            list(json[0]["projects"][0].keys()),
+        )

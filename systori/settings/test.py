@@ -15,6 +15,7 @@ DATABASES["default"].update(
         "PORT": 5432,
         "NAME": "systori_test",
         "USER": "postgres",
+        "PASSWORD": "postgres",
         "TEST": {"SERIALIZE": False},
     }
 )
