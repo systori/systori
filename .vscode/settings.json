@@ -22,7 +22,7 @@
     "python.linting.pep8Enabled": false,
     "python.linting.pylintEnabled": true,
     "python.linting.pylintArgs": ["--load-plugins", "pylint_django"],
-    "python.pythonPath": "/Users/elmcrest/.pyenv/versions/systori-python/bin/python",
+    "python.pythonPath": "/usr/bin/python3",
     "shellformat.effectLanguages": [
         "shellscript",
         "dockerfile",
