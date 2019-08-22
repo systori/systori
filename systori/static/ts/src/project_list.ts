@@ -1,24 +1,24 @@
 import { ArrayListMultimap, Multimap } from "@systori/lib/multimap";
 import naturalSort from "natural-sort";
 
-const searchRequestFired = false;
-const attemptMade = false;
-let searchMatches: Array<number>;
+// const searchRequestFired = false;
+// const attemptMade = false;
+// let searchMatches: Array<number>;
 let phaseFilter: Array<string>;
-const phaseOrder: Array<string> = [
-    "prospective",
-    "tendering",
-    "planning",
-    "executing",
-    "settlement",
-    "warranty",
-    "finished",
-];
+enum PhaseOrder {
+    prospective = "prospective",
+    tendering = "tendering",
+    planning = "planning",
+    executing = "executing",
+    settlement = "settlement",
+    warranty = "warranty",
+    finished = "finished",
+}
 
 function sortProjects(e: Event): void {
     if (e == null) return;
-    let lookup: Map<any, SystoriProjectTile> = new Map();
-    const i = 0;
+    let lookup: Map<string | number, SystoriProjectTile> = new Map();
+    // const i = 0;
 
     const btn = e.target as SystoriSortButton;
     btn.activateExclusive();
@@ -37,7 +37,7 @@ function sortProjects(e: Event): void {
         Array.from(document.querySelectorAll<SystoriProjectTile>(".tile")).map(
             e => lookup2.put(e.dataset["phase"] || "", e),
         );
-        for (const key of phaseOrder) {
+        for (const key in PhaseOrder) {
             // for (let element of lookup2[key]) {
             //     console.log(element);
             // }
@@ -45,7 +45,7 @@ function sortProjects(e: Event): void {
         }
     }
 
-    let sortedKeys: Array<number> = Array.from(lookup.keys()).sort(
+    let sortedKeys: Array<string | number> = Array.from(lookup.keys()).sort(
         naturalSort(),
     );
     if (btn.reversed == true) {
@@ -55,12 +55,12 @@ function sortProjects(e: Event): void {
         btn.reversed = true;
     }
 
-    const lastMoved = null;
+    let lastMoved = null;
 
     for (const key of sortedKeys) {
         if (lastMoved == null) {
             console.log(`lastMoved == ${lastMoved} with key == ${key}`);
-            // lastMoved = lookup[key];
+            lastMoved = lookup.get(key);
             continue;
         }
         //lastMoved.insertAdjacentElement("afterend", lookup[key]);

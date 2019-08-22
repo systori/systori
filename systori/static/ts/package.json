@@ -48,7 +48,7 @@
         "tsc": "./node_modules/.bin/tsc",
         "eslint": "./node_modules/.bin/eslint",
         "prettier": "./node_modules/.bin/prettier",
-        "webpack": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" ./node_modules/.bin/webpack",
+        "webpack": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" ./node_modules/.bin/webpack --watch",
         "build": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" webpack",
         "lint": "./node_modules/.bin/tsc --pretty -p ./tsconfig.json",
         "test": "jest"
