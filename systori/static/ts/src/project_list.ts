@@ -34,7 +34,7 @@ enum SortButtonType {
 class SystoriSortButton extends HTMLButtonElement {
     constructor() {
         super();
-        this.addEventListener("click", this.sortProjectTiles);
+        this.addEventListener("click", () => this.sortProjectTiles());
     }
     get type(): SortButtonType {
         switch (this.dataset["type"]) {
@@ -107,7 +107,6 @@ class SystoriSortButton extends HTMLButtonElement {
                 tileContainer.appendChild(tile);
             }
         }
-        console.log("sorting");
     }
 }
 
