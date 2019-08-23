@@ -9,13 +9,18 @@ enum PhaseOrder {
     warranty,
     finished,
 }
+enum SortButtonType {
+    id = "id",
+    name = "name",
+    phase = "phase",
+}
 
-class SystoriProjectTile extends HTMLDivElement {
+class SystoriProjectTile extends HTMLElement {
     constructor() {
         super();
     }
     get pk(): number {
-        return Number(this.dataset["pk"] || "0");
+        return Number(this.dataset["pk"]!);
     }
     get name(): string {
         return this.dataset["name"]!;
@@ -23,15 +28,19 @@ class SystoriProjectTile extends HTMLDivElement {
     get phase(): PhaseOrder {
         return (this.dataset["phase"] || PhaseOrder.prospective) as PhaseOrder;
     }
+
+    get hidden(): boolean {
+        return this.dataset["hidden"] === "true";
+    }
+    set hide(hide: boolean) {
+        this.dataset["hidden"] = hide.toString();
+    }
+    set s(hide: boolean) {
+        this.dataset["hidden"] = hide.toString();
+    }
 }
 
-enum SortButtonType {
-    id = "id",
-    name = "name",
-    phase = "phase",
-}
-
-class SystoriSortButton extends HTMLButtonElement {
+class SystoriSortButton extends HTMLElement {
     constructor() {
         super();
         this.addEventListener("click", () => this.sortProjectTiles());
@@ -70,8 +79,21 @@ class SystoriSortButton extends HTMLButtonElement {
     set active(active: boolean) {
         active ? this.classList.add("active") : this.classList.remove("active");
     }
+
+    // adds class `active` to active button and removes it from all others.
+    activateExclusive(): void {
+        const btns: SystoriSortButton[] = Array.from(
+            document.querySelectorAll("sys-sort-button"),
+        );
+        for (const btn of btns) {
+            btn.active = false;
+        }
+        this.active = true;
+    }
+
     sortProjectTiles(this: SystoriSortButton): void {
         this.toggleReversed();
+        this.activateExclusive();
 
         const projectTiles = Array.from(
             document.querySelectorAll<SystoriProjectTile>(".tile"),
@@ -110,12 +132,20 @@ class SystoriSortButton extends HTMLButtonElement {
     }
 }
 
-customElements.define("sys-sort-button", SystoriSortButton, {
-    extends: "button",
-});
-customElements.define("sys-project-tile", SystoriProjectTile, {
-    extends: "div",
-});
+class SystoriPhaseButton extends HTMLElement {
+    constructor() {
+        super();
+        this.addEventListener("click", () => this.filterProjectTiles());
+    }
+
+    filterProjectTiles(): void {
+        console.log("filtering!");
+    }
+}
+
+customElements.define("sys-phase-button", SystoriPhaseButton);
+customElements.define("sys-sort-button", SystoriSortButton);
+customElements.define("sys-project-tile", SystoriProjectTile);
 
 if (filterBar) {
     filterBar.classList.remove("hidden");

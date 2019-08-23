@@ -94,18 +94,18 @@
                 <button class="glyphicon glyphicon-remove" id="search_clear" class="hidden"></button>
             </div>
             <div class="btn-group">
-                <button is="sys-sort-button" type="button" data-type="id" data-reversed=true class="btn btn-xs btn-default">
-                    {% trans "ID ↓↑" %}</button>
-                <button is="sys-sort-button" type="button" data-type="name" data-reversed=false class="btn btn-xs btn-default">
-                    {% trans "name ↓↑" %}</button>
-                <button is="sys-sort-button" type="button" data-type="phase" data-reversed=true class="btn btn-xs btn-default active">
-                    {% trans "phase ↓↑" %}</button>
+                <sys-sort-button type="button" data-type="id" data-reversed=true class="btn btn-xs btn-default">
+                    {% trans "ID ↓↑" %}</sys-sort-button>
+                <sys-sort-button type="button" data-type="name" data-reversed=false class="btn btn-xs btn-default">
+                    {% trans "name ↓↑" %}</sys-sort-button>
+                <sys-sort-button type="button" data-type="phase" data-reversed=true class="btn btn-xs btn-default active">
+                    {% trans "phase ↓↑" %}</sys-sort-button>
             </div>
             <div class="btn-group" id="phase-btn-group" data-toggle="buttons">
             {% for phase, phase_display in phases %}
-                <sys-phase-button type="button" class="btn btn-default btn-xs active {{ phase }}" data-phase="{{ phase }}" data-hide-phase="false">
+                <button is="sys-phase-button" type="button" class="btn btn-default btn-xs active {{ phase }}" data-phase="{{ phase }}" data-hide-phase="false">
                     {{ phase_display }}
-                </sys-phase-button>
+                </button>
             {% endfor %}
             </div>
             <div class="btn-group">
