@@ -44,7 +44,7 @@
     .btn.active span.glyphicon {
         opacity: 1;
     }
-    .line_through {
+    .hide-phase {
         text-decoration: line-through !important;
     }
     .hidden {
@@ -103,9 +103,9 @@
             </div>
             <div class="btn-group" id="phase-btn-group" data-toggle="buttons">
             {% for phase, phase_display in phases %}
-                <button is="sys-phase-button" type="button" class="btn btn-default btn-xs active {{ phase }}" data-phase="{{ phase }}" data-hide-phase="false">
+                <sys-phase-button type="button" class="btn btn-default btn-xs active {{ phase }}" data-phase="{{ phase }}">
                     {{ phase_display }}
-                </button>
+                </sys-phase-button>
             {% endfor %}
             </div>
             <div class="btn-group">

@@ -20,7 +20,6 @@ class SystoriProjectTile extends HTMLElement {
         super();
     }
     get pk(): number {
-        console.log("hasdas");
         return Number(this.dataset["pk"]!);
     }
     get name(): string {
@@ -31,13 +30,10 @@ class SystoriProjectTile extends HTMLElement {
     }
 
     get hidden(): boolean {
-        return this.dataset["hidden"] === "true";
+        return this.classList.contains("hidden") === true;
     }
-    set hide(hide: boolean) {
-        this.dataset["hidden"] = hide.toString();
-    }
-    set show(hide: boolean) {
-        this.dataset["hidden"] = hide.toString();
+    hide(hide: boolean): void {
+        hide ? this.classList.add("hidden") : this.classList.remove("hidden");
     }
 }
 
@@ -139,8 +135,43 @@ class SystoriPhaseButton extends HTMLElement {
         this.addEventListener("click", () => this.filterProjectTiles());
     }
 
+    get phase(): string {
+        return this.dataset["phase"]!;
+    }
+    set phase(phase: string) {
+        this.dataset["phase"] = phase;
+    }
+
+    get hidePhase(): boolean {
+        return this.classList.contains("hide-phase");
+    }
+    set hidePhase(hide: boolean) {
+        hide
+            ? this.classList.add("hide-phase")
+            : this.classList.remove("hide-phase");
+    }
+
+    toggleHidePhase(): void {
+        this.hidePhase = !this.hidePhase;
+    }
+
+    toggleProjectTiles(hide: boolean): void {
+        const projectTiles: SystoriProjectTile[] = Array.from(
+            document.querySelectorAll(
+                `sys-project-tile[data-phase=${this.phase}]`,
+            ),
+        );
+        for (const tile of projectTiles) {
+            tile.hide(hide);
+        }
+    }
+
     filterProjectTiles(): void {
-        console.log("filtering!");
+        this.toggleHidePhase();
+        console.log(this.phase);
+        this.hidePhase
+            ? this.toggleProjectTiles(true)
+            : this.toggleProjectTiles(false);
     }
 }
 
