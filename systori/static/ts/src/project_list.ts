@@ -18,79 +18,38 @@ class SystoriProjectTile extends HTMLDivElement {
         return Number(this.dataset["pk"] || "0");
     }
     get name(): string {
-        return this.dataset["name"] || "unknown";
+        return this.dataset["name"]!;
     }
     get phase(): PhaseOrder {
         return (this.dataset["phase"] || PhaseOrder.prospective) as PhaseOrder;
     }
 }
 
-function sortProjectTiles(e: Event): void {
-    const btn = e.target as SystoriSortButton;
-    if (!btn)
-        throw new Error(
-            `Expected SystoriSortButton as EventTarget but got ${e.target}.`,
-        );
-    const projectTiles = Array.from(
-        document.querySelectorAll<SystoriProjectTile>(".tile"),
-    );
-
-    if (btn.type === "id") {
-        projectTiles.sort(function(
-            a: SystoriProjectTile,
-            b: SystoriProjectTile,
-        ) {
-            if (btn.reversed) {
-                return b.pk - a.pk;
-            } else {
-                return a.pk - b.pk;
-            }
-        });
-    } else if (btn.type === "name") {
-        projectTiles.sort(function(
-            a: SystoriProjectTile,
-            b: SystoriProjectTile,
-        ) {
-            if (btn.reversed) {
-                return a.name.localeCompare(b.name);
-            } else {
-                return b.name.localeCompare(a.name);
-            }
-        });
-    } else if (btn.type === "phase") {
-        projectTiles.sort(function(
-            a: SystoriProjectTile,
-            b: SystoriProjectTile,
-        ) {
-            if (btn.reversed) {
-                return PhaseOrder[a.phase] - PhaseOrder[b.phase];
-            } else {
-                return PhaseOrder[a.phase] - PhaseOrder[b.phase];
-            }
-        });
-    } else {
-        throw new Error("Unkown Button type.");
-    }
-
-    if (tileContainer) {
-        tileContainer.innerHTML = "";
-        for (const tile of projectTiles) {
-            tileContainer.appendChild(tile);
-        }
-    }
-    console.log("sorting");
+enum SortButtonType {
+    id = "id",
+    name = "name",
+    phase = "phase",
 }
 
 class SystoriSortButton extends HTMLButtonElement {
     constructor() {
         super();
-        this.addEventListener("click", e => this.clickHandler(e));
+        this.addEventListener("click", this.sortProjectTiles);
     }
-    get type(): string {
-        return this.dataset["type"] || "";
+    get type(): SortButtonType {
+        switch (this.dataset["type"]) {
+            case "id":
+                return SortButtonType.id;
+            case "name":
+                return SortButtonType.name;
+            case "phase":
+                return SortButtonType.phase;
+            default:
+                throw Error("Couldn't catch SortButtonType.");
+        }
     }
-    set type(type: string) {
-        this.dataset["type"] = type;
+    set type(type: SortButtonType) {
+        this.dataset["type"] = SortButtonType[type];
     }
 
     get reversed(): boolean {
@@ -111,9 +70,44 @@ class SystoriSortButton extends HTMLButtonElement {
     set active(active: boolean) {
         active ? this.classList.add("active") : this.classList.remove("active");
     }
-    clickHandler(e: Event): void {
+    sortProjectTiles(this: SystoriSortButton): void {
         this.toggleReversed();
-        sortProjectTiles(e);
+
+        const projectTiles = Array.from(
+            document.querySelectorAll<SystoriProjectTile>(".tile"),
+        );
+
+        projectTiles.sort((a, b) => {
+            if (this.type === "id") {
+                if (this.reversed) {
+                    return b.pk < a.pk ? -1 : 1;
+                } else {
+                    return a.pk < b.pk ? -1 : 1;
+                }
+            } else if (this.type === "name") {
+                if (this.reversed) {
+                    return a.name.localeCompare(b.name);
+                } else {
+                    return b.name.localeCompare(a.name);
+                }
+            } else if (this.type === "phase") {
+                if (this.reversed) {
+                    return PhaseOrder[b.phase] <= PhaseOrder[a.phase] ? -1 : 1;
+                } else {
+                    return PhaseOrder[a.phase] <= PhaseOrder[b.phase] ? -1 : 1;
+                }
+            } else {
+                throw new Error("Unkown Button type.");
+            }
+        });
+
+        if (tileContainer) {
+            tileContainer.innerHTML = "";
+            for (const tile of projectTiles) {
+                tileContainer.appendChild(tile);
+            }
+        }
+        console.log("sorting");
     }
 }
 
