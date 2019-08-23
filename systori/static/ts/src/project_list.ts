@@ -1,139 +1,91 @@
-import { ArrayListMultimap, Multimap } from "@systori/lib/multimap";
-import naturalSort from "natural-sort";
-
-// const searchRequestFired = false;
-// const attemptMade = false;
-// let searchMatches: Array<number>;
-let phaseFilter: Array<string>;
+const filterBar = document.querySelector("#filter-bar");
+const tileContainer = document.querySelector("#tile-container");
 enum PhaseOrder {
-    prospective = "prospective",
-    tendering = "tendering",
-    planning = "planning",
-    executing = "executing",
-    settlement = "settlement",
-    warranty = "warranty",
-    finished = "finished",
+    prospective,
+    tendering,
+    planning,
+    executing,
+    settlement,
+    warranty,
+    finished,
 }
 
-function sortProjects(e: Event): void {
-    if (e == null) return;
-    let lookup: Map<string | number, SystoriProjectTile> = new Map();
-    // const i = 0;
+class SystoriProjectTile extends HTMLDivElement {
+    constructor() {
+        super();
+    }
+    get pk(): number {
+        return Number(this.dataset["pk"] || "0");
+    }
+    get name(): string {
+        return this.dataset["name"] || "unknown";
+    }
+    get phase(): PhaseOrder {
+        return (this.dataset["phase"] || PhaseOrder.prospective) as PhaseOrder;
+    }
+}
 
+function sortProjectTiles(e: Event): void {
     const btn = e.target as SystoriSortButton;
-    btn.activateExclusive();
-
-    if (btn.type == "id") {
-        Array.from(document.querySelectorAll<SystoriProjectTile>(".tile")).map(
-            e => lookup.set(parseInt(e.dataset["pk"] || "0"), e),
+    if (!btn)
+        throw new Error(
+            `Expected SystoriSortButton as EventTarget but got ${e.target}.`,
         );
-    } else if (btn.type == "name") {
-        Array.from(document.querySelectorAll<SystoriProjectTile>(".tile")).map(
-            e => lookup.set(e.dataset["name"] || "", e),
-        );
-    } else if (btn.type == "phase") {
-        const lookup2: Multimap<string, HTMLElement> = new ArrayListMultimap();
-        lookup = new Map();
-        Array.from(document.querySelectorAll<SystoriProjectTile>(".tile")).map(
-            e => lookup2.put(e.dataset["phase"] || "", e),
-        );
-        for (const key in PhaseOrder) {
-            // for (let element of lookup2[key]) {
-            //     console.log(element);
-            // }
-            console.log(key);
-        }
-    }
-
-    let sortedKeys: Array<string | number> = Array.from(lookup.keys()).sort(
-        naturalSort(),
+    const projectTiles = Array.from(
+        document.querySelectorAll<SystoriProjectTile>(".tile"),
     );
-    if (btn.reversed == true) {
-        sortedKeys = sortedKeys.reverse();
-        btn.reversed = false;
-    } else if (btn.reversed == false) {
-        btn.reversed = true;
+
+    if (btn.type === "id") {
+        projectTiles.sort(function(
+            a: SystoriProjectTile,
+            b: SystoriProjectTile,
+        ) {
+            if (btn.reversed) {
+                return b.pk - a.pk;
+            } else {
+                return a.pk - b.pk;
+            }
+        });
+    } else if (btn.type === "name") {
+        projectTiles.sort(function(
+            a: SystoriProjectTile,
+            b: SystoriProjectTile,
+        ) {
+            if (btn.reversed) {
+                return a.name.localeCompare(b.name);
+            } else {
+                return b.name.localeCompare(a.name);
+            }
+        });
+    } else if (btn.type === "phase") {
+        projectTiles.sort(function(
+            a: SystoriProjectTile,
+            b: SystoriProjectTile,
+        ) {
+            if (btn.reversed) {
+                return PhaseOrder[a.phase] - PhaseOrder[b.phase];
+            } else {
+                return PhaseOrder[a.phase] - PhaseOrder[b.phase];
+            }
+        });
+    } else {
+        throw new Error("Unkown Button type.");
     }
 
-    let lastMoved = null;
-
-    for (const key of sortedKeys) {
-        if (lastMoved == null) {
-            console.log(`lastMoved == ${lastMoved} with key == ${key}`);
-            lastMoved = lookup.get(key);
-            continue;
+    if (tileContainer) {
+        tileContainer.innerHTML = "";
+        for (const tile of projectTiles) {
+            tileContainer.appendChild(tile);
         }
-        //lastMoved.insertAdjacentElement("afterend", lookup[key]);
-        //last_moved = lookup[key];
     }
+    console.log("sorting");
 }
 
-function filterProjects(): void {
-    const warning = document.querySelector(
-        "sys-warning-message",
-    ) as SystoriWarningMessage;
-    warning.hideWarningMessage = true;
-
-    const projects = document.querySelectorAll<SystoriProjectTile>(".tile");
-    for (const project of projects) {
-        project.classList.add("hidden");
+class SystoriSortButton extends HTMLButtonElement {
+    constructor() {
+        super();
+        this.addEventListener("click", e => this.clickHandler(e));
     }
-}
-
-function updatePhaseFilter(e: Event): void {
-    if (e == undefined) return;
-    const btn = e.target as SystoriPhaseButton;
-    btn.updatePhaseFilter();
-    localStorage["phaseFilter"] = JSON.stringify({ phaseFilter });
-    filterProjects();
-}
-
-class SystoriPhaseButton extends HTMLElement {
-    tag = "sys-phase-button";
-
-    get phase(): string {
-        return this.dataset["phase"] || "";
-    }
-    set phase(phase: string) {
-        this.dataset["phase"] = phase;
-    }
-
-    get hidePhase(): boolean {
-        return this.dataset["hide-phase"] == "true";
-    }
-    set hidePhase(hidePhase: boolean) {
-        hidePhase
-            ? (this.dataset["hide-phase"] = "true")
-            : (this.dataset["hide-phase"] = "false");
-    }
-    get visiblePhase(): boolean {
-        return !this.hidePhase;
-    }
-
-    hide(): void {
-        this.hidePhase = true;
-        phaseFilter = phaseFilter.filter(item => item != this.phase);
-        this.classList.add("line_through");
-    }
-
-    show(): void {
-        this.hidePhase = false;
-        phaseFilter.push(this.phase);
-        this.classList.remove("line_through");
-    }
-
-    updatePhaseFilter(): void {
-        phaseFilter.includes(this.phase) ? this.hide() : this.show();
-    }
-
-    connectedCallback(): void {
-        if (this.dataset["phase"]) this.phase = this.dataset["phase"] as string;
-    }
-}
-
-class SystoriSortButton extends HTMLElement {
-    tag = "sys-sort-button";
-
     get type(): string {
         return this.dataset["type"] || "";
     }
@@ -149,6 +101,9 @@ class SystoriSortButton extends HTMLElement {
             ? (this.dataset["reversed"] = "true")
             : (this.dataset["reversed"] = "false");
     }
+    toggleReversed(): void {
+        this.reversed = !this.reversed;
+    }
 
     get active(): boolean {
         return this.classList.contains("active");
@@ -156,90 +111,22 @@ class SystoriSortButton extends HTMLElement {
     set active(active: boolean) {
         active ? this.classList.add("active") : this.classList.remove("active");
     }
-
-    activateExclusive(): void {
-        const btns = Array.from(
-            (this.parentElement as HTMLDivElement).querySelectorAll<
-                SystoriSortButton
-            >("sys-sort-button"),
-        );
-        for (const btn of btns) {
-            btn.active = false;
-        }
-        this.active = true;
-        localStorage["sys-sort-button"] = this.type;
-        localStorage["sys-sort-button-reversed"] = this.reversed.toString();
-    }
-
-    connectedCallback(): void {
-        if (this.dataset["type"] != null)
-            this.type = this.dataset["type"] as string;
-        if (this.dataset["reversed"] != null)
-            this.reversed = this.dataset["reversed"] == "true";
+    clickHandler(e: Event): void {
+        this.toggleReversed();
+        sortProjectTiles(e);
     }
 }
 
-class SystoriProjectTile extends HTMLElement {
-    tag = "sys-project-tile";
+customElements.define("sys-sort-button", SystoriSortButton, {
+    extends: "button",
+});
+customElements.define("sys-project-tile", SystoriProjectTile, {
+    extends: "div",
+});
 
-    get hideProjectTile(): boolean {
-        return this.classList.contains("hidden");
-    }
-    set hideProjectTile(hideProjectTile: boolean) {
-        hideProjectTile
-            ? this.classList.add("hidden")
-            : this.classList.remove("hidden");
-    }
+if (filterBar) {
+    filterBar.classList.remove("hidden");
 }
-
-class SystoriWarningMessage extends HTMLElement {
-    tag = "sys-warning-message";
-
-    warnPhaseFilteredProjects(phaseFilteredProjects: number): void {
-        if (phaseFilteredProjects > 0) {
-            this.children[0].innerHTML = (document.querySelector(
-                "#sys-phaseFilteredProjects-translated",
-            ) as HTMLElement).innerText;
-            this.classList.remove("hidden");
-        }
-    }
-
-    get hideWarningMessage(): boolean {
-        return this.classList.contains("hidden");
-    }
-    set hideWarningMessage(hideWarningMessage: boolean) {
-        hideWarningMessage
-            ? this.classList.add("hidden")
-            : this.classList.remove("hidden");
-    }
+if (tileContainer) {
+    tileContainer.classList.remove("hidden");
 }
-
-function loadLocalStorage(): void {
-    (document.querySelector("#filter-bar") as HTMLElement).classList.remove(
-        "hidden",
-    );
-    (document.querySelector("#tile-container") as HTMLElement).classList.remove(
-        "hidden",
-    );
-}
-
-window.customElements.define("sys-phase-button", SystoriPhaseButton);
-window.customElements.define("sys-sort-button", SystoriSortButton);
-window.customElements.define("sys-project-tile", SystoriProjectTile);
-window.customElements.define("sys-warning-message", SystoriWarningMessage);
-
-// add Event Listeners
-for (const btn of document.querySelectorAll<SystoriSortButton>(
-    "sys-sort-button",
-)) {
-    btn.addEventListener("click", sortProjects);
-}
-
-for (const btn of document.querySelectorAll<SystoriPhaseButton>(
-    "sys-phase-button",
-)) {
-    btn.addEventListener("click", updatePhaseFilter);
-}
-
-// Load user (browser) data
-loadLocalStorage();
