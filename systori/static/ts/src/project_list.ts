@@ -20,6 +20,7 @@ class SystoriProjectTile extends HTMLElement {
         super();
     }
     get pk(): number {
+        console.log("hasdas");
         return Number(this.dataset["pk"]!);
     }
     get name(): string {
@@ -35,7 +36,7 @@ class SystoriProjectTile extends HTMLElement {
     set hide(hide: boolean) {
         this.dataset["hidden"] = hide.toString();
     }
-    set s(hide: boolean) {
+    set show(hide: boolean) {
         this.dataset["hidden"] = hide.toString();
     }
 }
@@ -91,7 +92,7 @@ class SystoriSortButton extends HTMLElement {
         this.active = true;
     }
 
-    sortProjectTiles(this: SystoriSortButton): void {
+    sortProjectTiles(): void {
         this.toggleReversed();
         this.activateExclusive();
 

@@ -120,12 +120,12 @@
     <div id="tile-container" class="hidden">
           {% for phase, projects in project_groups.items %}
                 {% for project in projects %}
-                        <div is="sys-project-tile" data-pk="{{ project.id|unlocalize }}" data-name="{{ project|slugify }} - {{ project.id }}"
+                        <sys-project-tile data-pk="{{ project.id|unlocalize }}" data-name="{{ project|slugify }} - {{ project.id }}"
                              data-phase="{{ phase }}" class="tile {{ phase }}" href="#">
                             <a href="{% url 'project.view' project.id %}" style="display: block">
                                 <span>#{{ project.id }}</span><br>{{ project }}
                             </a>
-                        </div>
+                        </sys-project-tile>
                 {% endfor %}
           {% endfor %}
     </div>
