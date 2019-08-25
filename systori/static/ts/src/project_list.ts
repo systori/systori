@@ -15,12 +15,21 @@ enum SortButtonType {
     phase = "phase",
 }
 
+type SortButtonState = {
+    type: string;
+    asc: boolean;
+};
+type PhaseButtonState = {
+    phase: string;
+    hidePhase: boolean;
+};
+
 class SystoriProjectTile extends HTMLElement {
     constructor() {
         super();
     }
     get pk(): number {
-        return Number(this.dataset["pk"]!);
+        return parseInt(this.dataset["pk"]!);
     }
     get name(): string {
         return this.dataset["name"]!;
@@ -40,7 +49,7 @@ class SystoriProjectTile extends HTMLElement {
 class SystoriSortButton extends HTMLElement {
     constructor() {
         super();
-        this.addEventListener("click", () => this.sortProjectTiles());
+        this.addEventListener("click", () => this.sortProjectTiles(true));
     }
     get type(): SortButtonType {
         switch (this.dataset["type"]) {
@@ -58,23 +67,22 @@ class SystoriSortButton extends HTMLElement {
         this.dataset["type"] = SortButtonType[type];
     }
 
-    get reversed(): boolean {
-        return this.dataset["reversed"] == "true";
+    // ASC/DESC sorting order
+    get asc(): boolean {
+        return this.dataset["asc"] == "true";
     }
-    set reversed(reversed: boolean) {
-        reversed
-            ? (this.dataset["reversed"] = "true")
-            : (this.dataset["reversed"] = "false");
+    set asc(asc: boolean) {
+        asc ? (this.dataset["asc"] = "true") : (this.dataset["asc"] = "false");
     }
-    toggleReversed(): void {
-        this.reversed = !this.reversed;
+    toggleAsc(): void {
+        this.asc = !this.asc;
     }
 
     get active(): boolean {
         return this.classList.contains("active");
     }
-    set active(active: boolean) {
-        active ? this.classList.add("active") : this.classList.remove("active");
+    set active(status: boolean) {
+        status ? this.classList.add("active") : this.classList.remove("active");
     }
 
     // adds class `active` to active button and removes it from all others.
@@ -88,8 +96,9 @@ class SystoriSortButton extends HTMLElement {
         this.active = true;
     }
 
-    sortProjectTiles(): void {
-        this.toggleReversed();
+    sortProjectTiles(toggleAsc: boolean): void {
+        // starting with toggling sorting order, move to bottom to exchange true/false behaviour
+        if (toggleAsc) this.toggleAsc();
         this.activateExclusive();
 
         const projectTiles = Array.from(
@@ -97,26 +106,33 @@ class SystoriSortButton extends HTMLElement {
         );
 
         projectTiles.sort((a, b) => {
-            if (this.type === "id") {
-                if (this.reversed) {
-                    return b.pk < a.pk ? -1 : 1;
-                } else {
-                    return a.pk < b.pk ? -1 : 1;
-                }
-            } else if (this.type === "name") {
-                if (this.reversed) {
-                    return a.name.localeCompare(b.name);
-                } else {
-                    return b.name.localeCompare(a.name);
-                }
-            } else if (this.type === "phase") {
-                if (this.reversed) {
-                    return PhaseOrder[b.phase] <= PhaseOrder[a.phase] ? -1 : 1;
-                } else {
-                    return PhaseOrder[a.phase] <= PhaseOrder[b.phase] ? -1 : 1;
-                }
-            } else {
-                throw new Error("Unkown Button type.");
+            switch (this.type) {
+                case SortButtonType.id:
+                    if (this.asc) {
+                        return b.pk < a.pk ? -1 : 1;
+                    } else {
+                        return a.pk < b.pk ? -1 : 1;
+                    }
+                case SortButtonType.name:
+                    if (this.asc) {
+                        return a.name.localeCompare(b.name);
+                    } else {
+                        return b.name.localeCompare(a.name);
+                    }
+                case SortButtonType.phase:
+                    if (this.asc) {
+                        return PhaseOrder[b.phase] <= PhaseOrder[a.phase]
+                            ? -1
+                            : 1;
+                    } else {
+                        return PhaseOrder[a.phase] <= PhaseOrder[b.phase]
+                            ? -1
+                            : 1;
+                    }
+                default:
+                    throw new Error(
+                        `Can't find a SortButtonType type for ${this.type}.`,
+                    );
             }
         });
 
@@ -126,13 +142,36 @@ class SystoriSortButton extends HTMLElement {
                 tileContainer.appendChild(tile);
             }
         }
+
+        this.saveStateToLocalStorage();
     }
+
+    saveStateToLocalStorage(): void {
+        localStorage.setItem(
+            "state-SystoriSortButton",
+            JSON.stringify({
+                type: this.type,
+                asc: this.asc,
+            }),
+        );
+    }
+}
+
+function savePhaseStateToLocalStorage(): void {
+    const btns: SystoriPhaseButton[] = Array.from(
+        document.querySelectorAll("sys-phase-button"),
+    );
+    const btnsState: PhaseButtonState[] = [];
+    for (const btn of btns) {
+        btnsState.push({ phase: btn.phase, hidePhase: btn.hidePhase });
+    }
+    localStorage.setItem("state-SystoriPhaseButton", JSON.stringify(btnsState));
 }
 
 class SystoriPhaseButton extends HTMLElement {
     constructor() {
         super();
-        this.addEventListener("click", () => this.filterProjectTiles());
+        this.addEventListener("click", () => this.filterProjectTiles(true));
     }
 
     get phase(): string {
@@ -142,6 +181,7 @@ class SystoriPhaseButton extends HTMLElement {
         this.dataset["phase"] = phase;
     }
 
+    // hidePhase === hidden
     get hidePhase(): boolean {
         return this.classList.contains("hide-phase");
     }
@@ -149,10 +189,6 @@ class SystoriPhaseButton extends HTMLElement {
         hide
             ? this.classList.add("hide-phase")
             : this.classList.remove("hide-phase");
-    }
-
-    toggleHidePhase(): void {
-        this.hidePhase = !this.hidePhase;
     }
 
     toggleProjectTiles(hide: boolean): void {
@@ -164,21 +200,83 @@ class SystoriPhaseButton extends HTMLElement {
         for (const tile of projectTiles) {
             tile.hide(hide);
         }
+        savePhaseStateToLocalStorage();
     }
 
-    filterProjectTiles(): void {
-        this.toggleHidePhase();
-        console.log(this.phase);
+    filterProjectTiles(toggle: boolean): void {
+        if (toggle) this.hidePhase = !this.hidePhase;
         this.hidePhase
             ? this.toggleProjectTiles(true)
             : this.toggleProjectTiles(false);
     }
 }
 
+class SystoriSearchElement extends HTMLElement {
+    // This custom element is for composing the two childNodes.
+    constructor() {
+        super();
+    }
+}
+
+class SystoriSearchInput extends HTMLInputElement {
+    constructor() {
+        super();
+        this.addEventListener("keyup", () => this.apiSearchProjects());
+    }
+
+    apiSearchProjects(): number[] {
+        const projects = [] as number[];
+        projects.push(11);
+        projects.push(23);
+        return projects;
+    }
+}
+
+function loadLocalStorage(): void {
+    const sortJson = localStorage.getItem("state-SystoriSortButton");
+    const phaseJson = localStorage.getItem("state-SystoriPhaseButton");
+    if (sortJson) {
+        const state: SortButtonState = JSON.parse(sortJson);
+        const btns: SystoriSortButton[] = Array.from(
+            document.querySelectorAll("sys-sort-button"),
+        );
+        for (const btn of btns) {
+            if (btn.type === state.type) {
+                console.log(`loading from localStorage for ${btn.type}.`);
+                btn.asc = state.asc;
+                btn.sortProjectTiles(false);
+            } else {
+                btn.active = false;
+            }
+        }
+    }
+    if (phaseJson) {
+        const state: PhaseButtonState[] = JSON.parse(phaseJson);
+        const btns: SystoriPhaseButton[] = Array.from(
+            document.querySelectorAll("sys-phase-button"),
+        );
+        for (const p of state) {
+            if (p.hidePhase) {
+                for (const btn of btns) {
+                    if (btn.phase === p.phase) {
+                        btn.hidePhase = p.hidePhase;
+                        btn.filterProjectTiles(false);
+                    }
+                }
+            }
+        }
+    }
+}
+
+customElements.define("sys-search-input", SystoriSearchInput, {
+    extends: "input",
+});
+customElements.define("sys-search-element", SystoriSearchElement);
 customElements.define("sys-phase-button", SystoriPhaseButton);
 customElements.define("sys-sort-button", SystoriSortButton);
 customElements.define("sys-project-tile", SystoriProjectTile);
 
+loadLocalStorage();
 if (filterBar) {
     filterBar.classList.remove("hidden");
 }
