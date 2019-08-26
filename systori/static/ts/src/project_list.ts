@@ -1,5 +1,21 @@
-const filterBar = document.querySelector("#filter-bar");
-const tileContainer = document.querySelector("#tile-container");
+function getCookie(query: string): string {
+    const cookies = document.cookie.split(";");
+    for (const cookie of cookies) {
+        const [name, value] = cookie.split("=");
+        if (name === query) {
+            return value;
+        }
+    }
+    return "";
+}
+const filterBar = document.querySelector(".filter-bar");
+const tileContainer = document.querySelector(".tile-container");
+const csrfToken = getCookie("csrftoken");
+const headers = new Headers({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "X-CSRFToken": csrfToken,
+});
 enum PhaseOrder {
     prospective,
     tendering,
@@ -18,9 +34,6 @@ enum SortButtonType {
 interface SortButtonState {
     type: SortButtonType;
     asc: boolean;
-}
-interface PhaseButtonState {
-    hidePhase: boolean;
 }
 
 class SystoriProjectTile extends HTMLElement {
@@ -250,61 +263,120 @@ class SystoriSearchElement extends HTMLElement {
 }
 
 class SystoriSearchInput extends HTMLInputElement {
+    timeout: ReturnType<typeof setTimeout> | undefined;
+
     constructor() {
         super();
-        this.addEventListener("keyup", () => this.apiSearchProjects());
+        this.addEventListener("keyup", () => this.clickHandler());
     }
 
-    apiSearchProjects(): number[] {
-        const projects = [] as number[];
-        projects.push(11);
-        projects.push(23);
-        return projects;
+    filterProjectTiles(searchResultPks: number[]): void {
+        const projectPks = this.getAllLocalProjectPks();
+        // all projects except the found projects
+        const difference = projectPks.filter(
+            pk => !searchResultPks.includes(pk),
+        );
+        for (const pk of difference) {
+            const tile = document.querySelector<SystoriProjectTile>(
+                `sys-project-tile[data-pk="${pk}"]`,
+            );
+            if (tile) tile.hide(true);
+        }
+    }
+
+    showAllProjects(): void {
+        const phaseBtns = new Map();
+        Array.from(
+            document.querySelectorAll<SystoriPhaseButton>("sys-phase-button"),
+        ).map(tile => phaseBtns.set(tile.phase, tile.hidePhase));
+        const projectPks = this.getAllLocalProjectPks();
+        for (const pk of projectPks) {
+            const tile = document.querySelector<SystoriProjectTile>(
+                `sys-project-tile[data-pk="${pk}"]`,
+            );
+            if (tile && !phaseBtns.get(tile.phase)) tile.hide(false);
+        }
+        const cancelButton = document.querySelector<SystoriSearchCancelButton>(
+            "sys-search-cancel-button",
+        )!;
+        cancelButton.visible = false;
+    }
+
+    getAllLocalProjectPks(): number[] {
+        return Array.from(
+            document.querySelectorAll<SystoriProjectTile>(`sys-project-tile`),
+        ).map(tile => {
+            return tile.pk;
+        });
+    }
+
+    apiSearchProjects(): void {
+        localStorage.setItem("sys-project-search-input", this.value);
+        fetch("/api/project/search/", {
+            method: "put",
+            credentials: "same-origin",
+            headers: headers,
+            body: JSON.stringify({ query: this.value }),
+        })
+            .then(response => response.json())
+            .then(body => {
+                this.filterProjectTiles(body.projects);
+            });
+    }
+
+    processQuery(): void {
+        const cancelButton = document.querySelector<SystoriSearchCancelButton>(
+            "sys-search-cancel-button",
+        )!;
+        cancelButton.visible = true;
+        this.apiSearchProjects();
+    }
+
+    delayedClickHandler(): void {
+        this.value == "" ? this.showAllProjects() : this.processQuery();
+    }
+
+    clickHandler(): void {
+        if (this.timeout) clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => {
+            this.value == "" ? this.showAllProjects() : this.processQuery();
+        }, 300);
     }
 }
 
-// function loadLocalStorage(): void {
-//     // const sortJson = localStorage.getItem("state-SystoriSortButton");
-//     const phaseJson = localStorage.getItem("state-SystoriPhaseButton");
-//     // if (sortJson) {
-//     //     const state: SortButtonState = JSON.parse(sortJson);
-//     //     const btns: SystoriSortButton[] = Array.from(
-//     //         document.querySelectorAll("sys-sort-button"),
-//     //     );
-//     //     for (const btn of btns) {
-//     //         if (btn.type === state.type) {
-//     //             btn.asc = state.asc;
-//     //             btn.sortProjectTiles(false);
-//     //         } else {
-//     //             btn.active = false;
-//     //         }
-//     //     }
-//     // }
-//     if (phaseJson) {
-//         const state: PhaseButtonState[] = JSON.parse(phaseJson);
-//         const btns: SystoriPhaseButton[] = Array.from(
-//             document.querySelectorAll("sys-phase-button"),
-//         );
-//         for (const p of state) {
-//             if (p.hidePhase) {
-//                 for (const btn of btns) {
-//                     if (btn.phase === p.phase) {
-//                         btn.hidePhase = p.hidePhase;
-//                         btn.filterProjectTiles(false);
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
+class SystoriSearchCancelButton extends HTMLElement {
+    constructor() {
+        super();
+        this.addEventListener("click", () => this.clickHandler());
+    }
+    get visible(): boolean {
+        return this.classList.contains("visible");
+    }
+    set visible(status: boolean) {
+        this.classList.toggle("visible", status);
+    }
+    clickHandler(): void {
+        if (this.parentElement) {
+            const input = this.parentElement.querySelector<SystoriSearchInput>(
+                'input[is="sys-search-input"]',
+            );
+            if (input) {
+                input.value = "";
+                input.showAllProjects();
+                this.visible = false;
+            }
+        }
+    }
+}
 
+customElements.define("sys-project-tile", SystoriProjectTile);
 customElements.define("sys-search-input", SystoriSearchInput, {
     extends: "input",
 });
 customElements.define("sys-search-element", SystoriSearchElement);
+customElements.define("sys-search-cancel-button", SystoriSearchCancelButton);
 customElements.define("sys-phase-button", SystoriPhaseButton);
 customElements.define("sys-sort-button", SystoriSortButton);
-customElements.define("sys-project-tile", SystoriProjectTile);
 
 // loadLocalStorage();
 if (filterBar) {

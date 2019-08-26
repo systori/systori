@@ -8,10 +8,16 @@
         justify-content: space-between;
         overflow: hidden;
     }
-    #filter-bar {
+    .filter-bar {
       grid-area: navextra;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      justify-content: space-around;
+      width: 100%;
+      height: 26px;
     }
-    #tile-container{
+    .tile-container{
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
       grid-gap: 5px;
@@ -33,37 +39,17 @@
       color: rgba(0,0,0,0.85);
       text-decoration: none;
     }
-
-    .btn {
-        text-shadow: none;
-    }
-
-    .btn span.glyphicon {
-        opacity: 0;
-    }
-    .btn.active span.glyphicon {
-        opacity: 1;
-    }
     .hide-phase {
-        text-decoration: line-through !important;
-    }
-    .hidden {
-        display:none;
+      text-decoration: line-through;
     }
 
-    #search_input {
-        width: 172px;
+    .sys-sort-group, .sys-filter-group, .sys-create-group {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
     }
-    #search_clear {
-        position: absolute;
-        right: 5px;
-        top: 0;
-        bottom: 0;
-        height: 20px;
-        margin: auto;
-        font-size: 14px;
-        color: #ccc;
-        z-index:10;
+    .sys-filter-group {
+      background-color: #fff;
     }
 
     sys-warning-message {
@@ -76,9 +62,21 @@
         color: whitesmoke;
         border-radius: 3px;
     }
-    #phase-btn-group {
-        background-color: white;
-        border-radius: 5px;
+    sys-sort-button, sys-phase-button, a[role="button"] {
+      background: rgb(238,238,238);
+      color: inherit;
+      border: none;
+      font: inherit;
+      cursor: pointer;
+      outline: inherit;
+      padding: 0 5px 0 5px;
+      font-size: 12px;
+      height: 26px;
+      line-height: 26px;
+      vertical-align: center;
+    }
+    input[is="sys-search-input"] {
+      font-size: 12px;
     }
     sys-sort-button.active[data-asc="false"]::after {
       content: " ↓";
@@ -92,6 +90,12 @@
     sys-sort-button[data-asc="true"]::after {
       content: " ↑";
     }
+    sys-search-cancel-button {
+      display: none !important;
+    }
+    .visible {
+      display: unset !important;
+    }
 </style>
 
 {{ super }}
@@ -99,37 +103,33 @@
 
 {% block mainmenu %}{% include "main/mainmenu.html" with section='projects' %}{% endblock %}
 {% block head_navbar %}
-<div id="filter-bar" class="hidden">
-    <div class="form-inline">
-            <sys-search-element class="input-group input-group-xs">
-                <input is="sys-search-input" type="text" class="form-control" id="search_input" placeholder="Filter">
-                <button class="glyphicon glyphicon-remove" id="search_clear" class="hidden"></button>
-            </sys-search-element>
-            <div class="btn-group">
-                <sys-sort-button type="button" data-type="id" data-asc=true class="btn btn-xs btn-default">
-                    {% trans "ID" %}</sys-sort-button>
-                <sys-sort-button type="button" data-type="name" data-asc=true class="btn btn-xs btn-default">
-                    {% trans "name" %}</sys-sort-button>
-                <sys-sort-button type="button" data-type="phase" data-asc=true class="btn btn-xs btn-default active">
-                    {% trans "phase" %}</sys-sort-button>
+<div class="filter-bar hidden">
+            <div class="sys-sort-group">
+                  <sys-sort-button type="button" data-type="id" data-asc=true>
+                      {% trans "ID" %}</sys-sort-button>
+                  <sys-sort-button type="button" data-type="name" data-asc=true>
+                      {% trans "name" %}</sys-sort-button>
+                  <sys-sort-button type="button" data-type="phase" data-asc=true class="active">
+                      {% trans "phase" %}</sys-sort-button>
             </div>
-            <div class="btn-group" id="phase-btn-group" data-toggle="buttons">
-            {% for phase, phase_display in phases %}
-                <sys-phase-button type="button" class="btn btn-default btn-xs active {{ phase }}" data-phase="{{ phase }}">
-                    {{ phase_display }}
-                </sys-phase-button>
-            {% endfor %}
+            <div class="sys-filter-group">
+              <input is="sys-search-input" type="text" placeholder="Filter">
+              <sys-search-cancel-button class="glyphicon glyphicon-remove"></sys-search-cancel-button>
+              {% for phase, phase_display in phases %}
+                  <sys-phase-button type="button" class="{{ phase }}-btn" data-phase="{{ phase }}">
+                      {{ phase_display }}
+                  </sys-phase-button>
+              {% endfor %}
             </div>
-            <div class="btn-group">
-                <a role="button" class="btn btn-default btn-xs" href="{% url 'project.create' %}">{% trans "Create" %}</a>
-                <a role="button" class="btn btn-default btn-xs" href="{% url 'project.import' %}">{% trans "GAEB-Import (experimental)" %}</a>
+            <div class="sys-create-group">
+                <a role="button" href="{% url 'project.create' %}">{% trans "Create" %}</a>
+                <a role="button" href="{% url 'project.import' %}">{% trans "GAEB-Import (experimental)" %}</a>
             </div>
-    </div>
 </div>
 {% endblock %}
 {% block content %}
 <div class="container-fluid">
-    <div id="tile-container" class="hidden">
+    <div class="tile-container hidden">
           {% for phase, projects in project_groups.items %}
                 {% for project in projects %}
                         <sys-project-tile data-pk="{{ project.id|unlocalize }}" data-name="{{ project|slugify }} - {{ project.id }}"
