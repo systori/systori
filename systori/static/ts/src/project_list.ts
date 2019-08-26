@@ -15,15 +15,13 @@ enum SortButtonType {
     phase = "phase",
 }
 
-type SortButtonState = {
+interface SortButtonState {
     type: SortButtonType;
     asc: boolean;
-    active: boolean;
-};
-type PhaseButtonState = {
-    phase: string;
+}
+interface PhaseButtonState {
     hidePhase: boolean;
-};
+}
 
 class SystoriProjectTile extends HTMLElement {
     constructor() {
@@ -38,9 +36,8 @@ class SystoriProjectTile extends HTMLElement {
     get phase(): PhaseOrder {
         return (this.dataset.phase || PhaseOrder.prospective) as PhaseOrder;
     }
-
     get hidden(): boolean {
-        return this.classList.contains("hidden") === true;
+        return this.classList.contains("hidden");
     }
     hide(hide: boolean): void {
         hide ? this.classList.add("hidden") : this.classList.remove("hidden");
@@ -50,7 +47,7 @@ class SystoriProjectTile extends HTMLElement {
 class SystoriSortButton extends HTMLElement {
     constructor() {
         super();
-        this.addEventListener("click", () => this.sortProjectTiles(true));
+        this.addEventListener("click", () => this.clickHandler());
     }
     get type(): SortButtonType {
         switch (this.dataset.type) {
@@ -83,9 +80,15 @@ class SystoriSortButton extends HTMLElement {
         return this.classList.contains("active");
     }
     set active(status: boolean) {
-        status ? this.classList.add("active") : this.classList.remove("active");
+        this.classList.toggle("active", status);
     }
 
+    clickHandler(): void {
+        this.toggleAsc();
+        this.activateExclusive();
+        this.sortProjectTiles();
+        this._saveStateToLocalStorage();
+    }
     // adds class `active` to active button and removes it from all others.
     activateExclusive(): void {
         const btns: SystoriSortButton[] = Array.from(
@@ -97,11 +100,7 @@ class SystoriSortButton extends HTMLElement {
         this.active = true;
     }
 
-    sortProjectTiles(toggleAsc: boolean): void {
-        // starting with toggling sorting order, move to bottom to exchange true/false behaviour
-        if (toggleAsc) this.toggleAsc();
-        this.activateExclusive();
-
+    sortProjectTiles(): void {
         const projectTiles = Array.from(
             document.querySelectorAll<SystoriProjectTile>(".tile"),
         );
@@ -115,10 +114,11 @@ class SystoriSortButton extends HTMLElement {
                         return a.pk < b.pk ? -1 : 1;
                     }
                 case SortButtonType.name:
+                    // ToDo: switch x.dataset.name! back to x.name if it works with _loadStateFromLocalStorage
                     if (this.asc) {
-                        return a.name.localeCompare(b.name);
+                        return a.dataset.name!.localeCompare(b.dataset.name!);
                     } else {
-                        return b.name.localeCompare(a.name);
+                        return b.dataset.name!.localeCompare(a.dataset.name!);
                     }
                 case SortButtonType.phase:
                     if (this.asc) {
@@ -144,62 +144,43 @@ class SystoriSortButton extends HTMLElement {
             }
         }
 
-        this.saveStateToLocalStorage();
+        this._saveStateToLocalStorage();
     }
 
-    saveStateToLocalStorage(): void {
+    _saveStateToLocalStorage(): void {
         localStorage.setItem(
             "state-SystoriSortButton",
             JSON.stringify({
                 type: this.type,
                 asc: this.asc,
-                active: this.active,
             }),
         );
     }
     _loadStateFromLocalStorage(): void {
-        console.log(
-            `SystoriSortButton type==${this.type} active state==${this.active}.`,
-            `background: fuchsia; color: #3e3e3e`,
-        );
-        // check if custom element is bound to dom
         if (this.active || !this.active) {
             const sortJson = localStorage.getItem("state-SystoriSortButton");
             if (sortJson) {
                 const state: SortButtonState = JSON.parse(sortJson);
-                console.info(
-                    `SystoriSortButton type==${this.type} localStorage active state==${state.active}.`,
-                );
                 if (this.type === state.type) {
                     this.asc = state.asc;
-                    this.sortProjectTiles(false);
+                    this.active = true;
+                    this.sortProjectTiles();
                 } else {
+                    delete this.dataset.active;
                     this.active = false;
                 }
             }
         }
     }
     connectedCallback(): void {
-        console.info(`SystoriSortButton type==${this.type} was attached.`);
         this._loadStateFromLocalStorage();
     }
-}
-
-function savePhaseStateToLocalStorage(): void {
-    const btns: SystoriPhaseButton[] = Array.from(
-        document.querySelectorAll("sys-phase-button"),
-    );
-    const btnsState: PhaseButtonState[] = [];
-    for (const btn of btns) {
-        btnsState.push({ phase: btn.phase, hidePhase: btn.hidePhase });
-    }
-    localStorage.setItem("state-SystoriPhaseButton", JSON.stringify(btnsState));
 }
 
 class SystoriPhaseButton extends HTMLElement {
     constructor() {
         super();
-        this.addEventListener("click", () => this.filterProjectTiles(true));
+        this.addEventListener("click", () => this.clickHandler());
     }
 
     get phase(): string {
@@ -218,24 +199,46 @@ class SystoriPhaseButton extends HTMLElement {
             ? this.classList.add("hide-phase")
             : this.classList.remove("hide-phase");
     }
-
-    toggleProjectTiles(hide: boolean): void {
+    toggleProjectTiles(status: boolean): void {
         const projectTiles: SystoriProjectTile[] = Array.from(
             document.querySelectorAll(
                 `sys-project-tile[data-phase=${this.phase}]`,
             ),
         );
         for (const tile of projectTiles) {
-            tile.hide(hide);
+            tile.hide(status);
         }
-        savePhaseStateToLocalStorage();
     }
-
-    filterProjectTiles(toggle: boolean): void {
-        if (toggle) this.hidePhase = !this.hidePhase;
+    clickHandler(): void {
+        this.hidePhase = !this.hidePhase;
+        this.filterProjectTiles();
+        this._saveStateToLocalStorage();
+    }
+    filterProjectTiles(): void {
         this.hidePhase
             ? this.toggleProjectTiles(true)
             : this.toggleProjectTiles(false);
+    }
+    _saveStateToLocalStorage(): void {
+        localStorage.setItem(
+            `state-SystoriPhaseButton-${this.phase}`,
+            JSON.stringify({
+                hidePhase: this.hidePhase,
+            }),
+        );
+    }
+    _loadStateFromLocalStorage(): void {
+        const stateJson = localStorage.getItem(
+            `state-SystoriPhaseButton-${this.phase}`,
+        );
+        if (stateJson) {
+            const state = JSON.parse(stateJson);
+            this.hidePhase = state.hidePhase;
+            this.filterProjectTiles();
+        }
+    }
+    connectedCallback(): void {
+        this._loadStateFromLocalStorage();
     }
 }
 
@@ -260,40 +263,40 @@ class SystoriSearchInput extends HTMLInputElement {
     }
 }
 
-function loadLocalStorage(): void {
-    // const sortJson = localStorage.getItem("state-SystoriSortButton");
-    const phaseJson = localStorage.getItem("state-SystoriPhaseButton");
-    // if (sortJson) {
-    //     const state: SortButtonState = JSON.parse(sortJson);
-    //     const btns: SystoriSortButton[] = Array.from(
-    //         document.querySelectorAll("sys-sort-button"),
-    //     );
-    //     for (const btn of btns) {
-    //         if (btn.type === state.type) {
-    //             btn.asc = state.asc;
-    //             btn.sortProjectTiles(false);
-    //         } else {
-    //             btn.active = false;
-    //         }
-    //     }
-    // }
-    if (phaseJson) {
-        const state: PhaseButtonState[] = JSON.parse(phaseJson);
-        const btns: SystoriPhaseButton[] = Array.from(
-            document.querySelectorAll("sys-phase-button"),
-        );
-        for (const p of state) {
-            if (p.hidePhase) {
-                for (const btn of btns) {
-                    if (btn.phase === p.phase) {
-                        btn.hidePhase = p.hidePhase;
-                        btn.filterProjectTiles(false);
-                    }
-                }
-            }
-        }
-    }
-}
+// function loadLocalStorage(): void {
+//     // const sortJson = localStorage.getItem("state-SystoriSortButton");
+//     const phaseJson = localStorage.getItem("state-SystoriPhaseButton");
+//     // if (sortJson) {
+//     //     const state: SortButtonState = JSON.parse(sortJson);
+//     //     const btns: SystoriSortButton[] = Array.from(
+//     //         document.querySelectorAll("sys-sort-button"),
+//     //     );
+//     //     for (const btn of btns) {
+//     //         if (btn.type === state.type) {
+//     //             btn.asc = state.asc;
+//     //             btn.sortProjectTiles(false);
+//     //         } else {
+//     //             btn.active = false;
+//     //         }
+//     //     }
+//     // }
+//     if (phaseJson) {
+//         const state: PhaseButtonState[] = JSON.parse(phaseJson);
+//         const btns: SystoriPhaseButton[] = Array.from(
+//             document.querySelectorAll("sys-phase-button"),
+//         );
+//         for (const p of state) {
+//             if (p.hidePhase) {
+//                 for (const btn of btns) {
+//                     if (btn.phase === p.phase) {
+//                         btn.hidePhase = p.hidePhase;
+//                         btn.filterProjectTiles(false);
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
 
 customElements.define("sys-search-input", SystoriSearchInput, {
     extends: "input",
@@ -303,7 +306,7 @@ customElements.define("sys-phase-button", SystoriPhaseButton);
 customElements.define("sys-sort-button", SystoriSortButton);
 customElements.define("sys-project-tile", SystoriProjectTile);
 
-loadLocalStorage();
+// loadLocalStorage();
 if (filterBar) {
     filterBar.classList.remove("hidden");
 }
