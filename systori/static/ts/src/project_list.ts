@@ -16,8 +16,9 @@ enum SortButtonType {
 }
 
 type SortButtonState = {
-    type: string;
+    type: SortButtonType;
     asc: boolean;
+    active: boolean;
 };
 type PhaseButtonState = {
     phase: string;
@@ -29,13 +30,13 @@ class SystoriProjectTile extends HTMLElement {
         super();
     }
     get pk(): number {
-        return parseInt(this.dataset["pk"]!);
+        return parseInt(this.dataset.pk!);
     }
     get name(): string {
-        return this.dataset["name"]!;
+        return this.dataset.name!;
     }
     get phase(): PhaseOrder {
-        return (this.dataset["phase"] || PhaseOrder.prospective) as PhaseOrder;
+        return (this.dataset.phase || PhaseOrder.prospective) as PhaseOrder;
     }
 
     get hidden(): boolean {
@@ -52,7 +53,7 @@ class SystoriSortButton extends HTMLElement {
         this.addEventListener("click", () => this.sortProjectTiles(true));
     }
     get type(): SortButtonType {
-        switch (this.dataset["type"]) {
+        switch (this.dataset.type) {
             case "id":
                 return SortButtonType.id;
             case "name":
@@ -64,15 +65,15 @@ class SystoriSortButton extends HTMLElement {
         }
     }
     set type(type: SortButtonType) {
-        this.dataset["type"] = SortButtonType[type];
+        this.dataset.type = SortButtonType[type];
     }
 
     // ASC/DESC sorting order
     get asc(): boolean {
-        return this.dataset["asc"] == "true";
+        return this.dataset.asc == "true";
     }
     set asc(asc: boolean) {
-        asc ? (this.dataset["asc"] = "true") : (this.dataset["asc"] = "false");
+        asc ? (this.dataset.asc = "true") : (this.dataset.asc = "false");
     }
     toggleAsc(): void {
         this.asc = !this.asc;
@@ -152,8 +153,35 @@ class SystoriSortButton extends HTMLElement {
             JSON.stringify({
                 type: this.type,
                 asc: this.asc,
+                active: this.active,
             }),
         );
+    }
+    _loadStateFromLocalStorage(): void {
+        console.log(
+            `SystoriSortButton type==${this.type} active state==${this.active}.`,
+            `background: fuchsia; color: #3e3e3e`,
+        );
+        // check if custom element is bound to dom
+        if (this.active || !this.active) {
+            const sortJson = localStorage.getItem("state-SystoriSortButton");
+            if (sortJson) {
+                const state: SortButtonState = JSON.parse(sortJson);
+                console.info(
+                    `SystoriSortButton type==${this.type} localStorage active state==${state.active}.`,
+                );
+                if (this.type === state.type) {
+                    this.asc = state.asc;
+                    this.sortProjectTiles(false);
+                } else {
+                    this.active = false;
+                }
+            }
+        }
+    }
+    connectedCallback(): void {
+        console.info(`SystoriSortButton type==${this.type} was attached.`);
+        this._loadStateFromLocalStorage();
     }
 }
 
@@ -175,10 +203,10 @@ class SystoriPhaseButton extends HTMLElement {
     }
 
     get phase(): string {
-        return this.dataset["phase"]!;
+        return this.dataset.phase!;
     }
     set phase(phase: string) {
-        this.dataset["phase"] = phase;
+        this.dataset.phase = phase;
     }
 
     // hidePhase === hidden
@@ -233,23 +261,22 @@ class SystoriSearchInput extends HTMLInputElement {
 }
 
 function loadLocalStorage(): void {
-    const sortJson = localStorage.getItem("state-SystoriSortButton");
+    // const sortJson = localStorage.getItem("state-SystoriSortButton");
     const phaseJson = localStorage.getItem("state-SystoriPhaseButton");
-    if (sortJson) {
-        const state: SortButtonState = JSON.parse(sortJson);
-        const btns: SystoriSortButton[] = Array.from(
-            document.querySelectorAll("sys-sort-button"),
-        );
-        for (const btn of btns) {
-            if (btn.type === state.type) {
-                console.log(`loading from localStorage for ${btn.type}.`);
-                btn.asc = state.asc;
-                btn.sortProjectTiles(false);
-            } else {
-                btn.active = false;
-            }
-        }
-    }
+    // if (sortJson) {
+    //     const state: SortButtonState = JSON.parse(sortJson);
+    //     const btns: SystoriSortButton[] = Array.from(
+    //         document.querySelectorAll("sys-sort-button"),
+    //     );
+    //     for (const btn of btns) {
+    //         if (btn.type === state.type) {
+    //             btn.asc = state.asc;
+    //             btn.sortProjectTiles(false);
+    //         } else {
+    //             btn.active = false;
+    //         }
+    //     }
+    // }
     if (phaseJson) {
         const state: PhaseButtonState[] = JSON.parse(phaseJson);
         const btns: SystoriPhaseButton[] = Array.from(
