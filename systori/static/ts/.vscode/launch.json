@@ -17,7 +17,7 @@
     ],
     "inputs": [
         {
-            "id": "comapany-schema",
+            "id": "company-schema",
             "type": "promptString",
             "default": "demo",
             "description": "Systori company schema"
