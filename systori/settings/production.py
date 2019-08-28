@@ -9,7 +9,7 @@ SESSION_COOKIE_DOMAIN = "." + SERVER_NAME
 ALLOWED_HOSTS = ["." + SERVER_NAME]
 
 DATABASES["default"].update(
-    {"HOST": "db", "NAME": "systori_production", "USER": "postgres"}
+    {"HOST": "postgres11", "NAME": "systori_production", "USER": "postgres"}
 )
 
 
