@@ -49,7 +49,7 @@ services:
 
   db:
     build:
-      context: ./
+      context: ./f
       dockerfile: docker/db/Dockerfile
     ports:
       - "5432:5432"

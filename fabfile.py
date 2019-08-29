@@ -59,19 +59,22 @@ def makemessages():
 
 def fetchdb(envname="production"):
     ":envname=production -- fetch remote database, see getdb"
-    container = "systori_db_1"
+    container = "systori_postgres11_1"
     dbname = "systori_" + envname
     dump_file = "systori." + envname + ".dump"
     dump_folder = "/var/lib/postgresql/dumps"
     dump_path = os.path.join(dump_folder, dump_file)
+    mapped_folder = "/var/lib/postgresql11/dumps"
+    mapped_path = os.path.join(mapped_folder, dump_file)
     # -Fc : custom postgresql compressed format
     run(
         "docker exec {container} pg_dump -U postgres -Fc -x -f {dump_path} {dbname}".format(
             **locals()
         )
     )
-    get(dump_path, dump_file)
-    sudo("rm {}".format(dump_path))
+    print("before get()")
+    get(mapped_path, dump_file)
+    sudo("rm {}".format(mapped_path))
 
 
 def dbexists(name):
@@ -125,7 +128,9 @@ def dockergetdb(container="postgres", envname="production", settings=None):
     local("rm " + dump_file)
 
 
-def localdockergetdb(container="db", envname="production", targetname="systori_local"):
+def localdockergetdb(
+    container="postgres11", envname="production", targetname="systori_local"
+):
     ":container=app,envname=production -- fetch and load remote database"
     dump_file = "systori." + envname + ".dump"
     settings = {"NAME": targetname, "USER": "postgres", "HOST": "localhost"}
