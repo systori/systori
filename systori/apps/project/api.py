@@ -245,7 +245,7 @@ class DailyPlanModelViewSet(ModelViewSet):
     @swagger_auto_schema(
         method="PUT",
         request_body=SelectedDaySerializer,
-        # responses={200: WorkerWithProjectsSerializer(many=True)},
+        responses={200: WorkerWithProjectsSerializer(many=True)},
     )
     @action(methods=["put"], detail=False)
     def week_by_day_pivot_workers(self, request):
