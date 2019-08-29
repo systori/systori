@@ -28,6 +28,12 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class WorkerSerializer(serializers.ModelSerializer):
+    # fields which are only a @property in models.py
+    has_owner = serializers.BooleanField(read_only=True)
+    has_staff = serializers.BooleanField(read_only=True)
+    has_foreman = serializers.BooleanField(read_only=True)
+    has_laborer = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = Worker
         fields = (

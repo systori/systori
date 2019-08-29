@@ -146,7 +146,9 @@ class ProjectModelViewSet(ModelViewSet):
         return JsonResponse({"projects": projects})
 
     @swagger_auto_schema(method="GET", responses={200: NoteSerializer(many=True)})
-    @swagger_auto_schema(method="POST", request_body=NoteSerializer, responses={201: NoteSerializer()})
+    @swagger_auto_schema(
+        method="POST", request_body=NoteSerializer, responses={201: NoteSerializer()}
+    )
     @action(methods=["GET", "POST"], detail=True)
     def notes(self, request, pk=None):
         project = self.get_object()
@@ -171,12 +173,16 @@ class ProjectModelViewSet(ModelViewSet):
         return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
 
     @swagger_auto_schema(
-        methods=["PUT", "PATCH"], request_body=NoteSerializer, responses={200: NoteSerializer()}
+        methods=["PUT", "PATCH"],
+        request_body=NoteSerializer,
+        responses={200: NoteSerializer()},
     )
-    @swagger_auto_schema(
-        method="DELETE", responses={204: "Note deleted successfully"}
+    @swagger_auto_schema(method="DELETE", responses={204: "Note deleted successfully"})
+    @action(
+        methods=["PUT", "PATCH", "DELETE"],
+        detail=True,
+        url_path=r"note/(?P<note_id>\d+)",
     )
-    @action(methods=["PUT", "PATCH", "DELETE"], detail=True, url_path=r"note/(?P<note_id>\d+)")
     def note(self, request, pk=None, note_id=None):
         if not (pk or note_id):
             return Response(status=HTTP_400_BAD_REQUEST)
@@ -210,7 +216,6 @@ class DailyPlanModelViewSet(ModelViewSet):
     filter_backends = (SearchFilter,)
     search_fields = ("day",)
 
-
     def get_serializer_class(self):
         if hasattr(self, "action_serializers"):
             if self.action in self.action_serializers:
@@ -240,7 +245,7 @@ class DailyPlanModelViewSet(ModelViewSet):
     @swagger_auto_schema(
         method="PUT",
         request_body=SelectedDaySerializer,
-        responses={200: WorkerWithProjectsSerializer(many=True)},
+        # responses={200: WorkerWithProjectsSerializer(many=True)},
     )
     @action(methods=["put"], detail=False)
     def week_by_day_pivot_workers(self, request):
