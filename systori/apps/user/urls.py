@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url, include
 
-from systori.apps.user.api import SystoriAuthToken
+from systori.apps.user.api import SystoriAuthToken, UserMeAPIView
 from systori.apps.user.authorization import office_auth
 from systori.apps.user.views import (
     SettingsView,
@@ -17,6 +17,7 @@ from systori.apps.user.views import (
 urlpatterns = [
     url(r"^accounts/", include("allauth.urls")),
     url(r"api/token/", SystoriAuthToken.as_view(), name="drf.tokenauth"),
+    url(r"api/user/user/me/", UserMeAPIView.as_view(), name="usermeapiview"),
     url(r"^settings$", login_required(SettingsView.as_view()), name="settings"),
     url(r"^set_language$", SetLanguageView.as_view(), name="set_language"),
     url(r"^users$", office_auth(WorkerList.as_view()), name="users"),
