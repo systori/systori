@@ -7,7 +7,9 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.renderers import JSONRenderer
 
+from systori.apps.company.serializers import CompanySerializer
 from systori.apps.user.models import User
 from systori.apps.user.permissions import HasStaffAccess
 from systori.apps.user.serializers import (
@@ -18,19 +20,13 @@ from systori.apps.user.serializers import (
 
 
 class SystoriAuthToken(ObtainAuthToken):
-    @swagger_auto_schema(
-        deprecated=True,
-        request_body=AuthCredentialSerializer,
-        responses={
-            HTTP_201_CREATED: openapi.Response("AuthToken", AuthTokenSerializer)
-        },
-    )
-    def post(self, request, *args, **kwargs):
+    def get_response(self, request):
         serializer = self.serializer_class(
             data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
+        companies = CompanySerializer(user.companies.all(), many=True)
         token, created = Token.objects.get_or_create(user=user)
         return Response(
             {
@@ -40,12 +36,19 @@ class SystoriAuthToken(ObtainAuthToken):
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "pusher_key": os.environ.get("PUSHER_KEY", ""),
-                "companies": [
-                    {"schema": company.schema, "name": company.name}
-                    for company in user.companies.all()
-                ],
+                "companies": JSONRenderer().render(companies.data),
             }
         )
+
+    @swagger_auto_schema(
+        deprecated=True,
+        request_body=AuthCredentialSerializer,
+        responses={
+            HTTP_201_CREATED: openapi.Response("AuthToken", AuthTokenSerializer)
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        return self.get_response(request)
 
     @swagger_auto_schema(
         operation_description="Login with username and password, "
@@ -71,26 +74,7 @@ class SystoriAuthToken(ObtainAuthToken):
         responses={HTTP_200_OK: openapi.Response("AuthToken", AuthTokenSerializer)},
     )
     def get(self, request, *args, **kwargs):
-        serializer = self.serializer_class(
-            data=request.query_params, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-        token, created = Token.objects.get_or_create(user=user)
-        return Response(
-            {
-                "token": token.key,
-                "id": user.pk,
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "pusher_key": os.environ.get("PUSHER_KEY", ""),
-                "companies": [
-                    {"schema": company.schema, "name": company.name}
-                    for company in user.companies.all()
-                ],
-            }
-        )
+        return self.get_response(request)
 
 
 class UserModelViewSet(ModelViewSet):

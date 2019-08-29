@@ -43,3 +43,5 @@ DATABASES["default"].update(
 )
 
 MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, "media"))
+
+SCHEMA_OUTPUT_FILEPATH = "schema.yaml"

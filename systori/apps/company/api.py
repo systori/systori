@@ -11,9 +11,9 @@ from systori.apps.company.serializers import (
 
 class CompanyModelViewSet(ModelViewSet):
 
-    # This is non effective, unless explicitly used, All methods in `ModelViewSet` use `get_queryset` method instead. However, `rest_framework` relies on this attribute. It only needs
-    # this to provide rest api features, this should be fine since internally
-    # `get_queryset` is being used
+    # This is non effective, unless explicitly used, All methods in `ModelViewSet` use `get_queryset` method instead.
+    # However, `rest_framework` relies on this attribute. It only needs this to provide rest api features, this should
+    # be fine since internally `get_queryset` is being used
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = (HasLaborerAccess,)

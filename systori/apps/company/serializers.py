@@ -19,7 +19,6 @@ class TimezoneSerializerField(Field):
 
 
 class CompanySerializer(serializers.ModelSerializer):
-
     timezone = TimezoneSerializerField()
 
     class Meta:
