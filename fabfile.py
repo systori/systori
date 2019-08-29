@@ -335,7 +335,7 @@ def git():
 
 
 def refresh_sandbox_db():
-    db_container = "systori_db_1"
+    db_container = "systori_postgres11_1"
     db_source = "systori_production"
     db_target = "systori_sandbox"
     dump_file = f"{db_source}.dump"
