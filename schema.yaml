@@ -3163,46 +3163,15 @@ paths:
         required: true
         type: integer
   /token/:
-    get:
-      operationId: token_login
-      summary: Login using username and password
-      description: Login with username and password, and get auth token for subsequent
-        operations
-      parameters:
-        - name: username
-          in: query
-          description: Username
-          required: true
-          type: string
-        - name: password
-          in: query
-          description: Password
-          required: true
-          type: string
-      responses:
-        '200':
-          description: AuthToken
-          schema:
-            $ref: '#/definitions/AuthToken'
-      tags:
-        - token
     post:
       operationId: token_create
       description: ''
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/AuthCredential'
+      parameters: []
       responses:
         '201':
-          description: AuthToken
-          schema:
-            $ref: '#/definitions/AuthToken'
+          description: ''
       tags:
         - token
-      deprecated: true
     parameters: []
 definitions:
   Account:
@@ -4583,58 +4552,3 @@ definitions:
         title: Job site
         type: integer
         x-nullable: true
-  AuthToken:
-    required:
-      - token
-      - id
-      - first_name
-      - companies
-    type: object
-    properties:
-      token:
-        title: Token
-        type: string
-        maxLength: 40
-        minLength: 1
-      id:
-        title: User
-        type: integer
-      email:
-        title: Email address
-        type: string
-        format: email
-        minLength: 5
-      first_name:
-        title: First name
-        type: string
-        maxLength: 30
-        minLength: 1
-      last_name:
-        title: Last name
-        type: string
-        maxLength: 30
-      pusher_key:
-        title: Pusher Api key
-        type: string
-        maxLength: 256
-        x-nullable: true
-      companies:
-        type: array
-        items:
-          $ref: '#/definitions/Company'
-  AuthCredential:
-    required:
-      - username
-      - password
-    type: object
-    properties:
-      username:
-        title: Username
-        type: string
-        maxLength: 200
-        minLength: 1
-      password:
-        title: Password
-        type: string
-        maxLength: 200
-        minLength: 1

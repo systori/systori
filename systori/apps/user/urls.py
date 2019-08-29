@@ -1,13 +1,12 @@
 from ..user.authorization import office_auth
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url, include
-from rest_framework.authtoken import views as drf_views
+from rest_framework.authtoken.views import ObtainAuthToken
 from . import views
-from .api import SystoriAuthToken
 
 urlpatterns = [
     url(r"^accounts/", include("allauth.urls")),
-    url(r"api/token/", SystoriAuthToken.as_view(), name="drf.tokenauth"),
+    url(r"api/token/", ObtainAuthToken.as_view(), name="drf.tokenauth"),
     url(r"^settings$", login_required(views.SettingsView.as_view()), name="settings"),
     url(r"^set_language$", views.SetLanguageView.as_view(), name="set_language"),
     url(r"^users$", office_auth(views.WorkerList.as_view()), name="users"),

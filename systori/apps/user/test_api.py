@@ -16,36 +16,4 @@ class ProjectApiTest(ClientTestCase):
             "/api/token/", data={"username": self.user.email, "password": "password"}
         )
         json = response.json()
-        self.assertEqual(
-            [
-                "token",
-                "id",
-                "email",
-                "first_name",
-                "last_name",
-                "pusher_key",
-                "companies",
-            ],
-            list(json.keys()),
-        )
-
-    def test_user_gets_authenticated_using_get_operation(self):
-        """
-        Expect retrieval of auth token and additional information
-        """
-        response = self.client.get(
-            "/api/token/", data={"username": self.user.email, "password": "password"}
-        )
-        json = response.json()
-        self.assertEqual(
-            [
-                "token",
-                "id",
-                "email",
-                "first_name",
-                "last_name",
-                "pusher_key",
-                "companies",
-            ],
-            list(json.keys()),
-        )
+        self.assertEqual(["token"], list(json.keys()))
