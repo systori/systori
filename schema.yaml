@@ -670,7 +670,9 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/SelectedDay'
+            type: array
+            items:
+              $ref: '#/definitions/WorkerWithProjects'
       tags:
         - dailyplan
     parameters: []
@@ -3686,6 +3688,151 @@ definitions:
         title: Selected day
         type: string
         format: date
+  ProjectWithDay:
+    required:
+      - name
+      - day
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Project Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      description:
+        title: Project Description
+        type: string
+        x-nullable: true
+      is_template:
+        title: Is template
+        type: boolean
+      structure:
+        title: Numbering Structure
+        type: string
+      notes:
+        type: array
+        items:
+          $ref: '#/definitions/Note'
+      phase:
+        title: Phase
+        type: string
+        enum:
+          - prospective
+          - tendering
+          - planning
+          - executing
+          - settlement
+          - warranty
+          - finished
+      state:
+        title: State
+        type: string
+        enum:
+          - active
+          - paused
+          - disputed
+          - stopped
+      day:
+        title: Day
+        type: string
+        format: date
+  WorkerWithProjects:
+    required:
+      - company
+      - user
+      - projects
+    type: object
+    properties:
+      first_name:
+        title: First name
+        type: string
+        readOnly: true
+      last_name:
+        title: Last name
+        type: string
+        readOnly: true
+      email:
+        title: Email
+        type: string
+        readOnly: true
+      language:
+        title: Language
+        type: string
+        readOnly: true
+      is_verified:
+        title: Is verified
+        type: string
+        readOnly: true
+      get_full_name:
+        title: Get full name
+        type: string
+        readOnly: true
+      company:
+        title: Company
+        type: string
+        pattern: ^[a-z][a-z0-9_\-]*$
+      user:
+        title: User
+        type: integer
+      is_owner:
+        title: Owner
+        description: Has full and unlimited access.
+        type: boolean
+      has_owner:
+        title: Has owner
+        type: boolean
+        readOnly: true
+      is_staff:
+        title: Staff
+        description: Manage projects and perform administrative tasks.
+        type: boolean
+      has_staff:
+        title: Has staff
+        type: boolean
+        readOnly: true
+      is_foreman:
+        title: Foreman
+        description: Manage workers in the field.
+        type: boolean
+      has_foreman:
+        title: Has foreman
+        type: boolean
+        readOnly: true
+      is_laborer:
+        title: Laborer
+        description: Limited access in the field.
+        type: boolean
+      has_laborer:
+        title: Has laborer
+        type: boolean
+        readOnly: true
+      is_accountant:
+        title: Accountant
+        description: Access to financial information.
+        type: boolean
+      is_active:
+        title: Active
+        description: Must be enabled to allow worker access to the company. Unchecking
+          this will completely disable access for the worker and you will not be able
+          to assign tasks to them in the daily planner.
+        type: boolean
+      can_track_time:
+        title: Allowed to track their own time?
+        description: Worker will be able to start and stop their own work timer. Requires
+          that "Time Tracking & Timesheets" is also enabled.
+        type: boolean
+      is_fake:
+        title: Is fake
+        type: string
+        readOnly: true
+      projects:
+        type: array
+        items:
+          $ref: '#/definitions/ProjectWithDay'
   Contact:
     type: object
     properties:
