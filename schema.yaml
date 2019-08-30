@@ -3173,6 +3173,17 @@ paths:
       tags:
         - token
     parameters: []
+  /user/user/me/:
+    get:
+      operationId: user_user_me_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - user
+    parameters: []
 definitions:
   Account:
     required:
