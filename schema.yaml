@@ -3181,6 +3181,8 @@ paths:
       responses:
         '200':
           description: ''
+          schema:
+            $ref: '#/definitions/User'
       tags:
         - user
     parameters: []
@@ -4563,3 +4565,63 @@ definitions:
         title: Job site
         type: integer
         x-nullable: true
+  User:
+    required:
+      - first_name
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      last_login:
+        title: Last login
+        type: string
+        format: date-time
+        x-nullable: true
+      is_superuser:
+        title: Superuser status
+        description: Designates that this user has all permissions without explicitly
+          assigning them.
+        type: boolean
+      first_name:
+        title: First name
+        type: string
+        maxLength: 30
+        minLength: 1
+      last_name:
+        title: Last name
+        type: string
+        maxLength: 30
+      email:
+        title: Email address
+        type: string
+        format: email
+        maxLength: 254
+        x-nullable: true
+      date_joined:
+        title: Date joined
+        type: string
+        format: date-time
+      language:
+        title: Language
+        type: string
+        enum:
+          - de
+          - en
+      groups:
+        description: The groups this user belongs to. A user will get all permissions
+          granted to each of their groups.
+        type: array
+        items:
+          description: The groups this user belongs to. A user will get all permissions
+            granted to each of their groups.
+          type: integer
+        uniqueItems: true
+      user_permissions:
+        description: Specific permissions for this user.
+        type: array
+        items:
+          description: Specific permissions for this user.
+          type: integer
+        uniqueItems: true
