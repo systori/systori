@@ -16,8 +16,7 @@ from systori.apps.user.serializers import UserSerializer
 class UserMeAPIView(APIView):
     permission_classes = (WorkerIsAuthenticated,)
 
-    @swagger_auto_schema(method="GET", responses={200: UserSerializer()})
-    @api_view(["GET"])
+    @swagger_auto_schema(responses={200: UserSerializer()})
     def get(self, request):
         return Response(UserSerializer(request.user).data)
 
