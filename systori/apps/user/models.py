@@ -39,7 +39,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
     date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
     language = models.CharField(
-        _("language"), choices=settings.LANGUAGES, max_length=2, blank=True
+        _("language"),
+        choices=settings.LANGUAGES,
+        max_length=2,
+        # Existing users have blank language if they never set it manually
+        blank=False,
+        null=False,
+        default=settings.LANGUAGE_CODE,
     )
 
     objects = UserManager()

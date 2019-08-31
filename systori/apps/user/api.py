@@ -1,21 +1,18 @@
-from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework.decorators import action
-from drf_yasg.openapi import Response as OpenApiResponse
 from drf_yasg.utils import swagger_auto_schema
 
 from systori.apps.company.serializers import CompanySerializer
-from systori.apps.user.models import User
-from systori.apps.user.permissions import HasStaffAccess, WorkerIsAuthenticated
+from systori.apps.user.permissions import WorkerIsAuthenticated
 from systori.apps.user.serializers import UserSerializer
 
 
 class UserMeAPIView(APIView):
     permission_classes = (WorkerIsAuthenticated,)
 
+    @swagger_auto_schema(responses={200: UserSerializer()})
     def get(self, request):
         return Response(UserSerializer(request.user).data)
 

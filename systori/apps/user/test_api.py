@@ -16,4 +16,4 @@ class ProjectApiTest(ClientTestCase):
             "/api/token/", data={"username": self.user.email, "password": "password"}
         )
         json = response.json()
-        self.assertEqual(["token"], list(json.keys()))
+        self.assertEqual(["token", "companies"], list(json.keys()))
