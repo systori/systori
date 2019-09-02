@@ -5,14 +5,18 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('document', '0002_auto_20190730_2210'),
-    ]
+    dependencies = [("document", "0002_auto_20190730_2210")]
 
     operations = [
         migrations.AlterField(
-            model_name='documentsettings',
-            name='language',
-            field=models.CharField(choices=[('de', 'Deutsch'), ('en', 'English')], default='en', max_length=2, unique=True, verbose_name='language'),
-        ),
+            model_name="documentsettings",
+            name="language",
+            field=models.CharField(
+                choices=[("de", "Deutsch"), ("en", "English")],
+                default="de",
+                max_length=2,
+                unique=True,
+                verbose_name="language",
+            ),
+        )
     ]
