@@ -361,6 +361,7 @@ def refresh_sandbox_db():
 
 def deploy_sandbox(build="yes", db="yes"):
     ":build=true and deploy sandbox image"
+    local("source .environment")
     if "yes" in build:
         local("docker-compose build app_sandbox")
         local("docker push elmcrest/systori:sandbox")
