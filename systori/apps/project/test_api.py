@@ -146,6 +146,20 @@ class ProjectApiTest(ClientTestCase):
         with self.assertRaises(Note.DoesNotExist):
             Note.objects.get(pk=note1.pk)
 
+    def test_list_jobs(self):
+        job1 = JobFactory(project=self.project, description="job1 desc")
+
+        job2 = JobFactory(project=self.project, description="job2 desc")
+
+        response = self.client.get(f"/api/project/{self.project.pk}/jobs/")
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertEqual(json[0]["name"], job1.name)
+        self.assertEqual(json[0]["description"], "job1 desc")
+        self.assertEqual(json[1]["name"], job2.name)
+        self.assertEqual(json[1]["description"], "job2 desc")
+
     def test_create_job(self):
         response = self.client.post(
             f"/api/project/{self.project.pk}/jobs/",
