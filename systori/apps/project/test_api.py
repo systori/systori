@@ -6,6 +6,8 @@ from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CON
 from systori.apps.main.factories import NoteFactory
 from systori.apps.main.serializers import NoteSerializer
 from systori.apps.main.models import Note
+from systori.apps.task.serializers import JobSerializer
+from systori.apps.task.factories import JobFactory
 
 from .api import get_week_by_day
 from .models import TeamMember, EquipmentAssignment
@@ -143,6 +145,18 @@ class ProjectApiTest(ClientTestCase):
         self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
         with self.assertRaises(Note.DoesNotExist):
             Note.objects.get(pk=note1.pk)
+
+    def test_create_job(self):
+        response = self.client.post(
+            f"/api/project/{self.project.pk}/jobs/",
+            {"name": "This is a test job", "description": "this is a desc"},
+        )
+
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        json = response.json()
+        # self.assertEqual(json["project"], self.project.pk)
+        self.assertEqual(json["name"], "This is a test job")
+        self.assertEqual(json["description"], "this is a desc")
 
     def test_search(self):
         response = self.client.put(

@@ -25,6 +25,8 @@ from rest_framework.permissions import IsAuthenticated
 from systori.apps.company.models import Worker
 from systori.apps.main.models import Note
 from systori.apps.main.serializers import NoteSerializer
+from systori.apps.task.models import Job
+from systori.apps.task.serializers import JobSerializer
 
 from ..user.permissions import HasLaborerAccess
 from .models import Project, DailyPlan
@@ -206,6 +208,27 @@ class ProjectModelViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data=serializer.data)
+
+    @swagger_auto_schema(method="GET", responses={200: JobSerializer(many=True)})
+    @swagger_auto_schema(
+        method="POST", request_body=JobSerializer, responses={201: JobSerializer()}
+    )
+    @action(methods=["GET", "POST"], detail=True)
+    def jobs(self, request, pk=None):
+        project = self.get_object()
+        if request.method.lower() == "get":
+            jobs = Job.objects.filter(project=project)
+            return Response(data=JobSerializer(jobs, many=True).data)
+
+        if request.method.lower() == "post" and pk:
+            serializer = JobSerializer(data=request.data, )
+            serializer.is_valid(raise_exception=True)
+
+            serializer.save(project=project)
+            return Response(serializer.data, status=HTTP_201_CREATED)
+
+        return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
+
 
 
 class DailyPlanModelViewSet(ModelViewSet):
