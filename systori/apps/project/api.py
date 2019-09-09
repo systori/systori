@@ -221,14 +221,13 @@ class ProjectModelViewSet(ModelViewSet):
             return Response(data=JobSerializer(jobs, many=True).data)
 
         if request.method.lower() == "post" and pk:
-            serializer = JobSerializer(data=request.data, )
+            serializer = JobSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
             serializer.save(project=project)
             return Response(serializer.data, status=HTTP_201_CREATED)
 
         return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
-
 
 
 class DailyPlanModelViewSet(ModelViewSet):
