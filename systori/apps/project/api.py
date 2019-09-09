@@ -172,6 +172,7 @@ class ProjectModelViewSet(ModelViewSet):
 
         return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
 
+    @swagger_auto_schema(methods=["GET"], responses={200: NoteSerializer()})
     @swagger_auto_schema(
         methods=["PUT", "PATCH"],
         request_body=NoteSerializer,
@@ -179,7 +180,7 @@ class ProjectModelViewSet(ModelViewSet):
     )
     @swagger_auto_schema(method="DELETE", responses={204: "Note deleted successfully"})
     @action(
-        methods=["PUT", "PATCH", "DELETE"],
+        methods=["GET", "PUT", "PATCH", "DELETE"],
         detail=True,
         url_path=r"note/(?P<note_id>\d+)",
     )
@@ -195,6 +196,9 @@ class ProjectModelViewSet(ModelViewSet):
         if request.method.lower() == "delete":
             note.delete()
             return Response(status=HTTP_204_NO_CONTENT)
+
+        if request.method.lower() == "get":
+            return Response(data=NoteSerializer(note).data)
 
         # This is an update request
         is_partial = request.method.lower() == "patch"

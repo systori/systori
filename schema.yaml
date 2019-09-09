@@ -2611,6 +2611,17 @@ paths:
         required: true
         type: integer
   /project/{id}/note/{note_id}/:
+    get:
+      operationId: project_note_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Note'
+      tags:
+        - project
     put:
       operationId: project_note_update
       description: ''

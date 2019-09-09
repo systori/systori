@@ -98,6 +98,20 @@ class ProjectApiTest(ClientTestCase):
         self.assertEqual(json["worker"], self.worker.pk)
         self.assertEqual(json["text"], "This is a test note")
 
+    def test_get_note(self):
+        note1 = NoteFactory(
+            project=self.project, content_object=self.project, worker=self.worker
+        )
+
+        response = self.client.get(f"/api/project/{self.project.pk}/note/{note1.pk}/")
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertEqual(json["text"], note1.text)
+        self.assertEqual(json["pk"], note1.pk)
+        self.assertEqual(json["project"], self.project.pk)
+        self.assertEqual(json["worker"], self.worker.pk)
+
     def test_partial_update_note(self):
         note1 = NoteFactory(
             project=self.project, content_object=self.project, worker=self.worker
