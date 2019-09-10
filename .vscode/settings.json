@@ -19,6 +19,8 @@
         "django-html": "html",
     },
     "[python]": {
+        "editor.formatOnSaveTimeout": 10000,
+        "editor.formatOnPaste": true,
         "editor.formatOnSave": true,
         "editor.formatOnType": true,
         "editor.defaultFormatter": "ms-python.python",
