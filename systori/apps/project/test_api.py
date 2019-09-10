@@ -7,6 +7,7 @@ from systori.apps.main.factories import NoteFactory
 from systori.apps.main.serializers import NoteSerializer
 from systori.apps.main.models import Note
 from systori.apps.task.serializers import JobSerializer
+from systori.apps.task.models import Job
 from systori.apps.task.factories import JobFactory
 
 from .api import get_week_by_day
@@ -171,6 +172,57 @@ class ProjectApiTest(ClientTestCase):
         # self.assertEqual(json["project"], self.project.pk)
         self.assertEqual(json["name"], "This is a test job")
         self.assertEqual(json["description"], "this is a desc")
+
+    def test_update_job(self):
+        job1 = JobFactory(project=self.project)
+
+        response = self.client.put(
+            f"/api/project/{self.project.pk}/job/{job1.pk}/",
+            {"description": "This is a test job"},
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertEqual(json["pk"], job1.pk)
+        self.assertEqual(json["name"], job1.name)
+        self.assertNotEqual(json["description"], job1.description)
+        self.assertEqual(json["description"], "This is a test job")
+
+    def test_get_job(self):
+        job1 = JobFactory(project=self.project)
+
+        response = self.client.get(f"/api/project/{self.project.pk}/job/{job1.pk}/")
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertEqual(json["pk"], job1.pk)
+        self.assertEqual(json["name"], job1.name)
+        self.assertEqual(json["description"], job1.description)
+
+    def test_partial_update_job(self):
+        job1 = JobFactory(project=self.project)
+
+        response = self.client.patch(
+            f"/api/project/{self.project.pk}/job/{job1.pk}/",
+            {"description": "This is a test job"},
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertEqual(json["pk"], job1.pk)
+        self.assertEqual(json["name"], job1.name)
+        self.assertNotEqual(json["description"], job1.description)
+        self.assertEqual(json["description"], "This is a test job")
+
+    def test_delete_job(self):
+        job1 = JobFactory(project=self.project)
+        self.assertIsNotNone(Job.objects.get(pk=job1.pk))
+
+        response = self.client.delete(f"/api/project/{self.project.pk}/job/{job1.pk}/")
+
+        self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
+        with self.assertRaises(Job.DoesNotExist):
+            Job.objects.get(pk=job1.pk)
 
     def test_search(self):
         response = self.client.put(

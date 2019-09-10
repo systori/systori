@@ -2610,6 +2610,69 @@ paths:
         description: A unique integer value identifying this Project.
         required: true
         type: integer
+  /project/{id}/job/{job_id}/:
+    get:
+      operationId: project_job_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Job'
+      tags:
+        - project
+    put:
+      operationId: project_job_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Job'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Job'
+      tags:
+        - project
+    patch:
+      operationId: project_job_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Job'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Job'
+      tags:
+        - project
+    delete:
+      operationId: project_job_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: Job deleted successfully
+      tags:
+        - project
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Project.
+        required: true
+        type: integer
+      - name: job_id
+        in: path
+        required: true
+        type: string
   /project/{id}/jobs/:
     get:
       operationId: project_jobs_read

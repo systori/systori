@@ -229,6 +229,40 @@ class ProjectModelViewSet(ModelViewSet):
 
         return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
 
+    @swagger_auto_schema(methods=["GET"], responses={200: JobSerializer()})
+    @swagger_auto_schema(
+        methods=["PUT", "PATCH"],
+        request_body=JobSerializer,
+        responses={200: JobSerializer()},
+    )
+    @swagger_auto_schema(method="DELETE", responses={204: "Job deleted successfully"})
+    @action(
+        methods=["GET", "PUT", "PATCH", "DELETE"],
+        detail=True,
+        url_path=r"job/(?P<job_id>\d+)",
+    )
+    def job(self, request, pk=None, job_id=None):
+        if not (pk or job_id):
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        project = self.get_object()
+        job = Job.objects.get(pk=job_id, project=project)
+
+        if request.method.lower() == "delete":
+            job.delete()
+            return Response(status=HTTP_204_NO_CONTENT)
+
+        if request.method.lower() == "get":
+            return Response(data=JobSerializer(job).data)
+
+        # This is an update request
+        # We always update jobs partially
+        # is_partial = request.method.lower() == "patch"
+        serializer = JobSerializer(job, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(project=project)
+        return Response(data=JobSerializer(job).data)
+
 
 class DailyPlanModelViewSet(ModelViewSet):
     queryset = (
