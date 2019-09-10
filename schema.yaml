@@ -2610,6 +2610,42 @@ paths:
         description: A unique integer value identifying this Project.
         required: true
         type: integer
+  /project/{id}/jobs/:
+    get:
+      operationId: project_jobs_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Job'
+      tags:
+        - project
+    post:
+      operationId: project_jobs_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Job'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Job'
+      tags:
+        - project
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Project.
+        required: true
+        type: integer
   /project/{id}/note/{note_id}/:
     get:
       operationId: project_note_read
