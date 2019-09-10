@@ -222,18 +222,20 @@ class DeleteSerializer(serializers.Serializer):
         if lineitems:
             LineItem.objects.filter(pk__in=lineitems).delete()
 
+
 class TasksSerializer(serializers.ListSerializer):
     child = TaskSerializer()
 
     def to_representation(self, data):
         return [self.child.to_representation(item) for item in data.all()]
-        
+
+
 class GroupsSerializer(serializers.ListSerializer):
     child = GroupSerializer()
 
     def to_representation(self, data):
         return [self.child.to_representation(item) for item in data.all()]
-        
+
 
 class JobSerializer(serializers.ModelSerializer):
     groups = GroupsSerializer(required=False)
