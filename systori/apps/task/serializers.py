@@ -244,7 +244,7 @@ class JobSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = ["name", "description", "groups", "tasks", "delete"]
+        fields = ["pk", "name", "description", "groups", "tasks", "delete"]
 
     def update(self, job, validated_data):
 

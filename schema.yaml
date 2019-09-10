@@ -4496,6 +4496,10 @@ definitions:
   Job:
     type: object
     properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
       name:
         title: Name
         type: string
