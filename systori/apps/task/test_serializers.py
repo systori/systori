@@ -29,7 +29,7 @@ class TaskSerializerTest(ClientTestCase):
         serializer = TaskSerializer(instance=task)
         serialized = serializer.data
 
-        self.assertDictContainsSubset(serialized, {"price": 5, "total": 100})
+        self.assertDictContainsSubset({"price": "5.00", "total": "100.00"}, serialized)
 
     def test_can_serialize_task_from_group_from_job(self):
         job = JobFactory(project=self.project)
@@ -41,8 +41,8 @@ class TaskSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized,
             {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            serialized,
         )
 
     def test_can_serialize_task_from_subgroup_from_group_from_job(self):
@@ -57,8 +57,8 @@ class TaskSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized,
             {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            serialized,
         )
 
     def test_can_serialize_task_with_lineitems_from_job(self):
@@ -72,19 +72,19 @@ class TaskSerializerTest(ClientTestCase):
         serializer = TaskSerializer(instance=task)
         serialized = serializer.data
 
-        self.assertDictContainsSubset(serialized, {"price": 5, "total": 100})
+        self.assertDictContainsSubset({"price": "5.00", "total": "100.00"}, serialized)
 
         self.assertDictContainsSubset(
+            {"name": "Clean celing", "unit": "hr", "qty": "8.000", "price": "12.00"},
             serialized["lineitems"][0],
-            {"name": "Clean celing", "unit": "hr", "qty": 8, "price": 12},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean floor", "unit": "hr", "qty": "4.000", "price": "26.00"},
             serialized["lineitems"][1],
-            {"name": "Clean floor", "unit": "hr", "qty": 4, "price": 26},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean doors", "unit": "hr", "qty": "4.000", "price": "20.00"},
             serialized["lineitems"][2],
-            {"name": "Clean doors", "unit": "hr", "qty": 4, "price": 20},
         )
 
     def test_can_serialize_task_with_lineitems_from_group(self):
@@ -101,21 +101,21 @@ class TaskSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized,
             {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            serialized,
         )
 
         self.assertDictContainsSubset(
+            {"name": "Clean celing", "unit": "hr", "qty": "8.000", "price": "12.00"},
             serialized["lineitems"][0],
-            {"name": "Clean celing", "unit": "hr", "qty": 8, "price": 12},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean floor", "unit": "hr", "qty": "4.000", "price": "26.00"},
             serialized["lineitems"][1],
-            {"name": "Clean floor", "unit": "hr", "qty": 4, "price": 26},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean doors", "unit": "hr", "qty": "4.000", "price": "20.00"},
             serialized["lineitems"][2],
-            {"name": "Clean doors", "unit": "hr", "qty": 4, "price": 20},
         )
 
     def test_can_serialize_task_with_lineitems_from_subgroup_from_group_from_job(self):
@@ -141,21 +141,21 @@ class TaskSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized,
             {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            serialized,
         )
 
         self.assertDictContainsSubset(
+            {"name": "Clean celing", "unit": "hr", "qty": "8.000", "price": "12.00"},
             serialized["lineitems"][0],
-            {"name": "Clean celing", "unit": "hr", "qty": 8, "price": 12},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean floor", "unit": "hr", "qty": "4.000", "price": "26.00"},
             serialized["lineitems"][1],
-            {"name": "Clean floor", "unit": "hr", "qty": 4, "price": 26},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean doors", "unit": "hr", "qty": "4.000", "price": "20.00"},
             serialized["lineitems"][2],
-            {"name": "Clean doors", "unit": "hr", "qty": 4, "price": 20},
         )
 
 
@@ -174,8 +174,8 @@ class GroupSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized,
             {"name": "test group", "description": "desc", "groups": [], "tasks": []},
+            serialized,
         )
 
     def test_can_serialize_group_with_tasks(self):
@@ -189,11 +189,11 @@ class GroupSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized, {"name": "test group", "description": "desc", "groups": []}
+            {"name": "test group", "description": "desc", "groups": []}, serialized
         )
         self.assertDictContainsSubset(
-            serialized["tasks"][0],
             {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            serialized["tasks"][0],
         )
 
     def test_can_serialize_group_with_tasks_with_lineitems(self):
@@ -210,23 +210,23 @@ class GroupSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized, {"name": "test group", "description": "desc", "groups": []}
+            {"name": "test group", "description": "desc", "groups": []}, serialized
         )
         self.assertDictContainsSubset(
-            serialized["tasks"][0],
             {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            serialized["tasks"][0],
         )
         self.assertDictContainsSubset(
+            {"name": "Clean celing", "unit": "hr", "qty": "8.000", "price": "12.00"},
             serialized["tasks"][0]["lineitems"][0],
-            {"name": "Clean celing", "unit": "hr", "qty": 8, "price": 12},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean floor", "unit": "hr", "qty": "4.000", "price": "26.00"},
             serialized["tasks"][0]["lineitems"][1],
-            {"name": "Clean floor", "unit": "hr", "qty": 4, "price": 26},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean doors", "unit": "hr", "qty": "4.000", "price": "20.00"},
             serialized["tasks"][0]["lineitems"][2],
-            {"name": "Clean doors", "unit": "hr", "qty": 4, "price": 20},
         )
 
     def test_can_serialize_group_with_sub_group_with_no_tasks(self):
@@ -240,11 +240,11 @@ class GroupSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized, {"name": "test group", "description": "desc", "tasks": []}
+            {"name": "test group", "description": "desc", "tasks": []}, serialized
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0],
             {"name": "sub group", "description": "desc", "tasks": []},
+            serialized["groups"][0],
         )
 
     def test_can_serialize_group_with_sub_group_with_tasks(self):
@@ -266,19 +266,19 @@ class GroupSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized, {"name": "test group", "description": "desc", "tasks": []}
+            {"name": "test group", "description": "desc", "tasks": []}, serialized
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0], {"name": "sub group", "description": "desc"}
+            {"name": "sub group", "description": "desc"}, serialized["groups"][0]
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0]["tasks"][0],
             {
                 "name": "Cleaning 2",
                 "qty": 1,
                 "total": 1,
                 "description": "clean stuff again",
             },
+            serialized["groups"][0]["tasks"][0],
         )
 
     def test_can_serialize_group_with_sub_group_with_tasks_with_lineitems(self):
@@ -310,31 +310,31 @@ class GroupSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized, {"name": "test group", "description": "desc", "tasks": []}
+            {"name": "test group", "description": "desc", "tasks": []}, serialized
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0], {"name": "sub group", "description": "desc"}
+            {"name": "sub group", "description": "desc"}, serialized["groups"][0]
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0]["tasks"][0],
             {
                 "name": "Cleaning 2",
                 "qty": 1,
                 "total": 1,
                 "description": "clean stuff again",
             },
+            serialized["groups"][0]["tasks"][0],
         )
         self.assertDictContainsSubset(
+            {"name": "Clean celing", "unit": "hr", "qty": "8.000", "price": "12.00"},
             serialized["groups"][0]["tasks"][0]["lineitems"][0],
-            {"name": "Clean celing", "unit": "hr", "qty": 8, "price": 12},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean floor", "unit": "hr", "qty": "4.000", "price": "26.00"},
             serialized["groups"][0]["tasks"][0]["lineitems"][1],
-            {"name": "Clean floor", "unit": "hr", "qty": 4, "price": 26},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean doors", "unit": "hr", "qty": "4.000", "price": "20.00"},
             serialized["groups"][0]["tasks"][0]["lineitems"][2],
-            {"name": "Clean doors", "unit": "hr", "qty": 4, "price": 20},
         )
 
     def test_can_serialize_group_with_sub_group_with_sub_group_with_no_tasks(self):
@@ -352,15 +352,15 @@ class GroupSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized, {"name": "test group", "description": "desc", "tasks": []}
+            {"name": "test group", "description": "desc", "tasks": []}, serialized
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0],
             {"name": "sub group", "description": "desc", "tasks": []},
+            serialized["groups"][0],
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0]["groups"][0],
             {"name": "sub sub group", "description": "desc", "tasks": []},
+            serialized["groups"][0]["groups"][0],
         )
 
     def test_can_serialize_group_with_sub_group_with_sub_group_with_tasks(self):
@@ -386,18 +386,17 @@ class GroupSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized, {"name": "test group", "description": "desc", "tasks": []}
+            {"name": "test group", "description": "desc", "tasks": []}, serialized
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0],
             {"name": "sub group", "description": "desc", "tasks": []},
+            serialized["groups"][0],
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0]["groups"][0],
             {"name": "sub sub group", "description": "desc"},
+            serialized["groups"][0]["groups"][0],
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0]["groups"][0]["tasks"][0],
             {
                 "name": "Cleaning 2",
                 "qty": 1,
@@ -405,6 +404,7 @@ class GroupSerializerTest(ClientTestCase):
                 "description": "clean stuff again",
                 "lineitems": [],
             },
+            serialized["groups"][0]["groups"][0]["tasks"][0],
         )
 
     def test_can_serialize_group_with_sub_group_with_sub_group_with_tasks_with_lineitems(
@@ -442,34 +442,34 @@ class GroupSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized, {"name": "test group", "description": "desc", "tasks": []}
+            {"name": "test group", "description": "desc", "tasks": []}, serialized
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0],
             {"name": "sub group", "description": "desc", "tasks": []},
+            serialized["groups"][0],
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0]["groups"][0],
             {"name": "sub sub group", "description": "desc"},
+            serialized["groups"][0]["groups"][0],
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0]["groups"][0]["tasks"][0],
             {
                 "name": "Cleaning 2",
                 "qty": 1,
                 "total": 1,
                 "description": "clean stuff again",
             },
+            serialized["groups"][0]["groups"][0]["tasks"][0],
         )
         self.assertDictContainsSubset(
+            {"name": "Clean celing", "unit": "hr", "qty": "8.000", "price": "12.00"},
             serialized["groups"][0]["groups"][0]["tasks"][0]["lineitems"][0],
-            {"name": "Clean celing", "unit": "hr", "qty": 8, "price": 12},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean floor", "unit": "hr", "qty": "4.000", "price": "26.00"},
             serialized["groups"][0]["groups"][0]["tasks"][0]["lineitems"][1],
-            {"name": "Clean floor", "unit": "hr", "qty": 4, "price": 26},
         )
         self.assertDictContainsSubset(
+            {"name": "Clean doors", "unit": "hr", "qty": "4.000", "price": "20.00"},
             serialized["groups"][0]["groups"][0]["tasks"][0]["lineitems"][2],
-            {"name": "Clean doors", "unit": "hr", "qty": 4, "price": 20},
         )
