@@ -33,7 +33,7 @@ class TaskSerializerTest(ClientTestCase):
 
     def test_can_serialize_task_from_group_from_job(self):
         job = JobFactory(project=self.project)
-        group = GroupFactory(name="test group", description="desc", job=job)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
         task = TaskFactory(
             name="Cleaning", group=group, qty=1, total=1, description="clean stuff"
         )
@@ -41,15 +41,15 @@ class TaskSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            {"name": "Cleaning", "qty": "1.000", "total": "1.00", "description": "clean stuff"},
             serialized,
         )
 
     def test_can_serialize_task_from_subgroup_from_group_from_job(self):
         project = ProjectFactory(structure="01.01.01.001")
         job = JobFactory(project=project)
-        group = GroupFactory(name="test group", description="desc", job=job)
-        sub_group = GroupFactory(name="test sub group", description="desc", job=group)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
+        sub_group = GroupFactory(name="test sub group", description="desc", parent=group)
         task = TaskFactory(
             name="Cleaning", group=sub_group, qty=1, total=1, description="clean stuff"
         )
@@ -57,7 +57,7 @@ class TaskSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            {"name": "Cleaning", "qty": "1.000", "total": "1.00", "description": "clean stuff"},
             serialized,
         )
 
@@ -89,7 +89,7 @@ class TaskSerializerTest(ClientTestCase):
 
     def test_can_serialize_task_with_lineitems_from_group(self):
         job = JobFactory(project=self.project)
-        group = GroupFactory(name="test group", description="desc", job=job)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
         task = TaskFactory(
             name="Cleaning", group=group, qty=1, total=1, description="clean stuff"
         )
@@ -101,7 +101,7 @@ class TaskSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            {"name": "Cleaning", "qty": "1.000", "total": "1.00", "description": "clean stuff"},
             serialized,
         )
 
@@ -121,8 +121,8 @@ class TaskSerializerTest(ClientTestCase):
     def test_can_serialize_task_with_lineitems_from_subgroup_from_group_from_job(self):
         project = ProjectFactory(structure="01.01.01.001")
         job = JobFactory(project=project)
-        group = GroupFactory(name="test group", description="desc", job=job)
-        sub_group = GroupFactory(name="test sub group", description="desc", job=group)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
+        sub_group = GroupFactory(name="test sub group", description="desc", parent=group)
 
         sub_group_task = TaskFactory(
             name="Cleaning", group=sub_group, qty=1, total=1, description="clean stuff"
@@ -141,7 +141,7 @@ class TaskSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            {"name": "Cleaning", "qty": "1.000", "total": "1.00", "description": "clean stuff"},
             serialized,
         )
 
@@ -168,7 +168,7 @@ class GroupSerializerTest(ClientTestCase):
 
     def test_can_serialize_group_with_no_tasks(self):
         job = JobFactory(project=self.project)
-        group = GroupFactory(name="test group", description="desc", job=job)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
 
         serializer = GroupSerializer(instance=group)
         serialized = serializer.data
@@ -180,7 +180,7 @@ class GroupSerializerTest(ClientTestCase):
 
     def test_can_serialize_group_with_tasks(self):
         job = JobFactory(project=self.project)
-        group = GroupFactory(name="test group", description="desc", job=job)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
         task = TaskFactory(
             name="Cleaning", group=group, qty=1, total=1, description="clean stuff"
         )
@@ -192,13 +192,13 @@ class GroupSerializerTest(ClientTestCase):
             {"name": "test group", "description": "desc", "groups": []}, serialized
         )
         self.assertDictContainsSubset(
-            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            {"name": "Cleaning", "qty": "1.000", "total": "1.00", "description": "clean stuff"},
             serialized["tasks"][0],
         )
 
     def test_can_serialize_group_with_tasks_with_lineitems(self):
         job = JobFactory(project=self.project)
-        group = GroupFactory(name="test group", description="desc", job=job)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
         task = TaskFactory(
             name="Cleaning", group=group, qty=1, total=1, description="clean stuff"
         )
@@ -213,7 +213,7 @@ class GroupSerializerTest(ClientTestCase):
             {"name": "test group", "description": "desc", "groups": []}, serialized
         )
         self.assertDictContainsSubset(
-            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            {"name": "Cleaning", "qty": "1.000", "total": "1.00", "description": "clean stuff"},
             serialized["tasks"][0],
         )
         self.assertDictContainsSubset(
@@ -232,9 +232,11 @@ class GroupSerializerTest(ClientTestCase):
     def test_can_serialize_group_with_sub_group_with_no_tasks(self):
         project = ProjectFactory(structure="01.01.01.001")
         job = JobFactory(project=project)
-        group = GroupFactory(name="test group", description="desc", job=job)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
 
-        sub_group = GroupFactory(name="sub group", description="desc", parent=group)
+        sub_group = GroupFactory(
+            name="sub group", description="desc", parent=group, depth=2
+        )
 
         serializer = GroupSerializer(instance=group)
         serialized = serializer.data
@@ -250,9 +252,11 @@ class GroupSerializerTest(ClientTestCase):
     def test_can_serialize_group_with_sub_group_with_tasks(self):
         project = ProjectFactory(structure="01.01.01.001")
         job = JobFactory(project=project)
-        group = GroupFactory(name="test group", description="desc", job=job)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
 
-        sub_group = GroupFactory(name="sub group", description="desc", parent=group)
+        sub_group = GroupFactory(
+            name="sub group", description="desc", parent=group, depth=2
+        )
 
         sub_group_task = TaskFactory(
             name="Cleaning 2",
@@ -284,9 +288,11 @@ class GroupSerializerTest(ClientTestCase):
     def test_can_serialize_group_with_sub_group_with_tasks_with_lineitems(self):
         project = ProjectFactory(structure="01.01.01.001")
         job = JobFactory(project=project)
-        group = GroupFactory(name="test group", description="desc", job=job)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
 
-        sub_group = GroupFactory(name="sub group", description="desc", parent=group)
+        sub_group = GroupFactory(
+            name="sub group", description="desc", parent=group, depth=2
+        )
 
         sub_group_task = TaskFactory(
             name="Cleaning 2",
@@ -340,12 +346,14 @@ class GroupSerializerTest(ClientTestCase):
     def test_can_serialize_group_with_sub_group_with_sub_group_with_no_tasks(self):
         project = ProjectFactory(structure="01.01.01.01.001")
         job = JobFactory(project=project)
-        group = GroupFactory(name="test group", description="desc", job=job)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
 
-        sub_group = GroupFactory(name="sub group", description="desc", parent=group)
+        sub_group = GroupFactory(
+            name="sub group", description="desc", parent=group, depth=2
+        )
 
         sub_sub_group = GroupFactory(
-            name="sub sub group", description="desc", parent=sub_group
+            name="sub sub group", description="desc", parent=sub_group, depth=3
         )
 
         serializer = GroupSerializer(instance=group)
@@ -366,12 +374,14 @@ class GroupSerializerTest(ClientTestCase):
     def test_can_serialize_group_with_sub_group_with_sub_group_with_tasks(self):
         project = ProjectFactory(structure="01.01.01.01.001")
         job = JobFactory(project=project)
-        group = GroupFactory(name="test group", description="desc", job=job)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
 
-        sub_group = GroupFactory(name="sub group", description="desc", parent=group)
+        sub_group = GroupFactory(
+            name="sub group", description="desc", parent=group, depth=2
+        )
 
         sub_sub_group = GroupFactory(
-            name="sub sub group", description="desc", parent=sub_group
+            name="sub sub group", description="desc", parent=sub_group, depth=3
         )
 
         sub_sub_group_task = TaskFactory(
@@ -412,12 +422,14 @@ class GroupSerializerTest(ClientTestCase):
     ):
         project = ProjectFactory(structure="01.01.01.01.001")
         job = JobFactory(project=project)
-        group = GroupFactory(name="test group", description="desc", job=job)
+        group = GroupFactory(name="test group", description="desc", parent=job, depth=1)
 
-        sub_group = GroupFactory(name="sub group", description="desc", parent=group)
+        sub_group = GroupFactory(
+            name="sub group", description="desc", parent=group, depth=2
+        )
 
         sub_sub_group = GroupFactory(
-            name="sub sub group", description="desc", parent=sub_group
+            name="sub sub group", description="desc", parent=sub_group, depth=3
         )
 
         sub_sub_group_task = TaskFactory(
