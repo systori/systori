@@ -18,6 +18,7 @@ from systori.apps.task.serializers import TaskSerializer, GroupSerializer
 class TaskSerializerTest(ClientTestCase):
     def setUp(self):
         super().setUp()
+        # Has structure 01.01.001
         self.project = ProjectFactory()
         self.jobsite = JobSiteFactory(project=self.project)
 
@@ -29,6 +30,36 @@ class TaskSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(serialized, {"price": 5, "total": 100})
+
+    def test_can_serialize_task_from_group_from_job(self):
+        job = JobFactory(project=self.project)
+        group = GroupFactory(name="test group", description="desc", job=job)
+        task = TaskFactory(
+            name="Cleaning", group=group, qty=1, total=1, description="clean stuff"
+        )
+        serializer = TaskSerializer(instance=task)
+        serialized = serializer.data
+
+        self.assertDictContainsSubset(
+            serialized,
+            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+        )
+
+    def test_can_serialize_task_from_subgroup_from_group_from_job(self):
+        project = ProjectFactory(structure="01.01.01.001")
+        job = JobFactory(project=project)
+        group = GroupFactory(name="test group", description="desc", job=job)
+        sub_group = GroupFactory(name="test sub group", description="desc", job=group)
+        task = TaskFactory(
+            name="Cleaning", group=sub_group, qty=1, total=1, description="clean stuff"
+        )
+        serializer = TaskSerializer(instance=task)
+        serialized = serializer.data
+
+        self.assertDictContainsSubset(
+            serialized,
+            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+        )
 
     def test_can_serialize_task_with_lineitems_from_job(self):
         job = JobFactory(project=self.project)
@@ -87,10 +118,51 @@ class TaskSerializerTest(ClientTestCase):
             {"name": "Clean doors", "unit": "hr", "qty": 4, "price": 20},
         )
 
+    def test_can_serialize_task_with_lineitems_from_subgroup_from_group_from_job(self):
+        project = ProjectFactory(structure="01.01.01.001")
+        job = JobFactory(project=project)
+        group = GroupFactory(name="test group", description="desc", job=job)
+        sub_group = GroupFactory(name="test sub group", description="desc", job=group)
+
+        sub_group_task = TaskFactory(
+            name="Cleaning", group=sub_group, qty=1, total=1, description="clean stuff"
+        )
+
+        LineItemFactory(
+            name="Clean celing", unit="hr", qty=8, price=12, task=sub_group_task
+        )
+        LineItemFactory(
+            name="Clean floor", unit="hr", qty=4, price=26, task=sub_group_task
+        )
+        LineItemFactory(
+            name="Clean doors", unit="hr", qty=4, price=20, task=sub_group_task
+        )
+        serializer = TaskSerializer(instance=sub_group_task)
+        serialized = serializer.data
+
+        self.assertDictContainsSubset(
+            serialized,
+            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+        )
+
+        self.assertDictContainsSubset(
+            serialized["lineitems"][0],
+            {"name": "Clean celing", "unit": "hr", "qty": 8, "price": 12},
+        )
+        self.assertDictContainsSubset(
+            serialized["lineitems"][1],
+            {"name": "Clean floor", "unit": "hr", "qty": 4, "price": 26},
+        )
+        self.assertDictContainsSubset(
+            serialized["lineitems"][2],
+            {"name": "Clean doors", "unit": "hr", "qty": 4, "price": 20},
+        )
+
 
 class GroupSerializerTest(ClientTestCase):
     def setUp(self):
         super().setUp()
+        # Has structure 01.01.001
         self.project = ProjectFactory()
         self.jobsite = JobSiteFactory(project=self.project)
 
@@ -122,6 +194,39 @@ class GroupSerializerTest(ClientTestCase):
         self.assertDictContainsSubset(
             serialized["tasks"][0],
             {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+        )
+
+    def test_can_serialize_group_with_tasks_with_lineitems(self):
+        job = JobFactory(project=self.project)
+        group = GroupFactory(name="test group", description="desc", job=job)
+        task = TaskFactory(
+            name="Cleaning", group=group, qty=1, total=1, description="clean stuff"
+        )
+        LineItemFactory(name="Clean celing", unit="hr", qty=8, price=12, task=task)
+        LineItemFactory(name="Clean floor", unit="hr", qty=4, price=26, task=task)
+        LineItemFactory(name="Clean doors", unit="hr", qty=4, price=20, task=task)
+
+        serializer = GroupSerializer(instance=group)
+        serialized = serializer.data
+
+        self.assertDictContainsSubset(
+            serialized, {"name": "test group", "description": "desc", "groups": []}
+        )
+        self.assertDictContainsSubset(
+            serialized["tasks"][0],
+            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+        )
+        self.assertDictContainsSubset(
+            serialized["tasks"][0]["lineitems"][0],
+            {"name": "Clean celing", "unit": "hr", "qty": 8, "price": 12},
+        )
+        self.assertDictContainsSubset(
+            serialized["tasks"][0]["lineitems"][1],
+            {"name": "Clean floor", "unit": "hr", "qty": 4, "price": 26},
+        )
+        self.assertDictContainsSubset(
+            serialized["tasks"][0]["lineitems"][2],
+            {"name": "Clean doors", "unit": "hr", "qty": 4, "price": 20},
         )
 
     def test_can_serialize_group_with_sub_group_with_no_tasks(self):
@@ -174,4 +279,197 @@ class GroupSerializerTest(ClientTestCase):
                 "total": 1,
                 "description": "clean stuff again",
             },
+        )
+
+    def test_can_serialize_group_with_sub_group_with_tasks_with_lineitems(self):
+        project = ProjectFactory(structure="01.01.01.001")
+        job = JobFactory(project=project)
+        group = GroupFactory(name="test group", description="desc", job=job)
+
+        sub_group = GroupFactory(name="sub group", description="desc", parent=group)
+
+        sub_group_task = TaskFactory(
+            name="Cleaning 2",
+            group=sub_group,
+            qty=1,
+            total=1,
+            description="clean stuff again",
+        )
+
+        LineItemFactory(
+            name="Clean celing", unit="hr", qty=8, price=12, task=sub_group_task
+        )
+        LineItemFactory(
+            name="Clean floor", unit="hr", qty=4, price=26, task=sub_group_task
+        )
+        LineItemFactory(
+            name="Clean doors", unit="hr", qty=4, price=20, task=sub_group_task
+        )
+
+        serializer = GroupSerializer(instance=group)
+        serialized = serializer.data
+
+        self.assertDictContainsSubset(
+            serialized, {"name": "test group", "description": "desc", "tasks": []}
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0], {"name": "sub group", "description": "desc"}
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["tasks"][0],
+            {
+                "name": "Cleaning 2",
+                "qty": 1,
+                "total": 1,
+                "description": "clean stuff again",
+            },
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["tasks"][0]["lineitems"][0],
+            {"name": "Clean celing", "unit": "hr", "qty": 8, "price": 12},
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["tasks"][0]["lineitems"][1],
+            {"name": "Clean floor", "unit": "hr", "qty": 4, "price": 26},
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["tasks"][0]["lineitems"][2],
+            {"name": "Clean doors", "unit": "hr", "qty": 4, "price": 20},
+        )
+
+    def test_can_serialize_group_with_sub_group_with_sub_group_with_no_tasks(self):
+        project = ProjectFactory(structure="01.01.01.01.001")
+        job = JobFactory(project=project)
+        group = GroupFactory(name="test group", description="desc", job=job)
+
+        sub_group = GroupFactory(name="sub group", description="desc", parent=group)
+
+        sub_sub_group = GroupFactory(
+            name="sub sub group", description="desc", parent=sub_group
+        )
+
+        serializer = GroupSerializer(instance=group)
+        serialized = serializer.data
+
+        self.assertDictContainsSubset(
+            serialized, {"name": "test group", "description": "desc", "tasks": []}
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0],
+            {"name": "sub group", "description": "desc", "tasks": []},
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["groups"][0],
+            {"name": "sub sub group", "description": "desc", "tasks": []},
+        )
+
+    def test_can_serialize_group_with_sub_group_with_sub_group_with_tasks(self):
+        project = ProjectFactory(structure="01.01.01.01.001")
+        job = JobFactory(project=project)
+        group = GroupFactory(name="test group", description="desc", job=job)
+
+        sub_group = GroupFactory(name="sub group", description="desc", parent=group)
+
+        sub_sub_group = GroupFactory(
+            name="sub sub group", description="desc", parent=sub_group
+        )
+
+        sub_sub_group_task = TaskFactory(
+            name="Cleaning 2",
+            group=sub_sub_group,
+            qty=1,
+            total=1,
+            description="clean stuff again",
+        )
+
+        serializer = GroupSerializer(instance=group)
+        serialized = serializer.data
+
+        self.assertDictContainsSubset(
+            serialized, {"name": "test group", "description": "desc", "tasks": []}
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0],
+            {"name": "sub group", "description": "desc", "tasks": []},
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["groups"][0],
+            {"name": "sub sub group", "description": "desc"},
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["groups"][0]["tasks"][0],
+            {
+                "name": "Cleaning 2",
+                "qty": 1,
+                "total": 1,
+                "description": "clean stuff again",
+                "lineitems": [],
+            },
+        )
+
+    def test_can_serialize_group_with_sub_group_with_sub_group_with_tasks_with_lineitems(
+        self
+    ):
+        project = ProjectFactory(structure="01.01.01.01.001")
+        job = JobFactory(project=project)
+        group = GroupFactory(name="test group", description="desc", job=job)
+
+        sub_group = GroupFactory(name="sub group", description="desc", parent=group)
+
+        sub_sub_group = GroupFactory(
+            name="sub sub group", description="desc", parent=sub_group
+        )
+
+        sub_sub_group_task = TaskFactory(
+            name="Cleaning 2",
+            group=sub_sub_group,
+            qty=1,
+            total=1,
+            description="clean stuff again",
+        )
+
+        LineItemFactory(
+            name="Clean celing", unit="hr", qty=8, price=12, task=sub_sub_group_task
+        )
+        LineItemFactory(
+            name="Clean floor", unit="hr", qty=4, price=26, task=sub_sub_group_task
+        )
+        LineItemFactory(
+            name="Clean doors", unit="hr", qty=4, price=20, task=sub_sub_group_task
+        )
+
+        serializer = GroupSerializer(instance=group)
+        serialized = serializer.data
+
+        self.assertDictContainsSubset(
+            serialized, {"name": "test group", "description": "desc", "tasks": []}
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0],
+            {"name": "sub group", "description": "desc", "tasks": []},
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["groups"][0],
+            {"name": "sub sub group", "description": "desc"},
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["groups"][0]["tasks"][0],
+            {
+                "name": "Cleaning 2",
+                "qty": 1,
+                "total": 1,
+                "description": "clean stuff again",
+            },
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["groups"][0]["tasks"][0]["lineitems"][0],
+            {"name": "Clean celing", "unit": "hr", "qty": 8, "price": 12},
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["groups"][0]["tasks"][0]["lineitems"][1],
+            {"name": "Clean floor", "unit": "hr", "qty": 4, "price": 26},
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0]["groups"][0]["tasks"][0]["lineitems"][2],
+            {"name": "Clean doors", "unit": "hr", "qty": 4, "price": 20},
         )
