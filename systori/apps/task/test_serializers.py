@@ -124,39 +124,12 @@ class GroupSerializerTest(ClientTestCase):
             {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
         )
 
-    def test_can_serialize_group_with_tasks_and_empty_group(self):
+    def test_can_serialize_group_with_sub_group_with_tasks(self):
         project = ProjectFactory(structure="01.01.01.001")
         job = JobFactory(project=project)
         group = GroupFactory(name="test group", description="desc", job=job)
-        empty_group = GroupFactory(name="empty group", description="desc", parent=group)
 
-        task = TaskFactory(
-            name="Cleaning", group=group, qty=1, total=1, description="clean stuff"
-        )
-
-        serializer = GroupSerializer(instance=group)
-        serialized = serializer.data
-
-        self.assertDictContainsSubset(
-            serialized, {"name": "test group", "description": "desc"}
-        )
-        self.assertDictContainsSubset(
-            serialized["groups"][0], {"name": "empty group", "description": "desc"}
-        )
-        self.assertDictContainsSubset(
-            serialized["tasks"][0],
-            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
-        )
-
-    def test_can_serialize_group_with_tasks_and_sub_group_with_tasks(self):
-        project = ProjectFactory(structure="01.01.01.001")
-        job = JobFactory(project=project)
-        group = GroupFactory(name="test group", description="desc", job=job)
         sub_group = GroupFactory(name="sub group", description="desc", parent=group)
-
-        task = TaskFactory(
-            name="Cleaning", group=group, qty=1, total=1, description="clean stuff"
-        )
 
         sub_group_task = TaskFactory(
             name="Cleaning 2",
@@ -170,14 +143,10 @@ class GroupSerializerTest(ClientTestCase):
         serialized = serializer.data
 
         self.assertDictContainsSubset(
-            serialized, {"name": "test group", "description": "desc"}
+            serialized, {"name": "test group", "description": "desc", "tasks": []}
         )
         self.assertDictContainsSubset(
-            serialized["groups"][0], {"name": "empty group", "description": "desc"}
-        )
-        self.assertDictContainsSubset(
-            serialized["tasks"][0],
-            {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
+            serialized["groups"][0], {"name": "sub group", "description": "desc"}
         )
         self.assertDictContainsSubset(
             serialized["groups"][0]["tasks"][0],
