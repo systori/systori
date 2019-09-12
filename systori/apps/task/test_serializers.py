@@ -124,6 +124,24 @@ class GroupSerializerTest(ClientTestCase):
             {"name": "Cleaning", "qty": 1, "total": 1, "description": "clean stuff"},
         )
 
+    def test_can_serialize_group_with_sub_group_with_no_tasks(self):
+        project = ProjectFactory(structure="01.01.01.001")
+        job = JobFactory(project=project)
+        group = GroupFactory(name="test group", description="desc", job=job)
+
+        sub_group = GroupFactory(name="sub group", description="desc", parent=group)
+
+        serializer = GroupSerializer(instance=group)
+        serialized = serializer.data
+
+        self.assertDictContainsSubset(
+            serialized, {"name": "test group", "description": "desc", "tasks": []}
+        )
+        self.assertDictContainsSubset(
+            serialized["groups"][0],
+            {"name": "sub group", "description": "desc", "tasks": []},
+        )
+
     def test_can_serialize_group_with_sub_group_with_tasks(self):
         project = ProjectFactory(structure="01.01.01.001")
         job = JobFactory(project=project)
