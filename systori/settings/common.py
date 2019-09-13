@@ -36,6 +36,9 @@ ENABLE_DEBUGTOOLBAR = False
 DISABLE_PUSHER = False
 TESTING = "test" in sys.argv
 
+ANDROID_LOCALHOST_LOOPBACK = None
+API_DEFAULT_COMPANY = None
+
 ALLOWED_HOSTS = []
 
 # Application definition

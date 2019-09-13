@@ -4,7 +4,13 @@ import os
 LANGUAGE_CODE = "en"
 SERVER_NAME = "systori.localhost"
 SESSION_COOKIE_DOMAIN = "." + SERVER_NAME
-ALLOWED_HOSTS = ["." + SERVER_NAME]
+
+# To access localhost on android this is the ip hardcoded in android OS
+ANDROID_LOCALHOST_LOOPBACK = "10.0.2.2"
+
+API_DEFAULT_COMPANY = os.environ.get("API_DEFAULT_COMPANY", "demo")
+
+ALLOWED_HOSTS = ["." + SERVER_NAME, ANDROID_LOCALHOST_LOOPBACK]
 INTERNAL_IPS = ("10.0.1.59", "127.0.0.1")
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"

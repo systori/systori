@@ -24,6 +24,21 @@ class CompanyMiddleware(MiddlewareMixin):
 
         request.company = None
 
+        is_android_development = (
+            request.META["HTTP_HOST"] == settings.ANDROID_LOCALHOST_LOOPBACK
+            and settings.API_DEFAULT_COMPANY
+        )
+        if is_android_development:
+            try:
+                company = Company.objects.get(schema=settings.API_DEFAULT_COMPANY)
+            except Company.DoesNotExist:
+                pass
+            else:
+                if company.is_active:
+                    company.activate()
+                    request.company = company
+                    return
+
         subdomain = get_subdomain(request)
 
         subdomain_is_safe = set(subdomain) <= SCHEMA_ALLOWED_CHARS
