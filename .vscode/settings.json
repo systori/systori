@@ -20,9 +20,9 @@
     },
     "[python]": {
         "editor.formatOnSaveTimeout": 10000,
-        "editor.formatOnPaste": true,
+        "editor.formatOnPaste": false,
         "editor.formatOnSave": true,
-        "editor.formatOnType": true,
+        "editor.formatOnType": false,
         "editor.defaultFormatter": "ms-python.python",
     },
     "python.linting.enabled": true,
