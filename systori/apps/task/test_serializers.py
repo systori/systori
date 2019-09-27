@@ -278,8 +278,8 @@ class GroupSerializerTest(ClientTestCase):
         self.assertDictContainsSubset(
             {
                 "name": "Cleaning 2",
-                "qty": 1,
-                "total": 1,
+                "qty": '1.000',
+                "total": '1.00',
                 "description": "clean stuff again",
             },
             serialized["groups"][0]["tasks"][0],
@@ -324,8 +324,8 @@ class GroupSerializerTest(ClientTestCase):
         self.assertDictContainsSubset(
             {
                 "name": "Cleaning 2",
-                "qty": 1,
-                "total": 1,
+                "qty": '1.000',
+                "total": '1.00',
                 "description": "clean stuff again",
             },
             serialized["groups"][0]["tasks"][0],
@@ -409,8 +409,8 @@ class GroupSerializerTest(ClientTestCase):
         self.assertDictContainsSubset(
             {
                 "name": "Cleaning 2",
-                "qty": 1,
-                "total": 1,
+                "qty": '1.000',
+                "total": '1.00',
                 "description": "clean stuff again",
                 "lineitems": [],
             },
@@ -467,8 +467,8 @@ class GroupSerializerTest(ClientTestCase):
         self.assertDictContainsSubset(
             {
                 "name": "Cleaning 2",
-                "qty": 1,
-                "total": 1,
+                "qty": '1.000',
+                "total": '1.00',
                 "description": "clean stuff again",
             },
             serialized["groups"][0]["groups"][0]["tasks"][0],
