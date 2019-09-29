@@ -4472,7 +4472,9 @@ definitions:
         maximum: 2147483647
         minimum: 0
       groups:
-        type: string
+        type: array
+        items:
+          $ref: '#/definitions/Group'
       tasks:
         type: array
         items:

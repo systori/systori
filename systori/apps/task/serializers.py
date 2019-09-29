@@ -1,58 +1,17 @@
+from collections import OrderedDict
+
+
+from django.db import models
+
 from rest_framework import serializers
+from rest_framework.fields import SkipField
+
 from rest_framework.generics import get_object_or_404
-from .models import Job, Group, Task, LineItem
+from rest_framework.relations import PKOnlyObject
 
+from rest_framework_recursive.fields import RecursiveField
 
-class RecursiveField(serializers.Field):
-
-    PROXIED_ATTRS = (
-        # methods
-        "get_value",
-        "get_initial",
-        "run_validation",
-        "get_attribute",
-        "to_representation",
-        # attributes
-        "field_name",
-        "source",
-        "read_only",
-        "default",
-        "source_attrs",
-        "write_only",
-    )
-
-    def __init__(self, **kwargs):
-        self._proxied = None
-        super().__init__(**kwargs)
-
-    def bind(self, field_name, parent):
-        self.bind_args = (field_name, parent)
-
-    @property
-    def proxied(self):
-        if not self._proxied:
-            if self.bind_args:
-                field_name, parent = self.bind_args
-                if hasattr(parent, "child") and parent.child is self:
-                    # RecursiveField nested inside of a ListField
-                    parent_class = parent.parent.__class__
-                else:
-                    # RecursiveField directly inside a Serializer
-                    parent_class = parent.__class__
-                proxied = parent_class(many=True, required=False)
-                proxied.bind(field_name, parent)
-                self._proxied = proxied
-        return self._proxied
-
-    def __getattribute__(self, name):
-        if name in RecursiveField.PROXIED_ATTRS:
-            try:
-                proxied = object.__getattribute__(self, "proxied")
-                return getattr(proxied, name)
-            except AttributeError:
-                pass
-
-        return object.__getattribute__(self, name)
+from .models import Group, Job, LineItem, Task
 
 
 class LineItemSerializer(serializers.ModelSerializer):
@@ -152,12 +111,65 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class GroupSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
-    groups = RecursiveField(required=False)
+    groups = serializers.ListField(child=RecursiveField(), required=False)
     tasks = TaskSerializer(many=True, required=False)
 
     class Meta:
         model = Group
         fields = ["pk", "token", "name", "description", "order", "groups", "tasks"]
+
+    def to_representation(self, instance):
+        ret = OrderedDict()
+        fields = self._readable_fields
+
+        for field in fields:
+            try:
+                attribute = field.get_attribute(instance)
+            except SkipField:
+                continue
+
+            # We skip `to_representation` for `None` values so that fields do
+            # not have to explicitly deal with that case.
+            #
+            # For related fields with `use_pk_only_optimization` we need to
+            # resolve the pk value.
+            check_for_none = (
+                attribute.pk if isinstance(attribute, PKOnlyObject) else attribute
+            )
+            if check_for_none is None:
+                ret[field.field_name] = None
+            elif field.field_name == "groups":
+                # If it's a single object
+                if isinstance(attribute, Group):
+                    ret[field.field_name] = [self.to_representation(attribute)]
+                # If it's already iterable (e.g. result from a QuerySet)
+                elif hasattr(attribute, "__iter__"):
+                    ret[field.field_name] = [
+                        self.to_representation(item) for item in attribute
+                    ]
+                # If it's a manager or QuerySet
+                elif isinstance(attribute, models.Manager) or isinstance(
+                    attribute, models.QuerySet
+                ):
+                    ret[field.field_name] = [
+                        self.to_representation(item) for item in attribute.all()
+                    ]
+                # If it can be made iterable (RelatedManager)
+                elif hasattr(attribute, "all"):
+                    iterator = attribute.all()
+                    if not hasattr(iterator, "__iter__"):
+                        raise Exception(f"Expected an iterator, got ${iterator}")
+                    ret[field.field_name] = [
+                        self.to_representation(item) for item in iterator
+                    ]
+                else:
+                    raise Exception(f"Invalid groups value: ${attribute}")
+            elif field.field_name == "tasks":
+                ret[field.field_name] = field.to_representation(attribute.all())
+            else:
+                ret[field.field_name] = field.to_representation(attribute)
+
+        return ret
 
     def create(self, validated_data):
         tasks = validated_data.pop("tasks", [])
@@ -223,23 +235,9 @@ class DeleteSerializer(serializers.Serializer):
             LineItem.objects.filter(pk__in=lineitems).delete()
 
 
-class TasksSerializer(serializers.ListSerializer):
-    child = TaskSerializer()
-
-    def to_representation(self, data):
-        return [self.child.to_representation(item) for item in data.all()]
-
-
-class GroupsSerializer(serializers.ListSerializer):
-    child = GroupSerializer()
-
-    def to_representation(self, data):
-        return [self.child.to_representation(item) for item in data.all()]
-
-
 class JobSerializer(serializers.ModelSerializer):
-    groups = GroupsSerializer(required=False)
-    tasks = TasksSerializer(required=False)
+    groups = GroupSerializer(required=False, many=True)
+    tasks = TaskSerializer(required=False, many=True)
     delete = DeleteSerializer(required=False)
 
     class Meta:
@@ -255,3 +253,6 @@ class JobSerializer(serializers.ModelSerializer):
         self._data = serializer.save()
 
         return self._data
+
+    def to_representation(self, instance):
+        return GroupSerializer.to_representation(self, instance)

@@ -2,6 +2,7 @@
 
 django==2.2.4
 djangorestframework==3.10.2
+djangorestframework-recursive==0.1.2
 drf-yasg==1.16.1
 packaging==19.1
 django-fsm==2.6.1
