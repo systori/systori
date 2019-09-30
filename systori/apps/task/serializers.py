@@ -260,4 +260,15 @@ class JobSerializer(serializers.ModelSerializer):
         return self._data
 
     def to_representation(self, instance):
-        return GroupSerializer.to_representation(self, instance)
+        return {
+            "pk": instance.pk,
+            "name": instance.name,
+            "description": instance.description,
+            "groups": [
+                GroupSerializer(instance=group).data for group in instance.groups.all()
+            ],
+            "tasks": [
+                TaskSerializer(instance=task).data for task in instance.tasks.all()
+            ],
+            "delete": {},
+        }
