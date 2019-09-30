@@ -4441,6 +4441,20 @@ definitions:
       is_provisional:
         title: Is provisional
         type: boolean
+      status:
+        title: Status
+        type: string
+        enum:
+          - approved
+          - ready
+          - running
+          - done
+      job:
+        title: Job
+        type: integer
+      group:
+        title: Group
+        type: integer
       lineitems:
         type: array
         items:

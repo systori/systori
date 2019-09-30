@@ -53,6 +53,8 @@ class LineItemSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
     lineitems = LineItemSerializer(many=True)
+    job = serializers.IntegerField(required=False, source="job.pk")
+    group = serializers.IntegerField(required=False, source="group.pk")
 
     class Meta:
         model = Task
@@ -72,6 +74,9 @@ class TaskSerializer(serializers.ModelSerializer):
             "variant_group",
             "variant_serial",
             "is_provisional",
+            "status",
+            "job",
+            "group",
             "lineitems",
         ]
 
