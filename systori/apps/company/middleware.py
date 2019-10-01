@@ -20,24 +20,40 @@ def get_subdomain(request):
 
 class CompanyMiddleware(MiddlewareMixin):
     @staticmethod
-    def process_request(request):
-
-        request.company = None
+    def get_android_development_company(request):
+        # Only allow in DEBUG mode
+        if not settings.DEBUG:
+            return None
 
         is_android_development = (
             request.META["HTTP_HOST"] == settings.ANDROID_LOCALHOST_LOOPBACK
             and settings.API_DEFAULT_COMPANY
         )
-        if is_android_development:
-            try:
-                company = Company.objects.get(schema=settings.API_DEFAULT_COMPANY)
-            except Company.DoesNotExist:
-                pass
-            else:
-                if company.is_active:
-                    company.activate()
-                    request.company = company
-                    return
+
+        # Only if android development is setup
+        if not is_android_development:
+            return None
+
+        try:
+            company = Company.objects.get(schema=settings.API_DEFAULT_COMPANY)
+        except Company.DoesNotExist:
+            pass
+        else:
+            if company.is_active:
+                company.activate()
+                return company
+        # When nothing found or company is not active
+        return None
+
+    @staticmethod
+    def process_request(request):
+
+        request.company = None
+
+        android_dev_company = CompanyMiddleware.get_android_development_company(request)
+        if android_dev_company:
+            request.company = android_dev_company
+            return
 
         subdomain = get_subdomain(request)
 
