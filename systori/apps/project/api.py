@@ -55,7 +55,7 @@ def get_week_by_day(day):
 class ProjectModelViewSet(ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (HasLaborerAccess,)
     search_fields = None
 
     action_serializers = {"search": QuerySerializer}
