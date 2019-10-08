@@ -244,10 +244,11 @@ class JobSerializer(serializers.ModelSerializer):
     groups = GroupSerializer(required=False, many=True)
     tasks = TaskSerializer(required=False, many=True)
     delete = DeleteSerializer(required=False)
+    order = serializers.IntegerField(required=False)
 
     class Meta:
         model = Job
-        fields = ["pk", "name", "description", "groups", "tasks", "delete"]
+        fields = ["pk", "name", "description", "groups", "tasks", "order", "delete"]
 
     def update(self, job, validated_data):
 
@@ -270,5 +271,6 @@ class JobSerializer(serializers.ModelSerializer):
             "tasks": [
                 TaskSerializer(instance=task).data for task in instance.tasks.all()
             ],
+            "order": instance.order,
             "delete": {},
         }
