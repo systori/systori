@@ -4523,6 +4523,9 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Task'
+      order:
+        title: Order
+        type: integer
       delete:
         $ref: '#/definitions/Delete'
   RefuelingStop:
