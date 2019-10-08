@@ -74,7 +74,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "variant_group",
             "variant_serial",
             "is_provisional",
-            "status",
+            # "status",
             "job",
             "group",
             "lineitems",

@@ -221,7 +221,7 @@ class TaskSerializerTest(ClientTestCase):
                 "variant_group": task.variant_group,
                 "variant_serial": task.variant_serial,
                 "is_provisional": task.is_provisional,
-                "status": "",
+                # "status": "",
                 "job": (
                     parent.pk
                     if isinstance(parent, (Job, JobFactory))
@@ -246,6 +246,7 @@ class TaskSerializerTest(ClientTestCase):
                 price=5,
                 complete=10,
                 total=100,
+                status=status,
                 description="This is a test task",
             )
 
@@ -268,7 +269,7 @@ class TaskSerializerTest(ClientTestCase):
                     "variant_group": task.variant_group,
                     "variant_serial": task.variant_serial,
                     "is_provisional": task.is_provisional,
-                    "status": "",
+                    # "status": status,
                     "job": (
                         parent.pk
                         if isinstance(parent, (Job, JobFactory))
@@ -327,7 +328,7 @@ class TaskSerializerTest(ClientTestCase):
                 "variant_group": task1.variant_group,
                 "variant_serial": task1.variant_serial,
                 "is_provisional": task1.is_provisional,
-                "status": "",
+                # "status": "",
                 "job": (
                     parent.pk
                     if isinstance(parent, (Job, JobFactory))
@@ -357,7 +358,7 @@ class TaskSerializerTest(ClientTestCase):
                 "variant_group": task2.variant_group,
                 "variant_serial": task2.variant_serial,
                 "is_provisional": task2.is_provisional,
-                "status": "",
+                # "status": "",
                 "job": (
                     parent.pk
                     if isinstance(parent, (Job, JobFactory))
@@ -414,7 +415,7 @@ class TaskSerializerTest(ClientTestCase):
                 "variant_group": task.variant_group,
                 "variant_serial": task.variant_serial,
                 "is_provisional": task.is_provisional,
-                "status": "",
+                # "status": "",
                 "job": (
                     parent.pk
                     if isinstance(parent, (Job, JobFactory))
@@ -483,7 +484,7 @@ class TaskSerializerTest(ClientTestCase):
                 "variant_group": task1.variant_group,
                 "variant_serial": task1.variant_serial,
                 "is_provisional": task1.is_provisional,
-                "status": "",
+                # "status": "",
                 "job": (
                     parent.pk
                     if isinstance(parent, (Job, JobFactory))
@@ -513,7 +514,7 @@ class TaskSerializerTest(ClientTestCase):
                 "variant_group": task2.variant_group,
                 "variant_serial": task2.variant_serial,
                 "is_provisional": task2.is_provisional,
-                "status": "",
+                # "status": "",
                 "job": (
                     parent.pk
                     if isinstance(parent, (Job, JobFactory))
