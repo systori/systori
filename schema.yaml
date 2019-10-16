@@ -4410,8 +4410,6 @@ definitions:
   LineItem:
     required:
       - order
-      - task
-      - job
     type: object
     properties:
       pk:
@@ -4474,9 +4472,11 @@ definitions:
       task:
         title: Task
         type: integer
+        readOnly: true
       job:
         title: Job
         type: integer
+        readOnly: true
   Task:
     required:
       - name
@@ -4551,9 +4551,11 @@ definitions:
       job:
         title: Job
         type: integer
+        readOnly: true
       group:
         title: Group
         type: integer
+        readOnly: true
       lineitems:
         type: array
         items:
@@ -4595,10 +4597,12 @@ definitions:
       parent:
         title: Parent
         type: integer
+        readOnly: true
         x-nullable: true
       job:
         title: Job
         type: integer
+        readOnly: true
         x-nullable: true
   Delete:
     title: Delete
