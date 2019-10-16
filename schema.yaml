@@ -3141,6 +3141,105 @@ paths:
         description: A unique integer value identifying this Task.
         required: true
         type: integer
+  /task/task/{id}/lineitem/{lineitem_id}/:
+    get:
+      operationId: task_task_lineitem_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LineItem'
+      tags:
+        - task
+    put:
+      operationId: task_task_lineitem_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/LineItem'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LineItem'
+      tags:
+        - task
+    patch:
+      operationId: task_task_lineitem_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/LineItem'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LineItem'
+      tags:
+        - task
+    delete:
+      operationId: task_task_lineitem_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: LineItem deleted successfully
+      tags:
+        - task
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Task.
+        required: true
+        type: integer
+      - name: lineitem_id
+        in: path
+        required: true
+        type: string
+  /task/task/{id}/lineitems/:
+    get:
+      operationId: task_task_lineitems_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/LineItem'
+      tags:
+        - task
+    post:
+      operationId: task_task_lineitems_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/LineItem'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/LineItem'
+      tags:
+        - task
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Task.
+        required: true
+        type: integer
   /timer/:
     post:
       operationId: timer_create

@@ -1,10 +1,27 @@
 from django.conf.urls import url
 from django.utils.translation import ugettext_lazy as _
+
+from drf_yasg.utils import swagger_auto_schema
+
 from rest_framework import views, viewsets, mixins
 from rest_framework import response, renderers
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.status import (
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_405_METHOD_NOT_ALLOWED,
+)
+
 from systori.lib.templatetags.customformatting import ubrdecimal
-from .models import Job, Group, Task
-from .serializers import JobSerializer, GroupSerializer, TaskSerializer
+from .models import Job, Group, Task, LineItem
+from .serializers import (
+    JobSerializer,
+    GroupSerializer,
+    TaskSerializer,
+    LineItemSerializer,
+)
 from ..user.permissions import HasStaffAccess
 
 
@@ -148,6 +165,64 @@ class TaskModelViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = (HasStaffAccess,)
+
+    @swagger_auto_schema(method="GET", responses={200: LineItemSerializer(many=True)})
+    @swagger_auto_schema(
+        method="POST",
+        request_body=LineItemSerializer,
+        responses={201: LineItemSerializer()},
+    )
+    @action(methods=["GET", "POST"], detail=True)
+    def lineitems(self, request, pk=None):
+        project = self.get_object()
+        if request.method.lower() == "get":
+            lineitems = LineItem.objects.filter(project=project)
+            return Response(data=LineItemSerializer(lineitems, many=True).data)
+
+        if request.method.lower() == "post" and pk:
+            serializer = LineItemSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            serializer.save(project=project)
+            return Response(serializer.data, status=HTTP_201_CREATED)
+
+        return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
+
+    @swagger_auto_schema(methods=["GET"], responses={200: LineItemSerializer()})
+    @swagger_auto_schema(
+        methods=["PUT", "PATCH"],
+        request_body=LineItemSerializer,
+        responses={200: LineItemSerializer()},
+    )
+    @swagger_auto_schema(
+        method="DELETE", responses={204: "LineItem deleted successfully"}
+    )
+    @action(
+        methods=["GET", "PUT", "PATCH", "DELETE"],
+        detail=True,
+        url_path=r"lineitem/(?P<lineitem_id>\d+)",
+    )
+    def lineitem(self, request, pk=None, lineitem_id=None):
+        if not (pk or lineitem_id):
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        project = self.get_object()
+        lineitem = LineItem.objects.get(pk=lineitem_id, project=project)
+
+        if request.method.lower() == "delete":
+            lineitem.delete()
+            return Response(status=HTTP_204_NO_CONTENT)
+
+        if request.method.lower() == "get":
+            return Response(data=LineItemSerializer(lineitem).data)
+
+        # This is an update request
+        # We always update lineitems partially
+        # is_partial = request.method.lower() == "patch"
+        serializer = LineItemSerializer(lineitem, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(project=project)
+        return Response(data=LineItemSerializer(lineitem).data)
 
 
 urlpatterns = [
