@@ -4485,6 +4485,14 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Task'
+      parent:
+        title: Parent
+        type: integer
+        x-nullable: true
+      job:
+        title: Job
+        type: string
+        x-nullable: true
   Delete:
     title: Delete
     type: object

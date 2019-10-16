@@ -585,6 +585,8 @@ class GroupSerializerTest(ClientTestCase):
 
         self.assertDictEqual(
             {
+                "job": group.job.pk,
+                "parent": group.parent.pk,
                 "pk": group.pk,
                 "token": group.token,
                 "name": "test group",
@@ -617,6 +619,8 @@ class GroupSerializerTest(ClientTestCase):
 
             self.assertDictEqual(
                 {
+                    "job": group.job.pk,
+                    "parent": group.parent.pk,
                     "pk": group.pk,
                     "token": group.token,
                     "name": "test group",
@@ -649,6 +653,8 @@ class GroupSerializerTest(ClientTestCase):
 
             self.assertDictEqual(
                 {
+                    "job": group.job.pk,
+                    "parent": group.parent.pk,
                     "pk": group.pk,
                     "token": group.token,
                     "name": "test group",
@@ -677,6 +683,8 @@ class GroupSerializerTest(ClientTestCase):
 
         self.assertDictEqual(
             {
+                "job": group1.job.pk,
+                "parent": group1.parent.pk,
                 "pk": group1.pk,
                 "token": group1.token,
                 "name": "test group",
@@ -689,6 +697,8 @@ class GroupSerializerTest(ClientTestCase):
         )
         self.assertDictEqual(
             {
+                "job": group2.job.pk,
+                "parent": group2.parent.pk,
                 "pk": group2.pk,
                 "token": group2.token,
                 "name": "test group",
@@ -728,6 +738,8 @@ class GroupSerializerTest(ClientTestCase):
 
             self.assertDictEqual(
                 {
+                    "job": group1.job.pk,
+                    "parent": group1.parent.pk,
                     "pk": group1.pk,
                     "token": group1.token,
                     "name": "test group",
@@ -740,6 +752,8 @@ class GroupSerializerTest(ClientTestCase):
             )
             self.assertDictEqual(
                 {
+                    "job": group2.job.pk,
+                    "parent": group2.parent.pk,
                     "pk": group2.pk,
                     "token": group2.token,
                     "name": "test group",
@@ -779,6 +793,8 @@ class GroupSerializerTest(ClientTestCase):
 
             self.assertDictEqual(
                 {
+                    "job": group1.job.pk,
+                    "parent": group1.parent.pk,
                     "pk": group1.pk,
                     "token": group1.token,
                     "name": "test group",
@@ -791,6 +807,8 @@ class GroupSerializerTest(ClientTestCase):
             )
             self.assertDictEqual(
                 {
+                    "job": group2.job.pk,
+                    "parent": group2.parent.pk,
                     "pk": group2.pk,
                     "token": group2.token,
                     "name": "test group",
@@ -818,6 +836,8 @@ class GroupSerializerTest(ClientTestCase):
 
         self.assertDictEqual(
             {
+                "job": group.job.pk,
+                "parent": group.parent.pk,
                 "pk": group.pk,
                 "token": group.token,
                 "name": "test group",
@@ -854,6 +874,8 @@ class GroupSerializerTest(ClientTestCase):
 
             self.assertDictEqual(
                 {
+                    "job": group.job.pk,
+                    "parent": group.parent.pk,
                     "pk": group.pk,
                     "token": group.token,
                     "name": "test group",
@@ -861,6 +883,8 @@ class GroupSerializerTest(ClientTestCase):
                     "order": group.order,
                     "groups": [
                         {
+                            "job": group.job.pk,
+                            "parent": group.pk,
                             "pk": sub_group.pk,
                             "token": sub_group.token,
                             "name": "test group",
@@ -900,6 +924,8 @@ class GroupSerializerTest(ClientTestCase):
 
             self.assertDictEqual(
                 {
+                    "job": group.job.pk,
+                    "parent": group.parent.pk,
                     "pk": group.pk,
                     "token": group.token,
                     "name": "test group",
@@ -907,6 +933,8 @@ class GroupSerializerTest(ClientTestCase):
                     "order": group.order,
                     "groups": [
                         {
+                            "job": group.job.pk,
+                            "parent": group.pk,
                             "pk": sub_group.pk,
                             "token": sub_group.token,
                             "name": "test group",
@@ -942,6 +970,8 @@ class GroupSerializerTest(ClientTestCase):
 
         self.assertDictEqual(
             {
+                "job": group.job.pk,
+                "parent": group.parent.pk,
                 "pk": group.pk,
                 "token": group.token,
                 "name": "test group",
@@ -983,6 +1013,8 @@ class GroupSerializerTest(ClientTestCase):
 
             self.assertDictEqual(
                 {
+                    "job": group.job.pk,
+                    "parent": group.parent.pk,
                     "pk": group.pk,
                     "token": group.token,
                     "name": "test group",
@@ -990,6 +1022,8 @@ class GroupSerializerTest(ClientTestCase):
                     "order": group.order,
                     "groups": [
                         {
+                            "job": group.job.pk,
+                            "parent": group.pk,
                             "pk": sub_group1.pk,
                             "token": sub_group1.token,
                             "name": "test group",
@@ -999,6 +1033,8 @@ class GroupSerializerTest(ClientTestCase):
                             "tasks": [serialized_subgroup1_task],
                         },
                         {
+                            "job": group.job.pk,
+                            "parent": group.pk,
                             "pk": sub_group2.pk,
                             "token": sub_group2.token,
                             "name": "test group",
@@ -1044,6 +1080,8 @@ class GroupSerializerTest(ClientTestCase):
 
             self.assertDictEqual(
                 {
+                    "job": group.job.pk,
+                    "parent": group.parent.pk,
                     "pk": group.pk,
                     "token": group.token,
                     "name": "test group",
@@ -1051,6 +1089,8 @@ class GroupSerializerTest(ClientTestCase):
                     "order": group.order,
                     "groups": [
                         {
+                            "job": group.job.pk,
+                            "parent": group.pk,
                             "pk": sub_group1.pk,
                             "token": sub_group1.token,
                             "name": "test group",
@@ -1060,6 +1100,8 @@ class GroupSerializerTest(ClientTestCase):
                             "tasks": serialized_subgroup1_tasks,
                         },
                         {
+                            "job": group.job.pk,
+                            "parent": group.pk,
                             "pk": sub_group2.pk,
                             "token": sub_group2.token,
                             "name": "test group",
@@ -1326,6 +1368,8 @@ class JobSerializerTest(ClientTestCase):
                     "description": job.description,
                     "groups": [
                         {
+                            "job": group.job.pk,
+                            "parent": group.parent.pk,
                             "pk": group.pk,
                             "token": group.token,
                             "name": "test group",
@@ -1368,6 +1412,8 @@ class JobSerializerTest(ClientTestCase):
                     "description": job.description,
                     "groups": [
                         {
+                            "job": group.job.pk,
+                            "parent": group.parent.pk,
                             "pk": group.pk,
                             "token": group.token,
                             "name": "test group",

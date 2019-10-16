@@ -121,7 +121,17 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ["pk", "token", "name", "description", "order", "groups", "tasks"]
+        fields = [
+            "pk",
+            "token",
+            "name",
+            "description",
+            "order",
+            "groups",
+            "tasks",
+            "parent",
+            "job",
+        ]
 
     def to_representation(self, instance):
         ret = OrderedDict()
