@@ -174,16 +174,16 @@ class TaskModelViewSet(viewsets.ModelViewSet):
     )
     @action(methods=["GET", "POST"], detail=True)
     def lineitems(self, request, pk=None):
-        project = self.get_object()
+        task = self.get_object()
         if request.method.lower() == "get":
-            lineitems = LineItem.objects.filter(project=project)
+            lineitems = LineItem.objects.filter(task=task)
             return Response(data=LineItemSerializer(lineitems, many=True).data)
 
         if request.method.lower() == "post" and pk:
             serializer = LineItemSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
-            serializer.save(project=project)
+            serializer.save(task=task)
             return Response(serializer.data, status=HTTP_201_CREATED)
 
         return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
@@ -206,8 +206,8 @@ class TaskModelViewSet(viewsets.ModelViewSet):
         if not (pk or lineitem_id):
             return Response(status=HTTP_400_BAD_REQUEST)
 
-        project = self.get_object()
-        lineitem = LineItem.objects.get(pk=lineitem_id, project=project)
+        task = self.get_object()
+        lineitem = LineItem.objects.get(pk=lineitem_id, task=task)
 
         if request.method.lower() == "delete":
             lineitem.delete()
@@ -221,7 +221,7 @@ class TaskModelViewSet(viewsets.ModelViewSet):
         # is_partial = request.method.lower() == "patch"
         serializer = LineItemSerializer(lineitem, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save(project=project)
+        serializer.save(task=task)
         return Response(data=LineItemSerializer(lineitem).data)
 
 
