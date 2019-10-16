@@ -33,6 +33,8 @@ class LineItemSerializer(serializers.ModelSerializer):
             "total_equation",
             "is_hidden",
             "lineitem_type",
+            "task",
+            "job",
         ]
 
     def create(self, validated_data):

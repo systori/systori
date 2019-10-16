@@ -55,6 +55,8 @@ class LineItemSerializerTest(ClientTestCase):
 
         self.assertDictEqual(
             {
+                "job": task.job.pk,
+                "task": task.pk,
                 "pk": lineitem1.pk,
                 "token": None,
                 "name": lineitem1.name,
@@ -84,6 +86,8 @@ class LineItemSerializerTest(ClientTestCase):
             serialized_with_lineitem_type = serializer.data
             self.assertDictEqual(
                 {
+                    "job": task.job.pk,
+                    "task": task.pk,
                     "pk": lineitem_with_type.pk,
                     "token": None,
                     "name": lineitem_with_type.name,
@@ -129,6 +133,8 @@ class LineItemSerializerTest(ClientTestCase):
 
         self.assertDictEqual(
             {
+                "job": task.job.pk,
+                "task": task.pk,
                 "pk": lineitem1.pk,
                 "token": None,
                 "name": lineitem1.name,
@@ -147,6 +153,8 @@ class LineItemSerializerTest(ClientTestCase):
         )
         self.assertDictEqual(
             {
+                "job": task.job.pk,
+                "task": task.pk,
                 "pk": lineitem2.pk,
                 "token": None,
                 "name": lineitem2.name,

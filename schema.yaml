@@ -4311,6 +4311,8 @@ definitions:
   LineItem:
     required:
       - order
+      - task
+      - job
     type: object
     properties:
       pk:
@@ -4370,6 +4372,12 @@ definitions:
           - labor
           - equipment
           - other
+      task:
+        title: Task
+        type: integer
+      job:
+        title: Job
+        type: string
   Task:
     required:
       - name
