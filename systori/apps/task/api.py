@@ -209,6 +209,30 @@ class GroupModelViewSet(viewsets.ModelViewSet):
         serializer.save(group=group)
         return Response(data=flutter.TaskSerializer(task).data)
 
+    @swagger_auto_schema(
+        method="GET", responses={200: flutter.GroupSerializer(many=True)}
+    )
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.GroupSerializer,
+        responses={201: flutter.GroupSerializer()},
+    )
+    @action(methods=["GET", "POST"], detail=True)
+    def subgroups(self, request, pk=None):
+        group = self.get_object()
+        if request.method.lower() == "get":
+            subgroups = Group.objects.filter(parent=group)
+            return Response(data=flutter.GroupSerializer(subgroups, many=True).data)
+
+        if request.method.lower() == "post" and pk:
+            serializer = flutter.GroupSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(parent=group)
+
+            return Response(serializer.data, status=HTTP_201_CREATED)
+
+        return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
+
 
 class JobModelViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()

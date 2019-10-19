@@ -751,6 +751,77 @@ class GroupApiTest(ClientTestCase):
         self.job = JobFactory(project=self.project, description="this is a test job")
         self.group = GroupFactory(parent=self.job, name="this is a test group")
 
+    def test_list_subgroups(self):
+        subgroup1 = GroupFactory(parent=self.group, name="this is a test subgroup 01")
+        subgroup2 = GroupFactory(parent=self.group, name="this is a test subgroup 02")
+
+        response = self.client.get(f"/api/task/group/{self.group.pk}/subgroups/")
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertDictEqual(
+            json[0],
+            {
+                "pk": subgroup1.pk,
+                "name": "this is a test subgroup 01",
+                "description": "",
+                "order": 1,
+                "groups": [],
+                "tasks": [],
+                "parent": self.group.pk,
+                "job": self.job.pk,
+            },
+            json[0],
+        )
+        self.assertDictEqual(
+            json[1],
+            {
+                "pk": subgroup2.pk,
+                "name": "this is a test subgroup 01",
+                "description": "",
+                "order": 1,
+                "groups": [],
+                "tasks": [],
+                "parent": self.group.pk,
+                "job": self.job.pk,
+            },
+            json[1],
+        )
+
+    def test_create_subgroup_without_order(self):
+        response = self.client.post(
+            f"/api/task/group/{self.group.pk}/subgroups/", {"name": "test subgroup"}
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+
+        self.assertDictEqual(json, {"order": ["This field is required."]}, json)
+
+    def test_create_subgroup(self):
+        response = self.client.post(
+            f"/api/task/group/{self.group.pk}/subgroups/",
+            {"name": "test subgroup", "order": 5},
+            format="json",
+        )
+        print(response.data)
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        json = response.json()
+
+        self.assertDictEqual(
+            json,
+            {
+                "pk": 3,
+                "name": "test subgroup",
+                "description": "",
+                "order": 5,
+                "groups": [],
+                "tasks": [],
+                "parent": self.group.pk,
+                "job": self.job.pk,
+            },
+            json,
+        )
+
     def test_list_tasks(self):
         task1 = TaskFactory(
             group=self.group, name="task 1", qty=1, unit="h", price=19.99, total=19.99

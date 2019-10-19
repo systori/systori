@@ -2919,6 +2919,42 @@ paths:
         description: A unique integer value identifying this Group.
         required: true
         type: integer
+  /task/group/{id}/subgroups/:
+    get:
+      operationId: task_group_subgroups_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Group'
+      tags:
+        - task
+    post:
+      operationId: task_group_subgroups_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Group'
+      tags:
+        - task
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Group.
+        required: true
+        type: integer
   /task/group/{id}/task/{task_id}/:
     get:
       operationId: task_group_task_read
@@ -5064,7 +5100,6 @@ definitions:
   Group:
     required:
       - order
-      - parent
     type: object
     properties:
       pk:
@@ -5093,6 +5128,7 @@ definitions:
       parent:
         title: Parent
         type: integer
+        x-nullable: true
       job:
         title: Job
         type: integer

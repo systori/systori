@@ -104,7 +104,7 @@ class GroupSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
     job = serializers.IntegerField(required=False, source="job.pk", allow_null=True)
     parent = serializers.IntegerField(
-        required=True, source="parent.pk", allow_null=True
+        required=False, source="parent.pk", allow_null=True
     )
     groups = serializers.ListField(child=RecursiveField(), required=False)
     tasks = TaskSerializer(many=True, required=False)
@@ -179,9 +179,8 @@ class GroupSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tasks = validated_data.pop("tasks", [])
         groups = validated_data.pop("groups", [])
-        group, _ = Group.objects.update_or_create(
-            validated_data, job=validated_data["parent"].job
-        )
+        job = validated_data["parent"].job
+        group, _ = Group.objects.update_or_create(validated_data, job=job)
         return self.update(group, {"tasks": tasks, "groups": groups})
 
     def update(self, group, validated_data):
