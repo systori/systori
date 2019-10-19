@@ -6,7 +6,6 @@ from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CON
 from systori.apps.main.factories import NoteFactory
 from systori.apps.main.serializers import NoteSerializer
 from systori.apps.main.models import Note
-from systori.apps.task.serializers import JobSerializer
 from systori.apps.task.models import Job
 from systori.apps.task.factories import JobFactory
 
