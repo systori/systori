@@ -1,9 +1,20 @@
 from decimal import Decimal
+
 from django.urls import reverse
+
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
+
 from systori.lib.testing import ClientTestCase
-from .models import Group, Task, LineItem
-from ..project.factories import ProjectFactory
-from .factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
+
+from systori.apps.project.factories import ProjectFactory, JobSiteFactory
+from systori.apps.task.serializers import LineItemSerializer
+from systori.apps.task.models import Group, Task, LineItem
+from systori.apps.task.factories import (
+    JobFactory,
+    GroupFactory,
+    TaskFactory,
+    LineItemFactory,
+)
 
 
 class EditorApiTest(ClientTestCase):
@@ -791,3 +802,212 @@ class AutocompleteApiTest(ClientTestCase):
         self.assertEqual(job2.tasks.first().name, "Easy Task")
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(len(response.data), 1)
+
+
+class TaskApiTest(ClientTestCase):
+    def setUp(self):
+        super().setUp()
+        self.project = ProjectFactory()
+        self.jobsite = JobSiteFactory(project=self.project)
+        self.job = JobFactory(project=self.project, description="this is a test job")
+        self.task = TaskFactory(group=self.job)
+
+    def test_list_lineitems(self):
+        lineitem1 = LineItemFactory(
+            task=self.task, name="lineitem 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+
+        lineitem2 = LineItemFactory(
+            task=self.task,
+            name="lineitem 2",
+            qty=1,
+            unit="pc",
+            price=19.99,
+            total=19.99,
+        )
+
+        response = self.client.get(f"/api/task/task/{self.task.pk}/lineitems/")
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertDictEqual(
+            json[0],
+            {
+                "pk": lineitem1.pk,
+                "name": "lineitem 1",
+                "order": 1,
+                "qty": "1.000",
+                "qty_equation": "",
+                "unit": "pc",
+                "price": "19.99",
+                "price_equation": "",
+                "total": "19.99",
+                "total_equation": "",
+                "is_hidden": False,
+                "lineitem_type": "other",
+                "task": self.task.pk,
+                "job": self.job.pk,
+            },
+        )
+        self.assertDictEqual(
+            json[1],
+            {
+                "pk": lineitem2.pk,
+                "name": "lineitem 2",
+                "order": 2,
+                "qty": "1.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "19.99",
+                "price_equation": "",
+                "total": "19.99",
+                "total_equation": "",
+                "is_hidden": False,
+                "lineitem_type": "other",
+                "task": self.task.pk,
+                "job": self.job.pk,
+            },
+        )
+
+    def test_create_lineitem(self):
+        response = self.client.post(
+            f"/api/task/task/{self.task.pk}/lineitems/",
+            {
+                "name": "lineitem 1",
+                "order": 6,
+                "qty": "1.000",
+                "unit": "h",
+                "price": "19.99",
+                "total": "19.99",
+            },
+        )
+
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "pk": 1,
+                "name": "lineitem 1",
+                "order": 6,
+                "qty": "1.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "19.99",
+                "price_equation": "",
+                "total": "19.99",
+                "total_equation": "",
+                "is_hidden": False,
+                "lineitem_type": "other",
+                "task": self.task.pk,
+                "job": self.job.pk,
+            },
+        )
+
+    def test_update_lineitem(self):
+        lineitem1 = LineItemFactory(
+            task=self.task, name="lineitem 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+
+        response = self.client.put(
+            f"/api/task/task/{self.task.pk}/lineitem/{lineitem1.pk}/",
+            {"name": "updated name"},
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "pk": 1,
+                "name": "updated name",
+                "order": 1,
+                "qty": "1.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "19.99",
+                "price_equation": "",
+                "total": "19.99",
+                "total_equation": "",
+                "is_hidden": False,
+                "lineitem_type": "other",
+                "task": self.task.pk,
+                "job": self.job.pk,
+            },
+        )
+
+    def test_get_lineitem(self):
+        lineitem1 = LineItemFactory(
+            task=self.task, name="lineitem 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+
+        response = self.client.get(
+            f"/api/task/task/{self.task.pk}/lineitem/{lineitem1.pk}/"
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "pk": lineitem1.pk,
+                "name": "lineitem 1",
+                "order": 1,
+                "qty": "1.000",
+                "qty_equation": "",
+                "unit": "pc",
+                "price": "19.99",
+                "price_equation": "",
+                "total": "19.99",
+                "total_equation": "",
+                "is_hidden": False,
+                "lineitem_type": "other",
+                "task": self.task.pk,
+                "job": self.job.pk,
+            },
+        )
+
+    def test_partial_update_lineitem(self):
+        lineitem1 = LineItemFactory(
+            task=self.task, name="lineitem 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+
+        response = self.client.patch(
+            f"/api/task/task/{self.task.pk}/lineitem/{lineitem1.pk}/",
+            {"name": "updated name"},
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "pk": 1,
+                "name": "updated name",
+                "order": 1,
+                "qty": "1.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "19.99",
+                "price_equation": "",
+                "total": "19.99",
+                "total_equation": "",
+                "is_hidden": False,
+                "lineitem_type": "other",
+                "task": self.task.pk,
+                "job": self.job.pk,
+            },
+        )
+
+    def test_delete_lineitem(self):
+        lineitem1 = LineItemFactory(
+            task=self.task, name="lineitem 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+        self.assertIsNotNone(LineItem.objects.get(pk=lineitem1.pk))
+
+        response = self.client.delete(
+            f"/api/task/task/{self.task.pk}/lineitem/{lineitem1.pk}/"
+        )
+
+        self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
+        with self.assertRaises(LineItem.DoesNotExist):
+            LineItem.objects.get(pk=lineitem1.pk)
