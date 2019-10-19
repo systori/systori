@@ -266,6 +266,18 @@ class JobModelViewSet(viewsets.ModelViewSet):
     def task(self, request, pk=None, task_id=None):
         return GroupModelViewSet.task(self, request, pk=pk, task_id=task_id)
 
+    @swagger_auto_schema(
+        method="GET", responses={200: flutter.GroupSerializer(many=True)}
+    )
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.GroupSerializer,
+        responses={201: flutter.GroupSerializer()},
+    )
+    @action(methods=["GET", "POST"], detail=True)
+    def groups(self, request, pk=None):
+        return GroupModelViewSet.subgroups(self, request, pk=pk)
+
 
 class TaskModelViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()

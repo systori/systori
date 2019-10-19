@@ -798,6 +798,7 @@ class GroupApiTest(ClientTestCase):
         self.assertDictEqual(json, {"order": ["This field is required."]}, json)
 
     def test_create_subgroup(self):
+        # Multiple groups returned, expected 1, got 2.
         response = self.client.post(
             f"/api/task/group/{self.group.pk}/subgroups/",
             {"name": "test subgroup", "order": 5},
@@ -1117,6 +1118,78 @@ class JobApiTest(ClientTestCase):
         self.project = ProjectFactory()
         self.jobsite = JobSiteFactory(project=self.project)
         self.job = JobFactory(project=self.project, description="this is a test job")
+
+    def test_list_groups(self):
+        group1 = GroupFactory(parent=self.job, name="this is a test group 01")
+        group2 = GroupFactory(parent=self.job, name="this is a test group 02")
+
+        response = self.client.get(f"/api/task/job/{self.job.pk}/groups/")
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertDictEqual(
+            json[0],
+            {
+                "pk": group1.pk,
+                "name": "this is a test group 01",
+                "description": "",
+                "order": 1,
+                "groups": [],
+                "tasks": [],
+                "parent": self.job.pk,
+                "job": self.job.pk,
+            },
+            json[0],
+        )
+        self.assertDictEqual(
+            json[1],
+            {
+                "pk": group2.pk,
+                "name": "this is a test group 02",
+                "description": "",
+                "order": 2,
+                "groups": [],
+                "tasks": [],
+                "parent": self.job.pk,
+                "job": self.job.pk,
+            },
+            json[1],
+        )
+
+    def test_create_group_without_order(self):
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/groups/", {"name": "test group"}
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+
+        self.assertDictEqual(json, {"order": ["This field is required."]}, json)
+
+    def test_create_group(self):
+        # Inifinite recursion issue here, flutter_serializers:168
+        response = self.client.patch(
+            f"/api/task/job/{self.job.pk}/",
+            {"groups": [{"name": "test group", "order": 5}]},
+            format="json",
+        )
+        print(response.data)
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        json = response.json()
+
+        self.assertDictEqual(
+            json,
+            {
+                "pk": 2,
+                "name": "test group",
+                "description": "",
+                "order": 5,
+                "groups": [],
+                "tasks": [],
+                "parent": self.job.pk,
+                "job": self.job.pk,
+            },
+            json,
+        )
 
     def test_list_tasks(self):
         task1 = TaskFactory(
