@@ -50,8 +50,10 @@ class LineItemSerializer(serializers.ModelSerializer):
     def update(self, lineitem, validated_data):
         if validated_data:
             super().update(lineitem, validated_data)
-        self._data = {"pk": lineitem.pk, "token": lineitem.token}
-        return self._data
+
+        # This forcefully sets the json returned by this, but we use [to_representation]
+        # self._data = {"pk": lineitem.pk, "token": lineitem.token}
+        return self.to_representation(lineitem)
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -113,9 +115,10 @@ class TaskSerializer(serializers.ModelSerializer):
             serializer.is_valid(raise_exception=True)
             data["lineitems"].append(serializer.save(task=task))
 
-        self._data = data
+        # This forcefully sets the json returned by this to [data], but we use [to_representation]
+        # self._data = data
 
-        return data
+        return self.to_representation(task)
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -235,9 +238,10 @@ class GroupSerializer(serializers.ModelSerializer):
             serializer.is_valid(raise_exception=True)
             data["groups"].append(serializer.save(parent=group))
 
-        self._data = data
+        # This forcefully sets the json returned by this to [data], but we use [to_representation]
+        # self._data = data
 
-        return data
+        return self.to_representation(group)
 
 
 class DeleteSerializer(serializers.Serializer):
@@ -274,6 +278,12 @@ class JobSerializer(serializers.ModelSerializer):
 
         DeleteSerializer(data=validated_data.pop("delete", {})).perform()
 
+        # This is requried because, nested fields [groups] and [tasks] need to be updated as well
+        # The process is same as that of [GroupSerializer.update]
+        # Downside of this is that the returned json for [job] would conform to whatever
+        # [GroupSerialzier.to_representation] produces
+        # This currently produces additional "token", "parent" & "job" fields
+        # The web editor does expect "token" field, which is not included in JobSerializer
         serializer = GroupSerializer(job, data=validated_data, partial=True)
         serializer.is_valid(raise_exception=True)
         self._data = serializer.save()
