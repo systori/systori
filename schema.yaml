@@ -3129,6 +3129,105 @@ paths:
         description: A unique integer value identifying this Job.
         required: true
         type: integer
+  /task/job/{id}/task/{task_id}/:
+    get:
+      operationId: task_job_task_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Task'
+      tags:
+        - task
+    put:
+      operationId: task_job_task_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Task'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Task'
+      tags:
+        - task
+    patch:
+      operationId: task_job_task_partial_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Task'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Task'
+      tags:
+        - task
+    delete:
+      operationId: task_job_task_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: Task deleted successfully
+      tags:
+        - task
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Job.
+        required: true
+        type: integer
+      - name: task_id
+        in: path
+        required: true
+        type: string
+  /task/job/{id}/tasks/:
+    get:
+      operationId: task_job_tasks_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Task'
+      tags:
+        - task
+    post:
+      operationId: task_job_tasks_create
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Task'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Task'
+      tags:
+        - task
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Job.
+        required: true
+        type: integer
   /task/task/:
     get:
       operationId: task_task_list

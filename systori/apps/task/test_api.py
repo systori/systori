@@ -780,7 +780,7 @@ class GroupApiTest(ClientTestCase):
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
-                "parent": 2,
+                "parent": self.group.pk,
                 "lineitems": [],
             },
             json[0],
@@ -856,7 +856,7 @@ class GroupApiTest(ClientTestCase):
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
-                "parent": 2,
+                "parent": self.group.pk,
                 "lineitems": [
                     {
                         "pk": 1,
@@ -1034,6 +1034,298 @@ class GroupApiTest(ClientTestCase):
         response = self.client.delete(
             f"/api/task/group/{self.group.pk}/task/{task1.pk}/"
         )
+
+        self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
+        with self.assertRaises(Task.DoesNotExist):
+            Task.objects.get(pk=task1.pk)
+
+
+class JobApiTest(ClientTestCase):
+    def setUp(self):
+        super().setUp()
+        self.project = ProjectFactory()
+        self.jobsite = JobSiteFactory(project=self.project)
+        self.job = JobFactory(project=self.project, description="this is a test job")
+
+    def test_list_tasks(self):
+        task1 = TaskFactory(
+            group=self.job, name="task 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+
+        task2 = TaskFactory(
+            group=self.job, name="task 2", qty=1, unit="pc", price=19.99, total=19.99
+        )
+
+        response = self.client.get(f"/api/task/job/{self.job.pk}/tasks/")
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertDictEqual(
+            json[0],
+            {
+                "pk": task1.pk,
+                "name": "task 1",
+                "description": "",
+                "order": 1,
+                "qty": "1.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "19.99",
+                "price_equation": "",
+                "total": "19.99",
+                "total_equation": "",
+                "variant_group": 0,
+                "variant_serial": 0,
+                "is_provisional": False,
+                "parent": self.job.pk,
+                "lineitems": [],
+            },
+            json[0],
+        )
+        self.assertDictEqual(
+            json[1],
+            {
+                "pk": task2.pk,
+                "name": "task 2",
+                "description": "",
+                "order": 2,
+                "qty": "1.000",
+                "qty_equation": "",
+                "unit": "pc",
+                "price": "19.99",
+                "price_equation": "",
+                "total": "19.99",
+                "total_equation": "",
+                "variant_group": 0,
+                "variant_serial": 0,
+                "is_provisional": False,
+                "parent": self.job.pk,
+                "lineitems": [],
+            },
+            json[1],
+        )
+
+    def test_create_task(self):
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "5.00",
+                "total": "25.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "pk": 1,
+                "name": "task 1",
+                "description": "",
+                "order": 6,
+                "qty": "5.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "5.00",
+                "price_equation": "",
+                "total": "25.00",
+                "total_equation": "",
+                "variant_group": 0,
+                "variant_serial": 0,
+                "is_provisional": False,
+                "parent": self.job.pk,
+                "lineitems": [
+                    {
+                        "pk": 1,
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            json,
+        )
+
+        task = Task.objects.get(pk=json["pk"], group=self.job)
+
+        self.assertEqual(
+            task.group.pk, self.job.pk, "Expected task to have correct group.pk"
+        )
+        self.assertEqual(
+            task.job.pk, self.job.pk, "Expected task to have correct job.pk"
+        )
+        self.assertDictEqual(
+            flutter.TaskSerializer(task).data,
+            json,
+            "Expected saved task to match response",
+        )
+
+    def test_create_task_without_lineitem(self):
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "5.00",
+                "total": "25.00",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+        self.assertDictEqual(json, {"lineitems": ["This field is required."]}, json)
+
+        self.assertEqual(len(Task.objects.all()), 0, "Expected no tasks to be created")
+
+    def test_update_task(self):
+        task1 = TaskFactory(
+            group=self.job, name="task 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+
+        response = self.client.put(
+            f"/api/task/job/{self.job.pk}/task/{task1.pk}/", {"name": "updated name"}
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "pk": task1.pk,
+                "name": "updated name",
+                "description": "",
+                "order": 1,
+                "qty": "1.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "19.99",
+                "price_equation": "",
+                "total": "19.99",
+                "total_equation": "",
+                "variant_group": 0,
+                "variant_serial": 0,
+                "is_provisional": False,
+                "parent": self.job.pk,
+                "lineitems": [],
+            },
+            json,
+        )
+
+        self.assertEqual(
+            Task.objects.get(pk=task1.pk).name,
+            "updated name",
+            "Expected task to have updated name in db",
+        )
+
+    def test_get_task(self):
+        task1 = TaskFactory(
+            group=self.job, name="task 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+
+        response = self.client.get(f"/api/task/job/{self.job.pk}/task/{task1.pk}/")
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "pk": task1.pk,
+                "name": "task 1",
+                "description": "",
+                "order": 1,
+                "qty": "1.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "19.99",
+                "price_equation": "",
+                "total": "19.99",
+                "total_equation": "",
+                "variant_group": 0,
+                "variant_serial": 0,
+                "is_provisional": False,
+                "parent": self.job.pk,
+                "lineitems": [],
+            },
+            json,
+        )
+
+    def test_partial_update_task(self):
+        task1 = TaskFactory(
+            group=self.job, name="task 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+
+        response = self.client.patch(
+            f"/api/task/job/{self.job.pk}/task/{task1.pk}/", {"name": "updated name"}
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "pk": task1.pk,
+                "name": "updated name",
+                "description": "",
+                "order": 1,
+                "qty": "1.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "19.99",
+                "price_equation": "",
+                "total": "19.99",
+                "total_equation": "",
+                "variant_group": 0,
+                "variant_serial": 0,
+                "is_provisional": False,
+                "parent": self.job.pk,
+                "lineitems": [],
+            },
+            json,
+        )
+
+        self.assertEqual(
+            Task.objects.get(pk=task1.pk).name,
+            "updated name",
+            "Expected task to have updated name in db",
+        )
+
+    def test_delete_task(self):
+        task1 = TaskFactory(
+            group=self.job, name="task 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+        self.assertIsNotNone(Task.objects.get(pk=task1.pk))
+
+        response = self.client.delete(f"/api/task/job/{self.job.pk}/task/{task1.pk}/")
 
         self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
         with self.assertRaises(Task.DoesNotExist):

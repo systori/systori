@@ -146,12 +146,6 @@ class CloneAPI(views.APIView):
         )
 
 
-class JobModelViewSet(viewsets.ModelViewSet):
-    queryset = Job.objects.all()
-    serializer_class = flutter.JobSerializer
-    permission_classes = (HasStaffAccess,)
-
-
 class GroupModelViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = flutter.GroupSerializer
@@ -214,6 +208,39 @@ class GroupModelViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(group=group)
         return Response(data=flutter.TaskSerializer(task).data)
+
+
+class JobModelViewSet(viewsets.ModelViewSet):
+    queryset = Job.objects.all()
+    serializer_class = flutter.JobSerializer
+    permission_classes = (HasStaffAccess,)
+
+    @swagger_auto_schema(
+        method="GET", responses={200: flutter.TaskSerializer(many=True)}
+    )
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.TaskSerializer,
+        responses={201: flutter.TaskSerializer()},
+    )
+    @action(methods=["GET", "POST"], detail=True)
+    def tasks(self, request, pk=None):
+        return GroupModelViewSet.tasks(self, request, pk=pk)
+
+    @swagger_auto_schema(methods=["GET"], responses={200: flutter.TaskSerializer()})
+    @swagger_auto_schema(
+        methods=["PUT", "PATCH"],
+        request_body=flutter.TaskSerializer,
+        responses={200: flutter.TaskSerializer()},
+    )
+    @swagger_auto_schema(method="DELETE", responses={204: "Task deleted successfully"})
+    @action(
+        methods=["GET", "PUT", "PATCH", "DELETE"],
+        detail=True,
+        url_path=r"task/(?P<task_id>\d+)",
+    )
+    def task(self, request, pk=None, task_id=None):
+        return GroupModelViewSet.task(self, request, pk=pk, task_id=task_id)
 
 
 class TaskModelViewSet(viewsets.ModelViewSet):
