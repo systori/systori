@@ -157,6 +157,64 @@ class GroupModelViewSet(viewsets.ModelViewSet):
     serializer_class = flutter.GroupSerializer
     permission_classes = (HasStaffAccess,)
 
+    @swagger_auto_schema(
+        method="GET", responses={200: flutter.TaskSerializer(many=True)}
+    )
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.TaskSerializer,
+        responses={201: flutter.TaskSerializer()},
+    )
+    @action(methods=["GET", "POST"], detail=True)
+    def tasks(self, request, pk=None):
+        group = self.get_object()
+        if request.method.lower() == "get":
+            tasks = Task.objects.filter(group=group)
+            return Response(data=flutter.TaskSerializer(tasks, many=True).data)
+
+        if request.method.lower() == "post" and pk:
+            serializer = flutter.TaskSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(group=group)
+
+            return Response(serializer.data, status=HTTP_201_CREATED)
+
+        return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
+
+    @swagger_auto_schema(methods=["GET"], responses={200: flutter.TaskSerializer()})
+    @swagger_auto_schema(
+        methods=["PUT", "PATCH"],
+        request_body=flutter.TaskSerializer,
+        responses={200: flutter.TaskSerializer()},
+    )
+    @swagger_auto_schema(method="DELETE", responses={204: "Task deleted successfully"})
+    @action(
+        methods=["GET", "PUT", "PATCH", "DELETE"],
+        detail=True,
+        url_path=r"task/(?P<task_id>\d+)",
+    )
+    def task(self, request, pk=None, task_id=None):
+        if not (pk or task_id):
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        group = self.get_object()
+        task = Task.objects.get(pk=task_id, group=group)
+
+        if request.method.lower() == "delete":
+            task.delete()
+            return Response(status=HTTP_204_NO_CONTENT)
+
+        if request.method.lower() == "get":
+            return Response(data=flutter.TaskSerializer(task).data)
+
+        # This is an update request
+        # We always update tasks partially
+        # is_partial = request.method.lower() == "patch"
+        serializer = flutter.TaskSerializer(task, request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(group=group)
+        return Response(data=flutter.TaskSerializer(task).data)
+
 
 class TaskModelViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()

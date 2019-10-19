@@ -44,7 +44,10 @@ class TaskSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
     lineitems = LineItemSerializer(many=True)
     parent = serializers.IntegerField(
-        required=True, source="group.pk", help_text="This can be a group or job pk"
+        required=False,
+        source="group.pk",
+        help_text="This can be a group or job pk",
+        read_only=True,
     )
 
     class Meta:
@@ -73,7 +76,7 @@ class TaskSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         lineitems = validated_data.pop("lineitems", [])
         task, _ = Task.objects.update_or_create(
-            validated_data, job=validated_data["parent"].job
+            validated_data, job=validated_data["group"].job
         )
         return self.update(task, {"lineitems": lineitems})
 
