@@ -16,8 +16,8 @@ from .models import Group, Job, LineItem, Task
 
 class LineItemSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
-    job = serializers.IntegerField(required=False, source="job.pk", read_only=True)
-    task = serializers.IntegerField(required=False, source="task.pk", read_only=True)
+    job = serializers.IntegerField(required=True, source="job.pk")
+    task = serializers.IntegerField(required=True, source="task.pk")
 
     class Meta:
         model = LineItem
@@ -57,8 +57,8 @@ class LineItemSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
     lineitems = LineItemSerializer(many=True)
-    job = serializers.IntegerField(required=False, source="job.pk", read_only=True)
-    group = serializers.IntegerField(required=False, source="group.pk", read_only=True)
+    job = serializers.IntegerField(required=False, source="job.pk")
+    group = serializers.IntegerField(required=False, source="group.pk")
 
     class Meta:
         model = Task
@@ -120,11 +120,9 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class GroupSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
-    job = serializers.IntegerField(
-        required=False, source="job.pk", allow_null=True, read_only=True
-    )
+    job = serializers.IntegerField(required=False, source="job.pk", allow_null=True)
     parent = serializers.IntegerField(
-        required=False, source="parent.pk", allow_null=True, read_only=True
+        required=False, source="parent.pk", allow_null=True
     )
     groups = serializers.ListField(child=RecursiveField(), required=False)
     tasks = TaskSerializer(many=True, required=False)
