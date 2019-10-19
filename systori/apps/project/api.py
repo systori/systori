@@ -26,7 +26,7 @@ from systori.apps.company.models import Worker
 from systori.apps.main.models import Note
 from systori.apps.main.serializers import NoteSerializer
 from systori.apps.task.models import Job
-from systori.apps.task.serializers import JobSerializer
+import systori.apps.task.flutter_serializers as flutter
 
 from ..user.permissions import HasLaborerAccess
 from .models import Project, DailyPlan
@@ -209,19 +209,23 @@ class ProjectModelViewSet(ModelViewSet):
         serializer.save()
         return Response(data=serializer.data)
 
-    @swagger_auto_schema(method="GET", responses={200: JobSerializer(many=True)})
     @swagger_auto_schema(
-        method="POST", request_body=JobSerializer, responses={201: JobSerializer()}
+        method="GET", responses={200: flutter.JobSerializer(many=True)}
+    )
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.JobSerializer,
+        responses={201: flutter.JobSerializer()},
     )
     @action(methods=["GET", "POST"], detail=True)
     def jobs(self, request, pk=None):
         project = self.get_object()
         if request.method.lower() == "get":
             jobs = Job.objects.filter(project=project)
-            return Response(data=JobSerializer(jobs, many=True).data)
+            return Response(data=flutter.JobSerializer(jobs, many=True).data)
 
         if request.method.lower() == "post" and pk:
-            serializer = JobSerializer(data=request.data)
+            serializer = flutter.JobSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
             serializer.save(project=project)
@@ -229,11 +233,11 @@ class ProjectModelViewSet(ModelViewSet):
 
         return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
 
-    @swagger_auto_schema(methods=["GET"], responses={200: JobSerializer()})
+    @swagger_auto_schema(methods=["GET"], responses={200: flutter.JobSerializer()})
     @swagger_auto_schema(
         methods=["PUT", "PATCH"],
-        request_body=JobSerializer,
-        responses={200: JobSerializer()},
+        request_body=flutter.JobSerializer,
+        responses={200: flutter.JobSerializer()},
     )
     @swagger_auto_schema(method="DELETE", responses={204: "Job deleted successfully"})
     @action(
@@ -253,15 +257,15 @@ class ProjectModelViewSet(ModelViewSet):
             return Response(status=HTTP_204_NO_CONTENT)
 
         if request.method.lower() == "get":
-            return Response(data=JobSerializer(job).data)
+            return Response(data=flutter.JobSerializer(job).data)
 
         # This is an update request
         # We always update jobs partially
         # is_partial = request.method.lower() == "patch"
-        serializer = JobSerializer(job, data=request.data, partial=True)
+        serializer = flutter.JobSerializer(job, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save(project=project)
-        return Response(data=JobSerializer(job).data)
+        return Response(data=flutter.JobSerializer(job).data)
 
 
 class DailyPlanModelViewSet(ModelViewSet):

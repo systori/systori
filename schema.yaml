@@ -1796,12 +1796,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Job'
+            $ref: '#/definitions/DeprecatedJob'
       responses:
         '201':
           description: ''
           schema:
-            $ref: '#/definitions/Job'
+            $ref: '#/definitions/DeprecatedJob'
       tags:
         - editor
     parameters:
@@ -4407,7 +4407,7 @@ definitions:
       worker:
         title: Worker
         type: integer
-  LineItem:
+  DeprecatedLineItem:
     required:
       - order
       - task
@@ -4477,7 +4477,7 @@ definitions:
       job:
         title: Job
         type: integer
-  Task:
+  DeprecatedTask:
     required:
       - name
       - order
@@ -4557,8 +4557,8 @@ definitions:
       lineitems:
         type: array
         items:
-          $ref: '#/definitions/LineItem'
-  Group:
+          $ref: '#/definitions/DeprecatedLineItem'
+  DeprecatedGroup:
     required:
       - order
     type: object
@@ -4587,11 +4587,11 @@ definitions:
       groups:
         type: array
         items:
-          $ref: '#/definitions/Group'
+          $ref: '#/definitions/DeprecatedGroup'
       tasks:
         type: array
         items:
-          $ref: '#/definitions/Task'
+          $ref: '#/definitions/DeprecatedTask'
       parent:
         title: Parent
         type: integer
@@ -4616,7 +4616,7 @@ definitions:
         type: array
         items:
           type: integer
-  Job:
+  DeprecatedJob:
     type: object
     properties:
       pk:
@@ -4633,11 +4633,11 @@ definitions:
       groups:
         type: array
         items:
-          $ref: '#/definitions/Group'
+          $ref: '#/definitions/DeprecatedGroup'
       tasks:
         type: array
         items:
-          $ref: '#/definitions/Task'
+          $ref: '#/definitions/DeprecatedTask'
       order:
         title: Order
         type: integer
@@ -4733,6 +4733,197 @@ definitions:
         type: array
         items:
           type: integer
+  LineItem:
+    required:
+      - order
+    type: object
+    properties:
+      pk:
+        title: Pk
+        type: integer
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+      order:
+        title: Order
+        type: integer
+        maximum: 2147483647
+        minimum: 0
+      qty:
+        title: Quantity
+        type: string
+        format: decimal
+      qty_equation:
+        title: Qty equation
+        type: string
+        maxLength: 512
+      unit:
+        title: Unit
+        type: string
+        maxLength: 512
+      price:
+        title: Price
+        type: string
+        format: decimal
+      price_equation:
+        title: Price equation
+        type: string
+        maxLength: 512
+      total:
+        title: Total
+        type: string
+        format: decimal
+      total_equation:
+        title: Total equation
+        type: string
+        maxLength: 512
+      is_hidden:
+        title: Is hidden
+        type: boolean
+      lineitem_type:
+        title: Line Item Type
+        type: string
+        enum:
+          - material
+          - labor
+          - equipment
+          - other
+  Task:
+    required:
+      - name
+      - order
+      - parent
+      - lineitems
+    type: object
+    properties:
+      pk:
+        title: Pk
+        type: integer
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      description:
+        title: Description
+        type: string
+      order:
+        title: Order
+        type: integer
+        maximum: 2147483647
+        minimum: 0
+      qty:
+        title: Quantity
+        type: string
+        format: decimal
+        x-nullable: true
+      qty_equation:
+        title: Qty equation
+        type: string
+        maxLength: 512
+      unit:
+        title: Unit
+        type: string
+        maxLength: 512
+      price:
+        title: Price
+        type: string
+        format: decimal
+      price_equation:
+        title: Price equation
+        type: string
+        maxLength: 512
+      total:
+        title: Total
+        type: string
+        format: decimal
+      total_equation:
+        title: Total equation
+        type: string
+        maxLength: 512
+      variant_group:
+        title: Variant group
+        type: integer
+        maximum: 2147483647
+        minimum: 0
+      variant_serial:
+        title: Variant serial
+        type: integer
+        maximum: 2147483647
+        minimum: 0
+      is_provisional:
+        title: Is provisional
+        type: boolean
+      parent:
+        title: Parent
+        description: This can be a group or job pk
+        type: integer
+      lineitems:
+        type: array
+        items:
+          $ref: '#/definitions/LineItem'
+  Group:
+    required:
+      - order
+      - parent
+    type: object
+    properties:
+      pk:
+        title: Pk
+        type: integer
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+      description:
+        title: Description
+        type: string
+      order:
+        title: Order
+        type: integer
+        maximum: 2147483647
+        minimum: 0
+      groups:
+        type: array
+        items:
+          $ref: '#/definitions/Group'
+      tasks:
+        type: array
+        items:
+          $ref: '#/definitions/Task'
+      parent:
+        title: Parent
+        type: integer
+      job:
+        title: Job
+        type: integer
+        x-nullable: true
+  Job:
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+      description:
+        title: Description
+        type: string
+      groups:
+        type: array
+        items:
+          $ref: '#/definitions/Group'
+      tasks:
+        type: array
+        items:
+          $ref: '#/definitions/Task'
+      order:
+        title: Order
+        type: integer
   Timer:
     required:
       - started

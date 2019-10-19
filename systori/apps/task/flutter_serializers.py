@@ -1,3 +1,7 @@
+"""
+Serializers for apis used by flutter client
+"""
+
 from collections import OrderedDict
 
 
@@ -16,15 +20,12 @@ from .models import Group, Job, LineItem, Task
 
 class LineItemSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
-    job = serializers.IntegerField(required=True, source="job.pk")
-    task = serializers.IntegerField(required=True, source="task.pk")
 
     class Meta:
-        ref_name = "DeprecatedLineItem"
+        ref_name = "LineItem"
         model = LineItem
         fields = [
             "pk",
-            "token",
             "name",
             "order",
             "qty",
@@ -36,37 +37,21 @@ class LineItemSerializer(serializers.ModelSerializer):
             "total_equation",
             "is_hidden",
             "lineitem_type",
-            "task",
-            "job",
         ]
-
-    def create(self, validated_data):
-        lineitem, _ = LineItem.objects.update_or_create(
-            validated_data,
-            job=validated_data["task"].job,
-            token=validated_data["token"],
-        )
-        return self.update(lineitem, {})
-
-    def update(self, lineitem, validated_data):
-        if validated_data:
-            super().update(lineitem, validated_data)
-        self._data = {"pk": lineitem.pk, "token": lineitem.token}
-        return self._data
 
 
 class TaskSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
     lineitems = LineItemSerializer(many=True)
-    job = serializers.IntegerField(required=False, source="job.pk")
-    group = serializers.IntegerField(required=False, source="group.pk")
+    parent = serializers.IntegerField(
+        required=True, source="group.pk", help_text="This can be a group or job pk"
+    )
 
     class Meta:
-        ref_name = "DeprecatedTask"
+        ref_name = "Task"
         model = Task
         fields = [
             "pk",
-            "token",
             "name",
             "description",
             "order",
@@ -81,17 +66,14 @@ class TaskSerializer(serializers.ModelSerializer):
             "variant_serial",
             "is_provisional",
             # "status",
-            "job",
-            "group",
+            "parent",
             "lineitems",
         ]
 
     def create(self, validated_data):
         lineitems = validated_data.pop("lineitems", [])
         task, _ = Task.objects.update_or_create(
-            validated_data,
-            job=validated_data["group"].job,
-            token=validated_data["token"],
+            validated_data, job=validated_data["parent"].job
         )
         return self.update(task, {"lineitems": lineitems})
 
@@ -101,11 +83,8 @@ class TaskSerializer(serializers.ModelSerializer):
         if validated_data:
             super().update(task, validated_data)
 
-        data = {"pk": task.pk, "token": task.token}
-
         for lineitem in lineitems:
-            if "lineitems" not in data:
-                data["lineitems"] = []
+
             pk, instance = lineitem.pop("pk", None), None
             if pk:
                 instance = get_object_or_404(LineItem.objects.all(), id=pk)
@@ -113,28 +92,25 @@ class TaskSerializer(serializers.ModelSerializer):
                 instance=instance, data=lineitem, partial=True
             )
             serializer.is_valid(raise_exception=True)
-            data["lineitems"].append(serializer.save(task=task))
+            serializer.save(task=task)
 
-        self._data = data
-
-        return data
+        return task
 
 
 class GroupSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
     job = serializers.IntegerField(required=False, source="job.pk", allow_null=True)
     parent = serializers.IntegerField(
-        required=False, source="parent.pk", allow_null=True
+        required=True, source="parent.pk", allow_null=True
     )
     groups = serializers.ListField(child=RecursiveField(), required=False)
     tasks = TaskSerializer(many=True, required=False)
 
     class Meta:
-        ref_name = "DeprecatedGroup"
+        ref_name = "Group"
         model = Group
         fields = [
             "pk",
-            "token",
             "name",
             "description",
             "order",
@@ -201,9 +177,7 @@ class GroupSerializer(serializers.ModelSerializer):
         tasks = validated_data.pop("tasks", [])
         groups = validated_data.pop("groups", [])
         group, _ = Group.objects.update_or_create(
-            validated_data,
-            job=validated_data["parent"].job,
-            token=validated_data["token"],
+            validated_data, job=validated_data["parent"].job
         )
         return self.update(group, {"tasks": tasks, "groups": groups})
 
@@ -214,73 +188,42 @@ class GroupSerializer(serializers.ModelSerializer):
         if validated_data:
             super().update(group, validated_data)
 
-        data = {"pk": group.pk, "token": group.token}
-
         for task in tasks:
-            if "tasks" not in data:
-                data["tasks"] = []
             pk, instance = task.pop("pk", None), None
             if pk:
                 instance = get_object_or_404(Task.objects.all(), id=pk)
             serializer = TaskSerializer(instance=instance, data=task, partial=True)
             serializer.is_valid(raise_exception=True)
-            data["tasks"].append(serializer.save(group=group))
+            serializer.save(group=group)
 
         for subgroup in groups:
-            if "groups" not in data:
-                data["groups"] = []
             pk, instance = subgroup.pop("pk", None), None
             if pk:
                 instance = get_object_or_404(Group.objects.all(), id=pk)
             serializer = GroupSerializer(instance=instance, data=subgroup, partial=True)
             serializer.is_valid(raise_exception=True)
-            data["groups"].append(serializer.save(parent=group))
+            serializer.save(parent=group)
 
-        self._data = data
-
-        return data
-
-
-class DeleteSerializer(serializers.Serializer):
-    groups = serializers.ListField(child=serializers.IntegerField(), required=False)
-    tasks = serializers.ListField(child=serializers.IntegerField(), required=False)
-    lineitems = serializers.ListField(child=serializers.IntegerField(), required=False)
-
-    def perform(self):
-
-        groups = self.initial_data.pop("groups", [])
-        if groups:
-            Group.objects.filter(pk__in=groups).delete()
-
-        tasks = self.initial_data.pop("tasks", [])
-        if tasks:
-            Task.objects.filter(pk__in=tasks).delete()
-
-        lineitems = self.initial_data.pop("lineitems", [])
-        if lineitems:
-            LineItem.objects.filter(pk__in=lineitems).delete()
+        return group
 
 
 class JobSerializer(serializers.ModelSerializer):
     groups = GroupSerializer(required=False, many=True)
     tasks = TaskSerializer(required=False, many=True)
-    delete = DeleteSerializer(required=False)
     order = serializers.IntegerField(required=False)
 
     class Meta:
-        ref_name = "DeprecatedJob"
+        ref_name = "Job"
         model = Job
-        fields = ["pk", "name", "description", "groups", "tasks", "order", "delete"]
+        fields = ["pk", "name", "description", "groups", "tasks", "order"]
 
     def update(self, job, validated_data):
 
-        DeleteSerializer(data=validated_data.pop("delete", {})).perform()
-
         serializer = GroupSerializer(job, data=validated_data, partial=True)
         serializer.is_valid(raise_exception=True)
-        self._data = serializer.save()
+        serializer.save()
 
-        return self._data
+        return job
 
     def to_representation(self, instance):
         return {

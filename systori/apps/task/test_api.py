@@ -7,7 +7,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CON
 from systori.lib.testing import ClientTestCase
 
 from systori.apps.project.factories import ProjectFactory, JobSiteFactory
-from systori.apps.task.serializers import LineItemSerializer
+import systori.apps.task.flutter_serializers as flutter
 from systori.apps.task.models import Group, Task, LineItem
 from systori.apps.task.factories import (
     JobFactory,
@@ -568,8 +568,6 @@ class TaskApiTest(ClientTestCase):
                 "total_equation": "",
                 "is_hidden": False,
                 "lineitem_type": "other",
-                "task": self.task.pk,
-                "job": self.job.pk,
             },
         )
         self.assertDictEqual(
@@ -587,8 +585,6 @@ class TaskApiTest(ClientTestCase):
                 "total_equation": "",
                 "is_hidden": False,
                 "lineitem_type": "other",
-                "task": self.task.pk,
-                "job": self.job.pk,
             },
         )
 
@@ -604,7 +600,6 @@ class TaskApiTest(ClientTestCase):
                 "total": "19.99",
             },
         )
-
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         json = response.json()
         self.assertDictEqual(
@@ -622,9 +617,21 @@ class TaskApiTest(ClientTestCase):
                 "total_equation": "",
                 "is_hidden": False,
                 "lineitem_type": "other",
-                "task": self.task.pk,
-                "job": self.job.pk,
             },
+        )
+
+        lineitem = LineItem.objects.get(pk=json["pk"], task=self.task)
+
+        self.assertEqual(
+            lineitem.task.pk, self.task.pk, "Expected lineitem to have correct task.pk"
+        )
+        self.assertEqual(
+            lineitem.job.pk, self.job.pk, "Expected lineitem to have correct job.pk"
+        )
+        self.assertDictEqual(
+            flutter.LineItemSerializer(lineitem).data,
+            json,
+            "Expected saved lineitem to match response",
         )
 
     def test_update_lineitem(self):
@@ -654,8 +661,6 @@ class TaskApiTest(ClientTestCase):
                 "total_equation": "",
                 "is_hidden": False,
                 "lineitem_type": "other",
-                "task": self.task.pk,
-                "job": self.job.pk,
             },
         )
 
@@ -685,8 +690,6 @@ class TaskApiTest(ClientTestCase):
                 "total_equation": "",
                 "is_hidden": False,
                 "lineitem_type": "other",
-                "task": self.task.pk,
-                "job": self.job.pk,
             },
         )
 
@@ -717,8 +720,6 @@ class TaskApiTest(ClientTestCase):
                 "total_equation": "",
                 "is_hidden": False,
                 "lineitem_type": "other",
-                "task": self.task.pk,
-                "job": self.job.pk,
             },
         )
 

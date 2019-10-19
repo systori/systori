@@ -15,13 +15,10 @@ from rest_framework.status import (
 )
 
 from systori.lib.templatetags.customformatting import ubrdecimal
-from .models import Job, Group, Task, LineItem
-from .serializers import (
-    JobSerializer,
-    GroupSerializer,
-    TaskSerializer,
-    LineItemSerializer,
-)
+from systori.apps.task.models import Job, Group, Task, LineItem
+from systori.apps.task.serializers import JobSerializer
+import systori.apps.task.flutter_serializers as flutter
+
 from ..user.permissions import HasStaffAccess
 
 
@@ -151,48 +148,50 @@ class CloneAPI(views.APIView):
 
 class JobModelViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
-    serializer_class = JobSerializer
+    serializer_class = flutter.JobSerializer
     permission_classes = (HasStaffAccess,)
 
 
 class GroupModelViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
-    serializer_class = GroupSerializer
+    serializer_class = flutter.GroupSerializer
     permission_classes = (HasStaffAccess,)
 
 
 class TaskModelViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+    serializer_class = flutter.TaskSerializer
     permission_classes = (HasStaffAccess,)
 
-    @swagger_auto_schema(method="GET", responses={200: LineItemSerializer(many=True)})
+    @swagger_auto_schema(
+        method="GET", responses={200: flutter.LineItemSerializer(many=True)}
+    )
     @swagger_auto_schema(
         method="POST",
-        request_body=LineItemSerializer,
-        responses={201: LineItemSerializer()},
+        request_body=flutter.LineItemSerializer,
+        responses={201: flutter.LineItemSerializer()},
     )
     @action(methods=["GET", "POST"], detail=True)
     def lineitems(self, request, pk=None):
         task = self.get_object()
         if request.method.lower() == "get":
             lineitems = LineItem.objects.filter(task=task)
-            return Response(data=LineItemSerializer(lineitems, many=True).data)
+            return Response(data=flutter.LineItemSerializer(lineitems, many=True).data)
 
         if request.method.lower() == "post" and pk:
-            serializer = LineItemSerializer(data=request.data)
+            serializer = flutter.LineItemSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-
             serializer.save(task=task)
+
             return Response(serializer.data, status=HTTP_201_CREATED)
 
         return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
 
-    @swagger_auto_schema(methods=["GET"], responses={200: LineItemSerializer()})
+    @swagger_auto_schema(methods=["GET"], responses={200: flutter.LineItemSerializer()})
     @swagger_auto_schema(
         methods=["PUT", "PATCH"],
-        request_body=LineItemSerializer,
-        responses={200: LineItemSerializer()},
+        request_body=flutter.LineItemSerializer,
+        responses={200: flutter.LineItemSerializer()},
     )
     @swagger_auto_schema(
         method="DELETE", responses={204: "LineItem deleted successfully"}
@@ -214,15 +213,15 @@ class TaskModelViewSet(viewsets.ModelViewSet):
             return Response(status=HTTP_204_NO_CONTENT)
 
         if request.method.lower() == "get":
-            return Response(data=LineItemSerializer(lineitem).data)
+            return Response(data=flutter.LineItemSerializer(lineitem).data)
 
         # This is an update request
         # We always update lineitems partially
         # is_partial = request.method.lower() == "patch"
-        serializer = LineItemSerializer(lineitem, data=request.data, partial=True)
+        serializer = flutter.LineItemSerializer(lineitem, request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save(task=task)
-        return Response(data=LineItemSerializer(lineitem).data)
+        return Response(data=flutter.LineItemSerializer(lineitem).data)
 
 
 urlpatterns = [
