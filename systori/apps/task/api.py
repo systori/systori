@@ -221,8 +221,9 @@ class GroupModelViewSet(viewsets.ModelViewSet):
     def subgroups(self, request, pk=None):
         group = self.get_object()
         if request.method.lower() == "get":
-            subgroups = Group.objects.filter(parent=group)
-            return Response(data=flutter.GroupSerializer(subgroups, many=True).data)
+            return Response(
+                data=flutter.GroupSerializer(group.groups.all(), many=True).data
+            )
 
         if request.method.lower() == "post" and pk:
             serializer = flutter.GroupSerializer(data=request.data)
@@ -296,8 +297,9 @@ class TaskModelViewSet(viewsets.ModelViewSet):
     def lineitems(self, request, pk=None):
         task = self.get_object()
         if request.method.lower() == "get":
-            lineitems = LineItem.objects.filter(task=task)
-            return Response(data=flutter.LineItemSerializer(lineitems, many=True).data)
+            return Response(
+                data=flutter.LineItemSerializer(task.lineitems.all(), many=True).data
+            )
 
         if request.method.lower() == "post" and pk:
             serializer = flutter.LineItemSerializer(data=request.data)
