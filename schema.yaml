@@ -2862,7 +2862,7 @@ paths:
     parameters: []
   /task/group/search/:
     post:
-      operationId: task_group_search
+      operationId: task_search_group
       description: ''
       parameters:
         - name: data
@@ -3374,7 +3374,7 @@ paths:
     parameters: []
   /task/task/search/:
     post:
-      operationId: task_task_search
+      operationId: task_search_task
       description: ''
       parameters:
         - name: data
