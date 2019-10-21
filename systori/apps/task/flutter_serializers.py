@@ -41,7 +41,7 @@ class LineItemSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    pk = serializers.IntegerField(required=False)
+    pk = serializers.IntegerField(required=False, read_only=True)
     lineitems = LineItemSerializer(many=True)
     parent = serializers.IntegerField(
         required=False,
@@ -75,9 +75,17 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         lineitems = validated_data.pop("lineitems", [])
-        task, _ = Task.objects.update_or_create(
-            validated_data, job=validated_data["group"].job
-        )
+        parent = validated_data.pop("group")
+
+        if "pk" in validated_data:
+            pk = validated_data.pop("pk")
+            if pk:
+                raise Exception(
+                    "Cannot create task with a predefined pk, try updating instead"
+                )
+
+        task = Task.objects.create(**validated_data, job=parent.job, group=parent)
+
         return self.update(task, {"lineitems": lineitems})
 
     def update(self, task, validated_data):

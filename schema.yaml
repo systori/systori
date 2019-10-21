@@ -5110,6 +5110,7 @@ definitions:
       pk:
         title: Pk
         type: integer
+        readOnly: true
       name:
         title: Name
         type: string
