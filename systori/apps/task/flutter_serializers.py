@@ -241,5 +241,4 @@ class JobSerializer(serializers.ModelSerializer):
                 TaskSerializer(instance=task).data for task in instance.tasks.all()
             ],
             "order": instance.order,
-            "delete": {},
         }
