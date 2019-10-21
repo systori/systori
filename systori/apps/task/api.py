@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 
 from drf_yasg.utils import swagger_auto_schema
@@ -193,7 +194,7 @@ class GroupModelViewSet(viewsets.ModelViewSet):
             return Response(status=HTTP_400_BAD_REQUEST)
 
         group = self.get_object()
-        task = Task.objects.get(pk=task_id, group=group)
+        task = get_object_or_404(group.tasks, pk=task_id)
 
         if request.method.lower() == "delete":
             task.delete()
@@ -330,7 +331,8 @@ class TaskModelViewSet(viewsets.ModelViewSet):
             return Response(status=HTTP_400_BAD_REQUEST)
 
         task = self.get_object()
-        lineitem = LineItem.objects.get(pk=lineitem_id, task=task)
+
+        lineitem = get_object_or_404(task.lineitems, pk=lineitem_id)
 
         if request.method.lower() == "delete":
             lineitem.delete()
