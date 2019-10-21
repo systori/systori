@@ -180,7 +180,9 @@ class GroupSerializer(serializers.ModelSerializer):
         tasks = validated_data.pop("tasks", [])
         groups = validated_data.pop("groups", [])
         job = validated_data["parent"].job
-        group, _ = Group.objects.update_or_create(validated_data, job=job)
+        group, _ = Group.objects.update_or_create(
+            validated_data, job=job, parent=validated_data["parent"]
+        )
         return self.update(group, {"tasks": tasks, "groups": groups})
 
     def update(self, group, validated_data):
