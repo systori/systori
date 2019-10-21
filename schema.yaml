@@ -5206,10 +5206,12 @@ definitions:
       parent:
         title: Parent
         type: integer
+        readOnly: true
         x-nullable: true
       job:
         title: Job
         type: integer
+        readOnly: true
         x-nullable: true
   Job:
     type: object

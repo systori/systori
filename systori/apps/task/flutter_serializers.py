@@ -110,9 +110,11 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class GroupSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
-    job = serializers.IntegerField(required=False, source="job.pk", allow_null=True)
+    job = serializers.IntegerField(
+        required=False, source="job.pk", allow_null=True, read_only=True
+    )
     parent = serializers.IntegerField(
-        required=False, source="parent.pk", allow_null=True
+        required=False, source="parent.pk", allow_null=True, read_only=True
     )
     groups = serializers.ListField(child=RecursiveField(), required=False)
     tasks = TaskSerializer(many=True, required=False)
@@ -187,10 +189,22 @@ class GroupSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tasks = validated_data.pop("tasks", [])
         groups = validated_data.pop("groups", [])
-        job = validated_data["parent"].job
-        group, _ = Group.objects.update_or_create(
-            validated_data, job=job, parent=validated_data["parent"]
-        )
+
+        parent = validated_data.pop("parent")
+
+        if "pk" in validated_data:
+            pk = validated_data.pop("pk")
+            if pk:
+                raise Exception(
+                    "Cannot create group with a predefined pk, try updating instead"
+                )
+
+        if "job" in validated_data:
+            validated_data.pop("job")
+
+        job = parent.job
+
+        group = Group.objects.create(**validated_data, job=job, parent=parent)
         return self.update(group, {"tasks": tasks, "groups": groups})
 
     def update(self, group, validated_data):
