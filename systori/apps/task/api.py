@@ -311,6 +311,40 @@ class TaskModelViewSet(viewsets.ModelViewSet):
     permission_classes = (HasStaffAccess,)
 
     @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.TaskSearchSerializer,
+        responses={200: flutter.TaskSerializer(many=True)},
+    )
+    @action(methods=["POST"], detail=False)
+    def search(self, request):
+        search = flutter.TaskSearchSerializer(data=request.data)
+        search.is_valid()
+        terms = search.data["terms"]
+
+        result = Task.objects.raw(
+            """
+                    SELECT
+                    task_task.id,
+                    COUNT(task_lineitem.id) AS lineItemCount,
+                    ts_headline('german', task_task.description, plainto_tsquery('german'::regconfig, '{terms}')) AS match_description,
+                    ts_headline('german', task_task.name, plainto_tsquery('german'::regconfig, '{terms}')) AS match_name
+                    FROM task_task
+                    JOIN (
+                    SELECT DISTINCT ON (task_task.search) * FROM task_task
+                    ) distinctifier
+                    ON task_task.id = distinctifier.id
+                    LEFT JOIN task_lineitem ON (task_task.id = task_lineitem.task_id)
+                    WHERE task_task.search @@ (plainto_tsquery('german'::regconfig, '{terms}')) = true 
+                    GROUP BY task_task.id
+                    ORDER BY lineItemCount DESC
+                """.format(
+                terms=terms
+            )
+        )
+
+        return Response(data=flutter.TaskSerializer(instance=result, many=True).data)
+
+    @swagger_auto_schema(
         method="GET", responses={200: flutter.LineItemSerializer(many=True)}
     )
     @swagger_auto_schema(

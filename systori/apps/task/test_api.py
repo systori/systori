@@ -541,6 +541,30 @@ class TaskApiTest(ClientTestCase):
         self.job = JobFactory(project=self.project, name="this is a test job")
         self.task = TaskFactory(group=self.job)
 
+    def test_search_tasks(self):
+        job = JobFactory(name="The Job", project=ProjectFactory(structure="01.001"))
+        task1 = TaskFactory(
+            group=job,
+            name="Voranstrich aus Bitumenlösung",
+            qty=3,
+            unit="m",
+            price=19.99,
+            total=59.97,
+        )
+
+        task2 = TaskFactory(group=job, name="Schächte und Fundamente")
+
+        serialized_task1 = flutter.TaskSerializer(instance=task1).data
+
+        response = self.client.post(
+            "/api/task/task/search/", {"terms": "bitumenlos"}, format="json"
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        json = response.json()
+        self.assertListEqual(json, [serialized_task1], json)
+
     def test_list_lineitems(self):
         lineitem1 = LineItemFactory(
             task=self.task, name="lineitem 1", qty=1, unit="h", price=19.99, total=19.99

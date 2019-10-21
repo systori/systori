@@ -254,3 +254,11 @@ class GroupSearchSerializer(serializers.Serializer):
     class Meta:
         ref_name = "GroupSearch"
         fields = ["terms", "remaining_depth"]
+
+
+class TaskSearchSerializer(serializers.Serializer):
+    terms = serializers.CharField(required=True, help_text="Terms to search tasks for")
+
+    class Meta:
+        ref_name = "TaskSearch"
+        fields = ["terms"]

@@ -3372,6 +3372,26 @@ paths:
       tags:
         - task
     parameters: []
+  /task/task/search/:
+    post:
+      operationId: task_task_search
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TaskSearch'
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Task'
+      tags:
+        - task
+    parameters: []
   /task/task/{id}/:
     get:
       operationId: task_task_read
@@ -5229,6 +5249,16 @@ definitions:
         title: Remaining depth
         description: Only groups that are valid for the remaining depth will be returned
         type: integer
+  TaskSearch:
+    required:
+      - terms
+    type: object
+    properties:
+      terms:
+        title: Terms
+        description: Terms to search tasks for
+        type: string
+        minLength: 1
   Timer:
     required:
       - started
