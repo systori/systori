@@ -163,8 +163,9 @@ class GroupModelViewSet(viewsets.ModelViewSet):
     def tasks(self, request, pk=None):
         group = self.get_object()
         if request.method.lower() == "get":
-            tasks = Task.objects.filter(group=group)
-            return Response(data=flutter.TaskSerializer(tasks, many=True).data)
+            return Response(
+                data=flutter.TaskSerializer(group.tasks.all(), many=True).data
+            )
 
         if request.method.lower() == "post" and pk:
             serializer = flutter.TaskSerializer(data=request.data)
