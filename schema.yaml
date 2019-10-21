@@ -2860,6 +2860,26 @@ paths:
       tags:
         - task
     parameters: []
+  /task/group/search/:
+    post:
+      operationId: task_group_search
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/GroupSearch'
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Group'
+      tags:
+        - task
+    parameters: []
   /task/group/{id}/:
     get:
       operationId: task_group_read
@@ -5193,6 +5213,21 @@ definitions:
           $ref: '#/definitions/Task'
       order:
         title: Order
+        type: integer
+  GroupSearch:
+    required:
+      - terms
+      - remaining_depth
+    type: object
+    properties:
+      terms:
+        title: Terms
+        description: Terms to search groups for
+        type: string
+        minLength: 1
+      remaining_depth:
+        title: Remaining depth
+        description: Only groups that are valid for the remaining depth will be returned
         type: integer
   Timer:
     required:

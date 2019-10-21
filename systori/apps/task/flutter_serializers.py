@@ -242,3 +242,15 @@ class JobSerializer(serializers.ModelSerializer):
             ],
             "order": instance.order,
         }
+
+
+class GroupSearchSerializer(serializers.Serializer):
+    terms = serializers.CharField(required=True, help_text="Terms to search groups for")
+    remaining_depth = serializers.IntegerField(
+        required=True,
+        help_text="Only groups that are valid for the remaining depth will be returned",
+    )
+
+    class Meta:
+        ref_name = "GroupSearch"
+        fields = ["terms", "remaining_depth"]

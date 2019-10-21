@@ -153,6 +153,29 @@ class GroupModelViewSet(viewsets.ModelViewSet):
     permission_classes = (HasStaffAccess,)
 
     @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.GroupSearchSerializer,
+        responses={200: flutter.GroupSerializer(many=True)},
+    )
+    @action(methods=["POST"], detail=False)
+    def search(self, request):
+        search = flutter.GroupSearchSerializer(data=request.data)
+        search.is_valid()
+        terms = search.data["terms"]
+        remaining_depth = search.data["remaining_depth"]
+
+        result = (
+            Group.objects.groups_with_remaining_depth(
+                remaining_depth
+            )  # filter groups valid only for remaining depth
+            .search(terms)  # search
+            .distinct("name", "rank")  # remove possible duplicates
+            .order_by("-rank")  # Order by rank descending
+        )
+
+        return Response(data=flutter.GroupSerializer(instance=result, many=True).data)
+
+    @swagger_auto_schema(
         method="GET", responses={200: flutter.TaskSerializer(many=True)}
     )
     @swagger_auto_schema(

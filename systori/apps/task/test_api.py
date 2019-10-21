@@ -751,6 +751,29 @@ class GroupApiTest(ClientTestCase):
         self.job = JobFactory(project=self.project, name="this is a test job")
         self.group = GroupFactory(parent=self.job, name="this is a test group")
 
+    def test_search_groups(self):
+        job = JobFactory(
+            name="The Job",
+            project=ProjectFactory(structure="01.01.001"),
+            generate_groups=True,
+        )
+        group1 = GroupFactory(parent=job, name="Voranstrich aus Bitumenlösung")
+
+        group2 = GroupFactory(parent=job, name="Schächte und Fundamente")
+
+        serialized_group1 = flutter.GroupSerializer(instance=group1).data
+
+        response = self.client.post(
+            "/api/task/group/search/",
+            {"remaining_depth": 0, "terms": "bitumenlos"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        json = response.json()
+        self.assertListEqual(json, [serialized_group1], json)
+
     def test_list_groups(self):
         group1 = GroupFactory(parent=self.job, name="this is a test group 01")
         subgroup1 = GroupFactory(parent=group1, name="this is a test subgroup 01")
