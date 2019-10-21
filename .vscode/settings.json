@@ -26,7 +26,7 @@
         "editor.defaultFormatter": "ms-python.python",
     },
     "python.linting.enabled": true,
-    "python.linting.pep8Enabled": false,
+    "python.linting.pycodestyleEnabled": false,
     "python.linting.pylintEnabled": true,
     "python.linting.pylintArgs": ["--load-plugins", "pylint_django"],
     "python.pythonPath": "/usr/bin/python3",
