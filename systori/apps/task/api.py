@@ -28,6 +28,7 @@ class EditorAPI(mixins.UpdateModelMixin, viewsets.GenericViewSet):
     serializer_class = JobSerializer
     permission_classes = (HasStaffAccess,)
 
+    @swagger_auto_schema(deprecated=True)
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, partial=True, **kwargs)
 

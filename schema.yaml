@@ -1804,6 +1804,7 @@ paths:
             $ref: '#/definitions/DeprecatedJob'
       tags:
         - editor
+      deprecated: true
     parameters:
       - name: id
         in: path
