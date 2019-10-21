@@ -66,6 +66,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "console": "internalConsole",
+            "justMyCode": false,
             "args": [
                 "test",
                 "--settings", "${input:django_settings_module}",
