@@ -538,7 +538,7 @@ class TaskApiTest(ClientTestCase):
         super().setUp()
         self.project = ProjectFactory()
         self.jobsite = JobSiteFactory(project=self.project)
-        self.job = JobFactory(project=self.project, description="this is a test job")
+        self.job = JobFactory(project=self.project, name="this is a test job")
         self.task = TaskFactory(group=self.job)
 
     def test_list_lineitems(self):
@@ -748,8 +748,116 @@ class GroupApiTest(ClientTestCase):
         super().setUp()
         self.project = ProjectFactory()
         self.jobsite = JobSiteFactory(project=self.project)
-        self.job = JobFactory(project=self.project, description="this is a test job")
+        self.job = JobFactory(project=self.project, name="this is a test job")
         self.group = GroupFactory(parent=self.job, name="this is a test group")
+
+    def test_list_groups(self):
+        group1 = GroupFactory(parent=self.job, name="this is a test group 01")
+        subgroup1 = GroupFactory(parent=group1, name="this is a test subgroup 01")
+        group2 = GroupFactory(parent=self.job, name="this is a test group 02")
+        subgroup2 = GroupFactory(parent=group2, name="this is a test subgroup 02")
+
+        serialized_group = flutter.GroupSerializer(instance=self.group).data
+        serialized_job = flutter.GroupSerializer(instance=self.job).data
+        serialized_group1 = flutter.GroupSerializer(instance=group1).data
+        serialized_group2 = flutter.GroupSerializer(instance=group2).data
+        serialized_subgroup1 = flutter.GroupSerializer(instance=subgroup1).data
+        serialized_subgroup2 = flutter.GroupSerializer(instance=subgroup2).data
+
+        response = self.client.get("/api/task/group/")
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "count": 6,
+                "next": None,
+                "previous": None,
+                "results": [
+                    serialized_subgroup2,
+                    serialized_subgroup1,
+                    serialized_group,
+                    serialized_job,
+                    serialized_group1,
+                    serialized_group2,
+                ],
+            },
+            json,
+        )
+
+    def test_list_groups_with_tasks(self):
+        group1 = GroupFactory(parent=self.job, name="this is a test group 01")
+        subgroup1 = GroupFactory(parent=group1, name="this is a test subgroup 01")
+        group2 = GroupFactory(parent=self.job, name="this is a test group 02")
+        subgroup2 = GroupFactory(parent=group2, name="this is a test subgroup 02")
+
+        task1 = TaskFactory(
+            group=subgroup1, name="task 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+        task1_lineitem1 = LineItemFactory(
+            task=task1,
+            name="The Line Item 01",
+            qty=1,
+            unit="h",
+            price=19.99,
+            total=19.99,
+        )
+        task1_lineitem2 = LineItemFactory(
+            task=task1,
+            name="The Line Item 02",
+            qty=1,
+            unit="h",
+            price=19.99,
+            total=19.99,
+        )
+        task2 = TaskFactory(
+            group=subgroup1, name="task 2", qty=1, unit="h", price=19.99, total=19.99
+        )
+        task2_lineitem1 = LineItemFactory(
+            task=task2,
+            name="The Line Item 01",
+            qty=1,
+            unit="h",
+            price=19.99,
+            total=19.99,
+        )
+        task2_lineitem2 = LineItemFactory(
+            task=task2,
+            name="The Line Item 02",
+            qty=1,
+            unit="h",
+            price=19.99,
+            total=19.99,
+        )
+
+        serialized_group = flutter.GroupSerializer(instance=self.group).data
+        serialized_job = flutter.GroupSerializer(instance=self.job).data
+        serialized_group1 = flutter.GroupSerializer(instance=group1).data
+        serialized_group2 = flutter.GroupSerializer(instance=group2).data
+        serialized_subgroup1 = flutter.GroupSerializer(instance=subgroup1).data
+        serialized_subgroup2 = flutter.GroupSerializer(instance=subgroup2).data
+
+        response = self.client.get("/api/task/group/")
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "count": 6,
+                "next": None,
+                "previous": None,
+                "results": [
+                    serialized_subgroup2,
+                    serialized_subgroup1,
+                    serialized_group,
+                    serialized_job,
+                    serialized_group1,
+                    serialized_group2,
+                ],
+            },
+            json,
+        )
 
     def test_list_subgroups(self):
         subgroup1 = GroupFactory(parent=self.group, name="this is a test subgroup 01")
@@ -776,9 +884,9 @@ class GroupApiTest(ClientTestCase):
             json[1],
             {
                 "pk": subgroup2.pk,
-                "name": "this is a test subgroup 01",
+                "name": "this is a test subgroup 02",
                 "description": "",
-                "order": 1,
+                "order": 2,
                 "groups": [],
                 "tasks": [],
                 "parent": self.group.pk,
@@ -798,13 +906,12 @@ class GroupApiTest(ClientTestCase):
         self.assertDictEqual(json, {"order": ["This field is required."]}, json)
 
     def test_create_subgroup(self):
-        # Multiple groups returned, expected 1, got 2.
         response = self.client.post(
             f"/api/task/group/{self.group.pk}/subgroups/",
             {"name": "test subgroup", "order": 5},
             format="json",
         )
-        print(response.data)
+
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         json = response.json()
 
@@ -1117,7 +1224,7 @@ class JobApiTest(ClientTestCase):
         super().setUp()
         self.project = ProjectFactory()
         self.jobsite = JobSiteFactory(project=self.project)
-        self.job = JobFactory(project=self.project, description="this is a test job")
+        self.job = JobFactory(project=self.project, name="this is a test job")
 
     def test_list_groups(self):
         group1 = GroupFactory(parent=self.job, name="this is a test group 01")
@@ -1166,13 +1273,11 @@ class JobApiTest(ClientTestCase):
         self.assertDictEqual(json, {"order": ["This field is required."]}, json)
 
     def test_create_group(self):
-        # Inifinite recursion issue here, flutter_serializers:168
-        response = self.client.patch(
-            f"/api/task/job/{self.job.pk}/",
-            {"groups": [{"name": "test group", "order": 5}]},
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/groups/",
+            {"name": "test group", "order": 5},
             format="json",
         )
-        print(response.data)
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         json = response.json()
 
