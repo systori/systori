@@ -7,6 +7,8 @@ from collections import OrderedDict
 
 from django.db import models
 
+from drf_yasg.inspectors import FieldInspector
+
 from rest_framework import serializers
 from rest_framework.fields import SkipField
 
@@ -15,7 +17,14 @@ from rest_framework.relations import PKOnlyObject
 
 from rest_framework_recursive.fields import RecursiveField
 
+from systori.apps.main import swagger_field_inspectors
+
 from .models import Group, Job, LineItem, Task
+
+
+# We want to do a deep merge instead of overriding field schema
+# See: https://github.com/axnsan12/drf-yasg/issues/291
+FieldInspector.add_manual_fields = swagger_field_inspectors.add_manual_fields
 
 
 class LineItemSerializer(serializers.ModelSerializer):
@@ -23,6 +32,13 @@ class LineItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         ref_name = "LineItem"
+        swagger_schema_fields = {
+            "properties": {
+                "qty": {"x-precision": 3},
+                "price": {"x-precision": 2},
+                "total": {"x-precision": 2},
+            }
+        }
         model = LineItem
         fields = [
             "pk",
@@ -52,6 +68,13 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         ref_name = "Task"
+        swagger_schema_fields = {
+            "properties": {
+                "qty": {"x-precision": 3},
+                "price": {"x-precision": 2},
+                "total": {"x-precision": 2},
+            }
+        }
         model = Task
         fields = [
             "pk",

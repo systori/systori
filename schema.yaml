@@ -5065,6 +5065,7 @@ definitions:
         title: Quantity
         type: string
         format: decimal
+        x-precision: 3
       qty_equation:
         title: Qty equation
         type: string
@@ -5077,6 +5078,7 @@ definitions:
         title: Price
         type: string
         format: decimal
+        x-precision: 2
       price_equation:
         title: Price equation
         type: string
@@ -5085,6 +5087,7 @@ definitions:
         title: Total
         type: string
         format: decimal
+        x-precision: 2
       total_equation:
         title: Total equation
         type: string
@@ -5129,6 +5132,7 @@ definitions:
         type: string
         format: decimal
         x-nullable: true
+        x-precision: 3
       qty_equation:
         title: Qty equation
         type: string
@@ -5141,6 +5145,7 @@ definitions:
         title: Price
         type: string
         format: decimal
+        x-precision: 2
       price_equation:
         title: Price equation
         type: string
@@ -5149,6 +5154,7 @@ definitions:
         title: Total
         type: string
         format: decimal
+        x-precision: 2
       total_equation:
         title: Total equation
         type: string
