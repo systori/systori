@@ -204,13 +204,13 @@ class GroupModelViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(methods=["GET"], responses={200: flutter.TaskSerializer()})
     @swagger_auto_schema(
-        methods=["PUT", "PATCH"],
+        methods=["PATCH"],
         request_body=flutter.TaskSerializer,
         responses={200: flutter.TaskSerializer()},
     )
     @swagger_auto_schema(method="DELETE", responses={204: "Task deleted successfully"})
     @action(
-        methods=["GET", "PUT", "PATCH", "DELETE"],
+        methods=["GET", "PATCH", "DELETE"],
         detail=True,
         url_path=r"task/(?P<task_id>\d+)",
     )
@@ -229,9 +229,9 @@ class GroupModelViewSet(viewsets.ModelViewSet):
             return Response(data=flutter.TaskSerializer(task).data)
 
         # This is an update request
-        # We always update tasks partially
+        # We never update tasks partially
         # is_partial = request.method.lower() == "patch"
-        serializer = flutter.TaskSerializer(task, request.data, partial=True)
+        serializer = flutter.TaskSerializer(task, request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(group=group)
         return Response(data=flutter.TaskSerializer(task).data)
@@ -281,13 +281,13 @@ class JobModelViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(methods=["GET"], responses={200: flutter.TaskSerializer()})
     @swagger_auto_schema(
-        methods=["PUT", "PATCH"],
+        methods=["PATCH"],
         request_body=flutter.TaskSerializer,
         responses={200: flutter.TaskSerializer()},
     )
     @swagger_auto_schema(method="DELETE", responses={204: "Task deleted successfully"})
     @action(
-        methods=["GET", "PUT", "PATCH", "DELETE"],
+        methods=["GET", "PATCH", "DELETE"],
         detail=True,
         url_path=r"task/(?P<task_id>\d+)",
     )
@@ -350,39 +350,19 @@ class TaskModelViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         method="GET", responses={200: flutter.LineItemSerializer(many=True)}
     )
-    @swagger_auto_schema(
-        method="POST",
-        request_body=flutter.LineItemSerializer,
-        responses={201: flutter.LineItemSerializer()},
-    )
-    @action(methods=["GET", "POST"], detail=True)
+    @action(methods=["GET"], detail=True)
     def lineitems(self, request, pk=None):
         task = self.get_object()
-        if request.method.lower() == "get":
-            return Response(
-                data=flutter.LineItemSerializer(task.lineitems.all(), many=True).data
-            )
-
-        if request.method.lower() == "post" and pk:
-            serializer = flutter.LineItemSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(task=task)
-
-            return Response(serializer.data, status=HTTP_201_CREATED)
-
-        return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(
+            data=flutter.LineItemSerializer(task.lineitems.all(), many=True).data
+        )
 
     @swagger_auto_schema(methods=["GET"], responses={200: flutter.LineItemSerializer()})
-    @swagger_auto_schema(
-        methods=["PUT", "PATCH"],
-        request_body=flutter.LineItemSerializer,
-        responses={200: flutter.LineItemSerializer()},
-    )
     @swagger_auto_schema(
         method="DELETE", responses={204: "LineItem deleted successfully"}
     )
     @action(
-        methods=["GET", "PUT", "PATCH", "DELETE"],
+        methods=["GET", "DELETE"],
         detail=True,
         url_path=r"lineitem/(?P<lineitem_id>\d+)",
     )
@@ -400,14 +380,6 @@ class TaskModelViewSet(viewsets.ModelViewSet):
 
         if request.method.lower() == "get":
             return Response(data=flutter.LineItemSerializer(lineitem).data)
-
-        # This is an update request
-        # We always update lineitems partially
-        # is_partial = request.method.lower() == "patch"
-        serializer = flutter.LineItemSerializer(lineitem, request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(task=task)
-        return Response(data=flutter.LineItemSerializer(lineitem).data)
 
 
 urlpatterns = [
