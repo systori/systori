@@ -588,6 +588,7 @@ class TaskApiTest(ClientTestCase):
                 "pk": lineitem1.pk,
                 "name": "lineitem 1",
                 "order": 1,
+                "token": None,
                 "qty": "1.000",
                 "qty_equation": "",
                 "unit": "h",
@@ -605,85 +606,10 @@ class TaskApiTest(ClientTestCase):
                 "pk": lineitem2.pk,
                 "name": "lineitem 2",
                 "order": 2,
+                "token": None,
                 "qty": "1.000",
                 "qty_equation": "",
                 "unit": "pc",
-                "price": "19.99",
-                "price_equation": "",
-                "total": "19.99",
-                "total_equation": "",
-                "is_hidden": False,
-                "lineitem_type": "other",
-            },
-        )
-
-    def test_create_lineitem(self):
-        response = self.client.post(
-            f"/api/task/task/{self.task.pk}/lineitems/",
-            {
-                "name": "lineitem 1",
-                "order": 6,
-                "qty": "1.000",
-                "unit": "h",
-                "price": "19.99",
-                "total": "19.99",
-            },
-        )
-        self.assertEqual(response.status_code, HTTP_201_CREATED)
-        json = response.json()
-        self.assertDictEqual(
-            json,
-            {
-                "pk": 1,
-                "name": "lineitem 1",
-                "order": 6,
-                "qty": "1.000",
-                "qty_equation": "",
-                "unit": "h",
-                "price": "19.99",
-                "price_equation": "",
-                "total": "19.99",
-                "total_equation": "",
-                "is_hidden": False,
-                "lineitem_type": "other",
-            },
-        )
-
-        lineitem = LineItem.objects.get(pk=json["pk"], task=self.task)
-
-        self.assertEqual(
-            lineitem.task.pk, self.task.pk, "Expected lineitem to have correct task.pk"
-        )
-        self.assertEqual(
-            lineitem.job.pk, self.job.pk, "Expected lineitem to have correct job.pk"
-        )
-        self.assertDictEqual(
-            flutter.LineItemSerializer(lineitem).data,
-            json,
-            "Expected saved lineitem to match response",
-        )
-
-    def test_update_lineitem(self):
-        lineitem1 = LineItemFactory(
-            task=self.task, name="lineitem 1", qty=1, unit="h", price=19.99, total=19.99
-        )
-
-        response = self.client.put(
-            f"/api/task/task/{self.task.pk}/lineitem/{lineitem1.pk}/",
-            {"name": "updated name"},
-        )
-
-        self.assertEqual(response.status_code, HTTP_200_OK)
-        json = response.json()
-        self.assertDictEqual(
-            json,
-            {
-                "pk": 1,
-                "name": "updated name",
-                "order": 1,
-                "qty": "1.000",
-                "qty_equation": "",
-                "unit": "h",
                 "price": "19.99",
                 "price_equation": "",
                 "total": "19.99",
@@ -710,36 +636,7 @@ class TaskApiTest(ClientTestCase):
                 "pk": lineitem1.pk,
                 "name": "lineitem 1",
                 "order": 1,
-                "qty": "1.000",
-                "qty_equation": "",
-                "unit": "h",
-                "price": "19.99",
-                "price_equation": "",
-                "total": "19.99",
-                "total_equation": "",
-                "is_hidden": False,
-                "lineitem_type": "other",
-            },
-        )
-
-    def test_partial_update_lineitem(self):
-        lineitem1 = LineItemFactory(
-            task=self.task, name="lineitem 1", qty=1, unit="h", price=19.99, total=19.99
-        )
-
-        response = self.client.patch(
-            f"/api/task/task/{self.task.pk}/lineitem/{lineitem1.pk}/",
-            {"name": "updated name"},
-        )
-
-        self.assertEqual(response.status_code, HTTP_200_OK)
-        json = response.json()
-        self.assertDictEqual(
-            json,
-            {
-                "pk": 1,
-                "name": "updated name",
-                "order": 1,
+                "token": None,
                 "qty": "1.000",
                 "qty_equation": "",
                 "unit": "h",
@@ -1042,12 +939,13 @@ class GroupApiTest(ClientTestCase):
                 "order": 6,
                 "qty": "5.000",
                 "unit": "h",
-                "price": "5.00",
-                "total": "25.00",
+                "price": "25.00",
+                "total": "125.00",
                 "lineitems": [
                     {
                         "name": "lineitem 1",
                         "order": 1,
+                        "token": 1,
                         "qty": "5.000",
                         "qty_equation": "",
                         "unit": "h",
@@ -1063,7 +961,7 @@ class GroupApiTest(ClientTestCase):
             format="json",
         )
 
-        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        self.assertEqual(response.status_code, HTTP_201_CREATED, response.data)
         json = response.json()
         self.assertDictEqual(
             json,
@@ -1075,9 +973,9 @@ class GroupApiTest(ClientTestCase):
                 "qty": "5.000",
                 "qty_equation": "",
                 "unit": "h",
-                "price": "5.00",
+                "price": "25.00",
                 "price_equation": "",
-                "total": "25.00",
+                "total": "125.00",
                 "total_equation": "",
                 "variant_group": 0,
                 "variant_serial": 0,
@@ -1088,6 +986,7 @@ class GroupApiTest(ClientTestCase):
                         "pk": 1,
                         "name": "lineitem 1",
                         "order": 1,
+                        "token": 1,
                         "qty": "5.000",
                         "qty_equation": "",
                         "unit": "h",
@@ -1117,7 +1016,9 @@ class GroupApiTest(ClientTestCase):
             "Expected saved task to match response",
         )
 
-    def test_create_task_without_lineitem(self):
+    def test_reject_create_task_without_lineitem(self):
+        self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
+
         response = self.client.post(
             f"/api/task/group/{self.group.pk}/tasks/",
             {
@@ -1135,16 +1036,45 @@ class GroupApiTest(ClientTestCase):
         json = response.json()
         self.assertDictEqual(json, {"lineitems": ["This field is required."]}, json)
 
-        self.assertEqual(len(Task.objects.all()), 0, "Expected no tasks to be created")
+        self.assertEqual(Task.objects.count(), 0, "Expected no tasks to be created")
 
     def test_update_task(self):
         task1 = TaskFactory(
             group=self.group, name="task 1", qty=1, unit="h", price=19.99, total=19.99
         )
 
-        response = self.client.put(
+        self.assertEqual(Task.objects.count(), 1, "Expected 1 pre-existing tasks")
+        self.assertEqual(
+            LineItem.objects.count(), 0, "Expected 0 pre-existing lineitems"
+        )
+
+        response = self.client.patch(
             f"/api/task/group/{self.group.pk}/task/{task1.pk}/",
-            {"name": "updated name"},
+            {
+                "name": "updated name",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "25.00",
+                "total": "125.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
         )
 
         self.assertEqual(response.status_code, HTTP_200_OK)
@@ -1152,22 +1082,38 @@ class GroupApiTest(ClientTestCase):
         self.assertDictEqual(
             json,
             {
-                "pk": task1.pk,
+                "pk": 1,
                 "name": "updated name",
                 "description": "",
-                "order": 1,
-                "qty": "1.000",
+                "order": 6,
+                "qty": "5.000",
                 "qty_equation": "",
                 "unit": "h",
-                "price": "19.99",
+                "price": "25.00",
                 "price_equation": "",
-                "total": "19.99",
+                "total": "125.00",
                 "total_equation": "",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
                 "parent": self.group.pk,
-                "lineitems": [],
+                "lineitems": [
+                    {
+                        "pk": 1,
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
             },
             json,
         )
@@ -1176,6 +1122,67 @@ class GroupApiTest(ClientTestCase):
             Task.objects.get(pk=task1.pk).name,
             "updated name",
             "Expected task to have updated name in db",
+        )
+
+        self.assertEqual(Task.objects.count(), 1, "Expected no new tasks to be created")
+        self.assertEqual(
+            LineItem.objects.count(), 1, "Expected 1 lineitem to be created"
+        )
+
+        # Repetative updates will not create new lineitems without pk
+        # they will fail
+
+        response = self.client.patch(
+            f"/api/task/group/{self.group.pk}/task/{task1.pk}/",
+            {
+                "name": "updated name 2",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "25.00",
+                "total": "125.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem with updated name",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST, response.data)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {"lineitems": [{"token": ["Token already assigned to another lineitem"]}]},
+            json,
+        )
+
+        self.assertEqual(
+            Task.objects.get(pk=task1.pk).name,
+            "updated name",
+            "Expected task to have previous name in db",
+        )
+        self.assertEqual(
+            Task.objects.get(pk=task1.pk).lineitems.first().name,
+            "lineitem 1",
+            "Expected lineitem to have previous name in db",
+        )
+
+        self.assertEqual(Task.objects.count(), 1, "Expected no new tasks to be created")
+        self.assertEqual(
+            LineItem.objects.count(), 1, "Expected no new lineitem to be created"
         )
 
     def test_get_task(self):
@@ -1208,47 +1215,6 @@ class GroupApiTest(ClientTestCase):
                 "lineitems": [],
             },
             json,
-        )
-
-    def test_partial_update_task(self):
-        task1 = TaskFactory(
-            group=self.group, name="task 1", qty=1, unit="h", price=19.99, total=19.99
-        )
-
-        response = self.client.patch(
-            f"/api/task/group/{self.group.pk}/task/{task1.pk}/",
-            {"name": "updated name"},
-        )
-
-        self.assertEqual(response.status_code, HTTP_200_OK)
-        json = response.json()
-        self.assertDictEqual(
-            json,
-            {
-                "pk": task1.pk,
-                "name": "updated name",
-                "description": "",
-                "order": 1,
-                "qty": "1.000",
-                "qty_equation": "",
-                "unit": "h",
-                "price": "19.99",
-                "price_equation": "",
-                "total": "19.99",
-                "total_equation": "",
-                "variant_group": 0,
-                "variant_serial": 0,
-                "is_provisional": False,
-                "parent": self.group.pk,
-                "lineitems": [],
-            },
-            json,
-        )
-
-        self.assertEqual(
-            Task.objects.get(pk=task1.pk).name,
-            "updated name",
-            "Expected task to have updated name in db",
         )
 
     def test_delete_task(self):
@@ -1408,12 +1374,13 @@ class JobApiTest(ClientTestCase):
                 "order": 6,
                 "qty": "5.000",
                 "unit": "h",
-                "price": "5.00",
-                "total": "25.00",
+                "price": "25.00",
+                "total": "125.00",
                 "lineitems": [
                     {
                         "name": "lineitem 1",
                         "order": 1,
+                        "token": 1,
                         "qty": "5.000",
                         "qty_equation": "",
                         "unit": "h",
@@ -1429,7 +1396,7 @@ class JobApiTest(ClientTestCase):
             format="json",
         )
 
-        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        self.assertEqual(response.status_code, HTTP_201_CREATED, response.data)
         json = response.json()
         self.assertDictEqual(
             json,
@@ -1441,9 +1408,9 @@ class JobApiTest(ClientTestCase):
                 "qty": "5.000",
                 "qty_equation": "",
                 "unit": "h",
-                "price": "5.00",
+                "price": "25.00",
                 "price_equation": "",
-                "total": "25.00",
+                "total": "125.00",
                 "total_equation": "",
                 "variant_group": 0,
                 "variant_serial": 0,
@@ -1454,6 +1421,7 @@ class JobApiTest(ClientTestCase):
                         "pk": 1,
                         "name": "lineitem 1",
                         "order": 1,
+                        "token": 1,
                         "qty": "5.000",
                         "qty_equation": "",
                         "unit": "h",
@@ -1483,7 +1451,355 @@ class JobApiTest(ClientTestCase):
             "Expected saved task to match response",
         )
 
-    def test_create_task_without_lineitem(self):
+    def test_reject_create_task_with_duplicate_lineitem_token(self):
+        self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "50.00",
+                "total": "250.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                    {
+                        "name": "lineitem 2",
+                        "order": 2,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+        self.assertDictEqual(
+            json, {"lineitems": ["Multiple lineitems have same token"]}, json
+        )
+        self.assertEqual(Task.objects.count(), 0, "Expected no tasks to be created")
+
+    def test_reject_create_task_with_lineitem_using_existing_token(self):
+        self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "25.00",
+                "total": "125.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "pk": 1,
+                "name": "task 1",
+                "description": "",
+                "order": 6,
+                "qty": "5.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "25.00",
+                "price_equation": "",
+                "total": "125.00",
+                "total_equation": "",
+                "variant_group": 0,
+                "variant_serial": 0,
+                "is_provisional": False,
+                "parent": 1,
+                "lineitems": [
+                    {
+                        "pk": 1,
+                        "token": 1,
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            json,
+        )
+
+        self.assertEqual(Task.objects.count(), 1, "Expected 1 task to be created")
+        self.assertEqual(
+            LineItem.objects.count(), 1, "Expected 1 lineitem to be created"
+        )
+
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 2",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "25.00",
+                "total": "125.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem with token that already exists",
+                        "order": 2,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {"lineitems": [{"token": ["Token already assigned to another lineitem"]}]},
+            json,
+        )
+        self.assertEqual(
+            Task.objects.count(), 1, "Expected no addiional task to be created"
+        )
+        self.assertEqual(
+            LineItem.objects.count(), 1, "Expected no additional lineitem to be created"
+        )
+
+    def test_reject_create_task_without_token_in_lineitem(self):
+
+        self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
+
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "5.00",
+                "total": "25.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+        self.assertEqual(
+            json, {"lineitems": [{"token": ["This field is required."]}]}, json
+        )
+
+        self.assertEqual(Task.objects.count(), 0, "Expected no tasks to be created")
+
+    def test_reject_create_task_with_mismatch_in_task_price_and_lineitems_total(self):
+
+        self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
+
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "5.00",
+                "total": "25.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                    {
+                        "name": "lineitem 2",
+                        "order": 2,
+                        "token": 2,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+        self.assertEqual(
+            json, {"price": ["Task price does not match lineitems total"]}, json
+        )
+
+        self.assertEqual(Task.objects.count(), 0, "Expected no tasks to be created")
+
+    def test_reject_create_task_with_wrong_task_total(self):
+
+        self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
+
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "5.00",
+                "total": "20.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+        self.assertEqual(json, {"total": ["Total is not equal to qty*price"]}, json)
+
+        self.assertEqual(Task.objects.count(), 0, "Expected no tasks to be created")
+
+    def test_reject_create_task_with_wrong_lineitem_total(self):
+
+        self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
+
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "5.00",
+                "total": "25.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "20.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+        self.assertEqual(
+            json, {"lineitems": [{"total": ["Total is not equal to qty*price"]}]}, json
+        )
+
+        self.assertEqual(Task.objects.count(), 0, "Expected no tasks to be created")
+
+    def test_reject_create_task_without_lineitem(self):
+        self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
+
         response = self.client.post(
             f"/api/task/job/{self.job.pk}/tasks/",
             {
@@ -1501,38 +1817,84 @@ class JobApiTest(ClientTestCase):
         json = response.json()
         self.assertDictEqual(json, {"lineitems": ["This field is required."]}, json)
 
-        self.assertEqual(len(Task.objects.all()), 0, "Expected no tasks to be created")
+        self.assertEqual(Task.objects.count(), 0, "Expected no tasks to be created")
 
     def test_update_task(self):
         task1 = TaskFactory(
             group=self.job, name="task 1", qty=1, unit="h", price=19.99, total=19.99
         )
 
-        response = self.client.put(
-            f"/api/task/job/{self.job.pk}/task/{task1.pk}/", {"name": "updated name"}
+        self.assertEqual(Task.objects.count(), 1, "Expected 1 pre-existing tasks")
+        self.assertEqual(
+            LineItem.objects.count(), 0, "Expected 0 pre-existing lineitems"
         )
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        response = self.client.patch(
+            f"/api/task/job/{self.job.pk}/task/{task1.pk}/",
+            {
+                "name": "updated name",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "25.00",
+                "total": "125.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK, response.data)
         json = response.json()
         self.assertDictEqual(
             json,
             {
-                "pk": task1.pk,
+                "pk": 1,
                 "name": "updated name",
                 "description": "",
-                "order": 1,
-                "qty": "1.000",
+                "order": 6,
+                "qty": "5.000",
                 "qty_equation": "",
                 "unit": "h",
-                "price": "19.99",
+                "price": "25.00",
                 "price_equation": "",
-                "total": "19.99",
+                "total": "125.00",
                 "total_equation": "",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
                 "parent": self.job.pk,
-                "lineitems": [],
+                "lineitems": [
+                    {
+                        "pk": 1,
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
             },
             json,
         )
@@ -1541,6 +1903,67 @@ class JobApiTest(ClientTestCase):
             Task.objects.get(pk=task1.pk).name,
             "updated name",
             "Expected task to have updated name in db",
+        )
+
+        self.assertEqual(Task.objects.count(), 1, "Expected no new tasks to be created")
+        self.assertEqual(
+            LineItem.objects.count(), 1, "Expected 1 lineitem to be created"
+        )
+
+        # Repetative updates will not create new lineitems without pk
+        # they will fail
+
+        response = self.client.patch(
+            f"/api/task/job/{self.job.pk}/task/{task1.pk}/",
+            {
+                "name": "updated name 2",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "25.00",
+                "total": "125.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem with updated name",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST, response.data)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {"lineitems": [{"token": ["Token already assigned to another lineitem"]}]},
+            json,
+        )
+
+        self.assertEqual(
+            Task.objects.get(pk=task1.pk).name,
+            "updated name",
+            "Expected task to have previous name in db",
+        )
+        self.assertEqual(
+            Task.objects.get(pk=task1.pk).lineitems.first().name,
+            "lineitem 1",
+            "Expected lineitem to have previous name in db",
+        )
+
+        self.assertEqual(Task.objects.count(), 1, "Expected no new tasks to be created")
+        self.assertEqual(
+            LineItem.objects.count(), 1, "Expected no new lineitem to be created"
         )
 
     def test_get_task(self):
@@ -1573,46 +1996,6 @@ class JobApiTest(ClientTestCase):
                 "lineitems": [],
             },
             json,
-        )
-
-    def test_partial_update_task(self):
-        task1 = TaskFactory(
-            group=self.job, name="task 1", qty=1, unit="h", price=19.99, total=19.99
-        )
-
-        response = self.client.patch(
-            f"/api/task/job/{self.job.pk}/task/{task1.pk}/", {"name": "updated name"}
-        )
-
-        self.assertEqual(response.status_code, HTTP_200_OK)
-        json = response.json()
-        self.assertDictEqual(
-            json,
-            {
-                "pk": task1.pk,
-                "name": "updated name",
-                "description": "",
-                "order": 1,
-                "qty": "1.000",
-                "qty_equation": "",
-                "unit": "h",
-                "price": "19.99",
-                "price_equation": "",
-                "total": "19.99",
-                "total_equation": "",
-                "variant_group": 0,
-                "variant_serial": 0,
-                "is_provisional": False,
-                "parent": self.job.pk,
-                "lineitems": [],
-            },
-            json,
-        )
-
-        self.assertEqual(
-            Task.objects.get(pk=task1.pk).name,
-            "updated name",
-            "Expected task to have updated name in db",
         )
 
     def test_delete_task(self):
