@@ -3,6 +3,7 @@ Serializers for apis used by flutter client
 """
 
 from collections import OrderedDict
+from decimal import Decimal
 
 
 from django.db import models
@@ -69,10 +70,41 @@ class LineItemSerializer(serializers.ModelSerializer):
             "lineitem_type",
         ]
 
+    def validate(self, data):
+        for field in ["qty", "price", "total"]:
+            if not field in data or not data[field]:
+                raise serializers.ValidationError({field: "This field is required"})
+            decimal = Decimal(data[field])
+            if decimal.is_nan():
+                raise serializers.ValidationError({field: "Invalid decimal value"})
+
+        qty = Decimal(data["qty"])
+        has_percent = "unit" in data and "%" in data["unit"]
+
+        if has_percent and not qty.is_zero():
+            qty = qty / Decimal("100.00")
+
+        total = Decimal(data["total"])
+        price = Decimal(data["price"])
+        if total != qty * price:
+            raise serializers.ValidationError(
+                {"total": "Total is not equal to qty*price"}
+            )
+        return data
+
+    def create(self, validated_data):
+        lineitem, _ = LineItem.objects.update_or_create(
+            validated_data,
+            job=validated_data["task"].job,
+            token=validated_data["token"],
+        )
+
+        return lineitem
+
 
 class TaskSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False, read_only=True)
-    lineitems = LineItemSerializer(many=True)
+    lineitems = LineItemSerializer(many=True, required=True)
     parent = serializers.IntegerField(
         required=False,
         source="group.pk",
@@ -110,6 +142,58 @@ class TaskSerializer(serializers.ModelSerializer):
             "lineitems",
         ]
 
+    def validate(self, data):
+        for field in ["qty", "price", "total"]:
+            if not field in data:
+                raise serializers.ValidationError({field: "This field is required"})
+            # qty can be empty in case of t&m tasks
+            if not data[field] and field != "qty":
+                raise serializers.ValidationError({field: "Invalid value"})
+            decimal = Decimal(data[field])
+            if decimal.is_nan():
+                raise serializers.ValidationError({field: "Invalid decimal value"})
+
+        qty = Decimal(data["qty"]) if data["qty"] else None
+        total = Decimal(data["total"])
+        price = Decimal(data["price"])
+
+        has_percent = "unit" in data and "%" in data["unit"]
+
+        if has_percent and qty and not qty.is_zero():
+            qty = qty / Decimal("100.00")
+
+        if qty and total != qty * price:
+            raise serializers.ValidationError(
+                {"total": "Total is not equal to qty*price"}
+            )
+
+        if not qty and total != price:
+            raise serializers.ValidationError(
+                {"total": "Total is not equal to price for t&m task"}
+            )
+
+        # Validate that all lineitems have unique tokens
+        # UniqueValidator only checks if the token in a lineitem exists in db only once or it does not exist at all
+        # if it exists, then it is an update request.
+        # But if multiple lineitems are to be created, they all must have unique tokens
+        li_tokens = [i["token"] for i in data["lineitems"]]
+
+        if len(set(li_tokens)) != len(li_tokens):
+            raise serializers.ValidationError(
+                {"lineitems": "Multiple lineitems have same token"}
+            )
+
+        # Valid tasks have their price equal to the total of all lineitems
+        lineitems_total = Decimal()
+        for lineitem in data["lineitems"]:
+            lineitems_total += Decimal(lineitem["total"])
+
+        if price != lineitems_total:
+            raise serializers.ValidationError(
+                {"price": "Task price does not match lineitems total"}
+            )
+        return data
+
     def create(self, validated_data):
         lineitems = validated_data.pop("lineitems", [])
         parent = validated_data.pop("group")
@@ -117,10 +201,9 @@ class TaskSerializer(serializers.ModelSerializer):
         if "pk" in validated_data:
             pk = validated_data.pop("pk")
             if pk:
-                raise Exception(
+                raise serializers.ValidationError(
                     "Cannot create task with a predefined pk, try updating instead"
                 )
-
         task = Task.objects.create(**validated_data, job=parent.job, group=parent)
 
         return self.update(task, {"lineitems": lineitems})
@@ -140,7 +223,7 @@ class TaskSerializer(serializers.ModelSerializer):
                 instance=instance, data=lineitem, partial=True
             )
             serializer.is_valid(raise_exception=True)
-            serializer.save(task=task)
+            serializer.save(task=task, job=task.job)
 
         return task
 
@@ -232,7 +315,7 @@ class GroupSerializer(serializers.ModelSerializer):
         if "pk" in validated_data:
             pk = validated_data.pop("pk")
             if pk:
-                raise Exception(
+                raise serializers.ValidationError(
                     "Cannot create group with a predefined pk, try updating instead"
                 )
 
