@@ -14,6 +14,7 @@ from rest_framework.fields import SkipField
 
 from rest_framework.generics import get_object_or_404
 from rest_framework.relations import PKOnlyObject
+from rest_framework.validators import UniqueValidator
 
 from rest_framework_recursive.fields import RecursiveField
 
@@ -29,6 +30,18 @@ FieldInspector.add_manual_fields = swagger_field_inspectors.add_manual_fields
 
 class LineItemSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
+    token = serializers.IntegerField(
+        required=True,
+        help_text="This should be unique among all lineitems in a job, "
+        "This is used to identify and correctly update lineitems sent by client "
+        "that may not already have a pk",
+        validators=[
+            UniqueValidator(
+                queryset=LineItem.objects.all(),
+                message="Token already assigned to another lineitem",
+            )
+        ],
+    )
 
     class Meta:
         ref_name = "LineItem"
@@ -42,6 +55,7 @@ class LineItemSerializer(serializers.ModelSerializer):
         model = LineItem
         fields = [
             "pk",
+            "token",
             "name",
             "order",
             "qty",

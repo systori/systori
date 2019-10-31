@@ -5046,11 +5046,18 @@ definitions:
           type: integer
   LineItem:
     required:
+      - token
       - order
     type: object
     properties:
       pk:
         title: Pk
+        type: integer
+      token:
+        title: Token
+        description: This should be unique among all lineitems in a job, This is used
+          to identify and correctly update lineitems sent by client that may not already
+          have a pk
         type: integer
       name:
         title: Name
