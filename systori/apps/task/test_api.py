@@ -1713,7 +1713,7 @@ class JobApiTest(ClientTestCase):
         self.assertEqual(
             LineItem.objects.count(), 1, "Expected 1 pre-existing lineitems"
         )
-        
+
         response = self.client.patch(
             f"/api/task/job/{self.job.pk}/task/{task1.pk}/",
             {
@@ -1800,6 +1800,118 @@ class JobApiTest(ClientTestCase):
             LineItem.objects.all().first().name,
             "lineitem 1",
             "Expected lineitem to update its name",
+        )
+
+    def test_reject_update_task_lineitem_token(self):
+        task1 = TaskFactory(
+            group=self.job, name="task 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+        lineitem1 = LineItemFactory(
+            task=task1,
+            name="The Line Item",
+            qty=1,
+            unit="h",
+            price=19.99,
+            total=19.99,
+            token=1,
+        )
+
+        self.assertEqual(Task.objects.count(), 1, "Expected 1 pre-existing tasks")
+        self.assertEqual(
+            LineItem.objects.count(), 1, "Expected 1 pre-existing lineitems"
+        )
+
+        response = self.client.patch(
+            f"/api/task/job/{self.job.pk}/task/{task1.pk}/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "25.00",
+                "total": "125.00",
+                "lineitems": [
+                    {
+                        "pk": lineitem1.pk,
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 55,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK, response.data)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "pk": 1,
+                "name": "task 1",
+                "description": "",
+                "order": 6,
+                "qty": "5.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "25.00",
+                "price_equation": "",
+                "total": "125.00",
+                "total_equation": "",
+                "variant_group": 0,
+                "variant_serial": 0,
+                "is_provisional": False,
+                "parent": 1,
+                "lineitems": [
+                    {
+                        "pk": 1,
+                        "token": 1,
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            json,
+        )
+
+        self.assertEqual(Task.objects.count(), 1, "Expected 1 task to be created")
+        self.assertEqual(
+            LineItem.objects.count(), 1, "Expected 1 lineitem to be created"
+        )
+
+        self.assertEqual(
+            Task.objects.count(), 1, "Expected no addiional task to be created"
+        )
+        self.assertEqual(
+            LineItem.objects.count(), 1, "Expected no additional lineitem to be created"
+        )
+        self.assertEqual(
+            LineItem.objects.all().first().name,
+            "lineitem 1",
+            "Expected lineitem to update its name",
+        )
+        self.assertEqual(
+            LineItem.objects.all().first().token,
+            1,
+            "Expected lineitem token to not be updated",
         )
 
     def test_reject_create_task_without_token_in_lineitem(self):
