@@ -15,7 +15,6 @@ from rest_framework.fields import SkipField
 
 from rest_framework.generics import get_object_or_404
 from rest_framework.relations import PKOnlyObject
-from rest_framework.validators import UniqueValidator
 
 from rest_framework_recursive.fields import RecursiveField
 
@@ -32,16 +31,10 @@ FieldInspector.add_manual_fields = swagger_field_inspectors.add_manual_fields
 class LineItemSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
     token = serializers.IntegerField(
-        required=True,
+        required=False,
         help_text="This should be unique among all lineitems in a job, "
         "This is used to identify and correctly update lineitems sent by client "
         "that may not already have a pk",
-        validators=[
-            UniqueValidator(
-                queryset=LineItem.objects.all(),
-                message="Token already assigned to another lineitem",
-            )
-        ],
     )
 
     class Meta:
@@ -90,6 +83,26 @@ class LineItemSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"total": "Total is not equal to qty*price"}
             )
+
+        has_pk = self.instance or data.get("pk", False)
+        has_token = data.get("token", False)
+
+        if has_token and not has_pk:
+            token = self.fields["token"].to_internal_value(data["token"])
+            is_dup_token = LineItem.objects.filter(token=token).count() > 0
+            if is_dup_token:
+                raise serializers.ValidationError(
+                    {"token": "Token already assigned to another lineitem"}
+                )
+
+        if not (has_pk or has_token):
+            raise serializers.ValidationError(
+                {
+                    "pk": "`pk` is required for updating lineitem",
+                    "token": "`token` is required for creating lineitem",
+                }
+            )
+
         return data
 
     def create(self, validated_data):
@@ -100,6 +113,11 @@ class LineItemSerializer(serializers.ModelSerializer):
         )
 
         return lineitem
+
+    def update(self, lineitem, validated_data):
+        # Do not update token
+        validated_data.pop("token")
+        return super().update(lineitem, validated_data)
 
 
 class TaskSerializer(serializers.ModelSerializer):

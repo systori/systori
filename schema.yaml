@@ -4966,7 +4966,6 @@ definitions:
           type: integer
   LineItem:
     required:
-      - token
       - order
     type: object
     properties:
