@@ -416,9 +416,47 @@ class GroupSearchSerializer(serializers.Serializer):
         fields = ["terms", "remaining_depth"]
 
 
+class GroupSearchResultSerializer(serializers.ModelSerializer):
+    tasks = serializers.SerializerMethodField(help_text="Number of tasks in this group")
+    groups = serializers.SerializerMethodField(
+        help_text="Number of groups in this group"
+    )
+
+    class Meta:
+        ref_name = "GroupSearchResult"
+        model = Group
+        fields = ["pk", "name", "description", "groups", "tasks"]
+
+    def get_tasks(self, group) -> int:
+        if group and group.pk:
+            return len(group.tasks)
+        return 0
+
+    def get_groups(self, group) -> int:
+        if group and group.pk:
+            return len(group.groups)
+        return 0
+
+
 class TaskSearchSerializer(serializers.Serializer):
     terms = serializers.CharField(required=True, help_text="Terms to search tasks for")
 
     class Meta:
         ref_name = "TaskSearch"
         fields = ["terms"]
+
+
+class TaskSearchResultSerializer(serializers.ModelSerializer):
+    lineitems = serializers.SerializerMethodField(
+        help_text="Number of lineitems in this task"
+    )
+
+    class Meta:
+        ref_name = "TaskSearchResult"
+        model = Task
+        fields = ["pk", "name", "description", "total", "lineitems"]
+
+    def get_lineitems(self, task) -> int:
+        if task and task.pk:
+            return len(task.lineitems)
+        return 0

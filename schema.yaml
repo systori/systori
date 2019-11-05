@@ -2877,7 +2877,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Group'
+              $ref: '#/definitions/GroupSearchResult'
       tags:
         - task
     parameters: []
@@ -3357,7 +3357,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Task'
+              $ref: '#/definitions/TaskSearchResult'
       tags:
         - task
     parameters: []
@@ -5185,6 +5185,30 @@ definitions:
         title: Remaining depth
         description: Only groups that are valid for the remaining depth will be returned
         type: integer
+  GroupSearchResult:
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+      description:
+        title: Description
+        type: string
+      groups:
+        title: Groups
+        description: Number of groups in this group
+        type: integer
+        readOnly: true
+      tasks:
+        title: Tasks
+        description: Number of tasks in this group
+        type: integer
+        readOnly: true
   TaskSearch:
     required:
       - terms
@@ -5195,6 +5219,32 @@ definitions:
         description: Terms to search tasks for
         type: string
         minLength: 1
+  TaskSearchResult:
+    required:
+      - name
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      description:
+        title: Description
+        type: string
+      total:
+        title: Total
+        type: string
+        format: decimal
+      lineitems:
+        title: Lineitems
+        description: Number of lineitems in this task
+        type: integer
+        readOnly: true
   Timer:
     required:
       - started

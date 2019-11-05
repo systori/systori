@@ -156,7 +156,7 @@ class GroupModelViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         method="POST",
         request_body=flutter.GroupSearchSerializer,
-        responses={200: flutter.GroupSerializer(many=True)},
+        responses={200: flutter.GroupSearchResultSerializer(many=True)},
         operation_id="task_search_group",
     )
     @action(methods=["POST"], detail=False)
@@ -175,7 +175,9 @@ class GroupModelViewSet(viewsets.ModelViewSet):
             .order_by("-rank")  # Order by rank descending
         )
 
-        return Response(data=flutter.GroupSerializer(instance=result, many=True).data)
+        return Response(
+            data=flutter.GroupSearchResultSerializer(instance=result, many=True).data
+        )
 
     @swagger_auto_schema(
         method="GET", responses={200: flutter.TaskSerializer(many=True)}
@@ -315,7 +317,7 @@ class TaskModelViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         method="POST",
         request_body=flutter.TaskSearchSerializer,
-        responses={200: flutter.TaskSerializer(many=True)},
+        responses={200: flutter.TaskSearchResultSerializer(many=True)},
         operation_id="task_search_task",
     )
     @action(methods=["POST"], detail=False)
@@ -345,7 +347,9 @@ class TaskModelViewSet(viewsets.ModelViewSet):
             )
         )
 
-        return Response(data=flutter.TaskSerializer(instance=result, many=True).data)
+        return Response(
+            data=flutter.TaskSearchResultSerializer(instance=result, many=True).data
+        )
 
     @swagger_auto_schema(
         method="GET", responses={200: flutter.LineItemSerializer(many=True)}
