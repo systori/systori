@@ -554,8 +554,6 @@ class TaskApiTest(ClientTestCase):
 
         task2 = TaskFactory(group=job, name="Schächte und Fundamente")
 
-        serialized_task1 = flutter.TaskSerializer(instance=task1).data
-
         response = self.client.post(
             "/api/task/task/search/", {"terms": "bitumenlos"}, format="json"
         )
@@ -563,7 +561,19 @@ class TaskApiTest(ClientTestCase):
         self.assertEqual(response.status_code, HTTP_200_OK)
 
         json = response.json()
-        self.assertListEqual(json, [serialized_task1], json)
+        self.assertListEqual(
+            json,
+            [
+                {
+                    "pk": 2,
+                    "name": "Voranstrich aus Bitumenlösung",
+                    "description": "",
+                    "total": "59.97",
+                    "lineitems": 0,
+                }
+            ],
+            json,
+        )
 
     def test_list_lineitems(self):
         lineitem1 = LineItemFactory(
@@ -682,8 +692,6 @@ class GroupApiTest(ClientTestCase):
 
         group2 = GroupFactory(parent=job, name="Schächte und Fundamente")
 
-        serialized_group1 = flutter.GroupSerializer(instance=group1).data
-
         response = self.client.post(
             "/api/task/group/search/",
             {"remaining_depth": 0, "terms": "bitumenlos"},
@@ -693,7 +701,19 @@ class GroupApiTest(ClientTestCase):
         self.assertEqual(response.status_code, HTTP_200_OK)
 
         json = response.json()
-        self.assertListEqual(json, [serialized_group1], json)
+        self.assertListEqual(
+            json,
+            [
+                {
+                    "pk": 5,
+                    "name": "Voranstrich aus Bitumenlösung",
+                    "description": "",
+                    "groups": 0,
+                    "tasks": 0,
+                }
+            ],
+            json,
+        )
 
     def test_list_groups(self):
         group1 = GroupFactory(parent=self.job, name="this is a test group 01")

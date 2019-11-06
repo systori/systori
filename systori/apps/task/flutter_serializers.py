@@ -439,12 +439,12 @@ class GroupSearchResultSerializer(serializers.ModelSerializer):
 
     def get_tasks(self, group) -> int:
         if group and group.pk:
-            return len(group.tasks)
+            return group.tasks.count()
         return 0
 
     def get_groups(self, group) -> int:
         if group and group.pk:
-            return len(group.groups)
+            return group.groups.count()
         return 0
 
 
@@ -468,5 +468,5 @@ class TaskSearchResultSerializer(serializers.ModelSerializer):
 
     def get_lineitems(self, task) -> int:
         if task and task.pk:
-            return len(task.lineitems)
+            return task.lineitems.count()
         return 0
