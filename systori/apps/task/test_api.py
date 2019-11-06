@@ -1,25 +1,24 @@
 from decimal import Decimal
 
 from django.urls import reverse
-
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_204_NO_CONTENT,
     HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
 )
 
-from systori.lib.testing import ClientTestCase
-
-from systori.apps.project.factories import ProjectFactory, JobSiteFactory
 import systori.apps.task.flutter_serializers as flutter
-from systori.apps.task.models import Group, Task, LineItem
+from systori.apps.project.factories import JobSiteFactory, ProjectFactory
 from systori.apps.task.factories import (
-    JobFactory,
     GroupFactory,
-    TaskFactory,
+    JobFactory,
     LineItemFactory,
+    TaskFactory,
 )
+from systori.apps.task.models import Group, LineItem, Task
+from systori.lib.testing import ClientTestCase
 
 
 class EditorApiTest(ClientTestCase):
@@ -1698,16 +1697,80 @@ class JobApiTest(ClientTestCase):
             json,
         )
 
-        self.assertEqual(Task.objects.count(), 1, "Expected 1 task to be created")
         self.assertEqual(
-            LineItem.objects.count(), 1, "Expected 1 lineitem to be created"
-        )
-
-        self.assertEqual(
-            Task.objects.count(), 1, "Expected no addiional task to be created"
+            Task.objects.count(), 1, "Expected no additional task to be created"
         )
         self.assertEqual(
             LineItem.objects.count(), 1, "Expected no additional lineitem to be created"
+        )
+        self.assertEqual(
+            LineItem.objects.all().first().name,
+            "The Line Item",
+            "Expected lineitem to not update its name",
+        )
+
+    def test_reject_update_task_lineitem_using_invalid_pk(self):
+        task1 = TaskFactory(
+            group=self.job, name="task 1", qty=1, unit="h", price=19.99, total=19.99
+        )
+        lineitem1 = LineItemFactory(
+            task=task1,
+            name="The Line Item",
+            qty=1,
+            unit="h",
+            price=19.99,
+            total=19.99,
+            token=1,
+        )
+
+        self.assertEqual(Task.objects.count(), 1, "Expected 1 pre-existing tasks")
+        self.assertEqual(
+            LineItem.objects.count(), 1, "Expected 1 pre-existing lineitems"
+        )
+
+        response = self.client.patch(
+            f"/api/task/job/{self.job.pk}/task/{task1.pk}/",
+            {
+                "name": "task 1 updated name",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "25.00",
+                "total": "125.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "pk": 123456,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND, response.data)
+        json = response.json()
+        self.assertDictEqual(json, {"detail": "Not found."}, json)
+
+        self.assertEqual(
+            Task.objects.count(), 1, "Expected no additional task to be created"
+        )
+        self.assertEqual(
+            LineItem.objects.count(), 1, "Expected no additional lineitem to be created"
+        )
+        self.assertEqual(
+            Task.objects.all().first().name,
+            "task 1",
+            "Expected task to not update its name",
         )
         self.assertEqual(
             LineItem.objects.all().first().name,

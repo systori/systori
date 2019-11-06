@@ -239,19 +239,30 @@ class TaskSerializer(serializers.ModelSerializer):
     def update(self, task, validated_data):
         lineitems = validated_data.pop("lineitems", [])
 
-        if validated_data:
-            super().update(task, validated_data)
+        # First we update the lineitems, if there are any lineitems
+        # They should have already been validated at this point, since lineitem serializer runs before task serializer
+        # The only thing that could fail is if an invalid pk was supplied
 
+        # List of validated lineitem serializers
+        li_serializers = []
         for lineitem in lineitems:
-
             pk, instance = lineitem.pop("pk", None), None
             if pk:
                 instance = get_object_or_404(LineItem.objects.all(), id=pk)
+
             serializer = LineItemSerializer(
                 instance=instance, data=lineitem, partial=True
             )
             serializer.is_valid(raise_exception=True)
+            li_serializers.append(serializer)
+
+        # At this point all lineitems are safe to be created/updated
+        for serializer in li_serializers:
             serializer.save(task=task, job=task.job)
+
+        # If lineitems successfully updated, update the task
+        if validated_data:
+            super().update(task, validated_data)
 
         return task
 
