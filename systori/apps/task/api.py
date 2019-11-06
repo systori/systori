@@ -162,7 +162,7 @@ class GroupModelViewSet(viewsets.ModelViewSet):
     @action(methods=["POST"], detail=False)
     def search(self, request):
         search = flutter.GroupSearchSerializer(data=request.data)
-        search.is_valid()
+        search.is_valid(raise_exception=True)
         terms = search.data["terms"]
         remaining_depth = search.data["remaining_depth"]
 
