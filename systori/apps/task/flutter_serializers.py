@@ -194,7 +194,17 @@ class TaskSerializer(serializers.ModelSerializer):
         # UniqueValidator only checks if the token in a lineitem exists in db only once or it does not exist at all
         # if it exists, then it is an update request.
         # But if multiple lineitems are to be created, they all must have unique tokens
-        li_tokens = [i["token"] for i in data["lineitems"]]
+
+        li_tokens = []
+        for i in data["lineitems"]:
+            has_token = i.get("token", False)
+            has_pk = i.get("pk", False)
+            if not (has_pk or has_token):
+                raise serializers.ValidationError(
+                    {"lineitems": "All lineitems must have a token"}
+                )
+            if has_token:
+                li_tokens.append(i["token"])
 
         if len(set(li_tokens)) != len(li_tokens):
             raise serializers.ValidationError(
