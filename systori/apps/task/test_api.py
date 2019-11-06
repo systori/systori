@@ -681,6 +681,34 @@ class GroupApiTest(ClientTestCase):
         self.job = JobFactory(project=self.project, name="this is a test job")
         self.group = GroupFactory(parent=self.job, name="this is a test group")
 
+    def test_group_clone(self):
+        job = JobFactory(project=ProjectFactory(structure="01.01.001"))
+        group = GroupFactory(parent=job, name="Groupy Group")
+        job2 = JobFactory(project=ProjectFactory(structure="01.01.001"))
+        self.assertEqual(job2.groups.count(), 0)
+        response = self.client.post(
+            "/api/task/group/clone/",
+            {"source": group.pk, "target": job2.pk, "position": 1},
+            format="json",
+        )
+        self.assertEqual(job2.groups.first().name, "Groupy Group")
+        self.assertEqual(response.status_code, 200, response.data)
+        json = response.json()
+        self.assertEqual(
+            json,
+            {
+                "pk": job2.groups.first().pk,
+                "name": "Groupy Group",
+                "description": "",
+                "order": 1,
+                "groups": [],
+                "tasks": [],
+                "parent": job2.pk,
+                "job": job2.pk,
+            },
+            json,
+        )
+
     def test_search_groups(self):
         job = JobFactory(
             name="The Job",

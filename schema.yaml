@@ -2861,6 +2861,24 @@ paths:
       tags:
         - task
     parameters: []
+  /task/group/clone/:
+    post:
+      operationId: task_clone_group
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CloneHeirarchy'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Group'
+      tags:
+        - task
+    parameters: []
   /task/group/search/:
     post:
       operationId: task_search_group
@@ -5169,6 +5187,25 @@ definitions:
           $ref: '#/definitions/Task'
       order:
         title: Order
+        type: integer
+  CloneHeirarchy:
+    required:
+      - source
+      - target
+      - position
+    type: object
+    properties:
+      source:
+        title: Source
+        description: PK of the model that should be cloned
+        type: integer
+      target:
+        title: Target
+        description: PK of the model where [source] should be cloned to
+        type: integer
+      position:
+        title: Position
+        description: Position where [source] shoulb be cloned to
         type: integer
   GroupSearch:
     required:

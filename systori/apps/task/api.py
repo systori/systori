@@ -155,6 +155,31 @@ class GroupModelViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         method="POST",
+        request_body=flutter.CloneHeirarchySerializer(),
+        responses={200: flutter.GroupSerializer()},
+        operation_id="task_clone_group",
+    )
+    @action(methods=["POST"], detail=False)
+    def clone(self, request):
+        serializer = flutter.CloneHeirarchySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        position = serializer.validated_data["position"]
+
+        source = get_object_or_404(
+            Group.objects, pk=serializer.validated_data["source"]
+        )
+        target = get_object_or_404(
+            Group.objects, pk=serializer.validated_data["target"]
+        )
+
+        source.clone_to(target, position)
+        # Refresh from db
+        refreshed_source = Group.objects.get(pk=source.pk)
+        return Response(data=flutter.GroupSerializer(instance=refreshed_source).data)
+
+    @swagger_auto_schema(
+        method="POST",
         request_body=flutter.GroupSearchSerializer,
         responses={200: flutter.GroupSearchResultSerializer(many=True)},
         operation_id="task_search_group",

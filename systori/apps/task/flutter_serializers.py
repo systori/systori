@@ -425,6 +425,22 @@ class JobSerializer(serializers.ModelSerializer):
         }
 
 
+class CloneHeirarchySerializer(serializers.Serializer):
+    source = serializers.IntegerField(
+        required=True, help_text="PK of the model that should be cloned"
+    )
+    target = serializers.IntegerField(
+        required=True, help_text="PK of the model where [source] should be cloned to"
+    )
+    position = serializers.IntegerField(
+        required=True, help_text="Position where [source] shoulb be cloned to"
+    )
+
+    class Meta:
+        ref_name = "CloneHeirarchy"
+        fields = ["source", "target", "position"]
+
+
 class GroupSearchSerializer(serializers.Serializer):
     terms = serializers.CharField(required=True, help_text="Terms to search groups for")
     remaining_depth = serializers.IntegerField(
