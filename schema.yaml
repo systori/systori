@@ -3359,6 +3359,24 @@ paths:
       tags:
         - task
     parameters: []
+  /task/task/clone/:
+    post:
+      operationId: task_clone_task
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CloneHeirarchy'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Task'
+      tags:
+        - task
+    parameters: []
   /task/task/search/:
     post:
       operationId: task_search_task

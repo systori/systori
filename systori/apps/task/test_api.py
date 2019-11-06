@@ -540,6 +540,43 @@ class TaskApiTest(ClientTestCase):
         self.job = JobFactory(project=self.project, name="this is a test job")
         self.task = TaskFactory(group=self.job)
 
+    def test_task_clone(self):
+        job = JobFactory(project=ProjectFactory(structure="01.01.001"))
+        group = GroupFactory(parent=job, name="Groupy Group")
+        task = TaskFactory(group=group, name="Easy Task")
+        job2 = JobFactory(project=ProjectFactory(structure="01.001"))
+        self.assertEqual(job2.tasks.count(), 0)
+        response = self.client.post(
+            "/api/task/task/clone/",
+            {"source": task.pk, "target": job2.pk, "position": 1},
+            format="json",
+        )
+        self.assertEqual(job2.tasks.first().name, "Easy Task")
+        self.assertEqual(response.status_code, 200, response.data)
+        json = response.json()
+        self.assertEqual(
+            json,
+            {
+                "pk": job2.tasks.first().pk,
+                "name": "Easy Task",
+                "description": "",
+                "order": 1,
+                "qty": "0.000",
+                "qty_equation": "",
+                "unit": "",
+                "price": "0.00",
+                "price_equation": "",
+                "total": "0.00",
+                "total_equation": "",
+                "variant_group": 0,
+                "variant_serial": 0,
+                "is_provisional": False,
+                "parent": job2.pk,
+                "lineitems": [],
+            },
+            json,
+        )
+
     def test_search_tasks(self):
         job = JobFactory(name="The Job", project=ProjectFactory(structure="01.001"))
         task1 = TaskFactory(

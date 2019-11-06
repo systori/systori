@@ -341,6 +341,29 @@ class TaskModelViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         method="POST",
+        request_body=flutter.CloneHeirarchySerializer(),
+        responses={200: flutter.TaskSerializer()},
+        operation_id="task_clone_task",
+    )
+    @action(methods=["POST"], detail=False)
+    def clone(self, request):
+        serializer = flutter.CloneHeirarchySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        position = serializer.validated_data["position"]
+
+        source = get_object_or_404(Task.objects, pk=serializer.validated_data["source"])
+        target = get_object_or_404(
+            Group.objects, pk=serializer.validated_data["target"]
+        )
+
+        source.clone_to(target, position)
+        # Refresh from db
+        refreshed_source = Task.objects.get(pk=source.pk)
+        return Response(data=flutter.TaskSerializer(instance=refreshed_source).data)
+
+    @swagger_auto_schema(
+        method="POST",
         request_body=flutter.TaskSearchSerializer,
         responses={200: flutter.TaskSearchResultSerializer(many=True)},
         operation_id="task_search_task",
