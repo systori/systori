@@ -3468,15 +3468,6 @@ paths:
             $ref: '#/definitions/LineItem'
       tags:
         - task
-    delete:
-      operationId: task_task_lineitem_delete
-      description: ''
-      parameters: []
-      responses:
-        '204':
-          description: LineItem deleted successfully
-      tags:
-        - task
     parameters:
       - name: id
         in: path

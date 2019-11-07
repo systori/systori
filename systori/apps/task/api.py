@@ -409,15 +409,12 @@ class TaskModelViewSet(viewsets.ModelViewSet):
             data=flutter.LineItemSerializer(task.lineitems.all(), many=True).data
         )
 
-    @swagger_auto_schema(methods=["GET"], responses={200: flutter.LineItemSerializer()})
     @swagger_auto_schema(
-        method="DELETE", responses={204: "LineItem deleted successfully"}
+        methods=["GET"],
+        responses={200: flutter.LineItemSerializer()},
+        operation_id="task_task_lineitem_read",
     )
-    @action(
-        methods=["GET", "DELETE"],
-        detail=True,
-        url_path=r"lineitem/(?P<lineitem_id>\d+)",
-    )
+    @action(methods=["GET"], detail=True, url_path=r"lineitem/(?P<lineitem_id>\d+)")
     def lineitem(self, request, pk=None, lineitem_id=None):
         if not (pk or lineitem_id):
             return Response(status=HTTP_400_BAD_REQUEST)
@@ -426,12 +423,7 @@ class TaskModelViewSet(viewsets.ModelViewSet):
 
         lineitem = get_object_or_404(task.lineitems, pk=lineitem_id)
 
-        if request.method.lower() == "delete":
-            lineitem.delete()
-            return Response(status=HTTP_204_NO_CONTENT)
-
-        if request.method.lower() == "get":
-            return Response(data=flutter.LineItemSerializer(lineitem).data)
+        return Response(data=flutter.LineItemSerializer(lineitem).data)
 
 
 urlpatterns = [

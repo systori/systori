@@ -247,7 +247,8 @@ class TaskSerializer(serializers.ModelSerializer):
         lineitems = validated_data.pop("lineitems", [])
 
         # First we update the lineitems, if there are any lineitems
-        # They should have already been validated at this point, since lineitem serializer runs before task serializer
+        # They should have already been validated at this point,
+        # since lineitem serializer runs before task serializer
         # The only thing that could fail is if an invalid pk was supplied
 
         # List of validated lineitem serializers
@@ -264,6 +265,16 @@ class TaskSerializer(serializers.ModelSerializer):
             )
             serializer.is_valid(raise_exception=True)
             li_serializers.append(serializer)
+
+        # Check that every existing line item pk is present in the validated line items
+        present_li_pks = [i.instance.pk for i in li_serializers if i.instance]
+
+        # If any line item pk is absent, delete it
+        # This needs to happen before new lineitems are created, otherwise
+        # they will be deleted as well
+        LineItem.objects.filter(task=task, job=task.job).exclude(
+            id__in=present_li_pks
+        ).delete()
 
         # At this point all lineitems are safe to be created/updated
         for serializer in li_serializers:

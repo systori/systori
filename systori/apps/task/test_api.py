@@ -695,20 +695,6 @@ class TaskApiTest(ClientTestCase):
             },
         )
 
-    def test_delete_lineitem(self):
-        lineitem1 = LineItemFactory(
-            task=self.task, name="lineitem 1", qty=1, unit="h", price=19.99, total=19.99
-        )
-        self.assertIsNotNone(LineItem.objects.get(pk=lineitem1.pk))
-
-        response = self.client.delete(
-            f"/api/task/task/{self.task.pk}/lineitem/{lineitem1.pk}/"
-        )
-
-        self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
-        with self.assertRaises(LineItem.DoesNotExist):
-            LineItem.objects.get(pk=lineitem1.pk)
-
     def test_reject_update_task_lineitem_which_belongs_to_another_task(self):
         # TODO
         pass
@@ -1131,6 +1117,144 @@ class TaskApiTest(ClientTestCase):
             "lineitem 1",
             "Expected lineitem to update its name",
         )
+
+    def test_update_task_deletes_absent_lineitems(self):
+
+        lineitem1 = LineItemFactory(
+            task=self.task,
+            name="The Line Item",
+            qty=1,
+            unit="h",
+            price=19.99,
+            total=19.99,
+            token=1,
+        )
+        lineitem2 = LineItemFactory(
+            task=self.task,
+            name="The Line Item 2",
+            qty=1,
+            unit="h",
+            price=19.99,
+            total=19.99,
+            token=2,
+        )
+
+        self.assertEqual(Task.objects.count(), 1, "Expected 1 pre-existing tasks")
+        self.assertEqual(
+            LineItem.objects.count(), 2, "Expected 2 pre-existing lineitems"
+        )
+
+        response = self.client.patch(
+            f"/api/task/task/{self.task.pk}/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "50.00",
+                "total": "250.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 2",
+                        "order": 1,
+                        "pk": lineitem2.pk,
+                        "token": 2,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                    {
+                        "name": "lineitem 3",
+                        "order": 2,
+                        "token": 3,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_200_OK, response.data)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "pk": self.task.pk,
+                "name": "task 1",
+                "description": "",
+                "order": 6,
+                "qty": "5.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "50.00",
+                "price_equation": "",
+                "total": "250.00",
+                "total_equation": "",
+                "variant_group": 0,
+                "variant_serial": 0,
+                "is_provisional": False,
+                "parent": self.task.group.pk,
+                "lineitems": [
+                    {
+                        "pk": 2,
+                        "token": 2,
+                        "name": "lineitem 2",
+                        "order": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                    {
+                        "pk": 3,
+                        "token": 3,
+                        "name": "lineitem 3",
+                        "order": 2,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                ],
+            },
+            json,
+        )
+
+        self.assertEqual(
+            Task.objects.count(), 1, "Expected no addiional task to be created"
+        )
+        self.assertEqual(
+            LineItem.objects.count(), 2, "Expected no additional lineitem to be created"
+        )
+
+        with self.assertRaises(
+            LineItem.DoesNotExist, msg="Expected absent line item to have been deleted"
+        ):
+            LineItem.objects.get(pk=lineitem1.pk)
 
     def test_reject_update_task_lineitem_token(self):
         task1 = TaskFactory(
