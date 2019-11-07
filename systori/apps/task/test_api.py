@@ -695,14 +695,6 @@ class TaskApiTest(ClientTestCase):
             },
         )
 
-    def test_reject_update_task_lineitem_which_belongs_to_another_task(self):
-        # TODO
-        pass
-
-    def test_reject_update_task_with_fewer_lineitems_than_already_existing(self):
-        # TODO
-        pass
-
     def test_reject_create_task_with_duplicate_lineitem_token(self):
         self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
         response = self.client.post(
