@@ -248,7 +248,9 @@ class TaskSerializer(serializers.ModelSerializer):
         for lineitem in lineitems:
             pk, instance = lineitem.pop("pk", None), None
             if pk:
-                instance = get_object_or_404(LineItem.objects.all(), id=pk)
+                instance = get_object_or_404(
+                    LineItem.objects, id=pk, task=task, job=task.job
+                )
 
             serializer = LineItemSerializer(
                 instance=instance, data=lineitem, partial=True
