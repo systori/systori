@@ -182,7 +182,7 @@ class GroupModelViewSet(viewsets.ModelViewSet):
         method="POST",
         request_body=flutter.GroupSearchSerializer,
         responses={200: flutter.GroupSearchResultSerializer(many=True)},
-        operation_id="task_search_group",
+        operation_id="task_search_groups",
     )
     @action(methods=["POST"], detail=False)
     def search(self, request):
@@ -366,7 +366,7 @@ class TaskModelViewSet(viewsets.ModelViewSet):
         method="POST",
         request_body=flutter.TaskSearchSerializer,
         responses={200: flutter.TaskSearchResultSerializer(many=True)},
-        operation_id="task_search_task",
+        operation_id="task_search_tasks",
     )
     @action(methods=["POST"], detail=False)
     def search(self, request):
