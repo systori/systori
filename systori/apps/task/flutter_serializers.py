@@ -226,6 +226,13 @@ class TaskSerializer(serializers.ModelSerializer):
         lineitems = validated_data.pop("lineitems", [])
         parent = validated_data.pop("group")
 
+        for i in lineitems:
+            has_pk = i.get("pk", False)
+            if has_pk:
+                raise serializers.ValidationError(
+                    "Cannot create task with lineitem with a predefined pk, try updating instead"
+                )
+
         if "pk" in validated_data:
             pk = validated_data.pop("pk")
             if pk:
