@@ -1253,7 +1253,7 @@ class TaskApiTest(ClientTestCase):
         )
 
         response = self.client.patch(
-            f"/api/task/task/{self.task.pk}/",
+            f"/api/task/job/{self.job.pk}/task/{self.task.pk}/",
             {
                 "name": "task 1",
                 "order": 6,
