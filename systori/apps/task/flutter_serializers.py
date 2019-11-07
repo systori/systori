@@ -238,7 +238,9 @@ class TaskSerializer(serializers.ModelSerializer):
             has_pk = i.get("pk", False)
             if has_pk:
                 raise serializers.ValidationError(
-                    "Cannot create task with lineitem with a predefined pk, try updating instead"
+                    {
+                        "lineitems": "Cannot create task with lineitem with a predefined pk, try updating instead"
+                    }
                 )
 
         if "pk" in validated_data:

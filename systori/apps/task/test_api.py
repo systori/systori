@@ -936,6 +936,60 @@ class TaskApiTest(ClientTestCase):
             LineItem.objects.count(), 1, "Expected no additional lineitem to be created"
         )
 
+    def test_reject_create_task_with_lineitem_with_pk(self):
+        self.assertEqual(Task.objects.count(), 1, "Expected 1 pre-existing tasks")
+
+        self.assertEqual(
+            LineItem.objects.count(), 0, "Expected zero pre-existing lineitems"
+        )
+
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "25.00",
+                "total": "125.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "pk": 123,
+                        "token": 2,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    }
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+        self.assertDictEqual(
+            json,
+            {
+                "lineitems": "Cannot create task with lineitem with a predefined pk, try updating instead"
+            },
+            json,
+        )
+
+        self.assertEqual(
+            Task.objects.count(), 1, "Expected no additional task to be created"
+        )
+        self.assertEqual(
+            LineItem.objects.count(), 0, "Expected no additional lineitem to be created"
+        )
+
     def test_reject_update_task_lineitem_using_token(self):
         task1 = TaskFactory(
             group=self.job, name="task 1", qty=1, unit="h", price=19.99, total=19.99
