@@ -755,6 +755,68 @@ class TaskApiTest(ClientTestCase):
         )
         self.assertEqual(Task.objects.count(), 0, "Expected no tasks to be created")
 
+    def test_reject_update_task_with_duplicate_lineitem_pk(self):
+        self.assertEqual(Task.objects.count(), 1, "Expected 1 pre-existing tasks")
+        self.assertEqual(
+            LineItem.objects.count(), 0, "Expected zero pre-existing lineitems"
+        )
+        response = self.client.patch(
+            f"/api/task/task/{self.task.pk}/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "50.00",
+                "total": "250.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "pk": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                    {
+                        "name": "lineitem 2",
+                        "order": 2,
+                        "pk": 1,
+                        "token": 2,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+        self.assertDictEqual(
+            json, {"lineitems": ["Multiple lineitems have same pk"]}, json
+        )
+        self.assertEqual(
+            Task.objects.count(), 1, "Expected no additionl tasks to be created"
+        )
+        self.assertEqual(
+            LineItem.objects.count(), 0, "Expected no lineitems to be created"
+        )
+
     def test_reject_create_task_with_lineitem_using_existing_token(self):
         self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
         response = self.client.post(

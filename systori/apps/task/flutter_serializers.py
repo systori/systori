@@ -196,6 +196,7 @@ class TaskSerializer(serializers.ModelSerializer):
         # But if multiple lineitems are to be created, they all must have unique tokens
 
         li_tokens = []
+        li_pks = []
         for i in data["lineitems"]:
             has_token = i.get("token", False)
             has_pk = i.get("pk", False)
@@ -205,10 +206,17 @@ class TaskSerializer(serializers.ModelSerializer):
                 )
             if has_token:
                 li_tokens.append(i["token"])
+            if has_pk:
+                li_pks.append(i["pk"])
 
         if len(set(li_tokens)) != len(li_tokens):
             raise serializers.ValidationError(
                 {"lineitems": "Multiple lineitems have same token"}
+            )
+
+        if len(set(li_pks)) != len(li_pks):
+            raise serializers.ValidationError(
+                {"lineitems": "Multiple lineitems have same pk"}
             )
 
         # Valid tasks have their price equal to the total of all lineitems
