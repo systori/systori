@@ -3345,6 +3345,24 @@ paths:
       tags:
         - task
     parameters: []
+  /task/task/{id}/:
+    get:
+      operationId: task_task_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Task'
+      tags:
+        - task
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Task.
+        required: true
+        type: integer
   /task/task/{id}/lineitem/{lineitem_id}/:
     get:
       operationId: task_task_lineitem_read

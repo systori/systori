@@ -334,7 +334,7 @@ class JobModelViewSet(viewsets.ModelViewSet):
         return GroupModelViewSet.subgroups(self, request, pk=pk)
 
 
-class TaskModelViewSet(viewsets.GenericViewSet):
+class TaskModelViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Task.objects.all()
     serializer_class = flutter.TaskSerializer
     permission_classes = (HasStaffAccess,)
