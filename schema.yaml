@@ -5139,6 +5139,9 @@ definitions:
         description: Only groups that are valid for the remaining depth will be returned
         type: integer
   GroupSearchResult:
+    required:
+      - project
+      - job
     type: object
     properties:
       pk:
@@ -5162,6 +5165,16 @@ definitions:
         description: Number of tasks in this group
         type: integer
         readOnly: true
+      project:
+        title: Project
+        description: Name of project this group belongs to
+        type: string
+        minLength: 1
+      job:
+        title: Job
+        description: Name of job this group belongs to
+        type: string
+        minLength: 1
   TaskSearch:
     required:
       - terms
