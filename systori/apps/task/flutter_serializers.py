@@ -488,11 +488,17 @@ class GroupSearchResultSerializer(serializers.ModelSerializer):
     groups = serializers.SerializerMethodField(
         help_text="Number of groups in this group"
     )
+    project = serializers.CharField(
+        source="job.project.name", help_text="Name of project this group belongs to"
+    )
+    job = serializers.CharField(
+        source="job.name", help_text="Name of job this group belongs to"
+    )
 
     class Meta:
         ref_name = "GroupSearchResult"
         model = Group
-        fields = ["pk", "name", "description", "groups", "tasks"]
+        fields = ["pk", "name", "description", "groups", "tasks", "project", "job"]
 
     def get_tasks(self, group) -> int:
         if group and group.pk:

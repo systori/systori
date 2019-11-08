@@ -735,7 +735,7 @@ class GroupApiTest(ClientTestCase):
     def test_search_groups(self):
         job = JobFactory(
             name="The Job",
-            project=ProjectFactory(structure="01.01.001"),
+            project=ProjectFactory(structure="01.01.001", name="The project"),
             generate_groups=True,
         )
         group1 = GroupFactory(parent=job, name="Voranstrich aus Bitumenlösung")
@@ -760,6 +760,8 @@ class GroupApiTest(ClientTestCase):
                     "description": "",
                     "groups": 0,
                     "tasks": 0,
+                    "project": "The project",
+                    "job": "The Job",
                 }
             ],
             json,
@@ -2699,4 +2701,3 @@ class JobApiTest(ClientTestCase):
         self.assertDictEqual(json, {"lineitems": ["This field is required."]}, json)
 
         self.assertEqual(Task.objects.count(), 0, "Expected no tasks to be created")
-
