@@ -578,7 +578,7 @@ class TaskApiTest(ClientTestCase):
         )
 
     def test_search_tasks(self):
-        job = JobFactory(name="The Job", project=ProjectFactory(structure="01.001"))
+        job = JobFactory(name="The Job", project=ProjectFactory(structure="01.001", name="The project"))
         task1 = TaskFactory(
             group=job,
             name="Voranstrich aus Bitumenlösung",
@@ -606,6 +606,8 @@ class TaskApiTest(ClientTestCase):
                     "description": "",
                     "total": "59.97",
                     "lineitems": 0,
+                    "project": "The project",
+                    "job": "The Job",
                 }
             ],
             json,

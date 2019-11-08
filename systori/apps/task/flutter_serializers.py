@@ -523,11 +523,17 @@ class TaskSearchResultSerializer(serializers.ModelSerializer):
     lineitems = serializers.SerializerMethodField(
         help_text="Number of lineitems in this task"
     )
+    project = serializers.CharField(
+        source="job.project.name", help_text="Name of project this task belongs to"
+    )
+    job = serializers.CharField(
+        source="job.name", help_text="Name of job this task belongs to"
+    )
 
     class Meta:
         ref_name = "TaskSearchResult"
         model = Task
-        fields = ["pk", "name", "description", "total", "lineitems"]
+        fields = ["pk", "name", "description", "total", "lineitems", "project", "job"]
 
     def get_lineitems(self, task) -> int:
         if task and task.pk:

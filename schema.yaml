@@ -5188,6 +5188,8 @@ definitions:
   TaskSearchResult:
     required:
       - name
+      - project
+      - job
     type: object
     properties:
       pk:
@@ -5211,6 +5213,16 @@ definitions:
         description: Number of lineitems in this task
         type: integer
         readOnly: true
+      project:
+        title: Project
+        description: Name of project this task belongs to
+        type: string
+        minLength: 1
+      job:
+        title: Job
+        description: Name of job this task belongs to
+        type: string
+        minLength: 1
   Timer:
     required:
       - started
