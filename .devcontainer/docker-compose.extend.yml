@@ -1,0 +1,10 @@
+version: "3.7"
+services:
+  app:
+    volumes:
+      # mount correct workspace dir
+      - .:/app
+      # SSH keys w/Git
+      - ~/.ssh:/root/.ssh-localhost:ro
+    # Overrides default command so things don't shut down after the process ends.
+    command: /bin/sh -c "while sleep 1000; do :; done"

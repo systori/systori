@@ -1,9 +1,0 @@
-.git
-.idea
-src
-media/letterhead
-media/attachments
-server
-# systori/dart/build
-**/__pycache__
-**/*venv*/**
