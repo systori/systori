@@ -222,6 +222,9 @@ class TaskSerializer(serializers.ModelSerializer):
         # Valid tasks have their price equal to the total of all lineitems
         lineitems_total = Decimal()
         for lineitem in data["lineitems"]:
+            is_hidden = lineitem.get('is_hidden', False)
+            if is_hidden:
+                continue
             lineitems_total += Decimal(lineitem["total"])
 
         if price != lineitems_total:

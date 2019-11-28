@@ -578,7 +578,10 @@ class TaskApiTest(ClientTestCase):
         )
 
     def test_search_tasks(self):
-        job = JobFactory(name="The Job", project=ProjectFactory(structure="01.001", name="The project"))
+        job = JobFactory(
+            name="The Job",
+            project=ProjectFactory(structure="01.001", name="The project"),
+        )
         task1 = TaskFactory(
             group=job,
             name="Voranstrich aus Bitumenlösung",
@@ -2573,6 +2576,168 @@ class JobApiTest(ClientTestCase):
                         "total": "25.00",
                         "total_equation": "",
                         "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                    {
+                        "name": "lineitem 2",
+                        "order": 2,
+                        "token": 2,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        json = response.json()
+        self.assertEqual(
+            json, {"price": ["Task price does not match lineitems total"]}, json
+        )
+
+        self.assertEqual(Task.objects.count(), 0, "Expected no tasks to be created")
+
+    def test_create_task_with_hidden_lineitems(self):
+
+        self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
+
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "5.00",
+                "total": "25.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": True,
+                        "lineitem_type": "other",
+                    },
+                    {
+                        "name": "lineitem 2",
+                        "order": 2,
+                        "token": 2,
+                        "qty": "1.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "5.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        json = response.json()
+        self.assertEqual(
+            json,
+            {
+                "pk": 1,
+                "name": "task 1",
+                "description": "",
+                "order": 6,
+                "qty": "5.000",
+                "qty_equation": "",
+                "unit": "h",
+                "price": "5.00",
+                "price_equation": "",
+                "total": "25.00",
+                "total_equation": "",
+                "variant_group": 0,
+                "variant_serial": 0,
+                "is_provisional": False,
+                "parent": 1,
+                "lineitems": [
+                    {
+                        "pk": 1,
+                        "token": 1,
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": True,
+                        "lineitem_type": "other",
+                    },
+                    {
+                        "pk": 2,
+                        "token": 2,
+                        "name": "lineitem 2",
+                        "order": 2,
+                        "qty": "1.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "5.00",
+                        "total_equation": "",
+                        "is_hidden": False,
+                        "lineitem_type": "other",
+                    },
+                ],
+            },
+            json,
+        )
+
+        self.assertEqual(Task.objects.count(), 1, "Expected 1 task to be created")
+
+    def test_reject_create_task_with_mismatch_in_task_price_and_lineitems_total_excluding_hidden_items(
+        self
+    ):
+
+        self.assertEqual(Task.objects.count(), 0, "Expected zero pre-existing tasks")
+
+        response = self.client.post(
+            f"/api/task/job/{self.job.pk}/tasks/",
+            {
+                "name": "task 1",
+                "order": 6,
+                "qty": "5.000",
+                "unit": "h",
+                "price": "5.00",
+                "total": "25.00",
+                "lineitems": [
+                    {
+                        "name": "lineitem 1",
+                        "order": 1,
+                        "token": 1,
+                        "qty": "5.000",
+                        "qty_equation": "",
+                        "unit": "h",
+                        "price": "5.00",
+                        "price_equation": "",
+                        "total": "25.00",
+                        "total_equation": "",
+                        "is_hidden": True,
                         "lineitem_type": "other",
                     },
                     {
