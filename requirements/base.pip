@@ -1,4 +1,5 @@
 psycopg2==2.8.3
+Celery
 lxml
 raven
 
