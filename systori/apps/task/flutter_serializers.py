@@ -162,18 +162,19 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         for field in ["qty", "price", "total"]:
-            if not field in data:
-                raise serializers.ValidationError({field: "This field is required"})
             # qty can be empty in case of t&m tasks
-            if not data[field] and field != "qty":
+            if field != "qty" and not field in data:
+                raise serializers.ValidationError({field: "This field is required"})
+            if field != "qty" and not data[field]:
                 raise serializers.ValidationError({field: "Invalid value"})
-            decimal = Decimal(data[field])
-            if decimal.is_nan():
+            value = data.get(field, None)
+            decimal = Decimal(value) if value else None
+            if field != "qty" and decimal.is_nan():
                 raise serializers.ValidationError({field: "Invalid decimal value"})
 
-        qty = Decimal(data["qty"]) if data["qty"] else None
-        total = Decimal(data["total"])
-        price = Decimal(data["price"])
+        qty = Decimal(data.get("qty")) if data.get("qty", None) else None
+        total = Decimal(data.get("total"))
+        price = Decimal(data.get("price"))
 
         has_percent = "unit" in data and "%" in data["unit"]
 
