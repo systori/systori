@@ -28,6 +28,17 @@ from .models import Group, Job, LineItem, Task
 FieldInspector.add_manual_fields = swagger_field_inspectors.add_manual_fields
 
 
+def validate_cell_values(qty: Decimal, price: Decimal, total: Decimal) -> bool:
+    """
+    Make sure qty*price == total
+    """
+    matches_qty = round(total / price, 3) == qty
+    matches_price = round(total / qty, 2) == price
+    matches_total = total == round(qty * price, 2)
+
+    return matches_qty or matches_price or matches_total
+
+
 class LineItemSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(required=False)
     token = serializers.IntegerField(
@@ -79,7 +90,7 @@ class LineItemSerializer(serializers.ModelSerializer):
 
         total = Decimal(data["total"])
         price = Decimal(data["price"])
-        if total != round(qty * price, 2):
+        if not validate_cell_values(qty, price, total):
             raise serializers.ValidationError(
                 {"total": "Total is not equal to qty*price"}
             )
@@ -181,7 +192,7 @@ class TaskSerializer(serializers.ModelSerializer):
         if has_percent and qty and not qty.is_zero():
             qty = qty / Decimal("100.00")
 
-        if qty and total != round(qty * price, 2):
+        if qty and not validate_cell_values(qty, price, total):
             raise serializers.ValidationError(
                 {"total": "Total is not equal to qty*price"}
             )
