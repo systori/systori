@@ -79,7 +79,7 @@ class LineItemSerializer(serializers.ModelSerializer):
 
         total = Decimal(data["total"])
         price = Decimal(data["price"])
-        if total != qty * price:
+        if total != round(qty * price, 2):
             raise serializers.ValidationError(
                 {"total": "Total is not equal to qty*price"}
             )
@@ -180,7 +180,7 @@ class TaskSerializer(serializers.ModelSerializer):
         if has_percent and qty and not qty.is_zero():
             qty = qty / Decimal("100.00")
 
-        if qty and total != qty * price:
+        if qty and total != round(qty * price, 2):
             raise serializers.ValidationError(
                 {"total": "Total is not equal to qty*price"}
             )
@@ -222,7 +222,7 @@ class TaskSerializer(serializers.ModelSerializer):
         # Valid tasks have their price equal to the total of all lineitems
         lineitems_total = Decimal()
         for lineitem in data["lineitems"]:
-            is_hidden = lineitem.get('is_hidden', False)
+            is_hidden = lineitem.get("is_hidden", False)
             if is_hidden:
                 continue
             lineitems_total += Decimal(lineitem["total"])
