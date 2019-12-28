@@ -516,6 +516,7 @@ class GroupSerializerTest(ClientTestCase):
         # Has structure 01.01.001
         self.project = ProjectFactory()
         self.jobsite = JobSiteFactory(project=self.project)
+        self.maxDiff = None
 
     def test_can_serialize_no_groups(self):
         self.assertEqual(GroupSerializer(many=True, instance=[]).data, [])
@@ -537,6 +538,7 @@ class GroupSerializerTest(ClientTestCase):
                 "order": group.order,
                 "groups": [],
                 "tasks": [],
+                "estimate": "0.00",
             },
             serialized,
         )
@@ -570,6 +572,9 @@ class GroupSerializerTest(ClientTestCase):
                     "order": group.order,
                     "groups": [],
                     "tasks": [serialized_task],
+                    "estimate": GroupSerializer()
+                    .fields["estimate"]
+                    .to_representation(group.estimate),
                 },
                 serialized,
                 f"Failed with single_task_test {task_test}",
@@ -603,6 +608,9 @@ class GroupSerializerTest(ClientTestCase):
                     "order": group.order,
                     "groups": [],
                     "tasks": serialized_tasks,
+                    "estimate": GroupSerializer()
+                    .fields["estimate"]
+                    .to_representation(group.estimate),
                 },
                 serialized,
                 f"Failed with multiple_task_test {task_test}",
@@ -632,6 +640,9 @@ class GroupSerializerTest(ClientTestCase):
                 "order": group1.order,
                 "groups": [],
                 "tasks": [],
+                "estimate": GroupSerializer()
+                .fields["estimate"]
+                .to_representation(group1.estimate),
             },
             serialized[0],
         )
@@ -645,6 +656,9 @@ class GroupSerializerTest(ClientTestCase):
                 "order": group2.order,
                 "groups": [],
                 "tasks": [],
+                "estimate": GroupSerializer()
+                .fields["estimate"]
+                .to_representation(group2.estimate),
             },
             serialized[1],
         )
@@ -685,6 +699,9 @@ class GroupSerializerTest(ClientTestCase):
                     "order": group1.order,
                     "groups": [],
                     "tasks": [serialized_group1_task],
+                    "estimate": GroupSerializer()
+                    .fields["estimate"]
+                    .to_representation(group1.estimate),
                 },
                 serialized[0],
             )
@@ -698,6 +715,9 @@ class GroupSerializerTest(ClientTestCase):
                     "order": group2.order,
                     "groups": [],
                     "tasks": [serialized_group2_task],
+                    "estimate": GroupSerializer()
+                    .fields["estimate"]
+                    .to_representation(group2.estimate),
                 },
                 serialized[1],
             )
@@ -738,6 +758,9 @@ class GroupSerializerTest(ClientTestCase):
                     "order": group1.order,
                     "groups": [],
                     "tasks": serialized_group1_tasks,
+                    "estimate": GroupSerializer()
+                    .fields["estimate"]
+                    .to_representation(group1.estimate),
                 },
                 serialized[0],
             )
@@ -751,6 +774,9 @@ class GroupSerializerTest(ClientTestCase):
                     "order": group2.order,
                     "groups": [],
                     "tasks": serialized_group2_tasks,
+                    "estimate": GroupSerializer()
+                    .fields["estimate"]
+                    .to_representation(group2.estimate),
                 },
                 serialized[1],
             )
@@ -779,6 +805,9 @@ class GroupSerializerTest(ClientTestCase):
                 "order": group.order,
                 "groups": [serialized_subgroup],
                 "tasks": [],
+                "estimate": GroupSerializer()
+                .fields["estimate"]
+                .to_representation(group.estimate),
             },
             serialized_group,
         )
@@ -824,12 +853,16 @@ class GroupSerializerTest(ClientTestCase):
                             "order": sub_group.order,
                             "groups": [],
                             "tasks": [serialized_task],
+                            "estimate": "100.00",
                         }
                     ],
                     "tasks": [],
+                    "estimate": GroupSerializer()
+                    .fields["estimate"]
+                    .to_representation(group.estimate),
                 },
                 serialized_group,
-                f"Failed with single_task_test: {task_test}",
+                f"Failed with single_task_test: {task_test}\nGroup: {serialized_group}",
             )
 
     def test_can_serialize_single_subgroup_with_multiple_tasks(self):
@@ -872,12 +905,16 @@ class GroupSerializerTest(ClientTestCase):
                             "order": sub_group.order,
                             "groups": [],
                             "tasks": serialized_tasks,
+                            "estimate": "125.00",
                         }
                     ],
                     "tasks": [],
+                    "estimate": GroupSerializer()
+                    .fields["estimate"]
+                    .to_representation(group.estimate),
                 },
                 serialized_group,
-                f"Failed with single_task_test: {task_test}",
+                f"Failed with single_task_test: {task_test}\nGroup: {serialized_group}",
             )
 
     def test_can_serialize_multiple_subgroup_with_no_tasks(self):
@@ -908,6 +945,9 @@ class GroupSerializerTest(ClientTestCase):
                 "order": group.order,
                 "groups": [serialized_subgroup1, serialized_subgroup2],
                 "tasks": [],
+                "estimate": GroupSerializer()
+                .fields["estimate"]
+                .to_representation(group.estimate),
             },
             serialized_group,
         )
@@ -958,6 +998,7 @@ class GroupSerializerTest(ClientTestCase):
                             "order": sub_group1.order,
                             "groups": [],
                             "tasks": [serialized_subgroup1_task],
+                            "estimate": "100.00",
                         },
                         {
                             "job": group.job.pk,
@@ -968,12 +1009,16 @@ class GroupSerializerTest(ClientTestCase):
                             "order": sub_group2.order,
                             "groups": [],
                             "tasks": [serialized_subgroup2_task],
+                            "estimate": "100.00",
                         },
                     ],
                     "tasks": [],
+                    "estimate": GroupSerializer()
+                    .fields["estimate"]
+                    .to_representation(group.estimate),
                 },
                 serialized_group,
-                f"Failed with single_task_test: {task_test}",
+                f"Failed with single_task_test: {task_test}\nGroup:{serialized_group}",
             )
 
     def test_can_serialize_multiple_subgroup_with_multiple_tasks(self):
@@ -1022,6 +1067,7 @@ class GroupSerializerTest(ClientTestCase):
                             "order": sub_group1.order,
                             "groups": [],
                             "tasks": serialized_subgroup1_tasks,
+                            "estimate": "125.00",
                         },
                         {
                             "job": group.job.pk,
@@ -1032,12 +1078,16 @@ class GroupSerializerTest(ClientTestCase):
                             "order": sub_group2.order,
                             "groups": [],
                             "tasks": serialized_subgroup2_tasks,
+                            "estimate": "125.00",
                         },
                     ],
                     "tasks": [],
+                    "estimate": GroupSerializer()
+                    .fields["estimate"]
+                    .to_representation(group.estimate),
                 },
                 serialized_group,
-                f"Failed with single_task_test: {task_test}",
+                f"Failed with single_task_test: {task_test}\nGroup:{serialized_group}",
             )
 
 
@@ -1064,6 +1114,7 @@ class JobSerializerTest(ClientTestCase):
                 "groups": [],
                 "tasks": [],
                 "order": job.order,
+                "estimate": "0.00",
             },
             serialized,
         )
@@ -1084,6 +1135,7 @@ class JobSerializerTest(ClientTestCase):
                 "groups": [],
                 "tasks": [],
                 "order": job1.order,
+                "estimate": "0.00",
             },
             serialized[0],
         )
@@ -1095,6 +1147,7 @@ class JobSerializerTest(ClientTestCase):
                 "groups": [],
                 "tasks": [],
                 "order": job2.order,
+                "estimate": "0.00",
             },
             serialized[1],
         )
@@ -1120,9 +1173,10 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": [serialized_task],
                     "order": job.order,
+                    "estimate": "100.00",
                 },
                 serialized,
-                f"Failed with single_task_test {task_test}",
+                f"Failed with single_task_test {task_test}\nJob:{serialized}",
             )
 
     def test_can_serialize_multiple_jobs_with_single_task_no_groups(self):
@@ -1153,6 +1207,7 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": [serialized_job1_task],
                     "order": job1.order,
+                    "estimate": "100.00",
                 },
                 serialized[0],
                 f"Failed with single_task_test {task_test}",
@@ -1165,6 +1220,7 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": [serialized_job2_task],
                     "order": job2.order,
+                    "estimate": "100.00",
                 },
                 serialized[1],
                 f"Failed with single_task_test {task_test}",
@@ -1191,6 +1247,7 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": serialized_tasks,
                     "order": job.order,
+                    "estimate": "125.00",
                 },
                 serialized,
                 f"Failed with single_task_test {task_test}",
@@ -1224,9 +1281,10 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": serialized_job1_tasks,
                     "order": job1.order,
+                    "estimate": "125.00",
                 },
                 serialized[0],
-                f"Failed with single_task_test {task_test}",
+                f"Failed with multiple_task_test {task_test}",
             )
             self.assertDictEqual(
                 {
@@ -1236,9 +1294,10 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": serialized_job2_tasks,
                     "order": job2.order,
+                    "estimate": "125.00",
                 },
                 serialized[1],
-                f"Failed with single_task_test {task_test}",
+                f"Failed with multiple_task_test {task_test}",
             )
 
     def test_can_serialize_single_job_with_single_group(self):
@@ -1257,11 +1316,13 @@ class JobSerializerTest(ClientTestCase):
                 "groups": [serialized_group],
                 "tasks": [],
                 "order": job.order,
+                "estimate": "0.00",
             },
             serialized,
+            f"Job:{serialized}",
         )
 
-        # Single task
+        # SIngle group with Single task
         for task_test in [
             "test_can_serialize_single_task_with_no_lineitems",
             "test_can_serialize_single_task_with_multiple_lineitems",
@@ -1289,16 +1350,18 @@ class JobSerializerTest(ClientTestCase):
                             "order": group.order,
                             "groups": [],
                             "tasks": [serialized_task],
+                            "estimate":"100.00"
                         }
                     ],
                     "tasks": [],
                     "order": job.order,
+                    "estimate": "100.00"
                 },
                 serialized,
-                f"Failed with single_task_test {task_test}",
+                f"Failed with single_task_test {task_test}\nJob:{serialized}",
             )
 
-        # Multiple tasks
+        # Single group with Multiple tasks
         for task_test in [
             "test_can_serialize_multiple_tasks_with_no_lineitems",
             "test_can_serialize_multiple_tasks_with_multiple_lineitems",
@@ -1331,11 +1394,13 @@ class JobSerializerTest(ClientTestCase):
                             "order": group.order,
                             "groups": [],
                             "tasks": serialized_tasks,
+                            "estimate":"125.00"
                         }
                     ],
                     "tasks": [],
                     "order": job.order,
+                    "estimate":"125.00"
                 },
                 serialized,
-                f"Failed with multiple_task_test {task_test}",
+                f"Failed with multiple_task_test {task_test}\nJob:{serialized}",
             )

@@ -322,6 +322,7 @@ class GroupSerializer(serializers.ModelSerializer):
     )
     groups = serializers.ListField(child=RecursiveField(), required=False)
     tasks = TaskSerializer(many=True, required=False)
+    estimate = serializers.DecimalField(required=False, decimal_places=2, max_digits=15)
 
     class Meta:
         ref_name = "Group"
@@ -335,6 +336,7 @@ class GroupSerializer(serializers.ModelSerializer):
             "tasks",
             "parent",
             "job",
+            "estimate",
         ]
 
     def to_representation(self, instance):
@@ -441,11 +443,12 @@ class JobSerializer(serializers.ModelSerializer):
     groups = GroupSerializer(required=False, many=True)
     tasks = TaskSerializer(required=False, many=True)
     order = serializers.IntegerField(required=False)
+    estimate = serializers.DecimalField(required=False, decimal_places=2, max_digits=15)
 
     class Meta:
         ref_name = "Job"
         model = Job
-        fields = ["pk", "name", "description", "groups", "tasks", "order"]
+        fields = ["pk", "name", "description", "groups", "tasks", "order", "estimate"]
 
     def update(self, job, validated_data):
 
@@ -467,6 +470,7 @@ class JobSerializer(serializers.ModelSerializer):
                 TaskSerializer(instance=task).data for task in instance.tasks.all()
             ],
             "order": instance.order,
+            "estimate": self.fields["estimate"].to_representation(instance.estimate),
         }
 
 

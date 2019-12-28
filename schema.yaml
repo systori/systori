@@ -5079,6 +5079,10 @@ definitions:
         type: integer
         readOnly: true
         x-nullable: true
+      estimate:
+        title: Estimate
+        type: string
+        format: decimal
   Job:
     type: object
     properties:
@@ -5104,6 +5108,10 @@ definitions:
       order:
         title: Order
         type: integer
+      estimate:
+        title: Estimate
+        type: string
+        format: decimal
   CloneHeirarchy:
     required:
       - source
