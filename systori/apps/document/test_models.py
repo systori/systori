@@ -55,50 +55,77 @@ class ProposalTests(TestCase):
         proposal.json = {"jobs": [{"job": self.job}], "add_terms": False}
         pdf_type.proposal.serialize(proposal)
         self.maxDiff = None
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 "add_terms": False,
                 "jobs": [
                     {
-                        "tasks": [],
+                        "pk": 1,
+                        "name": self.job.name,
+                        "code": "01",
+                        "description": "",
                         "groups": [
                             {
-                                "group.id": 2,
-                                "code": "01.01",
+                                "pk": 2,
                                 "name": self.group.name,
+                                "code": "01.01",
                                 "description": "",
-                                "estimate": Decimal("0.0000"),
+                                "order": 1,
                                 "groups": [],
                                 "tasks": [
                                     {
-                                        "task.id": 1,
+                                        "pk": 1,
                                         "code": "01.01.001",
                                         "name": self.task.name,
                                         "description": "",
-                                        "is_provisional": False,
+                                        "order": 1,
+                                        "qty": "0.000",
+                                        "qty_equation": "",
+                                        "unit": "",
+                                        "price": "0.00",
+                                        "price_equation": "",
+                                        "total": "0.00",
+                                        "total_equation": "",
+                                        "estimate": "0.00",
                                         "variant_group": 0,
                                         "variant_serial": 0,
-                                        "qty": Decimal("0.0000"),
-                                        "unit": "",
-                                        "price": Decimal("0.0000"),
-                                        "estimate": Decimal("0.0000"),
+                                        "is_provisional": False,
+                                        "parent": 2,
                                         "lineitems": [
                                             {
-                                                "lineitem.id": 1,
+                                                "pk": 1,
+                                                "token": None,
                                                 "name": self.lineitem.name,
-                                                "price": Decimal("0.0000"),
-                                                "estimate": Decimal("0.0000"),
-                                                "qty": Decimal("0.0000"),
+                                                "order": 1,
+                                                "qty": "0.000",
+                                                "qty_equation": "",
                                                 "unit": "",
+                                                "price": "0.00",
+                                                "price_equation": "",
+                                                "total": "0.00",
+                                                "total_equation": "",
+                                                "estimate": "0.00",
+                                                "is_hidden": False,
+                                                "lineitem_type": "other",
                                             }
                                         ],
                                     }
                                 ],
+                                "parent": 1,
+                                "job": 1,
+                                "estimate": "0.00",
+                                "group.id": 2,
                             }
                         ],
+                        "tasks": [],
+                        "order": 1,
+                        "estimate": "0.00",
+                        "job.id": 1,
+                        "is_attached": False,
                     }
                 ],
             },
+            proposal.json,
             proposal.json,
         )
 

@@ -4455,45 +4455,157 @@ definitions:
         title: Transaction
         type: integer
         x-nullable: true
-  Proposal:
+  Letterhead:
+    title: Letterhead
     required:
-      - letterhead
-      - project
-      - jobs
+      - name
     type: object
     properties:
       id:
         title: ID
         type: integer
         readOnly: true
-      json:
-        title: Json
+      name:
+        title: Name
         type: string
+        maxLength: 512
         minLength: 1
+      letterhead_pdf:
+        title: Letterhead PDF
+        type: string
+        readOnly: true
+        format: uri
+      document_unit:
+        title: Document Unit
+        type: string
+        enum:
+          - mm
+          - cm
+          - inch
+      top_margin:
+        title: Top Margin
+        type: string
+        format: decimal
+      right_margin:
+        title: Right Margin
+        type: string
+        format: decimal
+      bottom_margin:
+        title: Bottom Margin
+        type: string
+        format: decimal
+      left_margin:
+        title: Left Margin
+        type: string
+        format: decimal
+      top_margin_next:
+        title: Top Margin Next
+        type: string
+        format: decimal
+      bottom_margin_next:
+        title: Bottom Margin Next
+        type: string
+        format: decimal
+      document_format:
+        title: Pagesize
+        type: string
+        enum:
+          - A5
+          - A4
+          - A3
+          - LETTER
+          - LEGAL
+          - ELEVENSEVENTEEN
+          - B5
+          - B4
+      orientation:
+        title: Orientation
+        type: string
+        enum:
+          - portrait
+          - landscape
+      debug:
+        title: Debug Mode
+        type: boolean
+      font:
+        title: Font
+        type: string
+        enum:
+          - OpenSans
+          - DroidSerif
+          - Tinos
+          - Ubuntu
+  Amount:
+    title: Estimate total
+    type: object
+    properties:
+      net:
+        title: Net
+        type: string
+        format: decimal
+      gross:
+        title: Gross
+        type: string
+        format: decimal
+      tax:
+        title: Tax
+        type: string
+        format: decimal
+  Proposal:
+    required:
+      - document_date
+      - title
+      - header
+      - footer
+      - show_project_id
+      - add_terms
+      - project
+      - jobs
+    type: object
+    properties:
       created_on:
         title: Created on
         type: string
         format: date-time
         readOnly: true
       document_date:
-        title: Date
+        title: Document date
         type: string
         format: date
       notes:
         title: Notes
         type: string
         x-nullable: true
-      status:
-        title: Status
-        type: string
-        enum:
-          - new
-          - sent
-          - approved
-          - declined
-      letterhead:
-        title: Letterhead
+      id:
+        title: ID
         type: integer
+        readOnly: true
+      title:
+        title: Title
+        type: string
+        minLength: 1
+      billable_contact:
+        $ref: '#/definitions/Contact'
+      header:
+        title: Header
+        type: string
+        minLength: 1
+      footer:
+        title: Footer
+        type: string
+        minLength: 1
+      show_project_id:
+        title: Show project id
+        type: boolean
+      doc_template:
+        title: Doc template
+        description: Document template id
+        type: integer
+      add_terms:
+        title: Add terms
+        type: boolean
+      letterhead:
+        $ref: '#/definitions/Letterhead'
       project:
         title: Project
         type: integer
@@ -4502,6 +4614,19 @@ definitions:
         items:
           type: string
         uniqueItems: true
+      status:
+        title: Status
+        type: string
+        enum:
+          - new
+          - sent
+          - approved
+          - declined
+      estimate_total:
+        $ref: '#/definitions/Amount'
+      json:
+        title: Json
+        type: string
   Refund:
     required:
       - letterhead
