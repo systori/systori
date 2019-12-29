@@ -147,6 +147,7 @@ class TaskSerializer(serializers.ModelSerializer):
     estimate = serializers.DecimalField(
         read_only=True, source="total", max_digits=15, decimal_places=2, required=False
     )
+    code = serializers.CharField(read_only=True, required=False)
 
     class Meta:
         ref_name = "Task"
@@ -160,6 +161,7 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = [
             "pk",
+            "code",
             "name",
             "description",
             "order",
@@ -331,6 +333,7 @@ class GroupSerializer(serializers.ModelSerializer):
     groups = serializers.ListField(child=RecursiveField(), required=False)
     tasks = TaskSerializer(many=True, required=False)
     estimate = serializers.DecimalField(required=False, decimal_places=2, max_digits=15)
+    code = serializers.CharField(read_only=True, required=False)
 
     class Meta:
         ref_name = "Group"
@@ -338,6 +341,7 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = [
             "pk",
             "name",
+            "code",
             "description",
             "order",
             "groups",
@@ -452,11 +456,21 @@ class JobSerializer(serializers.ModelSerializer):
     tasks = TaskSerializer(required=False, many=True)
     order = serializers.IntegerField(required=False)
     estimate = serializers.DecimalField(required=False, decimal_places=2, max_digits=15)
+    code = serializers.CharField(read_only=True, required=False)
 
     class Meta:
         ref_name = "Job"
         model = Job
-        fields = ["pk", "name", "description", "groups", "tasks", "order", "estimate"]
+        fields = [
+            "pk",
+            "name",
+            "code",
+            "description",
+            "groups",
+            "tasks",
+            "order",
+            "estimate",
+        ]
 
     def update(self, job, validated_data):
 
@@ -470,6 +484,7 @@ class JobSerializer(serializers.ModelSerializer):
         return {
             "pk": instance.pk,
             "name": instance.name,
+            "code": instance.code,
             "description": instance.description,
             "groups": [
                 GroupSerializer(instance=group).data for group in instance.groups.all()

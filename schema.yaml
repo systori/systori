@@ -4979,6 +4979,11 @@ definitions:
         title: Pk
         type: integer
         readOnly: true
+      code:
+        title: Code
+        type: string
+        readOnly: true
+        minLength: 1
       name:
         title: Name
         type: string
@@ -5063,6 +5068,11 @@ definitions:
         title: Name
         type: string
         maxLength: 512
+      code:
+        title: Code
+        type: string
+        readOnly: true
+        minLength: 1
       description:
         title: Description
         type: string
@@ -5104,6 +5114,11 @@ definitions:
         title: Name
         type: string
         maxLength: 512
+      code:
+        title: Code
+        type: string
+        readOnly: true
+        minLength: 1
       description:
         title: Description
         type: string

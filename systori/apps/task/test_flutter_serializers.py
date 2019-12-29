@@ -212,6 +212,7 @@ class TaskSerializerTest(ClientTestCase):
             {
                 "pk": task.pk,
                 "name": task.name,
+                "code": task.code,
                 "description": "This is a test task",
                 "order": task.order,
                 "qty": "0.000",
@@ -253,6 +254,7 @@ class TaskSerializerTest(ClientTestCase):
                 {
                     "pk": task.pk,
                     "name": task.name,
+                    "code": task.code,
                     "description": "This is a test task",
                     "order": task.order,
                     "qty": "0.000",
@@ -305,6 +307,7 @@ class TaskSerializerTest(ClientTestCase):
             {
                 "pk": task1.pk,
                 "name": task1.name,
+                "code": task1.code,
                 "description": "This is test task1",
                 "order": task1.order,
                 "qty": "0.000",
@@ -328,6 +331,7 @@ class TaskSerializerTest(ClientTestCase):
             {
                 "pk": task2.pk,
                 "name": task2.name,
+                "code": task2.code,
                 "description": "This is test task2",
                 "order": task2.order,
                 "qty": "0.000",
@@ -378,6 +382,7 @@ class TaskSerializerTest(ClientTestCase):
             {
                 "pk": task.pk,
                 "name": task.name,
+                "code": task.code,
                 "description": "This is a test task",
                 "order": task.order,
                 "qty": "0.000",
@@ -440,6 +445,7 @@ class TaskSerializerTest(ClientTestCase):
             {
                 "pk": task1.pk,
                 "name": task1.name,
+                "code": task1.code,
                 "description": "This is test task1",
                 "order": task1.order,
                 "qty": "0.000",
@@ -463,6 +469,7 @@ class TaskSerializerTest(ClientTestCase):
             {
                 "pk": task2.pk,
                 "name": task2.name,
+                "code": task2.code,
                 "description": "This is test task2",
                 "order": task2.order,
                 "qty": "0.000",
@@ -545,6 +552,7 @@ class GroupSerializerTest(ClientTestCase):
                 "parent": group.parent.pk,
                 "pk": group.pk,
                 "name": "test group",
+                "code": group.code,
                 "description": "desc",
                 "order": group.order,
                 "groups": [],
@@ -579,6 +587,7 @@ class GroupSerializerTest(ClientTestCase):
                     "parent": group.parent.pk,
                     "pk": group.pk,
                     "name": "test group",
+                    "code": group.code,
                     "description": "desc",
                     "order": group.order,
                     "groups": [],
@@ -615,6 +624,7 @@ class GroupSerializerTest(ClientTestCase):
                     "parent": group.parent.pk,
                     "pk": group.pk,
                     "name": "test group",
+                    "code": group.code,
                     "description": "desc",
                     "order": group.order,
                     "groups": [],
@@ -647,6 +657,7 @@ class GroupSerializerTest(ClientTestCase):
                 "parent": group1.parent.pk,
                 "pk": group1.pk,
                 "name": "test group",
+                "code": group1.code,
                 "description": "desc",
                 "order": group1.order,
                 "groups": [],
@@ -663,6 +674,7 @@ class GroupSerializerTest(ClientTestCase):
                 "parent": group2.parent.pk,
                 "pk": group2.pk,
                 "name": "test group",
+                "code": group2.code,
                 "description": "desc",
                 "order": group2.order,
                 "groups": [],
@@ -706,6 +718,7 @@ class GroupSerializerTest(ClientTestCase):
                     "parent": group1.parent.pk,
                     "pk": group1.pk,
                     "name": "test group",
+                    "code": group1.code,
                     "description": "desc",
                     "order": group1.order,
                     "groups": [],
@@ -722,6 +735,7 @@ class GroupSerializerTest(ClientTestCase):
                     "parent": group2.parent.pk,
                     "pk": group2.pk,
                     "name": "test group",
+                    "code": group2.code,
                     "description": "desc",
                     "order": group2.order,
                     "groups": [],
@@ -765,6 +779,7 @@ class GroupSerializerTest(ClientTestCase):
                     "parent": group1.parent.pk,
                     "pk": group1.pk,
                     "name": "test group",
+                    "code": group1.code,
                     "description": "desc",
                     "order": group1.order,
                     "groups": [],
@@ -781,6 +796,7 @@ class GroupSerializerTest(ClientTestCase):
                     "parent": group2.parent.pk,
                     "pk": group2.pk,
                     "name": "test group",
+                    "code": group2.code,
                     "description": "desc",
                     "order": group2.order,
                     "groups": [],
@@ -812,6 +828,7 @@ class GroupSerializerTest(ClientTestCase):
                 "parent": group.parent.pk,
                 "pk": group.pk,
                 "name": "test group",
+                "code": group.code,
                 "description": "desc",
                 "order": group.order,
                 "groups": [serialized_subgroup],
@@ -852,6 +869,7 @@ class GroupSerializerTest(ClientTestCase):
                     "parent": group.parent.pk,
                     "pk": group.pk,
                     "name": "test group",
+                    "code": group.code,
                     "description": "desc",
                     "order": group.order,
                     "groups": [
@@ -860,6 +878,7 @@ class GroupSerializerTest(ClientTestCase):
                             "parent": group.pk,
                             "pk": sub_group.pk,
                             "name": "test group",
+                            "code": sub_group.code,
                             "description": "desc",
                             "order": sub_group.order,
                             "groups": [],
@@ -904,6 +923,7 @@ class GroupSerializerTest(ClientTestCase):
                     "parent": group.parent.pk,
                     "pk": group.pk,
                     "name": "test group",
+                    "code": group.code,
                     "description": "desc",
                     "order": group.order,
                     "groups": [
@@ -912,6 +932,7 @@ class GroupSerializerTest(ClientTestCase):
                             "parent": group.pk,
                             "pk": sub_group.pk,
                             "name": "test group",
+                            "code": sub_group.code,
                             "description": "desc",
                             "order": sub_group.order,
                             "groups": [],
@@ -952,6 +973,7 @@ class GroupSerializerTest(ClientTestCase):
                 "parent": group.parent.pk,
                 "pk": group.pk,
                 "name": "test group",
+                "code": group.code,
                 "description": "desc",
                 "order": group.order,
                 "groups": [serialized_subgroup1, serialized_subgroup2],
@@ -997,6 +1019,7 @@ class GroupSerializerTest(ClientTestCase):
                     "parent": group.parent.pk,
                     "pk": group.pk,
                     "name": "test group",
+                    "code": group.code,
                     "description": "desc",
                     "order": group.order,
                     "groups": [
@@ -1005,6 +1028,7 @@ class GroupSerializerTest(ClientTestCase):
                             "parent": group.pk,
                             "pk": sub_group1.pk,
                             "name": "test group",
+                            "code": sub_group1.code,
                             "description": "desc",
                             "order": sub_group1.order,
                             "groups": [],
@@ -1016,6 +1040,7 @@ class GroupSerializerTest(ClientTestCase):
                             "parent": group.pk,
                             "pk": sub_group2.pk,
                             "name": "test group",
+                            "code": sub_group2.code,
                             "description": "desc",
                             "order": sub_group2.order,
                             "groups": [],
@@ -1066,6 +1091,7 @@ class GroupSerializerTest(ClientTestCase):
                     "parent": group.parent.pk,
                     "pk": group.pk,
                     "name": "test group",
+                    "code": group.code,
                     "description": "desc",
                     "order": group.order,
                     "groups": [
@@ -1074,6 +1100,7 @@ class GroupSerializerTest(ClientTestCase):
                             "parent": group.pk,
                             "pk": sub_group1.pk,
                             "name": "test group",
+                            "code": sub_group1.code,
                             "description": "desc",
                             "order": sub_group1.order,
                             "groups": [],
@@ -1085,6 +1112,7 @@ class GroupSerializerTest(ClientTestCase):
                             "parent": group.pk,
                             "pk": sub_group2.pk,
                             "name": "test group",
+                            "code": sub_group2.code,
                             "description": "desc",
                             "order": sub_group2.order,
                             "groups": [],
@@ -1121,6 +1149,7 @@ class JobSerializerTest(ClientTestCase):
             {
                 "pk": job.id,
                 "name": job.name,
+                "code": job.code,
                 "description": job.description,
                 "groups": [],
                 "tasks": [],
@@ -1142,6 +1171,7 @@ class JobSerializerTest(ClientTestCase):
             {
                 "pk": job1.id,
                 "name": job1.name,
+                "code": job1.code,
                 "description": job1.description,
                 "groups": [],
                 "tasks": [],
@@ -1154,6 +1184,7 @@ class JobSerializerTest(ClientTestCase):
             {
                 "pk": job2.id,
                 "name": job2.name,
+                "code": job2.code,
                 "description": job2.description,
                 "groups": [],
                 "tasks": [],
@@ -1180,6 +1211,7 @@ class JobSerializerTest(ClientTestCase):
                 {
                     "pk": job.id,
                     "name": job.name,
+                    "code": job.code,
                     "description": job.description,
                     "groups": [],
                     "tasks": [serialized_task],
@@ -1214,6 +1246,7 @@ class JobSerializerTest(ClientTestCase):
                 {
                     "pk": job1.id,
                     "name": job1.name,
+                    "code": job1.code,
                     "description": job1.description,
                     "groups": [],
                     "tasks": [serialized_job1_task],
@@ -1227,6 +1260,7 @@ class JobSerializerTest(ClientTestCase):
                 {
                     "pk": job2.id,
                     "name": job2.name,
+                    "code": job2.code,
                     "description": job2.description,
                     "groups": [],
                     "tasks": [serialized_job2_task],
@@ -1254,6 +1288,7 @@ class JobSerializerTest(ClientTestCase):
                 {
                     "pk": job.id,
                     "name": job.name,
+                    "code": job.code,
                     "description": job.description,
                     "groups": [],
                     "tasks": serialized_tasks,
@@ -1288,6 +1323,7 @@ class JobSerializerTest(ClientTestCase):
                 {
                     "pk": job1.id,
                     "name": job1.name,
+                    "code": job1.code,
                     "description": job1.description,
                     "groups": [],
                     "tasks": serialized_job1_tasks,
@@ -1301,6 +1337,7 @@ class JobSerializerTest(ClientTestCase):
                 {
                     "pk": job2.id,
                     "name": job2.name,
+                    "code": job2.code,
                     "description": job2.description,
                     "groups": [],
                     "tasks": serialized_job2_tasks,
@@ -1323,6 +1360,7 @@ class JobSerializerTest(ClientTestCase):
             {
                 "pk": job.id,
                 "name": job.name,
+                "code": job.code,
                 "description": job.description,
                 "groups": [serialized_group],
                 "tasks": [],
@@ -1350,6 +1388,7 @@ class JobSerializerTest(ClientTestCase):
                 {
                     "pk": job.id,
                     "name": job.name,
+                    "code": job.code,
                     "description": job.description,
                     "groups": [
                         {
@@ -1357,6 +1396,7 @@ class JobSerializerTest(ClientTestCase):
                             "parent": group.parent.pk,
                             "pk": group.pk,
                             "name": "test group",
+                            "code": group.code,
                             "description": "desc",
                             "order": group.order,
                             "groups": [],
@@ -1394,6 +1434,7 @@ class JobSerializerTest(ClientTestCase):
                 {
                     "pk": job.id,
                     "name": job.name,
+                    "code": job.code,
                     "description": job.description,
                     "groups": [
                         {
@@ -1401,6 +1442,7 @@ class JobSerializerTest(ClientTestCase):
                             "parent": group.parent.pk,
                             "pk": group.pk,
                             "name": "test group",
+                            "code": group.code,
                             "description": "desc",
                             "order": group.order,
                             "groups": [],
