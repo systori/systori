@@ -4952,6 +4952,11 @@ definitions:
         title: Total equation
         type: string
         maxLength: 512
+      estimate:
+        title: Estimate
+        type: string
+        format: decimal
+        readOnly: true
       is_hidden:
         title: Is hidden
         type: boolean
@@ -5019,6 +5024,11 @@ definitions:
         title: Total equation
         type: string
         maxLength: 512
+      estimate:
+        title: Estimate
+        type: string
+        format: decimal
+        readOnly: true
       variant_group:
         title: Variant group
         type: integer

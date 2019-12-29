@@ -47,6 +47,9 @@ class LineItemSerializer(serializers.ModelSerializer):
         "This is used to identify and correctly update lineitems sent by client "
         "that may not already have a pk",
     )
+    estimate = serializers.DecimalField(
+        read_only=True, source="total", max_digits=15, decimal_places=2, required=False
+    )
 
     class Meta:
         ref_name = "LineItem"
@@ -70,6 +73,7 @@ class LineItemSerializer(serializers.ModelSerializer):
             "price_equation",
             "total",
             "total_equation",
+            "estimate",
             "is_hidden",
             "lineitem_type",
         ]
@@ -140,6 +144,9 @@ class TaskSerializer(serializers.ModelSerializer):
         help_text="This can be a group or job pk",
         read_only=True,
     )
+    estimate = serializers.DecimalField(
+        read_only=True, source="total", max_digits=15, decimal_places=2, required=False
+    )
 
     class Meta:
         ref_name = "Task"
@@ -163,6 +170,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "price_equation",
             "total",
             "total_equation",
+            "estimate",
             "variant_group",
             "variant_serial",
             "is_provisional",
