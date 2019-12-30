@@ -15,16 +15,8 @@ from systori.apps.document.models import (
     Refund,
     Timesheet,
 )
-from systori.lib.accounting.tools import JSONEncoder
+from systori.lib.accounting.tools import JSONEncoder, AmountSerializer
 
-
-class AmountSerializer(serializers.Serializer):
-    net = serializers.DecimalField(max_digits=15, decimal_places=2, required=False)
-    gross = serializers.DecimalField(max_digits=15, decimal_places=2, required=False)
-    tax = serializers.DecimalField(max_digits=15, decimal_places=2, required=False)
-
-    class Meta:
-        fields = ["net", "gross", "tax"]
 
 
 class DocumentSerializer(serializers.ModelSerializer):

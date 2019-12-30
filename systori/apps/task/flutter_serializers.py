@@ -9,6 +9,7 @@ from decimal import Decimal
 from django.db import models
 
 from drf_yasg.inspectors import FieldInspector
+from drf_yasg.utils import swagger_serializer_method
 
 from rest_framework import serializers
 from rest_framework.fields import SkipField
@@ -20,8 +21,10 @@ from rest_framework_recursive.fields import RecursiveField
 
 from systori.apps.main import swagger_field_inspectors
 
-from .models import Group, Job, LineItem, Task
+from systori.apps.task.models import Group, Job, LineItem, Task
 
+from systori.lib.accounting.tools import Amount, AmountSerializer
+from systori.apps.accounting.constants import TAX_RATE
 
 # We want to do a deep merge instead of overriding field schema
 # See: https://github.com/axnsan12/drf-yasg/issues/291
@@ -455,7 +458,7 @@ class JobSerializer(serializers.ModelSerializer):
     groups = GroupSerializer(required=False, many=True)
     tasks = TaskSerializer(required=False, many=True)
     order = serializers.IntegerField(required=False)
-    estimate = serializers.DecimalField(required=False, decimal_places=2, max_digits=15)
+    estimate = serializers.SerializerMethodField(required=False)
     code = serializers.CharField(read_only=True, required=False)
 
     class Meta:
@@ -480,21 +483,38 @@ class JobSerializer(serializers.ModelSerializer):
 
         return job
 
+    @swagger_serializer_method(serializer_or_field=AmountSerializer)
+    def get_estimate(self, job):
+        return AmountSerializer(instance=Amount.from_net(job.estimate, TAX_RATE)).data
+
     def to_representation(self, instance):
-        return {
-            "pk": instance.pk,
-            "name": instance.name,
-            "code": instance.code,
-            "description": instance.description,
-            "groups": [
-                GroupSerializer(instance=group).data for group in instance.groups.all()
-            ],
-            "tasks": [
-                TaskSerializer(instance=task).data for task in instance.tasks.all()
-            ],
-            "order": instance.order,
-            "estimate": self.fields["estimate"].to_representation(instance.estimate),
-        }
+        ret = OrderedDict()
+        fields = self._readable_fields
+        for field in fields:
+
+            try:
+                attribute = field.get_attribute(instance)
+            except SkipField:
+                continue
+
+            # We skip `to_representation` for `None` values so that fields do
+            # not have to explicitly deal with that case.
+            #
+            # For related fields with `use_pk_only_optimization` we need to
+            # resolve the pk value.
+            check_for_none = (
+                attribute.pk if isinstance(attribute, PKOnlyObject) else attribute
+            )
+            if check_for_none is None:
+                ret[field.field_name] = None
+                continue
+
+            if field.field_name in ["groups", "tasks"]:
+                ret[field.field_name] = field.to_representation(attribute.all())
+            else:
+                ret[field.field_name] = field.to_representation(attribute)
+
+        return ret
 
 
 class CloneHeirarchySerializer(serializers.Serializer):

@@ -1,6 +1,7 @@
 from decimal import Decimal
 from decimal import ROUND_HALF_UP
 from jsonfield.encoder import JSONEncoder as BaseJSONEncoder
+from rest_framework import serializers
 
 
 # German tax authorities require rounding up from the half cent.
@@ -122,6 +123,18 @@ class Amount:
         if "_amount_" in value:
             return Amount(**value["_amount_"])
         return value
+
+
+class AmountSerializer(serializers.Serializer):
+    net = serializers.DecimalField(max_digits=15, decimal_places=2, required=False)
+    gross = serializers.DecimalField(max_digits=15, decimal_places=2, required=False)
+    tax = serializers.DecimalField(max_digits=15, decimal_places=2, required=False)
+
+    class Meta:
+        fields = ["net", "gross", "tax"]
+
+    def to_representation(self, instance):
+        return {"_amount_": super().to_representation(instance)}
 
 
 class JSONEncoder(BaseJSONEncoder):
