@@ -133,8 +133,9 @@ class AmountSerializer(serializers.Serializer):
     class Meta:
         fields = ["net", "gross", "tax"]
 
-    def to_representation(self, instance):
-        return {"_amount_": super().to_representation(instance)}
+    # TODO: is this really needed anymore?
+    # def to_representation(self, instance):
+    #     return {"_amount_": super().to_representation(instance)}
 
 
 class JSONEncoder(BaseJSONEncoder):

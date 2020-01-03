@@ -1154,9 +1154,7 @@ class JobSerializerTest(ClientTestCase):
                 "groups": [],
                 "tasks": [],
                 "order": job.order,
-                "estimate": {
-                    "_amount_": {"net": "0.00", "gross": "0.00", "tax": "0.00"}
-                },
+                "estimate": {"net": "0.00", "gross": "0.00", "tax": "0.00"},
             },
             serialized,
         )
@@ -1178,9 +1176,7 @@ class JobSerializerTest(ClientTestCase):
                 "groups": [],
                 "tasks": [],
                 "order": job1.order,
-                "estimate": {
-                    "_amount_": {"net": "0.00", "gross": "0.00", "tax": "0.00"}
-                },
+                "estimate": {"net": "0.00", "gross": "0.00", "tax": "0.00"},
             },
             serialized[0],
         )
@@ -1193,9 +1189,7 @@ class JobSerializerTest(ClientTestCase):
                 "groups": [],
                 "tasks": [],
                 "order": job2.order,
-                "estimate": {
-                    "_amount_": {"net": "0.00", "gross": "0.00", "tax": "0.00"}
-                },
+                "estimate": {"net": "0.00", "gross": "0.00", "tax": "0.00"},
             },
             serialized[1],
         )
@@ -1222,9 +1216,7 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": [serialized_task],
                     "order": job.order,
-                    "estimate": {
-                        "_amount_": {"net": "100.00", "gross": "119.00", "tax": "19.00"}
-                    },
+                    "estimate": {"net": "100.00", "gross": "119.00", "tax": "19.00"},
                 },
                 serialized,
                 f"Failed with single_task_test {task_test}\nJob:{serialized}",
@@ -1259,9 +1251,7 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": [serialized_job1_task],
                     "order": job1.order,
-                    "estimate": {
-                        "_amount_": {"net": "100.00", "gross": "119.00", "tax": "19.00"}
-                    },
+                    "estimate": {"net": "100.00", "gross": "119.00", "tax": "19.00"},
                 },
                 serialized[0],
                 f"Failed with single_task_test {task_test}",
@@ -1275,9 +1265,7 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": [serialized_job2_task],
                     "order": job2.order,
-                    "estimate": {
-                        "_amount_": {"net": "100.00", "gross": "119.00", "tax": "19.00"}
-                    },
+                    "estimate": {"net": "100.00", "gross": "119.00", "tax": "19.00"},
                 },
                 serialized[1],
                 f"Failed with single_task_test {task_test}",
@@ -1305,9 +1293,7 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": serialized_tasks,
                     "order": job.order,
-                    "estimate": {
-                        "_amount_": {"net": "125.00", "gross": "148.75", "tax": "23.75"}
-                    },
+                    "estimate": {"net": "125.00", "gross": "148.75", "tax": "23.75"},
                 },
                 serialized,
                 f"Failed with single_task_test {task_test}\nJob:{serialized}",
@@ -1342,9 +1328,7 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": serialized_job1_tasks,
                     "order": job1.order,
-                    "estimate": {
-                        "_amount_": {"net": "125.00", "gross": "148.75", "tax": "23.75"}
-                    },
+                    "estimate": {"net": "125.00", "gross": "148.75", "tax": "23.75"},
                 },
                 serialized[0],
                 f"Failed with multiple_task_test {task_test}",
@@ -1358,9 +1342,7 @@ class JobSerializerTest(ClientTestCase):
                     "groups": [],
                     "tasks": serialized_job2_tasks,
                     "order": job2.order,
-                    "estimate": {
-                        "_amount_": {"net": "125.00", "gross": "148.75", "tax": "23.75"}
-                    },
+                    "estimate": {"net": "125.00", "gross": "148.75", "tax": "23.75"},
                 },
                 serialized[1],
                 f"Failed with multiple_task_test {task_test}",
@@ -1383,9 +1365,7 @@ class JobSerializerTest(ClientTestCase):
                 "groups": [serialized_group],
                 "tasks": [],
                 "order": job.order,
-                "estimate": {
-                    "_amount_": {"net": "0.00", "gross": "0.00", "tax": "0.00"}
-                },
+                "estimate": {"net": "0.00", "gross": "0.00", "tax": "0.00"},
             },
             serialized,
             f"Job:{serialized}",
@@ -1426,9 +1406,7 @@ class JobSerializerTest(ClientTestCase):
                     ],
                     "tasks": [],
                     "order": job.order,
-                    "estimate": {
-                        "_amount_": {"net": "100.00", "gross": "119.00", "tax": "19.00"}
-                    },
+                    "estimate": {"net": "100.00", "gross": "119.00", "tax": "19.00"},
                 },
                 serialized,
                 f"Failed with single_task_test {task_test}\nJob:{serialized}",
@@ -1474,9 +1452,7 @@ class JobSerializerTest(ClientTestCase):
                     ],
                     "tasks": [],
                     "order": job.order,
-                    "estimate": {
-                        "_amount_": {"net": "125.00", "gross": "148.75", "tax": "23.75"}
-                    },
+                    "estimate": {"net": "125.00", "gross": "148.75", "tax": "23.75"},
                 },
                 serialized,
                 f"Failed with multiple_task_test {task_test}\nJob:{serialized}",

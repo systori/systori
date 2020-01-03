@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 from itertools import chain
 
 from django.conf import settings
@@ -8,7 +9,7 @@ from django.utils.translation import ugettext as _
 from bericht.pdf import PDFStreamer
 from bericht.html import HTMLParser, CSS
 
-from systori.lib.accounting.tools import Amount
+from systori.lib.accounting.tools import Amount, AmountSerializer
 from systori.lib.templatetags.customformatting import money, ubrdecimal
 
 import systori.apps.task.flutter_serializers as flutter
@@ -51,8 +52,16 @@ class ProposalRowIterator(BaseRowIterator):
 
     def get_subtotal_context(self, group, **kwargs):
         total = group["estimate"]
-        if isinstance(group["estimate"], Amount):
-            total = group["estimate"].net
+        if isinstance(total, Amount):
+            total = total.net
+        if isinstance(total, str):
+            total = Decimal(total)
+        if isinstance(total, dict):
+            uses_old_serializer = total.get("_amount_", False)
+            if uses_old_serializer:
+                total = Amount.object_hook(total).net
+            else:
+                total = Amount(**AmountSerializer().to_internal_value(total)).net
         return super().get_subtotal_context(group, total=money(total), **kwargs)
 
 

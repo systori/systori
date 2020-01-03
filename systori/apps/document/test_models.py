@@ -1,21 +1,22 @@
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.translation import activate
+from html5lib import serializer
 
-from ..company.factories import CompanyFactory
-from ..user.factories import UserFactory
-from ..project.factories import ProjectFactory
-from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
-from ..directory.factories import ContactFactory
-
-from ..timetracking.models import Timer
 from systori.lib.accounting.tools import Amount
 
+from ..company.factories import CompanyFactory
+from ..directory.factories import ContactFactory
+from ..project.factories import ProjectFactory
+from ..task.factories import GroupFactory, JobFactory, LineItemFactory, TaskFactory
+from ..timetracking.models import Timer
+from ..user.factories import UserFactory
 from . import type as pdf_type
-from .models import Proposal, Invoice, Timesheet
-from .factories import LetterheadFactory, DocumentTemplateFactory
+from .factories import DocumentTemplateFactory, LetterheadFactory
+from .models import Invoice, Proposal, Timesheet
 
 
 class ProposalTests(TestCase):
@@ -49,6 +50,8 @@ class ProposalTests(TestCase):
         self.assertEquals(["Approve", "Decline"], labels)
 
     def test_serialize(self):
+        # TODO this test doesnt make sense since we now use a proper serializer
+        # See: test_serializers
         proposal = Proposal.objects.create(
             project=self.project, letterhead=self.letterhead
         )
@@ -119,7 +122,7 @@ class ProposalTests(TestCase):
                         ],
                         "tasks": [],
                         "order": 1,
-                        "estimate": "0.00",
+                        "estimate": {"net": "0.00", "gross": "0.00", "tax": "0.00"},
                         "job.id": 1,
                         "is_attached": False,
                     }
