@@ -4455,86 +4455,40 @@ definitions:
         title: Transaction
         type: integer
         x-nullable: true
-  Letterhead:
-    title: Letterhead
+  ProposalJSON:
+    title: Json
+    description: Extra Meta data for this proposal
     required:
-      - name
+      - title
+      - header
+      - footer
     type: object
     properties:
-      id:
-        title: ID
-        type: integer
-        readOnly: true
-      name:
-        title: Name
+      title:
+        title: Title
         type: string
-        maxLength: 512
         minLength: 1
-      letterhead_pdf:
-        title: Letterhead PDF
+      header:
+        title: Header
         type: string
-        readOnly: true
-        format: uri
-      document_unit:
-        title: Document Unit
+        minLength: 1
+      footer:
+        title: Footer
         type: string
-        enum:
-          - mm
-          - cm
-          - inch
-      top_margin:
-        title: Top Margin
-        type: string
-        format: decimal
-      right_margin:
-        title: Right Margin
-        type: string
-        format: decimal
-      bottom_margin:
-        title: Bottom Margin
-        type: string
-        format: decimal
-      left_margin:
-        title: Left Margin
-        type: string
-        format: decimal
-      top_margin_next:
-        title: Top Margin Next
-        type: string
-        format: decimal
-      bottom_margin_next:
-        title: Bottom Margin Next
-        type: string
-        format: decimal
-      document_format:
-        title: Pagesize
-        type: string
-        enum:
-          - A5
-          - A4
-          - A3
-          - LETTER
-          - LEGAL
-          - ELEVENSEVENTEEN
-          - B5
-          - B4
-      orientation:
-        title: Orientation
-        type: string
-        enum:
-          - portrait
-          - landscape
-      debug:
-        title: Debug Mode
+        minLength: 1
+      show_project_id:
+        title: Show project id
         type: boolean
-      font:
-        title: Font
-        type: string
-        enum:
-          - OpenSans
-          - DroidSerif
-          - Tinos
-          - Ubuntu
+        default: false
+      add_terms:
+        title: Add terms
+        type: boolean
+        default: false
+      doc_template:
+        title: Doc template
+        description: Document template id
+        type: integer
+        x-nullable: true
   Amount:
     title: Estimate total
     type: object
@@ -4554,13 +4508,9 @@ definitions:
   Proposal:
     required:
       - document_date
-      - title
-      - header
-      - footer
-      - show_project_id
-      - add_terms
-      - project
+      - project_id
       - jobs
+      - json
     type: object
     properties:
       created_on:
@@ -4580,34 +4530,8 @@ definitions:
         title: ID
         type: integer
         readOnly: true
-      title:
-        title: Title
-        type: string
-        minLength: 1
-      billable_contact:
-        $ref: '#/definitions/Contact'
-      header:
-        title: Header
-        type: string
-        minLength: 1
-      footer:
-        title: Footer
-        type: string
-        minLength: 1
-      show_project_id:
-        title: Show project id
-        type: boolean
-      doc_template:
-        title: Doc template
-        description: Document template id
-        type: integer
-      add_terms:
-        title: Add terms
-        type: boolean
-      letterhead:
-        $ref: '#/definitions/Letterhead'
-      project:
-        title: Project
+      project_id:
+        title: Project id
         type: integer
       jobs:
         type: array
@@ -4622,11 +4546,16 @@ definitions:
           - sent
           - approved
           - declined
+      json:
+        $ref: '#/definitions/ProposalJSON'
+      letterhead:
+        title: Letterhead
+        type: integer
+        readOnly: true
+      billable_contact:
+        $ref: '#/definitions/Contact'
       estimate_total:
         $ref: '#/definitions/Amount'
-      json:
-        title: Json
-        type: string
   Refund:
     required:
       - letterhead
@@ -5259,9 +5188,7 @@ definitions:
         title: Order
         type: integer
       estimate:
-        title: Estimate
-        type: string
-        format: decimal
+        $ref: '#/definitions/Amount'
   CloneHeirarchy:
     required:
       - source
