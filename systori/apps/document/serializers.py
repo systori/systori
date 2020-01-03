@@ -234,9 +234,9 @@ class ProposalSerializer(DocumentSerializer):
     def get_billable_contact(self, proposal):
         contact = None
 
-        if proposal is Proposal:
+        if isinstance(proposal, Proposal):
             contact = self._get_billable_contact_from_project(proposal.project)
-        elif proposal is dict:
+        elif isinstance(proposal, dict):
             contact = self._get_billable_contact_from_project(proposal["project"])
 
         return contact
