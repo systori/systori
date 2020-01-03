@@ -25,6 +25,8 @@ from rest_framework.permissions import IsAuthenticated
 from systori.apps.company.models import Worker
 from systori.apps.main.models import Note
 from systori.apps.main.serializers import NoteSerializer
+from systori.apps.task.models import Job
+import systori.apps.task.flutter_serializers as flutter
 
 from ..user.permissions import HasLaborerAccess
 from .models import Project, DailyPlan
@@ -53,7 +55,7 @@ def get_week_by_day(day):
 class ProjectModelViewSet(ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (HasLaborerAccess,)
     search_fields = None
 
     action_serializers = {"search": QuerySerializer}
@@ -172,6 +174,7 @@ class ProjectModelViewSet(ModelViewSet):
 
         return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
 
+    @swagger_auto_schema(methods=["GET"], responses={200: NoteSerializer()})
     @swagger_auto_schema(
         methods=["PUT", "PATCH"],
         request_body=NoteSerializer,
@@ -179,7 +182,7 @@ class ProjectModelViewSet(ModelViewSet):
     )
     @swagger_auto_schema(method="DELETE", responses={204: "Note deleted successfully"})
     @action(
-        methods=["PUT", "PATCH", "DELETE"],
+        methods=["GET", "PUT", "PATCH", "DELETE"],
         detail=True,
         url_path=r"note/(?P<note_id>\d+)",
     )
@@ -196,12 +199,73 @@ class ProjectModelViewSet(ModelViewSet):
             note.delete()
             return Response(status=HTTP_204_NO_CONTENT)
 
+        if request.method.lower() == "get":
+            return Response(data=NoteSerializer(note).data)
+
         # This is an update request
         is_partial = request.method.lower() == "patch"
         serializer = NoteSerializer(note, data=request.data, partial=is_partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data=serializer.data)
+
+    @swagger_auto_schema(
+        method="GET", responses={200: flutter.JobSerializer(many=True)}
+    )
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.JobSerializer,
+        responses={201: flutter.JobSerializer()},
+    )
+    @action(methods=["GET", "POST"], detail=True)
+    def jobs(self, request, pk=None):
+        project = self.get_object()
+        if request.method.lower() == "get":
+            jobs = Job.objects.filter(project=project)
+            return Response(data=flutter.JobSerializer(jobs, many=True).data)
+
+        if request.method.lower() == "post" and pk:
+            serializer = flutter.JobSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            serializer.save(project=project)
+            return Response(serializer.data, status=HTTP_201_CREATED)
+
+        return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
+
+    @swagger_auto_schema(methods=["GET"], responses={200: flutter.JobSerializer()})
+    @swagger_auto_schema(
+        methods=["PUT", "PATCH"],
+        request_body=flutter.JobSerializer,
+        responses={200: flutter.JobSerializer()},
+    )
+    @swagger_auto_schema(method="DELETE", responses={204: "Job deleted successfully"})
+    @action(
+        methods=["GET", "PUT", "PATCH", "DELETE"],
+        detail=True,
+        url_path=r"job/(?P<job_id>\d+)",
+    )
+    def job(self, request, pk=None, job_id=None):
+        if not (pk or job_id):
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        project = self.get_object()
+        job = Job.objects.get(pk=job_id, project=project)
+
+        if request.method.lower() == "delete":
+            job.delete()
+            return Response(status=HTTP_204_NO_CONTENT)
+
+        if request.method.lower() == "get":
+            return Response(data=flutter.JobSerializer(job).data)
+
+        # This is an update request
+        # We always update jobs partially
+        # is_partial = request.method.lower() == "patch"
+        serializer = flutter.JobSerializer(job, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(project=project)
+        return Response(data=flutter.JobSerializer(job).data)
 
 
 class DailyPlanModelViewSet(ModelViewSet):

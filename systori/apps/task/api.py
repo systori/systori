@@ -1,10 +1,25 @@
 from django.conf.urls import url
+from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
+
+from drf_yasg.utils import swagger_auto_schema
+
 from rest_framework import views, viewsets, mixins
 from rest_framework import response, renderers
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.status import (
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_405_METHOD_NOT_ALLOWED,
+)
+
 from systori.lib.templatetags.customformatting import ubrdecimal
-from .models import Job, Group, Task
-from .serializers import JobSerializer, GroupSerializer, TaskSerializer
+from systori.apps.task.models import Job, Group, Task, LineItem
+from systori.apps.task.serializers import JobSerializer
+import systori.apps.task.flutter_serializers as flutter
+
 from ..user.permissions import HasStaffAccess
 
 
@@ -13,6 +28,7 @@ class EditorAPI(mixins.UpdateModelMixin, viewsets.GenericViewSet):
     serializer_class = JobSerializer
     permission_classes = (HasStaffAccess,)
 
+    @swagger_auto_schema(deprecated=True)
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, partial=True, **kwargs)
 
@@ -132,22 +148,282 @@ class CloneAPI(views.APIView):
         )
 
 
-class JobModelViewSet(viewsets.ModelViewSet):
-    queryset = Job.objects.all()
-    serializer_class = JobSerializer
-    permission_classes = (HasStaffAccess,)
-
-
 class GroupModelViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
-    serializer_class = GroupSerializer
+    serializer_class = flutter.GroupSerializer
     permission_classes = (HasStaffAccess,)
 
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.CloneHeirarchySerializer(),
+        responses={200: flutter.GroupSerializer()},
+        operation_id="task_clone_group",
+    )
+    @action(methods=["POST"], detail=False)
+    def clone(self, request):
+        serializer = flutter.CloneHeirarchySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-class TaskModelViewSet(viewsets.ModelViewSet):
+        position = serializer.validated_data["position"]
+
+        source = get_object_or_404(
+            Group.objects, pk=serializer.validated_data["source"]
+        )
+        target = get_object_or_404(
+            Group.objects, pk=serializer.validated_data["target"]
+        )
+
+        source.clone_to(target, position)
+        # Refresh from db
+        refreshed_source = Group.objects.get(pk=source.pk)
+        return Response(data=flutter.GroupSerializer(instance=refreshed_source).data)
+
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.GroupSearchSerializer,
+        responses={200: flutter.GroupSearchResultSerializer(many=True)},
+        operation_id="task_search_groups",
+    )
+    @action(methods=["POST"], detail=False)
+    def search(self, request):
+        search = flutter.GroupSearchSerializer(data=request.data)
+        search.is_valid(raise_exception=True)
+        terms = search.data["terms"]
+        remaining_depth = search.data["remaining_depth"]
+
+        result = (
+            Group.objects.groups_with_remaining_depth(
+                remaining_depth
+            )  # filter groups valid only for remaining depth
+            .search(terms)  # search
+            .distinct("name", "rank")  # remove possible duplicates
+            .order_by("-rank")  # Order by rank descending
+        )
+
+        return Response(
+            data=flutter.GroupSearchResultSerializer(instance=result, many=True).data
+        )
+
+    @swagger_auto_schema(
+        method="GET", responses={200: flutter.TaskSerializer(many=True)}
+    )
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.TaskSerializer,
+        responses={201: flutter.TaskSerializer()},
+    )
+    @action(methods=["GET", "POST"], detail=True)
+    def tasks(self, request, pk=None):
+        group = self.get_object()
+        if request.method.lower() == "get":
+            return Response(
+                data=flutter.TaskSerializer(group.tasks.all(), many=True).data
+            )
+
+        if request.method.lower() == "post" and pk:
+            serializer = flutter.TaskSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(group=group)
+
+            return Response(serializer.data, status=HTTP_201_CREATED)
+
+        return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
+
+    @swagger_auto_schema(methods=["GET"], responses={200: flutter.TaskSerializer()})
+    @swagger_auto_schema(
+        methods=["PATCH"],
+        request_body=flutter.TaskSerializer,
+        responses={200: flutter.TaskSerializer()},
+    )
+    @swagger_auto_schema(method="DELETE", responses={204: "Task deleted successfully"})
+    @action(
+        methods=["GET", "PATCH", "DELETE"],
+        detail=True,
+        url_path=r"task/(?P<task_id>\d+)",
+    )
+    def task(self, request, pk=None, task_id=None):
+        if not (pk or task_id):
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        group = self.get_object()
+        task = get_object_or_404(group.tasks, pk=task_id)
+
+        if request.method.lower() == "delete":
+            task.delete()
+            return Response(status=HTTP_204_NO_CONTENT)
+
+        if request.method.lower() == "get":
+            return Response(data=flutter.TaskSerializer(task).data)
+
+        # This is an update request
+        # We never update tasks partially
+        # is_partial = request.method.lower() == "patch"
+        serializer = flutter.TaskSerializer(task, request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(group=group)
+        return Response(data=flutter.TaskSerializer(task).data)
+
+    @swagger_auto_schema(
+        method="GET", responses={200: flutter.GroupSerializer(many=True)}
+    )
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.GroupSerializer,
+        responses={201: flutter.GroupSerializer()},
+    )
+    @action(methods=["GET", "POST"], detail=True)
+    def subgroups(self, request, pk=None):
+        group = self.get_object()
+        if request.method.lower() == "get":
+            return Response(
+                data=flutter.GroupSerializer(group.groups.all(), many=True).data
+            )
+
+        if request.method.lower() == "post" and pk:
+            serializer = flutter.GroupSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(parent=group)
+
+            return Response(serializer.data, status=HTTP_201_CREATED)
+
+        return Response(data=request.method, status=HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class JobModelViewSet(viewsets.ModelViewSet):
+    queryset = Job.objects.all()
+    serializer_class = flutter.JobSerializer
+    permission_classes = (HasStaffAccess,)
+
+    @swagger_auto_schema(
+        method="GET", responses={200: flutter.TaskSerializer(many=True)}
+    )
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.TaskSerializer,
+        responses={201: flutter.TaskSerializer()},
+    )
+    @action(methods=["GET", "POST"], detail=True)
+    def tasks(self, request, pk=None):
+        return GroupModelViewSet.tasks(self, request, pk=pk)
+
+    @swagger_auto_schema(methods=["GET"], responses={200: flutter.TaskSerializer()})
+    @swagger_auto_schema(
+        methods=["PATCH"],
+        request_body=flutter.TaskSerializer,
+        responses={200: flutter.TaskSerializer()},
+    )
+    @swagger_auto_schema(method="DELETE", responses={204: "Task deleted successfully"})
+    @action(
+        methods=["GET", "PATCH", "DELETE"],
+        detail=True,
+        url_path=r"task/(?P<task_id>\d+)",
+    )
+    def task(self, request, pk=None, task_id=None):
+        return GroupModelViewSet.task(self, request, pk=pk, task_id=task_id)
+
+    @swagger_auto_schema(
+        method="GET", responses={200: flutter.GroupSerializer(many=True)}
+    )
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.GroupSerializer,
+        responses={201: flutter.GroupSerializer()},
+    )
+    @action(methods=["GET", "POST"], detail=True)
+    def groups(self, request, pk=None):
+        return GroupModelViewSet.subgroups(self, request, pk=pk)
+
+
+class TaskModelViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+    serializer_class = flutter.TaskSerializer
     permission_classes = (HasStaffAccess,)
+
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.CloneHeirarchySerializer(),
+        responses={200: flutter.TaskSerializer()},
+        operation_id="task_clone_task",
+    )
+    @action(methods=["POST"], detail=False)
+    def clone(self, request):
+        serializer = flutter.CloneHeirarchySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        position = serializer.validated_data["position"]
+
+        source = get_object_or_404(Task.objects, pk=serializer.validated_data["source"])
+        target = get_object_or_404(
+            Group.objects, pk=serializer.validated_data["target"]
+        )
+
+        source.clone_to(target, position)
+        # Refresh from db
+        refreshed_source = Task.objects.get(pk=source.pk)
+        return Response(data=flutter.TaskSerializer(instance=refreshed_source).data)
+
+    @swagger_auto_schema(
+        method="POST",
+        request_body=flutter.TaskSearchSerializer,
+        responses={200: flutter.TaskSearchResultSerializer(many=True)},
+        operation_id="task_search_tasks",
+    )
+    @action(methods=["POST"], detail=False)
+    def search(self, request):
+        search = flutter.TaskSearchSerializer(data=request.data)
+        search.is_valid(raise_exception=True)
+        terms = search.data["terms"]
+
+        result = Task.objects.raw(
+            """
+                    SELECT
+                    task_task.id,
+                    COUNT(task_lineitem.id) AS lineItemCount,
+                    ts_headline('german', task_task.description, plainto_tsquery('german'::regconfig, '{terms}')) AS match_description,
+                    ts_headline('german', task_task.name, plainto_tsquery('german'::regconfig, '{terms}')) AS match_name
+                    FROM task_task
+                    JOIN (
+                    SELECT DISTINCT ON (task_task.search) * FROM task_task
+                    ) distinctifier
+                    ON task_task.id = distinctifier.id
+                    LEFT JOIN task_lineitem ON (task_task.id = task_lineitem.task_id)
+                    WHERE task_task.search @@ (plainto_tsquery('german'::regconfig, '{terms}')) = true 
+                    GROUP BY task_task.id
+                    ORDER BY lineItemCount DESC
+                """.format(
+                terms=terms
+            )
+        )
+
+        return Response(
+            data=flutter.TaskSearchResultSerializer(instance=result, many=True).data
+        )
+
+    @swagger_auto_schema(
+        method="GET", responses={200: flutter.LineItemSerializer(many=True)}
+    )
+    @action(methods=["GET"], detail=True)
+    def lineitems(self, request, pk=None):
+        task = self.get_object()
+        return Response(
+            data=flutter.LineItemSerializer(task.lineitems.all(), many=True).data
+        )
+
+    @swagger_auto_schema(
+        methods=["GET"],
+        responses={200: flutter.LineItemSerializer()},
+        operation_id="task_task_lineitem_read",
+    )
+    @action(methods=["GET"], detail=True, url_path=r"lineitem/(?P<lineitem_id>\d+)")
+    def lineitem(self, request, pk=None, lineitem_id=None):
+        if not (pk or lineitem_id):
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        task = self.get_object()
+
+        lineitem = get_object_or_404(task.lineitems, pk=lineitem_id)
+
+        return Response(data=flutter.LineItemSerializer(lineitem).data)
 
 
 urlpatterns = [
