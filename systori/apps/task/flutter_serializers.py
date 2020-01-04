@@ -335,7 +335,9 @@ class GroupSerializer(serializers.ModelSerializer):
     )
     groups = serializers.ListField(child=RecursiveField(), required=False)
     tasks = TaskSerializer(many=True, required=False)
-    estimate = serializers.DecimalField(required=False, decimal_places=2, max_digits=15)
+    estimate = serializers.DecimalField(
+        required=False, decimal_places=2, max_digits=15, read_only=True
+    )
     code = serializers.CharField(read_only=True, required=False)
 
     class Meta:
