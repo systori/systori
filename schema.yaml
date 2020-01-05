@@ -1534,6 +1534,32 @@ paths:
         description: A unique integer value identifying this Proposal.
         required: true
         type: integer
+  /document/proposal/{id}/download_pdf/:
+    post:
+      operationId: document_download_proposal_pdf
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProposalPDFOptions'
+      responses:
+        '200':
+          description: PDF
+          schema:
+            title: PDF
+            type: file
+      produces:
+        - application/pdf
+      tags:
+        - document
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Proposal.
+        required: true
+        type: integer
   /document/refund/:
     get:
       operationId: document_refund_list
@@ -4556,6 +4582,37 @@ definitions:
         $ref: '#/definitions/Contact'
       estimate_total:
         $ref: '#/definitions/Amount'
+  ProposalPDFOptions:
+    required:
+      - format
+    type: object
+    properties:
+      with_lineitems:
+        title: With lineitems
+        description: With linetitems
+        type: boolean
+        default: false
+      only_groups:
+        title: Only groups
+        description: Only include groups
+        type: boolean
+        default: false
+      only_task_names:
+        title: Only task names
+        description: Only include task names
+        type: boolean
+        default: false
+      format:
+        title: Format
+        type: string
+        enum:
+          - Email
+          - Print
+      technical_listing:
+        title: Technical listing
+        description: Whether this is a technical listing
+        type: boolean
+        default: false
   Refund:
     required:
       - letterhead

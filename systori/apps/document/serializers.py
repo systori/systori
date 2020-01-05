@@ -1,4 +1,6 @@
 from django.utils.translation import get_language
+from django.utils.translation import ugettext_lazy as _
+
 import rest_framework.serializers as serializers
 from drf_yasg.utils import swagger_serializer_method
 from rest_framework.serializers import ModelSerializer
@@ -276,6 +278,31 @@ class ProposalSerializer(DocumentSerializer):
         updated.json = json
         updated.save()
         return updated
+
+
+class ProposalPDFOptionsSerializer(serializers.Serializer):
+
+    with_lineitems = serializers.BooleanField(
+        help_text="With linetitems", default=False
+    )
+    only_groups = serializers.BooleanField(
+        help_text="Only include groups", default=False
+    )
+    only_task_names = serializers.BooleanField(
+        help_text="Only include task names", default=False
+    )
+
+    EMAIL = "email"
+    PRINT = "print"
+
+    FORMAT_CHOICES = ((EMAIL, _("Email")), (PRINT, _("Print")))
+    format = serializers.ChoiceField(choices=("Email", "Print"), required=True)
+    technical_listing = serializers.BooleanField(
+        help_text="Whether this is a technical listing", default=False
+    )
+
+    class Meta:
+        fields = "__all__"
 
 
 class PaymentSerializer(ModelSerializer):
