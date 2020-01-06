@@ -300,7 +300,9 @@ class ProposalPDFOptionsSerializer(serializers.Serializer):
     PRINT = "print"
 
     FORMAT_CHOICES = ((EMAIL, _("email")), (PRINT, _("print")))
-    format = serializers.ChoiceField(choices=FORMAT_CHOICES, required=True)
+    format = serializers.ChoiceField(
+        help_text="PDF format to render", choices=FORMAT_CHOICES, required=True
+    )
     technical_listing = serializers.BooleanField(
         help_text="Whether this is a technical listing", default=False
     )
