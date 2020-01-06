@@ -1,6 +1,16 @@
 from django.conf.urls import url
 from ..user.authorization import office_auth, owner_auth
 from .views import *
+from systori.apps.document.api import ProposalModelViewSet
+
+
+def proposal_pdf(request, *args, **kwargs):
+    """
+    Reuse the existing ProposalModelViewSet action
+    """
+
+    return ProposalModelViewSet.as_view({"get": "render_pdf"})(request, *args, **kwargs)
+
 
 urlpatterns = [
     url(
@@ -15,7 +25,7 @@ urlpatterns = [
     ),
     url(
         r"^project-(?P<project_pk>\d+)/proposal-(?P<format>(email|print))-(?P<pk>\d+).pdf$",
-        office_auth(ProposalPDF.as_view()),
+        office_auth(proposal_pdf),
         name="proposal.pdf",
     ),
     url(

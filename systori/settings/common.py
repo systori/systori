@@ -159,6 +159,8 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ),
+    "URL_FORMAT_OVERRIDE": "response_format",
+    "FORMAT_SUFFIX_KWARG": "response_format",
 }
 
 

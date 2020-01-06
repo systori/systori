@@ -1534,16 +1534,49 @@ paths:
         description: A unique integer value identifying this Proposal.
         required: true
         type: integer
-  /document/proposal/{id}/download_pdf/:
-    post:
-      operationId: document_download_proposal_pdf
+  /document/proposal/{id}/render_pdf/:
+    get:
+      operationId: document_render_proposal_pdf
       description: ''
       parameters:
-        - name: data
-          in: body
+        - name: with_lineitems
+          in: query
+          description: With linetitems
+          required: false
+          type: boolean
+          default: false
+        - name: only_groups
+          in: query
+          description: Only include groups
+          required: false
+          type: boolean
+          default: false
+        - name: only_task_names
+          in: query
+          description: Only include task names
+          required: false
+          type: boolean
+          default: false
+        - name: download
+          in: query
+          description: Whether to instruct the client to download instead of viewing
+            inline
+          required: false
+          type: boolean
+          default: true
+        - name: format
+          in: query
           required: true
-          schema:
-            $ref: '#/definitions/ProposalPDFOptions'
+          type: string
+          enum:
+            - email
+            - print
+        - name: technical_listing
+          in: query
+          description: Whether this is a technical listing
+          required: false
+          type: boolean
+          default: false
       responses:
         '200':
           description: PDF
@@ -4582,37 +4615,6 @@ definitions:
         $ref: '#/definitions/Contact'
       estimate_total:
         $ref: '#/definitions/Amount'
-  ProposalPDFOptions:
-    required:
-      - format
-    type: object
-    properties:
-      with_lineitems:
-        title: With lineitems
-        description: With linetitems
-        type: boolean
-        default: false
-      only_groups:
-        title: Only groups
-        description: Only include groups
-        type: boolean
-        default: false
-      only_task_names:
-        title: Only task names
-        description: Only include task names
-        type: boolean
-        default: false
-      format:
-        title: Format
-        type: string
-        enum:
-          - Email
-          - Print
-      technical_listing:
-        title: Technical listing
-        description: Whether this is a technical listing
-        type: boolean
-        default: false
   Refund:
     required:
       - letterhead

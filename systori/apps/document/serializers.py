@@ -291,12 +291,16 @@ class ProposalPDFOptionsSerializer(serializers.Serializer):
     only_task_names = serializers.BooleanField(
         help_text="Only include task names", default=False
     )
+    download = serializers.BooleanField(
+        help_text="Whether to instruct the client to download instead of viewing inline",
+        default=True,
+    )
 
     EMAIL = "email"
     PRINT = "print"
 
-    FORMAT_CHOICES = ((EMAIL, _("Email")), (PRINT, _("Print")))
-    format = serializers.ChoiceField(choices=("Email", "Print"), required=True)
+    FORMAT_CHOICES = ((EMAIL, _("email")), (PRINT, _("print")))
+    format = serializers.ChoiceField(choices=FORMAT_CHOICES, required=True)
     technical_listing = serializers.BooleanField(
         help_text="Whether this is a technical listing", default=False
     )

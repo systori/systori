@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 
 from drf_yasg import openapi
@@ -62,35 +61,41 @@ class ProposalModelViewSet(ModelViewSet):
     permission_classes = (HasStaffAccess,)
 
     @swagger_auto_schema(
-        # method="GET",
-        method="POST",
+        method="GET",
         auto_schema=SwaggerSchema,
-        request_body=ProposalPDFOptionsSerializer,
-        # query_serializer=ProposalPDFOptionsSerializer,
+        query_serializer=ProposalPDFOptionsSerializer,
         responses={200: PDF_RESPONSE},
-        operation_id="document_download_proposal_pdf",
-        # Required for api generator but adding this header produces error:
-        # "Could not satisfy the request Accept header."
+        operation_id="document_render_proposal_pdf",
         produces=["application/pdf"],
     )
-    # Having a GET request would be ideal, but since the query parameters are part of the url
-    # Django never matches urls like download_pdf/?with_lineitem to this method
-    # Also query parameters could be provided in any order. so writing a url_path regex would be a pain
-    # @action(methods=["GET"], detail=True)
-    @action(methods=["POST"], detail=True)
-    def download_pdf(self, request, pk=None):
-        pdf = None
-        serializer = ProposalPDFOptionsSerializer(data=request.data)
-        serializer.is_valid()
+    @action(methods=["get"], detail=True)
+    def render_pdf(self, request, pk=None, *args, **kwargs):
+        query_params = (request.query_params or {}).copy()
+        query_params["format"] = query_params.get(
+            "format", self.kwargs.get("format", None)
+        )
+        serializer = ProposalPDFOptionsSerializer(data=query_params)
+        serializer.is_valid(raise_exception=True)
 
         json = self.get_object().json
         letterhead = self.get_object().letterhead
-        renderer = ProposalRenderer(json, letterhead, **serializer.validated_data)
+        invalid_options = ["download"]
+        options = serializer.validated_data.copy()
+        for invalid_option in invalid_options:
+            options.pop(invalid_option, None)
+        renderer = ProposalRenderer(json, letterhead, **options)
         pdf = renderer.pdf
-        # The drf's Response(pdf, content_type="application/pdf")
-        # Returns result in application/json even though application/pdf is provided
-        # This fails because a PDF cannot be encoded in json
-        return HttpResponse(pdf, content_type="application/pdf")
+
+        response = HttpResponse(pdf, content_type="application/pdf")
+        pdf_format = serializer.validated_data["format"]
+        filename = f"proposal-{pk}-{pdf_format}.pdf".lower()
+        if serializer.validated_data["download"]:
+            content_disposition = "attachment; filename=%s" % filename
+        else:
+            content_disposition = "inline; filename=%s" % filename
+
+        response["Content-Disposition"] = content_disposition
+        return response
 
 
 class PaymentModelViewSet(ModelViewSet):
