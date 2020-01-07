@@ -4594,9 +4594,11 @@ definitions:
         title: Project id
         type: integer
       jobs:
+        description: Attached jobs
         type: array
         items:
-          type: string
+          type: integer
+          description: Attached jobs
         uniqueItems: true
       status:
         title: Status

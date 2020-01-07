@@ -22,6 +22,7 @@ from systori.lib.accounting.tools import AmountSerializer, Amount
 from systori.apps.accounting.constants import TAX_RATE
 from systori.apps.project.models import Project
 from systori.apps.task import flutter_serializers
+from systori.apps.task.models import Job
 
 
 class DocumentSerializer(serializers.ModelSerializer):
@@ -150,6 +151,12 @@ class ProposalSerializer(DocumentSerializer):
     estimate_total = serializers.SerializerMethodField()
 
     billable_contact = serializers.SerializerMethodField()
+    jobs = serializers.PrimaryKeyRelatedField(
+        many=True,
+        help_text="Attached jobs",
+        pk_field=serializers.IntegerField(),
+        queryset=Job.objects.all(),
+    )
 
     class Meta:
         model = Proposal
