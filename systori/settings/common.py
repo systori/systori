@@ -159,6 +159,14 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ),
+    # TODO: https://github.com/encode/django-rest-framework/issues/7116
+    # The following is required to allow ?format in query parameters of endpoints
+    "URL_FORMAT_OVERRIDE": "response_format",
+    # The following is required for allowing "format" in self.kwargs dict
+    # drf-yasg somewhere has "format" kwarg hardcoded
+    # Thid causes it to ignore the actual format and always returns YAML format for schema
+    # Temporarily change it to "format" so that generators can fetch it properly
+    "FORMAT_SUFFIX_KWARG": "response_format",
 }
 
 

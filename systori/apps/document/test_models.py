@@ -1,21 +1,22 @@
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.translation import activate
+from html5lib import serializer
 
-from ..company.factories import CompanyFactory
-from ..user.factories import UserFactory
-from ..project.factories import ProjectFactory
-from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
-from ..directory.factories import ContactFactory
-
-from ..timetracking.models import Timer
 from systori.lib.accounting.tools import Amount
 
+from ..company.factories import CompanyFactory
+from ..directory.factories import ContactFactory
+from ..project.factories import ProjectFactory
+from ..task.factories import GroupFactory, JobFactory, LineItemFactory, TaskFactory
+from ..timetracking.models import Timer
+from ..user.factories import UserFactory
 from . import type as pdf_type
-from .models import Proposal, Invoice, Timesheet
-from .factories import LetterheadFactory, DocumentTemplateFactory
+from .factories import DocumentTemplateFactory, LetterheadFactory
+from .models import Invoice, Proposal, Timesheet
 
 
 class ProposalTests(TestCase):
@@ -49,56 +50,86 @@ class ProposalTests(TestCase):
         self.assertEquals(["Approve", "Decline"], labels)
 
     def test_serialize(self):
+        # TODO this test doesnt make sense since we now use a proper serializer
+        # See: test_serializers
         proposal = Proposal.objects.create(
             project=self.project, letterhead=self.letterhead
         )
         proposal.json = {"jobs": [{"job": self.job}], "add_terms": False}
         pdf_type.proposal.serialize(proposal)
         self.maxDiff = None
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 "add_terms": False,
                 "jobs": [
                     {
-                        "tasks": [],
+                        "pk": 1,
+                        "name": self.job.name,
+                        "code": "01",
+                        "description": "",
                         "groups": [
                             {
-                                "group.id": 2,
-                                "code": "01.01",
+                                "pk": 2,
                                 "name": self.group.name,
+                                "code": "01.01",
                                 "description": "",
-                                "estimate": Decimal("0.0000"),
+                                "order": 1,
                                 "groups": [],
                                 "tasks": [
                                     {
-                                        "task.id": 1,
+                                        "pk": 1,
                                         "code": "01.01.001",
                                         "name": self.task.name,
                                         "description": "",
-                                        "is_provisional": False,
+                                        "order": 1,
+                                        "qty": "0.000",
+                                        "qty_equation": "",
+                                        "unit": "",
+                                        "price": "0.00",
+                                        "price_equation": "",
+                                        "total": "0.00",
+                                        "total_equation": "",
+                                        "estimate": "0.00",
                                         "variant_group": 0,
                                         "variant_serial": 0,
-                                        "qty": Decimal("0.0000"),
-                                        "unit": "",
-                                        "price": Decimal("0.0000"),
-                                        "estimate": Decimal("0.0000"),
+                                        "is_provisional": False,
+                                        "parent": 2,
                                         "lineitems": [
                                             {
-                                                "lineitem.id": 1,
+                                                "pk": 1,
+                                                "token": None,
                                                 "name": self.lineitem.name,
-                                                "price": Decimal("0.0000"),
-                                                "estimate": Decimal("0.0000"),
-                                                "qty": Decimal("0.0000"),
+                                                "order": 1,
+                                                "qty": "0.000",
+                                                "qty_equation": "",
                                                 "unit": "",
+                                                "price": "0.00",
+                                                "price_equation": "",
+                                                "total": "0.00",
+                                                "total_equation": "",
+                                                "estimate": "0.00",
+                                                "is_hidden": False,
+                                                "lineitem_type": "other",
                                             }
                                         ],
                                     }
                                 ],
+                                "parent": 1,
+                                "job": 1,
+                                "estimate": "0.00",
+                                "group.id": 2,
                             }
                         ],
+                        "tasks": [],
+                        "order": 1,
+                        "status": "draft",
+                        "estimate": {"net": "0.00", "gross": "0.00", "tax": "0.00"},
+                        "job.id": 1,
+                        "is_attached": False,
                     }
                 ],
             },
+            proposal.json,
             proposal.json,
         )
 

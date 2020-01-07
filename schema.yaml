@@ -1534,6 +1534,66 @@ paths:
         description: A unique integer value identifying this Proposal.
         required: true
         type: integer
+  /document/proposal/{id}/render_pdf/:
+    get:
+      operationId: document_render_proposal_pdf
+      description: ''
+      parameters:
+        - name: with_lineitems
+          in: query
+          description: With linetitems
+          required: false
+          type: boolean
+          default: false
+        - name: only_groups
+          in: query
+          description: Only include groups
+          required: false
+          type: boolean
+          default: false
+        - name: only_task_names
+          in: query
+          description: Only include task names
+          required: false
+          type: boolean
+          default: false
+        - name: download
+          in: query
+          description: Whether to instruct the client to download instead of viewing
+            inline
+          required: false
+          type: boolean
+          default: true
+        - name: format
+          in: query
+          description: PDF format to render
+          required: true
+          type: string
+          enum:
+            - email
+            - print
+        - name: technical_listing
+          in: query
+          description: Whether this is a technical listing
+          required: false
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: PDF
+          schema:
+            title: PDF
+            type: file
+      produces:
+        - application/pdf
+      tags:
+        - document
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this Proposal.
+        required: true
+        type: integer
   /document/refund/:
     get:
       operationId: document_refund_list
@@ -4455,34 +4515,91 @@ definitions:
         title: Transaction
         type: integer
         x-nullable: true
-  Proposal:
+  ProposalJSON:
+    title: Json
+    description: Extra Meta data for this proposal
     required:
-      - letterhead
-      - project
-      - jobs
+      - title
+      - header
+      - footer
     type: object
     properties:
-      id:
-        title: ID
-        type: integer
-        readOnly: true
-      json:
-        title: Json
+      title:
+        title: Title
         type: string
         minLength: 1
+      header:
+        title: Header
+        type: string
+        minLength: 1
+      footer:
+        title: Footer
+        type: string
+        minLength: 1
+      show_project_id:
+        title: Show project id
+        type: boolean
+        default: false
+      add_terms:
+        title: Add terms
+        type: boolean
+        default: false
+      doc_template:
+        title: Doc template
+        description: Document template id
+        type: integer
+        x-nullable: true
+  Amount:
+    title: Estimate total
+    type: object
+    properties:
+      net:
+        title: Net
+        type: string
+        format: decimal
+      gross:
+        title: Gross
+        type: string
+        format: decimal
+      tax:
+        title: Tax
+        type: string
+        format: decimal
+  Proposal:
+    required:
+      - document_date
+      - project_id
+      - jobs
+      - json
+    type: object
+    properties:
       created_on:
         title: Created on
         type: string
         format: date-time
         readOnly: true
       document_date:
-        title: Date
+        title: Document date
         type: string
         format: date
       notes:
         title: Notes
         type: string
         x-nullable: true
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      project_id:
+        title: Project id
+        type: integer
+      jobs:
+        description: Attached jobs
+        type: array
+        items:
+          type: integer
+          description: Attached jobs
+        uniqueItems: true
       status:
         title: Status
         type: string
@@ -4491,17 +4608,16 @@ definitions:
           - sent
           - approved
           - declined
+      json:
+        $ref: '#/definitions/ProposalJSON'
       letterhead:
         title: Letterhead
         type: integer
-      project:
-        title: Project
-        type: integer
-      jobs:
-        type: array
-        items:
-          type: string
-        uniqueItems: true
+        readOnly: true
+      billable_contact:
+        $ref: '#/definitions/Contact'
+      estimate_total:
+        $ref: '#/definitions/Amount'
   Refund:
     required:
       - letterhead
@@ -4952,6 +5068,11 @@ definitions:
         title: Total equation
         type: string
         maxLength: 512
+      estimate:
+        title: Estimate
+        type: string
+        format: decimal
+        readOnly: true
       is_hidden:
         title: Is hidden
         type: boolean
@@ -4974,6 +5095,11 @@ definitions:
         title: Pk
         type: integer
         readOnly: true
+      code:
+        title: Code
+        type: string
+        readOnly: true
+        minLength: 1
       name:
         title: Name
         type: string
@@ -5019,6 +5145,11 @@ definitions:
         title: Total equation
         type: string
         maxLength: 512
+      estimate:
+        title: Estimate
+        type: string
+        format: decimal
+        readOnly: true
       variant_group:
         title: Variant group
         type: integer
@@ -5053,6 +5184,11 @@ definitions:
         title: Name
         type: string
         maxLength: 512
+      code:
+        title: Code
+        type: string
+        readOnly: true
+        minLength: 1
       description:
         title: Description
         type: string
@@ -5079,6 +5215,11 @@ definitions:
         type: integer
         readOnly: true
         x-nullable: true
+      estimate:
+        title: Estimate
+        type: string
+        format: decimal
+        readOnly: true
   Job:
     type: object
     properties:
@@ -5090,6 +5231,11 @@ definitions:
         title: Name
         type: string
         maxLength: 512
+      code:
+        title: Code
+        type: string
+        readOnly: true
+        minLength: 1
       description:
         title: Description
         type: string
@@ -5104,6 +5250,17 @@ definitions:
       order:
         title: Order
         type: integer
+      estimate:
+        $ref: '#/definitions/Amount'
+      status:
+        title: Status
+        type: string
+        enum:
+          - draft
+          - proposed
+          - approved
+          - started
+          - completed
   CloneHeirarchy:
     required:
       - source

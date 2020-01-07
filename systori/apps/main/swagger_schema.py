@@ -65,3 +65,16 @@ class SwaggerSchema(view.SwaggerAutoSchema):
             if auto_include_parameters
             else manual_parameters
         )
+
+    def get_produces(self):
+        """
+        Returns the MIME type this operation produces. 
+        Allows overriding it using swagger_auto_schema decorator
+        """
+        produces = self.overrides.get("produces", None)
+        if produces:
+            if isinstance(produces, str):
+                return [produces]
+            if isinstance(produces, (list, tuple)):
+                return list(produces)
+        return super().get_produces()

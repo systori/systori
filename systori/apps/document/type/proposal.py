@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 from itertools import chain
 
 from django.conf import settings
@@ -8,8 +9,12 @@ from django.utils.translation import ugettext as _
 from bericht.pdf import PDFStreamer
 from bericht.html import HTMLParser, CSS
 
-from systori.lib.accounting.tools import Amount
+from systori.lib.accounting.tools import Amount, AmountSerializer
 from systori.lib.templatetags.customformatting import money, ubrdecimal
+
+import systori.apps.task.flutter_serializers as flutter
+
+
 from .base import BaseRowIterator, parse_date
 
 
@@ -47,8 +52,16 @@ class ProposalRowIterator(BaseRowIterator):
 
     def get_subtotal_context(self, group, **kwargs):
         total = group["estimate"]
-        if isinstance(group["estimate"], Amount):
-            total = group["estimate"].net
+        if isinstance(total, Amount):
+            total = total.net
+        if isinstance(total, str):
+            total = Decimal(total)
+        if isinstance(total, dict):
+            uses_old_serializer = total.get("_amount_", False)
+            if uses_old_serializer:
+                total = Amount.object_hook(total).net
+            else:
+                total = Amount(**AmountSerializer().to_internal_value(total)).net
         return super().get_subtotal_context(group, total=money(total), **kwargs)
 
 
@@ -165,11 +178,34 @@ def serialize(proposal):
     if proposal.json["add_terms"]:
         pass  # TODO: Calculate the terms.
 
-    for job_data in proposal.json["jobs"]:
-        job_obj = job_data.pop("job")
-        job_data["groups"] = []
-        job_data["tasks"] = []
-        _serialize(job_data, job_obj)
+    if proposal.json["jobs"]:
+        attached_jobs = [
+            job_json["job"].id
+            for job_json in proposal.json["jobs"]
+            if job_json.get("is_attached", None)
+        ]
+
+        serialized_jobs = flutter.JobSerializer(
+            instance=[job_json["job"] for job_json in proposal.json["jobs"]], many=True
+        ).data
+
+        for job in serialized_jobs:
+            job["job.id"] = job["pk"]
+            job["is_attached"] = job["pk"] in attached_jobs
+            for group in job["groups"]:
+                group["group.id"] = group["pk"]
+            for task in job["tasks"]:
+                task["task.id"] = task["pk"]
+
+        # Replacing jobs with properly serialized version
+        proposal.json["jobs"] = serialized_jobs
+
+    # Hand written manual serializer for job/group/task/lineitem
+    # for job_data in proposal.json["jobs"]:
+    #     job_obj = job_data.pop("job")
+    #     job_data["groups"] = []
+    #     job_data["tasks"] = []
+    #     _serialize(job_data, job_obj)
 
 
 def _serialize(data, parent):

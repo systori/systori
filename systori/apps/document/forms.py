@@ -13,7 +13,7 @@ from dateutil.rrule import rrule, MONTHLY
 
 from systori.lib.accounting.tools import Amount
 from systori.lib.fields import DecimalMinuteHoursField
-
+from systori.apps.document.serializers import ProposalSerializer
 from ..accounting.workflow import (
     Account,
     credit_jobs,
@@ -287,7 +287,12 @@ class InvoiceForm(DocumentForm):
     def __init__(self, *args, **kwargs):
 
         try:
-            next_invoice_no_partial = int(re.match(r"(\d*)/(\d*)/(\d*)", Invoice.objects.last().invoice_no)[1])+1
+            next_invoice_no_partial = (
+                int(
+                    re.match(r"(\d*)/(\d*)/(\d*)", Invoice.objects.last().invoice_no)[1]
+                )
+                + 1
+            )
             now = date.today()
             initial_invoice_no = f"{next_invoice_no_partial}/{now.month:02}/{now.year}"
         except:
@@ -1009,16 +1014,23 @@ class ProposalForm(DocumentForm):
     def save(self, commit=True):
 
         proposal = self.instance
-        proposal.json = self.json
+        proposal.json = {}
 
         doc_settings = DocumentSettings.get_for_language(get_language())
         proposal.letterhead = doc_settings.proposal_letterhead
 
-        pdf_type.proposal.serialize(proposal)
+        # pdf_type.proposal.serialize(proposal)
 
         super().save(commit)
 
         proposal.jobs.set(self.formset.get_transaction_rows())
+        if commit:
+            serializer = ProposalSerializer(
+                instance=proposal, data={"json": self.json}, partial=True
+            )
+            serializer.is_valid()
+            proposal.json = serializer.update_json(proposal, serializer.validated_data)
+            proposal.save()
 
 
 class BaseProposalFormSet(BaseDocumentFormSet):
