@@ -1566,6 +1566,7 @@ paths:
           default: true
         - name: format
           in: query
+          description: PDF format to render
           required: true
           type: string
           enum:
