@@ -475,6 +475,7 @@ class JobSerializer(serializers.ModelSerializer):
             "tasks",
             "order",
             "estimate",
+            "status",
         ]
 
     def update(self, job, validated_data):

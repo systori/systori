@@ -122,6 +122,7 @@ class ProposalTests(TestCase):
                         ],
                         "tasks": [],
                         "order": 1,
+                        "status": "draft",
                         "estimate": {"net": "0.00", "gross": "0.00", "tax": "0.00"},
                         "job.id": 1,
                         "is_attached": False,

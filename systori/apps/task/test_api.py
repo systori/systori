@@ -337,6 +337,7 @@ class EditorApiTest(ClientTestCase):
                 "tasks": [
                     {
                         "pk": task.pk,
+                        "code": task.code,
                         "total": 11,
                         "lineitems": [{"pk": lineitem.pk, "total": 22}],
                     }
@@ -522,6 +523,7 @@ class AutocompleteApiTest(ClientTestCase):
             {
                 "source_type": "task",
                 "source_pk": task.pk,
+                "source_code": task.code,
                 "target_pk": job2.pk,
                 "position": 1,
             },
@@ -558,6 +560,7 @@ class TaskApiTest(ClientTestCase):
             json,
             {
                 "pk": job2.tasks.first().pk,
+                "code": job2.tasks.first().code,
                 "name": "Easy Task",
                 "description": "",
                 "order": 1,
@@ -568,6 +571,7 @@ class TaskApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "0.00",
                 "total_equation": "",
+                "estimate": "0.00",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -647,6 +651,7 @@ class TaskApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "19.99",
                 "total_equation": "",
+                "estimate": "19.99",
                 "is_hidden": False,
                 "lineitem_type": "other",
             },
@@ -665,6 +670,7 @@ class TaskApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "19.99",
                 "total_equation": "",
+                "estimate": "19.99",
                 "is_hidden": False,
                 "lineitem_type": "other",
             },
@@ -695,6 +701,7 @@ class TaskApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "19.99",
                 "total_equation": "",
+                "estimate": "19.99",
                 "is_hidden": False,
                 "lineitem_type": "other",
             },
@@ -705,7 +712,13 @@ class GroupApiTest(ClientTestCase):
     def setUp(self):
         super().setUp()
         self.project = ProjectFactory()
+        self.project_with_subgroup = ProjectFactory(structure="01.01.01.001")
+        self.project_with_subsubgroup = ProjectFactory(structure="01.01.01.01.001")
         self.jobsite = JobSiteFactory(project=self.project)
+        self.jobsite_with_subgroup = JobSiteFactory(project=self.project_with_subgroup)
+        self.jobsite_with_subsubgroup = JobSiteFactory(
+            project=self.project_with_subsubgroup
+        )
         self.job = JobFactory(project=self.project, name="this is a test job")
         self.group = GroupFactory(parent=self.job, name="this is a test group")
 
@@ -726,9 +739,11 @@ class GroupApiTest(ClientTestCase):
             json,
             {
                 "pk": job2.groups.first().pk,
+                "code": job2.groups.first().code,
                 "name": "Groupy Group",
                 "description": "",
                 "order": 1,
+                "estimate": "0.00",
                 "groups": [],
                 "tasks": [],
                 "parent": job2.pk,
@@ -773,6 +788,8 @@ class GroupApiTest(ClientTestCase):
         )
 
     def test_list_groups(self):
+        serialized_other_job = flutter.GroupSerializer(instance=self.job).data
+        self.job = JobFactory(project=self.project_with_subgroup)
         group1 = GroupFactory(parent=self.job, name="this is a test group 01")
         subgroup1 = GroupFactory(parent=group1, name="this is a test subgroup 01")
         group2 = GroupFactory(parent=self.job, name="this is a test group 02")
@@ -787,25 +804,25 @@ class GroupApiTest(ClientTestCase):
 
         response = self.client.get("/api/task/group/")
         json = response.json()
-        self.assertDictEqual(
-            json,
-            {
-                "count": 6,
-                "next": None,
-                "previous": None,
-                "results": [
-                    serialized_subgroup2,
-                    serialized_subgroup1,
-                    serialized_group,
-                    serialized_job,
-                    serialized_group1,
-                    serialized_group2,
-                ],
-            },
-            json,
+        self.assertDictContainsSubset(
+            {"count": 7, "next": None, "previous": None}, json, json
         )
+        self.assertEqual(len(json["results"]), 7)
+        expect_groups = [
+            serialized_subgroup2,
+            serialized_subgroup1,
+            serialized_job,
+            serialized_group1,
+            serialized_group,
+            serialized_other_job,
+            serialized_group2,
+        ]
+        for group in expect_groups:
+            self.assertIn(group, expect_groups)
 
     def test_list_groups_with_tasks(self):
+        serialized_other_job = flutter.GroupSerializer(instance=self.job).data
+        self.job = JobFactory(project=self.project_with_subgroup)
         group1 = GroupFactory(parent=self.job, name="this is a test group 01")
         subgroup1 = GroupFactory(parent=group1, name="this is a test subgroup 01")
         group2 = GroupFactory(parent=self.job, name="this is a test group 02")
@@ -862,25 +879,25 @@ class GroupApiTest(ClientTestCase):
         self.assertEqual(response.status_code, HTTP_200_OK)
 
         json = response.json()
-        self.assertDictEqual(
-            json,
-            {
-                "count": 6,
-                "next": None,
-                "previous": None,
-                "results": [
-                    serialized_subgroup2,
-                    serialized_subgroup1,
-                    serialized_group,
-                    serialized_job,
-                    serialized_group1,
-                    serialized_group2,
-                ],
-            },
-            json,
+        self.assertDictContainsSubset(
+            {"count": 7, "next": None, "previous": None}, json, json
         )
+        self.assertEqual(len(json["results"]), 7)
+        expect_groups = [
+            serialized_subgroup2,
+            serialized_subgroup1,
+            serialized_job,
+            serialized_group1,
+            serialized_group,
+            serialized_other_job,
+            serialized_group2,
+        ]
+        for group in expect_groups:
+            self.assertIn(group, expect_groups)
 
     def test_list_subgroups(self):
+        self.job = JobFactory(project=self.project_with_subgroup)
+        self.group = GroupFactory(job=self.job, depth=1)
         subgroup1 = GroupFactory(parent=self.group, name="this is a test subgroup 01")
         subgroup2 = GroupFactory(parent=self.group, name="this is a test subgroup 02")
 
@@ -891,9 +908,11 @@ class GroupApiTest(ClientTestCase):
             json[0],
             {
                 "pk": subgroup1.pk,
+                "code": subgroup1.code,
                 "name": "this is a test subgroup 01",
                 "description": "",
                 "order": 1,
+                "estimate": "0.00",
                 "groups": [],
                 "tasks": [],
                 "parent": self.group.pk,
@@ -905,9 +924,11 @@ class GroupApiTest(ClientTestCase):
             json[1],
             {
                 "pk": subgroup2.pk,
+                "code": subgroup2.code,
                 "name": "this is a test subgroup 02",
                 "description": "",
                 "order": 2,
+                "estimate": "0.00",
                 "groups": [],
                 "tasks": [],
                 "parent": self.group.pk,
@@ -927,6 +948,8 @@ class GroupApiTest(ClientTestCase):
         self.assertDictEqual(json, {"order": ["This field is required."]}, json)
 
     def test_create_subgroup(self):
+        self.job = JobFactory(project=self.project_with_subgroup)
+        self.group = GroupFactory(job=self.job, depth=1)
         response = self.client.post(
             f"/api/task/group/{self.group.pk}/subgroups/",
             {"name": "test subgroup", "order": 5},
@@ -939,10 +962,12 @@ class GroupApiTest(ClientTestCase):
         self.assertDictEqual(
             json,
             {
-                "pk": 3,
+                "pk": 5,
+                "code": f"{self.group.code}.05",
                 "name": "test subgroup",
                 "description": "",
                 "order": 5,
+                "estimate": "0.00",
                 "groups": [],
                 "tasks": [],
                 "parent": self.group.pk,
@@ -967,6 +992,7 @@ class GroupApiTest(ClientTestCase):
             json[0],
             {
                 "pk": task1.pk,
+                "code": task1.code,
                 "name": "task 1",
                 "description": "",
                 "order": 1,
@@ -977,6 +1003,7 @@ class GroupApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "19.99",
                 "total_equation": "",
+                "estimate": "19.99",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -989,6 +1016,7 @@ class GroupApiTest(ClientTestCase):
             json[1],
             {
                 "pk": task2.pk,
+                "code": task2.code,
                 "name": "task 2",
                 "description": "",
                 "order": 2,
@@ -999,6 +1027,7 @@ class GroupApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "19.99",
                 "total_equation": "",
+                "estimate": "19.99",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -1018,6 +1047,7 @@ class GroupApiTest(ClientTestCase):
                 "unit": "h",
                 "price": "25.00",
                 "total": "125.00",
+                "estimate": "125.00",
                 "lineitems": [
                     {
                         "name": "lineitem 1",
@@ -1030,6 +1060,7 @@ class GroupApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "25.00",
                         "total_equation": "",
+                        "estimate": "25.00",
                         "is_hidden": False,
                         "lineitem_type": "other",
                     }
@@ -1044,6 +1075,7 @@ class GroupApiTest(ClientTestCase):
             json,
             {
                 "pk": 1,
+                "code": f"{self.group.code}.006",
                 "name": "task 1",
                 "description": "",
                 "order": 6,
@@ -1054,6 +1086,7 @@ class GroupApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "125.00",
                 "total_equation": "",
+                "estimate": "125.00",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -1071,6 +1104,7 @@ class GroupApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "25.00",
                         "total_equation": "",
+                        "estimate": "25.00",
                         "is_hidden": False,
                         "lineitem_type": "other",
                     }
@@ -1160,6 +1194,7 @@ class GroupApiTest(ClientTestCase):
             json,
             {
                 "pk": 1,
+                "code": f"{self.group.code}.006",
                 "name": "updated name",
                 "description": "",
                 "order": 6,
@@ -1170,6 +1205,7 @@ class GroupApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "125.00",
                 "total_equation": "",
+                "estimate": "125.00",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -1187,6 +1223,7 @@ class GroupApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "25.00",
                         "total_equation": "",
+                        "estimate": "25.00",
                         "is_hidden": False,
                         "lineitem_type": "other",
                     }
@@ -1275,6 +1312,7 @@ class GroupApiTest(ClientTestCase):
             json,
             {
                 "pk": task1.pk,
+                "code": task1.code,
                 "name": "task 1",
                 "description": "",
                 "order": 1,
@@ -1285,6 +1323,7 @@ class GroupApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "19.99",
                 "total_equation": "",
+                "estimate": "19.99",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -1327,11 +1366,13 @@ class JobApiTest(ClientTestCase):
             json[0],
             {
                 "pk": group1.pk,
+                "code": group1.code,
                 "name": "this is a test group 01",
                 "description": "",
                 "order": 1,
                 "groups": [],
                 "tasks": [],
+                "estimate": "0.00",
                 "parent": self.job.pk,
                 "job": self.job.pk,
             },
@@ -1341,11 +1382,13 @@ class JobApiTest(ClientTestCase):
             json[1],
             {
                 "pk": group2.pk,
+                "code": group2.code,
                 "name": "this is a test group 02",
                 "description": "",
                 "order": 2,
                 "groups": [],
                 "tasks": [],
+                "estimate": "0.00",
                 "parent": self.job.pk,
                 "job": self.job.pk,
             },
@@ -1375,11 +1418,13 @@ class JobApiTest(ClientTestCase):
             json,
             {
                 "pk": 2,
+                "code": f"{self.job.code}.05",
                 "name": "test group",
                 "description": "",
                 "order": 5,
                 "groups": [],
                 "tasks": [],
+                "estimate": "0.00",
                 "parent": self.job.pk,
                 "job": self.job.pk,
             },
@@ -1402,6 +1447,7 @@ class JobApiTest(ClientTestCase):
             json[0],
             {
                 "pk": task1.pk,
+                "code": task1.code,
                 "name": "task 1",
                 "description": "",
                 "order": 1,
@@ -1412,6 +1458,7 @@ class JobApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "19.99",
                 "total_equation": "",
+                "estimate": "19.99",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -1424,6 +1471,7 @@ class JobApiTest(ClientTestCase):
             json[1],
             {
                 "pk": task2.pk,
+                "code": task2.code,
                 "name": "task 2",
                 "description": "",
                 "order": 2,
@@ -1434,6 +1482,7 @@ class JobApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "19.99",
                 "total_equation": "",
+                "estimate": "19.99",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -1479,6 +1528,7 @@ class JobApiTest(ClientTestCase):
             json,
             {
                 "pk": 1,
+                "code": f"{self.job.code}.006",
                 "name": "task 1",
                 "description": "",
                 "order": 6,
@@ -1489,6 +1539,7 @@ class JobApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "125.00",
                 "total_equation": "",
+                "estimate": "125.00",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -1506,6 +1557,7 @@ class JobApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "25.00",
                         "total_equation": "",
+                        "estimate": "25.00",
                         "is_hidden": False,
                         "lineitem_type": "other",
                     }
@@ -1573,6 +1625,7 @@ class JobApiTest(ClientTestCase):
             json,
             {
                 "pk": 1,
+                "code": f"{self.job.code}.006",
                 "name": "updated name",
                 "description": "",
                 "order": 6,
@@ -1583,6 +1636,7 @@ class JobApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "125.00",
                 "total_equation": "",
+                "estimate": "125.00",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -1600,6 +1654,7 @@ class JobApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "25.00",
                         "total_equation": "",
+                        "estimate": "25.00",
                         "is_hidden": False,
                         "lineitem_type": "other",
                     }
@@ -1688,6 +1743,7 @@ class JobApiTest(ClientTestCase):
             json,
             {
                 "pk": task1.pk,
+                "code": task1.code,
                 "name": "task 1",
                 "description": "",
                 "order": 1,
@@ -1698,6 +1754,7 @@ class JobApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "19.99",
                 "total_equation": "",
+                "estimate": "19.99",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -1871,6 +1928,7 @@ class JobApiTest(ClientTestCase):
             json,
             {
                 "pk": 1,
+                "code": f"{self.job.code}.006",
                 "name": "task 1",
                 "description": "",
                 "order": 6,
@@ -1881,6 +1939,7 @@ class JobApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "125.00",
                 "total_equation": "",
+                "estimate": "125.00",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -1898,6 +1957,7 @@ class JobApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "25.00",
                         "total_equation": "",
+                        "estimate": "25.00",
                         "is_hidden": False,
                         "lineitem_type": "other",
                     }
@@ -2199,6 +2259,7 @@ class JobApiTest(ClientTestCase):
             json,
             {
                 "pk": 1,
+                "code": f"{self.job.code}.006",
                 "name": "task 1",
                 "description": "",
                 "order": 6,
@@ -2209,6 +2270,7 @@ class JobApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "125.00",
                 "total_equation": "",
+                "estimate": "125.00",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -2226,6 +2288,7 @@ class JobApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "25.00",
                         "total_equation": "",
+                        "estimate": "25.00",
                         "is_hidden": False,
                         "lineitem_type": "other",
                     }
@@ -2327,6 +2390,7 @@ class JobApiTest(ClientTestCase):
             json,
             {
                 "pk": task.pk,
+                "code": f"{self.job.code}.006",
                 "name": "task 1",
                 "description": "",
                 "order": 6,
@@ -2337,6 +2401,7 @@ class JobApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "250.00",
                 "total_equation": "",
+                "estimate": "250.00",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -2354,6 +2419,7 @@ class JobApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "25.00",
                         "total_equation": "",
+                        "estimate": "25.00",
                         "is_hidden": False,
                         "lineitem_type": "other",
                     },
@@ -2369,6 +2435,7 @@ class JobApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "25.00",
                         "total_equation": "",
+                        "estimate": "25.00",
                         "is_hidden": False,
                         "lineitem_type": "other",
                     },
@@ -2444,6 +2511,7 @@ class JobApiTest(ClientTestCase):
             json,
             {
                 "pk": 1,
+                "code": f"{self.job.code}.006",
                 "name": "task 1",
                 "description": "",
                 "order": 6,
@@ -2454,6 +2522,7 @@ class JobApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "125.00",
                 "total_equation": "",
+                "estimate": "125.00",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -2471,6 +2540,7 @@ class JobApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "25.00",
                         "total_equation": "",
+                        "estimate": "25.00",
                         "is_hidden": False,
                         "lineitem_type": "other",
                     }
@@ -2658,6 +2728,7 @@ class JobApiTest(ClientTestCase):
             json,
             {
                 "pk": 1,
+                "code": f"{self.job.code}.006",
                 "name": "task 1",
                 "description": "",
                 "order": 6,
@@ -2668,6 +2739,7 @@ class JobApiTest(ClientTestCase):
                 "price_equation": "",
                 "total": "25.00",
                 "total_equation": "",
+                "estimate": "25.00",
                 "variant_group": 0,
                 "variant_serial": 0,
                 "is_provisional": False,
@@ -2685,6 +2757,7 @@ class JobApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "25.00",
                         "total_equation": "",
+                        "estimate": "25.00",
                         "is_hidden": True,
                         "lineitem_type": "other",
                     },
@@ -2700,6 +2773,7 @@ class JobApiTest(ClientTestCase):
                         "price_equation": "",
                         "total": "5.00",
                         "total_equation": "",
+                        "estimate": "5.00",
                         "is_hidden": False,
                         "lineitem_type": "other",
                     },

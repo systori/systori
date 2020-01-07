@@ -5252,6 +5252,15 @@ definitions:
         type: integer
       estimate:
         $ref: '#/definitions/Amount'
+      status:
+        title: Status
+        type: string
+        enum:
+          - draft
+          - proposed
+          - approved
+          - started
+          - completed
   CloneHeirarchy:
     required:
       - source

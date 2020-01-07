@@ -262,6 +262,7 @@ class ProposalApiTest(ClientTestCase):
                             }
                         ],
                         "order": 1,
+                        "status": "proposed",
                         "estimate": {"net": "5.00", "gross": "5.95", "tax": "0.95"},
                         "is_attached": True,
                         "job.id": 1,
@@ -426,6 +427,7 @@ class ProposalApiTest(ClientTestCase):
                         "order": 1,
                         "estimate": {"net": "5.00", "gross": "5.95", "tax": "0.95"},
                         "is_attached": True,
+                        "status": "proposed",
                         "job.id": 1,
                     }
                 ],
