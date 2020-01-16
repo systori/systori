@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load l10n i18n %}
 
 {% block mainmenu %}{% include "main/mainmenu.html" with section='directory' %}{% endblock %}
 
@@ -26,7 +26,7 @@
     {% for contact in contact_list %}
       <tr>
         <td><a
-            href="{% url 'contact.view' contact.id %}">{{ contact.id }}</a></td>
+            href="{% url 'contact.view' contact.id %}">{{ contact.id|unlocalize }}</a></td>
         <td>{{ contact.last_name }}</td>
         <td>{{ contact.first_name }}</td>
         </td>

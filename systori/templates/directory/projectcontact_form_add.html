@@ -1,5 +1,5 @@
 {% extends "project.html" %}
-{% load i18n %}
+{% load l10n i18n %}
 
 {% block sidebar %}{% include "project/sidebar.html" with section='contacts' %}{% endblock %}
 
@@ -23,7 +23,7 @@
     <tbody class="searchable">
     {% for contact in contact_list %}
       <tr>
-        <td>{{ contact.id }}</td>
+        <td>{{ contact.id|unlocalize }}</td>
         <td><a href="{% url 'contact.view' contact.id %}">
           {{ contact.salutation }} {{ contact.first_name }} {{ contact.last_name }}
         </a></td>
@@ -32,8 +32,8 @@
         </a></td>
         <td>
           <form method="post">{% csrf_token %}
-            <input type="hidden" name="project" value="{{ project.id }}"/>
-            <input type="hidden" name="contact" value="{{ contact.id }}"/>
+            <input type="hidden" name="project" value="{{ project.id|unlocalize }}"/>
+            <input type="hidden" name="contact" value="{{ contact.id|unlocalize }}"/>
             {{ form.association }}
             <button type="submit" class="btn btn-xs btn-primary" value="{% trans 'Add' %}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></button>
           </form>

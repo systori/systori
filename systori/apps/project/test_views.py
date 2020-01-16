@@ -8,6 +8,7 @@ from ..task.factories import JobFactory
 from ..task.models import Job
 from ..company.factories import WorkerFactory
 from ..user.factories import UserFactory
+from ..directory.factories import ContactFactory
 
 from .factories import ProjectFactory, JobSiteFactory, DailyPlanFactory
 from .models import Project, JobSite, TeamMember
@@ -324,3 +325,19 @@ class TestJobSiteViews(ClientTestCase):
         self.assertEqual(
             response.context["total_man_days"], 8
         )  # 8 days of work worth 8 hrs (just the concept)
+
+
+class TestProjectContactViews(ClientTestCase):
+    def setUp(self):
+        super().setUp()
+
+    def test_assign_projectcontact(self):
+        project = Project(pk=1001, name="ProjectName")
+        project.save()
+        contact = ContactFactory()
+        response = self.client.get(reverse("project.contact.add", args=[project.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(
+            b'value="1,001"', response.content
+        )  # 1,001 is l10n version of project.pk
+
