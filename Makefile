@@ -25,3 +25,8 @@ refresh_all:
 	make build_app
 	make build_test
 	make build_dev
+
+first_run:
+	docker volume create --name=systori_postgres_data
+	make refresh_all
+	
