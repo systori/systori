@@ -102,6 +102,7 @@ def vscodegetdb(envname="production"):
     local("dropdb -h db -U postgres systori_local --if-exists")
     local("createdb -h db -U postgres systori_local")
     local("pg_restore -d systori_local -O systori.production.dump -h db -U postgres")
+    local("rm systori.production.dump")
 
 
 def mail():

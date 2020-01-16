@@ -21,10 +21,10 @@ services:
       - "5432:5432"
     volumes:
       - systori_postgres_data:/var/lib/postgresql/data
-  dart:
+  dart1x:
     build:
       context: .
-      dockerfile: .devcontainer/dart/Dockerfile
+      dockerfile: .devcontainer/dart1x/Dockerfile
     volumes:
       - ./systori/dart/:/app:z
       # - /root/.pub-cache/:/root/.pub-cache/:z

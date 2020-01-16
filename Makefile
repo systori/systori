@@ -20,13 +20,19 @@ build_test:
 build_dev:
 	docker build -f .devcontainer/app/dev.Dockerfile --build-arg requirements_file=dev.pip -t hub.docker.com/elmcrest/systori:dev .
 
-refresh_all:
+refresh_containers:
 	make build_base
 	make build_app
 	make build_test
 	make build_dev
 
+
+build_dart1x:
+	docker-compose up -d dart1x
+	docker exec systori_dart1x_1 bash -c "cd app && pub get && pub build"
+
 first_run:
 	docker volume create --name=systori_postgres_data
-	make refresh_all
+	make refresh_containers
+	make build_dart1x
 	
