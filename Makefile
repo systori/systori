@@ -18,7 +18,7 @@ build_test:
 	docker build -f .devcontainer/app/test.Dockerfile --build-arg requirements_file=test.pip -t hub.docker.com/elmcrest/systori:test .
 
 build_dev:
-	docker build -f .devcontainer/app/app.Dockerfile --build-arg requirements_file=dev.pip -t hub.docker.com/elmcrest/systori:dev .
+	docker build -f .devcontainer/app/dev.Dockerfile --build-arg requirements_file=dev.pip -t hub.docker.com/elmcrest/systori:dev .
 
 refresh_all:
 	make build_base
