@@ -1,35 +1,31 @@
-// See https://aka.ms/vscode-remote/devcontainer.json for format details.
+// See https://aka.ms/vscode-remote/devcontainer.json for format details or
+// https://aka.ms/vscode-dev-containers/definitions for sample configurations.
 {
-    "service": "app_local",
-    "dockerComposeFile": [
-        "../docker-compose.yml", "docker-compose.devcontainer.yml",
-    ],
-    /// If SSH is used for git, copy ssh config and keys to the container
-    // "postCreateCommand": "mkdir -p ~/.ssh && cp -r ~/.ssh-localhost/* ~/.ssh && chmod 700 ~/.ssh && chmod 600 ~/.ssh/*",
-    "workspaceFolder": "/app",
-    /// Containers must be manually stopped `docker-compose stop`
-    "shutdownAction": "none",
-    "name": "Systori",
-    "extensions": [
-        /// --- Git extensions ---
-        "eamodio.gitlens",
-
-        /// --- Python Extensions ---
-        "donjayamanne.python-extension-pack",
-        // "brainfit.vscode-importmagic", // Not working in remote-containers
-        "njpwerner.autodocstring",
-        "filwaline.vscode-postfix-python",
-        "pachwenko.django-test-runner",
-
-        /// --- Postgres Extensions ---
-        "mtxr.sqltools",
-
-        /// --- Other utilities ---
-        "42crunch.vscode-openapi" // schema.yaml
-    ],
-    "settings": {
-        /// Default settings for the docker container
-        /// NOTE: .vscode/settings.json has precedence over this
-        "python.pythonPath": "python3",
-    },
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "docker-compose.extend.yml"
+  ],
+  "service": "app",
+  "workspaceFolder": "/app",
+  "extensions": [
+    "ms-python.python",
+    "batisteo.vscode-django",
+    "jhartell.vscode-line-endings",
+    "sauravmanoj.django-template-snippets",
+    "shakram02.bash-beautify",
+    "coolbear.systemd-unit-file"
+  ],
+  "runArgs": [
+    "-u",
+    "vscode"
+  ],
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "python.pythonPath": "/usr/local/bin/python",
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintPath": "/usr/local/bin/pylint",
+    "python.linting.enabled": true
+  },
+  "shutdownAction": "stopCompose",
+  "postCreateCommand": "mkdir -p ~/.ssh && cp -r ~/.ssh-localhost/* ~/.ssh && chmod 700 ~/.ssh && chmod 600 ~/.ssh/*"
 }

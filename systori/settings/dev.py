@@ -35,7 +35,7 @@ if ENABLE_DEBUGTOOLBAR:
 DATABASES["default"].update(
     {
         "NAME": "systori_local",
-        "HOST": "localhost",
+        "HOST": "systori_db_1",
         "USER": "postgres",
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
         "TEST": {"SERIALIZE": False},
@@ -44,4 +44,4 @@ DATABASES["default"].update(
 
 MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, "media"))
 
-SCHEMA_OUTPUT_FILEPATH = "schema.yaml"
+SCHEMA_OUTPUT_FILEPATH = "/app/schema.yaml"

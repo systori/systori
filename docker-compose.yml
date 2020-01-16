@@ -1,80 +1,40 @@
-version: "3"
+version: "3.7"
 services:
-  app_local:
+  app:
     build:
-      context: ./
-      dockerfile: docker/app/Dockerfile
+      context: .
+      dockerfile: .devcontainer/app/dev.Dockerfile
       args:
-        - REQUIREMENTS_FILE=dev.pip
-        - DJANGO_SETTINGS_MODULE=systori.settings.docker_local
-        - PUSHER_APP_ID=$PUSHER_APP_ID
-        - PUSHER_KEY=$PUSHER_KEY
-        - PUSHER_SECRET=$PUSHER_SECRET
+        - requirements_file=dev.pip
     ports:
-      - "$DOCKER_PORT_HOST:$DOCKER_PORT_CONTAINER"
-    environment:
-      PYTHONUNBUFFERED: 1
-      DJANGO_SETTINGS_MODULE: "systori.settings.docker_local"
-      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-      PUSHER_APP_ID: $PUSHER_APP_ID
-      PUSHER_KEY: $PUSHER_KEY
-      PUSHER_SECRET: $PUSHER_SECRET
-    links:
+      - "8000:8000"
+    depends_on:
       - db
-    entrypoint: ["dumb-init", "docker/app/startup.sh"]
-
-  app_sandbox:
-    build:
-      context: ./
-      dockerfile: docker/app/Dockerfile
-      args:
-        - REQUIREMENTS_FILE=app.pip
-        - DJANGO_SETTINGS_MODULE=systori.settings.sandbox
-        - PUSHER_APP_ID=$PUSHER_APP_ID
-        - PUSHER_KEY=$PUSHER_KEY
-        - PUSHER_SECRET=$PUSHER_SECRET
-    image: elmcrest/systori:sandbox
-    ports:
-      - "$DOCKER_SANDBOX_PORT_HOST:$DOCKER_SANDBOX_PORT_CONTAINER"
     environment:
-      PYTHONUNBUFFERED: 1
-      DJANGO_SETTINGS_MODULE: "systori.settings.sandbox"
-      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-      PUSHER_APP_ID: $PUSHER_APP_ID
-      PUSHER_KEY: $PUSHER_KEY
-      PUSHER_SECRET: $PUSHER_SECRET
-    links:
-      - db
-    entrypoint: ["dumb-init", "docker/app/startup.sh"]
-
+      - DJANGO_SETTINGS_MODULE=systori.settings.dev
+    command: "/idle.sh"
   db:
     build:
-      context: ./
-      dockerfile: docker/db/Dockerfile
+      context: .
+      dockerfile: .devcontainer/db/Dockerfile
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-
-  db_test:
-    image: "postgres:9.5"
-    ports:
-      - "5433:5432"
-    environment:
-      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-    command: -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c random_page_cost=1.0
-
+    volumes:
+      - systori_postgres_data:/var/lib/postgresql/data
   dart:
     build:
-      context: ./
-      dockerfile: docker/dart/Dockerfile
+      context: .
+      dockerfile: .devcontainer/dart/Dockerfile
     volumes:
       - ./systori/dart/:/app:z
       # - /root/.pub-cache/:/root/.pub-cache/:z
-      - ./docker:/startup
+      - .devcontainer/app:/startup
     entrypoint: /startup/idle.sh
     command: cd /app && pub get && pub build
     # create if needed /root/.pub-cache and change owner to current user, add in docker settings
     # `pwd`/docker-compose up -d dart
     # docker exec -it `container id` /bin/bash
     # cd app && pub get && pub build
+volumes:
+  systori_postgres_data:
+    external: true

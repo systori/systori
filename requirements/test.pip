@@ -1,6 +1,7 @@
 -r app.pip
 
-codecov
-selenium
+coverage==4.5.4
+selenium==3.141.0
+pyvirtualdisplay==0.2.4
 factory-boy
 freezegun
