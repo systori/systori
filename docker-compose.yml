@@ -13,6 +13,19 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=systori.settings.dev
     command: "/idle.sh"
+  sandbox:
+    build:
+      context: .
+      dockerfile: .devcontainer/app/app.Dockerfile
+      args:
+        - requirements_file=app.pip
+    # ports:
+    #   - "8000:8000"
+    # depends_on:
+    #   - db
+    environment:
+      - DJANGO_SETTINGS_MODULE=systori.settings.sandbox
+    command: "/idle.sh"
   db:
     build:
       context: .

@@ -139,7 +139,7 @@ def deploy_sandbox(build="yes", db="yes"):
     ":build=true and deploy sandbox image"
     local("source .environment")
     if "yes" in build:
-        local("docker-compose build app_sandbox")
+        local("docker-compose build sandbox")
         local("docker push elmcrest/systori:sandbox")
     # switch to metal
     with cd("infrastructure"):
