@@ -1,7 +1,7 @@
 # to build copy and paste
 # docker build -f .\.devcontainer\app\test.Dockerfile --build-arg requirements_file=test.pip -t hub.docker.com/elmcrest/systori:test .
 # docker push hub.docker.com/elmcrest/systori:test
-FROM hub.docker.com/elmcrest/systori:base
+FROM elmcrest/systori:base
 
 ARG requirements_file
 

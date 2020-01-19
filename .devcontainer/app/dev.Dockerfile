@@ -1,4 +1,4 @@
-FROM hub.docker.com/elmcrest/systori:test
+FROM elmcrest/systori:test
 
 ARG requirements_file
 ENV DEBIAN_FRONTEND=noninteractive
