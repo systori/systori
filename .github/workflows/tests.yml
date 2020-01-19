@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: create docker volume for db
+        run: docker volume create --name=systori_postgres_data
       - name: Build and run the db
         run: docker-compose up -d db
       - name: Build and run the app
