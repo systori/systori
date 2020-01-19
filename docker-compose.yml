@@ -45,7 +45,7 @@ services:
     entrypoint: /startup/idle.sh
     command: cd /app && pub get && pub build
     # create if needed /root/.pub-cache and change owner to current user, add in docker settings
-    # `pwd`/docker-compose up -d dart
+    # `pwd`/docker-compose up -d dart1x
     # docker exec -it `container id` /bin/bash
     # cd app && pub get && pub build
 volumes:
