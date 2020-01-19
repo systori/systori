@@ -4,7 +4,7 @@
    :alt: Systori logo
 
 ======================================================
-|codecov| |travis| |python| |codestyle| |style| |chat|
+|codecov| |travis| |python| |codestyle| |style-check| |chat|
 ======================================================
 
 Systori is a suite of tools for craftsmen to create project estimates, to manage those projects, and to generate invoices.
@@ -89,6 +89,6 @@ Systori color palette
 .. |chat| image:: https://img.shields.io/badge/chat-telegram-BBA892.svg
    :target: https://t.me/systori
    :alt: Chat
-.. |style| image: https://github.com/systori/systori/workflows/Style%20check/badge.svg
+.. |style-check| image:: https://github.com/systori/systori/workflows/Style%20check/badge.svg
    :target: https://github.com/systori/systori/workflows/Style%20check/badge.svg
    :alt: Style check
