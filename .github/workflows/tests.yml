@@ -13,13 +13,9 @@ jobs:
         run: docker-compose up -d db
       - name: Build and run the app
         run: docker-compose up -d app
-      # - name: migrate postgres_schema
-      #   run: docker exec systori_app_1 python3 manage.py migrate postgres_schema
-      # - name: migrate company
-      #   run: docker exec systori_app_1 python3 manage.py migrate company
-      # - name: migrate the rest
-      #   run: docker exec systori_app_1 python3 manage.py migrate
       - name: run collectstatic
         run: docker exec systori_app_1 python3 manage.py collectstatic --ignore=*.scss --noinput
       - name: run the tests
-        run: docker exec -e DJANGO_SETTINGS_MODULE=systori.settings.test systori_app_1 python3 manage.py test systori.apps systori.lib
+        run: docker exec -e DJANGO_SETTINGS_MODULE=systori.settings.test systori_app_1 coverage run -p manage.py test systori.apps systori.lib
+      - name: codecov
+        run: coverage combine && codecov
