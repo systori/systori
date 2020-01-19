@@ -9,16 +9,16 @@ define PAPER_ASCIIART
 endef
 
 build_base:
-	docker build -f .devcontainer/app/base.Dockerfile --build-arg requirements_file=base.pip -t hub.docker.com/elmcrest/systori:base .
+	docker build -f .devcontainer/app/base.Dockerfile --build-arg requirements_file=base.pip -t elmcrest/systori:base .
 
 build_app:
-	docker build -f .devcontainer/app/app.Dockerfile --build-arg requirements_file=app.pip -t hub.docker.com/elmcrest/systori:latest .
+	docker build -f .devcontainer/app/app.Dockerfile --build-arg requirements_file=app.pip -t elmcrest/systori:latest .
 
 build_test:
-	docker build -f .devcontainer/app/test.Dockerfile --build-arg requirements_file=test.pip -t hub.docker.com/elmcrest/systori:test .
+	docker build -f .devcontainer/app/test.Dockerfile --build-arg requirements_file=test.pip -t elmcrest/systori:test .
 
 build_dev:
-	docker build -f .devcontainer/app/dev.Dockerfile --build-arg requirements_file=dev.pip -t hub.docker.com/elmcrest/systori:dev .
+	docker build -f .devcontainer/app/dev.Dockerfile --build-arg requirements_file=dev.pip -t elmcrest/systori:dev .
 
 refresh_containers:
 	make build_base
@@ -26,6 +26,11 @@ refresh_containers:
 	make build_test
 	make build_dev
 
+push_containers:
+    push elmcrest/systori:base
+	push elmcrest/systori:app
+	push elmcrest/systori:test
+	push elmcrest/systori:dev
 
 build_dart1x:
 	docker-compose up -d dart1x
