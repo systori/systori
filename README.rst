@@ -90,4 +90,5 @@ Systori color palette
    :target: https://t.me/systori
    :alt: Chat
 .. |style| image: https://github.com/systori/systori/workflows/Style%20check/badge.svg
+   :target: https://github.com/systori/systori/workflows/Style%20check/badge.svg
    :alt: Style check
