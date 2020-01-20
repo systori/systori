@@ -20,3 +20,7 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           DJANGO_SETTINGS_MODULE: systori.settings.test
+      - name: deploy to sandbox
+        run: ssh -i $DEPLOY_KEY github@metal.systorigin.de "cd /home/elmcrest/infrastructure && make deploy_sandbox"
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
