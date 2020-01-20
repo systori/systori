@@ -16,7 +16,7 @@ jobs:
       - name: run collectstatic
         run: docker exec systori_app_1 python3 manage.py collectstatic --ignore=*.scss --noinput
       - name: run the tests
-        run: docker exec systori_app_1 bash -c "coverage run -p manage.py test systori.apps systori.lib && coverage combine && codecov"
+        run: docker exec -e DJANGO_SETTINGS_MODULE systori_app_1 bash -c "coverage run -p manage.py test systori.apps systori.lib && coverage combine && codecov"
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           DJANGO_SETTINGS_MODULE: systori.settings.test
