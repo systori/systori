@@ -25,6 +25,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan metal.systorigin.de >> ~/.ssh/known_hosts
           echo $DEPLOY_KEY > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
           ssh -i ~/.ssh/id_ed25519 github@metal.systorigin.de "cd /home/elmcrest/infrastructure && make deploy_sandbox"
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
