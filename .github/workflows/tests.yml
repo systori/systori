@@ -7,32 +7,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      # - name: create docker volume for db
-      #   run: docker volume create --name=systori_postgres_data
-      # - name: Build and run the db
-      #   run: docker-compose up -d db
-      # - name: Build and run the app
-      #   run: docker-compose up -d app
-      # - name: run collectstatic
-      #   run: docker exec systori_app_1 python3 manage.py collectstatic --ignore=*.scss --noinput
-      # - name: run the tests
-      #   run: docker exec -e DJANGO_SETTINGS_MODULE -e CODECOV_TOKEN systori_app_1 bash -c "coverage run -p manage.py test systori.apps systori.lib && coverage combine && codecov"
-      #   env:
-      #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      #     DJANGO_SETTINGS_MODULE: systori.settings.test
-      # - name: deploy to sandbox
-      #   run: |
-      #     mkdir -p ~/.ssh
-      #     ssh-keyscan metal.systorigin.de >> ~/.ssh/known_hosts
-      #     echo $DEPLOY_KEY > ~/.ssh/id_ed25519
-      #     chmod 600 ~/.ssh/id_ed25519
-      #     ssh -i ~/.ssh/id_ed25519 github@metal.systorigin.de "cd /home/elmcrest/infrastructure && make deploy_sandbox"
-      #   env:
-      #     DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-      - name: debug ssh
+      - name: create docker volume for db
+        run: docker volume create --name=systori_postgres_data
+      - name: Build and run the db
+        run: docker-compose up -d db
+      - name: Build and run the app
+        run: docker-compose up -d app
+      - name: run collectstatic
+        run: docker exec systori_app_1 python3 manage.py collectstatic --ignore=*.scss --noinput
+      - name: run the tests
+        run: docker exec -e DJANGO_SETTINGS_MODULE -e CODECOV_TOKEN systori_app_1 bash -c "coverage run -p manage.py test systori.apps systori.lib && coverage combine && codecov"
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          DJANGO_SETTINGS_MODULE: systori.settings.test
+      - name: deploy to sandbox
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan metal.systorigin.de >> ~/.ssh/known_hosts
           echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh -i ~/.ssh/id_ed25519 github@metal.systorigin.de "touch it_worked.txt"
+          ssh -i ~/.ssh/id_ed25519 github@metal.systorigin.de "cd /home/elmcrest/infrastructure && make deploy_sandbox"
