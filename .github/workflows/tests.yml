@@ -35,4 +35,4 @@ jobs:
           ssh-keyscan metal.systorigin.de >> ~/.ssh/known_hosts
           echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh -i ~/.ssh/id_ed25519 github@metal.systorigin.de ls
+          ssh -i ~/.ssh/id_ed25519 github@metal.systorigin.de "touch it_worked.txt"
