@@ -261,3 +261,6 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 SWAGGER_SETTINGS = {"DEFAULT_INFO": "systori.urls.systori_info"}
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000  # default: 1000
+
