@@ -34,6 +34,7 @@ jobs:
 
       - name: build and push app container
         run: |
+          make build_dart1x
           docker build -f .devcontainer/app/app.Dockerfile --build-arg requirements_file=app.pip -t docker.pkg.github.com/systori/systori/app:latest .
           docker push docker.pkg.github.com/systori/systori/app:latest
 
