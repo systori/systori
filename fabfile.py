@@ -135,16 +135,17 @@ def refresh_sandbox_db():
     run(f"docker exec {db_container} rm {dump_file}")
 
 
-def deploy_sandbox(build="yes", db="yes"):
+def deploy_sandbox(build="yes", db_name="yes"):
     ":build=true and deploy sandbox image"
-    local("source .environment")
+    # local("source .environment")
     if "yes" in build:
         local("docker-compose build sandbox")
         local("docker push elmcrest/systori:sandbox")
     # switch to metal
     with cd("infrastructure"):
         run("docker-compose stop sandbox")
-        if "yes" in db:
+        run("docker-compose pull sandbox")
+        if "yes" in db_name:
             refresh_sandbox_db()
         if "yes" in build:
             run("docker-compose pull sandbox")

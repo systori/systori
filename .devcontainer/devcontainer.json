@@ -24,6 +24,7 @@
     "python.pythonPath": "/usr/local/bin/python",
     "python.linting.pylintEnabled": true,
     "python.linting.pylintPath": "/usr/local/bin/pylint",
+    "python.linting.pylintArgs": ["--load-plugins", "pylint_django", "--disable=C0111,C0114,C0115,C0116"],
     "python.linting.enabled": true
   },
   "shutdownAction": "stopCompose",

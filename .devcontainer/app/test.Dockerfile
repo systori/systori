@@ -1,7 +1,7 @@
 # to build copy and paste
 # docker build -f .\.devcontainer\app\test.Dockerfile --build-arg requirements_file=test.pip -t hub.docker.com/elmcrest/systori:test .
 # docker push hub.docker.com/elmcrest/systori:test
-FROM elmcrest/systori:base
+FROM docker.pkg.github.com/systori/systori/base:latest
 
 ARG requirements_file
 
@@ -26,6 +26,8 @@ RUN apt-get update \
     curl \
     unzip \
     wget \
+    ssh \
+    postgresql-client-11 \
     xvfb \
     x11-utils \
     && GECKODRIVER_VERSION=`curl https://github.com/mozilla/geckodriver/releases/latest | grep -Po 'v[0-9]+.[0-9]+.[0-9]+'` \

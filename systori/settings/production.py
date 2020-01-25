@@ -19,4 +19,3 @@ RAVEN_CONFIG = {
     "dsn": "https://11c0341ce6d74de7968932986090227d:406344d994aa4524818e99d45cf8d44b@sentry.systorigin.de/1"
 }
 
-STATIC_ROOT = os.path.normpath(os.path.join(ROOT_DIR, "systori_static"))

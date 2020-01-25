@@ -60,7 +60,7 @@ urlpatterns = [
 urlpatterns += staticfiles_urlpatterns()
 
 
-if settings.DEBUG:
+if settings.ENABLE_DEBUGTOOLBAR and settings.DEV_MODE:
     import debug_toolbar
 
     urlpatterns = [url(r"^__debug__/", include(debug_toolbar.urls))] + urlpatterns

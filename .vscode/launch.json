@@ -40,7 +40,7 @@
             ],
             "django": true,
             "env": {
-                "DJANGO_SETTINGS_MODULE": "systori.settings.test",
+                "DJANGO_SETTINGS_MODULE": "systori.settings.dev",
                 "DJANGO_SECRET_KEY": "123213",
                 "COMPOSE_CONVERT_WINDOWS_PATHS": "1",
                 "PUSHER_APP_ID": "715946",
@@ -63,7 +63,7 @@
             ],
             "django": true,
             "env": {
-                "DJANGO_SETTINGS_MODULE": "systori.settings.test",
+                "DJANGO_SETTINGS_MODULE": "systori.settings.dev",
                 "DJANGO_SECRET_KEY": "123213",
                 "COMPOSE_CONVERT_WINDOWS_PATHS": "1",
                 "PUSHER_APP_ID": "715946",

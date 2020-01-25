@@ -1,4 +1,4 @@
-FROM elmcrest/systori:test
+FROM docker.pkg.github.com/systori/systori/dev_base:latest
 
 ARG requirements_file
 ENV DEBIAN_FRONTEND=noninteractive
@@ -11,7 +11,6 @@ RUN mv /app/.devcontainer/app/idle.sh / \
     && python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements/$requirements_file \
     && apt-get update \
     && apt-get install --no-install-recommends -y \
-    ssh postgresql-client-11 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

@@ -6,20 +6,33 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - uses: 
       - uses: actions/checkout@v2
+
       - name: create docker volume for db
         run: docker volume create --name=systori_postgres_data
+
       - name: Build and run the db
         run: docker-compose up -d db
-      - name: Build and run the app
+
+      - name: Build and run the app (dev container)
         run: docker-compose up -d app
+
       - name: run collectstatic
         run: docker exec systori_app_1 python3 manage.py collectstatic --ignore=*.scss --noinput
+
       - name: run the tests
         run: docker exec -e DJANGO_SETTINGS_MODULE -e CODECOV_TOKEN systori_app_1 bash -c "coverage run -p manage.py test systori.apps systori.lib && coverage combine && codecov"
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           DJANGO_SETTINGS_MODULE: systori.settings.test
+
+      - name: build and push app container
+        run: |
+          docker login docker.pkg.github.com --password ${{ secrets.GITHUB_DOCKER_TOKEN }}
+          docker build -f .devcontainer/app/app.Dockerfile --build-arg requirements_file=app.pip -t docker.pkg.github.com/systori/systori/app:latest .
+          docker push docker.pkg.github.com/systori/systori/app:latest
+
       - name: deploy to sandbox
         run: |
           mkdir -p ~/.ssh

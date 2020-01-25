@@ -9,40 +9,44 @@ define PAPER_ASCIIART
 endef
 
 build_base:
-	docker build -f .devcontainer/app/base.Dockerfile --build-arg requirements_file=base.pip -t elmcrest/systori:base .
+	docker build -f .devcontainer/app/base.Dockerfile --build-arg requirements_file=base.pip -t docker.pkg.github.com/systori/systori/base:latest .
 
 push_base:
-	docker push elmcrest/systori:base
+	docker push docker.pkg.github.com/systori/systori/base:latest
 
 build_app:
-	docker build -f .devcontainer/app/app.Dockerfile --build-arg requirements_file=app.pip -t elmcrest/systori:latest .
+	docker build -f .devcontainer/app/app.Dockerfile --build-arg requirements_file=app.pip -t docker.pkg.github.com/systori/systori/app:latest .
 
 push_app:
-	docker push elmcrest/systori:latest
+	docker push docker.pkg.github.com/systori/systori/app:latest
 
-build_test:
-	docker build -f .devcontainer/app/test.Dockerfile --build-arg requirements_file=test.pip -t elmcrest/systori:test .
+build_dev_base:
+	docker build -f .devcontainer/app/test.Dockerfile --build-arg requirements_file=test.pip -t docker.pkg.github.com/systori/systori/dev_base:latest .
 
-push_test:
-	docker push elmcrest/systori:test
+push_dev_base:
+	docker push docker.pkg.github.com/systori/systori/dev_base:latest
 
 build_dev:
-	docker build -f .devcontainer/app/dev.Dockerfile --build-arg requirements_file=dev.pip -t elmcrest/systori:dev .
+	docker build -f .devcontainer/app/dev.Dockerfile --build-arg requirements_file=dev.pip -t docker.pkg.github.com/systori/systori/dev:latest .
 
 push_dev:
-	docker push elmcrest/systori:dev
+	docker push docker.pkg.github.com/systori/systori/dev:latest
 
 refresh_containers:
 	make build_base
 	make build_app
-	make build_test
+	make build_dev_base
 	make build_dev
 
 push_containers:
 	make push_base
 	make push_app
-	make push_test
+	make push_dev_base
 	make push_dev
+
+refresh_and_push_containers:
+	make refresh_containers
+	make push_containers
 
 build_dart1x:
 	docker-compose up -d dart1x

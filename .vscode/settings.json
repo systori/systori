@@ -22,13 +22,10 @@
         "editor.formatOnType": true,
         "editor.defaultFormatter": "ms-python.python",
     },
-    "python.linting.enabled": true,
-    "python.linting.pycodestyleEnabled": false,
     "python.linting.pylintEnabled": true,
-    "python.linting.pylintArgs": [
-        "--load-plugins",
-        "pylint_django"
-    ],
+    "python.linting.pylintPath": "/usr/local/bin/pylint",
+    "python.linting.pylintArgs": ["--load-plugins", "pylint_django", "--disable=C0111,C0114,C0115,C0116"],
+    "python.linting.enabled": true,
     "python.pythonPath": "/usr/local/bin/python",
     "shellformat.effectLanguages": [
         "shellscript",

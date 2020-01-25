@@ -1,5 +1,5 @@
-from systori.settings.common import *
 import os
+from systori.settings.common import *
 
 SERVER_NAME = "systori.localhost"
 SESSION_COOKIE_DOMAIN = "." + SERVER_NAME
@@ -11,8 +11,10 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 DEBUG = True
 ENABLE_DEBUGTOOLBAR = True
+TESTING_MODE = "test" in sys.argv
+DEV_MODE = DEBUG and not TESTING_MODE
 
-if ENABLE_DEBUGTOOLBAR:
+if ENABLE_DEBUGTOOLBAR and DEV_MODE:
     INSTALLED_APPS += ("debug_toolbar",)
     MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
     DEBUG_TOOLBAR_PANELS = (
