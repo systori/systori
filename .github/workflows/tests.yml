@@ -6,7 +6,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: 
       - uses: actions/checkout@v2
 
       - name: create docker volume for db
