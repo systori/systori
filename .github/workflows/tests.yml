@@ -8,8 +8,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
     
-      - name: docker login
-        run: docker login docker.pkg.github.com --password ${{ secrets.GITHUB_DOCKER_TOKEN }}
+      - name: Login to GitHub Docker Registry
+        run: docker login docker.pkg.github.com --username $DOCKER_USERNAME --password $DOCKER_TOKEN
+        env:
+          DOCKER_USERNAME: ${{ secrets.GITHUB_DOCKER_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.GITHUB_DOCKER_TOKEN }}
 
       - name: create docker volume for db
         run: docker volume create --name=systori_postgres_data
