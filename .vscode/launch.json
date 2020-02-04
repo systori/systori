@@ -49,6 +49,27 @@
             },
         },
         {
+            "name": "test DocumentTemplateTests",
+            "type": "python",
+            "request": "launch",
+            "pythonPath": "/usr/local/bin/python",
+            "program": "${workspaceFolder}/manage.py",
+            "console": "integratedTerminal",
+            "args": [
+                "test",
+                "systori.apps.document.test_models.DocumentTemplateTests",
+            ],
+            "django": true,
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "systori.settings.dev",
+                "DJANGO_SECRET_KEY": "123213",
+                "COMPOSE_CONVERT_WINDOWS_PATHS": "1",
+                "PUSHER_APP_ID": "715946",
+                "PUSHED_KEY": "0422072ab493a5813ee0",
+                "PUSHER_SECRET": "abee022083132b5a57ef",
+            },
+        },
+        {
             "name": "test systori (collectstatic)",
             "type": "python",
             "request": "launch",

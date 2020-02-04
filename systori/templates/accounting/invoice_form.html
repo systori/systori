@@ -134,7 +134,7 @@
             //    "documenttemplate-for-project",
             //    kwargs={"pk": doc.pk, "project_pk": self.project.pk},
             // )
-          url: "/api/document/documenttemplate/"+templateid+"/project-{{ project.pk }}/",
+          url: "/api/document/documenttemplate/"+templateid+"/project-{{ project.pk|unlocalize }}/",
           async: false
         }).done(function (template) {
           $('[name="header"]').val(template['header']);

@@ -433,6 +433,11 @@ class SampleContact:
 class SampleProjectContact:
     contact = SampleContact
 
+class SampleProjectJobsite:
+    name = _("Jobsite")
+    address = _("Examplestreet No 2")
+    postal_code = 12345
+    city = _("Examplecity")
 
 class DocumentTemplate(models.Model):
     name = models.CharField(_("Name"), max_length=512)
@@ -458,7 +463,8 @@ class DocumentTemplate(models.Model):
             project_contact.contact.first_name,
             project_contact.contact.last_name,
         )
-
+        jobsite = project.jobsites.first() if project else SampleProjectJobsite
+        jobsite_address = f"{jobsite.name} ({jobsite.address}, {jobsite.postal_code} {jobsite.city})"
         date_now = localtime(now()).date()
         return OrderedDict(
             [
@@ -469,6 +475,7 @@ class DocumentTemplate(models.Model):
                 (_("today"), date_format(date_now, use_l10n=True)),
                 (_("today +14"), date_format(date_now + timedelta(14), use_l10n=True)),
                 (_("today +21"), date_format(date_now + timedelta(21), use_l10n=True)),
+                (_("jobsite"), jobsite_address)
             ]
         )
 

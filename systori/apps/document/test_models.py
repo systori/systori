@@ -1,12 +1,13 @@
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.test import TestCase
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.translation import activate
 
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
-from ..project.factories import ProjectFactory
+from ..project.factories import ProjectFactory, JobSiteFactory
 from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from ..directory.factories import ContactFactory
 
@@ -185,6 +186,7 @@ class DocumentTemplateTests(TestCase):
     def setUp(self):
         CompanyFactory()
         self.project = ProjectFactory()
+        self.jobsite = JobSiteFactory(project=self.project)
         ContactFactory(
             first_name="Ludwig",
             last_name="von Mises",
@@ -224,6 +226,30 @@ class DocumentTemplateTests(TestCase):
         self.assertEqual("Dear Smith", r["header"])
         self.assertEqual("Thanks John!", r["footer"])
 
+    def test_render_all_available_english_tpl(self):
+        activate("en")
+        d = DocumentTemplateFactory(
+            header="Dear [salutation] [firstname] [lastname] [name]",
+            footer="Bye [today] [today +14] [today +21] [jobsite] !",
+            document_type="invoice",
+        )
+        r = d.render()
+        self.assertEqual("Dear Mr John Smith Mr John Smith", r["header"])
+        today = datetime.today()
+        self.assertEqual(f"Bye {date_format(today)} {date_format(today+timedelta(14))} {date_format(today+timedelta(21))} Jobsite (Examplestreet No 2, 12345 Examplecity) !", r["footer"])
+
+    def test_render_all_available_german_tpl(self):
+        activate("de")
+        self.project = None
+        d = DocumentTemplateFactory(
+            header="Dear [Anrede] [Vorname] [Nachname] [Name]",
+            footer="Bye [heute] [heute +14] [heute +21] [Einsatzort] !",
+            document_type="invoice",
+        )
+        r = d.render()
+        self.assertEqual("Dear Herr Max Mustermann Herr Max Mustermann", r["header"])
+        today = datetime.today()
+        self.assertEqual(f"Bye {date_format(today)} {date_format(today+timedelta(14))} {date_format(today+timedelta(21))} Baustelle (Musterstraße 2, 12345 Musterstadt) !", r["footer"])
 
 class TimesheetTests(TestCase):
     def setUp(self):
