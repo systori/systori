@@ -463,7 +463,7 @@ class DocumentTemplate(models.Model):
             project_contact.contact.first_name,
             project_contact.contact.last_name,
         )
-        jobsite = project.jobsites.first() if project else SampleProjectJobsite
+        jobsite = project.jobsites.first() if (project and project.jobsites.first()) else SampleProjectJobsite
         jobsite_address = f"{jobsite.name} ({jobsite.address}, {jobsite.postal_code} {jobsite.city})"
         date_now = localtime(now()).date()
         return OrderedDict(

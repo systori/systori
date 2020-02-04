@@ -7,7 +7,7 @@ from django.utils.translation import activate
 
 from ..company.factories import CompanyFactory
 from ..user.factories import UserFactory
-from ..project.factories import ProjectFactory, JobSiteFactory
+from ..project.factories import ProjectFactory
 from ..task.factories import JobFactory, GroupFactory, TaskFactory, LineItemFactory
 from ..directory.factories import ContactFactory
 
@@ -186,7 +186,6 @@ class DocumentTemplateTests(TestCase):
     def setUp(self):
         CompanyFactory()
         self.project = ProjectFactory()
-        self.jobsite = JobSiteFactory(project=self.project)
         ContactFactory(
             first_name="Ludwig",
             last_name="von Mises",

@@ -57,7 +57,7 @@
             "console": "integratedTerminal",
             "args": [
                 "test",
-                "systori.apps.document.test_models.DocumentTemplateTests",
+                "systori.apps.document",
             ],
             "django": true,
             "env": {
