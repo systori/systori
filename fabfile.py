@@ -154,6 +154,8 @@ def deploy_sandbox(build="yes", db_name="yes"):
 
 def deploy_production():
     with cd("infrastructure"):
-        run("docker tag elmcrest/systori:sandbox elmcrest/systori:production")
+        run(
+            "docker tag docker.pkg.github.com/systori/systori/sandbox:latest docker.pkg.github.com/systori/systori/app:latest"
+        )
         run("docker-compose stop production")
         run("docker-compose up -d production")
