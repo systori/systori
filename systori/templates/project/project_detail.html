@@ -79,7 +79,7 @@
               {% endif %}
               <div class="btn-group" role="group">
                 <a type="button" class="btn btn-default btn-sm" href="{% url 'project.progress' project.id %}">{% trans "Project Progress" %}</a>
-                <a target="_blank" type="button" class="btn btn-default btn-sm" href="{% url 'project.evidence.pdf' project.id %}">{% trans "Evidence preprinted form" %}</a>
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'project.evidence.pdf' project.id %}">{% trans "Evidence preprinted form" %}</a>
               </div>
             </div>
           </td>
@@ -171,7 +171,7 @@
                   <a type="button" class="btn btn-default btn-xs"  href="{% url 'job.delete' project.id job.id %}">{% trans 'Delete' %}</a>
                 {% endif %}
                 <a type="button" class="btn btn-default btn-xs" href="{% url 'job.copy' project.id job.id %}">{% trans 'Copy' %}</a>
-                <a type="button" class="btn btn-default btn-xs" target="_blank" href="{% url 'job.evidence.pdf' project.id job.id %}">{% trans "Evidence preprinted form" %}</a>
+                <a type="button" class="btn btn-default btn-xs" href="{% url 'job.evidence.pdf' project.id job.id %}">{% trans "Evidence preprinted form" %}</a>
               </div>
             </td>
           </tr>
@@ -230,21 +230,21 @@
             <td>{{ doc.notes }}</td>
             <td style="min-width: 100px;">
               <div class="btn-group">
-                <a target="_blank" class="btn btn-default" href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'PDF' %}</a>
+                <a class="btn btn-default" href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'PDF' %}</a>
                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                   <span class="caret"></span>
                   <span class="sr-only">Toggle Dropdown</span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
-                  <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a></li>
-                  <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a></li>
-                  <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'email' doc.id %}?with_lineitems=1">{% trans 'with Line Items Email' %}</a></li>
-                  <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'with Line Items Print' %}</a></li>
-                  <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'email' doc.id %}?only_groups=1">{% trans 'only groups Email' %}</a></li>
-                  <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}?only_groups=1">{% trans 'only groups Print' %}</a></li>
-                  <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'email' doc.id %}?only_task_names=1">{% trans 'only task names Email' %}</a></li>
-                  <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}?only_task_names=1">{% trans 'only task names Print' %}</a></li>
-                  <li><a target="_blank" href="{% url 'proposal.pdf' project.id 'print' doc.id %}?technical_listing=1">{% trans 'technical listing' %}</a></li>
+                  <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}">{% trans 'Email PDF' %}</a></li>
+                  <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}">{% trans 'Print PDF' %}</a></li>
+                  <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}?with_lineitems=1">{% trans 'with Line Items Email' %}</a></li>
+                  <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}?with_lineitems=1">{% trans 'with Line Items Print' %}</a></li>
+                  <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}?only_groups=1">{% trans 'only groups Email' %}</a></li>
+                  <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}?only_groups=1">{% trans 'only groups Print' %}</a></li>
+                  <li><a href="{% url 'proposal.pdf' project.id 'email' doc.id %}?only_task_names=1">{% trans 'only task names Email' %}</a></li>
+                  <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}?only_task_names=1">{% trans 'only task names Print' %}</a></li>
+                  <li><a href="{% url 'proposal.pdf' project.id 'print' doc.id %}?technical_listing=1">{% trans 'technical listing' %}</a></li>
                 </ul>
               </div>
             </td>

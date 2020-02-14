@@ -168,10 +168,8 @@ urlpatterns = [
         office_auth(ItemizedListingPDF.as_view()),
         name="itemized_listing.pdf",
     ),
-    # two matching patterns for InvoiceList to get optional filter kwarg
-    url(r"^invoices/$", owner_auth(InvoiceList.as_view()), name="invoice.list"),
     url(
-        r"^invoices/(?P<status_filter>[\w-]+)$",
+        r"^invoices/(?P<status_filter>[\w-]+)/(?P<selected_year>\d+)$",
         owner_auth(InvoiceList.as_view()),
         name="invoice.list",
     ),

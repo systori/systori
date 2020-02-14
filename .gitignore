@@ -17,6 +17,7 @@ systori/dart/test/packages
 systori/dart/build/
 systori/dart/.pub/
 systori/dart/.packages
+systori/dart/.dart_tool
 media/letterhead/
 media/attachments/
 systori/dart/pub-cache

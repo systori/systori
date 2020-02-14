@@ -11,28 +11,40 @@
         <span class="btn" style="color:white;">{% trans "Filter Invoices" %}</span>
     </div>
     <div class="btn-group btn-group-sm" role="group" aria-label="Invoice filter">
-        <a href="{% url "invoice.list" %}" type="button"
+        <a href="{% url "invoice.list" "all" selected_year %}" type="button"
            class="btn btn-sm btn-default {% if "all" in status_filter %}active{% endif %}">
             {% trans "all" %}
         </a>
-        <a href="{% url "invoice.list" "draft" %}"
+        <a href="{% url "invoice.list" "draft" selected_year  %}"
            type="button" class="btn btn-sm btn-default {% if "draft" in status_filter %}active{% endif %}">
             {% trans "draft" %}
         </a>
-        <a href="{% url "invoice.list" "sent" %}" type="button"
+        <a href="{% url "invoice.list" "sent" selected_year  %}" type="button"
            class="btn btn-sm btn-default {% if "sent" in status_filter %}active{% endif %}">
             {% trans "sent" %}
         </a>
-        <a href="{% url "invoice.list" "paid" %}" type="button"
+        <a href="{% url "invoice.list" "paid" selected_year  %}" type="button"
            class="btn btn-sm btn-default {% if "paid" in status_filter %}active{% endif %}">
             {% trans "paid" %}
         </a>
+        <div class="btn-group btn-group-sm">
+          <span class="btn btn-default" href="">{{selected_year}}</span>
+          <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            {% for year in years %}
+            <li><a href="{% url 'invoice.list' status_filter year %}">{{year|unlocalize}}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block content %}
-  <h2>{% trans 'Invoices' %}</h2>
+  <h2>{{ invoice_count }} {% trans 'Invoices' %}</h2>
   <div class="table-responsive">
     <table class="table table-striped">
       <thead>
@@ -56,7 +68,7 @@
             <td style="text-align:right;">{{ invoice.json.invoiced.gross|money }}</td>
             <td style="text-align:right;">{{ invoice.json.paid.negate.gross|money }}</td>
             <td>{{ invoice.document_date }}</td>
-            <td><a target="_blank" href="{% url "invoice.pdf" invoice.project.id "email" invoice.id %}">{{ invoice.invoice_no }}</a></td>
+            <td><a href="{% url "invoice.pdf" invoice.project.id "email" invoice.id %}">{{ invoice.invoice_no }}</a></td>
             <td>{{ invoice.get_status_display }}</td>
             <td style="text-align:right;"><b>{{ invoice.json.debit.gross|money }}</b></td>
             <td>{% if invoice.parent %}<span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{ invoice.parent.invoice_no }}{% else %}---{% endif %}</td>
