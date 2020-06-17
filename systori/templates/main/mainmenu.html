@@ -17,7 +17,8 @@
 <a class="nav-button {% if section == 'notes' %}active{% endif %}" href="{% url 'notes' %}"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span><span> {% trans 'Notes' %}</span></a>
 {% endif %}
 {% if worker.has_accountant or worker.has_owner %}
-<a class="nav-button {% if section == 'invoices' %}active{% endif %}" href="{% url 'invoice.list' %}"><span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span><span> {% trans 'Invoices' %}</span></a>
+{# ToDo: implement currentYear as a global context variable #}
+<a class="nav-button {% if section == 'invoices' %}active{% endif %}" href="{% url 'invoice.list' 'all' 2020 %}"><span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span><span> {% trans 'Invoices' %}</span></a>
 <a class="nav-button {% if section == 'accounts' %}active{% endif %}" href="{% url 'accounts' %}"><span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span><span> {% trans 'Accounts' %}</span></a>
 {% endif %}
   <a class="nav-button" id="menu-handle" onclick="toggleMenu()"><span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span></a>

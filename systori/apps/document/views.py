@@ -1,6 +1,6 @@
 import os
 import mimetypes
-from datetime import date
+from datetime import datetime, date
 from dateutil.rrule import rrule, MONTHLY
 from calendar import monthrange
 from collections import OrderedDict, namedtuple
@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.utils.translation import get_language
 from django.utils.translation import ugettext_lazy as _
 from django.forms.fields import DateField
+from django.db.models.functions import ExtractYear
 
 from systori.lib.accounting.tools import Amount
 from ..project.models import Project, Job
@@ -300,9 +301,11 @@ class TimesheetUpdate(UpdateView):
             }
         )
         json = self.object.json
-        context["daynames"], context["daynumbers"], context[
-            "mondays"
-        ] = get_weekday_names_numbers_and_mondays(
+        (
+            context["daynames"],
+            context["daynumbers"],
+            context["mondays"],
+        ) = get_weekday_names_numbers_and_mondays(
             json["first_weekday"], json["total_days"], False
         )
         context["rows"] = [
@@ -347,32 +350,52 @@ class InvoiceList(ListView):
 
     def get(self, request, *args, **kwargs):
         self.status_filter = self.kwargs.get("status_filter", "all")
+        self.selected_year = self.kwargs.get("selected_year", datetime.now().year)
         return super().get(self, request, *args, **kwargs)
 
-    def get_queryset(self, model=model):
+    def get_queryset(self, model=model, get_years=None):
+        qs = (
+            model.objects.prefetch_related("project")
+            .prefetch_related("parent")
+            .order_by("-document_date", "invoice_no")
+        )
+
+        if get_years:  # dedicated query
+            return (
+                qs.annotate(year=ExtractYear("document_date"))
+                .order_by("-year")
+                .distinct("year")
+                .values("year")
+            )  # from new to old years
+
         if self.status_filter == "draft":
-            return model.objects.filter(status="draft")
+            qs = qs.filter(status="draft")
         elif self.status_filter == "sent":
-            return model.objects.filter(status="sent")
+            qs = qs.filter(status="sent")
         elif self.status_filter == "paid":
-            return model.objects.filter(status="paid")
+            qs = qs.filter(status="paid")
+        elif self.status_filter == "all":
+            pass  # qs can stay as it is
         else:
-            return model.objects
+            raise ValueError(f"can't match status_filter with: {self.status_filter}")
+
+        return qs.filter(document_date__gte=date(int(self.selected_year), 1, 1)).filter(
+            document_date__lte=date(int(self.selected_year), 12, 31)
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["status_filter"] = self.status_filter
+        context["selected_year"] = self.selected_year
 
-        query = self.get_queryset()
-        query = (
-            query.prefetch_related("project")
-            .prefetch_related("parent")
-            .filter(document_date__gte=date(2015, 9, 1))
-            .order_by("-document_date", "invoice_no")
-        )
+        years = self.get_queryset(get_years=True)
+        qs = self.get_queryset()
+
+        context["years"] = [year["year"] for year in years]
+        context["invoice_count"] = qs.count()
 
         months = OrderedDict()
-        for invoice in query:
+        for invoice in qs:
             doc_date = date(invoice.document_date.year, invoice.document_date.month, 1)
             month = months.setdefault(
                 doc_date, {"invoices": [], "debit": Amount.zero()}

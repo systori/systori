@@ -1234,23 +1234,38 @@ class InvoiceListViewTest(ClientTestCase):
         self.worker.save()
         project = ProjectFactory()
         InvoiceFactory(project=project, letterhead=LetterheadFactory())
+        self.current_year = datetime.now().year
 
     def test_kwarg_queryset_filter(self):
-        response = self.client.get(reverse("invoice.list"))
+        response = self.client.get(
+            reverse(
+                "invoice.list",
+                kwargs={"status_filter": "all", "selected_year": self.current_year},
+            )
+        )
         self.assertEqual(response.status_code, 200, response.content)
 
         response = self.client.get(
-            reverse("invoice.list", kwargs={"status_filter": "sent"})
+            reverse(
+                "invoice.list",
+                kwargs={"status_filter": "sent", "selected_year": self.current_year},
+            )
         )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(
-            reverse("invoice.list", kwargs={"status_filter": "paid"})
+            reverse(
+                "invoice.list",
+                kwargs={"status_filter": "paid", "selected_year": self.current_year},
+            )
         )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(
-            reverse("invoice.list", kwargs={"status_filter": "draft"})
+            reverse(
+                "invoice.list",
+                kwargs={"status_filter": "draft", "selected_year": self.current_year},
+            )
         )
         self.assertEqual(response.status_code, 200)
 

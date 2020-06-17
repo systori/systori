@@ -13,19 +13,6 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=systori.settings.dev
     command: "/idle.sh"
-    # sandbox:
-    #   build:
-    #     context: .
-    #     dockerfile: .devcontainer/app/app.Dockerfile
-    #     args:
-    #       - requirements_file=app.pip
-    #   ports:
-    #     - "8000:8000"
-    #   depends_on:
-    #     - db
-    environment:
-      - DJANGO_SETTINGS_MODULE=systori.settings.sandbox
-    command: "/idle.sh"
   db:
     build:
       context: .
@@ -43,7 +30,6 @@ services:
       # - /root/.pub-cache/:/root/.pub-cache/:z
       - .devcontainer/app:/startup
     entrypoint: /startup/idle.sh
-    command: cd /app && pub get && pub build
     # create if needed /root/.pub-cache and change owner to current user, add in docker settings
     # `pwd`/docker-compose up -d dart1x
     # docker exec -it `container id` /bin/bash
