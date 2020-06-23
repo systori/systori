@@ -1,245 +1,433 @@
-import { ArrayListMultimap, Multimap } from "@systori/lib/multimap";
-import naturalSort from "natural-sort";
 
-// const searchRequestFired = false;
-// const attemptMade = false;
-// let searchMatches: Array<number>;
-let phaseFilter: Array<string>;
+function getCookie(query: string): string {
+    const cookies = document.cookie.split(";");
+    for (const cookie of cookies) {
+        const [name, value] = cookie.split("=");
+        if (name === query) {
+            return value;
+        }
+    }
+    return "";
+}
+const filterBar = document.querySelector(".filter-bar");
+const tileContainer = document.querySelector(".tile-container");
+const csrfToken = getCookie("csrftoken");
+const headers = new Headers({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "X-CSRFToken": csrfToken,
+});
 enum PhaseOrder {
-    prospective = "prospective",
-    tendering = "tendering",
-    planning = "planning",
-    executing = "executing",
-    settlement = "settlement",
-    warranty = "warranty",
-    finished = "finished",
+    prospective,
+    tendering,
+    planning,
+    executing,
+    settlement,
+    warranty,
+    finished,
+}
+enum SortButtonType {
+    id = "id",
+    name = "name",
+    phase = "phase",
 }
 
-function sortProjects(e: Event): void {
-    if (e == null) return;
-    let lookup: Map<string | number, SystoriProjectTile> = new Map();
-    // const i = 0;
-
-    const btn = e.target as SystoriSortButton;
-    btn.activateExclusive();
-
-    if (btn.type == "id") {
-        Array.from(document.querySelectorAll<SystoriProjectTile>(".tile")).map(
-            e => lookup.set(parseInt(e.dataset["pk"] || "0"), e),
-        );
-    } else if (btn.type == "name") {
-        Array.from(document.querySelectorAll<SystoriProjectTile>(".tile")).map(
-            e => lookup.set(e.dataset["name"] || "", e),
-        );
-    } else if (btn.type == "phase") {
-        const lookup2: Multimap<string, HTMLElement> = new ArrayListMultimap();
-        lookup = new Map();
-        Array.from(document.querySelectorAll<SystoriProjectTile>(".tile")).map(
-            e => lookup2.put(e.dataset["phase"] || "", e),
-        );
-        for (const key in PhaseOrder) {
-            // for (let element of lookup2[key]) {
-            //     console.log(element);
-            // }
-            console.log(key);
-        }
-    }
-
-    let sortedKeys: Array<string | number> = Array.from(lookup.keys()).sort(
-        naturalSort(),
-    );
-    if (btn.reversed == true) {
-        sortedKeys = sortedKeys.reverse();
-        btn.reversed = false;
-    } else if (btn.reversed == false) {
-        btn.reversed = true;
-    }
-
-    let lastMoved = null;
-
-    for (const key of sortedKeys) {
-        if (lastMoved == null) {
-            console.log(`lastMoved == ${lastMoved} with key == ${key}`);
-            lastMoved = lookup.get(key);
-            continue;
-        }
-        //lastMoved.insertAdjacentElement("afterend", lookup[key]);
-        //last_moved = lookup[key];
-    }
+interface SortButtonState {
+    type: SortButtonType;
+    asc: boolean;
 }
 
-function filterProjects(): void {
-    const warning = document.querySelector(
-        "sys-warning-message",
-    ) as SystoriWarningMessage;
-    warning.hideWarningMessage = true;
-
-    const projects = document.querySelectorAll<SystoriProjectTile>(".tile");
-    for (const project of projects) {
-        project.classList.add("hidden");
+class SystoriProjectTile extends HTMLElement {
+    constructor() {
+        super();
     }
-}
-
-function updatePhaseFilter(e: Event): void {
-    if (e == undefined) return;
-    const btn = e.target as SystoriPhaseButton;
-    btn.updatePhaseFilter();
-    localStorage["phaseFilter"] = JSON.stringify({ phaseFilter });
-    filterProjects();
-}
-
-class SystoriPhaseButton extends HTMLElement {
-    tag = "sys-phase-button";
-
-    get phase(): string {
-        return this.dataset["phase"] || "";
+    get pk(): number {
+        return parseInt(this.dataset.pk!);
     }
-    set phase(phase: string) {
-        this.dataset["phase"] = phase;
+    get name(): string {
+        return this.dataset.name!;
     }
-
-    get hidePhase(): boolean {
-        return this.dataset["hide-phase"] == "true";
+    get phase(): PhaseOrder {
+        return (this.dataset.phase || PhaseOrder.prospective) as PhaseOrder;
     }
-    set hidePhase(hidePhase: boolean) {
-        hidePhase
-            ? (this.dataset["hide-phase"] = "true")
-            : (this.dataset["hide-phase"] = "false");
+    get hidden(): boolean {
+        return this.classList.contains("hidden");
     }
-    get visiblePhase(): boolean {
-        return !this.hidePhase;
-    }
-
-    hide(): void {
-        this.hidePhase = true;
-        phaseFilter = phaseFilter.filter(item => item != this.phase);
-        this.classList.add("line_through");
-    }
-
-    show(): void {
-        this.hidePhase = false;
-        phaseFilter.push(this.phase);
-        this.classList.remove("line_through");
-    }
-
-    updatePhaseFilter(): void {
-        phaseFilter.includes(this.phase) ? this.hide() : this.show();
-    }
-
-    connectedCallback(): void {
-        if (this.dataset["phase"]) this.phase = this.dataset["phase"] as string;
+    hide(hide: boolean): void {
+        hide ? this.classList.add("hidden") : this.classList.remove("hidden");
     }
 }
 
 class SystoriSortButton extends HTMLElement {
-    tag = "sys-sort-button";
+    constructor() {
+        super();
+        this.addEventListener("click", () => this.clickHandler());
+    }
+    get type(): SortButtonType {
+        switch (this.dataset.type) {
+            case "id":
+                return SortButtonType.id;
+            case "name":
+                return SortButtonType.name;
+            case "phase":
+                return SortButtonType.phase;
+            default:
+                throw Error("Couldn't catch SortButtonType.");
+        }
+    }
+    set type(type: SortButtonType) {
+        this.dataset.type = SortButtonType[type];
+    }
 
-    get type(): string {
-        return this.dataset["type"] || "";
+    // ASC/DESC sorting order
+    get asc(): boolean {
+        return this.dataset.asc == "true";
     }
-    set type(type: string) {
-        this.dataset["type"] = type;
+    set asc(asc: boolean) {
+        asc ? (this.dataset.asc = "true") : (this.dataset.asc = "false");
     }
-
-    get reversed(): boolean {
-        return this.dataset["reversed"] == "true";
-    }
-    set reversed(reversed: boolean) {
-        reversed
-            ? (this.dataset["reversed"] = "true")
-            : (this.dataset["reversed"] = "false");
+    toggleAsc(): void {
+        this.asc = !this.asc;
     }
 
     get active(): boolean {
         return this.classList.contains("active");
     }
-    set active(active: boolean) {
-        active ? this.classList.add("active") : this.classList.remove("active");
+    set active(status: boolean) {
+        this.classList.toggle("active", status);
     }
 
+    clickHandler(): void {
+        this.toggleAsc();
+        this.activateExclusive();
+        this.sortProjectTiles();
+        this._saveStateToLocalStorage();
+    }
+    // adds class `active` to active button and removes it from all others.
     activateExclusive(): void {
-        const btns = Array.from(
-            (this.parentElement as HTMLDivElement).querySelectorAll<
-                SystoriSortButton
-            >("sys-sort-button"),
+        const btns: SystoriSortButton[] = Array.from(
+            document.querySelectorAll("sys-sort-button"),
         );
         for (const btn of btns) {
             btn.active = false;
         }
         this.active = true;
-        localStorage["sys-sort-button"] = this.type;
-        localStorage["sys-sort-button-reversed"] = this.reversed.toString();
     }
 
+    sortProjectTiles(): void {
+        const projectTiles = Array.from(
+            document.querySelectorAll<SystoriProjectTile>(".tile"),
+        );
+
+        projectTiles.sort((a, b) => {
+            switch (this.type) {
+                case SortButtonType.id:
+                    if (this.asc) {
+                        return b.pk < a.pk ? -1 : 1;
+                    } else {
+                        return a.pk < b.pk ? -1 : 1;
+                    }
+                case SortButtonType.name:
+                    // ToDo: switch x.dataset.name! back to x.name if it works with _loadStateFromLocalStorage
+                    if (this.asc) {
+                        return a.dataset.name!.localeCompare(b.dataset.name!);
+                    } else {
+                        return b.dataset.name!.localeCompare(a.dataset.name!);
+                    }
+                case SortButtonType.phase:
+                    if (this.asc) {
+                        return PhaseOrder[b.phase] <= PhaseOrder[a.phase]
+                            ? -1
+                            : 1;
+                    } else {
+                        return PhaseOrder[a.phase] <= PhaseOrder[b.phase]
+                            ? -1
+                            : 1;
+                    }
+                default:
+                    throw new Error(
+                        `Can't find a SortButtonType type for ${this.type}.`,
+                    );
+            }
+        });
+
+        if (tileContainer) {
+            tileContainer.innerHTML = "";
+            for (const tile of projectTiles) {
+                tileContainer.appendChild(tile);
+            }
+        }
+
+        this._saveStateToLocalStorage();
+    }
+
+    _saveStateToLocalStorage(): void {
+        localStorage.setItem(
+            "state-SystoriSortButton",
+            JSON.stringify({
+                type: this.type,
+                asc: this.asc,
+            }),
+        );
+    }
+    _loadStateFromLocalStorage(): void {
+        if (this.active || !this.active) {
+            const sortJson = localStorage.getItem("state-SystoriSortButton");
+            if (sortJson) {
+                const state: SortButtonState = JSON.parse(sortJson);
+                if (this.type === state.type) {
+                    this.asc = state.asc;
+                    this.active = true;
+                    this.sortProjectTiles();
+                } else {
+                    delete this.dataset.active;
+                    this.active = false;
+                }
+            }
+        }
+    }
     connectedCallback(): void {
-        if (this.dataset["type"] != null)
-            this.type = this.dataset["type"] as string;
-        if (this.dataset["reversed"] != null)
-            this.reversed = this.dataset["reversed"] == "true";
+        this._loadStateFromLocalStorage();
     }
 }
 
-class SystoriProjectTile extends HTMLElement {
-    tag = "sys-project-tile";
-
-    get hideProjectTile(): boolean {
-        return this.classList.contains("hidden");
+class SystoriPhaseButton extends HTMLElement {
+    constructor() {
+        super();
+        this.addEventListener("click", () => this.clickHandler());
     }
-    set hideProjectTile(hideProjectTile: boolean) {
-        hideProjectTile
-            ? this.classList.add("hidden")
-            : this.classList.remove("hidden");
+
+    get phase(): string {
+        return this.dataset.phase!;
+    }
+    set phase(phase: string) {
+        this.dataset.phase = phase;
+    }
+
+    // hidePhase === hidden
+    get hidePhase(): boolean {
+        return this.classList.contains("hide-phase");
+    }
+    set hidePhase(hide: boolean) {
+        hide
+            ? this.classList.add("hide-phase")
+            : this.classList.remove("hide-phase");
+    }
+    toggleProjectTiles(status: boolean): void {
+        const projectTiles: SystoriProjectTile[] = Array.from(
+            document.querySelectorAll(
+                `sys-project-tile[data-phase=${this.phase}]`,
+            ),
+        );
+        for (const tile of projectTiles) {
+            tile.hide(status);
+        }
+    }
+    clickHandler(): void {
+        this.hidePhase = !this.hidePhase;
+        this.filterProjectTiles();
+        this.showWarningMessage();
+        this._saveStateToLocalStorage();
+    }
+    filterProjectTiles(): void {
+        this.hidePhase
+            ? this.toggleProjectTiles(true)
+            : this.toggleProjectTiles(false);
+    }
+    showWarningMessage(): void {
+        let hiddenProjectTiles = document.querySelectorAll<SystoriProjectTile>(".tile.hidden");
+        let sysWarningMessage = document.querySelector<SystoriWarningMessage>("sys-warning-message");
+        if (sysWarningMessage) sysWarningMessage.warnFilteredProjects(hiddenProjectTiles.length || 0);
+    }
+    _saveStateToLocalStorage(): void {
+        localStorage.setItem(
+            `state-SystoriPhaseButton-${this.phase}`,
+            JSON.stringify({
+                hidePhase: this.hidePhase,
+            }),
+        );
+    }
+    _loadStateFromLocalStorage(): void {
+        const stateJson = localStorage.getItem(
+            `state-SystoriPhaseButton-${this.phase}`,
+        );
+        if (stateJson) {
+            const state = JSON.parse(stateJson);
+            this.hidePhase = state.hidePhase;
+            this.filterProjectTiles();
+            this.showWarningMessage();
+        }
+    }
+    connectedCallback(): void {
+        this._loadStateFromLocalStorage();
+    }
+}
+
+class SystoriSearchElement extends HTMLElement {
+    // This custom element is for composing the two childNodes.
+    constructor() {
+        super();
+    }
+}
+
+class SystoriSearchInput extends HTMLInputElement {
+    timeout: ReturnType<typeof setTimeout> | undefined;
+
+    constructor() {
+        super();
+        this.addEventListener("keyup", () => this.clickHandler());
+    }
+
+    filterProjectTiles(searchResultPks: number[]): void {
+        const projectPks = this.getAllLocalProjectPks();
+        // all projects except the found projects
+        const difference = projectPks.filter(
+            pk => !searchResultPks.includes(pk),
+        );
+        for (const pk of difference) {
+            const tile = document.querySelector<SystoriProjectTile>(
+                `sys-project-tile[data-pk="${pk}"]`,
+            );
+            if (tile) tile.hide(true);
+        }
+
+        const sysWarningMessage = document.querySelector<SystoriWarningMessage>("sys-warning-message");
+        if(sysWarningMessage) sysWarningMessage.warnFilteredProjects(difference.length);
+        
+    }
+
+    showAllVisibleProjects(): void {
+        const phaseBtns = new Map();
+        Array.from(
+            document.querySelectorAll<SystoriPhaseButton>("sys-phase-button"),
+        ).map(tile => phaseBtns.set(tile.phase, tile.hidePhase));
+        const projectPks = this.getAllLocalProjectPks();
+        var countHiddenProjects = projectPks.length;
+        for (const pk of projectPks) {
+            const tile = document.querySelector<SystoriProjectTile>(
+                `sys-project-tile[data-pk="${pk}"]`,
+            );
+            if (tile && !phaseBtns.get(tile.phase)) {
+                tile.hide(false);
+                countHiddenProjects--;
+            }
+        }
+        const cancelButton = document.querySelector<SystoriSearchCancelButton>(
+            "sys-search-cancel-button",
+        )!;
+        cancelButton.visible = false;
+        const sysWarningMessage = document.querySelector<SystoriWarningMessage>("sys-warning-message");
+        if(sysWarningMessage) sysWarningMessage.warnFilteredProjects(countHiddenProjects);
+    }
+
+    getAllLocalProjectPks(): number[] {
+        return Array.from(
+            document.querySelectorAll<SystoriProjectTile>(`sys-project-tile`),
+        ).map(tile => {
+            return tile.pk;
+        });
+    }
+
+    apiSearchProjects(): void {
+        localStorage.setItem("sys-project-search-input", this.value);
+        fetch("/api/project/search/", {
+            method: "put",
+            credentials: "same-origin",
+            headers: headers,
+            body: JSON.stringify({ query: this.value }),
+        })
+            .then(response => response.json())
+            .then(body => {
+                this.filterProjectTiles(body.projects);
+            });
+    }
+
+    processQuery(): void {
+        const cancelButton = document.querySelector<SystoriSearchCancelButton>(
+            "sys-search-cancel-button",
+        )!;
+        cancelButton.visible = true;
+        this.apiSearchProjects();
+    }
+
+    delayedClickHandler(): void {
+        this.value == "" ? this.showAllVisibleProjects() : this.processQuery();
+    }
+
+    clickHandler(): void {
+        if (this.timeout) clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => {
+            this.value == "" ? this.showAllVisibleProjects() : this.processQuery();
+        }, 300);
+    }
+}
+
+class SystoriSearchCancelButton extends HTMLElement {
+    constructor() {
+        super();
+        this.addEventListener("click", () => this.clickHandler());
+    }
+    get visible(): boolean {
+        return this.classList.contains("visible");
+    }
+    set visible(status: boolean) {
+        this.classList.toggle("visible", status);
+    }
+    clickHandler(): void {
+        if (this.parentElement) {
+            const input = this.parentElement.querySelector<SystoriSearchInput>(
+                'input[is="sys-search-input"]',
+            );
+            if (input) {
+                input.value = "";
+                input.showAllVisibleProjects();
+                this.visible = false;
+            }
+        }
     }
 }
 
 class SystoriWarningMessage extends HTMLElement {
-    tag = "sys-warning-message";
 
-    warnPhaseFilteredProjects(phaseFilteredProjects: number): void {
-        if (phaseFilteredProjects > 0) {
-            this.children[0].innerHTML = (document.querySelector(
-                "#sys-phaseFilteredProjects-translated",
-            ) as HTMLElement).innerText;
+    constructor() {
+        super();
+    }
+
+    warnFilteredProjects(count: Number) {
+        let regex = /\$phaseFilteredProjects/gi;
+        if (count > 0) {
+            this.innerText = (document.querySelector("#sys-phaseFilteredProjects-translated") as HTMLElement).innerText.replace(regex, count.toString());
             this.classList.remove("hidden");
+        } else {
+            this.classList.add("hidden");
         }
     }
 
     get hideWarningMessage(): boolean {
-        return this.classList.contains("hidden");
+        return this.classList.contains('hidden');
     }
-    set hideWarningMessage(hideWarningMessage: boolean) {
-        hideWarningMessage
-            ? this.classList.add("hidden")
-            : this.classList.remove("hidden");
+
+    set hideWarningMessage(hide: boolean) {
+        hide
+            ? this.classList.add('hidden')
+            : this.classList.remove('hidden');
     }
 }
 
-function loadLocalStorage(): void {
-    (document.querySelector("#filter-bar") as HTMLElement).classList.remove(
-        "hidden",
-    );
-    (document.querySelector("#tile-container") as HTMLElement).classList.remove(
-        "hidden",
-    );
+customElements.define("sys-warning-message", SystoriWarningMessage);
+customElements.define("sys-project-tile", SystoriProjectTile);
+customElements.define("sys-search-input", SystoriSearchInput, {
+    extends: "input",
+});
+customElements.define("sys-search-element", SystoriSearchElement);
+customElements.define("sys-search-cancel-button", SystoriSearchCancelButton);
+customElements.define("sys-phase-button", SystoriPhaseButton);
+customElements.define("sys-sort-button", SystoriSortButton);
+
+// loadLocalStorage();
+if (filterBar) {
+    filterBar.classList.remove("hidden");
 }
-
-window.customElements.define("sys-phase-button", SystoriPhaseButton);
-window.customElements.define("sys-sort-button", SystoriSortButton);
-window.customElements.define("sys-project-tile", SystoriProjectTile);
-window.customElements.define("sys-warning-message", SystoriWarningMessage);
-
-// add Event Listeners
-for (const btn of document.querySelectorAll<SystoriSortButton>(
-    "sys-sort-button",
-)) {
-    btn.addEventListener("click", sortProjects);
+if (tileContainer) {
+    tileContainer.classList.remove("hidden");
 }
-
-for (const btn of document.querySelectorAll<SystoriPhaseButton>(
-    "sys-phase-button",
-)) {
-    btn.addEventListener("click", updatePhaseFilter);
-}
-
-// Load user (browser) data
-loadLocalStorage();

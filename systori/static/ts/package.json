@@ -12,8 +12,8 @@
     "homepage": "https://github.com/systori/systori#readme",
     "license": "BSD-3-Clause",
     "engines": {
-        "npm": ">= 6.10.3 < 7",
-        "node": ">= 10.16.3 < 11"
+        "npm": ">= 7",
+        "node": ">= 12"
     },
     "engineStrict": true,
     "dependencies": {
