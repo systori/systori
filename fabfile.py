@@ -23,7 +23,6 @@ def run_tests(parallel=2):
     local(
         f"DJANGO_SETTINGS_MODULE='systori.settings.test' python manage.py test --parallel={parallel} systori.apps systori.lib"
     )
-    local(f"python manage.py test --parallel={parallel} systori.apps systori.lib")
 
 
 def makemessages():
