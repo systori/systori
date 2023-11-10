@@ -113,148 +113,344 @@ class Token {
     }
 }
 /**
- * Represents a model extending HTML element, providing additional
- * properties and methods specific to the application's data model.
- * @extends HTMLElement
+ * Represents a model in the editor.
+ * @extends HtmlElement
  */
-class Model extends HTMLElement {
+class Model extends HtmlElement {
     /**
-     * Constructs the Model object and initializes its properties.
-     */
-    constructor() {
-        super();
-        this.state = null; // Placeholder for ModelState, define this class separately
-        this.inputs = {}; // Object for storing input elements
-        this.editor = null; // Editor element
-
-        if (!this.hasPK && !this.hasToken) {
-            this.token = tokenGenerator.next(); // Ensure tokenGenerator is defined
-        }
-
-        if (this.children.length === 0) {
-            const template = document.querySelector(`#${this.type}-template`);
-            const clone = document.importNode(template.content, true);
-            this.appendChild(clone);
-        }
-
-        this.editor = this.querySelector(":scope > .editor");
-    }
-
-    /**
-     * Gets the type of the model, derived from the element's node name.
-     * @returns {string} The model type.
+     * @returns {string} The type of the model.
      */
     get type() {
         return this.nodeName.toLowerCase().substring(4);
     }
 
     /**
-     * Gets the child types of the model. To be overridden by subclasses.
-     * @returns {Array<string>} An array of child types.
+     * @returns {Array<string>} The types of the children.
      */
     get childTypes() {
         return [];
     }
 
     /**
-     * Determines if the model has child models.
-     * @returns {boolean} True if the model has child models, false otherwise.
+     * @returns {boolean} Whether the model has child models.
      */
     get hasChildModels() {
-        return this.childTypes.some(childType => this.childrenOfType(childType).length > 0);
+        for (let childType of this.childTypes) {
+            if (this.childrenOfType(childType).length > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * Determines if the model has no child models.
-     * @returns {boolean} True if the model has no child models, false otherwise.
+     * @returns {boolean} Whether the model has no child models.
      */
     get hasNoChildModels() {
         return !this.hasChildModels;
     }
 
     /**
-     * Checks if the model has a primary key (PK).
-     * @returns {boolean} True if the model has a PK, false otherwise.
+     * @returns {boolean} Whether the model has a primary key.
      */
     get hasPK() {
         return this.dataset.hasOwnProperty('pk');
     }
 
     /**
-     * Checks if the model has no primary key (PK).
-     * @returns {boolean} True if the model has no PK, false otherwise.
+     * @returns {boolean} Whether the model has no primary key.
      */
     get hasNoPK() {
         return !this.hasPK;
     }
 
     /**
-     * Checks if the model has a token.
-     * @returns {boolean} True if the model has a token, false otherwise.
+     * @returns {boolean} Whether the model has a token.
      */
     get hasToken() {
         return this.dataset.hasOwnProperty('token');
     }
 
     /**
-     * Checks if the model has no token.
-     * @returns {boolean} True if the model has no token, false otherwise.
+     * @returns {boolean} Whether the model has no token.
      */
     get hasNoToken() {
         return !this.hasToken;
     }
 
     /**
-     * Gets the primary key (PK) of the model.
-     * @returns {number|null} The primary key, or null if not set.
+     * @returns {number|null} The primary key of the model.
      */
     get pk() {
-        return this.hasPK ? parseInt(this.dataset.pk) : null;
+        return this.hasPK ? parseInt(this.dataset['pk']) : null;
     }
 
     /**
-     * Sets the primary key (PK) of the model.
-     * @param {number} value - The primary key value to set.
+     * @param {number} pk The primary key to set.
      */
-    set pk(value) {
-        this.dataset.pk = value.toString();
+    set pk(pk) {
+        this.dataset['pk'] = pk.toString();
     }
 
     /**
-     * Gets the token of the model.
-     * @returns {number|null} The token, or null if not set.
+     * @returns {number|null} The token of the model.
      */
     get token() {
-        return this.hasToken ? parseInt(this.dataset.token) : null;
+        return this.hasToken ? parseInt(this.dataset['token']) : null;
     }
 
     /**
-     * Sets the token of the model.
-     * @param {number} value - The token value to set.
+     * @param {number} token The token to set.
      */
-    set token(value) {
-        this.dataset.token = value.toString();
+    set token(token) {
+        this.dataset['token'] = token.toString();
     }
 
     /**
-     * Finds children of a specific type within the model.
-     * @param {string} childType - The type of child to find.
-     * @returns {Array<Element>} An array of child elements of the specified type.
+     * @type {ModelState} The state of the model.
      */
-    childrenOfType(childType) {
-        // Implementation depends on how childType is defined and used
-        // Placeholder implementation:
-        return Array.from(this.children).filter(child => child.nodeName === `SYS-${childType.toUpperCase()}`);
+    state;
+
+    /**
+     * @type {Object.<string, Input>} The inputs of the model.
+     */
+    inputs = {};
+
+    /**
+     * @type {HtmlElement} The editor of the model.
+     */
+    editor;
+
+    /**
+     * Creates a new model.
+     */
+    constructor() {
+        super();
+        if (this.hasNoPK && this.hasNoToken) this.token = tokenGenerator.next();
+        if (this.children.length === 0) {
+            let template = document.querySelector(`#${this.type}-template`);
+            let clone = document.importNode(template.content, true);
+            this.append(clone);
+        }
+        this.editor = this.querySelector(":scope>.editor");
     }
 
     /**
-     * Placeholder getter for determining if the model can be saved.
-     * To be overridden with specific logic.
-     * @returns {boolean} True if the model can be saved, false otherwise.
+     * @returns {boolean} Whether the model can be saved.
      */
     get canSave() {
-        return false; // Default implementation
+        throw new Error("Method 'canSave' must be implemented.");
     }
 
-    // Other methods to be added...
+    /**
+     * Attaches the model to the DOM.
+     */
+    attached() {
+        if (!this._readyCalled) {
+            this.ready();
+            this.state = new ModelState(this);
+            this._readyCalled = true;
+        }
+    }
+
+    /**
+     * @type {boolean} Whether the model is ready.
+     */
+    _readyCalled = false;
+
+    /**
+     * Prepares the model.
+     */
+    ready() { }
+
+    /**
+     * @param {string} field The field to get the view for.
+     * @returns {HtmlElement} The view for the field.
+     */
+    getView(field) {
+        return this.editor.querySelector(`.${field}`);
+    }
+
+    /**
+     * @param {string} field The field to get the input for.
+     * @returns {Input} The input for the field.
+     */
+    getInput(field) {
+        let input = this.getView(field);
+        if (!(input instanceof Input)) {
+            throw new Error("Input is not an instance of Input.");
+        }
+        if (this.inputs.hasOwnProperty(input.name)) {
+            throw new Error("Input already exists.");
+        }
+        this.inputs[input.name] = input;
+        return input;
+    }
+
+    /**
+     * @returns {boolean} Whether the model has changed.
+     */
+    get isChanged() {
+        return Object.keys(this.state.delta).length > 0;
+    }
+
+    /**
+     * @param {string} childType The type of the children to get.
+     * @returns {Array<Model>} The children of the specified type.
+     */
+    childrenOfType(childType) {
+        let NODE_NAME = `SYS-${childType.toUpperCase()}`;
+        return Array.from(this.children).filter(child => child.nodeName === NODE_NAME);
+    }
+
+    /**
+     * @returns {Object} The data to save.
+     */
+    save() {
+        let data = (this.isChanged && this.canSave) ? { ...this.state.save() } : {};
+        if (Object.keys(data).length > 0) {
+            this.updateVisualState('saving');
+        }
+        for (let childType of this.childTypes) {
+            let saveChildren = this.childrenOfType(childType)
+                .map(child => child.save())
+                .filter(childData => Object.keys(childData).length > 0);
+            if (saveChildren.length > 0) {
+                data[`${childType}s`] = saveChildren;
+            }
+        }
+        if (Object.keys(data).length > 0) {
+            if (this.hasPK) {
+                data['pk'] = this.pk;
+            } else {
+                data['token'] = this.token;
+            }
+        }
+        return data;
+    }
+
+    /**
+     * Rolls back the model.
+     */
+    rollback() {
+        this.updateVisualState('changed');
+        if (this.state.isSaving) this.state.rollback();
+        for (let childType of this.childTypes) {
+            this.childrenOfType(childType).forEach(child => child.rollback());
+        }
+    }
+
+    /**
+     * @param {Object} result The result to commit.
+     */
+    commit(result) {
+        this.updateVisualState('saved');
+        if (this.hasNoPK) {
+            this.pk = result['pk'];
+            delete this.dataset['token'];
+        }
+        if (this.state.isSaving) this.state.commit();
+        for (let childType of this.childTypes) {
+            let listName = `${childType}s`;
+            if (!result.hasOwnProperty(listName)) continue;
+            for (let child of this.childrenOfType(childType)) {
+                for (let childResult of result[listName]) {
+                    if ((child.hasPK && childResult['pk'] === child.pk) ||
+                        (child.hasNoPK && childResult['token'] === child.token)) {
+                        child.commit(childResult);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Deletes the model.
+     */
+    delete() {
+        if (this.hasPK) changeManager.delete(this.type, this.pk);
+        this.remove();
+    }
+
+    /**
+     * Checks whether the children have changed.
+     */
+    maybeChildrenChanged() {
+        for (let childType of this.childTypes) {
+            this.childrenOfType(childType).forEach(child => child.updateVisualState('changed'));
+        }
+    }
+
+    /**
+     * @param {string} state The state to update the visual state to.
+     */
+    updateVisualState(state) {
+        switch (state) {
+            case 'changed':
+                if (!this.editor.classList.contains(state) && this.isChanged) {
+                    this.editor.className = 'editor changed';
+                }
+                break;
+            case 'saving':
+                this.editor.className = 'editor saving';
+                break;
+            case 'saved':
+                this.editor.className = 'editor';
+                break;
+        }
+    }
+
+    /**
+     * @returns {Model|null} The first model above this model.
+     */
+    firstAbove() {
+        let match;
+
+        // try siblings
+        match = this.previousElementSibling;
+        if (match instanceof Model) {
+            while (true) {
+                let modelChildren = null;
+                for (let childType of match.childTypes) {
+                    if (match.childrenOfType(childType).length > 0) {
+                        modelChildren = match.childrenOfType(childType);
+                        break;
+                    }
+                }
+                if (modelChildren === null) break;
+                match = modelChildren[modelChildren.length - 1];
+            }
+            return match;
+        }
+
+        return this.parent instanceof Model ? this.parent : null;
+    }
+
+    /**
+     * @returns {Model|null} The first model below this model.
+     */
+    firstBelow() {
+        // check children
+        for (let childType of this.childTypes) {
+            for (let child of this.childrenOfType(childType)) {
+                return child;
+            }
+        }
+        // now try siblings
+        if (this.nextElementSibling instanceof Model) {
+            return this.nextElementSibling;
+        }
+        // visit the ancestors
+        let ancestor = this.parent;
+        while (ancestor instanceof Model) {
+            let sibling = ancestor.nextElementSibling;
+            if (sibling instanceof Model) {
+                return sibling;
+            }
+            ancestor = ancestor.parent;
+        }
+
+        return null;
+    }
 }
+
