@@ -1,8 +1,8 @@
 -r app.pip
 
 coverage==4.5.4
-codecov==2.0.15
+codecov
 selenium==3.141.0
 pyvirtualdisplay==0.2.4
-factory-boy
-freezegun
+factory-boy==2.12.0
+freezegun==0.3.13

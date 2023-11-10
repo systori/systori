@@ -1,10 +1,10 @@
 import os
 from systori.settings.common import *
 
-SERVER_NAME = "systori.localhost"
+SERVER_NAME = "e.dev.fynal.app"
 SESSION_COOKIE_DOMAIN = "." + SERVER_NAME
-ALLOWED_HOSTS = ["." + SERVER_NAME]
-INTERNAL_IPS = ("10.0.1.233", "127.0.0.1")
+ALLOWED_HOSTS = ["." + SERVER_NAME, "37.27.15.206", "127.0.0.1", "*.localhost"]
+INTERNAL_IPS = ("37.27.15.206", "127.0.0.1")
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -37,9 +37,9 @@ if ENABLE_DEBUGTOOLBAR and DEV_MODE:
 DATABASES["default"].update(
     {
         "NAME": "systori_local",
-        "HOST": "systori_db_1",
+        "HOST": "localhost",
         "USER": "postgres",
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "dfguio22"),
         "TEST": {"SERIALIZE": False},
     }
 )

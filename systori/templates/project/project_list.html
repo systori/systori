@@ -132,7 +132,7 @@
     <div class="tile-container hidden">
           {% for phase, projects in project_groups.items %}
                 {% for project in projects %}
-                        <sys-project-tile data-pk="{{ project.id|unlocalize }}" data-name="{{ project|slugify }} - {{ project.id }}"
+                        <sys-project-tile data-pk="{{ project.id|unlocalize }}" data-name="{{ project|slugify }}-{{ project.id }}"
                              data-phase="{{ phase }}" class="tile {{ phase }}" href="#">
                             <a href="{% url 'project.view' project.id %}" style="display: block">
                                 <span>#{{ project.id }}</span><br>{{ project }}
@@ -153,7 +153,7 @@
 
 {% block extra_js %}
 
-  <script src="{% static "ts/dist/project_list.js" %}"></script>
+  <script src="{% static "js/project_list.js" %}"></script>
 
   <script type="application/javascript">
     //fix menu overflow under the responsive table

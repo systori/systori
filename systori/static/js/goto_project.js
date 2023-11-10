@@ -1,11 +1,20 @@
+/**
+ * Class representing a navigation element to jump to a project by project id.
+ * @extends HTMLElement
+ * @property {HTMLSpanElement} infoBox
+ * @property {number} queryPk
+ * @property {boolean} projectFouund
+ */
 class SystoriGotoProject extends HTMLElement {
-    infoBox: HTMLSpanElement;
-    queryPk: number;
-    projectFound: boolean;
-    
+    infoBox;
+    queryPk;
+    projectFound;
+    /**
+     * Create a SystoriGotoProject Element.
+     */
     constructor() {
         super();
-        this.infoBox = document.querySelector("#infoBox") as HTMLSpanElement;
+        this.infoBox = document.querySelector("#infoBox");
         this.queryPk = 0;
         this.projectFound = false;
 
@@ -17,7 +26,12 @@ class SystoriGotoProject extends HTMLElement {
         });
     }
 
-    showInfo(response: any, type: string) {
+    /**
+     * showInfo method
+     * @param {any} response - Info message to be displayed in UI
+     * @param {string} type - Info message type
+     */
+    showInfo(response, type) {
         this.infoBox.className = "input-group-addon";
         if (type == "success") {
             this.infoBox.classList.add("label-success");
@@ -44,8 +58,12 @@ class SystoriGotoProject extends HTMLElement {
         }
     }
 
-    async handleKeyup(event:KeyboardEvent) {
-        this.queryPk = parseInt((event.target as HTMLElement).innerText)
+    /**
+     * showInfo method
+     * @param {KeyboardEvent} event
+     */
+    async handleKeyup(event) {
+        this.queryPk = parseInt((/** @type {HTMLElement} */ event.target).innerText)
         if (isNaN(this.queryPk)) {
             this.showInfo("", "reset");
         } else {
@@ -53,7 +71,11 @@ class SystoriGotoProject extends HTMLElement {
         }
     }
 
-    handleKeydown(event: KeyboardEvent) {
+    /**
+     * showInfo method
+     * @param {KeyboardEvent} event
+     */
+    handleKeydown(event) {
         if (event.key == "Enter" && this.projectFound == true) {
             event.preventDefault();
             window.location.href = `${window.location.origin}/project-${this.queryPk}`;

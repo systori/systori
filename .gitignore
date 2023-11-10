@@ -26,3 +26,6 @@ systori.sublime-workspace
 celerybeat-schedule.db
 .environment
 systori_static
+.venv
+.env
+media/demo_letterhead_*.pdf

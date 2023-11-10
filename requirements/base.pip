@@ -1,7 +1,7 @@
-psycopg2==2.8.3
-Celery
-lxml
-raven
+psycopg2-binary==2.8.3
+celery==4.4.0
+lxml==4.4.2
+raven==6.10.0
 
 django==2.2.4
 djangorestframework==3.10.2
@@ -12,11 +12,11 @@ django-allauth==0.39.1
 jsonfield==2.0.2
 pusher==2.1.3
 
-geopy
+geopy==1.20.0
 python-dateutil==2.8.0
 
-git+https://github.com/MrBitBucket/reportlab-mirror.git
-git+https://github.com/MrBitBucket/preppy-mirror.git
+git+https://github.com/MrBitBucket/reportlab-mirror.git@de97afeae2adfaf129d577932caf2e455be8e606
+git+https://github.com/MrBitBucket/preppy-mirror.git@d5ebc0b7d66e06431d51e72fa153008fccf5dc14
 git+https://github.com/elmcrest/django-postgres-schema
 git+https://github.com/systori/pyth.git@pyth-py3
 git+https://github.com/eukreign/django-timezone-field.git@django2
@@ -24,7 +24,7 @@ django-tsvector-field
 django-bootstrap-components
 git+https://github.com/pmaupin/pdfrw.git
 bericht # pdf rendering library see https://github.com/systori/bericht
-mistune # markdown parser
-whitenoise # nice and easy staticfiles serving
-brotlipy # add infinity caching and brotli compression to whitenoise
-PyPDF2 # ToDo: change PDFFileMerger to pdfrw maybe
+mistune==0.8.4 # markdown parser
+whitenoise==5.0.1 # nice and easy staticfiles serving
+brotlipy==0.7.0 # add infinity caching and brotli compression to whitenoise
+PyPDF2==1.26.0 # ToDo: change PDFFileMerger to pdfrw maybe

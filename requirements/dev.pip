@@ -1,8 +1,8 @@
 -r test.pip
 
-black
-pylint
-pylint-django
-django-debug-toolbar
-django-extensions
-Fabric3
+black==19.10b0
+pylint==2.4.4
+pylint-django==2.0.13
+django-debug-toolbar==2.1
+django-extensions==2.2.6
+Fabric3==1.14.post1
