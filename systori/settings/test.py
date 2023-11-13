@@ -11,12 +11,11 @@ MEDIA_ROOT = os.path.normpath(os.path.join(ROOT_DIR, "media"))
 
 DATABASES["default"].update(
     {
-        "HOST": "db",
+        "HOST": "localhost",
         "PORT": 5432,
-        "NAME": "systori_test",
+        "NAME": "systori_local",
         "USER": "postgres",
-        "PASSWORD": "postgres",
-        "TEST": {"SERIALIZE": False},
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "dfguio22"),
     }
 )
 

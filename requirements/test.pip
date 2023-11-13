@@ -1,5 +1,8 @@
 -r app.pip
 
+importlib-metadata==4.13.0 # fix pytest discovery error
+pytest==6.2.5
+pytest-django==3.10.0
 coverage==4.5.4
 codecov
 selenium==3.141.0

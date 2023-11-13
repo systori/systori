@@ -26,6 +26,6 @@ class TestCompanyViews(ClientTestCase):
             {"name": "Widgets LLC", "schema": "widgets", "timezone": "Europe/Berlin"},
             follow=True,
         )
-        self.assertRedirects(response, "http://widgets.systori.localhost")
+        self.assertRedirects(response, "http://widgets." + settings.SERVER_NAME)
         response = self.client.get(reverse("companies"))
         self.assertContains(response, "Widgets LLC")

@@ -820,9 +820,9 @@ class FieldPaste(View):
         plans = clipboard.get("empty-plans", [])
         for plan in daily_plan_objects().filter(id__in=plans):
             delete_when_empty(plan)
-        pusher_client.trigger(
-            "dailyplan-channel", "data-changed-event", {"message": "refresh"}
-        )
+        # pusher_client.trigger(
+        #     "dailyplan-channel", "data-changed-event", {"message": "refresh"}
+        # )
         return HttpResponse("OK")
 
 

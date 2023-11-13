@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = []
+    dependencies = [("company", "0001_initial"),]
 
     operations = [
         RunInTemplate(

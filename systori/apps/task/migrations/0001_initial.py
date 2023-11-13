@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ("company", "0001_initial"),
         ("project", "0001_initial"),
         ("inventory", "0001_initial"),
         ("equipment", "0001_initial"),
         ("accounting", "0001_initial"),
-        ("company", "0001_initial"),
     ]
 
     operations = [
